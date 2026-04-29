@@ -3,7 +3,7 @@ import { VoidElement } from '../base.js';
 
 export class VoidBadge extends VoidElement {
   @property({ type: String, reflect: true }) color: 'default' | 'error' | 'warning' | 'success' | 'info' | 'notice' | 'highlight' = 'default';
-  @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' = 'md';
+  @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' | 'xl' | 'xxl' = 'md';
 
   connectedCallback(): void {
     super.connectedCallback();

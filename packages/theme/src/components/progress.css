@@ -1,0 +1,42 @@
+void-progress {
+  --tone: var(--void-color-accent);
+
+  display: block;
+  width: 100%;
+}
+
+.void-progress-track {
+  width: 100%;
+  height: 0.5rem;
+  background: var(--void-color-bg-hover);
+  border-radius: var(--void-radius-full);
+  overflow: hidden;
+}
+
+.void-progress-fill {
+  height: 100%;
+  background: var(--tone);
+  border-radius: var(--void-radius-full);
+  transition: width var(--void-duration-normal) var(--void-ease-in-out);
+}
+
+void-progress[color="error"]   { --tone: var(--void-color-error); }
+void-progress[color="warning"] { --tone: var(--void-color-warning); }
+void-progress[color="success"] { --tone: var(--void-color-success); }
+void-progress[color="info"]    { --tone: var(--void-color-info); }
+void-progress[color="notice"]  { --tone: var(--void-color-notice); }
+
+void-progress[size="sm"] .void-progress-track { height: 0.25rem; }
+void-progress[size="lg"] .void-progress-track { height: 0.75rem; }
+void-progress[size="xl"] .void-progress-track { height: 1rem; }
+void-progress[size="xxl"] .void-progress-track { height: 1.25rem; }
+
+void-progress[indeterminate] .void-progress-fill {
+  width: 40% !important;
+  animation: void-progress-indeterminate 1.5s ease-in-out infinite;
+}
+
+@keyframes void-progress-indeterminate {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(350%); }
+}

@@ -1,0 +1,26 @@
+void-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: var(--void-radius-full);
+  background: var(--void-color-bg-hover);
+  color: var(--void-color-text-secondary);
+  font-family: var(--void-font-sans);
+  font-size: var(--void-text-sm);
+  font-weight: var(--void-weight-semibold);
+  overflow: hidden;
+  user-select: none;
+}
+
+void-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+void-avatar[size="sm"] { width: 1.75rem; height: 1.75rem; font-size: var(--void-text-xs); }
+void-avatar[size="lg"] { width: 3.5rem; height: 3.5rem; font-size: var(--void-text-lg); }
+void-avatar[size="xl"] { width: 5rem; height: 5rem; font-size: var(--void-text-xl); }
+void-avatar[size="xxl"] { width: 6.5rem; height: 6.5rem; font-size: var(--void-text-2xl); }

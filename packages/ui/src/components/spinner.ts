@@ -3,7 +3,7 @@ import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
 
 export class VoidSpinner extends VoidElement {
-  @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' = 'md';
+  @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' | 'xl' | 'xxl' = 'md';
   @property({ type: String, reflect: true }) label: string = 'Loading';
 
   connectedCallback(): void {

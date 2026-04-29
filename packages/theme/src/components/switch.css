@@ -1,0 +1,81 @@
+void-switch {
+  --tone: var(--void-color-accent);
+  --tone-subtle: color-mix(in srgb, var(--tone) 20%, transparent);
+  --tone-border: color-mix(in srgb, var(--tone) 40%, transparent);
+
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+}
+
+.void-switch-track {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  width: 2.25rem;
+  height: 1.25rem;
+  background: var(--tone-subtle);
+  border: 1px solid var(--tone-border);
+  border-radius: var(--void-radius-full);
+  transition: background var(--void-duration-fast) var(--void-ease-in-out),
+              border-color var(--void-duration-fast) var(--void-ease-in-out);
+}
+
+.void-switch-thumb {
+  position: absolute;
+  left: 2px;
+  width: 0.875rem;
+  height: 0.875rem;
+  background: var(--void-color-text-secondary);
+  border-radius: var(--void-radius-full);
+  transition: transform var(--void-duration-fast) var(--void-ease-in-out),
+              background var(--void-duration-fast) var(--void-ease-in-out);
+}
+
+void-switch[checked] .void-switch-track {
+  background: var(--tone);
+  border-color: var(--tone);
+}
+
+void-switch[checked] .void-switch-thumb {
+  transform: translateX(1rem);
+  background: var(--void-color-text-on-accent);
+}
+
+void-switch:focus-visible .void-switch-track {
+  outline: 2px solid var(--void-color-border-focus);
+  outline-offset: 2px;
+}
+
+void-switch:hover .void-switch-track {
+  border-color: var(--void-color-border-strong);
+}
+
+void-switch[color="error"]   { --tone: var(--void-color-error); }
+void-switch[color="warning"] { --tone: var(--void-color-warning); }
+void-switch[color="success"] { --tone: var(--void-color-success); }
+void-switch[color="info"]    { --tone: var(--void-color-info); }
+void-switch[color="notice"]  { --tone: var(--void-color-notice); }
+
+void-switch[size="sm"] .void-switch-track { width: 1.75rem; height: 1rem; }
+void-switch[size="sm"] .void-switch-thumb { width: 0.625rem; height: 0.625rem; }
+void-switch[size="sm"][checked] .void-switch-thumb { transform: translateX(0.75rem); }
+
+void-switch[size="lg"] .void-switch-track { width: 2.75rem; height: 1.5rem; }
+void-switch[size="lg"] .void-switch-thumb { width: 1.125rem; height: 1.125rem; }
+void-switch[size="lg"][checked] .void-switch-thumb { transform: translateX(1.25rem); }
+
+void-switch[size="xl"] .void-switch-track { width: 3.25rem; height: 1.75rem; }
+void-switch[size="xl"] .void-switch-thumb { width: 1.375rem; height: 1.375rem; }
+void-switch[size="xl"][checked] .void-switch-thumb { transform: translateX(1.5rem); }
+
+void-switch[size="xxl"] .void-switch-track { width: 3.75rem; height: 2rem; }
+void-switch[size="xxl"] .void-switch-thumb { width: 1.625rem; height: 1.625rem; }
+void-switch[size="xxl"][checked] .void-switch-thumb { transform: translateX(1.75rem); }
+
+void-switch[disabled] {
+  opacity: 0.5;
+  pointer-events: none;
+  cursor: not-allowed;
+}

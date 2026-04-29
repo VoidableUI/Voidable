@@ -32,3 +32,5 @@ void-badge[color="highlight"] { --tone: var(--void-color-highlight); }
 /* Sizes */
 void-badge[size="sm"] { min-width: 1rem; min-height: 1rem; font-size: var(--void-text-2xs); padding: 0.0625rem var(--void-space-1) 0; }
 void-badge[size="lg"] { min-width: 1.75rem; min-height: 1.75rem; font-size: var(--void-text-sm); padding: 0.3125rem var(--void-space-3) 0.1875rem; }
+void-badge[size="xl"] { min-width: 2.25rem; min-height: 2.25rem; font-size: var(--void-text-base); padding: 0.375rem var(--void-space-4) 0.25rem; }
+void-badge[size="xxl"] { min-width: 3rem; min-height: 3rem; font-size: var(--void-text-lg); padding: 0.4375rem var(--void-space-5) 0.3125rem; }

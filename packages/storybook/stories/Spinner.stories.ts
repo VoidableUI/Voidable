@@ -8,7 +8,7 @@ const meta: Meta = {
   title: 'Components/Spinner',
   tags: ['autodocs'],
   argTypes: {
-    size: { control: 'select', options: ['sm', 'md', 'lg'] },
+    size: { control: 'select', options: ['sm', 'md', 'lg', 'xl', 'xxl'] },
     label: { control: 'text' },
   },
   render: (args) => html`
@@ -30,6 +30,8 @@ export const Sizes: Story = {
       <void-spinner size="sm" label="Loading small"></void-spinner>
       <void-spinner size="md" label="Loading medium"></void-spinner>
       <void-spinner size="lg" label="Loading large"></void-spinner>
+      <void-spinner size="xl" label="Loading xl"></void-spinner>
+      <void-spinner size="xxl" label="Loading xxl"></void-spinner>
     </div>
   `,
 };

@@ -26,6 +26,10 @@ void-spinner[size="sm"] { width: 1rem; height: 1rem; }
 void-spinner[size="sm"]::before { border-width: 1.5px; }
 void-spinner[size="lg"] { width: 2rem; height: 2rem; }
 void-spinner[size="lg"]::before { border-width: 3px; }
+void-spinner[size="xl"] { width: 2.5rem; height: 2.5rem; }
+void-spinner[size="xl"]::before { border-width: 3.5px; }
+void-spinner[size="xxl"] { width: 3.5rem; height: 3.5rem; }
+void-spinner[size="xxl"]::before { border-width: 4px; }
 
 /* Screen reader text (rendered by the component) */
 void-spinner [data-void-sr] {
