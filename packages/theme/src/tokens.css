@@ -23,8 +23,8 @@
   --void-color-text-on-accent: var(--void-black);
 
   /* Borders */
-  --void-color-border:        color-mix(in srgb, var(--void-white) 8%, transparent);
-  --void-color-border-strong: color-mix(in srgb, var(--void-white) 14%, transparent);
+  --void-color-border:        color-mix(in srgb, var(--void-white) 14%, transparent);
+  --void-color-border-strong: color-mix(in srgb, var(--void-white) 22%, transparent);
   --void-color-border-focus:  color-mix(in srgb, var(--void-white) 55%, transparent);
 
   /* Accent — monochrome */
@@ -61,7 +61,7 @@
   --void-color-bg:           var(--void-white);
   --void-color-bg-secondary: var(--void-stone-100);
   --void-color-bg-elevated:  var(--void-white);
-  --void-color-bg-hover:     var(--void-stone-100);
+  --void-color-bg-hover:     var(--void-stone-200);
   --void-color-bg-accent:    var(--void-stone-100);
   --void-color-bg-overlay:   color-mix(in srgb, var(--void-black) 30%, transparent);
 
@@ -74,8 +74,8 @@
   --void-color-text-on-accent: var(--void-white);
 
   /* Borders */
-  --void-color-border:        var(--void-stone-200);
-  --void-color-border-strong: var(--void-stone-300);
+  --void-color-border:        var(--void-stone-300);
+  --void-color-border-strong: var(--void-stone-400);
   --void-color-border-focus:  var(--void-stone-600);
 
   /* Accent */

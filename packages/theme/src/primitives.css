@@ -32,17 +32,17 @@
   --void-red-950: #450a0a;
 
   /* ── Amber palette (status: warning) ── */
-  --void-amber-50:  #fffbeb;
-  --void-amber-100: #fef3c7;
-  --void-amber-200: #fde68a;
-  --void-amber-300: #fcd34d;
-  --void-amber-400: #fbbf24;
-  --void-amber-500: #f59e0b;
-  --void-amber-600: #d97706;
-  --void-amber-700: #b45309;
-  --void-amber-800: #92400e;
-  --void-amber-900: #78350f;
-  --void-amber-950: #451a03;
+  --void-amber-50:  #fefae4;
+  --void-amber-100: #fdf1be;
+  --void-amber-200: #f9e182;
+  --void-amber-300: #f1cb48;
+  --void-amber-400: #e5c03c;
+  --void-amber-500: #cca93c;
+  --void-amber-600: #a88a2a;
+  --void-amber-700: #846b20;
+  --void-amber-800: #655118;
+  --void-amber-900: #503f13;
+  --void-amber-950: #30260b;
 
   /* ── Green palette (status: success) ── */
   --void-green-50:  #f0fdf4;

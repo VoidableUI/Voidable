@@ -1,0 +1,43 @@
+void-divider {
+  display: flex;
+  align-items: center;
+  gap: var(--void-space-3);
+  color: var(--void-color-text-muted);
+  font-family: var(--void-font-sans);
+  font-size: var(--void-text-xs);
+  font-weight: var(--void-weight-medium);
+}
+
+/* Horizontal line via pseudo-elements */
+void-divider::before,
+void-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--void-color-border);
+}
+
+/* Vertical orientation */
+void-divider[orientation="vertical"] {
+  flex-direction: column;
+  align-self: stretch;
+}
+void-divider[orientation="vertical"]::before,
+void-divider[orientation="vertical"]::after {
+  width: 1px;
+  height: auto;
+  flex: 1;
+}
+
+/* When no label, single line (hide ::after) */
+void-divider:empty::after {
+  display: none;
+}
+void-divider:empty::before {
+  flex: none;
+  width: 100%;
+}
+void-divider[orientation="vertical"]:empty::before {
+  width: 1px;
+  height: 100%;
+}

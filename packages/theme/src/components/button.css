@@ -1,0 +1,99 @@
+/* ============================================================
+   void-button — Tone system component
+   ============================================================ */
+
+void-button {
+  /* Tone system — base defaults to accent (monochrome white/black) */
+  --tone: var(--void-color-accent);
+  --tone-text: var(--tone);
+  --tone-subtle: color-mix(in srgb, var(--tone) 14%, transparent);
+  --tone-border: color-mix(in srgb, var(--tone) 36%, transparent);
+  --tone-hover: color-mix(in srgb, var(--tone) 22%, transparent);
+
+  /* Layout */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--void-space-2);
+
+  /* Generous spacing (negative space principle) */
+  padding: var(--void-space-2) var(--void-space-4);
+
+  /* Typography */
+  font-family: var(--void-font-sans);
+  font-size: var(--void-text-sm);
+  font-weight: var(--void-weight-medium);
+  line-height: var(--void-leading-tight);
+
+  /* Visual */
+  background: var(--tone-subtle);
+  border: 1px solid var(--tone-border);
+  border-radius: var(--void-radius-md);
+  color: var(--void-color-text);
+  cursor: pointer;
+
+  /* Motion */
+  transition: background var(--void-duration-fast) var(--void-ease-in-out),
+              border-color var(--void-duration-fast) var(--void-ease-in-out),
+              color var(--void-duration-fast) var(--void-ease-in-out);
+
+  /* Agent-friendly: no user-select so agents can read text */
+  user-select: none;
+}
+
+/* Hover */
+void-button:hover {
+  background: var(--tone-hover);
+}
+
+/* Focus */
+void-button:focus-visible {
+  outline: 2px solid var(--void-color-border-focus);
+  outline-offset: 2px;
+}
+
+/* Filled variant */
+void-button[variant="filled"] {
+  background: var(--tone);
+  border-color: var(--tone);
+  color: var(--void-color-text-on-accent);
+}
+
+void-button[variant="filled"]:hover {
+  opacity: 0.9;
+}
+
+/* Color variants — one override cascades to all derived states */
+void-button[color="error"]   { --tone: var(--void-color-error); }
+void-button[color="warning"] { --tone: var(--void-color-warning); }
+void-button[color="success"] { --tone: var(--void-color-success); }
+void-button[color="info"]    { --tone: var(--void-color-info); }
+void-button[color="notice"]  { --tone: var(--void-color-notice); }
+
+/* Size variants */
+void-button[size="sm"] {
+  padding: var(--void-space-1) var(--void-space-2);
+  font-size: var(--void-text-xs);
+}
+
+void-button[size="lg"] {
+  padding: var(--void-space-3) var(--void-space-6);
+  font-size: var(--void-text-base);
+}
+
+void-button[size="xl"] {
+  padding: var(--void-space-4) var(--void-space-8);
+  font-size: var(--void-text-lg);
+}
+
+void-button[size="xxl"] {
+  padding: var(--void-space-5) var(--void-space-10);
+  font-size: var(--void-text-xl);
+}
+
+/* Disabled */
+void-button[disabled] {
+  opacity: 0.5;
+  pointer-events: none;
+  cursor: not-allowed;
+}

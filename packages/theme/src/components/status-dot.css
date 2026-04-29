@@ -1,0 +1,21 @@
+void-status-dot {
+  display: inline-block;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: var(--void-radius-full);
+  background: var(--void-color-text-disabled);
+  flex-shrink: 0;
+}
+
+void-status-dot[status="online"] {
+  background: var(--void-color-success);
+  box-shadow: 0 0 6px var(--void-color-success);
+}
+
+void-status-dot[status="away"] {
+  background: var(--void-color-warning);
+}
+
+void-status-dot[status="offline"] {
+  background: var(--void-color-text-disabled);
+}
