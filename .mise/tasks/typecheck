@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+#MISE description="Run type checking for all packages"
+set -euo pipefail
+
+pnpm --filter '*' typecheck

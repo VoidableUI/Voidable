@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+#MISE description="Run tests for all packages"
+#MISE depends=["build"]
+set -euo pipefail
+
+pnpm --filter './packages/*' test
