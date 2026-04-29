@@ -7,29 +7,29 @@
 :root,
 [data-theme="dark"] {
   /* Surfaces */
-  --void-color-bg:          #000000;
-  --void-color-bg-secondary: #0a0a0a;
-  --void-color-bg-elevated:  #111111;
-  --void-color-bg-hover:     #141414;
-  --void-color-bg-accent:    #0b0b0b;
-  --void-color-bg-overlay:   rgba(0,0,0,.7);
+  --void-color-bg:           var(--void-black);
+  --void-color-bg-secondary: var(--void-dark-1);
+  --void-color-bg-elevated:  var(--void-dark-3);
+  --void-color-bg-hover:     var(--void-dark-4);
+  --void-color-bg-accent:    var(--void-dark-2);
+  --void-color-bg-overlay:   color-mix(in srgb, var(--void-black) 70%, transparent);
 
   /* Text */
-  --void-color-text:           #f5f5f4;
-  --void-color-text-secondary: #a8a29e;
-  --void-color-text-muted:     #78716c;
-  --void-color-text-tertiary:  #908a85;
-  --void-color-text-disabled:  #57534e;
-  --void-color-text-on-accent: #000000;
+  --void-color-text:           var(--void-stone-100);
+  --void-color-text-secondary: var(--void-stone-400);
+  --void-color-text-muted:     var(--void-stone-500);
+  --void-color-text-tertiary:  var(--void-stone-450);
+  --void-color-text-disabled:  var(--void-stone-600);
+  --void-color-text-on-accent: var(--void-black);
 
   /* Borders */
-  --void-color-border:        rgba(255,255,255,.08);
-  --void-color-border-strong: rgba(255,255,255,.14);
-  --void-color-border-focus:  rgba(255,255,255,.55);
+  --void-color-border:        color-mix(in srgb, var(--void-white) 8%, transparent);
+  --void-color-border-strong: color-mix(in srgb, var(--void-white) 14%, transparent);
+  --void-color-border-focus:  color-mix(in srgb, var(--void-white) 55%, transparent);
 
   /* Accent — monochrome */
-  --void-color-accent:       #ffffff;
-  --void-color-accent-hover: #e7e5e4;
+  --void-color-accent:       var(--void-white);
+  --void-color-accent-hover: var(--void-stone-200);
 
   /* Status — primary */
   --void-color-error:     var(--void-red-500);
@@ -58,29 +58,29 @@
 /* ── Light theme ── */
 [data-theme="light"] {
   /* Surfaces — pure white base */
-  --void-color-bg:           #ffffff;
-  --void-color-bg-secondary: #f5f5f4;
-  --void-color-bg-elevated:  #ffffff;
-  --void-color-bg-hover:     #f5f5f4;
-  --void-color-bg-accent:    #f5f5f4;
-  --void-color-bg-overlay:   rgba(0,0,0,.3);
+  --void-color-bg:           var(--void-white);
+  --void-color-bg-secondary: var(--void-stone-100);
+  --void-color-bg-elevated:  var(--void-white);
+  --void-color-bg-hover:     var(--void-stone-100);
+  --void-color-bg-accent:    var(--void-stone-100);
+  --void-color-bg-overlay:   color-mix(in srgb, var(--void-black) 30%, transparent);
 
   /* Text */
-  --void-color-text:           #1c1917;
-  --void-color-text-secondary: #57534e;
-  --void-color-text-muted:     #78716c;
-  --void-color-text-tertiary:  #a8a29e;
-  --void-color-text-disabled:  #d6d3d1;
-  --void-color-text-on-accent: #ffffff;
+  --void-color-text:           var(--void-stone-900);
+  --void-color-text-secondary: var(--void-stone-600);
+  --void-color-text-muted:     var(--void-stone-500);
+  --void-color-text-tertiary:  var(--void-stone-400);
+  --void-color-text-disabled:  var(--void-stone-300);
+  --void-color-text-on-accent: var(--void-white);
 
   /* Borders */
-  --void-color-border:        #e7e5e4;
-  --void-color-border-strong: #d6d3d1;
-  --void-color-border-focus:  #57534e;
+  --void-color-border:        var(--void-stone-200);
+  --void-color-border-strong: var(--void-stone-300);
+  --void-color-border-focus:  var(--void-stone-600);
 
   /* Accent */
-  --void-color-accent:       #1c1917;
-  --void-color-accent-hover: #0c0a09;
+  --void-color-accent:       var(--void-stone-900);
+  --void-color-accent-hover: var(--void-stone-950);
 
   /* Status — primary (-600 variants for light mode) */
   --void-color-error:     var(--void-red-600);

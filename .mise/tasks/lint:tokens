@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+#MISE description="Ensure raw color values only appear in primitives.css"
+set -euo pipefail
+
+PRIMITIVES="packages/theme/src/primitives.css"
+THEME_SRC="packages/theme/src"
+
+violations=0
+
+while IFS= read -r file; do
+  [[ "$file" == "$PRIMITIVES" ]] && continue
+
+  if grep -Pn '#[0-9a-fA-F]{3,8}\b|rgba?\(' "$file" | grep -v '^\s*/\*' | grep -v '^\s*\*'; then
+    echo "ERROR: Raw color values in $file (move to $PRIMITIVES)"
+    violations=1
+  fi
+done < <(find "$THEME_SRC" -name '*.css' -type f)
+
+if [[ $violations -eq 0 ]]; then
+  echo "Token lint passed: no raw colors outside primitives.css"
+else
+  exit 1
+fi

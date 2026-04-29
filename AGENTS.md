@@ -88,6 +88,7 @@ Consumer applications define their own Tier 3 tokens. These are not part of Void
 
 The name "Void" reflects two core ideas: components are **devoid** of styling without a theme loaded, and the visual language embraces the **void** — negative space as a first-class design element.
 
+- **Human and agent friendly** — the UI is designed for both human users and AI agents. Light DOM exposes component structure. Reflected attributes make state machine-readable without executing JS. Semantic ARIA roles and properties give agents a structured understanding of the interface. Stable tag+attribute selectors provide reliable handles for programmatic interaction.
 - **Pure backgrounds** — true black (`#000000`) in dark mode, true white (`#ffffff`) in light mode. No off-white, no near-black.
 - **Negative space** — generous padding, margins, and gaps. Let content breathe. Density comes from the consumer, not the library.
 - **Monochrome hierarchy** — color used sparingly, reserved for status indication.
@@ -136,6 +137,9 @@ set -euo pipefail
 | `mise run typecheck` | TypeScript type checking |
 | `mise run lint` | Lint all packages |
 | `mise run clean` | Remove build artifacts and node_modules |
+| `mise run ci` | Full CI pipeline: build, test, typecheck, lint, token lint |
+| `mise run lint` | ESLint with lit-a11y (WCAG checks on Lit templates) |
+| `mise run lint_tokens` | Ensure no raw color values outside primitives.css |
 | `mise run docs` | Start docs dev server |
 | `mise run docs:build` | Build docs for deployment |
 

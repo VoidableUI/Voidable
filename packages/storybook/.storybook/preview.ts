@@ -9,8 +9,13 @@ const preview: Preview = {
       default: 'dark',
       values: [
         { name: 'dark', value: '#000000' },
-        { name: 'light', value: '#fafaf9' },
+        { name: 'light', value: '#ffffff' },
       ],
+    },
+    a11y: {
+      config: {},
+      options: {},
+      test: 'error',
     },
   },
 };

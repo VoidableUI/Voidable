@@ -96,8 +96,15 @@
   --void-pink-900: #831843;
   --void-pink-950: #500724;
 
-  /* ── Pure black ── */
+  /* ── Pure black & white ── */
   --void-black: #000000;
+  --void-white: #ffffff;
+
+  /* ── Dark surface steps (near-blacks for elevation) ── */
+  --void-dark-1: #0a0a0a;
+  --void-dark-2: #0b0b0b;
+  --void-dark-3: #111111;
+  --void-dark-4: #141414;
 
   /* ── Spacing (rem) ── */
   --void-space-1:  0.25rem;

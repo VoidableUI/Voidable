@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-#MISE description="Lint all packages"
+#MISE description="Lint all packages (ESLint with lit-a11y)"
 set -euo pipefail
 
-pnpm --filter '*' lint
+pnpm exec eslint .
