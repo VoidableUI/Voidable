@@ -1,0 +1,185 @@
+/* ============================================================
+   @voidable/theme — Tier 1 Primitives
+   Raw scales only. No semantic meaning.
+   ============================================================ */
+
+:root {
+  /* ── Stone palette ── */
+  --vdb-stone-50:  #fafaf9;
+  --vdb-stone-100: #f5f5f4;
+  --vdb-stone-200: #e7e5e4;
+  --vdb-stone-300: #d6d3d1;
+  --vdb-stone-400: #a8a29e;
+  --vdb-stone-450: #908a85;
+  --vdb-stone-500: #78716c;
+  --vdb-stone-600: #57534e;
+  --vdb-stone-700: #44403c;
+  --vdb-stone-800: #292524;
+  --vdb-stone-900: #1c1917;
+  --vdb-stone-950: #0c0a09;
+
+  /* ── Red palette (status: error) ── */
+  --vdb-red-50:  #fef2f2;
+  --vdb-red-100: #fee2e2;
+  --vdb-red-200: #fecaca;
+  --vdb-red-300: #fca5a5;
+  --vdb-red-400: #f87171;
+  --vdb-red-500: #ef4444;
+  --vdb-red-600: #dc2626;
+  --vdb-red-700: #b91c1c;
+  --vdb-red-800: #991b1b;
+  --vdb-red-900: #7f1d1d;
+  --vdb-red-950: #450a0a;
+
+  /* ── Amber palette (status: warning) ── */
+  --vdb-amber-50:  #fffbeb;
+  --vdb-amber-100: #fef3c7;
+  --vdb-amber-200: #fde68a;
+  --vdb-amber-300: #fcd34d;
+  --vdb-amber-400: #fbbf24;
+  --vdb-amber-500: #f59e0b;
+  --vdb-amber-600: #d97706;
+  --vdb-amber-700: #b45309;
+  --vdb-amber-800: #92400e;
+  --vdb-amber-900: #78350f;
+  --vdb-amber-950: #451a03;
+
+  /* ── Green palette (status: success) ── */
+  --vdb-green-50:  #f0fdf4;
+  --vdb-green-100: #dcfce7;
+  --vdb-green-200: #bbf7d0;
+  --vdb-green-300: #86efac;
+  --vdb-green-400: #4ade80;
+  --vdb-green-500: #22c55e;
+  --vdb-green-600: #16a34a;
+  --vdb-green-700: #15803d;
+  --vdb-green-800: #166534;
+  --vdb-green-900: #14532d;
+  --vdb-green-950: #052e16;
+
+  /* ── Blue palette (status: info) ── */
+  --vdb-blue-50:  #eff6ff;
+  --vdb-blue-100: #dbeafe;
+  --vdb-blue-200: #bfdbfe;
+  --vdb-blue-300: #93c5fd;
+  --vdb-blue-400: #60a5fa;
+  --vdb-blue-500: #3b82f6;
+  --vdb-blue-600: #2563eb;
+  --vdb-blue-700: #1d4ed8;
+  --vdb-blue-800: #1e40af;
+  --vdb-blue-900: #1e3a8a;
+  --vdb-blue-950: #172554;
+
+  /* ── Purple palette (status: notice) ── */
+  --vdb-purple-50:  #faf5ff;
+  --vdb-purple-100: #f3e8ff;
+  --vdb-purple-200: #e9d5ff;
+  --vdb-purple-300: #d8b4fe;
+  --vdb-purple-400: #c084fc;
+  --vdb-purple-500: #a855f7;
+  --vdb-purple-600: #9333ea;
+  --vdb-purple-700: #7e22ce;
+  --vdb-purple-800: #6b21a8;
+  --vdb-purple-900: #581c87;
+  --vdb-purple-950: #3b0764;
+
+  /* ── Pink palette (status: highlight) ── */
+  --vdb-pink-50:  #fdf2f8;
+  --vdb-pink-100: #fce7f3;
+  --vdb-pink-200: #fbcfe8;
+  --vdb-pink-300: #f9a8d4;
+  --vdb-pink-400: #f472b6;
+  --vdb-pink-500: #ec4899;
+  --vdb-pink-600: #db2777;
+  --vdb-pink-700: #be185d;
+  --vdb-pink-800: #9d174d;
+  --vdb-pink-900: #831843;
+  --vdb-pink-950: #500724;
+
+  /* ── Pure black ── */
+  --vdb-black: #000000;
+
+  /* ── Spacing (rem) ── */
+  --vdb-space-1:  0.25rem;
+  --vdb-space-2:  0.5rem;
+  --vdb-space-3:  0.75rem;
+  --vdb-space-4:  1rem;
+  --vdb-space-5:  1.25rem;
+  --vdb-space-6:  1.5rem;
+  --vdb-space-8:  2rem;
+  --vdb-space-10: 2.5rem;
+  --vdb-space-12: 3rem;
+  --vdb-space-16: 4rem;
+  --vdb-space-20: 5rem;
+  --vdb-space-24: 6rem;
+
+  --vdb-space-xs: var(--vdb-space-1);
+  --vdb-space-sm: var(--vdb-space-2);
+  --vdb-space-md: var(--vdb-space-3);
+  --vdb-space-lg: var(--vdb-space-4);
+  --vdb-space-xl: var(--vdb-space-6);
+
+  /* ── Typography — sizes ── */
+  --vdb-text-2xs:  0.625rem;
+  --vdb-text-xs:   0.75rem;
+  --vdb-text-sm:   0.8125rem;
+  --vdb-text-base: 0.875rem;
+  --vdb-text-md:   1rem;
+  --vdb-text-lg:   1.125rem;
+  --vdb-text-xl:   1.25rem;
+  --vdb-text-2xl:  1.5rem;
+  --vdb-text-3xl:  1.875rem;
+  --vdb-text-4xl:  2.25rem;
+  --vdb-text-5xl:  3rem;
+
+  /* ── Typography — weights ── */
+  --vdb-weight-normal:   400;
+  --vdb-weight-medium:   500;
+  --vdb-weight-semibold: 600;
+  --vdb-weight-bold:     700;
+
+  /* ── Typography — line heights ── */
+  --vdb-leading-tight:   1.2;
+  --vdb-leading-normal:  1.5;
+  --vdb-leading-relaxed: 1.7;
+
+  /* ── Font stacks (system only — no webfont imports) ── */
+  --vdb-font-sans: ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --vdb-font-mono: ui-monospace, 'SF Mono', 'Fira Code', monospace;
+
+  /* ── Border radius ── */
+  --vdb-radius-none: 0;
+  --vdb-radius-xs:   4px;
+  --vdb-radius-sm:   6px;
+  --vdb-radius-md:   8px;
+  --vdb-radius-lg:   12px;
+  --vdb-radius-xl:   16px;
+  --vdb-radius-full: 9999px;
+
+  /* ── Shadows — white glows (dark-surface elevation) ── */
+  --vdb-shadow-sm: 0 1px 3px rgba(255,255,255,.14);
+  --vdb-shadow-md: 0 2px 6px rgba(255,255,255,.12), 0 10px 24px rgba(255,255,255,.20);
+  --vdb-shadow-lg: 0 4px 10px rgba(255,255,255,.16), 0 22px 50px rgba(255,255,255,.28);
+  --vdb-shadow-xl: 0 6px 14px rgba(255,255,255,.20), 0 40px 88px rgba(255,255,255,.38);
+
+  /* ── Ring hairlines ── */
+  --vdb-ring-hair:        0 0 0 1px rgba(255,255,255,.06);
+  --vdb-ring-hair-strong: 0 0 0 1px rgba(255,255,255,.12);
+
+  /* ── Motion — durations ── */
+  --vdb-duration-fast:   100ms;
+  --vdb-duration-normal: 200ms;
+  --vdb-duration-slow:   300ms;
+
+  /* ── Motion — easings ── */
+  --vdb-ease-in:     cubic-bezier(0.4, 0, 1, 0.2);
+  --vdb-ease-out:    cubic-bezier(0, 0, 0.2, 1);
+  --vdb-ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* ── Z-index layers ── */
+  --vdb-z-dropdown: 100;
+  --vdb-z-sticky:   200;
+  --vdb-z-modal:    300;
+  --vdb-z-toast:    400;
+  --vdb-z-tooltip:  500;
+}
