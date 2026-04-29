@@ -12,11 +12,11 @@ html {
 }
 
 body {
-  font-family: var(--vdb-font-sans);
-  font-size: var(--vdb-text-base);
-  line-height: var(--vdb-leading-normal);
-  color: var(--vdb-color-text);
-  background: var(--vdb-color-bg);
+  font-family: var(--void-font-sans);
+  font-size: var(--void-text-base);
+  line-height: var(--void-leading-normal);
+  color: var(--void-color-text);
+  background: var(--void-color-bg);
 }
 
 img,

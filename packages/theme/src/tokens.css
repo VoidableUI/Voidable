@@ -7,94 +7,104 @@
 :root,
 [data-theme="dark"] {
   /* Surfaces */
-  --vdb-color-bg:          #000000;
-  --vdb-color-bg-secondary: #0a0a0a;
-  --vdb-color-bg-elevated:  #111111;
-  --vdb-color-bg-hover:     #141414;
-  --vdb-color-bg-accent:    #0b0b0b;
-  --vdb-color-bg-overlay:   rgba(0,0,0,.7);
+  --void-color-bg:          #000000;
+  --void-color-bg-secondary: #0a0a0a;
+  --void-color-bg-elevated:  #111111;
+  --void-color-bg-hover:     #141414;
+  --void-color-bg-accent:    #0b0b0b;
+  --void-color-bg-overlay:   rgba(0,0,0,.7);
 
   /* Text */
-  --vdb-color-text:           #f5f5f4;
-  --vdb-color-text-secondary: #a8a29e;
-  --vdb-color-text-muted:     #78716c;
-  --vdb-color-text-tertiary:  #908a85;
-  --vdb-color-text-disabled:  #57534e;
-  --vdb-color-text-on-accent: #000000;
+  --void-color-text:           #f5f5f4;
+  --void-color-text-secondary: #a8a29e;
+  --void-color-text-muted:     #78716c;
+  --void-color-text-tertiary:  #908a85;
+  --void-color-text-disabled:  #57534e;
+  --void-color-text-on-accent: #000000;
 
   /* Borders */
-  --vdb-color-border:        rgba(255,255,255,.08);
-  --vdb-color-border-strong: rgba(255,255,255,.14);
-  --vdb-color-border-focus:  rgba(255,255,255,.55);
+  --void-color-border:        rgba(255,255,255,.08);
+  --void-color-border-strong: rgba(255,255,255,.14);
+  --void-color-border-focus:  rgba(255,255,255,.55);
 
   /* Accent — monochrome */
-  --vdb-color-accent:       #ffffff;
-  --vdb-color-accent-hover: #e7e5e4;
+  --void-color-accent:       #ffffff;
+  --void-color-accent-hover: #e7e5e4;
 
   /* Status — primary */
-  --vdb-color-error:     var(--vdb-red-500);
-  --vdb-color-warning:   var(--vdb-amber-500);
-  --vdb-color-success:   var(--vdb-green-500);
-  --vdb-color-info:      var(--vdb-blue-500);
-  --vdb-color-notice:    var(--vdb-purple-500);
-  --vdb-color-highlight: var(--vdb-pink-500);
+  --void-color-error:     var(--void-red-500);
+  --void-color-warning:   var(--void-amber-500);
+  --void-color-success:   var(--void-green-500);
+  --void-color-info:      var(--void-blue-500);
+  --void-color-notice:    var(--void-purple-500);
+  --void-color-highlight: var(--void-pink-500);
 
   /* Status — subtle (14% color-mix) */
-  --vdb-color-error-subtle:     color-mix(in srgb, var(--vdb-color-error)     14%, transparent);
-  --vdb-color-warning-subtle:   color-mix(in srgb, var(--vdb-color-warning)   14%, transparent);
-  --vdb-color-success-subtle:   color-mix(in srgb, var(--vdb-color-success)   14%, transparent);
-  --vdb-color-info-subtle:      color-mix(in srgb, var(--vdb-color-info)      14%, transparent);
-  --vdb-color-notice-subtle:    color-mix(in srgb, var(--vdb-color-notice)    14%, transparent);
-  --vdb-color-highlight-subtle: color-mix(in srgb, var(--vdb-color-highlight) 14%, transparent);
+  --void-color-error-subtle:     color-mix(in srgb, var(--void-color-error)     14%, transparent);
+  --void-color-warning-subtle:   color-mix(in srgb, var(--void-color-warning)   14%, transparent);
+  --void-color-success-subtle:   color-mix(in srgb, var(--void-color-success)   14%, transparent);
+  --void-color-info-subtle:      color-mix(in srgb, var(--void-color-info)      14%, transparent);
+  --void-color-notice-subtle:    color-mix(in srgb, var(--void-color-notice)    14%, transparent);
+  --void-color-highlight-subtle: color-mix(in srgb, var(--void-color-highlight) 14%, transparent);
 
   /* Named spacing aliases */
-  --vdb-spacing-xs: var(--vdb-space-xs);
-  --vdb-spacing-sm: var(--vdb-space-sm);
-  --vdb-spacing-md: var(--vdb-space-md);
-  --vdb-spacing-lg: var(--vdb-space-lg);
-  --vdb-spacing-xl: var(--vdb-space-xl);
+  --void-spacing-xs: var(--void-space-xs);
+  --void-spacing-sm: var(--void-space-sm);
+  --void-spacing-md: var(--void-space-md);
+  --void-spacing-lg: var(--void-space-lg);
+  --void-spacing-xl: var(--void-space-xl);
 }
 
 /* ── Light theme ── */
 [data-theme="light"] {
-  /* Surfaces */
-  --vdb-color-bg:           #fafaf9;
-  --vdb-color-bg-secondary: #f5f5f4;
-  --vdb-color-bg-elevated:  #ffffff;
-  --vdb-color-bg-hover:     #f5f5f4;
-  --vdb-color-bg-accent:    #f5f5f4;
-  --vdb-color-bg-overlay:   rgba(0,0,0,.3);
+  /* Surfaces — pure white base */
+  --void-color-bg:           #ffffff;
+  --void-color-bg-secondary: #f5f5f4;
+  --void-color-bg-elevated:  #ffffff;
+  --void-color-bg-hover:     #f5f5f4;
+  --void-color-bg-accent:    #f5f5f4;
+  --void-color-bg-overlay:   rgba(0,0,0,.3);
 
   /* Text */
-  --vdb-color-text:           #1c1917;
-  --vdb-color-text-secondary: #57534e;
-  --vdb-color-text-muted:     #78716c;
-  --vdb-color-text-tertiary:  #a8a29e;
-  --vdb-color-text-disabled:  #d6d3d1;
-  --vdb-color-text-on-accent: #fafaf9;
+  --void-color-text:           #1c1917;
+  --void-color-text-secondary: #57534e;
+  --void-color-text-muted:     #78716c;
+  --void-color-text-tertiary:  #a8a29e;
+  --void-color-text-disabled:  #d6d3d1;
+  --void-color-text-on-accent: #ffffff;
 
   /* Borders */
-  --vdb-color-border:        #e7e5e4;
-  --vdb-color-border-strong: #d6d3d1;
-  --vdb-color-border-focus:  #57534e;
+  --void-color-border:        #e7e5e4;
+  --void-color-border-strong: #d6d3d1;
+  --void-color-border-focus:  #57534e;
 
   /* Accent */
-  --vdb-color-accent:       #1c1917;
-  --vdb-color-accent-hover: #0c0a09;
+  --void-color-accent:       #1c1917;
+  --void-color-accent-hover: #0c0a09;
 
   /* Status — primary (-600 variants for light mode) */
-  --vdb-color-error:     var(--vdb-red-600);
-  --vdb-color-warning:   var(--vdb-amber-600);
-  --vdb-color-success:   var(--vdb-green-600);
-  --vdb-color-info:      var(--vdb-blue-600);
-  --vdb-color-notice:    var(--vdb-purple-600);
-  --vdb-color-highlight: var(--vdb-pink-600);
+  --void-color-error:     var(--void-red-600);
+  --void-color-warning:   var(--void-amber-600);
+  --void-color-success:   var(--void-green-600);
+  --void-color-info:      var(--void-blue-600);
+  --void-color-notice:    var(--void-purple-600);
+  --void-color-highlight: var(--void-pink-600);
 
   /* Status — subtle (8% color-mix for light backgrounds) */
-  --vdb-color-error-subtle:     color-mix(in srgb, var(--vdb-color-error)     8%, transparent);
-  --vdb-color-warning-subtle:   color-mix(in srgb, var(--vdb-color-warning)   8%, transparent);
-  --vdb-color-success-subtle:   color-mix(in srgb, var(--vdb-color-success)   8%, transparent);
-  --vdb-color-info-subtle:      color-mix(in srgb, var(--vdb-color-info)      8%, transparent);
-  --vdb-color-notice-subtle:    color-mix(in srgb, var(--vdb-color-notice)    8%, transparent);
-  --vdb-color-highlight-subtle: color-mix(in srgb, var(--vdb-color-highlight) 8%, transparent);
+  --void-color-error-subtle:     color-mix(in srgb, var(--void-color-error)     8%, transparent);
+  --void-color-warning-subtle:   color-mix(in srgb, var(--void-color-warning)   8%, transparent);
+  --void-color-success-subtle:   color-mix(in srgb, var(--void-color-success)   8%, transparent);
+  --void-color-info-subtle:      color-mix(in srgb, var(--void-color-info)      8%, transparent);
+  --void-color-notice-subtle:    color-mix(in srgb, var(--void-color-notice)    8%, transparent);
+  --void-color-highlight-subtle: color-mix(in srgb, var(--void-color-highlight) 8%, transparent);
+}
+
+/* ── Shape: sharp ── */
+[data-shape="sharp"] {
+  --void-radius-xs:   0;
+  --void-radius-sm:   0;
+  --void-radius-md:   0;
+  --void-radius-lg:   0;
+  --void-radius-xl:   0;
+  --void-radius-full: 0;
 }
