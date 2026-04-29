@@ -1,0 +1,80 @@
+/* tokens.css — Tier 2: semantic aliases. Reference primitives via var(). */
+
+/* ── Dark theme (default) ── */
+:root {
+  /* Surfaces */
+  --wf-color-bg: var(--wf-stone-950);
+  --wf-color-bg-secondary: var(--wf-stone-900);
+  --wf-color-bg-elevated: var(--wf-stone-800);
+  --wf-color-bg-overlay: rgba(0, 0, 0, 0.5);
+
+  /* Text */
+  --wf-color-text: var(--wf-stone-200);
+  --wf-color-text-secondary: var(--wf-stone-400);
+  --wf-color-text-muted: var(--wf-stone-600);
+  --wf-color-text-disabled: var(--wf-stone-700);
+  --wf-color-text-on-accent: var(--wf-stone-950);
+
+  /* Borders */
+  --wf-color-border: var(--wf-stone-700);
+  --wf-color-border-focus: var(--wf-stone-400);
+  --wf-color-border-strong: var(--wf-stone-500);
+
+  /* Accent */
+  --wf-color-accent: var(--wf-stone-200);
+
+  /* Status — primary */
+  --wf-color-error: var(--wf-red-500);
+  --wf-color-warning: var(--wf-amber-500);
+  --wf-color-success: var(--wf-green-500);
+  --wf-color-info: var(--wf-blue-500);
+
+  /* Status — subtle backgrounds */
+  --wf-color-error-subtle: color-mix(in srgb, var(--wf-color-error) 12%, transparent);
+  --wf-color-warning-subtle: color-mix(in srgb, var(--wf-color-warning) 12%, transparent);
+  --wf-color-success-subtle: color-mix(in srgb, var(--wf-color-success) 12%, transparent);
+  --wf-color-info-subtle: color-mix(in srgb, var(--wf-color-info) 12%, transparent);
+
+  /* Named spacing aliases (reference numeric primitives) */
+  --wf-space-xs: var(--wf-space-1);
+  --wf-space-sm: var(--wf-space-2);
+  --wf-space-md: var(--wf-space-3);
+  --wf-space-lg: var(--wf-space-4);
+  --wf-space-xl: var(--wf-space-6);
+}
+
+/* ── Light theme ── */
+[data-theme="light"] {
+  /* Surfaces */
+  --wf-color-bg: var(--wf-stone-50);
+  --wf-color-bg-secondary: var(--wf-stone-100);
+  --wf-color-bg-elevated: var(--wf-stone-50);
+  --wf-color-bg-overlay: rgba(0, 0, 0, 0.3);
+
+  /* Text */
+  --wf-color-text: var(--wf-stone-900);
+  --wf-color-text-secondary: var(--wf-stone-600);
+  --wf-color-text-muted: var(--wf-stone-400);
+  --wf-color-text-disabled: var(--wf-stone-300);
+  --wf-color-text-on-accent: var(--wf-stone-50);
+
+  /* Borders */
+  --wf-color-border: var(--wf-stone-200);
+  --wf-color-border-focus: var(--wf-stone-600);
+  --wf-color-border-strong: var(--wf-stone-500);
+
+  /* Accent */
+  --wf-color-accent: var(--wf-stone-900);
+
+  /* Status — primary */
+  --wf-color-error: var(--wf-red-600);
+  --wf-color-warning: var(--wf-amber-600);
+  --wf-color-success: var(--wf-green-600);
+  --wf-color-info: var(--wf-blue-600);
+
+  /* Status — subtle backgrounds (lower opacity on light backgrounds) */
+  --wf-color-error-subtle: color-mix(in srgb, var(--wf-color-error) 8%, transparent);
+  --wf-color-warning-subtle: color-mix(in srgb, var(--wf-color-warning) 8%, transparent);
+  --wf-color-success-subtle: color-mix(in srgb, var(--wf-color-success) 8%, transparent);
+  --wf-color-info-subtle: color-mix(in srgb, var(--wf-color-info) 8%, transparent);
+}
