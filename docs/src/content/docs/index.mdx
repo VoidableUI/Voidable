@@ -1,0 +1,33 @@
+---
+title: Void UI
+description: A component library built on Lit 3 web components with framework adapters and design tokens.
+---
+
+## What is Void UI?
+
+Void UI is a component library built on Lit 3 web components with a strict theme-separation architecture.
+
+### Packages
+
+- **@voidable/theme** — CSS custom properties and design tokens (`--vdb-*`)
+- **@voidable/ui** — Lit web components (Light DOM, zero visual CSS)
+- **@voidable/ui-react** — React adapter
+- **@voidable/ui-solid** — SolidJS adapter
+- **@voidable/ui-vue** — Vue adapter
+- **@voidable/ui-svelte** — Svelte adapter
+
+### Theme Separation
+
+Components ship with **zero visual CSS**. All styling flows through `--vdb-*` CSS custom properties defined by `@voidable/theme`. Without a theme loaded, components are completely unstyled.
+
+### Installation
+
+```bash
+npm install @voidable/ui @voidable/theme
+```
+
+Import the theme in your app entry point:
+
+```css
+@import '@voidable/theme';
+```
