@@ -1,0 +1,58 @@
+void-accordion {
+  display: flex;
+  flex-direction: column;
+}
+
+void-accordion-item {
+  border-bottom: 1px solid var(--void-color-border);
+}
+
+.void-accordion-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: var(--void-space-3) var(--void-space-4);
+  border: none;
+  background: transparent;
+  color: var(--void-color-text);
+  font-family: var(--void-font-sans);
+  font-size: var(--void-text-base);
+  font-weight: var(--void-weight-medium);
+  text-align: left;
+  cursor: pointer;
+  transition: background var(--void-duration-fast) var(--void-ease-in-out);
+}
+
+.void-accordion-trigger:hover {
+  background: var(--void-color-bg-hover);
+}
+
+.void-accordion-trigger:focus-visible {
+  outline: 2px solid var(--void-color-border);
+  outline-offset: -2px;
+}
+
+.void-accordion-chevron {
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+  color: var(--void-color-text-secondary);
+  transition: transform var(--void-duration-fast) var(--void-ease-in-out);
+}
+
+void-accordion-item[open] .void-accordion-chevron {
+  transform: rotate(90deg);
+}
+
+.void-accordion-content {
+  display: none;
+}
+
+void-accordion-item[open] .void-accordion-content {
+  display: block;
+  padding: var(--void-space-3) var(--void-space-4) var(--void-space-4);
+  color: var(--void-color-text);
+  font-family: var(--void-font-sans);
+  font-size: var(--void-text-sm);
+}

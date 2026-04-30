@@ -1,0 +1,42 @@
+void-scroll-area {
+  display: block;
+}
+
+.void-scroll-area-viewport {
+  overflow: hidden;
+}
+
+void-scroll-area[direction="vertical"] .void-scroll-area-viewport {
+  overflow-y: auto;
+}
+
+void-scroll-area[direction="horizontal"] .void-scroll-area-viewport {
+  overflow-x: auto;
+}
+
+void-scroll-area[direction="both"] .void-scroll-area-viewport {
+  overflow: auto;
+}
+
+.void-scroll-area-viewport::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.void-scroll-area-viewport::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.void-scroll-area-viewport::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--void-color-text-muted) 30%, transparent);
+  border-radius: var(--void-radius-full);
+}
+
+.void-scroll-area-viewport::-webkit-scrollbar-thumb:hover {
+  background: color-mix(in srgb, var(--void-color-text-muted) 60%, transparent);
+}
+
+.void-scroll-area-viewport {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--void-color-text-muted) 30%, transparent) transparent;
+}

@@ -1,0 +1,24 @@
+import { nothing } from 'lit';
+import { property } from 'lit/decorators.js';
+import { VoidElement } from '../base.js';
+
+export class VoidTable extends VoidElement {
+  @property({ type: Boolean, reflect: true }) striped = false;
+  @property({ type: Boolean, reflect: true }) hoverable = false;
+  @property({ type: Boolean, reflect: true }) compact = false;
+  @property({ type: Boolean, reflect: true }) bordered = false;
+
+  render() {
+    return nothing;
+  }
+}
+
+if (!customElements.get('void-table')) {
+  customElements.define('void-table', VoidTable);
+}
+
+declare global {
+  interface HTMLElementTagNameMap {
+    'void-table': VoidTable;
+  }
+}

@@ -1,0 +1,72 @@
+void-toast-container {
+  position: fixed;
+  bottom: 0;
+  right: 0;
+  z-index: 1100;
+  display: flex;
+  flex-direction: column;
+  gap: var(--void-space-2);
+  padding: var(--void-space-4);
+  pointer-events: none;
+}
+
+void-toast-container[position='top-right'] { top: 0; right: 0; bottom: auto; left: auto; }
+void-toast-container[position='top-left'] { top: 0; left: 0; bottom: auto; right: auto; }
+void-toast-container[position='bottom-right'] { bottom: 0; right: 0; top: auto; left: auto; }
+void-toast-container[position='bottom-left'] { bottom: 0; left: 0; top: auto; right: auto; }
+void-toast-container[position='top-center'] { top: 0; left: 50%; bottom: auto; right: auto; transform: translateX(-50%); }
+void-toast-container[position='bottom-center'] { bottom: 0; left: 50%; top: auto; right: auto; transform: translateX(-50%); }
+
+void-toast {
+  --tone: var(--void-color-accent);
+  position: relative;
+  pointer-events: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--void-space-1);
+  padding: var(--void-space-3) var(--void-space-4);
+  background: var(--void-color-bg-elevated);
+  border: 1px solid var(--void-color-border);
+  border-left: 3px solid var(--tone);
+  border-radius: var(--void-radius-md);
+  box-shadow: var(--void-shadow-lg);
+  min-width: 20rem;
+  max-width: 28rem;
+  color: var(--void-color-text);
+  font-family: var(--void-font-sans);
+  font-size: var(--void-text-sm);
+  line-height: var(--void-leading-normal);
+}
+
+void-toast[color='error']   { --tone: var(--void-color-error); }
+void-toast[color='warning'] { --tone: var(--void-color-warning); }
+void-toast[color='success'] { --tone: var(--void-color-success); }
+void-toast[color='info']    { --tone: var(--void-color-info); }
+
+.void-toast-heading {
+  font-weight: var(--void-weight-medium);
+}
+
+.void-toast-close {
+  position: absolute;
+  top: var(--void-space-2);
+  right: var(--void-space-2);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.25rem;
+  height: 1.25rem;
+  padding: 0;
+  border: none;
+  border-radius: var(--void-radius-sm);
+  background: transparent;
+  color: inherit;
+  font-size: var(--void-text-base);
+  cursor: pointer;
+  opacity: 0.6;
+  transition: opacity var(--void-duration-fast) var(--void-ease-in-out);
+}
+
+.void-toast-close:hover {
+  opacity: 1;
+}

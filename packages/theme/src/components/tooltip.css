@@ -1,0 +1,49 @@
+void-tooltip {
+  position: relative;
+  display: inline-flex;
+}
+
+.void-tooltip-bubble {
+  position: absolute;
+  bottom: calc(100% + var(--void-space-1));
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--void-color-bg-elevated);
+  border: 1px solid var(--void-color-border);
+  border-radius: var(--void-radius-sm);
+  padding: var(--void-space-1) var(--void-space-2);
+  font-family: var(--void-font-sans);
+  font-size: var(--void-text-xs);
+  color: var(--void-color-text);
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--void-duration-fast) var(--void-ease-in-out);
+  z-index: 1000;
+}
+
+void-tooltip[visible] .void-tooltip-bubble {
+  opacity: 1;
+}
+
+void-tooltip[position="bottom"] .void-tooltip-bubble {
+  bottom: auto;
+  top: calc(100% + var(--void-space-1));
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+void-tooltip[position="left"] .void-tooltip-bubble {
+  bottom: auto;
+  left: auto;
+  top: 50%;
+  right: calc(100% + var(--void-space-1));
+  transform: translateY(-50%);
+}
+
+void-tooltip[position="right"] .void-tooltip-bubble {
+  bottom: auto;
+  left: calc(100% + var(--void-space-1));
+  top: 50%;
+  transform: translateY(-50%);
+}

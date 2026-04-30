@@ -1,0 +1,68 @@
+void-compose-input {
+  display: block;
+  font-family: var(--void-font-sans);
+}
+
+.void-compose-input-wrapper {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--void-space-2);
+  padding: var(--void-space-2);
+  background: var(--void-color-bg-secondary);
+  border: 1px solid var(--void-color-border);
+  border-radius: var(--void-radius-lg);
+  transition: border-color var(--void-duration-fast) var(--void-ease-in-out);
+}
+
+.void-compose-input-wrapper:focus-within {
+  border-color: var(--void-color-border-focus);
+}
+
+.void-compose-input-textarea {
+  flex: 1;
+  border: none;
+  background: transparent;
+  color: var(--void-color-text);
+  font-family: inherit;
+  font-size: var(--void-text-sm);
+  resize: none;
+  outline: none;
+  min-height: 1.5rem;
+  max-height: 8rem;
+  overflow-y: auto;
+  padding: var(--void-space-1);
+}
+
+.void-compose-input-textarea::placeholder {
+  color: var(--void-color-text-muted);
+}
+
+.void-compose-input-send {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border: none;
+  border-radius: var(--void-radius-md);
+  background: var(--void-color-accent);
+  color: var(--void-color-text-on-accent);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: opacity var(--void-duration-fast) var(--void-ease-in-out);
+}
+
+.void-compose-input-send:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.void-compose-input-send svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+void-compose-input[disabled] .void-compose-input-wrapper {
+  opacity: 0.5;
+  pointer-events: none;
+}

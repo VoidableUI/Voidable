@@ -1,0 +1,103 @@
+void-file-upload {
+  display: flex;
+  flex-direction: column;
+  gap: var(--void-space-2);
+  font-family: var(--void-font-sans);
+}
+
+.void-file-upload-dropzone {
+  border: 2px dashed var(--void-color-border);
+  border-radius: var(--void-radius-lg);
+  padding: var(--void-space-6);
+  text-align: center;
+  cursor: pointer;
+  transition: border-color var(--void-duration-fast) var(--void-ease-in-out),
+              background-color var(--void-duration-fast) var(--void-ease-in-out);
+  outline: none;
+}
+
+.void-file-upload-dropzone:hover {
+  border-color: var(--void-color-border-strong);
+  background-color: var(--void-color-bg-hover);
+}
+
+.void-file-upload-dropzone:focus-visible {
+  border-color: var(--void-color-border-focus);
+  box-shadow: 0 0 0 1px var(--void-color-border-focus);
+}
+
+void-file-upload[dragging] .void-file-upload-dropzone {
+  border-color: var(--void-color-accent);
+  background-color: color-mix(in srgb, var(--void-color-accent) 8%, transparent);
+}
+
+.void-file-upload-text {
+  font-size: var(--void-text-sm);
+  color: var(--void-color-text-muted);
+}
+
+.void-file-upload-browse {
+  color: var(--void-color-accent);
+  font-weight: 500;
+}
+
+.void-file-upload-files {
+  display: flex;
+  flex-direction: column;
+  gap: var(--void-space-1);
+}
+
+.void-file-upload-file {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--void-space-2);
+  background-color: var(--void-color-bg-secondary);
+  border-radius: var(--void-radius-md);
+  font-size: var(--void-text-xs);
+}
+
+.void-file-upload-filename {
+  color: var(--void-color-text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.void-file-upload-remove {
+  appearance: none;
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  line-height: 1;
+  cursor: pointer;
+  color: var(--void-color-text-muted);
+  font-size: var(--void-text-sm);
+  flex-shrink: 0;
+  transition: color var(--void-duration-fast) var(--void-ease-in-out);
+}
+
+.void-file-upload-remove:hover {
+  color: var(--void-color-text);
+}
+
+.void-file-upload-remove:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.void-file-upload-error {
+  color: var(--void-color-error);
+  font-size: var(--void-text-xs);
+}
+
+void-file-upload[error]:not([error=""]) .void-file-upload-dropzone {
+  border-color: var(--void-color-error);
+}
+
+void-file-upload[disabled] .void-file-upload-dropzone {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}

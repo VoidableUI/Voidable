@@ -1,0 +1,24 @@
+void-radio-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--void-space-2);
+  font-family: var(--void-font-sans);
+}
+
+.void-radio-group-label {
+  font-size: var(--void-text-sm);
+  font-weight: var(--void-weight-medium);
+  color: var(--void-color-text);
+}
+
+.void-radio-group-options {
+  display: flex;
+  flex-direction: column;
+  gap: var(--void-space-2);
+}
+
+void-radio-group[orientation="horizontal"] .void-radio-group-options {
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: var(--void-space-4);
+}

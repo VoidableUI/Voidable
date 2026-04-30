@@ -1,0 +1,27 @@
+void-checkbox-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--void-space-2);
+  font-family: var(--void-font-sans);
+}
+
+.void-checkbox-group-label {
+  font-size: var(--void-text-sm);
+  font-weight: var(--void-weight-medium);
+  color: var(--void-color-text);
+  margin-bottom: var(--void-space-1);
+}
+
+.void-checkbox-group-items {
+  display: flex;
+  gap: var(--void-space-2);
+}
+
+void-checkbox-group[orientation="vertical"] .void-checkbox-group-items {
+  flex-direction: column;
+}
+
+void-checkbox-group[orientation="horizontal"] .void-checkbox-group-items {
+  flex-direction: row;
+  flex-wrap: wrap;
+}

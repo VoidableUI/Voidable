@@ -1,0 +1,56 @@
+void-error-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--void-space-8);
+  font-family: var(--void-font-sans);
+}
+
+.void-error-fallback-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--void-space-3);
+  text-align: center;
+  max-width: 24rem;
+}
+
+.void-error-fallback-icon {
+  font-size: 2rem;
+  color: var(--void-color-error);
+  opacity: 0.7;
+}
+
+.void-error-fallback-heading {
+  font-size: var(--void-text-lg);
+  font-weight: var(--void-weight-semibold);
+  color: var(--void-color-text);
+}
+
+.void-error-fallback-message {
+  font-size: var(--void-text-sm);
+  color: var(--void-color-text-secondary);
+}
+
+.void-error-fallback-retry {
+  padding: var(--void-space-2) var(--void-space-4);
+  background: var(--void-color-bg-secondary);
+  border: 1px solid var(--void-color-border);
+  border-radius: var(--void-radius-md);
+  font-size: var(--void-text-sm);
+  font-family: var(--void-font-sans);
+  color: var(--void-color-text);
+  cursor: pointer;
+  transition: background var(--void-duration-fast) var(--void-ease-in-out),
+              border-color var(--void-duration-fast) var(--void-ease-in-out);
+}
+
+.void-error-fallback-retry:hover {
+  background: var(--void-color-bg-secondary);
+  border-color: var(--void-color-text-muted);
+}
+
+.void-error-fallback-retry:focus-visible {
+  outline: 2px solid var(--void-color-border-focus);
+  outline-offset: 2px;
+}

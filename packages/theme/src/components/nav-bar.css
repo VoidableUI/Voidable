@@ -1,0 +1,28 @@
+void-nav-bar {
+  display: block;
+  font-family: var(--void-font-sans);
+  background: var(--void-color-bg);
+}
+
+void-nav-bar[bordered] {
+  border-bottom: 1px solid var(--void-color-border);
+}
+
+void-nav-bar[sticky] {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+void-nav-bar[variant="elevated"] {
+  background: var(--void-color-bg-secondary);
+  box-shadow: 0 1px 4px color-mix(in srgb, var(--void-color-text) 10%, transparent);
+}
+
+.void-nav-bar-content {
+  display: flex;
+  align-items: center;
+  gap: var(--void-space-4);
+  padding: var(--void-space-2) var(--void-space-4);
+  min-height: 3rem;
+}
