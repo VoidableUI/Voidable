@@ -1,0 +1,33 @@
+{
+  "name": "@voidable/ui-liveview",
+  "version": "0.0.0",
+  "type": "module",
+  "license": "MIT",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "development": "./src/index.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": ["dist"],
+  "scripts": {
+    "build": "vite build",
+    "typecheck": "tsc --noEmit"
+  },
+  "peerDependencies": {
+    "@voidable/ui": "workspace:*",
+    "phoenix_live_view": ">=1.0.0"
+  },
+  "devDependencies": {
+    "@voidable/ui": "workspace:*",
+    "typescript": "^6.0.0",
+    "vite": "^8.0.0",
+    "vite-plugin-dts": "^4.5.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/VoidableUI/Voidable",
+    "directory": "packages/liveview"
+  }
+}
