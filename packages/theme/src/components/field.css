@@ -1,0 +1,43 @@
+void-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--void-space-1);
+  font-family: var(--void-font-sans);
+}
+
+.void-field-label {
+  font-size: var(--void-text-sm);
+  font-weight: var(--void-weight-medium);
+  color: var(--void-color-text);
+}
+
+.void-field-required {
+  color: var(--void-color-error);
+}
+
+.void-field-control {
+  display: flex;
+  flex-direction: column;
+}
+
+.void-field-helper {
+  font-size: var(--void-text-xs);
+  color: var(--void-color-text-muted);
+}
+
+.void-field-error {
+  font-size: var(--void-text-xs);
+  color: var(--void-color-error);
+}
+
+void-field[error]:not([error=""]) input,
+void-field[error]:not([error=""]) textarea,
+void-field[error]:not([error=""]) select {
+  border-color: var(--void-color-error);
+}
+
+void-field[error]:not([error=""]) input:focus,
+void-field[error]:not([error=""]) textarea:focus,
+void-field[error]:not([error=""]) select:focus {
+  box-shadow: 0 0 0 1px var(--void-color-error);
+}

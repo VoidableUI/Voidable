@@ -13,3 +13,10 @@
 @import './components/tag.css';
 @import './components/progress.css';
 @import './components/panel.css';
+@import './components/input.css';
+@import './components/textarea.css';
+@import './components/select.css';
+@import './components/checkbox.css';
+@import './components/radio.css';
+@import './components/field.css';
+@import './components/multiselect.css';
