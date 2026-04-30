@@ -1,0 +1,1 @@
+{application,voidable_ui,[{modules,['Elixir.VoidableUI','Elixir.VoidableUI.Components']},{optional_applications,[]},{applications,[kernel,stdlib,elixir,logger,phoenix_live_view]},{description,"voidable_ui"},{registered,[]},{vsn,"0.1.0"}]}.
