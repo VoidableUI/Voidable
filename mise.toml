@@ -1,3 +1,5 @@
 [tools]
+elixir = "latest"
+erlang = "latest"
 node = "lts"
 "npm:pnpm" = "10"
