@@ -1,0 +1,99 @@
+# SPDX-License-Identifier: MIT
+name: Release voidable-hotwire Gem
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'packages/hotwire/gem/**'
+
+permissions:
+  contents: write
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3'
+
+      - name: Run tests
+        working-directory: packages/hotwire/gem
+        run: ruby -Ilib -Itest test/helpers_test.rb
+
+  tag:
+    name: Create Tag
+    runs-on: ubuntu-latest
+    needs: test
+    outputs:
+      new_tag: ${{ steps.tag_version.outputs.new_tag }}
+      changelog: ${{ steps.tag_version.outputs.changelog }}
+      should_release: ${{ steps.check_tag.outputs.should_release }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Bump version and create tag
+        id: tag_version
+        uses: Work-Fort/github-tag-action@v6.3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          default_bump: false
+          release_branches: master
+          tag_prefix: gem-hotwire-v
+          paths: packages/hotwire/gem/**
+
+      - name: Check if new tag was created
+        id: check_tag
+        run: |
+          if [ -n "$TAG" ]; then
+            echo "should_release=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "should_release=false" >> "$GITHUB_OUTPUT"
+          fi
+        env:
+          TAG: ${{ steps.tag_version.outputs.new_tag }}
+
+  release:
+    name: Publish to RubyGems
+    runs-on: ubuntu-latest
+    needs: tag
+    if: needs.tag.outputs.should_release == 'true'
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.tag.outputs.new_tag }}
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3'
+
+      - name: Build and publish gem
+        working-directory: packages/hotwire/gem
+        env:
+          TAG: ${{ needs.tag.outputs.new_tag }}
+          GEM_HOST_API_KEY: ${{ secrets.RUBYGEMS_API_KEY }}
+        run: |
+          VERSION=$(echo "$TAG" | sed 's|^gem-hotwire-v||')
+          sed -i "s/spec.version.*=.*/spec.version       = \"$VERSION\"/" voidable-hotwire.gemspec
+          sed -i "s/VERSION = .*/VERSION = \"$VERSION\"/" lib/voidable/hotwire/version.rb
+          gem build voidable-hotwire.gemspec
+          gem push voidable-hotwire-${VERSION}.gem
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ needs.tag.outputs.new_tag }}
+          name: "voidable-hotwire ${{ needs.tag.outputs.new_tag }}"
+          body: ${{ needs.tag.outputs.changelog }}
+          draft: false
+          prerelease: false
+          files: packages/hotwire/gem/voidable-hotwire-*.gem
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

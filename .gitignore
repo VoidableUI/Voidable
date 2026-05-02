@@ -7,3 +7,5 @@ storybook-static/
 /*.png
 .playwright-mcp/
 .astro/
+*.gem
+Gemfile.lock
