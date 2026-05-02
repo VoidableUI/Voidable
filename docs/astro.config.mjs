@@ -13,6 +13,12 @@ export default defineConfig({
   integrations: [
     starlight({
       title: 'Void UI',
+      head: [
+        { tag: 'link', attrs: { rel: 'preconnect', href: 'https://fonts.googleapis.com' } },
+        { tag: 'link', attrs: { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: true } },
+        { tag: 'link', attrs: { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap' } },
+      ],
+      customCss: ['./src/styles/fonts.css'],
       social: [
         {
           icon: 'github',
@@ -26,6 +32,7 @@ export default defineConfig({
           items: [
             { label: 'Introduction', slug: 'getting-started/introduction' },
             { label: 'Installation', slug: 'getting-started/installation' },
+            { label: 'Design Philosophy', slug: 'getting-started/design-philosophy' },
             { label: 'Theming', slug: 'getting-started/theming' },
           ],
         },

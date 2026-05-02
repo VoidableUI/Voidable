@@ -1,0 +1,67 @@
+---
+title: Design Philosophy
+---
+
+Every decision in Voidable traces back to a single requirement: a UI library that works inside a federated micro-frontend architecture.
+
+## Built for Federation
+
+A shell application connects to microservices via [Module Federation](https://webpack.js.org/concepts/module-federation/). Each microservice ships its own UI as a federated JavaScript module. Services carry only structure — no custom styling.
+
+The shell owns the design system and pushes it down into components. This means theming must be entirely independent of the consuming service. A service cannot and should not influence its own appearance.
+
+That constraint drove every major decision in Voidable.
+
+## Light DOM
+
+Components override `createRenderRoot()` to render into the Light DOM:
+
+```js
+createRenderRoot() { return this; }
+```
+
+No Shadow DOM. The consequences of this are significant:
+
+- Your CSS has full access to component internals
+- Theme tokens flow naturally through the cascade
+- No `::part()` or `::slotted()` workarounds
+- Services receive styling from the shell, not from themselves
+
+Shadow DOM solves encapsulation. Voidable solves the opposite problem: components that are deliberately transparent to their environment.
+
+## Devoid of Style
+
+Voidable components contain zero intrinsic styling. No fixed heights, no hardcoded spacing, no embedded CSS. They are semantic containers that receive all visual properties from `@voidable/theme` via CSS custom properties.
+
+The name reflects this: components are *void* of style. The theme package is the single source of visual identity. Swap the theme and every component changes. A service can't break the design system because it never owned the styling to begin with.
+
+## Semantic Elements for AI
+
+Custom elements like `void-button`, `void-input`, and `void-dialog` are semantic targets. AI agents using Playwright, Puppeteer, or other browser automation tools can target them directly:
+
+```js
+page.locator('void-button[variant="filled"]')
+page.locator('void-input[name="email"]')
+```
+
+No ambiguous `div` class hierarchies. No Shadow DOM barriers to pierce. This was a core design consideration, not a side effect.
+
+## CSS Token Architecture
+
+Styling flows through three layers:
+
+1. **Primitives** — raw values: color scales, spacing scale, font stacks
+2. **Tokens** — semantic mappings: `--void-color-bg`, `--void-color-text`, `--void-color-border`
+3. **Component CSS** — selectors that reference tokens only
+
+All three live in `@voidable/theme`. Components import nothing. Dark/light mode switches via `data-theme` attribute — tokens remap, components follow automatically.
+
+## Negative Space
+
+The default theme emphasizes negative space: more padding, bigger gaps. This is intentional. "Void" as in the space between things. The result is a UI that breathes even when dense with content.
+
+## Framework Adapters
+
+Each framework adapter is a separate package (`@voidable/ui-react`, `@voidable/ui-vue`, etc.). Adapters provide framework-idiomatic wrappers and type definitions — no additional styling. `@voidable/ui` and `@voidable/theme` are peer dependencies.
+
+Server-side frameworks (LiveView, Hotwire) use a dual-package architecture: an npm package for client-side hooks and controllers, plus a native server-side package (Hex for Elixir, gem for Ruby) providing template helpers.
