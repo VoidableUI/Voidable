@@ -1,5 +1,5 @@
 ---
-// Custom landing page — renders outside Starlight's layout
+import '@voidable/theme';
 ---
 
 <html lang="en" data-theme="dark">
@@ -10,8 +10,6 @@
     <meta name="description" content="A framework-agnostic web component library built with Lit 3. Light DOM, CSS token theming, adapters for React, Vue, Solid, Svelte, Angular, and Hotwire." />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <style>
-      @import '@voidable/theme';
-
       *,
       *::before,
       *::after {
@@ -83,10 +81,6 @@
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
         gap: 1.25rem;
-      }
-
-      .features void-card {
-        --void-card-padding: 1.5rem;
       }
 
       .feature-title {
