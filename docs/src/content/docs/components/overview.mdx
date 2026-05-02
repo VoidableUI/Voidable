@@ -1,0 +1,76 @@
+---
+title: Component Overview
+---
+
+import { LinkCard } from '@astrojs/starlight/components';
+
+Voidable UI ships 45+ components organized by category. All components render in the Light DOM and are styled entirely through `@voidable/theme` CSS tokens.
+
+<LinkCard title="Interactive Storybook" href="/storybook/" description="Browse all components with live examples and controls." />
+
+## Layout
+
+| Component | Tag | Description |
+|-----------|-----|-------------|
+| Card | `<void-card>` | Content container with heading, variants, and padding options |
+| Panel | `<void-panel>` | Bordered/elevated section wrapper |
+| Divider | `<void-divider>` | Horizontal or vertical separator with optional label |
+| ScrollArea | `<void-scroll-area>` | Scrollable container with styled scrollbars |
+| NavBar | `<void-nav-bar>` | Top navigation bar |
+
+## Data Display
+
+| Component | Tag | Description |
+|-----------|-----|-------------|
+| Avatar | `<void-avatar>` | User image or initials |
+| Badge | `<void-badge>` | Status indicator with color and size variants |
+| List / ListItem | `<void-list>` | Structured list with optional dividers |
+| Table | `<void-table>` | Styled table with striped, hoverable, compact modes |
+| Tag | `<void-tag>` | Removable label |
+| Breadcrumbs | `<void-breadcrumbs>` | Navigation breadcrumb trail |
+| StatusDot | `<void-status-dot>` | Online/away/offline indicator |
+| Tooltip | `<void-tooltip>` | Hover tooltip with positioning |
+| Popover | `<void-popover>` | Click/manual popover with positioning |
+| Tabs / TabPanel | `<void-tabs>` | Tabbed content navigation |
+| Accordion | `<void-accordion>` | Collapsible content sections |
+| Stepper | `<void-stepper>` | Multi-step progress indicator |
+| Pagination | `<void-pagination>` | Page navigation controls |
+
+## Forms
+
+| Component | Tag | Description |
+|-----------|-----|-------------|
+| Button | `<void-button>` | Action button with variants and colors |
+| Input | `<void-input>` | Text input with type, size, and error support |
+| Textarea | `<void-textarea>` | Multi-line text input |
+| Select | `<void-select>` | Dropdown select |
+| Multiselect | `<void-multiselect>` | Multi-value select with `<void-option>` children |
+| Combobox | `<void-combobox>` | Filterable select |
+| Checkbox | `<void-checkbox>` | Checkbox with indeterminate state |
+| CheckboxGroup | `<void-checkbox-group>` | Grouped checkboxes |
+| Radio / RadioGroup | `<void-radio>` | Radio button selection |
+| Switch | `<void-switch>` | Toggle switch |
+| Slider | `<void-slider>` | Range slider with min/max/step |
+| Field | `<void-field>` | Form field wrapper with label, error, and helper text |
+| FileUpload | `<void-file-upload>` | File upload with drag-and-drop |
+| ComposeInput | `<void-compose-input>` | Rich text compose area |
+
+## Feedback
+
+| Component | Tag | Description |
+|-----------|-----|-------------|
+| Alert | `<void-alert>` | Inline alert message |
+| Banner | `<void-banner>` | Full-width banner notification |
+| Toast / ToastContainer | `<void-toast>` | Temporary notification popup |
+| Progress | `<void-progress>` | Determinate/indeterminate progress bar |
+| Spinner | `<void-spinner>` | Loading spinner |
+| Skeleton | `<void-skeleton>` | Content placeholder (text, circular, rectangular) |
+| ErrorFallback | `<void-error-fallback>` | Error state with optional retry |
+| Dialog | `<void-dialog>` | Modal dialog |
+| Drawer | `<void-drawer>` | Slide-out panel from any edge |
+
+## Navigation
+
+| Component | Tag | Description |
+|-----------|-----|-------------|
+| Hamburger | `<void-hamburger>` | Animated hamburger menu toggle |

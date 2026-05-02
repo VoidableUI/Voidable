@@ -1,0 +1,316 @@
+---
+// Custom landing page — renders outside Starlight's layout
+---
+
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Voidable UI — Framework-agnostic web components built with Lit</title>
+    <meta name="description" content="A framework-agnostic web component library built with Lit 3. Light DOM, CSS token theming, adapters for React, Vue, Solid, Svelte, Angular, and Hotwire." />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <style>
+      @import '@voidable/theme';
+
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+      }
+
+      html {
+        font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+        color: var(--void-color-text);
+        background: var(--void-color-bg);
+      }
+
+      body {
+        min-height: 100dvh;
+        line-height: 1.6;
+      }
+
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+
+      /* ── Hero ── */
+
+      .hero {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 6rem 1.5rem 4rem;
+        gap: 1.5rem;
+        max-width: 64rem;
+        margin: 0 auto;
+      }
+
+      .hero h1 {
+        font-size: clamp(2.5rem, 6vw, 4.5rem);
+        font-weight: 700;
+        letter-spacing: -0.03em;
+        line-height: 1.1;
+      }
+
+      .hero .tagline {
+        font-size: clamp(1.1rem, 2.5vw, 1.35rem);
+        color: var(--void-color-text-secondary);
+        max-width: 38rem;
+      }
+
+      .hero-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 0.5rem;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+
+      .hero-actions void-button {
+        font-size: 1rem;
+      }
+
+      /* ── Feature grid ── */
+
+      .features {
+        max-width: 64rem;
+        margin: 0 auto;
+        padding: 3rem 1.5rem;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+        gap: 1.25rem;
+      }
+
+      .features void-card {
+        --void-card-padding: 1.5rem;
+      }
+
+      .feature-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 0.35rem;
+      }
+
+      .feature-desc {
+        font-size: 0.9rem;
+        color: var(--void-color-text-secondary);
+        line-height: 1.5;
+      }
+
+      /* ── Showcase ── */
+
+      .showcase {
+        max-width: 64rem;
+        margin: 0 auto;
+        padding: 3rem 1.5rem;
+      }
+
+      .showcase h2 {
+        font-size: 1.75rem;
+        font-weight: 600;
+        margin-bottom: 2rem;
+        text-align: center;
+      }
+
+      .showcase-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
+        gap: 1.5rem;
+      }
+
+      .showcase-section {
+        padding: 1.5rem;
+        border: 1px solid var(--void-color-border);
+        border-radius: var(--void-radius-lg, 12px);
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+      }
+
+      .showcase-section h3 {
+        font-size: 0.85rem;
+        font-weight: 500;
+        color: var(--void-color-text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+
+      .showcase-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        align-items: center;
+      }
+
+      /* ── Frameworks ── */
+
+      .frameworks {
+        max-width: 64rem;
+        margin: 0 auto;
+        padding: 3rem 1.5rem 2rem;
+        text-align: center;
+      }
+
+      .frameworks h2 {
+        font-size: 1.75rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+      }
+
+      .frameworks p {
+        color: var(--void-color-text-secondary);
+        margin-bottom: 2rem;
+      }
+
+      .framework-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: center;
+      }
+
+      .framework-list span {
+        padding: 0.5rem 1.25rem;
+        border: 1px solid var(--void-color-border);
+        border-radius: var(--void-radius-md, 8px);
+        font-size: 0.95rem;
+        font-weight: 500;
+        color: var(--void-color-text-secondary);
+        transition: border-color 0.15s, color 0.15s;
+      }
+
+      .framework-list span:hover {
+        border-color: var(--void-color-border-strong);
+        color: var(--void-color-text);
+      }
+
+      /* ── Footer ── */
+
+      .footer {
+        max-width: 64rem;
+        margin: 0 auto;
+        padding: 2rem 1.5rem 3rem;
+        display: flex;
+        justify-content: center;
+        gap: 2rem;
+        flex-wrap: wrap;
+        border-top: 1px solid var(--void-color-border);
+        margin-top: 2rem;
+      }
+
+      .footer a {
+        color: var(--void-color-text-secondary);
+        font-size: 0.9rem;
+        transition: color 0.15s;
+      }
+
+      .footer a:hover {
+        color: var(--void-color-text);
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Hero -->
+    <section class="hero">
+      <h1>Voidable UI</h1>
+      <p class="tagline">Framework-agnostic web components built with Lit. Light DOM, CSS token theming, and adapters for every major framework.</p>
+      <div class="hero-actions">
+        <a href="/getting-started/installation/">
+          <void-button variant="filled">Get Started</void-button>
+        </a>
+        <a href="/storybook/" target="_blank">
+          <void-button variant="outline">Storybook</void-button>
+        </a>
+      </div>
+    </section>
+
+    <!-- Features -->
+    <section class="features">
+      <void-card>
+        <div class="feature-title">45+ Components</div>
+        <div class="feature-desc">Production-ready UI primitives for layout, forms, data display, feedback, and navigation.</div>
+      </void-card>
+      <void-card>
+        <div class="feature-title">Light DOM</div>
+        <div class="feature-desc">No Shadow DOM barriers. Your CSS has full access to every component's internals.</div>
+      </void-card>
+      <void-card>
+        <div class="feature-title">Framework Adapters</div>
+        <div class="feature-desc">First-class support for React, Vue, Solid, Svelte, Angular, and Hotwire.</div>
+      </void-card>
+      <void-card>
+        <div class="feature-title">Themeable</div>
+        <div class="feature-desc">CSS custom property tokens with built-in dark and light modes. Override anything.</div>
+      </void-card>
+    </section>
+
+    <!-- Component Showcase -->
+    <section class="showcase">
+      <h2>Components in action</h2>
+      <div class="showcase-grid">
+        <div class="showcase-section">
+          <h3>Buttons</h3>
+          <div class="showcase-row">
+            <void-button variant="filled">Filled</void-button>
+            <void-button variant="outline">Outline</void-button>
+            <void-button variant="filled" color="success">Success</void-button>
+            <void-button variant="filled" color="error">Error</void-button>
+          </div>
+        </div>
+        <div class="showcase-section">
+          <h3>Badges</h3>
+          <div class="showcase-row">
+            <void-badge color="default">Default</void-badge>
+            <void-badge color="success">Success</void-badge>
+            <void-badge color="warning">Warning</void-badge>
+            <void-badge color="error">Error</void-badge>
+            <void-badge color="info">Info</void-badge>
+          </div>
+        </div>
+        <div class="showcase-section">
+          <h3>Form Controls</h3>
+          <void-field label="Email address">
+            <void-input type="email" placeholder="you@example.com"></void-input>
+          </void-field>
+        </div>
+        <div class="showcase-section">
+          <h3>Toggles</h3>
+          <div class="showcase-row">
+            <void-switch checked></void-switch>
+            <void-checkbox checked>Remember me</void-checkbox>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Frameworks -->
+    <section class="frameworks">
+      <h2>Works with your stack</h2>
+      <p>Native custom element support plus dedicated adapters with theme utilities.</p>
+      <div class="framework-list">
+        <span>React</span>
+        <span>Vue</span>
+        <span>Solid</span>
+        <span>Svelte</span>
+        <span>Angular</span>
+        <span>Hotwire</span>
+        <span>Vanilla JS</span>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <a href="/getting-started/introduction/">Documentation</a>
+      <a href="/storybook/" target="_blank">Storybook</a>
+      <a href="https://github.com/VoidableUI/Voidable" target="_blank">GitHub</a>
+    </footer>
+
+    <script>
+      import '@voidable/ui';
+    </script>
+  </body>
+</html>

@@ -1,0 +1,56 @@
+---
+title: Hotwire
+---
+
+The Hotwire adapter provides a Stimulus controller for bridging custom events and Turbo morph protection for Voidable components.
+
+## Install
+
+```bash
+npm install @voidable/ui @voidable/theme @voidable/ui-hotwire
+```
+
+## Register the Stimulus controller
+
+Register `VoidEventController` with your Stimulus application:
+
+```js
+import { Application } from '@hotwired/stimulus';
+import { VoidEventController } from '@voidable/ui-hotwire';
+
+const app = Application.start();
+app.register('void-event', VoidEventController);
+```
+
+## Start Turbo morph protection
+
+`VoidTurbo.start()` prevents Turbo from clobbering client-managed attributes (`open`, `checked`, `aria-expanded`, etc.) on `<void-*>` elements during page morphs:
+
+```js
+import { VoidTurbo } from '@voidable/ui-hotwire';
+VoidTurbo.start();
+```
+
+## Usage in ERB templates
+
+Use `data-controller` and `data-action` to wire up events:
+
+```erb
+<void-button
+  variant="filled"
+  data-controller="void-event"
+  data-void-event-events-value="void-click"
+  data-action="void-click->form#submit"
+>
+  Save
+</void-button>
+
+<void-input
+  placeholder="Email"
+  data-controller="void-event"
+  data-void-event-events-value="void-change"
+  data-action="void-change->search#filter"
+></void-input>
+```
+
+The `VoidEventController` listens for the specified custom events on the element and re-dispatches them as Stimulus-compatible events so they can be routed via `data-action`.

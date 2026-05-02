@@ -1,0 +1,59 @@
+---
+title: Angular
+---
+
+The Angular adapter provides `VoidableModule` to register the `CUSTOM_ELEMENTS_SCHEMA` and a `ThemeService` with Angular signals.
+
+## Install
+
+```bash
+npm install @voidable/ui @voidable/theme @voidable/ui-angular
+```
+
+## Module setup
+
+Import `VoidableModule` in your app module to allow `<void-*>` elements in templates:
+
+```ts
+import { VoidableModule } from '@voidable/ui-angular';
+
+@NgModule({
+  imports: [VoidableModule],
+})
+export class AppModule {}
+```
+
+This registers `CUSTOM_ELEMENTS_SCHEMA` so Angular does not reject unknown `<void-*>` tags.
+
+## Usage
+
+Use `<void-*>` elements in Angular templates:
+
+```html
+<void-button variant="filled" (void-click)="onSave()">
+  Save
+</void-button>
+
+<void-input [value]="name" (void-change)="name = $event.detail.value"></void-input>
+
+<void-alert color="info">Angular works with custom elements natively.</void-alert>
+```
+
+## ThemeService
+
+Inject `ThemeService` to read the current theme as an Angular signal:
+
+```ts
+import { Component } from '@angular/core';
+import { ThemeService } from '@voidable/ui-angular';
+
+@Component({
+  selector: 'app-root',
+  template: `<span>Current theme: {{ themeService.theme() }}</span>`,
+})
+export class AppComponent {
+  constructor(public themeService: ThemeService) {}
+}
+```
+
+`ThemeService` is provided in root, uses a `MutationObserver` to track the `data-theme` attribute, and exposes a `signal<'dark' | 'light'>`.

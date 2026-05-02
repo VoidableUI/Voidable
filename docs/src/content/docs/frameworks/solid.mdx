@@ -1,0 +1,56 @@
+---
+title: Solid
+---
+
+SolidJS handles custom elements natively in JSX. The `@voidable/ui-solid` package provides a `useTheme` signal.
+
+## Install
+
+```bash
+npm install @voidable/ui @voidable/theme @voidable/ui-solid
+```
+
+## Usage
+
+Use `<void-*>` elements directly in Solid JSX:
+
+```tsx
+import '@voidable/ui';
+
+function App() {
+  return (
+    <>
+      <void-button variant="filled" onClick={() => console.log('clicked')}>
+        Save
+      </void-button>
+
+      <void-input placeholder="Your name" />
+
+      <void-alert color="info">
+        Custom elements work natively in Solid.
+      </void-alert>
+    </>
+  );
+}
+```
+
+Listen to custom events with `on:` syntax:
+
+```tsx
+<void-input on:void-change={(e) => setValue(e.detail.value)} />
+```
+
+## Theme signal
+
+Track the active theme as a reactive signal:
+
+```tsx
+import { useTheme } from '@voidable/ui-solid';
+
+function ThemeIndicator() {
+  const theme = useTheme(); // Accessor<'dark' | 'light'>
+  return <span>Current theme: {theme()}</span>;
+}
+```
+
+The signal observes the `data-theme` attribute on `<html>` via `MutationObserver` and cleans up via `onCleanup`.

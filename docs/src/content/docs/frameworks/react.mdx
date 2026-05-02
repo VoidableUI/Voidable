@@ -1,0 +1,58 @@
+---
+title: React
+---
+
+The React adapter provides wrapped components with proper ref forwarding and custom event bridging.
+
+## Install
+
+```bash
+npm install @voidable/ui @voidable/theme @voidable/ui-react
+```
+
+## Usage
+
+Import wrapped components from `@voidable/ui-react`:
+
+```tsx
+import { Button, Input, Alert } from '@voidable/ui-react';
+
+function App() {
+  return (
+    <>
+      <Alert color="info">Welcome to Voidable UI</Alert>
+      <Input placeholder="Your name" />
+      <Button variant="filled" onVoidClick={() => console.log('clicked')}>
+        Submit
+      </Button>
+    </>
+  );
+}
+```
+
+## Event handling
+
+Voidable components emit `CustomEvent`s (e.g. `void-click`, `void-change`). The React wrappers use `useWcEvents` internally to bridge these to React-style props.
+
+Event props follow the pattern `onVoid{EventName}` in camelCase:
+
+```tsx
+<Input onVoidChange={(e) => setValue(e.detail.value)} />
+<Dialog onVoidClose={() => setOpen(false)} />
+<Switch onVoidChange={(e) => setChecked(e.detail.checked)} />
+```
+
+## Theme hook
+
+Track the current theme reactively with `useTheme`:
+
+```tsx
+import { useTheme } from '@voidable/ui-react';
+
+function ThemeIndicator() {
+  const theme = useTheme(); // 'dark' | 'light'
+  return <span>Current theme: {theme}</span>;
+}
+```
+
+The hook uses `useSyncExternalStore` to observe the `data-theme` attribute on `<html>`, so it works with SSR and concurrent mode.

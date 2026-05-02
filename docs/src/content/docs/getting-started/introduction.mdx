@@ -1,0 +1,46 @@
+---
+title: Voidable UI
+description: A framework-agnostic web component library built with Lit 3.
+---
+
+Voidable UI is a **framework-agnostic web component library** built on [Lit 3](https://lit.dev). Every component renders in the **Light DOM** — no Shadow DOM barriers — so your CSS has full access to component internals.
+
+## Key features
+
+- **45+ components** covering layout, forms, data display, feedback, and navigation
+- **CSS token system** with dark/light themes via `data-theme` attribute
+- **Zero visual CSS in components** — all styling flows through `@voidable/theme`
+- **First-class framework adapters** for React, Vue, Solid, Svelte, Angular, and Hotwire
+
+## Quick start
+
+```bash
+npm install @voidable/ui @voidable/theme
+```
+
+```css
+/* Import the full theme in your app entry point */
+@import '@voidable/theme';
+```
+
+```html
+<void-button variant="filled">Click me</void-button>
+```
+
+## Packages
+
+| Package | Description |
+|---------|-------------|
+| `@voidable/theme` | CSS custom properties and design tokens (`--void-*`) |
+| `@voidable/ui` | Lit 3 web components (Light DOM) |
+| `@voidable/ui-react` | React wrapper components with event bridging |
+| `@voidable/ui-vue` | Vue `useTheme` composable |
+| `@voidable/ui-solid` | Solid `useTheme` signal |
+| `@voidable/ui-svelte` | Svelte `theme` readable store |
+| `@voidable/ui-angular` | Angular module + `ThemeService` |
+| `@voidable/ui-hotwire` | Stimulus controller + Turbo morph protection |
+
+## Resources
+
+- [Storybook](/storybook/) — Interactive component demos
+- [GitHub](https://github.com/VoidableUI/Voidable) — Source code and issues

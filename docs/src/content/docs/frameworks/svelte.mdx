@@ -1,0 +1,46 @@
+---
+title: Svelte
+---
+
+Svelte handles custom elements natively in templates. The `@voidable/ui-svelte` package provides a `theme` readable store.
+
+## Install
+
+```bash
+npm install @voidable/ui @voidable/theme @voidable/ui-svelte
+```
+
+## Usage
+
+Use `<void-*>` elements directly in Svelte templates:
+
+```svelte
+<script>
+  import '@voidable/ui';
+
+  let name = '';
+
+  function handleChange(e) {
+    name = e.detail.value;
+  }
+</script>
+
+<void-input placeholder="Your name" on:void-change={handleChange} />
+<void-button variant="filled" on:void-click={() => console.log(name)}>
+  Submit
+</void-button>
+```
+
+## Theme store
+
+Track the active theme with a readable Svelte store:
+
+```svelte
+<script>
+  import { theme } from '@voidable/ui-svelte';
+</script>
+
+<span>Current theme: {$theme}</span>
+```
+
+The store observes the `data-theme` attribute on `<html>` via `MutationObserver` and cleans up its subscription automatically.

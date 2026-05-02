@@ -1,0 +1,74 @@
+---
+title: Vue
+---
+
+Vue handles custom elements natively. The `@voidable/ui-vue` package provides a `useTheme` composable.
+
+## Install
+
+```bash
+npm install @voidable/ui @voidable/theme @voidable/ui-vue
+```
+
+## Vite config
+
+Tell Vue's template compiler to treat `void-*` tags as custom elements:
+
+```js
+// vite.config.js
+import vue from '@vitejs/plugin-vue';
+
+export default {
+  plugins: [
+    vue({
+      template: {
+        compilerOptions: {
+          isCustomElement: (tag) => tag.startsWith('void-'),
+        },
+      },
+    }),
+  ],
+};
+```
+
+## Usage
+
+Use `<void-*>` elements directly in Vue templates:
+
+```vue
+<template>
+  <void-button variant="filled" @void-click="handleClick">
+    Save
+  </void-button>
+
+  <void-input :value="name" @void-change="name = $event.detail.value" />
+</template>
+
+<script setup>
+import '@voidable/ui';
+import { ref } from 'vue';
+
+const name = ref('');
+function handleClick() {
+  console.log('clicked');
+}
+</script>
+```
+
+## Theme composable
+
+Track the active theme reactively:
+
+```vue
+<script setup>
+import { useTheme } from '@voidable/ui-vue';
+
+const theme = useTheme(); // readonly ref: 'dark' | 'light'
+</script>
+
+<template>
+  <span>Current theme: {{ theme }}</span>
+</template>
+```
+
+The composable observes the `data-theme` attribute on `<html>` via `MutationObserver` and cleans up automatically when the component unmounts.

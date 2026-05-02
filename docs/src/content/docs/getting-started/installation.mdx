@@ -1,0 +1,62 @@
+---
+title: Installation
+---
+
+## Install core packages
+
+```bash
+npm install @voidable/ui @voidable/theme
+```
+
+## Import the theme
+
+Add the theme CSS to your app entry point. This loads all design tokens, primitives, and component styles:
+
+```css
+@import '@voidable/theme';
+```
+
+You can also import individual layers if you prefer granular control:
+
+```css
+@import '@voidable/theme/primitives'; /* raw color scales */
+@import '@voidable/theme/tokens';     /* semantic tokens (dark/light) */
+@import '@voidable/theme/reset';      /* minimal reset */
+```
+
+## Import components
+
+Importing `@voidable/ui` auto-registers all custom elements on the page:
+
+```js
+import '@voidable/ui';
+```
+
+## Usage
+
+Once imported, use `<void-*>` elements directly in HTML or any template:
+
+```html
+<void-button variant="filled" color="success">Save</void-button>
+
+<void-input placeholder="Email address" type="email"></void-input>
+
+<void-alert color="info">
+  Components render in the Light DOM — your CSS applies directly.
+</void-alert>
+```
+
+## Framework adapters
+
+For framework-specific wrappers and theme utilities, install the adapter for your framework:
+
+```bash
+npm install @voidable/ui-react   # React
+npm install @voidable/ui-vue     # Vue
+npm install @voidable/ui-solid   # Solid
+npm install @voidable/ui-svelte  # Svelte
+npm install @voidable/ui-angular # Angular
+npm install @voidable/ui-hotwire # Hotwire / Stimulus
+```
+
+See the [Frameworks](/frameworks/react/) section for usage guides.

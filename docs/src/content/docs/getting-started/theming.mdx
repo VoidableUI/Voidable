@@ -1,0 +1,67 @@
+---
+title: Theming
+---
+
+Voidable UI separates structure from style. Components ship with **zero visual CSS** — all appearance is driven by `--void-*` CSS custom properties defined in `@voidable/theme`.
+
+## Token architecture
+
+The theme is organized into three tiers:
+
+1. **Primitives** (`primitives.css`) — Raw color scales like `--void-stone-500`, `--void-red-400`. No semantic meaning.
+2. **Semantic tokens** (`tokens.css`) — Purpose-driven properties like `--void-color-bg`, `--void-color-text`, `--void-color-border`. These reference primitives and change based on the active theme.
+3. **Component styles** — Per-component CSS files that consume semantic tokens.
+
+## Dark and light mode
+
+Dark mode is the **default**. Switch themes by setting the `data-theme` attribute on `<html>`:
+
+```html
+<!-- Dark (default) -->
+<html data-theme="dark">
+
+<!-- Light -->
+<html data-theme="light">
+```
+
+Toggle with JavaScript:
+
+```js
+function toggleTheme() {
+  const current = document.documentElement.getAttribute('data-theme') ?? 'dark';
+  document.documentElement.setAttribute('data-theme', current === 'dark' ? 'light' : 'dark');
+}
+```
+
+All framework adapters provide a reactive theme primitive that tracks this attribute automatically.
+
+## Customizing tokens
+
+Override any token with CSS custom properties. Changes cascade to all components:
+
+```css
+:root {
+  /* Use a blue accent instead of the default monochrome */
+  --void-color-accent: #3b82f6;
+  --void-color-accent-hover: #2563eb;
+
+  /* Adjust border radius globally */
+  --void-radius-md: 8px;
+}
+```
+
+## Importing the theme
+
+Full theme (recommended):
+
+```css
+@import '@voidable/theme';
+```
+
+Individual layers for fine-grained control:
+
+```css
+@import '@voidable/theme/primitives';
+@import '@voidable/theme/tokens';
+@import '@voidable/theme/reset';
+```
