@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+#MISE description="Start the LiveView demo server"
+set -euo pipefail
+
+cd packages/liveview/demo
+mix phx.server

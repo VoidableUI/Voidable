@@ -9,6 +9,8 @@ defmodule VoidableUI.Components do
 
   use Phoenix.Component
 
+  defp unique_id, do: System.unique_integer([:positive]) |> Integer.to_string()
+
   # ---------------------------------------------------------------------------
   # Badge (static)
   # ---------------------------------------------------------------------------
@@ -33,6 +35,7 @@ defmodule VoidableUI.Components do
   # ---------------------------------------------------------------------------
 
   @doc "Renders a `<void-button>` element."
+  attr :id, :string, default: nil
   attr :variant, :string, default: nil
   attr :color, :string, default: nil
   attr :disabled, :boolean, default: false
@@ -44,6 +47,7 @@ defmodule VoidableUI.Components do
   def button(assigns) do
     ~H"""
     <void-button
+      id={@id || "void-button-#{unique_id()}"}
       variant={@variant}
       color={@color}
       disabled={@disabled}
@@ -121,6 +125,7 @@ defmodule VoidableUI.Components do
   # ---------------------------------------------------------------------------
 
   @doc "Renders a `<void-switch>` toggle."
+  attr :id, :string, default: nil
   attr :checked, :boolean, default: false
   attr :disabled, :boolean, default: false
   attr :color, :string, default: nil
@@ -130,6 +135,7 @@ defmodule VoidableUI.Components do
   def switch(assigns) do
     ~H"""
     <void-switch
+      id={@id || "void-switch-#{unique_id()}"}
       checked={@checked}
       disabled={@disabled}
       color={@color}
@@ -163,6 +169,7 @@ defmodule VoidableUI.Components do
   # ---------------------------------------------------------------------------
 
   @doc "Renders a `<void-alert>` message."
+  attr :id, :string, default: nil
   attr :color, :string, default: nil
   attr :dismissible, :boolean, default: false
   attr :variant, :string, default: nil
@@ -172,6 +179,7 @@ defmodule VoidableUI.Components do
   def alert(assigns) do
     ~H"""
     <void-alert
+      id={@id || "void-alert-#{unique_id()}"}
       color={@color}
       dismissible={@dismissible}
       variant={@variant}
@@ -189,6 +197,7 @@ defmodule VoidableUI.Components do
   # ---------------------------------------------------------------------------
 
   @doc "Renders a `<void-tag>` label."
+  attr :id, :string, default: nil
   attr :color, :string, default: nil
   attr :removable, :boolean, default: false
   attr :size, :string, default: nil
@@ -198,6 +207,7 @@ defmodule VoidableUI.Components do
   def tag(assigns) do
     ~H"""
     <void-tag
+      id={@id || "void-tag-#{unique_id()}"}
       color={@color}
       removable={@removable}
       size={@size}
@@ -258,6 +268,7 @@ defmodule VoidableUI.Components do
   # ---------------------------------------------------------------------------
 
   @doc "Renders a `<void-input>` text field."
+  attr :id, :string, default: nil
   attr :type, :string, default: nil
   attr :value, :string, default: nil
   attr :placeholder, :string, default: nil
@@ -272,6 +283,7 @@ defmodule VoidableUI.Components do
   def input(assigns) do
     ~H"""
     <void-input
+      id={@id || "void-input-#{unique_id()}"}
       type={@type}
       value={@value}
       placeholder={@placeholder}
@@ -293,6 +305,7 @@ defmodule VoidableUI.Components do
   # ---------------------------------------------------------------------------
 
   @doc "Renders a `<void-textarea>` multi-line text field."
+  attr :id, :string, default: nil
   attr :value, :string, default: nil
   attr :placeholder, :string, default: nil
   attr :disabled, :boolean, default: false
@@ -308,6 +321,7 @@ defmodule VoidableUI.Components do
   def textarea(assigns) do
     ~H"""
     <void-textarea
+      id={@id || "void-textarea-#{unique_id()}"}
       value={@value}
       placeholder={@placeholder}
       disabled={@disabled}
@@ -330,6 +344,7 @@ defmodule VoidableUI.Components do
   # ---------------------------------------------------------------------------
 
   @doc "Renders a `<void-select>` dropdown."
+  attr :id, :string, default: nil
   attr :value, :string, default: nil
   attr :disabled, :boolean, default: false
   attr :required, :boolean, default: false
@@ -343,6 +358,7 @@ defmodule VoidableUI.Components do
   def select(assigns) do
     ~H"""
     <void-select
+      id={@id || "void-select-#{unique_id()}"}
       value={@value}
       disabled={@disabled}
       required={@required}
@@ -364,6 +380,7 @@ defmodule VoidableUI.Components do
   # ---------------------------------------------------------------------------
 
   @doc "Renders a `<void-checkbox>` toggle."
+  attr :id, :string, default: nil
   attr :checked, :boolean, default: false
   attr :disabled, :boolean, default: false
   attr :indeterminate, :boolean, default: false
@@ -377,6 +394,7 @@ defmodule VoidableUI.Components do
   def checkbox(assigns) do
     ~H"""
     <void-checkbox
+      id={@id || "void-checkbox-#{unique_id()}"}
       checked={@checked}
       disabled={@disabled}
       indeterminate={@indeterminate}
@@ -398,6 +416,7 @@ defmodule VoidableUI.Components do
   # ---------------------------------------------------------------------------
 
   @doc "Renders a `<void-radio>` button."
+  attr :id, :string, default: nil
   attr :checked, :boolean, default: false
   attr :disabled, :boolean, default: false
   attr :name, :string, default: nil
@@ -410,6 +429,7 @@ defmodule VoidableUI.Components do
   def radio(assigns) do
     ~H"""
     <void-radio
+      id={@id || "void-radio-#{unique_id()}"}
       checked={@checked}
       disabled={@disabled}
       name={@name}
@@ -430,6 +450,7 @@ defmodule VoidableUI.Components do
   # ---------------------------------------------------------------------------
 
   @doc "Renders a `<void-radio-group>` container."
+  attr :id, :string, default: nil
   attr :label, :string, default: nil
   attr :value, :string, default: nil
   attr :name, :string, default: nil
@@ -440,6 +461,7 @@ defmodule VoidableUI.Components do
   def radio_group(assigns) do
     ~H"""
     <void-radio-group
+      id={@id || "void-radio-group-#{unique_id()}"}
       label={@label}
       value={@value}
       name={@name}
@@ -502,6 +524,7 @@ defmodule VoidableUI.Components do
   # ---------------------------------------------------------------------------
 
   @doc "Renders a `<void-multiselect>` multi-value dropdown."
+  attr :id, :string, default: nil
   attr :placeholder, :string, default: nil
   attr :disabled, :boolean, default: false
   attr :size, :string, default: nil
@@ -513,6 +536,7 @@ defmodule VoidableUI.Components do
   def multiselect(assigns) do
     ~H"""
     <void-multiselect
+      id={@id || "void-multiselect-#{unique_id()}"}
       placeholder={@placeholder}
       disabled={@disabled}
       size={@size}
@@ -532,6 +556,7 @@ defmodule VoidableUI.Components do
   # ---------------------------------------------------------------------------
 
   @doc "Renders a `<void-dialog>` modal."
+  attr :id, :string, default: nil
   attr :open, :boolean, default: false
   attr :heading, :string, default: nil
   attr :size, :string, default: nil
@@ -542,6 +567,7 @@ defmodule VoidableUI.Components do
   def dialog(assigns) do
     ~H"""
     <void-dialog
+      id={@id || "void-dialog-#{unique_id()}"}
       open={@open}
       heading={@heading}
       size={@size}
@@ -560,6 +586,7 @@ defmodule VoidableUI.Components do
   # ---------------------------------------------------------------------------
 
   @doc "Renders a `<void-tabs>` tab container."
+  attr :id, :string, default: nil
   attr :value, :string, default: nil
   attr :size, :string, default: nil
   attr :rest, :global
@@ -568,6 +595,7 @@ defmodule VoidableUI.Components do
   def tabs(assigns) do
     ~H"""
     <void-tabs
+      id={@id || "void-tabs-#{unique_id()}"}
       value={@value}
       size={@size}
       phx-hook="VoidEvent"
@@ -620,6 +648,7 @@ defmodule VoidableUI.Components do
   # ---------------------------------------------------------------------------
 
   @doc "Renders a `<void-accordion-item>` collapsible section."
+  attr :id, :string, default: nil
   attr :heading, :string, default: nil
   attr :open, :boolean, default: false
   attr :rest, :global
@@ -628,6 +657,7 @@ defmodule VoidableUI.Components do
   def accordion_item(assigns) do
     ~H"""
     <void-accordion-item
+      id={@id || "void-accordion-item-#{unique_id()}"}
       heading={@heading}
       open={@open}
       phx-hook="VoidEvent"
@@ -702,6 +732,7 @@ defmodule VoidableUI.Components do
   # ---------------------------------------------------------------------------
 
   @doc "Renders a `<void-toast>` notification."
+  attr :id, :string, default: nil
   attr :color, :string, default: nil
   attr :duration, :integer, default: nil
   attr :dismissable, :boolean, default: true
@@ -712,6 +743,7 @@ defmodule VoidableUI.Components do
   def toast(assigns) do
     ~H"""
     <void-toast
+      id={@id || "void-toast-#{unique_id()}"}
       color={@color}
       duration={@duration}
       dismissable={@dismissable}
@@ -763,6 +795,7 @@ defmodule VoidableUI.Components do
   # ---------------------------------------------------------------------------
 
   @doc "Renders a `<void-drawer>` slide-out panel."
+  attr :id, :string, default: nil
   attr :open, :boolean, default: false
   attr :side, :string, default: nil
   attr :size, :string, default: nil
@@ -774,6 +807,7 @@ defmodule VoidableUI.Components do
   def drawer(assigns) do
     ~H"""
     <void-drawer
+      id={@id || "void-drawer-#{unique_id()}"}
       open={@open}
       side={@side}
       size={@size}
@@ -812,6 +846,7 @@ defmodule VoidableUI.Components do
   # ---------------------------------------------------------------------------
 
   @doc "Renders a `<void-popover>` floating panel."
+  attr :id, :string, default: nil
   attr :open, :boolean, default: false
   attr :position, :string, default: nil
   attr :trigger, :string, default: nil
@@ -821,6 +856,7 @@ defmodule VoidableUI.Components do
   def popover(assigns) do
     ~H"""
     <void-popover
+      id={@id || "void-popover-#{unique_id()}"}
       open={@open}
       position={@position}
       trigger={@trigger}
@@ -925,6 +961,7 @@ defmodule VoidableUI.Components do
   # ---------------------------------------------------------------------------
 
   @doc "Renders a `<void-pagination>` page navigator."
+  attr :id, :string, default: nil
   attr :total, :integer, default: nil
   attr :value, :integer, default: nil
   attr :siblings, :integer, default: nil
@@ -934,6 +971,7 @@ defmodule VoidableUI.Components do
   def pagination(assigns) do
     ~H"""
     <void-pagination
+      id={@id || "void-pagination-#{unique_id()}"}
       total={@total}
       value={@value}
       siblings={@siblings}
@@ -975,6 +1013,7 @@ defmodule VoidableUI.Components do
   # ---------------------------------------------------------------------------
 
   @doc "Renders a `<void-checkbox-group>` container."
+  attr :id, :string, default: nil
   attr :label, :string, default: nil
   attr :orientation, :string, default: nil
   attr :rest, :global
@@ -983,6 +1022,7 @@ defmodule VoidableUI.Components do
   def checkbox_group(assigns) do
     ~H"""
     <void-checkbox-group
+      id={@id || "void-checkbox-group-#{unique_id()}"}
       label={@label}
       orientation={@orientation}
       phx-hook="VoidEvent"
@@ -999,6 +1039,7 @@ defmodule VoidableUI.Components do
   # ---------------------------------------------------------------------------
 
   @doc "Renders a `<void-combobox>` searchable dropdown."
+  attr :id, :string, default: nil
   attr :value, :string, default: nil
   attr :placeholder, :string, default: nil
   attr :disabled, :boolean, default: false
@@ -1011,6 +1052,7 @@ defmodule VoidableUI.Components do
   def combobox(assigns) do
     ~H"""
     <void-combobox
+      id={@id || "void-combobox-#{unique_id()}"}
       value={@value}
       placeholder={@placeholder}
       disabled={@disabled}
@@ -1031,6 +1073,7 @@ defmodule VoidableUI.Components do
   # ---------------------------------------------------------------------------
 
   @doc "Renders a `<void-slider>` range input."
+  attr :id, :string, default: nil
   attr :value, :integer, default: nil
   attr :min, :integer, default: nil
   attr :max, :integer, default: nil
@@ -1044,6 +1087,7 @@ defmodule VoidableUI.Components do
   def slider(assigns) do
     ~H"""
     <void-slider
+      id={@id || "void-slider-#{unique_id()}"}
       value={@value}
       min={@min}
       max={@max}
@@ -1064,6 +1108,7 @@ defmodule VoidableUI.Components do
   # ---------------------------------------------------------------------------
 
   @doc "Renders a `<void-file-upload>` drop zone."
+  attr :id, :string, default: nil
   attr :accept, :string, default: nil
   attr :multiple, :boolean, default: false
   attr :disabled, :boolean, default: false
@@ -1074,6 +1119,7 @@ defmodule VoidableUI.Components do
   def file_upload(assigns) do
     ~H"""
     <void-file-upload
+      id={@id || "void-file-upload-#{unique_id()}"}
       accept={@accept}
       multiple={@multiple}
       disabled={@disabled}
@@ -1110,6 +1156,7 @@ defmodule VoidableUI.Components do
   # ---------------------------------------------------------------------------
 
   @doc "Renders a `<void-hamburger>` menu toggle."
+  attr :id, :string, default: nil
   attr :active, :boolean, default: false
   attr :size, :string, default: nil
   attr :rest, :global
@@ -1117,6 +1164,7 @@ defmodule VoidableUI.Components do
   def hamburger(assigns) do
     ~H"""
     <void-hamburger
+      id={@id || "void-hamburger-#{unique_id()}"}
       active={@active}
       size={@size}
       phx-hook="VoidEvent"
@@ -1131,6 +1179,7 @@ defmodule VoidableUI.Components do
   # ---------------------------------------------------------------------------
 
   @doc "Renders a `<void-compose-input>` chat-style input."
+  attr :id, :string, default: nil
   attr :value, :string, default: nil
   attr :placeholder, :string, default: nil
   attr :disabled, :boolean, default: false
@@ -1140,6 +1189,7 @@ defmodule VoidableUI.Components do
   def compose_input(assigns) do
     ~H"""
     <void-compose-input
+      id={@id || "void-compose-input-#{unique_id()}"}
       value={@value}
       placeholder={@placeholder}
       disabled={@disabled}

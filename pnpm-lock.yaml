@@ -45,6 +45,27 @@ importers:
         specifier: ^4.5.0
         version: 4.5.4(@types/node@25.6.0)(rollup@4.60.2)(typescript@6.0.3)(vite@8.0.10(@types/node@25.6.0)(esbuild@0.27.7))
 
+  packages/hotwire:
+    devDependencies:
+      '@hotwired/stimulus':
+        specifier: ^3.2.0
+        version: 3.2.2
+      '@hotwired/turbo':
+        specifier: ^8.0.0
+        version: 8.0.23
+      '@voidable/ui':
+        specifier: workspace:*
+        version: link:../ui
+      typescript:
+        specifier: ^6.0.0
+        version: 6.0.3
+      vite:
+        specifier: ^8.0.0
+        version: 8.0.10(@types/node@25.6.0)(esbuild@0.27.7)
+      vite-plugin-dts:
+        specifier: ^4.5.0
+        version: 4.5.4(@types/node@25.6.0)(rollup@4.60.2)(typescript@6.0.3)(vite@8.0.10(@types/node@25.6.0)(esbuild@0.27.7))
+
   packages/liveview:
     dependencies:
       phoenix_live_view:
@@ -487,6 +508,13 @@ packages:
 
   '@expressive-code/plugin-text-markers@0.41.7':
     resolution: {integrity: sha512-Ewpwuc5t6eFdZmWlFyeuy3e1PTQC0jFvw2Q+2bpcWXbOZhPLsT7+h8lsSIJxb5mS7wZko7cKyQ2RLYDyK6Fpmw==}
+
+  '@hotwired/stimulus@3.2.2':
+    resolution: {integrity: sha512-eGeIqNOQpXoPAIP7tC1+1Yc1yl1xnwYqg+3mzqxyrbE5pg5YFBZcA6YoTiByJB6DKAEsiWtl6tjTJS4IYtbB7A==}
+
+  '@hotwired/turbo@8.0.23':
+    resolution: {integrity: sha512-GZ7cijxEZ6Ig71u7rD6LHaRv/wcE/hNsc+nEfiWOkLNqUgLOwo5MNGWOy5ZV9ZUDSiQx1no7YxjTNnT4O6//cQ==}
+    engines: {node: '>= 18'}
 
   '@humanfs/core@0.19.2':
     resolution: {integrity: sha512-UhXNm+CFMWcbChXywFwkmhqjs3PRCmcSa/hfBgLIb7oQ5HNb1wS0icWsGtSAUNgefHeI+eBrA8I1fxmbHsGdvA==}
@@ -3695,6 +3723,10 @@ snapshots:
   '@expressive-code/plugin-text-markers@0.41.7':
     dependencies:
       '@expressive-code/core': 0.41.7
+
+  '@hotwired/stimulus@3.2.2': {}
+
+  '@hotwired/turbo@8.0.23': {}
 
   '@humanfs/core@0.19.2':
     dependencies:

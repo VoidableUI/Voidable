@@ -15,8 +15,7 @@ config :demo, DemoWeb.Endpoint,
   debug_errors: true,
   secret_key_base: "gk/8lKYQMEimSmk91veVCb0FnoSITry8Xl2YFcIzbPhHtNJUBIFhpiFXoxhN6DN4",
   watchers: [
-    esbuild: {Esbuild, :install_and_run, [:demo, ~w(--sourcemap=inline --watch)]},
-    tailwind: {Tailwind, :install_and_run, [:demo, ~w(--watch)]}
+    esbuild: {Esbuild, :install_and_run, [:demo, ~w(--sourcemap=inline --watch)]}
   ]
 
 # ## SSL Support
