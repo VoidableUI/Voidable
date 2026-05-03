@@ -2,6 +2,7 @@
 name: Release voidable-hotwire Gem
 
 on:
+  workflow_dispatch:
   push:
     branches: [master]
     paths:

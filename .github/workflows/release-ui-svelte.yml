@@ -2,6 +2,7 @@
 name: Release Svelte Adapter Package
 
 on:
+  workflow_dispatch:
   push:
     branches: [master]
     paths:

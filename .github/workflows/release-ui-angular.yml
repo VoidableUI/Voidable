@@ -2,6 +2,7 @@
 name: Release Angular Adapter Package
 
 on:
+  workflow_dispatch:
   push:
     branches: [master]
     paths:

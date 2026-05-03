@@ -2,6 +2,7 @@
 name: Release Theme Package
 
 on:
+  workflow_dispatch:
   push:
     branches: [master]
     paths:

@@ -2,6 +2,7 @@
 name: Release Hotwire Adapter Package
 
 on:
+  workflow_dispatch:
   push:
     branches: [master]
     paths:

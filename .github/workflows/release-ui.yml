@@ -2,6 +2,7 @@
 name: Release UI Package
 
 on:
+  workflow_dispatch:
   push:
     branches: [master]
     paths:
