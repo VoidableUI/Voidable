@@ -81,7 +81,6 @@ jobs:
       - name: Build and publish
         env:
           TAG: ${{ needs.tag.outputs.new_tag }}
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           VERSION=$(echo "$TAG" | sed 's|^ui-solid-v||')
           pnpm install

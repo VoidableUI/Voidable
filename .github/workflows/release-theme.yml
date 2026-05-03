@@ -75,7 +75,6 @@ jobs:
       - name: Publish
         env:
           TAG: ${{ needs.tag.outputs.new_tag }}
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           VERSION=$(echo "$TAG" | sed 's|^theme-v||')
           pnpm install

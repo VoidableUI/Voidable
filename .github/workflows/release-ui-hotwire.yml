@@ -6,6 +6,7 @@ on:
     branches: [master]
     paths:
       - 'packages/hotwire/**'
+      - '!packages/hotwire/gem/**'
 
 permissions:
   contents: write
@@ -81,7 +82,6 @@ jobs:
       - name: Build and publish
         env:
           TAG: ${{ needs.tag.outputs.new_tag }}
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           VERSION=$(echo "$TAG" | sed 's|^ui-hotwire-v||')
           pnpm install
