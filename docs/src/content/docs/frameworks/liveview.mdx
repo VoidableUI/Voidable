@@ -74,6 +74,19 @@ end
 
 ## DOM preservation
 
-The preferred approach for preserving client-managed state is `VoidDOM`, which is included in `VoidHooks`. It automatically prevents LiveView from clobbering internal component state (open dialogs, checked states, focus) without needing `phx-update="ignore"` on every element.
+`VoidDOM` is a separate export from `@voidable/ui-liveview` (not part of `VoidHooks`). Wire it into your `LiveSocket` constructor via the `dom` option to prevent LiveView from clobbering client-managed state (open dialogs, checked states, ARIA attributes) during morphdom updates:
+
+```js
+import { VoidHooks, VoidDOM } from '@voidable/ui-liveview';
+
+let liveSocket = new LiveSocket('/live', Socket, {
+  hooks: { ...VoidHooks },
+  dom: {
+    onBeforeElUpdated(from, to) {
+      VoidDOM.onBeforeElUpdated(from, to);
+    },
+  },
+});
+```
 
 If you need more granular control, you can still add `phx-update="ignore"` to individual `<void-*>` elements, but `VoidDOM` handles this globally and is the recommended approach.

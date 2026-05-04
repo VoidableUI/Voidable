@@ -17,7 +17,7 @@ Qwik requires explicit registration of custom events before the app hydrates. Ad
 ```html
 <script>
   window.qwikevents = window.qwikevents || [];
-  window.qwikevents.push('void-change', 'void-click', 'void-input', 'void-toggle', 'void-select');
+  window.qwikevents.push('void-change', 'void-click', 'void-input');
 </script>
 ```
 
@@ -57,6 +57,23 @@ export const App = component$(() => {
       </void-button>
     </>
   );
+});
+```
+
+## Vite configuration
+
+Voidable packages are source-only and require the `development` condition to resolve correctly. Add the following to your `vite.config.ts`:
+
+```ts
+// vite.config.ts
+import { defineConfig } from 'vite';
+import { qwikVite } from '@builder.io/qwik/optimizer';
+
+export default defineConfig({
+  plugins: [qwikVite()],
+  resolve: {
+    conditions: ['development', 'import', 'module', 'browser', 'default'],
+  },
 });
 ```
 

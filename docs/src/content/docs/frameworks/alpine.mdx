@@ -30,7 +30,7 @@ Alpine.start();
 
 ### With Livewire
 
-Livewire 4 bundles Alpine and starts it automatically — do not import or start Alpine yourself. Instead, register the plugin via the `alpine:init` event and call `registerLivewireHooks` to wire Voidable events to Livewire:
+Livewire 4 bundles Alpine and starts it automatically — do not import or start Alpine yourself. Instead, register the plugin via the `alpine:init` event and call `registerLivewireHooks` to register Livewire morph lifecycle hooks that snapshot and restore void-* element internal state during re-renders:
 
 ```js
 import { VoidableAlpine, registerLivewireHooks } from '@voidable/ui-alpine';
@@ -47,7 +47,7 @@ registerLivewireHooks();
 The plugin registers two directives:
 
 - `x-void-on` — Wires Voidable custom events to Alpine handlers
-- `x-void-preserve` — Protects element state during Livewire morphs
+- `x-void-preserve` — Sets `wire:ignore.self` on the element, preventing Livewire from morphing it
 
 ## Usage
 
@@ -71,7 +71,7 @@ Use `x-void-on:{event}` to handle custom events within `x-data` scopes:
 
 ## Livewire morph protection
 
-Add `x-void-preserve` to prevent Livewire from clobbering client-managed state (`open`, `checked`, `aria-expanded`, etc.) during morphs:
+Add `x-void-preserve` to set `wire:ignore.self` on an element, preventing Livewire from morphing it during re-renders. Use this when you want to opt a specific element out of morphing entirely:
 
 ```html
 <void-dialog x-void-preserve>

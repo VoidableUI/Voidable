@@ -17,15 +17,14 @@ Import the component definitions as a module and use the elements in your HTML:
 ```html
 <!DOCTYPE html>
 <html data-theme="dark">
-<head>
-  <link rel="stylesheet" href="./node_modules/@voidable/theme/src/index.css">
-</head>
+<head></head>
 <body>
   <void-button variant="filled">Click me</void-button>
   <void-input placeholder="Your name"></void-input>
   <void-alert color="info">Welcome to Voidable UI</void-alert>
 
   <script type="module">
+    import '@voidable/theme';
     import '@voidable/ui';
   </script>
 </body>

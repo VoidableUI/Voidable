@@ -43,10 +43,9 @@ export class MyApp extends LitElement {
 
 ## Extending Voidable components
 
-Since Voidable components are Lit elements, you can extend them to add custom behavior. Note that internal event handlers are private arrow function properties and cannot be overridden. Instead, override lifecycle methods or `render()`:
+Since Voidable components are Lit elements, you can extend them to add custom behavior. Note that internal event handlers are private arrow function properties and cannot be overridden. Use `connectedCallback` to attach additional behavior:
 
 ```ts
-import { html } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import { VoidButton } from '@voidable/ui';
 
@@ -60,12 +59,10 @@ export class MyConfirmButton extends VoidButton {
       }
     });
   }
-
-  override render() {
-    return html`⚠️ ${super.render()}`;
-  }
 }
 ```
+
+Note: `VoidButton` renders in Light DOM — `super.render()` returns `nothing`, so overriding `render()` to wrap button content is not supported. Use `connectedCallback` for behavioral extensions and slots/child content for visual customization.
 
 ## Light DOM
 
