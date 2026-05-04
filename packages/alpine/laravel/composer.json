@@ -1,0 +1,36 @@
+{
+    "name": "voidable/laravel",
+    "description": "Laravel integration for Voidable UI web components with Livewire + Alpine.js",
+    "type": "library",
+    "license": "MIT",
+    "require": {
+        "php": ">=8.1",
+        "illuminate/support": ">=10.0"
+    },
+    "require-dev": {
+        "orchestra/testbench": ">=8.0",
+        "phpunit/phpunit": ">=10.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Voidable\\Laravel\\": "src/"
+        },
+        "files": [
+            "src/helpers.php"
+        ]
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Voidable\\Laravel\\Tests\\": "tests/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Voidable\\Laravel\\VoidableServiceProvider"
+            ]
+        }
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}
