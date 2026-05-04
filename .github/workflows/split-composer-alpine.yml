@@ -1,0 +1,42 @@
+# SPDX-License-Identifier: MIT
+name: Split voidable/laravel to Mirror
+
+on:
+  push:
+    tags:
+      - 'composer-alpine-v*'
+
+permissions:
+  contents: read
+
+jobs:
+  split:
+    name: Subtree Split
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup SSH agent
+        uses: webfactory/ssh-agent@v0.10.0
+        with:
+          ssh-private-key: ${{ secrets.LARAVEL_DEPLOY_KEY }}
+
+      - name: Strip tag prefix
+        id: tag
+        run: |
+          TAG="${GITHUB_REF_NAME#composer-alpine-}"
+          echo "value=$TAG" >> "$GITHUB_OUTPUT"
+
+      - name: Split to VoidableUI/laravel
+        uses: danharrin/monorepo-split-github-action@v2.4.4
+        with:
+          package_directory: packages/alpine/laravel
+          repository_organization: VoidableUI
+          repository_name: laravel
+          branch: master
+          tag: ${{ steps.tag.outputs.value }}
+          user_email: action@github.com
+          user_name: GitHub Action
