@@ -17,9 +17,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: '3.3'
+      - uses: jdx/mise-action@v3
 
       - name: Run tests
         working-directory: packages/hotwire/gem
@@ -71,9 +69,7 @@ jobs:
         with:
           ref: ${{ needs.tag.outputs.new_tag }}
 
-      - uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: '3.3'
+      - uses: jdx/mise-action@v3
 
       - name: Build and publish gem
         working-directory: packages/hotwire/gem

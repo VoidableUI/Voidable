@@ -17,10 +17,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: erlef/setup-beam@v1
-        with:
-          elixir-version: '1.17'
-          otp-version: '27'
+      - uses: jdx/mise-action@v3
 
       - name: Install dependencies
         working-directory: packages/liveview/hex
@@ -76,10 +73,7 @@ jobs:
         with:
           ref: ${{ needs.tag.outputs.new_tag }}
 
-      - uses: erlef/setup-beam@v1
-        with:
-          elixir-version: '1.17'
-          otp-version: '27'
+      - uses: jdx/mise-action@v3
 
       - name: Build and publish
         working-directory: packages/liveview/hex

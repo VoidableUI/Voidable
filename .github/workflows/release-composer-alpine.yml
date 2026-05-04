@@ -17,9 +17,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.3'
+      - uses: jdx/mise-action@v3
 
       - name: Install dependencies
         working-directory: packages/alpine/laravel
