@@ -9,3 +9,5 @@ storybook-static/
 .astro/
 *.gem
 Gemfile.lock
+composer.lock
+tmp/
