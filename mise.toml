@@ -1,5 +1,7 @@
 [tools]
-elixir = "latest"
-erlang = "latest"
-node = "lts"
+elixir = "1.19.5-otp-28"
+erlang = "28.5"
+node = "24.14.1"
+npm = "11.13.0"
 "npm:pnpm" = "10"
+ruby = "4.0.3"

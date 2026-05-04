@@ -11,3 +11,4 @@ storybook-static/
 Gemfile.lock
 composer.lock
 tmp/
+erl_crash.dump
