@@ -23,12 +23,11 @@ export function VoidableAlpine(Alpine: Alpine): void {
   // x-void-on directive: listens for Voidable custom events and evaluates
   // the bound Alpine expression when they fire.
   // Usage: <void-input x-void-on:void-change="handler($event)">
-  Alpine.directive('void-on', (el, { expression, modifiers }, { evaluate }) => {
-    const eventName = modifiers[0];
+  Alpine.directive('void-on', (el, { value: eventName, expression }, { evaluate }) => {
     if (!eventName) return;
 
     el.addEventListener(eventName, (event: Event) => {
-      evaluate(expression, { $event: event });
+      evaluate(expression, { scope: { $event: event } });
     });
   });
 
