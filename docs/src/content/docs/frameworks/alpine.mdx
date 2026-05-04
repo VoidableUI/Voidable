@@ -18,12 +18,30 @@ composer require voidable/laravel
 
 ## Register the Alpine plugin
 
+For standalone Alpine projects, import and start Alpine yourself:
+
 ```js
 import Alpine from 'alpinejs';
 import { VoidableAlpine } from '@voidable/ui-alpine';
 
 Alpine.plugin(VoidableAlpine);
 Alpine.start();
+```
+
+### With Livewire
+
+Livewire 4 bundles Alpine and starts it automatically — do not import or start Alpine yourself. Instead, register the plugin via the `alpine:init` event and call `registerLivewireHooks` to wire Voidable events to Livewire:
+
+```js
+import { VoidableAlpine, registerLivewireHooks } from '@voidable/ui-alpine';
+import '@voidable/ui';
+import '@voidable/theme';
+
+document.addEventListener('alpine:init', () => {
+    window.Alpine.plugin(VoidableAlpine);
+});
+
+registerLivewireHooks();
 ```
 
 The plugin registers two directives:
@@ -63,7 +81,7 @@ Add `x-void-preserve` to prevent Livewire from clobbering client-managed state (
 
 ## Laravel Blade directives
 
-The `voidable/laravel` package provides Blade directives for loading assets:
+The `voidable/laravel` package provides Blade directives for loading assets without a build step:
 
 ```blade
 <head>
@@ -73,3 +91,11 @@ The `voidable/laravel` package provides Blade directives for loading assets:
 ```
 
 `@voidableScripts` outputs a `<script type="module">` tag that imports the component definitions and registers the Alpine plugin. `@voidableStyles` loads the theme CSS.
+
+When using Vite to bundle your assets (the standard Laravel + Livewire setup), these directives are unnecessary. Import everything in your `app.js` entry point and load it with the `@vite` directive instead:
+
+```blade
+<head>
+  @vite(['resources/css/app.css', 'resources/js/app.js'])
+</head>
+```
