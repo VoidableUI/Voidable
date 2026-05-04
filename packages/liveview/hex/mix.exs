@@ -3,9 +3,12 @@ defmodule VoidableUI.MixProject do
 
   def project do
     [
-      app: :voidable_ui,
-      version: "0.1.0",
+      app: :live_voidable,
+      version: "0.0.0",
       elixir: "~> 1.17",
+      description: "Phoenix LiveView hooks and helpers for Voidable UI web components",
+      package: package(),
+      source_url: "https://github.com/VoidableUI/Voidable",
       deps: deps()
     ]
   end
@@ -16,7 +19,17 @@ defmodule VoidableUI.MixProject do
 
   defp deps do
     [
-      {:phoenix_live_view, "~> 1.1"}
+      {:phoenix_live_view, "~> 1.1"},
+      {:ex_doc, "~> 0.35", only: :dev, runtime: false}
+    ]
+  end
+
+  defp package do
+    [
+      name: "live_voidable",
+      licenses: ["MIT"],
+      links: %{"GitHub" => "https://github.com/VoidableUI/Voidable"},
+      files: ~w(lib mix.exs)
     ]
   end
 end
