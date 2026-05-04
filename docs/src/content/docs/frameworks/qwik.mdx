@@ -1,0 +1,68 @@
+---
+title: Qwik
+---
+
+No adapter package needed — web components work natively in Qwik's JSX. Qwik's resumable architecture doesn't interfere with custom element lifecycle.
+
+## Install
+
+```bash
+npm install @voidable/ui @voidable/theme
+```
+
+## Custom event registration
+
+Qwik requires explicit registration of custom events before the app hydrates. Add this script to your `<head>` before any other scripts:
+
+```html
+<script>
+  window.qwikevents = window.qwikevents || [];
+  window.qwikevents.push('void-change', 'void-click', 'void-input', 'void-toggle', 'void-select');
+</script>
+```
+
+Without this, Qwik won't listen for these events and your handlers won't fire.
+
+## Usage
+
+Use `useVisibleTask$` with a dynamic import to load component definitions on the client. Lit components cannot run during SSR, so they must be loaded only in the browser:
+
+```tsx
+import { component$, useSignal, useVisibleTask$ } from '@builder.io/qwik';
+
+export const App = component$(() => {
+  const count = useSignal(0);
+  const name = useSignal('');
+
+  useVisibleTask$(() => {
+    import('@voidable/ui');
+  });
+
+  return (
+    <>
+      <void-input
+        placeholder="Your name"
+        onVoid-change$={(e: CustomEvent) => {
+          name.value = e.detail.value;
+        }}
+      ></void-input>
+
+      <void-button
+        variant="filled"
+        onVoid-click$={() => {
+          count.value++;
+        }}
+      >
+        Clicked {count.value} times
+      </void-button>
+    </>
+  );
+});
+```
+
+## Notes
+
+- Event names are lowercase (`void-click`, `void-change`) which is what Qwik expects for custom events.
+- No wrapper components or special bindings are needed — Qwik handles custom elements and their properties natively.
+- Component definitions must be loaded via `useVisibleTask$` with a dynamic import because Lit requires browser APIs unavailable during SSR.
+- Qwik's lazy-loading and resumability work alongside the component definitions without conflict.

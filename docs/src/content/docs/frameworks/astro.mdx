@@ -1,0 +1,78 @@
+---
+title: Astro
+---
+
+No adapter package needed — web components work directly in Astro templates.
+
+## Install
+
+```bash
+npm install @voidable/ui @voidable/theme
+```
+
+## Usage
+
+Import the component definitions in a `<script>` tag and the theme CSS globally:
+
+```astro
+---
+import '@voidable/theme';
+---
+
+<html data-theme="dark">
+  <head>
+    <title>My App</title>
+  </head>
+  <body>
+    <void-button variant="filled">Click me</void-button>
+    <void-input placeholder="Your name"></void-input>
+
+    <script>
+      import '@voidable/ui';
+
+      document.querySelector('void-button')!.addEventListener('void-click', () => {
+        console.log('clicked');
+      });
+    </script>
+  </body>
+</html>
+```
+
+## Gotchas
+
+### Scoped styles don't reach Light DOM internals
+
+Astro's scoped `<style>` tags add `data-astro-*` attributes to selectors, which won't match Light DOM component internals. Use `is:global` on style tags or import theme CSS globally:
+
+```astro
+<style is:global>
+  void-button {
+    --void-button-radius: 8px;
+  }
+</style>
+```
+
+### Curly braces in templates
+
+Curly braces `{}` are expression delimiters in Astro templates. If you're rendering CSS or code content that contains braces, use `set:html`:
+
+```astro
+<pre><code set:html={`void-button { --void-button-radius: 8px; }`}></code></pre>
+```
+
+## Theme switching
+
+Set the theme via the `data-theme` attribute on the root element:
+
+```astro
+<html data-theme="dark">
+```
+
+For dynamic switching, use a client-side script:
+
+```astro
+<script>
+  document.documentElement.dataset.theme =
+    window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+</script>
+```

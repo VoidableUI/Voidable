@@ -1,0 +1,79 @@
+---
+title: LiveView
+---
+
+The LiveView adapter uses a dual-package architecture (npm + Hex) to bridge Voidable custom events to Phoenix LiveView's server-side event handling.
+
+## Install
+
+Install the JavaScript package:
+
+```bash
+npm install @voidable/ui @voidable/theme @voidable/ui-liveview
+```
+
+Add the Hex package to `mix.exs`:
+
+```elixir
+defp deps do
+  [
+    {:live_voidable, "~> 0.1.0"}
+  ]
+end
+```
+
+## Register the LiveView hook
+
+Add the `VoidEvent` hook to your LiveSocket:
+
+```js
+import { VoidHooks } from '@voidable/ui-liveview';
+
+let liveSocket = new LiveSocket('/live', Socket, {
+  hooks: { ...VoidHooks }
+});
+```
+
+The hook listens for Voidable custom events on the element and forwards them to the server via `pushEvent`.
+
+## Usage in HEEx templates
+
+Attach the hook with `phx-hook` and add `phx-update="ignore"` to prevent LiveView from clobbering client-managed state:
+
+```heex
+<void-button
+  variant="filled"
+  phx-hook="VoidEvent"
+  phx-update="ignore"
+  data-void-events="void-click"
+>
+  Submit
+</void-button>
+
+<void-input
+  placeholder="Search"
+  phx-hook="VoidEvent"
+  phx-update="ignore"
+  data-void-events="void-change"
+></void-input>
+```
+
+## Handle events on the server
+
+Events arrive as standard LiveView events:
+
+```elixir
+def handle_event("void-click", _params, socket) do
+  {:noreply, assign(socket, :submitted, true)}
+end
+
+def handle_event("void-change", %{"value" => value}, socket) do
+  {:noreply, assign(socket, :query, value)}
+end
+```
+
+## DOM preservation
+
+The preferred approach for preserving client-managed state is `VoidDOM`, which is included in `VoidHooks`. It automatically prevents LiveView from clobbering internal component state (open dialogs, checked states, focus) without needing `phx-update="ignore"` on every element.
+
+If you need more granular control, you can still add `phx-update="ignore"` to individual `<void-*>` elements, but `VoidDOM` handles this globally and is the recommended approach.

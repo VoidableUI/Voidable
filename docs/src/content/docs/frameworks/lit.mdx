@@ -1,0 +1,77 @@
+---
+title: Lit
+---
+
+No adapter needed — Voidable components are built on Lit 3 and render in Light DOM. You can use them as-is or extend them with custom behavior.
+
+## Install
+
+```bash
+npm install @voidable/ui @voidable/theme
+```
+
+## Usage alongside other Lit components
+
+Voidable components work like any other custom element in your Lit templates:
+
+```ts
+import { LitElement, html } from 'lit';
+import { customElement, state } from 'lit/decorators.js';
+import '@voidable/ui';
+
+@customElement('my-app')
+export class MyApp extends LitElement {
+  @state() count = 0;
+
+  render() {
+    return html`
+      <void-button
+        variant="filled"
+        @void-click=${() => this.count++}
+      >
+        Clicked ${this.count} times
+      </void-button>
+
+      <void-input
+        placeholder="Search"
+        @void-change=${(e: CustomEvent) => console.log(e.detail.value)}
+      ></void-input>
+    `;
+  }
+}
+```
+
+## Extending Voidable components
+
+Since Voidable components are Lit elements, you can extend them to add custom behavior. Note that internal event handlers are private arrow function properties and cannot be overridden. Instead, override lifecycle methods or `render()`:
+
+```ts
+import { html } from 'lit';
+import { customElement } from 'lit/decorators.js';
+import { VoidButton } from '@voidable/ui';
+
+@customElement('my-confirm-button')
+export class MyConfirmButton extends VoidButton {
+  override connectedCallback() {
+    super.connectedCallback();
+    this.addEventListener('void-click', (e) => {
+      if (!window.confirm('Are you sure?')) {
+        e.stopImmediatePropagation();
+      }
+    });
+  }
+
+  override render() {
+    return html`⚠️ ${super.render()}`;
+  }
+}
+```
+
+## Light DOM
+
+Voidable components render in Light DOM rather than Shadow DOM. This means:
+
+- Global styles apply directly to component internals
+- No `::part()` or `::slotted()` selectors needed
+- CSS custom properties from `@voidable/theme` style everything out of the box
+- Your Lit components (which may use Shadow DOM) can still compose Voidable elements in their templates without style isolation issues

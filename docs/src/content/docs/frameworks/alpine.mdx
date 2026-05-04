@@ -1,0 +1,75 @@
+---
+title: Alpine
+---
+
+The Alpine adapter provides directives for wiring custom events to Alpine handlers and preserving element state during Livewire morphs. A companion Laravel package adds Blade directives for easy asset loading.
+
+## Install
+
+```bash
+npm install @voidable/ui @voidable/theme @voidable/ui-alpine
+```
+
+For Laravel projects, also install the Composer package:
+
+```bash
+composer require voidable/laravel
+```
+
+## Register the Alpine plugin
+
+```js
+import Alpine from 'alpinejs';
+import { VoidableAlpine } from '@voidable/ui-alpine';
+
+Alpine.plugin(VoidableAlpine);
+Alpine.start();
+```
+
+The plugin registers two directives:
+
+- `x-void-on` — Wires Voidable custom events to Alpine handlers
+- `x-void-preserve` — Protects element state during Livewire morphs
+
+## Usage
+
+Use `x-void-on:{event}` to handle custom events within `x-data` scopes:
+
+```html
+<div x-data="{ count: 0 }">
+  <void-button
+    variant="filled"
+    x-void-on:void-click="count++"
+  >
+    Clicked <span x-text="count"></span> times
+  </void-button>
+
+  <void-input
+    placeholder="Search"
+    x-void-on:void-change="$dispatch('filter', $event.detail)"
+  ></void-input>
+</div>
+```
+
+## Livewire morph protection
+
+Add `x-void-preserve` to prevent Livewire from clobbering client-managed state (`open`, `checked`, `aria-expanded`, etc.) during morphs:
+
+```html
+<void-dialog x-void-preserve>
+  <p>This dialog's open state survives Livewire updates.</p>
+</void-dialog>
+```
+
+## Laravel Blade directives
+
+The `voidable/laravel` package provides Blade directives for loading assets:
+
+```blade
+<head>
+  @voidableStyles
+  @voidableScripts
+</head>
+```
+
+`@voidableScripts` outputs a `<script type="module">` tag that imports the component definitions and registers the Alpine plugin. `@voidableStyles` loads the theme CSS.

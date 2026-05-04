@@ -1,0 +1,83 @@
+---
+title: Vanilla
+---
+
+No framework, no adapter — just HTML and JavaScript.
+
+## Install
+
+```bash
+npm install @voidable/ui @voidable/theme
+```
+
+## Usage
+
+Import the component definitions as a module and use the elements in your HTML:
+
+```html
+<!DOCTYPE html>
+<html data-theme="dark">
+<head>
+  <link rel="stylesheet" href="./node_modules/@voidable/theme/src/index.css">
+</head>
+<body>
+  <void-button variant="filled">Click me</void-button>
+  <void-input placeholder="Your name"></void-input>
+  <void-alert color="info">Welcome to Voidable UI</void-alert>
+
+  <script type="module">
+    import '@voidable/ui';
+  </script>
+</body>
+</html>
+```
+
+## Event handling
+
+Voidable components emit standard `CustomEvent`s. Listen with `addEventListener`:
+
+```html
+<script type="module">
+  import '@voidable/ui';
+
+  document.querySelector('void-button').addEventListener('void-click', (e) => {
+    console.log('Button clicked');
+  });
+
+  document.querySelector('void-input').addEventListener('void-change', (e) => {
+    console.log('Value:', e.detail.value);
+  });
+</script>
+```
+
+## Theme switching
+
+Set the theme via the `data-theme` attribute on the document root:
+
+```js
+// Switch to light theme
+document.documentElement.dataset.theme = 'light';
+
+// Switch to dark theme
+document.documentElement.dataset.theme = 'dark';
+
+// Follow system preference
+const prefersDark = window.matchMedia('(prefers-color-scheme: dark)');
+document.documentElement.dataset.theme = prefersDark.matches ? 'dark' : 'light';
+
+prefersDark.addEventListener('change', (e) => {
+  document.documentElement.dataset.theme = e.matches ? 'dark' : 'light';
+});
+```
+
+## Dynamic element creation
+
+Create components programmatically like any DOM element:
+
+```js
+const button = document.createElement('void-button');
+button.variant = 'filled';
+button.textContent = 'Dynamic button';
+button.addEventListener('void-click', () => alert('clicked'));
+document.body.appendChild(button);
+```
