@@ -47,7 +47,7 @@ describe('VoidableAlpine plugin', () => {
 
       Alpine._directives['void-on'](
         el,
-        { expression: 'name = $event.detail.value', modifiers: ['void-change'] },
+        { value: 'void-change', expression: 'name = $event.detail.value' },
         { evaluate },
       );
 
@@ -57,11 +57,11 @@ describe('VoidableAlpine plugin', () => {
 
       expect(evaluate).toHaveBeenCalledWith(
         'name = $event.detail.value',
-        { $event: event },
+        { scope: { $event: event } },
       );
     });
 
-    it('does nothing when no modifier is provided', () => {
+    it('does nothing when no value is provided', () => {
       const Alpine = createMockAlpine();
       VoidableAlpine(Alpine as any);
 
@@ -70,7 +70,7 @@ describe('VoidableAlpine plugin', () => {
 
       Alpine._directives['void-on'](
         el,
-        { expression: 'foo()', modifiers: [] },
+        { value: '', expression: 'foo()' },
         { evaluate },
       );
 
