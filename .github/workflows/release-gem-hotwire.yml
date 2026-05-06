@@ -18,6 +18,8 @@ jobs:
       - uses: actions/checkout@v4
 
       - uses: jdx/mise-action@v3
+        with:
+          install_args: ruby
 
       - name: Run tests
         working-directory: packages/hotwire/gem
@@ -70,6 +72,8 @@ jobs:
           ref: ${{ needs.tag.outputs.new_tag }}
 
       - uses: jdx/mise-action@v3
+        with:
+          install_args: ruby
 
       - name: Build and publish gem
         working-directory: packages/hotwire/gem
