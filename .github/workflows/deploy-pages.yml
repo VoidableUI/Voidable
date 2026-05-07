@@ -43,10 +43,18 @@ jobs:
             echo "version=v0.0.0" >> "$GITHUB_OUTPUT"
           fi
 
+      - name: Get UI bundle size
+        id: get_bundle_size
+        run: |
+          BYTES=$(gzip -c packages/ui/dist/ui.js | wc -c)
+          KB=$(echo "scale=1; $BYTES / 1024" | bc)
+          echo "size=${KB} kB" >> "$GITHUB_OUTPUT"
+
       - name: Build docs site
         run: pnpm --filter docs build
         env:
           VOIDABLE_VERSION: ${{ steps.get_version.outputs.version }}
+          VOIDABLE_BUNDLE_SIZE: ${{ steps.get_bundle_size.outputs.size }}
 
       - name: Build Storybook
         run: pnpm --filter @voidable/storybook build

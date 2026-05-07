@@ -28,6 +28,7 @@ const highlightedCss = await codeToHtml(cssCode, {
 });
 
 const version = import.meta.env.VOIDABLE_VERSION || 'v0.0.0';
+const bundleSize = import.meta.env.VOIDABLE_BUNDLE_SIZE || '<15 kB';
 ---
 
 <html lang="en" data-theme="dark">
@@ -1039,7 +1040,7 @@ const version = import.meta.env.VOIDABLE_VERSION || 'v0.0.0';
           <div class="stat-label">visual CSS in core</div>
         </div>
         <div class="stat-card">
-          <div class="stat-number">12 kB</div>
+          <div class="stat-number">{bundleSize}</div>
           <div class="stat-label">gzipped runtime</div>
         </div>
       </div>
