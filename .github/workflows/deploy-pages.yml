@@ -19,6 +19,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - uses: jdx/mise-action@v3
         with:
@@ -30,8 +32,21 @@ jobs:
       - name: Build packages
         run: pnpm --filter './packages/*' build
 
+      - name: Get latest UI version
+        id: get_version
+        run: |
+          TAG=$(git tag --list 'ui-v*' --sort=-v:refname | head -n1)
+          if [ -n "$TAG" ]; then
+            VERSION=$(echo "$TAG" | sed 's|^ui-v||')
+            echo "version=v${VERSION}" >> "$GITHUB_OUTPUT"
+          else
+            echo "version=v0.0.0" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Build docs site
         run: pnpm --filter docs build
+        env:
+          VOIDABLE_VERSION: ${{ steps.get_version.outputs.version }}
 
       - name: Build Storybook
         run: pnpm --filter @voidable/storybook build
