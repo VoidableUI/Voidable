@@ -1,7 +1,7 @@
 void-sidebar {
   display: flex;
   flex-direction: column;
-  width: var(--void-sidebar-width, 240px);
+  width: var(--void-sidebar-width);
   height: 100%;
   background: var(--void-color-bg);
   border-right: 1px solid var(--void-color-border);

@@ -27,6 +27,7 @@ void-compose-input {
   font-size: var(--void-text-sm);
   resize: none;
   outline: none;
+  height: var(--void-compose-input-height, auto);
   min-height: 1.5rem;
   max-height: 8rem;
   overflow-y: auto;

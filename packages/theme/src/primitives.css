@@ -214,4 +214,11 @@
   --void-z-modal:    300;
   --void-z-toast:    400;
   --void-z-tooltip:  500;
+
+  /* ── Icon ── */
+  --void-icon-stroke-width: 1.5;
+
+  /* ── Sidebar ── */
+  --void-sidebar-width:           15rem;
+  --void-sidebar-collapsed-width: 3.75rem;
 }

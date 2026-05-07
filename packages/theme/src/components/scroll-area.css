@@ -4,6 +4,7 @@ void-scroll-area {
 
 .void-scroll-area-viewport {
   overflow: hidden;
+  max-height: var(--void-scroll-area-max-height);
 }
 
 void-scroll-area[direction="vertical"] .void-scroll-area-viewport {

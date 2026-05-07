@@ -15,6 +15,7 @@ void-progress {
 
 .void-progress-fill {
   height: 100%;
+  width: var(--void-progress-fill, 0%);
   background: var(--tone);
   border-radius: var(--void-radius-full);
   transition: width var(--void-duration-normal) var(--void-ease-in-out);
