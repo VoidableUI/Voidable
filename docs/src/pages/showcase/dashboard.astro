@@ -1,0 +1,1066 @@
+---
+import '@voidable/theme';
+import iconLayoutDashboard from '@tabler/icons/outline/layout-dashboard.svg?raw';
+import iconChartBar from '@tabler/icons/outline/chart-bar.svg?raw';
+import iconUsers from '@tabler/icons/outline/users.svg?raw';
+import iconList from '@tabler/icons/outline/list.svg?raw';
+import iconCreditCard from '@tabler/icons/outline/credit-card.svg?raw';
+import iconSettings from '@tabler/icons/outline/settings.svg?raw';
+import iconChevronDown from '@tabler/icons/outline/chevron-down.svg?raw';
+import iconBell from '@tabler/icons/outline/bell.svg?raw';
+import iconFilter from '@tabler/icons/outline/filter.svg?raw';
+import iconSun from '@tabler/icons/outline/sun.svg?raw';
+import iconMoon from '@tabler/icons/outline/moon.svg?raw';
+---
+
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Dashboard Showcase — Voidable</title>
+    <meta name="description" content="A realistic admin/analytics dashboard built with Voidable components." />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+    <style>
+      *, *::before, *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      html {
+        font-family: var(--void-font-sans);
+        color: var(--void-color-text);
+        background: var(--void-color-bg);
+      }
+
+      body {
+        min-height: 100dvh;
+        line-height: var(--void-leading-normal);
+        overflow-x: hidden;
+        display: flex;
+        flex-direction: column;
+      }
+
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+
+      /* ── Site nav ── */
+      .site-nav {
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        background: color-mix(in srgb, var(--void-color-bg) 88%, transparent);
+        backdrop-filter: saturate(140%) blur(6px);
+        -webkit-backdrop-filter: saturate(140%) blur(6px);
+        border-bottom: 1px solid var(--void-color-border);
+        flex-shrink: 0;
+      }
+
+      .site-nav-inner {
+        max-width: 100%;
+        padding: 0 var(--void-space-6);
+        display: flex;
+        align-items: center;
+        gap: var(--void-space-6);
+        height: var(--void-space-12);
+      }
+
+      .site-wordmark {
+        font-family: var(--void-font-mono);
+        font-weight: var(--void-weight-bold);
+        font-size: var(--void-text-base);
+        letter-spacing: var(--void-tracking-tightest);
+        color: var(--void-color-text);
+      }
+
+      .site-nav-links {
+        display: flex;
+        gap: var(--void-space-1);
+        list-style: none;
+      }
+
+      .site-nav-links a {
+        display: block;
+        padding: var(--void-space-1) var(--void-space-2);
+        font-size: var(--void-text-xs);
+        color: var(--void-color-text-secondary);
+        border-radius: var(--void-radius-sm);
+        transition: color 150ms;
+      }
+
+      .site-nav-links a:hover,
+      .site-nav-links a.active {
+        color: var(--void-color-text);
+      }
+
+      .site-nav-right {
+        margin-left: auto;
+        display: flex;
+        align-items: center;
+        gap: var(--void-space-3);
+      }
+
+      .theme-icon {
+        display: flex;
+        width: var(--void-space-4);
+        height: var(--void-space-4);
+      }
+      .theme-icon :global(svg) {
+        width: 100%;
+        height: 100%;
+      }
+      [data-theme="dark"] .theme-icon-sun { display: flex; }
+      [data-theme="dark"] .theme-icon-moon { display: none; }
+      [data-theme="light"] .theme-icon-sun { display: none; }
+      [data-theme="light"] .theme-icon-moon { display: flex; }
+
+      /* ── App shell ── */
+      .app-shell {
+        display: flex;
+        flex: 1;
+        min-height: calc(100dvh - var(--void-space-12));
+      }
+
+      /* ── Sidebar column ── */
+      .sidebar-column {
+        flex-shrink: 0;
+        border-right: 1px solid var(--void-color-border);
+        background: var(--void-color-bg);
+      }
+
+      void-sidebar {
+        position: sticky;
+        top: var(--void-space-12);
+        height: calc(100dvh - var(--void-space-12)) !important;
+        background: var(--void-color-bg) !important;
+        border-right: none !important;
+      }
+
+      .sidebar-header {
+        padding: 0 var(--void-space-4);
+        border-bottom: 1px solid var(--void-color-border);
+        display: flex;
+        align-items: center;
+        flex-shrink: 0;
+        min-height: 4.875rem;
+        box-sizing: border-box;
+        background: var(--void-color-bg-secondary);
+      }
+
+      .sidebar-project {
+        display: flex;
+        align-items: center;
+        gap: var(--void-space-2);
+        padding: var(--void-space-2) var(--void-space-2);
+        border-radius: var(--void-radius-md);
+        cursor: pointer;
+        transition: background 150ms;
+      }
+
+      .sidebar-project:hover {
+        background: var(--void-color-bg-hover);
+      }
+
+      .sidebar-project-icon {
+        width: var(--void-space-6);
+        height: var(--void-space-6);
+        border-radius: var(--void-radius-sm);
+        background: var(--void-color-bg-accent);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        font-size: var(--void-text-2xs);
+        font-family: var(--void-font-mono);
+        font-weight: var(--void-weight-bold);
+        color: var(--void-color-text);
+      }
+
+      .sidebar-project-info {
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+        overflow: hidden;
+      }
+
+      .sidebar-project-name {
+        font-size: var(--void-text-sm);
+        font-weight: var(--void-weight-semibold);
+        color: var(--void-color-text);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .sidebar-project-env {
+        font-size: var(--void-text-xs);
+        color: var(--void-color-text-secondary);
+        font-family: var(--void-font-mono);
+        white-space: nowrap;
+      }
+
+      .sidebar-chevron {
+        width: var(--void-space-3);
+        height: var(--void-space-3);
+        display: inline-flex;
+        margin-left: auto;
+        flex-shrink: 0;
+        color: var(--void-color-text-muted);
+      }
+      .sidebar-chevron :global(svg) {
+        width: 100%;
+        height: 100%;
+      }
+
+      .sidebar-header void-dropdown-menu {
+        width: 100%;
+      }
+
+      .sidebar-header .sidebar-project {
+        width: 100%;
+      }
+
+      .project-dropdown-sep {
+        margin: var(--void-space-1) var(--void-space-3);
+        border: none;
+        border-top: 1px solid var(--void-color-border);
+      }
+
+      .project-item-active {
+        color: var(--void-color-text);
+        font-weight: var(--void-weight-semibold);
+      }
+
+      .sidebar-nav {
+        flex: 1;
+        overflow-y: auto;
+        padding: var(--void-space-3) var(--void-space-3);
+        display: flex;
+        flex-direction: column;
+        gap: var(--void-space-1);
+      }
+
+      .sidebar-section-label {
+        font-family: var(--void-font-mono);
+        font-size: var(--void-text-2xs);
+        font-weight: var(--void-weight-medium);
+        text-transform: uppercase;
+        letter-spacing: var(--void-tracking-widest);
+        color: var(--void-color-text-muted);
+        padding: var(--void-space-2) var(--void-space-2) var(--void-space-1);
+        margin-top: var(--void-space-1);
+      }
+
+      .sidebar-nav-item {
+        display: flex;
+        align-items: center;
+        gap: var(--void-space-2);
+        padding: var(--void-space-2) var(--void-space-2);
+        border-radius: var(--void-radius-md);
+        font-size: var(--void-text-sm);
+        color: var(--void-color-text-secondary);
+        cursor: pointer;
+        transition: background 150ms, color 150ms;
+        user-select: none;
+      }
+
+      .sidebar-nav-item:hover {
+        background: var(--void-color-bg-hover);
+        color: var(--void-color-text);
+      }
+
+      .sidebar-nav-item.active {
+        background: var(--void-color-border-strong);
+        color: var(--void-color-text);
+      }
+
+      .sidebar-nav-icon {
+        width: var(--void-space-4);
+        height: var(--void-space-4);
+        display: inline-flex;
+        align-items: center;
+        flex-shrink: 0;
+        opacity: 0.6;
+      }
+      .sidebar-nav-icon :global(svg) {
+        width: 100%;
+        height: 100%;
+      }
+
+      .active .sidebar-nav-icon {
+        opacity: 1;
+      }
+
+      .sidebar-nav-badge {
+        margin-left: auto;
+        font-family: var(--void-font-mono);
+        font-size: var(--void-text-xs);
+        padding: var(--void-space-1) var(--void-space-1);
+        border-radius: var(--void-radius-xs);
+        background: var(--void-color-border-strong);
+        color: var(--void-color-text-secondary);
+      }
+
+      .sidebar-footer {
+        padding: var(--void-space-3);
+        border-top: 1px solid var(--void-color-border);
+        display: flex;
+        align-items: center;
+        gap: var(--void-space-2);
+        background: var(--void-color-bg-secondary);
+      }
+
+      .sidebar-avatar {
+        width: 26px;
+        height: 26px;
+        border-radius: var(--void-radius-full);
+        background: var(--void-color-bg-accent);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: var(--void-text-2xs);
+        font-weight: var(--void-weight-bold);
+        color: var(--void-color-text);
+        flex-shrink: 0;
+      }
+
+      .sidebar-user-info {
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+        overflow: hidden;
+      }
+
+      .sidebar-user-name {
+        font-size: var(--void-text-xs);
+        font-weight: var(--void-weight-medium);
+        color: var(--void-color-text);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .sidebar-user-role {
+        font-size: var(--void-text-2xs);
+        color: var(--void-color-text-muted);
+      }
+
+      /* ── Main content ── */
+      .main-content {
+        flex: 1;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        overflow-y: auto;
+      }
+
+      /* ── Dashboard header ── */
+      .dash-header {
+        padding: var(--void-space-5) var(--void-space-6);
+        border-bottom: 1px solid var(--void-color-border);
+        display: flex;
+        align-items: center;
+        gap: var(--void-space-4);
+        flex-wrap: wrap;
+        background: color-mix(in srgb, var(--void-color-bg) 40%, transparent);
+        backdrop-filter: blur(4px);
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        flex-shrink: 0;
+      }
+
+      .dash-title-group {
+        display: flex;
+        flex-direction: column;
+        gap: var(--void-space-1);
+      }
+
+      .dash-breadcrumb {
+        font-family: var(--void-font-mono);
+        font-size: var(--void-text-2xs);
+        color: var(--void-color-text-muted);
+        text-transform: uppercase;
+        letter-spacing: var(--void-tracking-widest);
+      }
+
+      .dash-title {
+        font-size: var(--void-text-md);
+        font-weight: var(--void-weight-semibold);
+        letter-spacing: var(--void-tracking-tight);
+        color: var(--void-color-text);
+        line-height: var(--void-leading-tight);
+      }
+
+      .dash-header-controls {
+        margin-left: auto;
+        display: flex;
+        align-items: center;
+        gap: var(--void-space-3);
+        flex-wrap: wrap;
+      }
+
+      /* ── Stats row ── */
+      .stats-row {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: var(--void-space-4);
+        padding: var(--void-space-4) var(--void-space-6);
+        border-bottom: 1px solid var(--void-color-border);
+        flex-shrink: 0;
+      }
+
+      .stats-row > void-stat {
+        padding: var(--void-space-4) var(--void-space-5);
+        border: 1px solid var(--void-color-border);
+        border-radius: var(--void-radius-md);
+      }
+
+      /* ── Content layout ── */
+      .content-area {
+        flex: 1;
+        padding: var(--void-space-6);
+        display: flex;
+        flex-direction: column;
+        gap: var(--void-space-5);
+      }
+
+      /* ── Toolbar row ── */
+      .toolbar-row {
+        display: flex;
+        align-items: center;
+        gap: var(--void-space-2);
+        flex-wrap: wrap;
+      }
+
+      .toolbar-divider {
+        width: 1px;
+        height: var(--void-space-5);
+        background: var(--void-color-border-strong);
+        flex-shrink: 0;
+      }
+
+      .toolbar-label {
+        font-size: var(--void-text-xs);
+        color: var(--void-color-text-muted);
+        font-family: var(--void-font-mono);
+        text-transform: uppercase;
+        letter-spacing: var(--void-tracking-widest);
+        margin-right: var(--void-space-1);
+      }
+
+      .toolbar-spacer {
+        flex: 1;
+      }
+
+      /* ── Filter popover ── */
+      .filter-popover {
+        display: flex;
+        flex-direction: column;
+        gap: var(--void-space-4);
+        min-width: 16rem;
+      }
+
+      .filter-section {
+        display: flex;
+        flex-direction: column;
+        gap: var(--void-space-2);
+      }
+
+      .filter-label {
+        font-size: var(--void-text-xs);
+        font-weight: var(--void-weight-semibold);
+        color: var(--void-color-text-secondary);
+        text-transform: uppercase;
+        letter-spacing: var(--void-tracking-wider);
+        font-family: var(--void-font-mono);
+      }
+
+      .filter-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: var(--void-space-2);
+        padding-top: var(--void-space-2);
+        border-top: 1px solid var(--void-color-border);
+      }
+
+      /* ── Charts grid ── */
+      .charts-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        border: 1px solid var(--void-color-border);
+        border-radius: var(--void-radius-lg);
+        overflow: hidden;
+      }
+
+      .chart-panel {
+        background: var(--void-color-bg);
+        padding: var(--void-space-5);
+        display: flex;
+        flex-direction: column;
+        gap: var(--void-space-4);
+      }
+
+      .chart-panel + .chart-panel {
+        border-left: 1px solid var(--void-color-border);
+      }
+
+      .chart-panel-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: var(--void-space-2);
+      }
+
+      .chart-panel-title {
+        font-size: var(--void-text-sm);
+        font-weight: var(--void-weight-medium);
+        color: var(--void-color-text);
+        letter-spacing: var(--void-tracking-snug);
+      }
+
+      .chart-panel-meta {
+        font-size: var(--void-text-xs);
+        color: var(--void-color-text-muted);
+        font-family: var(--void-font-mono);
+      }
+
+      .chart-placeholder {
+        flex: 1;
+        min-height: 180px;
+        border: 1px dashed var(--void-color-border-strong);
+        border-radius: var(--void-radius-md);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: var(--void-space-2);
+        background: var(--void-color-bg-secondary);
+      }
+
+      .chart-placeholder-label {
+        font-family: var(--void-font-mono);
+        font-size: var(--void-text-xs);
+        color: var(--void-color-text-muted);
+        text-transform: uppercase;
+        letter-spacing: var(--void-tracking-widest);
+      }
+
+      .chart-placeholder-sub {
+        font-size: var(--void-text-2xs);
+        color: var(--void-color-text-muted);
+        font-family: var(--void-font-mono);
+      }
+
+      /* ── Table section ── */
+      .table-section {
+        border: 1px solid var(--void-color-border);
+        border-radius: var(--void-radius-lg);
+        overflow: hidden;
+      }
+
+      .table-section-header {
+        padding: var(--void-space-3) var(--void-space-5);
+        border-bottom: 1px solid var(--void-color-border);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: var(--void-color-bg-secondary);
+      }
+
+      .table-section-title {
+        font-size: var(--void-text-sm);
+        font-weight: var(--void-weight-medium);
+        color: var(--void-color-text);
+        letter-spacing: var(--void-tracking-snug);
+      }
+
+      .table-section-count {
+        font-size: var(--void-text-xs);
+        color: var(--void-color-text-muted);
+        font-family: var(--void-font-mono);
+      }
+
+      /* ── Status dot ── */
+      .status-dot {
+        display: inline-block;
+        width: 6px;
+        height: 6px;
+        border-radius: var(--void-radius-full);
+        flex-shrink: 0;
+      }
+
+      .status-dot.success { background: var(--void-color-success, #22c55e); }
+      .status-dot.error   { background: var(--void-color-error, #ef4444); }
+      .status-dot.warning { background: var(--void-color-warning, #f59e0b); }
+      .status-dot.muted   { background: var(--void-color-text-muted); }
+
+      .cell-with-dot {
+        display: flex;
+        align-items: center;
+        gap: var(--void-space-2);
+      }
+
+      /* ── Method badge ── */
+      .method-tag {
+        display: inline-flex;
+        align-items: center;
+        padding: var(--void-space-1) var(--void-space-1);
+        border-radius: var(--void-radius-xs);
+        font-family: var(--void-font-mono);
+        font-size: var(--void-text-2xs);
+        font-weight: var(--void-weight-semibold);
+        text-transform: uppercase;
+        letter-spacing: var(--void-tracking-wide);
+      }
+
+      .method-tag.get    { background: color-mix(in srgb, var(--void-color-success, #22c55e) 15%, transparent); color: var(--void-color-success, #22c55e); }
+      .method-tag.post   { background: color-mix(in srgb, var(--void-color-accent, #3b82f6) 15%, transparent); color: var(--void-color-accent, #3b82f6); }
+      .method-tag.patch  { background: color-mix(in srgb, var(--void-color-warning, #f59e0b) 15%, transparent); color: var(--void-color-warning, #f59e0b); }
+      .method-tag.delete { background: color-mix(in srgb, var(--void-color-error, #ef4444) 15%, transparent); color: var(--void-color-error, #ef4444); }
+
+      /* ── Mono text ── */
+      .mono {
+        font-family: var(--void-font-mono);
+        font-size: var(--void-text-xs);
+      }
+
+      .text-secondary {
+        color: var(--void-color-text-secondary);
+      }
+
+      .text-sm {
+        font-size: var(--void-text-xs);
+      }
+
+      /* ── Inline icons (set:html wrappers) ── */
+      .icon-inline {
+        display: inline-flex;
+        align-items: center;
+        flex-shrink: 0;
+      }
+      .icon-inline :global(svg) {
+        width: 14px;
+        height: 14px;
+        margin-right: var(--void-space-1);
+      }
+      .icon-chevron :global(svg) {
+        width: 10px;
+        height: 10px;
+        margin-right: 0;
+        margin-left: var(--void-space-1);
+        opacity: 0.5;
+      }
+    </style>
+  </head>
+
+  <body>
+
+    <!-- Site nav -->
+    <nav class="site-nav">
+      <div class="site-nav-inner">
+        <a href="/" class="site-wordmark">voidable</a>
+        <ul class="site-nav-links">
+          <li><a href="/getting-started/introduction/">Docs</a></li>
+          <li><a href="/components/overview/">Components</a></li>
+          <li><a href="/showcase/dashboard/" class="active">Showcase</a></li>
+        </ul>
+        <div class="site-nav-right">
+          <void-button id="theme-toggle" variant="outline" size="md" aria-label="Toggle theme">
+            <span class="theme-icon theme-icon-sun" set:html={iconSun} />
+            <span class="theme-icon theme-icon-moon" set:html={iconMoon} />
+          </void-button>
+          <void-button variant="outline" size="md">
+            <a href="https://github.com/VoidableUI/Voidable" target="_blank">GitHub</a>
+          </void-button>
+        </div>
+      </div>
+    </nav>
+
+    <!-- App shell -->
+    <div class="app-shell">
+
+      <!-- Sidebar -->
+      <div class="sidebar-column">
+      <void-sidebar width="220px" collapsed-width="52px">
+        <div class="sidebar-header">
+          <void-dropdown-menu position="bottom-start" style="width: 100%;">
+            <div class="sidebar-project">
+              <div class="sidebar-project-icon">V</div>
+              <div class="sidebar-project-info">
+                <span class="sidebar-project-name">Voidable Cloud</span>
+                <span class="sidebar-project-env">production</span>
+              </div>
+              <span class="sidebar-chevron" set:html={iconChevronDown} />
+            </div>
+            <void-dropdown-menu-item class="project-item-active">&#x2713;&ensp;Voidable Cloud</void-dropdown-menu-item>
+            <void-dropdown-menu-item>Voidable Staging</void-dropdown-menu-item>
+            <void-dropdown-menu-item>Personal Sandbox</void-dropdown-menu-item>
+            <hr class="project-dropdown-sep">
+            <void-dropdown-menu-item>Create New Project</void-dropdown-menu-item>
+          </void-dropdown-menu>
+        </div>
+
+        <nav class="sidebar-nav">
+          <span class="sidebar-section-label">Main</span>
+
+          <div class="sidebar-nav-item active">
+            <span class="sidebar-nav-icon" set:html={iconLayoutDashboard} />
+            <span>Overview</span>
+          </div>
+
+          <div class="sidebar-nav-item">
+            <span class="sidebar-nav-icon" set:html={iconChartBar} />
+            <span>Analytics</span>
+            <span class="sidebar-nav-badge">New</span>
+          </div>
+
+          <div class="sidebar-nav-item">
+            <span class="sidebar-nav-icon" set:html={iconUsers} />
+            <span>Users</span>
+          </div>
+
+          <div class="sidebar-nav-item">
+            <span class="sidebar-nav-icon" set:html={iconList} />
+            <span>Logs</span>
+          </div>
+
+          <span class="sidebar-section-label">Account</span>
+
+          <div class="sidebar-nav-item">
+            <span class="sidebar-nav-icon" set:html={iconCreditCard} />
+            <span>Billing</span>
+          </div>
+
+          <div class="sidebar-nav-item">
+            <span class="sidebar-nav-icon" set:html={iconSettings} />
+            <span>Settings</span>
+          </div>
+        </nav>
+
+        <div class="sidebar-footer">
+          <div class="sidebar-avatar">KW</div>
+          <div class="sidebar-user-info">
+            <span class="sidebar-user-name">Kaz Walker</span>
+            <span class="sidebar-user-role">Admin</span>
+          </div>
+        </div>
+      </void-sidebar>
+      </div>
+
+      <!-- Main content area -->
+      <div class="main-content">
+
+        <!-- Dashboard header -->
+        <header class="dash-header">
+          <div class="dash-title-group">
+            <span class="dash-breadcrumb">Showcase / Dashboard</span>
+            <h1 class="dash-title">Overview</h1>
+          </div>
+
+          <div class="dash-header-controls">
+            <void-segmented-control value="1w">
+              <void-segmented-control-item value="1d">1D</void-segmented-control-item>
+              <void-segmented-control-item value="1w">1W</void-segmented-control-item>
+              <void-segmented-control-item value="1m">1M</void-segmented-control-item>
+              <void-segmented-control-item value="3m">3M</void-segmented-control-item>
+            </void-segmented-control>
+
+            <void-indicator color="error" count="3" ping position="top-right">
+              <void-button variant="outline" size="md">
+                <span class="icon-inline" set:html={iconBell} />
+                Notifications
+              </void-button>
+            </void-indicator>
+
+            <void-dropdown-menu position="bottom-end">
+              <void-button variant="outline" size="md">
+                Actions
+                <span class="icon-inline icon-chevron" set:html={iconChevronDown} />
+              </void-button>
+              <void-dropdown-menu-item>Export CSV</void-dropdown-menu-item>
+              <void-dropdown-menu-item>Share Link</void-dropdown-menu-item>
+              <void-dropdown-menu-item>Refresh Data</void-dropdown-menu-item>
+              <void-dropdown-menu-item destructive>Delete Report</void-dropdown-menu-item>
+            </void-dropdown-menu>
+          </div>
+        </header>
+
+        <!-- Stats row -->
+        <div class="stats-row">
+          <void-stat
+            label="Uptime"
+            value="99.97%"
+            delta="+0.02%"
+            trend="up"
+            color="success"
+          ></void-stat>
+          <void-stat
+            label="Latency"
+            value="42ms"
+            delta="-3ms"
+            trend="up"
+            color="success"
+          ></void-stat>
+          <void-stat
+            label="Requests"
+            value="1.2M"
+            delta="+12.4%"
+            trend="up"
+          ></void-stat>
+          <void-stat
+            label="Error Rate"
+            value="0.03%"
+            delta="+0.01%"
+            trend="down"
+            color="error"
+          ></void-stat>
+        </div>
+
+        <!-- Main content -->
+        <div class="content-area">
+
+          <!-- Toolbar row -->
+          <div class="toolbar-row">
+            <span class="toolbar-label">View</span>
+            <void-toggle variant="outline" size="sm" pressed>Live</void-toggle>
+            <void-toggle variant="outline" size="sm">Alerts</void-toggle>
+            <void-toggle variant="outline" size="sm">Compare</void-toggle>
+            <div class="toolbar-divider"></div>
+            <span class="toolbar-label">Layer</span>
+            <void-toggle variant="outline" size="sm" pressed>P99</void-toggle>
+            <void-toggle variant="outline" size="sm">P50</void-toggle>
+            <div class="toolbar-spacer"></div>
+            <void-popover position="bottom">
+              <void-button variant="outline" size="md">
+                <span class="icon-inline" set:html={iconFilter} />
+                Filter
+              </void-button>
+              <div class="filter-popover">
+                <div class="filter-section">
+                  <span class="filter-label">Status Code</span>
+                  <void-checkbox-group>
+                    <void-checkbox value="2xx" checked>2xx Success</void-checkbox>
+                    <void-checkbox value="3xx" checked>3xx Redirect</void-checkbox>
+                    <void-checkbox value="4xx" checked>4xx Client Error</void-checkbox>
+                    <void-checkbox value="5xx" checked>5xx Server Error</void-checkbox>
+                  </void-checkbox-group>
+                </div>
+                <div class="filter-section">
+                  <span class="filter-label">Method</span>
+                  <void-checkbox-group>
+                    <void-checkbox value="GET" checked>GET</void-checkbox>
+                    <void-checkbox value="POST" checked>POST</void-checkbox>
+                    <void-checkbox value="PATCH">PATCH</void-checkbox>
+                    <void-checkbox value="DELETE">DELETE</void-checkbox>
+                  </void-checkbox-group>
+                </div>
+                <div class="filter-section">
+                  <span class="filter-label">Latency</span>
+                  <void-select size="sm">
+                    <option value="all">All</option>
+                    <option value="fast">&lt; 50ms</option>
+                    <option value="moderate">50–200ms</option>
+                    <option value="slow">&gt; 200ms</option>
+                  </void-select>
+                </div>
+                <div class="filter-actions">
+                  <void-button variant="ghost" size="sm">Reset</void-button>
+                  <void-button variant="filled" size="sm">Apply</void-button>
+                </div>
+              </div>
+            </void-popover>
+          </div>
+
+          <!-- Charts -->
+          <div class="charts-grid">
+            <div class="chart-panel">
+              <div class="chart-panel-header">
+                <span class="chart-panel-title">Request Volume</span>
+                <span class="chart-panel-meta">requests / min · last 7 days</span>
+              </div>
+              <div class="chart-placeholder" style="min-height: 220px;">
+                <svg width="28" height="28" viewBox="0 0 28 28" fill="none" opacity="0.2">
+                  <rect x="2" y="14" width="4" height="12" rx="1" fill="currentColor"/>
+                  <rect x="8" y="8" width="4" height="18" rx="1" fill="currentColor"/>
+                  <rect x="14" y="4" width="4" height="22" rx="1" fill="currentColor"/>
+                  <rect x="20" y="10" width="4" height="16" rx="1" fill="currentColor"/>
+                </svg>
+                <span class="chart-placeholder-label">Request Volume Chart</span>
+                <span class="chart-placeholder-sub">chart component not yet available</span>
+              </div>
+            </div>
+
+            <div class="chart-panel">
+              <div class="chart-panel-header">
+                <span class="chart-panel-title">Error Distribution</span>
+                <span class="chart-panel-meta">by status code</span>
+              </div>
+              <div class="chart-placeholder" style="min-height: 220px;">
+                <svg width="28" height="28" viewBox="0 0 28 28" fill="none" opacity="0.2">
+                  <circle cx="14" cy="14" r="11" stroke="currentColor" stroke-width="2" fill="none"/>
+                  <path d="M14 3 A11 11 0 0 1 25 14" stroke="currentColor" stroke-width="2" fill="none"/>
+                </svg>
+                <span class="chart-placeholder-label">Error Distribution Chart</span>
+                <span class="chart-placeholder-sub">chart component not yet available</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Second charts row -->
+          <div class="charts-grid" style="grid-template-columns: 1fr 1fr;">
+            <div class="chart-panel">
+              <div class="chart-panel-header">
+                <span class="chart-panel-title">Revenue</span>
+                <span class="chart-panel-meta">USD · cumulative</span>
+              </div>
+              <div class="chart-placeholder" style="min-height: 160px;">
+                <svg width="28" height="28" viewBox="0 0 28 28" fill="none" opacity="0.2">
+                  <polyline points="2,22 8,16 14,10 20,14 26,6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                </svg>
+                <span class="chart-placeholder-label">Revenue Chart</span>
+                <span class="chart-placeholder-sub">chart component not yet available</span>
+              </div>
+            </div>
+
+            <div class="chart-panel">
+              <div class="chart-panel-header">
+                <span class="chart-panel-title">Active Users</span>
+                <span class="chart-panel-meta">MAU · rolling 30d</span>
+              </div>
+              <div class="chart-placeholder" style="min-height: 160px;">
+                <svg width="28" height="28" viewBox="0 0 28 28" fill="none" opacity="0.2">
+                  <rect x="2" y="10" width="4" height="16" rx="1" fill="currentColor"/>
+                  <rect x="8" y="6" width="4" height="20" rx="1" fill="currentColor"/>
+                  <rect x="14" y="12" width="4" height="14" rx="1" fill="currentColor"/>
+                  <rect x="20" y="4" width="4" height="22" rx="1" fill="currentColor"/>
+                </svg>
+                <span class="chart-placeholder-label">Active Users Chart</span>
+                <span class="chart-placeholder-sub">chart component not yet available</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Recent activity table -->
+          <div class="table-section">
+            <div class="table-section-header">
+              <span class="table-section-title">Recent Activity</span>
+              <div style="display:flex; align-items:center; gap:var(--void-space-4);">
+                <span class="table-section-count">24 events</span>
+                <void-button variant="outline" size="md">View all</void-button>
+              </div>
+            </div>
+
+            <void-table>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Status</th>
+                    <th>Method</th>
+                    <th>Endpoint</th>
+                    <th>Latency</th>
+                    <th>User</th>
+                    <th>Time</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><span class="cell-with-dot"><span class="status-dot success"></span>200</span></td>
+                    <td><span class="method-tag get">GET</span></td>
+                    <td class="mono">/api/v2/users</td>
+                    <td class="mono">38ms</td>
+                    <td class="text-sm">alice@example.com</td>
+                    <td class="text-sm text-secondary">2s ago</td>
+                  </tr>
+                  <tr>
+                    <td><span class="cell-with-dot"><span class="status-dot success"></span>201</span></td>
+                    <td><span class="method-tag post">POST</span></td>
+                    <td class="mono">/api/v2/sessions</td>
+                    <td class="mono">54ms</td>
+                    <td class="text-sm">bob@example.com</td>
+                    <td class="text-sm text-secondary">12s ago</td>
+                  </tr>
+                  <tr>
+                    <td><span class="cell-with-dot"><span class="status-dot error"></span>429</span></td>
+                    <td><span class="method-tag get">GET</span></td>
+                    <td class="mono">/api/v2/metrics</td>
+                    <td class="mono">4ms</td>
+                    <td class="text-sm">bot@crawler.io</td>
+                    <td class="text-sm text-secondary">18s ago</td>
+                  </tr>
+                  <tr>
+                    <td><span class="cell-with-dot"><span class="status-dot success"></span>200</span></td>
+                    <td><span class="method-tag patch">PATCH</span></td>
+                    <td class="mono">/api/v2/users/9182</td>
+                    <td class="mono">71ms</td>
+                    <td class="text-sm">carol@example.com</td>
+                    <td class="text-sm text-secondary">34s ago</td>
+                  </tr>
+                  <tr>
+                    <td><span class="cell-with-dot"><span class="status-dot error"></span>500</span></td>
+                    <td><span class="method-tag post">POST</span></td>
+                    <td class="mono">/api/v2/webhooks</td>
+                    <td class="mono">1204ms</td>
+                    <td class="text-sm text-secondary">—</td>
+                    <td class="text-sm text-secondary">1m ago</td>
+                  </tr>
+                  <tr>
+                    <td><span class="cell-with-dot"><span class="status-dot warning"></span>304</span></td>
+                    <td><span class="method-tag get">GET</span></td>
+                    <td class="mono">/api/v2/reports</td>
+                    <td class="mono">22ms</td>
+                    <td class="text-sm">dave@example.com</td>
+                    <td class="text-sm text-secondary">1m ago</td>
+                  </tr>
+                  <tr>
+                    <td><span class="cell-with-dot"><span class="status-dot success"></span>204</span></td>
+                    <td><span class="method-tag delete">DELETE</span></td>
+                    <td class="mono">/api/v2/sessions/7731</td>
+                    <td class="mono">29ms</td>
+                    <td class="text-sm">alice@example.com</td>
+                    <td class="text-sm text-secondary">2m ago</td>
+                  </tr>
+                  <tr>
+                    <td><span class="cell-with-dot"><span class="status-dot success"></span>200</span></td>
+                    <td><span class="method-tag get">GET</span></td>
+                    <td class="mono">/api/v2/billing/invoices</td>
+                    <td class="mono">46ms</td>
+                    <td class="text-sm">eve@example.com</td>
+                    <td class="text-sm text-secondary">3m ago</td>
+                  </tr>
+                </tbody>
+              </table>
+            </void-table>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <script>
+      import '@voidable/ui';
+
+      const toggle = document.getElementById('theme-toggle')!;
+      const html = document.documentElement;
+
+      toggle.addEventListener('click', () => {
+        const current = html.getAttribute('data-theme');
+        html.setAttribute('data-theme', current === 'dark' ? 'light' : 'dark');
+      });
+    </script>
+
+    <!-- Override theme popover positioning (must come after Vite-injected theme CSS) -->
+    <style>
+      .toolbar-row void-popover[position="bottom"] .void-popover-body {
+        left: auto !important;
+        right: 0;
+      }
+    </style>
+  </body>
+</html>
