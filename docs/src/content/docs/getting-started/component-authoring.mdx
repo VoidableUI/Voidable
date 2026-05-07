@@ -134,8 +134,8 @@ Use `@property` with `reflect: true` for attributes that CSS selects on. Reflect
 
 Standard scales across all components:
 
-- **Size** — `'sm' | 'md' | 'lg' | 'xl' | 'xxl'`
-- **Color** — `'default' | 'error' | 'warning' | 'success' | 'info' | 'notice' | 'highlight'`
+- **Size** — `'sm' | 'md' | 'lg'` at minimum. Some components extend to `'xl'` and `'xxl'`.
+- **Color** — `'default' | 'error' | 'warning' | 'success' | 'info' | 'notice'`. Some components add `'highlight'`.
 
 Use these exact values. Do not invent alternative names for the same concept.
 
@@ -148,6 +148,8 @@ The theme uses a tone system built on CSS custom properties. Note the distinctio
 - `--tone` — primary tone color
 - `--tone-subtle` — tone at 14% opacity (backgrounds)
 - `--tone-border` — tone at 36% opacity (borders)
+- `--tone-text` — text color on tone backgrounds
+- `--tone-hover` — hover state color
 
 Color variants override `--tone` only. All other derived values update automatically through the cascade.
 
