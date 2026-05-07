@@ -1,0 +1,507 @@
+---
+title: Design Tokens
+---
+
+Design tokens are the atomic values that define Voidable's visual language. Every color, spacing step, font size, shadow, radius, and motion curve is expressed as a CSS custom property prefixed with `--void-`. Components consume these tokens rather than hard-coding values, so a single override propagates everywhere.
+
+Tokens ship in the `@voidable/theme` package. After importing it, all tokens are available as standard CSS custom properties:
+
+```css
+@import '@voidable/theme';
+```
+
+The theme is organized into two tiers:
+
+- **Primitives** (`primitives.css`) -- Raw scales with no semantic meaning. Color palettes, spacing steps, font stacks.
+- **Semantic tokens** (`tokens.css`) -- Purpose-driven aliases like `--void-color-bg` and `--void-color-text` that reference primitives and adapt based on the active theme.
+
+---
+
+## Color primitives
+
+Primitive color palettes are always available on `:root` regardless of the active theme. They exist so semantic tokens (and your own overrides) can reference them.
+
+### Stone
+
+| Token | Value |
+|---|---|
+| `--void-stone-50` | `#fafaf9` |
+| `--void-stone-100` | `#f5f5f4` |
+| `--void-stone-200` | `#e7e5e4` |
+| `--void-stone-300` | `#d6d3d1` |
+| `--void-stone-400` | `#a8a29e` |
+| `--void-stone-450` | `#908a85` |
+| `--void-stone-500` | `#78716c` |
+| `--void-stone-600` | `#57534e` |
+| `--void-stone-700` | `#44403c` |
+| `--void-stone-800` | `#292524` |
+| `--void-stone-900` | `#1c1917` |
+| `--void-stone-950` | `#0c0a09` |
+
+### Red (error)
+
+| Token | Value |
+|---|---|
+| `--void-red-50` | `#fef2f2` |
+| `--void-red-100` | `#fee2e2` |
+| `--void-red-200` | `#fecaca` |
+| `--void-red-300` | `#fca5a5` |
+| `--void-red-400` | `#f87171` |
+| `--void-red-500` | `#ef4444` |
+| `--void-red-600` | `#dc2626` |
+| `--void-red-700` | `#b91c1c` |
+| `--void-red-800` | `#991b1b` |
+| `--void-red-900` | `#7f1d1d` |
+| `--void-red-950` | `#450a0a` |
+
+### Amber (warning)
+
+| Token | Value |
+|---|---|
+| `--void-amber-50` | `#fefae4` |
+| `--void-amber-100` | `#fdf1be` |
+| `--void-amber-200` | `#f9e182` |
+| `--void-amber-300` | `#f1cb48` |
+| `--void-amber-400` | `#e5c03c` |
+| `--void-amber-500` | `#cca93c` |
+| `--void-amber-600` | `#a88a2a` |
+| `--void-amber-700` | `#846b20` |
+| `--void-amber-800` | `#655118` |
+| `--void-amber-900` | `#503f13` |
+| `--void-amber-950` | `#30260b` |
+
+### Green (success)
+
+| Token | Value |
+|---|---|
+| `--void-green-50` | `#f0fdf4` |
+| `--void-green-100` | `#dcfce7` |
+| `--void-green-200` | `#bbf7d0` |
+| `--void-green-300` | `#86efac` |
+| `--void-green-400` | `#4ade80` |
+| `--void-green-500` | `#22c55e` |
+| `--void-green-600` | `#16a34a` |
+| `--void-green-700` | `#15803d` |
+| `--void-green-800` | `#166534` |
+| `--void-green-900` | `#14532d` |
+| `--void-green-950` | `#052e16` |
+
+### Blue (info)
+
+| Token | Value |
+|---|---|
+| `--void-blue-50` | `#eff6ff` |
+| `--void-blue-100` | `#dbeafe` |
+| `--void-blue-200` | `#bfdbfe` |
+| `--void-blue-300` | `#93c5fd` |
+| `--void-blue-400` | `#60a5fa` |
+| `--void-blue-500` | `#3b82f6` |
+| `--void-blue-600` | `#2563eb` |
+| `--void-blue-700` | `#1d4ed8` |
+| `--void-blue-800` | `#1e40af` |
+| `--void-blue-900` | `#1e3a8a` |
+| `--void-blue-950` | `#172554` |
+
+### Purple (notice)
+
+| Token | Value |
+|---|---|
+| `--void-purple-50` | `#faf5ff` |
+| `--void-purple-100` | `#f3e8ff` |
+| `--void-purple-200` | `#e9d5ff` |
+| `--void-purple-300` | `#d8b4fe` |
+| `--void-purple-400` | `#c084fc` |
+| `--void-purple-500` | `#a855f7` |
+| `--void-purple-600` | `#9333ea` |
+| `--void-purple-700` | `#7e22ce` |
+| `--void-purple-800` | `#6b21a8` |
+| `--void-purple-900` | `#581c87` |
+| `--void-purple-950` | `#3b0764` |
+
+### Pink (highlight)
+
+| Token | Value |
+|---|---|
+| `--void-pink-50` | `#fdf2f8` |
+| `--void-pink-100` | `#fce7f3` |
+| `--void-pink-200` | `#fbcfe8` |
+| `--void-pink-300` | `#f9a8d4` |
+| `--void-pink-400` | `#f472b6` |
+| `--void-pink-500` | `#ec4899` |
+| `--void-pink-600` | `#db2777` |
+| `--void-pink-700` | `#be185d` |
+| `--void-pink-800` | `#9d174d` |
+| `--void-pink-900` | `#831843` |
+| `--void-pink-950` | `#500724` |
+
+### Black, white, and dark surfaces
+
+| Token | Value | Purpose |
+|---|---|---|
+| `--void-black` | `#000000` | Pure black |
+| `--void-white` | `#ffffff` | Pure white |
+| `--void-dark-1` | `#0a0a0a` | Dark surface step 1 (near-black elevation) |
+| `--void-dark-2` | `#0b0b0b` | Dark surface step 2 |
+| `--void-dark-3` | `#111111` | Dark surface step 3 |
+| `--void-dark-4` | `#141414` | Dark surface step 4 |
+
+---
+
+## Semantic color tokens
+
+Semantic tokens carry purpose -- "the background color" rather than "stone-900". They change automatically between dark and light themes via the `data-theme` attribute on your root element.
+
+Dark mode is the **default**. Set `data-theme="light"` on `<html>` to activate light mode.
+
+### Surface colors
+
+| Token | Dark value | Light value |
+|---|---|---|
+| `--void-color-bg` | `var(--void-black)` | `var(--void-white)` |
+| `--void-color-bg-secondary` | `var(--void-dark-1)` | `var(--void-stone-100)` |
+| `--void-color-bg-elevated` | `var(--void-dark-3)` | `var(--void-white)` |
+| `--void-color-bg-hover` | `var(--void-dark-4)` | `var(--void-stone-200)` |
+| `--void-color-bg-accent` | `var(--void-dark-2)` | `var(--void-stone-100)` |
+| `--void-color-bg-overlay` | `black 70% / transparent` | `black 30% / transparent` |
+
+### Text colors
+
+| Token | Dark value | Light value |
+|---|---|---|
+| `--void-color-text` | `var(--void-stone-100)` | `var(--void-stone-900)` |
+| `--void-color-text-secondary` | `var(--void-stone-400)` | `var(--void-stone-600)` |
+| `--void-color-text-muted` | `var(--void-stone-500)` | `var(--void-stone-500)` |
+| `--void-color-text-tertiary` | `var(--void-stone-450)` | `var(--void-stone-400)` |
+| `--void-color-text-disabled` | `var(--void-stone-600)` | `var(--void-stone-300)` |
+| `--void-color-text-on-accent` | `var(--void-black)` | `var(--void-white)` |
+
+### Border colors
+
+| Token | Dark value | Light value |
+|---|---|---|
+| `--void-color-border` | `white 14% / transparent` | `var(--void-stone-300)` |
+| `--void-color-border-strong` | `white 22% / transparent` | `var(--void-stone-400)` |
+| `--void-color-border-focus` | `white 55% / transparent` | `var(--void-stone-600)` |
+
+### Accent colors
+
+| Token | Dark value | Light value |
+|---|---|---|
+| `--void-color-accent` | `var(--void-white)` | `var(--void-stone-900)` |
+| `--void-color-accent-hover` | `var(--void-stone-200)` | `var(--void-stone-950)` |
+
+### Status colors
+
+Status tokens map to the primitive palettes. Dark mode uses the `-500` stop; light mode uses `-600` for better contrast on white backgrounds.
+
+| Token | Dark value | Light value |
+|---|---|---|
+| `--void-color-error` | `var(--void-red-500)` | `var(--void-red-600)` |
+| `--void-color-warning` | `var(--void-amber-500)` | `var(--void-amber-600)` |
+| `--void-color-success` | `var(--void-green-500)` | `var(--void-green-600)` |
+| `--void-color-info` | `var(--void-blue-500)` | `var(--void-blue-600)` |
+| `--void-color-notice` | `var(--void-purple-500)` | `var(--void-purple-600)` |
+| `--void-color-highlight` | `var(--void-pink-500)` | `var(--void-pink-600)` |
+
+### Status subtle colors
+
+Subtle status colors use `color-mix()` to create low-opacity tinted backgrounds. Dark mode uses 14% opacity; light mode uses 8%.
+
+| Token | Dark value | Light value |
+|---|---|---|
+| `--void-color-error-subtle` | `error 14% / transparent` | `error 8% / transparent` |
+| `--void-color-warning-subtle` | `warning 14% / transparent` | `warning 8% / transparent` |
+| `--void-color-success-subtle` | `success 14% / transparent` | `success 8% / transparent` |
+| `--void-color-info-subtle` | `info 14% / transparent` | `info 8% / transparent` |
+| `--void-color-notice-subtle` | `notice 14% / transparent` | `notice 8% / transparent` |
+| `--void-color-highlight-subtle` | `highlight 14% / transparent` | `highlight 8% / transparent` |
+
+---
+
+## Spacing
+
+Spacing tokens use a numeric scale based on a 0.25rem (4px) grid. Named aliases provide T-shirt sizing for common use.
+
+### Numeric scale
+
+| Token | Value |
+|---|---|
+| `--void-space-1` | `0.25rem` (4px) |
+| `--void-space-1h` | `0.375rem` (6px) |
+| `--void-space-2` | `0.5rem` (8px) |
+| `--void-space-2h` | `0.625rem` (10px) |
+| `--void-space-3` | `0.75rem` (12px) |
+| `--void-space-4` | `1rem` (16px) |
+| `--void-space-5` | `1.25rem` (20px) |
+| `--void-space-6` | `1.5rem` (24px) |
+| `--void-space-7` | `1.75rem` (28px) |
+| `--void-space-8` | `2rem` (32px) |
+| `--void-space-9` | `2.25rem` (36px) |
+| `--void-space-10` | `2.5rem` (40px) |
+| `--void-space-12` | `3rem` (48px) |
+| `--void-space-14` | `3.5rem` (56px) |
+| `--void-space-15` | `3.75rem` (60px) |
+| `--void-space-16` | `4rem` (64px) |
+| `--void-space-20` | `5rem` (80px) |
+| `--void-space-24` | `6rem` (96px) |
+| `--void-space-28` | `7rem` (112px) |
+| `--void-space-30` | `7.5rem` (120px) |
+| `--void-space-32` | `8rem` (128px) |
+| `--void-space-35` | `8.75rem` (140px) |
+| `--void-space-40` | `10rem` (160px) |
+
+### Named aliases
+
+| Token | Maps to |
+|---|---|
+| `--void-space-xs` | `--void-space-1` (0.25rem) |
+| `--void-space-sm` | `--void-space-2` (0.5rem) |
+| `--void-space-md` | `--void-space-3` (0.75rem) |
+| `--void-space-lg` | `--void-space-4` (1rem) |
+| `--void-space-xl` | `--void-space-6` (1.5rem) |
+
+### Semantic spacing aliases
+
+Defined in `tokens.css`, these mirror the named spacing primitives:
+
+| Token | Maps to |
+|---|---|
+| `--void-spacing-xs` | `var(--void-space-xs)` |
+| `--void-spacing-sm` | `var(--void-space-sm)` |
+| `--void-spacing-md` | `var(--void-space-md)` |
+| `--void-spacing-lg` | `var(--void-space-lg)` |
+| `--void-spacing-xl` | `var(--void-space-xl)` |
+
+---
+
+## Typography
+
+### Text sizes
+
+| Token | Value |
+|---|---|
+| `--void-text-2xs` | `0.625rem` (10px) |
+| `--void-text-xs` | `0.75rem` (12px) |
+| `--void-text-sm` | `0.8125rem` (13px) |
+| `--void-text-base` | `0.875rem` (14px) |
+| `--void-text-md` | `1rem` (16px) |
+| `--void-text-lg` | `1.125rem` (18px) |
+| `--void-text-xl` | `1.25rem` (20px) |
+| `--void-text-2xl` | `1.5rem` (24px) |
+| `--void-text-3xl` | `1.875rem` (30px) |
+| `--void-text-4xl` | `2.25rem` (36px) |
+| `--void-text-5xl` | `3rem` (48px) |
+
+### Font weights
+
+| Token | Value |
+|---|---|
+| `--void-weight-normal` | `400` |
+| `--void-weight-medium` | `500` |
+| `--void-weight-semibold` | `600` |
+| `--void-weight-bold` | `700` |
+
+### Line heights
+
+| Token | Value | Notes |
+|---|---|---|
+| `--void-leading-display` | `0.92` | Large display headings |
+| `--void-leading-none` | `1` | No extra leading |
+| `--void-leading-snug` | `1.05` | Slightly more than none |
+| `--void-leading-tight` | `1.2` | |
+| `--void-leading-normal` | `1.5` | |
+| `--void-leading-relaxed` | `1.7` | |
+| `--void-leading-loose` | `1.75` | Extra loose for code blocks |
+
+### Letter spacing (tracking)
+
+| Token | Value | Use case |
+|---|---|---|
+| `--void-tracking-tightest` | `-0.05em` | Display text, wordmarks |
+| `--void-tracking-tighter` | `-0.04em` | Large headings |
+| `--void-tracking-tight` | `-0.025em` | Headings |
+| `--void-tracking-snug` | `-0.01em` | Subheadings, card titles |
+| `--void-tracking-normal` | `0em` | Body text (default) |
+| `--void-tracking-wide` | `0.04em` | Tags, badges |
+| `--void-tracking-wider` | `0.06em` | Labels |
+| `--void-tracking-widest` | `0.1em` | Uppercase labels, section headers |
+
+### Font families
+
+| Token | Value |
+|---|---|
+| `--void-font-sans` | `'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif` |
+| `--void-font-mono` | `'JetBrains Mono', ui-monospace, 'SF Mono', 'Fira Code', monospace` |
+
+---
+
+## Border radius
+
+| Token | Value |
+|---|---|
+| `--void-radius-none` | `0` |
+| `--void-radius-xs` | `4px` |
+| `--void-radius-sm` | `6px` |
+| `--void-radius-md` | `8px` |
+| `--void-radius-lg` | `12px` |
+| `--void-radius-xl` | `16px` |
+| `--void-radius-full` | `9999px` |
+
+The `data-shape="sharp"` attribute on a parent element resets all radius tokens to `0`, giving every component a sharp-cornered appearance:
+
+```html
+<html data-shape="sharp">
+```
+
+---
+
+## Shadows
+
+Shadows use white-based `rgba` values for glow-style elevation on dark surfaces.
+
+| Token | Value |
+|---|---|
+| `--void-shadow-sm` | `0 1px 3px rgba(255,255,255,.14)` |
+| `--void-shadow-md` | `0 2px 6px rgba(255,255,255,.12), 0 10px 24px rgba(255,255,255,.20)` |
+| `--void-shadow-lg` | `0 4px 10px rgba(255,255,255,.16), 0 22px 50px rgba(255,255,255,.28)` |
+| `--void-shadow-xl` | `0 6px 14px rgba(255,255,255,.20), 0 40px 88px rgba(255,255,255,.38)` |
+
+### Ring hairlines
+
+Subtle 1px ring effects for card edges and elevated surfaces:
+
+| Token | Value |
+|---|---|
+| `--void-ring-hair` | `0 0 0 1px rgba(255,255,255,.06)` |
+| `--void-ring-hair-strong` | `0 0 0 1px rgba(255,255,255,.12)` |
+
+---
+
+## Motion
+
+### Durations
+
+| Token | Value |
+|---|---|
+| `--void-duration-fast` | `100ms` |
+| `--void-duration-normal` | `200ms` |
+| `--void-duration-slow` | `300ms` |
+
+### Easings
+
+| Token | Value |
+|---|---|
+| `--void-ease-in` | `cubic-bezier(0.4, 0, 1, 0.2)` |
+| `--void-ease-out` | `cubic-bezier(0, 0, 0.2, 1)` |
+| `--void-ease-in-out` | `cubic-bezier(0.4, 0, 0.2, 1)` |
+
+---
+
+## Z-index layers
+
+A fixed stacking order so overlapping elements layer predictably:
+
+| Token | Value |
+|---|---|
+| `--void-z-dropdown` | `100` |
+| `--void-z-sticky` | `200` |
+| `--void-z-modal` | `300` |
+| `--void-z-toast` | `400` |
+| `--void-z-tooltip` | `500` |
+
+---
+
+## The tone system
+
+Many Voidable components use an internal `--tone` custom property pattern for color theming. Instead of writing separate rulesets for every color variant, each component defines:
+
+```css
+void-badge {
+  --tone: var(--void-color-accent);
+  background: var(--tone);
+}
+
+void-badge[color="error"]   { --tone: var(--void-color-error); }
+void-badge[color="warning"] { --tone: var(--void-color-warning); }
+void-badge[color="success"] { --tone: var(--void-color-success); }
+```
+
+Some components derive additional tones for subtle backgrounds and borders:
+
+```css
+void-stat {
+  --tone: var(--void-color-accent);
+  --tone-subtle: color-mix(in srgb, var(--tone) 14%, transparent);
+  --tone-border: color-mix(in srgb, var(--tone) 36%, transparent);
+
+  background: var(--tone-subtle);
+  border: 1px solid var(--tone-border);
+}
+```
+
+You set the tone from HTML using the `color` attribute:
+
+```html
+<void-badge color="error">3</void-badge>
+<void-stat color="success">+12%</void-stat>
+```
+
+The available `color` values are: `error`, `warning`, `success`, `info`, `notice`, and `highlight`. The default (no attribute) uses `--void-color-accent`.
+
+---
+
+## Using tokens in custom CSS
+
+Reference any token as a standard CSS custom property:
+
+```css
+.my-card {
+  background: var(--void-color-bg-elevated);
+  border: 1px solid var(--void-color-border);
+  border-radius: var(--void-radius-md);
+  padding: var(--void-space-4);
+  font-family: var(--void-font-sans);
+  font-size: var(--void-text-sm);
+  color: var(--void-color-text);
+  box-shadow: var(--void-shadow-md);
+  transition: background var(--void-duration-normal) var(--void-ease-out);
+}
+
+.my-card:hover {
+  background: var(--void-color-bg-hover);
+}
+```
+
+Tokens compose naturally. Build a status banner using semantic colors:
+
+```css
+.status-banner {
+  padding: var(--void-space-3) var(--void-space-4);
+  border-radius: var(--void-radius-sm);
+  font-size: var(--void-text-sm);
+  font-weight: var(--void-weight-medium);
+  line-height: var(--void-leading-normal);
+}
+
+.status-banner.error {
+  background: var(--void-color-error-subtle);
+  color: var(--void-color-error);
+}
+
+.status-banner.success {
+  background: var(--void-color-success-subtle);
+  color: var(--void-color-success);
+}
+```
+
+Override tokens at any scope to customize a subtree:
+
+```css
+.branded-section {
+  --void-color-accent: #3b82f6;
+  --void-color-accent-hover: #2563eb;
+  --void-color-text-on-accent: #ffffff;
+}
+```
+
+Every Voidable component inside `.branded-section` will pick up the new accent color automatically.

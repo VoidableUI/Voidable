@@ -35,6 +35,7 @@ export default defineConfig({
             { label: 'Design Philosophy', slug: 'getting-started/design-philosophy' },
             { label: 'Component Authoring', slug: 'getting-started/component-authoring' },
             { label: 'Theming', slug: 'getting-started/theming' },
+            { label: 'Design Tokens', slug: 'getting-started/tokens' },
           ],
         },
         {
@@ -53,6 +54,12 @@ export default defineConfig({
           items: [
             { label: 'Overview', slug: 'components/overview' },
             { label: 'Storybook', link: '/storybook/', attrs: { target: '_blank' } },
+          ],
+        },
+        {
+          label: 'Showcase',
+          items: [
+            { label: 'Dashboard', link: '/showcase/dashboard/' },
           ],
         },
       ],
