@@ -1,12 +1,40 @@
 ---
 import '@voidable/theme';
+import iconBrandGithub from '@tabler/icons/outline/brand-github.svg?raw';
+import iconSun from '@tabler/icons/outline/sun.svg?raw';
+import iconMoon from '@tabler/icons/outline/moon.svg?raw';
+import { codeToHtml } from 'shiki';
+
+const cssCode = `/* Override one variable.
+   Watch the entire library remap. */
+
+:root {
+  --void-color-accent: #3b82f6;
+  --void-color-accent-hover: #2563eb;
+  --void-radius-md: 8px;
+
+  --void-color-bg: #0a0e1a;
+  --void-color-text: #e5e7eb;
+}
+
+[data-shape="sharp"] {
+  --void-radius-md: 0;
+  --void-radius-lg: 0;
+}`;
+
+const highlightedCss = await codeToHtml(cssCode, {
+  lang: 'css',
+  theme: 'github-dark-default',
+});
+
+const version = import.meta.env.VOIDABLE_VERSION || 'v0.0.0';
 ---
 
 <html lang="en" data-theme="dark">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Voidable — Devoid of style.</title>
+    <title>Voidable. Devoid of style.</title>
     <meta name="description" content="A framework-agnostic web component library built with Lit 3. Light DOM, CSS token theming, 10 adapters for React, Vue, Solid, Svelte, Angular, Hotwire, Alpine, LiveView, Qwik, and Astro." />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -23,12 +51,12 @@ import '@voidable/theme';
       html {
         font-family: var(--void-font-sans);
         color: var(--void-color-text);
-        background: #000000;
+        background: var(--void-color-bg);
       }
 
       body {
         min-height: 100dvh;
-        line-height: 1.6;
+        line-height: var(--void-leading-normal);
         overflow-x: hidden;
       }
 
@@ -40,7 +68,7 @@ import '@voidable/theme';
       .container {
         max-width: 80rem;
         margin: 0 auto;
-        padding: 0 2.5rem;
+        padding: 0 var(--void-space-10);
       }
 
       /* ── Nav ── */
@@ -48,40 +76,40 @@ import '@voidable/theme';
         position: sticky;
         top: 0;
         z-index: 50;
-        background: rgba(0, 0, 0, 0.86);
+        background: color-mix(in srgb, var(--void-color-bg) 86%, transparent);
         backdrop-filter: saturate(140%) blur(6px);
         -webkit-backdrop-filter: saturate(140%) blur(6px);
-        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        border-bottom: 1px solid var(--void-color-border);
       }
 
       .nav-inner {
         display: flex;
         align-items: center;
-        gap: 1.75rem;
-        padding: 0.875rem 0;
+        gap: var(--void-space-7);
+        padding: var(--void-space-4) 0;
       }
 
       .nav-wordmark {
         font-family: var(--void-font-mono);
-        font-weight: 700;
-        font-size: 0.9375rem;
-        letter-spacing: -0.5px;
+        font-weight: var(--void-weight-bold);
+        font-size: var(--void-text-md);
+        letter-spacing: var(--void-tracking-tightest);
         color: var(--void-color-text);
       }
 
       .nav-links {
         display: flex;
-        gap: 0.25rem;
+        gap: var(--void-space-1);
         list-style: none;
       }
 
       .nav-links a {
         display: block;
-        padding: 0.375rem 0.75rem;
-        font-size: 0.8125rem;
-        font-weight: 400;
+        padding: var(--void-space-1h) var(--void-space-3);
+        font-size: var(--void-text-sm);
+        font-weight: var(--void-weight-normal);
         color: var(--void-color-text-secondary);
-        border-radius: 6px;
+        border-radius: var(--void-radius-sm);
         transition: color 150ms;
       }
 
@@ -93,33 +121,44 @@ import '@voidable/theme';
         margin-left: auto;
         display: flex;
         align-items: center;
-        gap: 0.5rem;
+        gap: var(--void-space-3);
+      }
+
+      .nav-right void-button {
+        --tone-subtle: transparent;
       }
 
       .nav-github {
         display: inline-flex;
         align-items: center;
-        gap: 0.375rem;
-        padding: 0.4375rem 0.6875rem;
-        background: transparent;
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        border-radius: 8px;
-        color: var(--void-color-text-secondary);
-        font-size: 0.75rem;
-        font-family: var(--void-font-sans);
-        transition: color 150ms, border-color 150ms;
+        gap: var(--void-space-1h);
+        color: inherit;
+        text-decoration: none;
       }
 
-      .nav-github:hover {
-        color: var(--void-color-text);
-        border-color: rgba(255, 255, 255, 0.16);
-      }
-
-      .nav-github svg {
+      .nav-github-icon {
+        display: flex;
         width: 14px;
         height: 14px;
-        fill: currentColor;
       }
+      .nav-github-icon :global(svg) {
+        width: 100%;
+        height: 100%;
+      }
+
+      .theme-icon {
+        display: flex;
+        width: var(--void-space-4);
+        height: var(--void-space-4);
+      }
+      .theme-icon :global(svg) {
+        width: 100%;
+        height: 100%;
+      }
+      [data-theme="dark"] .theme-icon-sun { display: flex; }
+      [data-theme="dark"] .theme-icon-moon { display: none; }
+      [data-theme="light"] .theme-icon-sun { display: none; }
+      [data-theme="light"] .theme-icon-moon { display: flex; }
 
       @media (max-width: 720px) {
         .nav-links {
@@ -130,7 +169,7 @@ import '@voidable/theme';
       /* ── Hero ── */
       .hero {
         position: relative;
-        padding: 10rem 2.5rem 7.5rem;
+        padding: var(--void-space-40) var(--void-space-10) var(--void-space-30);
         text-align: center;
         overflow: hidden;
       }
@@ -167,54 +206,54 @@ import '@voidable/theme';
       .hero-badge {
         display: inline-flex;
         align-items: center;
-        gap: 0.625rem;
-        padding: 0.3125rem 0.875rem 0.3125rem 0.375rem;
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        border-radius: 9999px;
-        font-size: 0.75rem;
+        gap: var(--void-space-2h);
+        padding: 0.3125rem var(--void-space-4) 0.3125rem var(--void-space-1h);
+        border: 1px solid var(--void-color-border);
+        border-radius: var(--void-radius-full);
+        font-size: var(--void-text-xs);
         color: var(--void-color-text-secondary);
-        margin-bottom: 2.5rem;
-        background: #0a0a0a;
+        margin-bottom: var(--void-space-10);
+        background: var(--void-color-bg-secondary);
       }
 
       .hero-badge-version {
-        padding: 0.0625rem 0.5rem;
-        background: rgba(255, 255, 255, 0.06);
-        border-radius: 9999px;
+        padding: 0.0625rem var(--void-space-2);
+        background: var(--void-color-border);
+        border-radius: var(--void-radius-full);
         font-family: var(--void-font-mono);
-        font-size: 0.625rem;
+        font-size: var(--void-text-2xs);
         color: var(--void-color-text);
       }
 
       .hero h1 {
         font-family: var(--void-font-sans);
-        font-weight: 700;
+        font-weight: var(--void-weight-bold);
         font-size: clamp(3.5rem, 11vw, 10.5rem);
-        letter-spacing: -0.05em;
-        line-height: 0.92;
+        letter-spacing: var(--void-tracking-tightest);
+        line-height: var(--void-leading-display);
         color: var(--void-color-text);
-        margin-bottom: 2.25rem;
+        margin-bottom: var(--void-space-9);
       }
 
       .hero-sub {
-        font-size: 1.25rem;
+        font-size: var(--void-text-xl);
         color: var(--void-color-text-secondary);
-        line-height: 1.45;
+        line-height: var(--void-leading-normal);
         max-width: 38.75rem;
-        margin: 0 auto 3rem;
+        margin: 0 auto var(--void-space-12);
       }
 
       .install-pill {
         display: inline-flex;
         align-items: center;
-        gap: 0.5rem;
-        padding: 0.75rem 1.125rem;
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        border-radius: 8px;
+        gap: var(--void-space-2);
+        padding: var(--void-space-3) var(--void-space-4);
+        border: 1px solid var(--void-color-border);
+        border-radius: var(--void-radius-md);
         font-family: var(--void-font-mono);
-        font-size: 0.8125rem;
+        font-size: var(--void-text-sm);
         color: var(--void-color-text-secondary);
-        margin-bottom: 2rem;
+        margin-bottom: var(--void-space-8);
         background: transparent;
         cursor: pointer;
         transition: color 150ms, border-color 150ms;
@@ -222,16 +261,16 @@ import '@voidable/theme';
 
       .install-pill:hover {
         color: var(--void-color-text);
-        border-color: rgba(255, 255, 255, 0.16);
+        border-color: var(--void-color-border-strong);
       }
 
       .install-pill-dollar {
-        color: rgba(255, 255, 255, 0.3);
+        color: var(--void-color-text-muted);
       }
 
       .hero-actions {
         display: flex;
-        gap: 0.75rem;
+        gap: var(--void-space-3);
         justify-content: center;
         align-items: center;
         flex-wrap: wrap;
@@ -241,69 +280,39 @@ import '@voidable/theme';
         display: block;
       }
 
-      .btn-filled {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.375rem;
-        padding: 0.8125rem 1.5rem;
-        background: var(--void-color-text);
-        color: #000000;
-        border: none;
-        border-radius: 8px;
-        font-size: 0.875rem;
-        font-weight: 500;
-        font-family: var(--void-font-sans);
-        cursor: pointer;
-        transition: opacity 150ms;
+      .hero-actions a {
+        color: inherit;
         text-decoration: none;
       }
 
-      .btn-filled:hover {
-        opacity: 0.9;
+      .hero-outline-btn {
+        --tone-subtle: transparent;
       }
-
-      .btn-outline {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.375rem;
-        padding: 0.75rem 1.125rem;
-        background: transparent;
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        border-radius: 8px;
-        color: var(--void-color-text-secondary);
-        font-size: 0.8125rem;
-        font-weight: 400;
-        font-family: var(--void-font-sans);
-        cursor: pointer;
-        transition: color 150ms, border-color 150ms;
+      .hero-outline-btn a {
+        color: inherit;
         text-decoration: none;
-      }
-
-      .btn-outline:hover {
-        color: var(--void-color-text);
-        border-color: rgba(255, 255, 255, 0.16);
       }
 
       /* ── Frameworks / Marquee ── */
       .frameworks {
-        padding: 3.75rem 2.5rem;
-        border-top: 1px solid rgba(255, 255, 255, 0.08);
-        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        padding: var(--void-space-15) var(--void-space-10);
+        border-top: 1px solid var(--void-color-border);
+        border-bottom: 1px solid var(--void-color-border);
       }
 
       .frameworks-eyebrow {
         text-align: center;
-        color: rgba(255, 255, 255, 0.4);
-        margin-bottom: 1.75rem;
-        font-size: 0.6875rem;
+        color: var(--void-color-text-muted);
+        margin-bottom: var(--void-space-7);
+        font-size: var(--void-text-xs);
         font-family: var(--void-font-mono);
         text-transform: uppercase;
-        letter-spacing: 0.08em;
+        letter-spacing: var(--void-tracking-widest);
       }
 
       .framework-list {
         display: flex;
-        gap: 0.75rem;
+        gap: var(--void-space-3);
         justify-content: center;
         flex-wrap: wrap;
         max-width: 68.75rem;
@@ -311,57 +320,57 @@ import '@voidable/theme';
       }
 
       .framework-pill {
-        padding: 0.4375rem 1rem;
-        font-size: 0.875rem;
-        font-weight: 500;
+        padding: var(--void-space-2) var(--void-space-4);
+        font-size: var(--void-text-base);
+        font-weight: var(--void-weight-medium);
         color: var(--void-color-text-secondary);
         font-family: var(--void-font-mono);
-        letter-spacing: -0.01em;
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        border-radius: 9999px;
+        letter-spacing: var(--void-tracking-snug);
+        border: 1px solid var(--void-color-border);
+        border-radius: var(--void-radius-full);
         transition: color 150ms, border-color 150ms;
       }
 
       a.framework-pill:hover {
         color: var(--void-color-text);
-        border-color: rgba(255, 255, 255, 0.2);
+        border-color: var(--void-color-border-strong);
       }
 
       /* ── Feature Grid ── */
       .feature-section {
-        padding: 7.5rem 2.5rem;
+        padding: var(--void-space-30) var(--void-space-10);
         max-width: 80rem;
         margin: 0 auto;
       }
 
       .feature-header {
         max-width: 45rem;
-        margin-bottom: 4rem;
+        margin-bottom: var(--void-space-16);
       }
 
       .eyebrow {
         font-family: var(--void-font-mono);
-        font-size: 0.6875rem;
-        font-weight: 500;
+        font-size: var(--void-text-xs);
+        font-weight: var(--void-weight-medium);
         text-transform: uppercase;
-        letter-spacing: 0.08em;
+        letter-spacing: var(--void-tracking-widest);
         color: var(--void-color-text-secondary);
-        margin-bottom: 1rem;
+        margin-bottom: var(--void-space-4);
       }
 
       .feature-heading {
         font-size: clamp(2.25rem, 5vw, 3.5rem);
-        font-weight: 700;
-        letter-spacing: -0.03em;
-        line-height: 1.05;
+        font-weight: var(--void-weight-bold);
+        letter-spacing: var(--void-tracking-tight);
+        line-height: var(--void-leading-snug);
         color: var(--void-color-text);
       }
 
       .feature-sub {
-        font-size: 1rem;
+        font-size: var(--void-text-md);
         color: var(--void-color-text-secondary);
-        line-height: 1.6;
-        margin-top: 1.25rem;
+        line-height: var(--void-leading-normal);
+        margin-top: var(--void-space-5);
         max-width: 35rem;
       }
 
@@ -369,29 +378,29 @@ import '@voidable/theme';
         display: grid;
         grid-template-columns: repeat(3, 1fr);
         gap: 1px;
-        background: rgba(255, 255, 255, 0.08);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        border-radius: 16px;
+        background: var(--void-color-border);
+        border: 1px solid var(--void-color-border);
+        border-radius: var(--void-radius-xl);
         overflow: hidden;
       }
 
       .feature-card {
-        background: #000000;
-        padding: 2.25rem 2rem;
+        background: var(--void-color-bg);
+        padding: var(--void-space-9) var(--void-space-8);
       }
 
       .feature-card-title {
-        font-weight: 600;
-        font-size: 1rem;
+        font-weight: var(--void-weight-semibold);
+        font-size: var(--void-text-md);
         color: var(--void-color-text);
-        margin-bottom: 0.5rem;
-        letter-spacing: -0.01em;
+        margin-bottom: var(--void-space-2);
+        letter-spacing: var(--void-tracking-snug);
       }
 
       .feature-card-desc {
-        font-size: 0.875rem;
+        font-size: var(--void-text-base);
         color: var(--void-color-text-secondary);
-        line-height: 1.55;
+        line-height: var(--void-leading-normal);
       }
 
       @media (max-width: 900px) {
@@ -408,8 +417,8 @@ import '@voidable/theme';
 
       /* ── Token Showcase ── */
       .token-section {
-        padding: 7.5rem 2.5rem;
-        border-top: 1px solid rgba(255, 255, 255, 0.08);
+        padding: var(--void-space-30) var(--void-space-10);
+        border-top: 1px solid var(--void-color-border);
       }
 
       .token-grid {
@@ -417,89 +426,97 @@ import '@voidable/theme';
         margin: 0 auto;
         display: grid;
         grid-template-columns: 1fr 1fr;
-        gap: 5rem;
+        gap: var(--void-space-20);
         align-items: center;
       }
 
       .token-heading {
         font-size: clamp(2rem, 4vw, 3rem);
-        font-weight: 700;
-        letter-spacing: -0.03em;
-        line-height: 1.05;
-        margin-bottom: 1.5rem;
+        font-weight: var(--void-weight-bold);
+        letter-spacing: var(--void-tracking-tight);
+        line-height: var(--void-leading-snug);
+        margin-bottom: var(--void-space-6);
         color: var(--void-color-text);
       }
 
       .token-description {
-        font-size: 0.9375rem;
+        font-size: var(--void-text-md);
         color: var(--void-color-text-secondary);
-        line-height: 1.6;
-        margin-bottom: 1.5rem;
+        line-height: var(--void-leading-normal);
+        margin-bottom: var(--void-space-6);
       }
 
       .token-description code {
         font-family: var(--void-font-mono);
         font-size: 0.85em;
         padding: 0.05em 0.35em;
-        background: #0a0a0a;
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        border-radius: 3px;
+        background: var(--void-color-bg-secondary);
+        border: 1px solid var(--void-color-border);
+        border-radius: var(--void-radius-xs);
       }
 
       .token-row {
         display: flex;
         align-items: center;
-        gap: 0.75rem;
-        padding: 0.5rem 0;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        gap: var(--void-space-3);
+        padding: var(--void-space-2) 0;
+        border-bottom: 1px solid var(--void-color-border);
       }
 
       .token-swatch {
         width: 14px;
         height: 14px;
-        border-radius: 4px;
-        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: var(--void-radius-xs);
+        border: 1px solid var(--void-color-border);
         flex-shrink: 0;
       }
 
       .token-name {
         font-family: var(--void-font-mono);
-        font-size: 0.75rem;
+        font-size: var(--void-text-xs);
         color: var(--void-color-text);
       }
 
       .token-value {
         margin-left: auto;
         font-family: var(--void-font-mono);
-        font-size: 0.6875rem;
-        color: rgba(255, 255, 255, 0.4);
+        font-size: var(--void-text-xs);
+        color: var(--void-color-text-muted);
       }
 
       .token-code-block {
         margin: 0;
-        padding: 2rem;
-        background: #0a0a0a;
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        border-radius: 12px;
-        font-family: var(--void-font-mono);
-        font-size: 0.78rem;
-        line-height: 1.75;
         overflow: auto;
-        color: var(--void-color-text);
+        border: 1px solid var(--void-color-border);
+        border-radius: var(--void-radius-lg);
+      }
+      .token-code-block :global(pre) {
+        margin: 0;
+        padding: var(--void-space-8);
+        background: var(--void-color-bg-secondary) !important;
+        font-family: var(--void-font-mono);
+        font-size: var(--void-text-xs);
+        line-height: var(--void-leading-loose);
         white-space: pre;
+        overflow: auto;
+      }
+      .token-code-block :global(code) {
+        font-family: inherit;
+        font-size: inherit;
+        line-height: inherit;
       }
 
       @media (max-width: 720px) {
         .token-grid {
           grid-template-columns: 1fr;
-          gap: 3rem;
+          gap: var(--void-space-12);
         }
       }
 
       /* ── Live Components ── */
       .components {
-        padding: 7.5rem 2.5rem;
-        border-top: 1px solid rgba(255, 255, 255, 0.08);
+        padding: var(--void-space-30) var(--void-space-10);
+        border-top: 1px solid var(--void-color-border);
       }
 
       .components-inner {
@@ -508,35 +525,38 @@ import '@voidable/theme';
       }
 
       .components-panel {
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        border-radius: 12px;
-        padding: 2.5rem;
+        border: 1px solid var(--void-color-border);
+        border-radius: var(--void-radius-lg);
+        padding: var(--void-space-10);
         display: flex;
         flex-direction: column;
-        gap: 2.5rem;
+        gap: var(--void-space-10);
       }
 
       .component-row-label {
         font-family: var(--void-font-mono);
-        font-size: 0.65rem;
-        font-weight: 500;
+        font-size: var(--void-text-2xs);
+        font-weight: var(--void-weight-medium);
         text-transform: uppercase;
-        letter-spacing: 0.12em;
+        letter-spacing: var(--void-tracking-widest);
         color: var(--void-color-text-secondary);
-        margin-bottom: 0.75rem;
+        margin-bottom: var(--void-space-3);
       }
 
       .component-row {
         display: flex;
         flex-wrap: wrap;
-        gap: 0.5rem;
+        gap: var(--void-space-2);
         align-items: center;
+      }
+      .component-row + .component-row {
+        margin-top: var(--void-space-2);
       }
 
       /* ── Stats ── */
       .stats {
-        padding: 6.25rem 2.5rem;
-        border-top: 1px solid rgba(255, 255, 255, 0.08);
+        padding: var(--void-space-24) var(--void-space-10);
+        border-top: 1px solid var(--void-color-border);
       }
 
       .stats-grid {
@@ -545,32 +565,32 @@ import '@voidable/theme';
         display: grid;
         grid-template-columns: repeat(4, 1fr);
         gap: 1px;
-        background: rgba(255, 255, 255, 0.08);
-        border: 1px solid rgba(255, 255, 255, 0.08);
+        background: var(--void-color-border);
+        border: 1px solid var(--void-color-border);
       }
 
       .stat-card {
-        background: #000000;
-        padding: 2.5rem 1.75rem;
+        background: var(--void-color-bg);
+        padding: var(--void-space-10) var(--void-space-7);
         text-align: left;
       }
 
       .stat-number {
         font-size: clamp(2.5rem, 5vw, 4rem);
-        font-weight: 700;
-        letter-spacing: -0.04em;
-        line-height: 1;
+        font-weight: var(--void-weight-bold);
+        letter-spacing: var(--void-tracking-tighter);
+        line-height: var(--void-leading-none);
         font-family: var(--void-font-mono);
         color: var(--void-color-text);
         white-space: nowrap;
       }
 
       .stat-label {
-        margin-top: 0.75rem;
-        font-size: 0.75rem;
-        color: rgba(255, 255, 255, 0.4);
+        margin-top: var(--void-space-3);
+        font-size: var(--void-text-xs);
+        color: var(--void-color-text-muted);
         text-transform: uppercase;
-        letter-spacing: 0.06em;
+        letter-spacing: var(--void-tracking-wider);
       }
 
       @media (max-width: 720px) {
@@ -587,39 +607,43 @@ import '@voidable/theme';
 
       /* ── CTA ── */
       .cta {
-        padding: 8.75rem 2.5rem;
-        border-top: 1px solid rgba(255, 255, 255, 0.08);
+        padding: var(--void-space-35) var(--void-space-10);
+        border-top: 1px solid var(--void-color-border);
         text-align: center;
       }
 
       .cta h2 {
         font-size: clamp(2.5rem, 6vw, 4.5rem);
-        font-weight: 700;
-        letter-spacing: -0.04em;
-        line-height: 1;
+        font-weight: var(--void-weight-bold);
+        letter-spacing: var(--void-tracking-tighter);
+        line-height: var(--void-leading-none);
         color: var(--void-color-text);
-        margin-bottom: 1.75rem;
+        margin-bottom: var(--void-space-7);
       }
 
       .cta p {
-        font-size: 1rem;
+        font-size: var(--void-text-md);
         color: var(--void-color-text-secondary);
-        line-height: 1.5;
+        line-height: var(--void-leading-normal);
         max-width: 30rem;
-        margin: 0 auto 2.5rem;
+        margin: 0 auto var(--void-space-10);
       }
 
       .cta-actions {
         display: flex;
-        gap: 0.625rem;
+        gap: var(--void-space-2h);
         justify-content: center;
         flex-wrap: wrap;
+      }
+      .cta-actions a {
+        color: inherit;
+        text-decoration: none;
       }
 
       /* ── Footer ── */
       .footer {
-        padding: 4rem 2.5rem 2.5rem;
-        border-top: 1px solid rgba(255, 255, 255, 0.08);
+        padding: var(--void-space-16) var(--void-space-10) var(--void-space-10);
+        border-top: 1px solid var(--void-color-border);
       }
 
       .footer-inner {
@@ -632,26 +656,26 @@ import '@voidable/theme';
         align-items: center;
         justify-content: space-between;
         flex-wrap: wrap;
-        gap: 1rem;
-        margin-bottom: 2rem;
+        gap: var(--void-space-4);
+        margin-bottom: var(--void-space-8);
       }
 
       .footer-wordmark {
         font-family: var(--void-font-mono);
-        font-weight: 700;
-        font-size: 0.9375rem;
-        letter-spacing: -0.5px;
+        font-weight: var(--void-weight-bold);
+        font-size: var(--void-text-md);
+        letter-spacing: var(--void-tracking-tightest);
         color: var(--void-color-text);
       }
 
       .footer-links {
         display: flex;
-        gap: 1.75rem;
+        gap: var(--void-space-7);
         list-style: none;
       }
 
       .footer-links a {
-        font-size: 0.8125rem;
+        font-size: var(--void-text-sm);
         color: var(--void-color-text-secondary);
         transition: color 150ms;
       }
@@ -661,12 +685,12 @@ import '@voidable/theme';
       }
 
       .footer-bottom {
-        padding-top: 1.5rem;
-        border-top: 1px solid rgba(255, 255, 255, 0.08);
+        padding-top: var(--void-space-6);
+        border-top: 1px solid var(--void-color-border);
         display: flex;
         justify-content: space-between;
-        font-size: 0.6875rem;
-        color: rgba(255, 255, 255, 0.4);
+        font-size: var(--void-text-xs);
+        color: var(--void-color-text-muted);
         font-family: var(--void-font-mono);
       }
     </style>
@@ -680,15 +704,21 @@ import '@voidable/theme';
           <span class="nav-wordmark">voidable</span>
           <ul class="nav-links">
             <li><a href="/getting-started/introduction/">Docs</a></li>
-            <li><a href="/components/button/">Components</a></li>
+            <li><a href="/storybook/">Components</a></li>
             <li><a href="/frameworks/react/">Frameworks</a></li>
-            <li><a href="/storybook/">Showcase</a></li>
+            <li><a href="/showcase/dashboard">Showcase</a></li>
           </ul>
           <div class="nav-right">
-            <a href="https://github.com/VoidableUI/Voidable" target="_blank" class="nav-github">
-              <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
-              GitHub
-            </a>
+            <void-button id="theme-toggle" variant="outline" size="md" aria-label="Toggle theme">
+              <span class="theme-icon theme-icon-sun" set:html={iconSun} />
+              <span class="theme-icon theme-icon-moon" set:html={iconMoon} />
+            </void-button>
+            <void-button variant="outline" size="md">
+              <a href="https://github.com/VoidableUI/Voidable" target="_blank" class="nav-github">
+                <span class="nav-github-icon" set:html={iconBrandGithub} />
+                GitHub
+              </a>
+            </void-button>
           </div>
         </div>
       </div>
@@ -700,21 +730,22 @@ import '@voidable/theme';
       <div class="hero-glow" aria-hidden="true"></div>
       <div class="hero-content">
         <div class="hero-badge">
-          <span class="hero-badge-version">v0.1.0</span>
+          <span class="hero-badge-version">{version}</span>
           Now with Alpine/Laravel + Qwik adapters
         </div>
         <h1>Devoid<br/>of style.</h1>
         <p class="hero-sub">
           45+ Lit 3 web components with zero visual CSS.<br/>
-          Theming flows through tokens — your shell owns the design.
+          Theming flows through tokens. You own the style.<br/>
+          Use a modern theme with clean defaults or roll your own.
         </p>
         <div class="install-pill" id="install-pill">
           <span class="install-pill-dollar">$</span>
           npm i @voidable/ui @voidable/theme
         </div>
         <div class="hero-actions">
-          <a href="/getting-started/installation/" class="btn-filled">Get started</a>
-          <a href="/getting-started/introduction/" class="btn-outline">Documentation</a>
+          <void-button variant="filled" size="lg"><a href="/getting-started/installation/">Get started</a></void-button>
+          <void-button variant="outline" size="lg" class="hero-outline-btn"><a href="/getting-started/introduction/">Documentation</a></void-button>
         </div>
       </div>
     </section>
@@ -743,7 +774,7 @@ import '@voidable/theme';
       <div class="feature-header">
         <div class="eyebrow">Foundation</div>
         <h2 class="feature-heading">Built on a single<br/>architectural decision.</h2>
-        <p class="feature-sub">Shadow DOM solves encapsulation. Voidable solves the opposite problem — components that are deliberately transparent to their environment.</p>
+        <p class="feature-sub">Shadow DOM solves encapsulation. Voidable solves the opposite problem: components that are deliberately transparent to their environment.</p>
       </div>
       <div class="feature-grid">
         <div class="feature-card">
@@ -760,7 +791,7 @@ import '@voidable/theme';
         </div>
         <div class="feature-card">
           <div class="feature-card-title">Embedded-grade bundles</div>
-          <p class="feature-card-desc">Pairs with Solid + UnoCSS for IoT-class budgets. Tree-shakes to component-level granularity.</p>
+          <p class="feature-card-desc">Pairs with Solid + UnoCSS for bundle sizes that are IoT friendly. Tree-shakes to component-level granularity.</p>
         </div>
         <div class="feature-card">
           <div class="feature-card-title">Agent-friendly markup</div>
@@ -780,7 +811,7 @@ import '@voidable/theme';
           <div class="eyebrow">Theming</div>
           <h2 class="token-heading">Tokens as<br/>the only API surface.</h2>
           <p class="token-description">
-            Three layers. Primitives are raw — color scales, spacing, type, radii. Semantic tokens map to roles — <code>--void-color-bg</code>, <code>--void-color-text-secondary</code>, <code>--void-color-border-strong</code>. Component CSS references only tokens. Override any layer; the whole library follows.
+            Three layers. Primitives are raw: color scales, spacing, type, radii. Semantic tokens map to roles: <code>--void-color-bg</code>, <code>--void-color-text-secondary</code>, <code>--void-color-border-strong</code>. Component CSS references only tokens. Override any layer; the whole library follows.
           </p>
           <div class="token-rows">
             <div class="token-row">
@@ -821,22 +852,7 @@ import '@voidable/theme';
           </div>
         </div>
         <div>
-          <pre class="token-code-block" set:html={`/* Override one variable.
-   Watch the entire library remap. */
-
-:root {
-  --void-color-accent: #3b82f6;
-  --void-color-accent-hover: #2563eb;
-  --void-radius-md: 8px;
-
-  --void-color-bg: #0a0e1a;
-  --void-color-text: #e5e7eb;
-}
-
-[data-shape="sharp"] {
-  --void-radius-md: 0;
-  --void-radius-lg: 0;
-}`} />
+          <div class="token-code-block" set:html={highlightedCss} />
         </div>
       </div>
     </section>
@@ -850,10 +866,20 @@ import '@voidable/theme';
           <div>
             <div class="component-row-label">Buttons</div>
             <div class="component-row">
-              <void-button variant="filled">Filled</void-button>
-              <void-button variant="outline">Outline</void-button>
+              <void-button variant="filled">Default</void-button>
               <void-button variant="filled" color="success">Success</void-button>
               <void-button variant="filled" color="error">Error</void-button>
+              <void-button variant="filled" color="warning">Warning</void-button>
+              <void-button variant="filled" color="info">Info</void-button>
+              <void-button variant="filled" color="notice">Notice</void-button>
+            </div>
+            <div class="component-row">
+              <void-button variant="outline">Default</void-button>
+              <void-button variant="outline" color="success">Success</void-button>
+              <void-button variant="outline" color="error">Error</void-button>
+              <void-button variant="outline" color="warning">Warning</void-button>
+              <void-button variant="outline" color="info">Info</void-button>
+              <void-button variant="outline" color="notice">Notice</void-button>
             </div>
           </div>
 
@@ -865,12 +891,23 @@ import '@voidable/theme';
               <void-badge color="warning">Warning</void-badge>
               <void-badge color="error">Error</void-badge>
               <void-badge color="info">Info</void-badge>
+              <void-badge color="notice">Notice</void-badge>
+              <void-badge color="highlight">Highlight</void-badge>
+            </div>
+            <div class="component-row">
+              <void-badge variant="outline" color="default">Default</void-badge>
+              <void-badge variant="outline" color="success">Success</void-badge>
+              <void-badge variant="outline" color="warning">Warning</void-badge>
+              <void-badge variant="outline" color="error">Error</void-badge>
+              <void-badge variant="outline" color="info">Info</void-badge>
+              <void-badge variant="outline" color="notice">Notice</void-badge>
+              <void-badge variant="outline" color="highlight">Highlight</void-badge>
             </div>
           </div>
 
           <div>
             <div class="component-row-label">Form</div>
-            <div class="component-row" style="align-items: flex-end; gap: 1.5rem; flex-wrap: wrap;">
+            <div class="component-row" style="align-items: flex-end; gap: var(--void-space-6); flex-wrap: wrap;">
               <void-field label="Email address">
                 <void-input type="email" placeholder="you@example.com"></void-input>
               </void-field>
@@ -906,11 +943,11 @@ import '@voidable/theme';
 
     <!-- CTA -->
     <section class="cta">
-      <h2>Ship structure.<br/>Inherit style.</h2>
+      <h2>Ship structure.<br/>Create style.</h2>
       <p>Read the docs, copy the install line, render a button. Ten minutes.</p>
       <div class="cta-actions">
-        <a href="/getting-started/introduction/" class="btn-filled">Read the docs</a>
-        <a href="https://github.com/VoidableUI/Voidable" target="_blank" class="btn-outline">Star on GitHub</a>
+        <void-button variant="filled" size="lg"><a href="/getting-started/introduction/">Read the docs</a></void-button>
+        <void-button variant="outline" size="lg" class="hero-outline-btn"><a href="https://github.com/VoidableUI/Voidable" target="_blank">Star on GitHub</a></void-button>
       </div>
     </section>
 
@@ -927,13 +964,21 @@ import '@voidable/theme';
         </div>
         <div class="footer-bottom">
           <span>&copy; voidable.dev &middot; MIT</span>
-          <span>v0.1.0</span>
+          <span>{version}</span>
         </div>
       </div>
     </footer>
 
     <script>
       import '@voidable/ui';
+
+      const themeToggle = document.getElementById('theme-toggle')!;
+      const html = document.documentElement;
+
+      themeToggle.addEventListener('click', () => {
+        const current = html.getAttribute('data-theme');
+        html.setAttribute('data-theme', current === 'dark' ? 'light' : 'dark');
+      });
     </script>
   </body>
 </html>
