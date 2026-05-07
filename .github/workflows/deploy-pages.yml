@@ -2,8 +2,10 @@
 name: Deploy to GitHub Pages
 
 on:
-  push:
-    branches: [master]
+  workflow_run:
+    workflows: ["Release UI Package"]
+    types: [completed]
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -16,6 +18,7 @@ concurrency:
 
 jobs:
   build:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -35,7 +38,7 @@ jobs:
       - name: Get latest UI version
         id: get_version
         run: |
-          TAG=$(git tag --list 'ui-v*' --sort=-v:refname | head -n1)
+          TAG=$(git tag --list 'ui-v[0-9]*' --sort=-v:refname | head -n1)
           if [ -n "$TAG" ]; then
             VERSION=$(echo "$TAG" | sed 's|^ui-v||')
             echo "version=v${VERSION}" >> "$GITHUB_OUTPUT"
