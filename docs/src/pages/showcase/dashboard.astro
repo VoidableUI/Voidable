@@ -1056,7 +1056,7 @@ import iconMoon from '@tabler/icons/outline/moon.svg?raw';
     </script>
 
     <!-- Override theme popover positioning (must come after Vite-injected theme CSS) -->
-    <style>
+    <style is:global>
       .toolbar-row void-popover[position="bottom"] .void-popover-body {
         left: auto !important;
         right: 0;
