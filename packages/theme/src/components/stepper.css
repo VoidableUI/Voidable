@@ -8,9 +8,10 @@ void-stepper {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--void-space-1);
-  flex: 1;
+  gap: var(--void-space-2);
+  flex: 0 0 auto;
   position: relative;
+  padding-bottom: calc(var(--void-text-xs) + var(--void-space-2));
 }
 
 .void-stepper-circle {
@@ -45,9 +46,14 @@ void-stepper {
 }
 
 .void-stepper-label {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
   font-size: var(--void-text-xs);
   color: var(--void-color-text-muted);
   text-align: center;
+  white-space: nowrap;
 }
 
 .void-stepper-step[data-state="active"] .void-stepper-label {
@@ -58,9 +64,9 @@ void-stepper {
 .void-stepper-connector {
   height: 2px;
   background-color: var(--void-color-border);
-  flex: 1;
+  flex: 1 1 0%;
   align-self: flex-start;
-  margin-top: 1rem;
+  margin-top: calc(1rem - 1px);
 }
 
 .void-stepper-connector[data-state="completed"] {
