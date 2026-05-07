@@ -59,7 +59,7 @@ render() {
 ```ts
 render() {
   if (!this.dismissible) return nothing;
-  return html`<button class="close" @click="${this._close}">&times;</button>`;
+  return html`<button class="void-alert-close" @click="${this._dismiss}">&times;</button>`;
 }
 ```
 
@@ -128,14 +128,14 @@ Use `@property` with `reflect: true` for attributes that CSS selects on. Reflect
 
 ```ts
 @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' | 'xl' | 'xxl' = 'md';
-@property({ type: String, reflect: true }) tone: 'default' | 'error' | 'warning' | 'success' | 'info' | 'notice' = 'default';
+@property({ type: String, reflect: true }) color: 'default' | 'error' | 'warning' | 'success' | 'info' | 'notice' = 'default';
 @property({ type: Boolean, reflect: true }) dismissible = false;
 ```
 
 Standard scales across all components:
 
 - **Size** — `'sm' | 'md' | 'lg' | 'xl' | 'xxl'`
-- **Tone** — `'default' | 'error' | 'warning' | 'success' | 'info' | 'notice'`
+- **Color** — `'default' | 'error' | 'warning' | 'success' | 'info' | 'notice' | 'highlight'`
 
 Use these exact values. Do not invent alternative names for the same concept.
 
@@ -143,7 +143,7 @@ Use these exact values. Do not invent alternative names for the same concept.
 
 Components contain zero styling. All CSS lives in `@voidable/theme`. A component author writes no CSS.
 
-The theme uses a tone system built on CSS custom properties. Component CSS in the theme references `--tone` for the primary color, with derived values computed via `color-mix()`:
+The theme uses a tone system built on CSS custom properties. Note the distinction: the component *property* is `color` (e.g. `color="error"`), but the CSS *custom property* is `--tone`. Component CSS in the theme references `--tone` for the primary color, with derived values computed via `color-mix()`:
 
 - `--tone` — primary tone color
 - `--tone-subtle` — tone at 14% opacity (backgrounds)

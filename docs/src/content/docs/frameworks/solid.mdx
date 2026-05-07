@@ -10,6 +10,19 @@ SolidJS handles custom elements natively in JSX. The `@voidable/ui-solid` packag
 npm install @voidable/ui @voidable/theme @voidable/ui-solid
 ```
 
+## Vite config
+
+Add the SolidJS plugin to your Vite config:
+
+```js
+// vite.config.js
+import solid from 'vite-plugin-solid';
+
+export default {
+  plugins: [solid()],
+};
+```
+
 ## Usage
 
 Use `<void-*>` elements directly in Solid JSX:
@@ -34,10 +47,12 @@ function App() {
 }
 ```
 
-Listen to custom events with `on:` syntax:
+Listen to custom events with `on:` syntax. Cast the event to `CustomEvent` so TypeScript knows the shape of `detail`:
 
 ```tsx
-<void-input on:void-change={(e) => setValue(e.detail.value)} />
+<void-input
+  on:void-change={(e: CustomEvent<{ value: string }>) => setValue(e.detail.value)}
+/>
 ```
 
 ## Theme signal

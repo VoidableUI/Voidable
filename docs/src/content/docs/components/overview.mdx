@@ -4,7 +4,7 @@ title: Component Overview
 
 import { LinkCard } from '@astrojs/starlight/components';
 
-Voidable UI ships 45+ components organized by category. All components render in the Light DOM and are styled entirely through `@voidable/theme` CSS tokens.
+Voidable UI ships 56 components organized by category. All components render in the Light DOM and are styled entirely through `@voidable/theme` CSS tokens.
 
 <LinkCard title="Interactive Storybook" href="/storybook/" description="Browse all components with live examples and controls." />
 
@@ -17,6 +17,7 @@ Voidable UI ships 45+ components organized by category. All components render in
 | Divider | `<void-divider>` | Horizontal or vertical separator with optional label |
 | ScrollArea | `<void-scroll-area>` | Scrollable container with styled scrollbars |
 | NavBar | `<void-nav-bar>` | Top navigation bar |
+| Sidebar | `<void-sidebar>` | Collapsible side navigation panel with configurable width and position |
 
 ## Data Display
 
@@ -35,6 +36,8 @@ Voidable UI ships 45+ components organized by category. All components render in
 | Accordion | `<void-accordion>` | Collapsible content sections |
 | Stepper | `<void-stepper>` | Multi-step progress indicator |
 | Pagination | `<void-pagination>` | Page navigation controls |
+| Indicator | `<void-indicator>` | Badge overlay with count, ping animation, and color variants |
+| Stat | `<void-stat>` | Metric display with label, value, delta, and trend |
 
 ## Forms
 
@@ -54,6 +57,8 @@ Voidable UI ships 45+ components organized by category. All components render in
 | Field | `<void-field>` | Form field wrapper with label, error, and helper text |
 | FileUpload | `<void-file-upload>` | File upload with drag-and-drop |
 | ComposeInput | `<void-compose-input>` | Rich text compose area |
+| Toggle | `<void-toggle>` | Pressable toggle button with color, size, and variant options |
+| SegmentedControl | `<void-segmented-control>` | Single-select button group with `<void-segmented-control-item>` children |
 
 ## Feedback
 
@@ -74,3 +79,4 @@ Voidable UI ships 45+ components organized by category. All components render in
 | Component | Tag | Description |
 |-----------|-----|-------------|
 | Hamburger | `<void-hamburger>` | Animated hamburger menu toggle |
+| DropdownMenu | `<void-dropdown-menu>` | Trigger-anchored menu with keyboard navigation and `<void-dropdown-menu-item>` children |

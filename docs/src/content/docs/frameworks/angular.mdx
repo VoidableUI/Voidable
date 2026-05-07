@@ -2,7 +2,7 @@
 title: Angular
 ---
 
-The Angular adapter provides `VoidableModule` to register the `CUSTOM_ELEMENTS_SCHEMA` and a `ThemeService` with Angular signals.
+The Angular adapter provides `VoidableModule` to register `CUSTOM_ELEMENTS_SCHEMA` and a `ThemeService` with Angular signals.
 
 ## Install
 
@@ -10,9 +10,32 @@ The Angular adapter provides `VoidableModule` to register the `CUSTOM_ELEMENTS_S
 npm install @voidable/ui @voidable/theme @voidable/ui-angular
 ```
 
-## Module setup
+## Standalone setup
 
-Import `VoidableModule` in your app module to allow `<void-*>` elements in templates:
+Angular 18+ defaults to standalone components. Add `CUSTOM_ELEMENTS_SCHEMA` directly to each component that uses `<void-*>` elements:
+
+```ts
+import { CUSTOM_ELEMENTS_SCHEMA, Component } from '@angular/core';
+
+@Component({
+  selector: 'app-root',
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
+  standalone: true,
+  template: `
+    <void-button variant="filled" (void-click)="onSave()">Save</void-button>
+    <void-input [value]="name" (void-change)="name = $event.detail.value"></void-input>
+    <void-alert color="info">Angular works with custom elements natively.</void-alert>
+  `,
+})
+export class AppComponent {
+  name = '';
+  onSave() {}
+}
+```
+
+## Module-based setup
+
+For NgModule-based apps, import `VoidableModule` once in your app module:
 
 ```ts
 import { VoidableModule } from '@voidable/ui-angular';
@@ -23,25 +46,11 @@ import { VoidableModule } from '@voidable/ui-angular';
 export class AppModule {}
 ```
 
-This registers `CUSTOM_ELEMENTS_SCHEMA` so Angular does not reject unknown `<void-*>` tags.
-
-## Usage
-
-Use `<void-*>` elements in Angular templates:
-
-```html
-<void-button variant="filled" (void-click)="onSave()">
-  Save
-</void-button>
-
-<void-input [value]="name" (void-change)="name = $event.detail.value"></void-input>
-
-<void-alert color="info">Angular works with custom elements natively.</void-alert>
-```
+`VoidableModule` registers `CUSTOM_ELEMENTS_SCHEMA` so Angular does not reject unknown `<void-*>` tags. All components in the module can then use `<void-*>` elements in their templates.
 
 ## ThemeService
 
-Inject `ThemeService` to read the current theme as an Angular signal:
+`ThemeService` is provided in root via `providedIn: 'root'` — no module import needed. Inject it anywhere in your app:
 
 ```ts
 import { Component } from '@angular/core';
@@ -56,4 +65,4 @@ export class AppComponent {
 }
 ```
 
-`ThemeService` is provided in root, uses a `MutationObserver` to track the `data-theme` attribute, and exposes a `signal<'dark' | 'light'>`.
+`ThemeService` uses a `MutationObserver` to track the `data-theme` attribute on `<html>` and exposes a `signal<'dark' | 'light'>`.

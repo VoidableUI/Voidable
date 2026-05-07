@@ -6,34 +6,62 @@ The Hotwire adapter provides a Stimulus controller for bridging custom events an
 
 ## Install
 
+### Gem (Rails with importmaps)
+
+```bash
+bundle add voidable-hotwire
+```
+
+The engine auto-registers importmap pins for `@voidable/ui` and `@voidable/ui-hotwire`, and includes the `void_attrs` view helper into ActionView.
+
+Then import and register in `application.js`:
+
+```js
+import { VoidEventController } from '@voidable/ui-hotwire';
+import { VoidTurbo } from '@voidable/ui-hotwire';
+
+const app = Application.start();
+app.register('void-event', VoidEventController);
+VoidTurbo.start();
+```
+
+### npm (Vite, esbuild, custom bundlers)
+
 ```bash
 npm install @voidable/ui @voidable/theme @voidable/ui-hotwire
 ```
 
-## Register the Stimulus controller
-
-Register `VoidEventController` with your Stimulus application:
+Register `VoidEventController` with your Stimulus application and start Turbo morph protection:
 
 ```js
 import { Application } from '@hotwired/stimulus';
 import { VoidEventController } from '@voidable/ui-hotwire';
+import { VoidTurbo } from '@voidable/ui-hotwire';
 
 const app = Application.start();
 app.register('void-event', VoidEventController);
-```
-
-## Start Turbo morph protection
-
-`VoidTurbo.start()` prevents Turbo from clobbering client-managed attributes (`open`, `checked`, `aria-expanded`, etc.) on `<void-*>` elements during page morphs:
-
-```js
-import { VoidTurbo } from '@voidable/ui-hotwire';
 VoidTurbo.start();
 ```
 
+## Turbo morph protection
+
+`VoidTurbo.start()` prevents Turbo from clobbering client-managed attributes (`open`, `checked`, `aria-expanded`, etc.) on `<void-*>` elements during page morphs.
+
 ## Usage in ERB templates
 
-Use `data-controller` and `data-action` to wire up events:
+With the `void_attrs` helper (gem only):
+
+`void_attrs` returns a Ruby hash (`{ data: { controller: "void-event", ... } }`) that you splat into a Rails tag helper:
+
+```erb
+<%= tag.void_button "Save", variant: "filled",
+      **void_attrs("void-click", "form#submit") %>
+
+<%= tag.void_input placeholder: "Email",
+      **void_attrs("void-change", "search#filter") %>
+```
+
+With manual data attributes:
 
 ```erb
 <void-button

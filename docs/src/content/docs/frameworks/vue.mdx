@@ -63,7 +63,7 @@ Track the active theme reactively:
 <script setup>
 import { useTheme } from '@voidable/ui-vue';
 
-const theme = useTheme(); // readonly ref: 'dark' | 'light'
+const theme = useTheme(); // Readonly<Ref<'dark' | 'light'>>
 </script>
 
 <template>

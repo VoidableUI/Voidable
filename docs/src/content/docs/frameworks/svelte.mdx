@@ -12,23 +12,30 @@ npm install @voidable/ui @voidable/theme @voidable/ui-svelte
 
 ## Usage
 
-Use `<void-*>` elements directly in Svelte templates:
+Use `<void-*>` elements directly in Svelte templates. Because Svelte 5's `onevent` syntax doesn't support hyphens in event names, bind a reference and wire up listeners in a `$effect`:
 
 ```svelte
 <script>
   import '@voidable/ui';
 
-  let name = '';
+  let name = $state('');
+  let input;
+  let button;
 
-  function handleChange(e) {
-    name = e.detail.value;
-  }
+  $effect(() => {
+    const onchange = (e) => { name = e.detail.value; };
+    const onclick = () => console.log(name);
+    input.addEventListener('void-change', onchange);
+    button.addEventListener('void-click', onclick);
+    return () => {
+      input.removeEventListener('void-change', onchange);
+      button.removeEventListener('void-click', onclick);
+    };
+  });
 </script>
 
-<void-input placeholder="Your name" on:void-change={handleChange} />
-<void-button variant="filled" on:void-click={() => console.log(name)}>
-  Submit
-</void-button>
+<void-input bind:this={input} placeholder="Your name" />
+<void-button bind:this={button} variant="filled">Submit</void-button>
 ```
 
 ## Theme store
