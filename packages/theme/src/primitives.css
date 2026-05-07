@@ -108,17 +108,28 @@
 
   /* ── Spacing (rem) ── */
   --void-space-1:  0.25rem;
+  --void-space-1h: 0.375rem;
   --void-space-2:  0.5rem;
+  --void-space-2h: 0.625rem;
   --void-space-3:  0.75rem;
   --void-space-4:  1rem;
   --void-space-5:  1.25rem;
   --void-space-6:  1.5rem;
+  --void-space-7:  1.75rem;
   --void-space-8:  2rem;
+  --void-space-9:  2.25rem;
   --void-space-10: 2.5rem;
   --void-space-12: 3rem;
+  --void-space-14: 3.5rem;
+  --void-space-15: 3.75rem;
   --void-space-16: 4rem;
   --void-space-20: 5rem;
   --void-space-24: 6rem;
+  --void-space-28: 7rem;
+  --void-space-30: 7.5rem;
+  --void-space-32: 8rem;
+  --void-space-35: 8.75rem;
+  --void-space-40: 10rem;
 
   --void-space-xs: var(--void-space-1);
   --void-space-sm: var(--void-space-2);
@@ -146,9 +157,23 @@
   --void-weight-bold:     700;
 
   /* ── Typography — line heights ── */
+  --void-leading-display: 0.92;
+  --void-leading-none:    1;
+  --void-leading-snug:    1.05;
   --void-leading-tight:   1.2;
   --void-leading-normal:  1.5;
   --void-leading-relaxed: 1.7;
+  --void-leading-loose:   1.75;
+
+  /* ── Typography — letter spacing (tracking) ── */
+  --void-tracking-tightest: -0.05em;
+  --void-tracking-tighter:  -0.04em;
+  --void-tracking-tight:    -0.025em;
+  --void-tracking-snug:     -0.01em;
+  --void-tracking-normal:   0em;
+  --void-tracking-wide:     0.04em;
+  --void-tracking-wider:    0.06em;
+  --void-tracking-widest:   0.1em;
 
   /* ── Font stacks ── */
   --void-font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
