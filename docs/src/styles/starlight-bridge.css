@@ -1,0 +1,138 @@
+/* ============================================================================
+ * Starlight Bridge — maps --sl-* variables to --void-* tokens
+ *
+ * Starlight defines its variables inside @layer starlight.base, so unlayered
+ * declarations here win automatically without specificity hacks.
+ * ============================================================================ */
+
+/* ---------------------------------------------------------------------------
+ * Typography
+ * ------------------------------------------------------------------------ */
+
+:root {
+  --sl-font: var(--void-font-sans);
+  --sl-font-mono: var(--void-font-mono);
+}
+
+/* ---------------------------------------------------------------------------
+ * Colors — Dark mode (default)
+ * ------------------------------------------------------------------------ */
+
+:root {
+  /* Grayscale ramp */
+  --sl-color-white: var(--void-color-text);
+  --sl-color-gray-1: var(--void-stone-200);
+  --sl-color-gray-2: var(--void-stone-400);
+  --sl-color-gray-3: var(--void-stone-500);
+  --sl-color-gray-4: var(--void-stone-600);
+  --sl-color-gray-5: var(--void-stone-800);
+  --sl-color-gray-6: var(--void-dark-3);
+  --sl-color-black: var(--void-black);
+
+  /* Accent */
+  --sl-color-accent-low: var(--void-stone-900);
+  --sl-color-accent: var(--void-color-accent);
+  --sl-color-accent-high: var(--void-stone-200);
+
+  /* Surfaces */
+  --sl-color-bg: var(--void-color-bg);
+  --sl-color-bg-nav: var(--void-color-bg-secondary);
+  --sl-color-bg-sidebar: var(--void-color-bg-secondary);
+
+  /* Borders */
+  --sl-color-hairline-light: var(--void-color-border);
+  --sl-color-hairline: var(--void-color-border);
+  --sl-color-hairline-shade: var(--void-black);
+
+  /* Shadows */
+  --sl-shadow-sm: var(--void-shadow-sm);
+  --sl-shadow-md: var(--void-shadow-md);
+  --sl-shadow-lg: var(--void-shadow-lg);
+}
+
+/* ---------------------------------------------------------------------------
+ * Colors — Light mode
+ * ------------------------------------------------------------------------ */
+
+:root[data-theme='light'] {
+  /* Grayscale ramp (inverted) */
+  --sl-color-white: var(--void-stone-900);
+  --sl-color-gray-1: var(--void-stone-800);
+  --sl-color-gray-2: var(--void-stone-700);
+  --sl-color-gray-3: var(--void-stone-500);
+  --sl-color-gray-4: var(--void-stone-400);
+  --sl-color-gray-5: var(--void-stone-200);
+  --sl-color-gray-6: var(--void-stone-100);
+  --sl-color-gray-7: var(--void-stone-50);
+  --sl-color-black: var(--void-white);
+
+  /* Accent */
+  --sl-color-accent-high: var(--void-stone-900);
+  --sl-color-accent: var(--void-color-accent);
+  --sl-color-accent-low: var(--void-stone-100);
+
+  /* Surfaces */
+  --sl-color-bg-nav: var(--void-stone-50);
+  --sl-color-bg-sidebar: var(--void-color-bg);
+  --sl-color-bg-inline-code: var(--void-stone-100);
+
+  /* Borders */
+  --sl-color-hairline-light: var(--void-color-border);
+  --sl-color-hairline-shade: var(--void-color-border);
+}
+
+/* ---------------------------------------------------------------------------
+ * Status colors — Asides / Callouts
+ *
+ * Starlight computes aside colors from hue variables. We override the
+ * computed --sl-color-* properties directly for each status type.
+ * ------------------------------------------------------------------------ */
+
+:root {
+  /* Note (blue) */
+  --sl-color-blue-low: color-mix(in srgb, var(--void-color-info) 15%, transparent);
+  --sl-color-blue: var(--void-color-info);
+  --sl-color-blue-high: color-mix(in srgb, var(--void-color-info) 90%, white);
+
+  /* Tip (green) */
+  --sl-color-green-low: color-mix(in srgb, var(--void-color-success) 15%, transparent);
+  --sl-color-green: var(--void-color-success);
+  --sl-color-green-high: color-mix(in srgb, var(--void-color-success) 90%, white);
+
+  /* Caution (orange) */
+  --sl-color-orange-low: color-mix(in srgb, var(--void-color-warning) 15%, transparent);
+  --sl-color-orange: var(--void-color-warning);
+  --sl-color-orange-high: color-mix(in srgb, var(--void-color-warning) 90%, white);
+
+  /* Danger (red) */
+  --sl-color-red-low: color-mix(in srgb, var(--void-color-error) 15%, transparent);
+  --sl-color-red: var(--void-color-error);
+  --sl-color-red-high: color-mix(in srgb, var(--void-color-error) 90%, white);
+
+  /* Purple (notice) */
+  --sl-color-purple-low: color-mix(in srgb, var(--void-color-notice) 15%, transparent);
+  --sl-color-purple: var(--void-color-notice);
+  --sl-color-purple-high: color-mix(in srgb, var(--void-color-notice) 90%, white);
+}
+
+:root[data-theme='light'] {
+  /* Note (blue) */
+  --sl-color-blue-low: color-mix(in srgb, var(--void-color-info) 10%, transparent);
+  --sl-color-blue-high: color-mix(in srgb, var(--void-color-info) 90%, black);
+
+  /* Tip (green) */
+  --sl-color-green-low: color-mix(in srgb, var(--void-color-success) 10%, transparent);
+  --sl-color-green-high: color-mix(in srgb, var(--void-color-success) 90%, black);
+
+  /* Caution (orange) */
+  --sl-color-orange-low: color-mix(in srgb, var(--void-color-warning) 10%, transparent);
+  --sl-color-orange-high: color-mix(in srgb, var(--void-color-warning) 90%, black);
+
+  /* Danger (red) */
+  --sl-color-red-low: color-mix(in srgb, var(--void-color-error) 10%, transparent);
+  --sl-color-red-high: color-mix(in srgb, var(--void-color-error) 90%, black);
+
+  /* Purple (notice) */
+  --sl-color-purple-low: color-mix(in srgb, var(--void-color-notice) 10%, transparent);
+  --sl-color-purple-high: color-mix(in srgb, var(--void-color-notice) 90%, black);
+}

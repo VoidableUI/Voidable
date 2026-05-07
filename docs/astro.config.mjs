@@ -7,18 +7,22 @@ export default defineConfig({
     resolve: {
       alias: {
         '@voidable/ui': new URL('../packages/ui/src/index.ts', import.meta.url).pathname,
+        '@voidable/theme': new URL('../packages/theme/src/index.css', import.meta.url).pathname,
       },
     },
   },
   integrations: [
     starlight({
-      title: 'Void UI',
+      title: 'Voidable',
       head: [
         { tag: 'link', attrs: { rel: 'preconnect', href: 'https://fonts.googleapis.com' } },
         { tag: 'link', attrs: { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: true } },
         { tag: 'link', attrs: { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap' } },
       ],
-      customCss: ['./src/styles/fonts.css'],
+      customCss: ['./src/styles/voidable-docs.css', './src/styles/fonts.css', './src/styles/starlight-bridge.css'],
+      components: {
+        Head: './src/components/Head.astro',
+      },
       social: [
         {
           icon: 'github',
