@@ -33,11 +33,11 @@ export class VoidStepper extends VoidElement {
             >${state === 'completed'
               ? html`<svg
                   viewBox="0 0 12 12"
-                  width="12"
-                  height="12"
+                  width="1em"
+                  height="1em"
                   fill="none"
                   stroke="currentColor"
-                  stroke-width="2"
+                  stroke-width="var(--void-icon-stroke-width)"
                   stroke-linecap="round"
                   stroke-linejoin="round"
                 >

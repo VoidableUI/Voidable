@@ -112,21 +112,21 @@ describe('VoidProgress', () => {
       el.value = 150;
       await el.updateComplete;
       const fill = el.querySelector('.void-progress-fill') as HTMLElement;
-      expect(fill.style.width).toBe('100%');
+      expect(fill.style.getPropertyValue('--void-progress-fill')).toBe('100%');
     });
 
     it('clamps fill width to 0% when value is negative', async () => {
       el.value = -10;
       await el.updateComplete;
       const fill = el.querySelector('.void-progress-fill') as HTMLElement;
-      expect(fill.style.width).toBe('0%');
+      expect(fill.style.getPropertyValue('--void-progress-fill')).toBe('0%');
     });
 
     it('sets fill width to 50% when value is half of max', async () => {
       el.value = 50;
       await el.updateComplete;
       const fill = el.querySelector('.void-progress-fill') as HTMLElement;
-      expect(fill.style.width).toBe('50%');
+      expect(fill.style.getPropertyValue('--void-progress-fill')).toBe('50%');
     });
   });
 });

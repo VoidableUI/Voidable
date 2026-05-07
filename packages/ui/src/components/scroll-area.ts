@@ -25,10 +25,7 @@ export class VoidScrollArea extends VoidElement {
         viewport.appendChild(node);
       }
     }
-    const viewport = this.querySelector('.void-scroll-area-viewport') as HTMLElement | null;
-    if (viewport) {
-      viewport.style.maxHeight = this.maxHeight || '';
-    }
+    this.style.setProperty('--void-scroll-area-max-height', this.maxHeight || '');
   }
 
   render() {

@@ -34,7 +34,7 @@ export class VoidProgress extends VoidElement {
 
   render() {
     const clampedPercent = Math.min(100, Math.max(0, (this.value / this.max) * 100));
-    return html`<div class="void-progress-track"><div class="void-progress-fill" style="width: ${this.indeterminate ? '' : clampedPercent + '%'}"></div></div>`;
+    return html`<div class="void-progress-track"><div class="void-progress-fill" style="--void-progress-fill: ${this.indeterminate ? '0%' : clampedPercent + '%'}"></div></div>`;
   }
 }
 

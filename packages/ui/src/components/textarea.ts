@@ -30,7 +30,7 @@ export class VoidTextarea extends VoidElement {
         ?required=${this.required}
         name=${this.name}
         rows=${this.rows}
-        style="resize: ${this.resize}"
+        style="--void-textarea-resize: ${this.resize}"
         aria-invalid=${this.error ? 'true' : 'false'}
         @input=${this._onInput}
         @change=${this._onChange}

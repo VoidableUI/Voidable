@@ -87,7 +87,7 @@ export class VoidMultiselect extends VoidElement {
               @keydown=${(e: KeyboardEvent) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); this._toggleOption(opt); } }}
             >
               <span class="void-multiselect-checkbox">
-                ${opt.selected ? html`<svg viewBox="0 0 12 12" fill="none"><path d="M2.5 6l2.5 2.5 4.5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>` : nothing}
+                ${opt.selected ? html`<svg viewBox="0 0 12 12" fill="none"><path d="M2.5 6l2.5 2.5 4.5-5" stroke="currentColor" stroke-width="var(--void-icon-stroke-width)" stroke-linecap="round" stroke-linejoin="round"/></svg>` : nothing}
               </span>
               <span class="void-multiselect-option-label">${opt.textContent?.trim() || opt.value}</span>
             </div>

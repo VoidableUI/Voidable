@@ -17,8 +17,6 @@ export class VoidTooltip extends VoidElement {
   connectedCallback(): void {
     this._userContent = Array.from(this.childNodes);
     super.connectedCallback();
-    this.style.display = 'inline-flex';
-    this.style.position = 'relative';
     this.addEventListener('mouseenter', this._onMouseEnter);
     this.addEventListener('mouseleave', this._onMouseLeave);
     this.addEventListener('focusin', this._onFocusIn);

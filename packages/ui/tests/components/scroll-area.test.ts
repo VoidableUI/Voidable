@@ -93,8 +93,7 @@ describe('VoidScrollArea', () => {
       el.maxHeight = '400px';
       document.body.appendChild(el);
       await el.updateComplete;
-      const viewport = el.querySelector('.void-scroll-area-viewport') as HTMLElement;
-      expect(viewport.style.maxHeight).toBe('400px');
+      expect(el.style.getPropertyValue('--void-scroll-area-max-height')).toBe('400px');
     });
 
     it('sets max-height with viewport unit', async () => {
@@ -102,8 +101,7 @@ describe('VoidScrollArea', () => {
       el.maxHeight = '50vh';
       document.body.appendChild(el);
       await el.updateComplete;
-      const viewport = el.querySelector('.void-scroll-area-viewport') as HTMLElement;
-      expect(viewport.style.maxHeight).toBe('50vh');
+      expect(el.style.getPropertyValue('--void-scroll-area-max-height')).toBe('50vh');
     });
 
     it('clears max-height when maxHeight is empty string', async () => {

@@ -31,7 +31,7 @@ export class VoidComposeInput extends VoidElement {
           aria-label="Send"
         >
           <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M2 8L14 8M14 8L9 3M14 8L9 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M2 8L14 8M14 8L9 3M14 8L9 13" stroke="currentColor" stroke-width="var(--void-icon-stroke-width)" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
         </button>
       </div>
@@ -42,7 +42,9 @@ export class VoidComposeInput extends VoidElement {
     const ta = e.target as HTMLTextAreaElement;
     this.value = ta.value;
     ta.style.height = 'auto';
-    ta.style.height = `${ta.scrollHeight}px`;
+    const scrollHeight = ta.scrollHeight;
+    ta.style.height = '';
+    this.style.setProperty('--void-compose-input-height', `${scrollHeight}px`);
     this.dispatchEvent(new CustomEvent('void-input', { bubbles: true, composed: true, detail: { value: this.value } }));
   }
 
@@ -58,7 +60,8 @@ export class VoidComposeInput extends VoidElement {
     const value = this.value;
     this.value = '';
     if (this._textarea) {
-      this._textarea.style.height = 'auto';
+      this._textarea.style.height = '';
+      this.style.removeProperty('--void-compose-input-height');
     }
     this.dispatchEvent(new CustomEvent('void-submit', { bubbles: true, composed: true, detail: { value } }));
   }
