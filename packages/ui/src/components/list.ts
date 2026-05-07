@@ -1,4 +1,3 @@
-import { nothing } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
 
@@ -10,9 +9,6 @@ export class VoidList extends VoidElement {
     this.setAttribute('role', 'list');
   }
 
-  render() {
-    return nothing;
-  }
 }
 
 if (!customElements.get('void-list')) {
@@ -49,9 +45,6 @@ export class VoidListItem extends VoidElement {
     }));
   };
 
-  render() {
-    return nothing;
-  }
 }
 
 if (!customElements.get('void-list-item')) {

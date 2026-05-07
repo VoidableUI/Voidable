@@ -1,0 +1,22 @@
+void-sidebar {
+  display: flex;
+  flex-direction: column;
+  width: var(--void-sidebar-width, 240px);
+  height: 100%;
+  background: var(--void-color-bg);
+  border-right: 1px solid var(--void-color-border);
+  overflow: hidden;
+  font-family: var(--void-font-sans);
+  color: var(--void-color-text);
+  transition: width var(--void-duration-normal) var(--void-ease-in-out);
+  flex-shrink: 0;
+}
+
+void-sidebar[position="right"] {
+  border-right: none;
+  border-left: 1px solid var(--void-color-border);
+}
+
+void-sidebar[collapsed] {
+  white-space: nowrap;
+}

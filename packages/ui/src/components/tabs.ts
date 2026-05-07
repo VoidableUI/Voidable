@@ -1,4 +1,4 @@
-import { html, nothing } from 'lit';
+import { html } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
 
@@ -19,9 +19,6 @@ export class VoidTabPanel extends VoidElement {
     if (_changed.has('tab') && this.tab) this.id = this.tab;
   }
 
-  render() {
-    return nothing;
-  }
 }
 
 if (!customElements.get('void-tab-panel')) {
@@ -69,7 +66,6 @@ export class VoidTabs extends VoidElement {
           >${panel.label || panel.tab}</button>
         `)}
       </div>
-      <slot></slot>
     `;
   }
 

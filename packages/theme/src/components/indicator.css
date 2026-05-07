@@ -1,0 +1,62 @@
+void-indicator {
+  --tone: var(--void-color-accent);
+  position: relative;
+  display: inline-flex;
+}
+
+.void-indicator-dot {
+  position: absolute;
+  display: inline-grid;
+  place-content: center;
+  min-width: 8px;
+  min-height: 8px;
+  border-radius: var(--void-radius-full);
+  background: var(--tone);
+  font-family: var(--void-font-sans);
+  font-size: var(--void-text-2xs);
+  font-weight: var(--void-weight-semibold);
+  color: var(--void-color-text-on-accent);
+  pointer-events: none;
+  line-height: 1;
+}
+
+.void-indicator-dot:not(:empty) {
+  min-width: 16px;
+  min-height: 16px;
+  padding: 0 4px;
+}
+
+void-indicator[position="top-right"] .void-indicator-dot { top: -4px; right: -4px; }
+void-indicator[position="top-left"] .void-indicator-dot { top: -4px; left: -4px; }
+void-indicator[position="bottom-right"] .void-indicator-dot { bottom: -4px; right: -4px; }
+void-indicator[position="bottom-left"] .void-indicator-dot { bottom: -4px; left: -4px; }
+
+void-indicator[color="error"]   { --tone: var(--void-color-error); }
+void-indicator[color="warning"] { --tone: var(--void-color-warning); }
+void-indicator[color="success"] { --tone: var(--void-color-success); }
+void-indicator[color="info"]    { --tone: var(--void-color-info); }
+void-indicator[color="notice"]  { --tone: var(--void-color-notice); }
+
+void-indicator[ping] .void-indicator-dot::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: var(--void-radius-full);
+  background: var(--tone);
+  animation: void-indicator-ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+@keyframes void-indicator-ping {
+  75%, 100% { transform: scale(2); opacity: 0; }
+}
+
+void-indicator[size="sm"] .void-indicator-dot { min-width: 6px; min-height: 6px; }
+void-indicator[size="sm"] .void-indicator-dot:not(:empty) { min-width: 14px; min-height: 14px; }
+void-indicator[size="lg"] .void-indicator-dot { min-width: 10px; min-height: 10px; }
+void-indicator[size="lg"] .void-indicator-dot:not(:empty) { min-width: 20px; min-height: 20px; font-size: var(--void-text-xs); }
+void-indicator[size="xl"] .void-indicator-dot { min-width: 12px; min-height: 12px; }
+void-indicator[size="xl"] .void-indicator-dot:not(:empty) { min-width: 24px; min-height: 24px; font-size: var(--void-text-sm); }
+void-indicator[size="xxl"] .void-indicator-dot { min-width: 14px; min-height: 14px; }
+void-indicator[size="xxl"] .void-indicator-dot:not(:empty) { min-width: 28px; min-height: 28px; font-size: var(--void-text-base); }
+
+void-indicator[color="success"] .void-indicator-dot { box-shadow: 0 0 6px var(--void-color-success); }

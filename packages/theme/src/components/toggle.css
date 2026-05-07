@@ -1,0 +1,84 @@
+void-toggle {
+  --tone: var(--void-color-accent);
+  --tone-subtle: color-mix(in srgb, var(--tone) 14%, transparent);
+  --tone-border: color-mix(in srgb, var(--tone) 36%, transparent);
+  --tone-hover: color-mix(in srgb, var(--tone) 22%, transparent);
+
+  display: inline-grid;
+  place-content: center;
+  padding: var(--void-space-2);
+  border: 1px solid var(--void-color-border);
+  border-radius: var(--void-radius-md);
+  background: transparent;
+  color: var(--void-color-text-secondary);
+  font-family: var(--void-font-sans);
+  font-size: var(--void-text-sm);
+  font-weight: var(--void-weight-medium);
+  cursor: pointer;
+  user-select: none;
+  transition: background var(--void-duration-fast) var(--void-ease-in-out),
+              border-color var(--void-duration-fast) var(--void-ease-in-out),
+              color var(--void-duration-fast) var(--void-ease-in-out);
+}
+
+void-toggle:hover {
+  background: var(--tone-hover);
+  border-color: var(--void-color-border-strong);
+}
+
+void-toggle:focus-visible {
+  outline: 2px solid var(--void-color-border-focus);
+  outline-offset: 2px;
+}
+
+void-toggle[pressed] {
+  background: var(--tone-subtle);
+  border-color: var(--tone-border);
+  color: var(--void-color-text);
+}
+
+void-toggle[pressed]:hover {
+  background: var(--tone-hover);
+}
+
+void-toggle[variant="filled"][pressed] {
+  background: var(--tone);
+  border-color: var(--tone);
+  color: var(--void-color-text-on-accent);
+}
+
+void-toggle[variant="filled"][pressed]:hover {
+  opacity: 0.9;
+}
+
+void-toggle[color="error"]   { --tone: var(--void-color-error); }
+void-toggle[color="warning"] { --tone: var(--void-color-warning); }
+void-toggle[color="success"] { --tone: var(--void-color-success); }
+void-toggle[color="info"]    { --tone: var(--void-color-info); }
+void-toggle[color="notice"]  { --tone: var(--void-color-notice); }
+
+void-toggle[size="sm"] {
+  padding: var(--void-space-1);
+  font-size: var(--void-text-xs);
+}
+
+void-toggle[size="lg"] {
+  padding: var(--void-space-3);
+  font-size: var(--void-text-base);
+}
+
+void-toggle[size="xl"] {
+  padding: var(--void-space-4);
+  font-size: var(--void-text-lg);
+}
+
+void-toggle[size="xxl"] {
+  padding: var(--void-space-5);
+  font-size: var(--void-text-xl);
+}
+
+void-toggle[disabled] {
+  opacity: 0.5;
+  pointer-events: none;
+  cursor: not-allowed;
+}

@@ -33,6 +33,7 @@ export default defineConfig({
             { label: 'Introduction', slug: 'getting-started/introduction' },
             { label: 'Installation', slug: 'getting-started/installation' },
             { label: 'Design Philosophy', slug: 'getting-started/design-philosophy' },
+            { label: 'Component Authoring', slug: 'getting-started/component-authoring' },
             { label: 'Theming', slug: 'getting-started/theming' },
           ],
         },

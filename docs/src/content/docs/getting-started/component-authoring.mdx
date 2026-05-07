@@ -1,0 +1,170 @@
+---
+title: Component Authoring
+---
+
+This guide covers the conventions for authoring new Voidable components correctly. Deviating from these patterns — particularly around Light DOM rendering — produces bugs that are easy to introduce and hard to trace.
+
+## Base Class
+
+All components extend `VoidElement` from `@voidable/ui`:
+
+```ts
+import { VoidElement } from '@voidable/ui';
+
+export class VoidMyComponent extends VoidElement {
+  // ...
+}
+```
+
+`VoidElement` extends `LitElement` with one override:
+
+```ts
+createRenderRoot() { return this; }
+```
+
+This opts out of Shadow DOM. The component element itself is the render root. All Lit rendering writes directly into the host element's Light DOM children.
+
+## The render() Gotcha
+
+This is the most common source of bugs in Voidable components.
+
+In Light DOM mode, `render()` writes directly into the host element — not into a shadow root. Lit's rendering pipeline manages the host element's children. Returning `nothing` from `render()` does not mean "render nothing and leave children alone" — **it actively wipes all children from the host element on every render cycle**.
+
+### Failure mode: blank component
+
+**Symptom:** The component renders as a completely empty element. In Storybook, the canvas is blank. Inspecting the DOM shows the host element exists but has no children, or only Lit marker comments (`<!---->`).
+
+**Cause:** The component's `render()` returns `nothing` unconditionally. Lit interprets this as "clear the render root," which in Light DOM mode is the host element itself. Every render cycle wipes all children — including those placed by the parent template.
+
+**Fix:** Delete the `render()` method entirely. LitElement's default returns `noChange`, which leaves existing DOM untouched.
+
+**Bad — this destroys all children every render:**
+
+```ts
+render() {
+  return nothing;
+}
+```
+
+**Good — wrapper components should not override render() at all:**
+
+```ts
+// LitElement's default render() returns noChange, which leaves the DOM untouched.
+// If your component is a pure wrapper that passes through slotted children,
+// simply do not define render().
+```
+
+**Good — only override render() when you need to inject specific elements:**
+
+```ts
+render() {
+  if (!this.dismissible) return nothing;
+  return html`<button class="close" @click="${this._close}">&times;</button>`;
+}
+```
+
+The rule: if your component exists only to wrap user-supplied children (e.g. a panel, a group, a layout container), do not override `render()`. The base class default returns `noChange`, leaving children intact. Only define `render()` when you need to inject elements that are not in the consumer's markup.
+
+### Failure mode: Lit-rendered elements appear after children
+
+**Symptom:** A component renders a generated element (like a tab bar or heading) that appears *below* child content instead of above it. The DOM order is inverted from what the template suggests.
+
+**Cause:** In Light DOM, Lit appends its render output after existing children placed by the parent template. A `render()` that returns `html\`<div class="header">...</div>\`` will place that div after any children the consumer wrote inside the component.
+
+**Fix:** Use CSS `order: -1` on the Lit-rendered element to pull it visually before the children. This works when the host uses `display: flex` with `flex-direction: column`. Do not use `<slot>` — it is a Shadow DOM concept and renders as a useless literal element in Light DOM.
+
+## DOM Manipulation in connectedCallback
+
+When you need to restructure children — for example, wrapping items in a generated panel `div` — use `this.children` (an `HTMLCollection` of elements) rather than `this.childNodes` (which includes text nodes and comments).
+
+### Failure mode: trigger element disappears into its own panel
+
+**Symptom:** A component with a trigger (button) and a hidden panel (dropdown, popover) renders completely blank. The trigger button is invisible. Inspecting the DOM reveals the trigger is *inside* the panel `div`, which has `display: none`.
+
+**Cause:** The `connectedCallback` code uses `childNodes` index positions to separate the trigger from the content. But `childNodes` includes whitespace text nodes from the template, so `childNodes[0]` is a text node and `childNodes[1]` is the trigger element — which gets moved into the panel.
+
+**Fix:** Use `this.children[0]` to get the trigger (element-only collection), then filter `childNodes` by reference instead of slicing by index.
+
+**Wrong — `childNodes` includes whitespace text nodes:**
+
+```ts
+// childNodes[0] is typically a whitespace text node, not the first element
+const trigger = this.childNodes[0]; // likely a text node, not what you want
+const panel   = this.childNodes[1]; // probably the trigger element, not the second item
+```
+
+**Correct — use `this.children` for element-only access:**
+
+```ts
+const trigger = this.children[0]; // first Element child, no text nodes
+```
+
+When moving children into a generated container, snapshot first and filter by saved element references rather than relying on index positions, which shift as you move nodes:
+
+```ts
+connectedCallback() {
+  super.connectedCallback();
+
+  const trigger = this.children[0] as HTMLElement;
+  this._triggerEl = trigger;
+
+  const panel = document.createElement('div');
+  panel.className = 'panel';
+
+  const nodes = Array.from(this.childNodes);
+  for (const node of nodes) {
+    if (node !== this._triggerEl) {
+      panel.appendChild(node);
+    }
+  }
+
+  this.appendChild(panel);
+}
+```
+
+## Properties
+
+Use `@property` with `reflect: true` for attributes that CSS selects on. Reflected properties become attributes on the host element, allowing theme selectors like `void-button[size="lg"]` to work.
+
+```ts
+@property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' | 'xl' | 'xxl' = 'md';
+@property({ type: String, reflect: true }) tone: 'default' | 'error' | 'warning' | 'success' | 'info' | 'notice' = 'default';
+@property({ type: Boolean, reflect: true }) dismissible = false;
+```
+
+Standard scales across all components:
+
+- **Size** — `'sm' | 'md' | 'lg' | 'xl' | 'xxl'`
+- **Tone** — `'default' | 'error' | 'warning' | 'success' | 'info' | 'notice'`
+
+Use these exact values. Do not invent alternative names for the same concept.
+
+## CSS
+
+Components contain zero styling. All CSS lives in `@voidable/theme`. A component author writes no CSS.
+
+The theme uses a tone system built on CSS custom properties. Component CSS in the theme references `--tone` for the primary color, with derived values computed via `color-mix()`:
+
+- `--tone` — primary tone color
+- `--tone-subtle` — tone at 14% opacity (backgrounds)
+- `--tone-border` — tone at 36% opacity (borders)
+
+Color variants override `--tone` only. All other derived values update automatically through the cascade.
+
+## Registration Pattern
+
+Every component registers defensively (to handle multiple imports) and declares its tag in `HTMLElementTagNameMap` for TypeScript consumers:
+
+```ts
+if (!customElements.get('void-my-component')) {
+  customElements.define('void-my-component', VoidMyComponent);
+}
+
+declare global {
+  interface HTMLElementTagNameMap {
+    'void-my-component': VoidMyComponent;
+  }
+}
+```
+
+The `customElements.get()` guard prevents duplicate registration errors when the same module is imported through multiple paths — a common scenario in federated builds.

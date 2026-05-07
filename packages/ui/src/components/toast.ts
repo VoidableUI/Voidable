@@ -38,7 +38,6 @@ export class VoidToast extends VoidElement {
   render() {
     return html`
       ${this.heading ? html`<span class='void-toast-heading'>${this.heading}</span>` : nothing}
-      <slot></slot>
       ${this.dismissable ? html`<button class='void-toast-close' aria-label='Close' @click='${this._close}'>&times;</button>` : nothing}
     `;
   }
@@ -63,10 +62,6 @@ export class VoidToastContainer extends VoidElement {
     this.setAttribute('role', 'region');
     this.setAttribute('aria-label', 'Notifications');
     this.setAttribute('aria-live', 'polite');
-  }
-
-  render() {
-    return nothing;
   }
 
   static show(options: {

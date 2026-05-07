@@ -6,9 +6,6 @@ export class VoidOption extends VoidElement {
   @property({ type: String, reflect: true }) value = '';
   @property({ type: Boolean, reflect: true }) selected = false;
 
-  render() {
-    return nothing;
-  }
 }
 
 if (!customElements.get('void-option')) {

@@ -42,3 +42,10 @@ export { VoidFileUpload } from './components/file-upload.js';
 export { VoidNavBar } from './components/nav-bar.js';
 export { VoidHamburger } from './components/hamburger.js';
 export { VoidComposeInput } from './components/compose-input.js';
+export { VoidSidebar } from './components/sidebar.js';
+export { VoidToggle } from './components/toggle.js';
+export { VoidSegmentedControl, VoidSegmentedControlItem } from './components/segmented-control.js';
+export { VoidStat } from './components/stat.js';
+
+export { VoidDropdownMenu, VoidDropdownMenuItem } from './components/dropdown-menu.js';
+export { VoidIndicator } from './components/indicator.js';

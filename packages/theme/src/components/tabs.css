@@ -8,6 +8,7 @@ void-tabs {
   display: flex;
   border-bottom: 1px solid var(--void-color-border);
   gap: var(--void-space-1);
+  order: -1;
 }
 
 .void-tabs-tab {

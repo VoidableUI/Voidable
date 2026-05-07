@@ -4,10 +4,6 @@ import { VoidElement } from '../base.js';
 
 export class VoidAccordion extends VoidElement {
   @property({ type: Boolean, reflect: true }) multiple = false;
-
-  render() {
-    return html`<slot></slot>`;
-  }
 }
 
 if (!customElements.get('void-accordion')) {

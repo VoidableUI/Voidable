@@ -2,6 +2,7 @@ import '@voidable/theme';
 import '@voidable/ui';
 
 import type { Preview } from '@storybook/web-components-vite';
+import { themes } from 'storybook/theming';
 
 const preview: Preview = {
   globalTypes: {
@@ -25,6 +26,9 @@ const preview: Preview = {
     },
   ],
   parameters: {
+    docs: {
+      theme: themes.dark,
+    },
     a11y: {
       config: {},
       options: {},

@@ -1,4 +1,3 @@
-import { nothing } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
 
@@ -15,7 +14,7 @@ export class VoidPopover extends VoidElement {
     super.connectedCallback();
     if (!this._didSetup) {
       this._triggerEl = this.children[0] ?? null;
-      this._contentNodes = Array.from(this.childNodes).slice(this._triggerEl ? 1 : 0);
+      this._contentNodes = Array.from(this.childNodes).filter(n => n !== this._triggerEl);
     }
     document.addEventListener('mousedown', this._handleOutsideClick);
     document.addEventListener('keydown', this._handleKeydown);
@@ -81,9 +80,6 @@ export class VoidPopover extends VoidElement {
     this.dispatchEvent(new CustomEvent('void-close', { bubbles: true, composed: true }));
   }
 
-  render() {
-    return nothing;
-  }
 }
 
 if (!customElements.get('void-popover')) {

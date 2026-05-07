@@ -45,6 +45,7 @@ void-toast[color='info']    { --tone: var(--void-color-info); }
 
 .void-toast-heading {
   font-weight: var(--void-weight-medium);
+  order: -1;
 }
 
 .void-toast-close {
