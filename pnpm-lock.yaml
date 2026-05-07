@@ -23,6 +23,9 @@ importers:
       '@astrojs/starlight':
         specifier: ^0.38.0
         version: 0.38.4(astro@6.1.10(@types/node@25.6.0)(jiti@2.7.0)(lightningcss@1.32.0)(rollup@4.60.2)(typescript@5.9.3))
+      '@tabler/icons':
+        specifier: ^3.43.0
+        version: 3.43.0
       '@voidable/theme':
         specifier: workspace:*
         version: link:../packages/theme
@@ -32,6 +35,9 @@ importers:
       astro:
         specifier: ^6.1.0
         version: 6.1.10(@types/node@25.6.0)(jiti@2.7.0)(lightningcss@1.32.0)(rollup@4.60.2)(typescript@5.9.3)
+      shiki:
+        specifier: ^4.0.2
+        version: 4.0.2
 
   examples/laravel:
     dependencies:
@@ -1421,6 +1427,9 @@ packages:
     resolution: {integrity: sha512-lVJX6qEgs/4DOcRTpo56tmKzVPtoWAaVbL4hfO7t7NVwl9AAXzQR6cihesW1BmNMPl+bK6dreu2sOKBP2Q9CIA==}
     peerDependencies:
       acorn: ^8.9.0
+
+  '@tabler/icons@3.43.0':
+    resolution: {integrity: sha512-qXwS17Op9jqr3Asvu31fejyw8+OnRDKH7oR8nQXyUgW1pI44ET8OKG9kssy+XIvvAIyej6gZdGmviNUn1VMfPw==}
 
   '@tailwindcss/node@4.2.4':
     resolution: {integrity: sha512-Ai7+yQPxz3ddrDQzFfBKdHEVBg0w3Zl83jnjuwxnZOsnH9pGn93QHQtpU0p/8rYWxvbFZHneni6p1BSLK4DkGA==}
@@ -4976,6 +4985,8 @@ snapshots:
   '@sveltejs/acorn-typescript@1.0.9(acorn@8.16.0)':
     dependencies:
       acorn: 8.16.0
+
+  '@tabler/icons@3.43.0': {}
 
   '@tailwindcss/node@4.2.4':
     dependencies:
