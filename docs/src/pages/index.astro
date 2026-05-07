@@ -553,6 +553,50 @@ const version = import.meta.env.VOIDABLE_VERSION || 'v0.0.0';
         margin-top: var(--void-space-2);
       }
 
+      .form-panel {
+        border: 1px solid var(--void-color-border);
+        border-radius: var(--void-radius-lg);
+        overflow: hidden;
+      }
+      .form-panel-header {
+        padding: var(--void-space-6) var(--void-space-8);
+        border-bottom: 1px solid var(--void-color-border);
+        background: var(--void-color-bg-secondary);
+      }
+      .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: var(--void-space-6);
+        padding: var(--void-space-8);
+      }
+      .form-full {
+        grid-column: 1 / -1;
+      }
+      .form-row {
+        display: flex;
+        flex-direction: column;
+        gap: var(--void-space-3);
+      }
+      .form-inline {
+        display: flex;
+        gap: var(--void-space-10);
+        align-items: flex-end;
+      }
+      .form-actions {
+        display: flex;
+        gap: var(--void-space-3);
+        justify-content: flex-end;
+      }
+      @media (max-width: 720px) {
+        .form-grid {
+          grid-template-columns: 1fr;
+        }
+        .form-inline {
+          flex-wrap: wrap;
+          gap: var(--void-space-6);
+        }
+      }
+
       /* ── Stats ── */
       .stats {
         padding: var(--void-space-24) var(--void-space-10);
@@ -907,11 +951,71 @@ const version = import.meta.env.VOIDABLE_VERSION || 'v0.0.0';
 
           <div>
             <div class="component-row-label">Form</div>
-            <div class="component-row" style="align-items: flex-end; gap: var(--void-space-6); flex-wrap: wrap;">
-              <void-field label="Email address">
-                <void-input type="email" placeholder="you@example.com"></void-input>
+            <div class="form-panel">
+              <div class="form-panel-header">
+                <void-stepper steps="Account, Preferences, Review" value="1"></void-stepper>
+              </div>
+              <div class="form-grid">
+              <void-field label="Display name" helper="How others see you">
+                <void-input placeholder="Jane Smith" value="Jane Smith"></void-input>
               </void-field>
-              <void-switch checked></void-switch>
+              <void-field label="Email" error="This email is already taken">
+                <void-input type="email" placeholder="you@example.com" value="jane@taken.com" error="taken"></void-input>
+              </void-field>
+              <void-field label="Role">
+                <void-select>
+                  <option value="" disabled>Select a role</option>
+                  <option value="admin">Admin</option>
+                  <option value="editor" selected>Editor</option>
+                  <option value="viewer">Viewer</option>
+                </void-select>
+              </void-field>
+              <void-field label="Region">
+                <void-select error="Required field">
+                  <option value="" disabled selected>Select a region</option>
+                  <option value="us">US East</option>
+                  <option value="eu">EU West</option>
+                  <option value="ap">AP Southeast</option>
+                </void-select>
+              </void-field>
+              <div class="form-full">
+                <void-field label="Bio">
+                  <void-textarea placeholder="Tell us about yourself..." rows="3"></void-textarea>
+                </void-field>
+              </div>
+              <div class="form-full">
+                <void-field label="Avatar">
+                  <void-file-upload accept="image/*"></void-file-upload>
+                </void-field>
+              </div>
+              <div class="form-full form-row">
+                <void-field label="Volume">
+                  <void-slider value="65" show-value></void-slider>
+                </void-field>
+              </div>
+              <div class="form-full form-row">
+                <void-checkbox-group>
+                  <void-checkbox value="updates" checked>Product updates</void-checkbox>
+                  <void-checkbox value="marketing">Marketing emails</void-checkbox>
+                  <void-checkbox value="security" checked>Security alerts</void-checkbox>
+                </void-checkbox-group>
+              </div>
+              <div class="form-full form-inline">
+                <void-field label="Dark mode">
+                  <void-switch checked></void-switch>
+                </void-field>
+                <void-field label="Notifications">
+                  <void-switch></void-switch>
+                </void-field>
+                <void-field label="Public profile">
+                  <void-switch checked></void-switch>
+                </void-field>
+              </div>
+              <div class="form-full form-actions">
+                <void-button variant="outline">Back</void-button>
+                <void-button variant="filled">Continue</void-button>
+              </div>
+            </div>
             </div>
           </div>
 
