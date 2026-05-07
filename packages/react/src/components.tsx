@@ -49,6 +49,14 @@ import type {
   VoidNavBar,
   VoidHamburger,
   VoidComposeInput,
+  VoidSidebar,
+  VoidDropdownMenu,
+  VoidDropdownMenuItem,
+  VoidToggle,
+  VoidSegmentedControl,
+  VoidSegmentedControlItem,
+  VoidStat,
+  VoidIndicator,
 } from '@voidable/ui';
 
 // ---------------------------------------------------------------------------
@@ -472,3 +480,56 @@ export const ComposeInput = wrapWc<VoidComposeInput, {
   disabled?: boolean;
   maxlength?: number;
 }>('void-compose-input', 'ComposeInput');
+
+export const Sidebar = wrapWc<VoidSidebar, {
+  position?: 'left' | 'right';
+  collapsed?: boolean;
+  width?: string;
+  collapsedWidth?: string;
+}>('void-sidebar', 'Sidebar');
+
+export const DropdownMenu = wrapWc<VoidDropdownMenu, {
+  open?: boolean;
+  position?: 'bottom-start' | 'bottom-end' | 'top-start' | 'top-end';
+}>('void-dropdown-menu', 'DropdownMenu');
+
+export const DropdownMenuItem = wrapWc<VoidDropdownMenuItem, {
+  disabled?: boolean;
+  destructive?: boolean;
+}>('void-dropdown-menu-item', 'DropdownMenuItem');
+
+export const Toggle = wrapWc<VoidToggle, {
+  pressed?: boolean;
+  disabled?: boolean;
+  color?: 'default' | 'error' | 'warning' | 'success' | 'info' | 'notice';
+  size?: 'sm' | 'md' | 'lg' | 'xl' | 'xxl';
+  variant?: 'outline' | 'filled' | 'ghost' | 'solid';
+}>('void-toggle', 'Toggle');
+
+export const SegmentedControl = wrapWc<VoidSegmentedControl, {
+  value?: string;
+  size?: 'sm' | 'md' | 'lg' | 'xl' | 'xxl';
+}>('void-segmented-control', 'SegmentedControl');
+
+export const SegmentedControlItem = wrapWc<VoidSegmentedControlItem, {
+  value?: string;
+  disabled?: boolean;
+}>('void-segmented-control-item', 'SegmentedControlItem');
+
+export const Stat = wrapWc<VoidStat, {
+  label?: string;
+  value?: string;
+  delta?: string;
+  trend?: 'up' | 'down' | 'flat' | 'error' | 'warning' | 'success' | 'info' | 'notice' | 'highlight' | null;
+  color?: 'default' | 'error' | 'warning' | 'success' | 'info' | 'notice';
+  size?: 'sm' | 'md' | 'lg' | 'xl' | 'xxl';
+}>('void-stat', 'Stat');
+
+export const Indicator = wrapWc<VoidIndicator, {
+  color?: 'default' | 'error' | 'warning' | 'success' | 'info' | 'notice';
+  size?: 'sm' | 'md' | 'lg' | 'xl' | 'xxl';
+  count?: number;
+  ping?: boolean;
+  overlay?: boolean;
+  position?: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left';
+}>('void-indicator', 'Indicator');

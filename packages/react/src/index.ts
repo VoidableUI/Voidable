@@ -47,6 +47,14 @@ export {
   NavBar,
   Hamburger,
   ComposeInput,
+  Sidebar,
+  DropdownMenu,
+  DropdownMenuItem,
+  Toggle,
+  SegmentedControl,
+  SegmentedControlItem,
+  Stat,
+  Indicator,
 } from './components.js';
 
 export { useTheme } from './use-theme.js';
