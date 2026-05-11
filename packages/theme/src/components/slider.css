@@ -12,8 +12,8 @@ void-slider input[type="range"] {
   height: 4px;
   background: linear-gradient(
     to right,
-    var(--void-color-accent) var(--fill, 50%),
-    var(--void-color-border) var(--fill, 50%)
+    var(--void-color-accent) var(--void-slider-fill, 50%),
+    var(--void-color-border) var(--void-slider-fill, 50%)
   );
   border-radius: var(--void-radius-full);
   outline: none;

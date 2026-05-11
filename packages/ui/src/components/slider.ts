@@ -2,6 +2,7 @@ import { html } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
 
+/** Continuous value selection for volume controls, price range filters, and numeric range settings. */
 export class VoidSlider extends VoidElement {
   @property({ type: Number }) value: number = 50;
   @property({ type: Number }) min: number = 0;
@@ -67,7 +68,7 @@ export class VoidSlider extends VoidElement {
         step=${this.step}
         ?disabled=${this.disabled}
         name=${this.name}
-        style="--fill: ${fill}%"
+        style="--void-slider-fill: ${fill}%"
         @input=${this._onInput}
         @change=${this._onChange}
       />

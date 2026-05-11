@@ -5,6 +5,10 @@ void-file-upload {
   font-family: var(--void-font-sans);
 }
 
+.void-file-upload-input {
+  display: none;
+}
+
 .void-file-upload-dropzone {
   border: 2px dashed var(--void-color-border);
   border-radius: var(--void-radius-lg);

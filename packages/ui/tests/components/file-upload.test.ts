@@ -76,7 +76,7 @@ describe('VoidFileUpload', () => {
     it('renders a hidden file input', () => {
       const input = el.querySelector('input[type="file"]') as HTMLInputElement;
       expect(input).not.toBeNull();
-      expect(input.style.display).toBe('none');
+      expect(input.classList.contains('void-file-upload-input')).toBe(true);
     });
 
     it('renders a dropzone', () => {

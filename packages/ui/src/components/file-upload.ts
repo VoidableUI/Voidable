@@ -2,6 +2,7 @@ import { html, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
 
+/** Drag-and-drop file picker for document uploads, image attachment flows, and import wizards. */
 export class VoidFileUpload extends VoidElement {
   @property({ type: String }) accept = '';
   @property({ type: Boolean, reflect: true }) multiple = false;
@@ -19,7 +20,7 @@ export class VoidFileUpload extends VoidElement {
     return html`
       <input
         type="file"
-        style="display:none"
+        class="void-file-upload-input"
         accept=${this.accept || nothing}
         ?multiple=${this.multiple}
         ?disabled=${this.disabled}

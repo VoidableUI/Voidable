@@ -132,9 +132,9 @@ describe('VoidSlider', () => {
       expect(input.getAttribute('step')).toBe('1');
     });
 
-    it('sets --fill CSS variable on input', () => {
+    it('sets --void-slider-fill CSS variable on input', () => {
       const input = el.querySelector('input[type="range"]') as HTMLInputElement;
-      expect(input.style.getPropertyValue('--fill')).toBe('50%');
+      expect(input.style.getPropertyValue('--void-slider-fill')).toBe('50%');
     });
 
     it('does not render value label when showValue is false', () => {
@@ -169,28 +169,28 @@ describe('VoidSlider', () => {
 
     it('computes 50% fill at default value', () => {
       const input = el.querySelector('input[type="range"]') as HTMLInputElement;
-      expect(input.style.getPropertyValue('--fill')).toBe('50%');
+      expect(input.style.getPropertyValue('--void-slider-fill')).toBe('50%');
     });
 
     it('computes 0% fill at min value', async () => {
       el.value = 0;
       await el.updateComplete;
       const input = el.querySelector('input[type="range"]') as HTMLInputElement;
-      expect(input.style.getPropertyValue('--fill')).toBe('0%');
+      expect(input.style.getPropertyValue('--void-slider-fill')).toBe('0%');
     });
 
     it('computes 100% fill at max value', async () => {
       el.value = 100;
       await el.updateComplete;
       const input = el.querySelector('input[type="range"]') as HTMLInputElement;
-      expect(input.style.getPropertyValue('--fill')).toBe('100%');
+      expect(input.style.getPropertyValue('--void-slider-fill')).toBe('100%');
     });
 
     it('computes 25% fill at quarter of range', async () => {
       el.value = 25;
       await el.updateComplete;
       const input = el.querySelector('input[type="range"]') as HTMLInputElement;
-      expect(input.style.getPropertyValue('--fill')).toBe('25%');
+      expect(input.style.getPropertyValue('--void-slider-fill')).toBe('25%');
     });
   });
 
