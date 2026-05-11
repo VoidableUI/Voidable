@@ -1,0 +1,449 @@
+/* ============================================================
+   void-calendar
+   ============================================================ */
+
+void-calendar {
+  display: inline-flex;
+  flex-direction: column;
+  font-family: var(--void-font-sans);
+  user-select: none;
+}
+
+/* ── Header ── */
+
+.void-calendar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--void-space-1) 0;
+  gap: var(--void-space-2);
+}
+
+.void-calendar-nav {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--void-space-8);
+  height: var(--void-space-8);
+  padding: 0;
+  border: none;
+  border-radius: var(--void-radius-md);
+  background: transparent;
+  color: var(--void-color-text-secondary);
+  cursor: pointer;
+  transition: background var(--void-duration-fast) var(--void-ease-in-out),
+              color var(--void-duration-fast) var(--void-ease-in-out);
+}
+
+.void-calendar-nav:hover {
+  background: var(--void-color-bg-hover);
+  color: var(--void-color-text);
+}
+
+.void-calendar-nav svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+.void-calendar-nav:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.void-calendar-title {
+  flex: 1;
+  padding: var(--void-space-1) var(--void-space-2);
+  border: none;
+  border-radius: var(--void-radius-md);
+  background: transparent;
+  color: var(--void-color-text);
+  font-family: inherit;
+  font-size: var(--void-text-sm);
+  font-weight: var(--void-weight-semibold);
+  text-align: center;
+  cursor: pointer;
+  transition: background var(--void-duration-fast) var(--void-ease-in-out);
+}
+
+.void-calendar-title:hover {
+  background: var(--void-color-bg-hover);
+}
+
+.void-calendar-title:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+.void-calendar-title--static {
+  cursor: default;
+}
+
+.void-calendar-title--static:hover {
+  background: transparent;
+}
+
+/* ── Day grid ── */
+
+.void-calendar-grid {
+  display: flex;
+  flex-direction: column;
+}
+
+.void-calendar-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+}
+
+.void-calendar-weekday {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: var(--void-space-8);
+  color: var(--void-color-text-muted);
+  font-size: var(--void-text-xs);
+  font-weight: var(--void-weight-medium);
+}
+
+.void-calendar-days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+}
+
+.void-calendar-day {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--void-space-8);
+  height: var(--void-space-8);
+  padding: 0;
+  border: none;
+  border-radius: var(--void-radius-md);
+  background: transparent;
+  color: var(--void-color-text);
+  font-family: inherit;
+  font-size: var(--void-text-sm);
+  cursor: pointer;
+  transition: background var(--void-duration-fast) var(--void-ease-in-out),
+              color var(--void-duration-fast) var(--void-ease-in-out);
+}
+
+.void-calendar-day:hover:not(:disabled) {
+  background: var(--void-color-bg-hover);
+}
+
+.void-calendar-day:focus-visible {
+  outline: 2px solid var(--void-color-border-focus);
+  outline-offset: -2px;
+}
+
+.void-calendar-day.outside {
+  color: var(--void-color-text-muted);
+}
+
+.void-calendar-day.today {
+  font-weight: var(--void-weight-bold);
+  box-shadow: inset 0 -2px 0 0 var(--void-color-text-muted);
+}
+
+.void-calendar-day.selected {
+  background: var(--void-color-accent);
+  color: var(--void-color-text-on-accent);
+  font-weight: var(--void-weight-semibold);
+}
+
+.void-calendar-day.selected:hover:not(:disabled) {
+  background: var(--void-color-accent-hover);
+}
+
+.void-calendar-day.selected.today {
+  box-shadow: none;
+}
+
+.void-calendar-day:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+/* ── Month picker ── */
+
+.void-calendar-months {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--void-space-1);
+  padding: var(--void-space-1) 0;
+}
+
+.void-calendar-month {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: var(--void-space-10);
+  padding: 0;
+  border: none;
+  border-radius: var(--void-radius-md);
+  background: transparent;
+  color: var(--void-color-text);
+  font-family: inherit;
+  font-size: var(--void-text-sm);
+  cursor: pointer;
+  transition: background var(--void-duration-fast) var(--void-ease-in-out);
+}
+
+.void-calendar-month:hover:not(:disabled) {
+  background: var(--void-color-bg-hover);
+}
+
+.void-calendar-month.current {
+  font-weight: var(--void-weight-bold);
+  box-shadow: inset 0 -2px 0 0 var(--void-color-text-muted);
+}
+
+.void-calendar-month:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ── Year picker ── */
+
+.void-calendar-years {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--void-space-1);
+  padding: var(--void-space-1) 0;
+}
+
+.void-calendar-year {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: var(--void-space-10);
+  padding: 0;
+  border: none;
+  border-radius: var(--void-radius-md);
+  background: transparent;
+  color: var(--void-color-text);
+  font-family: inherit;
+  font-size: var(--void-text-sm);
+  cursor: pointer;
+  transition: background var(--void-duration-fast) var(--void-ease-in-out);
+}
+
+.void-calendar-year:hover:not(:disabled) {
+  background: var(--void-color-bg-hover);
+}
+
+.void-calendar-year.current {
+  font-weight: var(--void-weight-bold);
+  box-shadow: inset 0 -2px 0 0 var(--void-color-text-muted);
+}
+
+.void-calendar-year:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ── Disabled state ── */
+
+void-calendar[disabled] {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+/* ── Size variants ── */
+
+void-calendar[size="sm"] .void-calendar-day,
+void-calendar[size="sm"] .void-calendar-weekday {
+  width: var(--void-space-7);
+  height: var(--void-space-7);
+  font-size: var(--void-text-xs);
+}
+
+void-calendar[size="sm"] .void-calendar-title {
+  font-size: var(--void-text-xs);
+}
+
+void-calendar[size="sm"] .void-calendar-month,
+void-calendar[size="sm"] .void-calendar-year {
+  height: var(--void-space-8);
+  font-size: var(--void-text-xs);
+}
+
+void-calendar[size="lg"] .void-calendar-day,
+void-calendar[size="lg"] .void-calendar-weekday {
+  width: var(--void-space-10);
+  height: var(--void-space-10);
+  font-size: var(--void-text-base);
+}
+
+void-calendar[size="lg"] .void-calendar-title {
+  font-size: var(--void-text-base);
+}
+
+void-calendar[size="lg"] .void-calendar-month,
+void-calendar[size="lg"] .void-calendar-year {
+  height: var(--void-space-12);
+  font-size: var(--void-text-base);
+}
+
+/* ============================================================
+   void-date-picker
+   ============================================================ */
+
+void-date-picker {
+  display: inline-flex;
+  flex-direction: column;
+  gap: var(--void-space-1);
+  font-family: var(--void-font-sans);
+  position: relative;
+}
+
+/* ── Input anchor ── */
+
+.void-date-picker-anchor {
+  display: flex;
+  position: relative;
+}
+
+.void-date-picker-input {
+  width: 100%;
+  padding: var(--void-space-2) var(--void-space-8) var(--void-space-2) var(--void-space-3);
+  background: var(--void-color-bg-secondary);
+  border: 1px solid var(--void-color-border);
+  border-radius: var(--void-radius-md);
+  color: var(--void-color-text);
+  font-family: inherit;
+  font-size: var(--void-text-sm);
+  line-height: var(--void-leading-normal);
+  outline: none;
+  cursor: pointer;
+  transition: border-color var(--void-duration-fast) var(--void-ease-in-out),
+              box-shadow var(--void-duration-fast) var(--void-ease-in-out);
+}
+
+.void-date-picker-input::placeholder {
+  color: var(--void-color-text-muted);
+}
+
+.void-date-picker-input:hover {
+  border-color: var(--void-color-border-strong);
+}
+
+.void-date-picker-input:focus {
+  border-color: var(--void-color-border-focus);
+  box-shadow: 0 0 0 1px var(--void-color-border-focus);
+}
+
+.void-date-picker-input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ── Calendar icon button ── */
+
+.void-date-picker-icon {
+  position: absolute;
+  right: var(--void-space-2);
+  top: 50%;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--void-space-1);
+  border: none;
+  border-radius: var(--void-radius-sm);
+  background: transparent;
+  color: var(--void-color-text-muted);
+  cursor: pointer;
+  transition: color var(--void-duration-fast) var(--void-ease-in-out);
+}
+
+.void-date-picker-icon svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+.void-date-picker-icon:hover {
+  color: var(--void-color-text);
+}
+
+.void-date-picker-icon:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ── Expanded state ── */
+
+void-date-picker[aria-expanded="true"] .void-date-picker-input {
+  border-color: var(--void-color-border-focus);
+  box-shadow: 0 0 0 1px var(--void-color-border-focus);
+}
+
+/* ── Dropdown ── */
+
+.void-date-picker-dropdown {
+  position: absolute;
+  top: calc(100% + var(--void-space-1));
+  left: 0;
+  background: var(--void-color-bg-elevated);
+  border: 1px solid var(--void-color-border);
+  border-radius: var(--void-radius-md);
+  box-shadow: 0 4px 16px var(--void-color-bg-overlay);
+  z-index: var(--void-z-dropdown);
+  padding: var(--void-space-2);
+}
+
+/* ── Color variants ── */
+
+void-date-picker[color="error"] .void-date-picker-input {
+  border-color: var(--void-color-error);
+}
+void-date-picker[color="error"] .void-date-picker-input:focus {
+  box-shadow: 0 0 0 1px var(--void-color-error);
+}
+
+void-date-picker[color="warning"] .void-date-picker-input {
+  border-color: var(--void-color-warning);
+}
+void-date-picker[color="warning"] .void-date-picker-input:focus {
+  box-shadow: 0 0 0 1px var(--void-color-warning);
+}
+
+void-date-picker[color="success"] .void-date-picker-input {
+  border-color: var(--void-color-success);
+}
+void-date-picker[color="success"] .void-date-picker-input:focus {
+  box-shadow: 0 0 0 1px var(--void-color-success);
+}
+
+void-date-picker[color="info"] .void-date-picker-input {
+  border-color: var(--void-color-info);
+}
+void-date-picker[color="info"] .void-date-picker-input:focus {
+  box-shadow: 0 0 0 1px var(--void-color-info);
+}
+
+void-date-picker[color="notice"] .void-date-picker-input {
+  border-color: var(--void-color-notice);
+}
+void-date-picker[color="notice"] .void-date-picker-input:focus {
+  box-shadow: 0 0 0 1px var(--void-color-notice);
+}
+
+/* ── Disabled ── */
+
+void-date-picker[disabled] {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+/* ── Size variants ── */
+
+void-date-picker[size="sm"] .void-date-picker-input {
+  padding: var(--void-space-1) var(--void-space-7) var(--void-space-1) var(--void-space-2);
+  font-size: var(--void-text-xs);
+}
+
+void-date-picker[size="lg"] .void-date-picker-input {
+  padding: var(--void-space-3) var(--void-space-10) var(--void-space-3) var(--void-space-4);
+  font-size: var(--void-text-base);
+}

@@ -1,0 +1,236 @@
+void-carousel {
+  display: block;
+  position: relative;
+  font-family: var(--void-font-sans);
+}
+
+.void-carousel-viewport {
+  overflow: hidden;
+  order: -1;
+}
+
+.void-carousel-track {
+  display: flex;
+  transition: transform var(--void-duration-slow) var(--void-ease-in-out);
+}
+
+void-carousel[orientation="horizontal"] .void-carousel-track {
+  flex-direction: row;
+  transform: translateX(calc(var(--void-carousel-offset, 0) * -100%));
+}
+
+void-carousel[orientation="vertical"] {
+  display: flex;
+  flex-direction: column;
+}
+
+void-carousel[orientation="vertical"] .void-carousel-viewport {
+  flex: 1;
+  min-height: 0;
+}
+
+void-carousel[orientation="vertical"] .void-carousel-track {
+  flex-direction: column;
+  height: 100%;
+  transform: translateY(calc(var(--void-carousel-offset, 0) * -100%));
+}
+
+void-carousel[orientation="vertical"] void-carousel-slide {
+  min-height: 0;
+  height: 100%;
+}
+
+void-carousel-slide {
+  flex: 0 0 100%;
+  min-width: 0;
+  overflow: hidden;
+}
+
+/* ── Prev / Next controls ── */
+
+.void-carousel-prev,
+.void-carousel-next {
+  appearance: none;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--void-color-border);
+  border-radius: var(--void-radius-full);
+  background: var(--void-color-bg);
+  color: var(--void-color-text);
+  cursor: pointer;
+  transition: background var(--void-duration-fast) var(--void-ease-in-out),
+              color var(--void-duration-fast) var(--void-ease-in-out),
+              border-color var(--void-duration-fast) var(--void-ease-in-out);
+  z-index: 1;
+}
+
+.void-carousel-prev {
+  left: var(--void-space-2);
+}
+
+.void-carousel-next {
+  right: var(--void-space-2);
+}
+
+.void-carousel-prev svg,
+.void-carousel-next svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+.void-carousel-prev:hover:not(:disabled),
+.void-carousel-next:hover:not(:disabled) {
+  background: var(--void-color-bg-hover);
+  border-color: var(--void-color-border-strong);
+}
+
+.void-carousel-prev:focus-visible,
+.void-carousel-next:focus-visible {
+  outline: 2px solid var(--void-color-accent);
+  outline-offset: 2px;
+}
+
+.void-carousel-prev:disabled,
+.void-carousel-next:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ── Vertical orientation controls ── */
+
+void-carousel[orientation="vertical"] .void-carousel-prev,
+void-carousel[orientation="vertical"] .void-carousel-next {
+  position: static;
+  transform: none;
+  align-self: center;
+}
+
+void-carousel[orientation="vertical"] .void-carousel-prev {
+  order: -2;
+}
+
+void-carousel[orientation="vertical"] .void-carousel-next {
+  order: 1;
+}
+
+void-carousel[orientation="vertical"] .void-carousel-prev svg {
+  transform: rotate(90deg);
+}
+
+void-carousel[orientation="vertical"] .void-carousel-next svg {
+  transform: rotate(90deg);
+}
+
+void-carousel[orientation="vertical"] .void-carousel-indicators {
+  position: absolute;
+  right: var(--void-space-2);
+  top: 50%;
+  transform: translateY(-50%);
+  flex-direction: column;
+  padding: var(--void-space-3);
+  z-index: 1;
+}
+
+/* ── Dot indicators ── */
+
+.void-carousel-indicators {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--void-space-2);
+  padding: var(--void-space-3) 0;
+}
+
+.void-carousel-dot {
+  appearance: none;
+  border: none;
+  background: var(--void-color-border);
+  border-radius: var(--void-radius-full);
+  cursor: pointer;
+  padding: 0;
+  transition: background var(--void-duration-fast) var(--void-ease-in-out),
+              transform var(--void-duration-fast) var(--void-ease-in-out);
+}
+
+.void-carousel-dot:hover {
+  background: var(--void-color-text-secondary);
+}
+
+.void-carousel-dot:focus-visible {
+  outline: 2px solid var(--void-color-accent);
+  outline-offset: 2px;
+}
+
+.void-carousel-dot[aria-selected="true"] {
+  background: var(--void-color-accent);
+}
+
+/* ── Sizes ── */
+
+/* sm */
+void-carousel[size="sm"] .void-carousel-prev,
+void-carousel[size="sm"] .void-carousel-next {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+void-carousel[size="sm"] .void-carousel-prev svg,
+void-carousel[size="sm"] .void-carousel-next svg {
+  width: 0.75rem;
+  height: 0.75rem;
+}
+
+void-carousel[size="sm"] .void-carousel-dot {
+  width: 0.375rem;
+  height: 0.375rem;
+}
+
+void-carousel[size="sm"] .void-carousel-dot[aria-selected="true"] {
+  transform: scale(1.25);
+}
+
+/* md (default) */
+void-carousel[size="md"] .void-carousel-prev,
+void-carousel[size="md"] .void-carousel-next,
+void-carousel:not([size]) .void-carousel-prev,
+void-carousel:not([size]) .void-carousel-next {
+  width: 2rem;
+  height: 2rem;
+}
+
+void-carousel[size="md"] .void-carousel-dot,
+void-carousel:not([size]) .void-carousel-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+}
+
+void-carousel[size="md"] .void-carousel-dot[aria-selected="true"],
+void-carousel:not([size]) .void-carousel-dot[aria-selected="true"] {
+  transform: scale(1.25);
+}
+
+/* lg */
+void-carousel[size="lg"] .void-carousel-prev,
+void-carousel[size="lg"] .void-carousel-next {
+  width: 2.5rem;
+  height: 2.5rem;
+}
+
+void-carousel[size="lg"] .void-carousel-prev svg,
+void-carousel[size="lg"] .void-carousel-next svg {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+void-carousel[size="lg"] .void-carousel-dot {
+  width: 0.625rem;
+  height: 0.625rem;
+}
+
+void-carousel[size="lg"] .void-carousel-dot[aria-selected="true"] {
+  transform: scale(1.25);
+}

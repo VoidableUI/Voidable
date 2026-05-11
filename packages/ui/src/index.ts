@@ -44,8 +44,13 @@ export { VoidHamburger } from './components/hamburger.js';
 export { VoidComposeInput } from './components/compose-input.js';
 export { VoidSidebar } from './components/sidebar.js';
 export { VoidToggle } from './components/toggle.js';
+export { VoidToggleGroup } from './components/toggle-group.js';
 export { VoidSegmentedControl, VoidSegmentedControlItem } from './components/segmented-control.js';
 export { VoidStat } from './components/stat.js';
 
+export { VoidCalendar, VoidDatePicker } from './components/calendar.js';
+export { VoidCarousel, VoidCarouselSlide } from './components/carousel.js';
 export { VoidDropdownMenu, VoidDropdownMenuItem } from './components/dropdown-menu.js';
 export { VoidIndicator } from './components/indicator.js';
+export { VoidMenu, VoidMenuItem, VoidMenuGroup } from './components/menu.js';
+export { VoidNumberInput } from './components/number-input.js';

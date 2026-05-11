@@ -1,0 +1,19 @@
+void-toggle-group {
+  display: inline-flex;
+  gap: var(--void-space-1);
+  flex-wrap: wrap;
+  font-family: var(--void-font-sans);
+}
+
+void-toggle-group[orientation="horizontal"] {
+  flex-direction: row;
+}
+
+void-toggle-group[orientation="vertical"] {
+  flex-direction: column;
+}
+
+void-toggle-group[disabled] {
+  opacity: 0.5;
+  pointer-events: none;
+}
