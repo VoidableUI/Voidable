@@ -2,7 +2,7 @@ void-toast-container {
   position: fixed;
   bottom: 0;
   right: 0;
-  z-index: 1100;
+  z-index: var(--void-z-toast);
   display: flex;
   flex-direction: column;
   gap: var(--void-space-2);

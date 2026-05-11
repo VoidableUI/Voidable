@@ -16,7 +16,7 @@ void-error-fallback {
 }
 
 .void-error-fallback-icon {
-  font-size: 2rem;
+  font-size: var(--void-text-3xl);
   color: var(--void-color-error);
   opacity: 0.7;
 }

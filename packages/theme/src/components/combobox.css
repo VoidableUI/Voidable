@@ -56,7 +56,7 @@ void-combobox[error]:not([error='']) .void-combobox-input:focus {
   box-shadow: 0 4px 16px var(--void-color-bg-overlay);
   max-height: 16rem;
   overflow-y: auto;
-  z-index: 100;
+  z-index: var(--void-z-dropdown);
   padding: var(--void-space-1) 0;
 }
 

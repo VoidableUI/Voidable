@@ -42,7 +42,7 @@ void-file-upload[dragging] .void-file-upload-dropzone {
 
 .void-file-upload-browse {
   color: var(--void-color-accent);
-  font-weight: 500;
+  font-weight: var(--void-weight-medium);
 }
 
 .void-file-upload-files {

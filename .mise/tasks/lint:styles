@@ -1,0 +1,59 @@
+#!/usr/bin/env bash
+#MISE description="Ensure UI components contain no visual styles (all styling in @voidable/theme)"
+set -euo pipefail
+
+UI_SRC="packages/ui/src/components"
+violations=0
+
+while IFS= read -r file; do
+  # Check for inline style= attributes with visual properties (not --void-* custom properties)
+  if grep -Pn 'style="(?!--void-)' "$file" | grep -v '// style-ok' | grep -v '^\s*//' | grep -v '^\s*\*' | grep -q .; then
+    grep -Pn 'style="(?!--void-)' "$file" | grep -v '// style-ok' | grep -v '^\s*//' | grep -v '^\s*\*'
+    echo "ERROR: Inline style with visual properties in $file (use CSS class or --void-* custom property)"
+    violations=1
+  fi
+
+  # Check for .style.xxx = direct property assignments (not setProperty('--void-*'))
+  # Allow document.body.style (scroll lock) and .style.height = '' / 'auto' (measurement resets)
+  if grep -Pn '\.style\.\w+\s*=' "$file" \
+    | grep -v 'setProperty' \
+    | grep -v 'document\.body\.style' \
+    | grep -v "\.style\.height\s*=\s*['\"]'*auto'*['\"]" \
+    | grep -v "\.style\.height\s*=\s*['\"]['\"]" \
+    | grep -v '// style-ok' \
+    | grep -v '^\s*//' \
+    | grep -v '^\s*\*' \
+    | grep -q .; then
+    grep -Pn '\.style\.\w+\s*=' "$file" \
+      | grep -v 'setProperty' \
+      | grep -v 'document\.body\.style' \
+      | grep -v "\.style\.height\s*=\s*['\"]'*auto'*['\"]" \
+      | grep -v "\.style\.height\s*=\s*['\"]['\"]" \
+      | grep -v '// style-ok' \
+      | grep -v '^\s*//' \
+      | grep -v '^\s*\*'
+    echo "ERROR: Direct style property assignment in $file (use CSS class or setProperty('--void-*'))"
+    violations=1
+  fi
+
+  # Check for hardcoded stroke-width on SVGs (should use var(--void-icon-stroke-width))
+  if grep -Pn 'stroke-width="[0-9]' "$file" | grep -v '// style-ok' | grep -v '^\s*//' | grep -v '^\s*\*' | grep -q .; then
+    grep -Pn 'stroke-width="[0-9]' "$file" | grep -v '// style-ok' | grep -v '^\s*//' | grep -v '^\s*\*'
+    echo "ERROR: Hardcoded stroke-width in $file (use var(--void-icon-stroke-width))"
+    violations=1
+  fi
+
+  # Check for hardcoded absolute dimensions on <svg> elements (size via CSS instead)
+  if grep -Pn '<svg[^>]*(width|height)="[0-9]+(\.[0-9]+)?(px)?"' "$file" | grep -v '// style-ok' | grep -v '^\s*//' | grep -v '^\s*\*' | grep -q .; then
+    grep -Pn '<svg[^>]*(width|height)="[0-9]+(\.[0-9]+)?(px)?"' "$file" | grep -v '// style-ok' | grep -v '^\s*//' | grep -v '^\s*\*'
+    echo "ERROR: Hardcoded absolute dimensions on SVG in $file (size via CSS or use relative units)"
+    violations=1
+  fi
+
+done < <(find "$UI_SRC" -name '*.ts' -type f)
+
+if [[ $violations -eq 0 ]]; then
+  echo "Style lint passed: no visual styles in UI components"
+else
+  exit 1
+fi

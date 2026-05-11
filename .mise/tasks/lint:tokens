@@ -1,23 +1,101 @@
 #!/usr/bin/env bash
-#MISE description="Ensure raw color values only appear in primitives.css"
+#MISE description="Ensure raw values use design tokens in theme CSS and UI components"
 set -euo pipefail
 
 PRIMITIVES="packages/theme/src/primitives.css"
+TOKENS="packages/theme/src/tokens.css"
 THEME_SRC="packages/theme/src"
+UI_SRC="packages/ui/src"
 
 violations=0
 
-while IFS= read -r file; do
-  [[ "$file" == "$PRIMITIVES" ]] && continue
+# Collect all files to check
+FILES=()
+while IFS= read -r f; do FILES+=("$f"); done < <(find "$THEME_SRC" -name '*.css' -type f)
+while IFS= read -r f; do FILES+=("$f"); done < <(find "$UI_SRC" -name '*.ts' -type f)
 
-  if grep -Pn '#[0-9a-fA-F]{3,8}\b|rgba?\(' "$file" | grep -v '^\s*/\*' | grep -v '^\s*\*'; then
-    echo "ERROR: Raw color values in $file (move to $PRIMITIVES)"
+check() {
+  local label="$1" pattern="$2" advice="$3"
+  shift 3
+  # Remaining args are additional grep -v filters
+  for file in "${FILES[@]}"; do
+    [[ "$file" == "$PRIMITIVES" || "$file" == "$TOKENS" ]] && continue
+    local result
+    result=$(grep -Pn "$pattern" "$file" 2>/dev/null || true)
+    [[ -z "$result" ]] && continue
+
+    # Apply standard exclusions (CSS comments, JS comments, token-ok marker)
+    result=$(echo "$result" | grep -v '^\s*/\*' | grep -v '^\s*\*' | grep -v '^\s*//' | grep -v 'token-ok' || true)
+    [[ -z "$result" ]] && continue
+
+    # Apply additional filters
+    for filter in "$@"; do
+      result=$(echo "$result" | grep -v "$filter" || true)
+      [[ -z "$result" ]] && break
+    done
+    [[ -z "$result" ]] && continue
+
+    echo "$result"
+    echo "ERROR: $label in $file ($advice)"
     violations=1
-  fi
-done < <(find "$THEME_SRC" -name '*.css' -type f)
+  done
+}
+
+# 1. Raw color values (#hex, rgb(), rgba()) — exclude HTML entities (&#NNN;)
+check "Raw color values" \
+  '(?<!&)#[0-9a-fA-F]{3,8}\b|rgba?\(' \
+  "use --void-color-* tokens"
+
+# 2. Raw font-family (not via var() or inherit)
+check "Raw font-family" \
+  'font-family:' \
+  "use var(--void-font-sans) or var(--void-font-mono)" \
+  'var(' 'inherit'
+
+# 3. Raw font-size (px/rem literal, not via var())
+check "Raw font-size" \
+  'font-size:\s*[0-9]+\.?[0-9]*(px|rem)\b' \
+  "use var(--void-text-*) tokens" \
+  'var('
+
+# 4. Raw font-weight (numeric, not via var())
+check "Raw font-weight" \
+  'font-weight:\s*[0-9]{3}\b' \
+  "use var(--void-weight-*) tokens" \
+  'var('
+
+# 5. Raw z-index (values > 2, not via var()) — z-index: 1 is a local stacking hint, not a layer
+check "Raw z-index" \
+  'z-index:\s*[0-9]{2,}\b' \
+  "use var(--void-z-*) tokens" \
+  'var('
+
+# 6. Raw border-radius px (not 0, not via var())
+check "Raw border-radius" \
+  'border-radius:\s*[1-9][0-9]*px\b' \
+  "use var(--void-radius-*) tokens" \
+  'var('
+
+# 7. Raw transition durations (flag ms/s in transition: shorthand, not animation:)
+check "Raw transition duration" \
+  'transition:[^;]*\b[0-9]+(ms)\b' \
+  "use var(--void-duration-*) tokens" \
+  'var(' 'animation'
+
+# 8. Raw cubic-bezier in transitions (not in animation or @keyframes)
+check "Raw transition easing" \
+  'transition:[^;]*cubic-bezier\(' \
+  "use var(--void-ease-*) tokens" \
+  'var('
+
+# 9. Raw stroke-width numbers (not via var())
+check "Raw stroke-width" \
+  'stroke-width:\s*[0-9]' \
+  "use var(--void-icon-stroke-width)" \
+  'var('
 
 if [[ $violations -eq 0 ]]; then
-  echo "Token lint passed: no raw colors outside primitives.css"
+  echo "Token lint passed: all values use design tokens"
 else
   exit 1
 fi

@@ -6,7 +6,7 @@ void-popover {
 .void-popover-body {
   display: none;
   position: absolute;
-  z-index: 1000;
+  z-index: var(--void-z-dropdown);
   min-width: 12rem;
   background: var(--void-color-bg-elevated);
   border: 1px solid var(--void-color-border);

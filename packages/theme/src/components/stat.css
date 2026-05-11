@@ -77,7 +77,7 @@ void-stat[size="xxl"] {
 }
 
 void-stat[size="xxl"] .void-stat-value {
-  font-size: 4rem;
+  font-size: 4rem; /* token-ok: display size beyond scale */
 }
 
 void-stat[color="error"]     { --tone: var(--void-color-error); }

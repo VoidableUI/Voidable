@@ -19,7 +19,7 @@ void-tooltip {
   pointer-events: none;
   opacity: 0;
   transition: opacity var(--void-duration-fast) var(--void-ease-in-out);
-  z-index: 1000;
+  z-index: var(--void-z-tooltip);
 }
 
 void-tooltip[visible] .void-tooltip-bubble {
