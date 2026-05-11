@@ -7,6 +7,13 @@ const meta: Meta = {
   title: 'Components/Badge',
   component: 'void-badge',
   tags: ['autodocs'],
+  parameters: {
+    docs: {
+      description: {
+        component: 'Status labels for issue trackers, tag systems, and categorization UIs where a small colored chip conveys state at a glance.',
+      },
+    },
+  },
   argTypes: {
     color: {
       control: { type: 'select' },

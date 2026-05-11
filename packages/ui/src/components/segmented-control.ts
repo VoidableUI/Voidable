@@ -1,6 +1,7 @@
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
 
+/** Individual option within a VoidSegmentedControl button group. */
 export class VoidSegmentedControlItem extends VoidElement {
   @property({ type: String, reflect: true }) value = '';
   @property({ type: Boolean, reflect: true }) disabled = false;
@@ -22,6 +23,7 @@ if (!customElements.get('void-segmented-control-item')) {
   customElements.define('void-segmented-control-item', VoidSegmentedControlItem);
 }
 
+/** Mutually exclusive button group for view mode toggles, time range selectors, and compact tab-like navigation. */
 export class VoidSegmentedControl extends VoidElement {
   @property({ type: String, reflect: true }) value = '';
   @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' | 'xl' | 'xxl' = 'md';

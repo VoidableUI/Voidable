@@ -6,6 +6,14 @@ import '@voidable/theme';
 const meta: Meta = {
   title: 'Components/StatusDot',
   component: 'void-status-dot',
+  tags: ['autodocs'],
+  parameters: {
+    docs: {
+      description: {
+        component: 'Small presence indicator for user avatars, team member lists, and real-time collaboration UIs that need to show online/away/offline state at a glance.',
+      },
+    },
+  },
   argTypes: {
     status: {
       control: 'select',

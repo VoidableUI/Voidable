@@ -1,6 +1,7 @@
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
 
+/** Structured item list for menus, option sets, and content feeds with consistent spacing and optional dividers. */
 export class VoidList extends VoidElement {
   @property({ type: Boolean, reflect: true }) dividers = false;
 
@@ -15,6 +16,7 @@ if (!customElements.get('void-list')) {
   customElements.define('void-list', VoidList);
 }
 
+/** Individual selectable item within a VoidList. */
 export class VoidListItem extends VoidElement {
   @property({ type: Boolean, reflect: true }) selected = false;
   @property({ type: Boolean, reflect: true }) disabled = false;

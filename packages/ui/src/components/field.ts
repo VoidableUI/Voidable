@@ -2,6 +2,7 @@ import { html, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
 
+/** Form field wrapper that pairs an input with its label, helper text, and validation error. */
 export class VoidField extends VoidElement {
   @property({ type: String, reflect: true }) label = '';
   @property({ type: String, reflect: true }) error = '';

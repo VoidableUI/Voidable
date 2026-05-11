@@ -7,6 +7,13 @@ const meta: Meta = {
   title: 'Components/Banner',
   component: 'void-banner',
   tags: ['autodocs'],
+  parameters: {
+    docs: {
+      description: {
+        component: 'Full-width site-level announcements for maintenance windows, cookie consent, or promotional messaging. Supports dismissible mode for one-time notices.',
+      },
+    },
+  },
   argTypes: {
     color: {
       control: { type: 'select' },

@@ -7,6 +7,13 @@ const meta: Meta = {
   title: 'Components/Tooltip',
   component: 'void-tooltip',
   tags: ['autodocs'],
+  parameters: {
+    docs: {
+      description: {
+        component: 'Hover-triggered label for icon buttons, abbreviated text, and UI controls that need a brief text explanation without taking up permanent space. Positions automatically around the trigger element.',
+      },
+    },
+  },
   argTypes: {
     text: {
       control: { type: 'text' },

@@ -6,6 +6,13 @@ import '@voidable/theme';
 const meta: Meta = {
   title: 'Form/FileUpload',
   tags: ['autodocs'],
+  parameters: {
+    docs: {
+      description: {
+        component: 'Drag-and-drop file picker for document upload forms, image attachment flows, and import wizards. Supports file type filtering, multiple files, and size validation.',
+      },
+    },
+  },
   argTypes: {
     accept: { control: 'text' },
     multiple: { control: 'boolean' },

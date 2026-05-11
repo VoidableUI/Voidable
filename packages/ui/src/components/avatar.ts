@@ -2,6 +2,7 @@ import { html } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
 
+/** User identity display for comment threads, user lists, and profile cards; falls back to initials when no image is provided. */
 export class VoidAvatar extends VoidElement {
   @property({ type: String, reflect: true }) src: string = '';
   @property({ type: String, reflect: true }) alt: string = '';

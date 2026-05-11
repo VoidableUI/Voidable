@@ -2,6 +2,7 @@ import { html } from 'lit';
 import { property, state } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
 
+/** Hover hint for icon buttons and truncated text that need a label without cluttering the visible interface. */
 export class VoidTooltip extends VoidElement {
   @property({ type: String }) text = '';
   @property({ type: String, reflect: true }) position: 'top' | 'bottom' | 'left' | 'right' = 'top';

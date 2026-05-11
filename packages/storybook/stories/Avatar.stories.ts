@@ -7,6 +7,13 @@ const meta: Meta = {
   title: 'Components/Avatar',
   component: 'void-avatar',
   tags: ['autodocs'],
+  parameters: {
+    docs: {
+      description: {
+        component: 'User identity representation in comment threads, user lists, and profile cards. Falls back to initials when no image is available.',
+      },
+    },
+  },
   argTypes: {
     src: { control: { type: 'text' } },
     alt: { control: { type: 'text' } },

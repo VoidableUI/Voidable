@@ -6,6 +6,13 @@ import '@voidable/theme';
 const meta: Meta = {
   title: 'Navigation/Breadcrumbs',
   tags: ['autodocs'],
+  parameters: {
+    docs: {
+      description: {
+        component: 'Navigation trail for deep page hierarchies in dashboards, e-commerce category trees, and file browsers. Helps users understand their location and navigate back.',
+      },
+    },
+  },
   argTypes: {
     separator: { control: 'text' },
   },

@@ -2,6 +2,7 @@ import { html, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
 
+/** Inline contextual message for form validation feedback, permission warnings, and system status notices. */
 export class VoidAlert extends VoidElement {
   @property({ type: String, reflect: true }) color: 'default' | 'error' | 'warning' | 'success' | 'info' | 'notice' = 'default';
   @property({ type: Boolean, reflect: true }) dismissible = false;

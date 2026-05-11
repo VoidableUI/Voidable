@@ -7,6 +7,13 @@ import '@voidable/theme';
 const meta: Meta = {
   title: 'Navigation/Hamburger',
   tags: ['autodocs'],
+  parameters: {
+    docs: {
+      description: {
+        component: 'Animated open/close toggle for mobile navigation menus and collapsible sidebars. Communicates open state visually through a morphing icon.',
+      },
+    },
+  },
   argTypes: {
     active: { control: 'boolean' },
     size: { control: 'select', options: ['sm', 'md', 'lg'] },

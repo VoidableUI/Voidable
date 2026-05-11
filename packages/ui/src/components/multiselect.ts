@@ -2,6 +2,7 @@ import { html, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
 
+/** Selectable option child element for VoidMultiselect and VoidCombobox. */
 export class VoidOption extends VoidElement {
   @property({ type: String, reflect: true }) value = '';
   @property({ type: Boolean, reflect: true }) selected = false;
@@ -12,6 +13,7 @@ if (!customElements.get('void-option')) {
   customElements.define('void-option', VoidOption);
 }
 
+/** Multi-value picker for tag selection, permission assignment, and filter fields that allow several simultaneous choices. */
 export class VoidMultiselect extends VoidElement {
   @property({ type: String }) placeholder = 'Select...';
   @property({ type: Boolean, reflect: true }) disabled = false;

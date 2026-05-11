@@ -2,6 +2,7 @@ import { html } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
 
+/** Top application navigation bar for branding, primary links, and user account controls. */
 export class VoidNavBar extends VoidElement {
   @property({ type: Boolean, reflect: true }) sticky = false;
   @property({ type: Boolean, reflect: true }) bordered = true;

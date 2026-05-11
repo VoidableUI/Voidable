@@ -2,6 +2,7 @@ import { html } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
 
+/** Single-line text entry for login forms, search fields, and structured data capture. */
 export class VoidInput extends VoidElement {
   @property({ type: String, reflect: true }) type: 'text' | 'email' | 'password' | 'number' | 'tel' | 'url' | 'search' = 'text';
   @property({ type: String }) value = '';

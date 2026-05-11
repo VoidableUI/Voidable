@@ -3,6 +3,7 @@ import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
 import type { VoidCheckbox } from './checkbox.js';
 
+/** Grouped multi-option selection for preference forms, filter panels, and permission editors. */
 export class VoidCheckboxGroup extends VoidElement {
   @property({ type: String, reflect: true }) label = '';
   @property({ type: String, reflect: true }) orientation: 'vertical' | 'horizontal' = 'vertical';

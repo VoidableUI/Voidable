@@ -6,6 +6,13 @@ import '@voidable/theme';
 const meta: Meta = {
   title: 'Form/Field',
   tags: ['autodocs'],
+  parameters: {
+    docs: {
+      description: {
+        component: 'Form field wrapper that pairs an input with its label, helper text, and error message. Use it to ensure consistent spacing and accessible association in any form.',
+      },
+    },
+  },
   argTypes: {
     label: { control: 'text' },
     helper: { control: 'text' },

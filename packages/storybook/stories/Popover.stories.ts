@@ -7,6 +7,13 @@ const meta: Meta = {
   title: 'Components/Popover',
   component: 'void-popover',
   tags: ['autodocs'],
+  parameters: {
+    docs: {
+      description: {
+        component: 'Click-triggered floating overlay for user menus, filter panels, and contextual detail cards that need richer content than a tooltip. Closes on outside click or Escape.',
+      },
+    },
+  },
   argTypes: {
     open: {
       control: { type: 'boolean' },

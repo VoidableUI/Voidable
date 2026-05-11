@@ -8,6 +8,13 @@ const meta: Meta = {
   title: 'Components/Toast',
   component: 'void-toast',
   tags: ['autodocs'],
+  parameters: {
+    docs: {
+      description: {
+        component: 'Ephemeral notification for confirming actions, surfacing errors, and delivering system messages without interrupting the user flow. Stacks in a corner via VoidToastContainer and auto-dismisses after a configurable duration.',
+      },
+    },
+  },
   argTypes: {
     color: {
       control: { type: 'select' },

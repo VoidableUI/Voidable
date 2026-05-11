@@ -2,6 +2,7 @@ import { html } from 'lit';
 import { property, query } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
 
+/** Rich text entry area for messaging UIs, comment boxes, and social post composers. */
 export class VoidComposeInput extends VoidElement {
   @property({ type: String }) value = '';
   @property({ type: String, reflect: true }) placeholder = 'Type a message...';

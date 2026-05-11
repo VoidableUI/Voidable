@@ -7,6 +7,13 @@ import '@voidable/theme';
 const meta: Meta = {
   title: 'Form/Slider',
   tags: ['autodocs'],
+  parameters: {
+    docs: {
+      description: {
+        component: 'Drag-to-set range input for volume controls, price filters, and settings with continuous numeric values. Supports min/max/step constraints and an optional value readout.',
+      },
+    },
+  },
   argTypes: {
     value: { control: 'number' },
     min: { control: 'number' },

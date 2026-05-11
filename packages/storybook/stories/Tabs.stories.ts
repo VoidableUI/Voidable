@@ -6,6 +6,13 @@ import '@voidable/theme';
 const meta: Meta = {
   title: 'Components/Tabs',
   tags: ['autodocs'],
+  parameters: {
+    docs: {
+      description: {
+        component: 'Section switcher for detail pages, settings screens, and documentation layouts that organize related content into named panels without a full page navigation. Only the active panel is visible.',
+      },
+    },
+  },
   argTypes: {
     size: { control: 'select', options: ['sm', 'md', 'lg'] },
     value: { control: 'text' },

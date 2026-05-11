@@ -7,6 +7,13 @@ const meta: Meta = {
   title: 'Components/Progress',
   component: 'void-progress',
   tags: ['autodocs'],
+  parameters: {
+    docs: {
+      description: {
+        component: 'Linear progress indicator for file uploads, multi-step form completion, and background tasks. Supports an indeterminate mode for operations with unknown duration.',
+      },
+    },
+  },
   argTypes: {
     value: {
       control: { type: 'range', min: 0, max: 100, step: 1 },

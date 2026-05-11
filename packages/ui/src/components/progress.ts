@@ -2,6 +2,7 @@ import { html } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
 
+/** Visual progress indicator for file uploads, multi-step processes, and loading states. */
 export class VoidProgress extends VoidElement {
   @property({ type: Number, reflect: true }) value: number = 0;
   @property({ type: Number, reflect: true }) max: number = 100;

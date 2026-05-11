@@ -1,6 +1,7 @@
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
 
+/** Action trigger for forms, dialogs, and toolbars; supports loading states and semantic color variants. */
 export class VoidButton extends VoidElement {
   static formAssociated = true;
 

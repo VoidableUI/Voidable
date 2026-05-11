@@ -7,6 +7,13 @@ import '@voidable/theme';
 const meta: Meta = {
   title: 'Form/Radio',
   tags: ['autodocs'],
+  parameters: {
+    docs: {
+      description: {
+        component: 'Individual radio button for use within a RadioGroup or custom form layouts where mutually exclusive selection is needed. Supports semantic color states and multiple sizes.',
+      },
+    },
+  },
   argTypes: {
     checked: { control: 'boolean' },
     disabled: { control: 'boolean' },

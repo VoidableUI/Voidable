@@ -1,6 +1,7 @@
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
 
+/** Presence indicator for user lists and chat rosters showing online/away/offline state at a glance. */
 export class VoidStatusDot extends VoidElement {
   @property({ type: String, reflect: true }) status: 'online' | 'away' | 'offline' = 'offline';
 

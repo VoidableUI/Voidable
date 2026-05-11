@@ -7,6 +7,13 @@ const meta: Meta = {
   title: 'Components/Sidebar',
   component: 'void-sidebar',
   tags: ['autodocs'],
+  parameters: {
+    docs: {
+      description: {
+        component: 'Collapsible navigation panel for app shells, admin dashboards, and documentation sites with a persistent left or right navigation rail. Transitions smoothly between expanded and icon-only collapsed states.',
+      },
+    },
+  },
   argTypes: {
     collapsed: {
       control: { type: 'boolean' },

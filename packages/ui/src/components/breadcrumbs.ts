@@ -2,6 +2,7 @@ import { html } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
 
+/** Navigation trail for deep page hierarchies in dashboards, e-commerce category trees, and file browsers. */
 export class VoidBreadcrumbs extends VoidElement {
   @property({ type: String }) separator = '/';
 

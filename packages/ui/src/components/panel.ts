@@ -2,6 +2,7 @@ import { html, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
 
+/** Bordered or elevated content region for grouping related settings, dashboard sections, and detail blocks. */
 export class VoidPanel extends VoidElement {
   @property({ type: String, reflect: true }) label = '';
   @property({ type: String, reflect: true }) variant: 'default' | 'bordered' | 'elevated' = 'default';

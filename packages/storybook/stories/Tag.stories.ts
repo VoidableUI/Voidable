@@ -7,6 +7,13 @@ const meta: Meta = {
   title: 'Components/Tag',
   component: 'void-tag',
   tags: ['autodocs'],
+  parameters: {
+    docs: {
+      description: {
+        component: 'Compact label for categories, status chips, and applied filter indicators. Use the removable variant in filter bars and multiselect chips where users need to dismiss individual tags.',
+      },
+    },
+  },
   argTypes: {
     color: {
       control: { type: 'select' },

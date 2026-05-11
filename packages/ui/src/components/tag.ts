@@ -2,6 +2,7 @@ import { html, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
 
+/** Removable label chip for selected filters, applied tags, and multi-value inputs. */
 export class VoidTag extends VoidElement {
   @property({ type: String, reflect: true }) color: 'default' | 'error' | 'warning' | 'success' | 'info' | 'notice' = 'default';
   @property({ type: Boolean, reflect: true }) removable = false;

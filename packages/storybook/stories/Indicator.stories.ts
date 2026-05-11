@@ -7,6 +7,13 @@ const meta: Meta = {
   title: 'Components/Indicator',
   component: 'void-indicator',
   tags: ['autodocs'],
+  parameters: {
+    docs: {
+      description: {
+        component: 'Badge overlay for notification counts on icons, unread message dots on avatars, and online presence signals. Supports ping animation for real-time attention cues.',
+      },
+    },
+  },
   argTypes: {
     color: {
       control: { type: 'select' },

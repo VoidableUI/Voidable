@@ -7,6 +7,13 @@ import '@voidable/theme';
 const meta: Meta = {
   title: 'Components/Accordion',
   tags: ['autodocs'],
+  parameters: {
+    docs: {
+      description: {
+        component: 'Collapsible content sections for FAQs, settings panels, and long-form content that users explore selectively. Supports multiple-open mode for independent sections.',
+      },
+    },
+  },
   argTypes: {
     multiple: { control: 'boolean' },
   },

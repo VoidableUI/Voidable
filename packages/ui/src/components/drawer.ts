@@ -2,6 +2,7 @@ import { html, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
 
+/** Slide-out overlay panel for filters, detail views, and navigation menus; opens from any screen edge. */
 export class VoidDrawer extends VoidElement {
   @property({ type: Boolean, reflect: true }) open = false;
   @property({ type: String, reflect: true }) side: 'left' | 'right' | 'top' | 'bottom' = 'right';

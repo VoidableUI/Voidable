@@ -6,6 +6,13 @@ import '@voidable/theme';
 const meta: Meta = {
   title: 'Form/Multiselect',
   tags: ['autodocs'],
+  parameters: {
+    docs: {
+      description: {
+        component: 'Multi-value picker for tag selection, permission assignment, and filter fields that allow several simultaneous choices. Selected values appear as removable chips.',
+      },
+    },
+  },
   argTypes: {
     disabled: { control: 'boolean' },
     size: { control: 'select', options: ['sm', 'md', 'lg', 'xl', 'xxl'] },

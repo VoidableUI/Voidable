@@ -2,6 +2,7 @@ import { html } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
 
+/** Collapsible section container for FAQs, settings panels, and long-form content organized into expandable items. */
 export class VoidAccordion extends VoidElement {
   @property({ type: Boolean, reflect: true }) multiple = false;
 }
@@ -10,6 +11,7 @@ if (!customElements.get('void-accordion')) {
   customElements.define('void-accordion', VoidAccordion);
 }
 
+/** Individual collapsible item within a VoidAccordion; renders a heading trigger and toggleable content body. */
 export class VoidAccordionItem extends VoidElement {
   @property({ type: String }) heading = '';
   @property({ type: Boolean, reflect: true }) open = false;

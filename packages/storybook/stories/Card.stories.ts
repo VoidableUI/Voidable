@@ -7,6 +7,13 @@ const meta: Meta = {
   title: 'Components/Card',
   component: 'void-card',
   tags: ['autodocs'],
+  parameters: {
+    docs: {
+      description: {
+        component: 'Content grouping containers for dashboard widgets, product listings, and media previews. Supports heading, variants, and configurable padding.',
+      },
+    },
+  },
   argTypes: {
     heading: {
       control: { type: 'text' },

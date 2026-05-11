@@ -7,6 +7,13 @@ import '@voidable/theme';
 const meta: Meta = {
   title: 'Components/Button',
   tags: ['autodocs'],
+  parameters: {
+    docs: {
+      description: {
+        component: 'Triggers actions in forms, dialogs, and toolbars. Supports loading states for async operations and multiple color variants for semantic emphasis.',
+      },
+    },
+  },
   argTypes: {
     variant: { control: 'select', options: ['outline', 'filled'] },
     color: { control: 'select', options: ['default', 'error', 'warning', 'success', 'info', 'notice'] },

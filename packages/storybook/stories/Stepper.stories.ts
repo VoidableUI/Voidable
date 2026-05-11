@@ -6,6 +6,13 @@ import '@voidable/theme';
 const meta: Meta = {
   title: 'Navigation/Stepper',
   tags: ['autodocs'],
+  parameters: {
+    docs: {
+      description: {
+        component: 'Step progress indicator for multi-stage wizards, onboarding flows, and checkout sequences that need to show the user where they are and how many steps remain.',
+      },
+    },
+  },
   argTypes: {
     value: { control: { type: 'range', min: 0, max: 5, step: 1 } },
     steps: { control: 'text' },

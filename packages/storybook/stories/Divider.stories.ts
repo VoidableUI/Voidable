@@ -6,6 +6,13 @@ import '@voidable/theme';
 const meta: Meta = {
   title: 'Components/Divider',
   tags: ['autodocs'],
+  parameters: {
+    docs: {
+      description: {
+        component: 'Visual separation between sections in forms, sidebars, and content layouts. Supports optional labels for section headings and both horizontal and vertical orientations.',
+      },
+    },
+  },
   argTypes: {
     label: { control: 'text' },
     orientation: { control: 'select', options: ['horizontal', 'vertical'] },

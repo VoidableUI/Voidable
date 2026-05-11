@@ -2,6 +2,7 @@ import { html } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
 
+/** Individual tab content panel within a VoidTabs component. */
 export class VoidTabPanel extends VoidElement {
   @property({ type: String, reflect: true }) tab = '';
   @property({ type: String, reflect: true }) label = '';
@@ -25,6 +26,7 @@ if (!customElements.get('void-tab-panel')) {
   customElements.define('void-tab-panel', VoidTabPanel);
 }
 
+/** Tabbed section navigation for settings pages, detail views, and parallel content categories. */
 export class VoidTabs extends VoidElement {
   @property({ type: String }) value = '';
   @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' = 'md';

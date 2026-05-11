@@ -7,6 +7,13 @@ const meta: Meta = {
   title: 'Navigation/NavBar',
   component: 'void-nav-bar',
   tags: ['autodocs'],
+  parameters: {
+    docs: {
+      description: {
+        component: 'Top application navigation bar for branding, primary links, and user account controls. Supports sticky positioning and an elevated variant for visual separation.',
+      },
+    },
+  },
   argTypes: {
     sticky: {
       control: { type: 'boolean' },

@@ -2,6 +2,7 @@ import { html } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
 
+/** Multi-line text entry for comment fields, description inputs, and freeform text that needs more than one line. */
 export class VoidTextarea extends VoidElement {
   @property({ type: String }) value = '';
   @property({ type: String, reflect: true }) placeholder = '';

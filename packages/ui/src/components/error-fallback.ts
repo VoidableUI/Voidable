@@ -2,6 +2,7 @@ import { html, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
 
+/** Error state display for failed data fetches and unexpected runtime errors; includes an optional retry action. */
 export class VoidErrorFallback extends VoidElement {
   @property({ type: String }) heading = 'Something went wrong';
   @property({ type: String }) message = '';

@@ -7,6 +7,13 @@ import '@voidable/theme';
 const meta: Meta = {
   title: 'Form/Checkbox',
   tags: ['autodocs'],
+  parameters: {
+    docs: {
+      description: {
+        component: 'Binary or indeterminate selection for form fields, data table row selection, and toggle-able settings. Supports the indeterminate state for parent/child selection patterns.',
+      },
+    },
+  },
   argTypes: {
     checked: { control: 'boolean' },
     disabled: { control: 'boolean' },

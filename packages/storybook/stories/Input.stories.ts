@@ -6,6 +6,13 @@ import '@voidable/theme';
 const meta: Meta = {
   title: 'Form/Input',
   tags: ['autodocs'],
+  parameters: {
+    docs: {
+      description: {
+        component: 'Single-line text entry for login forms, search fields, and any structured data capture. Supports common input types, sizes, and inline validation errors.',
+      },
+    },
+  },
   argTypes: {
     type: { control: 'select', options: ['text', 'email', 'password', 'number', 'tel', 'url', 'search'] },
     placeholder: { control: 'text' },

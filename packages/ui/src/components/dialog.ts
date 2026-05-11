@@ -2,6 +2,7 @@ import { html, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
 
+/** Modal overlay for confirmations, detail views, and multi-step forms that require user attention before continuing. */
 export class VoidDialog extends VoidElement {
   @property({ type: Boolean, reflect: true }) open = false;
   @property({ type: String }) heading = '';

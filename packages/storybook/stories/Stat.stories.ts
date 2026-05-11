@@ -7,6 +7,13 @@ const meta: Meta = {
   title: 'Components/Stat',
   component: 'void-stat',
   tags: ['autodocs'],
+  parameters: {
+    docs: {
+      description: {
+        component: 'KPI tile for analytics dashboards, admin summaries, and reporting pages that display a single metric with an optional delta and trend indicator. Supports semantic color coding to signal status at a glance.',
+      },
+    },
+  },
   argTypes: {
     color: {
       control: { type: 'select' },

@@ -1,6 +1,7 @@
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
 
+/** Pressable toggle button for toolbar actions and editor formatting controls with binary active/inactive state. */
 export class VoidToggle extends VoidElement {
   @property({ type: Boolean, reflect: true }) pressed = false;
   @property({ type: Boolean, reflect: true }) disabled = false;

@@ -6,6 +6,13 @@ import '@voidable/theme';
 const meta: Meta = {
   title: 'Form/Combobox',
   tags: ['autodocs'],
+  parameters: {
+    docs: {
+      description: {
+        component: 'Filterable dropdown for long option lists like country selectors, user assignment fields, and tag pickers. Users can type to narrow results before selecting.',
+      },
+    },
+  },
   argTypes: {
     disabled: { control: 'boolean' },
     size: { control: 'select', options: ['sm', 'md', 'lg', 'xl', 'xxl'] },

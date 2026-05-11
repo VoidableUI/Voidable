@@ -7,6 +7,13 @@ const meta: Meta = {
   title: 'Components/ErrorFallback',
   component: 'void-error-fallback',
   tags: ['autodocs'],
+  parameters: {
+    docs: {
+      description: {
+        component: 'Error state display for failed data fetches, broken features, and unexpected runtime errors. Provides an optional retry action to let users recover without a full page reload.',
+      },
+    },
+  },
   argTypes: {
     heading: {
       control: { type: 'text' },

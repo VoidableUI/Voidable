@@ -7,6 +7,13 @@ const meta: Meta = {
   title: 'Components/Panel',
   component: 'void-panel',
   tags: ['autodocs'],
+  parameters: {
+    docs: {
+      description: {
+        component: 'Structural content container for settings sections, detail views, and grouped information in dashboards. Supports labelled, bordered, and elevated variants for visual hierarchy.',
+      },
+    },
+  },
   argTypes: {
     label: {
       control: { type: 'text' },

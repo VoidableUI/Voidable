@@ -7,6 +7,13 @@ import '@voidable/theme';
 const meta: Meta = {
   title: 'Components/List',
   tags: ['autodocs'],
+  parameters: {
+    docs: {
+      description: {
+        component: 'Structured item lists for menus, option sets, and content feeds where items benefit from consistent spacing and optional dividers.',
+      },
+    },
+  },
   argTypes: {
     dividers: { control: 'boolean' },
   },

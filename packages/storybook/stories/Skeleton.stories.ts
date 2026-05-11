@@ -6,6 +6,14 @@ import '@voidable/theme';
 const meta: Meta = {
   title: 'Components/Skeleton',
   component: 'void-skeleton',
+  tags: ['autodocs'],
+  parameters: {
+    docs: {
+      description: {
+        component: 'Animated placeholder for content that is loading — use in card grids, feed lists, and profile pages to reduce perceived wait time. Comes in text, circular, and rectangular shapes to match the content it replaces.',
+      },
+    },
+  },
   argTypes: {
     variant: {
       control: { type: 'select' },

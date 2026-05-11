@@ -3,6 +3,7 @@ import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
 import type { VoidRadio } from './radio.js';
 
+/** Mutually exclusive option group for plan pickers, survey questions, and preference settings. */
 export class VoidRadioGroup extends VoidElement {
   @property({ type: String }) label = '';
   @property({ type: String }) value = '';

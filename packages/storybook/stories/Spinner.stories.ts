@@ -7,6 +7,13 @@ import '@voidable/theme';
 const meta: Meta = {
   title: 'Components/Spinner',
   tags: ['autodocs'],
+  parameters: {
+    docs: {
+      description: {
+        component: 'Inline loading indicator for button loading states, data fetch placeholders, and async operations where a full-screen overlay would be too disruptive. Accessible via an aria-label.',
+      },
+    },
+  },
   argTypes: {
     size: { control: 'select', options: ['sm', 'md', 'lg', 'xl', 'xxl'] },
     label: { control: 'text' },

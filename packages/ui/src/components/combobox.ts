@@ -3,6 +3,7 @@ import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
 import { VoidOption } from './multiselect.js';
 
+/** Filterable dropdown for long option lists like country selectors, user assignment fields, and tag pickers. */
 export class VoidCombobox extends VoidElement {
   @property({ type: String }) value = '';
   @property({ type: String }) placeholder = 'Search...';

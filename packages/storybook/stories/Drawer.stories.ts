@@ -7,6 +7,13 @@ const meta: Meta = {
   title: 'Components/Drawer',
   component: 'void-drawer',
   tags: ['autodocs'],
+  parameters: {
+    docs: {
+      description: {
+        component: 'Slide-out panels for filters, detail views, and navigation menus that need to overlay content without a full page change. Opens from any edge of the screen.',
+      },
+    },
+  },
   argTypes: {
     open: {
       control: { type: 'boolean' },

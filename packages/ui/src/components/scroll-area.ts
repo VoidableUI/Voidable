@@ -2,6 +2,7 @@ import { html } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
 
+/** Scrollable container with styled scrollbars for long content areas, code blocks, and chat histories. */
 export class VoidScrollArea extends VoidElement {
   @property({ type: String }) maxHeight = '';
   @property({ type: String, reflect: true }) direction: 'vertical' | 'horizontal' | 'both' = 'vertical';

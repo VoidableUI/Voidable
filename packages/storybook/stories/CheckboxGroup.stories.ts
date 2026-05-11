@@ -7,6 +7,13 @@ import '@voidable/theme';
 const meta: Meta = {
   title: 'Form/CheckboxGroup',
   tags: ['autodocs'],
+  parameters: {
+    docs: {
+      description: {
+        component: 'Multi-option selection for preference forms, filter panels, and permission editors. Groups related checkboxes with an accessible label and shared orientation.',
+      },
+    },
+  },
   argTypes: {
     label: { control: 'text' },
     orientation: { control: 'select', options: ['vertical', 'horizontal'] },

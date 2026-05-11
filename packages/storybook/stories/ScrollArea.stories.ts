@@ -7,6 +7,13 @@ const meta: Meta = {
   title: 'Components/ScrollArea',
   component: 'void-scroll-area',
   tags: ['autodocs'],
+  parameters: {
+    docs: {
+      description: {
+        component: 'Height-constrained scrollable region for long lists, code blocks, and log viewers that need consistent, cross-browser scrollbar styling. Supports vertical, horizontal, and bidirectional scroll.',
+      },
+    },
+  },
   argTypes: {
     maxHeight: {
       control: { type: 'text' },

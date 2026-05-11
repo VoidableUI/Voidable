@@ -7,6 +7,13 @@ const meta: Meta = {
   title: 'Components/Alert',
   component: 'void-alert',
   tags: ['autodocs'],
+  parameters: {
+    docs: {
+      description: {
+        component: 'Inline contextual messages for form validation feedback, permission warnings, and system status notices. Supports dismissible mode for transient messages.',
+      },
+    },
+  },
   argTypes: {
     color: {
       control: { type: 'select' },

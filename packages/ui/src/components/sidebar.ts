@@ -1,6 +1,7 @@
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
 
+/** Collapsible side navigation for app shells, admin panels, and documentation sites. */
 export class VoidSidebar extends VoidElement {
   @property({ type: Boolean, reflect: true }) collapsed = false;
   @property({ type: String, reflect: true }) width = 'var(--void-sidebar-width)';

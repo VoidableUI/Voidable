@@ -7,6 +7,13 @@ import '@voidable/theme';
 const meta: Meta = {
   title: 'Form/RadioGroup',
   tags: ['autodocs'],
+  parameters: {
+    docs: {
+      description: {
+        component: 'Managed set of radio buttons for plan selection, preference settings, and any single-choice field where all options should be visible at once. Renders vertically or horizontally.',
+      },
+    },
+  },
   argTypes: {
     label: { control: 'text' },
     value: { control: 'text' },

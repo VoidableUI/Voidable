@@ -7,6 +7,13 @@ const meta: Meta = {
   title: 'Components/Table',
   component: 'void-table',
   tags: ['autodocs'],
+  parameters: {
+    docs: {
+      description: {
+        component: 'Styled wrapper for HTML tables in data-dense admin views, user lists, and reporting pages. Provides striped, hoverable, compact, and bordered variants without imposing a rigid data model.',
+      },
+    },
+  },
   argTypes: {
     striped: {
       control: { type: 'boolean' },

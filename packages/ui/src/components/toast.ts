@@ -2,6 +2,7 @@ import { html, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
 
+/** Temporary notification for action confirmations, error alerts, and copy-to-clipboard feedback. */
 export class VoidToast extends VoidElement {
   @property({ type: String, reflect: true })
   color: 'default' | 'error' | 'warning' | 'success' | 'info' = 'default';
@@ -53,6 +54,7 @@ declare global {
   }
 }
 
+/** Container that manages toast positioning and provides a static show() helper for programmatic toast display. */
 export class VoidToastContainer extends VoidElement {
   @property({ type: String, reflect: true })
   position: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left' | 'top-center' | 'bottom-center' = 'bottom-right';

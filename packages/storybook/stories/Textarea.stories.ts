@@ -7,6 +7,13 @@ import '@voidable/theme';
 const meta: Meta = {
   title: 'Form/Textarea',
   tags: ['autodocs'],
+  parameters: {
+    docs: {
+      description: {
+        component: 'Multi-line text entry for comment fields, bio inputs, and description forms where users need room to write paragraphs. Supports resize control, row count, and validation error display.',
+      },
+    },
+  },
   argTypes: {
     placeholder: { control: 'text' },
     disabled: { control: 'boolean' },

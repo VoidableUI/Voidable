@@ -2,6 +2,7 @@ import { html, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
 
+/** Page navigation for data tables, search result lists, and content archives. */
 export class VoidPagination extends VoidElement {
   @property({ type: Number }) total = 1;
   @property({ type: Number, reflect: true }) value = 1;

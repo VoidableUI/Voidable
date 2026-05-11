@@ -7,6 +7,13 @@ import '@voidable/theme';
 const meta: Meta = {
   title: 'Components/Switch',
   tags: ['autodocs'],
+  parameters: {
+    docs: {
+      description: {
+        component: 'Binary toggle for enabling or disabling features, notification preferences, and settings where the effect is immediate and reversible. More discoverable than a checkbox for standalone boolean options.',
+      },
+    },
+  },
   argTypes: {
     checked: { control: 'boolean' },
     disabled: { control: 'boolean' },

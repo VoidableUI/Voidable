@@ -7,6 +7,13 @@ import '@voidable/theme';
 const meta: Meta = {
   title: 'Components/DropdownMenu',
   tags: ['autodocs'],
+  parameters: {
+    docs: {
+      description: {
+        component: 'Trigger-anchored action menus for row actions in tables, toolbar overflow menus, and context menus. Supports keyboard navigation and a destructive item variant.',
+      },
+    },
+  },
 };
 
 export default meta;

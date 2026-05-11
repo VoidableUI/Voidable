@@ -6,6 +6,13 @@ import '@voidable/theme';
 const meta: Meta = {
   title: 'Components/Toggle',
   tags: ['autodocs'],
+  parameters: {
+    docs: {
+      description: {
+        component: 'Pressable button with an active/inactive state for text-formatting controls, toolbar options, and feature flags that need a persistent pressed appearance. Use ToggleGroup to coordinate mutual exclusivity.',
+      },
+    },
+  },
   argTypes: {
     pressed: { control: 'boolean' },
     disabled: { control: 'boolean' },

@@ -2,6 +2,7 @@ import { html } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
 
+/** Animated open/close toggle for mobile navigation menus and collapsible sidebars. */
 export class VoidHamburger extends VoidElement {
   @property({ type: Boolean, reflect: true }) active = false;
   @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' = 'md';

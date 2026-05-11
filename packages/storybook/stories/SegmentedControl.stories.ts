@@ -6,6 +6,13 @@ import '@voidable/theme';
 const meta: Meta = {
   title: 'Components/SegmentedControl',
   tags: ['autodocs'],
+  parameters: {
+    docs: {
+      description: {
+        component: 'Compact single-select control for view switchers, time-range pickers, and chart type toggles where options are mutually exclusive and few in number. Renders as a connected button group with an active indicator.',
+      },
+    },
+  },
   argTypes: {
     value: { control: 'text' },
     size: { control: 'select', options: ['sm', 'md', 'lg', 'xl', 'xxl'] },

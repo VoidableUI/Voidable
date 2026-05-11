@@ -7,6 +7,13 @@ const meta: Meta = {
   title: 'Components/Dialog',
   component: 'void-dialog',
   tags: ['autodocs'],
+  parameters: {
+    docs: {
+      description: {
+        component: 'Modal overlays for confirmations, detail views, and multi-step forms that require user attention before continuing. Traps focus and blocks interaction with the page behind.',
+      },
+    },
+  },
   argTypes: {
     heading: {
       control: { type: 'text' },

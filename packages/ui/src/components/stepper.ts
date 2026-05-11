@@ -2,6 +2,7 @@ import { html, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
 
+/** Multi-step progress tracker for onboarding flows, checkout funnels, and guided wizards. */
 export class VoidStepper extends VoidElement {
   @property({ type: Number, reflect: true }) value: number = 0;
   @property({ reflect: true }) steps: string = '';

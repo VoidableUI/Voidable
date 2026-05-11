@@ -7,6 +7,13 @@ import '@voidable/theme';
 const meta: Meta = {
   title: 'Components/ComposeInput',
   tags: ['autodocs'],
+  parameters: {
+    docs: {
+      description: {
+        component: 'Rich text entry area for messaging UIs, comment boxes, and social post composers. Supports character limits and a disabled state for read-only contexts.',
+      },
+    },
+  },
   argTypes: {
     placeholder: { control: 'text' },
     disabled: { control: 'boolean' },

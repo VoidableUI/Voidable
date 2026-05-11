@@ -2,6 +2,7 @@ import { html, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
 
+/** Content grouping container for dashboard widgets, product listings, and media previews. */
 export class VoidCard extends VoidElement {
   @property({ type: String }) heading = '';
   @property({ type: String, reflect: true }) variant: 'default' | 'elevated' | 'outlined' = 'default';

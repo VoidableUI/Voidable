@@ -1,6 +1,7 @@
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
 
+/** Styled data table for admin lists, report grids, and comparison layouts. */
 export class VoidTable extends VoidElement {
   @property({ type: Boolean, reflect: true }) striped = false;
   @property({ type: Boolean, reflect: true }) hoverable = false;

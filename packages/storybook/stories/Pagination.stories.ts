@@ -6,6 +6,13 @@ import '@voidable/theme';
 const meta: Meta = {
   title: 'Navigation/Pagination',
   tags: ['autodocs'],
+  parameters: {
+    docs: {
+      description: {
+        component: 'Page navigation for data tables, search result lists, and content archives with many pages. Renders first/last, siblings, and ellipsis intelligently.',
+      },
+    },
+  },
   argTypes: {
     total: { control: 'number' },
     value: { control: 'number' },

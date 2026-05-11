@@ -6,6 +6,13 @@ import '@voidable/theme';
 const meta: Meta = {
   title: 'Form/Select',
   tags: ['autodocs'],
+  parameters: {
+    docs: {
+      description: {
+        component: 'Native dropdown for small option sets where a simple pick-one is sufficient. Use Combobox when options need search, or Multiselect when multiple values can be chosen.',
+      },
+    },
+  },
   argTypes: {
     disabled: { control: 'boolean' },
     size: { control: 'select', options: ['sm', 'md', 'lg', 'xl', 'xxl'] },

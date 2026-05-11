@@ -12,71 +12,71 @@ Voidable ships 56 components organized by category. All components render in the
 
 | Component | Tag | Description |
 |-----------|-----|-------------|
-| Card | `<void-card>` | Content container with heading, variants, and padding options |
-| Panel | `<void-panel>` | Bordered/elevated section wrapper |
-| Divider | `<void-divider>` | Horizontal or vertical separator with optional label |
-| ScrollArea | `<void-scroll-area>` | Scrollable container with styled scrollbars |
-| NavBar | `<void-nav-bar>` | Top navigation bar |
-| Sidebar | `<void-sidebar>` | Collapsible side navigation panel with configurable width and position |
+| Card | `<void-card>` | Content container for dashboard widgets, product listings, and media previews |
+| Panel | `<void-panel>` | Bordered or elevated region for grouping related settings and detail blocks |
+| Divider | `<void-divider>` | Visual separator between sections in forms, sidebars, and layouts; supports labels |
+| ScrollArea | `<void-scroll-area>` | Fixed-height scrollable container with styled scrollbars for long content and lists |
+| NavBar | `<void-nav-bar>` | Top navigation bar for branding, primary links, and user account controls |
+| Sidebar | `<void-sidebar>` | Collapsible side navigation for app shells, admin panels, and doc sites |
 
 ## Data Display
 
 | Component | Tag | Description |
 |-----------|-----|-------------|
-| Avatar | `<void-avatar>` | User image or initials |
-| Badge | `<void-badge>` | Status indicator with color and size variants |
-| List / ListItem | `<void-list>` | Structured list with optional dividers |
-| Table | `<void-table>` | Styled table with striped, hoverable, compact modes |
-| Tag | `<void-tag>` | Removable label |
-| Breadcrumbs | `<void-breadcrumbs>` | Navigation breadcrumb trail |
-| StatusDot | `<void-status-dot>` | Online/away/offline indicator |
-| Tooltip | `<void-tooltip>` | Hover tooltip with positioning |
-| Popover | `<void-popover>` | Click/manual popover with positioning |
-| Tabs / TabPanel | `<void-tabs>` | Tabbed content navigation |
-| Accordion | `<void-accordion>` / `<void-accordion-item>` | Collapsible content sections |
-| Stepper | `<void-stepper>` | Multi-step progress indicator |
-| Pagination | `<void-pagination>` | Page navigation controls |
-| Indicator | `<void-indicator>` | Badge overlay with count, ping animation, and color variants |
-| Stat | `<void-stat>` | Metric display with label, value, delta, and trend |
+| Avatar | `<void-avatar>` | User identity display for comment threads and user lists; falls back to initials |
+| Badge | `<void-badge>` | Small status chip for issue trackers, tag systems, and state indicators |
+| List / ListItem | `<void-list>` | Structured item list for menus, option sets, and content feeds with optional dividers |
+| Table | `<void-table>` | Styled data table for admin lists, report grids, and comparison layouts |
+| Tag | `<void-tag>` | Removable label chip for selected filters, applied tags, and multi-value inputs |
+| Breadcrumbs | `<void-breadcrumbs>` | Navigation trail for deep hierarchies in dashboards and file browsers |
+| StatusDot | `<void-status-dot>` | Presence indicator showing online/away/offline state in user lists and rosters |
+| Tooltip | `<void-tooltip>` | Hover hint for icon buttons and truncated text without cluttering the UI |
+| Popover | `<void-popover>` | Click-triggered anchored overlay for contextual detail and mini-forms |
+| Tabs / TabPanel | `<void-tabs>` | Tabbed navigation for settings pages and parallel content categories |
+| Accordion | `<void-accordion>` / `<void-accordion-item>` | Collapsible sections for FAQs, settings panels, and long-form selective content |
+| Stepper | `<void-stepper>` | Multi-step progress tracker for onboarding flows and checkout funnels |
+| Pagination | `<void-pagination>` | Page navigation for data tables, search results, and content archives |
+| Indicator | `<void-indicator>` | Badge overlay for notification counts and unread/presence signals on icons |
+| Stat | `<void-stat>` | Key metric display for analytics dashboards with label, value, delta, and trend |
 
 ## Forms
 
 | Component | Tag | Description |
 |-----------|-----|-------------|
-| Button | `<void-button>` | Action button with variants and colors |
-| Input | `<void-input>` | Text input with type, size, and error support |
-| Textarea | `<void-textarea>` | Multi-line text input |
-| Select | `<void-select>` | Dropdown select |
-| Multiselect | `<void-multiselect>` | Multi-value select with `<void-option>` children |
-| Combobox | `<void-combobox>` | Filterable select |
-| Checkbox | `<void-checkbox>` | Checkbox with indeterminate state |
-| CheckboxGroup | `<void-checkbox-group>` | Grouped checkboxes |
-| Radio / RadioGroup | `<void-radio>` | Radio button selection |
-| Switch | `<void-switch>` | Toggle switch |
-| Slider | `<void-slider>` | Range slider with min/max/step |
-| Field | `<void-field>` | Form field wrapper with label, error, and helper text |
-| FileUpload | `<void-file-upload>` | File upload with drag-and-drop |
-| ComposeInput | `<void-compose-input>` | Rich text compose area |
-| Toggle | `<void-toggle>` | Pressable toggle button with color, size, and variant options |
-| SegmentedControl | `<void-segmented-control>` | Single-select button group with `<void-segmented-control-item>` children |
+| Button | `<void-button>` | Action trigger for forms, dialogs, and toolbars with variants and loading state |
+| Input | `<void-input>` | Single-line text entry for login forms, search fields, and structured data capture |
+| Textarea | `<void-textarea>` | Multi-line text entry for comment fields, descriptions, and freeform text |
+| Select | `<void-select>` | Native dropdown for small option sets where a simple pick-one is sufficient |
+| Multiselect | `<void-multiselect>` | Multi-value picker for tag selection and filter fields; shows chips for selected items |
+| Combobox | `<void-combobox>` | Filterable dropdown for long option lists like country selectors and user pickers |
+| Checkbox | `<void-checkbox>` | Binary or indeterminate selection for form fields and data table row selection |
+| CheckboxGroup | `<void-checkbox-group>` | Grouped multi-option selection for preference forms and filter panels |
+| Radio / RadioGroup | `<void-radio>` | Mutually exclusive option selection for plan pickers and preference settings |
+| Switch | `<void-switch>` | On/off toggle for feature flags and settings that take immediate effect |
+| Slider | `<void-slider>` | Continuous value selection for volume controls, price ranges, and numeric settings |
+| Field | `<void-field>` | Form field wrapper pairing an input with label, helper text, and validation error |
+| FileUpload | `<void-file-upload>` | Drag-and-drop file picker for document uploads and import wizards |
+| ComposeInput | `<void-compose-input>` | Rich text entry area for messaging UIs, comment boxes, and post composers |
+| Toggle | `<void-toggle>` | Pressable toggle button for toolbar actions and editor formatting controls |
+| SegmentedControl | `<void-segmented-control>` | Mutually exclusive button group for view mode toggles and compact tab-like navigation |
 
 ## Feedback
 
 | Component | Tag | Description |
 |-----------|-----|-------------|
-| Alert | `<void-alert>` | Inline alert message |
-| Banner | `<void-banner>` | Full-width banner notification |
-| Toast / ToastContainer | `<void-toast>` | Temporary notification popup |
-| Progress | `<void-progress>` | Determinate/indeterminate progress bar |
-| Spinner | `<void-spinner>` | Loading spinner |
-| Skeleton | `<void-skeleton>` | Content placeholder (text, circular, rectangular) |
-| ErrorFallback | `<void-error-fallback>` | Error state with optional retry |
-| Dialog | `<void-dialog>` | Modal dialog |
-| Drawer | `<void-drawer>` | Slide-out panel from any edge |
+| Alert | `<void-alert>` | Inline contextual message for form validation, permission warnings, and status notices |
+| Banner | `<void-banner>` | Full-width site-level announcement for maintenance windows and promotional messaging |
+| Toast / ToastContainer | `<void-toast>` | Temporary notification popup for action confirmations and status feedback |
+| Progress | `<void-progress>` | Determinate or indeterminate progress bar for uploads and multi-step processes |
+| Spinner | `<void-spinner>` | Indeterminate loading indicator for async operations and inline fetching |
+| Skeleton | `<void-skeleton>` | Content placeholder during loading for cards and lists to prevent layout shift |
+| ErrorFallback | `<void-error-fallback>` | Error state display for failed fetches and runtime errors with optional retry |
+| Dialog | `<void-dialog>` | Modal overlay for confirmations and multi-step forms requiring user attention |
+| Drawer | `<void-drawer>` | Slide-out overlay panel for filters, detail views, and navigation menus |
 
 ## Navigation
 
 | Component | Tag | Description |
 |-----------|-----|-------------|
-| Hamburger | `<void-hamburger>` | Animated hamburger menu toggle |
-| DropdownMenu | `<void-dropdown-menu>` | Trigger-anchored menu with keyboard navigation and `<void-dropdown-menu-item>` children |
+| Hamburger | `<void-hamburger>` | Animated open/close toggle for mobile nav menus and collapsible sidebars |
+| DropdownMenu | `<void-dropdown-menu>` | Trigger-anchored action menu for table row actions and toolbar overflow menus |
