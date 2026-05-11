@@ -2,19 +2,21 @@
 
 ## Current State
 
-**43 components** shipped across `@voidable/ui` + `@voidable/theme`, all with Storybook stories and vitest tests.
+**54 components** (65 custom element tags) shipped across `@voidable/ui` + `@voidable/theme`, all with Storybook stories and vitest tests.
 
-**6 framework adapter packages** scaffolded (empty shells):
-- `@voidable/ui-react` — React 18/19
-- `@voidable/ui-vue` — Vue 3.4+
-- `@voidable/ui-solid` — Solid 1.8+
-- `@voidable/ui-svelte` — Svelte 5+
-- `@voidable/ui-angular` — Angular 18/19/20
-- `@voidable/ui-liveview` — Phoenix LiveView 1.0+
+**8 framework adapter packages:**
+- `@voidable/ui-react` — React 18/19 — **implemented** (typed wrappers, event bridging, ref forwarding, useTheme hook)
+- `@voidable/ui-vue` — Vue 3.4+ — native CE (useTheme composable; Vue handles CEs natively)
+- `@voidable/ui-solid` — Solid 1.8+ — native CE (useTheme hook; Solid handles CEs natively)
+- `@voidable/ui-svelte` — Svelte 5+ — native CE (theme store; Svelte handles CEs natively)
+- `@voidable/ui-angular` — Angular 18/19/20 — partial (VoidableModule + ThemeService, no directive wrappers)
+- `@voidable/ui-liveview` — Phoenix LiveView 1.0+ — **implemented** (VoidHooks JS + HEEx function components)
+- `@voidable/ui-hotwire` — Stimulus/Turbo — **implemented** (VoidEventController + Ruby gem helpers)
+- `@voidable/ui-alpine` — Alpine.js — **implemented** (x-void-on directive, x-void-preserve, $voidable magic)
 
 ---
 
-## Phase 1: Free/OSS Components (32 remaining)
+## Phase 1: Free/OSS Components (21 remaining)
 
 Frequency based on survey of 10 OSS libraries (shadcn, Radix, Chakra, Mantine, DaisyUI, Flowbite, Park UI, Headless UI, Ark UI, HeroUI). See [COMPONENT-RESEARCH.md](COMPONENT-RESEARCH.md) for full data.
 
@@ -22,23 +24,23 @@ Frequency based on survey of 10 OSS libraries (shadcn, Radix, Chakra, Mantine, D
 
 | Component | Freq | Description |
 |-----------|------|-------------|
-| **Dropdown Menu** | 9/10 | Trigger-based action menu, distinct from select |
-| **Menu** | 8/10 | Contextual/command palette menu |
-| **Carousel** | 8/10 | Horizontally scrollable slideshow with prev/next |
-| **Calendar / Date Picker** | 8/10 | Calendar-based date selection input |
-| **Number Input** | 8/10 | Numeric input with increment/decrement steppers |
+| ~~Dropdown Menu~~ | 9/10 | ✅ Shipped — `<void-dropdown-menu>` + `<void-dropdown-menu-item>` |
+| ~~Menu~~ | 8/10 | ✅ Shipped — `<void-menu>` + `<void-menu-item>` + `<void-menu-group>` |
+| ~~Carousel~~ | 8/10 | ✅ Shipped — `<void-carousel>` + `<void-carousel-slide>` |
+| ~~Calendar / Date Picker~~ | 8/10 | ✅ Shipped — `<void-calendar>` + `<void-date-picker>` |
+| ~~Number Input~~ | 8/10 | ✅ Shipped — `<void-number-input>` |
 
 ### Tier B — 6–7/10 OSS libraries
 
 | Component | Freq | Description |
 |-----------|------|-------------|
-| **Toggle / Toggle Group** | 7/10 | Pressable on/off button; group for multi-option |
+| ~~Toggle / Toggle Group~~ | 7/10 | ✅ Shipped — `<void-toggle>` + `<void-toggle-group>` |
 | **Collapsible** | 7/10 | Simple expand/collapse for a single section |
 | **Navigation Menu** | 7/10 | Horizontal nav with dropdowns/mega-menus |
 | **Hover Card** | 7/10 | Rich content preview on hover |
 | **Pin Input / OTP** | 7/10 | Single-char inputs for verification codes |
 | **Color Picker** | 7/10 | Color selection via spectrum, swatches, or hex |
-| **Segmented Control** | 7/10 | Pill-style toggle between mutually exclusive options |
+| ~~Segmented Control~~ | 7/10 | ✅ Shipped — `<void-segmented-control>` + `<void-segmented-control-item>` |
 | **Editable** | 7/10 | Inline editable text field |
 | **Tags Input / Pills** | 7/10 | Multi-tag input with add/remove |
 | **Rating** | 6/10 | Star/icon-based score input |
@@ -47,7 +49,7 @@ Frequency based on survey of 10 OSS libraries (shadcn, Radix, Chakra, Mantine, D
 | **Clipboard** | 6/10 | Copy-to-clipboard trigger |
 | **Tree View** | 6/10 | Hierarchical tree navigation |
 | **Listbox** | 6/10 | Accessible listbox component |
-| **Sidebar** | 6/10 | Collapsible side navigation shell |
+| ~~Sidebar~~ | 6/10 | ✅ Shipped — `<void-sidebar>` with configurable width and position |
 
 ### Tier C — 4–5/10 OSS libraries
 
@@ -57,10 +59,10 @@ Frequency based on survey of 10 OSS libraries (shadcn, Radix, Chakra, Mantine, D
 | **Menubar** | 5/10 | Persistent horizontal menu bar with sub-menus |
 | **Alert Dialog** | 5/10 | Confirmation/destructive dialog variant |
 | **Timeline** | 5/10 | Vertically ordered event list with connectors |
-| **Stat / Statistic** | 5/10 | KPI display block with value + delta |
+| ~~Stat / Statistic~~ | 5/10 | ✅ Shipped — `<void-stat>` with label, value, delta, and trend |
 | **Password Input** | 5/10 | Input with show/hide toggle |
 | **Splitter / Resizable** | 5/10 | Draggable handle resizing adjacent panels |
-| **Indicator** | 4/10 | Notification dot/badge overlaid on another element |
+| ~~Indicator~~ | 4/10 | ✅ Shipped — `<void-indicator>` with count, ping animation, and color variants |
 | **KBD** | 4/10 | Inline keyboard shortcut rendering |
 | **Speed Dial / FAB** | 4/10 | Floating action button with radial menu |
 | **QR Code** | 4/10 | QR code generator display |
@@ -112,27 +114,20 @@ Enterprise-grade components surveyed across 10 premium libraries (Syncfusion, Te
 
 ## Phase 3: Framework Adapters
 
-All 6 framework packages need implementation. The adapters expose `@voidable/ui` Lit web components to each framework's idioms.
+8 framework adapter packages expose `@voidable/ui` Lit web components to each framework's idioms. 4 are fully implemented; 4 need additional work.
 
-### Adapter Strategy per Framework
+### Adapter Status
 
-| Framework | Strategy | What ships |
-|-----------|----------|------------|
-| **React** | `createComponent()` wrappers + hooks (useTheme, etc.) | Typed React components wrapping each web component, event mapping (`onVoidChange`), ref forwarding |
-| **Vue** | Vue plugin + `defineCustomElement` config | Auto-registered custom elements, `v-model` support, typed props |
-| **Solid** | Hooks only (Solid has native CE support via JSX) | Composables (createTheme, etc.), TypeScript module augmentation for JSX |
-| **Svelte** | Svelte components wrapping CEs | Typed Svelte wrappers with two-way binding, event forwarding |
-| **Angular** | `CUSTOM_ELEMENTS_SCHEMA` + directive wrappers | NgModule/standalone directives, `[(ngModel)]` support, typed templates |
-| **LiveView** | JS hooks + HEEx components | Phoenix.LiveView.JS hooks for client-side interactivity, HEEx function components for markup, phx-* event bridging |
-
-### Implementation Order
-
-1. **React** — largest user base
-2. **Vue** — second largest, well-defined CE interop
-3. **Solid** — minimal work (native CE support)
-4. **Angular** — needs `CUSTOM_ELEMENTS_SCHEMA` + directive wrappers
-5. **Svelte** — Svelte 5 has good CE support, thin wrappers
-6. **LiveView** — unique Elixir/Phoenix integration, JS hooks pattern
+| Framework | Status | What's shipped | What's remaining |
+|-----------|--------|----------------|------------------|
+| **React** | ✅ Done | Typed wrappers via `wrapWc` factory for all 54 components, `onVoidX` event bridging, ref forwarding, `useTheme` hook | — |
+| **LiveView** | ✅ Done | `VoidHooks` JS (mount/update/destroy lifecycle, listener diffing), HEEx function components for all 54 components with phx-hook wiring | — |
+| **Hotwire** | ✅ Done | `VoidEventController` Stimulus controller, Ruby gem `Helpers` module (`void_attrs`) | — |
+| **Alpine** | ✅ Done | `VoidableAlpine` plugin, `x-void-on` directive, `x-void-preserve`, `$voidable` magic | — |
+| **Angular** | Partial | `VoidableModule` (exports `CUSTOM_ELEMENTS_SCHEMA`), signal-based `ThemeService` with `DestroyRef` cleanup | Directive wrappers, `[(ngModel)]` support, typed templates |
+| **Vue** | ✅ Native CE | `useTheme` composable (Vue handles CEs natively) | Optional: Vue plugin, `v-model` support, typed props |
+| **Solid** | ✅ Native CE | `useTheme` hook (Solid handles CEs natively) | Optional: JSX type augmentation |
+| **Svelte** | ✅ Native CE | Theme store utility (Svelte handles CEs natively) | Optional: typed wrappers, two-way binding |
 
 ---
 
