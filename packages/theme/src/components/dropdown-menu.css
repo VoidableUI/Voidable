@@ -3,6 +3,11 @@ void-dropdown-menu {
   display: inline-flex;
 }
 
+void-dropdown-menu > void-dropdown-menu-item,
+void-dropdown-menu > hr {
+  display: none;
+}
+
 .void-dropdown-menu-panel {
   display: none;
   position: absolute;
