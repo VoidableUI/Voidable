@@ -42,6 +42,7 @@ void-stat[trend="up"]        .void-stat-delta { color: var(--void-color-success)
 void-stat[trend="down"]      .void-stat-delta { color: var(--void-color-error); }
 void-stat[trend="error"]     .void-stat-delta { color: var(--void-color-error); }
 void-stat[trend="warning"]   .void-stat-delta { color: var(--void-color-warning); }
+void-stat[trend="caution"]   .void-stat-delta { color: var(--void-color-caution); }
 void-stat[trend="success"]   .void-stat-delta { color: var(--void-color-success); }
 void-stat[trend="info"]      .void-stat-delta { color: var(--void-color-info); }
 void-stat[trend="notice"]    .void-stat-delta { color: var(--void-color-notice); }
@@ -82,6 +83,7 @@ void-stat[size="xxl"] .void-stat-value {
 
 void-stat[color="error"]     { --tone: var(--void-color-error); }
 void-stat[color="warning"]   { --tone: var(--void-color-warning); }
+void-stat[color="caution"]   { --tone: var(--void-color-caution); }
 void-stat[color="success"]   { --tone: var(--void-color-success); }
 void-stat[color="info"]      { --tone: var(--void-color-info); }
 void-stat[color="notice"]    { --tone: var(--void-color-notice); }

@@ -8,6 +8,7 @@ void-tags-input {
 
 void-tags-input[color="error"]   { --tone: var(--void-color-error); }
 void-tags-input[color="warning"] { --tone: var(--void-color-warning); }
+void-tags-input[color="caution"] { --tone: var(--void-color-caution); }
 void-tags-input[color="success"] { --tone: var(--void-color-success); }
 void-tags-input[color="info"]    { --tone: var(--void-color-info); }
 void-tags-input[color="notice"]  { --tone: var(--void-color-notice); }
@@ -67,6 +68,7 @@ void-tags-input[color]:not([color=""]):not([color="default"]) .void-tags-input {
 /* Per-tag colors */
 .void-tags-input-tag[data-color="error"]   { --tag-tone: var(--void-color-error); }
 .void-tags-input-tag[data-color="warning"] { --tag-tone: var(--void-color-warning); }
+.void-tags-input-tag[data-color="caution"] { --tag-tone: var(--void-color-caution); }
 .void-tags-input-tag[data-color="success"] { --tag-tone: var(--void-color-success); }
 .void-tags-input-tag[data-color="info"]    { --tag-tone: var(--void-color-info); }
 .void-tags-input-tag[data-color="notice"]  { --tag-tone: var(--void-color-notice); }

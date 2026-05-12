@@ -33,6 +33,7 @@ void-indicator[position="bottom-left"] .void-indicator-dot { bottom: -4px; left:
 
 void-indicator[color="error"]   { --tone: var(--void-color-error); }
 void-indicator[color="warning"] { --tone: var(--void-color-warning); }
+void-indicator[color="caution"] { --tone: var(--void-color-caution); }
 void-indicator[color="success"] { --tone: var(--void-color-success); }
 void-indicator[color="info"]    { --tone: var(--void-color-info); }
 void-indicator[color="notice"]  { --tone: var(--void-color-notice); }

@@ -25,6 +25,7 @@ void-badge {
 /* Colors */
 void-badge[color="error"]     { --tone: var(--void-color-error); }
 void-badge[color="warning"]   { --tone: var(--void-color-warning); }
+void-badge[color="caution"]   { --tone: var(--void-color-caution); }
 void-badge[color="success"]   { --tone: var(--void-color-success); }
 void-badge[color="info"]      { --tone: var(--void-color-info); }
 void-badge[color="notice"]    { --tone: var(--void-color-notice); }

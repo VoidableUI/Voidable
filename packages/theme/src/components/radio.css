@@ -56,6 +56,7 @@ void-radio[checked] .void-radio-circle {
 
 void-radio[color="error"]   { --tone: var(--void-color-error); }
 void-radio[color="warning"] { --tone: var(--void-color-warning); }
+void-radio[color="caution"] { --tone: var(--void-color-caution); }
 void-radio[color="success"] { --tone: var(--void-color-success); }
 void-radio[color="info"]    { --tone: var(--void-color-info); }
 void-radio[color="notice"]  { --tone: var(--void-color-notice); }

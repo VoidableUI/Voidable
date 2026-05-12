@@ -60,6 +60,7 @@ void-checkbox[indeterminate] .void-checkbox-box {
 
 void-checkbox[color="error"]   { --tone: var(--void-color-error); }
 void-checkbox[color="warning"] { --tone: var(--void-color-warning); }
+void-checkbox[color="caution"] { --tone: var(--void-color-caution); }
 void-checkbox[color="success"] { --tone: var(--void-color-success); }
 void-checkbox[color="info"]    { --tone: var(--void-color-info); }
 void-checkbox[color="notice"]  { --tone: var(--void-color-notice); }

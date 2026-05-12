@@ -66,6 +66,7 @@ void-button[variant="filled"]:hover {
 /* Color variants — one override cascades to all derived states */
 void-button[color="error"]   { --tone: var(--void-color-error); }
 void-button[color="warning"] { --tone: var(--void-color-warning); }
+void-button[color="caution"] { --tone: var(--void-color-caution); }
 void-button[color="success"] { --tone: var(--void-color-success); }
 void-button[color="info"]    { --tone: var(--void-color-info); }
 void-button[color="notice"]  { --tone: var(--void-color-notice); }

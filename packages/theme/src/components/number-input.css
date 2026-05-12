@@ -115,36 +115,37 @@ void-number-input[controls="none"] input.void-number-input-field {
 /* Color variants */
 void-number-input[color="error"]   { --tone: var(--void-color-error); }
 void-number-input[color="warning"] { --tone: var(--void-color-warning); }
+void-number-input[color="caution"] { --tone: var(--void-color-caution); }
 void-number-input[color="success"] { --tone: var(--void-color-success); }
 void-number-input[color="info"]    { --tone: var(--void-color-info); }
 void-number-input[color="notice"]  { --tone: var(--void-color-notice); }
 
-void-number-input:where([color="error"], [color="warning"], [color="success"], [color="info"], [color="notice"]) {
+void-number-input:where([color="error"], [color="warning"], [color="caution"], [color="success"], [color="info"], [color="notice"]) {
   border-color: var(--tone-border);
   background: var(--tone-subtle);
 }
 
-void-number-input:where([color="error"], [color="warning"], [color="success"], [color="info"], [color="notice"]) .void-number-input-btn {
+void-number-input:where([color="error"], [color="warning"], [color="caution"], [color="success"], [color="info"], [color="notice"]) .void-number-input-btn {
   color: var(--tone);
 }
 
-void-number-input:where([color="error"], [color="warning"], [color="success"], [color="info"], [color="notice"]) .void-number-input-btn-dec {
+void-number-input:where([color="error"], [color="warning"], [color="caution"], [color="success"], [color="info"], [color="notice"]) .void-number-input-btn-dec {
   border-right-color: var(--tone-border);
 }
 
-void-number-input:where([color="error"], [color="warning"], [color="success"], [color="info"], [color="notice"]) .void-number-input-btn-inc {
+void-number-input:where([color="error"], [color="warning"], [color="caution"], [color="success"], [color="info"], [color="notice"]) .void-number-input-btn-inc {
   border-left-color: var(--tone-border);
 }
 
-void-number-input:where([color="error"], [color="warning"], [color="success"], [color="info"], [color="notice"]):where([controls="right"]) .void-number-input-btn-group {
+void-number-input:where([color="error"], [color="warning"], [color="caution"], [color="success"], [color="info"], [color="notice"]):where([controls="right"]) .void-number-input-btn-group {
   border-left-color: var(--tone-border);
 }
 
-void-number-input:where([color="error"], [color="warning"], [color="success"], [color="info"], [color="notice"]):where([controls="right"]) .void-number-input-btn-inc {
+void-number-input:where([color="error"], [color="warning"], [color="caution"], [color="success"], [color="info"], [color="notice"]):where([controls="right"]) .void-number-input-btn-inc {
   border-bottom-color: var(--tone-border);
 }
 
-void-number-input:where([color="error"], [color="warning"], [color="success"], [color="info"], [color="notice"]):focus-within {
+void-number-input:where([color="error"], [color="warning"], [color="caution"], [color="success"], [color="info"], [color="notice"]):focus-within {
   border-color: var(--tone);
   box-shadow: 0 0 0 1px var(--tone);
 }

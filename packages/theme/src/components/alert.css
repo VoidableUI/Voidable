@@ -24,6 +24,7 @@ void-alert[variant="filled"] {
 
 void-alert[color="error"]   { --tone: var(--void-color-error); }
 void-alert[color="warning"] { --tone: var(--void-color-warning); }
+void-alert[color="caution"] { --tone: var(--void-color-caution); }
 void-alert[color="success"] { --tone: var(--void-color-success); }
 void-alert[color="info"]    { --tone: var(--void-color-info); }
 void-alert[color="notice"]  { --tone: var(--void-color-notice); }

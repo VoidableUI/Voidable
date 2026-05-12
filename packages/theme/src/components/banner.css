@@ -23,6 +23,7 @@ void-banner[variant="filled"] {
 
 void-banner[color="error"]   { --tone: var(--void-color-error); }
 void-banner[color="warning"] { --tone: var(--void-color-warning); }
+void-banner[color="caution"] { --tone: var(--void-color-caution); }
 void-banner[color="success"] { --tone: var(--void-color-success); }
 void-banner[color="info"]    { --tone: var(--void-color-info); }
 void-banner[color="notice"]  { --tone: var(--void-color-notice); }

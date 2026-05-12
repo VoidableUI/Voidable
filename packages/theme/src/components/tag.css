@@ -20,6 +20,7 @@ void-tag {
 
 void-tag[color="error"]   { --tone: var(--void-color-error); }
 void-tag[color="warning"] { --tone: var(--void-color-warning); }
+void-tag[color="caution"] { --tone: var(--void-color-caution); }
 void-tag[color="success"] { --tone: var(--void-color-success); }
 void-tag[color="info"]    { --tone: var(--void-color-info); }
 void-tag[color="notice"]  { --tone: var(--void-color-notice); }

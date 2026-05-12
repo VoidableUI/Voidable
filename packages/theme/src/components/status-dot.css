@@ -13,7 +13,11 @@ void-status-dot[status="online"] {
 }
 
 void-status-dot[status="away"] {
-  background: var(--void-color-warning);
+  background: var(--void-color-caution);
+}
+
+void-status-dot[status="caution"] {
+  background: var(--void-color-caution);
 }
 
 void-status-dot[status="offline"] {

@@ -117,29 +117,30 @@ void-action-input[position="left"] .void-action-input-btn {
 /* Color variants */
 void-action-input[color="error"]   { --tone: var(--void-color-error); }
 void-action-input[color="warning"] { --tone: var(--void-color-warning); }
+void-action-input[color="caution"] { --tone: var(--void-color-caution); }
 void-action-input[color="success"] { --tone: var(--void-color-success); }
 void-action-input[color="info"]    { --tone: var(--void-color-info); }
 void-action-input[color="notice"]  { --tone: var(--void-color-notice); }
 
-void-action-input:where([color="error"], [color="warning"], [color="success"], [color="info"], [color="notice"]) {
+void-action-input:where([color="error"], [color="warning"], [color="caution"], [color="success"], [color="info"], [color="notice"]) {
   border-color: var(--tone-border);
   background: var(--tone-subtle);
 }
 
-void-action-input:where([color="error"], [color="warning"], [color="success"], [color="info"], [color="notice"]) .void-action-input-btn {
+void-action-input:where([color="error"], [color="warning"], [color="caution"], [color="success"], [color="info"], [color="notice"]) .void-action-input-btn {
   color: var(--tone);
 }
 
-void-action-input:where([color="error"], [color="warning"], [color="success"], [color="info"], [color="notice"]) .void-action-input-btn {
+void-action-input:where([color="error"], [color="warning"], [color="caution"], [color="success"], [color="info"], [color="notice"]) .void-action-input-btn {
   border-left-color: var(--tone-border);
 }
 
-void-action-input:where([color="error"], [color="warning"], [color="success"], [color="info"], [color="notice"])[position="left"] .void-action-input-btn {
+void-action-input:where([color="error"], [color="warning"], [color="caution"], [color="success"], [color="info"], [color="notice"])[position="left"] .void-action-input-btn {
   border-left-color: transparent;
   border-right-color: var(--tone-border);
 }
 
-void-action-input:where([color="error"], [color="warning"], [color="success"], [color="info"], [color="notice"]):focus-within {
+void-action-input:where([color="error"], [color="warning"], [color="caution"], [color="success"], [color="info"], [color="notice"]):focus-within {
   border-color: var(--tone);
   box-shadow: 0 0 0 1px var(--tone);
 }

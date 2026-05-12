@@ -23,6 +23,7 @@ void-progress {
 
 void-progress[color="error"]   { --tone: var(--void-color-error); }
 void-progress[color="warning"] { --tone: var(--void-color-warning); }
+void-progress[color="caution"] { --tone: var(--void-color-caution); }
 void-progress[color="success"] { --tone: var(--void-color-success); }
 void-progress[color="info"]    { --tone: var(--void-color-info); }
 void-progress[color="notice"]  { --tone: var(--void-color-notice); }

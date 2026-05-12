@@ -408,6 +408,13 @@ void-date-picker[color="warning"] .void-date-picker-input:focus {
   box-shadow: 0 0 0 1px var(--void-color-warning);
 }
 
+void-date-picker[color="caution"] .void-date-picker-input {
+  border-color: var(--void-color-caution);
+}
+void-date-picker[color="caution"] .void-date-picker-input:focus {
+  box-shadow: 0 0 0 1px var(--void-color-caution);
+}
+
 void-date-picker[color="success"] .void-date-picker-input {
   border-color: var(--void-color-success);
 }

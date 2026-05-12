@@ -54,6 +54,7 @@ void-switch:hover .void-switch-track {
 
 void-switch[color="error"]   { --tone: var(--void-color-error); }
 void-switch[color="warning"] { --tone: var(--void-color-warning); }
+void-switch[color="caution"] { --tone: var(--void-color-caution); }
 void-switch[color="success"] { --tone: var(--void-color-success); }
 void-switch[color="info"]    { --tone: var(--void-color-info); }
 void-switch[color="notice"]  { --tone: var(--void-color-notice); }

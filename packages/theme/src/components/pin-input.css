@@ -76,16 +76,17 @@ void-pin-input[disabled] .void-pin-cell {
 /* Color variants */
 void-pin-input[color="error"]   { --tone: var(--void-color-error); }
 void-pin-input[color="warning"] { --tone: var(--void-color-warning); }
+void-pin-input[color="caution"] { --tone: var(--void-color-caution); }
 void-pin-input[color="success"] { --tone: var(--void-color-success); }
 void-pin-input[color="info"]    { --tone: var(--void-color-info); }
 void-pin-input[color="notice"]  { --tone: var(--void-color-notice); }
 
-void-pin-input:where([color="error"], [color="warning"], [color="success"], [color="info"], [color="notice"]) .void-pin-cell {
+void-pin-input:where([color="error"], [color="warning"], [color="caution"], [color="success"], [color="info"], [color="notice"]) .void-pin-cell {
   border-color: var(--tone-border);
   background: var(--tone-subtle);
 }
 
-void-pin-input:where([color="error"], [color="warning"], [color="success"], [color="info"], [color="notice"]) .void-pin-cell:focus {
+void-pin-input:where([color="error"], [color="warning"], [color="caution"], [color="success"], [color="info"], [color="notice"]) .void-pin-cell:focus {
   border-color: var(--tone);
   box-shadow: 0 0 0 1px var(--tone);
 }
