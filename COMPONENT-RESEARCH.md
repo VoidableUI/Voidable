@@ -206,7 +206,7 @@ Status key:
 | Toggle Group | 6/10 | ROADMAP P1 | |
 | Toolbar | 6/10 | ROADMAP P1 | |
 | Fieldset | 6/10 | GAP | Grouped form fields with legend |
-| Clipboard | 6/10 | GAP | Copy-to-clipboard trigger |
+| Clipboard | 6/10 | SHIPPED | `action-input` with `icon="copy"` |
 | Tree View | 6/10 | GAP | Hierarchical tree navigation |
 | Listbox | 6/10 | GAP | Accessible listbox; `multiselect` covers one case but not all |
 | Sidebar | 6/10 | GAP | Collapsible side navigation shell |
@@ -217,7 +217,7 @@ Status key:
 | Stat / Statistic | 5/10 | GAP | KPI display block |
 | Chip / Tag | 5/10 | SHIPPED | `tag` covers this |
 | Field / Form Field | 5/10 | SHIPPED | `field` |
-| Password Input | 5/10 | GAP | Input with show/hide toggle; composable from `input` but not shipped |
+| Password Input | 5/10 | SHIPPED | `action-input` with `icon="eye"` / `icon="eye-off"` |
 | Splitter / Resizable | 5/10 | ROADMAP P1 | |
 | Speed Dial / FAB | 4/10 | GAP | Floating action button with radial menu |
 | Indicator / Badge Overlay | 4/10 | ROADMAP P1 | |
@@ -260,13 +260,11 @@ Status key:
 | Editable | 7/10 | Medium |
 | Tags Input / Pills | 7/10 | Medium — `tag` shipped but no tag-input |
 | Fieldset | 6/10 | Low |
-| Clipboard | 6/10 | Low |
 | Tree View | 6/10 | Medium |
 | Listbox | 6/10 | Medium |
 | Sidebar | 6/10 | Medium |
 | Alert Dialog | 5/10 | Medium — `dialog` may subsume this |
 | Stat / Statistic | 5/10 | Low |
-| Password Input | 5/10 | Low — composable from `input` |
 | Speed Dial / FAB | 4/10 | Low |
 | QR Code | 4/10 | Low |
 

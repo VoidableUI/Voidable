@@ -4,7 +4,7 @@ title: Component Overview
 
 import { LinkCard } from '@astrojs/starlight/components';
 
-Voidable ships 56 components organized by category. All components render in the Light DOM and are styled entirely through `@voidable/theme` CSS tokens.
+Voidable ships 74 components organized by category. All components render in the Light DOM and are styled entirely through `@voidable/theme` CSS tokens.
 
 <LinkCard title="Interactive Storybook" href="/storybook/" description="Browse all components with live examples and controls." />
 
@@ -18,6 +18,8 @@ Voidable ships 56 components organized by category. All components render in the
 | ScrollArea | `<void-scroll-area>` | Fixed-height scrollable container with styled scrollbars for long content and lists |
 | NavBar | `<void-nav-bar>` | Top navigation bar for branding, primary links, and user account controls |
 | Sidebar | `<void-sidebar>` | Collapsible side navigation for app shells, admin panels, and doc sites |
+| Carousel | `<void-carousel>` / `<void-carousel-slide>` | Scrollable content gallery for product photo viewers, onboarding flows, and featured content sliders |
+| Collapsible | `<void-collapsible>` | Simple expand/collapse panel for FAQ sections, spoiler text, and progressive disclosure of secondary content |
 
 ## Data Display
 
@@ -38,6 +40,10 @@ Voidable ships 56 components organized by category. All components render in the
 | Pagination | `<void-pagination>` | Page navigation for data tables, search results, and content archives |
 | Indicator | `<void-indicator>` | Badge overlay for notification counts and unread/presence signals on icons |
 | Stat | `<void-stat>` | Key metric display for analytics dashboards with label, value, delta, and trend |
+| Calendar / DatePicker | `<void-calendar>` / `<void-date-picker>` | Date selection for booking flows and scheduling UIs with locale-aware formatting and min/max constraints |
+| HoverCard | `<void-hover-card>` | Rich content preview card that appears on hover for user profiles, link previews, and contextual information panels |
+| NavMenu / NavMenuItem | `<void-nav-menu>` | Horizontal navigation bar with dropdown sub-menus for site headers, application nav bars, and mega-menu layouts |
+| ToggleGroup | `<void-toggle-group>` | Multi-button toggle set for text editor toolbars and filter chips where one or many options can be active |
 
 ## Forms
 
@@ -59,6 +65,12 @@ Voidable ships 56 components organized by category. All components render in the
 | ComposeInput | `<void-compose-input>` | Rich text entry area for messaging UIs, comment boxes, and post composers |
 | Toggle | `<void-toggle>` | Pressable toggle button for toolbar actions and editor formatting controls |
 | SegmentedControl | `<void-segmented-control>` | Mutually exclusive button group for view mode toggles and compact tab-like navigation |
+| NumberInput | `<void-number-input>` | Precise numeric entry for quantity selectors, price fields, and settings with increment/decrement controls |
+| Editable | `<void-editable>` | Inline editable text for renaming items, editing headings, and click-to-edit table cells |
+| PinInput | `<void-pin-input>` | Single-character input cells for OTP verification codes, PIN entry, and multi-digit confirmation fields |
+| TagsInput | `<void-tags-input>` | Multi-tag input field for email recipients, category labels, keyword tagging, and comma-separated value entry |
+| ColorPicker | `<void-color-picker>` | Color selection control with spectrum area, hue slider, hex input, and preset swatches for theme customization and design tools |
+| ActionInput | `<void-action-input>` | Input field with an attached icon button for copy-to-clipboard inputs, search boxes, and similar input-plus-action patterns |
 
 ## Feedback
 
@@ -80,3 +92,4 @@ Voidable ships 56 components organized by category. All components render in the
 |-----------|-----|-------------|
 | Hamburger | `<void-hamburger>` | Animated open/close toggle for mobile nav menus and collapsible sidebars |
 | DropdownMenu | `<void-dropdown-menu>` | Trigger-anchored action menu for table row actions and toolbar overflow menus |
+| Menu / MenuItem | `<void-menu>` | Always-visible menu panel for command palettes, side panels, and searchable action lists |
