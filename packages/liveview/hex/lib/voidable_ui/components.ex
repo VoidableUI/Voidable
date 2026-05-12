@@ -1911,4 +1911,41 @@ defmodule VoidableUI.Components do
     />
     """
   end
+
+  # ---------------------------------------------------------------------------
+  # ActionInput (interactive — void-input, void-change, void-action)
+  # ---------------------------------------------------------------------------
+
+  @doc "Renders a `<void-action-input>` input with an attached icon button."
+  attr :id, :string, default: nil
+  attr :value, :string, default: nil
+  attr :placeholder, :string, default: nil
+  attr :disabled, :boolean, default: false
+  attr :readonly, :boolean, default: false
+  attr :size, :string, default: nil
+  attr :color, :string, default: nil
+  attr :icon, :string, default: nil
+  attr :action_label, :string, default: nil
+  attr :position, :string, default: nil
+  attr :rest, :global
+
+  def action_input(assigns) do
+    ~H"""
+    <void-action-input
+      id={@id || "void-action-input-#{unique_id()}"}
+      value={@value}
+      placeholder={@placeholder}
+      disabled={@disabled}
+      readonly={@readonly}
+      size={@size}
+      color={@color}
+      icon={@icon}
+      action-label={@action_label}
+      position={@position}
+      phx-hook="VoidEvent"
+      data-void-events="void-input,void-change,void-action"
+      {@rest}
+    />
+    """
+  end
 end

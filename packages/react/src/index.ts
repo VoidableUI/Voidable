@@ -1,6 +1,7 @@
 export {
   Accordion,
   AccordionItem,
+  ActionInput,
   Alert,
   Avatar,
   Badge,

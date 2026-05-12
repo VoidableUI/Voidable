@@ -61,3 +61,4 @@ export { VoidPinInput } from './components/pin-input.js';
 export { VoidTagsInput } from './components/tags-input.js';
 export { VoidNavMenu, VoidNavMenuItem } from './components/nav-menu.js';
 export { VoidColorPicker } from './components/color-picker.js';
+export { VoidActionInput } from './components/action-input.js';

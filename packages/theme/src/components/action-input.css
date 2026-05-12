@@ -1,0 +1,181 @@
+/* ============================================================
+   void-action-input — Tone system component
+   ============================================================ */
+
+void-action-input {
+  /* Tone system */
+  --tone: var(--void-color-accent);
+  --tone-subtle: color-mix(in srgb, var(--tone) 14%, transparent);
+  --tone-border: color-mix(in srgb, var(--tone) 36%, transparent);
+  --tone-hover: color-mix(in srgb, var(--tone) 22%, transparent);
+
+  display: inline-flex;
+  align-items: stretch;
+  font-family: var(--void-font-sans);
+  border: 1px solid var(--void-color-border);
+  border-radius: var(--void-radius-md);
+  background: var(--void-color-bg-secondary);
+  transition: border-color var(--void-duration-fast) var(--void-ease-in-out),
+              box-shadow var(--void-duration-fast) var(--void-ease-in-out);
+}
+
+void-action-input:focus-within {
+  border-color: var(--void-color-border-focus);
+  box-shadow: 0 0 0 1px var(--void-color-border-focus);
+}
+
+void-action-input:hover:not(:focus-within) {
+  border-color: var(--void-color-border-strong);
+}
+
+/* Border-radius on children (no overflow:hidden so tooltip can escape) */
+void-action-input input.void-action-input-field {
+  border-radius: var(--void-radius-md) 0 0 var(--void-radius-md);
+}
+
+void-action-input .void-action-input-btn {
+  border-radius: 0 var(--void-radius-md) var(--void-radius-md) 0;
+}
+
+void-action-input[position="left"] input.void-action-input-field {
+  border-radius: 0 var(--void-radius-md) var(--void-radius-md) 0;
+}
+
+void-action-input[position="left"] .void-action-input-btn {
+  border-radius: var(--void-radius-md) 0 0 var(--void-radius-md);
+}
+
+/* The native input inside */
+void-action-input input.void-action-input-field {
+  flex: 1;
+  min-width: 0;
+  padding: var(--void-space-2) var(--void-space-3);
+  background: transparent;
+  border: none;
+  color: var(--void-color-text);
+  font-family: inherit;
+  font-size: var(--void-text-sm);
+  line-height: var(--void-leading-normal);
+  outline: none;
+  text-align: left;
+  -moz-appearance: textfield;
+}
+
+void-action-input input.void-action-input-field::placeholder {
+  color: var(--void-color-text-muted);
+}
+
+/* Action button */
+.void-action-input-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 var(--void-space-3);
+  background: transparent;
+  border: none;
+  color: var(--void-color-text-secondary);
+  cursor: pointer;
+  transition: background var(--void-duration-fast) var(--void-ease-in-out),
+              color var(--void-duration-fast) var(--void-ease-in-out);
+  user-select: none;
+  -webkit-user-select: none;
+  flex-shrink: 0;
+}
+
+.void-action-input-btn:hover:not(:disabled) {
+  background: var(--tone-hover);
+  color: var(--void-color-text);
+}
+
+.void-action-input-btn:focus-visible {
+  outline: 2px solid var(--void-color-border-focus);
+  outline-offset: -2px;
+}
+
+.void-action-input-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+/* Tooltip wrapper around button */
+void-action-input void-tooltip {
+  align-items: stretch;
+}
+
+/* Separator lines between btn and input */
+/* Default: button on the right */
+void-action-input .void-action-input-btn {
+  border-left: 1px solid var(--void-color-border);
+}
+
+/* Button on the left */
+void-action-input[position="left"] .void-action-input-btn {
+  border-left: none;
+  border-right: 1px solid var(--void-color-border);
+}
+
+/* Color variants */
+void-action-input[color="error"]   { --tone: var(--void-color-error); }
+void-action-input[color="warning"] { --tone: var(--void-color-warning); }
+void-action-input[color="success"] { --tone: var(--void-color-success); }
+void-action-input[color="info"]    { --tone: var(--void-color-info); }
+void-action-input[color="notice"]  { --tone: var(--void-color-notice); }
+
+void-action-input:where([color="error"], [color="warning"], [color="success"], [color="info"], [color="notice"]) {
+  border-color: var(--tone-border);
+  background: var(--tone-subtle);
+}
+
+void-action-input:where([color="error"], [color="warning"], [color="success"], [color="info"], [color="notice"]) .void-action-input-btn {
+  color: var(--tone);
+}
+
+void-action-input:where([color="error"], [color="warning"], [color="success"], [color="info"], [color="notice"]) .void-action-input-btn {
+  border-left-color: var(--tone-border);
+}
+
+void-action-input:where([color="error"], [color="warning"], [color="success"], [color="info"], [color="notice"])[position="left"] .void-action-input-btn {
+  border-left-color: transparent;
+  border-right-color: var(--tone-border);
+}
+
+void-action-input:where([color="error"], [color="warning"], [color="success"], [color="info"], [color="notice"]):focus-within {
+  border-color: var(--tone);
+  box-shadow: 0 0 0 1px var(--tone);
+}
+
+/* Size variants */
+void-action-input[size="sm"] input.void-action-input-field {
+  padding: var(--void-space-1) var(--void-space-2);
+  font-size: var(--void-text-xs);
+}
+
+void-action-input[size="sm"] .void-action-input-btn {
+  padding: 0 var(--void-space-2);
+  font-size: var(--void-text-xs);
+}
+
+void-action-input[size="lg"] input.void-action-input-field {
+  padding: var(--void-space-3) var(--void-space-4);
+  font-size: var(--void-text-base);
+}
+
+void-action-input[size="lg"] .void-action-input-btn {
+  padding: 0 var(--void-space-4);
+}
+
+/* Disabled state */
+void-action-input[disabled] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+void-action-input[disabled] input.void-action-input-field {
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Readonly state */
+void-action-input[readonly] input.void-action-input-field {
+  cursor: default;
+}

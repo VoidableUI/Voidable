@@ -74,6 +74,7 @@ import type {
   VoidNavMenu,
   VoidNavMenuItem,
   VoidColorPicker,
+  VoidActionInput,
 } from '@voidable/ui';
 
 // ---------------------------------------------------------------------------
@@ -698,3 +699,16 @@ export const ColorPicker = wrapWc<VoidColorPicker, {
   variant?: 'default' | 'compact';
   open?: boolean;
 }>('void-color-picker', 'ColorPicker');
+
+export const ActionInput = wrapWc<VoidActionInput, {
+  value?: string;
+  placeholder?: string;
+  disabled?: boolean;
+  readonly?: boolean;
+  type?: 'text' | 'password';
+  size?: 'sm' | 'md' | 'lg';
+  color?: 'default' | 'error' | 'warning' | 'success' | 'info' | 'notice';
+  icon?: string;
+  actionLabel?: string;
+  position?: 'left' | 'right';
+}>('void-action-input', 'ActionInput');
