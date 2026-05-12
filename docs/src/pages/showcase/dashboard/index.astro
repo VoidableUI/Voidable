@@ -56,8 +56,8 @@ import iconMoon from '@tabler/icons/outline/moon.svg?raw';
         top: 0;
         z-index: 100;
         background: color-mix(in srgb, var(--void-color-bg) 88%, transparent);
-        backdrop-filter: saturate(140%) blur(6px);
-        -webkit-backdrop-filter: saturate(140%) blur(6px);
+        backdrop-filter: saturate(140%) blur(6px); /* token-ok: backdrop blur */
+        -webkit-backdrop-filter: saturate(140%) blur(6px); /* token-ok: backdrop blur */
         border-bottom: 1px solid var(--void-color-border);
         flex-shrink: 0;
       }
@@ -91,7 +91,7 @@ import iconMoon from '@tabler/icons/outline/moon.svg?raw';
         font-size: var(--void-text-xs);
         color: var(--void-color-text-secondary);
         border-radius: var(--void-radius-sm);
-        transition: color 150ms;
+        transition: color var(--void-duration-fast);
       }
 
       .site-nav-links a:hover,
@@ -148,7 +148,7 @@ import iconMoon from '@tabler/icons/outline/moon.svg?raw';
         display: flex;
         align-items: center;
         flex-shrink: 0;
-        min-height: 4.875rem;
+        min-height: 4.875rem; /* token-ok: matches sidebar internal layout */
         box-sizing: border-box;
         background: var(--void-color-bg-secondary);
       }
@@ -160,7 +160,7 @@ import iconMoon from '@tabler/icons/outline/moon.svg?raw';
         padding: var(--void-space-2) var(--void-space-2);
         border-radius: var(--void-radius-md);
         cursor: pointer;
-        transition: background 150ms;
+        transition: background var(--void-duration-fast);
       }
 
       .sidebar-project:hover {
@@ -266,7 +266,7 @@ import iconMoon from '@tabler/icons/outline/moon.svg?raw';
         font-size: var(--void-text-sm);
         color: var(--void-color-text-secondary);
         cursor: pointer;
-        transition: background 150ms, color 150ms;
+        transition: background var(--void-duration-fast), color var(--void-duration-fast);
         user-select: none;
       }
 
@@ -297,14 +297,8 @@ import iconMoon from '@tabler/icons/outline/moon.svg?raw';
         opacity: 1;
       }
 
-      .sidebar-nav-badge {
+      .sidebar-nav-item void-badge {
         margin-left: auto;
-        font-family: var(--void-font-mono);
-        font-size: var(--void-text-xs);
-        padding: var(--void-space-1) var(--void-space-1);
-        border-radius: var(--void-radius-xs);
-        background: var(--void-color-border-strong);
-        color: var(--void-color-text-secondary);
       }
 
       .sidebar-footer {
@@ -314,20 +308,6 @@ import iconMoon from '@tabler/icons/outline/moon.svg?raw';
         align-items: center;
         gap: var(--void-space-2);
         background: var(--void-color-bg-secondary);
-      }
-
-      .sidebar-avatar {
-        width: 26px;
-        height: 26px;
-        border-radius: var(--void-radius-full);
-        background: var(--void-color-bg-accent);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: var(--void-text-2xs);
-        font-weight: var(--void-weight-bold);
-        color: var(--void-color-text);
-        flex-shrink: 0;
       }
 
       .sidebar-user-info {
@@ -369,7 +349,7 @@ import iconMoon from '@tabler/icons/outline/moon.svg?raw';
         gap: var(--void-space-4);
         flex-wrap: wrap;
         background: color-mix(in srgb, var(--void-color-bg) 40%, transparent);
-        backdrop-filter: blur(4px);
+        backdrop-filter: blur(4px); /* token-ok: backdrop blur */
         position: sticky;
         top: 0;
         z-index: 10;
@@ -439,11 +419,8 @@ import iconMoon from '@tabler/icons/outline/moon.svg?raw';
         flex-wrap: wrap;
       }
 
-      .toolbar-divider {
-        width: 1px;
+      .toolbar-row void-divider {
         height: var(--void-space-5);
-        background: var(--void-color-border-strong);
-        flex-shrink: 0;
       }
 
       .toolbar-label {
@@ -587,20 +564,6 @@ import iconMoon from '@tabler/icons/outline/moon.svg?raw';
         font-family: var(--void-font-mono);
       }
 
-      /* ── Status dot ── */
-      .status-dot {
-        display: inline-block;
-        width: 6px;
-        height: 6px;
-        border-radius: var(--void-radius-full);
-        flex-shrink: 0;
-      }
-
-      .status-dot.success { background: var(--void-color-success, #22c55e); }
-      .status-dot.error   { background: var(--void-color-error, #ef4444); }
-      .status-dot.warning { background: var(--void-color-warning, #f59e0b); }
-      .status-dot.muted   { background: var(--void-color-text-muted); }
-
       .cell-with-dot {
         display: flex;
         align-items: center;
@@ -646,13 +609,13 @@ import iconMoon from '@tabler/icons/outline/moon.svg?raw';
         flex-shrink: 0;
       }
       .icon-inline :global(svg) {
-        width: 14px;
-        height: 14px;
+        width: 14px; /* token-ok: icon size */
+        height: 14px; /* token-ok: icon size */
         margin-right: var(--void-space-1);
       }
       .icon-chevron :global(svg) {
-        width: 10px;
-        height: 10px;
+        width: 10px; /* token-ok: chevron icon size */
+        height: 10px; /* token-ok: chevron icon size */
         margin-right: 0;
         margin-left: var(--void-space-1);
         opacity: 0.5;
@@ -708,7 +671,7 @@ import iconMoon from '@tabler/icons/outline/moon.svg?raw';
           left: 0;
           bottom: 0;
           z-index: var(--void-z-modal);
-          width: 220px;
+          width: 220px; /* token-ok: matches sidebar width prop */
           border-right: 1px solid var(--void-color-border);
           background: var(--void-color-bg);
         }
@@ -822,21 +785,21 @@ import iconMoon from '@tabler/icons/outline/moon.svg?raw';
         <nav class="sidebar-nav">
           <span class="sidebar-section-label">Main</span>
 
-          <div class="sidebar-nav-item active">
+          <a href="/showcase/dashboard/" class="sidebar-nav-item active">
             <span class="sidebar-nav-icon" set:html={iconLayoutDashboard} />
             <span>Overview</span>
-          </div>
+          </a>
 
           <div class="sidebar-nav-item">
             <span class="sidebar-nav-icon" set:html={iconChartBar} />
             <span>Analytics</span>
-            <span class="sidebar-nav-badge">New</span>
+            <void-badge size="sm">New</void-badge>
           </div>
 
-          <div class="sidebar-nav-item">
+          <a href="/showcase/dashboard/users/" class="sidebar-nav-item">
             <span class="sidebar-nav-icon" set:html={iconUsers} />
             <span>Users</span>
-          </div>
+          </a>
 
           <div class="sidebar-nav-item">
             <span class="sidebar-nav-icon" set:html={iconList} />
@@ -857,7 +820,7 @@ import iconMoon from '@tabler/icons/outline/moon.svg?raw';
         </nav>
 
         <div class="sidebar-footer">
-          <div class="sidebar-avatar">KW</div>
+          <void-avatar initials="KW" size="sm"></void-avatar>
           <div class="sidebar-user-info">
             <span class="sidebar-user-name">Kaz Walker</span>
             <span class="sidebar-user-role">Admin</span>
@@ -946,7 +909,7 @@ import iconMoon from '@tabler/icons/outline/moon.svg?raw';
             <void-toggle variant="outline" size="sm" pressed>Live</void-toggle>
             <void-toggle variant="outline" size="sm">Alerts</void-toggle>
             <void-toggle variant="outline" size="sm">Compare</void-toggle>
-            <div class="toolbar-divider"></div>
+            <void-divider orientation="vertical"></void-divider>
             <span class="toolbar-label">Layer</span>
             <void-toggle variant="outline" size="sm" pressed>P99</void-toggle>
             <void-toggle variant="outline" size="sm">P50</void-toggle>
@@ -1085,7 +1048,7 @@ import iconMoon from '@tabler/icons/outline/moon.svg?raw';
                 </thead>
                 <tbody>
                   <tr>
-                    <td><span class="cell-with-dot"><span class="status-dot success"></span>200</span></td>
+                    <td><span class="cell-with-dot"><void-status-dot status="online"></void-status-dot>200</span></td>
                     <td><span class="method-tag get">GET</span></td>
                     <td class="mono">/api/v2/users</td>
                     <td class="mono">38ms</td>
@@ -1093,7 +1056,7 @@ import iconMoon from '@tabler/icons/outline/moon.svg?raw';
                     <td class="text-sm text-secondary">2s ago</td>
                   </tr>
                   <tr>
-                    <td><span class="cell-with-dot"><span class="status-dot success"></span>201</span></td>
+                    <td><span class="cell-with-dot"><void-status-dot status="online"></void-status-dot>201</span></td>
                     <td><span class="method-tag post">POST</span></td>
                     <td class="mono">/api/v2/sessions</td>
                     <td class="mono">54ms</td>
@@ -1101,7 +1064,7 @@ import iconMoon from '@tabler/icons/outline/moon.svg?raw';
                     <td class="text-sm text-secondary">12s ago</td>
                   </tr>
                   <tr>
-                    <td><span class="cell-with-dot"><span class="status-dot error"></span>429</span></td>
+                    <td><span class="cell-with-dot"><void-status-dot status="offline"></void-status-dot>429</span></td>
                     <td><span class="method-tag get">GET</span></td>
                     <td class="mono">/api/v2/metrics</td>
                     <td class="mono">4ms</td>
@@ -1109,7 +1072,7 @@ import iconMoon from '@tabler/icons/outline/moon.svg?raw';
                     <td class="text-sm text-secondary">18s ago</td>
                   </tr>
                   <tr>
-                    <td><span class="cell-with-dot"><span class="status-dot success"></span>200</span></td>
+                    <td><span class="cell-with-dot"><void-status-dot status="online"></void-status-dot>200</span></td>
                     <td><span class="method-tag patch">PATCH</span></td>
                     <td class="mono">/api/v2/users/9182</td>
                     <td class="mono">71ms</td>
@@ -1117,7 +1080,7 @@ import iconMoon from '@tabler/icons/outline/moon.svg?raw';
                     <td class="text-sm text-secondary">34s ago</td>
                   </tr>
                   <tr>
-                    <td><span class="cell-with-dot"><span class="status-dot error"></span>500</span></td>
+                    <td><span class="cell-with-dot"><void-status-dot status="offline"></void-status-dot>500</span></td>
                     <td><span class="method-tag post">POST</span></td>
                     <td class="mono">/api/v2/webhooks</td>
                     <td class="mono">1204ms</td>
@@ -1125,7 +1088,7 @@ import iconMoon from '@tabler/icons/outline/moon.svg?raw';
                     <td class="text-sm text-secondary">1m ago</td>
                   </tr>
                   <tr>
-                    <td><span class="cell-with-dot"><span class="status-dot warning"></span>304</span></td>
+                    <td><span class="cell-with-dot"><void-status-dot status="away"></void-status-dot>304</span></td>
                     <td><span class="method-tag get">GET</span></td>
                     <td class="mono">/api/v2/reports</td>
                     <td class="mono">22ms</td>
@@ -1133,7 +1096,7 @@ import iconMoon from '@tabler/icons/outline/moon.svg?raw';
                     <td class="text-sm text-secondary">1m ago</td>
                   </tr>
                   <tr>
-                    <td><span class="cell-with-dot"><span class="status-dot success"></span>204</span></td>
+                    <td><span class="cell-with-dot"><void-status-dot status="online"></void-status-dot>204</span></td>
                     <td><span class="method-tag delete">DELETE</span></td>
                     <td class="mono">/api/v2/sessions/7731</td>
                     <td class="mono">29ms</td>
@@ -1141,7 +1104,7 @@ import iconMoon from '@tabler/icons/outline/moon.svg?raw';
                     <td class="text-sm text-secondary">2m ago</td>
                   </tr>
                   <tr>
-                    <td><span class="cell-with-dot"><span class="status-dot success"></span>200</span></td>
+                    <td><span class="cell-with-dot"><void-status-dot status="online"></void-status-dot>200</span></td>
                     <td><span class="method-tag get">GET</span></td>
                     <td class="mono">/api/v2/billing/invoices</td>
                     <td class="mono">46ms</td>
