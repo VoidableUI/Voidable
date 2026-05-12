@@ -1,0 +1,111 @@
+void-editable {
+  display: inline-flex;
+  font-family: var(--void-font-sans);
+}
+
+/* Preview */
+.void-editable-preview {
+  display: inline;
+  padding: var(--void-space-0-5) var(--void-space-1);
+  border: 1px solid transparent;
+  border-radius: var(--void-radius-md);
+  color: var(--void-color-text);
+  cursor: text;
+  text-decoration: underline dotted var(--void-color-border-focus);
+  text-underline-offset: var(--void-space-1);
+  transition: border-color var(--void-duration-fast) var(--void-ease-in-out),
+              background var(--void-duration-fast) var(--void-ease-in-out);
+}
+
+.void-editable-preview:hover {
+  border-color: var(--void-color-border-focus);
+  border-style: dashed;
+  background: var(--void-color-bg-secondary);
+  text-decoration: none;
+}
+
+.void-editable-preview:focus-visible {
+  outline: none;
+  border-color: var(--void-color-border-focus);
+  box-shadow: 0 0 0 1px var(--void-color-border-focus);
+  text-decoration: none;
+}
+
+/* Placeholder */
+.void-editable-placeholder {
+  color: var(--void-color-text-muted);
+}
+
+/* Input */
+.void-editable-input {
+  padding: var(--void-space-1) var(--void-space-2);
+  background: var(--void-color-bg-secondary);
+  border: 1px solid var(--void-color-border);
+  border-radius: var(--void-radius-md);
+  color: var(--void-color-text);
+  font-family: inherit;
+  font-size: var(--void-text-sm);
+  line-height: var(--void-leading-normal);
+  outline: none;
+  transition: border-color var(--void-duration-fast) var(--void-ease-in-out),
+              box-shadow var(--void-duration-fast) var(--void-ease-in-out);
+}
+
+.void-editable-input:hover {
+  border-color: var(--void-color-border-strong);
+}
+
+.void-editable-input:focus {
+  border-color: var(--void-color-border-focus);
+  box-shadow: 0 0 0 1px var(--void-color-border-focus);
+}
+
+/* State: not editing — show preview, hide input */
+void-editable:not([editing]) .void-editable-input {
+  display: none;
+}
+
+void-editable:not([editing]) .void-editable-preview {
+  display: inline-flex;
+}
+
+/* State: editing — show input, hide preview */
+void-editable[editing] .void-editable-preview {
+  display: none;
+}
+
+void-editable[editing] .void-editable-input {
+  display: inline-flex;
+}
+
+/* Disabled */
+void-editable[disabled] .void-editable-preview {
+  cursor: default;
+  opacity: var(--void-opacity-disabled, 0.5);
+}
+
+void-editable[disabled] .void-editable-preview:hover {
+  border-color: transparent;
+  background: transparent;
+  text-decoration: underline dotted var(--void-color-border-focus);
+}
+
+/* Size: sm */
+void-editable[size="sm"] .void-editable-preview,
+void-editable[size="sm"] .void-editable-input {
+  font-size: var(--void-text-xs);
+}
+
+void-editable[size="sm"] .void-editable-input {
+  padding: var(--void-space-0-5) var(--void-space-1);
+}
+
+/* Size: lg */
+void-editable[size="lg"] .void-editable-preview,
+void-editable[size="lg"] .void-editable-input {
+  font-size: var(--void-text-base);
+}
+
+void-editable[size="lg"] .void-editable-input {
+  padding: var(--void-space-2) var(--void-space-3);
+}

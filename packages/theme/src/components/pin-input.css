@@ -1,0 +1,121 @@
+/* ============================================================
+   void-pin-input — Tone system component
+   ============================================================ */
+
+void-pin-input {
+  /* Tone system */
+  --tone: var(--void-color-accent);
+  --tone-subtle: color-mix(in srgb, var(--tone) 14%, transparent);
+  --tone-border: color-mix(in srgb, var(--tone) 36%, transparent);
+
+  display: inline-block;
+  font-family: var(--void-font-sans);
+}
+
+.void-pin-input {
+  display: flex;
+  gap: var(--void-space-2);
+}
+
+.void-pin-separator {
+  display: flex;
+  align-items: center;
+  color: var(--void-color-text-muted);
+  font-size: var(--void-text-2xl);
+  font-weight: var(--void-weight-semibold);
+  user-select: none;
+}
+
+.void-pin-cell {
+  width: var(--void-space-10);
+  height: var(--void-space-10);
+  padding: 0;
+  background: var(--void-color-bg-secondary);
+  border: 1px solid var(--void-color-border);
+  border-radius: var(--void-radius-md);
+  color: var(--void-color-text);
+  font-family: var(--void-font-mono);
+  font-size: var(--void-text-lg);
+  line-height: var(--void-leading-normal);
+  text-align: center;
+  outline: none;
+  transition: border-color var(--void-duration-fast) var(--void-ease-in-out),
+              box-shadow var(--void-duration-fast) var(--void-ease-in-out);
+  caret-color: var(--void-color-text);
+}
+
+.void-pin-cell::placeholder {
+  color: var(--void-color-text-muted);
+}
+
+.void-pin-cell:hover:not(:disabled) {
+  border-color: var(--void-color-border-strong);
+}
+
+.void-pin-cell:focus {
+  border-color: var(--void-color-border-focus);
+  box-shadow: 0 0 0 1px var(--void-color-border-focus);
+}
+
+/* Mask — password dots via text-security */
+void-pin-input[mask] .void-pin-cell {
+  -webkit-text-security: disc;
+}
+
+/* Disabled */
+void-pin-input[disabled] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+void-pin-input[disabled] .void-pin-cell {
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Color variants */
+void-pin-input[color="error"]   { --tone: var(--void-color-error); }
+void-pin-input[color="warning"] { --tone: var(--void-color-warning); }
+void-pin-input[color="success"] { --tone: var(--void-color-success); }
+void-pin-input[color="info"]    { --tone: var(--void-color-info); }
+void-pin-input[color="notice"]  { --tone: var(--void-color-notice); }
+
+void-pin-input:where([color="error"], [color="warning"], [color="success"], [color="info"], [color="notice"]) .void-pin-cell {
+  border-color: var(--tone-border);
+  background: var(--tone-subtle);
+}
+
+void-pin-input:where([color="error"], [color="warning"], [color="success"], [color="info"], [color="notice"]) .void-pin-cell:focus {
+  border-color: var(--tone);
+  box-shadow: 0 0 0 1px var(--tone);
+}
+
+/* Size: sm */
+void-pin-input[size="sm"] .void-pin-separator {
+  font-size: var(--void-text-lg);
+}
+
+void-pin-input[size="sm"] .void-pin-cell {
+  width: var(--void-space-8);
+  height: var(--void-space-8);
+  font-size: var(--void-text-sm);
+}
+
+void-pin-input[size="sm"] .void-pin-input {
+  gap: var(--void-space-1);
+}
+
+/* Size: lg */
+void-pin-input[size="lg"] .void-pin-separator {
+  font-size: var(--void-text-3xl);
+}
+
+void-pin-input[size="lg"] .void-pin-cell {
+  width: var(--void-space-12);
+  height: var(--void-space-12);
+  font-size: var(--void-text-xl);
+}
+
+void-pin-input[size="lg"] .void-pin-input {
+  gap: var(--void-space-3);
+}

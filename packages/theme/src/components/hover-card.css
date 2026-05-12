@@ -1,0 +1,124 @@
+void-hover-card {
+  position: relative;
+  display: inline-flex;
+}
+
+.void-hover-card-trigger {
+  display: inline-flex;
+}
+
+.void-hover-card-body {
+  position: absolute;
+  z-index: var(--void-z-dropdown);
+  min-width: 16rem; /* token-ok: intrinsic card minimum width */
+  background: var(--void-color-bg-elevated);
+  border: 1px solid var(--void-color-border);
+  border-radius: var(--void-radius-lg);
+  padding: var(--void-space-4);
+  box-shadow: 0 4px 16px var(--void-color-bg-overlay);
+  font-family: var(--void-font-sans);
+  font-size: var(--void-text-sm);
+  color: var(--void-color-text);
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(0.96);
+  transition:
+    opacity var(--void-duration-fast) var(--void-ease-in-out),
+    transform var(--void-duration-fast) var(--void-ease-in-out);
+}
+
+void-hover-card[open] .void-hover-card-body {
+  opacity: 1;
+  pointer-events: auto;
+  transform: scale(1);
+}
+
+/* Position: bottom (default) */
+void-hover-card[position="bottom"] .void-hover-card-body,
+void-hover-card:not([position]) .void-hover-card-body {
+  top: calc(100% + var(--void-space-2));
+  left: 50%;
+  transform: translateX(-50%) scale(0.96);
+}
+
+void-hover-card[position="bottom"][open] .void-hover-card-body,
+void-hover-card:not([position])[open] .void-hover-card-body {
+  transform: translateX(-50%) scale(1);
+}
+
+/* Position: top */
+void-hover-card[position="top"] .void-hover-card-body {
+  bottom: calc(100% + var(--void-space-2));
+  left: 50%;
+  transform: translateX(-50%) scale(0.96);
+}
+
+void-hover-card[position="top"][open] .void-hover-card-body {
+  transform: translateX(-50%) scale(1);
+}
+
+/* Position: left */
+void-hover-card[position="left"] .void-hover-card-body {
+  right: calc(100% + var(--void-space-2));
+  top: 50%;
+  transform: translateY(-50%) scale(0.96);
+}
+
+void-hover-card[position="left"][open] .void-hover-card-body {
+  transform: translateY(-50%) scale(1);
+}
+
+/* Position: right */
+void-hover-card[position="right"] .void-hover-card-body {
+  left: calc(100% + var(--void-space-2));
+  top: 50%;
+  transform: translateY(-50%) scale(0.96);
+}
+
+void-hover-card[position="right"][open] .void-hover-card-body {
+  transform: translateY(-50%) scale(1);
+}
+
+/* Arrow indicators */
+.void-hover-card-body::before {
+  content: '';
+  position: absolute;
+  width: var(--void-space-2);
+  height: var(--void-space-2);
+  background: var(--void-color-bg-elevated);
+  border: 1px solid var(--void-color-border);
+  transform: rotate(45deg);
+}
+
+void-hover-card[position="bottom"] .void-hover-card-body::before,
+void-hover-card:not([position]) .void-hover-card-body::before {
+  top: calc(-1 * var(--void-space-1) - 1px);
+  left: 50%;
+  margin-left: calc(-1 * var(--void-space-1));
+  border-bottom: none;
+  border-right: none;
+}
+
+void-hover-card[position="top"] .void-hover-card-body::before {
+  bottom: calc(-1 * var(--void-space-1) - 1px);
+  left: 50%;
+  margin-left: calc(-1 * var(--void-space-1));
+  border-top: none;
+  border-left: none;
+}
+
+void-hover-card[position="left"] .void-hover-card-body::before {
+  right: calc(-1 * var(--void-space-1) - 1px);
+  top: 50%;
+  margin-top: calc(-1 * var(--void-space-1));
+  border-left: none;
+  border-bottom: none;
+}
+
+void-hover-card[position="right"] .void-hover-card-body::before {
+  left: calc(-1 * var(--void-space-1) - 1px);
+  top: 50%;
+  margin-top: calc(-1 * var(--void-space-1));
+  border-right: none;
+  border-top: none;
+}

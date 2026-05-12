@@ -54,3 +54,10 @@ export { VoidDropdownMenu, VoidDropdownMenuItem } from './components/dropdown-me
 export { VoidIndicator } from './components/indicator.js';
 export { VoidMenu, VoidMenuItem, VoidMenuGroup } from './components/menu.js';
 export { VoidNumberInput } from './components/number-input.js';
+export { VoidCollapsible } from './components/collapsible.js';
+export { VoidEditable } from './components/editable.js';
+export { VoidHoverCard } from './components/hover-card.js';
+export { VoidPinInput } from './components/pin-input.js';
+export { VoidTagsInput } from './components/tags-input.js';
+export { VoidNavMenu, VoidNavMenuItem } from './components/nav-menu.js';
+export { VoidColorPicker } from './components/color-picker.js';

@@ -1,0 +1,128 @@
+void-nav-menu {
+  display: flex;
+  align-items: center;
+  gap: var(--void-space-1);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-family: var(--void-font-sans);
+}
+
+void-nav-menu[orientation="vertical"] {
+  flex-direction: column;
+  align-items: stretch;
+  width: var(--void-nav-menu-width, fit-content);
+}
+
+void-nav-menu-item {
+  position: relative;
+  display: inline-flex;
+}
+
+void-nav-menu[orientation="vertical"] void-nav-menu-item {
+  display: flex;
+}
+
+.void-nav-menu-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--void-space-1);
+  padding: var(--void-space-2) var(--void-space-3);
+  font-family: var(--void-font-sans);
+  font-size: var(--void-text-sm);
+  font-weight: var(--void-weight-medium);
+  color: var(--void-color-text-muted);
+  background: none;
+  border: none;
+  border-radius: var(--void-radius-md);
+  cursor: pointer;
+  text-decoration: none;
+  white-space: nowrap;
+  user-select: none;
+  outline: none;
+  transition:
+    color var(--void-duration-fast) var(--void-ease-in-out),
+    background var(--void-duration-fast) var(--void-ease-in-out);
+}
+
+.void-nav-menu-trigger:hover {
+  color: var(--void-color-text);
+  background: var(--void-color-bg-hover);
+}
+
+.void-nav-menu-trigger:focus-visible {
+  color: var(--void-color-text);
+  outline: 2px solid var(--void-color-ring);
+  outline-offset: 2px; /* token-ok: intrinsic focus outline offset */
+}
+
+.void-nav-menu-trigger:active {
+  background: var(--void-color-bg-active);
+}
+
+void-nav-menu-item[active] .void-nav-menu-trigger {
+  color: var(--void-color-text);
+}
+
+void-nav-menu-item[active] .void-nav-menu-trigger::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: var(--void-space-3);
+  right: var(--void-space-3);
+  height: 2px; /* token-ok: decorative active indicator */
+  background: var(--void-color-accent);
+  border-radius: var(--void-radius-full);
+}
+
+void-nav-menu[orientation="vertical"] void-nav-menu-item[active] .void-nav-menu-trigger::after {
+  top: var(--void-space-2);
+  bottom: var(--void-space-2);
+  left: 0;
+  right: auto;
+  width: 2px; /* token-ok: decorative active indicator */
+  height: auto;
+}
+
+void-nav-menu-item[disabled] .void-nav-menu-trigger {
+  color: var(--void-color-text-disabled);
+  cursor: default;
+  pointer-events: none;
+}
+
+.void-nav-menu-content {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: var(--void-z-dropdown);
+  min-width: 12rem; /* token-ok: intrinsic dropdown minimum width */
+  padding: var(--void-space-2);
+  background: var(--void-color-bg-elevated);
+  border: 1px solid var(--void-color-border);
+  border-radius: var(--void-radius-lg);
+  box-shadow: 0 4px 16px var(--void-color-bg-overlay);
+  font-size: var(--void-text-sm);
+  color: var(--void-color-text);
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(var(--void-space-1));
+  transition:
+    opacity var(--void-duration-fast) var(--void-ease-in-out),
+    transform var(--void-duration-fast) var(--void-ease-in-out);
+}
+
+void-nav-menu-item[open] .void-nav-menu-content {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
+void-nav-menu[orientation="vertical"] .void-nav-menu-content {
+  top: 0;
+  left: 100%;
+  transform: translateX(var(--void-space-1));
+}
+
+void-nav-menu[orientation="vertical"] void-nav-menu-item[open] .void-nav-menu-content {
+  transform: translateX(0);
+}
