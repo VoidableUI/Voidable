@@ -1675,4 +1675,240 @@ defmodule VoidableUI.Components do
     />
     """
   end
+
+  # ---------------------------------------------------------------------------
+  # Collapsible (interactive — void-toggle)
+  # ---------------------------------------------------------------------------
+
+  @doc "Renders a `<void-collapsible>` expandable section."
+  attr :id, :string, default: nil
+  attr :heading, :string, default: nil
+  attr :open, :boolean, default: false
+  attr :disabled, :boolean, default: false
+  attr :rest, :global
+  slot :inner_block, required: true
+
+  def collapsible(assigns) do
+    ~H"""
+    <void-collapsible
+      id={@id || "void-collapsible-#{unique_id()}"}
+      heading={@heading}
+      open={@open}
+      disabled={@disabled}
+      phx-hook="VoidEvent"
+      data-void-events="void-toggle"
+      {@rest}
+    >
+      {render_slot(@inner_block)}
+    </void-collapsible>
+    """
+  end
+
+  # ---------------------------------------------------------------------------
+  # Editable (interactive — void-change, void-cancel)
+  # ---------------------------------------------------------------------------
+
+  @doc "Renders a `<void-editable>` inline-editable text field."
+  attr :id, :string, default: nil
+  attr :value, :string, default: nil
+  attr :editing, :boolean, default: false
+  attr :disabled, :boolean, default: false
+  attr :placeholder, :string, default: nil
+  attr :submit_mode, :string, default: nil
+  attr :size, :string, default: nil
+  attr :rest, :global
+
+  def editable(assigns) do
+    ~H"""
+    <void-editable
+      id={@id || "void-editable-#{unique_id()}"}
+      value={@value}
+      editing={@editing}
+      disabled={@disabled}
+      placeholder={@placeholder}
+      submitMode={@submit_mode}
+      size={@size}
+      phx-hook="VoidEvent"
+      data-void-events="void-change,void-cancel"
+      {@rest}
+    />
+    """
+  end
+
+  # ---------------------------------------------------------------------------
+  # HoverCard (static — hover-based, no server events)
+  # ---------------------------------------------------------------------------
+
+  @doc "Renders a `<void-hover-card>` hover-triggered card."
+  attr :open, :boolean, default: false
+  attr :position, :string, default: nil
+  attr :open_delay, :integer, default: nil
+  attr :close_delay, :integer, default: nil
+  attr :rest, :global
+  slot :inner_block, required: true
+
+  def hover_card(assigns) do
+    ~H"""
+    <void-hover-card
+      open={@open}
+      position={@position}
+      openDelay={@open_delay}
+      closeDelay={@close_delay}
+      {@rest}
+    >
+      {render_slot(@inner_block)}
+    </void-hover-card>
+    """
+  end
+
+  # ---------------------------------------------------------------------------
+  # PinInput (interactive — void-change, void-complete)
+  # ---------------------------------------------------------------------------
+
+  @doc "Renders a `<void-pin-input>` verification code input."
+  attr :id, :string, default: nil
+  attr :length, :integer, default: nil
+  attr :groups, :string, default: nil
+  attr :value, :string, default: nil
+  attr :disabled, :boolean, default: false
+  attr :mask, :boolean, default: false
+  attr :type, :string, default: nil
+  attr :size, :string, default: nil
+  attr :color, :string, default: nil
+  attr :placeholder, :string, default: nil
+  attr :rest, :global
+
+  def pin_input(assigns) do
+    ~H"""
+    <void-pin-input
+      id={@id || "void-pin-input-#{unique_id()}"}
+      length={@length}
+      groups={@groups}
+      value={@value}
+      disabled={@disabled}
+      mask={@mask}
+      type={@type}
+      size={@size}
+      color={@color}
+      placeholder={@placeholder}
+      phx-hook="VoidEvent"
+      data-void-events="void-change,void-complete"
+      {@rest}
+    />
+    """
+  end
+
+  # ---------------------------------------------------------------------------
+  # TagsInput (interactive — void-change)
+  # ---------------------------------------------------------------------------
+
+  @doc "Renders a `<void-tags-input>` tag entry field."
+  attr :id, :string, default: nil
+  attr :disabled, :boolean, default: false
+  attr :readonly, :boolean, default: false
+  attr :max, :integer, default: nil
+  attr :placeholder, :string, default: nil
+  attr :size, :string, default: nil
+  attr :color, :string, default: nil
+  attr :variant, :string, default: nil
+  attr :allow_duplicates, :boolean, default: false
+  attr :rest, :global
+
+  def tags_input(assigns) do
+    ~H"""
+    <void-tags-input
+      id={@id || "void-tags-input-#{unique_id()}"}
+      disabled={@disabled}
+      readonly={@readonly}
+      max={@max}
+      placeholder={@placeholder}
+      size={@size}
+      color={@color}
+      variant={@variant}
+      allowDuplicates={@allow_duplicates}
+      phx-hook="VoidEvent"
+      data-void-events="void-change"
+      {@rest}
+    />
+    """
+  end
+
+  # ---------------------------------------------------------------------------
+  # NavMenu (static — container)
+  # ---------------------------------------------------------------------------
+
+  @doc "Renders a `<void-nav-menu>` navigation menu container."
+  attr :orientation, :string, default: nil
+  attr :width, :string, default: nil
+  attr :rest, :global
+  slot :inner_block, required: true
+
+  def nav_menu(assigns) do
+    ~H"""
+    <void-nav-menu orientation={@orientation} width={@width} {@rest}>
+      {render_slot(@inner_block)}
+    </void-nav-menu>
+    """
+  end
+
+  # ---------------------------------------------------------------------------
+  # NavMenuItem (interactive — void-open, void-close)
+  # ---------------------------------------------------------------------------
+
+  @doc "Renders a `<void-nav-menu-item>` navigation menu item."
+  attr :id, :string, default: nil
+  attr :open, :boolean, default: false
+  attr :disabled, :boolean, default: false
+  attr :href, :string, default: nil
+  attr :active, :boolean, default: false
+  attr :rest, :global
+  slot :inner_block, required: true
+
+  def nav_menu_item(assigns) do
+    ~H"""
+    <void-nav-menu-item
+      id={@id || "void-nav-menu-item-#{unique_id()}"}
+      open={@open}
+      disabled={@disabled}
+      href={@href}
+      active={@active}
+      phx-hook="VoidEvent"
+      data-void-events="void-open,void-close"
+      {@rest}
+    >
+      {render_slot(@inner_block)}
+    </void-nav-menu-item>
+    """
+  end
+
+  # ---------------------------------------------------------------------------
+  # ColorPicker (interactive — void-change)
+  # ---------------------------------------------------------------------------
+
+  @doc "Renders a `<void-color-picker>` color selection input."
+  attr :id, :string, default: nil
+  attr :value, :string, default: nil
+  attr :disabled, :boolean, default: false
+  attr :size, :string, default: nil
+  attr :show_input, :boolean, default: false
+  attr :variant, :string, default: nil
+  attr :open, :boolean, default: false
+  attr :rest, :global
+
+  def color_picker(assigns) do
+    ~H"""
+    <void-color-picker
+      id={@id || "void-color-picker-#{unique_id()}"}
+      value={@value}
+      disabled={@disabled}
+      size={@size}
+      showInput={@show_input}
+      variant={@variant}
+      open={@open}
+      phx-hook="VoidEvent"
+      data-void-events="void-change"
+      {@rest}
+    />
+    """
+  end
 end
