@@ -657,6 +657,117 @@ import iconMoon from '@tabler/icons/outline/moon.svg?raw';
         margin-left: var(--void-space-1);
         opacity: 0.5;
       }
+
+      /* ── Charts grid half (was inline style) ── */
+      .charts-grid-half {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      /* ── Mobile hamburger (hidden on desktop) ── */
+      .mobile-hamburger {
+        display: none;
+      }
+
+      /* ── Sidebar backdrop (hidden by default) ── */
+      .sidebar-backdrop {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: var(--void-color-bg-overlay);
+        z-index: calc(var(--void-z-modal) - 1);
+      }
+
+      .sidebar-open .sidebar-backdrop {
+        display: block;
+      }
+
+      /* ── Responsive: Tablet (≤1024px) ── */
+      @media (max-width: 1024px) {
+        .stats-row {
+          grid-template-columns: repeat(2, 1fr);
+        }
+
+        .charts-grid,
+        .charts-grid-half {
+          grid-template-columns: 1fr;
+        }
+
+        .chart-panel + .chart-panel {
+          border-left: none;
+          border-top: 1px solid var(--void-color-border);
+        }
+      }
+
+      /* ── Responsive: Mobile (≤768px) ── */
+      @media (max-width: 768px) {
+        /* Sidebar: hidden by default, overlay when open */
+        .sidebar-column {
+          display: none;
+          position: fixed;
+          top: 0;
+          left: 0;
+          bottom: 0;
+          z-index: var(--void-z-modal);
+          width: 220px;
+          border-right: 1px solid var(--void-color-border);
+          background: var(--void-color-bg);
+        }
+
+        .sidebar-open .sidebar-column {
+          display: block;
+        }
+
+        .sidebar-open void-sidebar {
+          position: static !important;
+          height: 100% !important;
+        }
+
+        /* Show hamburger */
+        .mobile-hamburger {
+          display: inline-flex;
+        }
+
+        /* Hide site nav links (sidebar has navigation) */
+        .site-nav-links {
+          display: none;
+        }
+
+        /* Stats row: 2×2 grid */
+        .stats-row {
+          grid-template-columns: repeat(2, 1fr);
+          padding-left: var(--void-space-3);
+          padding-right: var(--void-space-3);
+        }
+
+        /* Dash header: stack vertically */
+        .dash-header {
+          flex-direction: column;
+          align-items: flex-start;
+          padding-left: var(--void-space-3);
+          padding-right: var(--void-space-3);
+        }
+
+        .dash-header-controls {
+          margin-left: 0;
+          width: 100%;
+        }
+
+        /* Reduce horizontal padding */
+        .content-area {
+          padding-left: var(--void-space-3);
+          padding-right: var(--void-space-3);
+        }
+
+        .site-nav-inner {
+          padding-left: var(--void-space-3);
+          padding-right: var(--void-space-3);
+        }
+
+        /* Table horizontal scroll */
+        .table-section {
+          overflow-x: auto;
+        }
+      }
     </style>
   </head>
 
@@ -666,6 +777,7 @@ import iconMoon from '@tabler/icons/outline/moon.svg?raw';
     <nav class="site-nav">
       <div class="site-nav-inner">
         <a href="/" class="site-wordmark">voidable</a>
+        <void-hamburger id="sidebar-toggle" class="mobile-hamburger" size="md"></void-hamburger>
         <ul class="site-nav-links">
           <li><a href="/getting-started/introduction/">Docs</a></li>
           <li><a href="/components/overview/">Components</a></li>
@@ -753,6 +865,8 @@ import iconMoon from '@tabler/icons/outline/moon.svg?raw';
         </div>
       </void-sidebar>
       </div>
+
+      <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
 
       <!-- Main content area -->
       <div class="main-content">
@@ -914,7 +1028,7 @@ import iconMoon from '@tabler/icons/outline/moon.svg?raw';
           </div>
 
           <!-- Second charts row -->
-          <div class="charts-grid" style="grid-template-columns: 1fr 1fr;">
+          <div class="charts-grid charts-grid-half">
             <div class="chart-panel">
               <div class="chart-panel-header">
                 <span class="chart-panel-title">Revenue</span>
@@ -1052,6 +1166,19 @@ import iconMoon from '@tabler/icons/outline/moon.svg?raw';
       toggle.addEventListener('click', () => {
         const current = html.getAttribute('data-theme');
         html.setAttribute('data-theme', current === 'dark' ? 'light' : 'dark');
+      });
+
+      const hamburger = document.getElementById('sidebar-toggle');
+      const appShell = document.querySelector('.app-shell');
+      const backdrop = document.getElementById('sidebar-backdrop');
+
+      hamburger?.addEventListener('click', () => {
+        appShell?.classList.toggle('sidebar-open');
+      });
+
+      backdrop?.addEventListener('click', () => {
+        appShell?.classList.remove('sidebar-open');
+        if (hamburger) (hamburger as any).active = false;
       });
     </script>
 
