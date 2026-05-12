@@ -31,7 +31,7 @@
   --void-red-900: #7f1d1d;
   --void-red-950: #450a0a;
 
-  /* ── Amber palette (status: warning) ── */
+  /* ── Amber palette (status: caution) ── */
   --void-amber-50:  #fefae4;
   --void-amber-100: #fdf1be;
   --void-amber-200: #f9e182;
@@ -43,6 +43,19 @@
   --void-amber-800: #655118;
   --void-amber-900: #503f13;
   --void-amber-950: #30260b;
+
+  /* ── Orange palette (status: warning) ── */
+  --void-orange-50:  #fff7ed;
+  --void-orange-100: #ffedd5;
+  --void-orange-200: #fed7aa;
+  --void-orange-300: #fdba74;
+  --void-orange-400: #fb923c;
+  --void-orange-500: #f97316;
+  --void-orange-600: #ea580c;
+  --void-orange-700: #c2410c;
+  --void-orange-800: #9a3412;
+  --void-orange-900: #7c2d12;
+  --void-orange-950: #431407;
 
   /* ── Green palette (status: success) ── */
   --void-green-50:  #f0fdf4;

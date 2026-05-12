@@ -33,7 +33,8 @@
 
   /* Status — primary */
   --void-color-error:     var(--void-red-500);
-  --void-color-warning:   var(--void-amber-500);
+  --void-color-warning:   var(--void-orange-500);
+  --void-color-caution:   var(--void-amber-500);
   --void-color-success:   var(--void-green-500);
   --void-color-info:      var(--void-blue-500);
   --void-color-notice:    var(--void-purple-500);
@@ -42,6 +43,7 @@
   /* Status — subtle (14% color-mix) */
   --void-color-error-subtle:     color-mix(in srgb, var(--void-color-error)     14%, transparent);
   --void-color-warning-subtle:   color-mix(in srgb, var(--void-color-warning)   14%, transparent);
+  --void-color-caution-subtle:   color-mix(in srgb, var(--void-color-caution)   14%, transparent);
   --void-color-success-subtle:   color-mix(in srgb, var(--void-color-success)   14%, transparent);
   --void-color-info-subtle:      color-mix(in srgb, var(--void-color-info)      14%, transparent);
   --void-color-notice-subtle:    color-mix(in srgb, var(--void-color-notice)    14%, transparent);
@@ -84,7 +86,8 @@
 
   /* Status — primary (-600 variants for light mode) */
   --void-color-error:     var(--void-red-600);
-  --void-color-warning:   var(--void-amber-600);
+  --void-color-warning:   var(--void-orange-600);
+  --void-color-caution:   var(--void-amber-600);
   --void-color-success:   var(--void-green-600);
   --void-color-info:      var(--void-blue-600);
   --void-color-notice:    var(--void-purple-600);
@@ -93,6 +96,7 @@
   /* Status — subtle (8% color-mix for light backgrounds) */
   --void-color-error-subtle:     color-mix(in srgb, var(--void-color-error)     8%, transparent);
   --void-color-warning-subtle:   color-mix(in srgb, var(--void-color-warning)   8%, transparent);
+  --void-color-caution-subtle:   color-mix(in srgb, var(--void-color-caution)   8%, transparent);
   --void-color-success-subtle:   color-mix(in srgb, var(--void-color-success)   8%, transparent);
   --void-color-info-subtle:      color-mix(in srgb, var(--void-color-info)      8%, transparent);
   --void-color-notice-subtle:    color-mix(in srgb, var(--void-color-notice)    8%, transparent);
