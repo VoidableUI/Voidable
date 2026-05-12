@@ -3,6 +3,10 @@ void-popover {
   display: inline-flex;
 }
 
+void-popover > :not(:first-child):not(.void-popover-body) {
+  display: none;
+}
+
 .void-popover-body {
   display: none;
   position: absolute;

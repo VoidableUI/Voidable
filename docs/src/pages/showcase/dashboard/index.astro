@@ -11,6 +11,7 @@ import iconBell from '@tabler/icons/outline/bell.svg?raw';
 import iconFilter from '@tabler/icons/outline/filter.svg?raw';
 import iconSun from '@tabler/icons/outline/sun.svg?raw';
 import iconMoon from '@tabler/icons/outline/moon.svg?raw';
+import iconLogout from '@tabler/icons/outline/logout.svg?raw';
 ---
 
 <html lang="en" data-theme="dark">
@@ -331,6 +332,94 @@ import iconMoon from '@tabler/icons/outline/moon.svg?raw';
         color: var(--void-color-text-muted);
       }
 
+      .sidebar-settings-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 28px;
+        height: 28px;
+        padding: 0;
+        border: 1px solid var(--void-color-border);
+        border-radius: var(--void-radius-sm);
+        background: transparent;
+        color: var(--void-color-text-muted);
+        cursor: pointer;
+        flex-shrink: 0;
+        transition: color var(--void-duration-fast) var(--void-ease-in-out),
+                    background var(--void-duration-fast) var(--void-ease-in-out);
+      }
+
+      .sidebar-settings-btn:hover {
+        color: var(--void-color-text);
+        background: var(--void-color-bg-hover);
+      }
+
+      .sidebar-settings-btn .sidebar-nav-icon {
+        width: 14px;
+        height: 14px;
+      }
+
+      .sidebar-footer void-popover {
+        display: flex;
+        align-items: center;
+        margin-left: auto;
+      }
+
+      #settings-popover :global(.void-popover-body) {
+        right: 0;
+        left: auto;
+      }
+
+      .settings-menu {
+        display: flex;
+        flex-direction: column;
+        gap: var(--void-space-1);
+        min-width: 160px;
+      }
+
+      .settings-menu-item {
+        display: flex;
+        align-items: center;
+        gap: var(--void-space-2);
+        padding: var(--void-space-2) var(--void-space-2);
+        border: none;
+        border-radius: var(--void-radius-sm);
+        background: transparent;
+        font-family: var(--void-font-sans);
+        font-size: var(--void-text-sm);
+        color: var(--void-color-text);
+        cursor: pointer;
+        transition: background var(--void-duration-fast) var(--void-ease-in-out);
+      }
+
+      .settings-menu-item:hover {
+        background: var(--void-color-bg-hover);
+      }
+
+      .settings-menu-item void-switch {
+        margin-left: auto;
+      }
+
+      .settings-menu-icon {
+        display: flex;
+        width: 16px;
+        height: 16px;
+        color: var(--void-color-text-secondary);
+      }
+
+      .settings-menu-icon :global(svg) {
+        width: 100%;
+        height: 100%;
+      }
+
+      .settings-sign-out {
+        color: var(--void-color-error);
+      }
+
+      .settings-sign-out .settings-menu-icon {
+        color: var(--void-color-error);
+      }
+
       /* ── Main content ── */
       .main-content {
         flex: 1;
@@ -354,6 +443,8 @@ import iconMoon from '@tabler/icons/outline/moon.svg?raw';
         top: 0;
         z-index: 10;
         flex-shrink: 0;
+        height: 4.875rem; /* token-ok: matches sidebar header height */
+        box-sizing: border-box;
       }
 
       .dash-title-group {
@@ -825,6 +916,22 @@ import iconMoon from '@tabler/icons/outline/moon.svg?raw';
             <span class="sidebar-user-name">Kaz Walker</span>
             <span class="sidebar-user-role">Admin</span>
           </div>
+          <void-popover position="top" id="settings-popover">
+            <button class="sidebar-settings-btn" aria-label="Settings">
+              <span class="sidebar-nav-icon" set:html={iconSettings} />
+            </button>
+            <div class="settings-menu">
+              <label class="settings-menu-item">
+                <span class="settings-menu-icon" set:html={iconSun} />
+                <span>Dark Mode</span>
+                <void-switch id="theme-switch" size="sm"></void-switch>
+              </label>
+              <button class="settings-menu-item settings-sign-out" type="button">
+                <span class="settings-menu-icon" set:html={iconLogout} />
+                <span>Sign Out</span>
+              </button>
+            </div>
+          </void-popover>
         </div>
       </void-sidebar>
       </div>
@@ -1124,11 +1231,23 @@ import iconMoon from '@tabler/icons/outline/moon.svg?raw';
       import '@voidable/ui';
 
       const toggle = document.getElementById('theme-toggle')!;
+      const themeSwitch = document.getElementById('theme-switch') as any;
       const html = document.documentElement;
+
+      function syncTheme() {
+        const isDark = html.getAttribute('data-theme') === 'dark';
+        if (themeSwitch) themeSwitch.checked = isDark;
+      }
+      syncTheme();
 
       toggle.addEventListener('click', () => {
         const current = html.getAttribute('data-theme');
         html.setAttribute('data-theme', current === 'dark' ? 'light' : 'dark');
+        syncTheme();
+      });
+
+      themeSwitch?.addEventListener('void-change', () => {
+        html.setAttribute('data-theme', themeSwitch.checked ? 'dark' : 'light');
       });
 
       const hamburger = document.getElementById('sidebar-toggle');
