@@ -64,6 +64,14 @@ export {
   Toggle,
   ToggleGroup,
   Tooltip,
+  Collapsible,
+  ColorPicker,
+  Editable,
+  HoverCard,
+  NavMenu,
+  NavMenuItem,
+  PinInput,
+  TagsInput,
 } from './components.js';
 
 export { useTheme } from './use-theme.js';

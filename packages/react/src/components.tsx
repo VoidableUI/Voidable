@@ -66,6 +66,14 @@ import type {
   VoidDatePicker,
   VoidNumberInput,
   VoidToggleGroup,
+  VoidCollapsible,
+  VoidEditable,
+  VoidHoverCard,
+  VoidPinInput,
+  VoidTagsInput,
+  VoidNavMenu,
+  VoidNavMenuItem,
+  VoidColorPicker,
 } from '@voidable/ui';
 
 // ---------------------------------------------------------------------------
@@ -622,3 +630,71 @@ export const ToggleGroup = wrapWc<VoidToggleGroup, {
   color?: 'default' | 'error' | 'warning' | 'success' | 'info' | 'notice';
   orientation?: 'horizontal' | 'vertical';
 }>('void-toggle-group', 'ToggleGroup');
+
+export const Collapsible = wrapWc<VoidCollapsible, {
+  heading?: string;
+  open?: boolean;
+  disabled?: boolean;
+}>('void-collapsible', 'Collapsible');
+
+export const Editable = wrapWc<VoidEditable, {
+  value?: string;
+  editing?: boolean;
+  disabled?: boolean;
+  placeholder?: string;
+  submitMode?: 'blur' | 'enter' | 'both';
+  size?: 'sm' | 'md' | 'lg';
+}>('void-editable', 'Editable');
+
+export const HoverCard = wrapWc<VoidHoverCard, {
+  open?: boolean;
+  position?: 'top' | 'bottom' | 'left' | 'right';
+  openDelay?: number;
+  closeDelay?: number;
+}>('void-hover-card', 'HoverCard');
+
+export const PinInput = wrapWc<VoidPinInput, {
+  length?: number;
+  groups?: string;
+  value?: string;
+  disabled?: boolean;
+  mask?: boolean;
+  type?: 'numeric' | 'alphanumeric';
+  size?: 'sm' | 'md' | 'lg';
+  color?: 'default' | 'error' | 'warning' | 'success' | 'info' | 'notice';
+  placeholder?: string;
+}>('void-pin-input', 'PinInput');
+
+export const TagsInput = wrapWc<VoidTagsInput, {
+  value?: (string | { text: string; color?: string })[];
+  disabled?: boolean;
+  readonly?: boolean;
+  max?: number;
+  placeholder?: string;
+  size?: 'sm' | 'md' | 'lg';
+  color?: 'default' | 'error' | 'warning' | 'success' | 'info' | 'notice';
+  variant?: 'filled' | 'outline';
+  allowDuplicates?: boolean;
+}>('void-tags-input', 'TagsInput');
+
+export const NavMenu = wrapWc<VoidNavMenu, {
+  orientation?: 'horizontal' | 'vertical';
+  width?: string;
+}>('void-nav-menu', 'NavMenu');
+
+export const NavMenuItem = wrapWc<VoidNavMenuItem, {
+  open?: boolean;
+  disabled?: boolean;
+  href?: string;
+  active?: boolean;
+}>('void-nav-menu-item', 'NavMenuItem');
+
+export const ColorPicker = wrapWc<VoidColorPicker, {
+  value?: string;
+  disabled?: boolean;
+  size?: 'sm' | 'md' | 'lg';
+  swatches?: string[];
+  showInput?: boolean;
+  variant?: 'default' | 'compact';
+  open?: boolean;
+}>('void-color-picker', 'ColorPicker');
