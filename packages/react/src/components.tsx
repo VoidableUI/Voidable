@@ -57,6 +57,15 @@ import type {
   VoidSegmentedControlItem,
   VoidStat,
   VoidIndicator,
+  VoidMenu,
+  VoidMenuItem,
+  VoidMenuGroup,
+  VoidCarousel,
+  VoidCarouselSlide,
+  VoidCalendar,
+  VoidDatePicker,
+  VoidNumberInput,
+  VoidToggleGroup,
 } from '@voidable/ui';
 
 // ---------------------------------------------------------------------------
@@ -533,3 +542,83 @@ export const Indicator = wrapWc<VoidIndicator, {
   overlay?: boolean;
   position?: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left';
 }>('void-indicator', 'Indicator');
+
+export const Menu = wrapWc<VoidMenu, {
+  open?: boolean;
+  searchable?: boolean;
+  size?: 'sm' | 'md' | 'lg';
+  placeholder?: string;
+}>('void-menu', 'Menu');
+
+export const MenuItem = wrapWc<VoidMenuItem, {
+  value?: string;
+  disabled?: boolean;
+  shortcut?: string;
+  icon?: string;
+}>('void-menu-item', 'MenuItem');
+
+export const MenuGroup = wrapWc<VoidMenuGroup, {
+  label?: string;
+}>('void-menu-group', 'MenuGroup');
+
+export const Carousel = wrapWc<VoidCarousel, {
+  active?: number;
+  loop?: boolean;
+  autoplay?: boolean;
+  interval?: number;
+  size?: 'sm' | 'md' | 'lg';
+  controls?: boolean;
+  indicators?: boolean;
+  orientation?: 'horizontal' | 'vertical';
+}>('void-carousel', 'Carousel');
+
+export const CarouselSlide = wrapWc<VoidCarouselSlide, {
+}>('void-carousel-slide', 'CarouselSlide');
+
+export const Calendar = wrapWc<VoidCalendar, {
+  value?: string;
+  min?: string;
+  max?: string;
+  disabled?: boolean;
+  size?: 'sm' | 'md' | 'lg';
+  locale?: string;
+  firstDay?: number;
+}>('void-calendar', 'Calendar');
+
+export const DatePicker = wrapWc<VoidDatePicker, {
+  value?: string;
+  min?: string;
+  max?: string;
+  disabled?: boolean;
+  size?: 'sm' | 'md' | 'lg';
+  locale?: string;
+  firstDay?: number;
+  open?: boolean;
+  placeholder?: string;
+  format?: string;
+  color?: 'default' | 'error' | 'warning' | 'success' | 'info' | 'notice';
+}>('void-date-picker', 'DatePicker');
+
+export const NumberInput = wrapWc<VoidNumberInput, {
+  value?: number;
+  min?: number;
+  max?: number;
+  step?: number;
+  precision?: number;
+  disabled?: boolean;
+  readonly?: boolean;
+  size?: 'sm' | 'md' | 'lg';
+  color?: 'default' | 'error' | 'warning' | 'success' | 'info' | 'notice';
+  placeholder?: string;
+  controls?: 'sides' | 'right' | 'none';
+  label?: string;
+}>('void-number-input', 'NumberInput');
+
+export const ToggleGroup = wrapWc<VoidToggleGroup, {
+  value?: string;
+  multiple?: boolean;
+  disabled?: boolean;
+  size?: 'sm' | 'md' | 'lg';
+  color?: 'default' | 'error' | 'warning' | 'success' | 'info' | 'notice';
+  orientation?: 'horizontal' | 'vertical';
+}>('void-toggle-group', 'ToggleGroup');
