@@ -24,6 +24,8 @@ jobs:
       - uses: jdx/mise-action@v3
         with:
           install_args: "node npm:pnpm"
+        env:
+          MISE_NOT_FOUND_AUTO_INSTALL: "false"
 
       - name: Install and build
         run: |
@@ -83,6 +85,8 @@ jobs:
       - uses: jdx/mise-action@v3
         with:
           install_args: "node npm:pnpm"
+        env:
+          MISE_NOT_FOUND_AUTO_INSTALL: "false"
 
       - name: Build and publish
         env:

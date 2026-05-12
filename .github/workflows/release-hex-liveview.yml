@@ -20,6 +20,8 @@ jobs:
       - uses: jdx/mise-action@v3
         with:
           install_args: "erlang elixir"
+        env:
+          MISE_NOT_FOUND_AUTO_INSTALL: "false"
 
       - name: Install dependencies
         working-directory: packages/liveview/hex
@@ -78,6 +80,8 @@ jobs:
       - uses: jdx/mise-action@v3
         with:
           install_args: "erlang elixir"
+        env:
+          MISE_NOT_FOUND_AUTO_INSTALL: "false"
 
       - name: Build and publish
         working-directory: packages/liveview/hex
