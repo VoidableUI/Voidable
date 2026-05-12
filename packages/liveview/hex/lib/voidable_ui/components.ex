@@ -1200,4 +1200,479 @@ defmodule VoidableUI.Components do
     />
     """
   end
+
+  # ---------------------------------------------------------------------------
+  # Sidebar (interactive — void-toggle)
+  # ---------------------------------------------------------------------------
+
+  @doc "Renders a `<void-sidebar>` navigation sidebar."
+  attr :id, :string, default: nil
+  attr :width, :string, default: nil
+  attr :collapsed_width, :string, default: nil
+  attr :rest, :global
+  slot :inner_block, required: true
+
+  def sidebar(assigns) do
+    ~H"""
+    <void-sidebar
+      id={@id || "void-sidebar-#{unique_id()}"}
+      width={@width}
+      collapsed-width={@collapsed_width}
+      phx-hook="VoidEvent"
+      data-void-events="void-toggle"
+      {@rest}
+    >
+      {render_slot(@inner_block)}
+    </void-sidebar>
+    """
+  end
+
+  # ---------------------------------------------------------------------------
+  # DropdownMenu (interactive — void-select)
+  # ---------------------------------------------------------------------------
+
+  @doc "Renders a `<void-dropdown-menu>` dropdown."
+  attr :id, :string, default: nil
+  attr :open, :boolean, default: false
+  attr :position, :string, default: nil
+  attr :rest, :global
+  slot :inner_block, required: true
+
+  def dropdown_menu(assigns) do
+    ~H"""
+    <void-dropdown-menu
+      id={@id || "void-dropdown-menu-#{unique_id()}"}
+      open={@open}
+      position={@position}
+      phx-hook="VoidEvent"
+      data-void-events="void-select"
+      {@rest}
+    >
+      {render_slot(@inner_block)}
+    </void-dropdown-menu>
+    """
+  end
+
+  # ---------------------------------------------------------------------------
+  # DropdownMenuItem (static)
+  # ---------------------------------------------------------------------------
+
+  @doc "Renders a `<void-dropdown-menu-item>` inside a dropdown menu."
+  attr :disabled, :boolean, default: false
+  attr :destructive, :boolean, default: false
+  attr :rest, :global
+  slot :inner_block, required: true
+
+  def dropdown_menu_item(assigns) do
+    ~H"""
+    <void-dropdown-menu-item disabled={@disabled} destructive={@destructive} {@rest}>
+      {render_slot(@inner_block)}
+    </void-dropdown-menu-item>
+    """
+  end
+
+  # ---------------------------------------------------------------------------
+  # Toggle (interactive — void-change)
+  # ---------------------------------------------------------------------------
+
+  @doc "Renders a `<void-toggle>` button."
+  attr :id, :string, default: nil
+  attr :pressed, :boolean, default: false
+  attr :disabled, :boolean, default: false
+  attr :color, :string, default: nil
+  attr :size, :string, default: nil
+  attr :variant, :string, default: nil
+  attr :rest, :global
+  slot :inner_block, required: true
+
+  def toggle(assigns) do
+    ~H"""
+    <void-toggle
+      id={@id || "void-toggle-#{unique_id()}"}
+      pressed={@pressed}
+      disabled={@disabled}
+      color={@color}
+      size={@size}
+      variant={@variant}
+      phx-hook="VoidEvent"
+      data-void-events="void-change"
+      {@rest}
+    >
+      {render_slot(@inner_block)}
+    </void-toggle>
+    """
+  end
+
+  # ---------------------------------------------------------------------------
+  # ToggleGroup (interactive — void-change)
+  # ---------------------------------------------------------------------------
+
+  @doc "Renders a `<void-toggle-group>` button group."
+  attr :id, :string, default: nil
+  attr :value, :string, default: nil
+  attr :multiple, :boolean, default: false
+  attr :disabled, :boolean, default: false
+  attr :size, :string, default: nil
+  attr :color, :string, default: nil
+  attr :orientation, :string, default: nil
+  attr :rest, :global
+  slot :inner_block, required: true
+
+  def toggle_group(assigns) do
+    ~H"""
+    <void-toggle-group
+      id={@id || "void-toggle-group-#{unique_id()}"}
+      value={@value}
+      multiple={@multiple}
+      disabled={@disabled}
+      size={@size}
+      color={@color}
+      orientation={@orientation}
+      phx-hook="VoidEvent"
+      data-void-events="void-change"
+      {@rest}
+    >
+      {render_slot(@inner_block)}
+    </void-toggle-group>
+    """
+  end
+
+  # ---------------------------------------------------------------------------
+  # SegmentedControl (interactive — void-change)
+  # ---------------------------------------------------------------------------
+
+  @doc "Renders a `<void-segmented-control>` selector."
+  attr :id, :string, default: nil
+  attr :value, :string, default: nil
+  attr :size, :string, default: nil
+  attr :rest, :global
+  slot :inner_block, required: true
+
+  def segmented_control(assigns) do
+    ~H"""
+    <void-segmented-control
+      id={@id || "void-segmented-control-#{unique_id()}"}
+      value={@value}
+      size={@size}
+      phx-hook="VoidEvent"
+      data-void-events="void-change"
+      {@rest}
+    >
+      {render_slot(@inner_block)}
+    </void-segmented-control>
+    """
+  end
+
+  # ---------------------------------------------------------------------------
+  # SegmentedControlItem (static)
+  # ---------------------------------------------------------------------------
+
+  @doc "Renders a `<void-segmented-control-item>` inside a segmented control."
+  attr :value, :string, default: nil
+  attr :disabled, :boolean, default: false
+  attr :rest, :global
+  slot :inner_block, required: true
+
+  def segmented_control_item(assigns) do
+    ~H"""
+    <void-segmented-control-item value={@value} disabled={@disabled} {@rest}>
+      {render_slot(@inner_block)}
+    </void-segmented-control-item>
+    """
+  end
+
+  # ---------------------------------------------------------------------------
+  # Stat (static)
+  # ---------------------------------------------------------------------------
+
+  @doc "Renders a `<void-stat>` metric display."
+  attr :label, :string, default: nil
+  attr :value, :string, default: nil
+  attr :delta, :string, default: nil
+  attr :trend, :string, default: nil
+  attr :color, :string, default: nil
+  attr :size, :string, default: nil
+  attr :rest, :global
+
+  def stat(assigns) do
+    ~H"""
+    <void-stat
+      label={@label}
+      value={@value}
+      delta={@delta}
+      trend={@trend}
+      color={@color}
+      size={@size}
+      {@rest}
+    />
+    """
+  end
+
+  # ---------------------------------------------------------------------------
+  # Indicator (static)
+  # ---------------------------------------------------------------------------
+
+  @doc "Renders a `<void-indicator>` badge/notification dot."
+  attr :color, :string, default: nil
+  attr :size, :string, default: nil
+  attr :count, :integer, default: nil
+  attr :ping, :boolean, default: false
+  attr :overlay, :boolean, default: false
+  attr :position, :string, default: nil
+  attr :rest, :global
+  slot :inner_block, required: true
+
+  def indicator(assigns) do
+    ~H"""
+    <void-indicator
+      color={@color}
+      size={@size}
+      count={@count}
+      ping={@ping}
+      overlay={@overlay}
+      position={@position}
+      {@rest}
+    >
+      {render_slot(@inner_block)}
+    </void-indicator>
+    """
+  end
+
+  # ---------------------------------------------------------------------------
+  # Menu (interactive — void-select)
+  # ---------------------------------------------------------------------------
+
+  @doc "Renders a `<void-menu>` command menu."
+  attr :id, :string, default: nil
+  attr :open, :boolean, default: false
+  attr :searchable, :boolean, default: false
+  attr :size, :string, default: nil
+  attr :placeholder, :string, default: nil
+  attr :rest, :global
+  slot :inner_block, required: true
+
+  def menu(assigns) do
+    ~H"""
+    <void-menu
+      id={@id || "void-menu-#{unique_id()}"}
+      open={@open}
+      searchable={@searchable}
+      size={@size}
+      placeholder={@placeholder}
+      phx-hook="VoidEvent"
+      data-void-events="void-select"
+      {@rest}
+    >
+      {render_slot(@inner_block)}
+    </void-menu>
+    """
+  end
+
+  # ---------------------------------------------------------------------------
+  # MenuItem (static)
+  # ---------------------------------------------------------------------------
+
+  @doc "Renders a `<void-menu-item>` inside a menu."
+  attr :value, :string, default: nil
+  attr :disabled, :boolean, default: false
+  attr :shortcut, :string, default: nil
+  attr :icon, :string, default: nil
+  attr :rest, :global
+  slot :inner_block, required: true
+
+  def menu_item(assigns) do
+    ~H"""
+    <void-menu-item value={@value} disabled={@disabled} shortcut={@shortcut} icon={@icon} {@rest}>
+      {render_slot(@inner_block)}
+    </void-menu-item>
+    """
+  end
+
+  # ---------------------------------------------------------------------------
+  # MenuGroup (static)
+  # ---------------------------------------------------------------------------
+
+  @doc "Renders a `<void-menu-group>` label inside a menu."
+  attr :label, :string, default: nil
+  attr :rest, :global
+  slot :inner_block, required: true
+
+  def menu_group(assigns) do
+    ~H"""
+    <void-menu-group label={@label} {@rest}>
+      {render_slot(@inner_block)}
+    </void-menu-group>
+    """
+  end
+
+  # ---------------------------------------------------------------------------
+  # Carousel (interactive — void-change)
+  # ---------------------------------------------------------------------------
+
+  @doc "Renders a `<void-carousel>` image/content slider."
+  attr :id, :string, default: nil
+  attr :active, :integer, default: 0
+  attr :loop, :boolean, default: false
+  attr :autoplay, :boolean, default: false
+  attr :interval, :integer, default: nil
+  attr :size, :string, default: nil
+  attr :controls, :boolean, default: true
+  attr :indicators, :boolean, default: true
+  attr :orientation, :string, default: nil
+  attr :rest, :global
+  slot :inner_block, required: true
+
+  def carousel(assigns) do
+    ~H"""
+    <void-carousel
+      id={@id || "void-carousel-#{unique_id()}"}
+      active={@active}
+      loop={@loop}
+      autoplay={@autoplay}
+      interval={@interval}
+      size={@size}
+      controls={@controls}
+      indicators={@indicators}
+      orientation={@orientation}
+      phx-hook="VoidEvent"
+      data-void-events="void-change"
+      {@rest}
+    >
+      {render_slot(@inner_block)}
+    </void-carousel>
+    """
+  end
+
+  # ---------------------------------------------------------------------------
+  # CarouselSlide (static)
+  # ---------------------------------------------------------------------------
+
+  @doc "Renders a `<void-carousel-slide>` inside a carousel."
+  attr :rest, :global
+  slot :inner_block, required: true
+
+  def carousel_slide(assigns) do
+    ~H"""
+    <void-carousel-slide {@rest}>
+      {render_slot(@inner_block)}
+    </void-carousel-slide>
+    """
+  end
+
+  # ---------------------------------------------------------------------------
+  # Calendar (interactive — void-change)
+  # ---------------------------------------------------------------------------
+
+  @doc "Renders a `<void-calendar>` date picker grid."
+  attr :id, :string, default: nil
+  attr :value, :string, default: nil
+  attr :min, :string, default: nil
+  attr :max, :string, default: nil
+  attr :disabled, :boolean, default: false
+  attr :size, :string, default: nil
+  attr :locale, :string, default: nil
+  attr :first_day, :integer, default: nil
+  attr :rest, :global
+
+  def calendar(assigns) do
+    ~H"""
+    <void-calendar
+      id={@id || "void-calendar-#{unique_id()}"}
+      value={@value}
+      min={@min}
+      max={@max}
+      disabled={@disabled}
+      size={@size}
+      locale={@locale}
+      first-day={@first_day}
+      phx-hook="VoidEvent"
+      data-void-events="void-change"
+      {@rest}
+    />
+    """
+  end
+
+  # ---------------------------------------------------------------------------
+  # DatePicker (interactive — void-change)
+  # ---------------------------------------------------------------------------
+
+  @doc "Renders a `<void-date-picker>` input with calendar dropdown."
+  attr :id, :string, default: nil
+  attr :value, :string, default: nil
+  attr :min, :string, default: nil
+  attr :max, :string, default: nil
+  attr :disabled, :boolean, default: false
+  attr :size, :string, default: nil
+  attr :locale, :string, default: nil
+  attr :first_day, :integer, default: nil
+  attr :open, :boolean, default: false
+  attr :placeholder, :string, default: nil
+  attr :format, :string, default: nil
+  attr :color, :string, default: nil
+  attr :rest, :global
+
+  def date_picker(assigns) do
+    ~H"""
+    <void-date-picker
+      id={@id || "void-date-picker-#{unique_id()}"}
+      value={@value}
+      min={@min}
+      max={@max}
+      disabled={@disabled}
+      size={@size}
+      locale={@locale}
+      first-day={@first_day}
+      open={@open}
+      placeholder={@placeholder}
+      format={@format}
+      color={@color}
+      phx-hook="VoidEvent"
+      data-void-events="void-change"
+      {@rest}
+    />
+    """
+  end
+
+  # ---------------------------------------------------------------------------
+  # NumberInput (interactive — void-change)
+  # ---------------------------------------------------------------------------
+
+  @doc "Renders a `<void-number-input>` numeric stepper."
+  attr :id, :string, default: nil
+  attr :value, :integer, default: nil
+  attr :min, :integer, default: nil
+  attr :max, :integer, default: nil
+  attr :step, :integer, default: nil
+  attr :precision, :integer, default: nil
+  attr :disabled, :boolean, default: false
+  attr :readonly, :boolean, default: false
+  attr :size, :string, default: nil
+  attr :color, :string, default: nil
+  attr :placeholder, :string, default: nil
+  attr :controls, :string, default: nil
+  attr :label, :string, default: nil
+  attr :rest, :global
+
+  def number_input(assigns) do
+    ~H"""
+    <void-number-input
+      id={@id || "void-number-input-#{unique_id()}"}
+      value={@value}
+      min={@min}
+      max={@max}
+      step={@step}
+      precision={@precision}
+      disabled={@disabled}
+      readonly={@readonly}
+      size={@size}
+      color={@color}
+      placeholder={@placeholder}
+      controls={@controls}
+      label={@label}
+      phx-hook="VoidEvent"
+      data-void-events="void-change"
+      {@rest}
+    />
+    """
+  end
 end
