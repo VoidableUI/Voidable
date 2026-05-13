@@ -1,0 +1,15 @@
+<h1>Resend confirmation instructions</h1>
+
+<%= form_for(resource, as: resource_name, url: confirmation_path(resource_name), html: { method: :post }) do |f| %>
+  <%= render "devise/shared/error_messages", resource: resource %>
+
+  <void-field label="Email">
+    <void-input type="email" name="<%= resource_name %>[email]" value="<%= (resource.pending_reconfirmation? ? resource.unconfirmed_email : resource.email) %>" autofocus autocomplete="email"></void-input>
+  </void-field>
+
+  <div>
+    <void-button type="submit" color="success">Resend confirmation instructions</void-button>
+  </div>
+<% end %>
+
+<%= render "devise/shared/links" %>
