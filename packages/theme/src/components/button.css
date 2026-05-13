@@ -92,6 +92,38 @@ void-button[size="xxl"] {
   font-size: var(--void-text-xl);
 }
 
+/* Link targets — stretch <a> to fill the full button */
+void-button:has(> a) {
+  padding: 0;
+}
+
+void-button > a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--void-space-2);
+  padding: var(--void-space-2) var(--void-space-4);
+  color: inherit;
+  text-decoration: none;
+  flex: 1;
+}
+
+void-button[size="sm"] > a {
+  padding: var(--void-space-1) var(--void-space-2);
+}
+
+void-button[size="lg"] > a {
+  padding: var(--void-space-3) var(--void-space-6);
+}
+
+void-button[size="xl"] > a {
+  padding: var(--void-space-4) var(--void-space-8);
+}
+
+void-button[size="xxl"] > a {
+  padding: var(--void-space-5) var(--void-space-10);
+}
+
 /* Disabled */
 void-button[disabled] {
   opacity: 0.5;
