@@ -38,7 +38,32 @@
     </nav>
 
     <main class="app-main">
-      <%%= yield %>
+      <div class="app-content-header">
+        <div class="app-content-header-left">
+          <span class="app-content-header-breadcrumb"><%%= content_for(:breadcrumb) || content_for(:title) || "<%= app_name.titleize %>" %></span>
+          <%% if content_for?(:subtitle) %>
+            <span class="app-content-header-subtitle"><%%= content_for(:subtitle) %></span>
+          <%% end %>
+        </div>
+        <div class="app-content-header-right">
+          <void-action-input icon="search" placeholder="Search..." size="sm" tooltip-position="bottom" class="app-content-header-search"></void-action-input>
+          <%%= content_for(:header_actions) %>
+        </div>
+      </div>
+      <div class="app-content-body">
+        <%% if notice.present? %>
+          <div class="flash-messages">
+            <void-alert color="success" dismissible><%%= notice %></void-alert>
+          </div>
+        <%% end %>
+        <%% if alert.present? %>
+          <div class="flash-messages">
+            <void-alert color="error" dismissible><%%= alert %></void-alert>
+          </div>
+        <%% end %>
+
+        <%%= yield %>
+      </div>
     </main>
 
     <script>
@@ -52,22 +77,27 @@
       });
     </script>
     <script>
-      const toggle = document.getElementById('theme-toggle');
-      const html = document.documentElement;
+      (function() {
+        const html = document.documentElement;
 
-      // System preference detection on first load
-      if (!localStorage.getItem('theme')) {
-        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        html.setAttribute('data-theme', prefersDark ? 'dark' : 'light');
-      } else {
-        html.setAttribute('data-theme', localStorage.getItem('theme'));
-      }
+        function applyTheme() {
+          if (!localStorage.getItem('theme')) {
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            html.setAttribute('data-theme', prefersDark ? 'dark' : 'light');
+          } else {
+            html.setAttribute('data-theme', localStorage.getItem('theme'));
+          }
+        }
 
-      toggle?.addEventListener('click', () => {
-        const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-        html.setAttribute('data-theme', next);
-        localStorage.setItem('theme', next);
-      });
+        applyTheme();
+
+        const toggle = document.getElementById('theme-toggle');
+        toggle?.addEventListener('click', () => {
+          const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+          html.setAttribute('data-theme', next);
+          localStorage.setItem('theme', next);
+        });
+      })();
     </script>
   </body>
 </html>

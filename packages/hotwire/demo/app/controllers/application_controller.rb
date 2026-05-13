@@ -12,6 +12,6 @@ class ApplicationController < ActionController::Base
   private
 
   def resolve_layout
-    cookies[:layout] || "navbar"
+    cookies[:layout] || "topbar"
   end
 end

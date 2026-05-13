@@ -4,8 +4,8 @@ module Voidable
       source_root File.expand_path("templates", __dir__)
       desc "Install Voidable UI into your Rails application"
 
-      class_option :layout, type: :string, default: "navbar", enum: ["navbar", "sidebar"],
-        desc: "Application layout style (navbar or sidebar)"
+      class_option :layout, type: :string, default: "topbar", enum: ["topbar", "sidebar", "switching"],
+        desc: "Application layout style (topbar, sidebar, or switching)"
 
       def create_initializer
         template "initializer.rb.tt", "config/initializers/voidable.rb"
@@ -25,15 +25,51 @@ module Voidable
       end
 
       def create_layout
-        layout_template = options[:layout] == "sidebar" ? "application_sidebar.html.erb.tt" : "application.html.erb.tt"
-        template layout_template, "app/views/layouts/application.html.erb", force: true
+        case options[:layout]
+        when "sidebar"
+          template "application_sidebar.html.erb.tt", "app/views/layouts/application.html.erb", force: true
+        when "switching"
+          template "application_topbar.html.erb.tt", "app/views/layouts/application.html.erb", force: true
+          template "topbar.html.erb.tt", "app/views/layouts/topbar.html.erb"
+          template "sidebar.html.erb.tt", "app/views/layouts/sidebar.html.erb"
+        else
+          template "application_topbar.html.erb.tt", "app/views/layouts/application.html.erb", force: true
+        end
         say "Created Voidable application layout (#{options[:layout]})", :green
       end
 
       def create_layout_stylesheet
-        css_source = options[:layout] == "sidebar" ? "voidable-layout-sidebar.css" : "voidable-layout-navbar.css"
-        copy_file css_source, "app/assets/stylesheets/voidable-layout.css", force: true
+        case options[:layout]
+        when "sidebar"
+          copy_file "voidable-layout-sidebar.css", "app/assets/stylesheets/voidable-layout.css", force: true
+        when "switching"
+          copy_file "voidable-layout-topbar.css", "app/assets/stylesheets/voidable-layout-topbar.css"
+          copy_file "voidable-layout-sidebar.css", "app/assets/stylesheets/voidable-layout-sidebar.css"
+        else
+          copy_file "voidable-layout-topbar.css", "app/assets/stylesheets/voidable-layout.css", force: true
+        end
         say "Created Voidable layout stylesheet", :green
+      end
+
+      def setup_layout_switching
+        return unless options[:layout] == "switching"
+
+        template "settings_controller.rb.tt", "app/controllers/settings_controller.rb"
+
+        route 'post "toggle_layout", to: "settings#toggle_layout"'
+
+        inject_into_class "app/controllers/application_controller.rb", "ApplicationController", <<-RUBY
+
+  layout :resolve_layout
+
+  private
+
+  def resolve_layout
+    cookies[:layout] || "topbar"
+  end
+        RUBY
+
+        say "Configured layout switching (topbar/sidebar toggle)", :green
       end
 
       def add_js_import
