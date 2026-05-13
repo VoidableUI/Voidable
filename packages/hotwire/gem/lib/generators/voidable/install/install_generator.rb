@@ -40,7 +40,19 @@ module Voidable
         say "Created Voidable application layout (#{options[:layout]})", :green
       end
 
-      def create_layout_stylesheet
+      def create_layout_assets
+        copy_file "voidable-layout.js", "app/assets/javascripts/voidable-layout.js"
+        copy_file "voidable-devise.css", "app/assets/stylesheets/voidable-devise.css"
+
+        assets_init = "config/initializers/assets.rb"
+        if File.exist?(assets_init) && !File.read(assets_init).include?("javascripts")
+          append_to_file assets_init, <<~RUBY
+
+            # Voidable layout scripts
+            Rails.application.config.assets.paths << Rails.root.join("app/assets/javascripts")
+          RUBY
+        end
+
         case options[:layout]
         when "sidebar"
           copy_file "voidable-layout-sidebar.css", "app/assets/stylesheets/voidable-layout.css", force: true
@@ -50,7 +62,7 @@ module Voidable
         else
           copy_file "voidable-layout-topbar.css", "app/assets/stylesheets/voidable-layout.css", force: true
         end
-        say "Created Voidable layout stylesheet", :green
+        say "Created Voidable layout assets", :green
       end
 
       def setup_layout_switching

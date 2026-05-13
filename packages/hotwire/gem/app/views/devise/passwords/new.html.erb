@@ -1,17 +1,17 @@
-<div style="max-width: 28rem; margin: 0 auto; padding: 2rem;">
+<div class="devise-container">
   <void-card>
-    <div style="padding: var(--void-space-6);">
-      <h1 style="margin: 0 0 var(--void-space-5) 0; font-family: var(--void-font-sans); font-size: var(--void-text-xl); font-weight: var(--void-weight-bold); color: var(--void-color-text);">Forgot your password?</h1>
+    <div class="devise-card-body">
+      <h1 class="devise-heading">Forgot your password?</h1>
 
-      <%= form_for(resource, as: resource_name, url: password_path(resource_name), html: { method: :post, style: "display: flex; flex-direction: column; gap: var(--void-space-4);" }) do |f| %>
+      <%= form_for(resource, as: resource_name, url: password_path(resource_name), html: { method: :post, class: "devise-form" }) do |f| %>
         <%= render "devise/shared/error_messages", resource: resource %>
 
         <void-field label="Email">
           <void-input type="email" name="<%= resource_name %>[email]" value="<%= resource.email %>" autofocus autocomplete="email" placeholder="you@example.com"></void-input>
         </void-field>
 
-        <div style="padding-top: var(--void-space-2);">
-          <void-button type="submit" color="success" style="width: 100%;">Send reset instructions</void-button>
+        <div class="devise-submit">
+          <void-button type="submit" color="success" class="devise-btn-full">Send reset instructions</void-button>
         </div>
       <% end %>
 

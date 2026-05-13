@@ -11,6 +11,7 @@
     <%= stylesheet_link_tag "voidable-theme", "data-turbo-track": "reload" %>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.44.0/dist/tabler-icons.min.css">
     <%= stylesheet_link_tag "voidable-layout-topbar", "data-turbo-track": "reload" %>
+    <%= stylesheet_link_tag "voidable-devise", "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
   </head>
 
@@ -67,47 +68,6 @@
       </div>
     </main>
 
-    <script>
-      document.addEventListener('void-action', (e) => {
-        const el = e.target;
-        if (el.tagName === 'VOID-ACTION-INPUT' && (el.type === 'password' || el.type === 'text')) {
-          const visible = el.type === 'text';
-          el.type = visible ? 'password' : 'text';
-          el.icon = visible ? 'eye' : 'eye-off';
-        }
-      });
-    </script>
-    <script>
-      (function() {
-        const html = document.documentElement;
-
-        function applyTheme() {
-          if (!localStorage.getItem('theme')) {
-            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-            html.setAttribute('data-theme', prefersDark ? 'dark' : 'light');
-          } else {
-            html.setAttribute('data-theme', localStorage.getItem('theme'));
-          }
-        }
-
-        function syncToggle() {
-          const toggle = document.getElementById('theme-toggle');
-          if (toggle) {
-            toggle.toggleAttribute('checked', html.getAttribute('data-theme') === 'dark');
-          }
-        }
-
-        applyTheme();
-        syncToggle();
-        document.addEventListener('turbo:load', syncToggle);
-
-        document.addEventListener('void-change', (e) => {
-          if (e.target.id !== 'theme-toggle') return;
-          const next = e.detail.checked ? 'dark' : 'light';
-          html.setAttribute('data-theme', next);
-          localStorage.setItem('theme', next);
-        });
-      })();
-    </script>
+    <%= javascript_include_tag "voidable-layout", "data-turbo-track": "reload" %>
   </body>
 </html>

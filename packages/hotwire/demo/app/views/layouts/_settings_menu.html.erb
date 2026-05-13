@@ -18,7 +18,7 @@
     </label>
     <% if local_assigns[:layout_toggle] %>
       <div class="settings-menu-item">
-        <form action="/toggle_layout" method="post" style="display: contents;">
+        <form action="/toggle_layout" method="post" class="settings-menu-form">
           <input type="hidden" name="authenticity_token" value="<%= form_authenticity_token %>">
           <button type="submit" class="settings-menu-action">
             <i class="ti ti-<%= local_assigns[:layout_toggle_icon] %>"></i>

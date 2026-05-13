@@ -1,0 +1,37 @@
+/* Devise view styles */
+
+/* Page-level container: centers content with max-width */
+.devise-container { max-width: 28rem; margin: 0 auto; padding: 2rem; }
+.devise-container--wide { max-width: 36rem; }
+
+/* Card body padding */
+.devise-card-body { padding: var(--void-space-6); }
+
+/* Page heading */
+.devise-heading { margin: 0 0 var(--void-space-5) 0; font-family: var(--void-font-sans); font-size: var(--void-text-xl); font-weight: var(--void-weight-bold); color: var(--void-color-text); }
+
+/* Subtitle/description below heading */
+.devise-description { margin: calc(-1 * var(--void-space-3)) 0 var(--void-space-5) 0; font-family: var(--void-font-sans); font-size: var(--void-text-sm); color: var(--void-color-text-secondary); }
+
+/* Form layout */
+.devise-form { display: flex; flex-direction: column; gap: var(--void-space-4); }
+
+/* Submit button wrapper */
+.devise-submit { padding-top: var(--void-space-2); }
+
+/* Full-width button */
+.devise-btn-full { width: 100%; }
+
+/* "or" divider between form and links */
+.devise-divider { display: flex; align-items: center; gap: var(--void-space-3); margin-top: var(--void-space-4); }
+.devise-divider-line { flex: 1; height: 1px; background: var(--void-color-border); }
+.devise-divider-text { font-family: var(--void-font-sans); font-size: var(--void-text-xs); color: var(--void-color-text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+
+/* Links container */
+.devise-links { display: flex; flex-direction: column; gap: var(--void-space-2); margin-top: var(--void-space-3); }
+
+/* Error list inside alert */
+.devise-error-list { margin: var(--void-space-2) 0 0 var(--void-space-4); padding: 0; }
+
+/* Danger zone label (uppercase section heading) */
+.devise-danger-label { font-family: var(--void-font-sans); font-size: var(--void-text-xs); font-weight: var(--void-weight-semibold); color: var(--void-color-text-muted); text-transform: uppercase; letter-spacing: 0.06em; margin: 0 0 var(--void-space-3) 0; }

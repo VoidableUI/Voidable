@@ -1,9 +1,9 @@
-<div style="max-width: 36rem; margin: 0 auto; padding: 2rem;">
+<div class="devise-container devise-container--wide">
   <void-card>
-    <div style="padding: var(--void-space-6);">
-      <h1 style="margin: 0 0 var(--void-space-5) 0; font-family: var(--void-font-sans); font-size: var(--void-text-xl); font-weight: var(--void-weight-bold); color: var(--void-color-text);">Account settings</h1>
+    <div class="devise-card-body">
+      <h1 class="devise-heading">Account settings</h1>
 
-      <%= form_for(resource, as: resource_name, url: registration_path(resource_name), html: { method: :put, style: "display: flex; flex-direction: column; gap: var(--void-space-4);" }) do |f| %>
+      <%= form_for(resource, as: resource_name, url: registration_path(resource_name), html: { method: :put, class: "devise-form" }) do |f| %>
         <%= render "devise/shared/error_messages", resource: resource %>
 
         <void-field label="Email">
@@ -26,23 +26,23 @@
           <void-action-input type="password" name="<%= resource_name %>[current_password]" icon="eye" action-label="Toggle visibility" autocomplete="current-password"></void-action-input>
         </void-field>
 
-        <div style="padding-top: var(--void-space-2);">
-          <void-button type="submit" color="success" style="width: 100%;">Update</void-button>
+        <div class="devise-submit">
+          <void-button type="submit" color="success" class="devise-btn-full">Update</void-button>
         </div>
       <% end %>
     </div>
   </void-card>
 
-  <div style="margin-top: var(--void-space-5); padding: var(--void-space-4); border: 1px solid var(--void-color-border); border-radius: var(--void-radius-md);">
-    <p style="font-family: var(--void-font-sans); font-size: var(--void-text-xs); font-weight: var(--void-weight-semibold); color: var(--void-color-text-muted); text-transform: uppercase; letter-spacing: 0.06em; margin: 0 0 var(--void-space-3) 0;">Danger zone</p>
+  <div class="danger-zone">
+    <p class="devise-danger-label">Danger zone</p>
     <void-button variant="outline" color="error" size="sm" onclick="document.getElementById('delete-dialog').open = true">Delete my account</void-button>
   </div>
 
   <void-dialog id="delete-dialog" heading="Delete account" size="sm">
-    <p style="font-family: var(--void-font-sans); font-size: var(--void-text-sm); color: var(--void-color-text); margin: 0 0 var(--void-space-4) 0;">
+    <p class="danger-zone-description">
       Are you sure you want to delete your account? This action cannot be undone.
     </p>
-    <div style="display: flex; gap: var(--void-space-2); justify-content: flex-end;">
+    <div class="action-bar">
       <void-button variant="ghost" size="sm" onclick="document.getElementById('delete-dialog').open = false">Cancel</void-button>
       <void-button color="error" size="sm"><a href="<%= registration_path(resource_name) %>" data-turbo-method="delete">Delete</a></void-button>
     </div>

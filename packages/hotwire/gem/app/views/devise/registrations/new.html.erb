@@ -1,9 +1,9 @@
-<div style="max-width: 28rem; margin: 0 auto; padding: 2rem;">
+<div class="devise-container">
   <void-card>
-    <div style="padding: var(--void-space-6);">
-      <h1 style="margin: 0 0 var(--void-space-5) 0; font-family: var(--void-font-sans); font-size: var(--void-text-xl); font-weight: var(--void-weight-bold); color: var(--void-color-text);">Sign up</h1>
+    <div class="devise-card-body">
+      <h1 class="devise-heading">Sign up</h1>
 
-      <%= form_for(resource, as: resource_name, url: registration_path(resource_name), html: { style: "display: flex; flex-direction: column; gap: var(--void-space-4);" }) do |f| %>
+      <%= form_for(resource, as: resource_name, url: registration_path(resource_name), html: { class: "devise-form" }) do |f| %>
         <%= render "devise/shared/error_messages", resource: resource %>
 
         <void-field label="Email">
@@ -18,8 +18,8 @@
           <void-action-input type="password" name="<%= resource_name %>[password_confirmation]" icon="eye" action-label="Toggle visibility" autocomplete="new-password"></void-action-input>
         </void-field>
 
-        <div style="padding-top: var(--void-space-2);">
-          <void-button type="submit" color="success" style="width: 100%;">Sign up</void-button>
+        <div class="devise-submit">
+          <void-button type="submit" color="success" class="devise-btn-full">Sign up</void-button>
         </div>
       <% end %>
 

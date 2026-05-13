@@ -75,12 +75,3 @@
     </div>
   <% end %>
 </div>
-
-<script>
-  document.querySelector('void-pagination')?.addEventListener('void-change', (e) => {
-    const page = e.detail.value;
-    const url = new URL(window.location);
-    url.searchParams.set('page', page);
-    Turbo.visit(url.toString());
-  });
-</script>

@@ -1,18 +1,18 @@
-<div style="max-width: 28rem; margin: 0 auto; padding: 2rem;">
+<div class="devise-container">
   <void-card>
-    <div style="padding: var(--void-space-6);">
-      <h1 style="margin: 0 0 var(--void-space-5) 0; font-family: var(--void-font-sans); font-size: var(--void-text-xl); font-weight: var(--void-weight-bold); color: var(--void-color-text);">Resend unlock instructions</h1>
-      <p style="margin: calc(-1 * var(--void-space-3)) 0 var(--void-space-5) 0; font-family: var(--void-font-sans); font-size: var(--void-text-sm); color: var(--void-color-text-secondary);">Enter your email address and we'll send you instructions to unlock your account.</p>
+    <div class="devise-card-body">
+      <h1 class="devise-heading">Resend unlock instructions</h1>
+      <p class="devise-description">Enter your email address and we'll send you instructions to unlock your account.</p>
 
-      <%= form_for(resource, as: resource_name, url: unlock_path(resource_name), html: { method: :post, style: "display: flex; flex-direction: column; gap: var(--void-space-4);" }) do |f| %>
+      <%= form_for(resource, as: resource_name, url: unlock_path(resource_name), html: { method: :post, class: "devise-form" }) do |f| %>
         <%= render "devise/shared/error_messages", resource: resource %>
 
         <void-field label="Email">
           <void-input type="email" name="<%= resource_name %>[email]" value="<%= resource.email %>" autofocus autocomplete="email" placeholder="you@example.com"></void-input>
         </void-field>
 
-        <div style="padding-top: var(--void-space-2);">
-          <void-button type="submit" color="success" style="width: 100%;">Resend unlock instructions</void-button>
+        <div class="devise-submit">
+          <void-button type="submit" color="success" class="devise-btn-full">Resend unlock instructions</void-button>
         </div>
       <% end %>
 
