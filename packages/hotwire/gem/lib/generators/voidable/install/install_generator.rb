@@ -25,6 +25,8 @@ module Voidable
       end
 
       def create_layout
+        copy_file "_settings_menu.html.erb", "app/views/layouts/_settings_menu.html.erb"
+
         case options[:layout]
         when "sidebar"
           template "application_sidebar.html.erb.tt", "app/views/layouts/application.html.erb", force: true

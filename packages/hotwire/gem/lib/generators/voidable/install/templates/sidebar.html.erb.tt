@@ -33,12 +33,6 @@
             </div>
           </div>
 
-          <div class="sidebar-nav-section">
-            <div class="sidebar-nav-label">Settings</div>
-            <div class="sidebar-nav-item">
-              <%%= link_to "Profile", edit_user_registration_path if defined?(Devise) %>
-            </div>
-          </div>
         </nav>
 
         <div class="sidebar-footer">
@@ -46,24 +40,7 @@
             <%% if defined?(Devise) && user_signed_in? %>
               <span class="sidebar-user-email"><%%= current_user.email %></span>
             <%% end %>
-            <void-popover position="top" id="settings-popover">
-              <button class="sidebar-settings-btn" aria-label="View Settings" title="View Settings">
-                <i class="ti ti-settings"></i>
-              </button>
-              <div class="settings-menu">
-                <label class="settings-menu-item">
-                  <i class="ti ti-moon"></i>
-                  <span>Dark mode</span>
-                  <void-switch id="theme-toggle" size="sm" aria-label="Toggle theme"></void-switch>
-                </label>
-                <div class="settings-menu-item">
-                  <form action="/toggle_layout" method="post" style="display: contents;">
-                    <input type="hidden" name="authenticity_token" value="<%%= form_authenticity_token %>">
-                    <button type="submit" class="settings-menu-action"><i class="ti ti-layout-navbar"></i> Switch to topbar</button>
-                  </form>
-                </div>
-              </div>
-            </void-popover>
+            <%%= render "layouts/settings_menu", popover_position: "top", layout_toggle: true, layout_toggle_icon: "layout-navbar", layout_toggle_label: "Switch to topbar" %>
           </div>
           <%% if defined?(Devise) && user_signed_in? %>
             <void-button variant="ghost" size="sm" class="sidebar-sign-in"><a href="<%%= destroy_user_session_path %>" data-turbo-method="delete">Sign out</a></void-button>

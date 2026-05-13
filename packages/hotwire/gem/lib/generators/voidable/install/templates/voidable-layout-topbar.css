@@ -81,11 +81,96 @@ a { color: inherit; text-decoration: none; }
 .app-nav-auth a { color: var(--void-color-text-secondary); }
 .app-nav-auth a:hover { color: var(--void-color-text); }
 
-/* Theme toggle icons */
-[data-theme="dark"] .theme-icon-sun { display: inline; }
-[data-theme="dark"] .theme-icon-moon { display: none; }
-[data-theme="light"] .theme-icon-sun { display: none; }
-[data-theme="light"] .theme-icon-moon { display: inline; }
+/* Settings popover */
+.settings-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 1px solid var(--void-color-border);
+  border-radius: var(--void-radius-sm);
+  background: transparent;
+  color: var(--void-color-text-muted);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: color var(--void-duration-fast) var(--void-ease-in-out),
+              background var(--void-duration-fast) var(--void-ease-in-out);
+}
+
+.settings-btn:hover {
+  color: var(--void-color-text);
+  background: var(--void-color-bg-hover);
+}
+
+.settings-btn i {
+  font-size: 14px;
+}
+
+.app-nav-right void-popover .void-popover-body {
+  left: auto;
+  right: 0;
+}
+
+.settings-menu {
+  display: flex;
+  flex-direction: column;
+  gap: var(--void-space-1);
+  min-width: 160px;
+}
+
+.settings-menu-item {
+  display: flex;
+  align-items: center;
+  gap: var(--void-space-2);
+  padding: var(--void-space-2);
+  border: none;
+  border-radius: var(--void-radius-sm);
+  background: transparent;
+  font-family: var(--void-font-sans);
+  font-size: var(--void-text-sm);
+  color: var(--void-color-text);
+  cursor: pointer;
+  transition: background var(--void-duration-fast) var(--void-ease-in-out);
+}
+
+.settings-menu-item:hover {
+  background: var(--void-color-bg-hover);
+}
+
+.settings-menu-item void-switch {
+  margin-left: auto;
+}
+
+.settings-menu-item i {
+  font-size: 16px;
+  color: var(--void-color-text-secondary);
+}
+
+.settings-menu-item:has(.settings-menu-action) {
+  padding: 0;
+}
+
+.settings-menu-action {
+  display: flex;
+  align-items: center;
+  gap: var(--void-space-2);
+  width: 100%;
+  padding: var(--void-space-2);
+  border: none;
+  border-radius: var(--void-radius-sm);
+  background: transparent;
+  font-family: var(--void-font-sans);
+  font-size: var(--void-text-sm);
+  color: var(--void-color-text);
+  cursor: pointer;
+}
+
+.settings-menu-action i {
+  font-size: 16px;
+  color: var(--void-color-text-secondary);
+}
 
 /* Main content */
 .app-main {

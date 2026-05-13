@@ -26,11 +26,7 @@
               <a href="<%%= new_user_session_path %>">Sign in</a>
             <%% end %>
           </span>
-          <form action="/toggle_layout" method="post" style="display: contents;"><input type="hidden" name="authenticity_token" value="<%%= form_authenticity_token %>"><void-button type="submit" variant="ghost" size="sm"><i class="ti ti-layout-sidebar-left-collapse"></i></void-button></form>
-          <void-button id="theme-toggle" variant="ghost" size="sm" aria-label="Toggle theme">
-            <i class="ti ti-sun theme-icon-sun"></i>
-            <i class="ti ti-moon theme-icon-moon"></i>
-          </void-button>
+          <%%= render "layouts/settings_menu", popover_position: "bottom", layout_toggle: true, layout_toggle_icon: "layout-sidebar-left-collapse", layout_toggle_label: "Switch to sidebar" %>
           <%% if defined?(Devise) && user_signed_in? %>
             <void-button variant="ghost" size="sm"><a href="<%%= destroy_user_session_path %>" data-turbo-method="delete">Sign out</a></void-button>
           <%% end %>
@@ -90,11 +86,20 @@
           }
         }
 
-        applyTheme();
+        function syncToggle() {
+          const toggle = document.getElementById('theme-toggle');
+          if (toggle) {
+            toggle.toggleAttribute('checked', html.getAttribute('data-theme') === 'dark');
+          }
+        }
 
-        const toggle = document.getElementById('theme-toggle');
-        toggle?.addEventListener('click', () => {
-          const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+        applyTheme();
+        syncToggle();
+        document.addEventListener('turbo:load', syncToggle);
+
+        document.addEventListener('void-change', (e) => {
+          if (e.target.id !== 'theme-toggle') return;
+          const next = e.detail.checked ? 'dark' : 'light';
           html.setAttribute('data-theme', next);
           localStorage.setItem('theme', next);
         });
