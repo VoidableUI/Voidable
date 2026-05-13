@@ -1,0 +1,30 @@
+<%% content_for :title, "<%= human_name %>" %>
+
+<h1><%= human_name %></h1>
+
+<%% if notice.present? %>
+  <void-alert color="success"><%%= notice %></void-alert>
+<%% end %>
+
+<void-card>
+  <dl>
+<% attributes.reject(&:password_digest?).each do |attribute| -%>
+    <dt><%= attribute.human_name %></dt>
+<% if attribute.attachment? -%>
+    <dd><%%= link_to @<%= singular_table_name %>.<%= attribute.column_name %>.filename, @<%= singular_table_name %>.<%= attribute.column_name %> if @<%= singular_table_name %>.<%= attribute.column_name %>.attached? %></dd>
+<% elsif attribute.attachments? -%>
+    <dd>
+      <%% @<%= singular_table_name %>.<%= attribute.column_name %>.each do |<%= attribute.singular_name %>| %>
+        <div><%%= link_to <%= attribute.singular_name %>.filename, <%= attribute.singular_name %> %></div>
+      <%% end %>
+    </dd>
+<% else -%>
+    <dd><%%= @<%= singular_table_name %>.<%= attribute.column_name %> %></dd>
+<% end -%>
+<% end -%>
+  </dl>
+</void-card>
+
+<void-button tag="a" href="<%%= <%= edit_helper(type: :path) %> %>" variant="outline">Edit</void-button>
+<void-button tag="a" href="<%%= <%= index_helper(type: :path) %> %>" variant="ghost">Back</void-button>
+<%%= button_to "Delete", <%= model_resource_name(prefix: "@") %>, method: :delete, data: { turbo_confirm: "Are you sure?" }, is: "void-button", variant: "ghost", color: "error" %>

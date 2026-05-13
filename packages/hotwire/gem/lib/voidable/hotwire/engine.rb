@@ -14,6 +14,11 @@ module Voidable
           include Voidable::Hotwire::Helpers
         end
       end
+
+      initializer "voidable-hotwire.generator_templates" do |app|
+        templates_dir = root.join("lib/templates").to_s
+        app.config.generators.templates.unshift(templates_dir) if File.directory?(templates_dir)
+      end
     end
   end
 end
