@@ -420,6 +420,15 @@ import iconLogout from '@tabler/icons/outline/logout.svg?raw';
         color: var(--void-color-error);
       }
 
+      [data-theme="dark"] .settings-theme-moon { display: flex; }
+      [data-theme="dark"] .settings-theme-sun { display: none; }
+      [data-theme="dark"] .settings-theme-dark { display: inline; }
+      [data-theme="dark"] .settings-theme-light { display: none; }
+      [data-theme="light"] .settings-theme-moon { display: none; }
+      [data-theme="light"] .settings-theme-sun { display: flex; }
+      [data-theme="light"] .settings-theme-dark { display: none; }
+      [data-theme="light"] .settings-theme-light { display: inline; }
+
       /* ── Main content ── */
       .main-content {
         flex: 1;
@@ -922,8 +931,10 @@ import iconLogout from '@tabler/icons/outline/logout.svg?raw';
             </button>
             <div class="settings-menu">
               <label class="settings-menu-item">
-                <span class="settings-menu-icon" set:html={iconSun} />
-                <span>Dark Mode</span>
+                <span class="settings-menu-icon settings-theme-moon" set:html={iconMoon} />
+                <span class="settings-menu-icon settings-theme-sun" set:html={iconSun} />
+                <span class="settings-theme-dark">Dark Mode</span>
+                <span class="settings-theme-light">Light Mode</span>
                 <void-switch id="theme-switch" size="sm"></void-switch>
               </label>
               <button class="settings-menu-item settings-sign-out" type="button">
