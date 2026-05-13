@@ -1,0 +1,51 @@
+<%= form_with(model: product) do |form| %>
+  <% if product.errors.any? %>
+    <void-alert color="error">
+      <strong><%= pluralize(product.errors.count, "error") %> prohibited this product from being saved:</strong>
+      <ul>
+        <% product.errors.each do |error| %>
+          <li><%= error.full_message %></li>
+        <% end %>
+      </ul>
+    </void-alert>
+  <% end %>
+
+  <void-field label="Name">
+    <void-input name="product[name]" value="<%= product.name %>"></void-input>
+  </void-field>
+  <void-field label="Description">
+    <void-textarea name="product[description]"><%= product.description %></void-textarea>
+  </void-field>
+  <void-field label="Price">
+    <void-number-input name="product[price]" value="<%= product.price %>" step="any"></void-number-input>
+  </void-field>
+  <void-field label="Quantity">
+    <void-number-input name="product[quantity]" value="<%= product.quantity %>"></void-number-input>
+  </void-field>
+  <void-field label="Weight">
+    <void-number-input name="product[weight]" value="<%= product.weight %>" step="any"></void-number-input>
+  </void-field>
+  <void-field label="Active">
+    <void-switch name="product[active]" <%= "checked" if product.active %>></void-switch>
+  </void-field>
+  <void-field label="Release date">
+    <void-date-picker name="product[release_date]" value="<%= product.release_date %>"></void-date-picker>
+  </void-field>
+  <void-field label="Published at">
+    <void-input type="datetime-local" name="product[published_at]" value="<%= product.published_at&.strftime('%Y-%m-%dT%H:%M') %>"></void-input>
+  </void-field>
+  <void-field label="Available from">
+    <void-input type="time" name="product[available_from]" value="<%= product.available_from&.strftime('%H:%M') %>"></void-input>
+  </void-field>
+  <void-field label="Category">
+    <void-select name="product[category_id]">
+      <option value="">Select...</option>
+      <%= options_from_collection_for_select(Category.all, :id, :name, product.category_id) %>
+    </void-select>
+  </void-field>
+
+  <div>
+    <void-button type="submit" color="success"><%= product.persisted? ? "Update product" : "Create product" %></void-button>
+    <void-button tag="a" href="<%= products_path %>" variant="ghost">Back</void-button>
+  </div>
+<% end %>

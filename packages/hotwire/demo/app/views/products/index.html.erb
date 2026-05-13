@@ -1,0 +1,54 @@
+<% content_for :title, "Products" %>
+
+<h1>Products</h1>
+
+<% if notice.present? %>
+  <void-alert color="success"><%= notice %></void-alert>
+<% end %>
+
+<void-table hoverable>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Description</th>
+        <th>Price</th>
+        <th>Quantity</th>
+        <th>Weight</th>
+        <th>Active</th>
+        <th>Release date</th>
+        <th>Published at</th>
+        <th>Available from</th>
+        <th>Category</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @products.each do |product| %>
+        <tr>
+          <td><%= product.name %></td>
+          <td><%= product.description %></td>
+          <td><%= product.price %></td>
+          <td><%= product.quantity %></td>
+          <td><%= product.weight %></td>
+          <td><%= product.active %></td>
+          <td><%= product.release_date %></td>
+          <td><%= product.published_at %></td>
+          <td><%= product.available_from %></td>
+          <td><%= product.category_id %></td>
+          <td>
+            <void-dropdown-menu position="bottom-end">
+              <void-button variant="ghost" size="sm">&#x22EF;</void-button>
+              <void-dropdown-menu-item tag="a" href="<%= url_for(product) %>">Show</void-dropdown-menu-item>
+              <void-dropdown-menu-item tag="a" href="<%= edit_product_path(product) %>">Edit</void-dropdown-menu-item>
+              <hr>
+              <void-dropdown-menu-item tag="a" href="<%= url_for(product) %>" destructive data-turbo-method="delete" data-turbo-confirm="Are you sure?">Delete</void-dropdown-menu-item>
+            </void-dropdown-menu>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</void-table>
+
+<void-button tag="a" href="<%= new_product_path %>" color="success">New product</void-button>

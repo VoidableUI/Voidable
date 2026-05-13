@@ -1,0 +1,36 @@
+<% content_for :title, "Product" %>
+
+<h1>Product</h1>
+
+<% if notice.present? %>
+  <void-alert color="success"><%= notice %></void-alert>
+<% end %>
+
+<void-card>
+  <dl>
+    <dt>Name</dt>
+    <dd><%= @product.name %></dd>
+    <dt>Description</dt>
+    <dd><%= @product.description %></dd>
+    <dt>Price</dt>
+    <dd><%= @product.price %></dd>
+    <dt>Quantity</dt>
+    <dd><%= @product.quantity %></dd>
+    <dt>Weight</dt>
+    <dd><%= @product.weight %></dd>
+    <dt>Active</dt>
+    <dd><%= @product.active %></dd>
+    <dt>Release date</dt>
+    <dd><%= @product.release_date %></dd>
+    <dt>Published at</dt>
+    <dd><%= @product.published_at %></dd>
+    <dt>Available from</dt>
+    <dd><%= @product.available_from %></dd>
+    <dt>Category</dt>
+    <dd><%= @product.category_id %></dd>
+  </dl>
+</void-card>
+
+<void-button tag="a" href="<%= edit_product_path(@product) %>" variant="outline">Edit</void-button>
+<void-button tag="a" href="<%= products_path %>" variant="ghost">Back</void-button>
+<%= button_to "Delete", @product, method: :delete, data: { turbo_confirm: "Are you sure?" }, is: "void-button", variant: "ghost", color: "error" %>
