@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title><%%= content_for(:title) || "<%= app_name.titleize %>" %></title>
+    <%%= csrf_meta_tags %>
+    <%%= csp_meta_tag %>
+    <%%= yield :head %>
+    <%%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
+    <%%= stylesheet_link_tag "voidable-theme", "data-turbo-track": "reload" %>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.43.0/tabler-icons.min.css">
+    <%%= stylesheet_link_tag "voidable-layout", "data-turbo-track": "reload" %>
+    <%%= javascript_importmap_tags %>
+  </head>
+
+  <body>
+    <div class="app-shell">
+      <void-sidebar width="220px">
+        <div class="sidebar-header">
+          <div class="sidebar-brand-initial"><%= app_name.first.upcase %></div>
+          <div class="sidebar-brand-info">
+            <div class="sidebar-brand-name"><%= app_name.titleize %></div>
+            <div class="sidebar-brand-env">Production</div>
+          </div>
+        </div>
+
+        <nav class="sidebar-nav">
+          <div class="sidebar-nav-section">
+            <div class="sidebar-nav-label">Main</div>
+            <div class="sidebar-nav-item">
+              <%%= link_to "Dashboard", root_path %>
+            </div>
+          </div>
+
+          <div class="sidebar-nav-section">
+            <div class="sidebar-nav-label">Settings</div>
+            <div class="sidebar-nav-item">
+              <%%= link_to "Profile", edit_user_registration_path if defined?(Devise) %>
+            </div>
+          </div>
+        </nav>
+
+        <div class="sidebar-footer">
+          <%% if defined?(Devise) && user_signed_in? %>
+            <span class="sidebar-user-email"><%%= current_user.email %></span>
+          <%% end %>
+          <div class="sidebar-settings">
+            <span class="sidebar-settings-label"><i class="ti ti-moon"></i> Dark mode</span>
+            <void-switch id="theme-toggle" aria-label="Toggle theme"></void-switch>
+          </div>
+          <%% if defined?(Devise) && user_signed_in? %>
+            <void-button variant="ghost" size="sm" class="sidebar-sign-in"><a href="<%%= destroy_user_session_path %>" data-turbo-method="delete">Sign out</a></void-button>
+          <%% elsif defined?(Devise) %>
+            <void-button variant="ghost" size="sm" class="sidebar-sign-in"><a href="<%%= new_user_session_path %>">Sign in</a></void-button>
+          <%% end %>
+        </div>
+      </void-sidebar>
+
+      <main class="app-main">
+        <div class="app-content-header">
+          <div class="app-content-header-left">
+            <span class="app-content-header-breadcrumb"><%%= content_for(:breadcrumb) || content_for(:title) || "<%= app_name.titleize %>" %></span>
+            <%% if content_for?(:subtitle) %>
+              <span class="app-content-header-subtitle"><%%= content_for(:subtitle) %></span>
+            <%% end %>
+          </div>
+          <div class="app-content-header-right">
+            <void-action-input icon="search" placeholder="Search…" size="sm" tooltip-position="bottom" class="app-content-header-search"></void-action-input>
+            <%%= content_for(:header_actions) %>
+          </div>
+        </div>
+        <div class="app-content-body">
+          <%% if notice.present? %>
+            <div class="flash-messages">
+              <void-alert color="success" dismissible><%%= notice %></void-alert>
+            </div>
+          <%% end %>
+          <%% if alert.present? %>
+            <div class="flash-messages">
+              <void-alert color="error" dismissible><%%= alert %></void-alert>
+            </div>
+          <%% end %>
+
+          <%%= yield %>
+        </div>
+      </main>
+    </div>
+
+    <script>
+      document.addEventListener('void-action', (e) => {
+        const el = e.target;
+        if (el.tagName === 'VOID-ACTION-INPUT' && (el.type === 'password' || el.type === 'text')) {
+          const visible = el.type === 'text';
+          el.type = visible ? 'password' : 'text';
+          el.icon = visible ? 'eye' : 'eye-off';
+        }
+      });
+    </script>
+    <script>
+      (function() {
+        const html = document.documentElement;
+
+        function applyTheme() {
+          if (!localStorage.getItem('theme')) {
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            html.setAttribute('data-theme', prefersDark ? 'dark' : 'light');
+          } else {
+            html.setAttribute('data-theme', localStorage.getItem('theme'));
+          }
+        }
+
+        function syncToggle() {
+          const toggle = document.getElementById('theme-toggle');
+          if (toggle) {
+            toggle.toggleAttribute('checked', html.getAttribute('data-theme') === 'dark');
+          }
+        }
+
+        applyTheme();
+        syncToggle();
+        document.addEventListener('turbo:load', syncToggle);
+
+        document.addEventListener('void-change', (e) => {
+          if (e.target.id !== 'theme-toggle') return;
+          const next = e.detail.checked ? 'dark' : 'light';
+          html.setAttribute('data-theme', next);
+          localStorage.setItem('theme', next);
+        });
+      })();
+    </script>
+  </body>
+</html>

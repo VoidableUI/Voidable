@@ -8,94 +8,10 @@
     <%%= csp_meta_tag %>
     <%%= yield :head %>
     <%%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
+    <%%= stylesheet_link_tag "voidable-theme", "data-turbo-track": "reload" %>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.43.0/tabler-icons.min.css">
+    <%%= stylesheet_link_tag "voidable-layout", "data-turbo-track": "reload" %>
     <%%= javascript_importmap_tags %>
-    <style>
-      /* All values use Voidable design tokens */
-      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-      html {
-        font-family: var(--void-font-sans);
-        color: var(--void-color-text);
-        background: var(--void-color-bg);
-      }
-      body {
-        min-height: 100dvh;
-        line-height: var(--void-leading-normal);
-        display: flex;
-        flex-direction: column;
-      }
-      a { color: inherit; text-decoration: none; }
-
-      /* Nav bar */
-      .app-nav {
-        position: sticky;
-        top: 0;
-        z-index: 100;
-        background: color-mix(in srgb, var(--void-color-bg) 88%, transparent);
-        backdrop-filter: saturate(140%) blur(6px);
-        -webkit-backdrop-filter: saturate(140%) blur(6px);
-        border-bottom: 1px solid var(--void-color-border);
-        flex-shrink: 0;
-      }
-      .app-nav-inner {
-        max-width: 72rem;
-        margin: 0 auto;
-        padding: 0 var(--void-space-6);
-        display: flex;
-        align-items: center;
-        gap: var(--void-space-6);
-        height: var(--void-space-14);
-      }
-      .app-nav-brand {
-        font-family: var(--void-font-mono);
-        font-weight: var(--void-weight-bold);
-        font-size: var(--void-text-base);
-        letter-spacing: var(--void-tracking-tightest);
-        color: var(--void-color-text);
-      }
-      .app-nav-links {
-        display: flex;
-        gap: var(--void-space-1);
-        list-style: none;
-      }
-      .app-nav-links a {
-        display: block;
-        padding: var(--void-space-1) var(--void-space-2);
-        font-size: var(--void-text-sm);
-        color: var(--void-color-text-secondary);
-        border-radius: var(--void-radius-sm);
-        transition: color var(--void-duration-fast);
-      }
-      .app-nav-links a:hover { color: var(--void-color-text); }
-      .app-nav-right {
-        margin-left: auto;
-        display: flex;
-        align-items: center;
-        gap: var(--void-space-3);
-      }
-      .app-nav-auth {
-        font-size: var(--void-text-sm);
-        color: var(--void-color-text-secondary);
-      }
-      .app-nav-auth a { color: var(--void-color-text-secondary); }
-      .app-nav-auth a:hover { color: var(--void-color-text); }
-
-      /* Theme toggle icons */
-      .theme-icon { display: flex; width: 1rem; height: 1rem; }
-      .theme-icon svg { width: 100%; height: 100%; }
-      [data-theme="dark"] .theme-icon-sun { display: flex; }
-      [data-theme="dark"] .theme-icon-moon { display: none; }
-      [data-theme="light"] .theme-icon-sun { display: none; }
-      [data-theme="light"] .theme-icon-moon { display: flex; }
-
-      /* Main content */
-      .app-main {
-        flex: 1;
-        max-width: 72rem;
-        width: 100%;
-        margin: 0 auto;
-        padding: var(--void-space-8) var(--void-space-6);
-      }
-    </style>
   </head>
 
   <body>
@@ -103,22 +19,20 @@
       <div class="app-nav-inner">
         <a href="/" class="app-nav-brand"><%= app_name.titleize %></a>
         <div class="app-nav-right">
-          <void-button id="theme-toggle" variant="ghost" size="sm" aria-label="Toggle theme">
-            <span class="theme-icon theme-icon-sun">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
-            </span>
-            <span class="theme-icon theme-icon-moon">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-            </span>
-          </void-button>
           <span class="app-nav-auth">
             <%% if defined?(Devise) && user_signed_in? %>
               <span><%%= current_user.email %></span>
-              <%%= button_to "Sign out", destroy_user_session_path, method: :delete, is: "void-button", variant: "ghost", size: "sm" %>
             <%% elsif defined?(Devise) %>
               <a href="<%%= new_user_session_path %>">Sign in</a>
             <%% end %>
           </span>
+          <void-button id="theme-toggle" variant="ghost" size="sm" aria-label="Toggle theme">
+            <i class="ti ti-sun theme-icon-sun"></i>
+            <i class="ti ti-moon theme-icon-moon"></i>
+          </void-button>
+          <%% if defined?(Devise) && user_signed_in? %>
+            <void-button variant="ghost" size="sm"><a href="<%%= destroy_user_session_path %>" data-turbo-method="delete">Sign out</a></void-button>
+          <%% end %>
         </div>
       </div>
     </nav>
@@ -127,6 +41,16 @@
       <%%= yield %>
     </main>
 
+    <script>
+      document.addEventListener('void-action', (e) => {
+        const el = e.target;
+        if (el.tagName === 'VOID-ACTION-INPUT' && (el.type === 'password' || el.type === 'text')) {
+          const visible = el.type === 'text';
+          el.type = visible ? 'password' : 'text';
+          el.icon = visible ? 'eye' : 'eye-off';
+        }
+      });
+    </script>
     <script>
       const toggle = document.getElementById('theme-toggle');
       const html = document.documentElement;
