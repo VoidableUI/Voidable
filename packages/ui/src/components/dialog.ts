@@ -53,9 +53,9 @@ export class VoidDialog extends VoidElement {
     }
 
     if (!this._didSetup) {
-      this._didSetup = true;
       const body = this.querySelector('.void-dialog-body');
       if (body) {
+        this._didSetup = true;
         for (const n of this._userContent) body.appendChild(n);
       }
     }
