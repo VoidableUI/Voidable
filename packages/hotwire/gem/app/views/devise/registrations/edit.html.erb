@@ -1,37 +1,50 @@
-<void-card>
-  <h2>Edit account</h2>
+<div style="max-width: 36rem; margin: 0 auto; padding: 2rem;">
+  <void-card>
+    <div style="padding: var(--void-space-6);">
+      <h1 style="margin: 0 0 var(--void-space-5) 0; font-family: var(--void-font-sans); font-size: var(--void-text-xl); font-weight: var(--void-weight-bold); color: var(--void-color-text);">Account settings</h1>
 
-  <%= form_for(resource, as: resource_name, url: registration_path(resource_name), html: { method: :put }) do |f| %>
-    <%= render "devise/shared/error_messages", resource: resource %>
+      <%= form_for(resource, as: resource_name, url: registration_path(resource_name), html: { method: :put, style: "display: flex; flex-direction: column; gap: var(--void-space-4);" }) do |f| %>
+        <%= render "devise/shared/error_messages", resource: resource %>
 
-    <void-field label="Email">
-      <void-input type="email" name="<%= resource_name %>[email]" value="<%= resource.email %>" autofocus autocomplete="email"></void-input>
-    </void-field>
+        <void-field label="Email">
+          <void-input type="email" name="<%= resource_name %>[email]" value="<%= resource.email %>" autofocus autocomplete="email"></void-input>
+        </void-field>
 
-    <% if devise_mapping.confirmable? && resource.pending_reconfirmation? %>
-      <void-alert>Currently waiting confirmation for: <%= resource.unconfirmed_email %></void-alert>
-    <% end %>
+        <% if devise_mapping.confirmable? && resource.pending_reconfirmation? %>
+          <void-alert>Currently waiting confirmation for: <%= resource.unconfirmed_email %></void-alert>
+        <% end %>
 
-    <void-field label="New password">
-      <void-input type="password" name="<%= resource_name %>[password]" autocomplete="new-password"></void-input>
-    </void-field>
+        <void-field label="New password" helper="Leave blank if you don't want to change it">
+          <void-action-input type="password" name="<%= resource_name %>[password]" icon="eye" action-label="Toggle visibility" autocomplete="new-password"></void-action-input>
+        </void-field>
 
-    <void-field label="Confirm new password">
-      <void-input type="password" name="<%= resource_name %>[password_confirmation]" autocomplete="new-password"></void-input>
-    </void-field>
+        <void-field label="Confirm new password">
+          <void-action-input type="password" name="<%= resource_name %>[password_confirmation]" icon="eye" action-label="Toggle visibility" autocomplete="new-password"></void-action-input>
+        </void-field>
 
-    <void-field label="Current password" required>
-      <void-input type="password" name="<%= resource_name %>[current_password]" autocomplete="current-password"></void-input>
-    </void-field>
+        <void-field label="Current password" helper="We need your current password to confirm changes">
+          <void-action-input type="password" name="<%= resource_name %>[current_password]" icon="eye" action-label="Toggle visibility" autocomplete="current-password"></void-action-input>
+        </void-field>
 
-    <div>
-      <void-button type="submit" color="success">Update</void-button>
+        <div style="padding-top: var(--void-space-2);">
+          <void-button type="submit" color="success" style="width: 100%;">Update</void-button>
+        </div>
+      <% end %>
     </div>
-  <% end %>
-</void-card>
+  </void-card>
 
-<void-card>
-  <h3>Cancel my account</h3>
-  <p>This action is irreversible.</p>
-  <void-button variant="ghost" color="error"><a href="<%= registration_path(resource_name) %>" data-turbo-method="delete" data-turbo-confirm="Are you sure?">Cancel my account</a></void-button>
-</void-card>
+  <div style="margin-top: var(--void-space-5); padding: var(--void-space-4); border: 1px solid var(--void-color-border); border-radius: var(--void-radius-md);">
+    <p style="font-family: var(--void-font-sans); font-size: var(--void-text-xs); font-weight: var(--void-weight-semibold); color: var(--void-color-text-muted); text-transform: uppercase; letter-spacing: 0.06em; margin: 0 0 var(--void-space-3) 0;">Danger zone</p>
+    <void-button variant="outline" color="error" size="sm" onclick="document.getElementById('delete-dialog').open = true">Delete my account</void-button>
+  </div>
+
+  <void-dialog id="delete-dialog" heading="Delete account" size="sm">
+    <p style="font-family: var(--void-font-sans); font-size: var(--void-text-sm); color: var(--void-color-text); margin: 0 0 var(--void-space-4) 0;">
+      Are you sure you want to delete your account? This action cannot be undone.
+    </p>
+    <div style="display: flex; gap: var(--void-space-2); justify-content: flex-end;">
+      <void-button variant="ghost" size="sm" onclick="document.getElementById('delete-dialog').open = false">Cancel</void-button>
+      <void-button color="error" size="sm"><a href="<%= registration_path(resource_name) %>" data-turbo-method="delete">Delete</a></void-button>
+    </div>
+  </void-dialog>
+</div>

@@ -1,23 +1,27 @@
-<void-card>
-  <h2>Change your password</h2>
+<div style="max-width: 28rem; margin: 0 auto; padding: 2rem;">
+  <void-card>
+    <div style="padding: var(--void-space-6);">
+      <h1 style="margin: 0 0 var(--void-space-5) 0; font-family: var(--void-font-sans); font-size: var(--void-text-xl); font-weight: var(--void-weight-bold); color: var(--void-color-text);">Change your password</h1>
 
-  <%= form_for(resource, as: resource_name, url: password_path(resource_name), html: { method: :put }) do |f| %>
-    <%= render "devise/shared/error_messages", resource: resource %>
+      <%= form_for(resource, as: resource_name, url: password_path(resource_name), html: { method: :put, style: "display: flex; flex-direction: column; gap: var(--void-space-4);" }) do |f| %>
+        <%= render "devise/shared/error_messages", resource: resource %>
 
-    <%= f.hidden_field :reset_password_token %>
+        <%= f.hidden_field :reset_password_token %>
 
-    <void-field label="New password">
-      <void-input type="password" name="<%= resource_name %>[password]" autofocus autocomplete="new-password" minlength="<%= @minimum_password_length %>"></void-input>
-    </void-field>
+        <void-field label="New password" helper="6 characters minimum">
+          <void-action-input type="password" name="<%= resource_name %>[password]" icon="eye" action-label="Toggle visibility" autofocus autocomplete="new-password"></void-action-input>
+        </void-field>
 
-    <void-field label="Confirm new password">
-      <void-input type="password" name="<%= resource_name %>[password_confirmation]" autocomplete="new-password"></void-input>
-    </void-field>
+        <void-field label="Confirm new password">
+          <void-action-input type="password" name="<%= resource_name %>[password_confirmation]" icon="eye" action-label="Toggle visibility" autocomplete="new-password"></void-action-input>
+        </void-field>
 
-    <div>
-      <void-button type="submit" color="success">Change my password</void-button>
+        <div style="padding-top: var(--void-space-2);">
+          <void-button type="submit" color="success" style="width: 100%;">Change my password</void-button>
+        </div>
+      <% end %>
+
+      <%= render "devise/shared/links" %>
     </div>
-  <% end %>
-
-  <%= render "devise/shared/links" %>
-</void-card>
+  </void-card>
+</div>
