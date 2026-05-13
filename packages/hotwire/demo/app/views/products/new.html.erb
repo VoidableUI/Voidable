@@ -1,10 +1,3 @@
 <% content_for :title, "New product" %>
 
-<div class="page-header">
-  <p class="page-breadcrumb">
-    <%= link_to "Products", products_path %> / New
-  </p>
-  <h1 class="page-title">New product</h1>
-</div>
-
 <%= render "form", product: @product %>

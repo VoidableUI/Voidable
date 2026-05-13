@@ -1,24 +1,17 @@
 <% display_column = attributes.reject(&:password_digest?).first&.column_name || 'id' -%>
 <%% content_for :title, @<%= singular_table_name %>.<%= display_column %>.to_s %>
+<%% content_for :header_actions do %>
+  <void-dropdown-menu position="bottom-end">
+    <void-button color="caution" variant="outline" size="sm">Actions</void-button>
+    <void-dropdown-menu-item><a href="<%%= <%= edit_helper(type: :path) %> %>">Edit</a></void-dropdown-menu-item>
+    <hr>
+    <void-dropdown-menu-item destructive onclick="document.getElementById('delete-dialog').open = true">Delete</void-dropdown-menu-item>
+  </void-dropdown-menu>
+<%% end %>
 
 <%% if notice.present? %>
   <void-alert color="success" dismissible style="margin-bottom: var(--void-space-4);"><%%= notice %></void-alert>
 <%% end %>
-
-<div style="margin-bottom: var(--void-space-5);">
-  <p style="font-family: var(--void-font-mono); font-size: var(--void-text-xs); color: var(--void-color-text-muted); margin: 0 0 var(--void-space-2) 0;">
-    <%%= link_to "<%= human_name.pluralize %>", <%= index_helper(type: :path) %>, style: "color: inherit;" %> / <%%= @<%= singular_table_name %>.<%= display_column %> %>
-  </p>
-  <div style="display: flex; justify-content: space-between; align-items: center;">
-    <h1 style="margin: 0; font-family: var(--void-font-sans); color: var(--void-color-text);"><%%= @<%= singular_table_name %>.<%= display_column %> %></h1>
-    <void-dropdown-menu position="bottom-end">
-      <void-button variant="outline" size="sm">Actions</void-button>
-      <void-dropdown-menu-item><a href="<%%= <%= edit_helper(type: :path) %> %>">Edit</a></void-dropdown-menu-item>
-      <hr>
-      <void-dropdown-menu-item destructive onclick="document.getElementById('delete-dialog').open = true">Delete</void-dropdown-menu-item>
-    </void-dropdown-menu>
-  </div>
-</div>
 
 <void-card>
   <div style="padding: var(--void-space-5);">

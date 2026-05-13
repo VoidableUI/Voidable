@@ -1,10 +1,3 @@
 <%% content_for :title, "New <%= human_name.downcase %>" %>
 
-<div style="margin-bottom: var(--void-space-5);">
-  <p style="font-family: var(--void-font-mono); font-size: var(--void-text-xs); color: var(--void-color-text-muted); margin: 0 0 var(--void-space-2) 0;">
-    <%%= link_to "<%= human_name.pluralize %>", <%= index_helper(type: :path) %>, style: "color: inherit;" %> / New
-  </p>
-  <h1 style="margin: 0; font-family: var(--void-font-sans); color: var(--void-color-text);">New <%= human_name.downcase %></h1>
-</div>
-
 <%%= render "form", <%= singular_table_name %>: @<%= singular_table_name %> %>

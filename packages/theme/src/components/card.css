@@ -3,7 +3,7 @@ void-card {
   flex-direction: column;
   border: 1px solid var(--void-color-border);
   border-radius: var(--void-radius-lg);
-  overflow: hidden;
+  overflow: auto;
   background: var(--void-color-bg-secondary);
   font-family: var(--void-font-sans);
 }

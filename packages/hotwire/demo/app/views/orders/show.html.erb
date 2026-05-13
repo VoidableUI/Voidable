@@ -1,23 +1,16 @@
 <% content_for :title, @order.customer_name.to_s %>
+<% content_for :header_actions do %>
+  <void-dropdown-menu position="bottom-end">
+    <void-button color="caution" variant="outline" size="sm">Actions</void-button>
+    <void-dropdown-menu-item><a href="<%= edit_order_path(@order) %>">Edit</a></void-dropdown-menu-item>
+    <hr>
+    <void-dropdown-menu-item destructive onclick="document.getElementById('delete-dialog').open = true">Delete</void-dropdown-menu-item>
+  </void-dropdown-menu>
+<% end %>
 
 <% if notice.present? %>
   <void-alert color="success" dismissible class="flash-alert"><%= notice %></void-alert>
 <% end %>
-
-<div class="page-header">
-  <p class="page-breadcrumb">
-    <%= link_to "Orders", orders_path %> / <%= @order.customer_name %>
-  </p>
-  <div class="page-title-row">
-    <h1 class="page-title"><%= @order.customer_name %></h1>
-    <void-dropdown-menu position="bottom-end">
-      <void-button variant="outline" size="sm">Actions</void-button>
-      <void-dropdown-menu-item><a href="<%= edit_order_path(@order) %>">Edit</a></void-dropdown-menu-item>
-      <hr>
-      <void-dropdown-menu-item destructive onclick="document.getElementById('delete-dialog').open = true">Delete</void-dropdown-menu-item>
-    </void-dropdown-menu>
-  </div>
-</div>
 
 <void-card>
   <div class="detail-card-body">

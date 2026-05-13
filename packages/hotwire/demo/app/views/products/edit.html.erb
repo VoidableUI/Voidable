@@ -1,12 +1,5 @@
 <% content_for :title, "Editing product" %>
 
-<div class="page-header">
-  <p class="page-breadcrumb">
-    <%= link_to "Products", products_path %> / <%= @product.name %> / Edit
-  </p>
-  <h1 class="page-title">Edit product</h1>
-</div>
-
 <%= render "form", product: @product %>
 
 <div class="danger-zone">

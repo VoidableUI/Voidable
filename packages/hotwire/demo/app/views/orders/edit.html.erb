@@ -1,12 +1,5 @@
 <% content_for :title, "Editing order" %>
 
-<div class="page-header">
-  <p class="page-breadcrumb">
-    <%= link_to "Orders", orders_path %> / <%= @order.customer_name %> / Edit
-  </p>
-  <h1 class="page-title">Edit order</h1>
-</div>
-
 <%= render "form", order: @order %>
 
 <div class="danger-zone">
