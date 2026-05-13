@@ -43,6 +43,114 @@ app.register('void-event', VoidEventController);
 VoidTurbo.start();
 ```
 
+## Install generator
+
+After adding the gem, run the install generator to scaffold a complete application layout with theme, importmap pins, and JS imports:
+
+```bash
+rails generate voidable:install
+```
+
+### Layout option
+
+Pass `--layout` to choose a layout style:
+
+```bash
+rails generate voidable:install --layout topbar    # default — horizontal nav bar
+rails generate voidable:install --layout sidebar   # fixed sidebar with collapsible nav
+rails generate voidable:install --layout switching # both layouts with a cookie-based toggle
+```
+
+### What it generates
+
+| File | Description |
+|---|---|
+| `config/initializers/voidable.rb` | Voidable initializer |
+| `config/importmap.rb` | Pins for `@voidable/ui` and `@voidable/ui-hotwire` |
+| `app/javascript/application.js` | Adds Voidable imports |
+| `app/views/layouts/application.html.erb` | Application layout (topbar or sidebar) |
+| `app/views/layouts/_settings_menu.html.erb` | Shared settings popover partial |
+| `app/assets/stylesheets/voidable-layout.css` | Layout stylesheet |
+
+#### Switching mode
+
+When `--layout switching` is used, the generator additionally creates:
+
+| File | Description |
+|---|---|
+| `app/views/layouts/topbar.html.erb` | Topbar layout (named layout) |
+| `app/views/layouts/sidebar.html.erb` | Sidebar layout (named layout) |
+| `app/assets/stylesheets/voidable-layout-topbar.css` | Topbar layout styles |
+| `app/assets/stylesheets/voidable-layout-sidebar.css` | Sidebar layout styles |
+| `app/controllers/settings_controller.rb` | Toggles the layout cookie |
+| `config/routes.rb` | Adds `POST /toggle_layout` route |
+
+It also injects a `layout :resolve_layout` method into `ApplicationController` that reads the `:layout` cookie to pick the active layout, defaulting to `"topbar"`.
+
+### Settings menu
+
+All layouts include a shared `_settings_menu.html.erb` partial rendered inside a `void-popover`. The gear icon opens a menu with:
+
+- **Profile** link (when Devise is available and user is signed in)
+- **Dark mode** toggle via `void-switch`
+- **Layout switch** button (switching mode only)
+
+The partial accepts locals to configure its behavior:
+
+```erb
+<%= render "layouts/settings_menu",
+  popover_position: "bottom",
+  layout_toggle: true,
+  layout_toggle_icon: "layout-sidebar-left-collapse",
+  layout_toggle_label: "Switch to sidebar" %>
+```
+
+| Local | Type | Description |
+|---|---|---|
+| `popover_position` | `string` | Popover direction: `"top"` (sidebar) or `"bottom"` (topbar) |
+| `layout_toggle` | `boolean` | Show the layout switch button |
+| `layout_toggle_icon` | `string` | Tabler icon name for the switch button |
+| `layout_toggle_label` | `string` | Button label text |
+
+### Theme toggle
+
+The generated layouts include a theme toggle script that syncs `void-switch` state with `localStorage` and respects system preference on first load. The script listens for `void-change` events and persists the choice across Turbo navigations:
+
+```html
+<script>
+  (function() {
+    const html = document.documentElement;
+
+    function applyTheme() {
+      if (!localStorage.getItem('theme')) {
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        html.setAttribute('data-theme', prefersDark ? 'dark' : 'light');
+      } else {
+        html.setAttribute('data-theme', localStorage.getItem('theme'));
+      }
+    }
+
+    function syncToggle() {
+      const toggle = document.getElementById('theme-toggle');
+      if (toggle) {
+        toggle.toggleAttribute('checked', html.getAttribute('data-theme') === 'dark');
+      }
+    }
+
+    applyTheme();
+    syncToggle();
+    document.addEventListener('turbo:load', syncToggle);
+
+    document.addEventListener('void-change', (e) => {
+      if (e.target.id !== 'theme-toggle') return;
+      const next = e.detail.checked ? 'dark' : 'light';
+      html.setAttribute('data-theme', next);
+      localStorage.setItem('theme', next);
+    });
+  })();
+</script>
+```
+
 ## Turbo morph protection
 
 `VoidTurbo.start()` prevents Turbo from clobbering client-managed attributes (`open`, `checked`, `aria-expanded`, etc.) on `<void-*>` elements during page morphs.
@@ -137,13 +245,25 @@ Open it from a dropdown menu item or button:
 
 ## Devise
 
-Voidable components integrate naturally with [Devise](https://github.com/heartcombo/devise) authentication views. Generate Devise views, then replace the default markup with Voidable components.
-
-### Generate views
+The gem includes pre-styled [Devise](https://github.com/heartcombo/devise) views that match the Voidable design system. Views are installed automatically during `voidable:install` if Devise is detected, or can be installed separately:
 
 ```bash
-rails generate devise:views
+rails generate voidable:devise_views
 ```
+
+This copies all Devise views into `app/views/devise/` with Voidable components already wired up. The following views are included:
+
+| View | Description |
+|---|---|
+| `sessions/new` | Sign-in form with email and password fields |
+| `registrations/new` | Sign-up form with email, password, and confirmation |
+| `registrations/edit` | Account settings with profile update and danger zone for account deletion |
+| `passwords/new` | Forgot password form |
+| `passwords/edit` | Reset password form |
+| `confirmations/new` | Resend confirmation instructions |
+| `unlocks/new` | Resend unlock instructions |
+| `shared/_links` | Navigation links between Devise views (sign in, sign up, forgot password) |
+| `shared/_error_messages` | Validation error display using `void-alert` |
 
 ### Sign-in form
 
@@ -177,7 +297,7 @@ A typical sign-in view using Voidable components:
 
 ### Password visibility toggle
 
-`void-action-input` provides a built-in action button for password reveal. Add a global event listener to handle the toggle:
+`void-action-input` provides a built-in action button for password reveal. The generated layouts include a global event listener that handles the toggle automatically:
 
 ```html
 <script>
@@ -220,3 +340,5 @@ The shared error messages partial uses `void-alert`:
 | Submit buttons | `void-button` with `color="success"` |
 | Remember me | `void-switch` |
 | Flash / validation errors | `void-alert` with `color="error"` |
+| Account deletion | `void-dialog` with danger zone section |
+| Navigation links | `void-button` with `variant="ghost"` |
