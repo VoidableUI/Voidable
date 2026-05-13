@@ -19,14 +19,9 @@ module Voidable
         say "Pinned @voidable/ui and @voidable/ui-hotwire in importmap", :green
       end
 
-      def add_theme_stylesheet
-        sentinel = "</head>"
-        inject_into_file "app/views/layouts/application.html.erb", before: sentinel do
-          %(    <link rel="stylesheet" href="https://ga.jspm.io/npm:@voidable/theme@0.0.1/dist/theme.css" />\n)
-        end
-        say "Added @voidable/theme stylesheet to application layout", :green
-      rescue Thor::Error
-        say "Could not find application layout — add the theme stylesheet manually", :yellow
+      def create_layout
+        template "application.html.erb.tt", "app/views/layouts/application.html.erb", force: true
+        say "Created Voidable application layout", :green
       end
 
       def add_js_import
