@@ -8,3 +8,4 @@
 !/tmp/.keep
 !/storage/.keep
 /vendor/javascript/voidable-bundle.js
+/app/assets/stylesheets/voidable-theme.css

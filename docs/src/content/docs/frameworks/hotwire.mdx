@@ -82,3 +82,141 @@ With manual data attributes:
 ```
 
 The `VoidEventController` listens for the specified custom events on the element and re-dispatches them as Stimulus-compatible events so they can be routed via `data-action`.
+
+## Scaffolds
+
+The gem overrides Rails' default scaffold templates so `rails generate scaffold` produces Voidable-styled views automatically. The engine registers templates via `config.generators.templates.unshift`, requiring no extra configuration.
+
+### Generated views
+
+Every scaffold includes:
+
+- **Index** — page header with title, subtitle, and "New" button; hoverable table with boolean badges and per-row action menus; empty state when no records exist
+- **Show** — monospace breadcrumb, title with Actions dropdown (Edit / Delete), card with grid-layout definition list, delete confirmation dialog
+- **New** — breadcrumb (`Models / New`), card-wrapped form with properly spaced fields
+- **Edit** — breadcrumb with record name, card-wrapped form, "Danger zone" section with delete button and confirmation dialog
+- **Form partial** — `void-card` wrapper with `void-field` for every attribute type (text, number, boolean switch, date picker, select, textarea)
+
+### Component mapping by type
+
+| Attribute type | Voidable component |
+|---|---|
+| `string` | `void-input` |
+| `text` | `void-textarea` |
+| `integer` | `void-number-input` |
+| `float`, `decimal` | `void-number-input` with `step="any"` |
+| `boolean` | `void-switch` (form) / `void-badge` (show, index) |
+| `date` | `void-date-picker` |
+| `datetime` | `void-input` with `type="datetime-local"` |
+| `time` | `void-input` with `type="time"` |
+| `references` | `void-select` |
+| `password` | `void-input` with `type="password"` |
+
+### Delete confirmation
+
+Show and edit views use `void-dialog` for delete confirmation instead of the browser's `confirm()` dialog:
+
+```erb
+<void-dialog id="delete-dialog" heading="Delete order" size="sm">
+  <p>Are you sure? This action cannot be undone.</p>
+  <div style="display: flex; gap: var(--void-space-2); justify-content: flex-end;">
+    <void-button variant="ghost" size="sm"
+      onclick="document.getElementById('delete-dialog').open = false">Cancel</void-button>
+    <void-button tag="a" href="<%= url_for(@order) %>"
+      color="error" size="sm" data-turbo-method="delete">Delete</void-button>
+  </div>
+</void-dialog>
+```
+
+Open it from a dropdown menu item or button:
+
+```erb
+<void-dropdown-menu-item destructive
+  onclick="document.getElementById('delete-dialog').open = true">Delete</void-dropdown-menu-item>
+```
+
+## Devise
+
+Voidable components integrate naturally with [Devise](https://github.com/heartcombo/devise) authentication views. Generate Devise views, then replace the default markup with Voidable components.
+
+### Generate views
+
+```bash
+rails generate devise:views
+```
+
+### Sign-in form
+
+A typical sign-in view using Voidable components:
+
+```erb
+<div style="max-width: 28rem; margin: 0 auto; padding: 2rem;">
+  <void-card>
+    <div style="padding: var(--void-space-6);">
+      <h1 style="margin: 0 0 var(--void-space-5) 0; font-family: var(--void-font-sans); font-size: var(--void-text-xl); font-weight: var(--void-weight-bold); color: var(--void-color-text);">Sign in</h1>
+
+      <%= form_for(resource, as: resource_name, url: session_path(resource_name), html: { style: "display: flex; flex-direction: column; gap: var(--void-space-4);" }) do |f| %>
+        <%= render "devise/shared/error_messages", resource: resource %>
+
+        <void-field label="Email">
+          <void-input type="email" name="<%= resource_name %>[email]" value="<%= resource.email %>" autofocus autocomplete="email"></void-input>
+        </void-field>
+
+        <void-field label="Password">
+          <void-action-input type="password" icon="eye" action-label="Toggle visibility" name="<%= resource_name %>[password]" autocomplete="current-password"></void-action-input>
+        </void-field>
+
+        <div style="padding-top: var(--void-space-2);">
+          <void-button type="submit" color="success" style="width: 100%;">Sign in</void-button>
+        </div>
+      <% end %>
+    </div>
+  </void-card>
+</div>
+```
+
+### Password visibility toggle
+
+`void-action-input` provides a built-in action button for password reveal. Add a global event listener to handle the toggle:
+
+```html
+<script>
+  document.addEventListener('void-action', (e) => {
+    const el = e.target;
+    if (el.tagName === 'VOID-ACTION-INPUT' && (el.type === 'password' || el.type === 'text')) {
+      const visible = el.type === 'text';
+      el.type = visible ? 'password' : 'text';
+      el.icon = visible ? 'eye' : 'eye-off';
+    }
+  });
+</script>
+```
+
+### Error messages
+
+The shared error messages partial uses `void-alert`:
+
+```erb
+<% if resource.errors.any? %>
+  <void-alert color="error" data-turbo-temporary>
+    <strong><%= pluralize(resource.errors.count, "error") %> prohibited this operation:</strong>
+    <ul>
+      <% resource.errors.full_messages.each do |message| %>
+        <li><%= message %></li>
+      <% end %>
+    </ul>
+  </void-alert>
+<% end %>
+```
+
+### Components used
+
+| Devise concept | Voidable component |
+|---|---|
+| Form card wrapper | `void-card` |
+| Text inputs | `void-input` |
+| Password inputs | `void-action-input` with `icon="eye"` |
+| Field labels & errors | `void-field` with `label` and `error` attributes |
+| Submit buttons | `void-button` with `color="success"` |
+| Remember me | `void-switch` |
+| Flash / validation errors | `void-alert` with `color="error"` |
