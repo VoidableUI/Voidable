@@ -36,6 +36,12 @@ module Voidable
           say "Added Voidable imports to application.js", :green
         end
       end
+
+      def install_devise_views
+        return unless defined?(Devise)
+        generate "voidable:devise_views"
+        say "Installed Voidable-styled Devise views", :green
+      end
     end
   end
 end
