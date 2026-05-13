@@ -1,8 +1,25 @@
 <% content_for :title, "Editing product" %>
 
-<h1>Editing product</h1>
+<div class="page-header">
+  <p class="page-breadcrumb">
+    <%= link_to "Products", products_path %> / <%= @product.name %> / Edit
+  </p>
+  <h1 class="page-title">Edit product</h1>
+</div>
 
 <%= render "form", product: @product %>
 
-<void-button tag="a" href="<%= url_for(@product) %>" variant="ghost">Show</void-button>
-<void-button tag="a" href="<%= products_path %>" variant="ghost">Back to products</void-button>
+<div class="danger-zone">
+  <p class="detail-section-label">Danger zone</p>
+  <void-button variant="outline" color="error" size="sm" onclick="document.getElementById('delete-dialog').open = true">Delete this product</void-button>
+</div>
+
+<void-dialog id="delete-dialog" heading="Delete product" size="sm">
+  <p class="danger-zone-description">
+    Are you sure you want to delete <strong><%= @product.name %></strong>? This action cannot be undone.
+  </p>
+  <div class="action-bar">
+    <void-button variant="ghost" size="sm" onclick="document.getElementById('delete-dialog').open = false">Cancel</void-button>
+    <void-button color="error" size="sm"><a href="<%= url_for(@product) %>" data-turbo-method="delete">Delete</a></void-button>
+  </div>
+</void-dialog>

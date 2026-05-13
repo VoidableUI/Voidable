@@ -7,3 +7,4 @@
 !/log/.keep
 !/tmp/.keep
 !/storage/.keep
+/vendor/javascript/voidable-bundle.js

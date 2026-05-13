@@ -1,54 +1,86 @@
 <% content_for :title, "Products" %>
-
-<h1>Products</h1>
-
-<% if notice.present? %>
-  <void-alert color="success"><%= notice %></void-alert>
+<% content_for :subtitle, "Manage your products" %>
+<% content_for :header_actions do %>
+  <void-button color="success" size="sm"><a href="<%= new_product_path %>">New product</a></void-button>
 <% end %>
 
-<void-table hoverable>
-  <table>
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>Description</th>
-        <th>Price</th>
-        <th>Quantity</th>
-        <th>Weight</th>
-        <th>Active</th>
-        <th>Release date</th>
-        <th>Published at</th>
-        <th>Available from</th>
-        <th>Category</th>
-        <th></th>
-      </tr>
-    </thead>
-    <tbody>
-      <% @products.each do |product| %>
-        <tr>
-          <td><%= product.name %></td>
-          <td><%= product.description %></td>
-          <td><%= product.price %></td>
-          <td><%= product.quantity %></td>
-          <td><%= product.weight %></td>
-          <td><%= product.active %></td>
-          <td><%= product.release_date %></td>
-          <td><%= product.published_at %></td>
-          <td><%= product.available_from %></td>
-          <td><%= product.category_id %></td>
-          <td>
-            <void-dropdown-menu position="bottom-end">
-              <void-button variant="ghost" size="sm">&#x22EF;</void-button>
-              <void-dropdown-menu-item tag="a" href="<%= url_for(product) %>">Show</void-dropdown-menu-item>
-              <void-dropdown-menu-item tag="a" href="<%= edit_product_path(product) %>">Edit</void-dropdown-menu-item>
-              <hr>
-              <void-dropdown-menu-item tag="a" href="<%= url_for(product) %>" destructive data-turbo-method="delete" data-turbo-confirm="Are you sure?">Delete</void-dropdown-menu-item>
-            </void-dropdown-menu>
-          </td>
-        </tr>
-      <% end %>
-    </tbody>
-  </table>
-</void-table>
+<% if notice.present? %>
+  <void-alert color="success" dismissible class="flash-alert"><%= notice %></void-alert>
+<% end %>
 
-<void-button tag="a" href="<%= new_product_path %>" color="success">New product</void-button>
+<div class="table-section">
+  <div class="table-section-header">
+    <span class="table-section-title">All Products</span>
+    <span class="table-section-count"><%= @products.size %> products</span>
+  </div>
+
+  <void-table hoverable>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Description</th>
+          <th>Price</th>
+          <th>Quantity</th>
+          <th>Weight</th>
+          <th>Active</th>
+          <th>Release date</th>
+          <th>Published at</th>
+          <th>Available from</th>
+          <th>Category</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if @products.any? %>
+          <% @products.each do |product| %>
+            <tr>
+              <td><%= product.name %></td>
+              <td><%= product.description %></td>
+              <td><%= product.price %></td>
+              <td><%= product.quantity %></td>
+              <td><%= product.weight %></td>
+              <td>
+                <void-badge color="<%= product.active ? 'success' : 'default' %>" variant="outline"><%= product.active ? 'Yes' : 'No' %></void-badge>
+              </td>
+              <td><%= product.release_date %></td>
+              <td><%= product.published_at %></td>
+              <td><%= product.available_from %></td>
+              <td><%= product.category_id %></td>
+              <td class="table-cell-right">
+                <void-dropdown-menu position="bottom-end">
+                  <void-button variant="ghost" size="sm">&#x22EF;</void-button>
+                  <void-dropdown-menu-item><a href="<%= url_for(product) %>">Show</a></void-dropdown-menu-item>
+                  <void-dropdown-menu-item><a href="<%= edit_product_path(product) %>">Edit</a></void-dropdown-menu-item>
+                  <hr>
+                  <void-dropdown-menu-item destructive><a href="<%= url_for(product) %>" data-turbo-method="delete" data-turbo-confirm="Are you sure?">Delete</a></void-dropdown-menu-item>
+                </void-dropdown-menu>
+              </td>
+            </tr>
+          <% end %>
+        <% else %>
+          <tr>
+            <td colspan="11" class="table-empty">
+              No products found. Create your first one to get started.
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </void-table>
+
+  <% if @pagy.last > 1 %>
+    <div class="pagination-wrapper">
+      <void-pagination total="<%= @pagy.last %>" value="<%= @pagy.page %>"></void-pagination>
+    </div>
+  <% end %>
+</div>
+
+<script>
+  document.querySelector('void-pagination')?.addEventListener('void-change', (e) => {
+    const page = e.detail.value;
+    const url = new URL(window.location);
+    url.searchParams.set('page', page);
+    Turbo.visit(url.toString());
+  });
+</script>

@@ -1,36 +1,64 @@
-<% content_for :title, "Product" %>
-
-<h1>Product</h1>
+<% content_for :title, @product.name.to_s %>
 
 <% if notice.present? %>
-  <void-alert color="success"><%= notice %></void-alert>
+  <void-alert color="success" dismissible class="flash-alert"><%= notice %></void-alert>
 <% end %>
 
+<div class="page-header">
+  <p class="page-breadcrumb">
+    <%= link_to "Products", products_path %> / <%= @product.name %>
+  </p>
+  <div class="page-title-row">
+    <h1 class="page-title"><%= @product.name %></h1>
+    <void-dropdown-menu position="bottom-end">
+      <void-button variant="outline" size="sm">Actions</void-button>
+      <void-dropdown-menu-item><a href="<%= edit_product_path(@product) %>">Edit</a></void-dropdown-menu-item>
+      <hr>
+      <void-dropdown-menu-item destructive onclick="document.getElementById('delete-dialog').open = true">Delete</void-dropdown-menu-item>
+    </void-dropdown-menu>
+  </div>
+</div>
+
 <void-card>
-  <dl>
-    <dt>Name</dt>
-    <dd><%= @product.name %></dd>
-    <dt>Description</dt>
-    <dd><%= @product.description %></dd>
-    <dt>Price</dt>
-    <dd><%= @product.price %></dd>
-    <dt>Quantity</dt>
-    <dd><%= @product.quantity %></dd>
-    <dt>Weight</dt>
-    <dd><%= @product.weight %></dd>
-    <dt>Active</dt>
-    <dd><%= @product.active %></dd>
-    <dt>Release date</dt>
-    <dd><%= @product.release_date %></dd>
-    <dt>Published at</dt>
-    <dd><%= @product.published_at %></dd>
-    <dt>Available from</dt>
-    <dd><%= @product.available_from %></dd>
-    <dt>Category</dt>
-    <dd><%= @product.category_id %></dd>
-  </dl>
+  <div class="detail-card-body">
+    <p class="detail-section-label">Details</p>
+    <dl class="detail-grid">
+      <dt class="detail-label">Name</dt>
+      <dd class="detail-value"><%= @product.name %></dd>
+      <dt class="detail-label">Description</dt>
+      <dd class="detail-value"><%= @product.description %></dd>
+      <dt class="detail-label">Price</dt>
+      <dd class="detail-value-mono"><%= @product.price %></dd>
+      <dt class="detail-label">Quantity</dt>
+      <dd class="detail-value-mono"><%= @product.quantity %></dd>
+      <dt class="detail-label">Weight</dt>
+      <dd class="detail-value-mono"><%= @product.weight %></dd>
+      <dt class="detail-label">Active</dt>
+      <dd class="detail-value">
+        <void-badge color="<%= @product.active ? 'success' : 'default' %>" variant="outline"><%= @product.active ? 'Yes' : 'No' %></void-badge>
+      </dd>
+      <dt class="detail-label">Release date</dt>
+      <dd class="detail-value"><%= @product.release_date %></dd>
+      <dt class="detail-label">Published at</dt>
+      <dd class="detail-value"><%= @product.published_at %></dd>
+      <dt class="detail-label">Available from</dt>
+      <dd class="detail-value"><%= @product.available_from %></dd>
+      <dt class="detail-label">Category</dt>
+      <dd class="detail-value"><%= @product.category_id %></dd>
+    </dl>
+  </div>
 </void-card>
 
-<void-button tag="a" href="<%= edit_product_path(@product) %>" variant="outline">Edit</void-button>
-<void-button tag="a" href="<%= products_path %>" variant="ghost">Back</void-button>
-<%= button_to "Delete", @product, method: :delete, data: { turbo_confirm: "Are you sure?" }, is: "void-button", variant: "ghost", color: "error" %>
+<div class="back-link-wrapper">
+  <void-button variant="ghost" size="sm"><a href="<%= products_path %>">&#x2190; Back to products</a></void-button>
+</div>
+
+<void-dialog id="delete-dialog" heading="Delete product" size="sm">
+  <p class="danger-zone-description">
+    Are you sure you want to delete <strong><%= @product.name %></strong>? This action cannot be undone.
+  </p>
+  <div class="action-bar">
+    <void-button variant="ghost" size="sm" onclick="document.getElementById('delete-dialog').open = false">Cancel</void-button>
+    <void-button color="error" size="sm"><a href="<%= url_for(@product) %>" data-turbo-method="delete">Delete</a></void-button>
+  </div>
+</void-dialog>
