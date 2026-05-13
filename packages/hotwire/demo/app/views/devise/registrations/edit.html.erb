@@ -1,33 +1,37 @@
-<h1>Edit account</h1>
+<void-card>
+  <h2>Edit account</h2>
 
-<%= form_for(resource, as: resource_name, url: registration_path(resource_name), html: { method: :put }) do |f| %>
-  <%= render "devise/shared/error_messages", resource: resource %>
+  <%= form_for(resource, as: resource_name, url: registration_path(resource_name), html: { method: :put }) do |f| %>
+    <%= render "devise/shared/error_messages", resource: resource %>
 
-  <void-field label="Email">
-    <void-input type="email" name="<%= resource_name %>[email]" value="<%= resource.email %>" autofocus autocomplete="email"></void-input>
-  </void-field>
+    <void-field label="Email">
+      <void-input type="email" name="<%= resource_name %>[email]" value="<%= resource.email %>" autofocus autocomplete="email"></void-input>
+    </void-field>
 
-  <% if devise_mapping.confirmable? && resource.pending_reconfirmation? %>
-    <void-alert>Currently waiting confirmation for: <%= resource.unconfirmed_email %></void-alert>
+    <% if devise_mapping.confirmable? && resource.pending_reconfirmation? %>
+      <void-alert>Currently waiting confirmation for: <%= resource.unconfirmed_email %></void-alert>
+    <% end %>
+
+    <void-field label="New password">
+      <void-input type="password" name="<%= resource_name %>[password]" autocomplete="new-password"></void-input>
+    </void-field>
+
+    <void-field label="Confirm new password">
+      <void-input type="password" name="<%= resource_name %>[password_confirmation]" autocomplete="new-password"></void-input>
+    </void-field>
+
+    <void-field label="Current password" required>
+      <void-input type="password" name="<%= resource_name %>[current_password]" autocomplete="current-password"></void-input>
+    </void-field>
+
+    <div>
+      <void-button type="submit" color="success">Update</void-button>
+    </div>
   <% end %>
+</void-card>
 
-  <void-field label="New password">
-    <void-input type="password" name="<%= resource_name %>[password]" autocomplete="new-password"></void-input>
-  </void-field>
-
-  <void-field label="Confirm new password">
-    <void-input type="password" name="<%= resource_name %>[password_confirmation]" autocomplete="new-password"></void-input>
-  </void-field>
-
-  <void-field label="Current password" required>
-    <void-input type="password" name="<%= resource_name %>[current_password]" autocomplete="current-password"></void-input>
-  </void-field>
-
-  <div>
-    <void-button type="submit" color="success">Update</void-button>
-  </div>
-<% end %>
-
-<h2>Cancel my account</h2>
-
-<%= button_to "Cancel my account", registration_path(resource_name), method: :delete, data: { turbo_confirm: "Are you sure?" }, is: "void-button", color: "error", variant: "ghost" %>
+<void-card>
+  <h3>Cancel my account</h3>
+  <p>This action is irreversible.</p>
+  <%= button_to "Cancel my account", registration_path(resource_name), method: :delete, data: { turbo_confirm: "Are you sure?" }, is: "void-button", color: "error", variant: "ghost" %>
+</void-card>
