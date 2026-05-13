@@ -1,3 +1,10 @@
+void-pagination {
+  --tone: var(--void-color-accent);
+  --tone-subtle: color-mix(in srgb, var(--tone) 14%, transparent);
+  --tone-border: color-mix(in srgb, var(--tone) 36%, transparent);
+  --tone-hover: color-mix(in srgb, var(--tone) 22%, transparent);
+}
+
 void-pagination nav {
   display: flex;
   align-items: center;
@@ -26,7 +33,7 @@ void-pagination nav {
 }
 
 .void-pagination-btn:hover:not(:disabled) {
-  background: var(--void-color-bg-hover);
+  background: var(--tone-hover);
 }
 
 .void-pagination-btn:focus-visible {
@@ -35,9 +42,9 @@ void-pagination nav {
 }
 
 .void-pagination-btn[aria-current="page"] {
-  background: var(--void-color-accent);
-  color: var(--void-color-text-on-accent);
-  border-color: var(--void-color-accent);
+  background: var(--tone-subtle);
+  color: var(--void-color-text);
+  border-color: var(--tone-border);
   cursor: default;
 }
 
