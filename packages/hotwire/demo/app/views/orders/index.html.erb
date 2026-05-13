@@ -1,0 +1,61 @@
+<% content_for :title, "Orders" %>
+<% content_for :subtitle, "Manage your orders" %>
+<% content_for :header_actions do %>
+  <void-button color="success" size="sm"><a href="<%= new_order_path %>">New order</a></void-button>
+<% end %>
+
+<% if notice.present? %>
+  <void-alert color="success" dismissible class="flash-alert"><%= notice %></void-alert>
+<% end %>
+
+<div class="table-section">
+  <div class="table-section-header">
+    <span class="table-section-title">All Orders</span>
+    <span class="table-section-count"><%= @orders.size %> orders</span>
+  </div>
+
+  <void-table hoverable>
+    <table>
+      <thead>
+        <tr>
+          <th>Customer name</th>
+          <th>Total</th>
+          <th>Status</th>
+          <th>Shipped</th>
+          <th>Notes</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if @orders.any? %>
+          <% @orders.each do |order| %>
+            <tr>
+              <td><%= order.customer_name %></td>
+              <td><%= order.total %></td>
+              <td><%= order.status %></td>
+              <td>
+                <void-badge color="<%= order.shipped ? 'success' : 'default' %>" variant="outline"><%= order.shipped ? 'Yes' : 'No' %></void-badge>
+              </td>
+              <td><%= order.notes %></td>
+              <td class="table-cell-right">
+                <void-dropdown-menu position="bottom-end">
+                  <void-button variant="ghost" size="sm">&#x22EF;</void-button>
+                  <void-dropdown-menu-item><a href="<%= url_for(order) %>">Show</a></void-dropdown-menu-item>
+                  <void-dropdown-menu-item><a href="<%= edit_order_path(order) %>">Edit</a></void-dropdown-menu-item>
+                  <hr>
+                  <void-dropdown-menu-item destructive><a href="<%= url_for(order) %>" data-turbo-method="delete" data-turbo-confirm="Are you sure?">Delete</a></void-dropdown-menu-item>
+                </void-dropdown-menu>
+              </td>
+            </tr>
+          <% end %>
+        <% else %>
+          <tr>
+            <td colspan="6" class="table-empty">
+              No orders found. Create your first one to get started.
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </void-table>
+</div>

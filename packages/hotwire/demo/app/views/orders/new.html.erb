@@ -1,0 +1,10 @@
+<% content_for :title, "New order" %>
+
+<div class="page-header">
+  <p class="page-breadcrumb">
+    <%= link_to "Orders", orders_path %> / New
+  </p>
+  <h1 class="page-title">New order</h1>
+</div>
+
+<%= render "form", order: @order %>

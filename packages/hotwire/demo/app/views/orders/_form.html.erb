@@ -1,0 +1,37 @@
+<%= form_with(model: order) do |form| %>
+  <% if order.errors.any? %>
+    <void-alert color="error" class="form-errors">
+      <strong><%= pluralize(order.errors.count, "error") %> prohibited this order from being saved:</strong>
+      <ul class="form-error-list">
+        <% order.errors.each do |error| %>
+          <li><%= error.full_message %></li>
+        <% end %>
+      </ul>
+    </void-alert>
+  <% end %>
+
+  <void-card>
+    <div class="form-body">
+      <void-field label="Customer name">
+        <void-input name="order[customer_name]" value="<%= order.customer_name %>"></void-input>
+      </void-field>
+      <void-field label="Total">
+        <void-number-input name="order[total]" value="<%= order.total %>" step="any"></void-number-input>
+      </void-field>
+      <void-field label="Status">
+        <void-input name="order[status]" value="<%= order.status %>"></void-input>
+      </void-field>
+      <void-field label="Shipped">
+        <void-switch name="order[shipped]" <%= "checked" if order.shipped %>></void-switch>
+      </void-field>
+      <void-field label="Notes">
+        <void-textarea name="order[notes]"><%= order.notes %></void-textarea>
+      </void-field>
+
+      <div class="form-actions">
+        <void-button type="submit" color="success"><%= order.persisted? ? "Update order" : "Create order" %></void-button>
+        <void-button variant="ghost"><a href="<%= orders_path %>">Back</a></void-button>
+      </div>
+    </div>
+  </void-card>
+<% end %>

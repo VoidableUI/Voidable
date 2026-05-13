@@ -1,0 +1,54 @@
+<% content_for :title, @order.customer_name.to_s %>
+
+<% if notice.present? %>
+  <void-alert color="success" dismissible class="flash-alert"><%= notice %></void-alert>
+<% end %>
+
+<div class="page-header">
+  <p class="page-breadcrumb">
+    <%= link_to "Orders", orders_path %> / <%= @order.customer_name %>
+  </p>
+  <div class="page-title-row">
+    <h1 class="page-title"><%= @order.customer_name %></h1>
+    <void-dropdown-menu position="bottom-end">
+      <void-button variant="outline" size="sm">Actions</void-button>
+      <void-dropdown-menu-item><a href="<%= edit_order_path(@order) %>">Edit</a></void-dropdown-menu-item>
+      <hr>
+      <void-dropdown-menu-item destructive onclick="document.getElementById('delete-dialog').open = true">Delete</void-dropdown-menu-item>
+    </void-dropdown-menu>
+  </div>
+</div>
+
+<void-card>
+  <div class="detail-card-body">
+    <p class="detail-section-label">Details</p>
+    <dl class="detail-grid">
+      <dt class="detail-label">Customer name</dt>
+      <dd class="detail-value"><%= @order.customer_name %></dd>
+      <dt class="detail-label">Total</dt>
+      <dd class="detail-value-mono"><%= @order.total %></dd>
+      <dt class="detail-label">Status</dt>
+      <dd class="detail-value"><%= @order.status %></dd>
+      <dt class="detail-label">Shipped</dt>
+      <dd class="detail-value">
+        <void-badge color="<%= @order.shipped ? 'success' : 'default' %>" variant="outline"><%= @order.shipped ? 'Yes' : 'No' %></void-badge>
+      </dd>
+      <dt class="detail-label">Notes</dt>
+      <dd class="detail-value"><%= @order.notes %></dd>
+    </dl>
+  </div>
+</void-card>
+
+<div class="back-link-wrapper">
+  <void-button variant="ghost" size="sm"><a href="<%= orders_path %>">&#x2190; Back to orders</a></void-button>
+</div>
+
+<void-dialog id="delete-dialog" heading="Delete order" size="sm">
+  <p class="danger-zone-description">
+    Are you sure you want to delete this order? This action cannot be undone.
+  </p>
+  <div class="action-bar">
+    <void-button variant="ghost" size="sm" onclick="document.getElementById('delete-dialog').open = false">Cancel</void-button>
+    <void-button color="error" size="sm"><a href="<%= url_for(@order) %>" data-turbo-method="delete">Delete</a></void-button>
+  </div>
+</void-dialog>
