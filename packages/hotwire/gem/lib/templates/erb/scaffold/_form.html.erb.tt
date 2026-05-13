@@ -1,8 +1,8 @@
 <%%= form_with(model: <%= model_resource_name %>) do |form| %>
   <%% if <%= singular_table_name %>.errors.any? %>
-    <void-alert color="error">
+    <void-alert color="error" style="margin-bottom: var(--void-space-4);">
       <strong><%%= pluralize(<%= singular_table_name %>.errors.count, "error") %> prohibited this <%= singular_table_name %> from being saved:</strong>
-      <ul>
+      <ul style="margin: var(--void-space-2) 0 0 var(--void-space-4); padding: 0;">
         <%% <%= singular_table_name %>.errors.each do |error| %>
           <li><%%= error.full_message %></li>
         <%% end %>
@@ -11,68 +11,70 @@
   <%% end %>
 
   <void-card>
+    <div style="padding: var(--void-space-5); display: flex; flex-direction: column; gap: var(--void-space-4);">
 <% attributes.each do |attribute| -%>
 <% if attribute.password_digest? -%>
-    <void-field label="Password" required>
-      <void-input type="password" name="<%= singular_table_name %>[password]" autocomplete="new-password"></void-input>
-    </void-field>
+      <void-field label="Password" required>
+        <void-input type="password" name="<%= singular_table_name %>[password]" autocomplete="new-password"></void-input>
+      </void-field>
 
-    <void-field label="Password confirmation" required>
-      <void-input type="password" name="<%= singular_table_name %>[password_confirmation]" autocomplete="new-password"></void-input>
-    </void-field>
+      <void-field label="Password confirmation" required>
+        <void-input type="password" name="<%= singular_table_name %>[password_confirmation]" autocomplete="new-password"></void-input>
+      </void-field>
 <% elsif attribute.attachments? -%>
-    <void-field label="<%= attribute.human_name %>">
-      <%%= form.<%= attribute.field_type %> :<%= attribute.column_name %>, multiple: true %>
-    </void-field>
+      <void-field label="<%= attribute.human_name %>">
+        <%%= form.<%= attribute.field_type %> :<%= attribute.column_name %>, multiple: true %>
+      </void-field>
 <% elsif attribute.attachment? -%>
-    <void-field label="<%= attribute.human_name %>">
-      <%%= form.<%= attribute.field_type %> :<%= attribute.column_name %> %>
-    </void-field>
+      <void-field label="<%= attribute.human_name %>">
+        <%%= form.<%= attribute.field_type %> :<%= attribute.column_name %> %>
+      </void-field>
 <% elsif attribute.type == :text -%>
-    <void-field label="<%= attribute.human_name %>">
-      <void-textarea name="<%= singular_table_name %>[<%= attribute.column_name %>]"><%%= <%= singular_table_name %>.<%= attribute.column_name %> %></void-textarea>
-    </void-field>
+      <void-field label="<%= attribute.human_name %>">
+        <void-textarea name="<%= singular_table_name %>[<%= attribute.column_name %>]"><%%= <%= singular_table_name %>.<%= attribute.column_name %> %></void-textarea>
+      </void-field>
 <% elsif attribute.type == :integer -%>
-    <void-field label="<%= attribute.human_name %>">
-      <void-number-input name="<%= singular_table_name %>[<%= attribute.column_name %>]" value="<%%= <%= singular_table_name %>.<%= attribute.column_name %> %>"></void-number-input>
-    </void-field>
+      <void-field label="<%= attribute.human_name %>">
+        <void-number-input name="<%= singular_table_name %>[<%= attribute.column_name %>]" value="<%%= <%= singular_table_name %>.<%= attribute.column_name %> %>"></void-number-input>
+      </void-field>
 <% elsif attribute.type == :float || attribute.type == :decimal -%>
-    <void-field label="<%= attribute.human_name %>">
-      <void-number-input name="<%= singular_table_name %>[<%= attribute.column_name %>]" value="<%%= <%= singular_table_name %>.<%= attribute.column_name %> %>" step="any"></void-number-input>
-    </void-field>
+      <void-field label="<%= attribute.human_name %>">
+        <void-number-input name="<%= singular_table_name %>[<%= attribute.column_name %>]" value="<%%= <%= singular_table_name %>.<%= attribute.column_name %> %>" step="any"></void-number-input>
+      </void-field>
 <% elsif attribute.type == :boolean -%>
-    <void-field label="<%= attribute.human_name %>">
-      <void-switch name="<%= singular_table_name %>[<%= attribute.column_name %>]" <%%= "checked" if <%= singular_table_name %>.<%= attribute.column_name %> %>></void-switch>
-    </void-field>
+      <void-field label="<%= attribute.human_name %>">
+        <void-switch name="<%= singular_table_name %>[<%= attribute.column_name %>]" <%%= "checked" if <%= singular_table_name %>.<%= attribute.column_name %> %>></void-switch>
+      </void-field>
 <% elsif attribute.type == :date -%>
-    <void-field label="<%= attribute.human_name %>">
-      <void-date-picker name="<%= singular_table_name %>[<%= attribute.column_name %>]" value="<%%= <%= singular_table_name %>.<%= attribute.column_name %> %>"></void-date-picker>
-    </void-field>
+      <void-field label="<%= attribute.human_name %>">
+        <void-date-picker name="<%= singular_table_name %>[<%= attribute.column_name %>]" value="<%%= <%= singular_table_name %>.<%= attribute.column_name %> %>"></void-date-picker>
+      </void-field>
 <% elsif attribute.type == :datetime -%>
-    <void-field label="<%= attribute.human_name %>">
-      <void-input type="datetime-local" name="<%= singular_table_name %>[<%= attribute.column_name %>]" value="<%%= <%= singular_table_name %>.<%= attribute.column_name %>&.strftime('%Y-%m-%dT%H:%M') %>"></void-input>
-    </void-field>
+      <void-field label="<%= attribute.human_name %>">
+        <void-input type="datetime-local" name="<%= singular_table_name %>[<%= attribute.column_name %>]" value="<%%= <%= singular_table_name %>.<%= attribute.column_name %>&.strftime('%Y-%m-%dT%H:%M') %>"></void-input>
+      </void-field>
 <% elsif attribute.type == :time -%>
-    <void-field label="<%= attribute.human_name %>">
-      <void-input type="time" name="<%= singular_table_name %>[<%= attribute.column_name %>]" value="<%%= <%= singular_table_name %>.<%= attribute.column_name %>&.strftime('%H:%M') %>"></void-input>
-    </void-field>
+      <void-field label="<%= attribute.human_name %>">
+        <void-input type="time" name="<%= singular_table_name %>[<%= attribute.column_name %>]" value="<%%= <%= singular_table_name %>.<%= attribute.column_name %>&.strftime('%H:%M') %>"></void-input>
+      </void-field>
 <% elsif attribute.reference? -%>
-    <void-field label="<%= attribute.human_name %>">
-      <void-select name="<%= singular_table_name %>[<%= attribute.column_name %>]">
-        <option value="">Select...</option>
-        <%%= options_from_collection_for_select(<%= attribute.column_name.chomp("_id").classify %>.all, :id, :name, <%= singular_table_name %>.<%= attribute.column_name %>) %>
-      </void-select>
-    </void-field>
+      <void-field label="<%= attribute.human_name %>">
+        <void-select name="<%= singular_table_name %>[<%= attribute.column_name %>]">
+          <option value="">Select...</option>
+          <%%= options_from_collection_for_select(<%= attribute.column_name.chomp("_id").classify %>.all, :id, :name, <%= singular_table_name %>.<%= attribute.column_name %>) %>
+        </void-select>
+      </void-field>
 <% else -%>
-    <void-field label="<%= attribute.human_name %>">
-      <void-input name="<%= singular_table_name %>[<%= attribute.column_name %>]" value="<%%= <%= singular_table_name %>.<%= attribute.column_name %> %>"></void-input>
-    </void-field>
+      <void-field label="<%= attribute.human_name %>">
+        <void-input name="<%= singular_table_name %>[<%= attribute.column_name %>]" value="<%%= <%= singular_table_name %>.<%= attribute.column_name %> %>"></void-input>
+      </void-field>
 <% end -%>
 <% end -%>
-  </void-card>
 
-  <div>
-    <void-button type="submit" color="success"><%%= <%= singular_table_name %>.persisted? ? "Update <%= human_name.downcase %>" : "Create <%= human_name.downcase %>" %></void-button>
-    <void-button tag="a" href="<%%= <%= index_helper(type: :path) %> %>" variant="ghost">Back</void-button>
-  </div>
+      <div style="display: flex; gap: var(--void-space-2); align-items: center; padding-top: var(--void-space-2);">
+        <void-button type="submit" color="success"><%%= <%= singular_table_name %>.persisted? ? "Update <%= human_name.downcase %>" : "Create <%= human_name.downcase %>" %></void-button>
+        <void-button variant="ghost"><a href="<%%= <%= index_helper(type: :path) %> %>">Back</a></void-button>
+      </div>
+    </div>
+  </void-card>
 <%% end %>

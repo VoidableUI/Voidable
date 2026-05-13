@@ -1,8 +1,26 @@
+<% display_column = attributes.reject(&:password_digest?).first&.column_name || 'id' -%>
 <%% content_for :title, "Editing <%= human_name.downcase %>" %>
 
-<h1>Editing <%= human_name.downcase %></h1>
+<div style="margin-bottom: var(--void-space-5);">
+  <p style="font-family: var(--void-font-mono); font-size: var(--void-text-xs); color: var(--void-color-text-muted); margin: 0 0 var(--void-space-2) 0;">
+    <%%= link_to "<%= human_name.pluralize %>", <%= index_helper(type: :path) %>, style: "color: inherit;" %> / <%%= @<%= singular_table_name %>.<%= display_column %> %> / Edit
+  </p>
+  <h1 style="margin: 0; font-family: var(--void-font-sans); color: var(--void-color-text);">Edit <%= human_name.downcase %></h1>
+</div>
 
 <%%= render "form", <%= singular_table_name %>: @<%= singular_table_name %> %>
 
-<void-button tag="a" href="<%%= url_for(<%= model_resource_name(prefix: "@") %>) %>" variant="ghost">Show</void-button>
-<void-button tag="a" href="<%%= <%= index_helper(type: :path) %> %>" variant="ghost">Back to <%= human_name.pluralize.downcase %></void-button>
+<div style="margin-top: var(--void-space-5); padding: var(--void-space-4); border: 1px solid var(--void-color-border); border-radius: var(--void-radius-md);">
+  <p style="font-family: var(--void-font-sans); font-size: var(--void-text-xs); font-weight: var(--void-weight-semibold); color: var(--void-color-text-muted); text-transform: uppercase; letter-spacing: 0.06em; margin: 0 0 var(--void-space-3) 0;">Danger zone</p>
+  <void-button variant="outline" color="error" size="sm" onclick="document.getElementById('delete-dialog').open = true">Delete this <%= human_name.downcase %></void-button>
+</div>
+
+<void-dialog id="delete-dialog" heading="Delete <%= human_name.downcase %>" size="sm">
+  <p style="font-family: var(--void-font-sans); font-size: var(--void-text-sm); color: var(--void-color-text); margin: 0 0 var(--void-space-4) 0;">
+    Are you sure you want to delete <strong><%%= @<%= singular_table_name %>.<%= display_column %> %></strong>? This action cannot be undone.
+  </p>
+  <div style="display: flex; gap: var(--void-space-2); justify-content: flex-end;">
+    <void-button variant="ghost" size="sm" onclick="document.getElementById('delete-dialog').open = false">Cancel</void-button>
+    <void-button color="error" size="sm"><a href="<%%= url_for(<%= model_resource_name(prefix: "@") %>) %>" data-turbo-method="delete">Delete</a></void-button>
+  </div>
+</void-dialog>
