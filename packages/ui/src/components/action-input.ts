@@ -8,12 +8,15 @@ export class VoidActionInput extends VoidElement {
   @property({ type: String, reflect: true }) placeholder = '';
   @property({ type: Boolean, reflect: true }) disabled = false;
   @property({ type: Boolean, reflect: true }) readonly = false;
+  @property({ type: String, reflect: true }) name = '';
+  @property({ type: String, reflect: true }) autocomplete = '';
   @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' = 'md';
   @property({ type: String, reflect: true }) color: 'default' | 'error' | 'warning' | 'success' | 'info' | 'notice' = 'default';
   @property({ type: String, reflect: true }) type: 'text' | 'password' = 'text';
   @property({ type: String, reflect: true }) icon: string = 'search';
   @property({ type: String, attribute: 'action-label' }) actionLabel = 'Action';
   @property({ type: String, reflect: true }) position: 'left' | 'right' = 'right';
+  @property({ type: String, reflect: true, attribute: 'tooltip-position' }) tooltipPosition: 'top' | 'bottom' | 'left' | 'right' = 'top';
 
   private _renderIcon() {
     switch (this.icon) {
@@ -59,7 +62,7 @@ export class VoidActionInput extends VoidElement {
 
   render() {
     const btn = html`
-      <void-tooltip text=${this.actionLabel} position="top">
+      <void-tooltip text=${this.actionLabel} position=${this.tooltipPosition}>
         <button
           class="void-action-input-btn"
           type="button"
@@ -79,6 +82,8 @@ export class VoidActionInput extends VoidElement {
         placeholder=${this.placeholder}
         ?disabled=${this.disabled}
         ?readonly=${this.readonly}
+        name=${this.name}
+        autocomplete=${this.autocomplete}
         aria-label=${this.actionLabel}
         @input=${this._onInput}
         @change=${this._onChange}
