@@ -51,7 +51,7 @@ jobs:
           default_bump: false
           release_branches: master
           tag_prefix: theme-v
-          paths: packages/theme/**
+          paths: packages/theme/**,.github/workflows/release-theme.yml
 
       - name: Check if new tag was created
         id: check_tag

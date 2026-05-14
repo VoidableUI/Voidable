@@ -58,7 +58,7 @@ jobs:
           default_bump: false
           release_branches: master
           tag_prefix: ui-hotwire-v
-          paths: packages/hotwire/**
+          paths: packages/hotwire/**,.github/workflows/release-ui-hotwire.yml
 
       - name: Check if new tag was created
         id: check_tag
@@ -97,6 +97,8 @@ jobs:
           pnpm --filter @voidable/ui build
           cd packages/hotwire
           npm pkg set version="$VERSION"
+          UI_VERSION=$(node -p "require('../ui/package.json').version")
+          sed -i "s|\"workspace:\*\"|\"^$UI_VERSION\"|g" package.json
           pnpm run build
           npm publish --provenance --access public
           npm pack

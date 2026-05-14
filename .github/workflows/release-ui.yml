@@ -56,7 +56,7 @@ jobs:
           default_bump: false
           release_branches: master
           tag_prefix: ui-v
-          paths: packages/ui/**
+          paths: packages/ui/**,.github/workflows/release-ui.yml
 
       - name: Check if new tag was created
         id: check_tag

@@ -57,7 +57,7 @@ jobs:
           default_bump: false
           release_branches: master
           tag_prefix: ui-alpine-v
-          paths: packages/alpine/**
+          paths: packages/alpine/**,.github/workflows/release-ui-alpine.yml
 
       - name: Check if new tag was created
         id: check_tag

@@ -51,7 +51,7 @@ jobs:
           default_bump: false
           release_branches: master
           tag_prefix: composer-alpine-v
-          paths: packages/alpine/laravel/**
+          paths: packages/alpine/laravel/**,.github/workflows/release-composer-alpine.yml
 
       - name: Check if new tag was created
         id: check_tag

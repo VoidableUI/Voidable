@@ -53,7 +53,7 @@ jobs:
           default_bump: false
           release_branches: master
           tag_prefix: hex-liveview-v
-          paths: packages/liveview/hex/**
+          paths: packages/liveview/hex/**,.github/workflows/release-hex-liveview.yml
 
       - name: Check if new tag was created
         id: check_tag

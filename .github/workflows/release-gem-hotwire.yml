@@ -50,7 +50,7 @@ jobs:
           default_bump: false
           release_branches: master
           tag_prefix: gem-hotwire-v
-          paths: packages/hotwire/gem/**
+          paths: packages/hotwire/gem/**,.github/workflows/release-gem-hotwire.yml
 
       - name: Check if new tag was created
         id: check_tag
