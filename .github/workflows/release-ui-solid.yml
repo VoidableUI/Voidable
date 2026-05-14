@@ -7,6 +7,7 @@ on:
     branches: [master]
     paths:
       - 'packages/solid/**'
+      - '.github/workflows/release-ui-solid.yml'
 
 permissions:
   contents: write

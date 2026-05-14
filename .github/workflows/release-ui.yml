@@ -7,6 +7,7 @@ on:
     branches: [master]
     paths:
       - 'packages/ui/**'
+      - '.github/workflows/release-ui.yml'
 
 permissions:
   contents: write

@@ -8,6 +8,7 @@ on:
     paths:
       - 'packages/alpine/**'
       - '!packages/alpine/laravel/**'
+      - '.github/workflows/release-ui-alpine.yml'
 
 permissions:
   contents: write

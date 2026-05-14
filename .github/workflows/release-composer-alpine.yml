@@ -7,6 +7,7 @@ on:
     branches: [master]
     paths:
       - 'packages/alpine/laravel/**'
+      - '.github/workflows/release-composer-alpine.yml'
 
 permissions:
   contents: write

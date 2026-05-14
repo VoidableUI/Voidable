@@ -8,6 +8,7 @@ on:
     paths:
       - 'packages/hotwire/**'
       - '!packages/hotwire/gem/**'
+      - '.github/workflows/release-ui-hotwire.yml'
 
 permissions:
   contents: write

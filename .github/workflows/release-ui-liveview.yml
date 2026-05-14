@@ -8,6 +8,7 @@ on:
     paths:
       - 'packages/liveview/**'
       - '!packages/liveview/hex/**'
+      - '.github/workflows/release-ui-liveview.yml'
 
 permissions:
   contents: write
