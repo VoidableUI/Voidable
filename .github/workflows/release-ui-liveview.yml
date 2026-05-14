@@ -96,7 +96,7 @@ jobs:
           pnpm install
           cd packages/liveview
           npm pkg set version="$VERSION"
-          UI_VERSION=$(node -p "require('../ui/package.json').version")
+          UI_VERSION=$(npm view @voidable/ui version)
           sed -i "s|\"workspace:\*\"|\"^$UI_VERSION\"|g" package.json
           pnpm run build
           npm publish --provenance --access public
