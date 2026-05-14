@@ -6,7 +6,7 @@ export default defineConfig({
     lib: {
       entry: 'src/index.ts',
       formats: ['es'],
-      fileName: 'hotwire',
+      fileName: 'index',
     },
     rollupOptions: {
       external: [/^@hotwired\//, '@voidable/ui'],
