@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title><%= content_for(:title) || "Demo Vite" %></title>
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+    <%= yield :head %>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.44.0/dist/tabler-icons.min.css">
+    <link rel="stylesheet" href="<%= vite_asset_path('application.css') %>" data-turbo-track="reload">
+    <script type="module" src="<%= vite_asset_path('application.js') %>" data-turbo-track="reload"></script>
+
+  </head>
+
+  <body>
+    <nav class="app-nav">
+      <div class="app-nav-inner">
+        <a href="/" class="app-nav-brand">Demo Vite</a>
+        <div class="app-nav-right">
+          <span class="app-nav-auth">
+            <% if defined?(Devise) && user_signed_in? %>
+              <span><%= current_user.email %></span>
+            <% elsif defined?(Devise) %>
+              <a href="<%= new_user_session_path %>">Sign in</a>
+            <% end %>
+          </span>
+          <%= render "layouts/settings_menu", popover_position: "bottom", layout_toggle: true, layout_toggle_icon: "layout-sidebar-left-collapse", layout_toggle_label: "Switch to sidebar" %>
+          <% if defined?(Devise) && user_signed_in? %>
+            <void-button variant="ghost" size="sm"><a href="<%= destroy_user_session_path %>" data-turbo-method="delete">Sign out</a></void-button>
+          <% end %>
+        </div>
+      </div>
+    </nav>
+
+    <main class="app-main">
+      <div class="app-content-header">
+        <div class="app-content-header-left">
+          <span class="app-content-header-breadcrumb"><%= content_for(:breadcrumb) || content_for(:title) || "Demo Vite" %></span>
+          <% if content_for?(:subtitle) %>
+            <span class="app-content-header-subtitle"><%= content_for(:subtitle) %></span>
+          <% end %>
+        </div>
+        <div class="app-content-header-right">
+          <void-action-input icon="search" placeholder="Search..." size="sm" tooltip-position="bottom" class="app-content-header-search"></void-action-input>
+          <%= content_for(:header_actions) %>
+        </div>
+      </div>
+      <div class="app-content-body">
+        <% if notice.present? %>
+          <div class="flash-messages">
+            <void-alert color="success" dismissible><%= notice %></void-alert>
+          </div>
+        <% end %>
+        <% if alert.present? %>
+          <div class="flash-messages">
+            <void-alert color="error" dismissible><%= alert %></void-alert>
+          </div>
+        <% end %>
+
+        <%= yield %>
+      </div>
+    </main>
+
+
+  </body>
+</html>

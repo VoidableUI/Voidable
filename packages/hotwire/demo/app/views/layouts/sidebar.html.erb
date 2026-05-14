@@ -7,12 +7,14 @@
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
     <%= yield :head %>
+
     <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
-    <%= stylesheet_link_tag "voidable-theme", "data-turbo-track": "reload" %>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@voidable/theme@0.5.1/src/index.css" data-turbo-track="reload">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.44.0/dist/tabler-icons.min.css">
     <%= stylesheet_link_tag "voidable-layout-sidebar", "data-turbo-track": "reload" %>
     <%= stylesheet_link_tag "voidable-devise", "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
+
   </head>
 
   <body>
@@ -31,12 +33,6 @@
             <div class="sidebar-nav-label">Main</div>
             <div class="sidebar-nav-item">
               <%= link_to "Dashboard", root_path %>
-            </div>
-            <div class="sidebar-nav-item">
-              <%= link_to "Products", products_path %>
-            </div>
-            <div class="sidebar-nav-item">
-              <%= link_to "Orders", orders_path %>
             </div>
           </div>
 
@@ -66,7 +62,7 @@
             <% end %>
           </div>
           <div class="app-content-header-right">
-            <void-action-input icon="search" placeholder="Search…" size="sm" tooltip-position="bottom" class="app-content-header-search"></void-action-input>
+            <void-action-input icon="search" placeholder="Search..." size="sm" tooltip-position="bottom" class="app-content-header-search"></void-action-input>
             <%= content_for(:header_actions) %>
           </div>
         </div>
@@ -87,6 +83,8 @@
       </main>
     </div>
 
+
     <%= javascript_include_tag "voidable-layout", "data-turbo-track": "reload" %>
+
   </body>
 </html>

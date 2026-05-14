@@ -43,6 +43,231 @@ app.register('void-event', VoidEventController);
 VoidTurbo.start();
 ```
 
+## Setting up Vite with Rails
+
+This guide walks through replacing the default Rails asset pipeline (Propshaft + importmap) with plain Vite managed via npm. No additional gems are required — Vite builds assets to `public/` and Rails serves them as static files.
+
+Start with a standard Rails 8 app:
+
+```bash
+rails new myapp --database=sqlite3
+cd myapp
+```
+
+### Step 1: Remove Propshaft, importmap, and stimulus-rails
+
+Remove the gems that Vite replaces from your `Gemfile`:
+
+```ruby
+# Remove these lines:
+gem "propshaft"
+gem "importmap-rails"
+gem "stimulus-rails"
+```
+
+Run `bundle install` to update the lockfile.
+
+Delete the importmap config and binary:
+
+```bash
+rm config/importmap.rb
+rm bin/importmap
+```
+
+Remove the Propshaft assets initializer:
+
+```bash
+rm config/initializers/assets.rb
+```
+
+Remove the `config.assets.quiet = true` line from `config/environments/development.rb` — it relies on Propshaft which is no longer present.
+
+Remove the `stale_when_importmap_changes` line from `app/controllers/application_controller.rb` — it's an importmap-rails feature.
+
+### Step 2: Create package.json
+
+Initialize a `package.json` in your Rails root and install Vite along with Hotwire and Voidable packages:
+
+```bash
+npm init -y
+npm install vite @hotwired/turbo-rails @hotwired/stimulus
+npm install @voidable/ui @voidable/theme @voidable/ui-hotwire
+```
+
+### Step 3: Configure Vite
+
+Create `vite.config.ts` in your Rails root:
+
+```ts
+import { defineConfig } from "vite";
+
+export default defineConfig({
+  root: "app/javascript",
+  build: {
+    outDir: "../../public/assets",
+    assetsDir: ".",
+    emptyOutDir: true,
+    manifest: true,
+    rollupOptions: {
+      input: "app/javascript/application.js",
+    },
+  },
+  server: {
+    origin: "http://localhost:5173",
+  },
+});
+```
+
+Key points:
+- `root` points at `app/javascript` where your source lives
+- `build.outDir` outputs to `public/assets/` so Rails serves them as static files
+- `assetsDir: "."` prevents Vite from nesting output in an extra `assets/` subdirectory
+- `manifest: true` generates a `manifest.json` for fingerprinted asset lookup
+- `server.origin` ensures HMR assets reference the Vite dev server in development
+
+### Step 4: Rewrite application.js
+
+Replace the importmap-style `app/javascript/application.js` with ES imports:
+
+```js
+import "@hotwired/turbo-rails";
+import { Application } from "@hotwired/stimulus";
+import "@voidable/ui";
+import "@voidable/ui-hotwire";
+import { VoidEventController } from "@voidable/ui-hotwire";
+import { VoidTurbo } from "@voidable/ui-hotwire";
+
+const app = Application.start();
+app.register("void-event", VoidEventController);
+VoidTurbo.start();
+```
+
+Delete the importmap controller loader since Vite handles module resolution:
+
+```bash
+rm app/javascript/controllers/index.js
+```
+
+Update `app/javascript/controllers/application.js` to remove the `stimulus-loading` import (it's an importmap-only package):
+
+```js
+import { Application } from "@hotwired/stimulus";
+
+const application = Application.start();
+application.debug = false;
+window.Stimulus = application;
+
+export { application };
+```
+
+### Step 5: Update the layout
+
+Replace the Propshaft and importmap tags in `app/views/layouts/application.html.erb`:
+
+```diff
+- <%# Includes all stylesheet files in app/assets/stylesheets %>
+- <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
+- <%= javascript_importmap_tags %>
++ <link rel="stylesheet" href="/assets/application.css" data-turbo-track="reload">
++ <script type="module" src="/assets/application.js" data-turbo-track="reload"></script>
+```
+
+In production, reference the fingerprinted filenames from the Vite manifest. A minimal helper:
+
+```ruby
+# app/helpers/vite_helper.rb
+module ViteHelper
+  def vite_asset_path(name)
+    manifest_path = Rails.root.join("public/assets/.vite/manifest.json")
+    if File.exist?(manifest_path)
+      manifest = JSON.parse(File.read(manifest_path))
+      entry = manifest[name]
+      return "/assets/#{entry['file']}" if entry
+
+      if name.end_with?(".css")
+        manifest.each_value do |e|
+          next unless e["css"]
+          css_file = e["css"].find { |f| f.start_with?(File.basename(name, ".css")) }
+          return "/assets/#{css_file}" if css_file
+        end
+      end
+    end
+    "/assets/#{name}"
+  end
+end
+```
+
+Vite extracts CSS imported from JavaScript into separate files, but these don't appear as top-level keys in the manifest — they're nested under the importing JS entry's `css` array. The fallback search handles this by scanning all entries for a matching CSS filename.
+
+Then in your layout:
+
+```erb
+<link rel="stylesheet" href="<%= vite_asset_path('application.css') %>" data-turbo-track="reload">
+<script type="module" src="<%= vite_asset_path('application.js') %>" data-turbo-track="reload"></script>
+```
+
+### Step 6: Add CSS entry point
+
+Create `app/javascript/application.css` (or import your styles from `application.js`):
+
+```css
+@import "@voidable/theme";
+```
+
+Or import it from your JS entry point:
+
+```js
+import "@voidable/theme";
+```
+
+### Step 7: Add scripts to package.json
+
+Add build and dev scripts to your `package.json`:
+
+```json
+{
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build"
+  }
+}
+```
+
+### Step 8: Update bin/dev
+
+Update your `Procfile.dev` (or create one) to run both Rails and Vite in development:
+
+```procfile
+web: bin/rails server -p 3000
+vite: npm run dev
+```
+
+If you use `bin/dev` with `foreman`:
+
+```bash
+gem install foreman
+```
+
+Then `bin/dev` starts both servers.
+
+### Step 9: Add public/assets to .gitignore
+
+Vite's build output is generated — don't commit it:
+
+```gitignore
+/public/assets
+```
+
+### Production build
+
+Run `npm run build` before deploying. This generates fingerprinted files in `public/assets/` with a `.vite/manifest.json` for asset lookup.
+
+In your `Dockerfile`, add the Vite build step:
+
+```dockerfile
+RUN npm install && npm run build
+```
+
 ## Install generator
 
 After adding the gem, run the install generator to scaffold a complete application layout with theme, importmap pins, and JS imports:

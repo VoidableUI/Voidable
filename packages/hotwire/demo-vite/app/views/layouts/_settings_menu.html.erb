@@ -1,0 +1,31 @@
+<void-popover position="<%= local_assigns[:popover_position] || 'top' %>" id="settings-popover">
+  <button class="settings-btn" aria-label="View Settings" title="View Settings">
+    <i class="ti ti-settings"></i>
+  </button>
+  <div class="settings-menu">
+    <% if defined?(Devise) && user_signed_in? %>
+      <div class="settings-menu-item">
+        <a href="<%= edit_user_registration_path %>" class="settings-menu-action">
+          <i class="ti ti-user"></i>
+          Profile
+        </a>
+      </div>
+    <% end %>
+    <label class="settings-menu-item">
+      <i class="ti ti-moon"></i>
+      <span>Dark mode</span>
+      <void-switch id="theme-toggle" size="sm" aria-label="Toggle theme"></void-switch>
+    </label>
+    <% if local_assigns[:layout_toggle] %>
+      <div class="settings-menu-item">
+        <form action="/toggle_layout" method="post" class="settings-menu-form">
+          <input type="hidden" name="authenticity_token" value="<%= form_authenticity_token %>">
+          <button type="submit" class="settings-menu-action">
+            <i class="ti ti-<%= local_assigns[:layout_toggle_icon] %>"></i>
+            <%= local_assigns[:layout_toggle_label] %>
+          </button>
+        </form>
+      </div>
+    <% end %>
+  </div>
+</void-popover>

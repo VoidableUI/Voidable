@@ -1,0 +1,50 @@
+<div class="devise-container devise-container--wide">
+  <void-card>
+    <div class="devise-card-body">
+      <h1 class="devise-heading">Account settings</h1>
+
+      <%= form_for(resource, as: resource_name, url: registration_path(resource_name), html: { method: :put, class: "devise-form" }) do |f| %>
+        <%= render "devise/shared/error_messages", resource: resource %>
+
+        <void-field label="Email">
+          <void-input type="email" name="<%= resource_name %>[email]" value="<%= resource.email %>" autofocus autocomplete="email"></void-input>
+        </void-field>
+
+        <% if devise_mapping.confirmable? && resource.pending_reconfirmation? %>
+          <void-alert>Currently waiting confirmation for: <%= resource.unconfirmed_email %></void-alert>
+        <% end %>
+
+        <void-field label="New password" helper="Leave blank if you don't want to change it">
+          <void-action-input type="password" name="<%= resource_name %>[password]" icon="eye" action-label="Toggle visibility" autocomplete="new-password"></void-action-input>
+        </void-field>
+
+        <void-field label="Confirm new password">
+          <void-action-input type="password" name="<%= resource_name %>[password_confirmation]" icon="eye" action-label="Toggle visibility" autocomplete="new-password"></void-action-input>
+        </void-field>
+
+        <void-field label="Current password" helper="We need your current password to confirm changes">
+          <void-action-input type="password" name="<%= resource_name %>[current_password]" icon="eye" action-label="Toggle visibility" autocomplete="current-password"></void-action-input>
+        </void-field>
+
+        <div class="devise-submit">
+          <void-button type="submit" color="success" class="devise-btn-full">Update</void-button>
+        </div>
+      <% end %>
+    </div>
+  </void-card>
+
+  <div class="danger-zone">
+    <p class="devise-danger-label">Danger zone</p>
+    <void-button variant="outline" color="error" size="sm" onclick="document.getElementById('delete-dialog').open = true">Delete my account</void-button>
+  </div>
+
+  <void-dialog id="delete-dialog" heading="Delete account" size="sm">
+    <p class="danger-zone-description">
+      Are you sure you want to delete your account? This action cannot be undone.
+    </p>
+    <div class="action-bar">
+      <void-button variant="ghost" size="sm" onclick="document.getElementById('delete-dialog').open = false">Cancel</void-button>
+      <void-button color="error" size="sm"><a href="<%= registration_path(resource_name) %>" data-turbo-method="delete">Delete</a></void-button>
+    </div>
+  </void-dialog>
+</div>
