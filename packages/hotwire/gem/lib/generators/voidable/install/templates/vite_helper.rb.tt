@@ -1,0 +1,11 @@
+module ViteHelper
+  def vite_asset_path(name)
+    if Rails.env.production? && File.exist?(Rails.root.join("public/assets/.vite/manifest.json"))
+      manifest = JSON.parse(File.read(Rails.root.join("public/assets/.vite/manifest.json")))
+      entry = manifest[name]
+      "/assets/#{entry['file']}" if entry
+    else
+      "/assets/#{name}"
+    end
+  end
+end

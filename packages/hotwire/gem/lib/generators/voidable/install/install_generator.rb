@@ -6,12 +6,15 @@ module Voidable
 
       class_option :layout, type: :string, default: "topbar", enum: ["topbar", "sidebar", "switching"],
         desc: "Application layout style (topbar, sidebar, or switching)"
+      class_option :asset_pipeline, type: :string, default: "importmap", enum: ["importmap", "vite"],
+        desc: "Asset pipeline (importmap or vite)"
 
       def create_initializer
         template "initializer.rb.tt", "config/initializers/voidable.rb"
       end
 
       def pin_packages
+        return if vite?
         importmap = "config/importmap.rb"
         return unless File.exist?(importmap)
         return if File.read(importmap).include?("@voidable/ui")
@@ -41,26 +44,41 @@ module Voidable
       end
 
       def create_layout_assets
-        copy_file "voidable-layout.js", "app/assets/javascripts/voidable-layout.js"
-        copy_file "voidable-devise.css", "app/assets/stylesheets/voidable-devise.css"
+        if vite?
+          copy_file "voidable-layout.js", "app/javascript/voidable-layout.js"
+          copy_file "voidable-devise.css", "app/javascript/voidable-devise.css"
 
-        assets_init = "config/initializers/assets.rb"
-        if File.exist?(assets_init) && !File.read(assets_init).include?("javascripts")
-          append_to_file assets_init, <<~RUBY
-
-            # Voidable layout scripts
-            Rails.application.config.assets.paths << Rails.root.join("app/assets/javascripts")
-          RUBY
-        end
-
-        case options[:layout]
-        when "sidebar"
-          copy_file "voidable-layout-sidebar.css", "app/assets/stylesheets/voidable-layout.css", force: true
-        when "switching"
-          copy_file "voidable-layout-topbar.css", "app/assets/stylesheets/voidable-layout-topbar.css"
-          copy_file "voidable-layout-sidebar.css", "app/assets/stylesheets/voidable-layout-sidebar.css"
+          case options[:layout]
+          when "sidebar"
+            copy_file "voidable-layout-sidebar.css", "app/javascript/voidable-layout.css", force: true
+          when "switching"
+            copy_file "voidable-layout-topbar.css", "app/javascript/voidable-layout-topbar.css"
+            copy_file "voidable-layout-sidebar.css", "app/javascript/voidable-layout-sidebar.css"
+          else
+            copy_file "voidable-layout-topbar.css", "app/javascript/voidable-layout.css", force: true
+          end
         else
-          copy_file "voidable-layout-topbar.css", "app/assets/stylesheets/voidable-layout.css", force: true
+          copy_file "voidable-layout.js", "app/assets/javascripts/voidable-layout.js"
+          copy_file "voidable-devise.css", "app/assets/stylesheets/voidable-devise.css"
+
+          assets_init = "config/initializers/assets.rb"
+          if File.exist?(assets_init) && !File.read(assets_init).include?("javascripts")
+            append_to_file assets_init, <<~RUBY
+
+              # Voidable layout scripts
+              Rails.application.config.assets.paths << Rails.root.join("app/assets/javascripts")
+            RUBY
+          end
+
+          case options[:layout]
+          when "sidebar"
+            copy_file "voidable-layout-sidebar.css", "app/assets/stylesheets/voidable-layout.css", force: true
+          when "switching"
+            copy_file "voidable-layout-topbar.css", "app/assets/stylesheets/voidable-layout-topbar.css"
+            copy_file "voidable-layout-sidebar.css", "app/assets/stylesheets/voidable-layout-sidebar.css"
+          else
+            copy_file "voidable-layout-topbar.css", "app/assets/stylesheets/voidable-layout.css", force: true
+          end
         end
         say "Created Voidable layout assets", :green
       end
@@ -91,13 +109,32 @@ module Voidable
         return unless File.exist?(js_entrypoint)
         return if File.read(js_entrypoint).include?("@voidable/ui")
         prepend_to_file js_entrypoint, "import \"@voidable/ui\";\nimport \"@voidable/ui-hotwire\";\n\n"
+        if vite?
+          append_to_file js_entrypoint, <<~JS
+
+            import "@voidable/theme";
+            import "./voidable-layout.css";
+            import "./voidable-devise.css";
+            import "./voidable-layout.js";
+          JS
+        end
         say "Added Voidable imports to application.js", :green
+      end
+
+      def create_vite_helper
+        return unless vite?
+        template "vite_helper.rb.tt", "app/helpers/vite_helper.rb"
+        say "Created ViteHelper for asset path resolution", :green
       end
 
       private
 
       def app_name
         Rails.application.class.module_parent_name.underscore
+      end
+
+      def vite?
+        options[:asset_pipeline] == "vite"
       end
 
       public

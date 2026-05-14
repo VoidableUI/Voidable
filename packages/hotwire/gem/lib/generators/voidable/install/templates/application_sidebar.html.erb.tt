@@ -7,12 +7,18 @@
     <%%= csrf_meta_tags %>
     <%%= csp_meta_tag %>
     <%%= yield :head %>
+<% if vite? %>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.44.0/dist/tabler-icons.min.css">
+    <link rel="stylesheet" href="<%%= vite_asset_path('application.css') %>" data-turbo-track="reload">
+    <script type="module" src="<%%= vite_asset_path('application.js') %>" data-turbo-track="reload"></script>
+<% else %>
     <%%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
     <%%= stylesheet_link_tag "voidable-theme", "data-turbo-track": "reload" %>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.44.0/dist/tabler-icons.min.css">
     <%%= stylesheet_link_tag "voidable-layout", "data-turbo-track": "reload" %>
     <%%= stylesheet_link_tag "voidable-devise", "data-turbo-track": "reload" %>
     <%%= javascript_importmap_tags %>
+<% end %>
   </head>
 
   <body>
@@ -81,6 +87,8 @@
       </main>
     </div>
 
+<% unless vite? %>
     <%%= javascript_include_tag "voidable-layout", "data-turbo-track": "reload" %>
+<% end %>
   </body>
 </html>
