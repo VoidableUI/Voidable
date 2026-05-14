@@ -107,16 +107,25 @@ module Voidable
       def add_js_import
         js_entrypoint = "app/javascript/application.js"
         return unless File.exist?(js_entrypoint)
-        return if File.read(js_entrypoint).include?("@voidable/ui")
-        prepend_to_file js_entrypoint, "import \"@voidable/ui\";\nimport \"@voidable/ui-hotwire\";\n\n"
-        if vite?
-          append_to_file js_entrypoint, <<~JS
+        contents = File.read(js_entrypoint)
+        unless contents.include?("@voidable/ui")
+          prepend_to_file js_entrypoint, "import \"@voidable/ui\";\nimport \"@voidable/ui-hotwire\";\n\n"
+        end
+        if vite? && !contents.include?("voidable-layout.js")
+          css_imports = %w[./application.css]
+          case options[:layout]
+          when "switching"
+            css_imports << "./voidable-layout-topbar.css"
+            css_imports << "./voidable-layout-sidebar.css"
+          else
+            css_imports << "./voidable-layout.css"
+          end
+          css_imports << "./voidable-devise.css"
 
-            import "@voidable/theme";
-            import "./voidable-layout.css";
-            import "./voidable-devise.css";
-            import "./voidable-layout.js";
-          JS
+          imports = css_imports.map { |f| "import \"#{f}\";" }.join("\n")
+          imports += "\nimport \"@voidable/theme\";"
+          imports += "\nimport \"./voidable-layout.js\";"
+          append_to_file js_entrypoint, "\n#{imports}\n"
         end
         say "Added Voidable imports to application.js", :green
       end
