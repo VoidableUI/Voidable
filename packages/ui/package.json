@@ -8,8 +8,27 @@
       "types": "./dist/index.d.ts",
       "development": "./src/index.ts",
       "default": "./dist/index.js"
+    },
+    "./base": {
+      "types": "./dist/base.d.ts",
+      "development": "./src/base.ts",
+      "default": "./dist/base.js"
+    },
+    "./components/*": {
+      "types": "./dist/components/*.d.ts",
+      "development": "./src/components/*.ts",
+      "default": "./dist/components/*.js"
+    },
+    "./*": {
+      "types": "./dist/components/*.d.ts",
+      "development": "./src/components/*.ts",
+      "default": "./dist/components/*.js"
     }
   },
+  "sideEffects": [
+    "./dist/index.js",
+    "./dist/components/*.js"
+  ],
   "files": ["dist"],
   "scripts": {
     "build": "vite build",
