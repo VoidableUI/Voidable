@@ -9,6 +9,9 @@ html {
 body {
   min-height: 100dvh;
   line-height: var(--void-leading-normal);
+}
+
+body:has(.app-shell) {
   display: flex;
 }
 
@@ -205,7 +208,7 @@ a { color: inherit; text-decoration: none; }
   margin-left: auto;
 }
 
-.sidebar-footer void-popover .void-popover-body {
+.sidebar-footer void-popover[position="top"] .void-popover-body {
   left: auto;
   right: 0;
 }
@@ -273,8 +276,8 @@ a { color: inherit; text-decoration: none; }
   display: contents;
 }
 
-/* Main content area */
-.app-main {
+/* Main content area (sidebar-specific overrides scoped under .app-shell for switching-layout compat) */
+.app-shell > .app-main {
   flex: 1;
   min-width: 0;
   display: flex;
@@ -291,6 +294,9 @@ a { color: inherit; text-decoration: none; }
   border-bottom: 1px solid var(--void-color-border);
   background: var(--void-color-bg-secondary);
   flex-shrink: 0;
+}
+
+.app-shell .app-content-header {
   position: sticky;
   top: 0;
   z-index: 10;
@@ -326,10 +332,13 @@ a { color: inherit; text-decoration: none; }
 
 .app-content-body {
   flex: 1;
+  overflow-y: auto;
+}
+
+.app-shell .app-content-body {
   display: flex;
   flex-direction: column;
   overflow-x: hidden;
-  overflow-y: auto;
   padding: var(--void-space-6);
 }
 
