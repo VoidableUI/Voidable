@@ -8,9 +8,9 @@
     "test": "test"
   },
   "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "vite",
-    "build": "vite build",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "vite build"
   },
   "keywords": [],
   "author": "",
@@ -19,9 +19,9 @@
   "dependencies": {
     "@hotwired/stimulus": "^3.2.2",
     "@hotwired/turbo-rails": "^8.0.23",
-    "@voidable/theme": "^0.5.1",
-    "@voidable/ui": "^0.5.2",
-    "@voidable/ui-hotwire": "^0.3.0",
+    "@voidable/theme": "^0.6.0",
+    "@voidable/ui": "^0.5.3",
+    "@voidable/ui-hotwire": "^0.3.1",
     "vite": "^8.0.13"
   }
 }

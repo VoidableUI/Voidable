@@ -1,4 +1,5 @@
 import { defineConfig } from "vite";
+
 export default defineConfig({
   root: "app/javascript",
   build: {
@@ -6,7 +7,11 @@ export default defineConfig({
     assetsDir: ".",
     emptyOutDir: true,
     manifest: true,
-    rollupOptions: { input: "app/javascript/application.js" },
+    rollupOptions: {
+      input: "app/javascript/application.js",
+    },
   },
-  server: { origin: "http://localhost:5173" },
+  server: {
+    origin: "http://localhost:5173",
+  },
 });

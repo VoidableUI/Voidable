@@ -1,0 +1,132 @@
+<% content_for :title, "Samples" %>
+<% content_for :subtitle, "Manage your samples" %>
+<% content_for :header_actions do %>
+  <void-button color="success" size="sm"><a href="<%= new_sample_path %>">New sample</a></void-button>
+<% end %>
+
+<div class="table-section">
+  <div class="table-section-header">
+    <span class="table-section-title">All Samples</span>
+    <span class="table-section-count"><%= defined?(Pagy) && @pagy ? @pagy.count : @samples.size %> samples</span>
+  </div>
+
+  <void-table hoverable>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Description</th>
+          <th>Count</th>
+          <th>Price</th>
+          <th>Weight</th>
+          <th>Active</th>
+          <th>Published on</th>
+          <th>Scheduled at</th>
+          <th>Opens at</th>
+          <th>Category</th>
+          <th>Avatar</th>
+          <th>Gallery</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if @samples.any? %>
+          <% @samples.each do |sample| %>
+            <tr class="row-clickable" data-href="<%= url_for(sample) %>">
+              <td><%= sample.name %></td>
+              <td><%= sample.description %></td>
+              <td><%= sample.count %></td>
+              <td><%= sample.price %></td>
+              <td><%= sample.weight %></td>
+              <td>
+                <void-badge color="<%= sample.active ? 'success' : 'default' %>" variant="outline"><%= sample.active ? 'Yes' : 'No' %></void-badge>
+              </td>
+              <td><%= sample.published_on %></td>
+              <td><%= sample.scheduled_at %></td>
+              <td><%= sample.opens_at %></td>
+              <td><%= sample.category_id %></td>
+              <td><%= link_to sample.avatar.filename, sample.avatar if sample.avatar.attached? %></td>
+              <td><%= sample.gallery.count %> file(s)</td>
+            </tr>
+          <% end %>
+        <% else %>
+          <tr>
+            <td colspan="12" class="table-empty">
+              No samples found. Create your first one to get started.
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </void-table>
+
+  <% if defined?(Pagy) && @pagy && @pagy.pages > 1 %>
+    <div class="pagination-wrapper">
+      <void-pagination total="<%= @pagy.pages %>" value="<%= @pagy.page %>"></void-pagination>
+    </div>
+  <% end %>
+</div>
+
+<% if @sample %>
+    <% content_for :head do %>
+    <%# void-* components render Light-DOM content that Turbo's snapshot
+        cache captures verbatim; restoring it on back nav would duplicate
+        the dialog body. Skip caching while a modal is open. %>
+    <meta name="turbo-cache-control" content="no-cache">
+  <% end %>
+  <% if @new_mode %>
+    <void-dialog id="resource-modal" open size="md" heading="New sample" data-close-href="<%= samples_path %>">
+      <%= render "form", sample: @sample %>
+    </void-dialog>
+  <% elsif @edit_mode %>
+    <void-dialog id="resource-modal" open size="md" heading="Edit sample" data-close-href="<%= url_for(@sample) %>">
+      <%= render "form", sample: @sample %>
+    </void-dialog>
+  <% else %>
+    <void-dialog id="resource-modal" open size="md" heading="<%= @sample.name.to_s %>" data-close-href="<%= samples_path %>">
+      <dl class="detail-grid">
+        <dt class="detail-label">Name</dt>
+        <dd class="detail-value"><%= @sample.name %></dd>
+        <dt class="detail-label">Description</dt>
+        <dd class="detail-value"><%= @sample.description %></dd>
+        <dt class="detail-label">Count</dt>
+        <dd class="detail-value-mono"><%= @sample.count %></dd>
+        <dt class="detail-label">Price</dt>
+        <dd class="detail-value-mono"><%= @sample.price %></dd>
+        <dt class="detail-label">Weight</dt>
+        <dd class="detail-value-mono"><%= @sample.weight %></dd>
+        <dt class="detail-label">Active</dt>
+        <dd class="detail-value">
+          <void-badge color="<%= @sample.active ? 'success' : 'default' %>" variant="outline"><%= @sample.active ? 'Yes' : 'No' %></void-badge>
+        </dd>
+        <dt class="detail-label">Published on</dt>
+        <dd class="detail-value"><%= @sample.published_on %></dd>
+        <dt class="detail-label">Scheduled at</dt>
+        <dd class="detail-value"><%= @sample.scheduled_at %></dd>
+        <dt class="detail-label">Opens at</dt>
+        <dd class="detail-value"><%= @sample.opens_at %></dd>
+        <dt class="detail-label">Category</dt>
+        <dd class="detail-value"><%= @sample.category_id %></dd>
+        <dt class="detail-label">Avatar</dt>
+        <dd class="detail-value"><%= link_to @sample.avatar.filename, @sample.avatar if @sample.avatar.attached? %></dd>
+        <dt class="detail-label">Gallery</dt>
+        <dd class="detail-value">
+          <% @sample.gallery.each do |gallery| %>
+            <div><%= link_to gallery.filename, gallery %></div>
+          <% end %>
+        </dd>
+      </dl>
+      <div class="modal-actions">
+        <void-button variant="outline" size="sm"><a href="<%= edit_sample_path(@sample) %>">Edit</a></void-button>
+        <void-button color="error" variant="outline" size="sm" data-open-dialog="resource-delete-dialog">Delete</void-button>
+      </div>
+    </void-dialog>
+
+    <void-dialog id="resource-delete-dialog" heading="Delete sample" size="sm">
+      <p class="danger-zone-description">Are you sure you want to delete this sample? This action cannot be undone.</p>
+      <div class="action-bar">
+        <void-button variant="ghost" size="sm" data-close-dialog="resource-delete-dialog">Cancel</void-button>
+        <void-button color="error" size="sm"><a href="<%= url_for(@sample) %>" data-turbo-method="delete">Delete</a></void-button>
+      </div>
+    </void-dialog>
+  <% end %>
+<% end %>

@@ -1,4 +1,5 @@
 class ApplicationController < ActionController::Base
+  include Pagy::Method
 
   layout :resolve_layout
 

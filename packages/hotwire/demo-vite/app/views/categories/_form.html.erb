@@ -1,0 +1,25 @@
+<%= form_with(model: category) do |form| %>
+  <% if category.errors.any? %>
+    <void-alert color="error" class="form-errors">
+      <strong><%= pluralize(category.errors.count, "error") %> prohibited this category from being saved:</strong>
+      <ul class="form-error-list">
+        <% category.errors.each do |error| %>
+          <li><%= error.full_message %></li>
+        <% end %>
+      </ul>
+    </void-alert>
+  <% end %>
+
+  <div class="form-content">
+      <void-field label="Name">
+        <void-input name="category[name]" value="<%= category.name %>"></void-input>
+      </void-field>
+
+      <hr class="form-divider">
+
+      <div class="form-actions">
+        <void-button type="submit" color="success"><%= category.persisted? ? "Update category" : "Create category" %></void-button>
+        <void-button variant="ghost"><a href="<%= categories_path %>">Back</a></void-button>
+      </div>
+  </div>
+<% end %>

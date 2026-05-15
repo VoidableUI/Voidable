@@ -35,7 +35,7 @@
 
   <div class="danger-zone">
     <p class="devise-danger-label">Danger zone</p>
-    <void-button variant="outline" color="error" size="sm" onclick="document.getElementById('delete-dialog').open = true">Delete my account</void-button>
+    <void-button variant="outline" color="error" size="sm" data-open-dialog="delete-dialog">Delete my account</void-button>
   </div>
 
   <void-dialog id="delete-dialog" heading="Delete account" size="sm">
@@ -43,7 +43,7 @@
       Are you sure you want to delete your account? This action cannot be undone.
     </p>
     <div class="action-bar">
-      <void-button variant="ghost" size="sm" onclick="document.getElementById('delete-dialog').open = false">Cancel</void-button>
+      <void-button variant="ghost" size="sm" data-close-dialog="delete-dialog">Cancel</void-button>
       <void-button color="error" size="sm"><a href="<%= registration_path(resource_name) %>" data-turbo-method="delete">Delete</a></void-button>
     </div>
   </void-dialog>

@@ -7,5 +7,5 @@ pin "@hotwired/stimulus-loading", to: "stimulus-loading.js"
 pin_all_from "app/javascript/controllers", under: "controllers"
 
 # Voidable UI
-pin "@voidable/ui", to: "https://cdn.jsdelivr.net/npm/@voidable/ui@0.5.2/+esm"
-pin "@voidable/ui-hotwire", to: "https://cdn.jsdelivr.net/npm/@voidable/ui-hotwire@0.3.0/dist/index.js"
+pin "@voidable/ui", to: "https://cdn.jsdelivr.net/npm/@voidable/ui@0.5.3/+esm"
+pin "@voidable/ui-hotwire", to: "https://cdn.jsdelivr.net/npm/@voidable/ui-hotwire@0.3.1/dist/index.js"

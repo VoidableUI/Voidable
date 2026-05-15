@@ -1,0 +1,80 @@
+<% content_for :title, "Categories" %>
+<% content_for :subtitle, "Manage your categories" %>
+<% content_for :header_actions do %>
+  <void-button color="success" size="sm"><a href="<%= new_category_path %>">New category</a></void-button>
+<% end %>
+
+<div class="table-section">
+  <div class="table-section-header">
+    <span class="table-section-title">All Categories</span>
+    <span class="table-section-count"><%= defined?(Pagy) && @pagy ? @pagy.count : @categories.size %> categories</span>
+  </div>
+
+  <void-table hoverable>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if @categories.any? %>
+          <% @categories.each do |category| %>
+            <tr class="row-clickable" data-href="<%= url_for(category) %>">
+              <td><%= category.name %></td>
+            </tr>
+          <% end %>
+        <% else %>
+          <tr>
+            <td colspan="1" class="table-empty">
+              No categories found. Create your first one to get started.
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </void-table>
+
+  <% if defined?(Pagy) && @pagy && @pagy.pages > 1 %>
+    <div class="pagination-wrapper">
+      <void-pagination total="<%= @pagy.pages %>" value="<%= @pagy.page %>"></void-pagination>
+    </div>
+  <% end %>
+</div>
+
+<% if @category %>
+    <% content_for :head do %>
+    <%# void-* components render Light-DOM content that Turbo's snapshot
+        cache captures verbatim; restoring it on back nav would duplicate
+        the dialog body. Skip caching while a modal is open. %>
+    <meta name="turbo-cache-control" content="no-cache">
+  <% end %>
+  <% if @new_mode %>
+    <void-dialog id="resource-modal" open size="md" heading="New category" data-close-href="<%= categories_path %>">
+      <%= render "form", category: @category %>
+    </void-dialog>
+  <% elsif @edit_mode %>
+    <void-dialog id="resource-modal" open size="md" heading="Edit category" data-close-href="<%= url_for(@category) %>">
+      <%= render "form", category: @category %>
+    </void-dialog>
+  <% else %>
+    <void-dialog id="resource-modal" open size="md" heading="<%= @category.name.to_s %>" data-close-href="<%= categories_path %>">
+      <dl class="detail-grid">
+        <dt class="detail-label">Name</dt>
+        <dd class="detail-value"><%= @category.name %></dd>
+      </dl>
+      <div class="modal-actions">
+        <void-button variant="outline" size="sm"><a href="<%= edit_category_path(@category) %>">Edit</a></void-button>
+        <void-button color="error" variant="outline" size="sm" data-open-dialog="resource-delete-dialog">Delete</void-button>
+      </div>
+    </void-dialog>
+
+    <void-dialog id="resource-delete-dialog" heading="Delete category" size="sm">
+      <p class="danger-zone-description">Are you sure you want to delete this category? This action cannot be undone.</p>
+      <div class="action-bar">
+        <void-button variant="ghost" size="sm" data-close-dialog="resource-delete-dialog">Cancel</void-button>
+        <void-button color="error" size="sm"><a href="<%= url_for(@category) %>" data-turbo-method="delete">Delete</a></void-button>
+      </div>
+    </void-dialog>
+  <% end %>
+<% end %>

@@ -1,0 +1,61 @@
+<%= form_with(model: sample) do |form| %>
+  <% if sample.errors.any? %>
+    <void-alert color="error" class="form-errors">
+      <strong><%= pluralize(sample.errors.count, "error") %> prohibited this sample from being saved:</strong>
+      <ul class="form-error-list">
+        <% sample.errors.each do |error| %>
+          <li><%= error.full_message %></li>
+        <% end %>
+      </ul>
+    </void-alert>
+  <% end %>
+
+  <div class="form-content">
+      <void-field label="Name">
+        <void-input name="sample[name]" value="<%= sample.name %>"></void-input>
+      </void-field>
+      <void-field label="Description">
+        <void-textarea name="sample[description]"><%= sample.description %></void-textarea>
+      </void-field>
+      <void-field label="Count">
+        <void-number-input name="sample[count]" value="<%= sample.count %>"></void-number-input>
+      </void-field>
+      <void-field label="Price">
+        <void-number-input name="sample[price]" value="<%= sample.price %>" step="any"></void-number-input>
+      </void-field>
+      <void-field label="Weight">
+        <void-number-input name="sample[weight]" value="<%= sample.weight %>" step="any"></void-number-input>
+      </void-field>
+      <void-field label="Active">
+        <void-switch name="sample[active]" <%= "checked" if sample.active %>></void-switch>
+      </void-field>
+      <void-field label="Published on">
+        <void-date-picker name="sample[published_on]" value="<%= sample.published_on %>"></void-date-picker>
+      </void-field>
+      <void-field label="Scheduled at">
+        <void-input type="datetime-local" name="sample[scheduled_at]" value="<%= sample.scheduled_at&.strftime('%Y-%m-%dT%H:%M') %>"></void-input>
+      </void-field>
+      <void-field label="Opens at">
+        <void-input type="time" name="sample[opens_at]" value="<%= sample.opens_at&.strftime('%H:%M') %>"></void-input>
+      </void-field>
+      <void-field label="Category">
+        <void-select name="sample[category_id]">
+          <option value="">Select...</option>
+          <%= options_from_collection_for_select(Category.all, :id, :name, sample.category_id) %>
+        </void-select>
+      </void-field>
+      <void-field label="Avatar">
+        <%= form.file_field :avatar %>
+      </void-field>
+      <void-field label="Gallery">
+        <%= form.file_field :gallery, multiple: true %>
+      </void-field>
+
+      <hr class="form-divider">
+
+      <div class="form-actions">
+        <void-button type="submit" color="success"><%= sample.persisted? ? "Update sample" : "Create sample" %></void-button>
+        <void-button variant="ghost"><a href="<%= samples_path %>">Back</a></void-button>
+      </div>
+  </div>
+<% end %>

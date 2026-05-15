@@ -4,6 +4,7 @@ import "@voidable/ui";
 import "@voidable/ui-hotwire";
 import { VoidEventController } from "@voidable/ui-hotwire";
 import { VoidTurbo } from "@voidable/ui-hotwire";
+
 const app = Application.start();
 app.register("void-event", VoidEventController);
 VoidTurbo.start();

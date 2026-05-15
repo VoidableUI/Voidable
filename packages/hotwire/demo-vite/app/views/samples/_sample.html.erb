@@ -1,0 +1,64 @@
+<div id="<%= dom_id sample %>">
+  <div>
+    <strong>Name:</strong>
+    <%= sample.name %>
+  </div>
+
+  <div>
+    <strong>Description:</strong>
+    <%= sample.description %>
+  </div>
+
+  <div>
+    <strong>Count:</strong>
+    <%= sample.count %>
+  </div>
+
+  <div>
+    <strong>Price:</strong>
+    <%= sample.price %>
+  </div>
+
+  <div>
+    <strong>Weight:</strong>
+    <%= sample.weight %>
+  </div>
+
+  <div>
+    <strong>Active:</strong>
+    <%= sample.active %>
+  </div>
+
+  <div>
+    <strong>Published on:</strong>
+    <%= sample.published_on %>
+  </div>
+
+  <div>
+    <strong>Scheduled at:</strong>
+    <%= sample.scheduled_at %>
+  </div>
+
+  <div>
+    <strong>Opens at:</strong>
+    <%= sample.opens_at %>
+  </div>
+
+  <div>
+    <strong>Category:</strong>
+    <%= sample.category_id %>
+  </div>
+
+  <div>
+    <strong>Avatar:</strong>
+    <%= link_to sample.avatar.filename, sample.avatar if sample.avatar.attached? %>
+  </div>
+
+  <div>
+    <strong>Gallery:</strong>
+    <% sample.gallery.each do |gallery| %>
+      <div><%= link_to gallery.filename, gallery %></div>
+    <% end %>
+  </div>
+
+</div>

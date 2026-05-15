@@ -9,7 +9,7 @@
     <%= yield :head %>
 
     <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@voidable/theme@0.5.1/src/index.css" data-turbo-track="reload">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@voidable/theme@0.6.0/src/index.css" data-turbo-track="reload">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.44.0/dist/tabler-icons.min.css">
     <%= stylesheet_link_tag "voidable-layout", "data-turbo-track": "reload" %>
     <%= stylesheet_link_tag "voidable-devise", "data-turbo-track": "reload" %>
@@ -22,49 +22,50 @@
       <div class="app-nav-inner">
         <a href="/" class="app-nav-brand">Demo</a>
         <div class="app-nav-right">
-          <span class="app-nav-auth">
-            <% if defined?(Devise) && user_signed_in? %>
-              <span><%= current_user.email %></span>
-            <% elsif defined?(Devise) %>
-              <a href="<%= new_user_session_path %>">Sign in</a>
-            <% end %>
-          </span>
+          <% if defined?(Devise) && user_signed_in? %>
+            <span class="app-nav-auth"><%= current_user.email %></span>
+          <% end %>
           <%= render "layouts/settings_menu", popover_position: "bottom" %>
           <% if defined?(Devise) && user_signed_in? %>
             <void-button variant="ghost" size="sm"><a href="<%= destroy_user_session_path %>" data-turbo-method="delete">Sign out</a></void-button>
+          <% elsif defined?(Devise) %>
+            <void-button variant="ghost" size="sm"><a href="<%= new_user_session_path %>">Sign in</a></void-button>
           <% end %>
         </div>
       </div>
     </nav>
 
-    <main class="app-main">
-      <div class="app-content-header">
+    <div class="app-content-header">
+      <div class="app-content-header-inner">
         <div class="app-content-header-left">
-          <span class="app-content-header-breadcrumb"><%= content_for(:breadcrumb) || content_for(:title) || "Demo" %></span>
+          <span class="app-content-header-breadcrumb"><%= content_for(:breadcrumb) || content_for(:title) %></span>
           <% if content_for?(:subtitle) %>
             <span class="app-content-header-subtitle"><%= content_for(:subtitle) %></span>
           <% end %>
         </div>
         <div class="app-content-header-right">
-          <void-action-input icon="search" placeholder="Search..." size="sm" tooltip-position="bottom" class="app-content-header-search"></void-action-input>
+          <% unless defined?(Devise) && devise_controller? %>
+            <void-action-input icon="search" placeholder="Search..." size="sm" tooltip-position="bottom" class="app-content-header-search"></void-action-input>
+          <% end %>
           <%= content_for(:header_actions) %>
         </div>
       </div>
-      <div class="app-content-body">
-        <% if notice.present? %>
-          <div class="flash-messages">
-            <void-alert color="success" dismissible><%= notice %></void-alert>
-          </div>
-        <% end %>
-        <% if alert.present? %>
-          <div class="flash-messages">
-            <void-alert color="error" dismissible><%= alert %></void-alert>
-          </div>
-        <% end %>
+    </div>
 
+    <main class="app-main">
+      <div class="app-content-body">
         <%= yield %>
       </div>
     </main>
+
+    <void-toast-container position="bottom-right">
+      <% if notice.present? %>
+        <void-toast color="success" duration="20000" dismissable><%= notice %></void-toast>
+      <% end %>
+      <% if alert.present? %>
+        <void-toast color="caution" duration="20000" dismissable><%= alert %></void-toast>
+      <% end %>
+    </void-toast-container>
 
 
     <%= javascript_include_tag "voidable-layout", "data-turbo-track": "reload" %>
