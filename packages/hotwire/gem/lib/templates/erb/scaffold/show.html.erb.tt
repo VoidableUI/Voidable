@@ -9,10 +9,6 @@
   </void-dropdown-menu>
 <%% end %>
 
-<%% if notice.present? %>
-  <void-alert color="success" dismissible style="margin-bottom: var(--void-space-4);"><%%= notice %></void-alert>
-<%% end %>
-
 <void-card>
   <div style="padding: var(--void-space-5);">
     <p style="font-family: var(--void-font-sans); font-size: var(--void-text-xs); font-weight: var(--void-weight-semibold); color: var(--void-color-text-muted); text-transform: uppercase; letter-spacing: 0.06em; margin: 0 0 var(--void-space-3) 0;">Details</p>

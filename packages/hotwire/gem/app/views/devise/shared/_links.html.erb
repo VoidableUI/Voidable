@@ -1,8 +1,10 @@
-<div class="devise-divider">
-  <div class="devise-divider-line"></div>
-  <span class="devise-divider-text">or</span>
-  <div class="devise-divider-line"></div>
-</div>
+<% if devise_mapping.registerable? %>
+  <div class="devise-divider">
+    <div class="devise-divider-line"></div>
+    <span class="devise-divider-text">or</span>
+    <div class="devise-divider-line"></div>
+  </div>
+<% end %>
 
 <div class="devise-links">
   <%- if controller_name != 'sessions' %>

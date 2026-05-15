@@ -26,34 +26,37 @@
       <div class="app-nav-inner">
         <a href="/" class="app-nav-brand"><%= app_name.titleize %></a>
         <div class="app-nav-right">
-          <span class="app-nav-auth">
-            <%% if defined?(Devise) && user_signed_in? %>
-              <span><%%= current_user.email %></span>
-            <%% elsif defined?(Devise) %>
-              <a href="<%%= new_user_session_path %>">Sign in</a>
-            <%% end %>
-          </span>
+          <%% if defined?(Devise) && user_signed_in? %>
+            <span class="app-nav-auth"><%%= current_user.email %></span>
+          <%% end %>
           <%%= render "layouts/settings_menu", popover_position: "bottom" %>
           <%% if defined?(Devise) && user_signed_in? %>
             <void-button variant="ghost" size="sm"><a href="<%%= destroy_user_session_path %>" data-turbo-method="delete">Sign out</a></void-button>
+          <%% elsif defined?(Devise) %>
+            <void-button variant="ghost" size="sm"><a href="<%%= new_user_session_path %>">Sign in</a></void-button>
           <%% end %>
         </div>
       </div>
     </nav>
 
-    <main class="app-main">
-      <div class="app-content-header">
+    <div class="app-content-header">
+      <div class="app-content-header-inner">
         <div class="app-content-header-left">
-          <span class="app-content-header-breadcrumb"><%%= content_for(:breadcrumb) || content_for(:title) || "<%= app_name.titleize %>" %></span>
+          <span class="app-content-header-breadcrumb"><%%= content_for(:breadcrumb) || content_for(:title) %></span>
           <%% if content_for?(:subtitle) %>
             <span class="app-content-header-subtitle"><%%= content_for(:subtitle) %></span>
           <%% end %>
         </div>
         <div class="app-content-header-right">
-          <void-action-input icon="search" placeholder="Search..." size="sm" tooltip-position="bottom" class="app-content-header-search"></void-action-input>
+          <%% unless defined?(Devise) && devise_controller? %>
+            <void-action-input icon="search" placeholder="Search..." size="sm" tooltip-position="bottom" class="app-content-header-search"></void-action-input>
+          <%% end %>
           <%%= content_for(:header_actions) %>
         </div>
       </div>
+    </div>
+
+    <main class="app-main">
       <div class="app-content-body">
         <%% if notice.present? %>
           <div class="flash-messages">

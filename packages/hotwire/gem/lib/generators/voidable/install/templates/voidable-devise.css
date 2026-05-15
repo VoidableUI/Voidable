@@ -35,3 +35,10 @@
 
 /* Danger zone label (uppercase section heading) */
 .devise-danger-label { font-family: var(--void-font-sans); font-size: var(--void-text-xs); font-weight: var(--void-weight-semibold); color: var(--void-color-text-muted); text-transform: uppercase; letter-spacing: 0.06em; margin: 0 0 var(--void-space-3) 0; }
+
+/* Input fields stand out against the card surface (pure bg vs card's bg-secondary) */
+.devise-container void-input input,
+.devise-container void-action-input,
+.devise-container void-textarea textarea {
+  background: var(--void-color-bg);
+}

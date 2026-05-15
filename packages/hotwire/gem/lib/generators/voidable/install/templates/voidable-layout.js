@@ -8,6 +8,18 @@ document.addEventListener('void-action', (e) => {
   }
 });
 
+// Pagination navigation — translate void-pagination click into URL navigation
+document.addEventListener('void-change', (e) => {
+  if (e.target.tagName !== 'VOID-PAGINATION') return;
+  const url = new URL(window.location.href);
+  url.searchParams.set('page', e.detail.value);
+  if (window.Turbo) {
+    window.Turbo.visit(url.toString());
+  } else {
+    window.location.href = url.toString();
+  }
+});
+
 // Theme toggle
 (function() {
   const html = document.documentElement;

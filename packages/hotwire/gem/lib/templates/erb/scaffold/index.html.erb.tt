@@ -4,14 +4,10 @@
   <void-button color="success" size="sm"><a href="<%%= <%= new_helper(type: :path) %> %>">New <%= human_name.downcase %></a></void-button>
 <%% end %>
 
-<%% if notice.present? %>
-  <void-alert color="success" dismissible class="flash-alert"><%%= notice %></void-alert>
-<%% end %>
-
 <div class="table-section">
   <div class="table-section-header">
     <span class="table-section-title">All <%= human_name.pluralize %></span>
-    <span class="table-section-count"><%%= @<%= plural_table_name %>.size %> <%= human_name.pluralize.downcase %></span>
+    <span class="table-section-count"><%%= defined?(Pagy) && @pagy ? @pagy.count : @<%= plural_table_name %>.size %> <%= human_name.pluralize.downcase %></span>
   </div>
 
   <void-table hoverable>
@@ -62,4 +58,10 @@
       </tbody>
     </table>
   </void-table>
+
+  <%% if defined?(Pagy) && @pagy && @pagy.pages > 1 %>
+    <div class="pagination-wrapper">
+      <void-pagination total="<%%= @pagy.pages %>" value="<%%= @pagy.page %>"></void-pagination>
+    </div>
+  <%% end %>
 </div>

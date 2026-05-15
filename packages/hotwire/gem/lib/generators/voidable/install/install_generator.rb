@@ -153,6 +153,20 @@ module Voidable
         generate "voidable:devise_views"
         say "Installed Voidable-styled Devise views", :green
       end
+
+      def configure_pagy
+        if defined?(Pagy)
+          create_file "config/initializers/pagy.rb", "require \"pagy\"\nrequire \"pagy/toolbox/paginators/method\"\n" unless File.exist?("config/initializers/pagy.rb")
+          inject_into_class "app/controllers/application_controller.rb", "ApplicationController", "  include Pagy::Method\n" unless File.read("app/controllers/application_controller.rb").include?("Pagy::Method")
+          say "Configured Pagy::Method on ApplicationController for scaffold pagination", :green
+        else
+          say "", :yellow
+          say "Voidable scaffolds use Pagy for pagination. To enable:", :yellow
+          say "  bundle add pagy", :yellow
+          say "  rails generate voidable:install   # re-run to wire it up", :yellow
+          say "", :yellow
+        end
+      end
     end
   end
 end
