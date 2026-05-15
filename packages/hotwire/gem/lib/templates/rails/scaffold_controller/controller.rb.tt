@@ -8,16 +8,30 @@ class <%= controller_class_name %>Controller < ApplicationController
   end
 
   # GET <%= route_url %>/1
+  # Renders the index view with the resource modal open so direct URL
+  # navigation lands in the same place as clicking a row on the index.
   def show
+    @pagy, @<%= plural_table_name %> = pagy(<%= orm_class.all(class_name) %>)
+    render :index
   end
 
   # GET <%= route_url %>/new
+  # Renders the index view with the new-resource modal open. @new_mode
+  # tells the template which modal to render.
   def new
+    @pagy, @<%= plural_table_name %> = pagy(<%= orm_class.all(class_name) %>)
     @<%= singular_table_name %> = <%= orm_class.build(class_name) %>
+    @new_mode = true
+    render :index
   end
 
   # GET <%= route_url %>/1/edit
+  # Renders the index view with the edit modal open. @edit_mode tells the
+  # template which modal to render.
   def edit
+    @pagy, @<%= plural_table_name %> = pagy(<%= orm_class.all(class_name) %>)
+    @edit_mode = true
+    render :index
   end
 
   # POST <%= route_url %>
@@ -27,7 +41,9 @@ class <%= controller_class_name %>Controller < ApplicationController
     if @<%= orm_instance.save %>
       redirect_to <%= redirect_resource_name %>, notice: <%= %("#{human_name} was successfully created.") %>
     else
-      render :new, status: <%= ActionDispatch::Constants::UNPROCESSABLE_CONTENT.inspect %>
+      @pagy, @<%= plural_table_name %> = pagy(<%= orm_class.all(class_name) %>)
+      @new_mode = true
+      render :index, status: <%= ActionDispatch::Constants::UNPROCESSABLE_CONTENT.inspect %>
     end
   end
 
@@ -36,7 +52,9 @@ class <%= controller_class_name %>Controller < ApplicationController
     if @<%= orm_instance.update("#{singular_table_name}_params") %>
       redirect_to <%= redirect_resource_name %>, notice: <%= %("#{human_name} was successfully updated.") %>, status: :see_other
     else
-      render :edit, status: <%= ActionDispatch::Constants::UNPROCESSABLE_CONTENT.inspect %>
+      @pagy, @<%= plural_table_name %> = pagy(<%= orm_class.all(class_name) %>)
+      @edit_mode = true
+      render :index, status: <%= ActionDispatch::Constants::UNPROCESSABLE_CONTENT.inspect %>
     end
   end
 

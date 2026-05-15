@@ -10,8 +10,7 @@
     </void-alert>
   <%% end %>
 
-  <void-card>
-    <div style="padding: var(--void-space-5); display: flex; flex-direction: column; gap: var(--void-space-4);">
+  <div style="display: flex; flex-direction: column; gap: var(--void-space-4);">
 <% attributes.each do |attribute| -%>
 <% if attribute.password_digest? -%>
       <void-field label="Password" required>
@@ -71,10 +70,11 @@
 <% end -%>
 <% end -%>
 
-      <div style="display: flex; gap: var(--void-space-2); align-items: center; padding-top: var(--void-space-2);">
+      <div style="margin: 0 calc(-1 * var(--void-space-5)); border-top: 1px solid var(--void-color-border);"></div>
+
+      <div style="display: flex; gap: var(--void-space-2); align-items: center;">
         <void-button type="submit" color="success"><%%= <%= singular_table_name %>.persisted? ? "Update <%= human_name.downcase %>" : "Create <%= human_name.downcase %>" %></void-button>
         <void-button variant="ghost"><a href="<%%= <%= index_helper(type: :path) %> %>">Back</a></void-button>
       </div>
-    </div>
-  </void-card>
+  </div>
 <%% end %>

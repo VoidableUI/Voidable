@@ -20,6 +20,39 @@ document.addEventListener('void-change', (e) => {
   }
 });
 
+// Clickable table rows — navigate to data-href on click. Remember the
+// current URL keyed by the destination so closing the resource modal can
+// return to the exact page (with pagination/filters intact) instead of
+// the parent index path.
+document.addEventListener('click', (e) => {
+  const row = e.target.closest('tr.row-clickable');
+  if (!row) return;
+  const href = row.dataset.href;
+  if (!href) return;
+  sessionStorage.setItem('voidable:return:' + href, window.location.href);
+  if (window.Turbo) {
+    window.Turbo.visit(href);
+  } else {
+    window.location.href = href;
+  }
+});
+
+// Dialog close → if the user came from a row click, navigate back to
+// their saved index URL (Turbo restores the cached snapshot, preserving
+// pagination/scroll). On direct URL nav (no saved return), fall back to
+// the dialog's data-close-href.
+document.addEventListener('void-close', (e) => {
+  if (e.target.tagName !== 'VOID-DIALOG') return;
+  const href = e.target.getAttribute('data-close-href');
+  if (!href) return;
+  const target = sessionStorage.getItem('voidable:return:' + window.location.pathname) || href;
+  if (window.Turbo) {
+    window.Turbo.visit(target);
+  } else {
+    window.location.href = target;
+  }
+});
+
 // Theme toggle
 (function() {
   const html = document.documentElement;

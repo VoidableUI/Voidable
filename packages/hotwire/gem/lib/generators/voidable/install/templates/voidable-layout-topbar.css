@@ -355,6 +355,7 @@ a { color: inherit; text-decoration: none; }
 }
 
 /* Tables */
+.row-clickable { cursor: pointer; }
 .table-cell-right { text-align: right; }
 .table-empty { text-align: center; padding: var(--void-space-6); font-family: var(--void-font-sans); font-size: var(--void-text-sm); color: var(--void-color-text-muted); }
 .pagination-wrapper { display: flex; justify-content: center; margin-top: var(--void-space-4); }

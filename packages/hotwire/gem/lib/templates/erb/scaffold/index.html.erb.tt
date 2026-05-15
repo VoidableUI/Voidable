@@ -17,13 +17,12 @@
 <% attributes.reject(&:password_digest?).each do |attribute| -%>
           <th><%= attribute.human_name %></th>
 <% end -%>
-          <th></th>
         </tr>
       </thead>
       <tbody>
         <%% if @<%= plural_table_name %>.any? %>
           <%% @<%= plural_table_name %>.each do |<%= singular_table_name %>| %>
-            <tr>
+            <tr class="row-clickable" data-href="<%%= url_for(<%= model_resource_name(singular_table_name) %>) %>">
 <% attributes.reject(&:password_digest?).each do |attribute| -%>
 <% if attribute.type == :boolean -%>
               <td>
@@ -37,20 +36,11 @@
               <td><%%= <%= singular_table_name %>.<%= attribute.column_name %> %></td>
 <% end -%>
 <% end -%>
-              <td class="table-cell-right">
-                <void-dropdown-menu position="bottom-end">
-                  <void-button variant="ghost" size="sm">&#x22EF;</void-button>
-                  <void-dropdown-menu-item><a href="<%%= url_for(<%= model_resource_name(singular_table_name) %>) %>">Show</a></void-dropdown-menu-item>
-                  <void-dropdown-menu-item><a href="<%%= <%= edit_helper(singular_table_name, type: :path) %> %>">Edit</a></void-dropdown-menu-item>
-                  <hr>
-                  <void-dropdown-menu-item destructive><a href="<%%= url_for(<%= model_resource_name(singular_table_name) %>) %>" data-turbo-method="delete" data-turbo-confirm="Are you sure?">Delete</a></void-dropdown-menu-item>
-                </void-dropdown-menu>
-              </td>
             </tr>
           <%% end %>
         <%% else %>
           <tr>
-            <td colspan="<%= attributes.reject(&:password_digest?).size + 1 %>" class="table-empty">
+            <td colspan="<%= attributes.reject(&:password_digest?).size %>" class="table-empty">
               No <%= human_name.pluralize.downcase %> found. Create your first one to get started.
             </td>
           </tr>
@@ -65,3 +55,40 @@
     </div>
   <%% end %>
 </div>
+
+<%% if @<%= singular_table_name %> %>
+  <%
+    display_column = attributes.reject(&:password_digest?).first&.column_name || 'id'
+  -%>
+  <%% content_for :head do %>
+    <%%# void-* components render Light-DOM content that Turbo's snapshot
+        cache captures verbatim; restoring it on back nav would duplicate
+        the dialog body. Skip caching while a modal is open. %>
+    <meta name="turbo-cache-control" content="no-cache">
+  <%% end %>
+  <%% if @new_mode %>
+    <void-dialog id="resource-modal" open size="md" heading="New <%= human_name.downcase %>" data-close-href="<%%= <%= index_helper(type: :path) %> %>">
+      <%%= render "form", <%= singular_table_name %>: @<%= singular_table_name %> %>
+    </void-dialog>
+  <%% elsif @edit_mode %>
+    <void-dialog id="resource-modal" open size="md" heading="Edit <%= human_name.downcase %>" data-close-href="<%%= url_for(<%= model_resource_name(prefix: "@") %>) %>">
+      <%%= render "form", <%= singular_table_name %>: @<%= singular_table_name %> %>
+    </void-dialog>
+  <%% else %>
+    <void-dialog id="resource-modal" open size="md" heading="<%%= @<%= singular_table_name %>.<%= display_column %>.to_s %>" data-close-href="<%%= <%= index_helper(type: :path) %> %>">
+      <%%= render "details", <%= singular_table_name %>: @<%= singular_table_name %> %>
+      <div class="action-bar" style="margin-top: var(--void-space-4);">
+        <void-button variant="outline" size="sm"><a href="<%%= <%= edit_helper(type: :path) %> %>">Edit</a></void-button>
+        <void-button color="error" variant="outline" size="sm" onclick="document.getElementById('resource-delete-dialog').open = true">Delete</void-button>
+      </div>
+    </void-dialog>
+
+    <void-dialog id="resource-delete-dialog" heading="Delete <%= human_name.downcase %>" size="sm">
+      <p class="danger-zone-description">Are you sure you want to delete this <%= human_name.downcase %>? This action cannot be undone.</p>
+      <div class="action-bar">
+        <void-button variant="ghost" size="sm" onclick="document.getElementById('resource-delete-dialog').open = false">Cancel</void-button>
+        <void-button color="error" size="sm"><a href="<%%= url_for(<%= model_resource_name(prefix: "@") %>) %>" data-turbo-method="delete">Delete</a></void-button>
+      </div>
+    </void-dialog>
+  <%% end %>
+<%% end %>
