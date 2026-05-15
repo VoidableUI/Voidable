@@ -9,7 +9,7 @@ void-textarea textarea {
   width: 100%;
   resize: var(--void-textarea-resize, vertical);
   padding: var(--void-space-2) var(--void-space-3);
-  background: var(--void-color-bg);
+  background: var(--void-color-bg-secondary);
   border: 1px solid var(--void-color-border);
   border-radius: var(--void-radius-md);
   color: var(--void-color-text);
