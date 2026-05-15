@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+#MISE description="Verify every @voidable/ui component is tree-shake-friendly: subpath export, sideEffects, self-registers, re-exported from index"
+set -euo pipefail
+
+UI_DIR="packages/ui"
+COMPONENTS_DIR="$UI_DIR/src/components"
+PKG_JSON="$UI_DIR/package.json"
+INDEX_TS="$UI_DIR/src/index.ts"
+
+violations=0
+err() { echo "ERROR: $*" >&2; violations=1; }
+
+# 1. package.json must declare wildcard subpath exports for components
+# Expected:
+#   "./components/*": { ... "default": "./dist/components/*.js" }
+#   "./*":            { ... "default": "./dist/components/*.js" }
+node -e "
+  const p = require('./$PKG_JSON');
+  const e = p.exports || {};
+  if (!e['./components/*']) { console.error('missing exports[\"./components/*\"]'); process.exit(1); }
+  if (!e['./*'])            { console.error('missing exports[\"./*\"] wildcard'); process.exit(1); }
+  if (!Array.isArray(p.sideEffects)) { console.error('missing top-level sideEffects array'); process.exit(1); }
+  if (!p.sideEffects.includes('./dist/components/*.js')) {
+    console.error('sideEffects must include \"./dist/components/*.js\"'); process.exit(1);
+  }
+" || violations=1
+
+# 2. Every component file must be re-exported from src/index.ts (bulk-import
+# compatibility) AND must self-register via customElements.define (subpath
+# import sufficiency)
+for file in "$COMPONENTS_DIR"/*.ts; do
+  base=$(basename "$file" .ts)
+
+  if ! grep -qE "from ['\"]\./components/${base}(\.js)?['\"]" "$INDEX_TS"; then
+    err "$base.ts is not re-exported from src/index.ts (bulk import 'import \"@voidable/ui\"' will skip it)"
+  fi
+
+  if ! grep -q 'customElements.define' "$file"; then
+    err "$base.ts does not call customElements.define — subpath import won't register the element"
+  fi
+done
+
+if [[ $violations -eq 0 ]]; then
+  echo "Tree-shake export lint passed: all $(ls "$COMPONENTS_DIR"/*.ts | wc -l) components are properly exported"
+else
+  exit 1
+fi
