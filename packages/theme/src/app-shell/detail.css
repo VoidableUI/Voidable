@@ -1,0 +1,59 @@
+/* Layout primitives for dialog / detail bodies.
+   - .detail-grid: compact horizontal label | value pairs
+   - .info-grid:   spacious vertical-stack 2-col grid */
+
+:root {
+  --void-app-detail-label-width: 10rem;
+}
+
+/* Compact horizontal pairs */
+.detail-grid {
+  display: grid;
+  grid-template-columns: var(--void-app-detail-label-width) 1fr;
+  gap: var(--void-space-3) var(--void-space-4);
+  margin: 0;
+}
+.detail-label {
+  font-family: var(--void-font-sans);
+  font-size: var(--void-text-sm);
+  color: var(--void-color-text-secondary);
+  margin: 0;
+  padding-top: 2px;
+}
+.detail-value {
+  font-family: var(--void-font-sans);
+  font-size: var(--void-text-sm);
+  color: var(--void-color-text);
+  margin: 0;
+}
+.detail-value-mono {
+  font-family: var(--void-font-mono);
+  font-size: var(--void-text-sm);
+  color: var(--void-color-text);
+  margin: 0;
+}
+
+/* Spacious vertical stacks in a 2-col grid */
+.info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--void-space-4);
+  padding: var(--void-space-4) 0;
+}
+.info-grid-item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--void-space-1);
+}
+.info-grid-label {
+  font-size: var(--void-text-2xs);
+  font-family: var(--void-font-mono);
+  text-transform: uppercase;
+  letter-spacing: var(--void-tracking-widest);
+  color: var(--void-color-text-muted);
+}
+.info-grid-value {
+  font-size: var(--void-text-sm);
+  font-weight: var(--void-weight-medium);
+  color: var(--void-color-text);
+}

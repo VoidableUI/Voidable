@@ -1,0 +1,62 @@
+/* Sub-table inside a dialog body — for rendering related records. */
+
+.subtable-section {
+  margin-bottom: var(--void-space-5);
+}
+.subtable-section:last-child {
+  margin-bottom: 0;
+}
+
+.subtable-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--void-space-3);
+}
+
+.subtable-section-title {
+  font-size: var(--void-text-sm);
+  font-weight: var(--void-weight-semibold);
+  color: var(--void-color-text);
+  letter-spacing: var(--void-tracking-snug);
+}
+
+.subtable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--void-text-xs);
+}
+
+.subtable th {
+  text-align: left;
+  padding: var(--void-space-2) var(--void-space-3);
+  font-size: var(--void-text-2xs);
+  font-family: var(--void-font-mono);
+  text-transform: uppercase;
+  letter-spacing: var(--void-tracking-widest);
+  color: var(--void-color-text-muted);
+  border-bottom: 1px solid var(--void-color-border);
+  font-weight: var(--void-weight-medium);
+}
+
+.subtable td {
+  padding: var(--void-space-2) var(--void-space-3);
+  border-bottom: 1px solid var(--void-color-border);
+  color: var(--void-color-text-secondary);
+}
+
+.subtable tr:last-child td {
+  border-bottom: none;
+}
+
+.subtable-key-mono {
+  font-family: var(--void-font-mono);
+  font-size: var(--void-text-xs);
+  color: var(--void-color-text);
+}
+
+.subtable-scopes-cell {
+  display: flex;
+  gap: var(--void-space-1);
+  flex-wrap: wrap;
+}

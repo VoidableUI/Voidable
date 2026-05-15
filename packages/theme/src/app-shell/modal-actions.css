@@ -1,0 +1,8 @@
+/* Horizontal action-button row inside a dialog body. */
+
+.modal-actions {
+  display: flex;
+  gap: var(--void-space-2);
+  justify-content: flex-end;
+  margin-top: var(--void-space-4);
+}

@@ -64,3 +64,8 @@
 @import './components/nav-menu.css';
 @import './components/color-picker.css';
 @import './components/action-input.css';
+
+/* App-shell layout primitives */
+@import './app-shell/detail.css';
+@import './app-shell/modal-actions.css';
+@import './app-shell/subtable.css';
