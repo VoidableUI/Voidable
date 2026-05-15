@@ -36,7 +36,7 @@
           <div class="sidebar-nav-section">
             <div class="sidebar-nav-label">Main</div>
             <div class="sidebar-nav-item">
-              <%%= link_to "Dashboard", root_path %>
+              <%%= link_to "Dashboard", (respond_to?(:root_path) ? root_path : "/") %>
             </div>
           </div>
 
