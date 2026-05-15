@@ -1290,7 +1290,7 @@ import iconLogout from '@tabler/icons/outline/logout.svg?raw';
             (k) => `
           <tr>
             <td>${k.name}</td>
-            <td><span class="key-mono">${k.key}</span></td>
+            <td><span class="subtable-key-mono">${k.key}</span></td>
             <td>${k.created}</td>
             <td>${k.lastUsed}</td>
           </tr>`
@@ -1302,7 +1302,7 @@ import iconLogout from '@tabler/icons/outline/logout.svg?raw';
             (d) => `
           <tr>
             <td>${d.device}</td>
-            <td><span class="scopes-cell">${d.scopes.map((s) => `<void-tag size="sm">${s}</void-tag>`).join('')}</span></td>
+            <td><span class="subtable-scopes-cell">${d.scopes.map((s) => `<void-tag size="sm">${s}</void-tag>`).join('')}</span></td>
             <td>${getStatusBadge(d.status)}</td>
             <td>${d.lastUsed}</td>
           </tr>`
@@ -1312,40 +1312,40 @@ import iconLogout from '@tabler/icons/outline/logout.svg?raw';
         body.innerHTML = `
           <void-tabs value="auth-status">
             <void-tab-panel tab="auth-status" label="Auth Status">
-              <div class="auth-status-grid">
-                <div class="auth-status-item">
-                  <span class="auth-status-label">Last Login</span>
-                  <span class="auth-status-value">${user.auth.lastLogin}</span>
+              <div class="info-grid">
+                <div class="info-grid-item">
+                  <span class="info-grid-label">Last Login</span>
+                  <span class="info-grid-value">${user.auth.lastLogin}</span>
                 </div>
-                <div class="auth-status-item">
-                  <span class="auth-status-label">Last IP</span>
-                  <span class="auth-status-value mono">${user.auth.lastIP}</span>
+                <div class="info-grid-item">
+                  <span class="info-grid-label">Last IP</span>
+                  <span class="info-grid-value mono">${user.auth.lastIP}</span>
                 </div>
-                <div class="auth-status-item">
-                  <span class="auth-status-label">Login Count</span>
-                  <span class="auth-status-value">${user.auth.loginCount}</span>
+                <div class="info-grid-item">
+                  <span class="info-grid-label">Login Count</span>
+                  <span class="info-grid-value">${user.auth.loginCount}</span>
                 </div>
-                <div class="auth-status-item">
-                  <span class="auth-status-label">MFA Status</span>
-                  <span class="auth-status-value">${mfaBadge}</span>
+                <div class="info-grid-item">
+                  <span class="info-grid-label">MFA Status</span>
+                  <span class="info-grid-value">${mfaBadge}</span>
                 </div>
-                <div class="auth-status-item">
-                  <span class="auth-status-label">Account Created</span>
-                  <span class="auth-status-value">${user.auth.accountCreated}</span>
+                <div class="info-grid-item">
+                  <span class="info-grid-label">Account Created</span>
+                  <span class="info-grid-value">${user.auth.accountCreated}</span>
                 </div>
-                <div class="auth-status-item">
-                  <span class="auth-status-label">Active Sessions</span>
-                  <span class="auth-status-value">${user.auth.activeSessions}</span>
+                <div class="info-grid-item">
+                  <span class="info-grid-label">Active Sessions</span>
+                  <span class="info-grid-value">${user.auth.activeSessions}</span>
                 </div>
               </div>
             </void-tab-panel>
             <void-tab-panel tab="tokens" label="Tokens">
-              <div class="tokens-section">
-                <div class="tokens-section-header">
-                  <div class="tokens-section-title">API Keys</div>
+              <div class="subtable-section">
+                <div class="subtable-section-header">
+                  <div class="subtable-section-title">API Keys</div>
                   <void-button variant="outline" size="sm" id="create-key-btn" color="success">Create Key</void-button>
                 </div>
-                <table class="tokens-table">
+                <table class="subtable">
                   <thead>
                     <tr>
                       <th>Name</th>
@@ -1357,9 +1357,9 @@ import iconLogout from '@tabler/icons/outline/logout.svg?raw';
                   <tbody>${apiKeysRows}</tbody>
                 </table>
               </div>
-              <div class="tokens-section">
-                <div class="tokens-section-title">OAuth Device Authorizations (RFC 8628)</div>
-                <table class="tokens-table">
+              <div class="subtable-section">
+                <div class="subtable-section-title">OAuth Device Authorizations (RFC 8628)</div>
+                <table class="subtable">
                   <thead>
                     <tr>
                       <th>Device</th>
@@ -1514,103 +1514,6 @@ import iconLogout from '@tabler/icons/outline/logout.svg?raw';
         right: 0;
       }
 
-      /* ── Dialog: Auth status grid ── */
-      .void-dialog-body .auth-status-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: var(--void-space-4);
-        padding: var(--void-space-4) 0;
-      }
-
-      .void-dialog-body .auth-status-item {
-        display: flex;
-        flex-direction: column;
-        gap: var(--void-space-1);
-      }
-
-      .void-dialog-body .auth-status-label {
-        font-size: var(--void-text-2xs);
-        font-family: var(--void-font-mono);
-        text-transform: uppercase;
-        letter-spacing: var(--void-tracking-widest);
-        color: var(--void-color-text-muted);
-      }
-
-      .void-dialog-body .auth-status-value {
-        font-size: var(--void-text-sm);
-        font-weight: var(--void-weight-medium);
-        color: var(--void-color-text);
-      }
-
-      /* ── Dialog: Tokens sections ── */
-      .void-dialog-body .tokens-section {
-        margin-bottom: var(--void-space-5);
-      }
-
-      .void-dialog-body .tokens-section:last-child {
-        margin-bottom: 0;
-      }
-
-      .void-dialog-body .tokens-section-title {
-        font-size: var(--void-text-sm);
-        font-weight: var(--void-weight-semibold);
-        color: var(--void-color-text);
-        margin-bottom: var(--void-space-3);
-        letter-spacing: var(--void-tracking-snug);
-      }
-
-      .void-dialog-body .tokens-table {
-        width: 100%;
-        border-collapse: collapse;
-        font-size: var(--void-text-xs);
-      }
-
-      .void-dialog-body .tokens-table th {
-        text-align: left;
-        padding: var(--void-space-2) var(--void-space-3);
-        font-size: var(--void-text-2xs);
-        font-family: var(--void-font-mono);
-        text-transform: uppercase;
-        letter-spacing: var(--void-tracking-widest);
-        color: var(--void-color-text-muted);
-        border-bottom: 1px solid var(--void-color-border);
-        font-weight: var(--void-weight-medium);
-      }
-
-      .void-dialog-body .tokens-table td {
-        padding: var(--void-space-2) var(--void-space-3);
-        border-bottom: 1px solid var(--void-color-border);
-        color: var(--void-color-text-secondary);
-      }
-
-      .void-dialog-body .tokens-table tr:last-child td {
-        border-bottom: none;
-      }
-
-      .void-dialog-body .key-mono {
-        font-family: var(--void-font-mono);
-        font-size: var(--void-text-xs);
-        color: var(--void-color-text);
-      }
-
-      .void-dialog-body .scopes-cell {
-        display: flex;
-        gap: var(--void-space-1);
-        flex-wrap: wrap;
-      }
-
-      /* ── Dialog: Tokens section header ── */
-      .void-dialog-body .tokens-section-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        margin-bottom: var(--void-space-3);
-      }
-
-      .void-dialog-body .tokens-section-header .tokens-section-title {
-        margin-bottom: 0;
-      }
-
       /* ── Create Key dialog ── */
       .create-key-form {
         display: flex;
@@ -1678,17 +1581,6 @@ import iconLogout from '@tabler/icons/outline/logout.svg?raw';
         box-sizing: border-box;
       }
 
-      @media (max-width: 1024px) {
-        .void-dialog-body .auth-status-grid {
-          grid-template-columns: 1fr 1fr;
-        }
-      }
-
-      @media (max-width: 768px) {
-        .void-dialog-body .auth-status-grid {
-          grid-template-columns: 1fr;
-        }
-      }
     </style>
   </body>
 </html>
