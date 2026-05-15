@@ -8,7 +8,7 @@ void-compose-input {
   align-items: flex-end;
   gap: var(--void-space-2);
   padding: var(--void-space-2);
-  background: var(--void-color-bg-secondary);
+  background: var(--void-color-bg);
   border: 1px solid var(--void-color-border);
   border-radius: var(--void-radius-lg);
   transition: border-color var(--void-duration-fast) var(--void-ease-in-out);

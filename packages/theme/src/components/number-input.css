@@ -14,7 +14,7 @@ void-number-input {
   font-family: var(--void-font-sans);
   border: 1px solid var(--void-color-border);
   border-radius: var(--void-radius-md);
-  background: var(--void-color-bg-secondary);
+  background: var(--void-color-bg);
   overflow: hidden;
   transition: border-color var(--void-duration-fast) var(--void-ease-in-out),
               box-shadow var(--void-duration-fast) var(--void-ease-in-out);

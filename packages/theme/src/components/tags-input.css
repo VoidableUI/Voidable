@@ -20,7 +20,7 @@ void-tags-input[color="notice"]  { --tone: var(--void-color-notice); }
   gap: var(--void-space-1);
   padding: var(--void-space-2) var(--void-space-3);
   min-height: 2.25rem;
-  background: var(--void-color-bg-secondary);
+  background: var(--void-color-bg);
   border: 1px solid var(--void-color-border);
   border-radius: var(--void-radius-md);
   cursor: text;
