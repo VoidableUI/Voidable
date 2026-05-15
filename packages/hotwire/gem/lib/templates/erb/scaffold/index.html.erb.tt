@@ -76,7 +76,28 @@
     </void-dialog>
   <%% else %>
     <void-dialog id="resource-modal" open size="md" heading="<%%= @<%= singular_table_name %>.<%= display_column %>.to_s %>" data-close-href="<%%= <%= index_helper(type: :path) %> %>">
-      <%%= render "details", <%= singular_table_name %>: @<%= singular_table_name %> %>
+      <dl class="detail-grid">
+<% attributes.reject(&:password_digest?).each do |attribute| -%>
+        <dt class="detail-label"><%= attribute.human_name %></dt>
+<% if attribute.type == :boolean -%>
+        <dd class="detail-value">
+          <void-badge color="<%%= @<%= singular_table_name %>.<%= attribute.column_name %> ? 'success' : 'default' %>" variant="outline"><%%= @<%= singular_table_name %>.<%= attribute.column_name %> ? 'Yes' : 'No' %></void-badge>
+        </dd>
+<% elsif [:integer, :float, :decimal].include?(attribute.type) -%>
+        <dd class="detail-value-mono"><%%= @<%= singular_table_name %>.<%= attribute.column_name %> %></dd>
+<% elsif attribute.attachment? -%>
+        <dd class="detail-value"><%%= link_to @<%= singular_table_name %>.<%= attribute.column_name %>.filename, @<%= singular_table_name %>.<%= attribute.column_name %> if @<%= singular_table_name %>.<%= attribute.column_name %>.attached? %></dd>
+<% elsif attribute.attachments? -%>
+        <dd class="detail-value">
+          <%% @<%= singular_table_name %>.<%= attribute.column_name %>.each do |<%= attribute.singular_name %>| %>
+            <div><%%= link_to <%= attribute.singular_name %>.filename, <%= attribute.singular_name %> %></div>
+          <%% end %>
+        </dd>
+<% else -%>
+        <dd class="detail-value"><%%= @<%= singular_table_name %>.<%= attribute.column_name %> %></dd>
+<% end -%>
+<% end -%>
+      </dl>
       <div class="modal-actions">
         <void-button variant="outline" size="sm"><a href="<%%= <%= edit_helper(type: :path) %> %>">Edit</a></void-button>
         <void-button color="error" variant="outline" size="sm" data-open-dialog="resource-delete-dialog">Delete</void-button>
