@@ -145,7 +145,32 @@ module Voidable
           imports += "\nimport \"./voidable-layout.js\";"
           append_to_file js_entrypoint, "\n#{imports}\n"
         end
+        if vite? && !contents.include?("VoidEventController")
+          append_to_file js_entrypoint, <<~JS
+
+            import { VoidEventController, VoidTurbo } from "@voidable/ui-hotwire";
+            const app = Application.start();
+            app.register("void-event", VoidEventController);
+            VoidTurbo.start();
+          JS
+        end
         say "Added Voidable imports to application.js", :green
+      end
+
+      def wire_stimulus_controllers
+        return if vite?
+        controllers_js = "app/javascript/controllers/application.js"
+        return unless File.exist?(controllers_js)
+        return if File.read(controllers_js).include?("VoidEventController")
+        inject_into_file controllers_js, after: /window\.Stimulus\s*=\s*application\n/ do
+          <<~JS
+
+            import { VoidEventController, VoidTurbo } from "@voidable/ui-hotwire"
+            application.register("void-event", VoidEventController)
+            VoidTurbo.start()
+          JS
+        end
+        say "Registered VoidEventController and started VoidTurbo in controllers/application.js", :green
       end
 
       def create_vite_helper
@@ -184,6 +209,12 @@ module Voidable
           say "  rails generate voidable:install   # re-run to wire it up", :yellow
           say "", :yellow
         end
+      end
+
+      def install_active_storage
+        return if File.exist?("db/migrate") && Dir.glob("db/migrate/*active_storage*").any?
+        rails_command "active_storage:install"
+        say "Installed Active Storage migrations (run `bin/rails db:migrate` to apply)", :green
       end
     end
   end
