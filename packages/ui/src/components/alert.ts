@@ -36,7 +36,7 @@ export class VoidAlert extends VoidElement {
 
   render() {
     if (!this.dismissible) return nothing;
-    return html`<button class="void-alert-close" aria-label="Dismiss" @click="${this._dismiss}">&times;</button>`;
+    return html`<button type="button" class="void-alert-close" aria-label="Dismiss" @click="${this._dismiss}">&times;</button>`;
   }
 }
 

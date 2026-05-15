@@ -76,7 +76,7 @@ export class VoidDrawer extends VoidElement {
       <div class="void-drawer-panel">
         <div class="void-drawer-header">
           ${this.heading ? html`<span class="void-drawer-heading">${this.heading}</span>` : nothing}
-          ${this.closable ? html`<button class="void-drawer-close" aria-label="Close" @click="${this._close}">&times;</button>` : nothing}
+          ${this.closable ? html`<button type="button" class="void-drawer-close" aria-label="Close" @click="${this._close}">&times;</button>` : nothing}
         </div>
         <div class="void-drawer-body"></div>
       </div>

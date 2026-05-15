@@ -36,7 +36,7 @@ export class VoidBanner extends VoidElement {
 
   render() {
     if (!this.dismissable) return nothing;
-    return html`<button class="void-banner-close" aria-label="Close" @click="${this._close}">&times;</button>`;
+    return html`<button type="button" class="void-banner-close" aria-label="Close" @click="${this._close}">&times;</button>`;
   }
 }
 

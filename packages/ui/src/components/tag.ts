@@ -36,7 +36,7 @@ export class VoidTag extends VoidElement {
 
   render() {
     if (!this.removable) return nothing;
-    return html`<button class="void-tag-close" aria-label="Remove" @click="${this._remove}">×</button>`;
+    return html`<button type="button" class="void-tag-close" aria-label="Remove" @click="${this._remove}">×</button>`;
   }
 
   private _remove(): void {

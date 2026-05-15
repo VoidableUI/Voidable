@@ -119,6 +119,7 @@ export class VoidCalendar extends VoidElement {
     return html`
       <div class="void-calendar-header">
         <button
+          type="button"
           class="void-calendar-nav"
           aria-label="Previous month"
           ?disabled=${this.disabled}
@@ -127,12 +128,14 @@ export class VoidCalendar extends VoidElement {
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="var(--void-icon-stroke-width)" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"></polyline></svg>
         </button>
         <button
+          type="button"
           class="void-calendar-title"
           aria-label="Switch to month picker"
           ?disabled=${this.disabled}
           @click=${this._showMonths}
         >${monthLabel} ${this._viewYear}</button>
         <button
+          type="button"
           class="void-calendar-nav"
           aria-label="Next month"
           ?disabled=${this.disabled}
@@ -153,6 +156,7 @@ export class VoidCalendar extends VoidElement {
             const isDisabled = this.disabled || cell.disabled;
             return html`
               <button
+                type="button"
                 class="void-calendar-day${isSelected ? ' selected' : ''}${isToday ? ' today' : ''}${isOutside ? ' outside' : ''}"
                 ?disabled=${isDisabled}
                 aria-selected=${isSelected ? 'true' : 'false'}
@@ -237,6 +241,7 @@ export class VoidCalendar extends VoidElement {
     return html`
       <div class="void-calendar-header">
         <button
+          type="button"
           class="void-calendar-nav"
           aria-label="Previous year"
           ?disabled=${this.disabled}
@@ -245,12 +250,14 @@ export class VoidCalendar extends VoidElement {
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="var(--void-icon-stroke-width)" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"></polyline></svg>
         </button>
         <button
+          type="button"
           class="void-calendar-title"
           aria-label="Switch to year picker"
           ?disabled=${this.disabled}
           @click=${this._showYears}
         >${this._viewYear}</button>
         <button
+          type="button"
           class="void-calendar-nav"
           aria-label="Next year"
           ?disabled=${this.disabled}
@@ -264,6 +271,7 @@ export class VoidCalendar extends VoidElement {
           const isCurrent = m.index === this._viewMonth && this._viewYear === new Date().getFullYear();
           return html`
             <button
+              type="button"
               class="void-calendar-month${isCurrent ? ' current' : ''}"
               ?disabled=${this.disabled}
               @click=${() => this._pickMonth(m.index)}
@@ -284,6 +292,7 @@ export class VoidCalendar extends VoidElement {
     return html`
       <div class="void-calendar-header">
         <button
+          type="button"
           class="void-calendar-nav"
           aria-label="Previous years"
           ?disabled=${this.disabled}
@@ -293,6 +302,7 @@ export class VoidCalendar extends VoidElement {
         </button>
         <span class="void-calendar-title void-calendar-title--static">${start} – ${start + 11}</span>
         <button
+          type="button"
           class="void-calendar-nav"
           aria-label="Next years"
           ?disabled=${this.disabled}
@@ -304,6 +314,7 @@ export class VoidCalendar extends VoidElement {
       <div class="void-calendar-years">
         ${years.map(y => html`
           <button
+            type="button"
             class="void-calendar-year${y === currentYear ? ' current' : ''}"
             ?disabled=${this.disabled}
             @click=${() => this._pickYear(y)}
@@ -517,6 +528,7 @@ export class VoidDatePicker extends VoidElement {
           @keydown=${this._onInputKeydown}
         />
         <button
+          type="button"
           class="void-date-picker-icon"
           aria-label="Toggle calendar"
           ?disabled=${this.disabled}

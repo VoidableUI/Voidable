@@ -175,6 +175,7 @@ export class VoidCarousel extends VoidElement {
       </div>
       ${this.controls ? html`
         <button
+          type="button"
           class="void-carousel-prev"
           aria-label="Previous slide"
           ?disabled=${atStart}
@@ -185,6 +186,7 @@ export class VoidCarousel extends VoidElement {
           </svg>
         </button>
         <button
+          type="button"
           class="void-carousel-next"
           aria-label="Next slide"
           ?disabled=${atEnd}
@@ -199,6 +201,7 @@ export class VoidCarousel extends VoidElement {
         <div class="void-carousel-indicators" role="tablist" aria-label="Slide indicators">
           ${this._slides.map((_, i) => html`
             <button
+              type="button"
               class="void-carousel-dot"
               role="tab"
               aria-selected=${i === this.active ? 'true' : 'false'}

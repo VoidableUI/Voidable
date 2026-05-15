@@ -268,6 +268,7 @@ export class VoidColorPicker extends VoidElement {
           <div class="void-color-picker-swatches">
             ${this.swatches.map(swatch => html`
               <button
+                type="button"
                 class="void-color-picker-swatch"
                 style="--void-cp-swatch:${swatch}"
                 aria-label=${swatch}
@@ -286,6 +287,7 @@ export class VoidColorPicker extends VoidElement {
       return html`
         <div class="void-color-picker-compact">
           <button
+            type="button"
             class="void-color-picker-compact-trigger"
             @click=${this._onCompactTriggerClick}
             ?disabled=${this.disabled}

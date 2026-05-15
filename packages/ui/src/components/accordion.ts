@@ -67,6 +67,7 @@ export class VoidAccordionItem extends VoidElement {
   render() {
     return html`
       <button
+        type="button"
         id="trigger-${this._id}"
         class="void-accordion-trigger"
         aria-expanded=${String(this.open)}

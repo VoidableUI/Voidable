@@ -103,7 +103,7 @@ export class VoidDialog extends VoidElement {
           <div class="void-dialog-header">
             <span class="void-dialog-heading">${this.heading}</span>
             ${this.closable
-              ? html`<button class="void-dialog-close" aria-label="Close" @click="${this._close}">&times;</button>`
+              ? html`<button type="button" class="void-dialog-close" aria-label="Close" @click="${this._close}">&times;</button>`
               : nothing}
           </div>
           <div class="void-dialog-body"></div>

@@ -47,6 +47,7 @@ export class VoidFileUpload extends VoidElement {
             <div class="void-file-upload-file">
               <span class="void-file-upload-filename">${file.name}</span>
               <button
+                type="button"
                 class="void-file-upload-remove"
                 aria-label="Remove ${file.name}"
                 ?disabled=${this.disabled}

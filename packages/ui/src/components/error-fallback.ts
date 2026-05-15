@@ -25,7 +25,7 @@ export class VoidErrorFallback extends VoidElement {
         ${this.icon ? html`<span class="void-error-fallback-icon">&#9888;</span>` : nothing}
         <span class="void-error-fallback-heading">${this.heading}</span>
         ${this.message ? html`<span class="void-error-fallback-message">${this.message}</span>` : nothing}
-        ${this.retryable ? html`<button class="void-error-fallback-retry" @click="${this._retry}">${this.retryLabel}</button>` : nothing}
+        ${this.retryable ? html`<button type="button" class="void-error-fallback-retry" @click="${this._retry}">${this.retryLabel}</button>` : nothing}
       </div>
     `;
   }

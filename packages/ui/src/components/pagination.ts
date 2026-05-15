@@ -54,6 +54,7 @@ export class VoidPagination extends VoidElement {
     return html`
       <nav role="navigation" aria-label="Pagination">
         <button
+          type="button"
           class="void-pagination-btn"
           ?disabled=${this.value <= 1}
           @click=${() => this._go(this.value - 1)}
@@ -66,6 +67,7 @@ export class VoidPagination extends VoidElement {
           }
           return html`
             <button
+              type="button"
               class="void-pagination-btn"
               ?disabled=${p === this.value}
               aria-current=${p === this.value ? 'page' : nothing}
@@ -74,6 +76,7 @@ export class VoidPagination extends VoidElement {
           `;
         })}
         <button
+          type="button"
           class="void-pagination-btn"
           ?disabled=${this.value >= this.total}
           @click=${() => this._go(this.value + 1)}

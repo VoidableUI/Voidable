@@ -39,7 +39,7 @@ export class VoidToast extends VoidElement {
   render() {
     return html`
       ${this.heading ? html`<span class='void-toast-heading'>${this.heading}</span>` : nothing}
-      ${this.dismissable ? html`<button class='void-toast-close' aria-label='Close' @click='${this._close}'>&times;</button>` : nothing}
+      ${this.dismissable ? html`<button type="button" class='void-toast-close' aria-label='Close' @click='${this._close}'>&times;</button>` : nothing}
     `;
   }
 }

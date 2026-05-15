@@ -48,6 +48,7 @@ export class VoidTagsInput extends VoidElement {
                 <span class="void-tags-input-tag-text">${text}</span>
                 ${!this.disabled && !this.readonly
                   ? html`<button
+                      type="button"
                       class="void-tags-input-tag-remove"
                       aria-label="Remove ${text}"
                       @click=${(e: Event) => { e.stopPropagation(); this._removeTag(i); }}

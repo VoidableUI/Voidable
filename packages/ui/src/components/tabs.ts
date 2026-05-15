@@ -57,6 +57,7 @@ export class VoidTabs extends VoidElement {
       <div class="void-tabs-list" role="tablist">
         ${this._panels.map((panel, index) => html`
           <button
+            type="button"
             class="void-tabs-tab"
             role="tab"
             aria-selected=${panel.tab === this.value ? 'true' : 'false'}

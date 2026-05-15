@@ -68,6 +68,7 @@ export class VoidMultiselect extends VoidElement {
               <span class="void-multiselect-pill">
                 <span class="void-multiselect-pill-label">${opt.textContent?.trim() || opt.value}</span>
                 <button
+                  type="button"
                   class="void-multiselect-pill-remove"
                   aria-label="Remove ${opt.textContent?.trim() || opt.value}"
                   @click=${(e: Event) => { e.stopPropagation(); this._deselect(opt); }}

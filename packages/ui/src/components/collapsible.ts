@@ -53,6 +53,7 @@ export class VoidCollapsible extends VoidElement {
   render() {
     return html`
       <button
+        type="button"
         id="trigger-${this._id}"
         class="void-collapsible-trigger"
         aria-expanded=${String(this.open)}
