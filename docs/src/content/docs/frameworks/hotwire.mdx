@@ -14,16 +14,7 @@ bundle add voidable-hotwire
 
 The engine auto-registers importmap pins for `@voidable/ui` and `@voidable/ui-hotwire`, and includes the `void_attrs` view helper into ActionView.
 
-Then import and register in `application.js`:
-
-```js
-import { VoidEventController } from '@voidable/ui-hotwire';
-import { VoidTurbo } from '@voidable/ui-hotwire';
-
-const app = Application.start();
-app.register('void-event', VoidEventController);
-VoidTurbo.start();
-```
+Run `rails generate voidable:install` (see [Install generator](#install-generator) below) — it wires the Stimulus controller and Turbo morph protection automatically. No manual edit needed.
 
 ### npm (Vite, esbuild, custom bundlers)
 
@@ -142,6 +133,8 @@ app.register("void-event", VoidEventController);
 VoidTurbo.start();
 ```
 
+This is the baseline the install generator builds on. When you run `voidable:install --asset_pipeline vite` (Step 10), it appends CSS imports and ensures `VoidEventController` and `VoidTurbo` are registered — it does not undo this step.
+
 Delete the importmap controller loader since Vite handles module resolution:
 
 ```bash
@@ -161,6 +154,8 @@ export { application };
 ```
 
 ### Step 5: Update the layout
+
+> Note: If you'll run `voidable:install --asset_pipeline vite` later (recommended), it overwrites `application.html.erb` with a complete Vite-ready layout. You can skip this step in that case.
 
 Replace the Propshaft and importmap tags in `app/views/layouts/application.html.erb`:
 
@@ -233,22 +228,16 @@ Add build and dev scripts to your `package.json`:
 }
 ```
 
-### Step 8: Update bin/dev
+### Step 8: Run Rails and Vite together
 
-Update your `Procfile.dev` (or create one) to run both Rails and Vite in development:
-
-```procfile
-web: bin/rails server -p 3000
-vite: npm run dev
-```
-
-If you use `bin/dev` with `foreman`:
+In development you need both processes running:
 
 ```bash
-gem install foreman
+bin/rails server -p 3200    # one terminal
+npm run dev                  # another terminal
 ```
 
-Then `bin/dev` starts both servers.
+If you want a single command, use a process manager of your choice (`foreman`, `overmind`, etc.) with a `Procfile.dev` — that's a matter of preference, not a requirement.
 
 ### Step 9: Add public/assets to .gitignore
 
@@ -276,41 +265,75 @@ After adding the gem, run the install generator to scaffold a complete applicati
 rails generate voidable:install
 ```
 
-### Layout option
+### Options
 
-Pass `--layout` to choose a layout style:
+| Option | Values | Default | Description |
+|---|---|---|---|
+| `--layout` | `topbar`, `sidebar`, `switching` | `topbar` | Application layout style |
+| `--asset_pipeline` | `importmap`, `vite` | `importmap` | Asset pipeline integration |
 
 ```bash
-rails generate voidable:install --layout topbar    # default — horizontal nav bar
-rails generate voidable:install --layout sidebar   # fixed sidebar with collapsible nav
-rails generate voidable:install --layout switching # both layouts with a cookie-based toggle
+# Defaults: topbar layout, importmap pipeline
+rails generate voidable:install
+
+# Sidebar with fixed nav
+rails generate voidable:install --layout sidebar
+
+# Both layouts with a cookie-based toggle
+rails generate voidable:install --layout switching
+
+# For apps using Vite (see "Setting up Vite with Rails" above)
+rails generate voidable:install --layout switching --asset_pipeline vite
 ```
 
+The `--asset_pipeline vite` flag changes the destination paths for generated assets from `app/assets/stylesheets/` and `app/assets/javascripts/` to `app/javascript/`, adds CSS `@import` statements to `application.js`, and creates a `ViteHelper` for production manifest lookup. It does **not** modify `config/importmap.rb`.
+
+### Before you run the generator
+
+If you're using Devise, `rails generate devise:install` will warn that no `root to:` route exists. Define one before testing (any controller works — `root to: "samples#index"` for example). The gem's "Dashboard" sidebar link falls back gracefully to `/` when no root route is defined, but having one makes it useful.
+
+The install generator runs `bin/rails active_storage:install` automatically (added in 0.7.0), which queues an Active Storage migration alongside any scaffold migrations. Run `bin/rails db:migrate` after both the install generator and any scaffold generators to apply all pending migrations.
+
 ### What it generates
+
+For importmap apps (default):
 
 | File | Description |
 |---|---|
 | `config/initializers/voidable.rb` | Voidable initializer |
-| `config/importmap.rb` | Pins for `@voidable/ui` and `@voidable/ui-hotwire` |
+| `config/importmap.rb` | Pins for `@voidable/ui` and `@voidable/ui-hotwire` (appended) |
 | `app/javascript/application.js` | Adds Voidable imports |
 | `app/views/layouts/application.html.erb` | Application layout (topbar or sidebar) |
 | `app/views/layouts/_settings_menu.html.erb` | Shared settings popover partial |
+| `app/assets/javascripts/voidable-layout.js` | Layout JS (theme toggle, row clicks, dialog open/close, pagination) |
 | `app/assets/stylesheets/voidable-layout.css` | Layout stylesheet |
+| `app/assets/stylesheets/voidable-devise.css` | Devise view styles |
 
-#### Switching mode
+If Devise is bundled when the generator runs, it auto-runs
+`voidable:devise_views` and copies the styled Devise views into
+`app/views/devise/`. If Pagy is bundled, it creates
+`config/initializers/pagy.rb` and adds `include Pagy::Method` to
+`ApplicationController`.
 
-When `--layout switching` is used, the generator additionally creates:
+For Vite apps (`--asset_pipeline vite`):
 
 | File | Description |
 |---|---|
-| `app/views/layouts/topbar.html.erb` | Topbar layout (named layout) |
-| `app/views/layouts/sidebar.html.erb` | Sidebar layout (named layout) |
-| `app/assets/stylesheets/voidable-layout-topbar.css` | Topbar layout styles |
-| `app/assets/stylesheets/voidable-layout-sidebar.css` | Sidebar layout styles |
-| `app/controllers/settings_controller.rb` | Toggles the layout cookie |
-| `config/routes.rb` | Adds `POST /toggle_layout` route |
+| `config/initializers/voidable.rb` | Voidable initializer |
+| `app/javascript/application.js` | Adds Voidable imports including CSS files |
+| `app/views/layouts/application.html.erb` | Application layout (topbar or sidebar) |
+| `app/views/layouts/_settings_menu.html.erb` | Shared settings popover partial |
+| `app/javascript/voidable-layout.js` | Layout JS (theme toggle, row clicks, dialog open/close, pagination) |
+| `app/javascript/voidable-layout.css` | Layout stylesheet |
+| `app/javascript/voidable-devise.css` | Devise view styles |
+| `app/helpers/vite_helper.rb` | Asset path helper for Vite manifest |
 
-It also injects a `layout :resolve_layout` method into `ApplicationController` that reads the `:layout` cookie to pick the active layout, defaulting to `"topbar"`.
+Same Devise/Pagy auto-configuration as the importmap path (when those
+gems are bundled at generator runtime).
+
+#### Switching mode
+
+When `--layout switching` is used, the generator additionally creates topbar and sidebar variants of the layout file (`topbar.html.erb`, `sidebar.html.erb`) and CSS files (`voidable-layout-topbar.css`, `voidable-layout-sidebar.css`), a `SettingsController` that toggles the layout cookie, a `POST /toggle_layout` route, and injects a `layout :resolve_layout` method into `ApplicationController` that reads the `:layout` cookie to pick the active layout, defaulting to `"topbar"`.
 
 ### Settings menu
 
@@ -422,13 +445,41 @@ The gem overrides Rails' default scaffold templates so `rails generate scaffold`
 
 ### Generated views
 
-Every scaffold includes:
+The gem scaffolds use an index-with-modal architecture: the `show`,
+`edit`, and `new` actions all render the index template with the
+appropriate modal open. Direct URL navigation to a resource lands on
+the same page as clicking a row.
 
-- **Index** — page header with title, subtitle, and "New" button; hoverable table with boolean badges and per-row action menus; empty state when no records exist
-- **Show** — monospace breadcrumb, title with Actions dropdown (Edit / Delete), card with grid-layout definition list, delete confirmation dialog
-- **New** — breadcrumb (`Models / New`), card-wrapped form with properly spaced fields
-- **Edit** — breadcrumb with record name, card-wrapped form, "Danger zone" section with delete button and confirmation dialog
-- **Form partial** — `void-card` wrapper with `void-field` for every attribute type (text, number, boolean switch, date picker, select, textarea)
+- **Index** (`index.html.erb`) — page header with title, subtitle, and
+  "New" button; hoverable table whose rows are clickable
+  (`class="row-clickable" data-href="..."`) and open the show modal;
+  pagination via `<void-pagination>` when Pagy is configured; empty
+  state when no records exist. Below the table, three conditional
+  modals:
+  - **Show modal** — opened by clicking a row or navigating to
+    `/resources/:id`. Renders a `<dl class="detail-grid">` of the
+    record's attributes plus Edit / Delete action buttons.
+  - **Edit modal** (`@edit_mode`) — opened by clicking Edit inside
+    the show modal or navigating to `/resources/:id/edit`. Renders
+    the form partial.
+  - **New modal** (`@new_mode`) — opened by clicking the "New" header
+    button or navigating to `/resources/new`. Renders the form partial.
+- **Form partial** (`_form.html.erb`) — `<void-field>` per attribute,
+  full-width divider above the action row, Submit + Back buttons. No
+  `<void-card>` wrapper — that's externally applied only when the form
+  is rendered standalone, so the dialog body doesn't show a nested
+  border.
+- **Turbo partial** (`_<resource>.html.erb`) — Rails-conventional
+  partial used by Turbo Stream responses.
+- **Stub views** (`show.html.erb`, `edit.html.erb`, `new.html.erb`) —
+  shipped as empty stubs with an HTML comment explaining they are
+  never rendered (the controller `render :index` instead). Safe to
+  delete.
+
+The scaffold controller's `show`, `edit`, and `new` actions each load
+pagy data and call `render :index`. `update` and `create` failures
+also fall back to `render :index` with the matching mode flag so form
+errors appear in the modal.
 
 ### Component mapping by type
 
@@ -444,33 +495,106 @@ Every scaffold includes:
 | `time` | `void-input` with `type="time"` |
 | `references` | `void-select` |
 | `password` | `void-input` with `type="password"` |
+| `attachment` | Rails `file_field` |
+| `attachments` | Rails `file_field` with `multiple: true` |
+
+### Pagination
+
+Scaffolds use [Pagy](https://github.com/ddnexus/pagy) for pagination
+when the gem is bundled. Add it to your Gemfile alongside
+`voidable-hotwire`:
+
+```bash
+bundle add pagy
+rails generate voidable:install   # re-run to wire it up if you missed it the first time
+```
+
+The install generator detects Pagy and, when present:
+
+- Creates `config/initializers/pagy.rb` with `require "pagy"` and
+  `require "pagy/toolbox/paginators/method"` (Pagy 9+ API).
+- Adds `include Pagy::Method` to `ApplicationController`.
+
+If Pagy is not bundled when the generator runs, it prints a
+recommendation and skips the configuration. Re-run the generator
+after `bundle add pagy` to complete the wiring.
+
+In scaffolded controllers, the `index`, `show`, `edit`, and `new`
+actions all call:
+
+```ruby
+@pagy, @<plural> = pagy(<Model>.all)
+```
+
+The index template renders `<void-pagination>` at the bottom of the
+table when `@pagy.pages > 1`. `voidable-layout.js` listens for
+`void-change` events on `<void-pagination>` and translates clicks to
+`?page=N` URL changes via `Turbo.visit`.
 
 ### Delete confirmation
 
-Show and edit views use `void-dialog` for delete confirmation instead of the browser's `confirm()` dialog:
+The Delete button in the show modal opens a secondary `<void-dialog>`
+for confirmation. The gem's layout JS handles open/close via data
+attributes — no inline `onclick` handlers are needed:
 
 ```erb
-<void-dialog id="delete-dialog" heading="Delete order" size="sm">
-  <p>Are you sure? This action cannot be undone.</p>
-  <div style="display: flex; gap: var(--void-space-2); justify-content: flex-end;">
+<void-button data-open-dialog="resource-delete-dialog">Delete</void-button>
+
+<void-dialog id="resource-delete-dialog" heading="Delete order" size="sm">
+  <p class="danger-zone-description">Are you sure? This action cannot be undone.</p>
+  <div class="action-bar">
     <void-button variant="ghost" size="sm"
-      onclick="document.getElementById('delete-dialog').open = false">Cancel</void-button>
-    <void-button tag="a" href="<%= url_for(@order) %>"
-      color="error" size="sm" data-turbo-method="delete">Delete</void-button>
+      data-close-dialog="resource-delete-dialog">Cancel</void-button>
+    <void-button color="error" size="sm"
+      ><a href="<%= url_for(@order) %>" data-turbo-method="delete">Delete</a></void-button>
   </div>
 </void-dialog>
 ```
 
-Open it from a dropdown menu item or button:
+`voidable-layout.js` listens for clicks on `[data-open-dialog]` and
+`[data-close-dialog]` and toggles the targeted dialog's `open`
+attribute. The same handler is used by the Devise account-deletion
+flow.
 
-```erb
-<void-dropdown-menu-item destructive
-  onclick="document.getElementById('delete-dialog').open = true">Delete</void-dropdown-menu-item>
-```
+### Back navigation
+
+Closing a resource modal navigates back to the index. The layout JS
+remembers the user's index URL (with pagination/filter query string)
+in `sessionStorage` whenever a row is clicked, keyed by the
+destination path. When `<void-dialog data-close-href="...">` dispatches
+`void-close`, the handler navigates to the saved URL — falling back
+to the dialog's `data-close-href` for direct URL navigations where
+no saved state exists.
+
+While a resource modal is open, the index template emits
+`<meta name="turbo-cache-control" content="no-cache">`. Light-DOM
+custom-element children are captured verbatim in Turbo's snapshot
+cache, and restoring them would duplicate the dialog body — opting
+out of caching avoids this.
 
 ## Devise
 
-The gem includes pre-styled [Devise](https://github.com/heartcombo/devise) views that match the Voidable design system. Views are installed automatically during `voidable:install` if Devise is detected, or can be installed separately:
+The gem includes pre-styled [Devise](https://github.com/heartcombo/devise) views that match the Voidable design system.
+
+### Setup order
+
+The `voidable:install` generator auto-runs `voidable:devise_views` **only if Devise is already loaded** at generator execution time. If you add Devise to your app, the recommended order is:
+
+```bash
+# 1. Add both gems
+bundle add voidable-hotwire
+bundle add devise
+
+# 2. Set up Devise first
+rails generate devise:install
+rails generate devise User
+rails db:migrate
+
+# 3. Then run the Voidable installer — Devise views are auto-installed
+rails generate voidable:install --layout switching
+```
+
+If you installed Voidable **before** Devise, run the Devise views generator separately afterward:
 
 ```bash
 rails generate voidable:devise_views
