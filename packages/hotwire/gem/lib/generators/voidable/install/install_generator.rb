@@ -109,7 +109,25 @@ module Voidable
         return unless File.exist?(js_entrypoint)
         contents = File.read(js_entrypoint)
         unless contents.include?("@voidable/ui")
-          prepend_to_file js_entrypoint, "import \"@voidable/ui\";\nimport \"@voidable/ui-hotwire\";\n\n"
+          header = if vite?
+            <<~JS
+              // For smaller bundles, replace the bulk import below with
+              // per-component imports for only the elements you use, e.g.:
+              //   import "@voidable/ui/button";
+              //   import "@voidable/ui/input";
+              // See the available components under @voidable/ui's exports.
+              import "@voidable/ui";
+              import "@voidable/ui-hotwire";
+
+            JS
+          else
+            <<~JS
+              import "@voidable/ui";
+              import "@voidable/ui-hotwire";
+
+            JS
+          end
+          prepend_to_file js_entrypoint, header
         end
         if vite? && !contents.include?("voidable-layout.js")
           css_imports = %w[./application.css]

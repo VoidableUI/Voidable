@@ -58,20 +58,18 @@
 
     <main class="app-main">
       <div class="app-content-body">
-        <%% if notice.present? %>
-          <div class="flash-messages">
-            <void-alert color="success" dismissible><%%= notice %></void-alert>
-          </div>
-        <%% end %>
-        <%% if alert.present? %>
-          <div class="flash-messages">
-            <void-alert color="error" dismissible><%%= alert %></void-alert>
-          </div>
-        <%% end %>
-
         <%%= yield %>
       </div>
     </main>
+
+    <void-toast-container position="bottom-right">
+      <%% if notice.present? %>
+        <void-toast color="success" duration="20000" dismissable><%%= notice %></void-toast>
+      <%% end %>
+      <%% if alert.present? %>
+        <void-toast color="caution" duration="20000" dismissable><%%= alert %></void-toast>
+      <%% end %>
+    </void-toast-container>
 
 <% unless vite? %>
     <%%= javascript_include_tag "voidable-layout", "data-turbo-track": "reload" %>
