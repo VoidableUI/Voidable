@@ -20,6 +20,24 @@ document.addEventListener('void-change', (e) => {
   }
 });
 
+// Dialog open/close triggers via data attributes — replaces inline onclick
+// handlers in templates. Usage:
+//   <button data-open-dialog="my-dialog">Open</button>
+//   <button data-close-dialog="my-dialog">Close</button>
+document.addEventListener('click', (e) => {
+  const opener = e.target.closest('[data-open-dialog]');
+  if (opener) {
+    const target = document.getElementById(opener.getAttribute('data-open-dialog'));
+    if (target) target.open = true;
+    return;
+  }
+  const closer = e.target.closest('[data-close-dialog]');
+  if (closer) {
+    const target = document.getElementById(closer.getAttribute('data-close-dialog'));
+    if (target) target.open = false;
+  }
+});
+
 // Clickable table rows — navigate to data-href on click. Remember the
 // current URL keyed by the destination so closing the resource modal can
 // return to the exact page (with pagination/filters intact) instead of

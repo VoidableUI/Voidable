@@ -77,16 +77,16 @@
   <%% else %>
     <void-dialog id="resource-modal" open size="md" heading="<%%= @<%= singular_table_name %>.<%= display_column %>.to_s %>" data-close-href="<%%= <%= index_helper(type: :path) %> %>">
       <%%= render "details", <%= singular_table_name %>: @<%= singular_table_name %> %>
-      <div class="action-bar" style="margin-top: var(--void-space-4);">
+      <div class="modal-actions">
         <void-button variant="outline" size="sm"><a href="<%%= <%= edit_helper(type: :path) %> %>">Edit</a></void-button>
-        <void-button color="error" variant="outline" size="sm" onclick="document.getElementById('resource-delete-dialog').open = true">Delete</void-button>
+        <void-button color="error" variant="outline" size="sm" data-open-dialog="resource-delete-dialog">Delete</void-button>
       </div>
     </void-dialog>
 
     <void-dialog id="resource-delete-dialog" heading="Delete <%= human_name.downcase %>" size="sm">
       <p class="danger-zone-description">Are you sure you want to delete this <%= human_name.downcase %>? This action cannot be undone.</p>
       <div class="action-bar">
-        <void-button variant="ghost" size="sm" onclick="document.getElementById('resource-delete-dialog').open = false">Cancel</void-button>
+        <void-button variant="ghost" size="sm" data-close-dialog="resource-delete-dialog">Cancel</void-button>
         <void-button color="error" size="sm"><a href="<%%= url_for(<%= model_resource_name(prefix: "@") %>) %>" data-turbo-method="delete">Delete</a></void-button>
       </div>
     </void-dialog>

@@ -1,8 +1,8 @@
 <%%= form_with(model: <%= model_resource_name %>) do |form| %>
   <%% if <%= singular_table_name %>.errors.any? %>
-    <void-alert color="error" style="margin-bottom: var(--void-space-4);">
+    <void-alert color="error" class="form-errors">
       <strong><%%= pluralize(<%= singular_table_name %>.errors.count, "error") %> prohibited this <%= singular_table_name %> from being saved:</strong>
-      <ul style="margin: var(--void-space-2) 0 0 var(--void-space-4); padding: 0;">
+      <ul class="form-error-list">
         <%% <%= singular_table_name %>.errors.each do |error| %>
           <li><%%= error.full_message %></li>
         <%% end %>
@@ -10,7 +10,7 @@
     </void-alert>
   <%% end %>
 
-  <div style="display: flex; flex-direction: column; gap: var(--void-space-4);">
+  <div class="form-content">
 <% attributes.each do |attribute| -%>
 <% if attribute.password_digest? -%>
       <void-field label="Password" required>
@@ -70,9 +70,9 @@
 <% end -%>
 <% end -%>
 
-      <div style="margin: 0 calc(-1 * var(--void-space-5)); border-top: 1px solid var(--void-color-border);"></div>
+      <hr class="form-divider">
 
-      <div style="display: flex; gap: var(--void-space-2); align-items: center;">
+      <div class="form-actions">
         <void-button type="submit" color="success"><%%= <%= singular_table_name %>.persisted? ? "Update <%= human_name.downcase %>" : "Create <%= human_name.downcase %>" %></void-button>
         <void-button variant="ghost"><a href="<%%= <%= index_helper(type: :path) %> %>">Back</a></void-button>
       </div>
