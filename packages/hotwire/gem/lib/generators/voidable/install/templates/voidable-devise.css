@@ -1,8 +1,14 @@
 /* Devise view styles */
 
+:root {
+  /* Gem-scoped tokens — override on :root in your app to customise. */
+  --void-app-form-max-width:      28rem;
+  --void-app-form-max-width-wide: 36rem;
+}
+
 /* Page-level container: centers content with max-width */
-.devise-container { max-width: 28rem; margin: 0 auto; padding: 2rem; }
-.devise-container--wide { max-width: 36rem; }
+.devise-container { max-width: var(--void-app-form-max-width); margin: 0 auto; padding: var(--void-space-8); }
+.devise-container--wide { max-width: var(--void-app-form-max-width-wide); }
 
 /* Card body padding */
 .devise-card-body { padding: var(--void-space-6); }

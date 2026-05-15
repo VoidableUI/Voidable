@@ -21,8 +21,8 @@ module Voidable
         append_to_file importmap, <<~RUBY
 
           # Voidable UI
-          pin "@voidable/ui", to: "https://cdn.jsdelivr.net/npm/@voidable/ui@0.5.2/+esm"
-          pin "@voidable/ui-hotwire", to: "https://cdn.jsdelivr.net/npm/@voidable/ui-hotwire@0.3.0/dist/index.js"
+          pin "@voidable/ui", to: "https://cdn.jsdelivr.net/npm/@voidable/ui@0.5.3/+esm"
+          pin "@voidable/ui-hotwire", to: "https://cdn.jsdelivr.net/npm/@voidable/ui-hotwire@0.3.1/dist/index.js"
         RUBY
         say "Pinned @voidable/ui and @voidable/ui-hotwire in importmap", :green
       end
