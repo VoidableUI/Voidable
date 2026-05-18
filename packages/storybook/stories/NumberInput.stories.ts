@@ -97,3 +97,15 @@ export const Disabled: Story = {
 export const Readonly: Story = {
   args: { readonly: true, value: 42 },
 };
+
+export const WithUnit: Story = {
+  render: () => html`
+    <div style="display: flex; flex-direction: column; gap: var(--void-space-4); max-width: 18rem;">
+      <void-number-input value="25" unit="°C" min="-50" max="50"></void-number-input>
+      <void-number-input value="9.99" prefix="$" precision="2" step="0.01"></void-number-input>
+      <void-number-input value="50" unit="%" min="0" max="100"></void-number-input>
+      <void-number-input value="180" unit="°" min="0" max="360" step="15"></void-number-input>
+      <void-number-input value="1200" prefix="€" unit="/mo" precision="0"></void-number-input>
+    </div>
+  `,
+};

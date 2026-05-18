@@ -1,4 +1,4 @@
-import { html } from 'lit';
+import { html, nothing } from 'lit';
 import { property, query } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
 
@@ -16,6 +16,8 @@ export class VoidNumberInput extends VoidElement {
   @property({ type: String }) placeholder: string = '';
   @property({ type: String, reflect: true }) controls: 'sides' | 'right' | 'none' = 'sides';
   @property({ type: String }) label: string = '';
+  @property({ type: String }) prefix: string = '';
+  @property({ type: String }) unit: string = '';
 
   private _pressTimer: ReturnType<typeof setTimeout> | null = null;
   private _repeatTimer: ReturnType<typeof setInterval> | null = null;
@@ -188,6 +190,7 @@ export class VoidNumberInput extends VoidElement {
 
     return html`
       ${this.controls !== 'none' && this.controls !== 'right' ? decrementBtn : ''}
+      ${this.prefix ? html`<span class="void-number-input-prefix">${this.prefix}</span>` : nothing}
       <input
         class="void-number-input-field"
         type="text"
@@ -201,6 +204,7 @@ export class VoidNumberInput extends VoidElement {
         @blur=${this._onBlur}
         @change=${this._onInputChange}
       />
+      ${this.unit ? html`<span class="void-number-input-unit">${this.unit}</span>` : nothing}
       ${this.controls === 'right'
         ? html`<div class="void-number-input-btn-group">${incrementBtn}${decrementBtn}</div>`
         : ''}
