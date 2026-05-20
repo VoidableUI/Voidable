@@ -1,0 +1,68 @@
+/* ============================================================
+   void-bar-chart — light DOM SVG, theme-driven
+   ============================================================ */
+
+void-bar-chart {
+  display: block;
+  width: 100%;
+  font-family: var(--void-font-mono);
+  color: var(--void-color-text);
+}
+
+void-bar-chart svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+/* Gridlines */
+void-bar-chart .void-bar-chart-grid line {
+  stroke: var(--void-chart-grid);
+  stroke-width: 1;
+  shape-rendering: crispEdges;
+}
+
+/* Axis tick labels */
+void-bar-chart .void-bar-chart-y-axis text,
+void-bar-chart .void-bar-chart-x-axis text {
+  font-family: var(--void-font-mono);
+  font-size: var(--void-text-2xs);
+  fill: var(--void-chart-tick-label);
+  letter-spacing: var(--void-tracking-wide);
+}
+
+/* Bars — default 'filled' variant.
+   rx/ry pick up --void-radius-sm so [data-shape="sharp"] on <html>
+   auto-squares the corners (token cascades to 0). */
+void-bar-chart .void-bar-chart-bar {
+  fill: var(--series-color, var(--void-color-accent));
+  stroke: none;
+  rx: var(--void-radius-sm);
+  ry: var(--void-radius-sm);
+  transition: y var(--void-duration-fast) var(--void-ease-out),
+              height var(--void-duration-fast) var(--void-ease-out);
+}
+
+/* 'outline' variant — tinted fill + stroke */
+void-bar-chart[variant="outline"] .void-bar-chart-bar {
+  fill: color-mix(in srgb, var(--series-color, var(--void-color-accent)) 18%, transparent);
+  stroke: var(--series-color, var(--void-color-accent));
+  stroke-width: 1.5;
+}
+
+/* 'wireframe' variant — stroke only, no fill */
+void-bar-chart[variant="wireframe"] .void-bar-chart-bar {
+  fill: none;
+  stroke: var(--series-color, var(--void-color-accent));
+  stroke-width: 1.5;
+}
+
+/* Value labels above bars */
+void-bar-chart .void-bar-chart-values text {
+  font-family: var(--void-font-mono);
+  font-size: var(--void-text-2xs);
+  font-weight: var(--void-weight-medium);
+  fill: var(--void-color-text);
+  letter-spacing: var(--void-tracking-wide);
+}
