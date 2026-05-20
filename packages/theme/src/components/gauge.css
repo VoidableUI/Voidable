@@ -1,0 +1,182 @@
+/* ============================================================
+   void-gauge — light DOM SVG, theme-driven
+   ============================================================ */
+
+void-gauge {
+  display: inline-block;
+  font-family: var(--void-font-mono);
+  color: var(--void-color-text);
+}
+
+void-gauge svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+/* Background track — the empty arc */
+void-gauge .void-gauge-track {
+  fill: none;
+  stroke: var(--void-chart-grid);
+  stroke-linecap: round;
+}
+
+/* Zone bands — subtle threshold backgrounds. Butt caps so adjacent zones
+   meet cleanly without overlapping rounded "blobs" at the boundaries.
+   This base rule covers the 'filled' variant (stroked centerline arcs). */
+void-gauge .void-gauge-zone {
+  fill: none;
+  stroke: var(--zone-color, var(--void-color-text-muted));
+  stroke-linecap: butt;
+  opacity: 0.25;
+}
+
+/* Outline variant: zones are closed-band paths (not stroked arcs), so
+   paint via fill instead of stroke. Opacity sits below the value's
+   14% color-mix fill — the filled portion must read as the prominent
+   element with zones as faint backdrop hints, not the other way around. */
+void-gauge[variant="outline"] .void-gauge-zone {
+  fill: var(--zone-color, var(--void-color-text-muted));
+  stroke: none;
+  opacity: 0.10;
+}
+
+/* Half-disk cap that rounds the leading/trailing edge of the zone bands
+   without overlapping the straight section of the zone arc. Used only
+   by the filled variant — the outline variant bakes its caps directly
+   into the band path. */
+void-gauge .void-gauge-zone-cap {
+  fill: var(--zone-color, var(--void-color-text-muted));
+  stroke: none;
+  opacity: 0.25;
+}
+
+
+/* Value fill — solid arc. Rounded caps give the overall filled portion
+   a soft leading and trailing edge. Segments overlay on top with butt
+   caps; the value-fill's round caps remain visible at the start/end. */
+void-gauge .void-gauge-value {
+  fill: none;
+  stroke: var(--value-color, var(--void-color-accent));
+  stroke-linecap: round;
+}
+
+/* Per-segment arcs (overlay on top of value fill). Butt caps so
+   inter-segment boundaries are straight, not overlapping circles.
+   Round leading/trailing edges are added as separate cap circles
+   (.void-gauge-segment-cap) painted underneath in the first/last
+   segment's color. */
+void-gauge .void-gauge-segment {
+  fill: none;
+  stroke: var(--segment-color, var(--void-color-accent));
+  stroke-linecap: butt;
+  cursor: pointer;
+}
+
+/* Leading/trailing round caps for the segment group. Painted before
+   the segment arcs so the arcs cover the inward-facing half — only
+   the outward-facing half remains visible as a rounded edge. */
+void-gauge .void-gauge-segment-cap {
+  fill: var(--segment-color, var(--void-color-accent));
+  stroke: none;
+}
+
+/* 'outline' variant — matches outline-button styling:
+   - 14% color-mix fill (the tinted background of outline buttons)
+   - 36% color-mix stroke as a hairline border around the band
+   The value/segment paths render as closed bands (not stroked centerline
+   arcs) when variant="outline", so the SVG fill + stroke combo works. */
+void-gauge[variant="outline"] .void-gauge-value {
+  fill: color-mix(in srgb, var(--value-color, var(--void-color-accent)) 14%, transparent);
+  stroke: color-mix(in srgb, var(--value-color, var(--void-color-accent)) 36%, transparent);
+  stroke-width: 1 !important;
+}
+
+void-gauge[variant="outline"] .void-gauge-segment {
+  fill: color-mix(in srgb, var(--segment-color, var(--void-color-accent)) 14%, transparent);
+  stroke: color-mix(in srgb, var(--segment-color, var(--void-color-accent)) 36%, transparent);
+  stroke-width: 1 !important;
+}
+
+void-gauge[variant="outline"] .void-gauge-segment-cap {
+  fill: color-mix(in srgb, var(--segment-color, var(--void-color-accent)) 14%, transparent);
+  stroke: color-mix(in srgb, var(--segment-color, var(--void-color-accent)) 36%, transparent);
+  stroke-width: 1;
+}
+
+/* 'wireframe' variant — thin stroke, no opacity change */
+void-gauge[variant="wireframe"] .void-gauge-track,
+void-gauge[variant="wireframe"] .void-gauge-value,
+void-gauge[variant="wireframe"] .void-gauge-segment {
+  stroke-width: 1.5 !important;
+}
+
+/* Gauges are inherently arc shapes — sharp/curvy doesn't apply.
+   Use the `gaps` prop on the component to control segment whitespace. */
+
+/* Tick marks — speedometer-style indicator lines outside the arc band */
+void-gauge .void-gauge-tick {
+  stroke: var(--void-chart-axis, var(--void-color-border-strong));
+  stroke-linecap: butt;
+}
+
+void-gauge .void-gauge-tick-minor {
+  stroke-width: 1;
+  opacity: 0.5;
+}
+
+void-gauge .void-gauge-tick-major {
+  stroke-width: 2;
+  opacity: 1;
+}
+
+/* Center value label */
+void-gauge .void-gauge-center-value {
+  font-family: var(--void-font-mono);
+  font-size: var(--void-text-2xl);
+  font-weight: var(--void-weight-semibold);
+  fill: var(--void-color-text);
+  letter-spacing: var(--void-tracking-tight);
+}
+
+/* Center unit suffix */
+void-gauge .void-gauge-center-unit {
+  font-family: var(--void-font-mono);
+  font-size: var(--void-text-sm);
+  fill: var(--void-color-text-muted);
+  letter-spacing: var(--void-tracking-wide);
+}
+
+/* ── Hover tooltip (segments only) ───────────────────────────── */
+
+void-gauge .void-gauge-segment {
+  cursor: pointer;
+}
+
+void-gauge .void-gauge-tooltip-bg {
+  fill: var(--void-color-bg-elevated);
+  stroke: var(--void-color-border);
+  stroke-width: 1;
+}
+
+void-gauge .void-gauge-tooltip-name {
+  font-family: var(--void-font-mono);
+  font-size: var(--void-text-2xs);
+  font-weight: var(--void-weight-semibold);
+  fill: var(--void-color-text);
+  text-transform: uppercase;
+  letter-spacing: var(--void-tracking-widest);
+}
+
+void-gauge .void-gauge-tooltip-value {
+  font-family: var(--void-font-mono);
+  font-size: var(--void-text-xs);
+  font-weight: var(--void-weight-medium);
+  fill: var(--void-color-text);
+}
+
+void-gauge .void-gauge-tooltip-pct {
+  fill: var(--void-color-text-secondary);
+  font-weight: var(--void-weight-normal);
+}
