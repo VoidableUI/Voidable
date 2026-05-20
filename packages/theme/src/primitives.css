@@ -3,6 +3,16 @@
    Raw scales only. No semantic meaning.
    ============================================================ */
 
+/* Type --void-anim-scale so per-element inline overrides
+   (style="--void-anim-scale: 2") cascade reliably. Other animation
+   tokens stay untyped so their calc() expressions resolve lazily at
+   the consumer site, picking up local scale overrides. */
+@property --void-anim-scale {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 1;
+}
+
 :root {
   /* ── Stone palette ── */
   --void-stone-50:  #fafaf9;
@@ -211,10 +221,34 @@
   --void-ring-hair:        0 0 0 1px rgba(255,255,255,.06);
   --void-ring-hair-strong: 0 0 0 1px rgba(255,255,255,.12);
 
-  /* ── Motion — durations ── */
-  --void-duration-fast:   100ms;
-  --void-duration-normal: 200ms;
-  --void-duration-slow:   300ms;
+  /* ── Motion — durations
+       All durations scale with --void-anim-scale (1 = default, 0 = off).
+       Override per-element via inline style="--void-anim-scale: N" or
+       page-wide via <html data-anim-speed="…"> below. */
+  --void-anim-scale:      1;
+  --void-duration-fast:   calc(100ms * var(--void-anim-scale));
+  --void-duration-normal: calc(200ms * var(--void-anim-scale));
+  --void-duration-slow:   calc(300ms * var(--void-anim-scale));
+
+  /* Chart-specific base durations — consumed by JS rAF loops.
+       JS reads these as plain values, then multiplies by the
+       cascaded --void-anim-scale at the element's site. (Calc'd
+       tokens would break parseFloat in getComputedStyle.) */
+  --void-duration-chart-enter: 700ms;
+  --void-stagger-chart-bars:   40ms;
+
+  /* Chart series palette — cycle for multi-series charts */
+  --void-chart-series-1: var(--void-color-accent);
+  --void-chart-series-2: var(--void-color-info);
+  --void-chart-series-3: var(--void-color-success);
+  --void-chart-series-4: var(--void-color-warning);
+  --void-chart-series-5: var(--void-color-error);
+  --void-chart-series-6: var(--void-color-notice);
+
+  /* Chart structural colors */
+  --void-chart-grid:       color-mix(in srgb, var(--void-color-border) 60%, transparent);
+  --void-chart-axis:       var(--void-color-border-strong);
+  --void-chart-tick-label: var(--void-color-text-muted);
 
   /* ── Motion — easings ── */
   --void-ease-in:     cubic-bezier(0.4, 0, 1, 0.2);
@@ -234,4 +268,21 @@
   /* ── Sidebar ── */
   --void-sidebar-width:           15rem;
   --void-sidebar-collapsed-width: 3.75rem;
+}
+
+/* ── Animation speed levels ─────────────────────────────────────
+   Override the global scale; off = no animation, instant = ~15ms.
+   ─────────────────────────────────────────────────────────────── */
+
+:root[data-anim-speed="off"]      { --void-anim-scale: 0; }
+:root[data-anim-speed="slowest"]  { --void-anim-scale: 3; }
+:root[data-anim-speed="slow"]     { --void-anim-scale: 1.75; }
+:root[data-anim-speed="normal"]   { --void-anim-scale: 1; }
+:root[data-anim-speed="fast"]     { --void-anim-scale: 0.5; }
+:root[data-anim-speed="faster"]   { --void-anim-scale: 0.25; }
+:root[data-anim-speed="instant"]  { --void-anim-scale: 0.05; }
+
+/* Reduced-motion fallback — only when no explicit setting */
+@media (prefers-reduced-motion: reduce) {
+  :root:not([data-anim-speed]) { --void-anim-scale: 0; }
 }
