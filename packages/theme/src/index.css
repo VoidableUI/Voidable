@@ -69,3 +69,9 @@
 @import './app-shell/detail.css';
 @import './app-shell/modal-actions.css';
 @import './app-shell/subtable.css';
+
+/* Charts */
+@import './components/bar-chart.css';
+@import './components/line-chart.css';
+@import './components/donut-chart.css';
+@import './components/gauge.css';
