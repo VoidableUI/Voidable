@@ -1,0 +1,95 @@
+/* ============================================================
+   void-donut-chart — light DOM SVG, theme-driven
+   ============================================================ */
+
+void-donut-chart {
+  display: inline-block;
+  font-family: var(--void-font-mono);
+  color: var(--void-color-text);
+}
+
+void-donut-chart svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+/* Segment — default 'filled' variant.
+   Donut shape is inherently circular — sharp/curvy doesn't apply here.
+   Use the `gaps` prop on the component to control whitespace between
+   segments (boolean or %). */
+void-donut-chart .void-donut-chart-segment {
+  fill: var(--segment-color, var(--void-color-accent));
+  stroke: var(--segment-color, var(--void-color-accent));
+  stroke-width: 0;
+}
+
+/* 'outline' variant — tinted fill + stroke */
+void-donut-chart[variant="outline"] .void-donut-chart-segment {
+  fill: color-mix(in srgb, var(--segment-color, var(--void-color-accent)) 18%, transparent);
+  stroke-width: 1.5;
+}
+
+/* 'wireframe' variant — stroke only */
+void-donut-chart[variant="wireframe"] .void-donut-chart-segment {
+  fill: none;
+  stroke-width: 1.5;
+}
+
+/* Center total (when show-total) */
+void-donut-chart .void-donut-chart-total text {
+  font-family: var(--void-font-mono);
+  font-size: var(--void-text-xl);
+  font-weight: var(--void-weight-semibold);
+  fill: var(--void-color-text);
+  letter-spacing: var(--void-tracking-tight);
+}
+
+/* Per-segment labels (when show-values).
+   paint-order: stroke draws a bg-colored halo BEHIND the text, making it
+   legible against any segment color (white text on white segment would
+   otherwise vanish). The halo inverts with theme — black in dark mode,
+   white in light mode. */
+void-donut-chart .void-donut-chart-labels text {
+  font-family: var(--void-font-mono);
+  font-size: var(--void-text-2xs);
+  font-weight: var(--void-weight-medium);
+  fill: var(--void-color-text);
+  letter-spacing: var(--void-tracking-wide);
+  paint-order: stroke;
+  stroke: var(--void-color-bg);
+  stroke-width: 3px;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  pointer-events: none;
+}
+
+/* ── Hover tooltip ───────────────────────────────────────────── */
+
+void-donut-chart .void-donut-chart-tooltip-bg {
+  fill: var(--void-color-bg-elevated);
+  stroke: var(--void-color-border);
+  stroke-width: 1;
+}
+
+void-donut-chart .void-donut-chart-tooltip-name {
+  font-family: var(--void-font-mono);
+  font-size: var(--void-text-2xs);
+  font-weight: var(--void-weight-semibold);
+  fill: var(--void-color-text);
+  text-transform: uppercase;
+  letter-spacing: var(--void-tracking-widest);
+}
+
+void-donut-chart .void-donut-chart-tooltip-value {
+  font-family: var(--void-font-mono);
+  font-size: var(--void-text-xs);
+  font-weight: var(--void-weight-medium);
+  fill: var(--void-color-text);
+}
+
+void-donut-chart .void-donut-chart-tooltip-pct {
+  fill: var(--void-color-text-secondary);
+  font-weight: var(--void-weight-normal);
+}
