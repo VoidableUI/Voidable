@@ -1,0 +1,137 @@
+/* ============================================================
+   void-line-chart — light DOM SVG, theme-driven
+   ============================================================ */
+
+void-line-chart {
+  display: block;
+  width: 100%;
+  font-family: var(--void-font-mono);
+  color: var(--void-color-text);
+}
+
+void-line-chart svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+void-line-chart .void-line-chart-grid line {
+  stroke: var(--void-chart-grid);
+  stroke-width: 1;
+  shape-rendering: crispEdges;
+}
+
+void-line-chart .void-line-chart-y-axis text,
+void-line-chart .void-line-chart-x-axis text {
+  font-family: var(--void-font-mono);
+  font-size: var(--void-text-2xs);
+  fill: var(--void-chart-tick-label);
+  letter-spacing: var(--void-tracking-wide);
+}
+
+/* Series group — left-to-right reveal via clip-path */
+void-line-chart .void-line-chart-series {
+  clip-path: inset(0 calc((1 - var(--reveal, 1)) * 100%) 0 0);
+}
+
+/* Stroked line — curvy (round joins) by default.
+   [data-shape="sharp"] on any ancestor switches to mitered joins. */
+void-line-chart .void-line-chart-line {
+  fill: none;
+  stroke: var(--series-color, var(--void-color-accent));
+  stroke-width: 2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+[data-shape="sharp"] void-line-chart .void-line-chart-line {
+  stroke-linejoin: miter;
+  stroke-linecap: butt;
+}
+
+/* Area under line — default 'outline' variant: ~18% tinted fill */
+void-line-chart .void-line-chart-area {
+  fill: color-mix(in srgb, var(--series-color, var(--void-color-accent)) 18%, transparent);
+  stroke: none;
+}
+
+/* 'filled' variant — emphasize the area (stronger fill) */
+void-line-chart[variant="filled"] .void-line-chart-area {
+  fill: color-mix(in srgb, var(--series-color, var(--void-color-accent)) 40%, transparent);
+}
+
+/* 'wireframe' variant — no area at all, just the line */
+void-line-chart[variant="wireframe"] .void-line-chart-area {
+  display: none;
+}
+
+void-line-chart .void-line-chart-values text {
+  font-family: var(--void-font-mono);
+  font-size: var(--void-text-2xs);
+  font-weight: var(--void-weight-medium);
+  fill: var(--void-color-text);
+  letter-spacing: var(--void-tracking-wide);
+}
+
+/* ── Hover crosshair + tooltip ───────────────────────────────── */
+
+/* Vertical hairline at the hovered x */
+void-line-chart .void-line-chart-hairline {
+  stroke: var(--void-color-border-strong);
+  stroke-width: 1;
+  stroke-dasharray: 3 3;
+  pointer-events: none;
+}
+
+/* Per-series marker box at the hovered point */
+void-line-chart .void-line-chart-marker {
+  fill: var(--void-color-bg);
+  stroke: var(--marker-color, var(--void-color-accent));
+  stroke-width: 2;
+  rx: 2;
+  ry: 2;
+  pointer-events: none;
+}
+
+/* Tooltip background — bg-elevated for contrast against any chart variant */
+void-line-chart .void-line-chart-tooltip-bg {
+  fill: var(--void-color-bg-elevated);
+  stroke: var(--void-color-border);
+  stroke-width: 1;
+  pointer-events: none;
+}
+
+/* Tooltip label (the x-axis category at this index) */
+void-line-chart .void-line-chart-tooltip-label {
+  font-family: var(--void-font-mono);
+  font-size: var(--void-text-2xs);
+  font-weight: var(--void-weight-semibold);
+  fill: var(--void-color-text);
+  text-transform: uppercase;
+  letter-spacing: var(--void-tracking-widest);
+  pointer-events: none;
+}
+
+/* Series swatch in the tooltip */
+void-line-chart .void-line-chart-tooltip-swatch {
+  fill: var(--swatch-color, var(--void-color-accent));
+  pointer-events: none;
+}
+
+/* Series name in the tooltip */
+void-line-chart .void-line-chart-tooltip-name {
+  font-family: var(--void-font-sans);
+  font-size: var(--void-text-xs);
+  fill: var(--void-color-text-secondary);
+  pointer-events: none;
+}
+
+/* Series value in the tooltip — right-aligned, mono */
+void-line-chart .void-line-chart-tooltip-value {
+  font-family: var(--void-font-mono);
+  font-size: var(--void-text-xs);
+  font-weight: var(--void-weight-medium);
+  fill: var(--void-color-text);
+  pointer-events: none;
+}
