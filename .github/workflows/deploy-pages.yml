@@ -51,7 +51,10 @@ jobs:
       - name: Get UI bundle size
         id: get_bundle_size
         run: |
-          BYTES=$(gzip -c packages/ui/dist/ui.js | wc -c)
+          BUNDLE_DIR="packages/ui/dist"
+          test -d "$BUNDLE_DIR" || { echo "::error::$BUNDLE_DIR missing"; exit 1; }
+          BYTES=$(find "$BUNDLE_DIR" -name '*.js' -type f -exec cat {} + | gzip -c | wc -c)
+          test "$BYTES" -gt 0 || { echo "::error::bundle size came up zero"; exit 1; }
           KB=$(echo "scale=1; $BYTES / 1024" | bc)
           echo "size=${KB} kB" >> "$GITHUB_OUTPUT"
 
