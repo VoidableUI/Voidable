@@ -6,7 +6,6 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "development": "./src/index.ts",
       "default": "./dist/alpine.js"
     }
   },
