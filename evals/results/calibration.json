@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-25T14:52:21.208Z",
+  "generatedAt": "2026-11-25T15:56:56.032Z",
   "tasks": {
     "avatar-upload-svelte": {
       "passed": 8,
@@ -261,6 +261,9 @@
         "void-field",
         "void-input",
         "void-panel",
+        "void-panel-body",
+        "void-panel-header",
+        "void-panel-title",
         "void-switch",
         "void-textarea"
       ]

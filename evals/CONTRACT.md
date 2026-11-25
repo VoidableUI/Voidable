@@ -14,7 +14,7 @@ How to find every Voidable element and read its state the way a user, an agent d
 | `void-alert` | alert | text content (its void-alert-title and void-alert-description parts) | color (reflected) | always role="alert", so a static, non-urgent notice is announced as urgent; no status variant |
 | `void-avatar` | img | alt attribute | — | without alt the host is role="img" with an empty aria-label: an unnamed image (axe image-alt / role-img-alt) |
 | `void-badge` | status | text content | color (reflected) | every badge is role="status", a live region: a table of status badges is a page of live regions, and a decorative badge cannot opt out |
-| `void-banner` | banner | text content | dismissable (reflected) | role="banner" is the page header landmark; a second banner, or one inside <main>, is invalid |
+| `void-banner` | banner | text content (its void-banner-title and void-banner-description parts) | color (reflected)<br>a void-banner-close part makes it dismissible | role="banner" is the page header landmark; a second banner, or one inside <main>, is invalid |
 | `void-bar-chart` | img | aria-label attribute | — | data is a property only (its shape is in the manifest and `voidable ref`); the drawn values are not exposed as text |
 | `void-breadcrumbs` | navigation | fixed "Breadcrumb" | — | — |
 | `void-button` | button | text content or aria-label | disabled (reflected)<br>aria-disabled="true" while disabled (own or a disabled fieldset), absent otherwise | not form-associated: it submits and resets its closest form like a native button but is not in form.elements |
@@ -24,7 +24,7 @@ How to find every Voidable element and read its state the way a user, an agent d
 | `void-carousel-slide` | group | none (aria-roledescription="slide") | — | — |
 | `void-checkbox` | checkbox | text content | checked (reflected)<br>aria-checked ("mixed" when indeterminate) | — |
 | `void-checkbox-group` | group | label attribute (aria-label) | disabled (reflected) | the selected values are a property only (value: string[]); read them from the child checkboxes |
-| `void-collapsible` | inner | heading attribute, on the rendered button | open (reflected)<br>aria-expanded on the rendered button | — |
+| `void-collapsible` | inner | its void-collapsible-trigger part, which is the button | open (reflected)<br>aria-expanded on the trigger part | — |
 | `void-color-picker` | — | aria-label / aria-labelledby on the host, moved onto the inner hex input | value (reflected)<br>open (reflected) | no role on the host |
 | `void-combobox` | inner | void-field label or aria-label / aria-labelledby on the host (moved onto it), on the inner role="combobox" input (aria-label falls back to the placeholder) | open (reflected)<br>aria-expanded on the inner combobox<br>role="option" with data-selected on the rendered options<br>value (property only: the attribute is the initial value and is not updated) | the current value is not reflected to an attribute: [value=...] selectors and attribute assertions see the initial value only<br>aria-selected on the rendered options marks the keyboard-active option, not the chosen one; the choice is only in data-selected<br>the void-option children are not the options a user sees: the list renders its own role="option" copies |
 | `void-compose-input` | — | void-field label or aria-label / aria-labelledby on the host (moved onto it), on the inner textarea | value (property only: the attribute is the initial value and is not updated) | the current value is not reflected to an attribute: [value=...] selectors and attribute assertions see the initial value only<br>no role on the host; the send button has no stable name |
@@ -36,7 +36,7 @@ How to find every Voidable element and read its state the way a user, an agent d
 | `void-dropdown-menu` | inner | the control in its void-dropdown-menu-trigger part | open (reflected)<br>aria-haspopup="menu", aria-expanded and aria-controls on the trigger control<br>role="menu" on the void-dropdown-menu-content part<br>role="menuitem" items | — |
 | `void-dropdown-menu-item` | menuitem | text content | value (reflected)<br>disabled (reflected)<br>aria-disabled<br>destructive (reflected) | — |
 | `void-editable` | — | aria-label / aria-labelledby on the host, moved onto the role="button" preview and the inner input | value (reflected)<br>editing (reflected) | no role on the host |
-| `void-error-fallback` | alert | heading attribute | — | — |
+| `void-error-fallback` | alert | text content (its void-error-fallback-title part, or the heading attribute while no part is written) | — | void-retry comes only from the built-in retry button; write your own listener for buttons in void-error-fallback-actions |
 | `void-field` | — | its label names the control inside (aria-labelledby, and for= on native controls) | error (reflected) -> aria-invalid and aria-describedby on the control | — |
 | `void-file-upload` | inner | the drop zone is a role="button" named "Drop files here or browse", or by aria-label / aria-labelledby on the host (moved onto it); void-field label is not applied | the chosen file names as text | files over max-size or not matching accept are dropped silently: no event, no error attribute, nothing to assert<br>no attribute reflects whether a file is chosen |
 | `void-gauge` | img | aria-label attribute | value (property only: the attribute is the initial value and is not updated) | the current value is not reflected to an attribute: [value=...] selectors and attribute assertions see the initial value only |
@@ -57,7 +57,7 @@ How to find every Voidable element and read its state the way a user, an agent d
 | `void-number-input` | inner | void-field label or aria-label / aria-labelledby on the host (moved onto it), else the label attribute, on the inner role="spinbutton" input | value (reflected; absent when the field is empty)<br>aria-valuenow on the inner spinbutton (absent when empty) | — |
 | `void-option` | — | text content | selected (reflected) | not the element users interact with (see void-combobox) |
 | `void-pagination` | inner | the rendered nav is named "Pagination"; buttons by page number, "Previous page", "Next page" | value (attribute)<br>aria-current="page" on the current page button or link | value is not reflected after a click: read aria-current instead |
-| `void-panel` | region | label attribute (aria-label) | — | without label it is an unnamed role="region" |
+| `void-panel` | region | its void-panel-title part (aria-labelledby), or aria-label | — | without a title part or an aria-label it is an unnamed role="region" |
 | `void-pin-input` | group | fixed "PIN input" | value (property only: the attribute is the initial value and is not updated) | the current value is not reflected to an attribute: [value=...] selectors and attribute assertions see the initial value only |
 | `void-popover` | — | the control in its void-popover-trigger part (aria-labelledby on the role="dialog" void-popover-content part) | open (reflected)<br>aria-haspopup="dialog", aria-expanded and aria-controls on the trigger control | — |
 | `void-progress` | progressbar | none | aria-valuenow<br>aria-valuemin<br>aria-valuemax<br>value (reflected) | no accessible name |
@@ -80,13 +80,13 @@ How to find every Voidable element and read its state the way a user, an agent d
 | `void-tag` | — | text content | removable (reflected)<br>role="listitem" inside a void-list or a role="list" parent | — |
 | `void-tags-input` | inner | void-field label or aria-label / aria-labelledby on the host (moved onto it), on the inner entry input | — | the tags are a property (value: TagValue[]), not reflected |
 | `void-textarea` | inner | void-field label or aria-label / aria-labelledby on the host (moved onto it), on the inner textarea | value (attribute)<br>error (reflected) | — |
-| `void-toast` | status | text content (role="alert" for error and warning) | color (reflected) | no attribute says whether it is still showing; it is removed from the DOM after duration |
+| `void-toast` | status | text content (its void-toast-title and void-toast-description parts; role="alert" for error and warning) | color (reflected)<br>a void-toast-close part makes it dismissible | no attribute says whether it is still showing; it is removed from the DOM after duration |
 | `void-toast-container` | region | fixed "Notifications" (aria-live="polite") | — | — |
 | `void-toggle` | button | text content | pressed (reflected)<br>aria-pressed | — |
 | `void-toggle-group` | group | aria-label from the author | value (reflected, comma list when multiple; without one, taken from toggles written with pressed) | — |
 | `void-tooltip` | inner | its void-tooltip-content part (role="tooltip"), linked to the trigger control by aria-describedby | open (reflected) | — |
 
-## Gaps (51)
+## Gaps (52)
 
 - `void-accordion`: no group role or name; the items are only found by their trigger buttons
 - `void-action-input`: the current value is not reflected to an attribute: [value=...] selectors and attribute assertions see the initial value only
@@ -112,6 +112,7 @@ How to find every Voidable element and read its state the way a user, an agent d
 - `void-donut-chart`: data is a property only (its shape is in the manifest and `voidable ref`); the drawn values are not exposed as text
 - `void-drawer`: as void-dialog: getByRole("dialog") cannot be used as a scope for the parts; scope by the host (locator("void-drawer[open]"))
 - `void-editable`: no role on the host
+- `void-error-fallback`: void-retry comes only from the built-in retry button; write your own listener for buttons in void-error-fallback-actions
 - `void-file-upload`: files over max-size or not matching accept are dropped silently: no event, no error attribute, nothing to assert
 - `void-file-upload`: no attribute reflects whether a file is chosen
 - `void-gauge`: the current value is not reflected to an attribute: [value=...] selectors and attribute assertions see the initial value only
@@ -125,7 +126,7 @@ How to find every Voidable element and read its state the way a user, an agent d
 - `void-nav-bar`: role="navigation" on a top bar that usually holds search and account controls; a <nav> inside it makes a nested, unnamed landmark
 - `void-option`: not the element users interact with (see void-combobox)
 - `void-pagination`: value is not reflected after a click: read aria-current instead
-- `void-panel`: without label it is an unnamed role="region"
+- `void-panel`: without a title part or an aria-label it is an unnamed role="region"
 - `void-pin-input`: the current value is not reflected to an attribute: [value=...] selectors and attribute assertions see the initial value only
 - `void-progress`: no accessible name
 - `void-radio-group`: the current value is not reflected to an attribute: [value=...] selectors and attribute assertions see the initial value only
