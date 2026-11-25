@@ -17,6 +17,7 @@ import (
 	mcpcmd "github.com/VoidableUI/Voidable/tools/voidable/cmd/mcp"
 	refcmd "github.com/VoidableUI/Voidable/tools/voidable/cmd/ref"
 	skillcmd "github.com/VoidableUI/Voidable/tools/voidable/cmd/skill"
+	versioncmd "github.com/VoidableUI/Voidable/tools/voidable/cmd/version"
 	"github.com/VoidableUI/Voidable/tools/voidable/internal/domain"
 	"github.com/VoidableUI/Voidable/tools/voidable/internal/infra/embedded"
 	"github.com/VoidableUI/Voidable/tools/voidable/internal/infra/render"
@@ -24,8 +25,12 @@ import (
 	"github.com/VoidableUI/Voidable/tools/voidable/internal/infra/skillgen"
 )
 
-// Version is set from main.go, which receives it via -ldflags.
-var Version = "dev"
+// Version, Commit and Date are set from main.go, which receives them via -ldflags.
+var (
+	Version = "dev"
+	Commit  = "unknown"
+	Date    = "unknown"
+)
 
 type services struct {
 	once sync.Once
@@ -92,6 +97,13 @@ func NewRootCmd() *cobra.Command {
 			return skillgen.New(lib), nil
 		}),
 		installcmd.NewCmd(embedded.Source{}),
+		versioncmd.NewCmd(func() versioncmd.Info {
+			manifest := "unreadable"
+			if lib, err := svc.library(context.Background()); err == nil {
+				manifest = lib.Version()
+			}
+			return versioncmd.Info{Version: Version, Commit: Commit, Date: Date, Manifest: manifest, Assets: embedded.HasAssets()}
+		}),
 	)
 	return cmd
 }

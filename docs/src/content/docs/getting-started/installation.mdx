@@ -15,6 +15,16 @@ npm install @voidable/ui @voidable/theme
 
 Lit 3 is a peer dependency of `@voidable/ui`, so your app shares a single copy of it with every Voidable package. npm, pnpm and Bun install it automatically; with Yarn run `yarn add lit` as well.
 
+## Install the command-line tool (optional)
+
+The `voidable` tool checks your markup, looks up any element and can serve both to an AI agent. It is a single binary with no dependencies:
+
+```bash
+curl -fsSL https://voidable.dev/install.sh | sh
+```
+
+[For AI agents](/getting-started/for-agents/#install-it) covers the manual download, verifying it and connecting it over MCP. `voidable install --dir public/vendor/voidable` also writes the library, `lit` and the theme into a project with no Node toolchain: see [Loading components](/getting-started/loading/).
+
 ## Import the theme
 
 Add the theme CSS to your app entry point. This loads all design tokens and component styles, in cascade layers your own CSS can override without `!important`:

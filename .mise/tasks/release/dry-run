@@ -17,3 +17,6 @@ scripts/release/gem.sh
 scripts/release/hex.sh
 scripts/release/composer.sh
 scripts/release/github-release.sh "$OUT"/npm/*.tgz "$OUT"/gem/*.gem "$OUT"/hex/*.tar | tail -n 1
+# The binaries are a separate, later step in the workflow (they never gate the release above).
+scripts/release/binaries.sh
+scripts/release/binaries-attach.sh

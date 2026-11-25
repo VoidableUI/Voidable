@@ -140,3 +140,20 @@ func TestGenCheckDrift(t *testing.T) {
 		t.Error("want drift error")
 	}
 }
+
+// TestVersionCommand: `voidable version` reports the injected build facts and
+// whether the library assets are embedded, without any network access.
+func TestVersionCommand(t *testing.T) {
+	oldV, oldC, oldD := Version, Commit, Date
+	t.Cleanup(func() { Version, Commit, Date = oldV, oldC, oldD })
+	Version, Commit, Date = "1.2.3", "abc1234", "2026-01-02T03:04:05Z"
+	out, err := run(t, "version")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, want := range []string{"voidable 1.2.3\n", "commit:   abc1234\n", "built:    2026-01-02T03:04:05Z\n", "manifest: @voidable/ui ", "assets:   ", "platform: "} {
+		if !strings.Contains(out, want) {
+			t.Errorf("version output lacks %q:\n%s", want, out)
+		}
+	}
+}

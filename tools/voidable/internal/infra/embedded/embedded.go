@@ -130,3 +130,7 @@ func (Source) Assets(_ context.Context) (fs.FS, error) {
 	}
 	return fs.Sub(assetFS, "data/assets")
 }
+
+// HasAssets reports whether this binary was built with -tags assets, which
+// `voidable install` needs.
+func HasAssets() bool { return hasAssets }
