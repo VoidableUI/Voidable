@@ -180,3 +180,20 @@ export const TextFormatting: Story = {
     </void-toggle-group>
   `,
 };
+
+export const PressedInMarkup: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story: 'A group without `value` takes it from the toggles written with `pressed` (server markup often marks the toggle, not the group). A `value` on the group wins over `pressed`.',
+      },
+    },
+  },
+  render: () => html`
+    <void-toggle-group aria-label="Alignment">
+      <void-toggle value="left">Left</void-toggle>
+      <void-toggle value="center" pressed>Center</void-toggle>
+      <void-toggle value="right">Right</void-toggle>
+    </void-toggle-group>
+  `,
+};

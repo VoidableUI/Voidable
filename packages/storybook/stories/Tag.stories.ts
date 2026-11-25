@@ -80,3 +80,19 @@ export const Removable: Story = {
     </div>
   `,
 };
+
+export const InAList: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story: 'Inside an element with `role="list"` (or a `void-list`) each tag is a list item; on its own a tag has no role.',
+      },
+    },
+  },
+  render: () => html`
+    <div role="list" aria-label="Applied filters" style="display: flex; gap: 0.5rem;">
+      <void-tag removable>Open</void-tag>
+      <void-tag removable>Assigned to me</void-tag>
+    </div>
+  `,
+};

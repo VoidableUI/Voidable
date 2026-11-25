@@ -27,7 +27,7 @@ A misspelt event name never fires, and nothing complains; the [development warni
 | React | `<Input onVoidChange={(e) => …} />` from `@voidable/ui-react` |
 | Alpine / Livewire | `x-void-on:void-change="handler($event.detail)"` |
 | Rails (Stimulus) | `data-action="void-change->search#filter"` |
-| Phoenix LiveView | the `VoidEvent` hook forwards events to the server with `pushEvent` |
+| Phoenix LiveView | `phx-click` / `phx-change` / `phx-submit` first; for other events, `events` on a `live_voidable` component (the `VoidEvent` hook) forwards them with `pushEvent` |
 
 </div>
 
