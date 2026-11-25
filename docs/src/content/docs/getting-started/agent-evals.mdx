@@ -1,0 +1,39 @@
+---
+title: Measuring agent-friendliness
+description: How Voidable tests whether AI coding agents build working interfaces with it.
+---
+
+Voidable is meant to be the UI kit that AI coding agents use well. That claim is only worth something if it is measured, and measured the way the result is used: by running what the agent wrote.
+
+## The eval
+
+The repository has an evaluation harness in `evals/`. It gives a model a UI task, collects the file it writes, renders that file in headless Chromium against the built library and theme, and scores whether the interface works.
+
+**Tasks.** 28 tasks of the kind real apps need: a sign-in form, a settings page with sections, a data table with a toolbar, row actions and pagination, dashboards with stat tiles and charts, confirm dialogs, a multi-step form with validation, sidebar app shells, tabs, filterable comboboxes, toasts, a date range, an empty state, file uploads, master-detail drawers and a dark/light toggle. Each is phrased as a developer would phrase it and says nothing about Voidable's API. They are spread over plain HTML, React (TSX), Svelte 5, Rails ERB with Turbo, Phoenix HEEx and Laravel Blade with Livewire. Server templates are rendered by the real template engines (ActionView, the LiveView HEEx engine, Illuminate View) with fixture data.
+
+**Context conditions.** The same tasks run under three conditions, so their difference is the value of what Voidable ships for agents:
+
+1. the package name only;
+2. the compact reference from `voidable ref`, with a lookup tool;
+3. the generated skill plus the `ref`, `check` and `snippet` tools, as an agent connected to `voidable mcp` has them.
+
+**Scoring.** Every result is judged by what it does, not by how it reads:
+
+- `voidable check` finds no wrong markup (unknown elements or attributes, invalid values, misplaced children);
+- the template compiles or the bundle builds;
+- task-specific checks pass in the browser, written against roles, labels and visible text: the form submits the expected fields, the dialog opens, closes and returns focus, the table pages and its row menu acts, the right tab panel shows;
+- no console errors;
+- nothing overflows at 390 px wide;
+- axe-core reports no serious accessibility violation in the agent's own markup.
+
+Each task has a reference solution written by hand. A check the reference cannot pass is reported as a library defect instead of being held against the agent. The report also counts tokens, turns and tool calls, because what it costs an agent to get it right is part of friendliness, and it groups the failures (which wrong attribute, which composition mistake) so each group points at something to fix in the library, the manifest or the skill.
+
+## The selector and state contract
+
+The checks above only work if every component can be found and its state read without internal knowledge. `evals/CONTRACT.md` lists, for every element, its role, where its accessible name comes from and which attributes reflect its state, and it lists the places where no stable handle exists yet. A test checks the contract against the Custom Elements Manifest and in a real browser.
+
+## Results
+
+No results are published yet. When the first live run is in, its numbers will appear here with their spread over repetitions, and later runs will be compared with it.
+
+To run the evals yourself, see `evals/README.md` in the repository.

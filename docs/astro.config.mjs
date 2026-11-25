@@ -70,6 +70,7 @@ export default defineConfig({
             { label: 'Theming', slug: 'getting-started/theming' },
             { label: 'Design Tokens', slug: 'getting-started/tokens' },
             { label: 'Migrating from the framework packages', slug: 'getting-started/migrating-from-framework-packages' },
+            { label: 'Measuring agent-friendliness', slug: 'getting-started/agent-evals' },
           ],
         },
         {

@@ -198,6 +198,10 @@ set -euo pipefail
 | `mise run release:test` | Unit tests for the release scripts (bump rules, plan, version lint) |
 | `mise run voidable:ci` | Lint, test and build the Go CLI in `tools/voidable` (installs the pinned Go on demand; `VOIDABLE_SKIP_GO=1` skips it and `lint:markup`) |
 | `mise run lint:markup` | `voidable check` over docs, stories, examples and adapter templates; open product decisions are in `.voidable/markup-allowlist.txt` |
+| `mise run evals:setup` | Prepare the agent evals (library, voidable CLI, Blade and HEEx fixtures, Chromium) |
+| `mise run evals -- <cmd>` | Agent evals CLI: `run`, `report`, `estimate`, `calibrate`, `list`, `contract` (live runs cost money; not in `ci`) |
+| `mise run evals:test` | Unit, scoring and contract tests of the eval harness (part of `ci`; browser tests skip without Chromium) |
+| `mise run evals:calibrate` | Score the reference solutions and rewrite `evals/results/calibration.json` |
 | `mise run docs` | Start docs dev server |
 | `mise run docs:build` | Build docs for deployment |
 
@@ -213,6 +217,14 @@ set -euo pipefail
 - **Astro 6 + Starlight** — docs site (`docs/`)
 
 The docs Open Graph image is generated from `docs/scripts/og-image.svg` with `mise run docs_og` (the PNG is committed). With the current mise (2026.11) task files whose names contain a colon (`docs:build`, `storybook:build`, `docs:og`) are exposed with an underscore (`docs_build`, `storybook_build`, `docs_og`); run `mise tasks` to see the exact names. Tasks in directories (`lint:tokens`, `liveview:demo`) keep the colon.
+
+## Agent Evals
+
+`evals/` measures whether AI agents build working UIs with Voidable (#54, #27). A model gets a task from `evals/tasks/` under one of three context conditions (package name only; the `voidable ref` index and lookup tool; the generated skill with the ref/check/snippet tools), its file is rendered in headless Chromium (HTML, React, Svelte, and ERB/HEEx/Blade through the real template engines), and it is scored by `voidable check`, task checks written against roles, labels and text, console errors, 390 px overflow and axe. Runs go through the Anthropic TypeScript SDK's tool runner with `ANTHROPIC_API_KEY` from the environment; cassettes allow exact offline replay and a stub tests the harness without a key. `evals/README.md` covers running, adding a task and scoring.
+
+- Changing a component's roles, names or reflected state: update `evals/contract/contract.mjs`, run `mise run evals -- contract` to regenerate `evals/CONTRACT.md`, and keep `mise run evals:test` green.
+- Changing what a reference solution relies on: `mise run evals:calibrate` and commit `evals/results/calibration.json`.
+- After a live run worth keeping: `mise run evals -- report <run> --baseline` and commit `evals/results/baseline.json`.
 
 ## Component Conventions
 
