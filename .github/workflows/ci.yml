@@ -33,3 +33,7 @@ jobs:
 
       - name: Run CI
         run: mise run ci
+        env:
+          # `mise run` would otherwise install every tool in mise.toml (erlang,
+          # elixir, ruby, php) that the step above deliberately skipped.
+          MISE_TASK_RUN_AUTO_INSTALL: "false"

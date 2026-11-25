@@ -58,6 +58,7 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           default_bump: false
+          fetch_all_tags: true
           release_branches: master
           tag_prefix: gem-hotwire-v
           paths: packages/hotwire/gem/**,.github/workflows/release-gem-hotwire.yml

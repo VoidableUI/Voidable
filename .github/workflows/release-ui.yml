@@ -64,6 +64,7 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           default_bump: false
+          fetch_all_tags: true
           release_branches: master
           tag_prefix: ui-v
           paths: packages/ui/**,.github/workflows/release-ui.yml
