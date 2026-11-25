@@ -124,7 +124,7 @@ export class VoidElement extends LitElement {
   /** @internal The element's projection controller (see ProjectionController). */
   declare [PROJECTION_KEY]?: ProjectionController;
   /** @internal Controllers that carry what they wrote on parts into the server's markup (see parts.ts). */
-  declare [MORPH_PARTICIPANTS]?: Array<{ voidBeforeMorph(incoming: Element): void }>;
+  declare [MORPH_PARTICIPANTS]?: Array<{ voidBeforeMorph(incoming: Element): void; isCopy?(incoming: Element): boolean }>;
 
   /** Owned host attributes: last value this component wrote (null = it removed it). */
   #ownAttrs: Map<string, string | null> | null = null;
@@ -593,7 +593,8 @@ export class VoidElement extends LitElement {
       // Or a detached copy of a rendered element (LiveView patches a clone of
       // a locked element, then morphs the live element to that clone): lift
       // its consumer content out of the copied chrome and drop the chrome.
-      const copy = stripSerializedChrome(incoming);
+      // Explicit parts have no chrome: a copy shows itself by the ids its parts' controller generated.
+      const copy = stripSerializedChrome(incoming) || (this[MORPH_PARTICIPANTS] ?? []).some(p => p.isCopy?.(incoming));
       // The server stopped naming the host: the moved name goes as well.
       const label = this.#hostLabel;
       if (label) {

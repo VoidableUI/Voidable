@@ -52,6 +52,8 @@ export const MORPH_PARTICIPANTS: unique symbol = Symbol.for('@voidable/ui:morph-
 
 export interface MorphParticipant {
   voidBeforeMorph(incoming: Element): void;
+  /** Whether `incoming` is a copy of the live element rather than server markup. */
+  isCopy?(incoming: Element): boolean;
 }
 
 type Host = ReactiveControllerHost & HTMLElement & { [MORPH_PARTICIPANTS]?: MorphParticipant[] };
@@ -387,6 +389,28 @@ export class PartsController implements ReactiveController, MorphParticipant {
    * controlled (`set`) one, which follows the live element: it is state the
    * parent derives from its own reflected attributes.
    */
+  /**
+   * Whether `incoming` is a copy of the live element (`cloneNode`, LiveView's
+   * clone of a locked element) rather than server markup: one of its parts
+   * already carries an attribute this parent filled in because the author left
+   * it out (a generated id, a role), which server markup does not have. Call it
+   * before `voidBeforeMorph`, which writes those attributes onto the incoming
+   * element.
+   */
+  isCopy(incoming: Element): boolean {
+    for (const [el, attrs] of this._attrs) {
+      if (!this.owns(el)) continue;
+      let target: Element | null | undefined;
+      for (const [name, owned] of attrs) {
+        if (owned.mode !== 'provide' || owned.value === null) continue;
+        target ??= this._counterpart(el, incoming);
+        if (!target) break;
+        if (target.getAttribute(name) === owned.value) return true;
+      }
+    }
+    return false;
+  }
+
   voidBeforeMorph(incoming: Element): void {
     if (!this._attrs.size && !this._styles.size) return;
     const elements = new Set([...this._attrs.keys(), ...this._styles.keys()]);

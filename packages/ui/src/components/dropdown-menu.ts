@@ -223,7 +223,7 @@ export class VoidDropdownMenuItem extends VoidElement {
 
   updated(changed: Map<string, unknown>): void {
     if (changed.has('disabled')) {
-      this.setHostAttribute('aria-disabled', String(this.disabled));
+      this.setHostAttribute('aria-disabled', this.disabled ? 'true' : null);
     }
   }
 
