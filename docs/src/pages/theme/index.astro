@@ -10,7 +10,7 @@
 // is built from Voidable components and patterns, in the default theme:
 // the chrome does not move while you turn a knob.
 import '@voidable/theme';
-import '../../../../packages/theme/src/skins/loft.css';
+import '@voidable/theme/skins/loft.css';
 import knobsCss from '../../../../packages/theme/src/knobs.css?raw';
 import iconBrandGithub from '@tabler/icons/outline/brand-github.svg?raw';
 import iconSun from '@tabler/icons/outline/sun.svg?raw';
@@ -26,7 +26,7 @@ import { DTCG_VERSION, readTheme } from '../../../../packages/theme/build/tokens
 
 // Every theme file of the package is a preset; its stylesheet is loaded so a
 // preset's swatch can draw itself with data-void-theme.
-import.meta.glob('../../../../packages/theme/src/themes/*.css', { eager: true });
+import.meta.glob(['../../../../packages/theme/dist/themes/*.css', '!../../../../packages/theme/dist/themes/*.min.css'], { eager: true });
 const themeFiles = import.meta.glob<string>('../../../../packages/theme/src/themes/*.css', { eager: true, query: '?raw', import: 'default' });
 
 const defaults = declarations(ruleBody(stripComments(knobsCss), /^:root\s*\{/m));

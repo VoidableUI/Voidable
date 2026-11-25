@@ -5,6 +5,8 @@
 //   2. the scoping rule: no selector reaches an element outside `void-*` markup
 //      except the documented base, and the generated reset is current;
 //   3. the `!important` declarations, each of which inverts inside a layer;
+//   5. the attribute scales: every component's `color` takes the same set, and the
+//      theme styles every value on it.
 //   4. the built output: nothing unlayered, every export target present, every
 //      component stylesheet self-contained and generated, never hand-listed.
 import fs from 'node:fs';
@@ -18,23 +20,23 @@ const fail = (m) => errors.push(m);
 const rel = (f) => path.relative(L.ROOT, f);
 
 // ── 1. Layers ───────────────────────────────────────────────────────────────
-const EXPECTED = ['void.reset', 'void.tokens', 'void.themes', 'void.type', 'void.components', 'void.patterns', 'void.skins', 'void.a11y'];
+const EXPECTED = ['components.void.reset', 'components.void.tokens', 'components.void.themes', 'components.void.type', 'components.void.components', 'components.void.patterns', 'components.void.skins', 'components.void.a11y'];
 const statement = L.readLayersStatement();
 const order = statement.replace(/^@layer\s+|;$/g, '').split(',').map((s) => s.trim());
-if (order.filter((n) => n.startsWith('void.')).join() !== EXPECTED.join()) fail(`src/layers.css: the void.* layers must be ${EXPECTED.join(', ')} in that order (got ${order.filter((n) => n.startsWith('void.')).join(', ')})`);
+if (order.filter((n) => n.startsWith('components.void.')).join() !== EXPECTED.join()) fail(`src/layers.css: the components.void.* layers must be ${EXPECTED.join(', ')} in that order (got ${order.filter((n) => n.startsWith('components.void.')).join(', ')})`);
 const iv = order.indexOf(EXPECTED[0]);
 const before = order.slice(0, iv).join();
 const after = order.slice(iv + EXPECTED.length).join();
 if (before !== 'theme,base') fail('src/layers.css: `theme, base` must come before the void layers, so a framework reset (Tailwind preflight) sits under the theme whichever stylesheet loads first');
-if (after !== 'components,utilities') fail('src/layers.css: `components, utilities` must come after the void layers, so an application\'s own layers sit over the theme');
+if (after !== 'utilities') fail('src/layers.css: `utilities` must come after the void layers, so Tailwind utilities beat the theme');
 
 const LAYER_OF = (file) => {
-  if (/^(primitives|knobs|tokens)\.css$/.test(file)) return 'void.tokens';
-  if (file === 'reset.css') return 'void.reset';
-  if (file === 'type.css') return 'void.type';
-  if (file === 'forced-colors.css') return 'void.a11y';
-  if (file === 'pre-upgrade.css' || file.startsWith('components/')) return 'void.components';
-  if (/^(patterns|media|app-shell)\//.test(file)) return 'void.patterns';
+  if (/^(primitives|knobs|tokens)\.css$/.test(file)) return 'components.void.tokens';
+  if (file === 'reset.css') return 'components.void.reset';
+  if (file === 'type.css') return 'components.void.type';
+  if (file === 'forced-colors.css') return 'components.void.a11y';
+  if (file === 'pre-upgrade.css' || file.startsWith('components/')) return 'components.void.components';
+  if (/^(patterns|media|app-shell)\//.test(file)) return 'components.void.patterns';
   return undefined;
 };
 const imports = L.indexImports();
@@ -156,6 +158,38 @@ else {
   for (const key of ['./components/*', './patterns/*', './themes/*', './skins/*']) if (!pkg.exports[key]) fail(`package.json exports["${key}"] is missing`);
   if (!pkg.files?.includes('dist') || !pkg.files?.includes('src')) fail('package.json "files" must include both dist (the built stylesheets) and src (the sources)');
   if (fs.existsSync(path.join(DIST, 'void.min.css.map'))) fail('dist/void.min.css.map exists: the packaging lint rejects source maps');
+}
+
+// ── 5. Attribute scales ─────────────────────────────────────────────────────
+{
+  const UI = path.join(L.ROOT, '..', 'ui', 'src', 'components');
+  const COLORS = ['default', 'error', 'warning', 'caution', 'success', 'info', 'notice', 'highlight'];
+  const SIZES = ['sm', 'md', 'lg'];
+  // Delegates: the group hands its colour to the toggles it contains.
+  const DELEGATES = new Set(['toggle-group']);
+  const union = (src, attr) => {
+    const m = new RegExp(`@property\\([^)]*\\)\\s*${attr}:\\s*((?:'[a-z-]+'\\s*\\|?\\s*)+)`).exec(src);
+    return m ? [...m[1].matchAll(/'([a-z-]+)'/g)].map((x) => x[1]) : null;
+  };
+  for (const f of fs.readdirSync(UI).filter((x) => x.endsWith('.ts'))) {
+    const name = f.replace(/\.ts$/, '');
+    const src = fs.readFileSync(path.join(UI, f), 'utf8');
+    const colors = union(src, 'color');
+    if (colors) {
+      const missing = COLORS.filter((c) => !colors.includes(c));
+      const extra = colors.filter((c) => !COLORS.includes(c));
+      if (missing.length || extra.length) fail(`ui/src/components/${f}: color must be exactly ${COLORS.join(' | ')} (missing: ${missing.join(', ') || 'none'}; extra: ${extra.join(', ') || 'none'})`);
+      const cssFile = path.join(SRC, 'components', `${name}.css`);
+      if (!DELEGATES.has(name) && fs.existsSync(cssFile)) {
+        const css = fs.readFileSync(cssFile, 'utf8');
+        for (const c of COLORS.filter((x) => x !== 'default')) {
+          if (!new RegExp(`\\[(color|data-color)=["']?${c}["']?\\]`).test(css)) fail(`src/components/${name}.css does not style color="${c}", which <void-${name}> accepts`);
+        }
+      }
+    }
+    const sizes = union(src, 'size');
+    if (sizes && sizes.join() !== SIZES.join()) fail(`ui/src/components/${f}: size must be exactly ${SIZES.join(' | ')}, found ${sizes.join(' | ')}`);
+  }
 }
 
 if (errors.length) {

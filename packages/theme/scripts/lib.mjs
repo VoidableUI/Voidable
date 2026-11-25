@@ -30,7 +30,7 @@ export const voidLayers = () =>
     .replace(/^@layer\s+|;$/g, '')
     .split(',')
     .map((s) => s.trim())
-    .filter((s) => s.startsWith('void.'));
+    .filter((s) => s.startsWith('components.void.'));
 
 export const read = (f) => fs.readFileSync(f, 'utf8');
 export const stripComments = (s) => s.replace(/\/\*[\s\S]*?\*\//g, '');

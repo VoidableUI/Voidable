@@ -1,4 +1,4 @@
 /* Everything: the core (tokens, reset, components, patterns) and the optional
    base. `core.css` is the same without the base; see base.css. */
 @import './core.css';
-@import './base.css' layer(void.reset);
+@import './base.css' layer(components.void.reset);

@@ -96,6 +96,7 @@ export function environment(source, { scheme = 'dark', knobs = {}, skin = {} } =
     ...source.primitives,
     ...source.knobs,
     ...source.inputs,
+    '--void-color-scheme': scheme === 'dark' ? 'dark' : 'light',
     '--void-scheme-dark': dark,
     '--void-page-scheme-dark': dark,
     ...knobs,

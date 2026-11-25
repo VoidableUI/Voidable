@@ -31,7 +31,7 @@ Without a bundler, link the built file directly:
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@voidable/theme/dist/void.min.css" />
 ```
 
-Everything is in named cascade layers (`void.reset`, `void.tokens`, `void.components` and so on), so an unlayered rule in your app overrides the theme without `!important`. See Theming on the docs site.
+Everything is in named cascade layers (`components.void.reset`, `components.void.tokens`, `components.void.components` and so on), so an unlayered rule in your app overrides the theme without `!important`. See Theming on the docs site.
 
 In a JavaScript entry point processed by a bundler (for example Vite), `import '@voidable/theme';` also works.
 

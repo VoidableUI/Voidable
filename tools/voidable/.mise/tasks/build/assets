@@ -20,11 +20,12 @@ for pkg in lit lit-html lit-element @lit/reactive-element; do
   mkdir -p "$out/lit/$pkg"
   copy_js "$store/$pkg" "$out/lit/$pkg"
 done
-# The built, single-file theme (no @import chain), and the themes that go with it.
+# The built, single-file theme (no @import chain), and the themes and skins that go with it.
 (cd "$root" && pnpm --filter @voidable/theme build)
-mkdir -p "$out/theme/themes"
+mkdir -p "$out/theme/themes" "$out/theme/skins"
 cp "$root/packages/theme/dist/void.min.css" "$out/theme/void.min.css"
 cp "$root/packages/theme/dist/themes/"*.min.css "$out/theme/themes/"
+cp "$root/packages/theme/dist/skins/"*.min.css "$out/theme/skins/"
 
 cat > "$out/importmap.json" <<'JSON'
 {

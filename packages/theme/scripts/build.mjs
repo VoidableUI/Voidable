@@ -118,21 +118,21 @@ const wrapReset = (tags) => L.resetCss([...tags].sort());
 
 // layers, primitives, knobs, type, base, reset
 await emit('layers', statement);
-await emit('primitives', `${statement}\n${imp('primitives.css', 'void.tokens')}`);
-await emit('knobs', `${statement}\n${imp('knobs.css', 'void.tokens')}`);
-await emit('type', `${statement}\n${imp('type.css', 'void.type')}`);
-await emit('base', `${statement}\n${imp('base.css', 'void.reset')}`);
-await emit('reset', `${statement}\n${imp('reset.css', 'void.reset')}`);
+await emit('primitives', `${statement}\n${imp('primitives.css', 'components.void.tokens')}`);
+await emit('knobs', `${statement}\n${imp('knobs.css', 'components.void.tokens')}`);
+await emit('type', `${statement}\n${imp('type.css', 'components.void.type')}`);
+await emit('base', `${statement}\n${imp('base.css', 'components.void.reset')}`);
+await emit('reset', `${statement}\n${imp('reset.css', 'components.void.reset')}`);
 
 // tokens: everything a component's rules read
 await emit(
   'tokens',
-  [statement, imp('primitives.css', 'void.tokens'), imp('knobs.css', 'void.tokens'), imp('tokens.css', 'void.tokens'), imp('media/surface.css', 'void.patterns'), imp('type.css', 'void.type')].join('\n'),
+  [statement, imp('primitives.css', 'components.void.tokens'), imp('knobs.css', 'components.void.tokens'), imp('tokens.css', 'components.void.tokens'), imp('media/surface.css', 'components.void.patterns'), imp('type.css', 'components.void.type')].join('\n'),
 );
 
 // core and void
 await emit('core', `@import '${abs('core.css')}';`);
-await emit('void', `@import '${abs('core.css')}';\n${imp('base.css', 'void.reset')}`);
+await emit('void', `@import '${abs('core.css')}';\n${imp('base.css', 'components.void.reset')}`);
 
 // per component
 const exportsJson = { layers: L.voidLayers(), components: {}, patterns: {}, themes: [], skins: [] };
@@ -145,9 +145,9 @@ for (const name of components) {
   for (const f of files) for (const t of tagsOfFile(f)) tags.add(t);
   const upg = chain.map((n) => upgrade.byComponent.get(n) ?? '').join('');
   const fc = chain.map((n) => forced.byComponent.get(n) ?? '').join('');
-  const parts = [statement, impVirtual(`reset-${name}`, wrapReset(tags), 'void.reset'), ...files.map((f) => imp(f, 'void.components'))];
-  if (upg) parts.push(impVirtual(`upgrade-${name}`, upg, 'void.components'));
-  if (fc) parts.push(impVirtual(`forced-${name}`, fc, 'void.a11y'));
+  const parts = [statement, impVirtual(`reset-${name}`, wrapReset(tags), 'components.void.reset'), ...files.map((f) => imp(f, 'components.void.components'))];
+  if (upg) parts.push(impVirtual(`upgrade-${name}`, upg, 'components.void.components'));
+  if (fc) parts.push(impVirtual(`forced-${name}`, fc, 'components.void.a11y'));
   await emit(`components/${name}`, parts.join('\n'));
   exportsJson.components[name] = { requires: chain.filter((n) => n !== name), tags: [...tags].sort() };
 }
@@ -169,8 +169,8 @@ for (const [name, files] of Object.entries(patternGroups)) {
   const tags = new Set();
   for (const f of files) for (const t of tagsOfFile(f)) tags.add(t);
   const parts = [statement];
-  if (tags.size) parts.push(impVirtual(`reset-pattern-${name}`, wrapReset(tags), 'void.reset'));
-  for (const f of files) parts.push(imp(f, 'void.patterns'));
+  if (tags.size) parts.push(impVirtual(`reset-pattern-${name}`, wrapReset(tags), 'components.void.reset'));
+  for (const f of files) parts.push(imp(f, 'components.void.patterns'));
   await emit(`patterns/${name}`, parts.join('\n'));
   exportsJson.patterns[name] = { tags: [...tags].sort() };
 }
@@ -178,14 +178,14 @@ for (const [name, files] of Object.entries(patternGroups)) {
 // themes
 for (const f of L.listCss('themes')) {
   const n = path.basename(f, '.css');
-  await emit(`themes/${n}`, `${statement}\n${imp(f, 'void.themes')}`);
+  await emit(`themes/${n}`, `${statement}\n${imp(f, 'components.void.themes')}`);
   exportsJson.themes.push(n);
 }
 
 // skins
 for (const f of L.listCss('skins')) {
   const n = path.basename(f, '.css');
-  await emit(`skins/${n}`, `${statement}\n${imp(f, 'void.skins')}`);
+  await emit(`skins/${n}`, `${statement}\n${imp(f, 'components.void.skins')}`);
   exportsJson.skins.push(n);
 }
 

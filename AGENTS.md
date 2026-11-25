@@ -114,7 +114,7 @@ Computed from the knobs in plain CSS (`oklch()`, `color-mix()`, `calc()`; no bui
 - **Surfaces**: `bg`, `surface`, `bg-secondary`, `bg-elevated`, `bg-hover`, `bg-active`, `bg-overlay`
 - **Text**: `text`, `text-secondary`, `text-muted`, `text-disabled`, `text-on-accent`
 - **Borders**: `border` (divider), `border-strong`, `border-control` (3:1 control boundary), `border-focus`
-- **Accent**, and **status colours**: error, warning, caution, success, info, notice, highlight (each with a subtle variant); the `color` attribute of a component takes only error, warning, success, info and notice (the `caution` and `highlight` tokens remain for `void-state` and custom CSS)
+- **Accent**, and **status colours**: error, warning, caution, success, info, notice, highlight (each with a subtle variant); every component's `color` attribute takes the same eight values (default plus these)
 - **Control size**: `--void-control-height*`, `--void-control-padding*`, `--void-control-text*`
 - **Layout rhythm**: `--void-gap-tight|inside|stack|group|section`, `--void-gutter`, `--void-measure*`
 - **Type roles**: `--void-type-<role>-*` for label, value, unit, caption, heading, title, display, lede, body, code
@@ -344,9 +344,9 @@ void-button[color="info"]    { --tone: var(--void-color-info); }
 void-button[color="notice"]  { --tone: var(--void-color-notice); }
 ```
 
-Component CSS in `@voidable/theme` lives in `src/components/` with one file per component, imported by `src/core.css`, each into a cascade layer. `src/layers.css` declares the order (`theme, base, void.reset, void.tokens, void.themes, void.type, void.components, void.patterns, void.a11y, components, utilities`); a source file is never wrapped in `@layer` itself, only its `@import` is. `src/reset.css` is generated (scoped to `void-*` tags and what they contain): never hand-edit it, and never put a selector that matches an element outside a `void-*` component in the theme; `src/base.css` (`html`, `body`) is the one optional exception. `mise run theme:build` generates `packages/theme/dist/` (the single `void.css` and `void.min.css`, per-component and per-pattern files, `exports.json`); `lint:theme` checks the layer structure and the built output. Apps override the theme with unlayered CSS and no `!important`.
+Component CSS in `@voidable/theme` lives in `src/components/` with one file per component, imported by `src/core.css`, each into a cascade layer. `src/layers.css` declares the order (`theme, base, components.void.reset, components.void.tokens, components.void.themes, components.void.type, components.void.components, components.void.patterns, components.void.skins, components.void.a11y, utilities`: the theme's layers are children of `components` so Tailwind utilities beat them whichever stylesheet loads first; a skin lives in `components.void.skins`); a source file is never wrapped in `@layer` itself, only its `@import` is. `src/reset.css` is generated (scoped to `void-*` tags and what they contain): never hand-edit it, and never put a selector that matches an element outside a `void-*` component in the theme; `src/base.css` (`html`, `body`) is the one optional exception. `mise run theme:build` generates `packages/theme/dist/` (the single `void.css` and `void.min.css`, per-component and per-pattern files, `exports.json`); `lint:theme` checks the layer structure and the built output. Apps override the theme with unlayered CSS and no `!important`.
 
-Every enumerated attribute uses one scale: `size` is `sm | md | lg` (default `md`), `color` is `default | error | warning | success | info | notice`. Do not add steps or values to one component.
+Every enumerated attribute uses one scale: `size` is `sm | md | lg` (default `md`), `color` is `default | error | warning | caution | success | info | notice | highlight`. Do not add steps or values to one component.
 
 `void-button` has three variants of one size: `outline` (default), `filled` and `ghost` (nothing drawn at rest, a faint fill on hover; for row actions, toolbars and the quiet action beside a primary one).
 
