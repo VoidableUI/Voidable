@@ -44,6 +44,10 @@ void-tabs-content:not([active]) { display: none; }
 
 Where a part has state of its own the component writes it as a plain attribute on the part: `active` on the selected `<void-tabs-trigger>` and the visible `<void-tabs-content>`. Server markup can write the same attributes, so the page looks right before the script loads.
 
+## Opening and closing
+
+The content of a collapsible and of an accordion item animates its height when `open` changes, with no script measuring it: the host is a two-row grid, and the content row goes from `0fr` to `1fr` (animating grid rows is widely available in every browser). The animation follows `--void-anim-scale` and is off under `prefers-reduced-motion`. Closed content is hidden from the accessibility tree, the tab order and find-in-page by the theme from the host's attribute (`visibility`), and the component also marks it `hidden="until-found"` once the closing animation is over, where the browser supports that (Chrome and Edge 102, Firefox 148; not yet Safari): the content stays hidden from assistive technology, and find-in-page, a text fragment or an in-page link to text inside it opens the panel first (`void-toggle` fires). Both components use the same mechanism, and a server morph keeps the open state, the attribute and a running animation.
+
 ## Before the script loads
 
 `@voidable/theme/pre-upgrade.css` (included in the theme) gives every component its final layout before its JavaScript has run, so nothing shifts when it upgrades. The content of a closed popover, dropdown menu, hover card or tooltip is hidden until then, a closed dialog or drawer shows nothing, the first tab (or the one marked `active`) is visible, and a closed accordion item shows only its trigger.
@@ -87,7 +91,7 @@ The machine-readable form of this table is the `voidParts` entry of each compone
 | `<void-card>` | `-header` (holding `-title`, `-description`), `-body` (required), `-footer` | |
 | `<void-alert>` | `-title`, `-description` (required), `-close` (one control) | Without `-close` it cannot be dismissed. |
 | `<void-accordion>` | `<void-accordion-item>`, each with `<void-accordion-trigger>` and `<void-accordion-content>` | |
-| `<void-collapsible>` | `-trigger`, `-content` | The trigger is the button; closed content is hidden from `open`. |
+| `<void-collapsible>` | `-trigger`, `-content` | The trigger is the button; closed content is hidden from `open` and animates open and closed. |
 | `<void-panel>` | `-header` (holding `-title`, `-description`), `-body` (required) | The title names the region. |
 | `<void-banner>` | `-title`, `-description` (required), `-actions`, `-close` (one control) | Without `-close` it cannot be dismissed. |
 | `<void-toast>` | `-title`, `-description` (required), `-actions`, `-close` (one control) | `toast()` writes the same parts. |

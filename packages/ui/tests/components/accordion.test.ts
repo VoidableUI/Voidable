@@ -1,5 +1,5 @@
 // @vitest-environment happy-dom
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, beforeAll, afterAll } from 'vitest';
 import { VoidElement } from '../../src/base.js';
 import { VoidAccordion, VoidAccordionItem } from '../../src/components/accordion.js';
 
@@ -364,5 +364,59 @@ describe('VoidAccordionItem', () => {
       const trigger = el.querySelector('void-accordion-trigger') as HTMLElement;
       expect(trigger.getAttribute('aria-expanded')).toBe('true');
     });
+  });
+});
+
+describe('closed content is hidden="until-found" where the browser supports it', () => {
+  const proto = HTMLElement.prototype as unknown as Record<string, unknown>;
+  beforeAll(() => { proto.onbeforematch = null; });
+  afterAll(() => { delete proto.onbeforematch; });
+
+  it('marks closed content, takes the mark off on opening and puts it back after closing', async () => {
+    const el = createItem();
+    document.body.appendChild(el);
+    await el.updateComplete;
+    const content = el.querySelector('void-accordion-content') as HTMLElement;
+    expect(content.getAttribute('hidden')).toBe('until-found');
+    el.open = true;
+    await el.updateComplete;
+    expect(content.hasAttribute('hidden')).toBe(false);
+    el.open = false;
+    await el.updateComplete;
+    expect(content.getAttribute('hidden')).toBe('until-found');
+    el.remove();
+  });
+
+  it('a content part that starts open is never marked', async () => {
+    const el = createItem();
+    el.open = true;
+    document.body.appendChild(el);
+    await el.updateComplete;
+    expect(el.querySelector('void-accordion-content')!.hasAttribute('hidden')).toBe(false);
+    el.remove();
+  });
+
+  it('opens when find-in-page reaches the closed content (beforematch), and says so', async () => {
+    const el = createItem();
+    document.body.appendChild(el);
+    await el.updateComplete;
+    const toggles: boolean[] = [];
+    el.addEventListener('void-toggle', (e) => toggles.push((e as CustomEvent).detail.open));
+    el.querySelector('void-accordion-content')!.dispatchEvent(new Event('beforematch', { bubbles: true }));
+    await el.updateComplete;
+    expect(el.open).toBe(true);
+    expect(toggles).toEqual([true]);
+    expect(el.querySelector('void-accordion-content')!.hasAttribute('hidden')).toBe(false);
+    el.remove();
+  });
+
+  it('writes nothing where the browser lacks it', async () => {
+    delete proto.onbeforematch;
+    const el = createItem();
+    document.body.appendChild(el);
+    await el.updateComplete;
+    expect(el.querySelector('void-accordion-content')!.hasAttribute('hidden')).toBe(false);
+    el.remove();
+    proto.onbeforematch = null;
   });
 });

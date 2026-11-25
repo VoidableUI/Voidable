@@ -87,6 +87,45 @@ for (const engine of ENGINES) {
       expect(await page.evaluate(() => (window as any).__closes)).toBe(1);
     });
 
+    test('a morph while the collapsible is open or still animating neither replays the animation nor loses the open state', async ({ page }) => {
+      await page.evaluate(() => {
+        document.documentElement.style.setProperty('--void-anim-scale', '4');
+      });
+      await page.locator('#mc void-collapsible-trigger').click();
+      // Mid-animation: a transition is running on the host.
+      await page.waitForFunction(() => document.getElementById('mc')!.getAnimations().some((a) => 'transitionProperty' in a));
+      const started = await page.evaluate(() => {
+        const a = document.getElementById('mc')!.getAnimations().find((x) => 'transitionProperty' in x)!;
+        (window as any).__anim = a;
+        return a.currentTime;
+      });
+      await morph(page, serverMarkup(1));
+      const during = await page.evaluate(() => {
+        const host = document.getElementById('mc')!;
+        const a = (window as any).__anim as Animation;
+        return {
+          same: host.getAnimations().includes(a),
+          progressed: Number(a.currentTime) >= 0,
+          open: host.hasAttribute('open'),
+          hidden: document.querySelector('#mc void-collapsible-content')!.hasAttribute('hidden'),
+        };
+      });
+      expect(started).not.toBeNull();
+      expect(during.same, 'the same transition keeps running: it was not restarted').toBe(true);
+      expect(during.open).toBe(true);
+      expect(during.hidden).toBe(false);
+      await page.evaluate(() => Promise.all(document.getAnimations().map((a) => a.finished.catch(() => undefined))));
+      await settle(page);
+      // Open and settled: another morph starts nothing at all.
+      await morph(page, serverMarkup(1));
+      const after = await page.evaluate(() => ({
+        running: document.getElementById('mc')!.getAnimations().length + document.querySelector('#mc void-collapsible-content')!.getAnimations().length,
+        open: document.getElementById('mc')!.hasAttribute('open'),
+      }));
+      expect(after.open).toBe(true);
+      expect(after.running).toBe(0);
+    });
+
     test('a toast the server stops sending goes away and one it sends again comes back wired', async ({ page }) => {
       await morph(page, serverMarkup(1, { toast: false }));
       await expect(page.locator('#mt void-toast')).toHaveCount(0);

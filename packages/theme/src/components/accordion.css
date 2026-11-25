@@ -3,9 +3,20 @@ void-accordion {
   flex-direction: column;
 }
 
+/* Each item is a two-row grid, the trigger and then the content, and the
+   content row is 0fr closed and 1fr open: the row animates between them, so
+   content of any height opens and closes smoothly with no script measuring it
+   (animating grid rows is baseline widely available; where it is not, the
+   content just appears and disappears). */
 void-accordion-item {
-  display: block;
+  display: grid;
+  grid-template-rows: auto 0fr;
   border-bottom: var(--void-rule-between);
+  transition: grid-template-rows var(--void-duration-normal) var(--void-ease-in-out);
+}
+
+void-accordion-item[open] {
+  grid-template-rows: auto 1fr;
 }
 
 /* The trigger part is the button (role="button", a tab stop, written by the
@@ -55,15 +66,70 @@ void-accordion-item[open] > void-accordion-trigger::after {
   transform: rotate(90deg);
 }
 
-/* Closed content is hidden from the item's own attribute: no script needed. */
-void-accordion-content {
-  display: none;
+void-accordion-trigger {
+  grid-row: 1;
 }
 
-void-accordion-item[open] > void-accordion-content {
+/* The content is the second row. Closed, its box is empty (no block padding,
+   which would keep the row open) and it is visibility:hidden, so it is out of
+   the accessibility tree, the tab order and find-in-page, all from the item's
+   own attribute and before any script loads. The visibility change waits for
+   the closing animation to finish and happens at once on opening. The item
+   then also marks closed content hidden="until-found" (see accordion.ts),
+   which keeps it hidden from assistive technology and lets find-in-page open
+   it where the browser supports that. Same mechanism as the collapsible. */
+void-accordion-content {
+  grid-row: 2;
   display: block;
-  padding: var(--void-space-3) var(--void-space-4) var(--void-space-4);
+  min-height: 0;
+  overflow: hidden;
+  padding: 0 var(--void-space-4);
+  visibility: hidden;
   color: var(--void-color-text);
   font-family: var(--void-font-sans);
   font-size: var(--void-type-body-size);
+}
+
+void-accordion-item[open] > void-accordion-content {
+  padding-block: var(--void-space-3) var(--void-space-4);
+  visibility: visible;
+}
+
+/* hidden="until-found" hides through content-visibility; find-in-page only
+   searches it when it is not also visibility:hidden. */
+void-accordion-content[hidden="until-found"] {
+  visibility: visible;
+}
+
+/* Only once the element is defined: a page whose stylesheet arrives after the
+   first paint must not animate its open items into place. The visibility
+   change waits for the closing animation and happens at once on opening. */
+void-accordion-item:defined {
+  transition: grid-template-rows var(--void-duration-normal) var(--void-ease-in-out);
+}
+
+void-accordion-item:defined > void-accordion-content {
+  transition: padding-block var(--void-duration-normal) var(--void-ease-in-out),
+              visibility 0s linear var(--void-duration-normal);
+}
+
+void-accordion-item[open]:defined > void-accordion-content {
+  transition: padding-block var(--void-duration-normal) var(--void-ease-in-out),
+              visibility 0s linear 0s;
+}
+
+/* The until-found mark is put on once the content has closed; taking the delay
+   off here keeps visibility from lagging behind an opening that follows it. */
+void-accordion-item:defined > void-accordion-content[hidden="until-found"] {
+  transition: padding-block var(--void-duration-normal) var(--void-ease-in-out),
+              visibility 0s linear 0s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  void-accordion-item:defined,
+  void-accordion-item:defined > void-accordion-content,
+  void-accordion-item:defined > void-accordion-content[hidden="until-found"],
+  void-accordion-item[open]:defined > void-accordion-content {
+    transition: none;
+  }
 }
