@@ -182,6 +182,7 @@ export class VoidMenu extends VoidElement {
         emptyEl = document.createElement('div');
         emptyEl.className = 'void-menu-empty';
         emptyEl.textContent = 'No results found';
+        this._projection.own(emptyEl);
         list.appendChild(emptyEl);
       }
     } else if (emptyEl) {

@@ -67,6 +67,9 @@ export class VoidNumberInput extends InternalsFormControl(VoidElement) {
   /** Text the user typed since the last commit; null when the field shows `value`. */
   private _pendingText: string | null = null;
 
+  /** Typed text survives re-renders and morphs until committed, unless the server changes `value`. */
+  static override clientState = { _pendingText: 'value' };
+
   @query('.void-number-input-field') private _input!: HTMLInputElement;
 
   disconnectedCallback(): void {
@@ -275,7 +278,7 @@ export class VoidNumberInput extends InternalsFormControl(VoidElement) {
         class="void-number-input-field"
         type="text"
         inputmode=${this.precision === 0 ? 'numeric' : 'decimal'}
-        .value=${live(this._format(this.value))}
+        .value=${live(this._pendingText ?? this._format(this.value))}
         placeholder=${this.placeholder}
         ?disabled=${this.disabled}
         ?readonly=${this.readonly}

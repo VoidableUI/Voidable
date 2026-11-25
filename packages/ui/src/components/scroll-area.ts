@@ -15,7 +15,7 @@ export class VoidScrollArea extends VoidElement {
 
   // Consumer content is projected into the scroll viewport.
   protected readonly _projection = new ProjectionController(this, {
-    regions: [{ name: 'viewport', target: () => this.querySelector(':scope > .void-scroll-area-viewport') }],
+    regions: [{ name: 'viewport', target: () => this.querySelector(':scope > .void-scroll-area-viewport'), scrolls: true }],
   });
 
   protected override updated(_changed: Map<string, unknown>): void {

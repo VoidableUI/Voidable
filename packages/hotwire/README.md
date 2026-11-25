@@ -18,9 +18,13 @@ Application.start();
 VoidTurbo.start(); // returns a function that detaches the listeners
 ```
 
-`VoidTurbo` keeps client-managed state (`open`, `checked`, `selected`, `aria-*`)
-across Turbo morphs while the server keeps rendering the same value, and lets
-the server win as soon as it renders a different one.
+`VoidTurbo` calls each component's pre-morph hook during Turbo morphs: the
+state of every reflected property (`open`, `checked`, `pressed`, `collapsed`,
+`value`, ...) and the component's own `role` / `tabindex` / `aria-*` survive
+while the server keeps rendering the same value, and the server wins as soon
+as it renders a different one. The rule lives in `@voidable/ui` and is the
+same for the Livewire and LiveView adapters. A component whose server markup
+is identical to the previous render is skipped with its subtree.
 
 To load each component only when its tag first appears (including tags that
 arrive in Turbo visits, streams and frames), import `@voidable/ui/autoloader`

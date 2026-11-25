@@ -106,6 +106,11 @@ export class VoidSegmentedControl extends InternalsFormControl(VoidElement) {
 
   private _itemsSynced = false;
 
+  /** A morph may have replaced or added items that do not show the control's value yet. */
+  protected override morphedCallback(): void {
+    this._syncItems();
+  }
+
   /** The selected value, or nothing when no segment is selected. */
   protected formSubmission(): FormSubmission {
     return this.value || null;

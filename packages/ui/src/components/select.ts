@@ -109,11 +109,13 @@ export class VoidSelect extends NativeFormControl(VoidElement) {
   }
 
   /**
-   * When the option the value points at has been removed, fall back the way a native
-   * select does (the placeholder if there is one, else the first enabled option, else
-   * nothing) so the property, the native select and the submitted value agree. A value
-   * that never had an option (options still being parsed or rendered) is left alone.
-   * The change is programmatic, so no void-change is dispatched.
+   * When the option the value points at has been removed (the user picked it and the
+   * server, or a framework, removed it), fall back to the option the `value` attribute
+   * names (what the server says is selected), else the way a native select does (the
+   * placeholder if there is one, else the first enabled option, else nothing), so the
+   * property, the native select and the submitted value agree. A value that never had
+   * an option (options still being parsed or rendered) is left alone. The change is
+   * programmatic, so no void-change is dispatched.
    */
   private _reconcileRemovedSelection(select: HTMLSelectElement): void {
     const options = Array.from(select.options);
@@ -122,7 +124,9 @@ export class VoidSelect extends NativeFormControl(VoidElement) {
       return;
     }
     if (this._matchedValue === null || this._matchedValue !== this.value) return;
-    this.value = this.placeholder ? '' : (options.find((o) => !o.disabled)?.value ?? '');
+    const attr = this.getAttribute('value');
+    const named = attr !== null ? options.find((o) => o.value === attr && !o.disabled) : undefined;
+    this.value = named ? named.value : this.placeholder ? '' : (options.find((o) => !o.disabled)?.value ?? '');
     this._matchedValue = options.some((o) => o.value === this.value) ? this.value : null;
   }
 
@@ -142,6 +146,7 @@ export class VoidSelect extends NativeFormControl(VoidElement) {
       own = this.ownerDocument.createElement('option');
       own.className = 'void-select-placeholder';
       own.setAttribute(PLACEHOLDER_ATTR, '');
+      this._projection.own(own);
       own.value = '';
       own.disabled = true;
       own.hidden = true;
@@ -168,9 +173,10 @@ export class VoidSelect extends NativeFormControl(VoidElement) {
   /** Push the value into the native select without firing void-change. */
   private _applyValue(): void {
     const select = this.querySelector<HTMLSelectElement>(':scope > select');
-    if (select && select.value !== this.value) {
-      select.value = this.value;
-    }
+    if (!select) return;
+    if (select.value !== this.value) select.value = this.value;
+    // A value set in code that names an existing option counts as matched, like a picked one.
+    if (this.value && select.value === this.value) this._matchedValue = this.value;
   }
 
   /** Programmatic value sets reach the native select synchronously (a same-tick requestSubmit() sees them). */
@@ -217,6 +223,8 @@ export class VoidSelect extends NativeFormControl(VoidElement) {
   private _onChange(e: Event): void {
     const select = e.target as HTMLSelectElement;
     this.value = select.value;
+    // The user picked an existing option: if it is removed later, fall back (see _reconcileRemovedSelection).
+    this._matchedValue = this.value;
     this.dispatchEvent(new CustomEvent('void-change', { bubbles: true, composed: true, detail: { value: this.value } }));
   }
 }

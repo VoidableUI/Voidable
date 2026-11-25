@@ -128,15 +128,6 @@ export class VoidMultiselect extends InternalsFormControl(VoidElement) {
     this.removeEventListener('focusout', this._onFocusOut);
   }
 
-  /**
-   * The open list is transient UI state, not something the server renders: a morph whose
-   * markup does not carry `open` (it never does) must not close a list the user is using.
-   */
-  override voidBeforeMorph(incoming?: Element | null): boolean {
-    if (incoming && this.open && !incoming.hasAttribute('open')) incoming.setAttribute('open', '');
-    return super.voidBeforeMorph(incoming);
-  }
-
   protected override willUpdate(changed: Map<string, unknown>): void {
     super.willUpdate(changed);
     if (changed.has('open') && !this.open) {

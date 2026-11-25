@@ -65,7 +65,6 @@ test.describe('form', () => {
   });
 
   test('the slider value the user set is the value the server receives', async ({ page }) => {
-    expectedFailure('untracked:liveview-slider-reverts', 'the range input is re-created at 50 after the first server patch, so the server saves 50 although the user chose 60');
     await fillLabForm(page);
     await settle(page);
     await page.locator('#save').click();
@@ -160,7 +159,6 @@ test.describe('server updates while the user is mid-interaction', () => {
   });
 
   test('a selected tab stays selected and its panel text updates', async ({ page }) => {
-    expectedFailure('untracked:liveview-tabs-wiped', 'the first patch blanks the tab labels and the panels');
     await page.getByRole('tab', { name: 'Two' }).click();
     await page.click('#timer-on');
     const start = Number((await text(page, '#ticks')).replace('Ticks ', ''));
@@ -199,7 +197,6 @@ test.describe('server updates while the user is mid-interaction', () => {
   });
 
   test('the server selecting a tab wins over the user selection', async ({ page }) => {
-    expectedFailure('untracked:liveview-tabs-wiped', 'changing the value patches void-tabs and blanks its tabs and panels');
     await page.getByRole('tab', { name: 'One' }).click();
     await page.click('#server-tab');
     await expect(page.getByRole('tab', { name: 'Two' })).toHaveAttribute('aria-selected', 'true');

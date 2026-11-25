@@ -29,14 +29,11 @@
       morph: (html) => window.Turbo.morphChildren(root(), container(html)),
     },
     morphdom: {
-      start: () => root().querySelectorAll('*').forEach((el) => window.VoidLV.VoidDOM.onNodeAdded(el)),
+      // Elements record the server's attributes themselves when they connect.
+      start: () => {},
       morph: (html) =>
         window.morphdom(root(), container(html), {
           childrenOnly: true,
-          onNodeAdded: (el) => {
-            window.VoidLV.VoidDOM.onNodeAdded(el);
-            return el;
-          },
           onBeforeElUpdated: (from, to) => {
             window.VoidLV.VoidDOM.onBeforeElUpdated(from, to);
             return true;

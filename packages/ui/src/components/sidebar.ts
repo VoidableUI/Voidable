@@ -15,7 +15,24 @@ export class VoidSidebar extends VoidElement {
   /** Which side of the page the sidebar sits on: `left` (default) or `right`. */
   @property({ type: String, reflect: true }) position: 'left' | 'right' = 'left';
 
-  private _initialised = false;
+  /**
+   * Collapses or expands the sidebar on behalf of the user (call it from the
+   * control that toggles it, such as a `void-hamburger`) and dispatches
+   * `void-toggle` with `{ collapsed }`. Setting `collapsed` directly, or the
+   * server changing the attribute, dispatches nothing.
+   *
+   * @fires void-toggle
+   */
+  toggle(force?: boolean): void {
+    const next = force ?? !this.collapsed;
+    if (next === this.collapsed) return;
+    this.collapsed = next;
+    this.dispatchEvent(new CustomEvent('void-toggle', {
+      bubbles: true,
+      composed: true,
+      detail: { collapsed: this.collapsed },
+    }));
+  }
 
   connectedCallback(): void {
     super.connectedCallback();
@@ -29,20 +46,7 @@ export class VoidSidebar extends VoidElement {
   }
 
   updated(changed: Map<string, unknown>): void {
-    if (changed.has('collapsed')) {
-      this._updateWidth();
-      // The first update reports initialised properties as changed; that is
-      // not a toggle, so stay quiet until the user-visible state changes.
-      if (this._initialised) {
-        this.dispatchEvent(new CustomEvent('void-toggle', {
-          bubbles: true,
-          composed: true,
-          detail: { collapsed: this.collapsed },
-        }));
-      }
-    }
-    this._initialised = true;
-    if (changed.has('width') || changed.has('collapsedWidth')) {
+    if (changed.has('collapsed') || changed.has('width') || changed.has('collapsedWidth')) {
       this._updateWidth();
     }
   }

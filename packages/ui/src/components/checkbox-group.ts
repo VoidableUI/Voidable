@@ -102,6 +102,13 @@ export class VoidCheckboxGroup extends NativeFormControl(VoidElement) {
     }
   }
 
+  /** A morph may have replaced or added checkboxes that do not carry the group's name, form or validity yet. */
+  protected override morphedCallback(): void {
+    this._syncNames();
+    this._syncFormAttr();
+    this._syncRequiredValidity();
+  }
+
   private _boxes(): VoidCheckbox[] {
     return Array.from(this.querySelectorAll('void-checkbox')) as VoidCheckbox[];
   }

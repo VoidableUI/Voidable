@@ -36,6 +36,8 @@ export class VoidRadioGroup extends NativeFormControl(VoidElement) {
       this._syncRequired();
       this._syncFormAttr();
       this._syncChecked();
+      // Radios that arrived late (a framework, children re-created by innerHTML) get the default checkedness.
+      this.formRewriteNativeDefault();
       // Lets a pending native default (formWriteNativeDefault) reach radios that arrived late.
       this.requestUpdate();
     },
@@ -80,6 +82,14 @@ export class VoidRadioGroup extends NativeFormControl(VoidElement) {
   }
 
   private _didSync = false;
+
+  /** A morph may have replaced or added radios that do not show the group's value, name or form yet. */
+  protected override morphedCallback(): void {
+    this._syncNames();
+    this._syncRequired();
+    this._syncFormAttr();
+    this._syncChecked();
+  }
 
   protected formSyncNative(): void {
     // Programmatic value sets reach the radios (and their native inputs) synchronously.

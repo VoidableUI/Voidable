@@ -2,7 +2,7 @@ import { describe, it, expect, afterEach, vi } from 'vitest';
 import { VoidTurbo } from '../src/turbo.js';
 
 // The pre-morph hook: VoidTurbo calls voidBeforeMorph() on each void-* element
-// Turbo is about to morph, after recording the server state for it.
+// Turbo is about to morph, with Turbo's newElement.
 
 let stop: (() => void) | undefined;
 
@@ -31,16 +31,6 @@ function beforeMorph(el: Element, incoming: Element): CustomEvent {
   });
   el.dispatchEvent(event);
   return event;
-}
-
-function beforeAttribute(el: Element, attributeName: string): boolean {
-  const event = new CustomEvent('turbo:before-morph-attribute', {
-    bubbles: true,
-    cancelable: true,
-    detail: { attributeName, mutationType: 'update' },
-  });
-  el.dispatchEvent(event);
-  return !event.defaultPrevented;
 }
 
 function server(html: string): Element {
@@ -84,27 +74,5 @@ describe('VoidTurbo pre-morph hook', () => {
     document.body.innerHTML = '<void-badge id="b"></void-badge>';
     stop = VoidTurbo.start();
     expect(() => beforeMorph(document.getElementById('b')!, server('<void-badge id="b"></void-badge>'))).not.toThrow();
-  });
-
-  it('composes with server-wins state preservation', () => {
-    document.body.innerHTML = '<void-dialog id="d" open></void-dialog>';
-    const log: string[] = [];
-    const dialog = spied(document.getElementById('d')!, log);
-    // Unprojecting moves children only; prove the decision is made from host
-    // attributes recorded before it, not affected by it.
-    dialog.voidBeforeMorph.mockImplementation(() => {
-      log.push(`unproject with open=${dialog.hasAttribute('open')}`);
-      return true;
-    });
-    stop = VoidTurbo.start();
-
-    // Server still renders it open, client keeps it: open is not touched.
-    beforeMorph(dialog, server('<void-dialog id="d" open></void-dialog>'));
-    expect(beforeAttribute(dialog, 'open')).toBe(false);
-
-    // Server closes it: server wins, and the element is still unprojected for the morph.
-    beforeMorph(dialog, server('<void-dialog id="d"></void-dialog>'));
-    expect(beforeAttribute(dialog, 'open')).toBe(true);
-    expect(log).toEqual(['unproject with open=true', 'unproject with open=true']);
   });
 });

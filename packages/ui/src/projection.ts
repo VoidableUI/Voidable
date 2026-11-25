@@ -55,6 +55,13 @@ export interface ProjectionRegion {
    * parked and restored with the container. Only for function targets.
    */
   wrap?: (node: Node) => Element;
+  /**
+   * The container is itself a scroll viewport (a scroll area): its offsets are
+   * read when it is parked, even if no scroll event has reported them yet (a
+   * `scrollTop` set in code just before a morph). Other scrolled elements are
+   * found through scroll events, which costs nothing at park time.
+   */
+  scrolls?: boolean;
 }
 
 export interface ProjectionOptions {
@@ -87,6 +94,12 @@ const CONTAINER_ATTR = 'data-void-projection';
 const CHROME_ATTR = 'data-void-chrome';
 /** Set on each per-node wrapper of a `wrap` region. */
 const WRAP_ATTR = 'data-void-wrap';
+/**
+ * Comment data of the anchor that ends each wrapper. Frameworks find where to
+ * insert from `previousItem.nextSibling` (Solid, Vue); inside a wrapper that is
+ * this anchor, and an insert before it means "right after that item".
+ */
+const WRAP_END_DATA = 'void-item';
 
 type ProjectionHost = LitElement & { [PROJECTION_KEY]?: ProjectionController };
 type MovableParent = Node & { moveBefore?: (node: Node, child: Node | null) => void };
@@ -125,8 +138,6 @@ interface Parked {
   fragment: DocumentFragment | null;
   /** The consumer node that followed the chrome, to put it back in the same place. */
   anchor: Node | null;
-  /** Restores focus to a parked element where the nodes could not stay connected. */
-  focus: (() => void) | null;
   /** Scroll offsets of scrolled chrome elements, put back after the nodes return. */
   scroll: Array<[Element, number, number]>;
 }
@@ -138,6 +149,81 @@ const isStaleLooking = (n: Node): boolean =>
   (isElement(n) && n.hasAttribute(CHROME_ATTR));
 const isAnchor = (n: Node): boolean =>
   isComment(n) || (n.nodeType === Node.TEXT_NODE && !(n.textContent ?? '').trim());
+const isWrapEnd = (n: Node): n is Comment => isComment(n) && n.data === WRAP_END_DATA;
+
+/**
+ * Focus (and the focused field's value, selection and scroll) kept across a
+ * morph where `Element.moveBefore` is missing (Safari) or still blurs (Firefox,
+ * for a textarea): parking moves the focused element out of the document,
+ * which blurs it, and blur handlers may change its value. The first host to park it records it on the document;
+ * each host that re-projects tries to put it back, and the one that makes it
+ * connected again succeeds. Dropped at the end of the task.
+ */
+const FOCUS_KEY = Symbol.for('@voidable/ui:projection-focus');
+interface KeptFocus {
+  el: HTMLElement;
+  value: string | null;
+  range: [number, number, 'forward' | 'backward' | 'none'] | null;
+  scroll: [number, number];
+  /** The element's ancestors when it was recorded (it may be out of the document while held). */
+  within: Set<Element>;
+}
+type FocusDocument = Document & { [FOCUS_KEY]?: KeptFocus };
+
+function keepFocus(host: Element): void {
+  const doc = host.ownerDocument as FocusDocument;
+  const active = doc.activeElement as HTMLElement | null;
+  if (doc[FOCUS_KEY] || !active || active === doc.body || !host.contains(active)) return;
+  const field = active as Partial<HTMLInputElement>;
+  let range: KeptFocus['range'] = null;
+  try {
+    if (typeof field.selectionStart === 'number' && typeof field.selectionEnd === 'number') {
+      range = [field.selectionStart, field.selectionEnd, field.selectionDirection ?? 'none'];
+    }
+  } catch {
+    range = null;
+  }
+  const value = typeof field.value === 'string' ? field.value : null;
+  const within = new Set<Element>();
+  for (let p = active.parentElement; p; p = p.parentElement) within.add(p);
+  doc[FOCUS_KEY] = { el: active, value, range, scroll: [active.scrollTop, active.scrollLeft], within };
+  setTimeout(() => {
+    delete doc[FOCUS_KEY];
+  }, 0);
+}
+
+/**
+ * @internal True while a morph holds the focus of
+ * an element inside `host` (from just before it is moved out until it is
+ * focused again). Blur and focus handlers use it to ignore the blur and focus
+ * events that moving the element causes, so the morph does not commit, close
+ * or reset anything the user is doing.
+ */
+export function isFocusParked(host: Element): boolean {
+  const kept = (host.ownerDocument as FocusDocument)[FOCUS_KEY];
+  return !!kept && (kept.within.has(host) || host.contains(kept.el));
+}
+
+function restoreKeptFocus(doc: Document): void {
+  const kept = (doc as FocusDocument)[FOCUS_KEY];
+  if (!kept || !kept.el.isConnected) return;
+  const { el } = kept;
+  if (doc.activeElement !== el) el.focus({ preventScroll: true });
+  if (doc.activeElement !== el) return;
+  delete (doc as FocusDocument)[FOCUS_KEY];
+  const field = el as Partial<HTMLInputElement>;
+  // A blur handler that ran while the field was out of the document may have rewritten it.
+  if (kept.value !== null && field.value !== kept.value) field.value = kept.value;
+  if (kept.range) {
+    try {
+      field.setSelectionRange?.(kept.range[0], kept.range[1], kept.range[2]);
+    } catch {
+      // Input types without selection support.
+    }
+  }
+  if (el.scrollTop !== kept.scroll[0]) el.scrollTop = kept.scroll[0];
+  if (el.scrollLeft !== kept.scroll[1]) el.scrollLeft = kept.scroll[1];
+}
 
 /**
  * Moves `node` into `parent` before `ref`, preserving focus and other element
@@ -278,7 +364,7 @@ export class ProjectionController implements ReactiveController {
   private _start: Comment | null = null;
   private _end: Comment | null = null;
   private _observer: MutationObserver | null = null;
-  private _observedContainers = new Set<Element>();
+  private _observedContainers = new Set<Node>();
   private _placed = new WeakMap<Node, ProjectionRegion>();
   /** Top-level elements of the current render, in order. */
   private _chromeTop: Element[] = [];
@@ -309,9 +395,10 @@ export class ProjectionController implements ReactiveController {
     this._regions = options.regions ?? [];
     this._placement = options.placement ?? (this._regions.length ? 'start' : 'end');
     this._onChange = options.onChange;
-    // VoidElement gives every rendering component a region-less controller; a
-    // component that declares its own (with regions) replaces it. Both are
-    // created in the constructor, before anything was connected or rendered.
+    // VoidElement gives every rendering component without a controller of its
+    // own a region-less one on first connect; a component's own (with regions)
+    // is created in a field initializer, before anything was connected or
+    // rendered. Replacing a previous one is kept for controllers created later.
     const previous = this._host[PROJECTION_KEY];
     if (previous && previous !== this) host.removeController(previous);
     this._host[PROJECTION_KEY] = this;
@@ -331,8 +418,42 @@ export class ProjectionController implements ReactiveController {
     this._observer ??= new MutationObserver(() => this._onMutation());
     this._observer.observe(host, { childList: true });
     this._observedContainers.clear();
+    this._observeMarker();
     host.addEventListener('scroll', this._onScroll, { capture: true, passive: true });
     if (this._rendered) this._reconcile(true);
+  }
+
+  /**
+   * Watches the start marker's data. Solid updates a text-only child with
+   * `parent.firstChild.data = text`; on a host whose chrome comes first that
+   * first child is this marker, so the text lands here (see _redirectMarkerText).
+   */
+  private _observeMarker(): void {
+    const start = this._start;
+    if (!this._observer || !start || !this._host.isConnected || this._observedContainers.has(start)) return;
+    this._observedContainers.add(start);
+    this._observer.observe(start, { characterData: true });
+  }
+
+  /**
+   * Text written into a marker was meant for the host's first consumer text:
+   * put the marker back and give the text to that node (creating one, routed
+   * like any new child, if there is none).
+   */
+  private _redirectMarkerText(): void {
+    for (const [marker, data] of [[this._start, START_DATA], [this._end, END_DATA]] as const) {
+      if (!marker || marker.data === data) continue;
+      const text = marker.data;
+      marker.data = data;
+      const target = this._regions
+        .flatMap(r => this._regionNodes(r))
+        .find(n => n.nodeType === Node.TEXT_NODE) as Text | undefined;
+      if (target) {
+        if (target.data !== text) target.data = text;
+      } else if (text) {
+        moveNode(this._host, this._host.ownerDocument.createTextNode(text), this._placement === 'end' ? this._start : null);
+      }
+    }
   }
 
   /**
@@ -393,6 +514,11 @@ export class ProjectionController implements ReactiveController {
     this._recovered = false;
   }
 
+  /** True between {@link unproject} and re-projection. */
+  get parked(): boolean {
+    return this._parked !== null;
+  }
+
   /** Consumer nodes currently in the named region, in document order. */
   nodes(name: string): Node[] {
     const region = this._regions.find(r => r.name === name);
@@ -414,10 +540,53 @@ export class ProjectionController implements ReactiveController {
     return parent === container || (this._wrappers.has(parent as Element) && parent.parentNode === container);
   }
 
+  /**
+   * `host.insertBefore(element, null)` (or appendChild) on a rendered host:
+   * places the element at the end of its region right away, as the next
+   * mutation pass would, so a framework that goes on to read `nextSibling` of
+   * the items in that region (Solid reorders keyed lists so) sees it where it
+   * belongs. Returns false, leaving the append to the caller, for anything
+   * else: fragments, text, a parked or not yet rendered host, an element no
+   * container region takes.
+   */
+  append(node: Node): boolean {
+    if (!isElement(node) || this._parked || !this._rendered || !this._intact()) return false;
+    const region = this._placed.get(node) ?? this._route(node, 'after');
+    if (!region || typeof region.target !== 'function' || !region.target()) return false;
+    return this._place(node, region, null);
+  }
+
   /** `host.insertBefore(node, ref)` where `ref` has been projected into a container. */
   insertBefore<T extends Node>(node: T, ref: Node): T {
     if (node.nodeType === Node.DOCUMENT_FRAGMENT_NODE) {
       for (const child of Array.from(node.childNodes)) this.insertBefore(child, ref);
+      return node;
+    }
+    if (this.isWrapEnd(ref)) {
+      const wrapper = ref.parentNode as Element;
+      const container = wrapper.parentNode;
+      const item = Array.from(wrapper.childNodes).find(n => this._wrapperOf.get(n) === wrapper);
+      const region = item
+        ? this._placed.get(item)
+        : this._regions.find(r => r.wrap && typeof r.target === 'function' && r.target() === container);
+      if (container && region?.wrap && (!region.accepts || region.accepts(node, { initial: false, zone: 'insert' }))) {
+        const own = this._wrapperFor(node, region);
+        // After the item the anchor ends, or, for the anchor of a wrapper whose
+        // item has moved on, at the position the item had when it was read. A
+        // framework that inserts several nodes before the same reference (Solid,
+        // `before = prev.nextSibling` for a run of new items) gets them in order:
+        // the next one goes after the one inserted last.
+        const last = this._anchorAfter.get(ref);
+        const at = last && last !== own && last.parentNode === container ? last.nextSibling : item ? wrapper.nextSibling : wrapper;
+        if (own !== wrapper) moveNode(container, own, at);
+        this._anchorAfter.set(ref, own);
+        moveNode(own, node, this._wrapEnd(own));
+        this._placed.set(node, region);
+        if (isElement(node)) this._sawElement = true;
+        this._observeContainer(own);
+      } else {
+        moveNode(this._host, node, null);
+      }
       return node;
     }
     const region = this._route(node, 'insert');
@@ -456,6 +625,9 @@ export class ProjectionController implements ReactiveController {
     for (const n of doomed) {
       if (!nodes.includes(n)) n.parentNode?.removeChild(n);
     }
+    // All consumer content is new: route it as a fresh render would (the first
+    // element of an overlay becomes its trigger again).
+    this._sawElement = false;
     const ref = this._placement === 'end' ? this._start : null;
     for (const n of nodes) moveNode(host, n, ref);
     if (this._rendered) this._reconcile(true);
@@ -488,8 +660,20 @@ export class ProjectionController implements ReactiveController {
       .map(r => [r, (r.target as () => Element | null | undefined)()] as const)
       .filter((pair): pair is readonly [ProjectionRegion, Element] => !!pair[1])
       .sort((a, b) => (a[1].compareDocumentPosition(b[1]) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1));
+    const doc = host.ownerDocument;
+    const root = doc.documentElement as MovableParent | null;
+    const keepConnected = !!root && host.isConnected && typeof root.moveBefore === 'function';
+    // Without moveBefore, moving the focused element (chrome, or consumer content
+    // lifted onto the host) blurs it, and Firefox's moveBefore blurs a focused
+    // textarea: record it once, before anything moves.
+    keepFocus(host);
     // Before anything moves: emptying a container clamps its scroll offsets.
     const scroll: Array<[Element, number, number]> = [];
+    for (const [region, container] of containers) {
+      if (region.scrolls && !this._scrolled?.has(container) && (container.scrollTop || container.scrollLeft)) {
+        (this._scrolled ??= new Set()).add(container);
+      }
+    }
     if (this._scrolled) {
       for (const el of this._scrolled) {
         if (!host.contains(el)) {
@@ -509,10 +693,8 @@ export class ProjectionController implements ReactiveController {
       if (n === end) break;
     }
     const anchor = end.nextSibling;
-    const doc = host.ownerDocument;
-    const root = doc.documentElement as MovableParent | null;
-    const parked: Parked = { nodes: range, park: null, fragment: null, anchor, focus: null, scroll };
-    if (root && host.isConnected && typeof root.moveBefore === 'function') {
+    const parked: Parked = { nodes: range, park: null, fragment: null, anchor, scroll };
+    if (keepConnected) {
       // A direct child of <html>, outside <body> and any morph container, shared
       // by every host parked in this morph. Moved nodes stay connected, so a
       // focused chrome element (an input) keeps focus and selection without
@@ -521,7 +703,6 @@ export class ProjectionController implements ReactiveController {
       for (const n of range) moveNode(park, n, null);
       parked.park = park;
     } else {
-      parked.focus = range.map(n => captureFocus(n)).find(Boolean) ?? null;
       const fragment = doc.createDocumentFragment();
       for (const n of range) fragment.appendChild(n);
       parked.fragment = fragment;
@@ -582,7 +763,7 @@ export class ProjectionController implements ReactiveController {
     // tab) must be re-applied after the morph even when the node set is the same.
     this._signature = [];
     this._reconcile(true);
-    parked.focus?.();
+    restoreKeptFocus(host.ownerDocument);
     for (const [el, top, left] of parked.scroll) {
       if (el.scrollTop !== top) el.scrollTop = top;
       if (el.scrollLeft !== left) el.scrollLeft = left;
@@ -677,7 +858,7 @@ export class ProjectionController implements ReactiveController {
         for (const child of Array.from(container.childNodes)) {
           // A per-node wrapper of a `wrap` region: lift what it wraps.
           const wrapped = isElement(child) && (child.hasAttribute(WRAP_ATTR) || this._wrappers.has(child));
-          for (const n of wrapped ? Array.from(child.childNodes) : [child]) moveNode(host, n, node);
+          for (const n of wrapped ? Array.from(child.childNodes) : [child]) if (!isWrapEnd(n)) moveNode(host, n, node);
         }
       }
     }
@@ -733,7 +914,11 @@ export class ProjectionController implements ReactiveController {
       const container = region.target();
       if (!container) continue;
       if (!container.hasAttribute(CONTAINER_ATTR)) container.setAttribute(CONTAINER_ATTR, region.name);
-      this._containers.add(container);
+      if (!this._containers.has(container)) {
+        // Whatever the template put inside a fresh container is the component's own.
+        for (let n = container.firstChild; n; n = n.nextSibling) if (!this._placed.has(n)) this._owned.add(n);
+        this._containers.add(container);
+      }
     }
     const top: Element[] = [];
     for (let n = this._start?.nextSibling; n && n !== this._end; n = n.nextSibling) {
@@ -756,6 +941,7 @@ export class ProjectionController implements ReactiveController {
   }
 
   private _onMutation(): void {
+    this._redirectMarkerText();
     if (this._parked) {
       this._restore();
       return;
@@ -798,16 +984,14 @@ export class ProjectionController implements ReactiveController {
       if (!container.hasAttribute(CONTAINER_ATTR)) container.setAttribute(CONTAINER_ATTR, region.name);
       this._containers.add(container);
       if (region.wrap) {
-        let wrapper = this._wrapperOf.get(node);
-        if (!wrapper) {
-          wrapper = region.wrap(node);
-          wrapper.setAttribute(WRAP_ATTR, '');
-          this._wrapperOf.set(node, wrapper);
-          this._wrappers.add(wrapper);
-        }
+        const wrapper = this._wrapperFor(node, region);
+        // The reference's wrapper marks its place only while it still holds it: a
+        // node a framework moved out (appendChild onto the host, to reorder) left
+        // an empty wrapper behind at its old position.
         const refWrapper = validRef ? this._wrapperOf.get(validRef) : undefined;
-        moveNode(container, wrapper, refWrapper && refWrapper.parentNode === container ? refWrapper : null);
-        moveNode(wrapper, node, null);
+        const before = refWrapper && refWrapper.parentNode === container && validRef!.parentNode === refWrapper ? refWrapper : null;
+        moveNode(container, wrapper, before);
+        moveNode(wrapper, node, this._wrapEnd(wrapper));
         this._observeContainer(wrapper);
       } else {
         moveNode(container, node, validRef && validRef.parentNode === container ? validRef : null);
@@ -819,19 +1003,113 @@ export class ProjectionController implements ReactiveController {
     return true;
   }
 
-  /** Removes wrappers whose node left the region (removed by the consumer, or moved elsewhere). */
-  private _dropEmptyWrappers(region: ProjectionRegion): void {
+  /** Nodes the component itself put into a container (a placeholder option); never consumer content. */
+  private _owned = new WeakSet<Node>();
+
+  /**
+   * @internal Marks a node the component inserts into one of its containers
+   * itself, so it is never taken for consumer content.
+   */
+  own(node: Node): void {
+    this._owned.add(node);
+  }
+
+  /**
+   * Consumer nodes a framework put straight into a container, next to projected
+   * ones (Svelte's `item.before(x)`), become region nodes like any other, so
+   * they are counted, parked and reported to onChange.
+   */
+  private _adoptForeign(region: ProjectionRegion): void {
+    const container = (region.target as () => Element | null | undefined)();
+    if (!container || !this._containers.has(container)) return;
+    for (let n = container.firstChild; n; n = n.nextSibling) {
+      if (this._placed.has(n) || this._owned.has(n)) continue;
+      if (region.accepts && !region.accepts(n, { initial: false, zone: 'insert' })) continue;
+      this._placed.set(n, region);
+      if (isElement(n)) this._sawElement = true;
+    }
+  }
+
+  /** Per wrap end anchor used as an insert reference since the last mutation pass: the wrapper inserted last. */
+  private _anchorAfter = new Map<Node, Element>();
+
+  /** The wrapper of `node` in a `wrap` region, created (with its end anchor) on first use. */
+  private _wrapperFor(node: Node, region: ProjectionRegion): Element {
+    let wrapper = this._wrapperOf.get(node);
+    // A node that moves gets a new wrapper; the old one (empty but for its end
+    // anchor) stays where the node was until _normalizeWrappers drops it, so an
+    // end anchor a framework read before the move (Solid keeps `nextSibling` of
+    // an item across two moves) still marks the position it read. Likewise when
+    // a framework inserted other items next to `node` in its wrapper (Svelte:
+    // anchor.before): the old wrapper keeps those in place until normalised.
+    if (wrapper && (node.parentNode === wrapper || Array.from(wrapper.childNodes).some(c => c !== node && !isWrapEnd(c)))) {
+      wrapper = undefined;
+    }
+    if (!wrapper) {
+      wrapper = region.wrap!(node);
+      wrapper.setAttribute(WRAP_ATTR, '');
+      this._wrapperOf.set(node, wrapper);
+      this._wrappers.add(wrapper);
+    }
+    return wrapper;
+  }
+
+  /** The anchor that ends `wrapper`, created or moved back to the end if needed. */
+  private _wrapEnd(wrapper: Element): Comment {
+    const last = wrapper.lastChild;
+    if (last && isWrapEnd(last)) return last;
+    const existing = Array.from(wrapper.childNodes).find(isWrapEnd);
+    const end = existing ?? wrapper.ownerDocument.createComment(WRAP_END_DATA);
+    Node.prototype.insertBefore.call(wrapper, end, null);
+    return end;
+  }
+
+  /**
+   * Keeps a `wrap` region one node per wrapper, whatever the consumer did to the
+   * wrapped nodes directly (`node.before(x)`, `node.replaceWith(y)`, `remove()`,
+   * as Svelte and Solid do): a node the region accepts that sits inside a wrapper
+   * without being its node gets a wrapper of its own at the same position, and
+   * wrappers whose node left are removed.
+   */
+  private _normalizeWrappers(region: ProjectionRegion): void {
     const container = (region.target as () => Element | null | undefined)();
     if (!container) return;
     for (const n of Array.from(container.childNodes)) {
-      if (!this._wrappers.has(n as Element)) continue;
-      const held = Array.from(n.childNodes).filter(w => this._placed.get(w) === region);
+      if (!isElement(n) || !this._wrappers.has(n)) continue;
+      const wrapper = n;
+      let after = false;
+      for (const child of Array.from(wrapper.childNodes)) {
+        if (isWrapEnd(child)) continue;
+        if (this._placed.get(child) === region && this._wrapperOf.get(child) === wrapper) {
+          after = true;
+          continue;
+        }
+        if (!region.accepts || region.accepts(child, { initial: false, zone: 'insert' })) {
+          // Foreign: before the wrapped node it gets a wrapper before this one, after it one after.
+          const own = this._wrapperFor(child, region);
+          moveNode(container, own, after ? wrapper.nextSibling : wrapper);
+          moveNode(own, child, this._wrapEnd(own));
+          this._placed.set(child, region);
+          if (isElement(child)) this._sawElement = true;
+          this._observeContainer(own);
+        }
+      }
+      const held = Array.from(wrapper.childNodes).filter(w => this._placed.get(w) === region && this._wrapperOf.get(w) === wrapper);
       if (!held.length) {
         // Anything else a consumer put inside a wrapper stays in the region.
-        for (const w of Array.from(n.childNodes)) moveNode(container, w, n);
-        Node.prototype.removeChild.call(container, n);
+        for (const w of Array.from(wrapper.childNodes)) if (!isWrapEnd(w)) moveNode(container, w, wrapper);
+        Node.prototype.removeChild.call(container, wrapper);
       }
     }
+  }
+
+  /**
+   * `host.insertBefore(node, ref)` where `ref` is the end anchor of a wrapper:
+   * a framework that looked up `previousItem.nextSibling` inserts right after
+   * that item, so the node goes into a wrapper of its own after that one.
+   */
+  isWrapEnd(node: Node): boolean {
+    return isWrapEnd(node) && !!node.parentNode && this._wrappers.has(node.parentNode as Element);
   }
 
   private _isAfterEnd(node: Node): boolean {
@@ -876,6 +1154,7 @@ export class ProjectionController implements ReactiveController {
     const start = this._start;
     const end = this._end;
     if (!this._rendered || !start || !end || !this._intact()) return;
+    this._redirectMarkerText();
 
     // Route consumer nodes that sit directly on the host and are not yet where
     // their region wants them: nodes present before the first render, nodes
@@ -975,8 +1254,10 @@ export class ProjectionController implements ReactiveController {
       flush();
     }
 
+    this._anchorAfter.clear();
     for (const region of this._regions) {
-      if (region.wrap && typeof region.target === 'function') this._dropEmptyWrappers(region);
+      if (region.wrap && typeof region.target === 'function') this._normalizeWrappers(region);
+      else if (typeof region.target === 'function') this._adoptForeign(region);
       if (typeof region.target === 'function') {
         const container = region.target();
         if (container) {
@@ -987,6 +1268,7 @@ export class ProjectionController implements ReactiveController {
       }
     }
 
+    this._observeMarker();
     // Our own moves queue records; they carry no new information.
     this._observer?.takeRecords();
 
