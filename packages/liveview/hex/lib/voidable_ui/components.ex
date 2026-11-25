@@ -1012,11 +1012,31 @@ defmodule VoidableUI.Components do
   # Table (static)
   # ---------------------------------------------------------------------------
 
-  @doc "Renders a `<void-table>` wrapper."
+  @doc """
+  Renders a `<void-table>` around a native `<table>`.
+
+  `stack` stacks each row into label and value pairs while the table's container is narrow:
+  `stack={true}` uses the theme's breakpoint, a CSS length (`stack="48rem"`) sets this table's,
+  `stack="always"` stacks at every width. Put `data-stack="title"`, `"select"`, `"actions"` or
+  `"hide"` on a header cell to set the role of its column in the stacked block. The label of each
+  value is the header text; nothing is repeated on the cells.
+
+  `scrollable` makes the table a horizontal scroll region that is focusable and labelled while it
+  overflows (`label`, else the `<caption>`); `max_height` adds vertical scrolling for
+  `sticky_header`, and `sticky_column` keeps the first column in view. `inset` is for a table
+  inside a card or panel.
+  """
   attr :striped, :boolean, default: false
   attr :hoverable, :boolean, default: false
   attr :compact, :boolean, default: false
   attr :bordered, :boolean, default: false
+  attr :inset, :boolean, default: false
+  attr :stack, :any, default: nil, doc: "`true`, a CSS length or `\"always\"`"
+  attr :scrollable, :boolean, default: false
+  attr :sticky_header, :boolean, default: false
+  attr :sticky_column, :boolean, default: false
+  attr :max_height, :string, default: nil
+  attr :label, :string, default: nil
   attr :rest, :global
   slot :inner_block, required: true
 
@@ -1027,6 +1047,13 @@ defmodule VoidableUI.Components do
       hoverable={@hoverable}
       compact={@compact}
       bordered={@bordered}
+      inset={@inset}
+      stack={@stack}
+      scrollable={@scrollable}
+      sticky-header={@sticky_header}
+      sticky-column={@sticky_column}
+      max-height={@max_height}
+      label={@label}
       {@rest}
     >
       {render_slot(@inner_block)}

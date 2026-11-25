@@ -294,6 +294,49 @@ defmodule VoidableUI.Components.StaticContainerTest do
     assert html =~ "bordered"
   end
 
+  test "table renders the responsive and scroll attributes" do
+    assigns = %{}
+
+    html =
+      rendered_to_string(~H"""
+      <VoidableUI.Components.table stack={true} inset={true} scrollable={true} sticky_header={true} sticky_column={true} max_height="20rem" label="Users">Rows</VoidableUI.Components.table>
+      """)
+
+    assert html =~ ~r/stack[ >=]/
+    refute html =~ ~s(stack="true")
+    assert html =~ "inset"
+    assert html =~ "scrollable"
+    assert html =~ "sticky-header"
+    assert html =~ "sticky-column"
+    assert html =~ ~s(max-height="20rem")
+    assert html =~ ~s(label="Users")
+  end
+
+  test "table stack takes a breakpoint or always" do
+    assigns = %{}
+
+    html =
+      rendered_to_string(~H"""
+      <VoidableUI.Components.table stack="48rem">Rows</VoidableUI.Components.table>
+      """)
+
+    assert html =~ ~s(stack="48rem")
+  end
+
+  test "table omits stack and the scroll attributes by default" do
+    assigns = %{}
+
+    html =
+      rendered_to_string(~H"""
+      <VoidableUI.Components.table>Rows</VoidableUI.Components.table>
+      """)
+
+    refute html =~ "stack"
+    refute html =~ "scrollable"
+    refute html =~ "inset"
+    refute html =~ "label"
+  end
+
   test "table passes through global attributes" do
     assigns = %{}
 
