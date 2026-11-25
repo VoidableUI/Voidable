@@ -32,6 +32,9 @@ type Finding struct {
 	Attr       string `json:"attr,omitempty"`
 	Message    string `json:"message"`
 	Suggestion string `json:"suggestion,omitempty"`
+	// Value is the attribute's literal value when it has one (invalid-value
+	// findings use it to match allowlist entries).
+	Value string `json:"value,omitempty"`
 }
 
 // Checker validates markup against the catalog.
@@ -90,7 +93,13 @@ func (c *Checker) CheckTag(file string, t Tag) []Finding {
 		out = append(out, f(t.Line, t.Col, RuleInvalidParent, "", "", "<%s> is not valid inside <%s>; it belongs in %s", el.Tag, t.Parent, joinTags(allowed)))
 	}
 	for _, a := range t.Attrs {
-		out = append(out, c.checkAttr(el, t, a, f)...)
+		fs := c.checkAttr(el, t, a, f)
+		for i := range fs {
+			if a.HasValue && !a.Dynamic {
+				fs[i].Value = a.Value
+			}
+		}
+		out = append(out, fs...)
 	}
 	return out
 }

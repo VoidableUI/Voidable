@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+#MISE description="Validate void-* markup in docs, stories, examples and adapter templates with voidable check (VOIDABLE_SKIP_GO=1 skips)"
+#MISE depends=["voidable:ci"]
+set -euo pipefail
+
+if [[ "${VOIDABLE_SKIP_GO:-}" == "1" ]]; then
+  echo "lint:markup skipped (VOIDABLE_SKIP_GO=1): void-* markup was NOT checked" >&2
+  exit 0
+fi
+
+# Findings listed in .voidable/markup-allowlist.txt are open product decisions
+# (see issue #58); anything else, or a decision's usages growing, fails.
+tools/voidable/build/voidable check \
+  --allowlist .voidable/markup-allowlist.txt \
+  docs/src \
+  packages/storybook/stories \
+  examples \
+  packages/hotwire \
+  packages/liveview/hex \
+  packages/alpine/laravel
+echo "markup ok"
