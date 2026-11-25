@@ -12,7 +12,7 @@ function createElement(): VoidSwitch {
 describe('VoidSwitch', () => {
   describe('class', () => {
     it('extends VoidElement', () => {
-      expect(Object.getPrototypeOf(VoidSwitch)).toBe(VoidElement);
+      expect(VoidSwitch.prototype).toBeInstanceOf(VoidElement);
     });
 
     it('is registered as void-switch', () => {

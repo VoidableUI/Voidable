@@ -1,6 +1,8 @@
 import { html, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
+import { live } from 'lit/directives/live.js';
+import { InternalsFormControl } from '../form-control.js';
 
 /* ── Helpers ── */
 
@@ -44,7 +46,7 @@ function formatDisplay(iso: string, fmt: string): string {
 type CalendarView = 'days' | 'months' | 'years';
 
 /** Date selection for booking flows, scheduling UIs, and form fields with locale-aware formatting and min/max constraints. */
-export class VoidCalendar extends VoidElement {
+export class VoidCalendar extends InternalsFormControl(VoidElement) {
   @property({ type: String, reflect: true }) value = '';
   @property({ type: String }) min = '';
   @property({ type: String }) max = '';
@@ -480,7 +482,7 @@ declare global {
 /* ── VoidDatePicker ── */
 
 /** Input-anchored date picker that combines a text field with a VoidCalendar dropdown for form date selection. */
-export class VoidDatePicker extends VoidElement {
+export class VoidDatePicker extends InternalsFormControl(VoidElement) {
   @property({ type: String, reflect: true }) value = '';
   @property({ type: String }) min = '';
   @property({ type: String }) max = '';
@@ -518,7 +520,7 @@ export class VoidDatePicker extends VoidElement {
       <div class="void-date-picker-anchor">
         <input
           class="void-date-picker-input"
-          .value=${display}
+          .value=${live(display)}
           placeholder=${this.placeholder}
           ?disabled=${this.disabled}
           readonly

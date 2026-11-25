@@ -24,7 +24,7 @@ function makeDropEvent(dt: DataTransfer): DragEvent {
 describe('VoidFileUpload', () => {
   describe('class', () => {
     it('extends VoidElement', () => {
-      expect(Object.getPrototypeOf(VoidFileUpload)).toBe(VoidElement);
+      expect(VoidFileUpload.prototype).toBeInstanceOf(VoidElement);
     });
 
     it('is registered as void-file-upload', () => {

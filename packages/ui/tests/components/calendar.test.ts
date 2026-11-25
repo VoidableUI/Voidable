@@ -17,7 +17,7 @@ if (!customElements.get('void-date-picker')) {
 describe('VoidCalendar', () => {
   describe('class', () => {
     it('extends VoidElement', () => {
-      expect(Object.getPrototypeOf(VoidCalendar)).toBe(VoidElement);
+      expect(VoidCalendar.prototype).toBeInstanceOf(VoidElement);
     });
 
     it('is registered as void-calendar', () => {
@@ -407,7 +407,7 @@ describe('VoidCalendar', () => {
 describe('VoidDatePicker', () => {
   describe('class', () => {
     it('extends VoidElement', () => {
-      expect(Object.getPrototypeOf(VoidDatePicker)).toBe(VoidElement);
+      expect(VoidDatePicker.prototype).toBeInstanceOf(VoidElement);
     });
 
     it('is registered as void-date-picker', () => {

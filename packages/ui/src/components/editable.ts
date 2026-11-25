@@ -1,9 +1,11 @@
 import { html, nothing } from 'lit';
+import { live } from 'lit/directives/live.js';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
+import { InternalsFormControl } from '../form-control.js';
 
 /** Inline editable text for renaming items, editing headings, and click-to-edit table cells. */
-export class VoidEditable extends VoidElement {
+export class VoidEditable extends InternalsFormControl(VoidElement) {
   @property({ type: String, reflect: true }) value = '';
   @property({ type: Boolean, reflect: true }) editing = false;
   @property({ type: Boolean, reflect: true }) disabled = false;
@@ -34,7 +36,7 @@ export class VoidEditable extends VoidElement {
       >${this.value || html`<span class="void-editable-placeholder">${this.placeholder}</span>`}</span>
       <input
         class="void-editable-input"
-        .value=${this.value}
+        .value=${live(this.value)}
         @keydown=${this._handleInputKeydown}
         @blur=${this._handleBlur}
       />
@@ -42,12 +44,12 @@ export class VoidEditable extends VoidElement {
   }
 
   private _handleClick = (): void => {
-    if (this.disabled || this.editing) return;
+    if (this.formDisabled || this.editing) return;
     this._enterEditMode();
   };
 
   private _handlePreviewKeydown = (e: KeyboardEvent): void => {
-    if (this.disabled || this.editing) return;
+    if (this.formDisabled || this.editing) return;
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
       this._enterEditMode();

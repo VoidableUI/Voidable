@@ -1,11 +1,12 @@
 import { html, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
+import { InternalsFormControl, type FormSubmission } from '../form-control.js';
 
 export type TagValue = string | { text: string; color?: string };
 
 /** Multi-tag input field for email recipients, category labels, keyword tagging, and comma-separated value entry. */
-export class VoidTagsInput extends VoidElement {
+export class VoidTagsInput extends InternalsFormControl(VoidElement) {
   @property({ type: Array }) value: TagValue[] = [];
   @property({ type: Boolean, reflect: true }) disabled = false;
   @property({ type: Boolean, reflect: true }) readonly = false;
@@ -22,6 +23,11 @@ export class VoidTagsInput extends VoidElement {
 
   private _tagColor(tag: TagValue): string | undefined {
     return typeof tag === 'string' ? undefined : tag.color;
+  }
+
+  /** One entry per tag (its text). */
+  formSubmission(): FormSubmission {
+    return this.value.map((t) => this._tagText(t));
   }
 
   connectedCallback(): void {

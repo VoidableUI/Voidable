@@ -45,7 +45,7 @@ describe('VoidOption', () => {
 describe('VoidMultiselect', () => {
   describe('class', () => {
     it('extends VoidElement', () => {
-      expect(Object.getPrototypeOf(VoidMultiselect)).toBe(VoidElement);
+      expect(VoidMultiselect.prototype).toBeInstanceOf(VoidElement);
     });
 
     it('is registered as void-multiselect', () => {

@@ -1,9 +1,11 @@
 import { html, nothing } from 'lit';
+import { live } from 'lit/directives/live.js';
 import { property, query } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
+import { InternalsFormControl } from '../form-control.js';
 
 /** Precise numeric entry for quantity selectors, price fields, and settings with increment/decrement controls. */
-export class VoidNumberInput extends VoidElement {
+export class VoidNumberInput extends InternalsFormControl(VoidElement) {
   @property({ type: Number, reflect: true }) value: number = 0;
   @property({ type: Number }) min: number = Number.NEGATIVE_INFINITY;
   @property({ type: Number }) max: number = Number.POSITIVE_INFINITY;
@@ -59,6 +61,10 @@ export class VoidNumberInput extends VoidElement {
   disconnectedCallback(): void {
     super.disconnectedCallback();
     this._stopRepeat();
+  }
+
+  formRestore(state: unknown): void {
+    this.value = Number(state);
   }
 
   private _clamp(v: number): number {
@@ -195,7 +201,7 @@ export class VoidNumberInput extends VoidElement {
         class="void-number-input-field"
         type="text"
         inputmode="numeric"
-        .value=${this._format(this.value)}
+        .value=${live(this._format(this.value))}
         placeholder=${this.placeholder}
         ?disabled=${this.disabled}
         ?readonly=${this.readonly}

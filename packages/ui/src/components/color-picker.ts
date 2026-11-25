@@ -1,9 +1,11 @@
 import { html, nothing } from 'lit';
+import { live } from 'lit/directives/live.js';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
+import { InternalsFormControl } from '../form-control.js';
 
 /** Color selection control with spectrum area, hue slider, hex input, and preset swatches for theme customization and design tools. */
-export class VoidColorPicker extends VoidElement {
+export class VoidColorPicker extends InternalsFormControl(VoidElement) {
   @property({ type: String, reflect: true }) value: string = '#000000'; // token-ok: default color value
   @property({ type: Boolean, reflect: true }) disabled: boolean = false;
   @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' = 'md';
@@ -125,7 +127,7 @@ export class VoidColorPicker extends VoidElement {
   // ── Pointer interaction ──
 
   private _onAreaPointerDown(e: PointerEvent): void {
-    if (this.disabled) return;
+    if (this.formDisabled) return;
     this._dragging = 'area';
     this._updateAreaFromPointer(e);
     document.addEventListener('pointermove', this._boundPointerMove!);
@@ -133,7 +135,7 @@ export class VoidColorPicker extends VoidElement {
   }
 
   private _onHuePointerDown(e: PointerEvent): void {
-    if (this.disabled) return;
+    if (this.formDisabled) return;
     this._dragging = 'hue';
     this._updateHueFromPointer(e);
     document.addEventListener('pointermove', this._boundPointerMove!);
@@ -255,7 +257,7 @@ export class VoidColorPicker extends VoidElement {
             <input
               class="void-color-picker-input"
               type="text"
-              .value=${this.value}
+              .value=${live(this.value)}
               ?disabled=${this.disabled}
               maxlength="7"
               @change=${this._onHexInput}
@@ -299,7 +301,7 @@ export class VoidColorPicker extends VoidElement {
             <input
               class="void-color-picker-compact-input"
               type="text"
-              .value=${this.value}
+              .value=${live(this.value)}
               ?disabled=${this.disabled}
               maxlength="7"
               @click=${(e: Event) => e.stopPropagation()}

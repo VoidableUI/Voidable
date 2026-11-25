@@ -12,7 +12,7 @@ function createElement(): VoidTagsInput {
 describe('VoidTagsInput', () => {
   describe('class', () => {
     it('extends VoidElement', () => {
-      expect(Object.getPrototypeOf(VoidTagsInput)).toBe(VoidElement);
+      expect(VoidTagsInput.prototype).toBeInstanceOf(VoidElement);
     });
 
     it('is registered as void-tags-input', () => {

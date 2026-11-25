@@ -12,7 +12,7 @@ function createElement(): VoidColorPicker {
 describe('VoidColorPicker', () => {
   describe('class', () => {
     it('extends VoidElement', () => {
-      expect(Object.getPrototypeOf(VoidColorPicker)).toBe(VoidElement);
+      expect(VoidColorPicker.prototype).toBeInstanceOf(VoidElement);
     });
 
     it('is registered as void-color-picker', () => {

@@ -1,10 +1,12 @@
 import { html, nothing } from 'lit';
+import { live } from 'lit/directives/live.js';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
+import { InternalsFormControl } from '../form-control.js';
 import { VoidOption } from './multiselect.js';
 
 /** Filterable dropdown for long option lists like country selectors, user assignment fields, and tag pickers. */
-export class VoidCombobox extends VoidElement {
+export class VoidCombobox extends InternalsFormControl(VoidElement) {
   @property({ type: String }) value = '';
   @property({ type: String }) placeholder = 'Search...';
   @property({ type: Boolean, reflect: true }) disabled = false;
@@ -45,7 +47,7 @@ export class VoidCombobox extends VoidElement {
     return html`
       <input
         class="void-combobox-input"
-        .value=${this._open ? this._query : (selectedOpt?.textContent?.trim() || this.value || '')}
+        .value=${live(this._open ? this._query : (selectedOpt?.textContent?.trim() || this.value || ''))}
         placeholder=${this.placeholder}
         ?disabled=${this.disabled}
         autocomplete="off"

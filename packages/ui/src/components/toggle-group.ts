@@ -1,9 +1,10 @@
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
+import { InternalsFormControl, type FormSubmission } from '../form-control.js';
 import type { VoidToggle } from './toggle.js';
 
 /** Multi-button toggle set for text editor toolbars and filter chips where one or many options can be active. */
-export class VoidToggleGroup extends VoidElement {
+export class VoidToggleGroup extends InternalsFormControl(VoidElement) {
   @property({ type: String, reflect: true }) value = '';
   @property({ type: Boolean, reflect: true }) multiple = false;
   @property({ type: Boolean, reflect: true }) disabled = false;
@@ -29,6 +30,12 @@ export class VoidToggleGroup extends VoidElement {
     if (changed.has('value') || changed.has('disabled') || changed.has('size') || changed.has('color')) {
       this._syncToggles();
     }
+  }
+
+  /** Multiple: one entry per pressed toggle. Single: the pressed value, or nothing. */
+  formSubmission(): FormSubmission {
+    if (this.multiple) return this._selectedValues();
+    return this.value || null;
   }
 
   private _toggles(): VoidToggle[] {
@@ -61,6 +68,12 @@ export class VoidToggleGroup extends VoidElement {
     if (!toggle || toggle.closest('void-toggle-group') !== this) return;
 
     e.stopImmediatePropagation();
+
+    if (this.formDisabled) {
+      // e.g. inside <fieldset disabled>: undo the toggle's own flip.
+      this._syncToggles();
+      return;
+    }
 
     const toggleValue = toggle.getAttribute('value') || '';
     if (!toggleValue) return;
