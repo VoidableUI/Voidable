@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+#MISE description="Write release notes and create the GitHub release (needs VERSION; only with DRY_RUN=false)"
+set -euo pipefail
+
+exec scripts/release/github-release.sh "$@"

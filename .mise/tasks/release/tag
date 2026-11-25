@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+#MISE description="Create and push the vX.Y.Z tag (needs VERSION; only with DRY_RUN=false)"
+set -euo pipefail
+
+exec scripts/release/tag.sh "$@"

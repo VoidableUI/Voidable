@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+#MISE description="Print release notes: mise run release:notes 0.8.0 [previous-tag]"
+set -euo pipefail
+
+exec node scripts/release/notes.mjs "$@"

@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+#MISE description="Test, build and verify the live_voidable Hex package (needs VERSION; publishes only with DRY_RUN=false)"
+set -euo pipefail
+
+exec scripts/release/hex.sh "$@"

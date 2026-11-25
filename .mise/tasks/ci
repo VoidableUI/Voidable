@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-#MISE description="Run full CI pipeline: build, test, typecheck, lint"
-#MISE depends=["build", "test", "typecheck", "lint", "lint:tokens", "lint:undefined-tokens", "lint:contrast", "lint:styles", "lint:exports", "lint:manifest"]
+#MISE description="Run full CI pipeline: build, test, typecheck, lint, version lint and release-script tests"
+#MISE depends=["build", "test", "typecheck", "lint", "lint:tokens", "lint:undefined-tokens", "lint:contrast", "lint:styles", "lint:exports", "lint:manifest", "lint:versions", "release:test"]
 set -euo pipefail
 
 # mise aborts before running this body if any dependency fails.

@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+#MISE description="Local release dry run: build, pack and verify every package at the planned version; publishes nothing"
+#MISE depends=["install"]
+set -euo pipefail
+
+
+# Forced: this task never publishes, whatever the environment says.
+export DRY_RUN=true
+VERSION="${VERSION:-$(node scripts/release/version.mjs next)}"
+export VERSION
+export OUT="${OUT:-$PWD/release-artifacts}"
+echo "== release dry run at $VERSION (artifacts in $OUT)"
+node scripts/release/registry.mjs status "$VERSION"
+scripts/release/tag.sh
+scripts/release/npm.sh all
+scripts/release/gem.sh
+scripts/release/hex.sh
+scripts/release/composer.sh
+scripts/release/github-release.sh "$OUT"/npm/*.tgz "$OUT"/gem/*.gem "$OUT"/hex/*.tar | tail -n 1

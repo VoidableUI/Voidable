@@ -12,3 +12,7 @@ Gemfile.lock
 composer.lock
 tmp/
 erl_crash.dump
+_site/
+release-artifacts/
+packages/alpine/laravel/vendor/
+.phpunit.result.cache

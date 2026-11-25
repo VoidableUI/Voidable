@@ -1,13 +1,13 @@
 # SPDX-License-Identifier: MIT
 #
-# Also called by every release workflow (workflow_call), whose tag job needs
-# it: a release cannot be cut from a commit that fails `mise run ci`.
+# Runs on pull requests, and once per push to master as the `ci` job of
+# release.yml (workflow_call), whose tag and publish jobs need it: nothing is
+# released from a commit that fails `mise run ci`. There is deliberately no
+# push trigger here, so a push to master runs CI exactly once.
 name: CI
 
 on:
   pull_request:
-  push:
-    branches: [master]
   workflow_call:
 
 permissions:
@@ -16,7 +16,7 @@ permissions:
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   # Only superseded pull request runs are cancelled; a run gating a release
-  # (push to master, or called from a release workflow) always finishes.
+  # (called from release.yml) always finishes.
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:

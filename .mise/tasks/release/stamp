@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+#MISE description="Stamp a version into every manifest: mise run release:stamp 0.8.0 (0.0.0 restores the placeholder)"
+set -euo pipefail
+
+exec node scripts/release/stamp.mjs "$@"

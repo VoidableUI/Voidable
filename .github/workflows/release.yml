@@ -1,0 +1,336 @@
+# SPDX-License-Identifier: MIT
+#
+# The one release pipeline. Every package shares one version number.
+#
+# On every push to master: CI runs once. If the push brings releasing commits
+# (feat, fix, perf, revert or breaking, touching packages/**) since the last
+# vX.Y.Z tag, the next version is computed (scripts/release/version.mjs),
+# tagged, stamped into every manifest and published in order:
+#
+#   plan ─┬─────────────────────────────────────────────┐
+#   ci ───┴─ tag ─ npm-core ─ npm-adapters ─┬─ gem ──────┤
+#                                           ├─ hex ──────┼─ github-release ─ pages-build ─ pages-deploy
+#                                           └─ composer ─┘
+#
+# Docs-only pushes skip the packages and redeploy Pages. A manual run either
+# dry-runs (default: builds and packs everything, publishes nothing) or
+# re-runs a release: each step skips what is already on its registry, and a
+# commit that already carries its vX.Y.Z tag resumes at that version.
+# The logic lives in scripts/release/ and runs locally (mise run release:dry-run).
+name: Release
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: Build and pack everything, publish nothing
+        type: boolean
+        default: true
+      deploy_pages:
+        description: Also deploy the docs and Storybook (ignored for a dry run)
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+# One release at a time, never cancelled midway. A newer push waits; it
+# releases everything since the last tag, so a superseded pending run loses nothing.
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+env:
+  # No job installs every toolchain in mise.toml; do not let `mise run` try.
+  MISE_TASK_RUN_AUTO_INSTALL: "false"
+  MISE_NOT_FOUND_AUTO_INSTALL: "false"
+
+jobs:
+  plan:
+    name: Plan
+    runs-on: ubuntu-latest
+    outputs:
+      release: ${{ steps.plan.outputs.release }}
+      version: ${{ steps.plan.outputs.version }}
+      tag: ${{ steps.plan.outputs.tag }}
+      previous_tag: ${{ steps.plan.outputs.previous_tag }}
+      dry_run: ${{ steps.plan.outputs.dry_run }}
+      publish: ${{ steps.plan.outputs.publish }}
+      pages: ${{ steps.plan.outputs.pages }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - uses: jdx/mise-action@5228313ee0372e111a38da051671ca30fc5a96db # v3.6.3
+        with:
+          install_args: node
+
+      - name: Plan the release
+        id: plan
+        env:
+          EVENT: ${{ github.event_name }}
+          REF: ${{ github.ref }}
+          BEFORE: ${{ github.event.before }}
+          DRY_RUN_INPUT: ${{ inputs.dry_run }}
+          DEPLOY_PAGES_INPUT: ${{ inputs.deploy_pages }}
+        run: mise run release:plan
+
+  ci:
+    name: CI
+    uses: ./.github/workflows/ci.yml
+
+  tag:
+    name: Tag
+    needs: [plan, ci]
+    if: needs.plan.outputs.publish == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          fetch-depth: 0
+
+      - name: Create and push the release tag
+        env:
+          VERSION: ${{ needs.plan.outputs.version }}
+          DRY_RUN: ${{ needs.plan.outputs.dry_run }}
+          SHA: ${{ github.sha }}
+        run: scripts/release/tag.sh
+
+  npm-core:
+    name: npm (theme and core)
+    needs: [plan, tag]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # npm trusted publishing and provenance
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+
+      - uses: jdx/mise-action@5228313ee0372e111a38da051671ca30fc5a96db # v3.6.3
+        with:
+          install_args: "node npm npm:pnpm"
+
+      - run: mise run install
+
+      - name: Build, pack and publish @voidable/theme and @voidable/ui
+        env:
+          VERSION: ${{ needs.plan.outputs.version }}
+          DRY_RUN: ${{ needs.plan.outputs.dry_run }}
+        run: mise run release:npm core
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: release-npm-core
+          path: release-artifacts/npm/*.tgz
+          if-no-files-found: error
+
+  npm-adapters:
+    name: npm (adapters)
+    needs: [plan, npm-core]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # npm trusted publishing and provenance
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+
+      - uses: jdx/mise-action@5228313ee0372e111a38da051671ca30fc5a96db # v3.6.3
+        with:
+          install_args: "node npm npm:pnpm"
+
+      - run: mise run install
+
+      - name: Build, pack and publish the eight adapters
+        env:
+          VERSION: ${{ needs.plan.outputs.version }}
+          DRY_RUN: ${{ needs.plan.outputs.dry_run }}
+        run: mise run release:npm adapters
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: release-npm-adapters
+          path: release-artifacts/npm/*.tgz
+          if-no-files-found: error
+
+  gem:
+    name: RubyGems (voidable-hotwire)
+    needs: [plan, npm-adapters]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # RubyGems trusted publishing
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+
+      - uses: jdx/mise-action@5228313ee0372e111a38da051671ca30fc5a96db # v3.6.3
+        with:
+          install_args: "node ruby"
+
+      - name: Configure RubyGems credentials
+        if: needs.plan.outputs.dry_run != 'true'
+        uses: rubygems/configure-rubygems-credentials@dc5a8d8553e6ee01fc26761a49e99e733d17954a # v2.1.0
+
+      - name: Test, build and push the gem
+        env:
+          VERSION: ${{ needs.plan.outputs.version }}
+          DRY_RUN: ${{ needs.plan.outputs.dry_run }}
+        run: mise run release:gem
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: release-gem
+          path: release-artifacts/gem/*.gem
+          if-no-files-found: error
+
+  hex:
+    name: Hex (live_voidable)
+    needs: [plan, npm-adapters]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+
+      - uses: jdx/mise-action@5228313ee0372e111a38da051671ca30fc5a96db # v3.6.3
+        with:
+          install_args: "node erlang elixir"
+
+      - name: Test, build and publish the Hex package
+        env:
+          VERSION: ${{ needs.plan.outputs.version }}
+          DRY_RUN: ${{ needs.plan.outputs.dry_run }}
+          HEX_API_KEY: ${{ needs.plan.outputs.dry_run != 'true' && secrets.HEX_API_KEY || '' }}
+        run: mise run release:hex
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: release-hex
+          path: release-artifacts/hex/*.tar
+          if-no-files-found: error
+
+  composer:
+    name: Composer (voidable/laravel)
+    needs: [plan, npm-adapters]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+
+      - uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # 2.40.0
+        with:
+          php-version: '8.5'
+          tools: composer
+
+      - uses: jdx/mise-action@5228313ee0372e111a38da051671ca30fc5a96db # v3.6.3
+        with:
+          install_args: node
+
+      - name: Load the mirror's deploy key
+        if: needs.plan.outputs.dry_run != 'true'
+        uses: webfactory/ssh-agent@e83874834305fe9a4a2997156cb26c5de65a8555 # v0.10.0
+        with:
+          ssh-private-key: ${{ secrets.LARAVEL_DEPLOY_KEY }}
+
+      - name: Test and split to VoidableUI/laravel
+        env:
+          VERSION: ${{ needs.plan.outputs.version }}
+          DRY_RUN: ${{ needs.plan.outputs.dry_run }}
+          SHA: ${{ github.sha }}
+        # Not through `mise run`: PHP comes from setup-php, not mise.
+        run: scripts/release/composer.sh
+
+  github-release:
+    name: GitHub release
+    needs: [plan, npm-core, npm-adapters, gem, hex, composer]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - uses: jdx/mise-action@5228313ee0372e111a38da051671ca30fc5a96db # v3.6.3
+        with:
+          install_args: node
+
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          pattern: release-*
+          path: release-artifacts/files
+          merge-multiple: true
+
+      - name: Create the GitHub release
+        env:
+          VERSION: ${{ needs.plan.outputs.version }}
+          PREVIOUS_TAG: ${{ needs.plan.outputs.previous_tag }}
+          DRY_RUN: ${{ needs.plan.outputs.dry_run }}
+          SHA: ${{ github.sha }}
+          GH_TOKEN: ${{ github.token }}
+        run: scripts/release/github-release.sh release-artifacts/files/*
+
+  pages-build:
+    name: Build Pages
+    needs: [plan, ci, github-release]
+    # After a successful release, after a docs-only push, or in a dry run (build only).
+    if: >-
+      !cancelled() && needs.ci.result == 'success' &&
+      (needs.plan.outputs.pages == 'true' || needs.plan.outputs.dry_run == 'true') &&
+      (needs.plan.outputs.publish != 'true' || needs.github-release.result == 'success')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          fetch-depth: 0 # the docs read the newest vX.Y.Z tag when no release ran
+          persist-credentials: false
+
+      - uses: jdx/mise-action@5228313ee0372e111a38da051671ca30fc5a96db # v3.6.3
+        with:
+          install_args: "node npm:pnpm"
+
+      - name: Build docs and Storybook
+        env:
+          VOIDABLE_VERSION: ${{ needs.plan.outputs.release == 'true' && needs.plan.outputs.version || '' }}
+        run: mise run release:pages
+
+      - uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3.0.1
+        with:
+          path: _site
+
+  pages-deploy:
+    name: Deploy Pages
+    needs: [plan, pages-build]
+    if: >-
+      !cancelled() && needs.pages-build.result == 'success' &&
+      needs.plan.outputs.pages == 'true' && needs.plan.outputs.dry_run != 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4.0.5
