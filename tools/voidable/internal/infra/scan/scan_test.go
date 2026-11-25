@@ -112,6 +112,20 @@ func TestMarkdownFenceLang(t *testing.T) {
 	}
 }
 
+// Inline code in prose is a mention: it is checked but never becomes the
+// parent of what follows.
+func TestMarkdownInlineCodeDoesNotNest(t *testing.T) {
+	src := "Use `<void-button disabled>` here, and `<void-tab-panel tab=\"a\">` there.\n\n<void-tabs><void-tab-panel tab=\"b\"></void-tab-panel></void-tabs>"
+	tags, _ := Scanner{}.Scan(context.Background(), []byte(src), domain.LangMarkdown)
+	var got []string
+	for _, t := range tags {
+		got = append(got, t.Name+"<"+t.Parent+">")
+	}
+	if want := "void-button<>,void-tab-panel<>,void-tabs<>,void-tab-panel<void-tabs>"; strings.Join(got, ",") != want {
+		t.Errorf("tags = %v, want %s", got, want)
+	}
+}
+
 func TestFragments(t *testing.T) {
 	nodes, err := Fragments{}.ParseFragment(context.Background(), `<void-table striped><table><tr><td>A</td></tr></table></void-table><void-input required name="x"></void-input>`)
 	if err != nil {

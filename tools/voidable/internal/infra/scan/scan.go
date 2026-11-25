@@ -127,7 +127,8 @@ func (s *state) scanRegion(r region) []domain.Tag {
 		t, next := s.parseTag(src, i, name, r.lang)
 		// `<void-x>` in backticks is a mention in prose or a doc string,
 		// not markup: check the name but do not track nesting.
-		if i > 0 && src[i-1] == '`' && next < len(src) && src[next] == '`' && len(t.Attrs) == 0 {
+		if i > 0 && src[i-1] == '`' && next < len(src) && src[next] == '`' && len(t.Attrs) == 0 ||
+			r.lang == domain.LangMarkdown && inInlineCode(src, i) {
 			tags = append(tags, t)
 			i = next - 1
 			continue
@@ -142,6 +143,13 @@ func (s *state) scanRegion(r region) []domain.Tag {
 		i = next - 1
 	}
 	return tags
+}
+
+// inInlineCode reports whether offset i sits inside a backtick span on its
+// own line (an odd number of backticks precede it on the line).
+func inInlineCode(src []byte, i int) bool {
+	start := bytes.LastIndexByte(src[:i], '\n') + 1
+	return bytes.Count(src[start:i], []byte("`"))%2 == 1
 }
 
 var comments = [][2]string{
