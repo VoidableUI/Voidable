@@ -12,6 +12,7 @@
 //   --root DIR   a checkout whose built packages are photographed (default: this one)
 //   --jobs N     pages photographed at once (default: 4)
 //   --gallery D  also build the review gallery in D (shots/gallery.mjs)
+//   --webp       store the gallery's images as lossless WebP (the docs site)
 //   --stories    also photograph the Storybook stories (see stories.mjs), at one look
 //
 // Output: DIR/<page>/<look>.<scheme>.<width>.png and DIR/manifest.json.
@@ -21,19 +22,17 @@
 //   animations and transitions finished (0s), reduced motion, caret hidden,
 //   scrollbars hidden; fonts bundled and awaited (document.fonts.ready);
 //   fixed clock (2026-01-15T12:00:00Z), en-US, UTC; fixed data (it is in the HTML).
-import { chromium } from '@playwright/test';
+import { launch, newContext } from './browser.mjs';
 import { mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
-import { SCHEMES, TOOLING_ROOT, WIDTHS, HEIGHTS, pageDocument, serveReference } from './lib.mjs';
+import { SCHEMES, TOOLING_ROOT, WIDTHS, pageDocument, serveReference } from './lib.mjs';
 import { PAGES, SMOKE_LOOKS } from './pages.mjs';
 
-export const FIXED_TIME = '2026-01-15T12:00:00Z';
-
 export function parseArgs(argv) {
-  const opts = { out: null, root: TOOLING_ROOT, page: [], theme: [], skin: [], look: [], scheme: [], width: [], jobs: 4, smoke: false, stories: false, gallery: null };
+  const opts = { out: null, root: TOOLING_ROOT, page: [], theme: [], skin: [], look: [], scheme: [], width: [], jobs: 4, smoke: false, stories: false, webp: false, gallery: null };
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
-    if (a === '--smoke' || a === '--stories') opts[a.slice(2)] = true;
+    if (a === '--smoke' || a === '--stories' || a === '--webp') opts[a.slice(2)] = true;
     else if (a.startsWith('--')) {
       const key = a.slice(2);
       const value = argv[++i];
@@ -79,27 +78,6 @@ export function plan(opts, looks) {
       }
   }
   return jobs;
-}
-
-const launchArgs = ['--disable-gpu', '--disable-gpu-compositing', '--disable-lcd-text', '--font-render-hinting=none', '--force-color-profile=srgb', '--hide-scrollbars', '--disable-font-subpixel-positioning', '--disable-skia-runtime-opts'];
-
-export async function launch() {
-  return chromium.launch({ args: launchArgs, ...(process.env.VOID_CHROMIUM_PATH ? { executablePath: process.env.VOID_CHROMIUM_PATH } : {}) });
-}
-
-/** A browser context with everything that varies between machines or runs pinned. */
-export async function newContext(browser, { width, scheme }) {
-  const context = await browser.newContext({
-    viewport: { width, height: HEIGHTS[width] ?? 900 },
-    deviceScaleFactor: 1,
-    colorScheme: scheme,
-    reducedMotion: 'reduce',
-    locale: 'en-US',
-    timezoneId: 'UTC',
-    serviceWorkers: 'block',
-  });
-  await context.clock.setFixedTime(new Date(FIXED_TIME));
-  return context;
 }
 
 /** Forces the pseudo-classes a page names with data-force="hover active" on everything inside the marked element. */
@@ -180,6 +158,15 @@ export async function capture(opts) {
     }
   };
   await Promise.all(Array.from({ length: Math.max(1, opts.jobs) }, worker));
+  let storyPages = [];
+  if (opts.stories) {
+    const { buildStorybook, photographStories } = await import('./stories.mjs');
+    buildStorybook(opts.root);
+    const r = await photographStories(browser, opts.root, opts.out, { jobs: opts.jobs, schemes: csv(opts.scheme), widths: csv(opts.width.map(String)) });
+    shots.push(...r.shots);
+    failures.push(...r.failures);
+    storyPages = r.stories;
+  }
   await browser.close();
   await server.close();
 
@@ -192,6 +179,7 @@ export async function capture(opts) {
   const manifest = {
     version: 1,
     pages: PAGES.filter((p) => shots.some((s) => s.page === p.id)).map(({ id, title, group }) => ({ id, title, group })),
+    storyPages,
     looks: server.looks.filter((l) => shots.some((s) => s.look === l.id)),
     schemes: SCHEMES.filter((s) => shots.some((x) => x.scheme === s)),
     widths: WIDTHS.filter((w) => shots.some((s) => s.width === w)),
@@ -215,7 +203,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     const { failures } = await capture(opts);
     if (opts.gallery) {
       const { buildGallery } = await import('./gallery.mjs');
-      await buildGallery({ head: opts.out, out: opts.gallery, webp: false });
+      await buildGallery({ head: opts.out, out: opts.gallery, webp: opts.webp });
       console.log(`open ${join(opts.gallery, 'index.html')}`);
     }
     process.exit(failures.length ? 1 : 0);

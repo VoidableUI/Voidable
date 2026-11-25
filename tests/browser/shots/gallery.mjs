@@ -73,7 +73,8 @@ export async function buildGallery(opts) {
   if (webp) for (const it of items) if (it.diff) rmSync(join(out, it.diff), { force: true });
 
   // Order: a comparison by amount of change; one capture by page, look, scheme, width.
-  const pageIx = new Map(manifest.pages.map((p, i) => [p.id, i]));
+  const allPages = [...manifest.pages, ...(manifest.storyPages ?? [])];
+  const pageIx = new Map(allPages.map((p, i) => [p.id, i]));
   const lookIx = new Map(manifest.looks.map((l, i) => [l.id, i]));
   const rank = { changed: 0, removed: 1, added: 2, same: 3 };
   publish.sort((a, b) =>
@@ -87,13 +88,13 @@ export async function buildGallery(opts) {
     title: opts.title || (base ? 'Visual comparison' : 'Reference pages'),
     headLabel: opts.headLabel || 'head',
     baseLabel: opts.baseLabel || 'base',
-    pages: manifest.pages,
+    pages: allPages,
     looks: manifest.looks,
     schemes: manifest.schemes,
     widths: manifest.widths,
     fallbackMarkup: manifest.fallbackMarkup ?? [],
     generated: new Date().toISOString().slice(0, 16).replace('T', ' ') + ' UTC',
-    summary: { total: publish.length, changed: count('changed'), added: count('added'), removed: count('removed'), same: count('same') },
+    summary: { stories: publish.filter((i) => i.page.startsWith('story:')).length, storiesChanged: publish.filter((i) => i.page.startsWith('story:') && i.status === 'changed').length, total: publish.length, changed: count('changed'), added: count('added'), removed: count('removed'), same: count('same') },
     baseSeconds: baseManifest?.seconds,
     items: publish,
   };

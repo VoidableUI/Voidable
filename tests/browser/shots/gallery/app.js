@@ -34,28 +34,33 @@ $('scheme').addEventListener('click', () => setScheme(root.dataset.theme === 'da
 document.title = data.title;
 $('eyebrow').textContent = compare ? `${data.baseLabel} to ${data.headLabel}` : 'Reference pages';
 $('title').textContent = data.title;
-$('meta').textContent = `${data.summary.total} images · ${data.pages.length} pages · ${data.looks.length} looks · ${data.schemes.join(' and ')} · ${data.widths.join(' and ')} px · generated ${data.generated}`;
+$('meta').textContent = `${data.summary.total} images · ${data.pages.filter((p) => p.group !== 'stories').length} pages${data.summary.stories ? ` and ${new Set(data.pages.filter((p) => p.group === 'stories')).size} stories` : ''} · ${data.looks.length} looks · ${data.schemes.join(' and ')} · ${data.widths.join(' and ')} px · generated ${data.generated}`;
 if (data.fallbackMarkup.length && compare) {
   const n = $('notice');
   n.hidden = false;
   n.textContent = `The ${data.baseLabel} ref has no reference markup for ${data.fallbackMarkup.join(', ')}: those pages show this checkout's markup in the ${data.baseLabel} ref's styles.`;
 }
+const hasStories = data.summary.stories > 0;
+const refItems = data.items.filter((i) => !i.page.startsWith('story:'));
+const refCount = (st) => refItems.filter((i) => i.status === st).length;
 const fig = (name, value, caption) => `<void-figure><span data-void-type="label">${name}</span><span data-void-type="value">${value}</span><span data-void-type="caption">${caption}</span></void-figure>`;
 $('summary').innerHTML = compare
-  ? fig('Changed', data.summary.changed, `of ${data.summary.total} images`) +
-    fig('Unchanged', data.summary.same, 'identical in both') +
-    fig('New', data.summary.added, `only in ${data.headLabel}`) +
-    fig('Removed', data.summary.removed, `only in ${data.baseLabel}`)
-  : fig('Images', data.summary.total, 'full page') + fig('Pages', data.pages.length, data.pages.map((p) => p.group).filter((g, i, a) => a.indexOf(g) === i).length + ' groups') + fig('Looks', data.looks.length, 'themes and skins') + fig('Widths', data.widths.length, data.widths.join(' and ') + ' px');
+  ? fig('Changed', refCount('changed'), `of ${refItems.length} reference images`) +
+    fig('Unchanged', refCount('same'), 'identical in both') +
+    fig('New', refCount('added'), `only in ${data.headLabel}`) +
+    fig('Removed', refCount('removed'), `only in ${data.baseLabel}`) +
+    (hasStories ? fig('Stories changed', data.summary.storiesChanged, `of ${data.summary.stories} (regression only)`) : '')
+  : fig('Images', refItems.length, 'full page') + fig('Pages', data.pages.filter((p) => p.group !== 'stories').length, data.pages.map((p) => p.group).filter((g, i, a) => a.indexOf(g) === i).length + ' groups') + fig('Looks', data.looks.length, 'themes and skins') + fig('Widths', data.widths.length, data.widths.join(' and ') + ' px');
 
 // ── Filters ──
-const filters = { page: 'all', look: 'all', scheme: 'all', width: 'all', status: compare ? 'changed' : 'all' };
+const filters = { set: 'screens', page: 'all', look: 'all', scheme: 'all', width: 'all', status: compare ? 'changed' : 'all' };
 const select = (id, name, options) =>
   `<void-field label="${name}" class="filter"><void-select id="f-${id}" aria-label="${name}">${options.map(([v, t]) => `<option value="${esc(v)}"${filters[id] === v ? ' selected' : ''}>${esc(t)}</option>`).join('')}</void-select></void-field>`;
 const seg = (id, name, options) =>
   `<void-segmented-control id="f-${id}" value="${filters[id]}" aria-label="${name}" size="sm">${options.map(([v, t]) => `<void-segmented-control-item value="${esc(v)}">${esc(t)}</void-segmented-control-item>`).join('')}</void-segmented-control>`;
 $('filters').innerHTML = [
-  select('page', 'Page', [['all', 'All pages'], ...data.pages.map((p) => [p.id, p.title])]),
+  ...(hasStories ? [seg('set', 'Set', [['screens', 'Reference pages'], ['stories', 'Component stories']])] : []),
+  select('page', 'Page', [['all', 'All pages'], ...data.pages.filter((p) => p.group !== 'stories').map((p) => [p.id, p.title])]),
   select('look', 'Look', [['all', 'All themes and skins'], ...data.looks.map((l) => [l.id, lookName.get(l.id)])]),
   seg('scheme', 'Colour scheme', [['all', 'Both'], ...data.schemes.map((s) => [s, s[0].toUpperCase() + s.slice(1)])]),
   seg('width', 'Width', [['all', 'Both'], ...data.widths.map((w) => [String(w), `${w}px`])]),
@@ -69,6 +74,7 @@ for (const id of Object.keys(filters)) {
 // ── The grid ──
 let shown = [];
 const visible = (it) =>
+  (filters.set === 'stories') === it.page.startsWith('story:') &&
   (filters.page === 'all' || it.page === filters.page) &&
   (filters.look === 'all' || it.look === filters.look) &&
   (filters.scheme === 'all' || it.scheme === filters.scheme) &&

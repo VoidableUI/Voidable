@@ -54,7 +54,7 @@ async function main() {
   const d = decide(files, messages);
   console.log(`${files.length} changed file(s); ${d.full ? 'full matrix' : 'smoke subset'}; a visual difference is ${d.expected || d.acknowledged ? `expected (${d.reason})` : 'not expected'}.`);
 
-  const summary = await compare([base, '--out', out, ...(d.full ? [] : ['--smoke'])]);
+  const summary = await compare([base, '--out', out, ...(d.full ? ['--stories'] : ['--smoke'])]);
   const verdict = summary.changed === 0 && summary.added === 0 && summary.removed === 0 ? 'identical' : d.expected || d.acknowledged ? 'expected' : 'unexpected';
   const lines = [
     '### Visual review',

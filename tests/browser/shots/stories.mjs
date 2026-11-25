@@ -9,13 +9,25 @@
 // Nothing here goes to the network: the preview's webfonts and icon font are
 // requested from a CDN, so the requests are answered with the bundled fonts
 // or refused.
+import { spawnSync } from 'node:child_process';
 import { existsSync, readFileSync } from 'node:fs';
 import { createServer } from 'node:http';
 import { extname, join, normalize } from 'node:path';
 import { HEIGHTS, SCHEMES, TOOLING_ROOT, WIDTHS } from './lib.mjs';
-import { newContext } from './capture.mjs';
+import { newContext } from './browser.mjs';
 
 const types = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.mjs': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.woff2': 'font/woff2', '.jpg': 'image/jpeg', '.png': 'image/png', '.svg': 'image/svg+xml', '.map': 'application/json' };
+
+/**
+ * Builds the checkout's Storybook, so the stories photographed are the ones of this checkout.
+ * This is what `mise run storybook_build` runs after building the packages (which the callers
+ * have done); it is not run through mise because a mise task started from inside a running mise
+ * task of the same project can wait on it forever.
+ */
+export function buildStorybook(root) {
+  const r = spawnSync('pnpm', ['--filter', '@voidable/storybook', 'build'], { cwd: root, stdio: ['ignore', 'inherit', 'inherit'] });
+  if (r.status !== 0) throw new Error(`building Storybook failed in ${root}`);
+}
 
 /** Serves a built Storybook. */
 export async function serveStorybook(root) {
@@ -40,13 +52,13 @@ const fontFor = (url) => {
 };
 
 /** The shots of every story: [{ id, title, scheme, width, file }], written under outDir/stories/. */
-export async function photographStories(browser, root, outDir, { look = 'void', jobs = 4 } = {}) {
+export async function photographStories(browser, root, outDir, { look = 'void', jobs = 4, schemes = null, widths = null } = {}) {
   const sb = await serveStorybook(root);
   const harness = readFileSync(join(TOOLING_ROOT, 'tests/browser/src/harness.js'), 'utf8');
   const { DETERMINISM_CSS } = await import('./lib.mjs');
   const shots = [];
   const failures = [];
-  const queue = sb.stories.flatMap((s) => SCHEMES.flatMap((scheme) => WIDTHS.map((width) => ({ s, scheme, width }))));
+  const queue = sb.stories.flatMap((s) => SCHEMES.filter((x) => !schemes || schemes.has(x)).flatMap((scheme) => WIDTHS.filter((w) => !widths || widths.has(String(w))).map((width) => ({ s, scheme, width }))));
   let next = 0;
   const contexts = new Map();
   const contextFor = async (scheme, width) => {
