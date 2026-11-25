@@ -142,9 +142,7 @@ describe('VoidIndicator', () => {
       expect(el.getAttribute('aria-label')).toBe('notification');
     });
 
-    // BUG: the label is built by naive concatenation, so a count of 1 is announced as
-    // "1 notifications". indicator.ts:42. Expected: "1 notification".
-    it.fails('uses the singular for a count of one', async () => {
+    it('uses the singular for a count of one', async () => {
       const el = await mount({ count: 1 });
       expect(el.getAttribute('aria-label')).toBe('1 notification');
     });

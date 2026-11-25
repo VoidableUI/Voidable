@@ -122,9 +122,7 @@ describe('VoidLineChart', () => {
       expect(el.querySelector('svg')!.getAttribute('aria-label')).toBe('Signups');
     });
 
-    // BUG: the empty-data branch renders <svg aria-label=""> with no role and an empty
-    // name, unlike the populated branch which falls back to "Line chart". line-chart.ts:183.
-    it.fails('keeps an accessible name when there is no data', async () => {
+    it('keeps an accessible name when there is no data', async () => {
       const el = await mount<VoidLineChart>(TAG, {});
       expect(el.querySelector('svg')!.getAttribute('aria-label')).toBeTruthy();
     });
@@ -161,10 +159,7 @@ describe('VoidLineChart', () => {
       expect(el.innerHTML).not.toContain('NaN');
     });
 
-    // BUG: a NaN value poisons Math.max() so the y domain collapses to [0, 1] and the
-    // other points run off the top of the plot; the NaN point itself is emitted as "NaN".
-    // line-chart.ts:192-193. Expected: ignore/zero non-finite values.
-    it.fails('tolerates NaN values without emitting NaN coordinates', async () => {
+    it('tolerates NaN values without emitting NaN coordinates', async () => {
       const el = await mount<VoidLineChart>(TAG, { data: { series: [{ name: 'A', values: [1, NaN, 3] }] } });
       expect(el.innerHTML).not.toContain('NaN');
     });

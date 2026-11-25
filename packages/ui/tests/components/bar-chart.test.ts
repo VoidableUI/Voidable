@@ -114,9 +114,7 @@ describe('VoidBarChart', () => {
       expect(el.querySelector('svg')!.getAttribute('aria-label')).toBe('Monthly sales');
     });
 
-    // BUG: the empty-data branch renders <svg aria-label=""> without role and with an
-    // empty name, while the populated branch falls back to "Bar chart". See bar-chart.ts:168.
-    it.fails('keeps an accessible name when there is no data', async () => {
+    it('keeps an accessible name when there is no data', async () => {
       const el = await mount<VoidBarChart>(TAG, {});
       const svg = el.querySelector('svg')!;
       expect(svg.getAttribute('aria-label')).toBeTruthy();
@@ -303,10 +301,7 @@ describe('VoidBarChart', () => {
       expect(num(r, 'y') + num(r, 'height')).toBeCloseTo(TOP + (400 - 48), 5);
     });
 
-    // BUG: a NaN value poisons Math.max() so the whole y domain collapses to [0, 1];
-    // every other bar then overflows above the plot and the NaN bar gets y/height="NaN".
-    // See bar-chart.ts:177-178 and :213-214. Expected: ignore/zero non-finite values.
-    it.fails('tolerates NaN values without emitting NaN attributes or rescaling the others', async () => {
+    it('tolerates NaN values without emitting NaN attributes or rescaling the others', async () => {
       const el = await mount<VoidBarChart>(TAG, { data: { series: [{ name: 'A', values: [1, NaN, 3] }] } });
       expect(el.innerHTML).not.toContain('NaN');
       for (const r of bars(el)) expect(num(r, 'y')).toBeGreaterThanOrEqual(TOP);

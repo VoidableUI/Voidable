@@ -8,6 +8,8 @@ export class VoidSidebar extends VoidElement {
   @property({ type: String, attribute: 'collapsed-width', reflect: true }) collapsedWidth = 'var(--void-sidebar-collapsed-width)';
   @property({ type: String, reflect: true }) position: 'left' | 'right' = 'left';
 
+  private _initialised = false;
+
   connectedCallback(): void {
     super.connectedCallback();
     this.setHostAttribute('role', 'navigation');
@@ -22,12 +24,17 @@ export class VoidSidebar extends VoidElement {
   updated(changed: Map<string, unknown>): void {
     if (changed.has('collapsed')) {
       this._updateWidth();
-      this.dispatchEvent(new CustomEvent('void-toggle', {
-        bubbles: true,
-        composed: true,
-        detail: { collapsed: this.collapsed },
-      }));
+      // The first update reports initialised properties as changed; that is
+      // not a toggle, so stay quiet until the user-visible state changes.
+      if (this._initialised) {
+        this.dispatchEvent(new CustomEvent('void-toggle', {
+          bubbles: true,
+          composed: true,
+          detail: { collapsed: this.collapsed },
+        }));
+      }
     }
+    this._initialised = true;
     if (changed.has('width') || changed.has('collapsedWidth')) {
       this._updateWidth();
     }

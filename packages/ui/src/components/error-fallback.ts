@@ -1,6 +1,7 @@
 import { html, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
+import { defaultTrueBoolean } from '../converters.js';
 
 /** Error state display for failed data fetches and unexpected runtime errors; includes an optional retry action. */
 export class VoidErrorFallback extends VoidElement {
@@ -8,7 +9,7 @@ export class VoidErrorFallback extends VoidElement {
   @property({ type: String }) message = '';
   @property({ type: Boolean, reflect: true }) retryable = false;
   @property({ type: String, attribute: 'retry-label' }) retryLabel = 'Try again';
-  @property({ type: Boolean }) icon = true;
+  @property({ type: Boolean, converter: defaultTrueBoolean }) icon = true;
 
   connectedCallback(): void {
     super.connectedCallback();

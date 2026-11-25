@@ -311,13 +311,13 @@ function wrapWc<E extends HTMLElement, P = object>(
 // ---------------------------------------------------------------------------
 
 export const Badge = wrapWc<VoidBadge, {
-  color?: 'default' | 'error' | 'warning' | 'success' | 'info' | 'notice' | 'highlight';
+  color?: 'default' | 'error' | 'warning' | 'caution' | 'success' | 'info' | 'notice' | 'highlight';
   size?: 'sm' | 'md' | 'lg' | 'xl' | 'xxl';
 }>('void-badge', 'Badge');
 
 export const Button = wrapWc<VoidButton, {
   variant?: 'outline' | 'filled' | 'ghost';
-  color?: 'default' | 'error' | 'warning' | 'success' | 'info' | 'notice';
+  color?: 'default' | 'error' | 'warning' | 'caution' | 'success' | 'info' | 'notice';
   disabled?: boolean;
   type?: 'button' | 'submit' | 'reset';
   size?: 'sm' | 'md' | 'lg' | 'xl' | 'xxl';
@@ -344,7 +344,7 @@ export const StatusDot = wrapWc<VoidStatusDot, {
 export const Switch = wrapWc<VoidSwitch, {
   checked?: boolean;
   disabled?: boolean;
-  color?: 'default' | 'error' | 'warning' | 'success' | 'info' | 'notice';
+  color?: 'default' | 'error' | 'warning' | 'caution' | 'success' | 'info' | 'notice';
   size?: 'sm' | 'md' | 'lg' | 'xl' | 'xxl';
   /** Form field name; the value is submitted under it. */
   name?: string;
@@ -362,13 +362,13 @@ export const Avatar = wrapWc<VoidAvatar, {
 }>('void-avatar', 'Avatar');
 
 export const Alert = wrapWc<VoidAlert, {
-  color?: 'default' | 'error' | 'warning' | 'success' | 'info' | 'notice';
+  color?: 'default' | 'error' | 'warning' | 'caution' | 'success' | 'info' | 'notice';
   dismissible?: boolean;
   variant?: 'subtle' | 'filled';
 } & VoidEvents<{ Dismiss: null }>>('void-alert', 'Alert');
 
 export const Tag = wrapWc<VoidTag, {
-  color?: 'default' | 'error' | 'warning' | 'success' | 'info' | 'notice';
+  color?: 'default' | 'error' | 'warning' | 'caution' | 'success' | 'info' | 'notice';
   removable?: boolean;
   size?: 'sm' | 'md' | 'lg' | 'xl' | 'xxl';
 } & VoidEvents<{ Remove: null }>>('void-tag', 'Tag');
@@ -376,7 +376,7 @@ export const Tag = wrapWc<VoidTag, {
 export const Progress = wrapWc<VoidProgress, {
   value?: number;
   max?: number;
-  color?: 'default' | 'error' | 'warning' | 'success' | 'info' | 'notice';
+  color?: 'default' | 'error' | 'warning' | 'caution' | 'success' | 'info' | 'notice';
   size?: 'sm' | 'md' | 'lg' | 'xl' | 'xxl';
   indeterminate?: boolean;
 }>('void-progress', 'Progress');
@@ -387,7 +387,7 @@ export const Panel = wrapWc<VoidPanel, {
 }>('void-panel', 'Panel');
 
 export const Input = wrapWc<VoidInput, {
-  type?: 'text' | 'email' | 'password' | 'number' | 'tel' | 'url' | 'search';
+  type?: 'text' | 'email' | 'password' | 'number' | 'tel' | 'url' | 'search' | 'date' | 'datetime-local' | 'month' | 'time' | 'week';
   value?: string;
   placeholder?: string;
   disabled?: boolean;
@@ -396,6 +396,16 @@ export const Input = wrapWc<VoidInput, {
   name?: string;
   size?: 'sm' | 'md' | 'lg' | 'xl' | 'xxl';
   error?: string;
+  /** Autofill hint for the native control, e.g. `current-password`. */
+  autocomplete?: string;
+  minlength?: number;
+  maxlength?: number;
+  pattern?: string;
+  inputMode?: '' | 'none' | 'text' | 'decimal' | 'numeric' | 'tel' | 'search' | 'email' | 'url';
+  enterKeyHint?: '' | 'enter' | 'done' | 'go' | 'next' | 'previous' | 'search' | 'send';
+  autocapitalize?: '' | 'off' | 'none' | 'on' | 'sentences' | 'words' | 'characters';
+  /** Defaults to true; pass `false` to turn spell checking off. */
+  spellcheck?: boolean;
 } & VoidEvents<{ Input: { value: string }; Change: { value: string } }>>('void-input', 'Input');
 
 export const Textarea = wrapWc<VoidTextarea, {
@@ -409,6 +419,15 @@ export const Textarea = wrapWc<VoidTextarea, {
   resize?: 'none' | 'vertical' | 'both';
   size?: 'sm' | 'md' | 'lg' | 'xl' | 'xxl';
   error?: string;
+  /** Autofill hint for the native control, e.g. `current-password`. */
+  autocomplete?: string;
+  minlength?: number;
+  maxlength?: number;
+  inputMode?: '' | 'none' | 'text' | 'decimal' | 'numeric' | 'tel' | 'search' | 'email' | 'url';
+  enterKeyHint?: '' | 'enter' | 'done' | 'go' | 'next' | 'previous' | 'search' | 'send';
+  autocapitalize?: '' | 'off' | 'none' | 'on' | 'sentences' | 'words' | 'characters';
+  /** Defaults to true; pass `false` to turn spell checking off. */
+  spellcheck?: boolean;
 } & VoidEvents<{ Input: { value: string }; Change: { value: string } }>>('void-textarea', 'Textarea');
 
 export const Select = wrapWc<VoidSelect, {
@@ -427,7 +446,7 @@ export const Checkbox = wrapWc<VoidCheckbox, {
   indeterminate?: boolean;
   name?: string;
   value?: string;
-  color?: 'default' | 'error' | 'warning' | 'success' | 'info' | 'notice';
+  color?: 'default' | 'error' | 'warning' | 'caution' | 'success' | 'info' | 'notice';
   size?: 'sm' | 'md' | 'lg' | 'xl' | 'xxl';
   /** Form validation: the control must have a value. */
   required?: boolean;
@@ -438,7 +457,7 @@ export const Radio = wrapWc<VoidRadio, {
   disabled?: boolean;
   name?: string;
   value?: string;
-  color?: 'default' | 'error' | 'warning' | 'success' | 'info' | 'notice';
+  color?: 'default' | 'error' | 'warning' | 'caution' | 'success' | 'info' | 'notice';
   size?: 'sm' | 'md' | 'lg' | 'xl' | 'xxl';
   /** Form validation: the control must have a value. */
   required?: boolean;
@@ -521,14 +540,14 @@ export const ListItem = wrapWc<VoidListItem, {
 } & VoidEvents<{ Click: Record<string, never> }>>('void-list-item', 'ListItem');
 
 export const Toast = wrapWc<VoidToast, {
-  color?: 'default' | 'error' | 'warning' | 'success' | 'info';
+  color?: 'default' | 'error' | 'warning' | 'caution' | 'success' | 'info';
   duration?: number;
   dismissable?: boolean;
   heading?: string;
 } & VoidEvents<{ Close: null }>>('void-toast', 'Toast');
 
 export const ToastContainer = wrapWc<VoidToastContainer, {
-  position?: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left' | 'top-center' | 'bottom-center';
+  position?: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left' | 'top-center' | 'bottom-center' | 'inline';
 }>('void-toast-container', 'ToastContainer');
 
 export const Stepper = wrapWc<VoidStepper, {
@@ -579,7 +598,7 @@ export const Tooltip = wrapWc<VoidTooltip, {
 }>('void-tooltip', 'Tooltip');
 
 export const Banner = wrapWc<VoidBanner, {
-  color?: 'default' | 'error' | 'warning' | 'success' | 'info' | 'notice';
+  color?: 'default' | 'error' | 'warning' | 'caution' | 'success' | 'info' | 'notice';
   dismissable?: boolean;
   variant?: 'subtle' | 'filled';
 } & VoidEvents<{ Close: null }>>('void-banner', 'Banner');
@@ -715,7 +734,7 @@ export const DropdownMenuItem = wrapWc<VoidDropdownMenuItem, {
 export const Toggle = wrapWc<VoidToggle, {
   pressed?: boolean;
   disabled?: boolean;
-  color?: 'default' | 'error' | 'warning' | 'success' | 'info' | 'notice';
+  color?: 'default' | 'error' | 'warning' | 'caution' | 'success' | 'info' | 'notice';
   size?: 'sm' | 'md' | 'lg' | 'xl' | 'xxl';
   variant?: 'outline' | 'filled' | 'ghost' | 'solid';
   /** Value this toggle contributes to a parent ToggleGroup. */
@@ -741,13 +760,15 @@ export const Stat = wrapWc<VoidStat, {
   label?: string;
   value?: string;
   delta?: string;
-  trend?: 'up' | 'down' | 'flat' | 'error' | 'warning' | 'success' | 'info' | 'notice' | 'highlight' | null;
-  color?: 'default' | 'error' | 'warning' | 'success' | 'info' | 'notice';
+  /** Secondary line of text under the value. */
+  description?: string;
+  trend?: 'up' | 'down' | 'flat' | 'error' | 'warning' | 'caution' | 'success' | 'info' | 'notice' | 'highlight' | null;
+  color?: 'default' | 'error' | 'warning' | 'caution' | 'success' | 'info' | 'notice' | 'highlight';
   size?: 'sm' | 'md' | 'lg' | 'xl' | 'xxl';
 }>('void-stat', 'Stat');
 
 export const Indicator = wrapWc<VoidIndicator, {
-  color?: 'default' | 'error' | 'warning' | 'success' | 'info' | 'notice';
+  color?: 'default' | 'error' | 'warning' | 'caution' | 'success' | 'info' | 'notice';
   size?: 'sm' | 'md' | 'lg' | 'xl' | 'xxl';
   count?: number;
   ping?: boolean;
@@ -812,7 +833,7 @@ export const DatePicker = wrapWc<VoidDatePicker, {
   open?: boolean;
   placeholder?: string;
   format?: string;
-  color?: 'default' | 'error' | 'warning' | 'success' | 'info' | 'notice';
+  color?: 'default' | 'error' | 'warning' | 'caution' | 'success' | 'info' | 'notice';
   /** Form field name; the value is submitted under it. */
   name?: string;
   /** Form validation: the control must have a value. */
@@ -823,12 +844,13 @@ export const NumberInput = wrapWc<VoidNumberInput, {
   value?: number;
   min?: number;
   max?: number;
-  step?: number;
+  /** A number, or `'any'` for no step constraint (the buttons then step by 1). */
+  step?: number | 'any';
   precision?: number;
   disabled?: boolean;
   readonly?: boolean;
   size?: 'sm' | 'md' | 'lg';
-  color?: 'default' | 'error' | 'warning' | 'success' | 'info' | 'notice';
+  color?: 'default' | 'error' | 'warning' | 'caution' | 'success' | 'info' | 'notice';
   placeholder?: string;
   controls?: 'sides' | 'right' | 'none';
   label?: string;
@@ -899,7 +921,7 @@ export const PinInput = wrapWc<VoidPinInput, {
   mask?: boolean;
   type?: 'numeric' | 'alphanumeric';
   size?: 'sm' | 'md' | 'lg';
-  color?: 'default' | 'error' | 'warning' | 'success' | 'info' | 'notice';
+  color?: 'default' | 'error' | 'warning' | 'caution' | 'success' | 'info' | 'notice';
   placeholder?: string;
   /** Form field name; the value is submitted under it. */
   name?: string;
@@ -914,7 +936,7 @@ export const TagsInput = wrapWc<VoidTagsInput, {
   max?: number;
   placeholder?: string;
   size?: 'sm' | 'md' | 'lg';
-  color?: 'default' | 'error' | 'warning' | 'success' | 'info' | 'notice';
+  color?: 'default' | 'error' | 'warning' | 'caution' | 'success' | 'info' | 'notice';
   variant?: 'filled' | 'outline';
   allowDuplicates?: boolean;
   /** Form field name; the value is submitted under it. */
@@ -954,9 +976,19 @@ export const ActionInput = wrapWc<VoidActionInput, {
   placeholder?: string;
   disabled?: boolean;
   readonly?: boolean;
-  type?: 'text' | 'password';
+  type?: 'text' | 'password' | 'search' | 'email' | 'tel' | 'url';
   size?: 'sm' | 'md' | 'lg';
-  color?: 'default' | 'error' | 'warning' | 'success' | 'info' | 'notice';
+  color?: 'default' | 'error' | 'warning' | 'caution' | 'success' | 'info' | 'notice';
+  /** Autofill hint for the native control, e.g. `current-password`. */
+  autocomplete?: string;
+  minlength?: number;
+  maxlength?: number;
+  pattern?: string;
+  inputMode?: '' | 'none' | 'text' | 'decimal' | 'numeric' | 'tel' | 'search' | 'email' | 'url';
+  enterKeyHint?: '' | 'enter' | 'done' | 'go' | 'next' | 'previous' | 'search' | 'send';
+  autocapitalize?: '' | 'off' | 'none' | 'on' | 'sentences' | 'words' | 'characters';
+  /** Defaults to true; pass `false` to turn spell checking off. */
+  spellcheck?: boolean;
   icon?: string;
   actionLabel?: string;
   position?: 'left' | 'right';

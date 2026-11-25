@@ -14,7 +14,7 @@ const meta: Meta = {
     },
   },
   argTypes: {
-    type: { control: 'select', options: ['text', 'email', 'password', 'number', 'tel', 'url', 'search'] },
+    type: { control: 'select', options: ['text', 'email', 'password', 'number', 'tel', 'url', 'search', 'date', 'datetime-local', 'month', 'time', 'week'] },
     placeholder: { control: 'text' },
     disabled: { control: 'boolean' },
     readonly: { control: 'boolean' },
@@ -60,4 +60,34 @@ export const Disabled: Story = {
 
 export const Password: Story = {
   args: { type: 'password', placeholder: 'Enter password...' },
+};
+
+export const DateAndTimeTypes: Story = {
+  render: () => html`
+    <div style="display: flex; flex-direction: column; gap: 12px; max-width: 400px;">
+      <void-input type="date"></void-input>
+      <void-input type="time"></void-input>
+      <void-input type="datetime-local"></void-input>
+      <void-input type="month"></void-input>
+      <void-input type="week"></void-input>
+    </div>
+  `,
+};
+
+export const NativeAttributes: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story: 'The standard native attributes are forwarded to the native control: `autocomplete` (so password managers recognise the field), `minlength`, `maxlength`, `pattern`, `inputmode`, `enterkeyhint`, `autocapitalize` and `spellcheck`. `minlength` and `pattern` take part in the form\'s validity.',
+      },
+    },
+  },
+  render: () => html`
+    <form style="display: flex; flex-direction: column; gap: 12px; max-width: 400px;" @submit=${(e: Event) => e.preventDefault()}>
+      <void-input name="username" autocomplete="username" autocapitalize="off" spellcheck="false" placeholder="Username"></void-input>
+      <void-input name="password" type="password" autocomplete="current-password" minlength="8" maxlength="64" placeholder="Password (8 to 64 characters)"></void-input>
+      <void-input name="code" autocomplete="one-time-code" inputmode="numeric" pattern="[0-9]{6}" enterkeyhint="done" placeholder="6 digit code"></void-input>
+      <void-button type="submit">Sign in</void-button>
+    </form>
+  `,
 };

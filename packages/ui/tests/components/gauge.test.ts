@@ -391,10 +391,7 @@ describe('VoidGauge', () => {
       expect(q(el, '.void-gauge-center-value')).toBeNull();
     });
 
-    // BUG: `value` is only copied into the animated display value on connect and in the
-    // `data` setter, so assigning `el.value` after first render redraws the old value.
-    // gauge.ts:297-304 (_refreshTargets) is never invoked from a `value` change.
-    it.fails('re-renders the center label and fill when `value` changes after mount', async () => {
+    it('re-renders the center label and fill when `value` changes after mount', async () => {
       const el = await mount<VoidGauge>(TAG, { value: 20 });
       el.value = 80;
       await settle(el);
@@ -468,10 +465,7 @@ describe('VoidGauge', () => {
       expect(fill(await mount<VoidGauge>(TAG, { value: 150, max: 200, zones }))).toContain('--value-color: red');
     });
 
-    // BUG: the fallback comment says "fallback to last zone if over max", but a value *below*
-    // the first zone also gets the last zone's color (e.g. a "danger" colour for a tiny value).
-    // gauge.ts:464-472. Expected: fall back to the nearest zone (first) or the accent color.
-    it.fails('does not use the last zone colour for a value below the first zone', async () => {
+    it('does not use the last zone colour for a value below the first zone', async () => {
       const low: GaugeZone[] = [
         { from: 20, to: 50, color: 'green' },
         { from: 50, to: 100, color: 'red' },
@@ -534,10 +528,7 @@ describe('VoidGauge', () => {
       expect(q(el, '.void-gauge-zones')).toBeNull();
     });
 
-    // BUG: `zones` is a plain class field (no @property), so assigning it after the first render
-    // never triggers an update; consumers must remember to call requestUpdate() themselves.
-    // gauge.ts:257. Expected: assigning el.zones re-renders like every other input.
-    it.fails('re-renders when zones are assigned after mount', async () => {
+    it('re-renders when zones are assigned after mount', async () => {
       const el = await mount<VoidGauge>(TAG, { value: 25 });
       el.zones = zones;
       await settle(el);
@@ -732,12 +723,7 @@ describe('VoidGauge', () => {
       expect(el.innerHTML).not.toContain('NaN');
     });
 
-    // BUG: segment sweeps are computed as (value / total) * totalSweep, i.e. relative to the
-    // whole gauge arc, but they are then clipped to the fill (total / (max - min)). When the
-    // segments sum to less than `max`, the first segment balloons to cover the fill and the
-    // later ones vanish. gauge.ts:625-626 (and the hover hit-test at :386). Expected: the
-    // segments subdivide the filled arc in proportion (here 60% / 40% of the 50% fill).
-    it.fails('draws every segment when the segments sum to less than max', async () => {
+    it('draws every segment when the segments sum to less than max', async () => {
       const el = await mount<VoidGauge>(TAG, {
         data: { segments: [{ name: 'a', value: 30 }, { name: 'b', value: 20 }] },
         segmentsSort: 'manual',

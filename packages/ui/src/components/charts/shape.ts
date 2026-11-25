@@ -84,6 +84,13 @@ export function arcPath(
   endAngle: number,
   innerR = 0,
 ): string {
+  // A sweep of a full turn makes the arc's endpoints coincide, which SVG
+  // omits entirely. Stop just short so a single 100% segment still draws.
+  if (Math.abs(endAngle - startAngle) >= 2 * Math.PI) {
+    endAngle = startAngle + Math.sign(endAngle - startAngle) * (2 * Math.PI - 0.001);
+  }
+  const rd = (n: number) => String(Number(n.toFixed(2)));
+  const oR = rd(outerR);
   const x0 = cx + outerR * Math.cos(startAngle);
   const y0 = cy + outerR * Math.sin(startAngle);
   const x1 = cx + outerR * Math.cos(endAngle);
@@ -91,12 +98,12 @@ export function arcPath(
   const largeArc = endAngle - startAngle > Math.PI ? 1 : 0;
 
   if (innerR <= 0) {
-    return `M ${cx} ${cy} L ${x0.toFixed(2)} ${y0.toFixed(2)} A ${outerR} ${outerR} 0 ${largeArc} 1 ${x1.toFixed(2)} ${y1.toFixed(2)} Z`;
+    return `M ${cx} ${cy} L ${x0.toFixed(2)} ${y0.toFixed(2)} A ${oR} ${oR} 0 ${largeArc} 1 ${x1.toFixed(2)} ${y1.toFixed(2)} Z`;
   }
 
   const ix0 = cx + innerR * Math.cos(endAngle);
   const iy0 = cy + innerR * Math.sin(endAngle);
   const ix1 = cx + innerR * Math.cos(startAngle);
   const iy1 = cy + innerR * Math.sin(startAngle);
-  return `M ${x0.toFixed(2)} ${y0.toFixed(2)} A ${outerR} ${outerR} 0 ${largeArc} 1 ${x1.toFixed(2)} ${y1.toFixed(2)} L ${ix0.toFixed(2)} ${iy0.toFixed(2)} A ${innerR} ${innerR} 0 ${largeArc} 0 ${ix1.toFixed(2)} ${iy1.toFixed(2)} Z`;
+  return `M ${x0.toFixed(2)} ${y0.toFixed(2)} A ${oR} ${oR} 0 ${largeArc} 1 ${x1.toFixed(2)} ${y1.toFixed(2)} L ${ix0.toFixed(2)} ${iy0.toFixed(2)} A ${rd(innerR)} ${rd(innerR)} 0 ${largeArc} 0 ${ix1.toFixed(2)} ${iy1.toFixed(2)} Z`;
 }

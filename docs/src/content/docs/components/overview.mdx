@@ -40,7 +40,7 @@ Voidable ships {stats.elements} custom elements across {stats.components} compon
 | Stepper | `<void-stepper>` | Multi-step progress tracker for onboarding flows and checkout funnels |
 | Pagination | `<void-pagination>` | Page navigation for data tables, search results, and content archives |
 | Indicator | `<void-indicator>` | Badge overlay for notification counts and unread/presence signals on icons |
-| Stat | `<void-stat>` | Key metric display for analytics dashboards with label, value, delta, and trend |
+| Stat | `<void-stat>` | Key metric display for analytics dashboards with label, value, delta, trend, and an optional description line |
 | Calendar / DatePicker | `<void-calendar>` / `<void-date-picker>` | Date selection for booking flows and scheduling UIs with locale-aware formatting and min/max constraints |
 | HoverCard | `<void-hover-card>` | Rich content preview card that appears on hover for user profiles, link previews, and contextual information panels |
 | NavMenu / NavMenuItem | `<void-nav-menu>` / `<void-nav-menu-item>` | Horizontal navigation bar with dropdown sub-menus for site headers, application nav bars, and mega-menu layouts |
@@ -88,7 +88,7 @@ Voidable ships {stats.elements} custom elements across {stats.components} compon
 |-----------|-----|-------------|
 | Alert | `<void-alert>` | Inline contextual message for form validation, permission warnings, and status notices |
 | Banner | `<void-banner>` | Full-width site-level announcement for maintenance windows and promotional messaging |
-| Toast / ToastContainer | `<void-toast>` / `<void-toast-container>` | Temporary notification popup for action confirmations and status feedback |
+| Toast / ToastContainer | `<void-toast>` / `<void-toast-container>` | Temporary notification popup for action confirmations and status feedback. The container's `position` also takes `inline` to sit in the page flow, and `toast({ message })` from `@voidable/ui` shows one programmatically |
 | Progress | `<void-progress>` | Determinate or indeterminate progress bar for uploads and multi-step processes |
 | Spinner | `<void-spinner>` | Indeterminate loading indicator for async operations and inline fetching |
 | Skeleton | `<void-skeleton>` | Content placeholder during loading for cards and lists to prevent layout shift |
@@ -103,3 +103,41 @@ Voidable ships {stats.elements} custom elements across {stats.components} compon
 | Hamburger | `<void-hamburger>` | Animated open/close toggle for mobile nav menus and collapsible sidebars |
 | DropdownMenu | `<void-dropdown-menu>` / `<void-dropdown-menu-item>` | Trigger-anchored action menu for table row actions and toolbar overflow menus |
 | Menu / MenuItem / MenuGroup | `<void-menu>` / `<void-menu-item>` / `<void-menu-group>` | Always-visible menu panel for command palettes, side panels, and searchable action lists |
+
+## Attributes shared across components
+
+### Booleans that default to true
+
+A boolean attribute normally means true when present and false when absent. A boolean that defaults to true needs a way to say false from markup, so these accept the string `"false"`:
+
+| Component | Attributes |
+|-----------|------------|
+| `<void-dialog>`, `<void-drawer>` | `closable` |
+| `<void-toast>` | `dismissable` |
+| `<void-carousel>` | `controls`, `indicators` |
+| `<void-nav-bar>` | `bordered` |
+| `<void-gauge>` | `show-value`, `tick-min`, `tick-max` |
+| `<void-color-picker>` | `show-input` |
+| `<void-error-fallback>` | `icon` |
+| `<void-input>`, `<void-textarea>`, `<void-action-input>` | `spellcheck` |
+
+```html
+<void-toast dismissable="false">Saved</void-toast>
+<void-nav-bar bordered="false">...</void-nav-bar>
+```
+
+A bare attribute, `="true"` or no attribute all keep the default. Setting the property to `false` from JavaScript works too, and reflects as `"false"`.
+
+### Native text attributes
+
+`<void-input>`, `<void-textarea>` and `<void-action-input>` forward the standard native attributes to their native control: `autocomplete`, `minlength`, `maxlength`, `inputmode`, `enterkeyhint`, `autocapitalize`, `spellcheck`, `readonly`, and (on the single-line inputs) `pattern`. `<void-input>` accepts every text-like `type`: `text`, `email`, `password`, `number`, `tel`, `url`, `search`, `date`, `datetime-local`, `month`, `time` and `week`.
+
+```html
+<void-input type="password" name="password" autocomplete="current-password" minlength="8"></void-input>
+```
+
+`minlength` and `pattern` take part in validity and form submission. They apply to what the user types, as with a native input.
+
+### Color
+
+Components that take a `color` accept `default`, `error`, `warning`, `success`, `info` and `notice`. Every component whose theme styles it also accepts `caution` (all except `<void-toggle-group>` and `<void-segmented-control>`), and `<void-badge>` and `<void-stat>` accept `highlight`.

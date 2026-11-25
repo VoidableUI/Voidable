@@ -413,7 +413,7 @@ defmodule VoidableUI.Components.StaticContainerTest do
     assert html =~ "Nav content"
   end
 
-  test "nav_bar renders sticky when true and can disable bordered" do
+  test "nav_bar renders sticky when true and bordered=\"false\" when disabled" do
     assigns = %{}
 
     html =
@@ -422,7 +422,7 @@ defmodule VoidableUI.Components.StaticContainerTest do
       """)
 
     assert html =~ "sticky"
-    refute html =~ "bordered"
+    assert html =~ ~s(bordered="false")
     assert html =~ ~s(variant="transparent")
   end
 

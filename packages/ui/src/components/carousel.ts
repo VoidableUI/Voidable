@@ -2,6 +2,7 @@ import { html } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
 import { ProjectionController } from '../projection.js';
+import { defaultTrueBoolean } from '../converters.js';
 
 /** Individual slide within a VoidCarousel; wraps any content for display in the carousel sequence. */
 export class VoidCarouselSlide extends VoidElement {
@@ -23,8 +24,8 @@ export class VoidCarousel extends VoidElement {
   @property({ type: Boolean, reflect: true }) autoplay = false;
   @property({ type: Number }) interval = 5000;
   @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' = 'md';
-  @property({ type: Boolean, reflect: true }) controls = true;
-  @property({ type: Boolean, reflect: true }) indicators = true;
+  @property({ type: Boolean, reflect: true, converter: defaultTrueBoolean }) controls = true;
+  @property({ type: Boolean, reflect: true, converter: defaultTrueBoolean }) indicators = true;
   @property({ type: String, reflect: true }) orientation: 'horizontal' | 'vertical' = 'horizontal';
 
   private _slides: VoidCarouselSlide[] = [];

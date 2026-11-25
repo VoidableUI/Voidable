@@ -73,7 +73,7 @@ export class VoidLineChart extends VoidElement {
   private _refreshTargets() {
     this._targets.clear();
     this._data.series.forEach((s, si) => {
-      s.values.forEach((v, pi) => this._targets.set(this._key(si, pi), v));
+      s.values.forEach((v, pi) => this._targets.set(this._key(si, pi), Number.isFinite(v) ? v : 0));
     });
   }
 
@@ -180,7 +180,7 @@ export class VoidLineChart extends VoidElement {
   render() {
     const { series, labels = [] } = this._data;
     if (series.length === 0) {
-      return html`<svg viewBox="0 0 600 ${this.height}" aria-label=${this.ariaLabel}></svg>`;
+      return html`<svg viewBox="0 0 600 ${this.height}" role="img" aria-label=${this.ariaLabel || 'Line chart'}></svg>`;
     }
 
     const topMargin = 16, rightMargin = 16, bottomMargin = 32, leftMargin = 40;
@@ -188,7 +188,7 @@ export class VoidLineChart extends VoidElement {
     const innerWidth = width - leftMargin - rightMargin;
     const innerHeight = this.height - topMargin - bottomMargin;
     const numPoints = Math.max(...series.map(s => s.values.length));
-    const allValues = series.flatMap(s => s.values);
+    const allValues = series.flatMap(s => s.values).filter(Number.isFinite);
     const maxValue = Math.max(...allValues, 0);
     const domainMax = niceStepLocal(maxValue * 1.1) || 1;
 

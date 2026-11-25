@@ -48,7 +48,8 @@ Importing `@voidable/ui-react` also imports `@voidable/ui`, which defines the `<
 
 ### Props
 
-- Booleans, arrays and objects are set as element properties, so `disabled={false}` really is false and `TagsInput` `value` stays an array. This is the same on React 18 and 19.
+- Booleans, arrays and objects are set as element properties, so `disabled={false}` really is false and `TagsInput` `value` stays an array. This is the same on React 18 and 19. It also means booleans that default to true can be turned off: `<Toast dismissable={false}>`, `<NavBar bordered={false}>`.
+- Native input attributes (`autocomplete`, `minlength`, `maxlength`, `pattern`, `inputMode`, `enterKeyHint`, `autocapitalize`, `spellcheck`) are typed on `Input`, `Textarea` and `ActionInput`.
 - `className` is mapped to `class`.
 - Other attributes such as `aria-*` and `data-*` are passed through.
 

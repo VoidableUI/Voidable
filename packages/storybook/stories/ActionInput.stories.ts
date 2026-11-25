@@ -19,7 +19,7 @@ const meta: Meta = {
     disabled: { control: 'boolean' },
     readonly: { control: 'boolean' },
     size: { control: 'select', options: ['sm', 'md', 'lg'] },
-    color: { control: 'select', options: ['default', 'error', 'warning', 'success', 'info', 'notice'] },
+    color: { control: 'select', options: ['default', 'error', 'warning', 'caution', 'success', 'info', 'notice'] },
     type: { control: 'select', options: ['text', 'password'] },
     icon: { control: 'select', options: ['search', 'copy', 'send', 'eye', 'eye-off', 'check', 'x', 'arrow-right', 'clipboard'] },
     actionLabel: { control: 'text' },

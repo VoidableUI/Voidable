@@ -20,7 +20,7 @@ const meta: Meta = {
     },
     color: {
       control: { type: 'select' },
-      options: ['default', 'error', 'warning', 'success', 'info', 'notice'],
+      options: ['default', 'error', 'warning', 'caution', 'success', 'info', 'notice'],
     },
     size: {
       control: { type: 'select' },

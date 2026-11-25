@@ -146,10 +146,7 @@ describe('VoidSidebar', () => {
       expect(count).toBe(0);
     });
 
-    // BUG: Lit reports every initialised property as changed on first update, so `updated()`
-    // dispatches a void-toggle on connect even though nothing was toggled. sidebar.ts:27.
-    // Expected: only dispatch when collapsed actually changes after the initial render.
-    it.fails('is not dispatched on initial render', async () => {
+    it('is not dispatched on initial render', async () => {
       const el = document.createElement(TAG) as VoidSidebar;
       let count = 0;
       el.addEventListener('void-toggle', () => count++);

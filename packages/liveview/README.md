@@ -58,7 +58,19 @@ components. `phx-update="ignore"` protects the children Voidable components
 relocate, but also blocks all server attribute updates, so it is opt-in per
 element. See the `VoidableUI.Components` moduledoc for guidance.
 
-## `closable={false}`
+## Booleans that default to true
 
-`dialog` and `drawer` render `closable="false"`, which the core components
-read as false (any other value, or no attribute, means true).
+A boolean that defaults to true in the core component renders as `"true"` or
+`"false"`, which the core components read as true or false (any other value,
+or no attribute, means true): `closable` on `dialog` and `drawer`,
+`dismissable` on `toast`, `bordered` on `nav_bar`, `controls` and
+`indicators` on `carousel`, `show_input` on `color_picker` and `icon` on
+`error_fallback`. Turn one off with `<.toast dismissable={false}>`.
+
+## Native input attributes
+
+`input`, `textarea` and `action_input` declare `autocomplete`, `minlength`
+and `maxlength` (and `pattern` on the single-line inputs); `inputmode`,
+`enterkeyhint`, `autocapitalize` and `spellcheck` pass through as global
+attributes. `number_input` accepts `step="any"` and decimal `value`, `min`
+and `max`, and `stat` takes `description`.

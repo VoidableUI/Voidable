@@ -654,7 +654,7 @@ defmodule VoidableUI.Components.InteractiveUITest do
       assert html =~ "dismissable"
     end
 
-    test "omits dismissable when explicitly false" do
+    test "renders dismissable=\"false\" when explicitly false" do
       assigns = %{}
 
       html =
@@ -662,7 +662,7 @@ defmodule VoidableUI.Components.InteractiveUITest do
         <VoidableUI.Components.toast dismissable={false}>Msg</VoidableUI.Components.toast>
         """)
 
-      refute html =~ "dismissable"
+      assert html =~ ~s(dismissable="false")
     end
 
     test "passes through global attributes" do

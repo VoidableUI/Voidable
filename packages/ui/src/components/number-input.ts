@@ -9,12 +9,19 @@ export class VoidNumberInput extends InternalsFormControl(VoidElement) {
   @property({ type: Number, reflect: true }) value: number = 0;
   @property({ type: Number }) min: number = Number.NEGATIVE_INFINITY;
   @property({ type: Number }) max: number = Number.POSITIVE_INFINITY;
-  @property({ type: Number }) step: number = 1;
+  /** Increment applied by the stepper buttons and arrow keys. `any` matches the native
+      input: no step constraint on typed values, and the buttons step by 1. */
+  @property({
+    converter: {
+      fromAttribute: (v: string | null): number | 'any' => (v === 'any' ? 'any' : v === null ? 1 : Number(v)),
+      toAttribute: (v: number | 'any') => String(v),
+    },
+  }) step: number | 'any' = 1;
   @property({ type: Number }) precision: number = -1;
   @property({ type: Boolean, reflect: true }) disabled: boolean = false;
   @property({ type: Boolean, reflect: true }) readonly: boolean = false;
   @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' = 'md';
-  @property({ type: String, reflect: true }) color: 'default' | 'error' | 'warning' | 'success' | 'info' | 'notice' = 'default';
+  @property({ type: String, reflect: true }) color: 'default' | 'error' | 'warning' | 'caution' | 'success' | 'info' | 'notice' = 'default';
   @property({ type: String }) placeholder: string = '';
   @property({ type: String, reflect: true }) controls: 'sides' | 'right' | 'none' = 'sides';
   @property({ type: String }) label: string = '';
@@ -92,8 +99,13 @@ export class VoidNumberInput extends InternalsFormControl(VoidElement) {
     return this.precision >= 0 ? v.toFixed(this.precision) : String(v);
   }
 
+  /** Round to `precision` decimals (`precision="0"` gives integers); untouched when precision is unset. */
+  private _round(v: number): number {
+    return this.precision >= 0 ? Number(v.toFixed(this.precision)) : v;
+  }
+
   private _commit(newVal: number): void {
-    const clamped = this._clamp(newVal);
+    const clamped = this._clamp(this._round(newVal));
     if (clamped === this.value) return;
     this._pendingText = null;
     const previous = this.value;
@@ -108,14 +120,19 @@ export class VoidNumberInput extends InternalsFormControl(VoidElement) {
     }));
   }
 
+  /** Numeric step for the stepper buttons; `step="any"` steps by 1. */
+  private _stepSize(): number {
+    return typeof this.step === 'number' && Number.isFinite(this.step) && this.step > 0 ? this.step : 1;
+  }
+
   private _increment(): void {
     if (this.formDisabled || this.readonly) return;
-    this._commit(this.value + this.step);
+    this._commit(this.value + this._stepSize());
   }
 
   private _decrement(): void {
     if (this.formDisabled || this.readonly) return;
-    this._commit(this.value - this.step);
+    this._commit(this.value - this._stepSize());
   }
 
   private _canStep(dir: 1 | -1): boolean {
@@ -255,7 +272,7 @@ export class VoidNumberInput extends InternalsFormControl(VoidElement) {
       <input
         class="void-number-input-field"
         type="text"
-        inputmode="numeric"
+        inputmode=${this.precision === 0 ? 'numeric' : 'decimal'}
         .value=${live(this._format(this.value))}
         placeholder=${this.placeholder}
         ?disabled=${this.disabled}

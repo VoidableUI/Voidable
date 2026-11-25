@@ -93,14 +93,15 @@ func TestSkillContentFromManifest(t *testing.T) {
 		return string(f.Content)
 	}
 	for _, c := range []struct{ file, want string }{
-		{"SKILL.md", "`closable` on `<void-dialog>` and `closable` on `<void-drawer>`"},
+		{"SKILL.md", "`closable` on `<void-dialog>`, `closable` on `<void-drawer>`"},
 		{"references/components/void-popover.md", "| `trigger` | The element that toggles the popover"},
 		{"references/components/void-slider.md", "`show-value`"},
 		{"references/snippets/heex.md", "<.dropdown_menu position=\"bottom-end\">"},
 		{"references/snippets/jsx.md", "slot=\"trigger\""},
 		{"references/wrong-usages.md", "| `<void-gauge>` | `show-value` | `showvalue` |"},
 		{"references/wrong-usages.md", "| `<void-option>` | `<void-multiselect>`, `<void-combobox>` |"},
-		{"references/wrong-usages.md", "cannot be turned off from markup"},
+		{"references/wrong-usages.md", "accept `\"false\"` in markup"},
+		{"references/wrong-usages.md", "`dismissable` on `<void-toast>`"},
 		{"references/elements.md", "| `<void-button>` |"},
 	} {
 		if got := read(c.file); !strings.Contains(got, c.want) {

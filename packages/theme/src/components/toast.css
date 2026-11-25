@@ -17,6 +17,17 @@ void-toast-container[position='bottom-left'] { bottom: 0; left: 0; top: auto; ri
 void-toast-container[position='top-center'] { top: 0; left: 50%; bottom: auto; right: auto; transform: translateX(-50%); }
 void-toast-container[position='bottom-center'] { bottom: 0; left: 50%; top: auto; right: auto; transform: translateX(-50%); }
 
+/* In-flow strip: the container takes its place in the page layout (position it with sticky, grid, etc. from the app) instead of overlaying content. */
+void-toast-container[position='inline'] {
+  position: static;
+  z-index: auto;
+  pointer-events: auto;
+  align-items: stretch;
+}
+
+/* Nothing to show: take no space, whatever the placement. */
+void-toast-container:not(:has(void-toast)) { display: none; }
+
 void-toast {
   --tone: var(--void-color-accent);
   position: relative;

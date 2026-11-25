@@ -217,11 +217,7 @@ describe('arcPath', () => {
     expect(cmds[0]!.nums).toEqual(cmds[1]!.nums.slice(5));
   });
 
-  // BUG: arcPath() with a sweep of exactly 2*PI emits an SVG arc whose start
-  // and end points coincide; per the SVG spec such an arc is omitted, so a
-  // single 100% segment (full ring) renders nothing. gauge.ts clamps the
-  // sweep to 2*PI - 0.0001 for this reason; shape.ts does not.
-  it.fails('renders a full-circle sweep as a visible arc (start != end)', () => {
+  it('renders a full-circle sweep as a visible arc (start != end)', () => {
     const cmds = commands(arcPath(cx, cy, R, -Math.PI / 2, -Math.PI / 2 + 2 * Math.PI, 30));
     const start = cmds[0]!.nums;
     const end = cmds[1]!.nums.slice(5);

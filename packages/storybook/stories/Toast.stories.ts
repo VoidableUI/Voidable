@@ -18,7 +18,7 @@ const meta: Meta = {
   argTypes: {
     color: {
       control: { type: 'select' },
-      options: ['default', 'error', 'warning', 'success', 'info'],
+      options: ['default', 'error', 'warning', 'caution', 'success', 'info'],
     },
     duration: {
       control: { type: 'number' },
@@ -126,4 +126,22 @@ export const Positions: Story = {
       </div>
     `;
   },
+};
+
+export const InlinePlacement: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story: '`position="inline"` keeps the container in the page flow, so toasts push content instead of covering it. Style it with `position: sticky` from the app if it should stay in view. A container with no toasts takes no space.',
+      },
+    },
+  },
+  render: () => html`
+    <div style="max-width: 28rem;">
+      <void-toast-container position="inline">
+        <void-toast color="caution" heading="Heads up">Your trial ends in 3 days.</void-toast>
+      </void-toast-container>
+      <p>Page content continues below the toast.</p>
+    </div>
+  `,
 };

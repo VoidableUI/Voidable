@@ -16,7 +16,7 @@ const meta: Meta = {
   argTypes: {
     pressed: { control: 'boolean' },
     disabled: { control: 'boolean' },
-    color: { control: 'select', options: ['default', 'error', 'warning', 'success', 'info', 'notice'] },
+    color: { control: 'select', options: ['default', 'error', 'warning', 'caution', 'success', 'info', 'notice'] },
     size: { control: 'select', options: ['sm', 'md', 'lg', 'xl', 'xxl'] },
     variant: { control: 'select', options: ['outline', 'filled'] },
   },

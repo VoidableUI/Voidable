@@ -38,7 +38,7 @@ export const Default: Story = {
     variant: 'default',
   },
   render: (args) => html`
-    <void-nav-bar ?sticky=${args.sticky} ?bordered=${args.bordered} variant=${args.variant}>
+    <void-nav-bar ?sticky=${args.sticky} bordered=${String(args.bordered ?? true)} variant=${args.variant}>
       <a href="#">Home</a>
       <a href="#">Docs</a>
       <a href="#">Blog</a>

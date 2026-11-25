@@ -15,3 +15,15 @@ export const defaultTrueBoolean: ComplexAttributeConverter<boolean> = {
   fromAttribute: (value: string | null): boolean => value !== 'false',
   toAttribute: (value: boolean): string => (value ? '' : 'false'),
 };
+
+/**
+ * Value for the native control's `spellcheck` attribute, or `undefined` to
+ * leave the browser default alone. `spellcheck` is a default-true boolean, but
+ * forcing `true` onto every control would turn spellcheck on for fields the
+ * browser leaves off (passwords, emails), so `true` is forwarded only when the
+ * author wrote the attribute.
+ */
+export function forwardedSpellcheck(host: HTMLElement & { spellcheck: boolean }): 'true' | 'false' | undefined {
+  if (host.spellcheck === false) return 'false';
+  return host.hasAttribute('spellcheck') ? 'true' : undefined;
+}

@@ -5,7 +5,10 @@ import {
   Button,
   Calendar,
   Gauge,
+  Input,
+  NavBar,
   NumberInput,
+  Toast,
   TagsInput,
   Switch,
   BarChart,
@@ -53,6 +56,38 @@ describe('registration', () => {
     for (const tag of ['void-bar-chart', 'void-line-chart', 'void-donut-chart', 'void-gauge']) {
       expect(customElements.get(tag), tag).toBeDefined();
     }
+  });
+});
+
+describe('booleans that default to true', () => {
+  it('turns them off with false and back on with true', async () => {
+    const c = await render(<Toast dismissable={false}>x</Toast>);
+    const el = c.querySelector('void-toast') as HTMLElement & { dismissable: boolean; updateComplete: Promise<boolean> };
+    await el.updateComplete;
+    expect(el.dismissable).toBe(false);
+    expect(el.querySelector('.void-toast-close')).toBeNull();
+    await rerender(<Toast dismissable>x</Toast>);
+    await el.updateComplete;
+    expect(el.dismissable).toBe(true);
+  });
+
+  it('works for nav-bar bordered', async () => {
+    const c = await render(<NavBar bordered={false}>x</NavBar>);
+    const el = c.querySelector('void-nav-bar') as HTMLElement & { bordered: boolean };
+    expect(el.bordered).toBe(false);
+  });
+});
+
+describe('native input attributes', () => {
+  it('forwards autocomplete, minlength and inputMode to the native input', async () => {
+    const c = await render(<Input type="password" autocomplete="current-password" minlength={8} inputMode="text" spellcheck={false} />);
+    const el = c.querySelector('void-input') as HTMLElement & { updateComplete: Promise<boolean> };
+    await el.updateComplete;
+    const native = el.querySelector('input')!;
+    expect(native.getAttribute('autocomplete')).toBe('current-password');
+    expect(native.getAttribute('minlength')).toBe('8');
+    expect(native.getAttribute('inputmode')).toBe('text');
+    expect(native.getAttribute('spellcheck')).toBe('false');
   });
 });
 

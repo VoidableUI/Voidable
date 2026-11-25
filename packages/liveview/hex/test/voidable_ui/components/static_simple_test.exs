@@ -572,7 +572,7 @@ defmodule VoidableUI.Components.StaticSimpleTest do
       assert html =~ "icon"
     end
 
-    test "icon=false omits the icon attribute" do
+    test "icon=false renders icon=\"false\" (the core component reads it as off)" do
       assigns = %{}
 
       html =
@@ -580,9 +580,7 @@ defmodule VoidableUI.Components.StaticSimpleTest do
         <VoidableUI.Components.error_fallback icon={false} />
         """)
 
-      # With icon=false, the boolean attribute should not render.
-      # Match "icon" as an HTML attribute (preceded by space), not as part of tag name.
-      refute html =~ ~r/ icon[ =>]/
+      assert html =~ ~s(icon="false")
     end
 
     test "omits nil heading, message and false retryable" do
