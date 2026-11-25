@@ -6,7 +6,7 @@ body:
     id: package
     attributes:
       label: Package and version
-      description: For example @voidable/ui 0.6.1 and @voidable/theme 0.7.0
+      description: For example @voidable/ui 0.7.0 and @voidable/theme 0.8.0
     validations:
       required: true
   - type: textarea

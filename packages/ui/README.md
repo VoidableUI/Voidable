@@ -44,7 +44,7 @@ A bare `import '@voidable/theme'` cannot work in a browser, because the theme is
 </html>
 ```
 
-Pin versions (for example `@voidable/theme@0.7.0`, `@voidable/ui@0.6.1`) in production.
+Pin versions (for example `@voidable/theme@0.8.0`, `@voidable/ui@0.7.0`) in production.
 
 ## Component attributes
 
