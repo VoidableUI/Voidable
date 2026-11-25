@@ -1,6 +1,8 @@
 <void-dropdown-menu>
-  <void-button slot="trigger" variant="ghost">Actions</void-button>
-  <void-dropdown-menu-item>Rename</void-dropdown-menu-item>
-  <void-dropdown-menu-item>Duplicate</void-dropdown-menu-item>
-  <void-dropdown-menu-item destructive>Delete</void-dropdown-menu-item>
+  <void-dropdown-menu-trigger><void-button variant="ghost">Actions</void-button></void-dropdown-menu-trigger>
+  <void-dropdown-menu-content>
+    <void-dropdown-menu-item value="rename">Rename</void-dropdown-menu-item>
+    <void-dropdown-menu-item value="duplicate">Duplicate</void-dropdown-menu-item>
+    <void-dropdown-menu-item value="delete" destructive>Delete</void-dropdown-menu-item>
+  </void-dropdown-menu-content>
 </void-dropdown-menu>

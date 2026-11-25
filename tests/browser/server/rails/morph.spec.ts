@@ -152,7 +152,7 @@ test('client state survives a refresh morph: a toggled switch', async ({ page })
   await expect(page.getByRole('switch', { name: 'Newsletter' })).toBeChecked();
 });
 
-const panel = (page: Page) => page.locator('#lab-dialog .void-dialog-panel');
+const panel = (page: Page) => page.locator('#lab-dialog [part="surface"]');
 
 test('a dialog the user opened stays open through a refresh morph', async ({ page }) => {
   await page.click('#lab-open-dialog');

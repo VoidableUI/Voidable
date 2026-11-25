@@ -1,15 +1,14 @@
-/* The host only carries attributes; the native <dialog> is the panel. Before
-   the element upgrades, its content must not show inline. */
+/* The host only carries attributes. Its parts (title, description, body,
+   actions) are its own children, shown inside a native <dialog> that lives in
+   the host's shadow root (::part(surface)), with the close button
+   (::part(close)). Before the element upgrades there is no <dialog>, so the
+   parts must not show inline (pre-upgrade.css). */
 void-dialog {
   display: contents;
 }
 
-void-dialog:not(:defined) {
-  display: none;
-}
-
 /* Modal panel in the top layer (showModal); ::backdrop and transitions in overlay.css. */
-.void-dialog-panel {
+void-dialog::part(surface) {
   box-sizing: border-box;
   margin: auto;
   padding: 0;
@@ -27,37 +26,30 @@ void-dialog:not(:defined) {
   scale: 0.97;
 }
 
-.void-dialog-panel[open] {
+void-dialog[open]::part(surface) {
   opacity: 1;
   scale: 1;
 }
 
 @starting-style {
-  .void-dialog-panel[open] {
+  void-dialog[open]::part(surface) {
     opacity: 0;
     scale: 0.97;
   }
 }
 
-void-dialog[size="sm"] .void-dialog-panel { max-width: 24rem; }
-void-dialog[size="md"] .void-dialog-panel { max-width: 32rem; }
-void-dialog[size="lg"] .void-dialog-panel { max-width: 48rem; }
-void-dialog[size="xl"] .void-dialog-panel { max-width: 64rem; }
+void-dialog[size="sm"]::part(surface) { max-width: 24rem; }
+void-dialog[size="md"]::part(surface) { max-width: 32rem; }
+void-dialog[size="lg"]::part(surface) { max-width: 48rem; }
+void-dialog[size="xl"]::part(surface) { max-width: 64rem; }
 
-.void-dialog-heading[hidden] {
-  display: none;
-}
-
-.void-dialog-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: var(--void-space-4) var(--void-container-padding);
-  border-bottom: 1px solid var(--void-color-border);
-}
-
-.void-dialog-heading {
+/* The title row: the close button sits at its far end. */
+void-dialog-title {
+  display: block;
   margin: 0;
+  /* Room for the close button, which is laid over the end of the row. */
+  padding: var(--void-space-4) calc(var(--void-container-padding) + 1.5rem + var(--void-space-2)) var(--void-space-4) var(--void-container-padding);
+  border-bottom: 1px solid var(--void-color-border);
   font-family: var(--void-type-heading-family);
   font-size: var(--void-type-heading-size);
   line-height: var(--void-type-heading-leading);
@@ -66,7 +58,50 @@ void-dialog[size="xl"] .void-dialog-panel { max-width: 64rem; }
   color: var(--void-type-heading-color);
 }
 
-.void-dialog-close {
+void-dialog[closable="false"] void-dialog-title {
+  padding-inline-end: var(--void-container-padding);
+}
+
+/* A description joins the title's row: the hairline moves below it. */
+void-dialog-title:has(+ void-dialog-description) {
+  padding-bottom: var(--void-space-1);
+  border-bottom: none;
+}
+
+void-dialog-description {
+  display: block;
+  padding: 0 var(--void-container-padding) var(--void-space-4);
+  border-bottom: 1px solid var(--void-color-border);
+  font-family: var(--void-font-sans);
+  font-size: var(--void-type-body-size);
+  color: var(--void-color-text-secondary);
+}
+
+void-dialog-body {
+  display: block;
+  padding: var(--void-container-padding);
+  font-family: var(--void-font-sans);
+  font-size: var(--void-type-body-size);
+  color: var(--void-color-text);
+}
+
+void-dialog-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--void-space-2);
+  padding: 0 var(--void-container-padding) var(--void-container-padding);
+}
+
+/* Actions straight after the title: they need their own top space. */
+:is(void-dialog-title, void-dialog-description) + void-dialog-actions {
+  padding-top: var(--void-container-padding);
+}
+
+void-dialog::part(close) {
+  position: absolute;
+  top: calc(var(--void-space-4) + (var(--void-type-heading-size) * var(--void-type-heading-leading) - 1.5rem) / 2);
+  inset-inline-end: var(--void-container-padding);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -81,22 +116,14 @@ void-dialog[size="xl"] .void-dialog-panel { max-width: 64rem; }
   cursor: pointer;
   opacity: 0.6;
   transition: opacity var(--void-duration-fast) var(--void-ease-in-out);
-  flex-shrink: 0;
 }
 
-.void-dialog-close:hover {
+void-dialog::part(close):hover {
   opacity: 1;
 }
 
-.void-dialog-close:focus-visible {
+void-dialog::part(close):focus-visible {
   opacity: 1;
   outline: var(--void-focus-ring-width) solid var(--void-focus-ring-color);
   outline-offset: var(--void-focus-ring-offset);
-}
-
-.void-dialog-body {
-  padding: var(--void-container-padding);
-  font-family: var(--void-font-sans);
-  font-size: var(--void-type-body-size);
-  color: var(--void-color-text);
 }

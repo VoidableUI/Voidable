@@ -74,16 +74,16 @@ describe('VoidDOM.onBeforeElUpdated', () => {
   });
 
   it('leaves an element LiveView skips (data-phx-skip placeholder) alone, and its baseline too', async () => {
-    const live = await mount('<void-tab-panel tab="a" label="A">Panel A</void-tab-panel>');
-    const placeholder = el('<void-tab-panel data-phx-skip data-phx-id="m1"></void-tab-panel>');
+    const live = await mount('<void-dropdown-menu-item value="a">Item A</void-dropdown-menu-item>');
+    const placeholder = el('<void-dropdown-menu-item data-phx-skip data-phx-id="m1"></void-dropdown-menu-item>');
     let called = 0;
     const own = (live as any).voidBeforeMorph.bind(live);
     (live as any).voidBeforeMorph = (to: Element) => (called++, own(to));
     VoidDOM.onBeforeElUpdated(live, placeholder);
     expect(called).toBe(0);
     // The next real render with a changed label is still seen as a server change.
-    await patch(live, '<void-tab-panel tab="a" label="Aa">Panel A</void-tab-panel>');
-    expect(live.getAttribute('label')).toBe('Aa');
+    await patch(live, '<void-dropdown-menu-item value="b">Item A</void-dropdown-menu-item>');
+    expect(live.getAttribute("value")).toBe("b");
     expect(called).toBe(1);
   });
 

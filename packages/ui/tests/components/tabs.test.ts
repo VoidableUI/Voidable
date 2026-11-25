@@ -1,337 +1,231 @@
 // @vitest-environment happy-dom
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, afterEach } from 'vitest';
 import { VoidElement } from '../../src/base.js';
-import { VoidTabs, VoidTabPanel } from '../../src/components/tabs.js';
+import { VoidTabs } from '../../src/components/tabs.js';
 
-if (!customElements.get('void-tab-panel')) {
-  customElements.define('void-tab-panel', VoidTabPanel);
-}
-if (!customElements.get('void-tabs')) {
-  customElements.define('void-tabs', VoidTabs);
+interface Spec { value: string; label?: string; content?: string; disabled?: boolean }
+
+/** Tabs in the explicit-parts form (#52). */
+function markup(value: string | null, specs: Spec[]): string {
+  const triggers = specs
+    .map((s) => `<void-tabs-trigger value="${s.value}"${s.disabled ? ' disabled' : ''}>${s.label ?? s.value.toUpperCase()}</void-tabs-trigger>`)
+    .join('');
+  const contents = specs.map((s) => `<void-tabs-content value="${s.value}">${s.content ?? `panel ${s.value}`}</void-tabs-content>`).join('');
+  return `<void-tabs${value === null ? '' : ` value="${value}"`}><void-tabs-list>${triggers}</void-tabs-list>${contents}</void-tabs>`;
 }
 
-function createTabs(value: string, panels: Array<{ tab: string; label?: string; content?: string }>): VoidTabs {
-  const el = document.createElement('void-tabs') as VoidTabs;
-  el.value = value;
-  for (const p of panels) {
-    const panel = document.createElement('void-tab-panel') as VoidTabPanel;
-    panel.tab = p.tab;
-    if (p.label) panel.label = p.label;
-    if (p.content) panel.textContent = p.content;
-    el.appendChild(panel);
-  }
+async function mount(value: string | null = 'a', specs: Spec[] = [{ value: 'a' }, { value: 'b' }, { value: 'c' }]): Promise<VoidTabs> {
+  document.body.innerHTML = markup(value, specs);
+  const el = document.querySelector('void-tabs') as VoidTabs;
+  await el.updateComplete;
   return el;
 }
 
-describe('VoidTabPanel', () => {
-  it('extends VoidElement', () => {
-    expect(Object.getPrototypeOf(VoidTabPanel)).toBe(VoidElement);
-  });
+const triggers = (el: Element) => Array.from(el.querySelectorAll<HTMLElement>('void-tabs-trigger'));
+const contents = (el: Element) => Array.from(el.querySelectorAll<HTMLElement>('void-tabs-content'));
+const tick = () => new Promise((r) => setTimeout(r, 0));
 
-  it('is registered as void-tab-panel', () => {
-    expect(customElements.get('void-tab-panel')).toBe(VoidTabPanel);
-  });
+function key(target: Element, k: string): KeyboardEvent {
+  const e = new KeyboardEvent('keydown', { key: k, bubbles: true, cancelable: true });
+  target.dispatchEvent(e);
+  return e;
+}
 
-  it('tab defaults to empty string', () => {
-    const el = document.createElement('void-tab-panel') as VoidTabPanel;
-    expect(el.tab).toBe('');
-  });
-
-  it('label defaults to empty string', () => {
-    const el = document.createElement('void-tab-panel') as VoidTabPanel;
-    expect(el.label).toBe('');
-  });
-
-  it('active defaults to false', () => {
-    const el = document.createElement('void-tab-panel') as VoidTabPanel;
-    expect(el.active).toBe(false);
-  });
-
-  it('sets role="tabpanel" on connect', async () => {
-    const el = document.createElement('void-tab-panel') as VoidTabPanel;
-    document.body.appendChild(el);
-    await el.updateComplete;
-    expect(el.getAttribute('role')).toBe('tabpanel');
-    document.body.removeChild(el);
-  });
-
-  it('does not overwrite a consumer-set id with the tab name', async () => {
-    const el = document.createElement('void-tab-panel') as VoidTabPanel;
-    el.id = 'my-panel';
-    el.tab = 'my-tab';
-    document.body.appendChild(el);
-    await el.updateComplete;
-    el.tab = 'other';
-    await el.updateComplete;
-    expect(el.id).toBe('my-panel');
-    document.body.removeChild(el);
-  });
-
-  it('reflects active attribute', async () => {
-    const el = document.createElement('void-tab-panel') as VoidTabPanel;
-    document.body.appendChild(el);
-    el.active = true;
-    await el.updateComplete;
-    expect(el.hasAttribute('active')).toBe(true);
-    document.body.removeChild(el);
-  });
+afterEach(() => {
+  document.body.innerHTML = '';
 });
 
 describe('VoidTabs', () => {
-  let container: HTMLElement;
-
-  beforeEach(() => {
-    container = document.createElement('div');
-    document.body.appendChild(container);
-  });
-
-  afterEach(() => {
-    document.body.removeChild(container);
-  });
-
-  describe('class', () => {
-    it('extends VoidElement', () => {
+  describe('class and defaults', () => {
+    it('extends VoidElement and is registered', () => {
       expect(Object.getPrototypeOf(VoidTabs)).toBe(VoidElement);
-    });
-
-    it('is registered as void-tabs', () => {
       expect(customElements.get('void-tabs')).toBe(VoidTabs);
     });
-  });
 
-  describe('default property values', () => {
-    it('value defaults to empty string', () => {
+    it('defaults: value empty, size md, activation manual', () => {
       const el = document.createElement('void-tabs') as VoidTabs;
-      expect(el.value).toBe('');
+      expect([el.value, el.size, el.activation]).toEqual(['', 'md', 'manual']);
     });
 
-    it('size defaults to "md"', () => {
-      const el = document.createElement('void-tabs') as VoidTabs;
-      expect(el.size).toBe('md');
-    });
-  });
-
-  describe('tab list rendering', () => {
-    let el: VoidTabs;
-
-    beforeEach(async () => {
-      el = createTabs('one', [
-        { tab: 'one', label: 'First' },
-        { tab: 'two', label: 'Second' },
-        { tab: 'three', label: 'Third' },
-      ]);
-      container.appendChild(el);
-      await el.updateComplete;
-    });
-
-    it('renders .void-tabs-list with role="tablist"', () => {
-      const list = el.querySelector('.void-tabs-list');
-      expect(list).not.toBeNull();
-      expect(list?.getAttribute('role')).toBe('tablist');
-    });
-
-    it('renders one tab button per panel', () => {
-      const tabs = el.querySelectorAll('.void-tabs-tab');
-      expect(tabs.length).toBe(3);
-    });
-
-    it('tab buttons have role="tab"', () => {
-      const tabs = el.querySelectorAll('.void-tabs-tab');
-      for (const tab of Array.from(tabs)) {
-        expect(tab.getAttribute('role')).toBe('tab');
-      }
-    });
-
-    it('active tab has aria-selected="true"', () => {
-      const tabs = el.querySelectorAll('.void-tabs-tab');
-      expect(tabs[0].getAttribute('aria-selected')).toBe('true');
-      expect(tabs[1].getAttribute('aria-selected')).toBe('false');
-    });
-
-    it('wires aria-controls and aria-labelledby both ways', () => {
-      const tabs = Array.from(el.querySelectorAll('.void-tabs-tab'));
-      const panels = Array.from(el.querySelectorAll('void-tab-panel'));
-      tabs.forEach((tab, i) => {
-        expect(tab.id).not.toBe('');
-        expect(panels[i].id).not.toBe('');
-        expect(tab.getAttribute('aria-controls')).toBe(panels[i].id);
-        expect(panels[i].getAttribute('aria-labelledby')).toBe(tab.id);
-      });
-    });
-
-    it('uses a consumer-set panel id for aria-controls', async () => {
-      const panel = el.querySelector('void-tab-panel')!;
-      panel.id = 'mine';
-      el.requestUpdate();
-      await el.updateComplete;
-      expect(el.querySelector('.void-tabs-tab')!.getAttribute('aria-controls')).toBe('mine');
-      expect(panel.id).toBe('mine');
-    });
-
-    it('generates ids that are unique across tab sets that reuse tab names', async () => {
-      const other = createTabs('one', [{ tab: 'one', label: 'First' }, { tab: 'two', label: 'Second' }]);
-      document.body.appendChild(other);
-      await other.updateComplete;
-      const ids = [...el.querySelectorAll('[id]'), ...other.querySelectorAll('[id]')].map(e => e.id);
-      expect(new Set(ids).size).toBe(ids.length);
-      expect(ids.length).toBeGreaterThanOrEqual(8);
-      document.body.removeChild(other);
-    });
-
-    it('tab button text shows label', () => {
-      const tabs = el.querySelectorAll('.void-tabs-tab');
-      expect(tabs[0].textContent?.trim()).toBe('First');
-    });
-
-    it('active tab has tabindex="0", inactive has tabindex="-1"', () => {
-      const tabs = el.querySelectorAll('.void-tabs-tab');
-      expect(tabs[0].getAttribute('tabindex')).toBe('0');
-      expect(tabs[1].getAttribute('tabindex')).toBe('-1');
+    it('void-tab-panel is gone', () => {
+      expect(customElements.get('void-tab-panel')).toBeUndefined();
     });
   });
 
-  describe('label fallback', () => {
-    it('falls back to tab id when label is empty', async () => {
-      const el = createTabs('alpha', [{ tab: 'alpha' }, { tab: 'beta' }]);
-      container.appendChild(el);
+  describe('explicit parts (#52)', () => {
+    it('moves and renders nothing: every node stays where the author put it', async () => {
+      document.body.innerHTML = markup('a', [{ value: 'a' }, { value: 'b' }]);
+      const el = document.querySelector('void-tabs') as VoidTabs;
+      const before = [...el.querySelectorAll('*')];
       await el.updateComplete;
-      const tabs = el.querySelectorAll('.void-tabs-tab');
-      expect(tabs[0].textContent?.trim()).toBe('alpha');
+      expect([...el.querySelectorAll('*')]).toEqual(before);
+    });
+
+    it('wires the WAI-ARIA tabs pattern onto the parts', async () => {
+      const el = await mount('b');
+      expect(el.querySelector('void-tabs-list')!.getAttribute('role')).toBe('tablist');
+      const [a, b] = triggers(el);
+      const [pa, pb] = contents(el);
+      expect(a!.getAttribute('role')).toBe('tab');
+      expect(a!.getAttribute('aria-selected')).toBe('false');
+      expect(b!.getAttribute('aria-selected')).toBe('true');
+      expect(b!.hasAttribute('active')).toBe(true);
+      expect(b!.getAttribute('aria-controls')).toBe(pb!.id);
+      expect(pb!.getAttribute('role')).toBe('tabpanel');
+      expect(pb!.getAttribute('aria-labelledby')).toBe(b!.id);
+      expect(pb!.hasAttribute('active')).toBe(true);
+      expect(pa!.hasAttribute('active')).toBe(false);
+      expect(pb!.getAttribute('tabindex')).toBe('0');
+      expect(pa!.hasAttribute('tabindex')).toBe(false);
+    });
+
+    it('uses a roving tab stop: only the selected tab is in the tab order', async () => {
+      const el = await mount('b');
+      expect(triggers(el).map((t) => t.getAttribute('tabindex'))).toEqual(['-1', '0', '-1']);
+    });
+
+    it('with no matching value, the first enabled tab is the tab stop', async () => {
+      const el = await mount(null, [{ value: 'a', disabled: true }, { value: 'b' }]);
+      expect(triggers(el).map((t) => t.getAttribute('tabindex'))).toEqual(['-1', '0']);
+      expect(triggers(el)[0]!.getAttribute('aria-disabled')).toBe('true');
+    });
+
+    it('never replaces a server id', async () => {
+      document.body.innerHTML =
+        '<void-tabs value="a"><void-tabs-list><void-tabs-trigger id="t-a" value="a">A</void-tabs-trigger></void-tabs-list><void-tabs-content id="p-a" value="a">x</void-tabs-content></void-tabs>';
+      const el = document.querySelector('void-tabs') as VoidTabs;
+      await el.updateComplete;
+      expect(triggers(el)[0]!.id).toBe('t-a');
+      expect(contents(el)[0]!.id).toBe('p-a');
+      expect(triggers(el)[0]!.getAttribute('aria-controls')).toBe('p-a');
+    });
+
+    it('wires a tab and panel added after the upgrade, and releases removed ones', async () => {
+      const el = await mount('a', [{ value: 'a' }]);
+      const t = document.createElement('void-tabs-trigger');
+      t.setAttribute('value', 'z');
+      t.textContent = 'Z';
+      el.querySelector('void-tabs-list')!.appendChild(t);
+      const c = document.createElement('void-tabs-content');
+      c.setAttribute('value', 'z');
+      el.appendChild(c);
+      await tick();
+      expect(t.getAttribute('role')).toBe('tab');
+      expect(t.getAttribute('aria-controls')).toBe(c.id);
+      t.remove();
+      c.remove();
+      await tick();
+      expect(t.hasAttribute('role')).toBe(false);
+      expect(c.hasAttribute('role')).toBe(false);
+    });
+
+    it('selects another tab when the selected one is removed', async () => {
+      const el = await mount('b');
+      triggers(el)[1]!.remove();
+      contents(el)[1]!.remove();
+      await tick();
+      await el.updateComplete;
+      expect(el.value).toBe('a');
+      expect(contents(el)[0]!.hasAttribute('active')).toBe(true);
+    });
+
+    it('ignores the parts of nested tabs', async () => {
+      document.body.innerHTML =
+        '<void-tabs value="a"><void-tabs-list><void-tabs-trigger value="a">A</void-tabs-trigger></void-tabs-list><void-tabs-content value="a">' +
+        markup('x', [{ value: 'x' }, { value: 'y' }]).replace('<void-tabs', '<void-tabs id="inner"') +
+        '</void-tabs-content></void-tabs>';
+      const outer = document.querySelector('void-tabs') as VoidTabs;
+      const inner = document.getElementById('inner') as VoidTabs;
+      await outer.updateComplete;
+      await inner.updateComplete;
+      expect(triggers(inner)[0]!.getAttribute('aria-selected')).toBe('true');
+      expect(contents(outer)[0]!.getAttribute('aria-labelledby')).toBe(triggers(outer)[0]!.id);
+      expect(contents(inner)[1]!.hasAttribute('active')).toBe(false);
     });
   });
 
-  describe('panel activation', () => {
-    let el: VoidTabs;
-
-    beforeEach(async () => {
-      el = createTabs('one', [
-        { tab: 'one', label: 'First', content: 'Content 1' },
-        { tab: 'two', label: 'Second', content: 'Content 2' },
-      ]);
-      container.appendChild(el);
+  describe('selection', () => {
+    it('a click selects the tab, reflects value and fires void-change', async () => {
+      const el = await mount('a');
+      const seen: string[] = [];
+      el.addEventListener('void-change', (e) => seen.push((e as CustomEvent).detail.value));
+      triggers(el)[2]!.click();
       await el.updateComplete;
+      expect(el.value).toBe('c');
+      expect(el.getAttribute('value')).toBe('c');
+      expect(seen).toEqual(['c']);
+      expect(contents(el)[2]!.hasAttribute('active')).toBe(true);
     });
 
-    it('active panel has active attribute', () => {
-      const panels = el.querySelectorAll('void-tab-panel');
-      expect(panels[0].hasAttribute('active')).toBe(true);
-      expect(panels[1].hasAttribute('active')).toBe(false);
+    it('a click on text inside a trigger selects it', async () => {
+      const el = await mount('a', [{ value: 'a' }, { value: 'b', label: '<b>Bold</b>' }]);
+      el.querySelector('b')!.click();
+      expect(el.value).toBe('b');
     });
 
-    it('clicking a tab updates value', async () => {
-      const tabs = el.querySelectorAll('.void-tabs-tab');
-      (tabs[1] as HTMLElement).click();
-      await el.updateComplete;
-      expect(el.value).toBe('two');
+    it('a disabled tab cannot be selected', async () => {
+      const el = await mount('a', [{ value: 'a' }, { value: 'b', disabled: true }]);
+      triggers(el)[1]!.click();
+      expect(el.value).toBe('a');
     });
 
-    it('clicking a tab updates active panel', async () => {
-      const tabs = el.querySelectorAll('.void-tabs-tab');
-      (tabs[1] as HTMLElement).click();
-      await el.updateComplete;
-      const panels = el.querySelectorAll('void-tab-panel');
-      expect(panels[0].hasAttribute('active')).toBe(false);
-      expect(panels[1].hasAttribute('active')).toBe(true);
-    });
-
-    it('clicking a tab updates aria-selected', async () => {
-      const tabs = el.querySelectorAll('.void-tabs-tab');
-      (tabs[1] as HTMLElement).click();
-      await el.updateComplete;
-      expect(tabs[0].getAttribute('aria-selected')).toBe('false');
-      expect(tabs[1].getAttribute('aria-selected')).toBe('true');
-    });
-  });
-
-  describe('void-change event', () => {
-    let el: VoidTabs;
-
-    beforeEach(async () => {
-      el = createTabs('one', [
-        { tab: 'one', label: 'First' },
-        { tab: 'two', label: 'Second' },
-      ]);
-      container.appendChild(el);
-      await el.updateComplete;
-    });
-
-    it('dispatches void-change on tab click', async () => {
+    it('setting value programmatically selects without void-change', async () => {
+      const el = await mount('a');
       let fired = false;
-      el.addEventListener('void-change', () => { fired = true; });
-      const tabs = el.querySelectorAll('.void-tabs-tab');
-      (tabs[1] as HTMLElement).click();
+      el.addEventListener('void-change', () => (fired = true));
+      el.value = 'b';
       await el.updateComplete;
-      expect(fired).toBe(true);
-    });
-
-    it('void-change detail contains value', async () => {
-      let detail: { value: string } | null = null;
-      el.addEventListener('void-change', (e) => { detail = (e as CustomEvent).detail; });
-      const tabs = el.querySelectorAll('.void-tabs-tab');
-      (tabs[1] as HTMLElement).click();
-      await el.updateComplete;
-      expect(detail?.value).toBe('two');
-    });
-
-    it('void-change bubbles', async () => {
-      let firedOnParent = false;
-      container.addEventListener('void-change', () => { firedOnParent = true; }, { once: true });
-      const tabs = el.querySelectorAll('.void-tabs-tab');
-      (tabs[1] as HTMLElement).click();
-      await el.updateComplete;
-      expect(firedOnParent).toBe(true);
+      expect(triggers(el)[1]!.getAttribute('aria-selected')).toBe('true');
+      expect(fired).toBe(false);
     });
   });
 
-  describe('keyboard navigation', () => {
-    let el: VoidTabs;
-
-    beforeEach(async () => {
-      el = createTabs('one', [
-        { tab: 'one', label: 'First' },
-        { tab: 'two', label: 'Second' },
-        { tab: 'three', label: 'Third' },
-      ]);
-      container.appendChild(el);
-      await el.updateComplete;
+  describe('keyboard', () => {
+    it('ArrowRight and ArrowLeft move focus, wrapping and skipping disabled tabs', async () => {
+      const el = await mount('a', [{ value: 'a' }, { value: 'b', disabled: true }, { value: 'c' }]);
+      const [a, , c] = triggers(el);
+      a!.focus();
+      key(a!, 'ArrowRight');
+      expect(document.activeElement).toBe(c);
+      key(c!, 'ArrowRight');
+      expect(document.activeElement).toBe(a);
+      key(a!, 'ArrowLeft');
+      expect(document.activeElement).toBe(c);
+      expect(el.value).toBe('a');
     });
 
-    it('ArrowRight moves focus to next tab', async () => {
-      const tabs = Array.from(el.querySelectorAll('.void-tabs-tab')) as HTMLElement[];
-      tabs[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
-      await el.updateComplete;
-      expect(document.activeElement).toBe(tabs[1]);
+    it('Home and End jump to the first and last enabled tab', async () => {
+      const el = await mount('b');
+      const [a, b, c] = triggers(el);
+      b!.focus();
+      key(b!, 'End');
+      expect(document.activeElement).toBe(c);
+      key(c!, 'Home');
+      expect(document.activeElement).toBe(a);
     });
 
-    it('ArrowLeft moves focus to previous tab', async () => {
-      const tabs = Array.from(el.querySelectorAll('.void-tabs-tab')) as HTMLElement[];
-      tabs[1].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true }));
-      await el.updateComplete;
-      expect(document.activeElement).toBe(tabs[0]);
+    it('Enter and Space select the focused tab', async () => {
+      const el = await mount('a');
+      const [, b, c] = triggers(el);
+      expect(key(b!, 'Enter').defaultPrevented).toBe(true);
+      expect(el.value).toBe('b');
+      key(c!, ' ');
+      expect(el.value).toBe('c');
     });
 
-    it('ArrowRight wraps from last to first', async () => {
-      const tabs = Array.from(el.querySelectorAll('.void-tabs-tab')) as HTMLElement[];
-      tabs[2].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
+    it('activation="auto" selects on arrow keys', async () => {
+      const el = await mount('a');
+      el.activation = 'auto';
       await el.updateComplete;
-      expect(document.activeElement).toBe(tabs[0]);
+      key(triggers(el)[0]!, 'ArrowRight');
+      expect(el.value).toBe('b');
     });
 
-    it('ArrowLeft wraps from first to last', async () => {
-      const tabs = Array.from(el.querySelectorAll('.void-tabs-tab')) as HTMLElement[];
-      tabs[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true }));
-      await el.updateComplete;
-      expect(document.activeElement).toBe(tabs[2]);
-    });
-  });
-
-  describe('size reflection', () => {
-    it('reflects size attribute', async () => {
-      const el = document.createElement('void-tabs') as VoidTabs;
-      container.appendChild(el);
-      el.size = 'lg';
-      await el.updateComplete;
-      expect(el.getAttribute('size')).toBe('lg');
+    it('modified keys are left alone', async () => {
+      const el = await mount('a');
+      const e = new KeyboardEvent('keydown', { key: 'ArrowRight', altKey: true, bubbles: true, cancelable: true });
+      triggers(el)[0]!.dispatchEvent(e);
+      expect(e.defaultPrevented).toBe(false);
     });
   });
 });

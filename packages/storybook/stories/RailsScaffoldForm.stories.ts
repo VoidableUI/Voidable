@@ -22,9 +22,11 @@ type Story = StoryObj;
 const formWrapper = (content: unknown) => html`
   <div style="max-width: 36rem; margin: 0 auto; padding: 2rem;">
     <void-card>
-      <div style="padding: var(--void-space-5);">
-        ${content}
-      </div>
+      <void-card-body>
+        <div style="padding: var(--void-space-5);">
+          ${content}
+        </div>
+      </void-card-body>
     </void-card>
   </div>
 `;
@@ -239,11 +241,13 @@ export const WithErrors: Story = {
   render: () => formWrapper(html`
     <form style="display: flex; flex-direction: column; gap: var(--void-space-4);">
       <void-alert color="error">
-        2 errors prohibited this product from being saved:
-        <ul style="margin: var(--void-space-2) 0 0 var(--void-space-4); padding: 0;">
-          <li>Name can't be blank</li>
-          <li>Price must be greater than 0</li>
-        </ul>
+        <void-alert-description>
+          2 errors prohibited this product from being saved:
+                  <ul style="margin: var(--void-space-2) 0 0 var(--void-space-4); padding: 0;">
+                    <li>Name can't be blank</li>
+                    <li>Price must be greater than 0</li>
+                  </ul>
+        </void-alert-description>
       </void-alert>
 
       <void-field label="Name" error="can't be blank">

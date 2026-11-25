@@ -48,74 +48,59 @@ afterEach(() => {
   document.body.style.overflow = '';
 });
 
-describe('void-dialog projection', () => {
-  it('keeps content across open, close and reopen', async () => {
-    const el = mount<LitElement & { open: boolean }>('<void-dialog open heading="H"><p id="c">Body</p></void-dialog>');
+// Dialog, drawer, dropdown menu, tabs, popover and hover card use explicit
+// parts (#52): nothing is projected, so these check that the author's nodes
+// stay where they were through the same scenarios.
+describe('void-dialog explicit parts', () => {
+  type Dialog = LitElement & { open: boolean };
+  const surface = (el: Element) => el.shadowRoot!.querySelector('dialog')!;
+
+  it('keeps every node in place across open, close and reopen', async () => {
+    const el = mount<Dialog>('<void-dialog open><void-dialog-title>H</void-dialog-title><void-dialog-body><p id="c">Body</p></void-dialog-body></void-dialog>');
     await settle(el);
     const p = el.querySelector('#c')!;
-    expect(p.parentElement?.classList.contains('void-dialog-body')).toBe(true);
+    const parent = p.parentElement;
     el.open = false;
     await settle(el);
-    expect(el.contains(p)).toBe(true);
     el.open = true;
     await settle(el);
-    expect(el.querySelector('.void-dialog-body #c')).toBe(p);
+    expect(el.querySelector('#c')).toBe(p);
+    expect(p.parentElement).toBe(parent);
+    expect(surface(el).open).toBe(true);
   });
 
-  it('projects content when it starts closed', async () => {
-    const el = mount<LitElement & { open: boolean }>('<void-dialog><p id="c">Body</p></void-dialog>');
+  it('keeps the native dialog rendered but closed while closed', async () => {
+    const el = mount<Dialog>('<void-dialog><void-dialog-body><p>Body</p></void-dialog-body></void-dialog>');
     await settle(el);
+    expect(surface(el).open).toBe(false);
     el.open = true;
     await settle(el);
-    expect(el.querySelector('.void-dialog-body #c')).not.toBeNull();
-  });
-
-  it('keeps the native dialog rendered but closed while closed instead of removing it', async () => {
-    const el = mount<LitElement & { open: boolean }>('<void-dialog><p>Body</p></void-dialog>');
-    await settle(el);
-    expect(el.querySelector<HTMLDialogElement>('dialog.void-dialog-panel')!.open).toBe(false);
-    el.open = true;
-    await settle(el);
-    expect(el.querySelector<HTMLDialogElement>('dialog.void-dialog-panel')!.open).toBe(true);
+    expect(surface(el).open).toBe(true);
   });
 
   it('keeps consumer listeners and does not duplicate on move', async () => {
-    const el = mount<LitElement & { open: boolean }>('<void-dialog open><button id="b">Go</button></void-dialog>');
+    const el = mount<Dialog>('<void-dialog open><void-dialog-actions><button id="b">Go</button></void-dialog-actions></void-dialog>');
     await settle(el);
     let clicks = 0;
     el.querySelector('#b')!.addEventListener('click', () => clicks++);
-    const other = document.createElement('section');
-    document.body.appendChild(other);
-    other.appendChild(el);
+    document.body.appendChild(document.createElement('section')).appendChild(el);
     await settle(el);
     el.remove();
     document.body.appendChild(el);
     await settle(el);
-    expect(el.querySelectorAll('.void-dialog-body').length).toBe(1);
+    expect(el.shadowRoot!.querySelectorAll('dialog').length).toBe(1);
     expect(el.querySelectorAll('#b').length).toBe(1);
     el.querySelector<HTMLElement>('#b')!.click();
     expect(clicks).toBe(1);
   });
 
-  it('projects children appended after connect', async () => {
-    const el = mount<LitElement & { open: boolean }>('<void-dialog></void-dialog>');
-    await settle(el);
-    const late = document.createElement('p');
-    el.appendChild(late);
-    await settle(el);
-    expect(late.parentElement?.classList.contains('void-dialog-body')).toBe(true);
-  });
-});
-
-describe('void-dialog: persistent declarative dialog (issue #4 production report)', () => {
-  type Dialog = LitElement & { open: boolean };
-
-  it('shows its content on every one of many open/close cycles', async () => {
+  it('shows the same content on every one of many open/close cycles (issue #4 production report)', async () => {
     document.body.innerHTML = `
       <button id="opener">Open</button>
-      <void-dialog id="d" heading="Confirm">
-        <p id="msg">Are you sure?</p>
-        <button id="ok">OK</button>
+      <void-dialog id="d">
+        <void-dialog-title>Confirm</void-dialog-title>
+        <void-dialog-description id="msg">Are you sure?</void-dialog-description>
+        <void-dialog-actions><button id="ok">OK</button></void-dialog-actions>
       </void-dialog>`;
     const el = document.getElementById('d') as Dialog;
     await settle(el);
@@ -125,13 +110,10 @@ describe('void-dialog: persistent declarative dialog (issue #4 production report
     for (let i = 0; i < 10; i++) {
       el.open = true;
       await settle(el);
-      const body = el.querySelector('.void-dialog-body')!;
-      expect(el.querySelector<HTMLDialogElement>('dialog.void-dialog-panel')!.open).toBe(true);
-      expect(body.querySelector('#msg')).toBe(msg);
-      expect(body.textContent).toContain('Are you sure?');
+      expect(surface(el).open).toBe(true);
+      expect(el.querySelector('#msg')).toBe(msg);
       el.querySelector<HTMLElement>('#ok')!.click();
-      // alternate between the close button, Escape and setting the property
-      if (i % 3 === 0) el.querySelector<HTMLElement>('.void-dialog-close')!.click();
+      if (i % 3 === 0) el.shadowRoot!.querySelector<HTMLElement>('[part="close"]')!.click();
       else if (i % 3 === 1) document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
       else el.open = false;
       await settle(el);
@@ -140,69 +122,38 @@ describe('void-dialog: persistent declarative dialog (issue #4 production report
     }
     expect(okClicks).toBe(10);
     expect(el.querySelectorAll('#msg').length).toBe(1);
-    expect(el.querySelectorAll('.void-dialog-body').length).toBe(1);
   });
 
-  it('re-routes original children appended back onto the host without duplicating them', async () => {
-    const el = mount<Dialog>('<void-dialog open><p id="a">A</p><p id="b">B</p></void-dialog>');
-    await settle(el);
-    const a = el.querySelector('#a')!;
-    const b = el.querySelector('#b')!;
-    // Same nodes moved back onto the host (chrome left intact); real morph coverage is below.
-    el.appendChild(a);
-    el.appendChild(b);
-    await settle(el);
-    const body = el.querySelector('.void-dialog-body')!;
-    expect(Array.from(body.children)).toEqual([a, b]);
-    expect(el.querySelectorAll('p').length).toBe(2);
-  });
-
-  it('re-routes original children reordered through the host', async () => {
-    const el = mount<Dialog>('<void-dialog open><p id="a">A</p><p id="b">B</p></void-dialog>');
-    await settle(el);
-    const a = el.querySelector('#a')!;
-    const b = el.querySelector('#b')!;
-    // Reorder through the host with the chrome left intact.
-    el.insertBefore(b, a);
-    await settle(el);
-    expect(Array.from(el.querySelector('.void-dialog-body')!.children)).toEqual([b, a]);
-    el.appendChild(b);
-    await settle(el);
-    expect(Array.from(el.querySelector('.void-dialog-body')!.children)).toEqual([a, b]);
-    expect(el.querySelectorAll('p').length).toBe(2);
-  });
-
-  it('supports framework-style keyed child updates through the host', async () => {
+  it('takes framework-style keyed updates of its parts directly (React, Solid)', async () => {
     const el = mount<Dialog>('<void-dialog open></void-dialog>');
     await settle(el);
-    // What React/Solid do: treat the host as the parent of the nodes they render.
-    const one = document.createElement('li');
-    const two = document.createElement('li');
-    el.appendChild(one);
-    el.appendChild(two);
+    const title = document.createElement('void-dialog-title');
+    const body = document.createElement('void-dialog-body');
+    el.append(title, body);
     await settle(el);
-    const three = document.createElement('li');
-    expect(() => el.insertBefore(three, two)).not.toThrow();
-    expect(() => el.removeChild(one)).not.toThrow();
-    const four = document.createElement('li');
-    expect(() => el.replaceChild(four, two)).not.toThrow();
-    expect(Array.from(el.querySelector('.void-dialog-body')!.children)).toEqual([three, four]);
+    expect(title.getAttribute('role')).toBe('heading');
+    const actions = document.createElement('void-dialog-actions');
+    expect(() => el.insertBefore(actions, null)).not.toThrow();
+    expect(() => el.removeChild(body)).not.toThrow();
+    const other = document.createElement('void-dialog-body');
+    expect(() => el.replaceChild(other, actions)).not.toThrow();
+    await settle(el);
+    expect(Array.from(el.children)).toEqual([title, other]);
   });
 });
 
-describe('void-drawer projection', () => {
-  it('projects content when it starts closed and keeps it on reopen', async () => {
-    const el = mount<LitElement & { open: boolean }>('<void-drawer><p id="c">Body</p></void-drawer>');
+describe('void-drawer explicit parts', () => {
+  it('keeps its content in place when it starts closed and on reopen', async () => {
+    const el = mount<LitElement & { open: boolean }>('<void-drawer><void-drawer-body><p id="c">Body</p></void-drawer-body></void-drawer>');
     await settle(el);
+    const p = el.querySelector('#c');
     el.open = true;
     await settle(el);
-    const p = el.querySelector('.void-drawer-body #c');
-    expect(p).not.toBeNull();
     el.open = false;
     await settle(el);
     el.open = true;
     await settle(el);
-    expect(el.querySelector('.void-drawer-body #c')).toBe(p);
+    expect(el.querySelector('void-drawer-body > #c')).toBe(p);
   });
 });
 
@@ -241,39 +192,19 @@ describe('void-menu-item projection', () => {
   });
 });
 
-describe('void-dropdown-menu projection', () => {
-  it('does not nest panels or duplicate trigger listeners when moved', async () => {
+describe('void-dropdown-menu explicit parts', () => {
+  it('does not duplicate trigger listeners when moved', async () => {
     const el = mount<LitElement & { open: boolean }>(
-      '<void-dropdown-menu><button id="t">Menu</button><void-dropdown-menu-item>One</void-dropdown-menu-item></void-dropdown-menu>'
+      '<void-dropdown-menu><void-dropdown-menu-trigger><button id="t">Menu</button></void-dropdown-menu-trigger><void-dropdown-menu-content><void-dropdown-menu-item>One</void-dropdown-menu-item></void-dropdown-menu-content></void-dropdown-menu>'
     );
     await settle(el);
-    const other = document.createElement('div');
-    document.body.appendChild(other);
-    other.appendChild(el);
+    document.body.appendChild(document.createElement('div')).appendChild(el);
     await settle(el);
-    expect(el.querySelectorAll('.void-dropdown-menu-panel').length).toBe(1);
-    expect(el.querySelectorAll('.void-dropdown-menu-panel void-dropdown-menu-item').length).toBe(1);
+    expect(el.children.length).toBe(2);
     el.querySelector<HTMLElement>('#t')!.click();
     expect(el.open).toBe(true);
-  });
-});
-
-describe('void-tabs projection', () => {
-  it('adds and removes a tab when panels are added and removed after connect', async () => {
-    const el = mount<LitElement & { value: string }>(
-      '<void-tabs value="a"><void-tab-panel tab="a" label="A">A</void-tab-panel></void-tabs>'
-    );
-    await settle(el);
-    expect(el.querySelectorAll('.void-tabs-tab').length).toBe(1);
-    const panel = document.createElement('void-tab-panel');
-    panel.setAttribute('tab', 'b');
-    panel.setAttribute('label', 'B');
-    el.appendChild(panel);
-    await settle(el);
-    expect(el.querySelectorAll('.void-tabs-tab').length).toBe(2);
-    panel.remove();
-    await settle(el);
-    expect(el.querySelectorAll('.void-tabs-tab').length).toBe(1);
+    el.querySelector<HTMLElement>('#t')!.click();
+    expect(el.open).toBe(false);
   });
 });
 
@@ -332,42 +263,36 @@ describe('void-select projection', () => {
   });
 });
 
-describe('void-popover projection', () => {
-  it('keeps the trigger first, projects the body and survives moves', async () => {
-    const el = mount<LitElement & { open: boolean }>('<void-popover><button id="t">T</button><p id="c">C</p></void-popover>');
+describe('void-popover explicit parts', () => {
+  it('toggles from the trigger, not from clicks inside the content, and survives moves', async () => {
+    const el = mount<LitElement & { open: boolean }>('<void-popover><void-popover-trigger><button id="t">T</button></void-popover-trigger><void-popover-content><p id="c">C</p></void-popover-content></void-popover>');
     await settle(el);
-    expect(el.firstElementChild?.id).toBe('t');
-    expect(el.querySelector('.void-popover-body #c')).not.toBeNull();
     document.body.appendChild(document.createElement('div')).appendChild(el);
     await settle(el);
-    expect(el.querySelectorAll('.void-popover-body').length).toBe(1);
+    expect(el.children.length).toBe(2);
     el.querySelector<HTMLElement>('#t')!.click();
     expect(el.open).toBe(true);
-    // clicks inside the body do not toggle
     el.querySelector<HTMLElement>('#c')!.click();
     expect(el.open).toBe(true);
   });
 });
 
-describe('void-hover-card projection', () => {
-  it('projects trigger and body once and does not duplicate wrappers on reconnect', async () => {
-    const el = mount<LitElement>('<void-hover-card><a id="t">T</a><p id="c">C</p></void-hover-card>');
+describe('void-hover-card explicit parts', () => {
+  it('adds nothing on reconnect', async () => {
+    const el = mount<LitElement>('<void-hover-card><void-hover-card-trigger><a id="t">T</a></void-hover-card-trigger><void-hover-card-content><p id="c">C</p></void-hover-card-content></void-hover-card>');
     await settle(el);
+    const before = [...el.querySelectorAll('*')];
     el.remove();
     document.body.appendChild(el);
     await settle(el);
-    expect(el.querySelectorAll('.void-hover-card-trigger').length).toBe(1);
-    expect(el.querySelector('.void-hover-card-trigger #t')).not.toBeNull();
-    expect(el.querySelector('.void-hover-card-body #c')).not.toBeNull();
+    expect([...el.querySelectorAll('*')]).toEqual(before);
   });
 });
 
 describe('container components project late children and survive reconnect', () => {
   const cases: Array<[string, string]> = [
-    ['void-card', '.void-card-body'],
     ['void-scroll-area', '.void-scroll-area-viewport'],
     ['void-nav-bar', '.void-nav-bar-content'],
-    ['void-accordion-item', '.void-accordion-content'],
     ['void-collapsible', '.void-collapsible-inner'],
     ['void-checkbox-group', '.void-checkbox-group-items'],
   ];

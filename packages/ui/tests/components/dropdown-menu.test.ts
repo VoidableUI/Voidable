@@ -18,18 +18,22 @@ async function mount(
 ): Promise<VoidDropdownMenu> {
   const el = document.createElement(TAG) as VoidDropdownMenu;
   if (withTrigger) {
+    const part = document.createElement('void-dropdown-menu-trigger');
     const t = document.createElement('button');
     t.id = 'trigger';
     t.textContent = 'Actions';
-    el.appendChild(t);
+    part.appendChild(t);
+    el.appendChild(part);
   }
+  const content = document.createElement('void-dropdown-menu-content');
   for (const spec of items) {
     const item = document.createElement(ITEM) as VoidDropdownMenuItem;
     item.textContent = spec.label;
     if (spec.disabled) item.disabled = true;
     if (spec.destructive) item.destructive = true;
-    el.appendChild(item);
+    content.appendChild(item);
   }
+  el.appendChild(content);
   Object.assign(el, props);
   document.body.appendChild(el);
   await el.updateComplete;
@@ -38,7 +42,7 @@ async function mount(
 }
 
 const trigger = (el: Element) => el.querySelector('#trigger') as HTMLButtonElement;
-const panels = (el: Element) => el.querySelectorAll('.void-dropdown-menu-panel');
+const panels = (el: Element) => el.querySelectorAll('void-dropdown-menu-content');
 const menuItems = (el: Element) => Array.from(el.querySelectorAll(ITEM)) as VoidDropdownMenuItem[];
 
 function press(key: string, target: EventTarget = document): KeyboardEvent {
@@ -83,44 +87,62 @@ describe('VoidDropdownMenu', () => {
     });
   });
 
-  describe('structure', () => {
-    it('keeps the first child as the trigger, outside the panel', async () => {
+  describe('structure (explicit parts, #52)', () => {
+    it('moves nothing: the trigger and content parts stay where the author put them', async () => {
       const el = await mount();
-      expect(el.children[0]).toBe(trigger(el));
+      expect([...el.children].map((c) => c.localName)).toEqual(['void-dropdown-menu-trigger', 'void-dropdown-menu-content']);
+      expect(trigger(el).parentElement!.localName).toBe('void-dropdown-menu-trigger');
+      expect(panels(el)[0]!.querySelectorAll(ITEM)).toHaveLength(3);
     });
 
-    it('wraps every other child in a role="menu" panel appended last', async () => {
+    it('makes the content part the role="menu" popover', async () => {
       const el = await mount();
-      const panel = el.querySelector('.void-dropdown-menu-panel')!;
+      const panel = panels(el)[0]!;
       expect(panel.getAttribute('role')).toBe('menu');
-      expect(el.lastElementChild).toBe(panel);
-      expect(panel.querySelectorAll(ITEM)).toHaveLength(3);
-      expect(trigger(el).parentElement).toBe(el);
+      expect(panel.id).not.toBe('');
     });
 
-    it('moves text nodes along with elements', async () => {
+    it('keeps an author id on the content part', async () => {
       const el = document.createElement(TAG) as VoidDropdownMenu;
-      el.innerHTML = '<button id="trigger">t</button>loose text<span>x</span>';
+      el.innerHTML = '<void-dropdown-menu-trigger><button id="trigger">t</button></void-dropdown-menu-trigger><void-dropdown-menu-content id="srv"><void-dropdown-menu-item>a</void-dropdown-menu-item></void-dropdown-menu-content>';
       document.body.appendChild(el);
       await el.updateComplete;
-      const panel = el.querySelector('.void-dropdown-menu-panel')!;
-      expect(panel.textContent).toContain('loose text');
+      expect(panels(el)[0]!.id).toBe('srv');
+      expect(trigger(el).getAttribute('aria-controls')).toBe('srv');
     });
 
-    it('creates exactly one panel', async () => {
-      const el = await mount();
-      expect(panels(el)).toHaveLength(1);
+    it('gives separators role="separator"', async () => {
+      const el = document.createElement(TAG) as VoidDropdownMenu;
+      el.innerHTML = '<void-dropdown-menu-trigger><button id="trigger">t</button></void-dropdown-menu-trigger><void-dropdown-menu-content><void-dropdown-menu-item>a</void-dropdown-menu-item><void-dropdown-menu-separator></void-dropdown-menu-separator><void-dropdown-menu-item>b</void-dropdown-menu-item></void-dropdown-menu-content>';
+      document.body.appendChild(el);
+      await el.updateComplete;
+      expect(el.querySelector('void-dropdown-menu-separator')!.getAttribute('role')).toBe('separator');
     });
 
-    it('renders an empty panel when there are no items', async () => {
+    it('renders no element of its own, even with no items', async () => {
       const el = await mount({}, []);
       expect(panels(el)).toHaveLength(1);
       expect(panels(el)[0]!.children).toHaveLength(0);
     });
 
-    it('does not throw without a trigger child or items', async () => {
+    it('does not throw without parts', async () => {
       const el = await mount({}, [], false);
-      expect(el.querySelector('.void-dropdown-menu-panel')).not.toBeNull();
+      el.open = true;
+      await el.updateComplete;
+      expect(el.children).toHaveLength(1);
+    });
+
+    it('wires a content part that arrives after the upgrade', async () => {
+      const el = document.createElement(TAG) as VoidDropdownMenu;
+      el.innerHTML = '<void-dropdown-menu-trigger><button id="trigger">t</button></void-dropdown-menu-trigger>';
+      document.body.appendChild(el);
+      await el.updateComplete;
+      const content = document.createElement('void-dropdown-menu-content');
+      content.innerHTML = '<void-dropdown-menu-item>late</void-dropdown-menu-item>';
+      el.appendChild(content);
+      await new Promise((r) => setTimeout(r, 0));
+      expect(content.getAttribute('role')).toBe('menu');
+      expect(trigger(el).getAttribute('aria-controls')).toBe(content.id);
     });
   });
 
@@ -234,8 +256,8 @@ describe('VoidDropdownMenu', () => {
     it('marks the trigger with aria-haspopup="menu" and points aria-controls at the panel', async () => {
       const el = await mount();
       expect(trigger(el).getAttribute('aria-haspopup')).toBe('menu');
-      expect(trigger(el).getAttribute('aria-controls')).toBe(el.querySelector('.void-dropdown-menu-panel')!.id);
-      expect(el.querySelector('.void-dropdown-menu-panel')!.getAttribute('aria-labelledby')).toBe(trigger(el).id);
+      expect(trigger(el).getAttribute('aria-controls')).toBe(el.querySelector('void-dropdown-menu-content')!.id);
+      expect(el.querySelector('void-dropdown-menu-content')!.getAttribute('aria-labelledby')).toBe(trigger(el).id);
     });
 
     it('keeps aria-expanded on the trigger in sync with open', async () => {
@@ -270,10 +292,12 @@ describe('VoidDropdownMenu', () => {
 
     it('Enter and Space on a trigger that is not natively activated open the menu', async () => {
       const el = await mount({}, DEFAULT_ITEMS, false);
+      const part = document.createElement('void-dropdown-menu-trigger');
       const custom = document.createElement('void-button');
       custom.id = 'trigger';
-      custom.setAttribute('slot', 'trigger');
-      el.prepend(custom);
+      part.appendChild(custom);
+      el.prepend(part);
+      await new Promise((r) => setTimeout(r, 0));
       await el.updateComplete;
       press('Enter', custom);
       expect(el.open).toBe(true);

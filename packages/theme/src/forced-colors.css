@@ -69,7 +69,7 @@
   /* Selected state: backgrounds and accent colours are remapped, so a selected
      tab, segment or day would match the unselected ones. System colours are
      preserved, so mark selection with Highlight / HighlightText. */
-  .void-tabs-tab[aria-selected="true"] {
+  void-tabs-trigger[aria-selected="true"] {
     color: Highlight;
     border-bottom-color: Highlight;
   }

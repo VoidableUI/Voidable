@@ -13,8 +13,13 @@
   {:else}
     <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr)); gap: var(--void-space-4);">
       {#each projects as project (project.id)}
-        <void-card heading={project.name}>
-          <p>Updated {project.updatedAt}</p>
+        <void-card>
+          <void-card-header>
+            <void-card-title>{project.name}</void-card-title>
+          </void-card-header>
+          <void-card-body>
+            <p>Updated {project.updatedAt}</p>
+          </void-card-body>
         </void-card>
       {/each}
     </div>

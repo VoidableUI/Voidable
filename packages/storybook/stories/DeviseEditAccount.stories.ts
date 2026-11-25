@@ -35,14 +35,17 @@ const closeDelete = (e: Event) => {
 };
 
 const deleteDialog = html`
-  <void-dialog id="delete-dialog" heading="Delete account" size="sm">
-    <p style="font-family: var(--void-font-sans); font-size: var(--void-text-sm); color: var(--void-color-text); margin: 0 0 var(--void-space-4) 0;">
-      Are you sure you want to delete your account? This action cannot be undone.
-    </p>
-    <div style="display: flex; gap: var(--void-space-2); justify-content: flex-end;">
+  <void-dialog id="delete-dialog" size="sm">
+    <void-dialog-title>Delete account</void-dialog-title>
+    <void-dialog-body>
+      <p style="font-family: var(--void-font-sans); font-size: var(--void-text-sm); color: var(--void-color-text); margin: 0 0 var(--void-space-4) 0;">
+        Are you sure you want to delete your account? This action cannot be undone.
+      </p>
+    </void-dialog-body>
+    <void-dialog-actions>
       <void-button variant="ghost" size="sm" @click="${closeDelete}">Cancel</void-button>
       <void-button color="error" size="sm" @click="${closeDelete}">Delete</void-button>
-    </div>
+    </void-dialog-actions>
   </void-dialog>
 `;
 
@@ -50,31 +53,33 @@ export const Default: Story = {
   render: () => html`
     <div class="devise-edit-account" style="max-width: 36rem; margin: 0 auto; padding: 2rem;">
       <void-card>
-        <div style="padding: var(--void-space-6);">
-          <h1 style="margin: 0 0 var(--void-space-5) 0; font-family: var(--void-font-sans); font-size: var(--void-text-xl); font-weight: var(--void-weight-bold); color: var(--void-color-text);">Account settings</h1>
+        <void-card-body>
+          <div style="padding: var(--void-space-6);">
+            <h1 style="margin: 0 0 var(--void-space-5) 0; font-family: var(--void-font-sans); font-size: var(--void-text-xl); font-weight: var(--void-weight-bold); color: var(--void-color-text);">Account settings</h1>
 
-          <form style="display: flex; flex-direction: column; gap: var(--void-space-4);">
-            <void-field label="Email">
-              <void-input type="email" value="user@example.com" autocomplete="email"></void-input>
-            </void-field>
+            <form style="display: flex; flex-direction: column; gap: var(--void-space-4);">
+              <void-field label="Email">
+                <void-input type="email" value="user@example.com" autocomplete="email"></void-input>
+              </void-field>
 
-            <void-field label="New password" helper="Leave blank if you don't want to change it">
-              <void-action-input type="password" icon="eye" action-label="Toggle visibility" autocomplete="new-password" @void-action=${togglePasswordVisibility}></void-action-input>
-            </void-field>
+              <void-field label="New password" helper="Leave blank if you don't want to change it">
+                <void-action-input type="password" icon="eye" action-label="Toggle visibility" autocomplete="new-password" @void-action=${togglePasswordVisibility}></void-action-input>
+              </void-field>
 
-            <void-field label="Confirm new password">
-              <void-action-input type="password" icon="eye" action-label="Toggle visibility" autocomplete="new-password" @void-action=${togglePasswordVisibility}></void-action-input>
-            </void-field>
+              <void-field label="Confirm new password">
+                <void-action-input type="password" icon="eye" action-label="Toggle visibility" autocomplete="new-password" @void-action=${togglePasswordVisibility}></void-action-input>
+              </void-field>
 
-            <void-field label="Current password" helper="We need your current password to confirm changes">
-              <void-action-input type="password" icon="eye" action-label="Toggle visibility" autocomplete="current-password" @void-action=${togglePasswordVisibility}></void-action-input>
-            </void-field>
+              <void-field label="Current password" helper="We need your current password to confirm changes">
+                <void-action-input type="password" icon="eye" action-label="Toggle visibility" autocomplete="current-password" @void-action=${togglePasswordVisibility}></void-action-input>
+              </void-field>
 
-            <div style="padding-top: var(--void-space-2);">
-              <void-button type="submit" color="success" style="width: 100%;">Update</void-button>
-            </div>
-          </form>
-        </div>
+              <div style="padding-top: var(--void-space-2);">
+                <void-button type="submit" color="success" style="width: 100%;">Update</void-button>
+              </div>
+            </form>
+          </div>
+        </void-card-body>
       </void-card>
 
       <div style="
@@ -104,33 +109,35 @@ export const WithPendingReconfirmation: Story = {
   render: () => html`
     <div class="devise-edit-account" style="max-width: 36rem; margin: 0 auto; padding: 2rem;">
       <void-card>
-        <div style="padding: var(--void-space-6);">
-          <h1 style="margin: 0 0 var(--void-space-5) 0; font-family: var(--void-font-sans); font-size: var(--void-text-xl); font-weight: var(--void-weight-bold); color: var(--void-color-text);">Account settings</h1>
+        <void-card-body>
+          <div style="padding: var(--void-space-6);">
+            <h1 style="margin: 0 0 var(--void-space-5) 0; font-family: var(--void-font-sans); font-size: var(--void-text-xl); font-weight: var(--void-weight-bold); color: var(--void-color-text);">Account settings</h1>
 
-          <form style="display: flex; flex-direction: column; gap: var(--void-space-4);">
-            <void-field label="Email">
-              <void-input type="email" value="user@example.com" autocomplete="email"></void-input>
-            </void-field>
+            <form style="display: flex; flex-direction: column; gap: var(--void-space-4);">
+              <void-field label="Email">
+                <void-input type="email" value="user@example.com" autocomplete="email"></void-input>
+              </void-field>
 
-            <void-alert>Currently waiting confirmation for: new@example.com</void-alert>
+              <void-alert><void-alert-description>Currently waiting confirmation for: new@example.com</void-alert-description></void-alert>
 
-            <void-field label="New password" helper="Leave blank if you don't want to change it">
-              <void-action-input type="password" icon="eye" action-label="Toggle visibility" autocomplete="new-password" @void-action=${togglePasswordVisibility}></void-action-input>
-            </void-field>
+              <void-field label="New password" helper="Leave blank if you don't want to change it">
+                <void-action-input type="password" icon="eye" action-label="Toggle visibility" autocomplete="new-password" @void-action=${togglePasswordVisibility}></void-action-input>
+              </void-field>
 
-            <void-field label="Confirm new password">
-              <void-action-input type="password" icon="eye" action-label="Toggle visibility" autocomplete="new-password" @void-action=${togglePasswordVisibility}></void-action-input>
-            </void-field>
+              <void-field label="Confirm new password">
+                <void-action-input type="password" icon="eye" action-label="Toggle visibility" autocomplete="new-password" @void-action=${togglePasswordVisibility}></void-action-input>
+              </void-field>
 
-            <void-field label="Current password" helper="We need your current password to confirm changes">
-              <void-action-input type="password" icon="eye" action-label="Toggle visibility" autocomplete="current-password" @void-action=${togglePasswordVisibility}></void-action-input>
-            </void-field>
+              <void-field label="Current password" helper="We need your current password to confirm changes">
+                <void-action-input type="password" icon="eye" action-label="Toggle visibility" autocomplete="current-password" @void-action=${togglePasswordVisibility}></void-action-input>
+              </void-field>
 
-            <div style="padding-top: var(--void-space-2);">
-              <void-button type="submit" color="success" style="width: 100%;">Update</void-button>
-            </div>
-          </form>
-        </div>
+              <div style="padding-top: var(--void-space-2);">
+                <void-button type="submit" color="success" style="width: 100%;">Update</void-button>
+              </div>
+            </form>
+          </div>
+        </void-card-body>
       </void-card>
 
       <div style="
@@ -160,38 +167,42 @@ export const WithErrors: Story = {
   render: () => html`
     <div class="devise-edit-account" style="max-width: 36rem; margin: 0 auto; padding: 2rem;">
       <void-card>
-        <div style="padding: var(--void-space-6);">
-          <h1 style="margin: 0 0 var(--void-space-5) 0; font-family: var(--void-font-sans); font-size: var(--void-text-xl); font-weight: var(--void-weight-bold); color: var(--void-color-text);">Account settings</h1>
+        <void-card-body>
+          <div style="padding: var(--void-space-6);">
+            <h1 style="margin: 0 0 var(--void-space-5) 0; font-family: var(--void-font-sans); font-size: var(--void-text-xl); font-weight: var(--void-weight-bold); color: var(--void-color-text);">Account settings</h1>
 
-          <form style="display: flex; flex-direction: column; gap: var(--void-space-4);">
-            <void-alert color="error">
-              1 error prohibited this account from being updated:
-              <ul style="margin: var(--void-space-2) 0 0 var(--void-space-4); padding: 0;">
-                <li>Current password is invalid</li>
-              </ul>
-            </void-alert>
+            <form style="display: flex; flex-direction: column; gap: var(--void-space-4);">
+              <void-alert color="error">
+                <void-alert-description>
+                  1 error prohibited this account from being updated:
+                                  <ul style="margin: var(--void-space-2) 0 0 var(--void-space-4); padding: 0;">
+                                    <li>Current password is invalid</li>
+                                  </ul>
+                </void-alert-description>
+              </void-alert>
 
-            <void-field label="Email">
-              <void-input type="email" value="user@example.com" autocomplete="email"></void-input>
-            </void-field>
+              <void-field label="Email">
+                <void-input type="email" value="user@example.com" autocomplete="email"></void-input>
+              </void-field>
 
-            <void-field label="New password" helper="Leave blank if you don't want to change it">
-              <void-action-input type="password" icon="eye" action-label="Toggle visibility" autocomplete="new-password" @void-action=${togglePasswordVisibility}></void-action-input>
-            </void-field>
+              <void-field label="New password" helper="Leave blank if you don't want to change it">
+                <void-action-input type="password" icon="eye" action-label="Toggle visibility" autocomplete="new-password" @void-action=${togglePasswordVisibility}></void-action-input>
+              </void-field>
 
-            <void-field label="Confirm new password">
-              <void-action-input type="password" icon="eye" action-label="Toggle visibility" autocomplete="new-password" @void-action=${togglePasswordVisibility}></void-action-input>
-            </void-field>
+              <void-field label="Confirm new password">
+                <void-action-input type="password" icon="eye" action-label="Toggle visibility" autocomplete="new-password" @void-action=${togglePasswordVisibility}></void-action-input>
+              </void-field>
 
-            <void-field label="Current password" helper="We need your current password to confirm changes" error="is invalid">
-              <void-action-input type="password" icon="eye" action-label="Toggle visibility" autocomplete="current-password" @void-action=${togglePasswordVisibility}></void-action-input>
-            </void-field>
+              <void-field label="Current password" helper="We need your current password to confirm changes" error="is invalid">
+                <void-action-input type="password" icon="eye" action-label="Toggle visibility" autocomplete="current-password" @void-action=${togglePasswordVisibility}></void-action-input>
+              </void-field>
 
-            <div style="padding-top: var(--void-space-2);">
-              <void-button type="submit" color="success" style="width: 100%;">Update</void-button>
-            </div>
-          </form>
-        </div>
+              <div style="padding-top: var(--void-space-2);">
+                <void-button type="submit" color="success" style="width: 100%;">Update</void-button>
+              </div>
+            </form>
+          </div>
+        </void-card-body>
       </void-card>
 
       <div style="

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-25T08:15:31.231Z",
+  "generatedAt": "2026-11-25T12:26:49.396Z",
   "tasks": {
     "avatar-upload-svelte": {
       "passed": 8,
@@ -38,7 +38,13 @@
       "usedTags": [
         "void-button",
         "void-card",
-        "void-dialog"
+        "void-card-body",
+        "void-card-header",
+        "void-card-title",
+        "void-dialog",
+        "void-dialog-actions",
+        "void-dialog-body",
+        "void-dialog-title"
       ]
     },
     "confirm-remove-react": {
@@ -52,6 +58,9 @@
         "void-avatar",
         "void-button",
         "void-dialog",
+        "void-dialog-actions",
+        "void-dialog-body",
+        "void-dialog-title",
         "void-list",
         "void-list-item"
       ]
@@ -81,6 +90,9 @@
       "usedTags": [
         "void-bar-chart",
         "void-card",
+        "void-card-body",
+        "void-card-header",
+        "void-card-title",
         "void-list",
         "void-list-item",
         "void-stat"
@@ -95,6 +107,9 @@
       "notes": [],
       "usedTags": [
         "void-card",
+        "void-card-body",
+        "void-card-header",
+        "void-card-title",
         "void-donut-chart",
         "void-line-chart",
         "void-stat"
@@ -111,7 +126,9 @@
         "void-badge",
         "void-button",
         "void-dropdown-menu",
+        "void-dropdown-menu-content",
         "void-dropdown-menu-item",
+        "void-dropdown-menu-trigger",
         "void-field",
         "void-input",
         "void-pagination",
@@ -120,15 +137,11 @@
       ]
     },
     "date-range-blade": {
-      "passed": 6,
+      "passed": 7,
       "total": 7,
-      "failed": {
-        "a11y": "aria-allowed-attr (critical) #x8yrsmi6p3f-control, #p5lkflb6dyr-control"
-      },
+      "failed": {},
       "findings": [],
-      "axe": [
-        "aria-allowed-attr|void-date-picker"
-      ],
+      "axe": [],
       "notes": [],
       "usedTags": [
         "void-button",
@@ -145,7 +158,9 @@
       "notes": [],
       "usedTags": [
         "void-button",
-        "void-drawer"
+        "void-drawer",
+        "void-drawer-body",
+        "void-drawer-title"
       ]
     },
     "empty-state-svelte": {
@@ -181,7 +196,9 @@
       "notes": [],
       "usedTags": [
         "void-avatar",
-        "void-drawer"
+        "void-drawer",
+        "void-drawer-body",
+        "void-drawer-title"
       ]
     },
     "multi-step-svelte": {
@@ -225,20 +242,19 @@
         "void-badge",
         "void-button",
         "void-card",
+        "void-card-body",
+        "void-card-header",
+        "void-card-title",
         "void-segmented-control",
         "void-segmented-control-item"
       ]
     },
     "settings-erb": {
-      "passed": 8,
+      "passed": 9,
       "total": 9,
-      "failed": {
-        "a11y": "aria-input-field-name (serious) void-textarea"
-      },
+      "failed": {},
       "findings": [],
-      "axe": [
-        "aria-input-field-name|void-textarea"
-      ],
+      "axe": [],
       "notes": [],
       "usedTags": [
         "void-button",
@@ -286,6 +302,7 @@
       "notes": [],
       "usedTags": [
         "void-alert",
+        "void-alert-description",
         "void-button",
         "void-checkbox",
         "void-field",
@@ -317,8 +334,10 @@
         "void-list",
         "void-list-item",
         "void-switch",
-        "void-tab-panel",
-        "void-tabs"
+        "void-tabs",
+        "void-tabs-content",
+        "void-tabs-list",
+        "void-tabs-trigger"
       ]
     },
     "tabs-keyboard-svelte": {
@@ -332,8 +351,10 @@
         "void-field",
         "void-input",
         "void-switch",
-        "void-tab-panel",
-        "void-tabs"
+        "void-tabs",
+        "void-tabs-content",
+        "void-tabs-list",
+        "void-tabs-trigger"
       ]
     },
     "theme-toggle-html": {
@@ -386,7 +407,9 @@
         "void-badge",
         "void-button",
         "void-dropdown-menu",
+        "void-dropdown-menu-content",
         "void-dropdown-menu-item",
+        "void-dropdown-menu-trigger",
         "void-field",
         "void-input",
         "void-pagination",
@@ -409,8 +432,5 @@
       ]
     }
   },
-  "libraryAxe": [
-    "aria-allowed-attr|void-date-picker",
-    "aria-input-field-name|void-textarea"
-  ]
+  "libraryAxe": []
 }

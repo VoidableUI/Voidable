@@ -8,7 +8,7 @@ import { cleanup, flush, locks, pointerdown, press, stack } from '../helpers/ove
 
 const TAG = 'void-drawer';
 
-async function mount(props: Partial<VoidDrawer> = {}, content = '<button id="inside">x</button>'): Promise<VoidDrawer> {
+async function mount(props: Partial<VoidDrawer> = {}, content = '<void-drawer-title>Filters</void-drawer-title><void-drawer-body><button id="inside">x</button></void-drawer-body>'): Promise<VoidDrawer> {
   const el = document.createElement(TAG) as VoidDrawer;
   el.id = 'drawer';
   el.innerHTML = content;
@@ -18,14 +18,15 @@ async function mount(props: Partial<VoidDrawer> = {}, content = '<button id="ins
   return el;
 }
 
-const panel = (el: Element) => el.querySelector(':scope > dialog.void-drawer-panel') as HTMLDialogElement;
+const panel = (el: Element) => el.shadowRoot!.querySelector('dialog') as HTMLDialogElement;
+const closeButton = (el: Element) => el.shadowRoot?.querySelector<HTMLButtonElement>('[part="close"]') ?? null;
 
 afterEach(cleanup);
 
 describe('VoidDrawer', () => {
   describe('class', () => {
     it('extends VoidElement and is registered', () => {
-      expect(Object.getPrototypeOf(VoidDrawer)).toBe(VoidElement);
+      expect(VoidDrawer.prototype).toBeInstanceOf(VoidElement);
       expect(customElements.get(TAG)).toBe(VoidDrawer);
     });
 
@@ -38,7 +39,8 @@ describe('VoidDrawer', () => {
   describe('defaults and reflection', () => {
     it('open false, side right, size md, heading empty, closable true', () => {
       const el = document.createElement(TAG) as VoidDrawer;
-      expect([el.open, el.side, el.size, el.heading, el.closable]).toEqual([false, 'right', 'md', '', true]);
+      expect([el.open, el.side, el.size, el.closable]).toEqual([false, 'right', 'md', true]);
+      expect('heading' in el).toBe(false);
     });
 
     it('reflects open, side and size, and reads them from markup', async () => {
@@ -52,32 +54,34 @@ describe('VoidDrawer', () => {
     });
   });
 
-  describe('structure and naming', () => {
-    it('renders a native <dialog> panel holding the content; the host has no dialog role', async () => {
-      const el = await mount({ heading: 'Filters' });
+  describe('structure and naming (explicit parts, #52)', () => {
+    it('renders a native <dialog> in its shadow root and leaves the parts in place', async () => {
+      const el = await mount();
       expect(panel(el)).toBeInstanceOf(HTMLDialogElement);
-      expect(panel(el).querySelector('.void-drawer-body #inside')).not.toBeNull();
+      expect([...el.children].map((c) => c.localName)).toEqual(['void-drawer-title', 'void-drawer-body']);
+      // The role is on the native dialog only (one dialog in every tool).
       expect(el.hasAttribute('role')).toBe(false);
       expect(el.hasAttribute('aria-modal')).toBe(false);
-      const title = el.querySelector(`#${panel(el).getAttribute('aria-labelledby')}`);
-      expect(title?.textContent).toBe('Filters');
+      const title = el.querySelector('void-drawer-title')!;
+      expect(title.getAttribute('role')).toBe('heading');
+      const d = panel(el) as HTMLDialogElement & { ariaLabelledByElements?: Element[] };
+      if ('ariaLabelledByElements' in d) expect(d.ariaLabelledByElements).toEqual([title]);
     });
 
-    it('hides the empty heading and names the panel from aria-label without one', async () => {
+    it('names the panel from aria-label without a title', async () => {
       const el = document.createElement(TAG) as VoidDrawer;
       el.setAttribute('aria-label', 'Navigation');
       document.body.appendChild(el);
       await flush(el);
-      expect(el.querySelector<HTMLElement>('.void-drawer-heading')!.hidden).toBe(true);
       expect(panel(el).getAttribute('aria-label')).toBe('Navigation');
     });
 
-    it('renders the close button only when closable', async () => {
+    it('shows the close button only when closable', async () => {
       const el = await mount();
-      expect(el.querySelector('.void-drawer-close')).not.toBeNull();
+      expect(closeButton(el)!.hidden).toBe(false);
       el.closable = false;
       await flush(el);
-      expect(el.querySelector('.void-drawer-close')).toBeNull();
+      expect(closeButton(el)!.hidden).toBe(true);
     });
   });
 
@@ -114,7 +118,7 @@ describe('VoidDrawer', () => {
       el.addEventListener('void-close', e => reasons.push((e as CustomEvent).detail.reason));
       el.open = true;
       await flush(el);
-      el.querySelector<HTMLButtonElement>('.void-drawer-close')!.click();
+      closeButton(el)!.click();
       await flush(el);
       el.open = true;
       await flush(el);
@@ -146,7 +150,7 @@ describe('VoidDrawer', () => {
 
   describe('nesting', () => {
     it('a dialog inside the drawer stacks above it: Escape closes the dialog, then the drawer', async () => {
-      const el = await mount({ open: true }, '<button id="b">x</button><void-dialog id="inner"><input id="i"></void-dialog>');
+      const el = await mount({ open: true }, '<button id="b">x</button><void-dialog id="inner"><void-dialog-body><input id="i"></void-dialog-body></void-dialog>');
       const inner = el.querySelector('#inner') as VoidDialog;
       inner.open = true;
       await flush(inner, el);

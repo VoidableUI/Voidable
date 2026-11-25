@@ -74,7 +74,7 @@ test.describe('dialog', () => {
         await expect.poll(() => page.evaluate(() => document.getElementById('dlg')!.contains(document.activeElement))).toBe(true);
         expect(await page.evaluate(() => getComputedStyle(document.body).overflow)).toBe('hidden');
 
-        if (route === 'close button') await page.locator('#dlg .void-dialog-close').click();
+        if (route === 'close button') await page.locator('#dlg [part="close"]').click();
         if (route === 'Escape') await page.keyboard.press('Escape');
         if (route === 'backdrop click') await page.mouse.click(5, 5);
         if (route === 'open = false') await setOpen(page, 'dlg', false);
@@ -94,7 +94,7 @@ test.describe('dialog', () => {
       }
       await page.locator('#open-dlg').click();
       await expect.poll(() => page.evaluate(() => document.getElementById('dlg')!.contains(document.activeElement))).toBe(true);
-      if (route === 'close button') await page.locator('#dlg .void-dialog-close').click();
+      if (route === 'close button') await page.locator('#dlg [part="close"]').click();
       if (route === 'Escape') await page.keyboard.press('Escape');
       if (route === 'backdrop click') await page.mouse.click(5, 5);
       await expect.poll(() => prop(page, 'dlg', 'open')).toBe(false);
@@ -118,7 +118,7 @@ test.describe('dialog', () => {
   test('closable="false" ignores Escape and the backdrop and has no close button', async ({ page }) => {
     await page.locator('#open-dlg-nc').click();
     await expect(page.locator('#dlg-nc .nc-content')).toBeVisible();
-    await expect(page.locator('#dlg-nc .void-dialog-close')).toHaveCount(0);
+    await expect(page.locator('#dlg-nc [part="close"]')).toBeHidden();
     await page.keyboard.press('Escape');
     await page.mouse.click(5, 5);
     expect(await prop(page, 'dlg-nc', 'open')).toBe(true);
@@ -153,7 +153,7 @@ test.describe('drawer', () => {
         await page.locator('#open-drw').click();
         await expect(page.locator('#drw .drw-content')).toBeVisible();
         expect(await isPerceivable(page.locator('#drw-btn'))).toBe(true);
-        if (route === 'close button') await page.locator('#drw > .void-drawer-panel .void-drawer-close').click();
+        if (route === 'close button') await page.locator('#drw [part="close"]').first().click();
         if (route === 'backdrop click') await page.mouse.click(20, 400);
         if (route === 'open = false') await setOpen(page, 'drw', false);
         expect(await prop(page, 'drw', 'open'), `closed by ${route}`).toBe(false);
@@ -184,7 +184,7 @@ test.describe('drawer', () => {
     await page.keyboard.press('Escape');
     await page.mouse.click(20, 400);
     expect(await prop(page, 'drw-nc', 'open')).toBe(true);
-    await expect(page.locator('#drw-nc .void-drawer-close')).toHaveCount(0);
+    await expect(page.locator('#drw-nc [part="close"]')).toBeHidden();
     await setOpen(page, 'drw-nc', false);
     await expectGone(page, '#drw-nc .drw-nc-content', /stays/);
   });
@@ -237,7 +237,7 @@ test.describe('popover', () => {
           await expect(content).toBeVisible();
           expect(await isPerceivable(content)).toBe(true);
           const t = (await trigger.boundingBox())!;
-          const p = (await page.locator(`#${id} > .void-popover-body`).boundingBox())!;
+          const p = (await page.locator(`#${id} > void-popover-content`).boundingBox())!;
           expect(p.y, 'opens below the trigger').toBeGreaterThanOrEqual(t.y + t.height - 1);
           const align = id === 'pop-default' ? 'start' : id.slice(4);
           if (align === 'start') expect(Math.abs(p.x - t.x)).toBeLessThanOrEqual(1);
@@ -288,7 +288,7 @@ test.describe('hover-card', () => {
     expectedFailure('#6', 'after Escape, the card content is still in the accessibility tree');
     await page.locator('#hc-t').focus();
     await expect(page.locator('#hc .hcc')).toBeVisible();
-    await expect(page.locator('#hc .void-hover-card-trigger')).toHaveAttribute('aria-expanded', 'true');
+    await expect(page.locator('#hc-t')).toHaveAttribute('aria-expanded', 'true');
     await page.keyboard.press('Escape');
     await expect(page.locator('#hc')).not.toHaveAttribute('open', '');
     await expectGone(page, '#hc .hcc', /Hover card content/);
@@ -297,7 +297,7 @@ test.describe('hover-card', () => {
 
 test.describe('dropdown-menu', () => {
   for (const [id, first, slotted] of [['dd', 'dd-1', true], ['dd2', 'dd2-1', false]] as const) {
-    const label = slotted ? 'with slot="trigger"' : 'with a plain first-child trigger';
+    const label = slotted ? 'menu one' : 'menu two';
     test(`${label}: opens by click and Enter, closes by Escape, outside click and trigger, repeatedly`, async ({ page }) => {
       const trigger = page.locator(`#${id}-t`);
       const item = page.locator(`#${first}`);
@@ -316,7 +316,7 @@ test.describe('dropdown-menu', () => {
           if (route === 'trigger click') await trigger.click();
           if (route === 'open = false') await setOpen(page, id, false);
           expect(await prop(page, id, 'open'), `closed by ${route}`).toBe(false);
-          await expectGone(page, `#${id} .void-dropdown-menu-panel`, new RegExp(`menuitem "${slotted ? 'One' : 'Alpha'}"`));
+          await expectGone(page, `#${id} void-dropdown-menu-content`, new RegExp(`menuitem "${slotted ? 'One' : 'Alpha'}"`));
           if (route === 'Escape') expect(await focusedId(page)).toBe(`${id}-t`);
         }
       }

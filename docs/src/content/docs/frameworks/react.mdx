@@ -20,7 +20,7 @@ import { Button, Input, Alert } from '@voidable/ui-react';
 function App() {
   return (
     <>
-      <Alert color="info">Welcome to Voidable</Alert>
+      <Alert color="info"><AlertDescription>Welcome to Voidable</AlertDescription></Alert>
       <Input placeholder="Your name" />
       <Button variant="filled" onVoidClick={() => console.log('clicked')}>
         Submit
@@ -52,13 +52,15 @@ const [open, setOpen] = useState(false);
 <Button onVoidClick={() => setOpen(true)}>Edit</Button>
 <Dialog
   open={open}
-  heading="Edit project"
   onVoidClose={(e) => {
     if (e.detail.reason === 'escape' && dirty) e.preventDefault();
     else setOpen(false);
   }}
 >
-  …
+  <DialogTitle>Edit project</DialogTitle>
+  <DialogBody>
+    …
+  </DialogBody>
 </Dialog>
 ```
 

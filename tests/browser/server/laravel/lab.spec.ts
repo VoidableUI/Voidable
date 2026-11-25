@@ -185,7 +185,7 @@ test.describe('server updates while the user is mid-interaction', () => {
 test.describe('overlays opened by the server or the user', () => {
   test.beforeEach(async ({ page }) => open(page));
 
-  const panel = (page: Page) => page.locator('#dlg .void-dialog-panel');
+  const panel = (page: Page) => page.locator('#dlg [part="surface"]');
   const server = (page: Page, call: string) => page.evaluate((c) => new Function("lw", `return lw.${c}`)((window as any).Livewire.first()), call);
 
   test('the server opens a dialog and the user closes it, and the server hears about it', async ({ page }) => {
@@ -193,7 +193,7 @@ test.describe('overlays opened by the server or the user', () => {
     await expect(panel(page)).toBeVisible();
     await expect(page.getByRole('dialog', { name: 'Server dialog' })).toBeVisible();
     await expect(page.locator('#dialog-state')).toContainText('open');
-    await page.locator('#dlg .void-dialog-close').click();
+    await page.locator('#dlg [part="close"]').click();
     await expect(panel(page)).toBeHidden();
     await expect(page.locator('#dialog-state')).toContainText('closed');
     // The server can open it again: its state followed the user's.
@@ -219,7 +219,7 @@ test.describe('overlays opened by the server or the user', () => {
     await expect(page.locator('#version')).toHaveText('Server version 3');
     await expect(panel(page)).toBeVisible();
     await expect(page.locator('#dlg-body')).toContainText('Dialog body');
-    await expect(page.locator('#dlg .void-dialog-close')).toHaveCount(1);
+    await expect(page.locator('#dlg [part="close"]')).toHaveCount(1);
   });
 
   test('a dialog the user opened without the server stays open through an unrelated update', async ({ page }) => {

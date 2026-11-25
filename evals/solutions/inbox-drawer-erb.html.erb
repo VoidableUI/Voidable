@@ -21,7 +21,10 @@
     <p><%= message.body %></p>
   </template>
 <% end %>
-<void-drawer id="reader" side="right"></void-drawer>
+<void-drawer id="reader" side="right">
+  <void-drawer-title></void-drawer-title>
+  <void-drawer-body></void-drawer-body>
+</void-drawer>
 
 <script>
   const reader = document.getElementById('reader');
@@ -31,8 +34,8 @@
     if (!button) return;
     opener = button;
     const tpl = document.getElementById(`message-${button.dataset.messageId}`);
-    reader.heading = tpl.dataset.subject;
-    reader.replaceChildren(tpl.content.cloneNode(true));
+    reader.querySelector('void-drawer-title').textContent = tpl.dataset.subject;
+    reader.querySelector('void-drawer-body').replaceChildren(tpl.content.cloneNode(true));
     reader.open = true;
     // The drawer does not take focus or listen for Escape outside itself.
     requestAnimationFrame(() => reader.querySelector('button')?.focus());

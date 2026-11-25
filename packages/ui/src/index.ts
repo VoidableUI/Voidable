@@ -27,7 +27,7 @@ export { VoidRadioGroup } from './components/radio-group.js';
 export { VoidField } from './components/field.js';
 export { VoidMultiselect, VoidOption } from './components/multiselect.js';
 export { VoidDialog } from './components/dialog.js';
-export { VoidTabs, VoidTabPanel } from './components/tabs.js';
+export { VoidTabs } from './components/tabs.js';
 export { VoidAccordion, VoidAccordionItem } from './components/accordion.js';
 export { VoidBreadcrumbs } from './components/breadcrumbs.js';
 export { VoidList, VoidListItem } from './components/list.js';

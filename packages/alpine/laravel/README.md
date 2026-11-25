@@ -97,9 +97,14 @@ Voidable components work seamlessly with Livewire. The morph-protection hooks (e
         x-data="{ open: @entangle('showDialog') }"
         x-bind:open="open"
     >
+      <void-dialog-title>Submit the form?</void-dialog-title>
+      <void-dialog-body>
         <p>Are you sure?</p>
+      </void-dialog-body>
+      <void-dialog-actions>
         <void-button x-on:void-click="$wire.confirm()">Confirm</void-button>
-        <void-button x-on:void-click="open = false" variant="ghost">Cancel</void-button>
+                <void-button x-on:void-click="open = false" variant="ghost">Cancel</void-button>
+      </void-dialog-actions>
     </void-dialog>
 </div>
 ```
@@ -120,8 +125,12 @@ Without Livewire, use Alpine.js directly for client-side interactivity:
 
 ```blade
 <void-tabs value="overview" x-data="{ active: 'overview' }" x-on:void-change="active = $event.detail.value">
-    <void-tab-panel tab="overview" label="Overview">Overview content</void-tab-panel>
-    <void-tab-panel tab="settings" label="Settings">Settings content</void-tab-panel>
+  <void-tabs-list>
+    <void-tabs-trigger value="overview">Overview</void-tabs-trigger>
+    <void-tabs-trigger value="settings">Settings</void-tabs-trigger>
+  </void-tabs-list>
+  <void-tabs-content value="overview">Overview content</void-tabs-content>
+  <void-tabs-content value="settings">Settings content</void-tabs-content>
 </void-tabs>
 
 <p x-text="'Active tab: ' + active"></p>

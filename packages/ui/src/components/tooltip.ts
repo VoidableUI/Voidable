@@ -1,57 +1,74 @@
-import { html } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
 import { OverlayController } from '../overlay.js';
+import { PartsController, triggerControl } from '../parts.js';
 
 /**
  * Hover hint for icon buttons and truncated text that need a label without cluttering the visible interface.
  *
- * Follows the WAI-ARIA tooltip pattern: the trigger (the first child that is not the bubble) is described by the
- * bubble with `aria-describedby`, also when it arrives after the tooltip rendered. The bubble appears after `delay`
- * on pointer hover and at once on keyboard focus, never takes focus, and Escape hides it. It is shown in the top
- * layer and placed with CSS anchor positioning, flipping at viewport edges.
+ * Two parts: `<void-tooltip-trigger>` around the described element (one element: a `<void-button>`, a link), and
+ * `<void-tooltip-content>` with the hint text. The parts are the final DOM. Follows the WAI-ARIA tooltip pattern:
+ * the trigger's element is described by the content with `aria-describedby` (its own descriptions are kept), also
+ * when either part arrives after the tooltip upgraded. The content appears after `delay` on pointer hover and at
+ * once on keyboard focus, never takes focus, and Escape hides it. It is shown in the top layer and placed with CSS
+ * anchor positioning, flipping at viewport edges.
  *
  * @fires {CustomEvent<{ reason: 'hover' | 'focus' | 'api' }>} void-open - The tooltip appeared.
  * @fires {CustomEvent<{ reason: 'hover' | 'blur' | 'escape' | 'parent' | 'api' }>} void-close - The tooltip is hiding.
  */
 export class VoidTooltip extends VoidElement {
-  /** The hint text shown in the bubble. Keep it short and supplementary: it only appears on hover or focus. */
-  @property({ type: String }) text = '';
   /** Side of the trigger the tooltip appears on; it flips to the opposite side when there is no room. */
   @property({ type: String, reflect: true }) position: 'top' | 'bottom' | 'left' | 'right' = 'top';
   /** Alignment with the trigger along that side. */
   @property({ type: String, reflect: true }) align: 'start' | 'center' | 'end' = 'center';
-  /** Milliseconds the pointer rests on the trigger before the bubble appears (keyboard focus shows it at once). Defaults to 200. */
+  /** Milliseconds the pointer rests on the trigger before the content appears (keyboard focus shows it at once). Defaults to 200. */
   @property({ type: Number }) delay = 200;
   /** Whether the tooltip is shown. It opens and closes itself from hover, focus and Escape; set it to drive it from script. */
   @property({ type: Boolean, reflect: true }) open = false;
 
   private _timerId: ReturnType<typeof setTimeout> | undefined;
-  private _tooltipId = 'void-tooltip-' + Math.random().toString(36).slice(2);
-  /** The trigger the bubble currently describes. */
-  private _described: Element | null = null;
-  /** The trigger can arrive after the tooltip (blocking script in the head, framework rendering, morphs). */
-  private _observer: MutationObserver | null = null;
+
+  protected readonly _parts = new PartsController(this, {
+    tags: ['void-tooltip-trigger', 'void-tooltip-content'],
+    onChange: () => {
+      this._wire();
+      this.requestUpdate();
+    },
+  });
 
   protected readonly _overlay: OverlayController = new OverlayController(this, {
     kind: 'tooltip',
-    surface: () => this.querySelector<HTMLElement>(':scope > .void-tooltip-bubble'),
+    surface: () => this._parts.one('void-tooltip-content'),
     isOpen: () => this.open,
     setOpen: open => {
       this.open = open;
     },
-    trigger: () => this._trigger(),
-    anchor: (): Element => this._trigger() ?? this,
+    trigger: () => this._control(),
+    anchor: (): Element => this._control() ?? this,
     placement: () => ({ side: this.position, align: this.align }),
+    attr: (el, name, value) => this._parts.set(el, name, value),
+    style: (el, p, v) => this._parts.style(el, p, v),
   });
+
+  private _control(): HTMLElement | null {
+    return triggerControl(this._parts.one('void-tooltip-trigger'));
+  }
+
+  /** The content is the trigger's description. */
+  private _wire(): void {
+    const content = this._parts.one('void-tooltip-content');
+    const control = this._control();
+    if (!content) return;
+    this._parts.set(content, 'popover', 'manual');
+    this._parts.set(content, 'role', 'tooltip');
+    const id = this._parts.id(content, 'void-tooltip-content');
+    if (control) this._parts.token(control, 'aria-describedby', id);
+  }
 
   connectedCallback(): void {
     super.connectedCallback();
-    this._observer ??= new MutationObserver(() => this._describeTrigger());
-    this._observer.observe(this, { childList: true });
-    this._describeTrigger();
-    this.addEventListener('mouseenter', this._onMouseEnter);
-    this.addEventListener('mouseleave', this._onMouseLeave);
+    this.addEventListener('mouseover', this._onOver);
+    this.addEventListener('mouseout', this._onOut);
     this.addEventListener('focusin', this._onFocusIn);
     this.addEventListener('focusout', this._onFocusOut);
   }
@@ -59,53 +76,24 @@ export class VoidTooltip extends VoidElement {
   disconnectedCallback(): void {
     super.disconnectedCallback();
     clearTimeout(this._timerId);
-    this._observer?.disconnect();
-    this.removeEventListener('mouseenter', this._onMouseEnter);
-    this.removeEventListener('mouseleave', this._onMouseLeave);
+    this.removeEventListener('mouseover', this._onOver);
+    this.removeEventListener('mouseout', this._onOut);
     this.removeEventListener('focusin', this._onFocusIn);
     this.removeEventListener('focusout', this._onFocusOut);
   }
 
-  /** The described element: the first child element that is not the bubble. */
-  private _trigger(): HTMLElement | null {
-    for (const child of Array.from(this.children)) {
-      if (!child.classList.contains('void-tooltip-bubble')) return child as HTMLElement;
-    }
-    return null;
+  private _inTrigger(node: EventTarget | null): boolean {
+    return node instanceof Node && !!this._parts.one('void-tooltip-trigger')?.contains(node);
   }
 
-  // The trigger (consumer content) stays on the host; the bubble is rendered after it.
-  protected override updated(changed: Map<string, unknown>): void {
-    super.updated(changed);
-    this._describeTrigger();
-  }
-
-  /** The trigger is described by the bubble, keeping any other descriptions it has. */
-  private _describeTrigger(): void {
-    const trigger = this._trigger();
-    if (this._described && this._described !== trigger) this._release(this._described);
-    this._described = trigger;
-    if (trigger && !this._tokens(trigger).includes(this._tooltipId)) {
-      trigger.setAttribute('aria-describedby', [...this._tokens(trigger), this._tooltipId].join(' '));
-    }
-  }
-
-  private _tokens(el: Element): string[] {
-    return (el.getAttribute('aria-describedby') ?? '').split(/\s+/).filter(Boolean);
-  }
-
-  private _release(el: Element): void {
-    const rest = this._tokens(el).filter(t => t !== this._tooltipId);
-    if (rest.length) el.setAttribute('aria-describedby', rest.join(' '));
-    else el.removeAttribute('aria-describedby');
-  }
-
-  private _onMouseEnter = (): void => {
+  private _onOver = (e: MouseEvent): void => {
+    if (!this._inTrigger(e.target) || this._inTrigger(e.relatedTarget)) return;
     clearTimeout(this._timerId);
     this._timerId = setTimeout(() => this._overlay.requestOpen('hover'), this.delay);
   };
 
-  private _onMouseLeave = (): void => {
+  private _onOut = (e: MouseEvent): void => {
+    if (!this._inTrigger(e.target) || this._inTrigger(e.relatedTarget)) return;
     clearTimeout(this._timerId);
     if (this.ownerDocument.activeElement && this.contains(this.ownerDocument.activeElement) && this._focusVisible()) return;
     this._overlay.requestClose('hover');
@@ -130,12 +118,6 @@ export class VoidTooltip extends VoidElement {
     } catch {
       return true;
     }
-  }
-
-  render() {
-    // The bubble is named by its text content, which the static lint rule cannot see.
-    // eslint-disable-next-line lit-a11y/accessible-name
-    return html`<span id="${this._tooltipId}" class="void-tooltip-bubble" role="tooltip" popover="manual">${this.text}</span>`;
   }
 }
 

@@ -2,15 +2,15 @@ void-dropdown-menu {
   display: inline-flex;
 }
 
-/* Before the element upgrades, only the trigger shows. */
-void-dropdown-menu:not(:defined) > void-dropdown-menu-item,
-void-dropdown-menu:not(:defined) > hr {
-  display: none;
+/* The trigger part wraps the control and draws nothing itself: the control is
+   the box (and the anchor's only in-flow content), before and after upgrade. */
+void-dropdown-menu-trigger {
+  display: contents;
 }
 
 /* A popover="manual" surface in the top layer; placement, gap, flipping and
    transitions are shared (overlay.css). */
-.void-dropdown-menu-panel {
+void-dropdown-menu-content {
   --void-overlay-gap: var(--void-space-1);
   /* As wide as its longest item, not as narrow as its trigger. */
   width: max-content;
@@ -25,8 +25,8 @@ void-dropdown-menu:not(:defined) > hr {
   box-shadow: var(--void-shadow-md);
 }
 
-.void-dropdown-menu-panel hr {
-  border: none;
+void-dropdown-menu-separator {
+  display: block;
   border-top: 1px solid var(--void-color-border-strong);
   margin: var(--void-space-1) 0;
 }

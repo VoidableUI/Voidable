@@ -6,7 +6,7 @@ import { cleanup, flush, locks, pointerdown, press, stack } from '../helpers/ove
 
 const TAG = 'void-dialog';
 
-async function mount(props: Partial<VoidDialog> = {}, content = '<input id="field"><button id="ok">OK</button>'): Promise<VoidDialog> {
+async function mount(props: Partial<VoidDialog> = {}, content = '<void-dialog-title>Title</void-dialog-title><void-dialog-body><input id="field"><button id="ok">OK</button></void-dialog-body>'): Promise<VoidDialog> {
   const el = document.createElement(TAG) as VoidDialog;
   el.id = `dlg-${Math.random().toString(36).slice(2, 6)}`;
   el.innerHTML = content;
@@ -16,7 +16,8 @@ async function mount(props: Partial<VoidDialog> = {}, content = '<input id="fiel
   return el;
 }
 
-const panel = (el: Element) => el.querySelector(':scope > dialog.void-dialog-panel') as HTMLDialogElement;
+const panel = (el: Element) => el.shadowRoot!.querySelector('dialog') as HTMLDialogElement;
+const closeButton = (el: Element) => el.shadowRoot?.querySelector<HTMLButtonElement>('[part="close"]') ?? null;
 
 function opener(id = 'opener'): HTMLButtonElement {
   const b = document.createElement('button');
@@ -31,7 +32,7 @@ afterEach(cleanup);
 describe('VoidDialog', () => {
   describe('class', () => {
     it('extends VoidElement', () => {
-      expect(Object.getPrototypeOf(VoidDialog)).toBe(VoidElement);
+      expect(VoidDialog.prototype).toBeInstanceOf(VoidElement);
     });
 
     it('is registered as void-dialog', () => {
@@ -47,39 +48,60 @@ describe('VoidDialog', () => {
   describe('defaults', () => {
     it('open false, heading empty, size md, closable true', () => {
       const el = document.createElement(TAG) as VoidDialog;
-      expect([el.open, el.heading, el.size, el.closable]).toEqual([false, '', 'md', true]);
+      expect([el.open, el.size, el.closable]).toEqual([false, 'md', true]);
+      expect('heading' in el).toBe(false);
     });
   });
 
-  describe('structure and naming', () => {
-    it('renders a native <dialog> holding the projected content; the host carries no dialog role', async () => {
+  describe('structure and naming (explicit parts, #52)', () => {
+    it('renders a native <dialog> in its shadow root and never moves the author parts', async () => {
       const el = await mount();
+      const before = [...el.childNodes];
       const d = panel(el);
       expect(d).toBeInstanceOf(HTMLDialogElement);
-      expect(d.querySelector('.void-dialog-body #field')).not.toBeNull();
+      expect(d.querySelector('slot')).not.toBeNull();
+      expect([...el.childNodes]).toEqual(before);
+      expect([...el.children].map((c) => c.localName)).toEqual(['void-dialog-title', 'void-dialog-body']);
+      // The role is on the native dialog only (one dialog in every tool).
       expect(el.hasAttribute('role')).toBe(false);
       expect(el.hasAttribute('aria-modal')).toBe(false);
     });
 
-    it('is named by its heading (aria-labelledby the visible title)', async () => {
-      const el = await mount({ heading: 'Confirm' });
-      const d = panel(el);
-      const title = el.querySelector(`#${d.getAttribute('aria-labelledby')}`);
-      expect(title?.textContent).toBe('Confirm');
-      expect(title?.localName).toBe('h2');
+    it('makes the title part a level-2 heading and names the dialog by it', async () => {
+      const el = await mount({}, '<void-dialog-title>Confirm</void-dialog-title><void-dialog-description>Sure?</void-dialog-description>');
+      const title = el.querySelector('void-dialog-title')!;
+      expect(title.getAttribute('role')).toBe('heading');
+      expect(title.getAttribute('aria-level')).toBe('2');
+      const d = panel(el) as HTMLDialogElement & { ariaLabelledByElements?: Element[]; ariaDescribedByElements?: Element[] };
+      if ('ariaLabelledByElements' in d) {
+        expect(d.ariaLabelledByElements).toEqual([title]);
+        expect(d.ariaDescribedByElements).toEqual([el.querySelector('void-dialog-description')]);
+      }
     });
 
-    it('without a heading, passes the host aria-label to the dialog and hides the empty title', async () => {
+    it('keeps a server role on the title', async () => {
+      const el = await mount({}, '<void-dialog-title role="none">Confirm</void-dialog-title>');
+      expect(el.querySelector('void-dialog-title')!.getAttribute('role')).toBe('none');
+    });
+
+    it('without a title, passes the host aria-label to the dialog', async () => {
       const el = document.createElement(TAG) as VoidDialog;
       el.setAttribute('aria-label', 'Settings');
       document.body.appendChild(el);
       await flush(el);
       expect(panel(el).getAttribute('aria-label')).toBe('Settings');
-      expect(panel(el).hasAttribute('aria-labelledby')).toBe(false);
-      expect(el.querySelector<HTMLElement>('.void-dialog-heading')!.hidden).toBe(true);
       el.setAttribute('aria-label', 'Preferences');
       await flush(el);
       expect(panel(el).getAttribute('aria-label')).toBe('Preferences');
+    });
+
+    it('releases what it set on a title that is removed', async () => {
+      const el = await mount();
+      const title = el.querySelector('void-dialog-title')!;
+      title.remove();
+      await flush(el);
+      expect(title.hasAttribute('role')).toBe(false);
+      expect(title.hasAttribute('aria-level')).toBe(false);
     });
 
     it('hides the native dialog while closed, keeping the projected content', async () => {
@@ -100,7 +122,7 @@ describe('VoidDialog', () => {
     });
 
     it('an open attribute in markup opens it on connect', async () => {
-      document.body.innerHTML = '<void-dialog id="d" open heading="H"><p>x</p></void-dialog>';
+      document.body.innerHTML = '<void-dialog id="d" open><void-dialog-title>H</void-dialog-title><void-dialog-body><p>x</p></void-dialog-body></void-dialog>';
       const el = document.getElementById('d') as VoidDialog;
       await flush(el);
       expect(panel(el).open).toBe(true);
@@ -125,7 +147,7 @@ describe('VoidDialog', () => {
         await flush(el);
         expect(panel(el).open).toBe(false);
       }
-      expect(el.querySelectorAll('dialog')).toHaveLength(1);
+      expect(el.shadowRoot!.querySelectorAll('dialog')).toHaveLength(1);
       expect(el.querySelectorAll('#field')).toHaveLength(1);
       expect(locks()).toBe(0);
     });
@@ -222,7 +244,7 @@ describe('VoidDialog', () => {
       const el = await mount({ open: true });
       const reasons: string[] = [];
       el.addEventListener('void-close', e => reasons.push((e as CustomEvent).detail.reason));
-      el.querySelector<HTMLButtonElement>('.void-dialog-close')!.click();
+      closeButton(el)!.click();
       await flush(el);
       expect(el.open).toBe(false);
       expect(reasons).toEqual(['close-button']);
@@ -256,7 +278,7 @@ describe('VoidDialog', () => {
       const el = await mount({ closable: false, open: true });
       const events: Event[] = [];
       el.addEventListener('void-close', e => events.push(e));
-      expect(el.querySelector('.void-dialog-close')).toBeNull();
+      expect(closeButton(el)!.hidden).toBe(true);
       const e = press('Escape');
       pointerdown(document.body);
       await flush(el);
@@ -277,7 +299,7 @@ describe('VoidDialog', () => {
   describe('focus', () => {
     it('moves focus to the first focusable element of the content, not the close button', async () => {
       opener();
-      const el = await mount({ heading: 'H', open: true });
+      const el = await mount({ open: true });
       expect(document.activeElement?.id).toBe('field');
       void el;
     });
@@ -290,10 +312,12 @@ describe('VoidDialog', () => {
 
     it('falls back to the close button, then the panel itself, when the content has nothing focusable', async () => {
       opener();
-      const el = await mount({ open: true }, '<p>text</p>');
-      expect(document.activeElement).toBe(el.querySelector('.void-dialog-close'));
-      const nc = await mount({ open: true, closable: false }, '<p>text</p>');
-      expect(document.activeElement).toBe(panel(nc));
+      const el = await mount({ open: true }, '<void-dialog-body><p>text</p></void-dialog-body>');
+      expect(document.activeElement).toBe(el);
+      expect(el.shadowRoot!.activeElement).toBe(closeButton(el));
+      // The closable="false" fallback (the panel itself) is checked in a real
+      // browser (tests/browser): happy-dom's showModal() focuses the hidden
+      // close button itself.
     });
 
     it('returns focus to the opener on close', async () => {
@@ -317,9 +341,9 @@ describe('VoidDialog', () => {
     });
 
     it('with the opener gone, falls back to the overlay underneath', async () => {
-      const outer = await mount({ open: true }, '<button id="outer-btn">x</button>');
+      const outer = await mount({ open: true }, '<void-dialog-body><button id="outer-btn">x</button></void-dialog-body>');
       const b = document.createElement('button');
-      outer.querySelector('.void-dialog-body')!.appendChild(b);
+      outer.querySelector('void-dialog-body')!.appendChild(b);
       b.focus();
       const inner = await mount({ open: true });
       b.remove();
@@ -332,7 +356,7 @@ describe('VoidDialog', () => {
 
   describe('stacking', () => {
     it('Escape closes only the topmost of nested dialogs', async () => {
-      const outer = await mount({ open: true }, '<void-dialog id="inner"><input id="in"></void-dialog>');
+      const outer = await mount({ open: true }, '<void-dialog id="inner"><void-dialog-body><input id="in"></void-dialog-body></void-dialog>');
       const inner = outer.querySelector('#inner') as VoidDialog;
       inner.open = true;
       await flush(inner, outer);
@@ -347,7 +371,7 @@ describe('VoidDialog', () => {
     });
 
     it('closing the outer dialog closes the one inside it (reason parent)', async () => {
-      const outer = await mount({ open: true }, '<void-dialog id="inner"><input></void-dialog>');
+      const outer = await mount({ open: true }, '<void-dialog id="inner"><void-dialog-body><input></void-dialog-body></void-dialog>');
       const inner = outer.querySelector('#inner') as VoidDialog;
       inner.open = true;
       await flush(inner, outer);
@@ -362,7 +386,7 @@ describe('VoidDialog', () => {
     });
 
     it('a non-closable dialog on top shields the one underneath from Escape', async () => {
-      const outer = await mount({ open: true }, '<void-dialog id="inner" closable="false"><input></void-dialog>');
+      const outer = await mount({ open: true }, '<void-dialog id="inner" closable="false"><void-dialog-body><input></void-dialog-body></void-dialog>');
       const inner = outer.querySelector('#inner') as VoidDialog;
       inner.open = true;
       await flush(inner, outer);

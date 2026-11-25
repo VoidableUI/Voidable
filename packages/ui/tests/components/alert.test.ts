@@ -58,7 +58,7 @@ describe('VoidAlert', () => {
       const events: Event[] = [];
       document.addEventListener('void-dismiss', (e) => events.push(e));
 
-      const btn = el.querySelector('.void-alert-close') as HTMLButtonElement;
+      const btn = el.shadowRoot!.querySelector('[part="close"]') as HTMLButtonElement;
       btn.click();
 
       expect(events).toHaveLength(1);
@@ -69,10 +69,32 @@ describe('VoidAlert', () => {
     it('removes itself from the DOM when dismissed', async () => {
       expect(document.body.contains(el)).toBe(true);
 
-      const btn = el.querySelector('.void-alert-close') as HTMLButtonElement;
+      const btn = el.shadowRoot!.querySelector('[part="close"]') as HTMLButtonElement;
       btn.click();
 
       expect(document.body.contains(el)).toBe(false);
+    });
+  });
+
+  describe('explicit parts (#52)', () => {
+    it('leaves the title and description parts where they are and adds no light-DOM nodes', async () => {
+      const el = document.createElement('void-alert') as VoidAlert;
+      el.innerHTML = '<void-alert-title>Saved</void-alert-title><void-alert-description>All changes are stored.</void-alert-description>';
+      const before = [...el.childNodes];
+      el.dismissible = true;
+      document.body.appendChild(el);
+      await el.updateComplete;
+      expect([...el.childNodes]).toEqual(before);
+      expect(el.shadowRoot!.querySelector('slot')).not.toBeNull();
+      el.remove();
+    });
+
+    it('has no shadow root unless it is dismissible', async () => {
+      const el = document.createElement('void-alert') as VoidAlert;
+      document.body.appendChild(el);
+      await el.updateComplete;
+      expect(el.shadowRoot).toBeNull();
+      el.remove();
     });
   });
 

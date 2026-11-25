@@ -145,7 +145,8 @@ describe('VoidActionInput', () => {
     it('passes the action label and position to the tooltip', async () => {
       const el = await mount({ actionLabel: 'Copy', tooltipPosition: 'left' });
       const tip = el.querySelector('void-tooltip')!;
-      expect(tip.getAttribute('text')).toBe('Copy');
+      expect(tip.querySelector('void-tooltip-content')!.textContent).toBe('Copy');
+      expect(tip.querySelector('void-tooltip-trigger > button')).not.toBeNull();
       expect(tip.getAttribute('position')).toBe('left');
     });
 

@@ -61,7 +61,7 @@ for (const strict of [false, true]) {
         await expect(page.locator('#r-dlg .di').first()).toBeVisible();
         await api(page, 'setDlgItems', ['one', 'two', `three-${i}`]);
         await expect(page.locator('#r-dlg .di')).toHaveText(['one', 'two', `three-${i}`]);
-        await expect(page.locator('#r-dlg .void-dialog-heading')).toHaveText('Dialog 3');
+        await expect(page.locator('#r-dlg void-dialog-title')).toHaveText('Dialog 3');
         await api(page, 'setOpen', false);
         await expect(page.locator('#r-dlg .di').first()).toBeHidden();
       }
@@ -88,7 +88,7 @@ for (const strict of [false, true]) {
       await expect(page.locator('#r-tabs').getByRole('tabpanel')).toHaveText(/Panel y v2/);
       await api(page, 'setTabs', ['z', 'y']);
       await expect(page.locator('#r-tabs').getByRole('tab')).toHaveText(['Tab z', 'Tab y']);
-      expect(await page.locator('#r-tabs void-tab-panel').count()).toBe(2);
+      expect(await page.locator('#r-tabs void-tabs-content').count()).toBe(2);
     });
 
     test('options and menu items from state', async ({ page }) => {
@@ -98,7 +98,7 @@ for (const strict of [false, true]) {
       await page.locator('#r-ddt').click();
       await expect(page.locator('#r-dd').getByRole('menuitem')).toHaveText(['Item b', 'Item c', 'Item d']);
       await page.locator('#r-ddi-d').click();
-      expect(await events(page)).toContain('select-d:{"item":"void-dropdown-menu-item"}');
+      expect(await events(page)).toContain('select-d:{"item":"void-dropdown-menu-item","value":""}');
       await api(page, 'setOpts', ['a']);
       await expect(page.locator('#r-dd').getByRole('menuitem')).toHaveText(['Item a']);
       await api(page, 'setLabel', 'v3');

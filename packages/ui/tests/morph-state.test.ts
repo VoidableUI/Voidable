@@ -21,6 +21,7 @@ import '../src/components/tabs.js';
 import '../src/components/select.js';
 import '../src/components/breadcrumbs.js';
 import '../src/components/alert.js';
+import '../src/components/tag.js';
 import '../src/components/field.js';
 import '../src/components/input.js';
 import '../src/components/popover.js';
@@ -215,36 +216,44 @@ describe('owned attributes are restored a bounded number of times', () => {
   });
 });
 
-describe('tabs', () => {
-  it('copies only generated ids onto incoming panels; an id the server sends wins', async () => {
-    const tabs = await mount<Host>('<void-tabs value="a"><void-tab-panel tab="a" label="A">a</void-tab-panel><void-tab-panel tab="b" label="B" id="mine">b</void-tab-panel></void-tabs>');
-    const [a] = Array.from(tabs.querySelectorAll('void-tab-panel'));
-    const next = server('<void-tabs value="a"><void-tab-panel tab="a" label="A" id="mine">a</void-tab-panel><void-tab-panel tab="b" label="B">b</void-tab-panel></void-tabs>');
+describe('tabs (explicit parts, #52)', () => {
+  it('copies the generated ids and wiring onto the incoming parts; an id the server sends wins', async () => {
+    const tabs = await mount<Host>('<void-tabs value="a"><void-tabs-list><void-tabs-trigger value="a">A</void-tabs-trigger><void-tabs-trigger value="b">B</void-tabs-trigger></void-tabs-list><void-tabs-content value="a">a</void-tabs-content><void-tabs-content value="b" id="mine">b</void-tabs-content></void-tabs>');
+    const [a, b] = Array.from(tabs.querySelectorAll('void-tabs-content'));
+    const next = server('<void-tabs value="a"><void-tabs-list><void-tabs-trigger value="a">A</void-tabs-trigger><void-tabs-trigger value="b">B</void-tabs-trigger></void-tabs-list><void-tabs-content value="a">a</void-tabs-content><void-tabs-content value="b" id="theirs">b</void-tabs-content></void-tabs>');
     tabs.voidBeforeMorph(next);
-    expect(Array.from(next.children).map(p => p.getAttribute('id'))).toEqual(['mine', null]);
-    const fresh = server('<void-tabs value="a"><void-tab-panel tab="a" label="A">a</void-tab-panel></void-tabs>');
-    await settle();
-    tabs.voidBeforeMorph(fresh);
-    expect(fresh.firstElementChild!.id).toBe(a.id);
+    const [na, nb] = Array.from(next.querySelectorAll('void-tabs-content'));
+    expect(na!.id).toBe(a!.id);
+    expect(na!.getAttribute('role')).toBe('tabpanel');
+    expect(na!.hasAttribute('active')).toBe(true);
+    expect(nb!.id).toBe('theirs');
+    expect(b!.id).toBe('mine');
+    const [nt] = Array.from(next.querySelectorAll('void-tabs-trigger'));
+    expect(nt!.getAttribute('aria-selected')).toBe('true');
+    expect(nt!.getAttribute('tabindex')).toBe('0');
   });
 
-  it('selects the panel the value attribute names, else the first, when the selected panel is removed', async () => {
-    const tabs = await mount<Host>('<void-tabs value="a"><void-tab-panel tab="a" label="A">a</void-tab-panel><void-tab-panel tab="b" label="B">b</void-tab-panel><void-tab-panel tab="c" label="C">c</void-tab-panel></void-tabs>');
+  it('selects the tab the value attribute names, else the first, when the selected tab is removed', async () => {
+    const tabs = await mount<Host>('<void-tabs value="a"><void-tabs-list><void-tabs-trigger value="a">A</void-tabs-trigger><void-tabs-trigger value="b">B</void-tabs-trigger><void-tabs-trigger value="c">C</void-tabs-trigger></void-tabs-list><void-tabs-content value="a">a</void-tabs-content><void-tabs-content value="b">b</void-tabs-content><void-tabs-content value="c">c</void-tabs-content></void-tabs>');
     (tabs.querySelectorAll('[role=tab]')[2] as HTMLElement).click();
     await settle();
     expect(tabs.value).toBe('c');
-    tabs.querySelector('void-tab-panel[tab=c]')!.remove();
+    tabs.querySelector('void-tabs-trigger[value=c]')!.remove();
+    tabs.querySelector('void-tabs-content[value=c]')!.remove();
     await settle();
     expect(tabs.value).toBe('a');
     expect(Array.from(tabs.querySelectorAll('[role=tab]')).map(t => t.getAttribute('aria-selected'))).toEqual(['true', 'false']);
   });
 
-  it('nested tab sets: each lists only its own panels', async () => {
-    const tabs = await mount<Host>('<void-tabs value="x"><void-tab-panel tab="x" label="X"><void-tabs value="a"><void-tab-panel tab="a" label="a">a</void-tab-panel></void-tabs></void-tab-panel><void-tab-panel tab="y" label="Y">y</void-tab-panel></void-tabs>');
-    const outer = Array.from(tabs.querySelectorAll(':scope > .void-tabs-list [role=tab]')).map(t => t.textContent!.trim());
+  it('nested tab sets: each wires only its own parts', async () => {
+    const tabs = await mount<Host>('<void-tabs value="x"><void-tabs-list><void-tabs-trigger value="x">X</void-tabs-trigger><void-tabs-trigger value="y">Y</void-tabs-trigger></void-tabs-list><void-tabs-content value="x"><void-tabs value="a"><void-tabs-list><void-tabs-trigger value="a">a</void-tabs-trigger></void-tabs-list><void-tabs-content value="a">a</void-tabs-content></void-tabs></void-tabs-content><void-tabs-content value="y">y</void-tabs-content></void-tabs>');
+    await settle();
+    const outer = Array.from(tabs.querySelectorAll(':scope > void-tabs-list [role=tab]')).map(t => t.textContent!.trim());
     expect(outer).toEqual(['X', 'Y']);
     const ids = Array.from(tabs.querySelectorAll('[id]')).map(e => e.id);
     expect(new Set(ids).size).toBe(ids.length);
+    const inner = tabs.querySelector('void-tabs void-tabs')!;
+    expect(inner.querySelector('void-tabs-content')!.getAttribute('aria-labelledby')).toBe(inner.querySelector('void-tabs-trigger')!.id);
   });
 });
 
@@ -352,27 +361,30 @@ describe('wrap regions under direct DOM edits (breadcrumbs)', () => {
 
 describe('text written into the start marker (Solid text-only children)', () => {
   it('is moved to the consumer text node', async () => {
-    const alert = await mount<Host>('<void-alert>hello</void-alert>');
-    expect(alert.firstChild!.nodeType).toBe(Node.COMMENT_NODE);
-    (alert.firstChild as CharacterData).data = 'world';
+    const tag = await mount<Host>('<void-tag>hello</void-tag>');
+    const start = () => Array.from(tag.childNodes).find((n): n is Comment => n.nodeType === Node.COMMENT_NODE && /^void-projection/.test((n as Comment).data))!;
+    expect(start()).toBeDefined();
+    start().data = 'world';
     await settle();
-    expect(alert.textContent).toContain('world');
-    expect(alert.textContent).not.toContain('hello');
-    expect((alert.firstChild as Comment).data).toBe('void-projection');
+    expect(tag.textContent).toContain('world');
+    expect(tag.textContent).not.toContain('hello');
+    expect(start().data).toBe('void-projection');
   });
 });
 
-describe('replaceChildren on an overlay', () => {
-  it('routes the first unslotted element to the trigger, as a fresh render does', async () => {
-    const pop = await mount<Host>('<void-popover><button id="t1">t</button><div>body</div></void-popover>');
-    const t2 = document.createElement('button');
-    t2.id = 't2';
-    const body = document.createElement('div');
-    body.textContent = 'new body';
-    pop.replaceChildren(t2, body);
+describe('replaceChildren on an overlay (explicit parts, #52)', () => {
+  it('wires the new parts and releases the old ones', async () => {
+    const pop = await mount<Host>('<void-popover><void-popover-trigger><button id="t1">t</button></void-popover-trigger><void-popover-content><div>body</div></void-popover-content></void-popover>');
+    const t1 = pop.querySelector('#t1')!;
+    const trigger = document.createElement('void-popover-trigger');
+    trigger.innerHTML = '<button id="t2">t</button>';
+    const content = document.createElement('void-popover-content');
+    content.textContent = 'new body';
+    pop.replaceChildren(trigger, content);
     await settle();
-    expect(pop.querySelector('.void-popover-body #t2')).toBeNull();
-    expect(pop.querySelector('.void-popover-body')!.textContent).toBe('new body');
+    expect(pop.querySelector('#t2')!.getAttribute('aria-controls')).toBe(content.id);
+    expect(content.getAttribute('role')).toBe('dialog');
+    expect(t1.hasAttribute('aria-controls')).toBe(false);
   });
 });
 
@@ -434,29 +446,29 @@ describe('appending to a rendered host (Solid keyed lists)', () => {
 
 describe('overlay open state (what the Livewire hook hands to the morph)', () => {
   it('keeps a dialog the user opened open through a re-render that does not mention it', async () => {
-    const live = await mount<Host>('<void-dialog heading="D">x</void-dialog>');
+    const live = await mount<Host>('<void-dialog><void-dialog-title>D</void-dialog-title><void-dialog-body>x</void-dialog-body></void-dialog>');
     live.setAttribute('open', '');
     await settle();
-    const toEl = server('<void-dialog heading="D">x</void-dialog>');
+    const toEl = server('<void-dialog><void-dialog-title>D</void-dialog-title><void-dialog-body>x</void-dialog-body></void-dialog>');
     live.voidBeforeMorph(toEl);
     expect(toEl.hasAttribute('open')).toBe(true);
   });
 
   it('closes it when the server stops rendering open (server wins)', async () => {
-    const live = await mount<Host>('<void-dialog heading="D" open>x</void-dialog>');
-    const toEl = server('<void-dialog heading="D">x</void-dialog>');
+    const live = await mount<Host>('<void-dialog open><void-dialog-title>D</void-dialog-title><void-dialog-body>x</void-dialog-body></void-dialog>');
+    const toEl = server('<void-dialog><void-dialog-title>D</void-dialog-title><void-dialog-body>x</void-dialog-body></void-dialog>');
     live.voidBeforeMorph(toEl);
     expect(toEl.hasAttribute('open')).toBe(false);
   });
 
   it('opens it when the server starts rendering open, and keeps a user close while the server repeats itself', async () => {
-    const live = await mount<Host>('<void-dialog heading="D">x</void-dialog>');
-    const first = await morph(live, '<void-dialog heading="D" open>x</void-dialog>');
+    const live = await mount<Host>('<void-dialog><void-dialog-title>D</void-dialog-title><void-dialog-body>x</void-dialog-body></void-dialog>');
+    const first = await morph(live, '<void-dialog open><void-dialog-title>D</void-dialog-title><void-dialog-body>x</void-dialog-body></void-dialog>');
     expect(first.hasAttribute('open')).toBe(true);
     expect(live.hasAttribute('open')).toBe(true);
     live.removeAttribute('open'); // the user closed it
     await settle();
-    const again = server('<void-dialog heading="D" open>x</void-dialog>');
+    const again = server('<void-dialog open><void-dialog-title>D</void-dialog-title><void-dialog-body>x</void-dialog-body></void-dialog>');
     live.voidBeforeMorph(again);
     expect(again.hasAttribute('open')).toBe(false);
   });
@@ -464,11 +476,11 @@ describe('overlay open state (what the Livewire hook hands to the morph)', () =>
 
 describe('tabs under LiveView placeholders', () => {
   it('gives an unchanged panel sent as a data-phx-skip placeholder its generated id, paired by data-phx-id', async () => {
-    const tabs = await mount<Host>('<void-tabs><void-tab-panel tab="a" label="A" data-phx-id="m1">A</void-tab-panel><void-tab-panel tab="b" label="B" data-phx-id="m2">B</void-tab-panel></void-tabs>');
-    const live = Array.from(tabs.querySelectorAll('void-tab-panel')).map(p => p.id);
+    const tabs = await mount<Host>('<void-tabs><void-tabs-list><void-tabs-trigger value="a">A</void-tabs-trigger><void-tabs-trigger value="b">B</void-tabs-trigger></void-tabs-list><void-tabs-content value="a" data-phx-id="m1">A</void-tabs-content><void-tabs-content value="b" data-phx-id="m2">B</void-tabs-content></void-tabs>');
+    const live = Array.from(tabs.querySelectorAll('void-tabs-content')).map(p => p.id);
     expect(live.every(Boolean)).toBe(true);
-    const next = server('<void-tabs value="b"><void-tab-panel data-phx-skip data-phx-id="m1"></void-tab-panel><void-tab-panel tab="b" label="B" data-phx-id="m2">B!</void-tab-panel></void-tabs>');
+    const next = server('<void-tabs value="b"><void-tabs-list><void-tabs-trigger></void-tabs-trigger><void-tabs-trigger value="b">B</void-tabs-trigger></void-tabs-list><void-tabs-content data-phx-skip data-phx-id="m1"></void-tabs-content><void-tabs-content value="b" data-phx-id="m2">B!</void-tabs-content></void-tabs>');
     tabs.voidBeforeMorph(next);
-    expect(Array.from(next.querySelectorAll('void-tab-panel')).map(p => p.id)).toEqual(live);
+    expect(Array.from(next.querySelectorAll('void-tabs-content')).map(p => p.id)).toEqual(live);
   });
 });

@@ -74,59 +74,71 @@
     <meta name="turbo-cache-control" content="no-cache">
   <% end %>
   <% if @new_mode %>
-    <void-dialog id="resource-modal" open size="md" heading="New sample" data-close-href="<%= samples_path %>">
-      <%= render "form", sample: @sample %>
+    <void-dialog id="resource-modal" open size="md" data-close-href="<%= samples_path %>">
+      <void-dialog-title>New sample</void-dialog-title>
+      <void-dialog-body>
+        <%= render "form", sample: @sample %>
+      </void-dialog-body>
     </void-dialog>
   <% elsif @edit_mode %>
-    <void-dialog id="resource-modal" open size="md" heading="Edit sample" data-close-href="<%= url_for(@sample) %>">
-      <%= render "form", sample: @sample %>
+    <void-dialog id="resource-modal" open size="md" data-close-href="<%= url_for(@sample) %>">
+      <void-dialog-title>Edit sample</void-dialog-title>
+      <void-dialog-body>
+        <%= render "form", sample: @sample %>
+      </void-dialog-body>
     </void-dialog>
   <% else %>
-    <void-dialog id="resource-modal" open size="md" heading="<%= @sample.name.to_s %>" data-close-href="<%= samples_path %>">
-      <dl class="detail-grid">
-        <dt class="detail-label">Name</dt>
-        <dd class="detail-value"><%= @sample.name %></dd>
-        <dt class="detail-label">Description</dt>
-        <dd class="detail-value"><%= @sample.description %></dd>
-        <dt class="detail-label">Count</dt>
-        <dd class="detail-value-mono"><%= @sample.count %></dd>
-        <dt class="detail-label">Price</dt>
-        <dd class="detail-value-mono"><%= @sample.price %></dd>
-        <dt class="detail-label">Weight</dt>
-        <dd class="detail-value-mono"><%= @sample.weight %></dd>
-        <dt class="detail-label">Active</dt>
-        <dd class="detail-value">
-          <void-badge color="<%= @sample.active ? 'success' : 'default' %>" variant="outline"><%= @sample.active ? 'Yes' : 'No' %></void-badge>
-        </dd>
-        <dt class="detail-label">Published on</dt>
-        <dd class="detail-value"><%= @sample.published_on %></dd>
-        <dt class="detail-label">Scheduled at</dt>
-        <dd class="detail-value"><%= @sample.scheduled_at %></dd>
-        <dt class="detail-label">Opens at</dt>
-        <dd class="detail-value"><%= @sample.opens_at %></dd>
-        <dt class="detail-label">Category</dt>
-        <dd class="detail-value"><%= @sample.category_id %></dd>
-        <dt class="detail-label">Avatar</dt>
-        <dd class="detail-value"><%= link_to @sample.avatar.filename, @sample.avatar if @sample.avatar.attached? %></dd>
-        <dt class="detail-label">Gallery</dt>
-        <dd class="detail-value">
-          <% @sample.gallery.each do |gallery| %>
-            <div><%= link_to gallery.filename, gallery %></div>
-          <% end %>
-        </dd>
-      </dl>
-      <div class="modal-actions">
+    <void-dialog id="resource-modal" open size="md" data-close-href="<%= samples_path %>">
+      <void-dialog-title><%= @sample.name.to_s %></void-dialog-title>
+      <void-dialog-body>
+        <dl class="detail-grid">
+          <dt class="detail-label">Name</dt>
+          <dd class="detail-value"><%= @sample.name %></dd>
+          <dt class="detail-label">Description</dt>
+          <dd class="detail-value"><%= @sample.description %></dd>
+          <dt class="detail-label">Count</dt>
+          <dd class="detail-value-mono"><%= @sample.count %></dd>
+          <dt class="detail-label">Price</dt>
+          <dd class="detail-value-mono"><%= @sample.price %></dd>
+          <dt class="detail-label">Weight</dt>
+          <dd class="detail-value-mono"><%= @sample.weight %></dd>
+          <dt class="detail-label">Active</dt>
+          <dd class="detail-value">
+            <void-badge color="<%= @sample.active ? 'success' : 'default' %>" variant="outline"><%= @sample.active ? 'Yes' : 'No' %></void-badge>
+          </dd>
+          <dt class="detail-label">Published on</dt>
+          <dd class="detail-value"><%= @sample.published_on %></dd>
+          <dt class="detail-label">Scheduled at</dt>
+          <dd class="detail-value"><%= @sample.scheduled_at %></dd>
+          <dt class="detail-label">Opens at</dt>
+          <dd class="detail-value"><%= @sample.opens_at %></dd>
+          <dt class="detail-label">Category</dt>
+          <dd class="detail-value"><%= @sample.category_id %></dd>
+          <dt class="detail-label">Avatar</dt>
+          <dd class="detail-value"><%= link_to @sample.avatar.filename, @sample.avatar if @sample.avatar.attached? %></dd>
+          <dt class="detail-label">Gallery</dt>
+          <dd class="detail-value">
+            <% @sample.gallery.each do |gallery| %>
+              <div><%= link_to gallery.filename, gallery %></div>
+            <% end %>
+          </dd>
+        </dl>
+      </void-dialog-body>
+      <void-dialog-actions>
         <void-button variant="outline" size="sm"><a href="<%= edit_sample_path(@sample) %>">Edit</a></void-button>
         <void-button color="error" variant="outline" size="sm" data-open-dialog="resource-delete-dialog">Delete</void-button>
-      </div>
+      </void-dialog-actions>
     </void-dialog>
 
-    <void-dialog id="resource-delete-dialog" heading="Delete sample" size="sm">
-      <p class="danger-zone-description">Are you sure you want to delete this sample? This action cannot be undone.</p>
-      <div class="action-bar">
+    <void-dialog id="resource-delete-dialog" size="sm">
+      <void-dialog-title>Delete sample</void-dialog-title>
+      <void-dialog-body>
+        <p class="danger-zone-description">Are you sure you want to delete this sample? This action cannot be undone.</p>
+      </void-dialog-body>
+      <void-dialog-actions>
         <void-button variant="ghost" size="sm" data-close-dialog="resource-delete-dialog">Cancel</void-button>
         <void-button color="error" size="sm"><a href="<%= url_for(@sample) %>" data-turbo-method="delete">Delete</a></void-button>
-      </div>
+      </void-dialog-actions>
     </void-dialog>
   <% end %>
 <% end %>

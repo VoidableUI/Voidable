@@ -36,9 +36,14 @@ type Story = StoryObj;
 export const Default: Story = {
   render: (args) => html`
     <void-tabs value=${args.value || 'one'} size=${args.size || 'md'}>
-      <void-tab-panel tab="one" label="First">Content 1</void-tab-panel>
-      <void-tab-panel tab="two" label="Second">Content 2</void-tab-panel>
-      <void-tab-panel tab="three" label="Third">Content 3</void-tab-panel>
+      <void-tabs-list>
+        <void-tabs-trigger value="one">First</void-tabs-trigger>
+        <void-tabs-trigger value="two">Second</void-tabs-trigger>
+        <void-tabs-trigger value="three">Third</void-tabs-trigger>
+      </void-tabs-list>
+      <void-tabs-content value="one">Content 1</void-tabs-content>
+      <void-tabs-content value="two">Content 2</void-tabs-content>
+      <void-tabs-content value="three">Content 3</void-tabs-content>
     </void-tabs>
   `,
 };
@@ -47,16 +52,28 @@ export const Sizes: Story = {
   render: () => html`
     <div style="display: flex; flex-direction: column; gap: 2rem;">
       <void-tabs value="a" size="sm">
-        <void-tab-panel tab="a" label="Alpha">Small tab A</void-tab-panel>
-        <void-tab-panel tab="b" label="Beta">Small tab B</void-tab-panel>
+        <void-tabs-list>
+          <void-tabs-trigger value="a">Alpha</void-tabs-trigger>
+          <void-tabs-trigger value="b">Beta</void-tabs-trigger>
+        </void-tabs-list>
+        <void-tabs-content value="a">Small tab A</void-tabs-content>
+        <void-tabs-content value="b">Small tab B</void-tabs-content>
       </void-tabs>
       <void-tabs value="a" size="md">
-        <void-tab-panel tab="a" label="Alpha">Medium tab A</void-tab-panel>
-        <void-tab-panel tab="b" label="Beta">Medium tab B</void-tab-panel>
+        <void-tabs-list>
+          <void-tabs-trigger value="a">Alpha</void-tabs-trigger>
+          <void-tabs-trigger value="b">Beta</void-tabs-trigger>
+        </void-tabs-list>
+        <void-tabs-content value="a">Medium tab A</void-tabs-content>
+        <void-tabs-content value="b">Medium tab B</void-tabs-content>
       </void-tabs>
       <void-tabs value="a" size="lg">
-        <void-tab-panel tab="a" label="Alpha">Large tab A</void-tab-panel>
-        <void-tab-panel tab="b" label="Beta">Large tab B</void-tab-panel>
+        <void-tabs-list>
+          <void-tabs-trigger value="a">Alpha</void-tabs-trigger>
+          <void-tabs-trigger value="b">Beta</void-tabs-trigger>
+        </void-tabs-list>
+        <void-tabs-content value="a">Large tab A</void-tabs-content>
+        <void-tabs-content value="b">Large tab B</void-tabs-content>
       </void-tabs>
     </div>
   `,
@@ -65,15 +82,20 @@ export const Sizes: Story = {
 export const WithRichContent: Story = {
   render: () => html`
     <void-tabs value="overview">
-      <void-tab-panel tab="overview" label="Overview">
+      <void-tabs-list>
+        <void-tabs-trigger value="overview">Overview</void-tabs-trigger>
+        <void-tabs-trigger value="api">API</void-tabs-trigger>
+        <void-tabs-trigger value="examples">Examples</void-tabs-trigger>
+      </void-tabs-list>
+      <void-tabs-content value="overview">
         <p>This is the overview panel with some content about the component.</p>
-      </void-tab-panel>
-      <void-tab-panel tab="api" label="API">
+      </void-tabs-content>
+      <void-tabs-content value="api">
         <p>API reference documentation goes here.</p>
-      </void-tab-panel>
-      <void-tab-panel tab="examples" label="Examples">
+      </void-tabs-content>
+      <void-tabs-content value="examples">
         <p>Code examples and usage patterns are shown here.</p>
-      </void-tab-panel>
+      </void-tabs-content>
     </void-tabs>
   `,
 };
@@ -81,8 +103,12 @@ export const WithRichContent: Story = {
 export const FallbackLabel: Story = {
   render: () => html`
     <void-tabs value="tab-one">
-      <void-tab-panel tab="tab-one">Tab one content (label falls back to tab id)</void-tab-panel>
-      <void-tab-panel tab="tab-two">Tab two content</void-tab-panel>
+      <void-tabs-list>
+        <void-tabs-trigger value="tab-one">tab-one</void-tabs-trigger>
+        <void-tabs-trigger value="tab-two">tab-two</void-tabs-trigger>
+      </void-tabs-list>
+      <void-tabs-content value="tab-one">Tab one content (label falls back to tab id)</void-tabs-content>
+      <void-tabs-content value="tab-two">Tab two content</void-tabs-content>
     </void-tabs>
   `,
 };
@@ -90,9 +116,14 @@ export const FallbackLabel: Story = {
 export const AutomaticActivation: Story = {
   render: () => html`
     <void-tabs value="one" activation="auto">
-      <void-tab-panel tab="one" label="First">Arrow keys select the focused tab.</void-tab-panel>
-      <void-tab-panel tab="two" label="Second">Content 2</void-tab-panel>
-      <void-tab-panel tab="three" label="Third">Content 3</void-tab-panel>
+      <void-tabs-list>
+        <void-tabs-trigger value="one">First</void-tabs-trigger>
+        <void-tabs-trigger value="two">Second</void-tabs-trigger>
+        <void-tabs-trigger value="three">Third</void-tabs-trigger>
+      </void-tabs-list>
+      <void-tabs-content value="one">Arrow keys select the focused tab.</void-tabs-content>
+      <void-tabs-content value="two">Content 2</void-tabs-content>
+      <void-tabs-content value="three">Content 3</void-tabs-content>
     </void-tabs>
   `,
 };
@@ -100,9 +131,14 @@ export const AutomaticActivation: Story = {
 export const DisabledTab: Story = {
   render: () => html`
     <void-tabs value="one">
-      <void-tab-panel tab="one" label="First">Content 1</void-tab-panel>
-      <void-tab-panel tab="two" label="Second" disabled>Content 2</void-tab-panel>
-      <void-tab-panel tab="three" label="Third">Content 3</void-tab-panel>
+      <void-tabs-list>
+        <void-tabs-trigger value="one">First</void-tabs-trigger>
+        <void-tabs-trigger value="two" disabled>Second</void-tabs-trigger>
+        <void-tabs-trigger value="three">Third</void-tabs-trigger>
+      </void-tabs-list>
+      <void-tabs-content value="one">Content 1</void-tabs-content>
+      <void-tabs-content value="two">Content 2</void-tabs-content>
+      <void-tabs-content value="three">Content 3</void-tabs-content>
     </void-tabs>
   `,
 };

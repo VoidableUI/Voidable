@@ -365,7 +365,7 @@ import iconLogout from '@tabler/icons/outline/logout.svg?raw';
         margin-left: auto;
       }
 
-      #settings-popover :global(.void-popover-body) {
+      #settings-popover :global(void-popover-content) {
         right: 0;
         left: auto;
       }
@@ -853,19 +853,21 @@ import iconLogout from '@tabler/icons/outline/logout.svg?raw';
       <void-sidebar width="220px" collapsed-width="52px" style="--void-sidebar-width: 220px;">
         <div class="sidebar-header">
           <void-dropdown-menu style="width: 100%;">
-            <div class="sidebar-project">
+            <void-dropdown-menu-trigger><div class="sidebar-project">
               <div class="sidebar-project-icon">V</div>
               <div class="sidebar-project-info">
                 <span class="sidebar-project-name">Voidable Cloud</span>
                 <span class="sidebar-project-env">production</span>
               </div>
               <span class="sidebar-chevron" set:html={iconChevronDown} />
-            </div>
-            <void-dropdown-menu-item class="project-item-active">&#x2713;&ensp;Voidable Cloud</void-dropdown-menu-item>
-            <void-dropdown-menu-item>Voidable Staging</void-dropdown-menu-item>
-            <void-dropdown-menu-item>Personal Sandbox</void-dropdown-menu-item>
-            <hr class="project-dropdown-sep">
-            <void-dropdown-menu-item>Create New Project</void-dropdown-menu-item>
+            </div></void-dropdown-menu-trigger>
+            <void-dropdown-menu-content>
+              <void-dropdown-menu-item class="project-item-active">&#x2713;&ensp;Voidable Cloud</void-dropdown-menu-item>
+              <void-dropdown-menu-item>Voidable Staging</void-dropdown-menu-item>
+              <void-dropdown-menu-item>Personal Sandbox</void-dropdown-menu-item>
+              <hr class="project-dropdown-sep">
+              <void-dropdown-menu-item>Create New Project</void-dropdown-menu-item>
+            </void-dropdown-menu-content>
           </void-dropdown-menu>
         </div>
 
@@ -913,22 +915,24 @@ import iconLogout from '@tabler/icons/outline/logout.svg?raw';
             <span class="sidebar-user-role">Admin</span>
           </div>
           <void-popover position="top" id="settings-popover">
-            <button class="sidebar-settings-btn" aria-label="Settings">
+            <void-popover-trigger><button class="sidebar-settings-btn" aria-label="Settings">
               <span class="sidebar-nav-icon" set:html={iconSettings} />
-            </button>
-            <div class="settings-menu">
-              <label class="settings-menu-item">
-                <span class="settings-menu-icon settings-theme-moon" set:html={iconMoon} />
-                <span class="settings-menu-icon settings-theme-sun" set:html={iconSun} />
-                <span class="settings-theme-dark">Dark Mode</span>
-                <span class="settings-theme-light">Light Mode</span>
-                <void-switch id="theme-switch" size="sm"></void-switch>
-              </label>
-              <button class="settings-menu-item settings-sign-out" type="button">
-                <span class="settings-menu-icon" set:html={iconLogout} />
-                <span>Sign Out</span>
-              </button>
-            </div>
+            </button></void-popover-trigger>
+            <void-popover-content>
+              <div class="settings-menu">
+                <label class="settings-menu-item">
+                  <span class="settings-menu-icon settings-theme-moon" set:html={iconMoon} />
+                  <span class="settings-menu-icon settings-theme-sun" set:html={iconSun} />
+                  <span class="settings-theme-dark">Dark Mode</span>
+                  <span class="settings-theme-light">Light Mode</span>
+                  <void-switch id="theme-switch" size="sm"></void-switch>
+                </label>
+                <button class="settings-menu-item settings-sign-out" type="button">
+                  <span class="settings-menu-icon" set:html={iconLogout} />
+                  <span>Sign Out</span>
+                </button>
+              </div>
+            </void-popover-content>
           </void-popover>
         </div>
       </void-sidebar>
@@ -962,14 +966,16 @@ import iconLogout from '@tabler/icons/outline/logout.svg?raw';
             </void-indicator>
 
             <void-dropdown-menu align="end">
-              <void-button variant="outline" size="md">
+              <void-dropdown-menu-trigger><void-button variant="outline" size="md">
                 Actions
                 <span class="icon-inline icon-chevron" set:html={iconChevronDown} />
-              </void-button>
-              <void-dropdown-menu-item>Export CSV</void-dropdown-menu-item>
-              <void-dropdown-menu-item>Share Link</void-dropdown-menu-item>
-              <void-dropdown-menu-item>Refresh Data</void-dropdown-menu-item>
-              <void-dropdown-menu-item destructive>Delete Report</void-dropdown-menu-item>
+              </void-button></void-dropdown-menu-trigger>
+              <void-dropdown-menu-content>
+                <void-dropdown-menu-item>Export CSV</void-dropdown-menu-item>
+                <void-dropdown-menu-item>Share Link</void-dropdown-menu-item>
+                <void-dropdown-menu-item>Refresh Data</void-dropdown-menu-item>
+                <void-dropdown-menu-item destructive>Delete Report</void-dropdown-menu-item>
+              </void-dropdown-menu-content>
             </void-dropdown-menu>
           </div>
         </header>
@@ -1017,43 +1023,45 @@ import iconLogout from '@tabler/icons/outline/logout.svg?raw';
             <void-toggle variant="outline" size="sm">P50</void-toggle>
             <div class="toolbar-spacer"></div>
             <void-popover position="bottom">
-              <void-button variant="outline" size="md">
+              <void-popover-trigger><void-button variant="outline" size="md">
                 <span class="icon-inline" set:html={iconFilter} />
                 Filter
-              </void-button>
-              <div class="filter-popover">
-                <div class="filter-section">
-                  <span class="filter-label">Status Code</span>
-                  <void-checkbox-group>
-                    <void-checkbox value="2xx" checked>2xx Success</void-checkbox>
-                    <void-checkbox value="3xx" checked>3xx Redirect</void-checkbox>
-                    <void-checkbox value="4xx" checked>4xx Client Error</void-checkbox>
-                    <void-checkbox value="5xx" checked>5xx Server Error</void-checkbox>
-                  </void-checkbox-group>
+              </void-button></void-popover-trigger>
+              <void-popover-content>
+                <div class="filter-popover">
+                  <div class="filter-section">
+                    <span class="filter-label">Status Code</span>
+                    <void-checkbox-group>
+                      <void-checkbox value="2xx" checked>2xx Success</void-checkbox>
+                      <void-checkbox value="3xx" checked>3xx Redirect</void-checkbox>
+                      <void-checkbox value="4xx" checked>4xx Client Error</void-checkbox>
+                      <void-checkbox value="5xx" checked>5xx Server Error</void-checkbox>
+                    </void-checkbox-group>
+                  </div>
+                  <div class="filter-section">
+                    <span class="filter-label">Method</span>
+                    <void-checkbox-group>
+                      <void-checkbox value="GET" checked>GET</void-checkbox>
+                      <void-checkbox value="POST" checked>POST</void-checkbox>
+                      <void-checkbox value="PATCH">PATCH</void-checkbox>
+                      <void-checkbox value="DELETE">DELETE</void-checkbox>
+                    </void-checkbox-group>
+                  </div>
+                  <div class="filter-section">
+                    <span class="filter-label">Latency</span>
+                    <void-select size="sm">
+                      <option value="all">All</option>
+                      <option value="fast">&lt; 50ms</option>
+                      <option value="moderate">50–200ms</option>
+                      <option value="slow">&gt; 200ms</option>
+                    </void-select>
+                  </div>
+                  <div class="filter-actions">
+                    <void-button variant="ghost" size="sm">Reset</void-button>
+                    <void-button variant="filled" size="sm">Apply</void-button>
+                  </div>
                 </div>
-                <div class="filter-section">
-                  <span class="filter-label">Method</span>
-                  <void-checkbox-group>
-                    <void-checkbox value="GET" checked>GET</void-checkbox>
-                    <void-checkbox value="POST" checked>POST</void-checkbox>
-                    <void-checkbox value="PATCH">PATCH</void-checkbox>
-                    <void-checkbox value="DELETE">DELETE</void-checkbox>
-                  </void-checkbox-group>
-                </div>
-                <div class="filter-section">
-                  <span class="filter-label">Latency</span>
-                  <void-select size="sm">
-                    <option value="all">All</option>
-                    <option value="fast">&lt; 50ms</option>
-                    <option value="moderate">50–200ms</option>
-                    <option value="slow">&gt; 200ms</option>
-                  </void-select>
-                </div>
-                <div class="filter-actions">
-                  <void-button variant="ghost" size="sm">Reset</void-button>
-                  <void-button variant="filled" size="sm">Apply</void-button>
-                </div>
-              </div>
+              </void-popover-content>
             </void-popover>
           </div>
 
@@ -1262,7 +1270,7 @@ import iconLogout from '@tabler/icons/outline/logout.svg?raw';
 
     <!-- Override theme popover positioning (must come after Vite-injected theme CSS) -->
     <style is:global>
-      .toolbar-row void-popover[position="bottom"] .void-popover-body {
+      .toolbar-row void-popover[position="bottom"] void-popover-content {
         left: auto !important;
         right: 0;
       }

@@ -31,7 +31,10 @@ describe.each(['void-dialog', 'void-drawer'])('%s closable attribute', (tag) => 
     await el.updateComplete;
     return el;
   }
-  const closeButton = (el: Element) => el.querySelector('.void-dialog-close, .void-drawer-close');
+  const closeButton = (el: Element) => {
+    const b = el.shadowRoot?.querySelector<HTMLElement>('[part="close"]');
+    return b && !b.hidden ? b : null;
+  };
 
   it('closable="false" in markup turns it off', async () => {
     const el = await mount(`<${tag} open closable="false"></${tag}>`);

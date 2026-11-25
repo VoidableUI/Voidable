@@ -35,13 +35,20 @@ void-card[variant="outlined"] {
   border: 1px solid var(--void-color-border);
 }
 
-.void-card-header {
+/* Parts (CSS-only): header (title, description, anything at its far end),
+   body, footer. The card renders nothing itself. */
+void-card-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: var(--void-space-3);
+  row-gap: var(--void-space-1);
   border-radius: var(--void-card-inner-radius) var(--void-card-inner-radius) 0 0;
   padding: var(--void-space-3) var(--void-card-padding);
   border-bottom: 1px solid var(--void-color-border);
 }
 
-.void-card-heading {
+void-card-title {
   font-family: var(--void-type-heading-family);
   font-size: var(--void-type-body-size);
   line-height: var(--void-type-heading-leading);
@@ -50,28 +57,54 @@ void-card[variant="outlined"] {
   color: var(--void-type-heading-color);
 }
 
-.void-card-body {
-  padding: var(--void-card-padding);
-  border-radius: 0 0 var(--void-card-inner-radius) var(--void-card-inner-radius);
+/* Whatever follows the title and description (a badge, void-actions) sits at the far end. */
+void-card-header > :not(void-card-title, void-card-description):first-of-type {
+  margin-inline-start: auto;
 }
 
-/* Without a header the body is also the top of the card. */
-void-card > .void-card-body:first-child {
-  border-radius: var(--void-card-inner-radius);
+void-card-description {
+  flex-basis: 100%;
+  font-size: var(--void-type-caption-size);
+  color: var(--void-color-text-secondary);
+}
+
+void-card-body {
+  display: block;
+  padding: var(--void-card-padding);
+}
+
+void-card-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--void-space-2);
+  padding: var(--void-space-3) var(--void-card-padding);
+  border-top: 1px solid var(--void-color-border);
+}
+
+/* The first part takes the top corners, the last the bottom ones. */
+void-card > :first-child {
+  border-top-left-radius: var(--void-card-inner-radius);
+  border-top-right-radius: var(--void-card-inner-radius);
+}
+
+void-card > :last-child {
+  border-bottom-left-radius: var(--void-card-inner-radius);
+  border-bottom-right-radius: var(--void-card-inner-radius);
 }
 
 /* Edge-to-edge media: the first and last child follow the body's corners. */
-void-card[padding="none"] .void-card-body > :first-child {
+void-card[padding="none"] > void-card-body > :first-child {
   border-top-left-radius: inherit;
   border-top-right-radius: inherit;
 }
 
-void-card[padding="none"] .void-card-body > :last-child {
+void-card[padding="none"] > void-card-body > :last-child {
   border-bottom-left-radius: inherit;
   border-bottom-right-radius: inherit;
 }
 
-void-card[padding="none"] .void-card-body {
+void-card[padding="none"] > void-card-body {
   padding: 0;
 }
 

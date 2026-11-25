@@ -77,13 +77,13 @@ describe('VoidTurbo.start', () => {
   });
 
   it('returns a stop function that detaches the listener', async () => {
-    const dialog = await mount('<void-dialog></void-dialog>');
+    const dialog = await mount('<void-dialog><void-dialog-title>T</void-dialog-title></void-dialog>');
     stop = VoidTurbo.start();
     stop();
     stop = undefined;
     dialog.open = true;
     await settle();
-    await morph(dialog, '<void-dialog></void-dialog>');
+    await morph(dialog, '<void-dialog><void-dialog-title>T</void-dialog-title></void-dialog>');
     expect(dialog.open).toBe(false);
   });
 
@@ -109,27 +109,27 @@ describe('VoidTurbo.start', () => {
   });
 
   it('keeps the client value when the server value is unchanged', async () => {
-    const dialog = await mount('<void-dialog></void-dialog>');
+    const dialog = await mount('<void-dialog><void-dialog-title>T</void-dialog-title></void-dialog>');
     stop = VoidTurbo.start();
     dialog.open = true;
     await settle();
-    await morph(dialog, '<void-dialog></void-dialog>');
+    await morph(dialog, '<void-dialog><void-dialog-title>T</void-dialog-title></void-dialog>');
     expect(dialog.open).toBe(true);
   });
 
   it('lets the server win when the server value changed, and tracks it across morphs', async () => {
-    const dialog = await mount('<void-dialog></void-dialog>');
+    const dialog = await mount('<void-dialog><void-dialog-title>T</void-dialog-title></void-dialog>');
     stop = VoidTurbo.start();
-    await morph(dialog, '<void-dialog open></void-dialog>');
+    await morph(dialog, '<void-dialog open><void-dialog-title>T</void-dialog-title></void-dialog>');
     expect(dialog.open).toBe(true);
     dialog.open = false; // the user closes it
     await settle();
-    await morph(dialog, '<void-dialog open></void-dialog>');
+    await morph(dialog, '<void-dialog open><void-dialog-title>T</void-dialog-title></void-dialog>');
     expect(dialog.open).toBe(false);
-    await morph(dialog, '<void-dialog></void-dialog>');
+    await morph(dialog, '<void-dialog><void-dialog-title>T</void-dialog-title></void-dialog>');
     dialog.open = true;
     await settle();
-    await morph(dialog, '<void-dialog></void-dialog>');
+    await morph(dialog, '<void-dialog><void-dialog-title>T</void-dialog-title></void-dialog>');
     expect(dialog.open).toBe(true);
   });
 

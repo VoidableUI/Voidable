@@ -292,25 +292,30 @@ defmodule DemoWeb.StaticShowcases do
       <h3>Default</h3>
       <p>A hover-triggered tooltip for supplemental information.</p>
       <div class="showcase-row">
-        <VoidableUI.Components.tooltip text="Hello, tooltip!" position="top">
-          <button style="padding: 0.5rem 1rem; cursor: pointer;">Hover me</button>
+        <VoidableUI.Components.tooltip position="top">
+          <void-tooltip-trigger><button style="padding: 0.5rem 1rem; cursor: pointer;">Hover me</button></void-tooltip-trigger>
+          <void-tooltip-content>Hello, tooltip!</void-tooltip-content>
         </VoidableUI.Components.tooltip>
       </div>
     </div>
     <div class="showcase-section">
       <h3>Positions</h3>
       <div class="showcase-row" style="padding: 3rem; gap: 4rem;">
-        <VoidableUI.Components.tooltip text="Top tooltip" position="top">
-          <button style="padding: 0.5rem 1rem; cursor: pointer;">Top</button>
+        <VoidableUI.Components.tooltip position="top">
+          <void-tooltip-trigger><button style="padding: 0.5rem 1rem; cursor: pointer;">Top</button></void-tooltip-trigger>
+          <void-tooltip-content>Top tooltip</void-tooltip-content>
         </VoidableUI.Components.tooltip>
-        <VoidableUI.Components.tooltip text="Bottom tooltip" position="bottom">
-          <button style="padding: 0.5rem 1rem; cursor: pointer;">Bottom</button>
+        <VoidableUI.Components.tooltip position="bottom">
+          <void-tooltip-trigger><button style="padding: 0.5rem 1rem; cursor: pointer;">Bottom</button></void-tooltip-trigger>
+          <void-tooltip-content>Bottom tooltip</void-tooltip-content>
         </VoidableUI.Components.tooltip>
-        <VoidableUI.Components.tooltip text="Left tooltip" position="left">
-          <button style="padding: 0.5rem 1rem; cursor: pointer;">Left</button>
+        <VoidableUI.Components.tooltip position="left">
+          <void-tooltip-trigger><button style="padding: 0.5rem 1rem; cursor: pointer;">Left</button></void-tooltip-trigger>
+          <void-tooltip-content>Left tooltip</void-tooltip-content>
         </VoidableUI.Components.tooltip>
-        <VoidableUI.Components.tooltip text="Right tooltip" position="right">
-          <button style="padding: 0.5rem 1rem; cursor: pointer;">Right</button>
+        <VoidableUI.Components.tooltip position="right">
+          <void-tooltip-trigger><button style="padding: 0.5rem 1rem; cursor: pointer;">Right</button></void-tooltip-trigger>
+          <void-tooltip-content>Right tooltip</void-tooltip-content>
         </VoidableUI.Components.tooltip>
       </div>
     </div>
@@ -318,8 +323,9 @@ defmodule DemoWeb.StaticShowcases do
       <h3>On Text</h3>
       <p style="font-size: 1rem;">
         Hover over
-        <VoidableUI.Components.tooltip text="This is an explanation">
-          <span style="text-decoration: underline dotted; cursor: help;">this term</span>
+        <VoidableUI.Components.tooltip>
+          <void-tooltip-trigger><span style="text-decoration: underline dotted; cursor: help;">this term</span></void-tooltip-trigger>
+          <void-tooltip-content>This is an explanation</void-tooltip-content>
         </VoidableUI.Components.tooltip>
         for details.
       </p>
@@ -427,14 +433,23 @@ defmodule DemoWeb.StaticShowcases do
       <h3>Default</h3>
       <p>Collapsible sections for organizing content. Only one section open at a time by default.</p>
       <VoidableUI.Components.accordion>
-        <VoidableUI.Components.accordion_item heading="Section 1" open>
-          Content for section 1. This section starts open.
+        <VoidableUI.Components.accordion_item open>
+          <void-accordion-trigger>Section 1</void-accordion-trigger>
+          <void-accordion-content>
+            Content for section 1. This section starts open.
+          </void-accordion-content>
         </VoidableUI.Components.accordion_item>
-        <VoidableUI.Components.accordion_item heading="Section 2">
-          Content for section 2.
+        <VoidableUI.Components.accordion_item>
+          <void-accordion-trigger>Section 2</void-accordion-trigger>
+          <void-accordion-content>
+            Content for section 2.
+          </void-accordion-content>
         </VoidableUI.Components.accordion_item>
-        <VoidableUI.Components.accordion_item heading="Section 3">
-          Content for section 3.
+        <VoidableUI.Components.accordion_item>
+          <void-accordion-trigger>Section 3</void-accordion-trigger>
+          <void-accordion-content>
+            Content for section 3.
+          </void-accordion-content>
         </VoidableUI.Components.accordion_item>
       </VoidableUI.Components.accordion>
     </div>
@@ -442,14 +457,23 @@ defmodule DemoWeb.StaticShowcases do
       <h3>Multiple</h3>
       <p>With the multiple attribute, more than one section can be open simultaneously.</p>
       <VoidableUI.Components.accordion multiple>
-        <VoidableUI.Components.accordion_item heading="Section 1" open>
-          Content for section 1. Multiple sections can be open at once.
+        <VoidableUI.Components.accordion_item open>
+          <void-accordion-trigger>Section 1</void-accordion-trigger>
+          <void-accordion-content>
+            Content for section 1. Multiple sections can be open at once.
+          </void-accordion-content>
         </VoidableUI.Components.accordion_item>
-        <VoidableUI.Components.accordion_item heading="Section 2" open>
-          Content for section 2. This is also open simultaneously.
+        <VoidableUI.Components.accordion_item open>
+          <void-accordion-trigger>Section 2</void-accordion-trigger>
+          <void-accordion-content>
+            Content for section 2. This is also open simultaneously.
+          </void-accordion-content>
         </VoidableUI.Components.accordion_item>
-        <VoidableUI.Components.accordion_item heading="Section 3">
-          Content for section 3.
+        <VoidableUI.Components.accordion_item>
+          <void-accordion-trigger>Section 3</void-accordion-trigger>
+          <void-accordion-content>
+            Content for section 3.
+          </void-accordion-content>
         </VoidableUI.Components.accordion_item>
       </VoidableUI.Components.accordion>
     </div>
@@ -545,41 +569,78 @@ defmodule DemoWeb.StaticShowcases do
       <h3>Default</h3>
       <p>A card container for presenting grouped content.</p>
       <VoidableUI.Components.card>
-        This is a default card. Use it to present self-contained pieces of content such as summaries, previews, or calls to action.
+        <void-card-body>
+          This is a default card. Use it to present self-contained pieces of content such as summaries, previews, or calls to action.
+        </void-card-body>
       </VoidableUI.Components.card>
     </div>
     <div class="showcase-section">
       <h3>With Heading</h3>
-      <VoidableUI.Components.card heading="Project Overview">
-        Track milestones, manage contributors, and review progress across all active workstreams.
+      <VoidableUI.Components.card>
+        <void-card-header>
+          <void-card-title>Project Overview</void-card-title>
+        </void-card-header>
+        <void-card-body>
+          Track milestones, manage contributors, and review progress across all active workstreams.
+        </void-card-body>
       </VoidableUI.Components.card>
     </div>
     <div class="showcase-section">
       <h3>Elevated</h3>
-      <VoidableUI.Components.card heading="Weekly Summary" variant="elevated">
-        You completed 12 tasks this week, a 20% increase from last week.
+      <VoidableUI.Components.card variant="elevated">
+        <void-card-header>
+          <void-card-title>Weekly Summary</void-card-title>
+        </void-card-header>
+        <void-card-body>
+          You completed 12 tasks this week, a 20% increase from last week.
+        </void-card-body>
       </VoidableUI.Components.card>
     </div>
     <div class="showcase-section">
       <h3>Outlined</h3>
-      <VoidableUI.Components.card heading="Integration Status" variant="outlined">
-        All connected services are operating normally.
+      <VoidableUI.Components.card variant="outlined">
+        <void-card-header>
+          <void-card-title>Integration Status</void-card-title>
+        </void-card-header>
+        <void-card-body>
+          All connected services are operating normally.
+        </void-card-body>
       </VoidableUI.Components.card>
     </div>
     <div class="showcase-section">
       <h3>Padding</h3>
       <div class="showcase-row">
-        <VoidableUI.Components.card padding="none" heading="No Padding">
-          Content sits flush against the card edges.
+        <VoidableUI.Components.card padding="none">
+          <void-card-header>
+            <void-card-title>No Padding</void-card-title>
+          </void-card-header>
+          <void-card-body>
+            Content sits flush against the card edges.
+          </void-card-body>
         </VoidableUI.Components.card>
-        <VoidableUI.Components.card padding="sm" heading="Small Padding">
-          Compact spacing for dense layouts.
+        <VoidableUI.Components.card padding="sm">
+          <void-card-header>
+            <void-card-title>Small Padding</void-card-title>
+          </void-card-header>
+          <void-card-body>
+            Compact spacing for dense layouts.
+          </void-card-body>
         </VoidableUI.Components.card>
-        <VoidableUI.Components.card heading="Medium Padding">
-          Balanced spacing suitable for most use cases.
+        <VoidableUI.Components.card>
+          <void-card-header>
+            <void-card-title>Medium Padding</void-card-title>
+          </void-card-header>
+          <void-card-body>
+            Balanced spacing suitable for most use cases.
+          </void-card-body>
         </VoidableUI.Components.card>
-        <VoidableUI.Components.card padding="lg" heading="Large Padding">
-          Generous spacing for featured content.
+        <VoidableUI.Components.card padding="lg">
+          <void-card-header>
+            <void-card-title>Large Padding</void-card-title>
+          </void-card-header>
+          <void-card-body>
+            Generous spacing for featured content.
+          </void-card-body>
         </VoidableUI.Components.card>
       </div>
     </div>
@@ -826,30 +887,6 @@ defmodule DemoWeb.StaticShowcases do
         <VoidableUI.Components.option value="b" selected>Option B (selected)</VoidableUI.Components.option>
         <VoidableUI.Components.option value="c">Option C</VoidableUI.Components.option>
       </div>
-    </div>
-    """
-  end
-
-  # ---------------------------------------------------------------------------
-  # TabPanel
-  # ---------------------------------------------------------------------------
-
-  def tab_panel(assigns) do
-    ~H"""
-    <div class="showcase-section">
-      <h3>Default</h3>
-      <p>Tab panels used inside a tabs container for switching between views.</p>
-      <VoidableUI.Components.tabs value="tab1">
-        <VoidableUI.Components.tab_panel tab="tab1" label="First">
-          Content of the first tab panel.
-        </VoidableUI.Components.tab_panel>
-        <VoidableUI.Components.tab_panel tab="tab2" label="Second">
-          Content of the second tab panel.
-        </VoidableUI.Components.tab_panel>
-        <VoidableUI.Components.tab_panel tab="tab3" label="Third">
-          Content of the third tab panel.
-        </VoidableUI.Components.tab_panel>
-      </VoidableUI.Components.tabs>
     </div>
     """
   end

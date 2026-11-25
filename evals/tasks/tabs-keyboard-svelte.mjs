@@ -5,7 +5,7 @@ export default {
   id: 'tabs-keyboard-svelte',
   title: 'Tabs with forms, keyboard operable',
   format: 'svelte',
-  components: ['void-tabs', 'void-tab-panel', 'void-field', 'void-input', 'void-switch'],
+  components: ['void-tabs', 'void-field', 'void-input', 'void-switch'],
   prompt: `Account page with three tabs: "Profile" (a "Name" field), "Billing" (the text "Plan: Pro, renews Dec 1, 2026") and "Security" (a "Two-factor authentication" switch). Profile is selected first. Switching tabs must keep what the user typed, and the tabs must work with the keyboard (arrow keys move between them).`,
   checks: [
     {

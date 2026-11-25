@@ -69,8 +69,8 @@ test.describe('Turbo Drive', () => {
     await page.keyboard.press('Escape');
     await page.click('#a-open-dialog');
     await expect(page.getByRole('dialog', { name: 'A dialog' })).toBeVisible();
-    await page.locator('#a-dialog .void-dialog-close').click();
-    await expect(page.locator('#a-dialog .void-dialog-panel')).toBeHidden();
+    await page.locator('#a-dialog [part="close"]').click();
+    await expect(page.locator('#a-dialog [part="surface"]')).toBeHidden();
 
     await page.goForward();
     await expect(page.locator('#lab-page')).toHaveText('Turbo lab, page two');
@@ -113,13 +113,13 @@ test.describe('Turbo Drive', () => {
 
   test('a cached preview does not leave a dialog open that the user closed before leaving', async ({ page }) => {
     await page.click('#a-open-dialog');
-    await page.locator('#a-dialog .void-dialog-close').click();
+    await page.locator('#a-dialog [part="close"]').click();
     await page.click('#to-two');
     await expect(page.locator('#lab-page')).toHaveText('Turbo lab, page two');
     await page.goBack();
     await expect(page.locator('#lab-page')).toHaveText('Turbo lab, page one');
     await settle(page);
-    await expect(page.locator('#a-dialog .void-dialog-panel')).toBeHidden();
+    await expect(page.locator('#a-dialog [part="surface"]')).toBeHidden();
   });
 
   test('a full page load of the second page (Turbo off for the link) renders the same components', async ({ page }) => {

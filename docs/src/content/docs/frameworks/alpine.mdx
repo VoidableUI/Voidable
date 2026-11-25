@@ -90,7 +90,10 @@ To leave a subtree completely alone, add `wire:ignore` (or the `x-void-preserve`
 <div wire:ignore>…</div>
 
 <void-dialog x-void-preserve>
-  <p>Livewire never touches this dialog or its content.</p>
+  <void-dialog-title>Client-owned</void-dialog-title>
+  <void-dialog-body>
+    <p>Livewire never touches this dialog or its content.</p>
+  </void-dialog-body>
 </void-dialog>
 ```
 

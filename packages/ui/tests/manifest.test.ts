@@ -81,11 +81,18 @@ function evaluateDefault(text: string): { ok: true; value: unknown } | { ok: fal
 /** Dispatched `void-*` event names per class, read from source (runtime cannot list them). */
 function sourceEvents(): Map<string, Set<string>> {
   const out = new Map<string, Set<string>>();
+  const bases = new Map<string, string>();
   const dir = resolve(root, 'src/components');
-  for (const file of readdirSync(dir).filter((f) => f.endsWith('.ts'))) {
-    const sf = ts.createSourceFile(file, readFileSync(resolve(dir, file), 'utf8'), ts.ScriptTarget.Latest, true);
+  // Shared bases outside components/ (modal.ts: dialog and drawer).
+  const files = [...readdirSync(dir).filter((f) => f.endsWith('.ts')).map((f) => resolve(dir, f)), resolve(root, 'src/modal.ts')];
+  for (const path of files) {
+    const sf = ts.createSourceFile(path, readFileSync(path, 'utf8'), ts.ScriptTarget.Latest, true);
     const visit = (node: ts.Node, cls: string | null) => {
       const name = ts.isClassDeclaration(node) && node.name ? node.name.text : cls;
+      if (ts.isClassDeclaration(node) && node.name) {
+        const base = node.heritageClauses?.[0]?.types[0]?.expression.getText();
+        if (base) bases.set(node.name.text, base);
+      }
       if (
         name &&
         ts.isNewExpression(node) &&
@@ -104,6 +111,15 @@ function sourceEvents(): Map<string, Set<string>> {
       ts.forEachChild(node, (child) => visit(child, name));
     };
     visit(sf, null);
+  }
+  // Events a base class dispatches are dispatched by its subclasses.
+  for (const [cls, base] of bases) {
+    for (let b: string | undefined = base; b; b = bases.get(b)) {
+      for (const e of out.get(b) ?? []) {
+        if (!out.has(cls)) out.set(cls, new Set());
+        out.get(cls)!.add(e);
+      }
+    }
   }
   return out;
 }
@@ -141,17 +157,16 @@ describe('custom-elements.json', () => {
     expect(declared.length).toBe(byTag.size); // no duplicate tags
   });
 
-  it('documents slot="trigger" on every component with a projected trigger', () => {
-    const dir = resolve(root, 'src/components');
-    const withTrigger = readdirSync(dir)
-      .filter((f) => f.endsWith('.ts'))
-      .filter((f) => /triggerRegion\(\s*'trigger'/.test(readFileSync(resolve(dir, f), 'utf8')))
-      .map((f) => `void-${f.replace(/\.ts$/, '')}`)
-      .sort();
-    expect(withTrigger).toEqual(['void-dropdown-menu', 'void-hover-card', 'void-popover']);
-    for (const tag of withTrigger) {
-      const slots = (byTag.get(tag)?.decl as { slots?: { name: string }[] } | undefined)?.slots ?? [];
-      expect(slots.map((s) => s.name).sort(), tag).toEqual(['', 'trigger']);
+  it('describes the explicit parts of every component that has them, and no slots for those (#52)', () => {
+    const withParts = declared.filter(({ decl }) => (decl as { voidParts?: unknown }).voidParts).map(({ decl }) => decl.tagName!).sort();
+    expect(withParts).toEqual(
+      ['void-accordion', 'void-alert', 'void-card', 'void-dialog', 'void-drawer', 'void-dropdown-menu', 'void-hover-card', 'void-popover', 'void-tabs', 'void-tooltip'].sort(),
+    );
+    for (const tag of withParts) {
+      const decl = byTag.get(tag)!.decl as { slots?: unknown[]; voidParts: { parts: { tag: string }[] } };
+      expect(decl.slots ?? [], tag).toEqual([]);
+      expect(decl.voidParts.parts.length, tag).toBeGreaterThan(0);
+      for (const part of decl.voidParts.parts) expect(part.tag.startsWith(`${tag}-`) || part.tag.startsWith('void-'), part.tag).toBe(true);
     }
   });
 

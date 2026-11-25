@@ -548,14 +548,17 @@ attributes — no inline `onclick` handlers are needed:
 ```erb
 <void-button data-open-dialog="resource-delete-dialog">Delete</void-button>
 
-<void-dialog id="resource-delete-dialog" heading="Delete order" size="sm">
-  <p class="danger-zone-description">Are you sure? This action cannot be undone.</p>
-  <div class="action-bar">
+<void-dialog id="resource-delete-dialog" size="sm">
+  <void-dialog-title>Delete order</void-dialog-title>
+  <void-dialog-body>
+    <p class="danger-zone-description">Are you sure? This action cannot be undone.</p>
+  </void-dialog-body>
+  <void-dialog-actions>
     <void-button variant="ghost" size="sm"
       data-close-dialog="resource-delete-dialog">Cancel</void-button>
     <void-button color="error" size="sm"
       ><a href="<%= url_for(@order) %>" data-turbo-method="delete">Delete</a></void-button>
-  </div>
+  </void-dialog-actions>
 </void-dialog>
 ```
 
@@ -631,25 +634,27 @@ A typical sign-in view using Voidable components:
 ```erb
 <div style="max-width: 28rem; margin: 0 auto; padding: 2rem;">
   <void-card>
-    <div style="padding: var(--void-space-6);">
-      <h1 style="margin: 0 0 var(--void-space-5) 0; font-family: var(--void-font-sans); font-size: var(--void-text-xl); font-weight: var(--void-weight-bold); color: var(--void-color-text);">Sign in</h1>
+    <void-card-body>
+      <div style="padding: var(--void-space-6);">
+        <h1 style="margin: 0 0 var(--void-space-5) 0; font-family: var(--void-font-sans); font-size: var(--void-text-xl); font-weight: var(--void-weight-bold); color: var(--void-color-text);">Sign in</h1>
 
-      <%= form_for(resource, as: resource_name, url: session_path(resource_name), html: { style: "display: flex; flex-direction: column; gap: var(--void-space-4);" }) do |f| %>
-        <%= render "devise/shared/error_messages", resource: resource %>
+        <%= form_for(resource, as: resource_name, url: session_path(resource_name), html: { style: "display: flex; flex-direction: column; gap: var(--void-space-4);" }) do |f| %>
+          <%= render "devise/shared/error_messages", resource: resource %>
 
-        <void-field label="Email">
-          <void-input type="email" name="<%= resource_name %>[email]" value="<%= resource.email %>" autofocus autocomplete="email"></void-input>
-        </void-field>
+          <void-field label="Email">
+            <void-input type="email" name="<%= resource_name %>[email]" value="<%= resource.email %>" autofocus autocomplete="email"></void-input>
+          </void-field>
 
-        <void-field label="Password">
-          <void-action-input type="password" icon="eye" action-label="Toggle visibility" name="<%= resource_name %>[password]" autocomplete="current-password"></void-action-input>
-        </void-field>
+          <void-field label="Password">
+            <void-action-input type="password" icon="eye" action-label="Toggle visibility" name="<%= resource_name %>[password]" autocomplete="current-password"></void-action-input>
+          </void-field>
 
-        <div style="padding-top: var(--void-space-2);">
-          <void-button type="submit" color="success" style="width: 100%;">Sign in</void-button>
-        </div>
-      <% end %>
-    </div>
+          <div style="padding-top: var(--void-space-2);">
+            <void-button type="submit" color="success" style="width: 100%;">Sign in</void-button>
+          </div>
+        <% end %>
+      </div>
+    </void-card-body>
   </void-card>
 </div>
 ```
@@ -678,12 +683,14 @@ The shared error messages partial uses `void-alert`:
 ```erb
 <% if resource.errors.any? %>
   <void-alert color="error" data-turbo-temporary>
-    <strong><%= pluralize(resource.errors.count, "error") %> prohibited this operation:</strong>
-    <ul>
-      <% resource.errors.full_messages.each do |message| %>
-        <li><%= message %></li>
-      <% end %>
-    </ul>
+    <void-alert-title><%= pluralize(resource.errors.count, "error") %> prohibited this operation</void-alert-title>
+    <void-alert-description>
+      <ul>
+            <% resource.errors.full_messages.each do |message| %>
+              <li><%= message %></li>
+            <% end %>
+          </ul>
+    </void-alert-description>
   </void-alert>
 <% end %>
 ```

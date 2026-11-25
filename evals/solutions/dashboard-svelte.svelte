@@ -13,16 +13,26 @@
 <main style="padding: var(--void-space-4); display: grid; gap: var(--void-space-6); grid-template-columns: minmax(0, 1fr);">
   <h1>Usage</h1>
   <section style="display: grid; grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr)); gap: var(--void-space-4);">
-    <void-card><void-stat label="Weekly active users" value="3,412"></void-stat></void-card>
-    <void-card><void-stat label="Avg. session" value="6m 20s"></void-stat></void-card>
-    <void-card><void-stat label="Error rate" value="0.4%"></void-stat></void-card>
+    <void-card><void-card-body><void-stat label="Weekly active users" value="3,412"></void-stat></void-card-body></void-card>
+    <void-card><void-card-body><void-stat label="Avg. session" value="6m 20s"></void-stat></void-card-body></void-card>
+    <void-card><void-card-body><void-stat label="Error rate" value="0.4%"></void-stat></void-card-body></void-card>
   </section>
   <section style="display: grid; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); gap: var(--void-space-4);">
-    <void-card heading="Weekly active users">
-      <void-line-chart aria-label="Weekly active users" {@attach setData(wau)}></void-line-chart>
+    <void-card>
+      <void-card-header>
+        <void-card-title>Weekly active users</void-card-title>
+      </void-card-header>
+      <void-card-body>
+        <void-line-chart aria-label="Weekly active users" {@attach setData(wau)}></void-line-chart>
+      </void-card-body>
     </void-card>
-    <void-card heading="Plan mix">
-      <void-donut-chart aria-label="Plan mix" show-total {@attach setData(plans)}></void-donut-chart>
+    <void-card>
+      <void-card-header>
+        <void-card-title>Plan mix</void-card-title>
+      </void-card-header>
+      <void-card-body>
+        <void-donut-chart aria-label="Plan mix" show-total {@attach setData(plans)}></void-donut-chart>
+      </void-card-body>
     </void-card>
   </section>
 </main>

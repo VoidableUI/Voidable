@@ -312,28 +312,34 @@ const ogImage = new URL('/og.png', canonical).href;
 
           <div class="tb-export-grid">
             <void-tabs id="tb-tabs" value="css" class="tb-tabs">
-              <void-tab-panel tab="css" label="theme.css">
+              <void-tabs-list>
+                <void-tabs-trigger value="css">theme.css</void-tabs-trigger>
+                <void-tabs-trigger value="link">Link</void-tabs-trigger>
+                <void-tabs-trigger value="prompt">Prompt</void-tabs-trigger>
+                <void-tabs-trigger value="tokens">Design tokens</void-tabs-trigger>
+              </void-tabs-list>
+              <void-tabs-content value="css">
                 <pre class="tb-code" tabindex="0" aria-label="Theme CSS"><code id="tb-css"></code></pre>
                 <void-actions>
                   <void-button id="tb-copy-css-2" variant="filled"><span class="tb-icon" set:html={iconCopy} /><span data-label>Copy CSS</span></void-button>
                   <void-button id="tb-download-css"><span class="tb-icon" set:html={iconDownload} />Download <span id="tb-filename">theme.css</span></void-button>
                 </void-actions>
-              </void-tab-panel>
-              <void-tab-panel tab="link" label="Link">
+              </void-tabs-content>
+              <void-tabs-content value="link">
                 <void-field label="A link to this theme" helper="Every knob is a parameter named after it (--void-radius is radius), so a person or an agent can also write this link by hand.">
                   <void-input id="tb-url" readonly></void-input>
                 </void-field>
                 <void-actions>
                   <void-button id="tb-copy-link-2" variant="filled"><span class="tb-icon" set:html={iconLink} /><span data-label>Copy link</span></void-button>
                 </void-actions>
-              </void-tab-panel>
-              <void-tab-panel tab="prompt" label="Prompt">
+              </void-tabs-content>
+              <void-tabs-content value="prompt">
                 <p class="tb-prompt" id="tb-prompt" tabindex="0"></p>
                 <void-actions>
                   <void-button id="tb-copy-prompt" variant="filled"><span class="tb-icon" set:html={iconCopy} /><span data-label>Copy prompt</span></void-button>
                 </void-actions>
-              </void-tab-panel>
-              <void-tab-panel tab="tokens" label="Design tokens">
+              </void-tabs-content>
+              <void-tabs-content value="tokens">
                 <p class="tb-note">The knobs, or every token they resolve to, as <a href="https://www.designtokens.org/TR/2025.10/format/">Design Tokens Community Group</a> JSON (format {DTCG_VERSION}) for Tokens Studio, Style Dictionary and other design tools. Colours are sRGB with a hex fallback.</p>
                 <void-actions>
                   <void-button id="tb-dtcg-knobs"><span class="tb-icon" set:html={iconDownload} />Knobs</void-button>
@@ -341,7 +347,7 @@ const ogImage = new URL('/og.png', canonical).href;
                   <void-button id="tb-dtcg-light"><span class="tb-icon" set:html={iconDownload} />Resolved, light</void-button>
                 </void-actions>
                 <p class="tb-note">The shipped themes are already exported in the package: <code>@voidable/theme/dtcg/dune.light.tokens.json</code>.</p>
-              </void-tab-panel>
+              </void-tabs-content>
             </void-tabs>
 
             <void-stack class="tb-use">
@@ -693,7 +699,7 @@ const ogImage = new URL('/og.png', canonical).href;
         outline: none;
       }
       .tb-export-grid { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: var(--void-gap-group); align-items: start; }
-      .tb-tabs void-tab-panel[active] { display: flex; flex-direction: column; gap: var(--void-gap-inside); padding-top: var(--void-gap-inside); }
+      .tb-tabs void-tabs-content[active] { display: flex; flex-direction: column; gap: var(--void-gap-inside); padding-top: var(--void-gap-inside); }
       .tb-code {
         margin: 0;
         padding: var(--void-space-4) var(--void-space-5);

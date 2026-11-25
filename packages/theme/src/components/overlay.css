@@ -31,10 +31,10 @@
 
 /* The UA box of [popover] is centred with a border and padding; the
    component CSS styles the surface itself. */
-.void-popover-body,
-.void-dropdown-menu-panel,
-.void-hover-card-body,
-.void-tooltip-bubble,
+void-popover-content,
+void-dropdown-menu-content,
+void-hover-card-content,
+void-tooltip-content,
 .void-combobox-dropdown,
 .void-multiselect-dropdown,
 .void-date-picker-dropdown {
@@ -89,10 +89,10 @@
    Browsers without these simply show and hide at once. */
 
 :is(
-  .void-popover-body,
-  .void-dropdown-menu-panel,
-  .void-hover-card-body,
-  .void-tooltip-bubble,
+  void-popover-content,
+  void-dropdown-menu-content,
+  void-hover-card-content,
+  void-tooltip-content,
   .void-combobox-dropdown,
   .void-multiselect-dropdown,
   .void-date-picker-dropdown
@@ -101,10 +101,10 @@
 }
 
 :is(
-  .void-popover-body,
-  .void-dropdown-menu-panel,
-  .void-hover-card-body,
-  .void-tooltip-bubble,
+  void-popover-content,
+  void-dropdown-menu-content,
+  void-hover-card-content,
+  void-tooltip-content,
   .void-combobox-dropdown,
   .void-multiselect-dropdown,
   .void-date-picker-dropdown
@@ -118,10 +118,10 @@
 
 /* Without the Popover API the component toggles [hidden] instead. */
 :is(
-  .void-popover-body,
-  .void-dropdown-menu-panel,
-  .void-hover-card-body,
-  .void-tooltip-bubble,
+  void-popover-content,
+  void-dropdown-menu-content,
+  void-hover-card-content,
+  void-tooltip-content,
   .void-combobox-dropdown,
   .void-multiselect-dropdown,
   .void-date-picker-dropdown
@@ -131,10 +131,10 @@
 
 @starting-style {
   :is(
-    .void-popover-body,
-    .void-dropdown-menu-panel,
-    .void-hover-card-body,
-    .void-tooltip-bubble,
+    void-popover-content,
+    void-dropdown-menu-content,
+    void-hover-card-content,
+    void-tooltip-content,
     .void-combobox-dropdown,
     .void-multiselect-dropdown,
     .void-date-picker-dropdown
@@ -143,9 +143,10 @@
   }
 }
 
-/* Modal surfaces: native <dialog> in the top layer with a ::backdrop. */
-.void-dialog-panel,
-.void-drawer-panel {
+/* Modal surfaces: native <dialog> in the top layer with a ::backdrop (in the
+   component's shadow root, so styled through ::part(surface)). */
+void-dialog::part(surface),
+void-drawer::part(surface) {
   transition:
     opacity var(--void-duration-normal) var(--void-ease-out),
     translate var(--void-duration-normal) var(--void-ease-out),
@@ -154,8 +155,8 @@
     overlay var(--void-duration-normal) allow-discrete;
 }
 
-.void-dialog-panel::backdrop,
-.void-drawer-panel::backdrop {
+void-dialog::part(surface)::backdrop,
+void-drawer::part(surface)::backdrop {
   background: var(--void-color-bg-overlay);
   opacity: 0;
   transition:
@@ -164,14 +165,14 @@
     overlay var(--void-duration-normal) allow-discrete;
 }
 
-.void-dialog-panel[open]::backdrop,
-.void-drawer-panel[open]::backdrop {
+void-dialog[open]::part(surface)::backdrop,
+void-drawer[open]::part(surface)::backdrop {
   opacity: 1;
 }
 
 @starting-style {
-  .void-dialog-panel[open]::backdrop,
-  .void-drawer-panel[open]::backdrop {
+  void-dialog[open]::part(surface)::backdrop,
+  void-drawer[open]::part(surface)::backdrop {
     opacity: 0;
   }
 }
@@ -179,8 +180,8 @@
 /* Reduced motion: durations already scale to zero (primitives); also
    drop movement so nothing slides or scales in. */
 @media (prefers-reduced-motion: reduce) {
-  .void-dialog-panel,
-  .void-drawer-panel {
+  void-dialog::part(surface),
+  void-drawer::part(surface) {
     translate: none !important;
     scale: none !important;
   }
@@ -189,20 +190,20 @@
 /* Forced colours: surfaces keep a visible edge and the backdrop does
    not wash out the dialog. */
 @media (forced-colors: active) {
-  .void-dialog-panel,
-  .void-drawer-panel,
-  .void-popover-body,
-  .void-dropdown-menu-panel,
-  .void-hover-card-body,
-  .void-tooltip-bubble,
+  void-dialog::part(surface),
+  void-drawer::part(surface),
+  void-popover-content,
+  void-dropdown-menu-content,
+  void-hover-card-content,
+  void-tooltip-content,
   .void-combobox-dropdown,
   .void-multiselect-dropdown,
   .void-date-picker-dropdown {
     border: 1px solid CanvasText;
   }
 
-  .void-dialog-panel::backdrop,
-  .void-drawer-panel::backdrop {
+  void-dialog::part(surface)::backdrop,
+  void-drawer::part(surface)::backdrop {
     background: transparent;
   }
 }

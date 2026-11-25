@@ -27,8 +27,8 @@ describe('VoidCard', () => {
       el = createElement();
     });
 
-    it('heading defaults to empty string', () => {
-      expect(el.heading).toBe('');
+    it('has no heading property (the title is a part)', () => {
+      expect('heading' in el).toBe(false);
     });
 
     it('variant defaults to "default"', () => {
@@ -123,33 +123,16 @@ describe('VoidCard', () => {
     });
   });
 
-  describe('heading rendering', () => {
-    it('renders header and heading when heading is set', async () => {
-      const el = createElement();
-      el.heading = 'Card Title';
+  describe('explicit parts (#52)', () => {
+    it('renders nothing and moves nothing: the parts are the card', async () => {
+      const el = document.createElement('void-card') as VoidCard;
+      el.innerHTML = '<void-card-header><void-card-title>T</void-card-title></void-card-header><void-card-body>B</void-card-body><void-card-footer>F</void-card-footer>';
+      const before = [...el.querySelectorAll('*')];
       document.body.appendChild(el);
       await el.updateComplete;
-      const header = el.querySelector('.void-card-header');
-      const heading = el.querySelector('.void-card-heading');
-      expect(header).not.toBeNull();
-      expect(heading).not.toBeNull();
-      expect(heading?.textContent).toBe('Card Title');
-    });
-
-    it('does not render header when heading is empty', async () => {
-      const el = createElement();
-      document.body.appendChild(el);
-      await el.updateComplete;
-      expect(el.querySelector('.void-card-header')).toBeNull();
-    });
-  });
-
-  describe('card body', () => {
-    it('always renders void-card-body div', async () => {
-      const el = createElement();
-      document.body.appendChild(el);
-      await el.updateComplete;
-      expect(el.querySelector('.void-card-body')).not.toBeNull();
+      expect([...el.querySelectorAll('*')]).toEqual(before);
+      expect(el.shadowRoot).toBeNull();
+      el.remove();
     });
   });
 

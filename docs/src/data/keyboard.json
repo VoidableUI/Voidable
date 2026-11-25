@@ -74,7 +74,7 @@
     ]
   },
   "void-tabs": {
-    "intro": "Pattern: [tabs with manual activation](https://www.w3.org/WAI/ARIA/apg/patterns/tabs/examples/tabs-manual/) (default) or [automatic activation](https://www.w3.org/WAI/ARIA/apg/patterns/tabs/examples/tabs-automatic/) with `activation=\"auto\"`. The tab list is one tab stop (roving tabindex): the selected tab, or the first enabled tab while none is selected. Each tab controls its panel and each panel is labelled by its tab; the visible panel is itself a tab stop. Mark a `<void-tab-panel disabled>` to disable its tab.",
+    "intro": "Pattern: [tabs with manual activation](https://www.w3.org/WAI/ARIA/apg/patterns/tabs/examples/tabs-manual/) (default) or [automatic activation](https://www.w3.org/WAI/ARIA/apg/patterns/tabs/examples/tabs-automatic/) with `activation=\"auto\"`. The tab list is one tab stop (roving tabindex): the selected tab, or the first enabled tab while none is selected. Each tab controls its panel and each panel is labelled by its tab; the visible panel is itself a tab stop. Mark a `<void-tabs-trigger disabled>` to disable its tab.",
     "rows": [
       {
         "keys": "Tab",

@@ -1,12 +1,15 @@
-import { html } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
-import { isPrintable, stepEnabled, Typeahead, uid } from '../keyboard.js';
+import { isPrintable, stepEnabled, Typeahead } from '../keyboard.js';
 import { OverlayController } from '../overlay.js';
-import { ProjectionController, triggerRegion } from '../projection.js';
+import { PartsController, triggerControl } from '../parts.js';
 
 /**
  * Trigger-anchored action menu for table row actions, toolbar overflow menus, and context menus.
+ *
+ * Two parts: `<void-dropdown-menu-trigger>` around the control that opens the menu (one element: a
+ * `<void-button>`, a `<button>`), and `<void-dropdown-menu-content>` holding the `<void-dropdown-menu-item>`s
+ * (and `<void-dropdown-menu-separator>`s between groups). The parts are the final DOM.
  *
  * Follows the WAI-ARIA menu button pattern: the trigger gets `aria-haspopup="menu"`, `aria-expanded` and
  * `aria-controls`; the panel is a `role="menu"` of `menuitem`s that take focus one at a time. Keyboard on the
@@ -18,8 +21,6 @@ import { ProjectionController, triggerRegion } from '../projection.js';
  * trigger; Tab or a press outside closes it. The panel is shown in the top layer and placed with CSS anchor
  * positioning, flipping at viewport edges.
  *
- * @slot trigger - The element that opens the menu. Mark it with `slot="trigger"`; without one, the first child element is used.
- * @slot - The menu items (`<void-dropdown-menu-item>`).
  * @fires {CustomEvent<{ reason: 'trigger' | 'keyboard' | 'api' }>} void-open - The menu opened.
  * @fires {CustomEvent<{ reason: 'trigger' | 'select' | 'escape' | 'outside' | 'blur' | 'parent' | 'api' }>} void-close -
  * The menu is closing. Cancelable when the user caused it (every reason but `parent` and `api`).
@@ -32,24 +33,21 @@ export class VoidDropdownMenu extends VoidElement {
   /** Alignment with the trigger along that side. */
   @property({ type: String, reflect: true }) align: 'start' | 'center' | 'end' = 'start';
 
-  // The trigger (slot="trigger", else the first element child) stays before the panel; everything else goes into the panel.
-  protected readonly _projection: ProjectionController = new ProjectionController(this, {
-    regions: [
-      triggerRegion('trigger', 'before', () => this._projection, this),
-      { name: 'panel', target: () => this.querySelector(':scope > .void-dropdown-menu-panel') },
-    ],
-    // Trigger ARIA follows the trigger, including one the parser adds after the first render.
-    onChange: () => this.requestUpdate(),
+  protected readonly _parts = new PartsController(this, {
+    tags: ['void-dropdown-menu-trigger', 'void-dropdown-menu-content', 'void-dropdown-menu-item', 'void-dropdown-menu-separator'],
+    onChange: () => {
+      this._wire();
+      this.requestUpdate();
+    },
   });
 
   /** Which item receives focus when the menu opens from the keyboard. */
   private _focusLast = false;
-  private readonly _panelId = uid('void-dropdown-menu-panel');
   private readonly _typeahead = new Typeahead();
 
   protected readonly _overlay = new OverlayController(this, {
     kind: 'menu',
-    surface: () => this.querySelector<HTMLElement>(':scope > .void-dropdown-menu-panel'),
+    surface: () => this._content(),
     isOpen: () => this.open,
     setOpen: open => {
       this.open = open;
@@ -59,6 +57,8 @@ export class VoidDropdownMenu extends VoidElement {
     anchor: () => this,
     hostStyle: (p, v) => this.setHostStyle(p, v),
     placement: () => ({ side: this.position, align: this.align }),
+    attr: (el, name, value) => this._parts.set(el, name, value),
+    style: (el, p, v) => this._parts.style(el, p, v),
     initialFocus: reason => {
       const last = this._focusLast;
       this._focusLast = false;
@@ -68,15 +68,30 @@ export class VoidDropdownMenu extends VoidElement {
     },
   });
 
+  /** The control inside the trigger part (gets the menu-button ARIA). */
   private get _triggerEl(): HTMLElement | null {
-    return (this._projection.nodes('trigger').find(n => n instanceof HTMLElement) as HTMLElement | undefined) ?? null;
+    return triggerControl(this._parts.one('void-dropdown-menu-trigger'));
+  }
+
+  private _content(): HTMLElement | null {
+    return this._parts.one('void-dropdown-menu-content');
   }
 
   /** Enabled items of this menu (not of a menu nested inside it). */
   private _items(): HTMLElement[] {
-    return Array.from(this.querySelectorAll<HTMLElement>('void-dropdown-menu-item:not([disabled])')).filter(
-      item => item.closest('void-dropdown-menu') === this
-    );
+    return this._parts.all('void-dropdown-menu-item').filter(item => !item.hasAttribute('disabled'));
+  }
+
+  /** The content is a `role="menu"` in the top layer, named by the trigger's control; separators are separators. */
+  private _wire(): void {
+    const content = this._content();
+    if (!content) return;
+    const control = this._triggerEl;
+    this._parts.set(content, 'popover', 'manual');
+    this._parts.set(content, 'role', 'menu');
+    this._parts.id(content, 'void-dropdown-menu-content');
+    this._parts.set(content, 'aria-labelledby', control ? this._parts.id(control, 'void-dropdown-menu-trigger') : null);
+    for (const sep of this._parts.all('void-dropdown-menu-separator')) this._parts.provide(sep, 'role', 'separator');
   }
 
   connectedCallback(): void {
@@ -95,22 +110,6 @@ export class VoidDropdownMenu extends VoidElement {
     this._typeahead.reset();
   }
 
-  protected override updated(changed: Map<string, unknown>): void {
-    super.updated(changed);
-    // The menu is named by its trigger (the overlay adds aria-haspopup, aria-expanded and aria-controls).
-    const trigger = this._triggerEl;
-    const panel = this.querySelector(':scope > .void-dropdown-menu-panel');
-    if (trigger && panel) {
-      if (!trigger.id) trigger.id = `${this._panelId}-trigger`;
-      panel.setAttribute('aria-labelledby', trigger.id);
-    }
-  }
-
-  render() {
-    // The panel holds only consumer items (no Lit child bindings).
-    return html`<div id=${this._panelId} class="void-dropdown-menu-panel" role="menu" popover="manual"></div>`;
-  }
-
   /** Opens the menu and focuses its first or last item (or moves there when it is already open). */
   private _openAndFocus(which: 'first' | 'last'): void {
     if (this.open) {
@@ -123,13 +122,13 @@ export class VoidDropdownMenu extends VoidElement {
   }
 
   private _handleTriggerClick = (e: Event): void => {
-    const trigger = this._triggerEl;
+    const trigger = this._parts.one('void-dropdown-menu-trigger');
     if (trigger && trigger.contains(e.target as Node)) this._overlay.toggle('trigger');
   };
 
   private _handleSelect = (e: Event): void => {
     const item = e.target as Element;
-    if (!(item instanceof VoidDropdownMenuItem) || item.closest('void-dropdown-menu') !== this) return;
+    if (!(item instanceof VoidDropdownMenuItem) || !this._parts.owns(item)) return;
     if (item.keepOpen) return;
     this._overlay.requestClose('select');
   };
@@ -142,7 +141,7 @@ export class VoidDropdownMenu extends VoidElement {
     if (e.defaultPrevented || e.altKey || e.ctrlKey || e.metaKey || e.isComposing) return;
     const target = e.target as HTMLElement;
     const trigger = this._triggerEl;
-    if (trigger?.contains(target)) {
+    if (trigger && this._parts.one('void-dropdown-menu-trigger')?.contains(target)) {
       if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
         e.preventDefault();
         this._openAndFocus(e.key === 'ArrowDown' ? 'first' : 'last');
@@ -154,7 +153,7 @@ export class VoidDropdownMenu extends VoidElement {
       }
       return;
     }
-    const panel = this.querySelector(':scope > .void-dropdown-menu-panel');
+    const panel = this._content();
     const item = target.closest('void-dropdown-menu-item');
     if (!this.open || !panel?.contains(target) || !item) return;
     const items = this._items();
@@ -192,12 +191,14 @@ if (!customElements.get('void-dropdown-menu')) {
 }
 
 /**
- * An item of a `<void-dropdown-menu>`. Choosing it (click, Enter or Space) dispatches `void-select` and closes the
- * menu, unless it has `keep-open`.
+ * An item of a `<void-dropdown-menu>`, inside its `<void-dropdown-menu-content>`. Choosing it (click, Enter or
+ * Space) dispatches `void-select` and closes the menu, unless it has `keep-open`.
  *
- * @fires {CustomEvent<{ item: VoidDropdownMenuItem }>} void-select - The item was chosen.
+ * @fires {CustomEvent<{ item: VoidDropdownMenuItem; value: string }>} void-select - The item was chosen.
  */
 export class VoidDropdownMenuItem extends VoidElement {
+  /** What the item stands for, passed as `detail.value` of `void-select` (empty when not set). */
+  @property({ type: String, reflect: true }) value = '';
   /** Dim the item, skip it in keyboard navigation and stop it firing `void-select`. */
   @property({ type: Boolean, reflect: true }) disabled = false;
   /** Draw the item in the error colour, for an action that deletes or cannot be undone. */
@@ -234,7 +235,7 @@ export class VoidDropdownMenuItem extends VoidElement {
     this.dispatchEvent(new CustomEvent('void-select', {
       bubbles: true,
       composed: true,
-      detail: { item: this },
+      detail: { item: this, value: this.value },
     }));
   };
 

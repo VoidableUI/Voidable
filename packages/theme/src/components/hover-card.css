@@ -2,13 +2,15 @@ void-hover-card {
   display: inline-flex;
 }
 
-.void-hover-card-trigger {
-  display: inline-flex;
+/* The trigger part wraps the control and draws nothing itself: the control is
+   the box (and the anchor's only in-flow content), before and after upgrade. */
+void-hover-card-trigger {
+  display: contents;
 }
 
 /* A popover="manual" surface in the top layer; placement, gap, flipping and
    transitions are shared (overlay.css). */
-.void-hover-card-body {
+void-hover-card-content {
   min-width: 16rem; /* token-ok: intrinsic card minimum width */
   max-width: min(24rem, calc(100vw - 2 * var(--void-overlay-gap)));
   background: var(--void-color-bg-elevated);

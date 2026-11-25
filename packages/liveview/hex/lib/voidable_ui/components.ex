@@ -13,10 +13,28 @@ defmodule VoidableUI.Components do
   the same across re-renders. Pass an explicit `id` when you render several
   otherwise identical anonymous components on one page.
 
+  ## Explicit parts
+
+  Dialog, drawer, popover, hover card, dropdown menu, tooltip, tabs, card,
+  alert and accordion items are written with explicit parts: plain
+  `<void-*-title>`, `<void-*-trigger>`, `<void-*-content>`... tags that the
+  component finds and wires up, never moving them. Write the parts as plain
+  tags inside the function component:
+
+      <.dialog id="confirm" open={@confirming}>
+        <void-dialog-title>Delete project</void-dialog-title>
+        <void-dialog-description>This cannot be undone.</void-dialog-description>
+        <void-dialog-actions>
+          <.button phx-click="delete">Delete</.button>
+        </void-dialog-actions>
+      </.dialog>
+
+  The parts need no `phx-update="ignore"`: LiveView can patch them freely.
+
   ## `phx-update="ignore"`
 
-  Many Voidable components move their light-DOM children into Lit-rendered
-  wrappers, which a LiveView patch can disturb. `phx-update="ignore"` protects
+  Some Voidable components still move their light-DOM children into
+  Lit-rendered wrappers, which a LiveView patch can disturb. `phx-update="ignore"` protects
   that structure, but LiveView then also skips every non-`data-*` attribute
   update and all child updates for that element. Because that would block
   legitimate server updates (`open`, `value`, `error`, dynamic options or menu
@@ -28,9 +46,8 @@ defmodule VoidableUI.Components do
         <option value="de">Germany</option>
       </.select>
 
-  Good candidates: `select`, `multiselect`, `dropdown_menu`, `menu`, `popover`,
-  `hover_card`, `tooltip`, `carousel`, `accordion_item` and `collapsible`
-  *when their content is static*. Avoid it on `dialog`/`drawer` (the server
+  Good candidates: `select`, `multiselect`, `menu`, `carousel` and
+  `collapsible` *when their content is static*. Avoid it on `dialog`/`drawer` (the server
   drives `open`), `input`, `checkbox`, `switch` and other value-bound controls.
 
   ## Booleans that default to true
@@ -228,7 +245,7 @@ defmodule VoidableUI.Components do
   # Alert (interactive — void-dismiss when dismissible)
   # ---------------------------------------------------------------------------
 
-  @doc "Renders a `<void-alert>` message."
+  @doc "Renders a `<void-alert>` message: `<void-alert-title>` and `<void-alert-description>` children."
   attr :id, :string, default: nil
   attr :color, :string, default: nil
   attr :dismissible, :boolean, default: false
@@ -633,13 +650,15 @@ defmodule VoidableUI.Components do
   @doc """
   Renders a `<void-dialog>` modal (a native `<dialog>` opened with `showModal()`).
 
+  Write its parts as children: `<void-dialog-title>` (required: it names the dialog),
+  `<void-dialog-description>`, `<void-dialog-body>` and `<void-dialog-actions>`, in that order.
+
   Pushes `void-close` with `%{"reason" => reason}` (`escape`, `outside`, `close-button`, `form`,
   `api`, ...). Render `open={false}` to close it from the server; a dialog the user opened stays
   open through re-renders that keep `open={false}` unchanged.
   """
   attr :id, :string, default: nil
   attr :open, :boolean, default: false
-  attr :heading, :string, default: nil
   attr :size, :string, default: nil
   attr :closable, :boolean, default: true
   attr :rest, :global
@@ -650,7 +669,6 @@ defmodule VoidableUI.Components do
     <void-dialog
       id={@id || auto_id("void-dialog", @rest)}
       open={@open}
-      heading={@heading}
       size={@size}
       closable={to_string(@closable)}
       phx-hook="VoidEvent"
@@ -666,7 +684,12 @@ defmodule VoidableUI.Components do
   # Tabs (interactive — void-change)
   # ---------------------------------------------------------------------------
 
-  @doc "Renders a `<void-tabs>` tab container."
+  @doc """
+  Renders a `<void-tabs>` tab container.
+
+  Write its parts as children: a `<void-tabs-list>` holding one `<void-tabs-trigger>`
+  per tab (with a `value`), then one `<void-tabs-content>` per panel with the same `value`.
+  """
   attr :id, :string, default: nil
   attr :value, :string, default: nil
   attr :size, :string, default: nil
@@ -691,26 +714,6 @@ defmodule VoidableUI.Components do
   end
 
   # ---------------------------------------------------------------------------
-  # TabPanel (static)
-  # ---------------------------------------------------------------------------
-
-  @doc "Renders a `<void-tab-panel>` inside tabs."
-  attr :tab, :string, required: true
-  attr :label, :string, default: nil
-  attr :active, :boolean, default: false
-  attr :disabled, :boolean, default: false
-  attr :rest, :global
-  slot :inner_block, required: true
-
-  def tab_panel(assigns) do
-    ~H"""
-    <void-tab-panel tab={@tab} label={@label} active={@active} disabled={@disabled} {@rest}>
-      {render_slot(@inner_block)}
-    </void-tab-panel>
-    """
-  end
-
-  # ---------------------------------------------------------------------------
   # Accordion (static — parent container)
   # ---------------------------------------------------------------------------
 
@@ -731,9 +734,13 @@ defmodule VoidableUI.Components do
   # AccordionItem (interactive — void-toggle)
   # ---------------------------------------------------------------------------
 
-  @doc "Renders a `<void-accordion-item>` collapsible section."
+  @doc """
+  Renders a `<void-accordion-item>` collapsible section.
+
+  Write its parts as children: `<void-accordion-trigger>` (the heading text) and
+  `<void-accordion-content>`.
+  """
   attr :id, :string, default: nil
-  attr :heading, :string, default: nil
   attr :open, :boolean, default: false
   attr :rest, :global
   slot :inner_block, required: true
@@ -742,7 +749,6 @@ defmodule VoidableUI.Components do
     ~H"""
     <void-accordion-item
       id={@id || auto_id("void-accordion-item", @rest)}
-      heading={@heading}
       open={@open}
       phx-hook="VoidEvent"
       data-void-events="void-toggle"
@@ -878,12 +884,11 @@ defmodule VoidableUI.Components do
   # Drawer (interactive — void-close)
   # ---------------------------------------------------------------------------
 
-  @doc "Renders a `<void-drawer>` slide-out panel (modal, like `dialog/1`); pushes `void-close` with its `reason`."
+  @doc "Renders a `<void-drawer>` slide-out panel (modal, like `dialog/1`); pushes `void-close` with its `reason`. Takes the same parts as `dialog/1` (`<void-drawer-title>`, ...)."
   attr :id, :string, default: nil
   attr :open, :boolean, default: false
   attr :side, :string, default: nil
   attr :size, :string, default: nil
-  attr :heading, :string, default: nil
   attr :closable, :boolean, default: true
   attr :rest, :global
   slot :inner_block, required: true
@@ -895,7 +900,6 @@ defmodule VoidableUI.Components do
       open={@open}
       side={@side}
       size={@size}
-      heading={@heading}
       closable={to_string(@closable)}
       phx-hook="VoidEvent"
       data-void-events="void-close"
@@ -910,8 +914,12 @@ defmodule VoidableUI.Components do
   # Card (static)
   # ---------------------------------------------------------------------------
 
-  @doc "Renders a `<void-card>` container."
-  attr :heading, :string, default: nil
+  @doc """
+  Renders a `<void-card>` container.
+
+  Write its parts as children: `<void-card-header>` (with `<void-card-title>` and
+  `<void-card-description>`), `<void-card-body>` and `<void-card-footer>`.
+  """
   attr :variant, :string, default: nil
   attr :padding, :string, default: nil
   attr :rest, :global
@@ -919,7 +927,7 @@ defmodule VoidableUI.Components do
 
   def card(assigns) do
     ~H"""
-    <void-card heading={@heading} variant={@variant} padding={@padding} {@rest}>
+    <void-card variant={@variant} padding={@padding} {@rest}>
       {render_slot(@inner_block)}
     </void-card>
     """
@@ -929,7 +937,7 @@ defmodule VoidableUI.Components do
   # Popover (interactive — void-close)
   # ---------------------------------------------------------------------------
 
-  @doc "Renders a `<void-popover>` floating panel."
+  @doc "Renders a `<void-popover>` floating panel: `<void-popover-trigger>` (wrapping one button) and `<void-popover-content>` children."
   attr :id, :string, default: nil
   attr :open, :boolean, default: false
   attr :position, :string, default: nil, doc: "top, bottom, left or right (flips when there is no room)"
@@ -959,8 +967,7 @@ defmodule VoidableUI.Components do
   # Tooltip (static — hover-based, no server events)
   # ---------------------------------------------------------------------------
 
-  @doc "Renders a `<void-tooltip>` hover tip."
-  attr :text, :string, default: nil
+  @doc "Renders a `<void-tooltip>` hover tip: `<void-tooltip-trigger>` (wrapping the described element) and `<void-tooltip-content>` (the hint)."
   attr :position, :string, default: nil
   attr :align, :string, default: nil, doc: "start, center or end"
   attr :delay, :integer, default: nil
@@ -969,7 +976,7 @@ defmodule VoidableUI.Components do
 
   def tooltip(assigns) do
     ~H"""
-    <void-tooltip text={@text} position={@position} align={@align} delay={@delay} {@rest}>
+    <void-tooltip position={@position} align={@align} delay={@delay} {@rest}>
       {render_slot(@inner_block)}
     </void-tooltip>
     """
@@ -1345,7 +1352,7 @@ defmodule VoidableUI.Components do
   # DropdownMenu (interactive — void-select)
   # ---------------------------------------------------------------------------
 
-  @doc "Renders a `<void-dropdown-menu>` dropdown."
+  @doc "Renders a `<void-dropdown-menu>` dropdown: `<void-dropdown-menu-trigger>` (wrapping one button) and `<void-dropdown-menu-content>` holding the items."
   attr :id, :string, default: nil
   attr :open, :boolean, default: false
   attr :position, :string, default: nil, doc: "top, bottom, left or right (flips when there is no room)"
@@ -1373,7 +1380,8 @@ defmodule VoidableUI.Components do
   # DropdownMenuItem (static)
   # ---------------------------------------------------------------------------
 
-  @doc "Renders a `<void-dropdown-menu-item>` inside a dropdown menu."
+  @doc "Renders a `<void-dropdown-menu-item>` inside `<void-dropdown-menu-content>`; `value` is sent in the `void-select` detail."
+  attr :value, :string, default: nil
   attr :disabled, :boolean, default: false
   attr :destructive, :boolean, default: false
   attr :keep_open, :boolean, default: false, doc: "keep the menu open when this item is chosen"
@@ -1382,7 +1390,7 @@ defmodule VoidableUI.Components do
 
   def dropdown_menu_item(assigns) do
     ~H"""
-    <void-dropdown-menu-item disabled={@disabled} destructive={@destructive} keep-open={@keep_open} {@rest}>
+    <void-dropdown-menu-item value={@value} disabled={@disabled} destructive={@destructive} keep-open={@keep_open} {@rest}>
       {render_slot(@inner_block)}
     </void-dropdown-menu-item>
     """
@@ -1856,7 +1864,7 @@ defmodule VoidableUI.Components do
   # HoverCard (static — hover-based, no server events)
   # ---------------------------------------------------------------------------
 
-  @doc "Renders a `<void-hover-card>` hover-triggered card."
+  @doc "Renders a `<void-hover-card>` hover-triggered card: `<void-hover-card-trigger>` (wrapping the link) and `<void-hover-card-content>` children."
   attr :open, :boolean, default: false
   attr :position, :string, default: nil
   attr :align, :string, default: nil, doc: "start, center or end"

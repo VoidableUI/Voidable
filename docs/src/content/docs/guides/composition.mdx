@@ -1,54 +1,121 @@
 ---
-title: Composition and children
-description: Voidable renders into the light DOM, so your markup stays yours. How children are placed, which components need which parents, and what to avoid.
+title: Composition and parts
+description: How Voidable components take their content. Components with regions are written with explicit parts, plain void-* tags the component finds and wires up but never moves. The rules, every component's parts, and what is still to convert.
 ---
 
-Voidable components render into the **light DOM**: there is no shadow root. Your children, your classes, your `id`s and your framework's bindings stay where you wrote them, in the same document the rest of the page uses. Global CSS reaches into components, `querySelector` finds their parts, and a test library sees their roles and text.
+Voidable components render into the **light DOM**. Your children, classes, `id`s and framework bindings stay where you wrote them, in the same document as the rest of the page. Global CSS reaches into components, `querySelector` finds their parts, and a test library sees their roles and text.
+
+A component that has **regions**, such as a title, a body, a trigger or a list of tabs, is written with **explicit parts**. A part is a plain `void-*` tag named after its component and region:
 
 ```html
-<void-card heading="Monthly revenue">
-  <p id="kid">$48,200, up 12% on last month.</p>
-</void-card>
+<void-dialog>
+  <void-dialog-title>Delete project</void-dialog-title>
+  <void-dialog-description>This cannot be undone.</void-dialog-description>
+  <void-dialog-actions>
+    <void-button>Cancel</void-button>
+    <void-button color="error" variant="filled">Delete</void-button>
+  </void-dialog-actions>
+</void-dialog>
 ```
 
-Once upgraded, that card contains its rendered parts and your paragraph in the body part:
+The component finds its parts where they are and wires them up. It sets the roles, ids and ARIA links between them and handles focus and keyboard. It never moves, wraps or copies them. After the upgrade the DOM is the DOM you wrote, node for node, so a React, Vue, Svelte or Solid re-render, a Turbo or LiveView morph and an Alpine morph all find the nodes they expect.
 
-```html
-<void-card heading="Monthly revenue">
-  <div class="void-card-header">…the heading…</div>
-  <div class="void-card-body"><p id="kid">$48,200, up 12% on last month.</p></div>
-</void-card>
+## The rules
+
+- **One way per component.** Each component has a single way of writing it. The implicit forms that came before (`heading="..."`, `slot="trigger"`, the tab-panel element, `text="..."` on a tooltip) are gone, and the [development warnings](/getting-started/development-warnings/) and `voidable check` report them with the correct markup.
+- **Parts are regions, not styling.** Only a real region of the component becomes a part. Its name ends in one of `-trigger`, `-content`, `-title`, `-description`, `-body`, `-actions`, `-header`, `-footer`, `-item`, `-list` or `-separator`, following Radix and shadcn/ui where they have a name for it.
+- **At most two levels.** A part can have parts of its own (`<void-tabs-list>` holds `<void-tabs-trigger>`, `<void-card-header>` holds `<void-card-title>`), and it stops there.
+- **Plain tags, plain attributes.** You write no wrapper `<div>`s and no utility classes. A part that only needs styling is CSS-only: `@voidable/theme` styles it and no JavaScript defines it, so it costs nothing. Where a part does have behaviour, such as `<void-dropdown-menu-item>` or `<void-accordion-item>`, it is a registered element like any other.
+- **A trigger wraps one control.** `<void-popover-trigger>`, `<void-dropdown-menu-trigger>`, `<void-hover-card-trigger>` and `<void-tooltip-trigger>` hold exactly one element, the `<void-button>`, `<button>` or link that gets the ARIA. The trigger part itself does not appear in the layout (`display: contents`).
+- **Ids are yours.** The component generates an id only for a part that has none and never replaces one the author or the server wrote. When a part is removed, everything the component wrote on it is taken off again.
+
+### Attribute or part?
+
+**Attributes configure the component; parts hold its content.** If the author writes text or markup that appears on the screen as a region of the component (a title, a description, a body, the thing you press), it is a part, even when it is plain text. Settings that are not on the screen stay attributes: `size`, `variant`, `position`, `align`, `open`, `value`, `delay`, `closable`. `aria-label` stays an attribute. A component that generates all of its content from data (a calendar, a chart, pagination) has no parts.
+
+## State lives on the parent
+
+The component's state is the parent's reflected attributes: `open` on a dialog, popover or accordion item, `value` on tabs. Parts are styled from it with ordinary CSS, so the theme needs no class names:
+
+```css
+void-accordion-item[open] > void-accordion-content { display: block; }
+void-tabs-content:not([active]) { display: none; }
 ```
 
-The paragraph is the same node you wrote. It was moved, not copied, so a reference to it, an event listener on it or an input inside it keeps working.
+Where a part has state of its own the component writes it as a plain attribute on the part: `active` on the selected `<void-tabs-trigger>` and the visible `<void-tabs-content>`. Server markup can write the same attributes, so the page looks right before the script loads.
 
-## Where children go
+## Before the script loads
 
-Each component decides where its children belong and moves them there. The **Children and placement** section of every [component page](/components/overview/) says what it takes. Two conventions cover most of it:
+`@voidable/theme/pre-upgrade.css` (included in the theme) gives every component its final layout before its JavaScript has run, so nothing shifts when it upgrades. The content of a closed popover, dropdown menu, hover card or tooltip is hidden until then, a closed dialog or drawer shows nothing, the first tab (or the one marked `active`) is visible, and a closed accordion item shows only its trigger.
 
-- **Default children** go in the component's body. A `<void-card>`, `<void-panel>` or `<void-dialog>` puts them in its content area.
-- **Named placement** uses the `slot` attribute, as a convention rather than shadow DOM slots. `<void-popover>`, `<void-dropdown-menu>` and `<void-hover-card>` treat the child marked `slot="trigger"` as the element that opens them; everything else is the content.
+## Dialogs and drawers
 
-```html
-<void-popover>
-  <void-button slot="trigger">Details</void-button>
-  <p>Anchored content.</p>
-</void-popover>
-```
+`<void-dialog>` and `<void-drawer>` are the one place the library uses a shadow root. A modal needs the browser's native `<dialog>` and `showModal()` (the top layer, an inert page behind it, Escape and the backdrop), and that element has to contain the content. Rather than move your nodes into a rendered `<dialog>`, the component keeps a small shadow root, `<dialog part="surface">`, a close button and a `<slot>`, and your parts stay unmoved children of the host. The dialog is named and described by your `-title` and `-description` parts through ARIA element references. The theme styles the surface with `void-dialog::part(surface)` and its backdrop with `void-dialog::part(surface)::backdrop`. `<void-alert dismissible>` uses the same arrangement for its dismiss button.
 
-Children can arrive at any time. A node you append after the component has rendered, or one a framework inserts later, is routed to the same place as the ones that were there at the start. Cloning a component (`cloneNode(true)`) or round-tripping it through `outerHTML` gives one set of rendered parts, not two.
+## Frameworks and morphs
 
-## Parents and required children
+Parts are ordinary children, so every framework renders them directly. React has wrappers for them next to the components (`DialogTitle`, `TabsTrigger`, `PopoverContent` and the rest, generated from the manifest). Vue, Svelte, Solid, Angular, ERB, HEEx and Blade write the tags as they are. A part can arrive late, be reordered, re-keyed or removed, including while the overlay is open or the user is typing in it: the component looks its parts up when something changes and rewires them.
 
-Some components only work in the right container. `<void-accordion-item>` belongs in a `<void-accordion>`, `<void-option>` in a `<void-combobox>` or `<void-multiselect>`, `<void-tab-panel>` in `<void-tabs>`, and a `<void-select>` takes native `<option>` elements, not `<void-option>`. Each page lists these as **Children and placement**, and they come from the same data that `voidable check` and the [development warnings](/getting-started/development-warnings/) use, so a wrong parent is reported in the editor, in CI and in the console.
+Before a morph (Turbo, LiveView, Livewire), the component copies what it wrote on its parts (generated ids, roles, `aria-*`, `active`) onto the server's version of the same parts, matched by id or by position, so the morph keeps them instead of stripping them. The usual [state rule](/guides/server-rendered/) still applies: a reflected attribute the server changes wins, client state it did not touch is kept.
+
+## Components and their parts
+
+The machine-readable form of this table is the `voidParts` entry of each component in `custom-elements.json` (and `components.json`). The typings, the React wrappers, the development warnings, `voidable check`, `voidable ref` and the generated agent skill all come from it.
+
+| Component | Parts (in order) | Notes |
+|---|---|---|
+| `<void-dialog>` | `-title` (required), `-description`, `-body`, `-actions` | A `<form>` may wrap the parts. Shadow surface. |
+| `<void-drawer>` | `-title` (required), `-description`, `-body`, `-actions` | As the dialog. |
+| `<void-popover>` | `-trigger` (one control), `-content` | Content is the `role="dialog"` panel. |
+| `<void-hover-card>` | `-trigger` (one control), `-content` | |
+| `<void-dropdown-menu>` | `-trigger` (one control), `-content` holding `<void-dropdown-menu-item>` and `<void-dropdown-menu-separator>` | Items take a `value`, sent in `void-select`. |
+| `<void-tooltip>` | `-trigger` (one control), `-content` | Content describes the control. |
+| `<void-tabs>` | `-list` holding `<void-tabs-trigger value>`, then `<void-tabs-content value>` | Trigger and content are paired by `value`. |
+| `<void-card>` | `-header` (holding `-title`, `-description`), `-body` (required), `-footer` | |
+| `<void-alert>` | `-title`, `-description` (required) | Shadow dismiss button when `dismissible`. |
+| `<void-accordion>` | `<void-accordion-item>`, each with `<void-accordion-trigger>` and `<void-accordion-content>` | |
+
+Every part above except the dropdown menu item and the accordion item is CSS-only.
+
+### Inventory
+
+What every component does today, and what it becomes. **Parts** components are converted. **No parts** components have no regions the author writes and stay as they are. **To convert** components still place their children themselves (the older projection), and their target markup is the proposal for the next round; **open** marks a decision the owner has to make first.
+
+| Component | Today | Target | Status |
+|---|---|---|---|
+| accordion, accordion-item | Parts | `void-accordion-item` > `-trigger`, `-content` | Parts |
+| alert | Parts | `-title`, `-description` | Parts |
+| card | Parts | `-header` (`-title`, `-description`), `-body`, `-footer` | Parts |
+| dialog, drawer | Parts | `-title`, `-description`, `-body`, `-actions` | Parts |
+| dropdown-menu, dropdown-menu-item | Parts | `-trigger`, `-content` (`-item`, `-separator`) | Parts |
+| hover-card, popover, tooltip | Parts | `-trigger`, `-content` | Parts |
+| tabs | Parts | `-list` (`-trigger`), `-content` | Parts |
+| collapsible | Projects content below a rendered trigger (`heading`) | `void-collapsible-trigger`, `void-collapsible-content` | To convert |
+| panel | Projects content below a rendered header (`heading`) | `void-panel-header` (`-title`, `-description`), `void-panel-body` | To convert |
+| banner | Projects content beside a rendered dismiss button | `void-banner-title`, `void-banner-description`, `void-banner-actions` | To convert |
+| toast | Renders `heading` and the message | `void-toast-title`, `void-toast-description`, `void-toast-action` | To convert |
+| error-fallback | Renders `heading`, `message`, a retry button | `void-error-fallback-title`, `-description`, `-actions` | To convert (open: keep the attributes for the built-in default) |
+| nav-menu, nav-menu-item | Item text becomes the trigger, child elements the dropdown | `void-nav-menu-item` > `void-nav-menu-trigger`, `void-nav-menu-content` | To convert |
+| menu, menu-item, menu-group | Projects items into a rendered list; group `label` | `void-menu-group-label`; item label, icon and shortcut as parts | To convert (open: icon and shortcut as parts or attributes) |
+| nav-bar | Projects content into a rendered bar | `void-nav-bar-brand`, `void-nav-bar-content`, `void-nav-bar-actions` | To convert |
+| breadcrumbs | Wraps each child in a rendered list item | `void-breadcrumbs-item`, with separators drawn by CSS | To convert |
+| carousel, carousel-slide | Projects slides into a rendered track; renders controls | `void-carousel-content` > `void-carousel-item`; controls in a shadow root | To convert (open: rename `void-carousel-slide` to `-item`) |
+| field | Projects the control between rendered label, helper and error | `void-field-label`, the control, `void-field-description`, `void-field-error` | To convert (open: `label`/`helper`/`error` attributes are used everywhere) |
+| checkbox-group, radio-group | Projects options below a rendered legend (`label`) | `void-checkbox-group-label` / `void-radio-group-label`, then the options | To convert (open, with field) |
+| checkbox, radio | Projects the label text after a rendered native input | No parts: label as content; the control in a shadow root | To convert (open: form association) |
+| tag | Projects the label before a rendered remove button | No parts: remove button in a shadow root, as the alert | To convert |
+| scroll-area | Projects content into a rendered viewport | No parts: viewport in a shadow root | To convert |
+| select | Moves native `<option>`s into a rendered `<select>` | No parts: keeps native options (open: customizable `<select>`) | Open |
+| combobox, multiselect, option | Projects `void-option`s after a rendered input | `void-combobox-content` / `void-multiselect-content` holding `void-option` | To convert (open) |
+| action-input, avatar, badge, bar-chart, button, calendar, date-picker, color-picker, compose-input, divider, donut-chart, editable, file-upload, gauge, hamburger, indicator, input, line-chart, list, list-item, number-input, pagination, pin-input, progress, segmented-control, segmented-control-item, sidebar, skeleton, slider, spinner, stat, status-dot, stepper, switch, table, tags-input, textarea, toast-container, toggle, toggle-group | Text content, attributes, or content generated from data | Unchanged | No parts |
 
 ## What to avoid
 
-- **Do not replace a component's `innerHTML`.** It removes the rendered parts. The component notices and re-renders them, but anything you wrote inside is gone. Append or remove children individually, or let your framework do it.
-- **Do not set `role`, `tabindex` or `aria-*` on the host unless the component's documentation says to.** The component manages them. A value you write that it also manages is left alone, and it puts back the ones it owns if something removes them.
-- **Do not rely on the rendered class names.** `void-card-body` is styling structure and may change; select by role, name and text as the [testing guide](/guides/testing/) describes.
+- **Do not put content directly in a component that takes parts.** A bare `<void-button>` inside `<void-popover>`, or a paragraph inside `<void-dialog>`, is reported with the correct markup and is not wired.
+- **Do not set the attributes the component writes on its parts** (`role`, `aria-*`, `tabindex`, `active`, generated ids) unless a component page says so. The component puts back the ones it owns if something else changes them; an id you set is always kept.
+- **Do not replace a component's `innerHTML` to update it** in a component that still projects (the **To convert** rows above). Components with parts take any child changes.
 - **Do not wrap a component in another to restyle it.** Use the [theme tokens](/getting-started/tokens/), and see [patterns](/patterns/overview/) for page structure such as a shell, a page head or a toolbar.
 
-## Frameworks
+## Parents
 
-Because the DOM is ordinary, children from any framework or template engine land where you wrote them: JSX elements, Svelte `{#each}` blocks and Rails partials all become direct descendants of the component. The adapters for [React](/frameworks/react/), [Alpine](/frameworks/alpine/), [Hotwire](/frameworks/hotwire/) and [LiveView](/frameworks/liveview/) add event and morph handling on top; see [Server-rendered apps](/guides/server-rendered/) for what that protects.
+Some elements only work in the right container: a part only inside its component, `<void-dropdown-menu-item>` in a `<void-dropdown-menu-content>`, `<void-accordion-item>` in a `<void-accordion>`, `<void-option>` in a `<void-combobox>` or `<void-multiselect>`, and a `<void-select>` takes native `<option>` elements. Each component page lists these under **Children and placement**, from the same data that `voidable check` and the [development warnings](/getting-started/development-warnings/) use, so a wrong parent is reported in the editor, in CI and in the console.

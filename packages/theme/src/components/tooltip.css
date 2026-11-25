@@ -2,9 +2,15 @@ void-tooltip {
   display: inline-flex;
 }
 
+/* The trigger part wraps the control and draws nothing itself: the control is
+   the box (and the anchor's only in-flow content), before and after upgrade. */
+void-tooltip-trigger {
+  display: contents;
+}
+
 /* A popover="manual" surface in the top layer; placement, gap, flipping and
    transitions are shared (overlay.css). */
-.void-tooltip-bubble {
+void-tooltip-content {
   --void-overlay-gap: var(--void-space-1);
   background: var(--void-color-bg-elevated);
   border: 1px solid var(--void-color-border);

@@ -81,14 +81,16 @@ export default function App() {
                   </td>
                   <td>
                     <void-dropdown-menu
-                      position="bottom-end"
+                      position="bottom" align="end"
                       onvoid-select={(e) => {
                         if (e.detail.item.textContent?.trim() === 'Delete') setRows((rs) => rs.filter((r) => r.id !== u.id));
                       }}
                     >
-                      <void-button slot="trigger" size="sm" aria-label={`Actions for ${u.name}`}>⋯</void-button>
-                      <void-dropdown-menu-item>Edit</void-dropdown-menu-item>
-                      <void-dropdown-menu-item destructive>Delete</void-dropdown-menu-item>
+                      <void-dropdown-menu-trigger><void-button size="sm" aria-label={`Actions for ${u.name}`}>⋯</void-button></void-dropdown-menu-trigger>
+                      <void-dropdown-menu-content>
+                        <void-dropdown-menu-item>Edit</void-dropdown-menu-item>
+                        <void-dropdown-menu-item destructive>Delete</void-dropdown-menu-item>
+                      </void-dropdown-menu-content>
                     </void-dropdown-menu>
                   </td>
                 </tr>

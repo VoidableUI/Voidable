@@ -9,21 +9,26 @@
   </div>
 
   <div id="col" style="display: flex; flex-direction: column; height: 300px; width: 400px; overflow: hidden; margin-top: 1rem">
-    <void-card id="c1" heading="Plain"><p style="height: 200px; margin: 0">tall</p></void-card>
-    <void-card id="c2" heading="Second"><p style="height: 200px; margin: 0">tall</p></void-card>
+    <void-card id="c1"><void-card-header><void-card-title>Plain</void-card-title></void-card-header><void-card-body><p style="height: 200px; margin: 0">tall</p></void-card-body></void-card>
+    <void-card id="c2"><void-card-header><void-card-title>Second</void-card-title></void-card-header><void-card-body><p style="height: 200px; margin: 0">tall</p></void-card-body></void-card>
   </div>
   <div style="display: flex; flex-direction: column; height: 300px; width: 400px; margin-top: 1rem">
-    <void-card id="c3" heading="Scrollable" scrollable style="flex: 1; min-height: 0"><p style="height: 600px; margin: 0">very tall</p></void-card>
+    <void-card id="c3" scrollable style="flex: 1; min-height: 0"><void-card-header><void-card-title>Scrollable</void-card-title></void-card-header><void-card-body><p style="height: 600px; margin: 0">very tall</p></void-card-body></void-card>
   </div>
 
-  <void-card id="card" heading="Settings" style="width: 420px; margin-top: 1rem">
-    <void-field label="Framework"><void-combobox id="cb" placeholder="Pick"><void-option value="react">React</void-option><void-option value="vue">Vue</void-option><void-option value="lit">Lit</void-option><void-option value="svelte">Svelte</void-option><void-option value="solid">Solid</void-option></void-combobox></void-field>
-    <void-field label="Skills"><void-multiselect id="ms" placeholder="Pick many"><void-option value="css">CSS</void-option><void-option value="js">JS</void-option><void-option value="html">HTML</void-option><void-option value="sql">SQL</void-option></void-multiselect></void-field>
-    <void-field label="Date"><void-date-picker id="dp" value="2026-11-10"></void-date-picker></void-field>
-    <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 1rem">
-      <void-dropdown-menu id="dd"><button slot="trigger" id="dd-t">Actions</button><void-dropdown-menu-item>Rename</void-dropdown-menu-item><void-dropdown-menu-item>Duplicate</void-dropdown-menu-item><void-dropdown-menu-item>Move</void-dropdown-menu-item><void-dropdown-menu-item destructive>Delete</void-dropdown-menu-item></void-dropdown-menu>
-      <void-popover id="po"><button slot="trigger" id="po-t">More</button><div style="width: 180px; height: 160px">Popover text that should be readable</div></void-popover>
-    </div>
+  <void-card id="card" style="width: 420px; margin-top: 1rem">
+    <void-card-header>
+      <void-card-title>Settings</void-card-title>
+    </void-card-header>
+    <void-card-body>
+      <void-field label="Framework"><void-combobox id="cb" placeholder="Pick"><void-option value="react">React</void-option><void-option value="vue">Vue</void-option><void-option value="lit">Lit</void-option><void-option value="svelte">Svelte</void-option><void-option value="solid">Solid</void-option></void-combobox></void-field>
+      <void-field label="Skills"><void-multiselect id="ms" placeholder="Pick many"><void-option value="css">CSS</void-option><void-option value="js">JS</void-option><void-option value="html">HTML</void-option><void-option value="sql">SQL</void-option></void-multiselect></void-field>
+      <void-field label="Date"><void-date-picker id="dp" value="2026-11-10"></void-date-picker></void-field>
+      <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 1rem">
+        <void-dropdown-menu id="dd"><void-dropdown-menu-trigger><button id="dd-t">Actions</button></void-dropdown-menu-trigger><void-dropdown-menu-content><void-dropdown-menu-item>Rename</void-dropdown-menu-item><void-dropdown-menu-item>Duplicate</void-dropdown-menu-item><void-dropdown-menu-item>Move</void-dropdown-menu-item><void-dropdown-menu-item destructive>Delete</void-dropdown-menu-item></void-dropdown-menu-content></void-dropdown-menu>
+        <void-popover id="po"><void-popover-trigger><button id="po-t">More</button></void-popover-trigger><void-popover-content><div style="width: 180px; height: 160px">Popover text that should be readable</div></void-popover-content></void-popover>
+      </div>
+    </void-card-body>
   </void-card>
   <div style="height: 600px"></div>
 </main>
