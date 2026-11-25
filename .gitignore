@@ -16,3 +16,4 @@ _site/
 release-artifacts/
 packages/alpine/laravel/vendor/
 .phpunit.result.cache
+packages/ui/src/autoloader-table.generated.ts
