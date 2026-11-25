@@ -43,25 +43,27 @@ func Index(w io.Writer, version string, cat *domain.Catalog, f Format) error {
 	for i, e := range cat.Elements {
 		rows[i] = IndexEntry{e.Tag, e.Description}
 	}
+	p := &printer{w: w}
 	switch f {
 	case FormatJSON:
 		return writeJSON(w, map[string]any{"version": version, "elements": rows})
 	case FormatMarkdown:
-		fmt.Fprintf(w, "# @voidable/ui %s elements\n\n| Tag | Description |\n|---|---|\n", version)
+		p.f("# @voidable/ui %s elements\n\n| Tag | Description |\n|---|---|\n", version)
 		for _, r := range rows {
-			fmt.Fprintf(w, "| `<%s>` | %s |\n", r.Tag, mdEscape(r.Description))
+			p.f("| `<%s>` | %s |\n", r.Tag, mdEscape(r.Description))
 		}
-		return nil
+		return p.err
 	}
-	fmt.Fprintf(w, "@voidable/ui %s: %d elements. `voidable ref <tag>` for attributes, events, example.\n", version, len(rows))
+	p.f("@voidable/ui %s: %d elements. `voidable ref <tag>` for attributes, events, example.\n", version, len(rows))
 	for _, r := range rows {
-		fmt.Fprintf(w, "%s %s\n", r.Tag, r.Description)
+		p.f("%s %s\n", r.Tag, r.Description)
 	}
-	return nil
+	return p.err
 }
 
 // References writes one or more element references.
 func References(w io.Writer, refs []*domain.Reference, f Format) error {
+	p := &printer{w: w}
 	switch f {
 	case FormatJSON:
 		if len(refs) == 1 {
@@ -71,19 +73,19 @@ func References(w io.Writer, refs []*domain.Reference, f Format) error {
 	case FormatMarkdown:
 		for i, r := range refs {
 			if i > 0 {
-				io.WriteString(w, "\n")
+				p.f("%s", "\n")
 			}
-			refMarkdown(w, r)
+			refMarkdown(p, r)
 		}
-		return nil
+		return p.err
 	}
 	for i, r := range refs {
 		if i > 0 {
-			io.WriteString(w, "\n")
+			p.f("%s", "\n")
 		}
-		refText(w, r)
+		refText(p, r)
 	}
-	return nil
+	return p.err
 }
 
 // attrType renders the compact type: enum values joined by |.
@@ -108,10 +110,10 @@ func attrDefault(a domain.Attribute) string {
 	return " =" + a.Default
 }
 
-func refText(w io.Writer, r *domain.Reference) {
-	fmt.Fprintf(w, "<%s> %s: %s\n", r.Tag, r.Class, r.Description)
+func refText(p *printer, r *domain.Reference) {
+	p.f("<%s> %s: %s\n", r.Tag, r.Class, r.Description)
 	if len(r.Attributes) > 0 {
-		io.WriteString(w, "attrs:\n")
+		p.f("%s", "attrs:\n")
 		for _, a := range r.Attributes {
 			line := fmt.Sprintf(" %s: %s%s", a.Name, attrType(a), attrDefault(a))
 			if a.Field != "" && a.Field != a.Name {
@@ -120,17 +122,17 @@ func refText(w io.Writer, r *domain.Reference) {
 			if a.Description != "" {
 				line += " # " + a.Description
 			}
-			fmt.Fprintln(w, line)
+			p.f("%s\n", line)
 		}
 	}
 	if po := (&r.Element).PropertyOnly(); len(po) > 0 {
-		io.WriteString(w, "props only (set in JS, no attribute):\n")
-		for _, p := range po {
-			fmt.Fprintf(w, " %s: %s\n", p.Name, p.Type)
+		p.f("%s", "props only (set in JS, no attribute):\n")
+		for _, prop := range po {
+			p.f(" %s: %s\n", prop.Name, prop.Type)
 		}
 	}
 	if len(r.Events) > 0 {
-		io.WriteString(w, "events:\n")
+		p.f("%s", "events:\n")
 		for _, e := range r.Events {
 			d := e.Detail
 			if d == "" {
@@ -140,14 +142,14 @@ func refText(w io.Writer, r *domain.Reference) {
 			if e.Description != "" {
 				line += " # " + e.Description
 			}
-			fmt.Fprintln(w, line)
+			p.f("%s\n", line)
 		}
 	}
 	if len(r.Parents) > 0 {
-		fmt.Fprintf(w, "parents: %s [stand-in]\n", strings.Join(r.Parents, ", "))
+		p.f("parents: %s [stand-in]\n", strings.Join(r.Parents, ", "))
 	}
 	if len(r.Missing) > 0 {
-		fmt.Fprintf(w, "not in manifest: %s\n", strings.Join(r.Missing, ", "))
+		p.f("not in manifest: %s\n", strings.Join(r.Missing, ", "))
 	}
 	if r.Example != nil {
 		label := "example"
@@ -156,28 +158,28 @@ func refText(w io.Writer, r *domain.Reference) {
 		} else {
 			label += " [synthesized, children unknown]"
 		}
-		fmt.Fprintf(w, "%s:\n%s", label, indent(r.Example.Code, " "))
+		p.f("%s:\n%s", label, indent(r.Example.Code, " "))
 	}
 }
 
-func refMarkdown(w io.Writer, r *domain.Reference) {
-	fmt.Fprintf(w, "## `<%s>`\n\n%s\n\n", r.Tag, r.Description)
+func refMarkdown(p *printer, r *domain.Reference) {
+	p.f("## `<%s>`\n\n%s\n\n", r.Tag, r.Description)
 	if len(r.Attributes) > 0 {
-		io.WriteString(w, "| Attribute | Type | Default | Description |\n|---|---|---|---|\n")
+		p.f("%s", "| Attribute | Type | Default | Description |\n|---|---|---|---|\n")
 		for _, a := range r.Attributes {
-			fmt.Fprintf(w, "| `%s` | `%s` | %s | %s |\n", a.Name, mdEscape(attrType(a)), mdCode(a.Default), mdEscape(a.Description))
+			p.f("| `%s` | `%s` | %s | %s |\n", a.Name, mdEscape(attrType(a)), mdCode(a.Default), mdEscape(a.Description))
 		}
-		io.WriteString(w, "\n")
+		p.f("%s", "\n")
 	}
 	if len(r.Events) > 0 {
-		io.WriteString(w, "| Event | Detail |\n|---|---|\n")
+		p.f("%s", "| Event | Detail |\n|---|---|\n")
 		for _, e := range r.Events {
-			fmt.Fprintf(w, "| `%s` | %s |\n", e.Name, mdCode(e.Detail))
+			p.f("| `%s` | %s |\n", e.Name, mdCode(e.Detail))
 		}
-		io.WriteString(w, "\n")
+		p.f("%s", "\n")
 	}
 	if r.Example != nil {
-		fmt.Fprintf(w, "Example (%s):\n\n```html\n%s```\n", r.Example.Source, r.Example.Code)
+		p.f("Example (%s):\n\n```html\n%s```\n", r.Example.Source, r.Example.Code)
 	}
 }
 
@@ -192,6 +194,7 @@ func Snippet(w io.Writer, s *domain.Snippet, f Format) error {
 
 // Findings writes check results: one `file:line:col: message` per line.
 func Findings(w io.Writer, fs []domain.Finding, f Format) error {
+	p := &printer{w: w}
 	if f == FormatJSON {
 		if fs == nil {
 			fs = []domain.Finding{}
@@ -199,9 +202,21 @@ func Findings(w io.Writer, fs []domain.Finding, f Format) error {
 		return writeJSON(w, fs)
 	}
 	for _, x := range fs {
-		fmt.Fprintf(w, "%s:%d:%d: [%s] %s\n", x.File, x.Line, x.Col, x.Rule, x.Message)
+		p.f("%s:%d:%d: [%s] %s\n", x.File, x.Line, x.Col, x.Rule, x.Message)
 	}
-	return nil
+	return p.err
+}
+
+// printer writes formatted output and keeps the first error.
+type printer struct {
+	w   io.Writer
+	err error
+}
+
+func (p *printer) f(format string, a ...any) {
+	if p.err == nil {
+		_, p.err = fmt.Fprintf(p.w, format, a...)
+	}
 }
 
 func writeJSON(w io.Writer, v any) error {

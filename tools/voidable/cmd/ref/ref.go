@@ -79,8 +79,10 @@ func printSizes(ctx context.Context, l *domain.Library, w interface{ Write([]byt
 			return err
 		}
 		// ~4 bytes per token is the usual rough estimate for English and code.
-		fmt.Fprintf(w, "%-8s index %6d bytes (~%5d tokens)  full %7d bytes (~%6d tokens)  %d elements\n",
-			f, idx.Len(), idx.Len()/4, full.Len(), full.Len()/4, len(refs))
+		if _, err := fmt.Fprintf(w, "%-8s index %6d bytes (~%5d tokens)  full %7d bytes (~%6d tokens)  %d elements\n",
+			f, idx.Len(), idx.Len()/4, full.Len(), full.Len()/4, len(refs)); err != nil {
+			return err
+		}
 	}
 	return nil
 }

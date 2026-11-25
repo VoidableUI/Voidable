@@ -77,7 +77,9 @@ func NewCmd(checker CheckerProvider) *cobra.Command {
 				for _, x := range all {
 					counts[x.Rule]++
 				}
-				fmt.Fprintf(cmd.ErrOrStderr(), "scanned %d void-* tags, %d problems %v\n", c.Tags, len(all), counts)
+				if _, err := fmt.Fprintf(cmd.ErrOrStderr(), "scanned %d void-* tags, %d problems %v\n", c.Tags, len(all), counts); err != nil {
+					return err
+				}
 			}
 			if len(all) > 0 {
 				return ErrProblems

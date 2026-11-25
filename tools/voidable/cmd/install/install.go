@@ -36,7 +36,9 @@ func NewCmd(assets domain.AssetSource) *cobra.Command {
 			if err != nil {
 				return err
 			}
-			fmt.Fprintf(cmd.OutOrStdout(), "wrote %d files under %s\nadd to your layout:\n%s", n, dir, usage)
+			if _, err := fmt.Fprintf(cmd.OutOrStdout(), "wrote %d files under %s\nadd to your layout:\n%s", n, dir, usage); err != nil {
+				return err
+			}
 			return nil
 		},
 	}

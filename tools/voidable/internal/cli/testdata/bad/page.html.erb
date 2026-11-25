@@ -1,0 +1,6 @@
+<%= form_with model: @user do |f| %>
+  <void-button color="primary" type="submit">Save</void-button>
+  <void-input label="Email" name="<%= f.object_name %>[email]" value="<%= @user.email %>"></void-input>
+  <void-switch name="user[admin]" <%= "checked" if @user.admin? %>></void-switch>
+  <void-button disabled="false">Never disabled?</void-button>
+<% end %>

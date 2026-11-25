@@ -162,11 +162,14 @@ func (c *Checker) checkAttr(el *Element, t Tag, a AttrToken, f findingFn) []Find
 	v := a.Value
 	switch attr.Kind {
 	case KindEnum:
-		if !contains(attr.Values, v) && !(attr.Nullable && v == "") {
+		if !contains(attr.Values, v) && (!attr.Nullable || v != "") {
 			s := Suggest(v, attr.Values)
 			return []Finding{f(a.Line, a.Col, RuleInvalidValue, a.Name, s, "%s=%q is not valid on <%s>; allowed: %s", a.Name, v, el.Tag, strings.Join(attr.Values, "|"))}
 		}
 	case KindBoolean:
+		if strings.EqualFold(v, "false") && attr.Default == "true" {
+			return []Finding{f(a.Line, a.Col, RuleBooleanFalse, a.Name, "", "%s=\"false\" on <%s> is true, and %s defaults to true, so HTML cannot turn it off; set the property (el.%s = false) instead", a.Name, el.Tag, a.Name, attr.Field)}
+		}
 		if strings.EqualFold(v, "false") {
 			return []Finding{f(a.Line, a.Col, RuleBooleanFalse, a.Name, "", "%s=\"false\" on <%s> is true: a boolean attribute is on whenever present; remove it to make it false", a.Name, el.Tag)}
 		}

@@ -5,6 +5,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"strings"
@@ -44,10 +45,13 @@ func NewCmd(lib LibraryProvider, g domain.Generator) *cobra.Command {
 			w := cmd.OutOrStdout()
 			if out == "" {
 				for _, f := range files {
+					header := ""
 					if len(files) > 1 {
-						fmt.Fprintf(w, "==> %s <==\n", f.Path)
+						header = "==> " + f.Path + " <==\n"
 					}
-					fmt.Fprint(w, f.Content)
+					if _, err := io.WriteString(w, header+f.Content); err != nil {
+						return err
+					}
 				}
 				return nil
 			}
@@ -57,7 +61,9 @@ func NewCmd(lib LibraryProvider, g domain.Generator) *cobra.Command {
 				if check {
 					cur, err := os.ReadFile(p)
 					if err != nil || string(cur) != f.Content {
-						fmt.Fprintf(w, "differs: %s\n", p)
+						if _, err := fmt.Fprintf(w, "differs: %s\n", p); err != nil {
+							return err
+						}
 						drift++
 					}
 					continue
@@ -73,7 +79,9 @@ func NewCmd(lib LibraryProvider, g domain.Generator) *cobra.Command {
 				return ErrDrift
 			}
 			if !check {
-				fmt.Fprintf(w, "wrote %d file(s) under %s\n", len(files), out)
+				if _, err := fmt.Fprintf(w, "wrote %d file(s) under %s\n", len(files), out); err != nil {
+					return err
+				}
 			}
 			return nil
 		},

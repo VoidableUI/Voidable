@@ -1,0 +1,8 @@
+---
+const items = ['a', 'b'];
+---
+<void-tabs client:load value="a">
+  {items.map((i) => <void-tab-panel value={i}>{i}</void-tab-panel>)}
+</void-tabs>
+<void-badge color="primary" size={size}>New</void-badge>
+<void-input />

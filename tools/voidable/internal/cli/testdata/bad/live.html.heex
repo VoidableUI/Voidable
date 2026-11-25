@@ -1,0 +1,6 @@
+<void-sidebar collapsed={@collapsed} collapsed-width="4rem" phx-hook="VoidEvent" {@rest}>
+  <void-slider show-value value={@volume} :if={@show} />
+  <void-select name="plan" value={@plan}>
+    <void-option value="free">Free</void-option>
+  </void-select>
+</void-sidebar>

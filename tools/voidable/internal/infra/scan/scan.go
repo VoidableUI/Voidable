@@ -233,7 +233,7 @@ func (s *state) parseTag(src []byte, lt int, name string, lang domain.Lang) (dom
 		// Attribute name.
 		start := j
 		for j < n && !isSpace(src[j]) && src[j] != '=' && src[j] != '>' && src[j] != '"' && src[j] != '\'' &&
-			!(src[j] == '/' && j+1 < n && src[j+1] == '>') && !(src[j] == '{' && j > start) {
+			(src[j] != '/' || j+1 >= n || src[j+1] != '>') && (src[j] != '{' || j == start) {
 			j++
 		}
 		raw := string(src[start:j])
@@ -315,7 +315,7 @@ func readValue(src []byte, k int) (string, bool, int) {
 		return string(src[k:end]), true, end
 	}
 	j := k
-	for j < n && !isSpace(src[j]) && src[j] != '>' && !(src[j] == '/' && j+1 < n && src[j+1] == '>') {
+	for j < n && !isSpace(src[j]) && src[j] != '>' && (src[j] != '/' || j+1 >= n || src[j+1] != '>') {
 		j++
 	}
 	return string(src[k:j]), false, j

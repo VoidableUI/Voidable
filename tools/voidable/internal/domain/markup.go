@@ -57,9 +57,7 @@ func LangForPath(path string) Lang {
 	if strings.HasSuffix(base, ".blade.php") {
 		return LangBlade
 	}
-	if strings.HasSuffix(base, ".tt") { // Rails generator templates: x.html.erb.tt
-		base = strings.TrimSuffix(base, ".tt")
-	}
+	base = strings.TrimSuffix(base, ".tt") // Rails generator templates: x.html.erb.tt
 	l, err := ParseLang(filepath.Ext(base))
 	if err != nil {
 		return LangHTML
