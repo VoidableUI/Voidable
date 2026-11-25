@@ -2,7 +2,7 @@ import { html, nothing } from 'lit';
 import { live } from 'lit/directives/live.js';
 import { property, query } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
-import { InternalsFormControl } from '../form-control.js';
+import { InternalsFormControl, type FormSubmission } from '../form-control.js';
 
 /** Precise numeric entry for quantity selectors, price fields, and settings with increment/decrement controls. */
 export class VoidNumberInput extends InternalsFormControl(VoidElement) {
@@ -25,6 +25,8 @@ export class VoidNumberInput extends InternalsFormControl(VoidElement) {
   private _repeatTimer: ReturnType<typeof setInterval> | null = null;
   private _repeatInterval: number = 300;
   private _repeatCount: number = 0;
+  /** Text the user typed since the last commit; null when the field shows `value`. */
+  private _pendingText: string | null = null;
 
   @query('.void-number-input-field') private _input!: HTMLInputElement;
 
@@ -63,8 +65,23 @@ export class VoidNumberInput extends InternalsFormControl(VoidElement) {
     this._stopRepeat();
   }
 
-  formRestore(state: unknown): void {
+  protected formRestore(state: unknown): void {
+    this._pendingText = null;
     this.value = Number(state);
+  }
+
+  /**
+   * Submits the committed value, or the typed text if it parses (clamped):
+   * a submit triggered while the field still has focus (requestSubmit from a
+   * shortcut or autosave) must not drop what the user typed.
+   */
+  protected formSubmission(): FormSubmission {
+    const text = this._pendingText;
+    if (text !== null) {
+      const parsed = parseFloat(text);
+      if (!isNaN(parsed)) return String(this._clamp(parsed));
+    }
+    return String(this.value);
   }
 
   private _clamp(v: number): number {
@@ -78,6 +95,7 @@ export class VoidNumberInput extends InternalsFormControl(VoidElement) {
   private _commit(newVal: number): void {
     const clamped = this._clamp(newVal);
     if (clamped === this.value) return;
+    this._pendingText = null;
     const previous = this.value;
     this.value = clamped;
     if (this._input) {
@@ -91,12 +109,12 @@ export class VoidNumberInput extends InternalsFormControl(VoidElement) {
   }
 
   private _increment(): void {
-    if (this.disabled || this.readonly) return;
+    if (this.formDisabled || this.readonly) return;
     this._commit(this.value + this.step);
   }
 
   private _decrement(): void {
-    if (this.disabled || this.readonly) return;
+    if (this.formDisabled || this.readonly) return;
     this._commit(this.value - this.step);
   }
 
@@ -136,7 +154,7 @@ export class VoidNumberInput extends InternalsFormControl(VoidElement) {
   }
 
   private _onKeydown(e: KeyboardEvent): void {
-    if (this.disabled || this.readonly) return;
+    if (this.formDisabled || this.readonly) return;
     if (e.key === 'ArrowUp') {
       e.preventDefault();
       this._increment();
@@ -148,6 +166,7 @@ export class VoidNumberInput extends InternalsFormControl(VoidElement) {
 
   private _onBlur(): void {
     if (!this._input || this.readonly) return;
+    this._pendingText = null;
     const parsed = parseFloat(this._input.value);
     if (isNaN(parsed)) {
       this._input.value = this._format(this.value);
@@ -156,8 +175,15 @@ export class VoidNumberInput extends InternalsFormControl(VoidElement) {
     }
   }
 
+  /** Keep the form value in step with the typed text. */
+  private _onFieldInput(): void {
+    this._pendingText = this._input?.value ?? null;
+    this.formSync();
+  }
+
+  /** Commit on change: browsers fire it before Enter's implicit submission. */
   private _onInputChange(): void {
-    // Handled on blur
+    this._onBlur();
   }
 
   render() {
@@ -208,6 +234,7 @@ export class VoidNumberInput extends InternalsFormControl(VoidElement) {
         aria-label=${this.label || 'Number input'}
         @keydown=${this._onKeydown}
         @blur=${this._onBlur}
+        @input=${this._onFieldInput}
         @change=${this._onInputChange}
       />
       ${this.unit ? html`<span class="void-number-input-unit">${this.unit}</span>` : nothing}

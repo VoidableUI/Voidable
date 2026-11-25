@@ -4,7 +4,14 @@ import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
 import { InternalsFormControl } from '../form-control.js';
 
-/** Inline editable text for renaming items, editing headings, and click-to-edit table cells. */
+/**
+ * Inline editable text for renaming items, editing headings, and click-to-edit table cells.
+ *
+ * Forms submit the committed `value`, never text still being edited. With
+ * `submit-mode="enter"` only Enter commits: leaving the field (blur, including
+ * clicking a submit button) cancels the edit by design, so the form submits
+ * the previous value. Use `both` (default) or `blur` to commit on blur.
+ */
 export class VoidEditable extends InternalsFormControl(VoidElement) {
   @property({ type: String, reflect: true }) value = '';
   @property({ type: Boolean, reflect: true }) editing = false;
