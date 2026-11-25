@@ -103,8 +103,9 @@ class ServiceProviderTest extends TestCase
 
     public function test_dev_script_defaults_to_the_release_never_latest(): void
     {
-        $this->assertSame('https://cdn.jsdelivr.net/npm/@voidable/ui@1.4.2/dist/dev.js', \Voidable\Laravel\VoidableServiceProvider::devScriptUrl('v1.4.2'));
-        $this->assertSame('https://cdn.jsdelivr.net/npm/@voidable/ui@0.9.0-rc.1/dist/dev.js', \Voidable\Laravel\VoidableServiceProvider::devScriptUrl('0.9.0-rc.1'));
+        $cdn = fn (string $v) => 'https://cdn.jsdelivr.net/npm/@voidable/ui' . '@' . $v . '/dist/dev.js';
+        $this->assertSame($cdn('1.4.2'), \Voidable\Laravel\VoidableServiceProvider::devScriptUrl('v1.4.2'));
+        $this->assertSame($cdn('0.9.0-rc.1'), \Voidable\Laravel\VoidableServiceProvider::devScriptUrl('0.9.0-rc.1'));
         $this->assertNull(\Voidable\Laravel\VoidableServiceProvider::devScriptUrl('dev-master'));
         $this->assertNull(\Voidable\Laravel\VoidableServiceProvider::devScriptUrl('0.0.0'));
         $this->assertStringNotContainsString('@latest', (string) config('voidable.dev_script'));
