@@ -1,5 +1,10 @@
 @import '../../../packages/theme/src/primitives.css';
+@import '../../../packages/theme/src/knobs.css';
 @import '../../../packages/theme/src/tokens.css';
+@import '../../../packages/theme/src/type.css';
+@import '../../../packages/theme/src/themes/void.css';
+@import '../../../packages/theme/src/themes/dune.css';
+@import '../../../packages/theme/src/themes/console.css';
 @import '../../../packages/theme/src/components/badge.css';
 @import '../../../packages/theme/src/components/button.css';
 @import '../../../packages/theme/src/components/divider.css';
@@ -49,3 +54,7 @@
 @import '../../../packages/theme/src/components/stat.css';
 @import '../../../packages/theme/src/components/dropdown-menu.css';
 @import '../../../packages/theme/src/components/indicator.css';
+@import '../../../packages/theme/src/components/number-input.css';
+@import '../../../packages/theme/src/components/tags-input.css';
+@import '../../../packages/theme/src/components/action-input.css';
+@import '../../../packages/theme/src/components/menu.css';

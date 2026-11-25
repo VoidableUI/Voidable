@@ -8,6 +8,10 @@ const OG_ALT = 'Voidable. Devoid of style.';
 
 export default defineConfig({
   site: SITE,
+  // Stated explicitly: this Astro leaves `gfm` unset for the Markdown processor
+  // to default, and the MDX integration reads the unset value as off, which
+  // turns every table in the docs into a paragraph of pipes.
+  markdown: { gfm: true },
   vite: {
     resolve: {
       alias: {
@@ -38,7 +42,7 @@ export default defineConfig({
         { tag: 'link', attrs: { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: true } },
         { tag: 'link', attrs: { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap' } },
       ],
-      customCss: ['./src/styles/voidable-docs.css', './src/styles/fonts.css', './src/styles/starlight-bridge.css'],
+      customCss: ['./src/styles/voidable-docs.css', './src/styles/fonts.css', './src/styles/starlight-bridge.css', './src/styles/demos.css'],
       components: {
         Head: './src/components/Head.astro',
       },
@@ -74,6 +78,7 @@ export default defineConfig({
           label: 'Components',
           items: [
             { label: 'Overview', slug: 'components/overview' },
+            { label: 'Button', slug: 'components/button' },
             { label: 'Storybook', link: '/storybook/', attrs: { target: '_blank' } },
           ],
         },

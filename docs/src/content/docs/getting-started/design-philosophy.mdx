@@ -48,17 +48,26 @@ No ambiguous `div` class hierarchies. No Shadow DOM barriers to pierce. This was
 
 ## CSS Token Architecture
 
-Styling flows through three layers:
+Styling flows through four layers:
 
-1. **Primitives** — raw values: color scales, spacing scale, font stacks
-2. **Tokens** — semantic mappings: `--void-color-bg`, `--void-color-text`, `--void-color-border`
-3. **Component CSS** — selectors that reference tokens only
+1. **Primitives** — fixed values: color palettes, weights, easings
+2. **Knobs** — about a dozen inputs a theme sets: accent, neutral tint, contrast, chrome, radius, density, rhythm, type
+3. **Tokens** — semantic values derived from the knobs: `--void-color-bg`, `--void-color-text`, `--void-color-border`
+4. **Component CSS** — selectors that reference tokens only
 
-All three live in `@voidable/theme`. Components import nothing. Dark/light mode switches via `data-theme` attribute — tokens remap, components follow automatically.
+All of it lives in `@voidable/theme`. Components import nothing. Dark/light mode switches via `data-theme` attribute — tokens remap, components follow automatically.
 
 ## Negative Space
 
-The default theme emphasizes negative space: more padding, bigger gaps. This is intentional. "Void" as in the space between things. The result is a UI that breathes even when dense with content.
+"Void" as in the space between things. The default theme reads as light and airy, and it gets there with three decisions rather than with padding:
+
+1. **Control size: modest.** Controls are 36px tall and share one height per size step. Padding inside a component makes each element heavier and pushes elements toward each other, so there is only as much as the control needs.
+2. **Layout rhythm: generous.** The space between groups and sections is several times the space inside them (8 and 16px inside a group, 40px between groups, 72px between sections). This is where the airiness comes from, and it belongs to the page layout, not to components.
+3. **Chrome: minimal.** Hairlines instead of boxes, containers with a fill you can barely see, content sitting directly on the page, and shadows only for things that overlap it.
+
+Type does the rest: regular weights, small quiet uppercase labels, large plain numerals, and secondary text that is the same color at a lower opacity.
+
+Each of the three is a knob (`--void-density`, `--void-rhythm`, `--void-chrome`), so a theme can be dense, or boxed, without touching a component. See [Theming](/getting-started/theming/).
 
 ## Framework Adapters
 

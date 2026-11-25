@@ -74,9 +74,9 @@ import iconLogout from '@tabler/icons/outline/logout.svg?raw';
 
       .site-wordmark {
         font-family: var(--void-font-mono);
-        font-weight: var(--void-weight-bold);
+        font-weight: var(--void-weight-medium);
         font-size: var(--void-text-base);
-        letter-spacing: var(--void-tracking-tightest);
+        letter-spacing: var(--void-tracking-tight);
         color: var(--void-color-text);
       }
 
@@ -277,7 +277,7 @@ import iconLogout from '@tabler/icons/outline/logout.svg?raw';
       }
 
       .sidebar-nav-item.active {
-        background: var(--void-color-border-strong);
+        background: var(--void-color-bg-hover);
         color: var(--void-color-text);
       }
 
@@ -463,17 +463,18 @@ import iconLogout from '@tabler/icons/outline/logout.svg?raw';
       }
 
       .dash-breadcrumb {
-        font-family: var(--void-font-mono);
-        font-size: var(--void-text-2xs);
-        color: var(--void-color-text-muted);
-        text-transform: uppercase;
-        letter-spacing: var(--void-tracking-widest);
+        font-family: var(--void-type-label-family);
+        font-size: var(--void-type-label-size);
+        font-weight: var(--void-type-label-weight);
+        color: var(--void-type-label-color);
+        text-transform: var(--void-type-label-case);
+        letter-spacing: var(--void-type-label-tracking);
       }
 
       .dash-title {
-        font-size: var(--void-text-md);
-        font-weight: var(--void-weight-semibold);
-        letter-spacing: var(--void-tracking-tight);
+        font-size: var(--void-type-heading-size);
+        font-weight: var(--void-type-heading-weight);
+        letter-spacing: var(--void-type-heading-tracking);
         color: var(--void-color-text);
         line-height: var(--void-leading-tight);
       }
@@ -487,28 +488,37 @@ import iconLogout from '@tabler/icons/outline/logout.svg?raw';
       }
 
       /* ── Stats row ── */
+      /* Figures sit on the page, divided by hairlines; no boxes. */
       .stats-row {
         display: grid;
         grid-template-columns: repeat(4, 1fr);
-        gap: var(--void-space-4);
-        padding: var(--void-space-4) var(--void-space-6);
+        padding: 0 var(--void-space-6);
         border-bottom: 1px solid var(--void-color-border);
         flex-shrink: 0;
       }
 
       .stats-row > void-stat {
-        padding: var(--void-space-4) var(--void-space-5);
-        border: 1px solid var(--void-color-border);
-        border-radius: var(--void-radius-md);
+        padding: var(--void-space-6) var(--void-space-6);
+        border: 0;
+        border-radius: 0;
+        background: transparent;
+      }
+
+      .stats-row > void-stat:first-child {
+        padding-left: 0;
+      }
+
+      .stats-row > void-stat + void-stat {
+        border-left: 1px solid var(--void-color-border);
       }
 
       /* ── Content layout ── */
       .content-area {
         flex: 1;
-        padding: var(--void-space-6);
+        padding: var(--void-gap-stack) var(--void-space-6) var(--void-gap-section);
         display: flex;
         flex-direction: column;
-        gap: var(--void-space-5);
+        gap: var(--void-gap-group);
       }
 
       /* ── Toolbar row ── */
@@ -571,21 +581,18 @@ import iconLogout from '@tabler/icons/outline/logout.svg?raw';
       .charts-grid {
         display: grid;
         grid-template-columns: 2fr 1fr;
-        border: 1px solid var(--void-color-border);
-        border-radius: var(--void-radius-lg);
-        overflow: hidden;
+        gap: var(--void-gap-group);
       }
 
       .chart-panel {
-        background: var(--void-color-bg);
-        padding: var(--void-space-5);
+        min-width: 0;
         display: flex;
         flex-direction: column;
-        gap: var(--void-space-4);
+        gap: var(--void-gap-inside);
       }
 
-      .chart-panel + .chart-panel {
-        border-left: 1px solid var(--void-color-border);
+      .chart-panel void-donut-chart {
+        align-self: center;
       }
 
       .chart-panel-header {
@@ -596,72 +603,48 @@ import iconLogout from '@tabler/icons/outline/logout.svg?raw';
       }
 
       .chart-panel-title {
-        font-size: var(--void-text-sm);
-        font-weight: var(--void-weight-medium);
+        font-size: var(--void-type-heading-size);
+        font-weight: var(--void-type-heading-weight);
         color: var(--void-color-text);
-        letter-spacing: var(--void-tracking-snug);
+        letter-spacing: var(--void-type-heading-tracking);
       }
 
       .chart-panel-meta {
-        font-size: var(--void-text-xs);
-        color: var(--void-color-text-muted);
-        font-family: var(--void-font-mono);
-      }
-
-      .chart-placeholder {
-        flex: 1;
-        min-height: 180px;
-        border: 1px dashed var(--void-color-border-strong);
-        border-radius: var(--void-radius-md);
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        gap: var(--void-space-2);
-        background: var(--void-color-bg-secondary);
-      }
-
-      .chart-placeholder-label {
-        font-family: var(--void-font-mono);
-        font-size: var(--void-text-xs);
-        color: var(--void-color-text-muted);
-        text-transform: uppercase;
-        letter-spacing: var(--void-tracking-widest);
-      }
-
-      .chart-placeholder-sub {
-        font-size: var(--void-text-2xs);
-        color: var(--void-color-text-muted);
-        font-family: var(--void-font-mono);
+        font-family: var(--void-type-label-family);
+        font-size: var(--void-type-label-size);
+        font-weight: var(--void-type-label-weight);
+        color: var(--void-type-label-color);
+        text-transform: var(--void-type-label-case);
+        letter-spacing: var(--void-type-label-tracking);
       }
 
       /* ── Table section ── */
       .table-section {
-        border: 1px solid var(--void-color-border);
-        border-radius: var(--void-radius-lg);
-        overflow: hidden;
+        display: flex;
+        flex-direction: column;
       }
 
       .table-section-header {
-        padding: var(--void-space-3) var(--void-space-5);
-        border-bottom: 1px solid var(--void-color-border);
+        padding: 0 0 var(--void-gap-tight);
         display: flex;
         align-items: center;
         justify-content: space-between;
-        background: var(--void-color-bg-secondary);
       }
 
       .table-section-title {
-        font-size: var(--void-text-sm);
-        font-weight: var(--void-weight-medium);
+        font-size: var(--void-type-heading-size);
+        font-weight: var(--void-type-heading-weight);
         color: var(--void-color-text);
-        letter-spacing: var(--void-tracking-snug);
+        letter-spacing: var(--void-type-heading-tracking);
       }
 
       .table-section-count {
-        font-size: var(--void-text-xs);
-        color: var(--void-color-text-muted);
-        font-family: var(--void-font-mono);
+        font-family: var(--void-type-label-family);
+        font-size: var(--void-type-label-size);
+        font-weight: var(--void-type-label-weight);
+        color: var(--void-type-label-color);
+        text-transform: var(--void-type-label-case);
+        letter-spacing: var(--void-type-label-tracking);
       }
 
       .cell-with-dot {
@@ -755,8 +738,12 @@ import iconLogout from '@tabler/icons/outline/logout.svg?raw';
           grid-template-columns: 1fr;
         }
 
-        .chart-panel + .chart-panel {
-          border-left: none;
+        .stats-row > void-stat:nth-child(odd) {
+          padding-left: 0;
+          border-left: 0;
+        }
+
+        .stats-row > void-stat:nth-child(n + 3) {
           border-top: 1px solid var(--void-color-border);
         }
       }
@@ -847,11 +834,11 @@ import iconLogout from '@tabler/icons/outline/logout.svg?raw';
           <li><a href="/showcase/dashboard/" class="active">Showcase</a></li>
         </ul>
         <div class="site-nav-right">
-          <void-button id="theme-toggle" variant="outline" size="md" aria-label="Toggle theme">
+          <void-button id="theme-toggle" variant="ghost" size="md" aria-label="Toggle theme">
             <span class="theme-icon theme-icon-sun" set:html={iconSun} />
             <span class="theme-icon theme-icon-moon" set:html={iconMoon} />
           </void-button>
-          <void-button variant="outline" size="md">
+          <void-button variant="ghost" size="md">
             <a href="https://github.com/VoidableUI/Voidable" target="_blank">GitHub</a>
           </void-button>
         </div>
@@ -994,14 +981,12 @@ import iconLogout from '@tabler/icons/outline/logout.svg?raw';
             value="99.97%"
             delta="+0.02%"
             trend="up"
-            color="success"
           ></void-stat>
           <void-stat
             label="Latency"
             value="42ms"
             delta="-3ms"
             trend="up"
-            color="success"
           ></void-stat>
           <void-stat
             label="Requests"
@@ -1014,7 +999,6 @@ import iconLogout from '@tabler/icons/outline/logout.svg?raw';
             value="0.03%"
             delta="+0.01%"
             trend="down"
-            color="error"
           ></void-stat>
         </div>
 
@@ -1080,16 +1064,7 @@ import iconLogout from '@tabler/icons/outline/logout.svg?raw';
                 <span class="chart-panel-title">Request Volume</span>
                 <span class="chart-panel-meta">requests / min · last 7 days</span>
               </div>
-              <div class="chart-placeholder" style="min-height: 220px;">
-                <svg width="28" height="28" viewBox="0 0 28 28" fill="none" opacity="0.2">
-                  <rect x="2" y="14" width="4" height="12" rx="1" fill="currentColor"/>
-                  <rect x="8" y="8" width="4" height="18" rx="1" fill="currentColor"/>
-                  <rect x="14" y="4" width="4" height="22" rx="1" fill="currentColor"/>
-                  <rect x="20" y="10" width="4" height="16" rx="1" fill="currentColor"/>
-                </svg>
-                <span class="chart-placeholder-label">Request Volume Chart</span>
-                <span class="chart-placeholder-sub">chart component not yet available</span>
-              </div>
+              <void-line-chart id="chart-requests" height="240" aria-label="Requests per minute over the last seven days"></void-line-chart>
             </div>
 
             <div class="chart-panel">
@@ -1097,14 +1072,7 @@ import iconLogout from '@tabler/icons/outline/logout.svg?raw';
                 <span class="chart-panel-title">Error Distribution</span>
                 <span class="chart-panel-meta">by status code</span>
               </div>
-              <div class="chart-placeholder" style="min-height: 220px;">
-                <svg width="28" height="28" viewBox="0 0 28 28" fill="none" opacity="0.2">
-                  <circle cx="14" cy="14" r="11" stroke="currentColor" stroke-width="2" fill="none"/>
-                  <path d="M14 3 A11 11 0 0 1 25 14" stroke="currentColor" stroke-width="2" fill="none"/>
-                </svg>
-                <span class="chart-placeholder-label">Error Distribution Chart</span>
-                <span class="chart-placeholder-sub">chart component not yet available</span>
-              </div>
+              <void-donut-chart id="chart-errors" size="200" variant="outline" show-total aria-label="Errors by status code"></void-donut-chart>
             </div>
           </div>
 
@@ -1115,13 +1083,7 @@ import iconLogout from '@tabler/icons/outline/logout.svg?raw';
                 <span class="chart-panel-title">Revenue</span>
                 <span class="chart-panel-meta">USD · cumulative</span>
               </div>
-              <div class="chart-placeholder" style="min-height: 160px;">
-                <svg width="28" height="28" viewBox="0 0 28 28" fill="none" opacity="0.2">
-                  <polyline points="2,22 8,16 14,10 20,14 26,6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-                </svg>
-                <span class="chart-placeholder-label">Revenue Chart</span>
-                <span class="chart-placeholder-sub">chart component not yet available</span>
-              </div>
+              <void-line-chart id="chart-revenue" height="200" aria-label="Cumulative revenue in US dollars"></void-line-chart>
             </div>
 
             <div class="chart-panel">
@@ -1129,16 +1091,7 @@ import iconLogout from '@tabler/icons/outline/logout.svg?raw';
                 <span class="chart-panel-title">Active Users</span>
                 <span class="chart-panel-meta">MAU · rolling 30d</span>
               </div>
-              <div class="chart-placeholder" style="min-height: 160px;">
-                <svg width="28" height="28" viewBox="0 0 28 28" fill="none" opacity="0.2">
-                  <rect x="2" y="10" width="4" height="16" rx="1" fill="currentColor"/>
-                  <rect x="8" y="6" width="4" height="20" rx="1" fill="currentColor"/>
-                  <rect x="14" y="12" width="4" height="14" rx="1" fill="currentColor"/>
-                  <rect x="20" y="4" width="4" height="22" rx="1" fill="currentColor"/>
-                </svg>
-                <span class="chart-placeholder-label">Active Users Chart</span>
-                <span class="chart-placeholder-sub">chart component not yet available</span>
-              </div>
+              <void-bar-chart id="chart-users" height="200" variant="outline" aria-label="Monthly active users"></void-bar-chart>
             </div>
           </div>
 
@@ -1148,7 +1101,7 @@ import iconLogout from '@tabler/icons/outline/logout.svg?raw';
               <span class="table-section-title">Recent Activity</span>
               <div style="display:flex; align-items:center; gap:var(--void-space-4);">
                 <span class="table-section-count">24 events</span>
-                <void-button variant="outline" size="md">View all</void-button>
+                <void-button variant="ghost" size="sm">View all</void-button>
               </div>
             </div>
 
@@ -1255,6 +1208,36 @@ import iconLogout from '@tabler/icons/outline/logout.svg?raw';
         const current = html.getAttribute('data-theme');
         html.setAttribute('data-theme', current === 'dark' ? 'light' : 'dark');
         syncTheme();
+      });
+
+      // Chart data is a property, so it is set from script.
+      const setData = (id: string, data: unknown) => {
+        const el = document.getElementById(id) as (HTMLElement & { data: unknown }) | null;
+        if (el) el.data = data;
+      };
+      const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+      setData('chart-requests', {
+        labels: days,
+        series: [
+          { name: 'Requests', values: [16400, 18900, 18100, 21300, 20600, 14800, 13200] },
+          { name: 'Cached', values: [6100, 7400, 7000, 8800, 8300, 6200, 5600] },
+        ],
+      });
+      setData('chart-errors', {
+        segments: [
+          { name: '404', value: 212 },
+          { name: '429', value: 96 },
+          { name: '500', value: 41 },
+          { name: '503', value: 18 },
+        ],
+      });
+      setData('chart-revenue', {
+        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+        series: [{ name: 'Revenue', values: [18200, 39400, 61800, 88100, 117500, 149300] }],
+      });
+      setData('chart-users', {
+        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+        series: [{ name: 'Active users', values: [8200, 8900, 9700, 10400, 11800, 12600] }],
       });
 
       themeSwitch?.addEventListener('void-change', () => {

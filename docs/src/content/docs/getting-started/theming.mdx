@@ -1,30 +1,194 @@
 ---
 title: Theming
+description: Retheme Voidable by setting about a dozen knobs. What each knob does, three copy-paste themes, theming a subtree, type roles and layout rhythm, with live examples.
 ---
 
-Voidable separates structure from style. Components ship with **zero visual CSS** — all appearance is driven by `--void-*` CSS custom properties defined in `@voidable/theme`.
+import KnobPlayground from '../../../components/KnobPlayground.astro';
+import ThemeDemo from '../../../components/ThemeDemo.astro';
 
-## Token architecture
+Voidable separates structure from style. Components ship with **zero visual CSS**: all appearance comes from `--void-*` CSS custom properties defined in `@voidable/theme`.
 
-The theme is organized into three tiers:
+The theme is built to be rethemed by changing a handful of inputs, by a person or by an AI agent. You do not edit hundreds of tokens. You set **knobs**, and every colour, size, radius and duration is derived from them in plain CSS, in both colour schemes, with no build step.
 
-1. **Primitives** (`primitives.css`) — Raw scales for colors (`--void-stone-500`), spacing (`--void-space-4`), typography, border radius, shadows, motion, and z-index. No semantic meaning.
-2. **Semantic tokens** (`tokens.css`) — Purpose-driven properties like `--void-color-bg`, `--void-color-text`, `--void-color-border`. These reference primitives and change based on the active theme.
-3. **Component styles** — Per-component CSS files that consume semantic tokens.
+## The knobs
 
-## Dark and light mode
+Set these on `:root`. Everything else follows.
 
-Dark mode is the **default**. Switch themes by setting the `data-theme` attribute on `<html>`:
-
-```html
-<!-- Dark (default) -->
-<html data-theme="dark">
-
-<!-- Light -->
-<html data-theme="light">
+```css
+:root {
+  --void-accent-hue: 250;       /* blue */
+  --void-accent-chroma: 0.16;   /* 0 = no accent colour (the default) */
+  --void-radius: 8px;
+}
 ```
 
-Toggle with JavaScript:
+| Knob | Default | What it changes |
+|---|---|---|
+| `--void-accent-hue` | `250` | Hue of the accent, as an OKLCH angle in degrees: 30 red, 60 orange, 90 yellow, 150 green, 200 teal, 250 blue, 300 purple, 350 pink. Has no effect while chroma is 0. |
+| `--void-accent-chroma` | `0` | How colourful the accent is. `0` means no accent colour: primary buttons, selection and switches are the inverse of the page (white on black, black on white). `0.10` to `0.20` gives a coloured accent. Lightness is chosen for you in each scheme so the accent keeps 4.5:1 as text and under text. |
+| `--void-neutral-hue` | `60` | Hue of the greys: text, borders and surfaces. |
+| `--void-neutral-chroma` | `0.004` | Tint of the greys. `0` is pure grey, `0.004` is barely warm, `0.02` is clearly tinted. Capped at `0.04`. |
+| `--void-page-tint` | `0` | How much of the neutral tint the page background takes, 0 to 1. `0` is a pure black or pure white page. `1` is off-white paper in light and a lifted near-black in dark. |
+| `--void-contrast` | `0.2` | Strength of secondary text and control borders, 0 to 1. `0` is the softest setting that still meets WCAG AA; `1` is the strongest. Values outside the range are clamped, so no setting takes text below 4.5:1. `prefers-contrast: more` raises it to 1. |
+| `--void-chrome` | `0.3` | How much the containers draw, 0 to 1: the strength of divider lines and the fill of cards and panels. `0` is faint hairlines and no fills, `1` is clear lines and visibly filled containers. |
+| `--void-radius` | `4px` | Corner radius of a control. Smaller and larger radii scale from it. `0px` is square; `999px` makes controls pills (cards and dialogs stop at 24 to 32px). |
+| `--void-density` | `1` | Size of things inside components: control height (36px at 1), padding and the spacing scale. `0.8` is compact, `1.15` is roomy. |
+| `--void-rhythm` | `1` | Space between groups and sections of a page, independent of density. |
+| `--void-font-size` | `0.875rem` | Body text size. Every other text size scales from it. |
+| `--void-font-sans`, `--void-font-mono` | Inter, JetBrains Mono | Typefaces. The theme names them but ships no font files: load them yourself (for example `@fontsource-variable/inter`), or the next family in each stack is used. |
+| `--void-anim-scale` | `1` | Multiplies every duration. `0` switches animation off. `prefers-reduced-motion` sets it to 0. |
+
+The knobs are declared, with the same explanations, in `@voidable/theme/knobs` (`src/knobs.css`).
+
+### Try them
+
+Move a knob and the preview follows. Nothing below is special-cased: the sliders set custom properties on the preview's wrapper, and the theme derives the rest. The CSS underneath is what to paste into your stylesheet.
+
+<KnobPlayground />
+
+## Writing a theme
+
+A theme is a file that sets knobs and nothing else. The package ships three as examples; each is about a dozen lines.
+
+```css
+/* themes/dune.css — warm, rounded, comfortable */
+[data-void-theme="dune"] {
+  --void-accent-hue: 40;
+  --void-accent-chroma: 0.15;
+  --void-neutral-hue: 70;
+  --void-neutral-chroma: 0.025;
+  --void-page-tint: 1;
+  --void-contrast: 0.3;
+  --void-chrome: 0.9;
+  --void-radius: 10px;
+  --void-density: 1.12;
+  --void-rhythm: 1.1;
+  --void-font-size: 0.9375rem;
+}
+```
+
+```css
+@import '@voidable/theme';
+@import '@voidable/theme/themes/dune.css';
+```
+
+```html
+<html data-void-theme="dune">
+```
+
+| Theme | Character |
+|---|---|
+| `void` | The default, written out: monochrome, hairlines, 4px corners, 36px controls. |
+| `dune` | Warm, rounded, comfortable: a terracotta accent, sand-tinted greys on a soft page, filled containers. |
+| `console` | Dense and sharp: square corners, compact controls, a signal-green accent, monospace throughout. |
+
+Every theme works in dark and in light. You do not write a second block for light: both schemes are the same formulas.
+
+The same components under each theme, live. Switch the site between dark and light to see the other half.
+
+<div class="vd-themes not-content">
+  {['void', 'dune', 'console'].map((theme) => (
+    <div class="vd-themed" data-void-theme={theme}>
+      <span data-void-type="label">{theme}</span>
+      <div class="vd-stack">
+        <span><span data-void-type="value">41</span> <span data-void-type="unit">of 44</span></span>
+        <span data-void-type="caption">Stations online</span>
+      </div>
+      <void-input value="Kiruna 3" aria-label="Station name"></void-input>
+      <div class="vd-row">
+        <void-checkbox checked>X band</void-checkbox>
+        <void-switch checked aria-label="Accept passes"></void-switch>
+        <void-badge variant="outline" color="success">Online</void-badge>
+      </div>
+      <div class="vd-row">
+        <void-button variant="filled">Save</void-button>
+        <void-button variant="ghost">Cancel</void-button>
+      </div>
+    </div>
+  ))}
+</div>
+
+The other two, to copy:
+
+```css
+/* themes/void.css — the default, written out */
+[data-void-theme="void"] {
+  --void-accent-hue: 250;
+  --void-accent-chroma: 0;
+  --void-neutral-hue: 60;
+  --void-neutral-chroma: 0.004;
+  --void-page-tint: 0;
+  --void-contrast: 0.2;
+  --void-chrome: 0.3;
+  --void-radius: 4px;
+  --void-density: 1;
+  --void-rhythm: 1;
+  --void-font-size: 0.875rem;
+}
+```
+
+```css
+/* themes/console.css — dense, sharp, monospace */
+[data-void-theme="console"] {
+  --void-accent-hue: 155;
+  --void-accent-chroma: 0.17;
+  --void-neutral-hue: 240;
+  --void-neutral-chroma: 0.012;
+  --void-contrast: 0.45;
+  --void-chrome: 0.5;
+  --void-radius: 0px;
+  --void-density: 0.8;
+  --void-rhythm: 0.7;
+  --void-font-size: 0.8125rem;
+  --void-font-sans: 'JetBrains Mono', ui-monospace, 'SF Mono', 'Fira Code', monospace;
+}
+```
+
+### Contrast is checked for you
+
+`mise run lint:contrast` evaluates the derived colours for the default knobs, for every file in `themes/`, and for the extremes of each colour knob, in both schemes. It fails if any text pair drops below 4.5:1 or any control border below 3:1, and if a theme file sets anything other than a knob.
+
+## Theming part of a page
+
+Knobs can be set on any element that carries the `data-void-theme` attribute (with a theme name, or empty). Everything under it is restyled:
+
+```html
+<section data-void-theme style="--void-radius: 0px; --void-density: 0.85">
+  …square, compact controls in here…
+</section>
+
+<aside data-void-theme="console">…a console-themed panel…</aside>
+```
+
+Live: the first box sets two knobs inline, the second names a theme, and the third nests a light region inside a themed one. The page around them is untouched.
+
+<div class="vd-themes not-content">
+  <div class="vd-themed" data-void-theme style="--void-radius: 0px; --void-density: 0.85">
+    <span data-void-type="label">Inline knobs</span>
+    <void-input value="Square and compact" aria-label="Example"></void-input>
+    <div class="vd-row"><void-button variant="filled">Save</void-button><void-button>Schedule</void-button></div>
+  </div>
+  <div class="vd-themed" data-void-theme="dune">
+    <span data-void-type="label">A named theme</span>
+    <void-input value="Warm and rounded" aria-label="Example"></void-input>
+    <div class="vd-row"><void-button variant="filled">Save</void-button><void-button>Schedule</void-button></div>
+  </div>
+  <div class="vd-themed" data-void-theme="dune" data-theme="light">
+    <span data-void-type="label">Theme + light scheme</span>
+    <void-input value="Always light" aria-label="Example"></void-input>
+    <div class="vd-row"><void-button variant="filled">Save</void-button><void-button>Schedule</void-button></div>
+  </div>
+</div>
+
+The attribute matters. Custom properties that are computed from other custom properties are resolved where they are declared, so the theme re-declares its derived tokens on `:root` and on every element with `data-theme`, `data-void-theme` or `data-shape`. A knob set on an element without one of those attributes changes nothing below it.
+
+## Dark and light
+
+Dark is the **default**. Set `data-theme` on `<html>`, or on any element, to choose a scheme explicitly; without it, the page follows the operating system.
+
+```html
+<html data-theme="light">
+```
 
 ```js
 function toggleTheme() {
@@ -33,22 +197,129 @@ function toggleTheme() {
 }
 ```
 
-All framework adapters provide a reactive theme primitive that tracks this attribute automatically.
+All framework adapters provide a reactive theme primitive that tracks this attribute.
 
-## Customizing tokens
+## Shape
 
-Override any token with CSS custom properties. Changes cascade to all components:
+`data-shape="sharp"` on any element zeroes every radius under it; `data-shape="curvy"` restores the theme's radius. It is a preset for the radius knob.
+
+## Type roles
+
+Text in an interface does a small number of jobs. Each job is a **role**: a group of tokens for family, size, line height, weight, tracking, case, colour and numeric features. Components use the roles, and one attribute applies a role to your own markup:
+
+```html
+<span data-void-type="label">Stations online</span>
+<span data-void-type="value">41</span> <span data-void-type="unit">of 44</span>
+<span data-void-type="caption">2 in maintenance, 1 degraded</span>
+```
+
+| Role | Job | Default |
+|---|---|---|
+| `label` | The small quiet name of a thing: table headers, stat labels, crumbs, section meta | Mono, 11px, medium, uppercase, 0.08em tracking, secondary colour |
+| `value` | The number or word a stat is about | Sans, 30px, regular, tabular figures (`data-size="sm"` and `"lg"` for 20px and 36px) |
+| `unit` | Set after a value: "TB", "ms", "of 44" | 14px, secondary colour |
+| `caption` | The supporting line under a value, field or row | 12px, secondary colour |
+| `heading` | A section heading | 18px, medium |
+| `title` | The page title | 24px, medium |
+| `body` | Running text | 14px, line height 1.5 |
+| `code` | Ids, configuration, anything typed exactly | Mono, 13px, tabular figures |
+
+Each role, live:
+
+<div class="vd-example not-content">
+  <div class="vd-roles">
+    <span data-void-type="code">label</span><span data-void-type="label">Stations online</span>
+    <span data-void-type="code">value</span><span><span data-void-type="value">79.6</span> <span data-void-type="unit">TB</span></span>
+    <span data-void-type="code">unit</span><span data-void-type="unit">of 44</span>
+    <span data-void-type="code">caption</span><span data-void-type="caption">2 in maintenance, 1 degraded</span>
+    <span data-void-type="code">title</span><span data-void-type="title">Ground network</span>
+    <span data-void-type="code">heading</span><span data-void-type="heading">Upcoming passes</span>
+    <span data-void-type="code">body</span><span data-void-type="body">A station joins the schedule once its first calibration pass succeeds.</span>
+    <span data-void-type="code">code</span><span data-void-type="code">mrd_live_9f2c…e41a</span>
+  </div>
+</div>
+
+Restyle a role once and it changes everywhere, in components and in your markup:
 
 ```css
 :root {
-  /* Use a blue accent instead of the default monochrome */
-  --void-color-accent: #3b82f6;
-  --void-color-accent-hover: #2563eb;
-
-  /* Adjust border radius globally */
-  --void-radius-md: 12px;
+  --void-type-label-family: var(--void-font-sans);
+  --void-type-label-case: none;
+  --void-type-heading-weight: var(--void-weight-bold);
 }
 ```
+
+Role tokens are the second layer of theming, below the knobs: reach for them when a knob cannot express what you want.
+
+## Design values
+
+The default look is light and airy, and it gets there with three decisions. Each is a knob, so a theme can move it.
+
+**Control size: modest** (`--void-density`). Controls are 36px tall and every control shares the height of its size step, so a mixed row lines up:
+
+<div class="vd-example not-content">
+  <div class="vd-row">
+    <void-input placeholder="Search stations" style="width: 14rem"></void-input>
+    <void-select aria-label="Region"><option>All regions</option></void-select>
+    <void-segmented-control value="all" aria-label="State">
+      <void-segmented-control-item value="all">All</void-segmented-control-item>
+      <void-segmented-control-item value="online">Online</void-segmented-control-item>
+    </void-segmented-control>
+    <void-button>Schedule</void-button>
+    <void-button variant="filled">Add station</void-button>
+  </div>
+</div>
+
+**Layout rhythm: generous** (`--void-rhythm`). The space between groups is several times the space inside them. That is where the airiness comes from, and it belongs to the page layout, not to components.
+
+**Chrome: minimal** (`--void-chrome`). Hairlines instead of boxes, containers with a fill you can barely see, tables and lists directly on the page, and shadows only for things that overlap it. The screen below has no box in it:
+
+<div class="vd-example not-content">
+  <ThemeDemo />
+</div>
+
+## Layout rhythm
+
+The theme provides the distances as tokens, for your page layout:
+
+| Token | Default | Use |
+|---|---|---|
+| `--void-gap-tight` | 8px | A label to its control, an icon to its text |
+| `--void-gap-inside` | 16px | Items in a row or a group |
+| `--void-gap-stack` | 24px | Blocks stacked in a group: fields in a form |
+| `--void-gap-group` | 40px | Between groups |
+| `--void-gap-section` | 72px | Between sections of a page |
+| `--void-gutter` | 16 to 48px | Page side padding, by viewport width |
+| `--void-measure` | 34rem | Line length for running text |
+| `--void-measure-page` | 72rem | Width of a page column |
+
+The first three follow `--void-density`; the group, section and gutter distances follow `--void-rhythm`.
+
+To scale:
+
+<div class="vd-example not-content">
+  <div class="vd-rhythm">
+    {['tight', 'inside', 'stack', 'group', 'section'].map((gap) => (
+      <>
+        <span data-void-type="code">{`--void-gap-${gap}`}</span>
+        <span class="vd-rhythm-bar" style={`width: var(--void-gap-${gap})`}></span>
+        <span></span>
+      </>
+    ))}
+  </div>
+</div>
+
+## Overriding a single token
+
+Any derived token can still be overridden directly. Put the override on the same elements the theme derives on, so it also holds inside nested scheme or theme regions:
+
+```css
+:root, [data-theme], [data-void-theme] {
+  --void-color-success: #22c55e;
+}
+```
+
+Prefer a knob where one exists: an override is one value, a knob moves everything that depends on it.
 
 ## Importing the theme
 
@@ -58,10 +329,16 @@ Full theme (recommended):
 @import '@voidable/theme';
 ```
 
-Individual layers for fine-grained control:
+Individual layers:
 
 ```css
-@import '@voidable/theme/primitives';
-@import '@voidable/theme/tokens';
+@import '@voidable/theme/primitives'; /* fixed palettes and scales */
+@import '@voidable/theme/knobs';      /* the inputs */
+@import '@voidable/theme/tokens';     /* everything derived from them */
 @import '@voidable/theme/reset';
+@import '@voidable/theme/type';       /* data-void-type roles */
 ```
+
+## Browser support
+
+The derivation uses `oklch()`, `color-mix()` and `calc()` inside both: Chrome 111, Firefox 113 and Safari 16.2, all released in 2023. It does not use relative colour syntax or `light-dark()`.

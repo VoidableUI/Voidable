@@ -1,0 +1,111 @@
+/* Live examples in the docs. Layout only: everything visual comes from the
+   theme. Each wrapper also carries Starlight's `not-content` class so the
+   prose styles do not reach into the example. */
+
+/* A themed region: carries data-void-theme (named, or empty with knobs set
+   inline), so the tokens under it are derived again, and paints its own
+   page colour. */
+.vd-themed {
+  background: var(--void-color-bg);
+  color: var(--void-color-text);
+  font-family: var(--void-font-sans);
+  font-size: var(--void-text-base);
+  line-height: var(--void-leading-normal);
+  border: 1px solid var(--void-color-border);
+  border-radius: var(--void-radius-xl);
+  padding: var(--void-space-6);
+  margin-block: var(--void-gap-stack);
+}
+
+/* A plain example on the docs page itself. */
+.vd-example {
+  display: flex;
+  flex-direction: column;
+  gap: var(--void-gap-stack);
+  padding: var(--void-space-6) 0;
+  margin-block: var(--void-gap-stack);
+  border-top: 1px solid var(--void-color-border);
+  border-bottom: 1px solid var(--void-color-border);
+  font-size: var(--void-text-base);
+}
+
+.vd-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--void-gap-tight);
+}
+
+.vd-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--void-gap-tight);
+}
+
+/* Three themes side by side. */
+.vd-themes {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--void-gap-inside);
+  margin-block: var(--void-gap-stack);
+}
+
+.vd-themes > .vd-themed {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--void-gap-stack);
+}
+
+@media (max-width: 50rem) {
+  .vd-themes {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* The type roles, one per row: the role's name, then a sample set in it. */
+.vd-roles {
+  display: grid;
+  grid-template-columns: 6rem minmax(0, 1fr);
+  align-items: baseline;
+  gap: var(--void-space-4) var(--void-gap-inside);
+}
+
+/* Layout rhythm, drawn to scale: a bar as long as each distance. */
+.vd-rhythm {
+  display: grid;
+  grid-template-columns: 9rem auto 1fr;
+  align-items: center;
+  gap: var(--void-space-3) var(--void-gap-inside);
+}
+
+.vd-rhythm-bar {
+  height: var(--void-space-2);
+  border-radius: var(--void-radius-full);
+  background: var(--void-color-text);
+}
+
+/* Starlight's own chrome, in the theme's terms: no fills, hairlines only. */
+.sl-markdown-content :is(h1, h2, h3, h4) {
+  font-weight: var(--void-weight-medium);
+  letter-spacing: var(--void-tracking-tight);
+}
+
+h1#_top {
+  font-weight: var(--void-weight-medium);
+  letter-spacing: var(--void-tracking-tighter);
+}
+
+/* Token and knob names in the first column of a table stay on one line. */
+.sl-markdown-content td:first-child code {
+  white-space: nowrap;
+}
+
+/* The current page in the sidebar is a quiet fill, not an inverted slab. */
+.sidebar-content a[aria-current='page'],
+.sidebar-content a[aria-current='page']:hover,
+.sidebar-content a[aria-current='page']:focus {
+  background-color: var(--void-color-bg-hover);
+  color: var(--void-color-text);
+  font-weight: var(--void-weight-medium);
+}
