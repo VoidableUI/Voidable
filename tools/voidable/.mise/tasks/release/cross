@@ -2,6 +2,8 @@
 #MISE description="Cross-compile voidable for linux/amd64, linux/arm64, darwin/arm64, windows/amd64 (local only, nothing is published)"
 #MISE depends=["build:manifest"]
 set -euo pipefail
+# Use the mise-pinned Go even when another go precedes it on PATH (mise sets GOROOT).
+if [[ -n "${GOROOT:-}" ]]; then export PATH="$GOROOT/bin:$PATH"; fi
 
 cd "$(dirname "$0")/../../.."
 version="$(sed -n 's/.*"version": *"\([^"]*\)".*/\1/p' internal/infra/embedded/data/manifest/components.json | head -1)"

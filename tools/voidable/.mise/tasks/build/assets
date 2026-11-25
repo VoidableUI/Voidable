@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+#MISE description="Copy the built @voidable/ui bundle, lit and theme CSS into the Go embed directory (for -tags assets)"
+#MISE depends=["build:manifest"]
+set -euo pipefail
+
+here="$(cd "$(dirname "$0")/../../.." && pwd)"
+root="$(cd "$here/../.." && pwd)"
+out="$here/internal/infra/embedded/data/assets"
+mkdir -p "$out/ui" "$out/lit" "$out/theme"
+
+copy_js() { # copy_js <src dir> <dest dir>: production ES modules only
+  (cd "$1" && find . -name '*.js' -not -path './development/*' -not -path './node/*' \
+     -not -path './node_modules/*' -exec cp --parents {} "$2" \;)
+}
+
+copy_js "$root/packages/ui/dist" "$out/ui"
+lit="$(readlink -f "$root/packages/ui/node_modules/lit")"
+store="$(dirname "$lit")"
+for pkg in lit lit-html lit-element @lit/reactive-element; do
+  mkdir -p "$out/lit/$pkg"
+  copy_js "$store/$pkg" "$out/lit/$pkg"
+done
+(cd "$root/packages/theme/src" && find . -name '*.css' -exec cp --parents {} "$out/theme" \;)
+
+cat > "$out/importmap.json" <<'JSON'
+{
+  "imports": {
+    "@voidable/ui": "./ui/index.js",
+    "@voidable/ui/": "./ui/",
+    "lit": "./lit/lit/index.js",
+    "lit/": "./lit/lit/",
+    "lit-html": "./lit/lit-html/lit-html.js",
+    "lit-html/": "./lit/lit-html/",
+    "lit-element": "./lit/lit-element/index.js",
+    "lit-element/": "./lit/lit-element/",
+    "@lit/reactive-element": "./lit/@lit/reactive-element/reactive-element.js",
+    "@lit/reactive-element/": "./lit/@lit/reactive-element/"
+  }
+}
+JSON
+du -sh "$out"

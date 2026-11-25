@@ -8,6 +8,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/spf13/cobra"
 
@@ -16,7 +17,7 @@ import (
 
 // NewCmd creates the install subcommand.
 func NewCmd(assets domain.AssetSource) *cobra.Command {
-	var dir string
+	var dir, baseURL string
 	var force bool
 	cmd := &cobra.Command{
 		Use:   "install --dir <path>",
@@ -36,21 +37,25 @@ func NewCmd(assets domain.AssetSource) *cobra.Command {
 			if err != nil {
 				return err
 			}
-			if _, err := fmt.Fprintf(cmd.OutOrStdout(), "wrote %d files under %s\nadd to your layout:\n%s", n, dir, usage); err != nil {
+			im, err := fs.ReadFile(src, "importmap.json")
+			if err != nil {
 				return err
 			}
-			return nil
+			// Browsers do not load external import maps, so print it for
+			// inlining, with paths made absolute under the served URL.
+			base := strings.TrimSuffix(baseURL, "/") + "/"
+			inline := strings.ReplaceAll(string(im), `"./`, `"`+base)
+			_, err = fmt.Fprintf(cmd.OutOrStdout(),
+				"wrote %d files under %s\nadd to your layout <head> (serve %s at %s):\n<link rel=\"stylesheet\" href=\"%stheme/index.css\">\n<script type=\"importmap\">\n%s</script>\n<script type=\"module\">import '@voidable/ui';</script>\n",
+				n, dir, dir, base, base, inline)
+			return err
 		},
 	}
 	cmd.Flags().StringVar(&dir, "dir", "", "Target directory, e.g. public/vendor/voidable or priv/static/vendor/voidable")
 	cmd.Flags().BoolVar(&force, "force", false, "Overwrite existing files")
+	cmd.Flags().StringVar(&baseURL, "url", "/vendor/voidable/", "URL path the directory is served at (for the printed import map)")
 	return cmd
 }
-
-const usage = `  <link rel="stylesheet" href="/vendor/voidable/theme/index.css">
-  <script type="importmap" src="/vendor/voidable/importmap.json"></script>  (or inline its contents)
-  <script type="module">import '@voidable/ui';</script>
-`
 
 func write(ctx context.Context, src fs.FS, dir string, force bool) (int, error) {
 	n := 0
