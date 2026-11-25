@@ -18,7 +18,27 @@ Each component page has the same sections: a description, a live example with it
 
 ## Use the `voidable` tool
 
-The `voidable` command-line tool carries the same knowledge, offline, and checks what you write. It is built from `tools/voidable` in the repository with `mise run build:go`.
+The `voidable` command-line tool carries the same knowledge, offline, and checks what you write. It is one static binary: it needs no Go and no Node.
+
+### Install it
+
+On Linux or macOS, the installer downloads the binary for your OS and CPU from the latest [GitHub release](https://github.com/VoidableUI/Voidable/releases), refuses to continue unless its SHA-256 matches the release's `checksums.txt`, and puts it in `~/.local/bin` (no `sudo`):
+
+```bash
+curl -fsSL https://voidable.dev/install.sh | sh
+```
+
+Pass a release and a directory with `sh -s -- --version X.Y.Z --dir <path>`. `voidable version` prints what you have.
+
+To do it by hand, download `voidable_<os>_<arch>.tar.gz` (`.zip` on Windows) for `linux`, `darwin` or `windows` on `amd64` or `arm64` from the release page, compare its SHA-256 with `checksums.txt`, unpack it and put `voidable` on your `PATH`. Each archive has a signed build-provenance attestation that records which commit and workflow built it:
+
+```bash
+gh attestation verify voidable_linux_amd64.tar.gz --repo VoidableUI/Voidable
+```
+
+The tool is not installable with `go install`: the library files it embeds are build output, not committed source.
+
+### Commands
 
 | Command | Does |
 | --- | --- |
@@ -27,6 +47,25 @@ The `voidable` command-line tool carries the same knowledge, offline, and checks
 | `voidable gen snippet <tag> --lang html\|jsx\|erb\|heex\|blade` | Prints a working example of one element in the language you are writing. |
 | `voidable mcp` | Serves the same three as MCP tools (`voidable_ref`, `voidable_check`, `voidable_snippet`) plus the skill, over stdio. |
 | `voidable skill install` | Writes the Agent Skill into `.claude/skills/voidable`, for clients that load skills from disk. |
+| `voidable install --dir <path>` | Writes the built library, `lit` and the theme into a project, for pages with no bundler. See [Loading components](/getting-started/loading/). |
+| `voidable version` | Prints the version, commit and build date. Makes no network call; no command does. |
+
+### Connect it to an agent over MCP
+
+An MCP client starts `voidable mcp` itself, so it has to find the binary: either `voidable` is on the `PATH` the client runs with (the installer's `~/.local/bin` often is not, for editors started from a launcher), or the configuration gives the absolute path. For Claude Code:
+
+```bash
+claude mcp add voidable -- voidable mcp
+claude mcp add voidable -- /home/you/.local/bin/voidable mcp   # when it is not on the client's PATH
+```
+
+Most other clients take the same thing as JSON:
+
+```json
+{ "mcpServers": { "voidable": { "command": "/home/you/.local/bin/voidable", "args": ["mcp"] } } }
+```
+
+Run `voidable skill install` in a project to write the skill to `.claude/skills/voidable` as well.
 
 Run `voidable check` on every file you write, and fix what it reports before showing the result. Run `import '@voidable/ui/dev'` in development so the browser reports what static checking cannot (see [Development warnings](/getting-started/development-warnings/)).
 
