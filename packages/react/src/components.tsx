@@ -1,4 +1,10 @@
-import React, { forwardRef, useRef, useEffect } from 'react';
+'use client';
+
+import React, { forwardRef, useCallback, useEffect, useLayoutEffect, useRef } from 'react';
+
+// Registers every `<void-*>` custom element (idempotent `customElements.define`
+// guards live in the core package). See README "Element registration".
+import '@voidable/ui';
 
 import type {
   VoidBadge,
@@ -75,11 +81,33 @@ import type {
   VoidNavMenuItem,
   VoidColorPicker,
   VoidActionInput,
+  VoidBarChart,
+  VoidLineChart,
+  VoidDonutChart,
+  VoidGauge,
+  BarChartData,
+  LineChartData,
+  DonutChartData,
+  GaugeData,
+  GaugeZone,
 } from '@voidable/ui';
+
+export type { BarChartData, LineChartData, DonutChartData, GaugeData, GaugeZone };
 
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
+
+type TagValue = string | { text: string; color?: string };
+
+/**
+ * Typed `onVoid*` props. Keys are the PascalCase custom-event suffix
+ * (`Change` -> `onVoidChange` -> `void-change`), values are the `detail`
+ * payload the core component dispatches (`null` when it dispatches no detail).
+ */
+export type VoidEvents<M> = {
+  [K in keyof M & string as `onVoid${K}`]?: (event: CustomEvent<M[K]>) => void;
+};
 
 type VoidProps<P = object> = P &
   Omit<React.HTMLAttributes<HTMLElement>, keyof P> & {
@@ -87,64 +115,162 @@ type VoidProps<P = object> = P &
   };
 
 // ---------------------------------------------------------------------------
-// useWcEvents — separate onVoidX event props, attach via addEventListener
+// Prop routing
+//
+// React 18 writes every prop on a custom element as an attribute; React 19
+// writes it as a property when the element has one. To behave identically on
+// both we decide ourselves:
+//   - `onVoid*`            -> addEventListener
+//   - booleans, objects,
+//     arrays, functions,
+//     null, camelCase keys -> element properties, set in a layout effect.
+//                             Lit's Boolean converter reads any present
+//                             attribute (even "false") as true, arrays and
+//                             objects would stringify, and camelCase keys
+//                             like `firstDay` would become `firstday`
+//                             instead of the `first-day` attribute.
+//   - lowercase strings
+//     and numbers          -> normal attributes (SSR friendly, selectors like
+//                             void-button[variant] match before hydration)
+//   - className            -> `class`
+//   - ARIA/data/global
+//     attributes, DOM
+//     handlers (onClick)   -> passed to React untouched.
 // ---------------------------------------------------------------------------
 
-/** Convert camelCase event name to kebab-case custom-event name.
- *  e.g. "onVoidChange" -> "void-change", "onVoidTabClick" -> "void-tab-click"
- */
-function toEventName(prop: string): string {
-  // Strip leading "on" and lowercase the first char
-  const stripped = prop.slice(2);
-  // Insert hyphens before uppercase chars then lowercase everything
-  return stripped.replace(/([A-Z])/g, '-$1').toLowerCase().replace(/^-/, '');
-}
+const PASSTHROUGH = new Set([
+  'children', 'style', 'id', 'slot', 'title', 'role', 'hidden', 'tabIndex',
+  'lang', 'dir', 'draggable', 'part', 'class', 'className',
+  'suppressHydrationWarning', 'suppressContentEditableWarning',
+]);
 
 function isEventProp(key: string): boolean {
   return /^onVoid[A-Z]/.test(key);
 }
 
-function useWcEvents<E extends HTMLElement>(
-  ref: React.RefObject<E | null>,
-  props: Record<string, unknown>,
-): Record<string, unknown> {
-  const eventProps = useRef<Record<string, EventListener>>({});
-  const attribProps: Record<string, unknown> = {};
+function isPassthrough(key: string): boolean {
+  return (
+    PASSTHROUGH.has(key) ||
+    key.startsWith('data-') ||
+    key.startsWith('aria-') ||
+    (/^on[A-Z]/.test(key) && !isEventProp(key))
+  );
+}
 
-  const nextEvents: Record<string, EventListener> = {};
+/** "onVoidChange" -> "void-change", "onVoidTabClick" -> "void-tab-click" */
+function toEventName(prop: string): string {
+  return prop
+    .slice(2)
+    .replace(/([A-Z])/g, '-$1')
+    .toLowerCase()
+    .replace(/^-/, '');
+}
+
+function toKebab(key: string): string {
+  return key.replace(/([A-Z])/g, '-$1').toLowerCase();
+}
+
+function isPrimitiveAttr(value: unknown): value is string | number {
+  return typeof value === 'string' || typeof value === 'number';
+}
+
+const useIsomorphicLayoutEffect =
+  typeof window !== 'undefined' ? useLayoutEffect : useEffect;
+
+interface SplitProps {
+  /** Props handed to React.createElement. */
+  react: Record<string, unknown>;
+  /** Props set on the element instance. */
+  elementProps: Record<string, unknown>;
+  /** `void-*` listeners keyed by event name. */
+  events: Record<string, EventListener>;
+}
+
+function splitProps(props: Record<string, unknown>): SplitProps {
+  const react: Record<string, unknown> = {};
+  const elementProps: Record<string, unknown> = {};
+  const events: Record<string, EventListener> = {};
 
   for (const key of Object.keys(props)) {
+    const value = props[key];
     if (isEventProp(key)) {
-      nextEvents[toEventName(key)] = props[key] as EventListener;
+      if (typeof value === 'function') events[toEventName(key)] = value as EventListener;
+    } else if (key === 'className') {
+      if (value != null) react['class'] = value;
+    } else if (isPassthrough(key)) {
+      react[key] = value;
+    } else if (value === undefined) {
+      continue;
+    } else if (isPrimitiveAttr(value) && key === key.toLowerCase()) {
+      react[key] = value;
     } else {
-      attribProps[key] = props[key];
+      elementProps[key] = value;
     }
   }
+  return { react, elementProps, events };
+}
 
-  useEffect(() => {
+function applyProp(el: HTMLElement, key: string, value: unknown): void {
+  if (key in el) {
+    (el as unknown as Record<string, unknown>)[key] = value;
+    return;
+  }
+  // Element not upgraded (registration failed or not yet defined): fall back
+  // to an attribute so the value is not lost.
+  const attr = toKebab(key);
+  if (value === false || value == null) el.removeAttribute(attr);
+  else if (value === true) el.setAttribute(attr, '');
+  else if (isPrimitiveAttr(value)) el.setAttribute(attr, String(value));
+}
+
+// ---------------------------------------------------------------------------
+// useWcProps — set non-attribute props and bind `void-*` listeners
+// ---------------------------------------------------------------------------
+
+function useWcProps<E extends HTMLElement>(
+  ref: React.RefObject<E | null>,
+  elementProps: Record<string, unknown>,
+  events: Record<string, EventListener>,
+): void {
+  const appliedProps = useRef<Record<string, unknown>>({});
+  const appliedEvents = useRef<Record<string, EventListener>>({});
+
+  // No deps array: compare against the last applied value each commit, so a
+  // user-edited property (e.g. an input's value) is only overwritten when the
+  // React prop itself changed.
+  useIsomorphicLayoutEffect(() => {
     const el = ref.current;
     if (!el) return;
 
-    const prev = eventProps.current;
-
-    // Remove stale listeners
-    for (const eventName of Object.keys(prev)) {
-      if (!nextEvents[eventName] || prev[eventName] !== nextEvents[eventName]) {
-        el.removeEventListener(eventName, prev[eventName]);
+    const prev = appliedProps.current;
+    for (const key of Object.keys(elementProps)) {
+      if (!(key in prev) || !Object.is(prev[key], elementProps[key])) {
+        applyProp(el, key, elementProps[key]);
       }
     }
+    appliedProps.current = elementProps;
 
-    // Add new / changed listeners
-    for (const eventName of Object.keys(nextEvents)) {
-      if (!prev[eventName] || prev[eventName] !== nextEvents[eventName]) {
-        el.addEventListener(eventName, nextEvents[eventName]);
-      }
+    const prevEvents = appliedEvents.current;
+    for (const name of Object.keys(prevEvents)) {
+      if (prevEvents[name] !== events[name]) el.removeEventListener(name, prevEvents[name]);
     }
-
-    eventProps.current = nextEvents;
+    for (const name of Object.keys(events)) {
+      if (prevEvents[name] !== events[name]) el.addEventListener(name, events[name]);
+    }
+    appliedEvents.current = events;
   });
 
-  return attribProps;
+  useIsomorphicLayoutEffect(() => {
+    const el = ref.current;
+    return () => {
+      if (!el) return;
+      for (const name of Object.keys(appliedEvents.current)) {
+        el.removeEventListener(name, appliedEvents.current[name]);
+      }
+      appliedEvents.current = {};
+      appliedProps.current = {};
+    };
+  }, [ref]);
 }
 
 // ---------------------------------------------------------------------------
@@ -156,21 +282,24 @@ function wrapWc<E extends HTMLElement, P = object>(
   displayName: string,
 ) {
   const Wrapped = forwardRef<E, VoidProps<P>>((props, externalRef) => {
-    const innerRef = useRef<E>(null);
+    const innerRef = useRef<E | null>(null);
 
-    const attribProps = useWcEvents(innerRef, props as Record<string, unknown>);
+    const { react, elementProps, events } = splitProps(props as Record<string, unknown>);
+    useWcProps(innerRef, elementProps, events);
 
-    // Merge refs
-    const setRef = (el: E | null) => {
-      (innerRef as React.MutableRefObject<E | null>).current = el;
-      if (typeof externalRef === 'function') {
-        externalRef(el);
-      } else if (externalRef) {
-        (externalRef as React.MutableRefObject<E | null>).current = el;
-      }
-    };
+    const setRef = useCallback(
+      (el: E | null) => {
+        innerRef.current = el;
+        if (typeof externalRef === 'function') {
+          externalRef(el);
+        } else if (externalRef) {
+          (externalRef as React.MutableRefObject<E | null>).current = el;
+        }
+      },
+      [externalRef],
+    );
 
-    return React.createElement(tag, { ...attribProps, ref: setRef });
+    return React.createElement(tag, { ...react, ref: setRef });
   });
 
   Wrapped.displayName = displayName;
@@ -192,7 +321,7 @@ export const Button = wrapWc<VoidButton, {
   disabled?: boolean;
   type?: 'button' | 'submit' | 'reset';
   size?: 'sm' | 'md' | 'lg' | 'xl' | 'xxl';
-}>('void-button', 'Button');
+} & VoidEvents<{ Click: null }>>('void-button', 'Button');
 
 export const Divider = wrapWc<VoidDivider, {
   label?: string;
@@ -217,7 +346,7 @@ export const Switch = wrapWc<VoidSwitch, {
   disabled?: boolean;
   color?: 'default' | 'error' | 'warning' | 'success' | 'info' | 'notice';
   size?: 'sm' | 'md' | 'lg' | 'xl' | 'xxl';
-}>('void-switch', 'Switch');
+} & VoidEvents<{ Change: { checked: boolean } }>>('void-switch', 'Switch');
 
 export const Avatar = wrapWc<VoidAvatar, {
   src?: string;
@@ -230,13 +359,13 @@ export const Alert = wrapWc<VoidAlert, {
   color?: 'default' | 'error' | 'warning' | 'success' | 'info' | 'notice';
   dismissible?: boolean;
   variant?: 'subtle' | 'filled';
-}>('void-alert', 'Alert');
+} & VoidEvents<{ Dismiss: null }>>('void-alert', 'Alert');
 
 export const Tag = wrapWc<VoidTag, {
   color?: 'default' | 'error' | 'warning' | 'success' | 'info' | 'notice';
   removable?: boolean;
   size?: 'sm' | 'md' | 'lg' | 'xl' | 'xxl';
-}>('void-tag', 'Tag');
+} & VoidEvents<{ Remove: null }>>('void-tag', 'Tag');
 
 export const Progress = wrapWc<VoidProgress, {
   value?: number;
@@ -261,7 +390,7 @@ export const Input = wrapWc<VoidInput, {
   name?: string;
   size?: 'sm' | 'md' | 'lg' | 'xl' | 'xxl';
   error?: string;
-}>('void-input', 'Input');
+} & VoidEvents<{ Input: { value: string }; Change: { value: string } }>>('void-input', 'Input');
 
 export const Textarea = wrapWc<VoidTextarea, {
   value?: string;
@@ -274,7 +403,7 @@ export const Textarea = wrapWc<VoidTextarea, {
   resize?: 'none' | 'vertical' | 'both';
   size?: 'sm' | 'md' | 'lg' | 'xl' | 'xxl';
   error?: string;
-}>('void-textarea', 'Textarea');
+} & VoidEvents<{ Input: { value: string }; Change: { value: string } }>>('void-textarea', 'Textarea');
 
 export const Select = wrapWc<VoidSelect, {
   value?: string;
@@ -284,7 +413,7 @@ export const Select = wrapWc<VoidSelect, {
   size?: 'sm' | 'md' | 'lg' | 'xl' | 'xxl';
   error?: string;
   placeholder?: string;
-}>('void-select', 'Select');
+} & VoidEvents<{ Change: { value: string } }>>('void-select', 'Select');
 
 export const Checkbox = wrapWc<VoidCheckbox, {
   checked?: boolean;
@@ -294,7 +423,7 @@ export const Checkbox = wrapWc<VoidCheckbox, {
   value?: string;
   color?: 'default' | 'error' | 'warning' | 'success' | 'info' | 'notice';
   size?: 'sm' | 'md' | 'lg' | 'xl' | 'xxl';
-}>('void-checkbox', 'Checkbox');
+} & VoidEvents<{ Change: { checked: boolean } }>>('void-checkbox', 'Checkbox');
 
 export const Radio = wrapWc<VoidRadio, {
   checked?: boolean;
@@ -303,14 +432,14 @@ export const Radio = wrapWc<VoidRadio, {
   value?: string;
   color?: 'default' | 'error' | 'warning' | 'success' | 'info' | 'notice';
   size?: 'sm' | 'md' | 'lg' | 'xl' | 'xxl';
-}>('void-radio', 'Radio');
+} & VoidEvents<{ Change: { value: string; checked: boolean } }>>('void-radio', 'Radio');
 
 export const RadioGroup = wrapWc<VoidRadioGroup, {
   label?: string;
   value?: string;
   name?: string;
   orientation?: 'vertical' | 'horizontal';
-}>('void-radio-group', 'RadioGroup');
+} & VoidEvents<{ Change: { value: string } }>>('void-radio-group', 'RadioGroup');
 
 export const Field = wrapWc<VoidField, {
   label?: string;
@@ -325,7 +454,7 @@ export const Multiselect = wrapWc<VoidMultiselect, {
   size?: 'sm' | 'md' | 'lg' | 'xl' | 'xxl';
   error?: string;
   name?: string;
-}>('void-multiselect', 'Multiselect');
+} & VoidEvents<{ Change: { values: string[] } }>>('void-multiselect', 'Multiselect');
 
 export const Option = wrapWc<VoidOption, {
   value?: string;
@@ -337,12 +466,12 @@ export const Dialog = wrapWc<VoidDialog, {
   heading?: string;
   size?: 'sm' | 'md' | 'lg' | 'xl';
   closable?: boolean;
-}>('void-dialog', 'Dialog');
+} & VoidEvents<{ Close: null }>>('void-dialog', 'Dialog');
 
 export const Tabs = wrapWc<VoidTabs, {
   value?: string;
   size?: 'sm' | 'md' | 'lg';
-}>('void-tabs', 'Tabs');
+} & VoidEvents<{ Change: { value: string } }>>('void-tabs', 'Tabs');
 
 export const TabPanel = wrapWc<VoidTabPanel, {
   tab?: string;
@@ -357,7 +486,7 @@ export const Accordion = wrapWc<VoidAccordion, {
 export const AccordionItem = wrapWc<VoidAccordionItem, {
   heading?: string;
   open?: boolean;
-}>('void-accordion-item', 'AccordionItem');
+} & VoidEvents<{ Toggle: { open: boolean } }>>('void-accordion-item', 'AccordionItem');
 
 export const Breadcrumbs = wrapWc<VoidBreadcrumbs, {
   separator?: string;
@@ -371,14 +500,14 @@ export const ListItem = wrapWc<VoidListItem, {
   selected?: boolean;
   disabled?: boolean;
   interactive?: boolean;
-}>('void-list-item', 'ListItem');
+} & VoidEvents<{ Click: Record<string, never> }>>('void-list-item', 'ListItem');
 
 export const Toast = wrapWc<VoidToast, {
   color?: 'default' | 'error' | 'warning' | 'success' | 'info';
   duration?: number;
   dismissable?: boolean;
   heading?: string;
-}>('void-toast', 'Toast');
+} & VoidEvents<{ Close: null }>>('void-toast', 'Toast');
 
 export const ToastContainer = wrapWc<VoidToastContainer, {
   position?: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left' | 'top-center' | 'bottom-center';
@@ -395,7 +524,7 @@ export const Drawer = wrapWc<VoidDrawer, {
   size?: 'sm' | 'md' | 'lg';
   heading?: string;
   closable?: boolean;
-}>('void-drawer', 'Drawer');
+} & VoidEvents<{ Close: null }>>('void-drawer', 'Drawer');
 
 export const Card = wrapWc<VoidCard, {
   heading?: string;
@@ -407,7 +536,7 @@ export const Popover = wrapWc<VoidPopover, {
   open?: boolean;
   position?: 'top' | 'bottom' | 'left' | 'right';
   trigger?: 'click' | 'manual';
-}>('void-popover', 'Popover');
+} & VoidEvents<{ Close: null }>>('void-popover', 'Popover');
 
 export const Tooltip = wrapWc<VoidTooltip, {
   text?: string;
@@ -419,7 +548,7 @@ export const Banner = wrapWc<VoidBanner, {
   color?: 'default' | 'error' | 'warning' | 'success' | 'info' | 'notice';
   dismissable?: boolean;
   variant?: 'subtle' | 'filled';
-}>('void-banner', 'Banner');
+} & VoidEvents<{ Close: null }>>('void-banner', 'Banner');
 
 export const ScrollArea = wrapWc<VoidScrollArea, {
   maxHeight?: string;
@@ -438,7 +567,7 @@ export const Pagination = wrapWc<VoidPagination, {
   value?: number;
   siblings?: number;
   size?: 'sm' | 'md' | 'lg';
-}>('void-pagination', 'Pagination');
+} & VoidEvents<{ Change: { value: number } }>>('void-pagination', 'Pagination');
 
 export const ErrorFallback = wrapWc<VoidErrorFallback, {
   heading?: string;
@@ -446,12 +575,12 @@ export const ErrorFallback = wrapWc<VoidErrorFallback, {
   retryable?: boolean;
   retryLabel?: string;
   icon?: boolean;
-}>('void-error-fallback', 'ErrorFallback');
+} & VoidEvents<{ Retry: null }>>('void-error-fallback', 'ErrorFallback');
 
 export const CheckboxGroup = wrapWc<VoidCheckboxGroup, {
   label?: string;
   orientation?: 'vertical' | 'horizontal';
-}>('void-checkbox-group', 'CheckboxGroup');
+} & VoidEvents<{ Change: { values: string[] } }>>('void-checkbox-group', 'CheckboxGroup');
 
 export const Combobox = wrapWc<VoidCombobox, {
   value?: string;
@@ -460,7 +589,7 @@ export const Combobox = wrapWc<VoidCombobox, {
   size?: 'sm' | 'md' | 'lg' | 'xl' | 'xxl';
   error?: string;
   name?: string;
-}>('void-combobox', 'Combobox');
+} & VoidEvents<{ Change: { value: string } }>>('void-combobox', 'Combobox');
 
 export const Slider = wrapWc<VoidSlider, {
   value?: number;
@@ -471,7 +600,7 @@ export const Slider = wrapWc<VoidSlider, {
   name?: string;
   showValue?: boolean;
   size?: 'sm' | 'md' | 'lg';
-}>('void-slider', 'Slider');
+} & VoidEvents<{ Input: { value: number }; Change: { value: number } }>>('void-slider', 'Slider');
 
 export const FileUpload = wrapWc<VoidFileUpload, {
   accept?: string;
@@ -479,7 +608,7 @@ export const FileUpload = wrapWc<VoidFileUpload, {
   disabled?: boolean;
   maxSize?: number;
   error?: string;
-}>('void-file-upload', 'FileUpload');
+} & VoidEvents<{ Change: { files: File[] } }>>('void-file-upload', 'FileUpload');
 
 export const NavBar = wrapWc<VoidNavBar, {
   sticky?: boolean;
@@ -490,21 +619,21 @@ export const NavBar = wrapWc<VoidNavBar, {
 export const Hamburger = wrapWc<VoidHamburger, {
   active?: boolean;
   size?: 'sm' | 'md' | 'lg';
-}>('void-hamburger', 'Hamburger');
+} & VoidEvents<{ Toggle: { active: boolean } }>>('void-hamburger', 'Hamburger');
 
 export const ComposeInput = wrapWc<VoidComposeInput, {
   value?: string;
   placeholder?: string;
   disabled?: boolean;
   maxlength?: number;
-}>('void-compose-input', 'ComposeInput');
+} & VoidEvents<{ Input: { value: string }; Submit: { value: string } }>>('void-compose-input', 'ComposeInput');
 
 export const Sidebar = wrapWc<VoidSidebar, {
   position?: 'left' | 'right';
   collapsed?: boolean;
   width?: string;
   collapsedWidth?: string;
-}>('void-sidebar', 'Sidebar');
+} & VoidEvents<{ Toggle: { collapsed: boolean } }>>('void-sidebar', 'Sidebar');
 
 export const DropdownMenu = wrapWc<VoidDropdownMenu, {
   open?: boolean;
@@ -514,7 +643,7 @@ export const DropdownMenu = wrapWc<VoidDropdownMenu, {
 export const DropdownMenuItem = wrapWc<VoidDropdownMenuItem, {
   disabled?: boolean;
   destructive?: boolean;
-}>('void-dropdown-menu-item', 'DropdownMenuItem');
+} & VoidEvents<{ Select: { item: VoidDropdownMenuItem } }>>('void-dropdown-menu-item', 'DropdownMenuItem');
 
 export const Toggle = wrapWc<VoidToggle, {
   pressed?: boolean;
@@ -522,12 +651,12 @@ export const Toggle = wrapWc<VoidToggle, {
   color?: 'default' | 'error' | 'warning' | 'success' | 'info' | 'notice';
   size?: 'sm' | 'md' | 'lg' | 'xl' | 'xxl';
   variant?: 'outline' | 'filled' | 'ghost' | 'solid';
-}>('void-toggle', 'Toggle');
+} & VoidEvents<{ Change: { pressed: boolean } }>>('void-toggle', 'Toggle');
 
 export const SegmentedControl = wrapWc<VoidSegmentedControl, {
   value?: string;
   size?: 'sm' | 'md' | 'lg' | 'xl' | 'xxl';
-}>('void-segmented-control', 'SegmentedControl');
+} & VoidEvents<{ Change: { value: string } }>>('void-segmented-control', 'SegmentedControl');
 
 export const SegmentedControlItem = wrapWc<VoidSegmentedControlItem, {
   value?: string;
@@ -564,7 +693,7 @@ export const MenuItem = wrapWc<VoidMenuItem, {
   disabled?: boolean;
   shortcut?: string;
   icon?: string;
-}>('void-menu-item', 'MenuItem');
+} & VoidEvents<{ Select: { value: string } }>>('void-menu-item', 'MenuItem');
 
 export const MenuGroup = wrapWc<VoidMenuGroup, {
   label?: string;
@@ -579,7 +708,7 @@ export const Carousel = wrapWc<VoidCarousel, {
   controls?: boolean;
   indicators?: boolean;
   orientation?: 'horizontal' | 'vertical';
-}>('void-carousel', 'Carousel');
+} & VoidEvents<{ Change: { index: number; previous: number } }>>('void-carousel', 'Carousel');
 
 export const CarouselSlide = wrapWc<VoidCarouselSlide, {
 }>('void-carousel-slide', 'CarouselSlide');
@@ -592,7 +721,7 @@ export const Calendar = wrapWc<VoidCalendar, {
   size?: 'sm' | 'md' | 'lg';
   locale?: string;
   firstDay?: number;
-}>('void-calendar', 'Calendar');
+} & VoidEvents<{ Change: { value: string; date: Date } }>>('void-calendar', 'Calendar');
 
 export const DatePicker = wrapWc<VoidDatePicker, {
   value?: string;
@@ -606,7 +735,7 @@ export const DatePicker = wrapWc<VoidDatePicker, {
   placeholder?: string;
   format?: string;
   color?: 'default' | 'error' | 'warning' | 'success' | 'info' | 'notice';
-}>('void-date-picker', 'DatePicker');
+} & VoidEvents<{ Change: { value: string; date: Date } }>>('void-date-picker', 'DatePicker');
 
 export const NumberInput = wrapWc<VoidNumberInput, {
   value?: number;
@@ -621,7 +750,9 @@ export const NumberInput = wrapWc<VoidNumberInput, {
   placeholder?: string;
   controls?: 'sides' | 'right' | 'none';
   label?: string;
-}>('void-number-input', 'NumberInput');
+  prefix?: string;
+  unit?: string;
+} & VoidEvents<{ Change: { value: number; previous: number } }>>('void-number-input', 'NumberInput');
 
 export const ToggleGroup = wrapWc<VoidToggleGroup, {
   value?: string;
@@ -630,13 +761,13 @@ export const ToggleGroup = wrapWc<VoidToggleGroup, {
   size?: 'sm' | 'md' | 'lg';
   color?: 'default' | 'error' | 'warning' | 'success' | 'info' | 'notice';
   orientation?: 'horizontal' | 'vertical';
-}>('void-toggle-group', 'ToggleGroup');
+} & VoidEvents<{ Change: { value: string | string[] } }>>('void-toggle-group', 'ToggleGroup');
 
 export const Collapsible = wrapWc<VoidCollapsible, {
   heading?: string;
   open?: boolean;
   disabled?: boolean;
-}>('void-collapsible', 'Collapsible');
+} & VoidEvents<{ Toggle: { open: boolean } }>>('void-collapsible', 'Collapsible');
 
 export const Editable = wrapWc<VoidEditable, {
   value?: string;
@@ -645,14 +776,14 @@ export const Editable = wrapWc<VoidEditable, {
   placeholder?: string;
   submitMode?: 'blur' | 'enter' | 'both';
   size?: 'sm' | 'md' | 'lg';
-}>('void-editable', 'Editable');
+} & VoidEvents<{ Change: { value: string }; Cancel: null }>>('void-editable', 'Editable');
 
 export const HoverCard = wrapWc<VoidHoverCard, {
   open?: boolean;
   position?: 'top' | 'bottom' | 'left' | 'right';
   openDelay?: number;
   closeDelay?: number;
-}>('void-hover-card', 'HoverCard');
+} & VoidEvents<{ Open: null; Close: null }>>('void-hover-card', 'HoverCard');
 
 export const PinInput = wrapWc<VoidPinInput, {
   length?: number;
@@ -664,7 +795,7 @@ export const PinInput = wrapWc<VoidPinInput, {
   size?: 'sm' | 'md' | 'lg';
   color?: 'default' | 'error' | 'warning' | 'success' | 'info' | 'notice';
   placeholder?: string;
-}>('void-pin-input', 'PinInput');
+} & VoidEvents<{ Change: { value: string }; Complete: { value: string } }>>('void-pin-input', 'PinInput');
 
 export const TagsInput = wrapWc<VoidTagsInput, {
   value?: (string | { text: string; color?: string })[];
@@ -676,7 +807,7 @@ export const TagsInput = wrapWc<VoidTagsInput, {
   color?: 'default' | 'error' | 'warning' | 'success' | 'info' | 'notice';
   variant?: 'filled' | 'outline';
   allowDuplicates?: boolean;
-}>('void-tags-input', 'TagsInput');
+} & VoidEvents<{ Change: { value: TagValue[] } }>>('void-tags-input', 'TagsInput');
 
 export const NavMenu = wrapWc<VoidNavMenu, {
   orientation?: 'horizontal' | 'vertical';
@@ -688,7 +819,7 @@ export const NavMenuItem = wrapWc<VoidNavMenuItem, {
   disabled?: boolean;
   href?: string;
   active?: boolean;
-}>('void-nav-menu-item', 'NavMenuItem');
+} & VoidEvents<{ Open: null; Close: null }>>('void-nav-menu-item', 'NavMenuItem');
 
 export const ColorPicker = wrapWc<VoidColorPicker, {
   value?: string;
@@ -698,7 +829,7 @@ export const ColorPicker = wrapWc<VoidColorPicker, {
   showInput?: boolean;
   variant?: 'default' | 'compact';
   open?: boolean;
-}>('void-color-picker', 'ColorPicker');
+} & VoidEvents<{ Change: { value: string } }>>('void-color-picker', 'ColorPicker');
 
 export const ActionInput = wrapWc<VoidActionInput, {
   value?: string;
@@ -711,4 +842,54 @@ export const ActionInput = wrapWc<VoidActionInput, {
   icon?: string;
   actionLabel?: string;
   position?: 'left' | 'right';
-}>('void-action-input', 'ActionInput');
+} & VoidEvents<{ Input: { value: string }; Change: { value: string }; Action: { value: string } }>>('void-action-input', 'ActionInput');
+
+export const BarChart = wrapWc<VoidBarChart, {
+  data?: BarChartData;
+  height?: number;
+  showValues?: boolean;
+  variant?: 'filled' | 'outline' | 'wireframe';
+  /** `true` staggers bars, `false` disables, a number sets the stagger amount. */
+  stagger?: boolean | number;
+}>('void-bar-chart', 'BarChart');
+
+export const LineChart = wrapWc<VoidLineChart, {
+  data?: LineChartData;
+  height?: number;
+  showValues?: boolean;
+  variant?: 'filled' | 'outline' | 'wireframe';
+  interpolation?: 'linear' | 'step';
+}>('void-line-chart', 'LineChart');
+
+export const DonutChart = wrapWc<VoidDonutChart, {
+  data?: DonutChartData;
+  size?: number;
+  /** Inner radius as a fraction of the outer radius. */
+  inner?: number;
+  /** `false`/`0` seamless, `true` 1% gaps, a number is the percent of the arc used by gaps. */
+  gaps?: boolean | number;
+  variant?: 'filled' | 'outline' | 'wireframe';
+  showValues?: boolean;
+  showTotal?: boolean;
+}>('void-donut-chart', 'DonutChart');
+
+export const Gauge = wrapWc<VoidGauge, {
+  data?: GaugeData;
+  zones?: GaugeZone[];
+  value?: number;
+  min?: number;
+  max?: number;
+  unit?: string;
+  size?: number;
+  thickness?: number;
+  circular?: 'full' | 'semi' | 'triple';
+  variant?: 'filled' | 'outline' | 'wireframe';
+  showValue?: boolean;
+  unitInline?: boolean;
+  tickMajor?: number;
+  tickMinor?: number;
+  tickMin?: boolean;
+  tickMax?: boolean;
+  segmentsSort?: 'value' | 'manual';
+  gaps?: boolean | number;
+}>('void-gauge', 'Gauge');
