@@ -57,13 +57,6 @@ export class VoidAccordionItem extends VoidElement {
     }));
   };
 
-  private _handleKeydown = (e: KeyboardEvent): void => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      this._handleClick(e);
-    }
-  };
-
   render() {
     return html`
       <button
@@ -73,7 +66,6 @@ export class VoidAccordionItem extends VoidElement {
         aria-expanded=${String(this.open)}
         aria-controls="content-${this._id}"
         @click=${this._handleClick}
-        @keydown=${this._handleKeydown}
       >
         ${this.heading}
         <svg class="void-accordion-chevron" viewBox="0 0 16 16" fill="none" aria-hidden="true">
