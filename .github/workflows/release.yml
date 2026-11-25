@@ -11,6 +11,12 @@
 #   ci ───┴─ tag ─ npm-core ─ npm-adapters ─┬─ gem ──────┤
 #                                           ├─ hex ──────┼─ github-release ─ pages-build ─ pages-deploy
 #                                           └─ composer ─┘
+#   tag ─ binaries ──────────────────────────────── binaries-attach  (needs github-release too)
+#
+# The voidable command-line binaries are built beside the packages and attached
+# to the GitHub release afterwards. Nothing above waits for them: no package,
+# release or Pages job lists `binaries` or `binaries-attach` in its needs, so a
+# failure to build or upload them cannot stop or undo a publish.
 #
 # Docs-only pushes skip the packages and redeploy Pages. A manual run either
 # dry-runs (default: builds and packs everything, publishes nothing) or
@@ -283,6 +289,54 @@ jobs:
         # Not through `mise run`: PHP comes from setup-php, not mise.
         run: scripts/release/composer.sh
 
+  # The voidable command-line binaries. Runs beside npm-core, needs nothing the
+  # package jobs produce, and no other job needs it (see the header): a failure
+  # here leaves every publish and the release as they are. Only this job may
+  # write attestations.
+  binaries:
+    name: Binaries (voidable)
+    needs: [plan, tag]
+    if: needs.plan.outputs.publish == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      id-token: write # sign the build provenance (Sigstore)
+      attestations: write # store it
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+
+      - uses: jdx/mise-action@5228313ee0372e111a38da051671ca30fc5a96db # v3.6.3
+        with:
+          install_args: "node npm npm:pnpm"
+
+      - run: mise run install
+
+      # Stamps the version, builds @voidable/ui and the theme from the stamped
+      # checkout, embeds them, cross-compiles, packs and checksums, then runs the
+      # linux binary's `install` to check the embedded files are at VERSION.
+      - name: Build, package and checksum the binaries
+        env:
+          VERSION: ${{ needs.plan.outputs.version }}
+        run: mise run release:binaries
+
+      # Not in a dry run: provenance for archives nobody will download is noise.
+      - name: Attest build provenance
+        if: needs.plan.outputs.dry_run != 'true'
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        with:
+          subject-path: release-artifacts/binaries/dist/*
+
+      # Named binaries-dist, not release-*: github-release downloads release-*
+      # and must never pick these up.
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: binaries-dist
+          path: release-artifacts/binaries/dist/*
+          if-no-files-found: error
+
   github-release:
     name: GitHub release
     needs: [plan, npm-core, npm-adapters, gem, hex, composer]
@@ -313,6 +367,38 @@ jobs:
           SHA: ${{ github.sha }}
           GH_TOKEN: ${{ github.token }}
         run: scripts/release/github-release.sh release-artifacts/files/*
+
+  # After the release exists. Never a dependency of anything.
+  binaries-attach:
+    name: Attach binaries
+    needs: [plan, github-release, binaries]
+    if: >-
+      !cancelled() && needs.github-release.result == 'success' &&
+      needs.binaries.result == 'success'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # upload release assets
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+
+      - uses: jdx/mise-action@5228313ee0372e111a38da051671ca30fc5a96db # v3.6.3
+        with:
+          install_args: node
+
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: binaries-dist
+          path: release-artifacts/binaries/dist
+
+      - name: Attach the binaries to the GitHub release
+        env:
+          VERSION: ${{ needs.plan.outputs.version }}
+          DRY_RUN: ${{ needs.plan.outputs.dry_run }}
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: scripts/release/binaries-attach.sh
 
   pages-build:
     name: Build Pages
