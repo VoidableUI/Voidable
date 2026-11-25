@@ -1,0 +1,26 @@
+<% content_for :title, "Morph lab" %>
+<% content_for :subtitle, "Turbo page-refresh and stream morphs on Voidable components" %>
+<% content_for :no_search, "1" unless @search %>
+<% content_for :head do %>
+  <%= turbo_refreshes_with method: :morph, scroll: :preserve %>
+<% end %>
+
+<p id="lab-version">Server version <%= @lab["version"] %></p>
+
+<div class="lab-actions" style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem">
+  <%= button_to "Refresh", morph_lab_path, method: :patch, params: { notes: @lab["notes"] }, id: "lab-refresh" %>
+  <%= button_to "Next version", morph_lab_path, method: :patch, params: { bump: 1 }, id: "lab-bump" %>
+  <%= button_to "Server picks c", morph_lab_path, method: :patch, params: { select: "c" }, id: "lab-select-c" %>
+  <%= button_to "Server adds d", morph_lab_path, method: :patch, params: { options: "a,b,c,d", bump: 1 }, id: "lab-add-d" %>
+  <%= button_to "Server opens dialog", morph_lab_path, method: :patch, params: { dialog: "open" }, id: "lab-open" %>
+  <%= button_to "Server closes dialog", morph_lab_path, method: :patch, params: { dialog: "closed" }, id: "lab-close" %>
+  <%= button_to "Stream", stream_morph_lab_path, id: "lab-stream" %>
+</div>
+
+<%= render "morph_lab/panel", lab: @lab %>
+
+<%= form_with url: morph_lab_path, method: :patch, id: "lab-form" do %>
+  <void-field label="Notes"><void-input id="lab-notes" name="notes" value="<%= @lab["notes"] %>"></void-input></void-field>
+  <void-switch id="lab-news" name="news" value="yes">Newsletter</void-switch>
+  <void-button id="lab-save" type="submit">Save notes</void-button>
+<% end %>

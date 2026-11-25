@@ -1,0 +1,97 @@
+<div id="root"></div>
+<script src="/build/turbo.js"></script>
+<script src="/build/hotwire.js"></script>
+<script>
+  // Workloads for specs/perf.spec.ts. Each returns milliseconds from the DOM
+  // change until every component has rendered and two frames have painted.
+  const root = document.getElementById('root');
+  const now = () => performance.now();
+  const MIX = (i) =>
+    [
+      `<void-button>Button ${i}</void-button>`,
+      `<void-input name="i${i}" value="v${i}" aria-label="Input ${i}"></void-input>`,
+      `<void-badge color="info">B${i}</void-badge>`,
+      `<void-checkbox name="c${i}">Check ${i}</void-checkbox>`,
+      `<void-card heading="Card ${i}"><p>Body ${i}</p></void-card>`,
+      `<void-select name="s${i}" aria-label="Select ${i}"><option value="a">A</option><option value="b">B</option></void-select>`,
+      `<void-switch>S${i}</void-switch>`,
+      `<void-tag>T${i}</void-tag>`,
+      `<void-alert color="info">Alert ${i}</void-alert>`,
+      `<void-dropdown-menu><button slot="trigger">M${i}</button><void-dropdown-menu-item>One</void-dropdown-menu-item><void-dropdown-menu-item>Two</void-dropdown-menu-item></void-dropdown-menu>`,
+    ][i % 10];
+  const ROWS = (n, v) =>
+    `<void-table><table><tbody>${Array.from({ length: n }, (_, i) => `<tr id="row-${i}"><td>Row ${i} ${i === 7 ? v : ''}</td><td><void-badge color="${i % 2 ? 'success' : 'info'}">${i % 2 ? 'Active' : 'Idle'}</void-badge></td><td><void-button size="sm">Edit</void-button><void-button size="sm" color="error">Delete</void-button></td><td><void-dropdown-menu><button slot="trigger" aria-label="Actions">⋯</button><void-dropdown-menu-item>Rename</void-dropdown-menu-item><void-dropdown-menu-item>Archive</void-dropdown-menu-item><void-dropdown-menu-item destructive>Delete</void-dropdown-menu-item></void-dropdown-menu></td></tr>`).join('')}</tbody></table></void-table>`;
+
+  const timed = async (fn) => {
+    const t0 = now();
+    await fn();
+    await window.__settle(root);
+    return now() - t0;
+  };
+  const clear = async () => {
+    root.innerHTML = '';
+    await window.__settle(root);
+  };
+  const heapKB = async () => {
+    for (let i = 0; i < 3; i++) {
+      window.gc?.();
+      await new Promise((r) => setTimeout(r));
+    }
+    return performance.memory ? performance.memory.usedJSHeapSize / 1024 : null;
+  };
+
+  window.perf = {
+    // Machine speed: plain DOM work with no components, to scale budgets on slower machines.
+    async calibrate() {
+      return timed(() => {
+        root.innerHTML = Array.from({ length: 4000 }, (_, i) => `<div class="c"><span>${i}</span><button>b${i}</button><input value="${i}"></div>`).join('');
+        root.getBoundingClientRect();
+      }).finally(clear);
+    },
+    async mixed1000() {
+      return timed(() => (root.innerHTML = Array.from({ length: 1000 }, (_, i) => MIX(i)).join(''))).finally(clear);
+    },
+    async table500() {
+      const first = await timed(() => (root.innerHTML = ROWS(500, 'a')));
+      VoidTurbo.start();
+      const morph = await timed(() => {
+        const t = document.createElement('div');
+        t.innerHTML = ROWS(500, 'b');
+        Turbo.morphChildren(root, t);
+      });
+      const intact = { rows: root.querySelectorAll('tr').length, menus: root.querySelectorAll('.void-dropdown-menu-panel').length, row7: root.querySelector('#row-7 td').textContent.trim() };
+      await clear();
+      return { first, morph, intact };
+    },
+    async select5000() {
+      const ms = await timed(() => (root.innerHTML = `<void-select id="big" name="big" placeholder="Pick" aria-label="Big">${Array.from({ length: 5000 }, (_, i) => `<option value="${i}">Option ${i}</option>`).join('')}</void-select>`));
+      const big = document.getElementById('big');
+      big.value = '4321';
+      await big.updateComplete;
+      const value = big.querySelector('select').value;
+      await clear();
+      return { ms, value };
+    },
+    async dialog200() {
+      root.innerHTML = '<void-dialog id="dlg" heading="Perf"><p>Body</p><input aria-label="x"><void-button>OK</void-button></void-dialog>';
+      await window.__settle(root);
+      const d = document.getElementById('dlg');
+      const cycle = async (n) => {
+        for (let i = 0; i < n; i++) {
+          d.open = true;
+          await d.updateComplete;
+          d.open = false;
+          await d.updateComplete;
+        }
+      };
+      await cycle(20); // warm up
+      const nodes0 = document.getElementsByTagName('*').length;
+      const heap0 = await heapKB();
+      const ms = await timed(() => cycle(200));
+      const nodes1 = document.getElementsByTagName('*').length;
+      const heap1 = await heapKB();
+      await clear();
+      return { ms, nodeGrowth: nodes1 - nodes0, heapGrowthKB: heap0 === null ? null : heap1 - heap0 };
+    },
+  };
+</script>

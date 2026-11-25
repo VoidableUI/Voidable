@@ -1,0 +1,39 @@
+---
+title: Testing in real browsers
+description: How the real-browser suite and the server-backed framework suites are run, and how they report known defects.
+---
+
+Voidable is tested where it runs. Unit tests cover logic, but custom elements, focus, keyboard behaviour, accessibility trees and framework patching only exist in a real browser, so the repository has a Playwright suite in `tests/browser/` and a second one that drives real server frameworks.
+
+## The browser suite
+
+Every spec runs in Chromium, Firefox and WebKit against the built packages, then a Chromium-only set of performance and bundle-size budgets runs.
+
+```bash
+mise run test:browser:install                 # once: download the browsers
+mise run test:browser                         # build, then every spec on every engine, then the budgets
+VOID_BROWSERS=chromium mise run test:browser  # one engine
+mise run test:browser -- specs/forms.spec.ts --project=firefox
+```
+
+Locally an engine that cannot start is skipped with a warning. In CI every engine must run. Where WebKit cannot run on your distribution, start Playwright's server in its Docker image and point `VOID_WEBKIT_WS` at it.
+
+## The server-backed suites
+
+`mise run test:server` starts real applications on the built packages and drives them in Chromium:
+
+| App | Where | What it covers |
+| --- | --- | --- |
+| Rails | `packages/hotwire/demo` | Turbo 8 page-refresh and stream morphs, Turbo Drive with the page cache and back and forward, Turbo Frames, Turbo Streams |
+| Phoenix LiveView | `packages/liveview/demo` | live navigation and patches, `phx-change` forms, server timers, server-opened overlays, the event bridge hooks |
+| Laravel Livewire | `examples/laravel` | `wire:navigate`, `wire:poll`, `wire:click`, server-driven values and overlays, the Alpine event bridge |
+
+Each app is described in `tests/browser/server/apps.mjs` and started by `tests/browser/server/start.mjs`, which bundles the built packages into the app, prepares it (dependencies, database) and runs it. `VOID_SERVER_APPS=phoenix mise run test:server` runs one. Each needs its toolchain from `mise.toml` (Ruby, Erlang and Elixir, or PHP). The same specs check what a user would: typed text and focus that survive a server update, an open overlay that stays open, a value the server changes winning over the user's, and the same controls submitting the same values.
+
+## Known defects
+
+A test for a defect that is not fixed asserts the correct behaviour and starts with `expectedFailure('#61', 'what goes wrong')`. The key names a GitHub issue in `tests/browser/helpers/known-issues.ts` (or `untracked:` when no issue exists yet). The test still runs and is reported, but does not turn the suite red; when the defect is fixed, Playwright reports "expected to fail but passed" and the marker is removed with the fix. `VOID_RUN_EXPECTED=1` runs every marked test as an ordinary test.
+
+## In CI
+
+The `browser`, `server` (Rails), `phoenix` and `laravel` jobs of `.github/workflows/ci.yml` run on every pull request. The release workflow calls the same file, so nothing is tagged or published unless every one of them passed.

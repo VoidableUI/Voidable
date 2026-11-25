@@ -1,0 +1,31 @@
+{
+  "name": "@voidable/browser-tests",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "description": "Real-browser test suite (Playwright) run against the built packages. See Browser tests in CONTRIBUTING.md.",
+  "scripts": {
+    "typecheck": "tsc -p ."
+  },
+  "dependencies": {
+    "@alpinejs/morph": "^3.17.5",
+    "@hotwired/turbo": "^8.0.23",
+    "@playwright/test": "^1.65.1",
+    "@types/node": "^25.6.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@voidable/theme": "workspace:*",
+    "@voidable/ui": "workspace:*",
+    "@voidable/ui-alpine": "workspace:*",
+    "@voidable/ui-hotwire": "workspace:*",
+    "@voidable/ui-liveview": "workspace:*",
+    "@voidable/ui-react": "workspace:*",
+    "alpinejs": "^3.17.5",
+    "axe-core": "^4.11.4",
+    "esbuild": "^0.28.1",
+    "morphdom": "^2.7.8",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "typescript": "^6.0.0"
+  }
+}

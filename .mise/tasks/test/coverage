@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+#MISE description="Run the unit tests with coverage and print a per-package summary (reported, not enforced)"
+#MISE depends=["build"]
+set -euo pipefail
+
+# Each package with a test script writes packages/<name>/coverage/ (HTML report
+# in index.html, totals in coverage-summary.json).
+pnpm --filter './packages/*' test --coverage
+
+node - <<'NODE'
+const fs = require('fs');
+const rows = [];
+for (const pkg of fs.readdirSync('packages')) {
+  const file = `packages/${pkg}/coverage/coverage-summary.json`;
+  if (!fs.existsSync(file)) continue;
+  const t = JSON.parse(fs.readFileSync(file, 'utf8')).total;
+  rows.push([pkg, t.statements.pct, t.branches.pct, t.functions.pct, t.lines.pct]);
+}
+const pad = (s, n) => String(s).padEnd(n);
+console.log('\nUnit-test coverage (%)');
+console.log(pad('package', 12) + pad('statements', 12) + pad('branches', 10) + pad('functions', 11) + 'lines');
+for (const r of rows) console.log(pad(r[0], 12) + pad(r[1], 12) + pad(r[2], 10) + pad(r[3], 11) + r[4]);
+NODE

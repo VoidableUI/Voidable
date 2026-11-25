@@ -1,0 +1,24 @@
+<% content_for :title, "Turbo lab two" %>
+<% content_for :no_search, "1" %>
+
+<p id="lab-page">Turbo lab, page two</p>
+<nav style="display: flex; gap: 1rem; margin-bottom: 1rem">
+  <%= link_to "Page one", turbo_lab_path, id: "to-one" %>
+</nav>
+
+<div id="b-controls" style="display: grid; gap: 1rem; max-width: 40rem">
+  <void-field label="Title"><void-input id="b-title" name="title" value="Server title"></void-input></void-field>
+  <void-field label="Kind">
+    <void-select id="b-kind" name="kind" value="y">
+      <option value="x">Ex</option>
+      <option value="y">Why</option>
+    </void-select>
+  </void-field>
+  <void-checkbox-group id="b-group" label="Toppings" name="toppings">
+    <void-checkbox value="olives">Olives</void-checkbox>
+    <void-checkbox value="basil" checked>Basil</void-checkbox>
+  </void-checkbox-group>
+  <void-accordion id="b-acc">
+    <void-accordion-item id="b-acc-1" heading="Section 1">Content 1</void-accordion-item>
+  </void-accordion>
+</div>

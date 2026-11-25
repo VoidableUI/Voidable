@@ -224,6 +224,21 @@ set -euo pipefail
 | `mise run warnings:sweep` | Load every Storybook story and every built docs page in headless Chromium (needs Chromium: `CHROMIUM_PATH`, default `/usr/bin/chromium`) with `@voidable/ui/dev` running and fail on any `[voidable]` warning. Not part of `ci`; run it after changing components, stories or docs markup |
 | `mise run docs` | Start docs dev server |
 | `mise run docs:build` | Build docs for deployment |
+| `mise run test:browser` | Real-browser suite (Playwright; Chromium, Firefox, WebKit) against the built packages; not part of `ci` |
+| `mise run test:browser:install` | Download the browsers for it (`-- --with-deps` adds system libraries on Debian/Ubuntu) |
+| `mise run test:server` | Server-backed suite: starts the Rails, Phoenix LiveView and Laravel Livewire demos on the built packages and drives each (`VOID_SERVER_APPS=rails,phoenix,laravel` selects; each needs its toolchain from `mise.toml`) |
+| `mise run test:coverage` | Unit tests with V8 coverage, per-package summary (no thresholds) |
+
+### Browser Tests
+
+`tests/browser/` holds the Playwright suite; "Browser tests" in CONTRIBUTING.md covers running it. For agents:
+
+- Specs are in `tests/browser/specs/`, pages in `tests/browser/pages/`, helpers in `tests/browser/helpers/`. Bundles are built from `packages/*/dist`, so run `mise run build` (the task does) after changing a package.
+- Never wait with sleeps or timeouts. Use `settle(page)` (every `updateComplete` plus two frames), `expect` retries, `expect.poll` or component events.
+- A failing test that shows a real defect is not fixed by changing the test. Mark it with `expectedFailure('#n', detail)` (key in `helpers/known-issues.ts`, `untracked:` when no issue exists yet), keep the assertion of the correct behaviour, and report it.
+- When a fix makes an expected failure pass, remove its marker in the same change. `VOID_RUN_EXPECTED=1` runs every expected failure as an ordinary test, to see how each still fails.
+- The `browser`, `server` (Rails), `phoenix` and `laravel` jobs of `ci.yml` run on pull requests and, through `workflow_call`, gate every release: `release.yml` tags and publishes only if all of `ci.yml` passed.
+- Performance budgets are in `tests/browser/budgets.ts`, the axe baseline in `tests/browser/axe-baseline.json`, and the server apps in `tests/browser/server/apps.mjs`.
 
 ### Tech Stack
 
@@ -322,7 +337,7 @@ Component CSS in `@voidable/theme` lives in `src/components/` with one file per 
 ## Release & Versioning
 
 - **One version for everything.** Every package (npm, the `voidable-hotwire` gem, the `live_voidable` Hex package, the `voidable/laravel` Composer package) is released together at one version, tagged `vX.Y.Z`, even packages without changes. The first unified release is 0.8.0; the old per-package tags (`ui-v*`, `theme-v*`, `gem-hotwire-v*`, ...) are history only.
-- **Automatic on merge.** `.github/workflows/release.yml` runs on every push to `master`. It computes the next version from the conventional commits since the last `vX.Y.Z` tag that touch `packages/**` (not Storybook) or `release.yml`: `feat` minor, `fix`/`perf`/`revert` patch, breaking (`type!:` or `BREAKING CHANGE:`) major, which is a **minor** bump while the major is 0. No releasing commit, no release. Logic: `scripts/release/version.mjs`, tested by `mise run release:test`.
+- **Automatic on merge.** `.github/workflows/release.yml` runs on every push to `master`. It computes the next version from the conventional commits since the last `vX.Y.Z` tag that touch `packages/**` (not Storybook, the placeholder `voidable` gem or the unpublished demo apps `packages/*/demo*`) or `release.yml`: `feat` minor, `fix`/`perf`/`revert` patch, breaking (`type!:` or `BREAKING CHANGE:`) major, which is a **minor** bump while the major is 0. No releasing commit, no release. Logic: `scripts/release/version.mjs`, tested by `mise run release:test`.
 - **Order:** plan, CI (`ci.yml` via `workflow_call`, the only CI run for a push), tag, npm theme and core, npm adapters, then gem, Hex and Composer, then the GitHub release (notes from `scripts/release/notes.mjs`), then docs and Storybook to GitHub Pages. Docs-only pushes skip the packages and deploy Pages.
 - **Versions are stamped, never committed.** Manifests hold `0.0.0` (`package.json` files, `packages/hotwire/gem/lib/voidable/hotwire/version.rb`, `packages/liveview/hex/mix.exs`); `scripts/release/stamp.mjs` writes the release version into the CI checkout. Internal npm dependencies are `workspace:*`, which `pnpm pack` turns into the exact version. The gem's CDN pins (`Voidable::Hotwire::CDN`) derive from its `VERSION`. Composer has no version field; the tag on the `VoidableUI/laravel` mirror is the version.
 - **Never hand-type a Voidable version** (CDN URL, Gemfile/mix requirement, demo pin). `mise run lint:versions` fails on it; derive it (the docs use `stats.versionNumber` from `docs/src/lib/stats.ts`) or leave it out.
