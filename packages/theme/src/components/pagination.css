@@ -26,13 +26,15 @@ void-pagination nav {
   font-family: var(--void-font-sans);
   font-size: var(--void-text-sm);
   color: var(--void-color-text);
+  box-sizing: border-box;
+  text-decoration: none;
   cursor: pointer;
   transition: background var(--void-duration-fast) var(--void-ease-in-out),
               color var(--void-duration-fast) var(--void-ease-in-out),
               border-color var(--void-duration-fast) var(--void-ease-in-out);
 }
 
-.void-pagination-btn:hover:not(:disabled) {
+.void-pagination-btn:hover:not(:disabled):not([aria-disabled="true"]) {
   background: var(--tone-hover);
 }
 
@@ -48,7 +50,8 @@ void-pagination nav {
   cursor: default;
 }
 
-.void-pagination-btn:disabled {
+.void-pagination-btn:disabled,
+.void-pagination-btn[aria-disabled="true"] {
   opacity: 0.4;
   cursor: not-allowed;
 }
