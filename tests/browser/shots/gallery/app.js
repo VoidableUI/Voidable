@@ -78,22 +78,17 @@ const visible = (it) =>
 /** A thumbnail: the top of the image, or for a change the area that changed. */
 function thumb(it, index) {
   const src = it.status === 'changed' ? it.diff : it.head || it.base;
-  let style = '';
+  let attrs = '';
   let inner = `<img src="${esc(src)}" alt="" loading="lazy" decoding="async">`;
   if (it.status === 'changed' && it.bbox) {
-    // Fit the changed area (with some of what is around it) in the 4:3 frame.
-    const [w, h] = it.size.head;
-    const pad = 24;
-    const bx = Math.max(0, it.bbox.x - pad), by = Math.max(0, it.bbox.y - pad);
-    const bw = Math.min(w - bx, it.bbox.w + 2 * pad), bh = Math.min(h - by, it.bbox.h + 2 * pad);
-    const scale = Math.min(1, 240 / bw, 180 / bh) ; // CSS pixels per image pixel within a 240x180 frame
+    // The frame shows the area that changed (see fitThumbs), not the top of the page.
     inner = '';
-    style = `background-image:url('${esc(src)}');background-size:${w * scale}px ${h * scale}px;background-position:${-bx * scale}px ${-by * scale}px`;
+    attrs = ` data-src="${esc(src)}" data-box="${it.bbox.x},${it.bbox.y},${it.bbox.w},${it.bbox.h}" data-size="${it.size.head.join(',')}"`;
   }
   const [tone, text] = STATUS[it.status];
   const ratio = it.status === 'changed' ? percent(it.ratio) : text;
   return `<button class="thumb" type="button" data-i="${index}" aria-label="${esc(label(it))}${it.status === 'same' ? '' : `, ${text}${it.status === 'changed' ? ` ${ratio}` : ''}`}">
-    <span class="thumb-image" style="${style}">${inner}</span>
+    <span class="thumb-image"${attrs}>${inner}</span>
     <span class="thumb-caption"><span>${esc(compare ? label(it) : `${lookName.get(it.look)} · ${it.scheme} · ${it.width}px`)}</span>${compare && it.status !== 'same' ? `<void-badge size="sm" color="${tone}">${ratio}</void-badge>` : ''}</span>
   </button>`;
 }
@@ -114,7 +109,26 @@ function render() {
   grid.innerHTML = html;
   $('none').hidden = shown.length > 0;
   $('grid').hidden = shown.length === 0;
+  fitThumbs();
 }
+
+/** Crops each changed thumbnail to the box around its change, with some of what surrounds it, to fill its frame. */
+function fitThumbs() {
+  for (const el of document.querySelectorAll('.thumb-image[data-box]')) {
+    const [x, y, w, h] = el.dataset.box.split(',').map(Number);
+    const [iw, ih] = el.dataset.size.split(',').map(Number);
+    const W = el.clientWidth, H = el.clientHeight;
+    if (!W || !H) continue;
+    const pad = 32;
+    const bx = Math.max(0, x - pad), by = Math.max(0, y - pad);
+    const bw = Math.min(iw - bx, w + 2 * pad), bh = Math.min(ih - by, h + 2 * pad);
+    const scale = Math.min(W / bw, H / bh, 1.5);
+    el.style.backgroundImage = `url("${el.dataset.src}")`;
+    el.style.backgroundSize = `${iw * scale}px ${ih * scale}px`;
+    el.style.backgroundPosition = `${-bx * scale}px ${-by * scale}px`;
+  }
+}
+addEventListener('resize', fitThumbs);
 $('grid').addEventListener('click', (e) => {
   const b = e.target.closest('.thumb');
   if (b) openViewer(Number(b.dataset.i), b);
@@ -124,7 +138,9 @@ $('grid').addEventListener('click', (e) => {
 let current = -1;
 let view = 'side';
 let opener = null;
-const views = compare ? [['side', 'Side by side'], ['slider', 'Slider'], ['diff', 'Difference'], ['base', data.baseLabel], ['head', data.headLabel]] : [['fit', 'Fit width'], ['actual', 'Actual size']];
+const BASE = 'Base';
+const HEAD = 'Head';
+const views = compare ? [['side', 'Side by side'], ['slider', 'Slider'], ['diff', 'Difference'], ['base', BASE], ['head', HEAD]] : [['fit', 'Fit width'], ['actual', 'Actual size']];
 
 function renderViewer() {
   const it = shown[current];
@@ -139,13 +155,13 @@ function renderViewer() {
   if (!compare) {
     body.innerHTML = `<div class="single ${view === 'actual' ? 'actual' : ''}" style="${style}">${img(it.head, label(it))}</div>`;
   } else if (it.status === 'added') {
-    body.innerHTML = `<div class="single" style="${style}">${img(it.head, `${data.headLabel}: ${label(it)}`)}</div>`;
+    body.innerHTML = `<div class="single" style="${style}">${img(it.head, `${HEAD}: ${label(it)}`)}</div>`;
   } else if (it.status === 'removed') {
-    body.innerHTML = `<div class="single" style="${style}">${img(it.base, `${data.baseLabel}: ${label(it)}`)}</div>`;
+    body.innerHTML = `<div class="single" style="${style}">${img(it.base, `${BASE}: ${label(it)}`)}</div>`;
   } else if (view === 'side') {
-    body.innerHTML = `<div class="pane-row" style="${style}"><figure class="pane"><figcaption data-void-type="label">${esc(data.baseLabel)}</figcaption>${img(it.base, `${data.baseLabel}: ${label(it)}`)}</figure><figure class="pane"><figcaption data-void-type="label">${esc(data.headLabel)}</figcaption>${img(it.head, `${data.headLabel}: ${label(it)}`)}</figure></div>`;
+    body.innerHTML = `<div class="pane-row" style="${style}"><figure class="pane"><figcaption data-void-type="label">${esc(BASE)}</figcaption>${img(it.base, `${BASE}: ${label(it)}`)}</figure><figure class="pane"><figcaption data-void-type="label">${esc(HEAD)}</figcaption>${img(it.head, `${HEAD}: ${label(it)}`)}</figure></div>`;
   } else if (view === 'slider') {
-    body.innerHTML = `<div class="slider-control"><span data-void-type="label">${esc(data.baseLabel)}</span><void-slider id="cut" min="0" max="100" value="50" aria-label="Position of the divider: left shows ${esc(data.baseLabel)}, right shows ${esc(data.headLabel)}"></void-slider><span data-void-type="label">${esc(data.headLabel)}</span></div><div class="slider-stage" id="stage" style="${style}">${img(it.head, `${data.headLabel}: ${label(it)}`)}<div class="over">${img(it.base, `${data.baseLabel}: ${label(it)}`)}</div><div class="rule"></div></div>`;
+    body.innerHTML = `<div class="slider-control"><span data-void-type="label">${esc(BASE)}</span><void-slider id="cut" min="0" max="100" value="50" aria-label="Position of the divider: left shows ${esc(BASE)}, right shows ${esc(HEAD)}"></void-slider><span data-void-type="label">${esc(HEAD)}</span></div><div class="slider-stage" id="stage" style="${style}">${img(it.head, `${HEAD}: ${label(it)}`)}<div class="over">${img(it.base, `${BASE}: ${label(it)}`)}</div><div class="rule"></div></div>`;
     const stage = $('stage');
     $('cut').addEventListener('void-input', (e) => stage.style.setProperty('--cut', `${e.detail.value}%`));
     $('cut').addEventListener('void-change', (e) => stage.style.setProperty('--cut', `${e.detail.value}%`));

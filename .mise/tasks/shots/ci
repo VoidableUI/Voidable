@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+#MISE description="Pull request visual check: photograph BASE_SHA and this checkout on this machine and compare (what the visual job of ci.yml runs)"
+#MISE depends=["build"]
+set -euo pipefail
+
+# BASE_SHA=<commit the change is against> mise run shots:ci
+# Fails only when the look changed and nothing in the change is meant to change it; see "Visual review" in CONTRIBUTING.md.
+exec node tests/browser/shots/ci.mjs "$@"
