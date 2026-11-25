@@ -52,7 +52,7 @@ describe('VoidToggle', () => {
       expect(el.hasAttribute('pressed')).toBe(true);
       expect(el.hasAttribute('disabled')).toBe(true);
       expect(el.getAttribute('color')).toBe('error');
-      expect(el.getAttribute('size')).toBe('xl');
+      expect(el.getAttribute('size')).toBe('lg');
       expect(el.getAttribute('variant')).toBe('filled');
     });
 
