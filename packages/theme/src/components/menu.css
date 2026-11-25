@@ -2,10 +2,10 @@ void-menu {
   display: none;
   flex-direction: column;
   font-family: var(--void-font-sans);
-  background: var(--void-color-bg-elevated);
-  border: 1px solid var(--void-color-border);
-  border-radius: var(--void-radius-lg);
-  box-shadow: var(--void-shadow-md);
+  background: var(--void-float-surface);
+  border: var(--void-float-border-width) solid var(--void-float-border);
+  border-radius: var(--void-float-radius);
+  box-shadow: var(--void-float-shadow);
   overflow: hidden;
   min-width: 220px;
 }

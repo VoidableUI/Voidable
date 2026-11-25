@@ -57,6 +57,13 @@ function compareInPage({ flat, dtcg }) {
     probe.style.boxShadow = expr;
     return getComputedStyle(probe).boxShadow;
   };
+  const border = (expr) => {
+    probe.style.borderTop = expr;
+    const cs = getComputedStyle(probe);
+    const out = { width: parseFloat(cs.borderTopWidth), style: cs.borderTopStyle, colour: srgb(cs.borderTopColor) };
+    probe.style.borderTop = '';
+    return out;
+  };
 
   for (const [name, text] of Object.entries(flat)) {
     const ref = `var(${name})`;
@@ -101,6 +108,12 @@ function compareInPage({ flat, dtcg }) {
       const a = getComputedStyle(probe).transitionTimingFunction;
       ok = close(numbers(a), numbers(text), 1e-6);
       got = a;
+    } else if (/^-?[\d.]+(px|rem) (solid|dashed|dotted|double) #[0-9a-f]{6,8}$/.test(text)) {
+      // a border (the rule tokens): width, style and colour through the border shorthand
+      const a = border(ref);
+      const b = border(text);
+      ok = close([a.width], [b.width], 0.01) && a.style === b.style && close(a.colour.rgb, b.colour.rgb, 0.5 / 255 + 1e-4) && Math.abs(a.colour.alpha - b.colour.alpha) <= 0.5 / 255 + 1e-4;
+      got = JSON.stringify(a);
     } else if (/px .*#[0-9a-f]{6,8}/.test(text)) {
       // a shadow list: lengths and a colour per layer; compare layer by layer
       const layers = (s) => s.split(/,(?![^(]*\))/).map((l) => l.trim());
@@ -149,15 +162,33 @@ function compareInPage({ flat, dtcg }) {
   const walk = (node, path, type) => {
     for (const [key, child] of Object.entries(node)) {
       if ((key.startsWith('$') && key !== '$root') || typeof child !== 'object') continue;
-      const t = child.$type ?? type;
       if (!('$value' in child)) {
+        const t = child.$type ?? type;
         walk(child, [...path, key], t);
         continue;
       }
-      const v = child.$value;
+      let v = child.$value;
       const group = path[0];
-      const name = group === undefined || group === 'knob' ? `--void-${key}` : key === '$root' ? `--void-${group}` : `--void-${group}-${key}`;
-      const ref = `var(${name})`;
+      let name = group === undefined || group === 'knob' ? `--void-${key}` : key === '$root' ? `--void-${group}` : `--void-${group}-${key}`;
+      let ref = `var(${name})`;
+      let t = child.$type ?? type;
+      if (group === 'component') {
+        // A component token is not declared by the theme: what Chromium computes
+        // is its default (the fallback the component reads it with), or the
+        // skin's assignment. An alias is checked as the token it points to.
+        const ext = child.$extensions['dev.voidable'];
+        name = ext.css;
+        ref = ext.assigned ? `var(${name})` : ext.default;
+        if (typeof v === 'string') {
+          const target = v.slice(1, -1).split('.').reduce((node, k) => node?.[k], dtcg);
+          if (!target || !('$value' in target)) {
+            problems.push(`${[...path, key].join('.')}: alias ${v} does not point to a token`);
+            continue;
+          }
+          t = target.$type ?? dtcg[v.slice(1, -1).split('.')[0]].$type;
+          v = target.$value;
+        }
+      }
       const fail = (got) => problems.push(`${[...path, key].join('.')} (${t}): exported ${JSON.stringify(v)}, Chromium computes ${got}`);
       const colourOk = (c, expr) => {
         const a = srgb(expr);
@@ -182,6 +213,9 @@ function compareInPage({ flat, dtcg }) {
       } else if (t === 'cubicBezier') {
         probe.style.transitionTimingFunction = ref;
         if (!close(numbers(getComputedStyle(probe).transitionTimingFunction), v, 1e-6)) fail(getComputedStyle(probe).transitionTimingFunction);
+      } else if (t === 'border') {
+        const a = border(ref);
+        if (!close([a.width], [v.width.unit === 'rem' ? v.width.value * 16 : v.width.value], 0.01) || a.style !== v.style || !close(a.colour.rgb, v.color.components, 1e-3) || Math.abs(a.colour.alpha - (v.color.alpha ?? 1)) > 1e-3) fail(JSON.stringify(a));
       } else if (t === 'shadow') {
         const got = shadow(ref).split(/,(?![^(]*\))/).map((l) => l.trim());
         const want = [v].flat();

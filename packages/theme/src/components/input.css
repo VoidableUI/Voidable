@@ -1,7 +1,7 @@
 void-input {
-  --void-field-height: var(--void-control-height);
-  --void-field-padding: var(--void-control-padding);
-  --void-field-text: var(--void-control-text);
+  --_void-field-height: var(--void-control-height);
+  --_void-field-padding: var(--void-control-padding);
+  --_void-field-text: var(--void-control-text);
   display: flex;
   flex-direction: column;
   gap: var(--void-space-1h);
@@ -10,14 +10,14 @@ void-input {
 
 void-input input {
   width: 100%;
-  height: var(--void-field-height);
-  padding: 0 var(--void-field-padding);
-  background: var(--void-color-surface);
-  border: 1px solid var(--void-color-border-control);
-  border-radius: var(--void-radius-md);
+  height: var(--_void-field-height);
+  padding: 0 var(--_void-field-padding);
+  background: var(--void-field-surface);
+  border: var(--void-control-border-width) solid var(--void-field-border);
+  border-radius: var(--void-control-radius);
   color: var(--void-color-text);
   font-family: inherit;
-  font-size: var(--void-field-text);
+  font-size: var(--_void-field-text);
   line-height: var(--void-leading-normal);
   outline: none;
   transition: border-color var(--void-duration-fast) var(--void-ease-in-out),
@@ -29,7 +29,7 @@ void-input input::placeholder {
 }
 
 void-input input:hover {
-  border-color: var(--void-color-border-control);
+  border-color: var(--void-field-border);
 }
 
 void-input input:focus {
@@ -56,5 +56,5 @@ void-input[error]:not([error=""]) input:focus {
   line-height: var(--void-type-caption-leading);
 }
 
-void-input[size="sm"]  { --void-field-height: var(--void-control-height-sm);  --void-field-padding: var(--void-control-padding-sm);  --void-field-text: var(--void-control-text-sm); }
-void-input[size="lg"]  { --void-field-height: var(--void-control-height-lg);  --void-field-padding: var(--void-control-padding-lg);  --void-field-text: var(--void-control-text-lg); }
+void-input[size="sm"]  { --_void-field-height: var(--void-control-height-sm);  --_void-field-padding: var(--void-control-padding-sm);  --_void-field-text: var(--void-control-text-sm); }
+void-input[size="lg"]  { --_void-field-height: var(--void-control-height-lg);  --_void-field-padding: var(--void-control-padding-lg);  --_void-field-text: var(--void-control-text-lg); }

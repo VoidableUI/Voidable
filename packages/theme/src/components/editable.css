@@ -8,7 +8,7 @@ void-editable {
   display: inline;
   padding: var(--void-space-0h) var(--void-space-1);
   border: 1px solid transparent;
-  border-radius: var(--void-radius-md);
+  border-radius: var(--void-control-radius);
   color: var(--void-color-text);
   cursor: text;
   text-decoration: underline dotted var(--void-color-border-focus);
@@ -41,7 +41,7 @@ void-editable {
   padding: var(--void-space-1) var(--void-space-2);
   background: var(--void-color-surface);
   border: 1px solid var(--void-color-border);
-  border-radius: var(--void-radius-md);
+  border-radius: var(--void-control-radius);
   color: var(--void-color-text);
   font-family: inherit;
   font-size: var(--void-text-sm);

@@ -1,5 +1,5 @@
 void-progress {
-  --tone: var(--void-color-accent);
+  --_void-tone: var(--void-color-accent);
 
   display: block;
   width: 100%;
@@ -16,18 +16,18 @@ void-progress {
 .void-progress-fill {
   height: 100%;
   width: var(--void-progress-fill, 0%);
-  background: var(--tone);
+  background: var(--_void-tone);
   border-radius: var(--void-radius-full);
   transition: width var(--void-duration-normal) var(--void-ease-in-out);
 }
 
-void-progress[color="error"]   { --tone: var(--void-color-error); }
-void-progress[color="warning"] { --tone: var(--void-color-warning); }
-void-progress[color="caution"] { --tone: var(--void-color-caution); }
-void-progress[color="highlight"] { --tone: var(--void-color-highlight); }
-void-progress[color="success"] { --tone: var(--void-color-success); }
-void-progress[color="info"]    { --tone: var(--void-color-info); }
-void-progress[color="notice"]  { --tone: var(--void-color-notice); }
+void-progress[color="error"]   { --_void-tone: var(--void-color-error); }
+void-progress[color="warning"] { --_void-tone: var(--void-color-warning); }
+void-progress[color="caution"] { --_void-tone: var(--void-color-caution); }
+void-progress[color="highlight"] { --_void-tone: var(--void-color-highlight); }
+void-progress[color="success"] { --_void-tone: var(--void-color-success); }
+void-progress[color="info"]    { --_void-tone: var(--void-color-info); }
+void-progress[color="notice"]  { --_void-tone: var(--void-color-notice); }
 
 void-progress[size="sm"] .void-progress-track { height: 0.25rem; }
 void-progress[size="lg"] .void-progress-track { height: 0.75rem; }

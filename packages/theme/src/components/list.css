@@ -1,3 +1,6 @@
+/* @tokens void-list
+   --void-list-rule  The line between the items of a list with dividers. */
+
 void-list {
   display: flex;
   flex-direction: column;
@@ -5,7 +8,7 @@ void-list {
 }
 
 void-list[dividers] void-list-item + void-list-item {
-  border-top: 1px solid var(--void-color-border);
+  border-top: var(--void-list-rule, var(--void-rule-between));
 }
 
 void-list-item {
@@ -14,7 +17,7 @@ void-list-item {
   gap: var(--void-space-3);
   min-height: var(--void-control-height);
   padding: var(--void-space-1) var(--void-control-padding);
-  border-radius: var(--void-radius-md);
+  border-radius: var(--void-control-radius);
   font-size: var(--void-control-text);
   color: var(--void-color-text-secondary);
 }

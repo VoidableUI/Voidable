@@ -1,15 +1,20 @@
+/* @tokens void-alert
+   --void-alert-border        Edge colour of an alert that is not filled, in place of the edge of its tone.
+   --void-alert-border-width  Edge thickness.
+   --void-alert-radius        Corner radius: the control radius by default, so set it to follow the containers. */
+
 void-alert {
-  --tone: var(--void-color-accent);
-  --tone-subtle: color-mix(in srgb, var(--tone) var(--void-tone-tint), transparent);
-  --tone-border: color-mix(in srgb, var(--tone) 36%, transparent);
+  --_void-tone: var(--void-color-accent);
+  --_void-tone-subtle: color-mix(in srgb, var(--_void-tone) var(--void-tone-tint), transparent);
+  --_void-tone-border: color-mix(in srgb, var(--_void-tone) 36%, transparent);
 
   display: flex;
   align-items: flex-start;
   gap: var(--void-space-3);
   padding: var(--void-space-3) var(--void-container-padding);
-  border: 1px solid var(--tone-border);
-  border-radius: var(--void-radius-md);
-  background: var(--tone-subtle);
+  border: var(--void-alert-border-width, var(--void-container-border-width)) solid var(--void-alert-border, var(--_void-tone-border));
+  border-radius: var(--void-alert-radius, var(--void-radius-md));
+  background: var(--_void-tone-subtle);
   color: var(--void-color-text);
   font-family: var(--void-font-sans);
   font-size: var(--void-type-body-size);
@@ -17,18 +22,18 @@ void-alert {
 }
 
 void-alert[variant="filled"] {
-  background: var(--tone);
-  border-color: var(--tone);
+  background: var(--_void-tone);
+  border-color: var(--_void-tone);
   color: var(--void-color-text-on-accent);
 }
 
-void-alert[color="error"]   { --tone: var(--void-color-error); }
-void-alert[color="warning"] { --tone: var(--void-color-warning); }
-void-alert[color="caution"] { --tone: var(--void-color-caution); }
-void-alert[color="highlight"] { --tone: var(--void-color-highlight); }
-void-alert[color="success"] { --tone: var(--void-color-success); }
-void-alert[color="info"]    { --tone: var(--void-color-info); }
-void-alert[color="notice"]  { --tone: var(--void-color-notice); }
+void-alert[color="error"]   { --_void-tone: var(--void-color-error); }
+void-alert[color="warning"] { --_void-tone: var(--void-color-warning); }
+void-alert[color="caution"] { --_void-tone: var(--void-color-caution); }
+void-alert[color="highlight"] { --_void-tone: var(--void-color-highlight); }
+void-alert[color="success"] { --_void-tone: var(--void-color-success); }
+void-alert[color="info"]    { --_void-tone: var(--void-color-info); }
+void-alert[color="notice"]  { --_void-tone: var(--void-color-notice); }
 
 .void-alert-close {
   order: 1;
@@ -63,6 +68,6 @@ void-alert[color="notice"]  { --tone: var(--void-color-notice); }
 /* The attribute is reflected, so the plain alert carries color="default":
    it is a quiet container, not an accent-tinted one. */
 void-alert:not([variant="filled"]):is([color="default"], :not([color])) {
-  --tone-subtle: var(--void-color-bg-secondary);
-  --tone-border: var(--void-color-border);
+  --_void-tone-subtle: var(--void-color-bg-secondary);
+  --_void-tone-border: var(--void-color-border);
 }

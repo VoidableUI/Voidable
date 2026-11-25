@@ -1,3 +1,16 @@
+/* @tokens void-page-head
+   --void-page-head-rule     The line under the page head.
+   --void-page-head-padding  Space between the head's text and that line. */
+
+/* @tokens void-section
+   --void-section-surface       Fill of a titled section (one with a heading, or one that holds a table). Unset, a section draws nothing.
+   --void-section-border        Edge colour of a titled section.
+   --void-section-border-width  Edge thickness of a titled section; 0 by default.
+   --void-section-radius        Corner radius of a titled section.
+   --void-section-shadow        Shadow of a titled section.
+   --void-section-padding       Padding inside a titled section.
+   --void-section-rule          The line under the head of a `divided` section. */
+
 /* The patterns style the native elements placed inside them (h1, h2,
    p, dl). Their browser margins are removed here, so the patterns do
    not depend on the theme's reset being loaded. */
@@ -21,21 +34,21 @@
    width="narrow" is for forms and reading; "wide" and "full" for
    dense tables and dashboards. */
 void-page {
-  --void-page-width: var(--void-measure-page);
+  --_void-page-width: var(--void-measure-page);
 
   display: flex;
   flex-direction: column;
   gap: var(--void-gap-group);
   box-sizing: border-box;
   width: 100%;
-  max-width: var(--void-page-width);
+  max-width: var(--_void-page-width);
   margin-inline: auto;
   padding: var(--void-gap-group) var(--void-gutter) var(--void-gap-section);
 }
 
-void-page[width="narrow"] { --void-page-width: calc(var(--void-measure) * 1.25 + 2 * var(--void-gutter)); }
-void-page[width="wide"]   { --void-page-width: calc(var(--void-measure-page) * 1.3334); }
-void-page[width="full"]   { --void-page-width: none; }
+void-page[width="narrow"] { --_void-page-width: calc(var(--void-measure) * 1.25 + 2 * var(--void-gutter)); }
+void-page[width="wide"]   { --_void-page-width: calc(var(--void-measure-page) * 1.3334); }
+void-page[width="full"]   { --_void-page-width: none; }
 
 void-page > * {
   min-width: 0;
@@ -68,8 +81,8 @@ void-page-head {
   grid-template-columns: minmax(0, 1fr) auto;
   column-gap: var(--void-gap-inside);
   align-items: end;
-  padding-bottom: var(--void-gap-inside);
-  border-bottom: 1px solid var(--void-color-border);
+  padding-bottom: var(--void-page-head-padding, var(--void-gap-inside));
+  border-bottom: var(--void-page-head-rule, var(--void-rule-head));
 }
 
 void-page-head > * {
@@ -162,6 +175,20 @@ void-section > * {
   min-width: 0;
 }
 
+/* A titled section, or one that holds a table, can be drawn as a box:
+   the section tokens apply to it and to nothing else. A bare section (a
+   row of figures, an alert) stays a layout group, so its contents are
+   never boxed twice. Unset, the tokens draw nothing. */
+void-section:has(> :is(void-section-head, h2, h3, h4, void-table)) {
+  padding: var(--void-section-padding, 0);
+  border: var(--void-section-border-width, 0) solid var(--void-section-border, transparent);
+  border-radius: var(--void-section-radius, 0);
+  background: var(--void-section-surface, transparent);
+  box-shadow: var(--void-section-shadow, none);
+  /* What a table inside paints its sticky cells with. */
+  --_void-under: var(--void-section-surface);
+}
+
 void-section-head {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
@@ -205,7 +232,7 @@ void-section-head > void-actions {
 
 void-section[divided] > void-section-head {
   padding-bottom: var(--void-gap-inside);
-  border-bottom: 1px solid var(--void-color-border);
+  border-bottom: var(--void-section-rule, var(--void-rule-head));
 }
 
 /* A section whose content is several blocks (the groups of a form). */

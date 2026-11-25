@@ -32,6 +32,7 @@
     "./dtcg/*": "./dist/dtcg/*",
     "./json/*": "./dist/json/*",
     "./knobs.json": "./dist/knobs.json",
+    "./component-tokens.json": "./dist/component-tokens.json",
     "./names": {
       "types": "./dist/names.d.ts",
       "default": "./dist/names.js"

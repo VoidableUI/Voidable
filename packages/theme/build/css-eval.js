@@ -390,6 +390,7 @@ function shadowLayer(part) {
  *   { kind: 'percentage', n }             n is the percentage, 14 for 14%
  *   { kind: 'em', n }                     a length relative to the font size
  *   { kind: 'shadow', layers }
+ *   { kind: 'border', width, style, color }
  *   { kind: 'cubicBezier', points }
  *   { kind: 'fluid', css }                depends on the viewport: CSS text only
  *   { kind: 'string', css }               anything else (a keyword, a list)
@@ -413,6 +414,19 @@ export function evaluate(value, env) {
     if (LENGTH.has(n.unit)) return { kind: 'dimension', n: n.n, unit: n.unit };
     if (n.unit === 'ms' || n.unit === 's') return { kind: 'duration', n: n.n, unit: n.unit };
     throw new Error(`unsupported unit in ${v}`);
+  }
+
+  // A border: a width, a line style and a colour (the rule tokens).
+  if ((m = /^(\S+) (solid|dashed|dotted|double) (.+)$/.exec(v))) {
+    const col = color(m[3]);
+    if (col) {
+      try {
+        const w = numeric(m[1]);
+        if (!isSym(w) && LENGTH.has(w.unit)) return { kind: 'border', width: { n: w.n, unit: w.unit }, style: m[2], color: col };
+      } catch {
+        /* not a border */
+      }
+    }
   }
 
   // A shadow list: every comma-separated part is lengths and a colour.

@@ -3,9 +3,9 @@ void-option {
 }
 
 void-multiselect {
-  --void-field-height: var(--void-control-height);
-  --void-field-padding: var(--void-control-padding);
-  --void-field-text: var(--void-control-text);
+  --_void-field-height: var(--void-control-height);
+  --_void-field-padding: var(--void-control-padding);
+  --_void-field-text: var(--void-control-text);
   display: flex;
   flex-direction: column;
   gap: var(--void-space-1h);
@@ -18,14 +18,14 @@ void-multiselect {
   flex-wrap: wrap;
   align-items: center;
   gap: var(--void-space-1);
-  padding: var(--void-space-1) var(--void-field-padding);
-  min-height: var(--void-field-height);
-  background: var(--void-color-surface);
-  border: 1px solid var(--void-color-border-control);
-  border-radius: var(--void-radius-md);
+  padding: var(--void-space-1) var(--_void-field-padding);
+  min-height: var(--_void-field-height);
+  background: var(--void-field-surface);
+  border: var(--void-control-border-width) solid var(--void-field-border);
+  border-radius: var(--void-control-radius);
   color: var(--void-color-text);
   font-family: inherit;
-  font-size: var(--void-field-text);
+  font-size: var(--_void-field-text);
   line-height: var(--void-leading-normal);
   cursor: pointer;
   outline: none;
@@ -34,7 +34,7 @@ void-multiselect {
 }
 
 .void-multiselect-trigger:hover {
-  border-color: var(--void-color-border-control);
+  border-color: var(--void-field-border);
 }
 
 .void-multiselect-trigger:focus-visible {
@@ -49,7 +49,7 @@ void-multiselect[open] .void-multiselect-trigger {
 
 .void-multiselect-placeholder {
   color: var(--void-color-text-muted);
-  font-size: var(--void-field-text);
+  font-size: var(--_void-field-text);
   line-height: var(--void-leading-normal);
 }
 
@@ -95,10 +95,10 @@ void-multiselect[open] .void-multiselect-trigger {
   --void-overlay-gap: var(--void-space-1);
   min-width: var(--void-overlay-anchor-width);
   color: var(--void-color-text);
-  background: var(--void-color-bg-elevated);
-  border: 1px solid var(--void-color-border);
-  border-radius: var(--void-radius-lg);
-  box-shadow: var(--void-shadow-md);
+  background: var(--void-float-surface);
+  border: var(--void-float-border-width) solid var(--void-float-border);
+  border-radius: var(--void-float-radius);
+  box-shadow: var(--void-float-shadow);
   max-height: 16rem;
   overflow-y: auto;
   padding: var(--void-space-1) 0;
@@ -111,7 +111,7 @@ void-multiselect[open] .void-multiselect-trigger {
   padding: var(--void-space-2) var(--void-space-3);
   cursor: pointer;
   color: var(--void-color-text);
-  font-size: var(--void-field-text);
+  font-size: var(--_void-field-text);
   user-select: none;
   transition: background var(--void-duration-fast) var(--void-ease-in-out);
 }
@@ -175,5 +175,5 @@ void-multiselect[disabled] .void-multiselect-trigger {
 }
 
 /* Size variants: each step sets the field tokens and nothing else */
-void-multiselect[size="sm"] { --void-field-height: var(--void-control-height-sm); --void-field-padding: var(--void-control-padding-sm); --void-field-text: var(--void-control-text-sm); }
-void-multiselect[size="lg"] { --void-field-height: var(--void-control-height-lg); --void-field-padding: var(--void-control-padding-lg); --void-field-text: var(--void-control-text-lg); }
+void-multiselect[size="sm"] { --_void-field-height: var(--void-control-height-sm); --_void-field-padding: var(--void-control-padding-sm); --_void-field-text: var(--void-control-text-sm); }
+void-multiselect[size="lg"] { --_void-field-height: var(--void-control-height-lg); --_void-field-padding: var(--void-control-padding-lg); --_void-field-text: var(--void-control-text-lg); }

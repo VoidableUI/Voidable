@@ -9,7 +9,9 @@
 // the theme builder on the docs site calls the same functions in the page.
 
 import { declarations, evaluate, fontFamilies, hex, clipped, ruleBody, stripComments, toPx } from './css-eval.js';
+import { aliasOf } from './component-tokens.js';
 import { knobs as knobMeta } from './knobs.js';
+import { readSkin as readSkinSource, skinTokens } from './skins.js';
 
 export const DTCG_VERSION = '2025.10';
 const EXT = 'dev.voidable';
@@ -74,15 +76,12 @@ export function readTheme(css) {
 }
 
 /**
- * The token overrides of a skin file: its first rule, which may hold only
- * custom properties. The rules after it restyle elements and are not tokens.
+ * The token assignments of a skin file (one rule that holds nothing else;
+ * build/skins.js says why), as an object. Its private working values
+ * (--_void-<skin>-*) are included: the others are computed from them.
  */
 export function readSkin(css) {
-  const rule = topLevelRules(stripComments(css))[0];
-  if (!rule) throw new Error('a skin file starts with a rule of token overrides');
-  const rest = rule.body.replace(/--void-[\w-]+\s*:\s*[^;{}]+;/g, '').trim();
-  if (rest) throw new Error(`the first rule of a skin may only set --void-* properties, found: ${rest.slice(0, 60)}`);
-  return declarations(rule.body);
+  return skinTokens(readSkinSource(css));
 }
 
 /**
@@ -91,14 +90,14 @@ export function readSkin(css) {
  * theme's knobs, the derived block, then a skin's overrides of it.
  */
 export function environment(source, { scheme = 'dark', knobs = {}, skin = {} } = {}) {
-  const dark = scheme === 'dark' ? '1' : '0';
+  // The scheme is stated the way data-theme states it; the derived block
+  // picks it over a theme's or a skin's preferred scheme and the system's.
   return {
     ...source.primitives,
     ...source.knobs,
     ...source.inputs,
-    '--void-color-scheme': scheme === 'dark' ? 'dark' : 'light',
-    '--void-scheme-dark': dark,
-    '--void-page-scheme-dark': dark,
+    '--void-scheme-explicit': scheme === 'dark' ? '1' : '0',
+    '--void-color-scheme-explicit': scheme === 'dark' ? 'dark' : 'light',
     ...knobs,
     ...source.derived,
     ...skin,
@@ -111,12 +110,18 @@ const isWeight = (name) => /(^--void-weight-|-weight$)/.test(name);
 
 // Working values of the derivation: real custom properties, of no use to a
 // design tool. They stay in the flat JSON and out of the DTCG file.
-const INTERNAL = /^--void-(alpha-|scheme-dark$|page-scheme-dark$|contrast-boost$|contrast-level$|chrome-level$|page-level$|shape$|neutral-c$|accent-c$|accent-l$|accent-shift$|status-pole$|status-shift$|fg$|glass-solid$|glass-alpha$|scrim-alpha$|space-unit$|radius-base$)/;
+const INTERNAL = /^--void-(alpha-|scheme-dark$|page-scheme-dark$|scheme-explicit$|scheme-system$|preferred-scheme-dark$|contrast-boost$|contrast-level$|chrome-level$|page-level$|shape$|neutral-c$|accent-c$|accent-l$|accent-shift$|status-pole$|status-shift$|fg$|glass-solid$|glass-alpha$|scrim-alpha$|space-unit$|radius-base$)/;
+
+// What the user's system says (prefers-color-scheme): an input of the page it
+// is shown on, not a token of the theme.
+const SYSTEM = /^--void-(color-)?scheme-system$/;
 
 /** Resolve every property of an environment. Returns Map(name → evaluated value). */
 export function resolve(env) {
   const out = new Map();
   for (const name of Object.keys(env)) {
+    if (!name.startsWith('--void-')) continue; // a skin's working values
+    if (SYSTEM.test(name)) continue;
     if (isFamily(name)) out.set(name, { kind: 'fontFamily', families: fontFamilies(env[name], env) });
     else out.set(name, evaluate(env[name], env));
   }
@@ -159,6 +164,8 @@ function dtcgToken(name, v) {
       return { $type: 'shadow', $value: v.layers.length === 1 ? dtcgShadow(v.layers[0]) : v.layers.map(dtcgShadow) };
     case 'cubicBezier':
       return { $type: 'cubicBezier', $value: v.points };
+    case 'border':
+      return { $type: 'border', $value: { color: dtcgColor(v.color), width: dim(v.width), style: v.style } };
     default:
       return null; // em, fluid, string
   }
@@ -210,11 +217,12 @@ function typography(resolved) {
  * cannot express (keywords, em lengths, anything that depends on the
  * viewport) are listed under $extensions and are in the flat JSON.
  */
-export function toDtcg(resolved, meta = {}) {
+export function toDtcg(resolved, meta = {}, { componentTokens = [], env = {} } = {}) {
   const doc = {};
   const omitted = [];
+  const isComponent = new Set(componentTokens.map((t) => t.name));
   for (const [name, v] of resolved) {
-    if (INTERNAL.test(name)) continue;
+    if (INTERNAL.test(name) || isComponent.has(name)) continue;
     const token = dtcgToken(name, v);
     if (!token) {
       omitted.push(name);
@@ -229,12 +237,59 @@ export function toDtcg(resolved, meta = {}) {
   }
   if (doc.knob) doc.knob = { $description: 'The inputs. Everything else in this file is derived from them.', ...doc.knob };
   doc.typography = typography(resolved);
+  if (componentTokens.length) doc.component = componentGroup(componentTokens, resolved, env, doc, omitted);
   return {
     $description: meta.description ?? 'Voidable theme tokens, resolved.',
     $extensions: { [EXT]: { format: `DTCG ${DTCG_VERSION}`, ...meta.extension, omitted } },
     ...Object.fromEntries(Object.keys(doc).sort().map((k) => [k, doc[k]])),
   };
 }
+
+/**
+ * The component tokens as a DTCG group: component.<component>.<token>.
+ *
+ * A component token is an alias of its default wherever the default is one
+ * token ({container.surface}), so a design tool sees the same structure the
+ * CSS has: change the role and every component that reads it follows. Where
+ * a skin assigns the token, the value is that assignment (again an alias
+ * when it is one token). Defaults the format cannot express (a keyword, a
+ * private working value of the component) are listed as omitted.
+ */
+function componentGroup(componentTokens, resolved, env, doc, omitted) {
+  const reference = (target) => {
+    if (!resolved.has(target) || INTERNAL.test(target)) return null;
+    const [group, key] = dtcgPath(target);
+    const at = doc[group];
+    if (!at) return null;
+    if (at.$value !== undefined) return key === '$root' ? `{${group}}` : null;
+    return at[key] ? `{${group}.${key}}` : null;
+  };
+  const out = { $description: 'Component tokens: per-component override points. Each is an alias of its default (a role or semantic token) unless a skin assigns it. In CSS they are never declared by the theme; set one on :root, a subtree or an element.' };
+  for (const t of componentTokens) {
+    const assigned = Object.hasOwn(env, t.name);
+    const raw = assigned ? env[t.name] : t.default;
+    let token = null;
+    const alias = aliasOf(raw);
+    const ref = alias ? reference(alias) : null;
+    if (ref) token = { $value: ref };
+    else {
+      try {
+        token = dtcgToken(t.name, assigned ? resolved.get(t.name) : evaluateIn(raw, env));
+      } catch {
+        token = null; // the default reads a working value of the component
+      }
+    }
+    if (!token) {
+      omitted.push(t.name);
+      continue;
+    }
+    const key = t.name.slice(`--void-${t.component}-`.length);
+    (out[t.component] ??= {})[key] = { ...token, $description: t.description, $extensions: { [EXT]: { css: t.name, default: t.default, ...(assigned ? { assigned: true } : {}) } } };
+  }
+  return out;
+}
+
+const evaluateIn = (value, env) => evaluate(value, env);
 
 const n4 = (n) => String(r4(n));
 
@@ -258,6 +313,8 @@ export function cssText(v) {
       return v.layers.map((l) => `${l.inset ? 'inset ' : ''}${n4(l.offsetX)}px ${n4(l.offsetY)}px ${n4(l.blur)}px ${n4(l.spread)}px ${hex(l.color, true)}`).join(', ');
     case 'cubicBezier':
       return `cubic-bezier(${v.points.join(', ')})`;
+    case 'border':
+      return `${n4(v.width.n)}${v.width.unit} ${v.style} ${hex(v.color, true)}`;
     default:
       return v.css;
   }

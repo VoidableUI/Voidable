@@ -2,23 +2,29 @@
    void-badge — Tone system component
    ============================================================ */
 
+/* @tokens void-badge
+   --void-badge-height     Least height and width. Applies at every size.
+   --void-badge-padding    Inline padding.
+   --void-badge-font-size  Size of the text.
+   --void-badge-radius     Corner radius: a pill by default, whatever the radius knob says. */
+
 void-badge {
-  --tone: var(--void-color-accent);
-  --void-badge-size: 1.375rem;
-  --void-badge-padding: var(--void-space-2);
-  --void-badge-text: var(--void-text-xs);
+  --_void-tone: var(--void-color-accent);
+  --_void-badge-height: var(--void-badge-height, 1.375rem);
+  --_void-badge-padding: var(--void-badge-padding, var(--void-space-2));
+  --_void-badge-font-size: var(--void-badge-font-size, var(--void-text-xs));
 
   display: inline-grid;
   place-content: center;
-  padding: 0 var(--void-badge-padding);
-  min-width: var(--void-badge-size);
-  min-height: var(--void-badge-size);
+  padding: 0 var(--_void-badge-padding);
+  min-width: var(--_void-badge-height);
+  min-height: var(--_void-badge-height);
   border: 1px solid transparent;
-  border-radius: var(--void-radius-full);
-  background: var(--tone);
+  border-radius: var(--void-badge-radius, var(--void-radius-full));
+  background: var(--_void-tone);
   color: var(--void-color-text-on-accent);
   font-family: var(--void-font-sans);
-  font-size: var(--void-badge-text);
+  font-size: var(--_void-badge-font-size);
   font-weight: var(--void-weight-medium);
   font-variant-numeric: tabular-nums;
   line-height: var(--void-leading-none);
@@ -27,22 +33,22 @@ void-badge {
 }
 
 /* Colors */
-void-badge[color="error"]     { --tone: var(--void-color-error); }
-void-badge[color="warning"]   { --tone: var(--void-color-warning); }
-void-badge[color="caution"]   { --tone: var(--void-color-caution); }
-void-badge[color="success"]   { --tone: var(--void-color-success); }
-void-badge[color="info"]      { --tone: var(--void-color-info); }
-void-badge[color="notice"]    { --tone: var(--void-color-notice); }
-void-badge[color="highlight"] { --tone: var(--void-color-highlight); }
+void-badge[color="error"]     { --_void-tone: var(--void-color-error); }
+void-badge[color="warning"]   { --_void-tone: var(--void-color-warning); }
+void-badge[color="caution"]   { --_void-tone: var(--void-color-caution); }
+void-badge[color="success"]   { --_void-tone: var(--void-color-success); }
+void-badge[color="info"]      { --_void-tone: var(--void-color-info); }
+void-badge[color="notice"]    { --_void-tone: var(--void-color-notice); }
+void-badge[color="highlight"] { --_void-tone: var(--void-color-highlight); }
 
 /* Variants — outline is the status chip: a tint of the tone, the tone
    as text, and a faint edge. */
 void-badge[variant="outline"] {
-  background: color-mix(in srgb, var(--tone) var(--void-tone-tint), var(--void-color-control-fill));
-  border: 1px solid color-mix(in srgb, var(--tone) 24%, transparent);
-  color: var(--tone);
+  background: color-mix(in srgb, var(--_void-tone) var(--void-tone-tint), var(--void-color-control-fill));
+  border: 1px solid color-mix(in srgb, var(--_void-tone) 24%, transparent);
+  color: var(--_void-tone);
 }
 
 /* Sizes */
-void-badge[size="sm"]  { --void-badge-size: 1.125rem; --void-badge-padding: var(--void-space-1h); --void-badge-text: var(--void-type-label-size); }
-void-badge[size="lg"]  { --void-badge-size: 1.75rem;  --void-badge-padding: var(--void-space-3);  --void-badge-text: var(--void-text-sm); }
+void-badge[size="sm"]  { --_void-badge-height: var(--void-badge-height, 1.125rem); --_void-badge-padding: var(--void-badge-padding, var(--void-space-1h)); --_void-badge-font-size: var(--void-badge-font-size, var(--void-type-label-size)); }
+void-badge[size="lg"]  { --_void-badge-height: var(--void-badge-height, 1.75rem);  --_void-badge-padding: var(--void-badge-padding, var(--void-space-3));  --_void-badge-font-size: var(--void-badge-font-size, var(--void-text-sm)); }

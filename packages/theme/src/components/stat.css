@@ -1,20 +1,25 @@
 /* A stat is three type roles stacked: label, value, caption (the
    delta). Its container is a hairline with the chrome knob's fill; a
    colour tints it. */
+/* @tokens void-stat
+   --void-stat-padding          Padding inside the stat. Applies at every size.
+   --void-stat-value-font-size  Size of the value. Applies at every size. */
+
 void-stat {
-  --tone: var(--void-color-accent);
-  --tone-subtle: var(--void-color-surface);
-  --tone-border: var(--void-color-border);
-  --void-stat-padding: var(--void-container-padding);
-  --void-stat-value-size: var(--void-type-value-size);
+  --_void-tone: var(--void-color-accent);
+  --_void-tone-subtle: var(--void-container-surface);
+  --_void-tone-border: var(--void-container-border);
+  --_void-stat-padding: var(--void-stat-padding, var(--void-container-padding));
+  --_void-stat-value-font-size: var(--void-stat-value-font-size, var(--void-type-value-size));
 
   display: flex;
   flex-direction: column;
   gap: var(--void-gap-tight);
-  padding: var(--void-stat-padding);
-  border: 1px solid var(--tone-border);
-  border-radius: var(--void-radius-lg);
-  background: var(--tone-subtle);
+  padding: var(--_void-stat-padding);
+  border: var(--void-container-border-width) solid var(--_void-tone-border);
+  border-radius: var(--void-container-radius);
+  box-shadow: var(--void-container-shadow);
+  background: var(--_void-tone-subtle);
 }
 
 .void-stat-label {
@@ -29,7 +34,7 @@ void-stat {
 
 .void-stat-value {
   font-family: var(--void-type-value-family);
-  font-size: var(--void-stat-value-size);
+  font-size: var(--_void-stat-value-font-size);
   line-height: var(--void-type-value-leading);
   font-weight: var(--void-type-value-weight);
   letter-spacing: var(--void-type-value-tracking);
@@ -68,25 +73,25 @@ void-stat[trend="highlight"] .void-stat-delta { color: var(--void-color-highligh
 
 /* Sizes */
 void-stat[size="sm"] {
-  --void-stat-padding: var(--void-space-3);
-  --void-stat-value-size: var(--void-text-2xl);
+  --_void-stat-padding: var(--void-stat-padding, var(--void-space-3));
+  --_void-stat-value-font-size: var(--void-stat-value-font-size, var(--void-text-2xl));
 }
 
 void-stat[size="lg"] {
-  --void-stat-padding: var(--void-space-6);
-  --void-stat-value-size: var(--void-text-4xl);
+  --_void-stat-padding: var(--void-stat-padding, var(--void-space-6));
+  --_void-stat-value-font-size: var(--void-stat-value-font-size, var(--void-text-4xl));
 }
 
-void-stat[color="error"]     { --tone: var(--void-color-error); }
-void-stat[color="warning"]   { --tone: var(--void-color-warning); }
-void-stat[color="caution"]   { --tone: var(--void-color-caution); }
-void-stat[color="success"]   { --tone: var(--void-color-success); }
-void-stat[color="info"]      { --tone: var(--void-color-info); }
-void-stat[color="notice"]    { --tone: var(--void-color-notice); }
-void-stat[color="highlight"] { --tone: var(--void-color-highlight); }
+void-stat[color="error"]     { --_void-tone: var(--void-color-error); }
+void-stat[color="warning"]   { --_void-tone: var(--void-color-warning); }
+void-stat[color="caution"]   { --_void-tone: var(--void-color-caution); }
+void-stat[color="success"]   { --_void-tone: var(--void-color-success); }
+void-stat[color="info"]      { --_void-tone: var(--void-color-info); }
+void-stat[color="notice"]    { --_void-tone: var(--void-color-notice); }
+void-stat[color="highlight"] { --_void-tone: var(--void-color-highlight); }
 
 /* The attribute is reflected, so the plain stat carries color="default". */
 void-stat[color]:not([color="default"]) {
-  --tone-subtle: color-mix(in srgb, var(--tone) var(--void-tone-tint), transparent);
-  --tone-border: color-mix(in srgb, var(--tone) 36%, transparent);
+  --_void-tone-subtle: color-mix(in srgb, var(--_void-tone) var(--void-tone-tint), transparent);
+  --_void-tone-border: color-mix(in srgb, var(--_void-tone) 36%, transparent);
 }

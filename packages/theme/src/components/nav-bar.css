@@ -1,11 +1,17 @@
+/* @tokens void-nav-bar
+   --void-nav-bar-surface  Fill of the bar. A bar over an image (data-void-surface="media") stays transparent.
+   --void-nav-bar-rule     The line under a bordered bar.
+   --void-nav-bar-shadow   Shadow under the bar. */
+
 void-nav-bar {
   display: block;
   font-family: var(--void-font-sans);
-  background: var(--void-color-bg);
+  background: var(--void-nav-bar-surface, var(--void-color-bg));
+  box-shadow: var(--void-nav-bar-shadow, none);
 }
 
 void-nav-bar[bordered]:not([bordered="false"]) {
-  border-bottom: 1px solid var(--void-color-border);
+  border-bottom: var(--void-nav-bar-rule, var(--void-rule));
 }
 
 void-nav-bar[sticky] {
@@ -15,8 +21,8 @@ void-nav-bar[sticky] {
 }
 
 void-nav-bar[variant="elevated"] {
-  background: var(--void-color-bg-elevated);
-  box-shadow: var(--void-shadow-sm);
+  background: var(--void-nav-bar-surface, var(--void-color-bg-elevated));
+  box-shadow: var(--void-nav-bar-shadow, var(--void-shadow-sm));
 }
 
 .void-nav-bar-content {

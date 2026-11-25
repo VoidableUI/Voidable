@@ -1,7 +1,13 @@
+/* @tokens void-tabs
+   --void-tabs-height     Height of a tab. Applies at every size step; for a proportional change set the --void-control-* steps instead.
+   --void-tabs-padding    Inline padding of a tab. Applies at every size step; for a proportional change set the --void-control-* steps instead.
+   --void-tabs-font-size  Size of a tab's label. Applies at every size step; for a proportional change set the --void-control-* steps instead.
+   --void-tabs-rule       The line under the row of tabs. */
+
 void-tabs {
-  --void-tabs-height: var(--void-control-height);
-  --void-tabs-padding: var(--void-control-padding);
-  --void-tabs-text: var(--void-control-text);
+  --_void-tabs-height: var(--void-tabs-height, var(--void-control-height));
+  --_void-tabs-padding: var(--void-tabs-padding, var(--void-control-padding));
+  --_void-tabs-font-size: var(--void-tabs-font-size, var(--void-control-text));
 
   display: flex;
   flex-direction: column;
@@ -10,7 +16,7 @@ void-tabs {
 
 .void-tabs-list {
   display: flex;
-  border-bottom: 1px solid var(--void-color-border);
+  border-bottom: var(--void-tabs-rule, var(--void-rule-head));
   gap: var(--void-space-2);
   order: -1;
 }
@@ -21,10 +27,10 @@ void-tabs {
   border: none;
   border-bottom: 2px solid transparent;
   border-radius: 0;
-  min-height: var(--void-tabs-height);
-  padding: 0 var(--void-tabs-padding);
+  min-height: var(--_void-tabs-height);
+  padding: 0 var(--_void-tabs-padding);
   font-family: var(--void-font-sans);
-  font-size: var(--void-tabs-text);
+  font-size: var(--_void-tabs-font-size);
   color: var(--void-color-text-secondary);
   cursor: pointer;
   transition: color var(--void-duration-fast) var(--void-ease-in-out),
@@ -57,5 +63,5 @@ void-tab-panel[active] {
   display: block;
 }
 
-void-tabs[size="sm"] { --void-tabs-height: var(--void-control-height-sm); --void-tabs-padding: var(--void-control-padding-sm); --void-tabs-text: var(--void-control-text-sm); }
-void-tabs[size="lg"] { --void-tabs-height: var(--void-control-height-lg); --void-tabs-padding: var(--void-control-padding-lg); --void-tabs-text: var(--void-control-text-lg); }
+void-tabs[size="sm"] { --_void-tabs-height: var(--void-tabs-height, var(--void-control-height-sm)); --_void-tabs-padding: var(--void-tabs-padding, var(--void-control-padding-sm)); --_void-tabs-font-size: var(--void-tabs-font-size, var(--void-control-text-sm)); }
+void-tabs[size="lg"] { --_void-tabs-height: var(--void-tabs-height, var(--void-control-height-lg)); --_void-tabs-padding: var(--void-tabs-padding, var(--void-control-padding-lg)); --_void-tabs-font-size: var(--void-tabs-font-size, var(--void-control-text-lg)); }

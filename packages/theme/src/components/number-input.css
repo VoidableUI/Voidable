@@ -4,21 +4,21 @@
 
 void-number-input {
   /* Tone system */
-  --tone: var(--void-color-accent);
-  --tone-subtle: color-mix(in srgb, var(--tone) 14%, transparent);
-  --tone-border: color-mix(in srgb, var(--tone) 36%, transparent);
-  --tone-hover: color-mix(in srgb, var(--tone) 22%, transparent);
-  --void-field-height: var(--void-control-height);
-  --void-field-padding: var(--void-control-padding);
-  --void-field-text: var(--void-control-text);
+  --_void-tone: var(--void-color-accent);
+  --_void-tone-subtle: color-mix(in srgb, var(--_void-tone) 14%, transparent);
+  --_void-tone-border: color-mix(in srgb, var(--_void-tone) 36%, transparent);
+  --_void-tone-hover: color-mix(in srgb, var(--_void-tone) 22%, transparent);
+  --_void-field-height: var(--void-control-height);
+  --_void-field-padding: var(--void-control-padding);
+  --_void-field-text: var(--void-control-text);
 
   display: inline-flex;
   align-items: stretch;
   font-family: var(--void-font-sans);
-  border: 1px solid var(--void-color-border-control);
-  border-radius: var(--void-radius-md);
-  background: var(--void-color-surface);
-  min-height: var(--void-field-height);
+  border: var(--void-control-border-width) solid var(--void-field-border);
+  border-radius: var(--void-control-radius);
+  background: var(--void-field-surface);
+  min-height: var(--_void-field-height);
   overflow: hidden;
   transition: border-color var(--void-duration-fast) var(--void-ease-in-out),
               box-shadow var(--void-duration-fast) var(--void-ease-in-out);
@@ -30,19 +30,19 @@ void-number-input:focus-within {
 }
 
 void-number-input:hover:not(:focus-within) {
-  border-color: var(--void-color-border-control);
+  border-color: var(--void-field-border);
 }
 
 /* The native input inside */
 void-number-input input.void-number-input-field {
   flex: 1;
   min-width: 0;
-  padding: 0 var(--void-field-padding);
+  padding: 0 var(--_void-field-padding);
   background: transparent;
   border: none;
   color: var(--void-color-text);
   font-family: inherit;
-  font-size: var(--void-field-text);
+  font-size: var(--_void-field-text);
   font-variant-numeric: tabular-nums;
   line-height: var(--void-leading-normal);
   outline: none;
@@ -61,7 +61,7 @@ void-number-input input.void-number-input-field::placeholder {
   align-items: center;
   color: var(--void-color-text-muted);
   font-family: inherit;
-  font-size: var(--void-field-text);
+  font-size: var(--_void-field-text);
   user-select: none;
   pointer-events: none;
   white-space: nowrap;
@@ -69,11 +69,11 @@ void-number-input input.void-number-input-field::placeholder {
 }
 
 .void-number-input-prefix {
-  padding-left: var(--void-field-padding);
+  padding-left: var(--_void-field-padding);
 }
 
 .void-number-input-unit {
-  padding-right: var(--void-field-padding);
+  padding-right: var(--_void-field-padding);
 }
 
 /* When a prefix is present, the input doesn't need its own left padding */
@@ -91,7 +91,7 @@ void-number-input:has(.void-number-input-unit) input.void-number-input-field {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0 var(--void-field-padding);
+  padding: 0 var(--_void-field-padding);
   background: transparent;
   border: none;
   color: var(--void-color-text-secondary);
@@ -104,7 +104,7 @@ void-number-input:has(.void-number-input-unit) input.void-number-input-field {
 }
 
 .void-number-input-btn:hover:not(:disabled) {
-  background: var(--tone-hover);
+  background: var(--_void-tone-hover);
   color: var(--void-color-text);
 }
 
@@ -150,42 +150,42 @@ void-number-input[controls="none"] input.void-number-input-field {
 }
 
 /* Color variants */
-void-number-input[color="error"]   { --tone: var(--void-color-error); }
-void-number-input[color="warning"] { --tone: var(--void-color-warning); }
-void-number-input[color="caution"] { --tone: var(--void-color-caution); }
-void-number-input[color="highlight"] { --tone: var(--void-color-highlight); }
-void-number-input[color="success"] { --tone: var(--void-color-success); }
-void-number-input[color="info"]    { --tone: var(--void-color-info); }
-void-number-input[color="notice"]  { --tone: var(--void-color-notice); }
+void-number-input[color="error"]   { --_void-tone: var(--void-color-error); }
+void-number-input[color="warning"] { --_void-tone: var(--void-color-warning); }
+void-number-input[color="caution"] { --_void-tone: var(--void-color-caution); }
+void-number-input[color="highlight"] { --_void-tone: var(--void-color-highlight); }
+void-number-input[color="success"] { --_void-tone: var(--void-color-success); }
+void-number-input[color="info"]    { --_void-tone: var(--void-color-info); }
+void-number-input[color="notice"]  { --_void-tone: var(--void-color-notice); }
 
 void-number-input:where([color="error"], [color="warning"], [color="caution"], [color="highlight"], [color="success"], [color="info"], [color="notice"]) {
-  border-color: var(--tone-border);
-  background: var(--tone-subtle);
+  border-color: var(--_void-tone-border);
+  background: var(--_void-tone-subtle);
 }
 
 void-number-input:where([color="error"], [color="warning"], [color="caution"], [color="highlight"], [color="success"], [color="info"], [color="notice"]) .void-number-input-btn {
-  color: var(--tone);
+  color: var(--_void-tone);
 }
 
 void-number-input:where([color="error"], [color="warning"], [color="caution"], [color="highlight"], [color="success"], [color="info"], [color="notice"]) .void-number-input-btn-dec {
-  border-right-color: var(--tone-border);
+  border-right-color: var(--_void-tone-border);
 }
 
 void-number-input:where([color="error"], [color="warning"], [color="caution"], [color="highlight"], [color="success"], [color="info"], [color="notice"]) .void-number-input-btn-inc {
-  border-left-color: var(--tone-border);
+  border-left-color: var(--_void-tone-border);
 }
 
 void-number-input:where([color="error"], [color="warning"], [color="caution"], [color="highlight"], [color="success"], [color="info"], [color="notice"]):where([controls="right"]) .void-number-input-btn-group {
-  border-left-color: var(--tone-border);
+  border-left-color: var(--_void-tone-border);
 }
 
 void-number-input:where([color="error"], [color="warning"], [color="caution"], [color="highlight"], [color="success"], [color="info"], [color="notice"]):where([controls="right"]) .void-number-input-btn-inc {
-  border-bottom-color: var(--tone-border);
+  border-bottom-color: var(--_void-tone-border);
 }
 
 void-number-input:where([color="error"], [color="warning"], [color="caution"], [color="highlight"], [color="success"], [color="info"], [color="notice"]):focus-within {
-  border-color: var(--tone);
-  box-shadow: 0 0 0 1px var(--tone);
+  border-color: var(--_void-tone);
+  box-shadow: 0 0 0 1px var(--_void-tone);
 }
 
 /* Disabled state */
@@ -205,5 +205,5 @@ void-number-input[readonly] input.void-number-input-field {
 }
 
 /* Size variants: each step sets the field tokens and nothing else */
-void-number-input[size="sm"] { --void-field-height: var(--void-control-height-sm); --void-field-padding: var(--void-control-padding-sm); --void-field-text: var(--void-control-text-sm); }
-void-number-input[size="lg"] { --void-field-height: var(--void-control-height-lg); --void-field-padding: var(--void-control-padding-lg); --void-field-text: var(--void-control-text-lg); }
+void-number-input[size="sm"] { --_void-field-height: var(--void-control-height-sm); --_void-field-padding: var(--void-control-padding-sm); --_void-field-text: var(--void-control-text-sm); }
+void-number-input[size="lg"] { --_void-field-height: var(--void-control-height-lg); --_void-field-padding: var(--void-control-padding-lg); --_void-field-text: var(--void-control-text-lg); }

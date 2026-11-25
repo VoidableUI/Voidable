@@ -1,45 +1,51 @@
 /* A tag names a property of a thing. The plain tag is neutral: a
    hairline pill. A colour tints it. */
+/* @tokens void-tag
+   --void-tag-height     Least height.
+   --void-tag-padding    Inline padding.
+   --void-tag-font-size  Size of the text.
+   --void-tag-radius     Corner radius: a pill by default, whatever the radius knob says. */
+
 void-tag {
-  --tone: var(--void-color-accent);
-  --tone-subtle: transparent;
-  --tone-border: var(--void-color-border-strong);
-  --void-tag-size: 1.375rem;
-  --void-tag-padding: var(--void-space-2);
-  --void-tag-text: var(--void-text-xs);
+  --_void-tone: var(--void-color-accent);
+  --_void-tone-subtle: transparent;
+  --_void-tone-border: var(--void-color-border-strong);
+  --_void-tag-height: var(--void-tag-height, 1.375rem);
+  --_void-tag-padding: var(--void-tag-padding, var(--void-space-2));
+  --_void-tag-font-size: var(--void-tag-font-size, var(--void-text-xs));
 
   display: inline-flex;
   align-items: center;
   gap: var(--void-space-1);
-  min-height: var(--void-tag-size);
-  padding: 0 var(--void-tag-padding);
-  border: 1px solid var(--tone-border);
-  border-radius: var(--void-radius-full);
-  background: var(--tone-subtle);
+  min-height: var(--_void-tag-height);
+  padding: 0 var(--_void-tag-padding);
+  border: 1px solid var(--_void-tone-border);
+  border-radius: var(--void-tag-radius, var(--void-radius-full));
+  background: var(--_void-tone-subtle);
   color: var(--void-color-text);
   font-family: var(--void-font-sans);
-  font-size: var(--void-tag-text);
+  font-size: var(--_void-tag-font-size);
   font-weight: var(--void-weight-normal);
   line-height: var(--void-leading-none);
   white-space: nowrap;
 }
 
-void-tag[color="error"]   { --tone: var(--void-color-error); }
-void-tag[color="warning"] { --tone: var(--void-color-warning); }
-void-tag[color="caution"] { --tone: var(--void-color-caution); }
-void-tag[color="highlight"] { --tone: var(--void-color-highlight); }
-void-tag[color="success"] { --tone: var(--void-color-success); }
-void-tag[color="info"]    { --tone: var(--void-color-info); }
-void-tag[color="notice"]  { --tone: var(--void-color-notice); }
+void-tag[color="error"]   { --_void-tone: var(--void-color-error); }
+void-tag[color="warning"] { --_void-tone: var(--void-color-warning); }
+void-tag[color="caution"] { --_void-tone: var(--void-color-caution); }
+void-tag[color="highlight"] { --_void-tone: var(--void-color-highlight); }
+void-tag[color="success"] { --_void-tone: var(--void-color-success); }
+void-tag[color="info"]    { --_void-tone: var(--void-color-info); }
+void-tag[color="notice"]  { --_void-tone: var(--void-color-notice); }
 
 /* The attribute is reflected, so the plain tag carries color="default". */
 void-tag[color]:not([color="default"]) {
-  --tone-subtle: color-mix(in srgb, var(--tone) var(--void-tone-tint), transparent);
-  --tone-border: color-mix(in srgb, var(--tone) 36%, transparent);
+  --_void-tone-subtle: color-mix(in srgb, var(--_void-tone) var(--void-tone-tint), transparent);
+  --_void-tone-border: color-mix(in srgb, var(--_void-tone) 36%, transparent);
 }
 
-void-tag[size="sm"]  { --void-tag-size: 1.125rem; --void-tag-padding: var(--void-space-1h); --void-tag-text: var(--void-type-label-size); }
-void-tag[size="lg"]  { --void-tag-size: 1.75rem;  --void-tag-padding: var(--void-space-3);  --void-tag-text: var(--void-text-sm); }
+void-tag[size="sm"]  { --_void-tag-height: var(--void-tag-height, 1.125rem); --_void-tag-padding: var(--void-tag-padding, var(--void-space-1h)); --_void-tag-font-size: var(--void-tag-font-size, var(--void-type-label-size)); }
+void-tag[size="lg"]  { --_void-tag-height: var(--void-tag-height, 1.75rem);  --_void-tag-padding: var(--void-tag-padding, var(--void-space-3));  --_void-tag-font-size: var(--void-tag-font-size, var(--void-text-sm)); }
 
 .void-tag-close {
   display: inline-flex;

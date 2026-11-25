@@ -1,26 +1,26 @@
 void-segmented-control {
-  --void-segment-height: var(--void-control-height);
-  --void-segment-padding: var(--void-control-padding);
-  --void-segment-text: var(--void-control-text);
+  --_void-segment-height: var(--void-control-height);
+  --_void-segment-padding: var(--void-control-padding);
+  --_void-segment-text: var(--void-control-text);
 
   display: inline-flex;
   align-items: center;
   /* Border plus padding plus item equals the shared control height. */
   padding: 2px;
   background: var(--void-color-surface);
-  border: 1px solid var(--void-color-border-control);
-  border-radius: var(--void-radius-md);
+  border: var(--void-control-border-width) solid var(--void-color-border-control);
+  border-radius: var(--void-control-radius);
   gap: 2px;
 }
 
 void-segmented-control-item {
   display: inline-grid;
   place-content: center;
-  min-height: calc(var(--void-segment-height) - 6px);
-  padding: 0 var(--void-segment-padding);
-  border-radius: max(0px, calc(var(--void-radius-md) - 2px));
+  min-height: calc(var(--_void-segment-height) - 6px);
+  padding: 0 var(--_void-segment-padding);
+  border-radius: max(0px, calc(var(--void-control-radius) - 2px));
   font-family: var(--void-font-sans);
-  font-size: var(--void-segment-text);
+  font-size: var(--_void-segment-text);
   white-space: nowrap;
   color: var(--void-color-text-secondary);
   cursor: pointer;
@@ -45,16 +45,16 @@ void-segmented-control-item[aria-checked="true"] {
 }
 
 /* Colour: the selected segment takes the tone. */
-void-segmented-control[color="error"]     { --tone: var(--void-color-error); }
-void-segmented-control[color="warning"]   { --tone: var(--void-color-warning); }
-void-segmented-control[color="caution"]   { --tone: var(--void-color-caution); }
-void-segmented-control[color="success"]   { --tone: var(--void-color-success); }
-void-segmented-control[color="info"]      { --tone: var(--void-color-info); }
-void-segmented-control[color="notice"]    { --tone: var(--void-color-notice); }
-void-segmented-control[color="highlight"] { --tone: var(--void-color-highlight); }
+void-segmented-control[color="error"]     { --_void-tone: var(--void-color-error); }
+void-segmented-control[color="warning"]   { --_void-tone: var(--void-color-warning); }
+void-segmented-control[color="caution"]   { --_void-tone: var(--void-color-caution); }
+void-segmented-control[color="success"]   { --_void-tone: var(--void-color-success); }
+void-segmented-control[color="info"]      { --_void-tone: var(--void-color-info); }
+void-segmented-control[color="notice"]    { --_void-tone: var(--void-color-notice); }
+void-segmented-control[color="highlight"] { --_void-tone: var(--void-color-highlight); }
 
 void-segmented-control:where([color="error"], [color="warning"], [color="caution"], [color="success"], [color="info"], [color="notice"], [color="highlight"]) void-segmented-control-item[aria-checked="true"] {
-  background: color-mix(in srgb, var(--tone) 14%, transparent);
+  background: color-mix(in srgb, var(--_void-tone) 14%, transparent);
 }
 
 void-segmented-control-item[disabled] {
@@ -62,5 +62,5 @@ void-segmented-control-item[disabled] {
   pointer-events: none;
 }
 
-void-segmented-control[size="sm"] { --void-segment-height: var(--void-control-height-sm); --void-segment-padding: var(--void-control-padding-sm); --void-segment-text: var(--void-control-text-sm); }
-void-segmented-control[size="lg"] { --void-segment-height: var(--void-control-height-lg); --void-segment-padding: var(--void-control-padding-lg); --void-segment-text: var(--void-control-text-lg); }
+void-segmented-control[size="sm"] { --_void-segment-height: var(--void-control-height-sm); --_void-segment-padding: var(--void-control-padding-sm); --_void-segment-text: var(--void-control-text-sm); }
+void-segmented-control[size="lg"] { --_void-segment-height: var(--void-control-height-lg); --_void-segment-padding: var(--void-control-padding-lg); --_void-segment-text: var(--void-control-text-lg); }

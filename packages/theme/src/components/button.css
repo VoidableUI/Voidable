@@ -5,40 +5,50 @@
    line up whatever their variant.
    ============================================================ */
 
+/* @tokens void-button
+   --void-button-height       Height of the button. Applies at every size step; for a proportional change set the --void-control-* steps instead.
+   --void-button-padding      Inline padding. Applies at every size step; for a proportional change set the --void-control-* steps instead.
+   --void-button-font-size    Size of the label. Applies at every size step; for a proportional change set the --void-control-* steps instead.
+   --void-button-font-weight  Weight of the label.
+   --void-button-radius       Corner radius.
+   --void-button-border       Edge colour of the default outline button. A coloured button keeps the edge of its tone; a filled one is its tone.
+   --void-button-shadow       Shadow of the outline and filled button at rest. A ghost button never casts one. */
+
 void-button {
   /* Tone system — base defaults to accent (monochrome white/black) */
-  --tone: var(--void-color-accent);
-  --tone-text: var(--void-color-text);
-  --tone-subtle: var(--void-color-control-fill);
-  --tone-border: var(--void-color-border-control);
-  --tone-hover: color-mix(in srgb, var(--tone) 8%, var(--void-color-control-fill));
-  --tone-active: color-mix(in srgb, var(--tone) 13%, var(--void-color-control-fill));
+  --_void-tone: var(--void-color-accent);
+  --_void-tone-text: var(--void-color-text);
+  --_void-tone-subtle: var(--void-color-control-fill);
+  --_void-tone-border: var(--void-button-border, var(--void-color-border-control));
+  --_void-tone-hover: color-mix(in srgb, var(--_void-tone) 8%, var(--void-color-control-fill));
+  --_void-tone-active: color-mix(in srgb, var(--_void-tone) 13%, var(--void-color-control-fill));
 
   /* Size — each size step sets these three and nothing else */
-  --void-button-height: var(--void-control-height);
-  --void-button-padding: calc(var(--void-control-padding) * 1.25);
-  --void-button-text: var(--void-control-text);
+  --_void-button-height: var(--void-button-height, var(--void-control-height));
+  --_void-button-padding: var(--void-button-padding, calc(var(--void-control-padding) * 1.25));
+  --_void-button-font-size: var(--void-button-font-size, var(--void-control-text));
 
   /* Layout */
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: var(--void-space-2);
-  min-height: var(--void-button-height);
-  padding: 0 var(--void-button-padding);
+  min-height: var(--_void-button-height);
+  padding: 0 var(--_void-button-padding);
 
   /* Typography */
   font-family: var(--void-font-sans);
-  font-size: var(--void-button-text);
-  font-weight: var(--void-weight-medium);
+  font-size: var(--_void-button-font-size);
+  font-weight: var(--void-button-font-weight, var(--void-weight-medium));
   line-height: var(--void-leading-tight);
   white-space: nowrap;
 
   /* Visual */
-  background: var(--tone-subtle);
-  border: 1px solid var(--tone-border);
-  border-radius: var(--void-radius-md);
-  color: var(--tone-text);
+  background: var(--_void-tone-subtle);
+  border: var(--void-control-border-width) solid var(--_void-tone-border);
+  border-radius: var(--void-button-radius, var(--void-control-radius));
+  box-shadow: var(--void-button-shadow, none);
+  color: var(--_void-tone-text);
   cursor: pointer;
 
   /* Motion */
@@ -58,11 +68,11 @@ void-button svg {
 
 /* Hover and pressed */
 void-button:hover {
-  background: var(--tone-hover);
+  background: var(--_void-tone-hover);
 }
 
 void-button:active {
-  background: var(--tone-active);
+  background: var(--_void-tone-active);
 }
 
 /* Focus */
@@ -73,8 +83,8 @@ void-button:focus-visible {
 
 /* Filled variant */
 void-button[variant="filled"] {
-  background: var(--tone);
-  border-color: var(--tone);
+  background: var(--_void-tone);
+  border-color: var(--_void-tone);
   color: var(--void-color-text-on-accent);
 }
 
@@ -89,67 +99,68 @@ void-button[variant="filled"]:active {
 /* Ghost variant — nothing drawn at rest: for row actions, toolbars
    and the quiet button beside a primary one. */
 void-button[variant="ghost"] {
-  --tone-hover: color-mix(in srgb, var(--tone) 8%, transparent);
-  --tone-active: color-mix(in srgb, var(--tone) 13%, transparent);
+  --_void-tone-hover: color-mix(in srgb, var(--_void-tone) 8%, transparent);
+  --_void-tone-active: color-mix(in srgb, var(--_void-tone) 13%, transparent);
   background: transparent;
   border-color: transparent;
+  box-shadow: none;
 }
 
 void-button[variant="ghost"]:hover {
-  background: var(--tone-hover);
+  background: var(--_void-tone-hover);
 }
 
 void-button[variant="ghost"]:active {
-  background: var(--tone-active);
+  background: var(--_void-tone-active);
 }
 
 /* Color variants — one override cascades to all derived states */
-void-button[color="error"]   { --tone: var(--void-color-error); }
-void-button[color="warning"] { --tone: var(--void-color-warning); }
-void-button[color="caution"] { --tone: var(--void-color-caution); }
-void-button[color="highlight"] { --tone: var(--void-color-highlight); }
-void-button[color="success"] { --tone: var(--void-color-success); }
-void-button[color="info"]    { --tone: var(--void-color-info); }
-void-button[color="notice"]  { --tone: var(--void-color-notice); }
+void-button[color="error"]   { --_void-tone: var(--void-color-error); }
+void-button[color="warning"] { --_void-tone: var(--void-color-warning); }
+void-button[color="caution"] { --_void-tone: var(--void-color-caution); }
+void-button[color="highlight"] { --_void-tone: var(--void-color-highlight); }
+void-button[color="success"] { --_void-tone: var(--void-color-success); }
+void-button[color="info"]    { --_void-tone: var(--void-color-info); }
+void-button[color="notice"]  { --_void-tone: var(--void-color-notice); }
 
 /* Coloured buttons keep a tone-derived border and tint; only the
    default (accent) button uses the control boundary token. The
    attribute is reflected, so the default button carries
    color="default". */
 void-button[color]:not([color="default"]) {
-  --tone-subtle: color-mix(in srgb, var(--tone) var(--void-tone-tint), var(--void-color-control-fill));
-  --tone-border: color-mix(in srgb, var(--tone) 50%, transparent);
-  --tone-hover: color-mix(in srgb, var(--tone) calc(var(--void-tone-tint) * 1.5), var(--void-color-control-fill));
-  --tone-active: color-mix(in srgb, var(--tone) calc(var(--void-tone-tint) * 2), var(--void-color-control-fill));
+  --_void-tone-subtle: color-mix(in srgb, var(--_void-tone) var(--void-tone-tint), var(--void-color-control-fill));
+  --_void-tone-border: color-mix(in srgb, var(--_void-tone) 50%, transparent);
+  --_void-tone-hover: color-mix(in srgb, var(--_void-tone) calc(var(--void-tone-tint) * 1.5), var(--void-color-control-fill));
+  --_void-tone-active: color-mix(in srgb, var(--_void-tone) calc(var(--void-tone-tint) * 2), var(--void-color-control-fill));
 }
 
 /* A coloured ghost button carries its colour in the label, and its
    hover fill is the same tint the tone uses everywhere else, so the
    label keeps 4.5:1 on it. */
 void-button[variant="ghost"][color]:not([color="default"]) {
-  --tone-text: var(--tone);
-  --tone-hover: color-mix(in srgb, var(--tone) var(--void-tone-tint), transparent);
-  --tone-active: color-mix(in srgb, var(--tone) calc(var(--void-tone-tint) * 1.25), transparent);
+  --_void-tone-text: var(--_void-tone);
+  --_void-tone-hover: color-mix(in srgb, var(--_void-tone) var(--void-tone-tint), transparent);
+  --_void-tone-active: color-mix(in srgb, var(--_void-tone) calc(var(--void-tone-tint) * 1.25), transparent);
 }
 
 /* Size variants */
 void-button[size="sm"] {
-  --void-button-height: var(--void-control-height-sm);
-  --void-button-padding: calc(var(--void-control-padding-sm) * 1.25);
-  --void-button-text: var(--void-control-text-sm);
+  --_void-button-height: var(--void-button-height, var(--void-control-height-sm));
+  --_void-button-padding: var(--void-button-padding, calc(var(--void-control-padding-sm) * 1.25));
+  --_void-button-font-size: var(--void-button-font-size, var(--void-control-text-sm));
 }
 
 void-button[size="lg"] {
-  --void-button-height: var(--void-control-height-lg);
-  --void-button-padding: calc(var(--void-control-padding-lg) * 1.25);
-  --void-button-text: var(--void-control-text-lg);
+  --_void-button-height: var(--void-button-height, var(--void-control-height-lg));
+  --_void-button-padding: var(--void-button-padding, calc(var(--void-control-padding-lg) * 1.25));
+  --_void-button-font-size: var(--void-button-font-size, var(--void-control-text-lg));
 }
 
 /* Icon-only: a labelled button whose only child is an icon is square. */
 void-button[aria-label]:has(> svg:only-child),
 void-button[aria-label]:has(> i:only-child) {
   padding: 0;
-  min-width: var(--void-button-height);
+  min-width: var(--_void-button-height);
 }
 
 /* Link targets — the <a> fills the button and carries the padding, so
@@ -164,7 +175,7 @@ void-button > a {
   justify-content: center;
   align-self: stretch;
   gap: var(--void-space-2);
-  padding: 0 var(--void-button-padding);
+  padding: 0 var(--_void-button-padding);
   color: inherit;
   text-decoration: none;
   flex: 1;

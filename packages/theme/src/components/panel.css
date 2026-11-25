@@ -1,19 +1,26 @@
+/* @tokens void-panel
+   --void-panel-padding  Padding inside the panel. */
+
 void-panel {
   display: block;
-  padding: var(--void-container-padding);
-  border: 1px solid var(--void-color-border);
-  border-radius: var(--void-radius-lg);
-  background: var(--void-color-surface);
+  padding: var(--void-panel-padding, var(--void-container-padding));
+  border: var(--void-container-border-width) solid var(--void-container-border);
+  border-radius: var(--void-container-radius);
+  background: var(--void-container-surface);
+  box-shadow: var(--void-container-shadow);
   font-family: var(--void-font-sans);
 }
 
 void-panel[variant="bordered"] {
   background: transparent;
+  border-color: var(--void-color-border);
+  box-shadow: none;
 }
 
 void-panel[variant="elevated"] {
-  background: var(--void-color-bg-elevated);
-  box-shadow: var(--void-shadow-md);
+  background: var(--void-float-surface);
+  border-color: var(--void-float-border);
+  box-shadow: var(--void-float-shadow);
 }
 
 .void-panel-label {
