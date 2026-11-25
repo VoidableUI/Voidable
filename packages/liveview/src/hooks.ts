@@ -31,6 +31,7 @@ type ListenerEntry = [event: string, handler: (e: Event) => void];
 interface VoidEventInstance extends ViewHookInstance {
   _listeners: ListenerEntry[];
   _boundEvents: string[];
+  _destroyed?: boolean;
 }
 
 function parseEvents(el: HTMLElement): string[] {
@@ -55,20 +56,26 @@ export function buildPayload(el: HTMLElement, event: string, detail: unknown): R
   };
 }
 
-function push(hook: ViewHookInstance, event: string, payload: object): void {
+function push(hook: VoidEventInstance, event: string, payload: object): void {
+  if (hook._destroyed) return;
   // Honour phx-target (a component cid or a CSS selector), like phx-click does.
   const target = hook.el.getAttribute("phx-target");
-  if (target) {
-    hook.pushEventTo(target, event, payload);
-  } else {
-    hook.pushEvent(event, payload);
-  }
+  const sent: unknown = target ? hook.pushEventTo(target, event, payload) : hook.pushEvent(event, payload);
+  // LiveView rejects a hook push once the view has gone (a navigation away);
+  // it logs that itself, so the rejection is not left unhandled.
+  if (sent && typeof (sent as Promise<unknown>).catch === "function") (sent as Promise<unknown>).catch(() => {});
 }
 
 function attachListeners(hook: VoidEventInstance, events: string[]): void {
   for (const event of events) {
     const handler = (e: Event) => {
-      push(hook, event, buildPayload(hook.el, event, (e as CustomEvent).detail));
+      const payload = buildPayload(hook.el, event, (e as CustomEvent).detail);
+      // Pushed in a task of its own, after the DOM event that caused it has
+      // finished dispatching. A hook push marks the element as awaiting a
+      // reply, and LiveView drops its own binding on an element in that state
+      // (phx-click on a void-button whose void-click is bridged), so the
+      // element's phx-* bindings run first.
+      setTimeout(() => push(hook, event, payload), 0);
     };
     hook.el.addEventListener(event, handler);
     hook._listeners.push([event, handler]);
@@ -97,6 +104,7 @@ function detachListeners(hook: VoidEventInstance): void {
 export const VoidHooks: Record<string, Partial<ViewHookInstance> & ThisType<VoidEventInstance>> = {
   VoidEvent: {
     mounted(this: VoidEventInstance) {
+      this._destroyed = false;
       this._listeners = [];
       this._boundEvents = [];
       const events = parseEvents(this.el);
@@ -122,6 +130,7 @@ export const VoidHooks: Record<string, Partial<ViewHookInstance> & ThisType<Void
     },
 
     destroyed(this: VoidEventInstance) {
+      this._destroyed = true;
       detachListeners(this);
     },
   },

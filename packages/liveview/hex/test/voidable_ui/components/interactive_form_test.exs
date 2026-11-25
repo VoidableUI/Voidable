@@ -37,12 +37,12 @@ defmodule VoidableUI.Components.InteractiveFormTest do
       assert html =~ ~s(error="Invalid")
     end
 
-    test "has phx-hook and data-void-events" do
+    test "has phx-hook and data-void-events with events" do
       assigns = %{}
 
       html =
         rendered_to_string(~H"""
-        <VoidableUI.Components.input />
+        <VoidableUI.Components.input events />
         """)
 
       assert html =~ ~s(phx-hook="VoidEvent")
@@ -139,12 +139,12 @@ defmodule VoidableUI.Components.InteractiveFormTest do
       assert html =~ ~s(value="hello")
     end
 
-    test "has phx-hook and data-void-events" do
+    test "has phx-hook and data-void-events with events" do
       assigns = %{}
 
       html =
         rendered_to_string(~H"""
-        <VoidableUI.Components.textarea />
+        <VoidableUI.Components.textarea events />
         """)
 
       assert html =~ ~s(phx-hook="VoidEvent")
@@ -244,12 +244,12 @@ defmodule VoidableUI.Components.InteractiveFormTest do
       assert html =~ ~s(error="Required")
     end
 
-    test "has phx-hook and data-void-events" do
+    test "has phx-hook and data-void-events with events" do
       assigns = %{}
 
       html =
         rendered_to_string(~H"""
-        <VoidableUI.Components.select><option value="x">X</option></VoidableUI.Components.select>
+        <VoidableUI.Components.select events><option value="x">X</option></VoidableUI.Components.select>
         """)
 
       assert html =~ ~s(phx-hook="VoidEvent")
@@ -352,12 +352,12 @@ defmodule VoidableUI.Components.InteractiveFormTest do
       assert html =~ ~s(size="sm")
     end
 
-    test "has phx-hook and data-void-events" do
+    test "has phx-hook and data-void-events with events" do
       assigns = %{}
 
       html =
         rendered_to_string(~H"""
-        <VoidableUI.Components.checkbox />
+        <VoidableUI.Components.checkbox events />
         """)
 
       assert html =~ ~s(phx-hook="VoidEvent")
@@ -459,12 +459,12 @@ defmodule VoidableUI.Components.InteractiveFormTest do
       assert html =~ ~s(size="lg")
     end
 
-    test "has phx-hook and data-void-events" do
+    test "has phx-hook and data-void-events with events" do
       assigns = %{}
 
       html =
         rendered_to_string(~H"""
-        <VoidableUI.Components.radio />
+        <VoidableUI.Components.radio events />
         """)
 
       assert html =~ ~s(phx-hook="VoidEvent")
@@ -558,12 +558,12 @@ defmodule VoidableUI.Components.InteractiveFormTest do
       assert html =~ ~s(orientation="horizontal")
     end
 
-    test "has phx-hook and data-void-events" do
+    test "has phx-hook and data-void-events with events" do
       assigns = %{}
 
       html =
         rendered_to_string(~H"""
-        <VoidableUI.Components.radio_group>
+        <VoidableUI.Components.radio_group events>
           <VoidableUI.Components.radio value="x">X</VoidableUI.Components.radio>
         </VoidableUI.Components.radio_group>
         """)
@@ -637,12 +637,12 @@ defmodule VoidableUI.Components.InteractiveFormTest do
       assert html =~ ~s(orientation="horizontal")
     end
 
-    test "has phx-hook and data-void-events" do
+    test "has phx-hook and data-void-events with events" do
       assigns = %{}
 
       html =
         rendered_to_string(~H"""
-        <VoidableUI.Components.checkbox_group>
+        <VoidableUI.Components.checkbox_group events>
           <VoidableUI.Components.checkbox value="a">A</VoidableUI.Components.checkbox>
         </VoidableUI.Components.checkbox_group>
         """)
@@ -717,12 +717,12 @@ defmodule VoidableUI.Components.InteractiveFormTest do
       assert html =~ ~s(error="Not found")
     end
 
-    test "has phx-hook and data-void-events" do
+    test "has phx-hook and data-void-events with events" do
       assigns = %{}
 
       html =
         rendered_to_string(~H"""
-        <VoidableUI.Components.combobox>
+        <VoidableUI.Components.combobox events>
           <VoidableUI.Components.option value="x">X</VoidableUI.Components.option>
         </VoidableUI.Components.combobox>
         """)
@@ -825,12 +825,12 @@ defmodule VoidableUI.Components.InteractiveFormTest do
       assert html =~ ~s(error="Required")
     end
 
-    test "has phx-hook and data-void-events" do
+    test "has phx-hook and data-void-events with events" do
       assigns = %{}
 
       html =
         rendered_to_string(~H"""
-        <VoidableUI.Components.multiselect>
+        <VoidableUI.Components.multiselect events>
           <VoidableUI.Components.option value="x">X</VoidableUI.Components.option>
         </VoidableUI.Components.multiselect>
         """)
@@ -928,12 +928,12 @@ defmodule VoidableUI.Components.InteractiveFormTest do
       assert html =~ ~s(size="lg")
     end
 
-    test "has phx-hook and data-void-events" do
+    test "has phx-hook and data-void-events with events" do
       assigns = %{}
 
       html =
         rendered_to_string(~H"""
-        <VoidableUI.Components.slider />
+        <VoidableUI.Components.slider events />
         """)
 
       assert html =~ ~s(phx-hook="VoidEvent")
@@ -1032,12 +1032,12 @@ defmodule VoidableUI.Components.InteractiveFormTest do
       assert html =~ ~s(error="Too large")
     end
 
-    test "has phx-hook and data-void-events" do
+    test "has phx-hook and data-void-events with events" do
       assigns = %{}
 
       html =
         rendered_to_string(~H"""
-        <VoidableUI.Components.file_upload />
+        <VoidableUI.Components.file_upload events />
         """)
 
       assert html =~ ~s(phx-hook="VoidEvent")
@@ -1133,12 +1133,12 @@ defmodule VoidableUI.Components.InteractiveFormTest do
       assert html =~ ~s(size="sm")
     end
 
-    test "has phx-hook and data-void-events" do
+    test "has phx-hook and data-void-events with events" do
       assigns = %{}
 
       html =
         rendered_to_string(~H"""
-        <VoidableUI.Components.switch />
+        <VoidableUI.Components.switch events />
         """)
 
       assert html =~ ~s(phx-hook="VoidEvent")
@@ -1223,12 +1223,12 @@ defmodule VoidableUI.Components.InteractiveFormTest do
       assert html =~ ~s(maxlength="500")
     end
 
-    test "has phx-hook and data-void-events for input and submit" do
+    test "has phx-hook and data-void-events for input and submit with events" do
       assigns = %{}
 
       html =
         rendered_to_string(~H"""
-        <VoidableUI.Components.compose_input />
+        <VoidableUI.Components.compose_input events />
         """)
 
       assert html =~ ~s(phx-hook="VoidEvent")
