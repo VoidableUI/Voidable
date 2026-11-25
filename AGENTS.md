@@ -156,10 +156,14 @@ set -euo pipefail
 | `mise run lint` | Lint all packages |
 | `mise run clean` | Remove build artifacts and node_modules |
 | `mise run liveview:demo` | Start the LiveView demo server |
-| `mise run ci` | Full CI pipeline: build, test, typecheck, lint, token lint |
+| `mise run ci` | Full CI pipeline: build, test, typecheck, lint and every `lint:*` task below |
 | `mise run lint` | ESLint with lit-a11y (WCAG checks on Lit templates) |
 | `mise run lint:tokens` | Ensure no raw values (colors, sizes, etc.) outside primitives.css |
 | `mise run lint:undefined-tokens` | Fail if a `--void-*` token is referenced but neither defined in theme CSS nor set from TypeScript |
+| `mise run lint:contrast` | Check WCAG contrast of theme tokens in dark and light mode |
+| `mise run lint:styles` | Ensure UI components contain no visual styles |
+| `mise run lint:exports` | Verify every component has a subpath export, self-registers and is re-exported from the index |
+| `mise run lint:manifest` | Fail when a tag in the Custom Elements Manifest has no story, React wrapper or LiveView component (known gaps: `.mise/manifest-drift-allowlist.txt`) |
 | `mise run docs` | Start docs dev server |
 | `mise run docs:build` | Build docs for deployment |
 
@@ -189,6 +193,9 @@ The docs Open Graph image is generated from `docs/scripts/og-image.svg` with `mi
 4. Components have zero visual styling without a theme loaded.
 5. Never hardcode color values — always use `var(--void-*)`.
 6. Never import CSS in the `@voidable/ui` package entry point.
+7. Components that host consumer children use `ProjectionController` (`packages/ui/src/projection.ts`), never a `childNodes` snapshot; region containers hold no Lit bindings.
+8. Form controls use the `NativeFormControl` or `InternalsFormControl` mixin (`packages/ui/src/form-control.ts`).
+9. Multi-word properties declare a kebab-case `attribute` (enforced by the manifest test).
 
 ### CSS Selector Strategy
 
@@ -240,7 +247,7 @@ Component CSS in `@voidable/theme` lives in `src/components/` with one file per 
 
 - **Conventional commits** (Angular convention) for automatic semver.
 - Per-package tagging with prefixes: `ui-v`, `theme-v`, `ui-react-v`, `ui-solid-v`, `ui-vue-v`, `ui-svelte-v`, `ui-angular-v`, `ui-hotwire-v`, `ui-alpine-v`, `ui-liveview-v`, plus `hex-liveview-v`, `gem-hotwire-v` and `composer-alpine-v` for the server-side packages.
-- Each package has its own release workflow triggered by path-scoped changes on `master`.
+- Each package has its own release workflow triggered by path-scoped changes on `master`. Every release workflow runs `.github/workflows/ci.yml` (`mise run ci`) and only tags and publishes if it passes; the same workflow runs on pull requests.
 - Version comes from git tags at publish time — no manual version management in `package.json`.
 - Storybook and docs deploy to GitHub Pages via a separate workflow that runs after the UI or theme release workflow succeeds (or on manual dispatch). It passes the latest `ui-v*` tag and the gzipped `@voidable/ui` size to the docs build.
 

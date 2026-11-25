@@ -20,7 +20,7 @@ Run `mise tasks` for the complete list. Run `mise run ci` before opening a pull 
 
 ## Tenets
 
-These are enforced in review and partly by `lint:styles`, `lint:tokens` and `lint:exports`:
+These are enforced in review and partly by `lint:styles`, `lint:tokens`, `lint:undefined-tokens` and `lint:exports`:
 
 - **No visual CSS in `@voidable/ui`.** Components are unstyled without a theme. All styling lives in `@voidable/theme`.
 - **Light DOM only.** Components extend `VoidElement`; never use Shadow DOM.
@@ -37,7 +37,7 @@ Use [conventional commits](https://www.conventionalcommits.org) (Angular convent
 
 ## Releases
 
-There are no manual version bumps. Each package has its own release workflow in `.github/workflows/`. When a push to `master` changes files under a package's path, its workflow runs tests, creates a prefixed git tag (for example `ui-v`, `theme-v`, `ui-react-v`) from the conventional commits since the last tag, and publishes. The version is taken from the tag at publish time. Pushes to `master` that release `@voidable/ui` or `@voidable/theme` also redeploy the docs and Storybook to GitHub Pages, so merge only what you are ready to ship.
+There are no manual version bumps. Each package has its own release workflow in `.github/workflows/`. When a push to `master` changes files under a package's path, its workflow runs the full CI (`mise run ci`, the same check pull requests get), then creates a prefixed git tag (for example `ui-v`, `theme-v`, `ui-react-v`) from the conventional commits since the last tag, and publishes. The version is taken from the tag at publish time. Pushes to `master` that release `@voidable/ui` or `@voidable/theme` also redeploy the docs and Storybook to GitHub Pages, so merge only what you are ready to ship.
 
 ## Security
 

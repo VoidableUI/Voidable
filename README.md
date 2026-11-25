@@ -64,7 +64,7 @@ mise run test      # run tests
 mise run lint      # lint
 mise run storybook # Storybook dev server
 mise run docs      # docs dev server
-mise run ci        # full pipeline: build, test, typecheck, lint, token and export lint
+mise run ci        # full pipeline: build, test, typecheck, lint and all lint:* checks
 ```
 
 `mise tasks` lists every task. See [CONTRIBUTING.md](CONTRIBUTING.md) and [AGENTS.md](AGENTS.md) for conventions.
