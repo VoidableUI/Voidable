@@ -4,7 +4,7 @@
 // /lab/two) with the built @voidable/ui and @voidable/ui-liveview packages and
 // the live_voidable Hex package from this repository. Every test gets a new
 // browser context and so a new LiveView.
-import { test, expect, expectedFailure, settle, ready, fillLabForm, formEntries, mark, kept, type Page } from '../shared';
+import { test, expect, expectedFailure, settle, ready, fillLabForm, addTag, formEntries, mark, kept, type Page } from '../shared';
 
 /** Opens the lab and waits for the LiveView to connect (the dead render has upgraded by then too). */
 async function lab(page: Page, path = '/lab') {

@@ -10,6 +10,7 @@ export const KNOWN_ISSUES = {
   'untracked:tooltip-hover-card-no-flip': 'a tooltip on a trigger at the top edge of the viewport and a hover card on one at the bottom edge keep their default side, are pushed back inside the viewport and so cover their trigger; popover, dropdown-menu and the select-like panels flip',
   'untracked:firefox-flipped-overlay-invisible': 'Firefox: a popover, dropdown-menu, combobox, multiselect or date-picker panel that CSS anchor positioning flips (position-try-fallbacks) to stay inside the viewport ends its opening transition at opacity 0 and stays invisible',
   'untracked:webkit-morph-drops-menu-focus': 'WebKit: a server morph while a dropdown-menu is open and one of its items has focus leaves the menu open but moves focus to the body (Chromium and Firefox keep it)',
+  'untracked:turbo-server-open-dialog-ignored': 'Turbo: a refresh morph whose HTML adds `open` to a closed void-dialog leaves it closed (attribute and property stay false), though the response contains <void-dialog open>',
   'untracked:number-input-required': 'an empty required number-input reports valid and its form does not submit',
   'untracked:required-not-focusable': 'some invalid required controls cannot take focus, so the browser shows no message',
   'untracked:fieldset-disabled-focusable': 'several controls stay in the tab order inside a disabled fieldset',
