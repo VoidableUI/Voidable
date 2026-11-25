@@ -42,6 +42,21 @@ Locally, an engine that is not installed or cannot load its system libraries is 
 
 **Server toolchains.** `mise run test:server` uses Ruby, Erlang/Elixir and PHP from `mise` when installed, and otherwise from `PATH` (as CI provides them through `ruby/setup-ruby`, `erlef/setup-beam` and `shivammathur/setup-php`, with versions read from `mise.toml`). Steps that touch a package registry (bundler, hex, composer) are retried up to three times, so a registry blip does not fail the run. The apps listen on 4520 (Rails), 4530 (Phoenix) and 4540 (Laravel), and the browser suite's server on 4417; set `VOID_RAILS_PORT`, `VOID_PHOENIX_PORT`, `VOID_LARAVEL_PORT` and `VOID_TEST_PORT` to run two checkouts side by side. A busy port fails the run and an existing server is never reused.
 
+## Screen readers
+
+`tests/browser/screen-readers` drives a real screen reader by script, VoiceOver on macOS and NVDA on Windows through [Guidepup](https://www.guidepup.dev), and asserts on what is spoken. The scenarios are data (a page and steps such as reach the next form control, activate, hear this) and each is replayed twice from the same definition: against the browser's accessibility tree in the normal browser suite (Linux, every engine, gating like any spec), and with the real screen reader.
+
+```bash
+mise run test:browser -- specs/screen-reader-tree.spec.ts   # the tree replay, any machine
+mise run test:screen-readers:setup                          # once, on a Mac or a Windows machine: configure the OS, fetch the screen reader and browser
+mise run test:screen-readers                                # then run the scenarios with the screen reader
+mise run test:screen-readers -- --grep dialog               # one scenario
+```
+
+Do not type during a run: the screen reader owns the keyboard. A failure says which step, what was expected and the last phrases heard; every test also keeps a transcript (`spoken-phrases.json`), the spoken log, a trace and a video under `tests/browser/test-results-screen-readers/`. If the tree replay of the same scenario passes, the page is right and the wording is the screen reader's: widen the vocabulary in `screen-readers/words.ts`, never match a whole phrase. `tests/browser/screen-readers/README.md` has the tooling and versions, how to read a failure and how to add a scenario (markup on `pages/sr-<area>.html`, a `Scenario` in `scenarios.ts`, tree replay green first).
+
+CI runs the real screen readers in `.github/workflows/screen-readers.yml` (macOS 15 with VoiceOver and WebKit, Windows Server 2025 with NVDA and Chromium) on pull requests that touch `packages/ui`, `packages/theme` or the screen-reader tests, weekly, and on demand. It is separate from `ci.yml`, has no `workflow_call`, and is not part of any release: it never gates a release. After a run, `mise run test:screen-readers:record -- <downloaded artifacts>` merges the results into `docs/src/data/screen-reader-results.json`, which the [accessibility statement](docs/src/content/docs/guides/accessibility-statement.mdx) shows; commit that file.
+
 ## Visual review
 
 A component that works can still look wrong on a page. `tests/browser/shots` photographs the reference pages (`packages/storybook/stories/reference/`: dashboard, queue table, form, form with an open dialog, settings, empty states, a page over a photograph, a component sheet with every component in its variants, the three sizes and the eight colours, the interaction states hover, focus, pressed, disabled and invalid, and each open overlay) at 1440x900 and 390x844, in dark and light, in every theme and skin the theme package ships (read from `packages/theme/dist/exports.json`, so a new theme or skin is captured without touching the tooling). The markup lives only in those HTML files; Storybook (Reference/Screens), the docs theme builder and the capture all render them.

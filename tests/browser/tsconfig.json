@@ -12,5 +12,5 @@
     "skipLibCheck": true,
     "types": ["node"]
   },
-  "include": ["*.ts", "specs", "helpers", "server", "src"]
+  "include": ["*.ts", "specs", "helpers", "server", "src", "screen-readers"]
 }

@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+#MISE description="Merge screen-reader run files (from a workflow run's artifacts) into docs/src/data/screen-reader-results.json, which the accessibility statement renders"
+set -euo pipefail
+
+# mise run test:screen-readers:record -- path/to/downloaded/artifacts
+# Then review the diff and commit docs/src/data/screen-reader-results.json.
+exec node tests/browser/screen-readers/merge-results.mjs "$@"
