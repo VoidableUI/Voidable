@@ -54,5 +54,5 @@ void-accordion-item[open] .void-accordion-content {
   padding: var(--void-space-3) var(--void-space-4) var(--void-space-4);
   color: var(--void-color-text);
   font-family: var(--void-font-sans);
-  font-size: var(--void-text-sm);
+  font-size: var(--void-type-body-size);
 }

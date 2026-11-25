@@ -46,11 +46,13 @@
   gap: var(--void-space-1);
 }
 .info-grid-label {
-  font-size: var(--void-text-2xs);
-  font-family: var(--void-font-mono);
-  text-transform: uppercase;
-  letter-spacing: var(--void-tracking-widest);
-  color: var(--void-color-text-muted);
+  font-family: var(--void-type-label-family);
+  font-size: var(--void-type-label-size);
+  line-height: var(--void-type-label-leading);
+  font-weight: var(--void-type-label-weight);
+  letter-spacing: var(--void-type-label-tracking);
+  text-transform: var(--void-type-label-case);
+  color: var(--void-type-label-color);
 }
 .info-grid-value {
   font-size: var(--void-text-sm);

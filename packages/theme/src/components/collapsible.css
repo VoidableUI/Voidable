@@ -25,8 +25,8 @@ void-collapsible {
 }
 
 .void-collapsible-trigger:focus-visible {
-  outline: 2px solid var(--void-color-border-focus);
-  outline-offset: -2px;
+  outline: var(--void-focus-ring-width) solid var(--void-focus-ring-color);
+  outline-offset: calc(-1 * var(--void-focus-ring-width));
 }
 
 .void-collapsible-chevron {
@@ -59,7 +59,7 @@ void-collapsible[open] .void-collapsible-inner {
   padding: var(--void-space-3) var(--void-space-4) var(--void-space-4);
   color: var(--void-color-text);
   font-family: var(--void-font-sans);
-  font-size: var(--void-text-sm);
+  font-size: var(--void-type-body-size);
 }
 
 /* Disabled state */

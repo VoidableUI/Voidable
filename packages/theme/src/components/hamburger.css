@@ -15,8 +15,8 @@ void-hamburger:hover {
 }
 
 void-hamburger:focus-visible {
-  outline: 2px solid var(--void-color-border-focus);
-  outline-offset: 2px;
+  outline: var(--void-focus-ring-width) solid var(--void-focus-ring-color);
+  outline-offset: var(--void-focus-ring-offset);
 }
 
 .void-hamburger-lines {

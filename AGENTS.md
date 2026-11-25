@@ -76,54 +76,87 @@ No Material, Chakra, shadcn, or similar. Everything is built from scratch.
 
 ## CSS Token Architecture
 
-Three-tier token system with `--void-*` prefix.
+Everything visual is a `--void-*` custom property in `@voidable/theme`, in three layers.
 
-### Tier 1 — Primitives (`@voidable/theme/primitives`)
+### Layer 1 — Primitives (`@voidable/theme/primitives`)
 
-Raw color scales with no semantic meaning:
+Fixed values with no semantic meaning, never derived from anything:
 - **Stone palette**: 50–950 (includes 450)
 - **Status palettes**: red, orange, amber, green, blue, purple, pink
-- **Spacing scale**: rem-based
-- **Typography**: sizes, weights, line heights, system font stacks
-- **Other**: border radii, shadows, motion durations, z-index
+- **Typography constants**: weights, line heights, tracking
+- **Other**: easings, z-index, chart stroke widths
 
-### Tier 2 — Semantic Tokens (`@voidable/theme/tokens`)
+### Layer 2 — Knobs (`@voidable/theme/knobs`)
 
-Semantic aliases that reference Tier 1 primitives:
-- **Surfaces**: `bg`, `bg-secondary`, `bg-elevated`, `bg-hover`, `bg-accent`, `bg-overlay`
-- **Text**: `text`, `text-secondary`, `text-muted`, `text-tertiary`, `text-disabled`, `text-on-accent`
-- **Borders**: `border`, `border-strong`, `border-focus`
-- **Accent**
-- **Status colors**: error, warning, caution, success, info, notice, highlight (each with subtle variants)
-- **Dark mode** is default (true black `#000000` surfaces)
-- **Light mode** via `[data-theme="light"]`
+The inputs a theme sets. To retheme, change these and nothing else:
 
-### Tier 3 — App-Specific Themes
+| Knob | Default | Changes |
+|------|---------|---------|
+| `--void-accent-hue`, `--void-accent-chroma` | `250`, `0` | Accent colour (OKLCH). Chroma 0 = no accent: primary actions are the inverse of the page |
+| `--void-neutral-hue`, `--void-neutral-chroma` | `60`, `0.004` | Tint of text, borders and surfaces |
+| `--void-page-tint` | `0` | 0 = pure black/white page; 1 = soft tinted page |
+| `--void-contrast` | `0.2` | Strength of secondary text and control borders, 0–1; clamped, never below AA |
+| `--void-chrome` | `0.3` | Strength of dividers and container fills, 0–1 |
+| `--void-radius` | `4px` | Radius of a control; the other radii scale from it |
+| `--void-density` | `1` | Control height, padding, spacing scale |
+| `--void-rhythm` | `1` | Space between groups and sections |
+| `--void-font-size`, `--void-font-sans`, `--void-font-mono` | `0.875rem`, Inter, JetBrains Mono | Type |
+| `--void-anim-scale` | `1` | Multiplies durations |
 
-Consumer applications define their own Tier 3 tokens. These are not part of Void UI.
+A **theme** is a file in `packages/theme/src/themes/` with one `[data-void-theme="name"]` rule that sets knobs only (`lint:contrast` rejects anything else). `void`, `dune` and `console` ship as examples.
+
+### Layer 3 — Derived Tokens (`@voidable/theme/tokens`)
+
+Computed from the knobs in plain CSS (`oklch()`, `color-mix()`, `calc()`; no build step, no relative colour syntax, no `light-dark()`):
+- **Surfaces**: `bg`, `surface`, `bg-secondary`, `bg-elevated`, `bg-hover`, `bg-active`, `bg-overlay`
+- **Text**: `text`, `text-secondary`, `text-muted`, `text-disabled`, `text-on-accent`
+- **Borders**: `border` (divider), `border-strong`, `border-control` (3:1 control boundary), `border-focus`
+- **Accent**, and **status colours**: error, warning, caution, success, info, notice, highlight (each with a subtle variant)
+- **Control size**: `--void-control-height*`, `--void-control-padding*`, `--void-control-text*`
+- **Layout rhythm**: `--void-gap-tight|inside|stack|group|section`, `--void-gutter`, `--void-measure*`
+- **Type roles**: `--void-type-<role>-*` for label, value, unit, caption, heading, title, body, code
+- **Spacing, text sizes, radii, shadows, durations**
+
+How the derivation works, and the rules that keep it working:
+- The colour scheme is a number, `--void-scheme-dark` (1 or 0), set by `data-theme` or the system preference. Formulas blend between their dark and light results with it, so light mode is never a second hand-written block.
+- Every grey is one neutral foreground (`--void-fg`) at an alpha step. Do not add hand-picked grey values.
+- Derived tokens are declared on `:where(:root, [data-theme], [data-void-theme], [data-shape])`. A custom property computed from another is resolved where it is declared, so a knob set on a subtree only takes effect if that element carries `data-void-theme`.
+- Never put a `var()` in `primitives.css` or `knobs.css`, and never put a raw value in a theme file.
+- **Dark mode** is the default (true black `#000000` page). **Light mode** via `[data-theme="light"]`.
 
 ## Design Values
 
 The name "Void" reflects two core ideas: components are **devoid** of styling without a theme loaded, and the visual language embraces the **void** — negative space as a first-class design element.
 
+The default look is light and airy. It gets there with three decisions, each a knob:
+
+- **Control size: modest** (`--void-density`). Controls are 36px tall, 28px small, 44px large, and every control shares the height of its size step so a row of mixed controls lines up. Use `--void-control-*` tokens; never a raw height. Padding inside a component is only what the control needs: more padding makes elements heavier, not the page airier.
+- **Layout rhythm: generous** (`--void-rhythm`). Space between groups (40px) and sections (72px) is several times the space inside a group (8, 16, 24px). This is where the airiness comes from. Use `--void-gap-*` for layout.
+- **Chrome: minimal** (`--void-chrome`). Hairline dividers rather than boxes; containers have a barely visible fill; tables and lists sit directly on the page; no fills behind headers. Borders have two jobs with two tokens: `--void-color-border` divides and may be faint, `--void-color-border-control` bounds a control and keeps 3:1.
+
+And these:
+
 - **Human and agent friendly** — the UI is designed for both human users and AI agents. Light DOM exposes component structure. Reflected attributes make state machine-readable without executing JS. Semantic ARIA roles and properties give agents a structured understanding of the interface. Stable tag+attribute selectors provide reliable handles for programmatic interaction.
-- **Pure backgrounds** — true black (`#000000`) in dark mode, true white (`#ffffff`) in light mode. No off-white, no near-black.
-- **Negative space** — generous padding, margins, and gaps. Let content breathe. Density comes from the consumer, not the library.
-- **Monochrome hierarchy** — color used sparingly, reserved for status indication.
-- **Stone warm neutrals** for text and borders.
-- **White glow shadows** (not dark drop shadows) for elevation on dark backgrounds.
-- **Status palette**: red (error), orange (warning), amber (caution), green (success), blue (info), purple (notice), pink (highlight). Components that take a `color` attribute accept `default`, `error`, `warning`, `success`, `info` and `notice`.
+- **Pure backgrounds by default** — true black (`#000000`) in dark mode, true white (`#ffffff`) in light mode. A theme may soften the page with `--void-page-tint`.
+- **Monochrome hierarchy** — hierarchy comes from the opacity of one foreground colour, not from weight or hue. Colour is reserved for status. The default accent has no colour.
+- **Quiet type** — regular weights (medium for headings and labels, nothing bolder by default), small uppercase mono labels, large plain numerals. Use the type roles; do not set `text-transform` or a tracking value directly.
+- **Elevation only for what overlaps** — menus, popovers, dialogs and toasts get a lifted surface, a hairline and a soft dark shadow. Nothing in the page flow has a shadow. No white glows.
+- **Status palette**: red (error), orange (warning), amber (caution), green (success), blue (info), purple (notice), pink (highlight), at the 400 step on black and the 700/800 step on white so each keeps 4.5:1 as text. Components that take a `color` attribute accept `default`, `error`, `warning`, `success`, `info` and `notice`.
 
 ### Shape Variants
 
-Two shape modes controlled by `[data-shape]` on an ancestor (defaults to `"curvy"`):
+`--void-radius` is the knob. `[data-shape]` on an ancestor is a preset for it:
 
 | Variant | Radii | Character |
 |---------|-------|-----------|
-| `curvy` (default) | `--void-radius-*` values (4px–16px) | Rounded, approachable |
+| `curvy` (default) | scale from `--void-radius` (4px by default) | The theme's corners |
 | `sharp` | All radii resolve to `0` | Angular, technical |
 
 Consumers toggle shape globally (`<html data-shape="sharp">`) or locally on any ancestor.
+
+### Reference Screens
+
+`packages/storybook/stories/reference/` holds four realistic screens (application overview, data table with toolbar, form, settings) built only from components, type roles and layout tokens, shown in Storybook under Reference/Screens. Judge any theme change by looking at them at 1440x900 and 390x844, in dark and light.
 
 ## Tooling
 
@@ -158,9 +191,9 @@ set -euo pipefail
 | `mise run liveview:demo` | Start the LiveView demo server |
 | `mise run ci` | Full CI pipeline: build, test, typecheck, lint and every `lint:*` task below |
 | `mise run lint` | ESLint with lit-a11y (WCAG checks on Lit templates) |
-| `mise run lint:tokens` | Ensure no raw values (colors, sizes, etc.) outside primitives.css |
+| `mise run lint:tokens` | Ensure no raw values (colors, sizes, control heights, tracking, text case) in component CSS; values live in primitives.css, knobs.css and tokens.css |
 | `mise run lint:undefined-tokens` | Fail if a `--void-*` token is referenced but neither defined in theme CSS nor set from TypeScript |
-| `mise run lint:contrast` | Check WCAG contrast of theme tokens in dark and light mode |
+| `mise run lint:contrast` | Evaluate the derived colours and check WCAG contrast in dark and light for the default knobs, every theme file and the extremes of each colour knob; reject theme files that set anything but knobs |
 | `mise run lint:styles` | Ensure UI components contain no visual styles |
 | `mise run lint:exports` | Verify every component has a subpath export, self-registers and is re-exported from the index |
 | `mise run lint:manifest` | Fail when a tag in the Custom Elements Manifest has no story, React wrapper or LiveView component (known gaps: `.mise/manifest-drift-allowlist.txt`) |
@@ -227,10 +260,17 @@ Components that support color variants use a **tone variable** pattern. The base
 ```css
 void-button {
   --tone: var(--void-color-accent);
-  --tone-text: var(--tone);
-  --tone-subtle: color-mix(in srgb, var(--tone) 10%, transparent);
-  --tone-border: color-mix(in srgb, var(--tone) 28%, transparent);
-  --tone-hover: color-mix(in srgb, var(--tone) 16%, transparent);
+  --tone-text: var(--void-color-text);
+  --tone-subtle: transparent;
+  --tone-border: var(--void-color-border-control);
+  --tone-hover: color-mix(in srgb, var(--tone) 8%, transparent);
+  --tone-active: color-mix(in srgb, var(--tone) 13%, transparent);
+}
+
+/* A coloured button tints itself with the shared tint strength */
+void-button[color]:not([color="default"]) {
+  --tone-subtle: color-mix(in srgb, var(--tone) var(--void-tone-tint), transparent);
+  --tone-border: color-mix(in srgb, var(--tone) 50%, transparent);
 }
 
 /* One override cascades to all derived states */
@@ -242,6 +282,8 @@ void-button[color="notice"]  { --tone: var(--void-color-notice); }
 ```
 
 Component CSS in `@voidable/theme` lives in `src/components/` with one file per component, imported by `src/index.css`.
+
+`void-button` has three variants of one size: `outline` (default), `filled` and `ghost` (nothing drawn at rest, a faint fill on hover; for row actions, toolbars and the quiet action beside a primary one).
 
 ## Release & Versioning
 

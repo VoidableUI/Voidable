@@ -1,12 +1,15 @@
 void-field {
   display: flex;
   flex-direction: column;
-  gap: var(--void-space-1);
+  gap: var(--void-space-1h);
   font-family: var(--void-font-sans);
 }
 
+/* A field label is read as a sentence, so it is set in the control's
+   own text rather than as an uppercase label. */
 .void-field-label {
-  font-size: var(--void-text-sm);
+  font-size: var(--void-control-text-sm);
+  line-height: var(--void-leading-normal);
   font-weight: var(--void-weight-medium);
   color: var(--void-color-text);
 }
@@ -21,12 +24,16 @@ void-field {
 }
 
 .void-field-helper {
-  font-size: var(--void-text-xs);
-  color: var(--void-color-text-muted);
+  font-family: var(--void-type-caption-family);
+  font-size: var(--void-type-caption-size);
+  line-height: var(--void-type-caption-leading);
+  font-weight: var(--void-type-caption-weight);
+  color: var(--void-type-caption-color);
 }
 
 .void-field-error {
-  font-size: var(--void-text-xs);
+  font-size: var(--void-type-caption-size);
+  line-height: var(--void-type-caption-leading);
   color: var(--void-color-error);
 }
 

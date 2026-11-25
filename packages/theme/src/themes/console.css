@@ -1,0 +1,16 @@
+/* Console — dense and sharp.
+   Square corners, compact controls, tighter rhythm, a cool grey, a
+   signal-green accent, and the monospace face for everything. */
+[data-void-theme="console"] {
+  --void-accent-hue: 155;
+  --void-accent-chroma: 0.17;
+  --void-neutral-hue: 240;
+  --void-neutral-chroma: 0.012;
+  --void-contrast: 0.45;
+  --void-chrome: 0.5;
+  --void-radius: 0px;
+  --void-density: 0.8;
+  --void-rhythm: 0.7;
+  --void-font-size: 0.8125rem;
+  --void-font-sans: 'JetBrains Mono', ui-monospace, 'SF Mono', 'Fira Code', monospace;
+}

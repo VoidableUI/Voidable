@@ -1,0 +1,101 @@
+/* ============================================================
+   @voidable/theme — Knobs
+   The handful of inputs the whole theme derives from. To retheme,
+   change these and nothing else: every colour, size, radius and
+   duration in tokens.css is computed from them, in both colour
+   schemes, with no build step.
+
+   Set them on :root for the whole page:
+
+     :root { --void-accent-chroma: 0.16; --void-accent-hue: 250; }
+
+   or on any element that carries data-void-theme (any value, or
+   none) to restyle just that subtree:
+
+     <section data-void-theme style="--void-radius: 0px">…</section>
+
+   The attribute is what makes the derived tokens recompute there;
+   a knob set on an element without it changes nothing below it.
+
+   Knobs are plain numbers and lengths on purpose, so that a person
+   or an agent can set them without knowing the rest of the theme.
+   ============================================================ */
+
+:root {
+  /* ── Colour ─────────────────────────────────────────────── */
+
+  /* Accent: the colour of primary actions, selection and focus.
+     Chroma 0 (the default) means no accent colour at all: primary
+     actions are the inverse of the page (white on black, black on
+     white) and colour is left to status. Raise chroma to 0.10–0.20
+     for a coloured accent; hue is an OKLCH angle in degrees
+     (30 red, 60 orange, 90 yellow, 150 green, 200 teal, 250 blue,
+     300 purple, 350 pink). Lightness is chosen for you per colour
+     scheme so that text on the accent and the accent as text both
+     keep 4.5:1. */
+  --void-accent-hue: 250;
+  --void-accent-chroma: 0;
+
+  /* Neutral: the tint of text, borders and surfaces. Every grey is
+     this one colour at a different opacity over a pure black or
+     pure white page. Chroma 0 is pure grey; 0.004 is the default
+     barely-warm stone; 0.02 is clearly tinted. Hue as above. */
+  --void-neutral-hue: 60;
+  --void-neutral-chroma: 0.004;
+
+  /* Page tint: how much of the neutral tint the page itself takes,
+     from 0 to 1. 0 (default) is a pure black or pure white page. 1 is
+     a soft page: off-white paper in light, a lifted near-black in
+     dark, both in the neutral hue. Status colours shift with it so
+     their contrast holds. */
+  --void-page-tint: 0;
+
+  /* Contrast: how strong secondary text and control borders are,
+     from 0 to 1. 0 is the softest setting that still meets WCAG AA
+     (4.5:1 for text, 3:1 for control borders); 1 is the strongest.
+     Values outside 0–1 are clamped, so no setting can take text
+     below 4.5:1. prefers-contrast: more raises it to 1. */
+  --void-contrast: 0.2;
+
+  /* Chrome: how much the containers draw, from 0 to 1. It sets the
+     strength of divider lines and the fill of cards and panels.
+     0 is faint hairlines and no fills; 0.3 (default) is quiet
+     hairlines with a fill you can barely see; 1 is clear lines and
+     visibly filled containers. Decorative only: control borders and
+     text follow --void-contrast instead. */
+  --void-chrome: 0.3;
+
+  /* ── Shape and size ─────────────────────────────────────── */
+
+  /* Radius of a control (button, input). Larger and smaller radii
+     scale from it. 0px is square; 999px makes controls pills (cards
+     and dialogs stop at 24–32px). */
+  --void-radius: 4px;
+
+  /* Density: the size of things inside components. 1 gives 36px
+     controls; 0.8 is compact (about 29px), 1.15 is roomy (about
+     41px). Scales control height, padding and the spacing scale. */
+  --void-density: 1;
+
+  /* Rhythm: the space between groups and sections of a page,
+     independent of density. Compact controls with generous rhythm
+     is what makes a screen read as airy. */
+  --void-rhythm: 1;
+
+  /* ── Type ───────────────────────────────────────────────── */
+
+  /* Body text size; every other text size scales from it. */
+  --void-font-size: 0.875rem;
+
+  /* Typefaces. The theme names them but ships no font files: load
+     them yourself (for example @fontsource-variable/inter), or the
+     next family in each stack is used. */
+  --void-font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --void-font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', 'Fira Code', monospace;
+
+  /* ── Motion ─────────────────────────────────────────────── */
+
+  /* Multiplies every duration. 1 is default, 0 switches animation
+     off, 2 is half speed. prefers-reduced-motion sets it to 0. */
+  --void-anim-scale: 1;
+}

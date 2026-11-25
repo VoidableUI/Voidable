@@ -1,20 +1,26 @@
+/* A tag names a property of a thing. The plain tag is neutral: a
+   hairline pill. A colour tints it. */
 void-tag {
   --tone: var(--void-color-accent);
-  --tone-subtle: color-mix(in srgb, var(--tone) 14%, transparent);
-  --tone-border: color-mix(in srgb, var(--tone) 36%, transparent);
+  --tone-subtle: transparent;
+  --tone-border: var(--void-color-border-strong);
+  --void-tag-size: 1.375rem;
+  --void-tag-padding: var(--void-space-2);
+  --void-tag-text: var(--void-text-xs);
 
   display: inline-flex;
   align-items: center;
   gap: var(--void-space-1);
-  padding: 0.125rem var(--void-space-2);
+  min-height: var(--void-tag-size);
+  padding: 0 var(--void-tag-padding);
   border: 1px solid var(--tone-border);
   border-radius: var(--void-radius-full);
   background: var(--tone-subtle);
   color: var(--void-color-text);
   font-family: var(--void-font-sans);
-  font-size: var(--void-text-xs);
-  font-weight: var(--void-weight-medium);
-  line-height: var(--void-leading-tight);
+  font-size: var(--void-tag-text);
+  font-weight: var(--void-weight-normal);
+  line-height: var(--void-leading-none);
   white-space: nowrap;
 }
 
@@ -25,10 +31,16 @@ void-tag[color="success"] { --tone: var(--void-color-success); }
 void-tag[color="info"]    { --tone: var(--void-color-info); }
 void-tag[color="notice"]  { --tone: var(--void-color-notice); }
 
-void-tag[size="sm"] { font-size: var(--void-text-2xs); padding: 0 var(--void-space-1); }
-void-tag[size="lg"] { font-size: var(--void-text-sm); padding: 0.1875rem var(--void-space-3); }
-void-tag[size="xl"] { font-size: var(--void-text-base); padding: 0.25rem var(--void-space-4); }
-void-tag[size="xxl"] { font-size: var(--void-text-lg); padding: 0.3125rem var(--void-space-5); }
+/* The attribute is reflected, so the plain tag carries color="default". */
+void-tag[color]:not([color="default"]) {
+  --tone-subtle: color-mix(in srgb, var(--tone) var(--void-tone-tint), transparent);
+  --tone-border: color-mix(in srgb, var(--tone) 36%, transparent);
+}
+
+void-tag[size="sm"]  { --void-tag-size: 1.125rem; --void-tag-padding: var(--void-space-1h); --void-tag-text: var(--void-type-label-size); }
+void-tag[size="lg"]  { --void-tag-size: 1.75rem;  --void-tag-padding: var(--void-space-3);  --void-tag-text: var(--void-text-sm); }
+void-tag[size="xl"]  { --void-tag-size: 2.25rem;  --void-tag-padding: var(--void-space-4);  --void-tag-text: var(--void-text-base); }
+void-tag[size="xxl"] { --void-tag-size: 2.75rem;  --void-tag-padding: var(--void-space-5);  --void-tag-text: var(--void-text-lg); }
 
 .void-tag-close {
   display: inline-flex;

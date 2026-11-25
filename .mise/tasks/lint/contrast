@@ -1,12 +1,15 @@
 #!/usr/bin/env bash
-#MISE description="Check WCAG contrast of theme tokens in dark and light mode, and that the light blocks stay in sync"
+#MISE description="Check WCAG contrast of the derived theme tokens, in dark and light, for the default knobs, every shipped theme and the extremes of every colour knob"
 set -euo pipefail
 
 node - <<'NODE'
 const fs = require('fs');
+const path = require('path');
 const dir = 'packages/theme/src/';
-const prim = fs.readFileSync(dir + 'primitives.css', 'utf8');
-const tok = fs.readFileSync(dir + 'tokens.css', 'utf8');
+const read = (f) => fs.readFileSync(dir + f, 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
+const prim = read('primitives.css');
+const knobsCss = read('knobs.css');
+const tok = read('tokens.css');
 
 // ── parsing ──────────────────────────────────────────────
 function decls(body) {
@@ -22,22 +25,115 @@ function block(src, headerRe) {
   return src.slice(i, j - 1);
 }
 const primitives = decls(block(prim, /^:root\s*\{/m));
-const dark = decls(block(tok, /^:root,\s*\[data-theme="dark"\]\s*\{/m));
-const light = decls(block(tok, /^\[data-theme="light"\]\s*\{/m));
-const lightMedia = decls(block(block(tok, /@media \(prefers-color-scheme: light\)\s*\{/m), /:root:not\(\[data-theme\]\)\s*\{/m));
+const knobs = decls(block(knobsCss, /^:root\s*\{/m));
+const derived = decls(block(tok, /^:where\(:root, \[data-theme\], \[data-void-theme\], \[data-shape\]\)\s*\{/m));
 
-// ── colour maths ─────────────────────────────────────────
-const hex = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
-function resolve(val, env, depth = 0) {
-  if (depth > 20) throw new Error('var loop: ' + val);
-  let m;
-  if ((m = /^var\((--[\w-]+)\)$/.exec(val))) return resolve(env[m[1]], env, depth + 1);
-  if (/^#[0-9a-f]{6}$/i.test(val)) return { rgb: hex(val), a: 1 };
-  if ((m = /^color-mix\(in srgb, (.+?) (\d+)%, transparent\)$/.exec(val))) {
-    const c = resolve(m[1], env, depth + 1);
-    return { rgb: c.rgb, a: c.a * (+m[2] / 100) };
+// The derived block is the only place a token may depend on a knob: a
+// token derived on :root alone would not follow a knob set on a subtree.
+let failures = 0;
+const fail = (msg) => { failures++; console.log('FAIL ' + msg); };
+for (const [file, src] of [['primitives.css', prim], ['knobs.css', knobsCss]]) {
+  if (/var\(/.test(block(src, /^:root\s*\{/m))) fail(`${file}: :root must hold fixed values only; move anything that uses var() into the derived block of tokens.css`);
+}
+
+// User preferences must beat the knob defaults. knobs.css is imported
+// after primitives.css and sets the defaults on :root, so a preference
+// block in either of those files would be overridden by the default.
+for (const [file, src] of [['primitives.css', prim], ['knobs.css', knobsCss]]) {
+  if (/@media\s*\(prefers-(reduced-motion|contrast)/.test(src)) fail(`${file}: user-preference media queries belong in tokens.css, after the knob defaults`);
+}
+if (!/@media\s*\(prefers-reduced-motion:\s*reduce\)\s*\{[^}]*--void-anim-scale:\s*0\s*!important/.test(tok)) fail('tokens.css: prefers-reduced-motion must set --void-anim-scale: 0 !important');
+if (!/@media\s*\(prefers-contrast:\s*more\)\s*\{[^}]*--void-contrast-boost:\s*1/.test(tok)) fail('tokens.css: prefers-contrast: more must set --void-contrast-boost: 1');
+
+// ── tiny CSS value evaluator: var(), calc/min/max/clamp, oklch(), color-mix(in srgb) ──
+function substitute(val, env, depth = 0) {
+  if (depth > 40) throw new Error('var loop: ' + val);
+  return val.replace(/var\((--[\w-]+)\)/g, (_, name) => {
+    if (!(name in env)) throw new Error('undefined ' + name);
+    return substitute(env[name], env, depth + 1);
+  });
+}
+// split on a separator at parenthesis depth 0
+function splitTop(s, sep) {
+  const out = []; let depth = 0, cur = '';
+  for (const ch of s) {
+    if (ch === '(') depth++; else if (ch === ')') depth--;
+    if (depth === 0 && (sep === ' ' ? /\s/.test(ch) : ch === sep)) { if (cur.trim() !== '' || sep !== ' ') out.push(cur.trim()); cur = ''; } else cur += ch;
   }
-  throw new Error('cannot resolve: ' + val);
+  if (cur.trim() !== '' || sep !== ' ') out.push(cur.trim());
+  return out;
+}
+// numbers: percentages evaluate to fractions (8% → 0.08); other units are dropped
+function num(expr) {
+  let s = expr.trim(), pos = 0;
+  const peek = () => s[pos];
+  const ws = () => { while (/\s/.test(s[pos] || '')) pos++; };
+  function primary() {
+    ws();
+    const fn = /^(calc|min|max|clamp)\(/.exec(s.slice(pos));
+    if (fn) {
+      pos += fn[0].length;
+      const args = [sum()]; ws();
+      while (peek() === ',') { pos++; args.push(sum()); ws(); }
+      if (peek() !== ')') throw new Error('expected ) in ' + expr);
+      pos++;
+      if (fn[1] === 'calc') return args[0];
+      if (fn[1] === 'min') return Math.min(...args);
+      if (fn[1] === 'max') return Math.max(...args);
+      return Math.max(args[0], Math.min(args[1], args[2]));
+    }
+    if (peek() === '(') { pos++; const v = sum(); ws(); pos++; return v; }
+    const m = /^-?(\d+\.?\d*|\.\d+)(%|[a-z]+)?/.exec(s.slice(pos));
+    if (!m) throw new Error(`bad number at "${s.slice(pos)}" in ${expr}`);
+    pos += m[0].length;
+    return m[2] === '%' ? parseFloat(m[0]) / 100 : parseFloat(m[0]);
+  }
+  function product() { let v = primary(); for (;;) { ws(); if (peek() === '*') { pos++; v *= primary(); } else if (peek() === '/') { pos++; v /= primary(); } else return v; } }
+  function sum() { let v = product(); for (;;) { ws(); if (peek() === '+') { pos++; v += product(); } else if (peek() === '-') { pos++; v -= product(); } else return v; } }
+  const v = sum(); ws();
+  if (pos !== s.length) throw new Error(`trailing "${s.slice(pos)}" in ${expr}`);
+  return v;
+}
+const toSrgb = (x) => { x = Math.min(1, Math.max(0, x)); return x <= 0.0031308 ? 12.92 * x : 1.055 * x ** (1 / 2.4) - 0.055; };
+function oklch(L, C, H) {
+  const a = C * Math.cos((H * Math.PI) / 180), b = C * Math.sin((H * Math.PI) / 180);
+  const l = (L + 0.3963377774 * a + 0.2158037573 * b) ** 3;
+  const m = (L - 0.1055613458 * a - 0.0638541728 * b) ** 3;
+  const s = (L - 0.0894841775 * a - 1.291485548 * b) ** 3;
+  // out-of-gamut values are clipped per channel, as browsers do on an sRGB display
+  return [
+    4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s,
+    -1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s,
+    -0.0041960863 * l - 0.7034186147 * m + 1.707614701 * s,
+  ].map((c) => toSrgb(c) * 255);
+}
+function color(val) {
+  val = val.trim();
+  let m;
+  if ((m = /^#([0-9a-f]{6})$/i.exec(val))) return { rgb: [0, 2, 4].map((i) => parseInt(m[1].slice(i, i + 2), 16)), a: 1 };
+  if (val === 'transparent') return { rgb: [0, 0, 0], a: 0 };
+  if ((m = /^oklch\((.*)\)$/.exec(val))) {
+    const [chan, alpha] = splitTop(m[1], '/');
+    const [L, C, H] = splitTop(chan, ' ').map(num);
+    return { rgb: oklch(L, C, H), a: alpha === undefined ? 1 : Math.min(1, Math.max(0, num(alpha))) };
+  }
+  if ((m = /^color-mix\(in srgb,(.*)\)$/.exec(val))) {
+    const parts = splitTop(m[1], ',').map((part) => {
+      const t = splitTop(part, ' ');
+      const last = t[t.length - 1];
+      const hasPct = t.length > 1 && /^(calc\(|min\(|max\(|clamp\(|-?[\d.])/.test(last);
+      return { c: color(hasPct ? t.slice(0, -1).join(' ') : part), p: hasPct ? num(last) : null };
+    });
+    let [x, y] = parts;
+    if (x.p === null && y.p === null) x.p = y.p = 0.5;
+    else if (x.p === null) x.p = 1 - y.p;
+    else if (y.p === null) y.p = 1 - x.p;
+    const total = x.p + y.p, px = x.p / total, py = y.p / total;
+    const a = x.c.a * px + y.c.a * py;
+    const rgb = a === 0 ? [0, 0, 0] : x.c.rgb.map((c, i) => (c * x.c.a * px + y.c.rgb[i] * y.c.a * py) / a);
+    return { rgb, a: a * Math.min(1, total) };
+  }
+  throw new Error('cannot resolve colour: ' + val);
 }
 const over = (fg, bg) => ({ rgb: fg.rgb.map((c, i) => c * fg.a + bg.rgb[i] * (1 - fg.a)), a: 1 });
 const lum = ({ rgb }) => {
@@ -50,76 +146,121 @@ function ratio(fg, bg) {
   return (hi + 0.05) / (lo + 0.05);
 }
 
-// ── checks ───────────────────────────────────────────────
-let failures = 0;
+// ── the pairs ────────────────────────────────────────────
 const verbose = process.env.CONTRAST_VERBOSE === '1';
 const statuses = ['error', 'warning', 'caution', 'success', 'info', 'notice', 'highlight'];
-const surfaces = ['bg', 'bg-secondary', 'bg-elevated', 'bg-hover'];
+// every surface text can sit on; the page first
+const surfaces = ['bg', 'surface', 'bg-secondary', 'bg-elevated', 'bg-hover'];
+const roles = ['label', 'value', 'unit', 'caption', 'heading', 'title', 'body', 'code'];
 
-for (const [mode, overrides] of [['dark', {}], ['light', light]]) {
-  const env = { ...primitives, ...dark, ...overrides };
-  const c = (name) => resolve(`var(--void-color-${name})`, env);
-  const check = (label, fg, bg, min) => {
-    const r = ratio(fg, bg);
-    const ok = r >= min;
-    if (!ok) failures++;
-    if (!ok || verbose) console.log(`${ok ? 'ok  ' : 'FAIL'} [${mode}] ${label}: ${r.toFixed(2)} (min ${min})`);
-  };
-  for (const t of ['text', 'text-secondary']) for (const s of surfaces) check(`${t} on ${s}`, c(t), c(s), 4.5);
-  for (const s of surfaces) check(`text-muted on ${s}`, c('text-muted'), c(s), 4.5);
-  // Component pairings reported in rendered pages (tab labels, multiselect placeholder).
-  check('inactive tab label (text-muted) on bg', c('text-muted'), c('bg'), 4.5);
-  check('inactive tab label (text-muted) on bg-secondary card', c('text-muted'), c('bg-secondary'), 4.5);
-  check('multiselect placeholder (text-muted) on its bg-secondary trigger', c('text-muted'), c('bg-secondary'), 4.5);
-  // Tone tints (outline badge, stat): --void-tone-tint of the tone over the page.
-  const tint = +/^(\d+)%$/.exec(env['--void-tone-tint'])[1] / 100;
-  const tintOf = (name, base) => over({ rgb: c(name).rgb, a: tint }, base);
-  const tones = ['accent', ...statuses];
-  for (const st of tones) for (const s of ['bg', 'bg-secondary']) {
-    const base = c(s);
-    // Known gap: over bg-secondary the status colours themselves sit at ~4.5:1 (light) and
-    // 4.4:1 (dark notice), so any tint pushes them under; gated on the page background only.
-    if (s === 'bg') check(`outline badge text (${st}) on its tint over ${s}`, c(st), tintOf(st, base), 4.5);
-    check(`stat label (text-secondary) on ${st} tint over ${s}`, c('text-secondary'), tintOf(st, base), 4.5);
+function checkConfig(name, overrides, { quiet = false } = {}) {
+  let local = 0;
+  for (const [mode, dark] of [['dark', 1], ['light', 0]]) {
+    const env = { ...primitives, ...knobs, '--void-scheme-dark': String(dark), '--void-contrast-boost': '0', '--void-shape': '1', ...overrides, ...derived };
+    const raw = (token) => substitute(`var(${token})`, env);
+    const page = color(raw('--void-color-bg'));
+    // surfaces are opaque; anything translucent is composited over the page
+    const c = (n) => { const v = color(raw(`--void-color-${n}`)); return v; };
+    const solid = (n) => { const v = c(n); return v.a < 1 ? over(v, page) : v; };
+    const check = (label, fg, bg, min) => {
+      const r = ratio(fg, bg);
+      const ok = r >= min;
+      if (!ok) { failures++; local++; }
+      if ((!ok && !quiet) || verbose) console.log(`${ok ? 'ok  ' : 'FAIL'} [${name}, ${mode}] ${label}: ${r.toFixed(2)} (min ${min})`);
+    };
+    const tint = num(raw('--void-tone-tint'));
+    const tintOf = (toneName, base, k = 1) => over({ rgb: c(toneName).rgb, a: Math.min(1, tint * k) }, base);
+
+    for (const s of surfaces) {
+      const bg = solid(s);
+      for (const t of ['text', 'text-secondary', 'text-muted', 'text-tertiary']) check(`${t} on ${s}`, c(t), bg, 4.5);
+      // type roles carry their own colour token
+      for (const r of roles) check(`type role ${r} on ${s}`, color(raw(`--void-type-${r}-color`)), bg, 4.5);
+      // the accent is also used as text (links, selected items)
+      check(`accent as text on ${s}`, c('accent'), bg, 4.5);
+      // non-text boundaries and indicators
+      check(`border-control on ${s}`, c('border-control'), bg, 3);
+      check(`border-focus on ${s}`, c('border-focus'), bg, 3);
+      check(`focus-ring-color on ${s}`, color(raw('--void-focus-ring-color')), bg, 3);
+      // ghost button (default tone): the label on its hover and pressed fills
+      check(`ghost button label on its hover fill over ${s}`, c('text'), over({ rgb: c('accent').rgb, a: 0.08 }, bg), 4.5);
+      check(`ghost button label on its pressed fill over ${s}`, c('text'), over({ rgb: c('accent').rgb, a: 0.13 }, bg), 4.5);
+      // status colours as text, and a coloured ghost button on every surface:
+      // at rest, on its hover fill (the tone tint) and on its pressed fill
+      for (const st of statuses) {
+        check(`${st} text on ${s}`, c(st), bg, 4.5);
+        check(`ghost ${st} button label on its hover fill over ${s}`, c(st), tintOf(st, bg), 4.5);
+        check(`ghost ${st} button label on its pressed fill over ${s}`, c(st), tintOf(st, bg, 1.25), 4.5);
+      }
+    }
+    check('text on bg-active (pressed, selected segment)', c('text'), solid('bg-active'), 4.5);
+    check('text-on-accent on accent fill', c('text-on-accent'), c('accent'), 4.5);
+    check('text-on-accent on accent-hover fill', c('text-on-accent'), solid('accent-hover'), 4.5);
+    for (const st of statuses) {
+      check(`text-on-accent on ${st} fill`, c('text-on-accent'), c(st), 4.5);
+      check(`${st} text on own subtle tint over bg`, c(st), over(c(`${st}-subtle`), page), 4.5);
+    }
+    // Tone tints (outline badge, alert, stat, tag): --void-tone-tint of the tone over a surface.
+    for (const st of ['accent', ...statuses]) for (const s of ['bg', 'surface', 'bg-secondary']) {
+      const base = solid(s);
+      check(`outline badge text (${st}) on its tint over ${s}`, c(st), tintOf(st, base), 4.5);
+      check(`text on ${st} tint over ${s}`, c('text'), tintOf(st, base), 4.5);
+      check(`stat label (text-secondary) on ${st} tint over ${s}`, c('text-secondary'), tintOf(st, base), 4.5);
+    }
   }
-  for (const st of statuses) check(`stat delta (${st}) on its own tint over bg`, c(st), tintOf(st, c('bg')), 4.5);
-  // Focus ring (accordion trigger and every other :focus-visible), incl. the hover surface it sits on.
-  for (const s of ['bg', 'bg-secondary', 'bg-elevated', 'bg-hover']) check(`focus-ring-color on ${s}`, resolve('var(--void-focus-ring-color)', env), c(s), 3);
-  for (const st of statuses) for (const s of ['bg', 'bg-secondary']) {
-    check(`${st} text on ${s}`, c(st), c(s), 4.5);
-    if (s === 'bg') check(`${st} text on own subtle tint over ${s}`, c(st), over(c(`${st}-subtle`), c(s)), 4.5);
-    check(`text-on-accent on ${st} fill`, c('text-on-accent'), c(st), 4.5);
-  }
-  check('text-on-accent on accent fill', c('text-on-accent'), c('accent'), 4.5);
-  for (const s of ['bg', 'bg-secondary', 'bg-elevated']) check(`border-control on ${s}`, c('border-control'), c(s), 3);
-  check('border-control vs bg-secondary fill, on bg page', over(c('border-control'), c('bg')), c('bg-secondary'), 1);
-  for (const s of ['bg', 'bg-secondary', 'bg-elevated']) check(`border-focus on ${s}`, c('border-focus'), c(s), 3);
+  return local;
+}
+
+// 1. the default knobs, and the default with the user's contrast preference
+checkConfig('default', {});
+checkConfig('default + prefers-contrast', { '--void-contrast-boost': '1' });
+
+// 2. every shipped theme: a theme whose knobs produce failing contrast fails CI
+const themesDir = dir + 'themes/';
+const themes = fs.existsSync(themesDir) ? fs.readdirSync(themesDir).filter((f) => f.endsWith('.css')) : [];
+for (const file of themes) {
+  const src = fs.readFileSync(themesDir + file, 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
+  const set = decls(src);
+  for (const k of Object.keys(set)) if (!(k in knobs)) fail(`themes/${file}: ${k} is not a knob; a theme may only set the knobs declared in knobs.css`);
+  if (/[^-\w](?!--void-)[a-z-]+\s*:\s*[^;{}]+;/.test(src.replace(/--void-[\w-]+\s*:\s*[^;]+;/g, ''))) fail(`themes/${file}: a theme may only contain knob declarations`);
+  checkConfig(`theme ${path.basename(file, '.css')}`, set);
+}
+
+// 3. the guarantee: no setting of a colour knob can take text below AA.
+//    Sweep each knob to its extremes (values outside the range are clamped
+//    by the derivation, so the far-out values are part of the sweep).
+let sweeps = 0, sweepFailures = 0;
+const sweep = (label, overrides) => { sweeps++; const n = checkConfig(label, overrides, { quiet: !verbose }); if (n) { sweepFailures++; console.log(`FAIL knob sweep [${label}]: ${n} pair(s) below the minimum (CONTRAST_VERBOSE=1 lists them)`); } };
+for (const contrast of ['-1', '0', '0.5', '1', '5']) for (const chrome of ['-1', '0', '0.5', '1', '5']) {
+  sweep(`contrast ${contrast}, chrome ${chrome}`, { '--void-contrast': contrast, '--void-chrome': chrome });
+}
+for (const chroma of ['0.05', '0.1', '0.15', '0.2', '0.3', '0.5']) for (let hue = 0; hue < 360; hue += 15) {
+  sweep(`accent chroma ${chroma}, hue ${hue}`, { '--void-accent-chroma': chroma, '--void-accent-hue': String(hue), '--void-contrast': '0' });
+}
+for (const chroma of ['0.01', '0.02', '0.04', '0.2']) for (let hue = 0; hue < 360; hue += 30) for (const page of ['0', '0.5', '1', '3']) {
+  sweep(`neutral chroma ${chroma}, hue ${hue}, page tint ${page}`, { '--void-neutral-chroma': chroma, '--void-neutral-hue': String(hue), '--void-page-tint': page, '--void-contrast': '0', '--void-chrome': '1' });
+}
+for (const page of ['0.5', '1']) for (let hue = 0; hue < 360; hue += 30) {
+  sweep(`page tint ${page}, accent hue ${hue}`, { '--void-neutral-chroma': '0.04', '--void-neutral-hue': String((hue + 180) % 360), '--void-page-tint': page, '--void-accent-chroma': '0.2', '--void-accent-hue': String(hue), '--void-contrast': '0' });
 }
 
 // ── the default button's border is the control boundary token ──
 // The button reflects color="default", so a bare void-button[color] selector
-// would also turn the default border into a 36% tone mix (2.27:1 in light).
+// would also turn the default border into a tone mix (below 3:1 in light).
 const buttonCss = fs.readFileSync(dir + 'components/button.css', 'utf8');
 if (/void-button\[color\]\s*\{[^}]*--tone-border/.test(buttonCss)) {
-  failures++;
-  console.log('FAIL button.css: void-button[color] must exclude color="default" when overriding --tone-border');
+  fail('button.css: void-button[color] must exclude color="default" when overriding --tone-border');
 }
-
-// ── light blocks must stay identical ─────────────────────
-const a = JSON.stringify(Object.entries(light).sort());
-const b = JSON.stringify(Object.entries(lightMedia).sort());
-if (a !== b) {
-  failures++;
-  const keys = new Set([...Object.keys(light), ...Object.keys(lightMedia)]);
-  for (const k of keys) if (light[k] !== lightMedia[k]) console.log(`FAIL light/prefers-color-scheme blocks differ at ${k}`);
-}
-const lightShadow = decls(block(prim, /^\[data-theme="light"\]\s*\{/m));
-const lightShadowMedia = decls(block(block(prim, /@media \(prefers-color-scheme: light\)\s*\{/m), /:root:not\(\[data-theme\]\)\s*\{/m));
-if (JSON.stringify(Object.entries(lightShadow).sort()) !== JSON.stringify(Object.entries(lightShadowMedia).sort())) {
-  failures++;
-  console.log('FAIL light shadow blocks in primitives.css differ between [data-theme="light"] and prefers-color-scheme');
+// The ghost fills checked above are the ones button.css declares.
+for (const [what, re] of [
+  ['default hover fill of 8%', /--tone-hover:\s*color-mix\(in srgb, var\(--tone\) 8%, transparent\)/],
+  ['default pressed fill of 13%', /--tone-active:\s*color-mix\(in srgb, var\(--tone\) 13%, transparent\)/],
+  ['coloured ghost hover fill of --void-tone-tint', /void-button\[variant="ghost"\]\[color\]:not\(\[color="default"\]\)\s*\{[^}]*--tone-hover:\s*color-mix\(in srgb, var\(--tone\) var\(--void-tone-tint\), transparent\)/],
+  ['coloured ghost pressed fill of 1.25 × --void-tone-tint', /void-button\[variant="ghost"\]\[color\]:not\(\[color="default"\]\)\s*\{[^}]*--tone-active:\s*color-mix\(in srgb, var\(--tone\) calc\(var\(--void-tone-tint\) \* 1\.25\), transparent\)/],
+]) {
+  if (!re.test(buttonCss)) fail(`button.css: expected the ${what}; update lint:contrast together with the button's fills`);
 }
 
 if (failures) { console.log(`Contrast check failed: ${failures} problem(s)`); process.exit(1); }
-console.log('Contrast check passed');
+console.log(`Contrast check passed: default, ${themes.length} theme(s) and ${sweeps} knob settings, dark and light`);
 NODE

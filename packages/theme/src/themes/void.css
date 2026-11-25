@@ -1,0 +1,16 @@
+/* Void — the default look, written out as a theme.
+   Monochrome, hairlines, 4px corners, 36px controls. Importing this
+   file changes nothing; copy it as the starting point for your own. */
+[data-void-theme="void"] {
+  --void-accent-hue: 250;
+  --void-accent-chroma: 0;
+  --void-neutral-hue: 60;
+  --void-neutral-chroma: 0.004;
+  --void-page-tint: 0;
+  --void-contrast: 0.2;
+  --void-chrome: 0.3;
+  --void-radius: 4px;
+  --void-density: 1;
+  --void-rhythm: 1;
+  --void-font-size: 0.875rem;
+}

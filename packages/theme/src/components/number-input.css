@@ -8,13 +8,17 @@ void-number-input {
   --tone-subtle: color-mix(in srgb, var(--tone) 14%, transparent);
   --tone-border: color-mix(in srgb, var(--tone) 36%, transparent);
   --tone-hover: color-mix(in srgb, var(--tone) 22%, transparent);
+  --void-field-height: var(--void-control-height);
+  --void-field-padding: var(--void-control-padding);
+  --void-field-text: var(--void-control-text);
 
   display: inline-flex;
   align-items: stretch;
   font-family: var(--void-font-sans);
   border: 1px solid var(--void-color-border-control);
   border-radius: var(--void-radius-md);
-  background: var(--void-color-bg-secondary);
+  background: var(--void-color-surface);
+  min-height: var(--void-field-height);
   overflow: hidden;
   transition: border-color var(--void-duration-fast) var(--void-ease-in-out),
               box-shadow var(--void-duration-fast) var(--void-ease-in-out);
@@ -33,12 +37,13 @@ void-number-input:hover:not(:focus-within) {
 void-number-input input.void-number-input-field {
   flex: 1;
   min-width: 0;
-  padding: var(--void-space-2) var(--void-space-3);
+  padding: 0 var(--void-field-padding);
   background: transparent;
   border: none;
   color: var(--void-color-text);
   font-family: inherit;
-  font-size: var(--void-text-sm);
+  font-size: var(--void-field-text);
+  font-variant-numeric: tabular-nums;
   line-height: var(--void-leading-normal);
   outline: none;
   text-align: center;
@@ -56,7 +61,7 @@ void-number-input input.void-number-input-field::placeholder {
   align-items: center;
   color: var(--void-color-text-muted);
   font-family: inherit;
-  font-size: var(--void-text-sm);
+  font-size: var(--void-field-text);
   user-select: none;
   pointer-events: none;
   white-space: nowrap;
@@ -64,11 +69,11 @@ void-number-input input.void-number-input-field::placeholder {
 }
 
 .void-number-input-prefix {
-  padding-left: var(--void-space-3);
+  padding-left: var(--void-field-padding);
 }
 
 .void-number-input-unit {
-  padding-right: var(--void-space-3);
+  padding-right: var(--void-field-padding);
 }
 
 /* When a prefix is present, the input doesn't need its own left padding */
@@ -86,7 +91,7 @@ void-number-input:has(.void-number-input-unit) input.void-number-input-field {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0 var(--void-space-3);
+  padding: 0 var(--void-field-padding);
   background: transparent;
   border: none;
   color: var(--void-color-text-secondary);
@@ -104,8 +109,8 @@ void-number-input:has(.void-number-input-unit) input.void-number-input-field {
 }
 
 .void-number-input-btn:focus-visible {
-  outline: 2px solid var(--void-color-border-focus);
-  outline-offset: -2px;
+  outline: var(--void-focus-ring-width) solid var(--void-focus-ring-color);
+  outline-offset: calc(-1 * var(--void-focus-ring-width));
 }
 
 .void-number-input-btn:disabled {
@@ -131,7 +136,7 @@ void-number-input[controls="right"] .void-number-input-btn-group {
 
 void-number-input[controls="right"] .void-number-input-btn {
   flex: 1;
-  padding: 0 var(--void-space-2);
+  padding: 0 var(--void-control-padding-sm);
   border: none;
 }
 
@@ -182,40 +187,6 @@ void-number-input:where([color="error"], [color="warning"], [color="caution"], [
   box-shadow: 0 0 0 1px var(--tone);
 }
 
-/* Size variants */
-void-number-input[size="sm"] input.void-number-input-field {
-  padding: var(--void-space-1) var(--void-space-2);
-  font-size: var(--void-text-xs);
-}
-
-void-number-input[size="sm"] .void-number-input-btn {
-  padding: 0 var(--void-space-2);
-  font-size: var(--void-text-xs);
-}
-
-void-number-input[size="lg"] input.void-number-input-field {
-  padding: var(--void-space-3) var(--void-space-4);
-  font-size: var(--void-text-base);
-}
-
-void-number-input[size="lg"] .void-number-input-btn {
-  padding: 0 var(--void-space-4);
-}
-
-void-number-input[size="sm"] .void-number-input-prefix,
-void-number-input[size="sm"] .void-number-input-unit {
-  font-size: var(--void-text-xs);
-  padding-left: var(--void-space-2);
-  padding-right: var(--void-space-2);
-}
-
-void-number-input[size="lg"] .void-number-input-prefix,
-void-number-input[size="lg"] .void-number-input-unit {
-  font-size: var(--void-text-base);
-  padding-left: var(--void-space-4);
-  padding-right: var(--void-space-4);
-}
-
 /* Disabled state */
 void-number-input[disabled] {
   opacity: 0.5;
@@ -231,3 +202,7 @@ void-number-input[disabled] input.void-number-input-field {
 void-number-input[readonly] input.void-number-input-field {
   cursor: default;
 }
+
+/* Size variants: each step sets the field tokens and nothing else */
+void-number-input[size="sm"] { --void-field-height: var(--void-control-height-sm); --void-field-padding: var(--void-control-padding-sm); --void-field-text: var(--void-control-text-sm); }
+void-number-input[size="lg"] { --void-field-height: var(--void-control-height-lg); --void-field-padding: var(--void-control-padding-lg); --void-field-text: var(--void-control-text-lg); }

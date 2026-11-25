@@ -93,7 +93,8 @@ void-file-upload[dragging] .void-file-upload-dropzone {
 
 .void-file-upload-error {
   color: var(--void-color-error);
-  font-size: var(--void-text-xs);
+  font-size: var(--void-type-caption-size);
+  line-height: var(--void-type-caption-leading);
 }
 
 void-file-upload[error]:not([error=""]) .void-file-upload-dropzone {

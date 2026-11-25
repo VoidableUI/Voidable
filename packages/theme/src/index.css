@@ -1,6 +1,8 @@
 @import './primitives.css';
+@import './knobs.css';
 @import './tokens.css';
 @import './reset.css';
+@import './type.css';
 @import './components/badge.css';
 @import './components/button.css';
 @import './components/divider.css';

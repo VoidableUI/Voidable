@@ -1,4 +1,7 @@
 void-table {
+  --void-table-padding-block: var(--void-cell-padding-block);
+  --void-table-padding-inline: var(--void-cell-padding-inline);
+
   display: block;
   font-family: var(--void-font-sans);
   overflow-x: auto;
@@ -7,37 +10,58 @@ void-table {
 void-table table {
   width: 100%;
   border-collapse: collapse;
-  font-size: var(--void-text-sm);
+  font-size: var(--void-type-body-size);
+  /* Digits line up down a column without any per-cell markup. */
+  font-variant-numeric: tabular-nums;
 }
 
+/* Header cells are labels: the small quiet name of a column. */
 void-table th {
   text-align: left;
-  font-weight: var(--void-weight-medium);
-  font-size: var(--void-text-xs);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--void-color-text-secondary);
-  padding: var(--void-space-3);
+  font-family: var(--void-type-label-family);
+  font-size: var(--void-type-label-size);
+  line-height: var(--void-type-label-leading);
+  font-weight: var(--void-type-label-weight);
+  letter-spacing: var(--void-type-label-tracking);
+  text-transform: var(--void-type-label-case);
+  color: var(--void-type-label-color);
+  white-space: nowrap;
+  padding: var(--void-space-2) var(--void-table-padding-inline);
   border-bottom: 1px solid var(--void-color-border);
 }
 
 void-table td {
-  padding: var(--void-space-3);
+  padding: var(--void-table-padding-block) var(--void-table-padding-inline);
   color: var(--void-color-text);
   border-bottom: 1px solid var(--void-color-border);
+}
+
+/* A plain table sits on the page: its first and last columns align
+   with the content edge instead of being inset from it. Tables that
+   paint rows or cells (striped, hoverable, bordered) keep the inset. */
+void-table:not([bordered], [striped], [hoverable]) :is(th, td):first-child {
+  padding-inline-start: 0;
+}
+
+void-table:not([bordered], [striped], [hoverable]) :is(th, td):last-child {
+  padding-inline-end: 0;
 }
 
 void-table[striped] tbody tr:nth-child(even) {
   background: var(--void-color-bg-secondary);
 }
 
-void-table[hoverable] tbody tr:hover {
-  background: var(--void-color-bg-hover);
+void-table[hoverable] tbody tr {
+  transition: background var(--void-duration-fast) var(--void-ease-in-out);
 }
 
-void-table[compact] th,
-void-table[compact] td {
-  padding: var(--void-space-2);
+void-table[hoverable] tbody tr:hover {
+  background: var(--void-color-bg-secondary);
+}
+
+void-table[compact] {
+  --void-table-padding-block: var(--void-space-1h);
+  --void-table-padding-inline: var(--void-space-2);
 }
 
 void-table[bordered] th,

@@ -39,11 +39,12 @@ void-donut-chart[variant="wireframe"] .void-donut-chart-segment {
 
 /* Center total (when show-total) */
 void-donut-chart .void-donut-chart-total text {
-  font-family: var(--void-font-mono);
+  font-family: var(--void-type-value-family);
   font-size: var(--void-text-xl);
-  font-weight: var(--void-weight-semibold);
-  fill: var(--void-color-text);
-  letter-spacing: var(--void-tracking-tight);
+  font-weight: var(--void-type-value-weight);
+  font-variant-numeric: var(--void-type-value-numeric);
+  fill: var(--void-type-value-color);
+  letter-spacing: var(--void-type-value-tracking);
 }
 
 /* Per-segment labels (when show-values).
@@ -74,12 +75,12 @@ void-donut-chart .void-donut-chart-tooltip-bg {
 }
 
 void-donut-chart .void-donut-chart-tooltip-name {
-  font-family: var(--void-font-mono);
-  font-size: var(--void-text-2xs);
-  font-weight: var(--void-weight-semibold);
+  font-family: var(--void-type-label-family);
+  font-size: var(--void-type-label-size);
+  font-weight: var(--void-type-label-weight);
   fill: var(--void-color-text);
-  text-transform: uppercase;
-  letter-spacing: var(--void-tracking-widest);
+  text-transform: var(--void-type-label-case);
+  letter-spacing: var(--void-type-label-tracking);
 }
 
 void-donut-chart .void-donut-chart-tooltip-value {

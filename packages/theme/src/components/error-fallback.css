@@ -22,22 +22,27 @@ void-error-fallback {
 }
 
 .void-error-fallback-heading {
-  font-size: var(--void-text-lg);
-  font-weight: var(--void-weight-semibold);
-  color: var(--void-color-text);
+  font-family: var(--void-type-heading-family);
+  font-size: var(--void-type-heading-size);
+  line-height: var(--void-type-heading-leading);
+  font-weight: var(--void-type-heading-weight);
+  letter-spacing: var(--void-type-heading-tracking);
+  color: var(--void-type-heading-color);
 }
 
 .void-error-fallback-message {
-  font-size: var(--void-text-sm);
+  font-size: var(--void-type-body-size);
   color: var(--void-color-text-secondary);
 }
 
 .void-error-fallback-retry {
-  padding: var(--void-space-2) var(--void-space-4);
-  background: var(--void-color-bg-secondary);
-  border: 1px solid var(--void-color-border);
+  min-height: var(--void-control-height);
+  padding: 0 calc(var(--void-control-padding) * 1.25);
+  background: transparent;
+  border: 1px solid var(--void-color-border-control);
   border-radius: var(--void-radius-md);
-  font-size: var(--void-text-sm);
+  font-size: var(--void-control-text);
+  font-weight: var(--void-weight-medium);
   font-family: var(--void-font-sans);
   color: var(--void-color-text);
   cursor: pointer;
@@ -46,11 +51,10 @@ void-error-fallback {
 }
 
 .void-error-fallback-retry:hover {
-  background: var(--void-color-bg-secondary);
-  border-color: var(--void-color-text-muted);
+  background: var(--void-color-bg-hover);
 }
 
 .void-error-fallback-retry:focus-visible {
-  outline: 2px solid var(--void-color-border-focus);
-  outline-offset: 2px;
+  outline: var(--void-focus-ring-width) solid var(--void-focus-ring-color);
+  outline-offset: var(--void-focus-ring-offset);
 }

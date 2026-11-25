@@ -1,12 +1,16 @@
 /* ============================================================
    @voidable/theme — Tier 1 Primitives
-   Raw scales only. No semantic meaning.
+   Fixed values only: palettes, weights, line heights, tracking,
+   easings and layers. Nothing here depends on a knob, so it is
+   declared once on :root. Everything that scales with a knob
+   (spacing, text sizes, radii, shadows, durations) is derived in
+   tokens.css.
    ============================================================ */
 
-/* Type --void-anim-scale so per-element inline overrides
-   (style="--void-anim-scale: 2") cascade reliably. Other animation
-   tokens stay untyped so their calc() expressions resolve lazily at
-   the consumer site, picking up local scale overrides. */
+/* Type --void-anim-scale so it always computes to a number, which
+   the chart components read from JavaScript. Durations are derived
+   from it in tokens.css; to change the speed for one subtree, set it
+   on an element that carries data-void-theme. */
 @property --void-anim-scale {
   syntax: '<number>';
   inherits: true;
@@ -130,51 +134,6 @@
   --void-dark-3: #111111;
   --void-dark-4: #141414;
 
-  /* ── Spacing (rem) ── */
-  --void-space-0h: 0.125rem;
-  --void-space-1:  0.25rem;
-  --void-space-1h: 0.375rem;
-  --void-space-2:  0.5rem;
-  --void-space-2h: 0.625rem;
-  --void-space-3:  0.75rem;
-  --void-space-4:  1rem;
-  --void-space-5:  1.25rem;
-  --void-space-6:  1.5rem;
-  --void-space-7:  1.75rem;
-  --void-space-8:  2rem;
-  --void-space-9:  2.25rem;
-  --void-space-10: 2.5rem;
-  --void-space-12: 3rem;
-  --void-space-14: 3.5rem;
-  --void-space-15: 3.75rem;
-  --void-space-16: 4rem;
-  --void-space-20: 5rem;
-  --void-space-24: 6rem;
-  --void-space-28: 7rem;
-  --void-space-30: 7.5rem;
-  --void-space-32: 8rem;
-  --void-space-35: 8.75rem;
-  --void-space-40: 10rem;
-
-  --void-space-xs: var(--void-space-1);
-  --void-space-sm: var(--void-space-2);
-  --void-space-md: var(--void-space-3);
-  --void-space-lg: var(--void-space-4);
-  --void-space-xl: var(--void-space-6);
-
-  /* ── Typography — sizes ── */
-  --void-text-2xs:  0.625rem;
-  --void-text-xs:   0.75rem;
-  --void-text-sm:   0.8125rem;
-  --void-text-base: 0.875rem;
-  --void-text-md:   1rem;
-  --void-text-lg:   1.125rem;
-  --void-text-xl:   1.25rem;
-  --void-text-2xl:  1.5rem;
-  --void-text-3xl:  1.875rem;
-  --void-text-4xl:  2.25rem;
-  --void-text-5xl:  3rem;
-
   /* ── Typography — weights ── */
   --void-weight-normal:   400;
   --void-weight-medium:   500;
@@ -200,37 +159,8 @@
   --void-tracking-wider:    0.06em;
   --void-tracking-widest:   0.1em;
 
-  /* ── Font stacks ── */
-  --void-font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
-  --void-font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', 'Fira Code', monospace;
-
-  /* ── Border radius ── */
+  /* ── Border radius — fixed ends of the scale ── */
   --void-radius-none: 0;
-  --void-radius-xs:   4px;
-  --void-radius-sm:   6px;
-  --void-radius-md:   8px;
-  --void-radius-lg:   12px;
-  --void-radius-xl:   16px;
-  --void-radius-full: 9999px;
-
-  /* ── Shadows — white glows (dark-surface elevation) ── */
-  --void-shadow-sm: 0 1px 3px rgba(255,255,255,.14);
-  --void-shadow-md: 0 2px 6px rgba(255,255,255,.12), 0 10px 24px rgba(255,255,255,.20);
-  --void-shadow-lg: 0 4px 10px rgba(255,255,255,.16), 0 22px 50px rgba(255,255,255,.28);
-  --void-shadow-xl: 0 6px 14px rgba(255,255,255,.20), 0 40px 88px rgba(255,255,255,.38);
-
-  /* ── Ring hairlines ── */
-  --void-ring-hair:        0 0 0 1px rgba(255,255,255,.06);
-  --void-ring-hair-strong: 0 0 0 1px rgba(255,255,255,.12);
-
-  /* ── Motion — durations
-       All durations scale with --void-anim-scale (1 = default, 0 = off).
-       Override per-element via inline style="--void-anim-scale: N" or
-       page-wide via <html data-anim-speed="…"> below. */
-  --void-anim-scale:      1;
-  --void-duration-fast:   calc(100ms * var(--void-anim-scale));
-  --void-duration-normal: calc(200ms * var(--void-anim-scale));
-  --void-duration-slow:   calc(300ms * var(--void-anim-scale));
 
   /* Chart-specific base durations — consumed by JS rAF loops.
        JS reads these as plain values, then multiplies by the
@@ -238,19 +168,6 @@
        tokens would break parseFloat in getComputedStyle.) */
   --void-duration-chart-enter: 700ms;
   --void-stagger-chart-bars:   40ms;
-
-  /* Chart series palette — cycle for multi-series charts */
-  --void-chart-series-1: var(--void-color-accent);
-  --void-chart-series-2: var(--void-color-info);
-  --void-chart-series-3: var(--void-color-success);
-  --void-chart-series-4: var(--void-color-warning);
-  --void-chart-series-5: var(--void-color-error);
-  --void-chart-series-6: var(--void-color-notice);
-
-  /* Chart structural colors */
-  --void-chart-grid:       color-mix(in srgb, var(--void-color-border) 60%, transparent);
-  --void-chart-axis:       var(--void-color-border-strong);
-  --void-chart-tick-label: var(--void-color-text-muted);
 
   /* Chart stroke widths (SVG user units) */
   --void-chart-stroke-none:     0;
@@ -279,31 +196,9 @@
   --void-sidebar-collapsed-width: 3.75rem;
 }
 
-/* ── Light-mode elevation — subtle dark shadows (white glows vanish on
-     white). SYNC: declared twice, for [data-theme="light"] and for the
-     prefers-color-scheme block; keep both identical. ── */
-[data-theme="light"] {
-  --void-shadow-sm: 0 1px 3px rgba(12,10,9,.12);
-  --void-shadow-md: 0 2px 6px rgba(12,10,9,.08), 0 10px 24px rgba(12,10,9,.12);
-  --void-shadow-lg: 0 4px 10px rgba(12,10,9,.10), 0 22px 50px rgba(12,10,9,.16);
-  --void-shadow-xl: 0 6px 14px rgba(12,10,9,.12), 0 40px 88px rgba(12,10,9,.22);
-  --void-ring-hair:        0 0 0 1px rgba(12,10,9,.06);
-  --void-ring-hair-strong: 0 0 0 1px rgba(12,10,9,.12);
-}
-
-@media (prefers-color-scheme: light) {
-  :root:not([data-theme]) {
-    --void-shadow-sm: 0 1px 3px rgba(12,10,9,.12);
-    --void-shadow-md: 0 2px 6px rgba(12,10,9,.08), 0 10px 24px rgba(12,10,9,.12);
-    --void-shadow-lg: 0 4px 10px rgba(12,10,9,.10), 0 22px 50px rgba(12,10,9,.16);
-    --void-shadow-xl: 0 6px 14px rgba(12,10,9,.12), 0 40px 88px rgba(12,10,9,.22);
-    --void-ring-hair:        0 0 0 1px rgba(12,10,9,.06);
-    --void-ring-hair-strong: 0 0 0 1px rgba(12,10,9,.12);
-  }
-}
-
 /* ── Animation speed levels ─────────────────────────────────────
-   Override the global scale; off = no animation, instant = ~15ms.
+   Presets for the --void-anim-scale knob; off = no animation,
+   instant = a few milliseconds.
    ─────────────────────────────────────────────────────────────── */
 
 :root[data-anim-speed="off"]      { --void-anim-scale: 0; }
@@ -313,14 +208,3 @@
 :root[data-anim-speed="fast"]     { --void-anim-scale: 0.5; }
 :root[data-anim-speed="faster"]   { --void-anim-scale: 0.25; }
 :root[data-anim-speed="instant"]  { --void-anim-scale: 0.05; }
-
-/* Reduced motion — the OS preference wins over an explicit
-   data-anim-speed. An explicit attribute used to switch the OS
-   preference off silently; that is not honoured any more, because
-   a user who asked their OS for less motion should not get it back
-   from an app default. Apps that want a motion toggle should drive it
-   from their own UI and treat the OS preference as the initial value. */
-@media (prefers-reduced-motion: reduce) {
-  :root,
-  :root[data-anim-speed] { --void-anim-scale: 0; }
-}
