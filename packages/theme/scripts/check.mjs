@@ -116,6 +116,13 @@ for (const f of srcFiles) {
 if (!fs.existsSync(path.join(DIST, 'void.css'))) fail('dist/ is missing: run the theme build first');
 else {
   const dist = walk(DIST).filter((f) => f.endsWith('.css') && !f.endsWith('.min.css'));
+  // The minifier folds `animation-timeline` into the `animation` shorthand, which
+  // browsers do not read: the whole declaration is dropped and the animation never
+  // runs. Sources write the timeline through var() to stop that; this proves it held.
+  for (const f of walk(DIST).filter((x) => x.endsWith('.css'))) {
+    const folded = /animation:[^;}]*\b(?:scroll|view)\(/.exec(L.read(f));
+    if (folded) fail(`${path.relative(DIST, f)}: a scroll timeline was folded into the animation shorthand (\`${folded[0].slice(0, 80)}\`), which browsers reject. Write it as \`animation-timeline: var(--_void-timeline, scroll(...))\` in the source`);
+  }
   for (const f of dist) {
     const root = postcss.parse(L.read(f), { from: f });
     for (const node of root.nodes) {

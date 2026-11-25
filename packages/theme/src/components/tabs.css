@@ -14,22 +14,69 @@ void-tabs {
   font-family: var(--void-font-sans);
 }
 
+/* The fades at the ends of a row of tabs that scrolls: 0 unless the row
+   overflows (set by the scroll timeline below). */
+@property --_void-tabs-fade-start {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
+
+@property --_void-tabs-fade-end {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
+
+/* A row with more tabs than fit scrolls sideways inside itself; it used to
+   push the page wider than the screen. Tabs keep their width and their
+   label on one line, and snap to the start of the row. */
 void-tabs-list {
   display: flex;
   border-bottom: var(--void-tabs-rule, var(--void-rule-head));
   gap: var(--void-space-2);
   order: -1;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: inline proximity;
+  -webkit-mask-image: linear-gradient(to right, transparent, black var(--_void-tabs-fade-start), black calc(100% - var(--_void-tabs-fade-end)), transparent);
+  mask-image: linear-gradient(to right, transparent, black var(--_void-tabs-fade-start), black calc(100% - var(--_void-tabs-fade-end)), transparent);
+}
+
+void-tabs-list::-webkit-scrollbar {
+  display: none;
+}
+
+/* Where the browser can tie an animation to the row's own scroll position,
+   the edge with more tabs beyond it fades out. A row that does not overflow
+   has no scroll range, so the animation does not apply and nothing fades. */
+@supports (animation-timeline: scroll()) {
+  void-tabs-list {
+    animation: void-tabs-fade linear both;
+    animation-timeline: var(--_void-timeline, scroll(self inline));
+  }
+
+  @keyframes void-tabs-fade {
+    0% { --_void-tabs-fade-start: 0px; --_void-tabs-fade-end: var(--void-space-10); }
+    10%, 90% { --_void-tabs-fade-start: var(--void-space-10); --_void-tabs-fade-end: var(--void-space-10); }
+    100% { --_void-tabs-fade-start: var(--void-space-10); --_void-tabs-fade-end: 0px; }
+  }
 }
 
 /* A tab: the trigger part itself is the control (role="tab", a tab stop). */
 void-tabs-trigger {
   display: inline-flex;
   align-items: center;
+  flex: none;
   box-sizing: border-box;
   background: none;
   border: none;
   border-bottom: 2px solid transparent;
   border-radius: 0;
+  white-space: nowrap;
+  scroll-snap-align: start;
   min-height: var(--_void-tabs-height);
   padding: 0 var(--_void-tabs-padding);
   font-family: var(--void-font-sans);
@@ -39,7 +86,9 @@ void-tabs-trigger {
   transition: color var(--void-duration-fast) var(--void-ease-in-out),
               background var(--void-duration-fast) var(--void-ease-in-out),
               border-bottom-color var(--void-duration-fast) var(--void-ease-in-out);
-  margin-bottom: -1px;
+  /* The marker of the selected tab sits on the row's rule, not over it: the
+     row is a scroll container, and anything that reached outside it (a
+     negative margin, an outline outside the tab) would be cut off. */
   outline: none;
   user-select: none;
 }
@@ -50,7 +99,7 @@ void-tabs-trigger:hover {
 
 void-tabs-trigger:focus-visible {
   outline: var(--void-focus-ring-width) solid var(--void-focus-ring-color);
-  outline-offset: var(--void-focus-ring-offset);
+  outline-offset: calc(-1 * var(--void-focus-ring-width));
 }
 
 void-tabs-trigger[disabled] {
