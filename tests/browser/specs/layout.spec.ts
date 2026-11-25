@@ -75,23 +75,23 @@ test.describe('layout page', () => {
   test('overlays opened inside a card are not clipped by it', async ({ page }) => {
     await page.locator('#card').scrollIntoViewIfNeeded();
     await page.locator('#dd-t').click();
-    expect(await fullyVisible(page, '#dd .void-dropdown-menu-panel')).toBe(true);
+    await expect.poll(() => fullyVisible(page, '#dd .void-dropdown-menu-panel')).toBe(true);
     await page.keyboard.press('Escape');
 
     await page.locator('#po-t').click();
-    expect(await fullyVisible(page, '#po .void-popover-body')).toBe(true);
+    await expect.poll(() => fullyVisible(page, '#po .void-popover-body')).toBe(true);
     await page.keyboard.press('Escape');
 
     await page.locator('#cb input').click();
-    expect(await isPerceivable(page.locator('#cb').getByRole('option', { name: 'Solid' }))).toBe(true);
+    await expect.poll(() => isPerceivable(page.locator('#cb').getByRole('option', { name: 'Solid' }))).toBe(true);
     await page.keyboard.press('Escape');
 
     await page.locator('#ms .void-multiselect-trigger').click();
-    expect(await isPerceivable(page.locator('#ms').getByRole('option', { name: 'SQL' }))).toBe(true);
+    await expect.poll(() => isPerceivable(page.locator('#ms').getByRole('option', { name: 'SQL' }))).toBe(true);
     await page.locator('h1, main').first().click({ position: { x: 900, y: 5 } });
 
     await page.locator('#dp input').click();
-    expect(await isPerceivable(page.locator('#dp').getByRole('button', { name: /November 30, 2026|December 5, 2026/ }).last())).toBe(true);
+    await expect.poll(() => isPerceivable(page.locator('#dp').getByRole('button', { name: /November 30, 2026|December 5, 2026/ }).last())).toBe(true);
   });
 });
 

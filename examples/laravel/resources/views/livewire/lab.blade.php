@@ -96,16 +96,16 @@
         <void-button id="bridge-btn" variant="filled" data-name="bridge"
             x-void-on:void-click="$wire.logEvent('void-click', {id: $el.id, name: $el.dataset.name, detail: $event.detail ?? {}})">Bridge button</void-button>
         <void-select id="bridge-select" name="bridge_select" placeholder="Bridge select"
-            x-void-on:void-change="$wire.logEvent('void-change', {id: $el.id, name: $el.dataset.name, detail: $event.detail})">
+            x-void-on:void-change="$wire.logEvent('void-change', {id: $el.id, name: $el.getAttribute('name'), detail: $event.detail})">
             <option value="a">A</option>
             <option value="b">B</option>
         </void-select>
         <void-checkbox id="bridge-check" name="bridge_check" value="1"
-            x-void-on:void-change="$wire.logEvent('void-change', {id: $el.id, name: $el.dataset.name, detail: $event.detail})">Bridge check</void-checkbox>
+            x-void-on:void-change="$wire.logEvent('void-change', {id: $el.id, name: $el.getAttribute('name'), detail: $event.detail})">Bridge check</void-checkbox>
         <void-switch id="bridge-switch" name="bridge_switch"
-            x-void-on:void-change="$wire.logEvent('void-change', {id: $el.id, name: $el.dataset.name, detail: $event.detail})">Bridge switch</void-switch>
+            x-void-on:void-change="$wire.logEvent('void-change', {id: $el.id, name: $el.getAttribute('name'), detail: $event.detail})">Bridge switch</void-switch>
         <void-input id="bridge-input" name="bridge_input" placeholder="Bridge input"
-            x-void-on:void-change="$wire.logEvent('void-change', {id: $el.id, name: $el.dataset.name, detail: $event.detail})"></void-input>
+            x-void-on:void-change="$wire.logEvent('void-change', {id: $el.id, name: $el.getAttribute('name'), detail: $event.detail})"></void-input>
     </section>
     <pre id="events">{{ json_encode($events) }}</pre>
 </div>

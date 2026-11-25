@@ -238,6 +238,8 @@ set -euo pipefail
 - A failing test that shows a real defect is not fixed by changing the test. Mark it with `expectedFailure('#n', detail)` (key in `helpers/known-issues.ts`, `untracked:` when no issue exists yet), keep the assertion of the correct behaviour, and report it.
 - When a fix makes an expected failure pass, remove its marker in the same change. `VOID_RUN_EXPECTED=1` runs every expected failure as an ordinary test, to see how each still fails.
 - The `browser`, `server` (Rails), `phoenix` and `laravel` jobs of `ci.yml` run on pull requests and, through `workflow_call`, gate every release: `release.yml` tags and publishes only if all of `ci.yml` passed.
+- Overlay specs: `overlays.spec.ts` (per component) and `overlay-stress.spec.ts` (nesting, containers, corners, focus return, cancelled close, close reasons, fifty-cycle leaks, morphs), with pages `overlays`, `overlay-deep` and `overlay-corners`. `expectPerceivable` and `scrollLocked` in `helpers/test.ts` are the overlay assertions. A failure in one engine only is an `expectedFailure(key, detail, { browsers: [...] })` naming the engine.
+- CI gets Ruby, Erlang/Elixir and PHP from `ruby/setup-ruby`, `erlef/setup-beam` and `shivammathur/setup-php` (pinned to commit SHAs, versions read from `mise.toml`), not from mise, which would compile them. `tests/browser/server/start.mjs` falls back to `PATH` when mise has not installed a tool, and retries registry steps three times.
 - Performance budgets are in `tests/browser/budgets.ts`, the axe baseline in `tests/browser/axe-baseline.json`, and the server apps in `tests/browser/server/apps.mjs`.
 
 ### Tech Stack

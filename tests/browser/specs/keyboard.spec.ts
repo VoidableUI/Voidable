@@ -2,7 +2,7 @@
 //
 // Keyboard operation and accessibility-tree structure of the composite
 // widgets, against the WAI-ARIA Authoring Practices patterns.
-import { test, expect, expectedFailure, load, settle, focused, type Page } from '../helpers/test';
+import { test, expect, load, settle, focused, type Page } from '../helpers/test';
 
 test.beforeEach(async ({ page }) => {
   await load(page, '/widgets');
@@ -250,21 +250,19 @@ test.describe('calendar', () => {
 test.describe('date-picker', () => {
   test('is a combobox named by its field that opens a calendar dialog', async ({ page }) => {
     const input = page.locator('#date input');
-    await expect(page.getByRole('textbox', { name: 'Start date' })).toHaveCount(1);
+    await expect(page.getByRole('combobox', { name: 'Start date' })).toHaveCount(1);
     await input.click();
     await expect(page.locator('#date [role=grid]')).toBeVisible();
-    await expect(page.locator('#date')).toHaveAttribute('aria-expanded', 'true');
+    await expect(page.getByRole('combobox', { name: 'Start date' })).toHaveAttribute('aria-expanded', 'true');
   });
 
   test('opening moves focus into the calendar on the selected day', async ({ page }) => {
-    expectedFailure('#6', 'date-picker does not move focus into its popup');
     await page.locator('#date input').focus();
     await page.keyboard.press('Enter');
     await expect.poll(() => activeLabel(page), { timeout: 1000 }).toBe('Tuesday, November 10, 2026');
   });
 
   test('Escape inside the calendar closes it and returns focus to the input', async ({ page }) => {
-    expectedFailure('#6', 'Escape with focus inside the date-picker drops focus to <body>');
     await page.locator('#date input').click();
     await page.locator('#date').getByRole('button', { name: 'Tuesday, November 10, 2026' }).focus();
     await page.keyboard.press('Escape');

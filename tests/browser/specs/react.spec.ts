@@ -68,7 +68,7 @@ for (const strict of [false, true]) {
       await api(page, 'setOpen', true);
       await page.keyboard.press('Escape');
       await settle(page);
-      expect(await events(page)).toContain('close:null');
+      expect(await events(page)).toContain('close:{"reason":"escape"}');
       expect(await prop(page, 'r-dlg', 'open')).toBe(false);
       // React's state followed the close, so opening again works.
       await api(page, 'setOpen', true);
@@ -99,7 +99,10 @@ for (const strict of [false, true]) {
       await expect(page.locator('#r-dd').getByRole('menuitem')).toHaveText(['Item b', 'Item c', 'Item d']);
       await page.locator('#r-ddi-d').click();
       expect(await events(page)).toContain('select-d:{"item":"void-dropdown-menu-item"}');
+      // Choosing an item closes the menu; open it again to see the items follow state.
+      await expect(page.locator('#r-dd')).not.toHaveAttribute('open', '');
       await api(page, 'setOpts', ['a']);
+      await page.locator('#r-ddt').click();
       await expect(page.locator('#r-dd').getByRole('menuitem')).toHaveText(['Item a']);
       await api(page, 'setLabel', 'v3');
       await expect(page.locator('#r-ddt')).toHaveText('Menu v3');
@@ -112,7 +115,7 @@ for (const strict of [false, true]) {
       expect(await page.evaluate(() => document.getElementById('app')!.childElementCount)).toBe(0);
       expect(await page.evaluate(() => document.querySelectorAll('[class^=void-]').length)).toBe(0);
       // The open dialog's scroll lock is released with it.
-      expect(await page.evaluate(() => getComputedStyle(document.body).overflow)).not.toBe('hidden');
+      expect(await page.evaluate(() => getComputedStyle(document.documentElement).overflow)).not.toBe('hidden');
       await page.keyboard.press('Escape');
       await page.mouse.click(5, 5);
       expect(await events(page)).toEqual([]);

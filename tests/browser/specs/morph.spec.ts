@@ -80,7 +80,6 @@ for (const engine of ENGINES) {
     });
 
     test('client state is kept while the server repeats itself', async ({ page }) => {
-      if (engine === 'alpine') expectedFailure('untracked:livewire-open-state', 'the Livewire hooks preserve only value and checked, so a morph that repeats the server markup closes a dialog the user opened');
       await render(page, projectionApp(initialState));
       await page.locator('#s select').selectOption('c');
       await page.locator('#ck-a').click();
