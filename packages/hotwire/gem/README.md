@@ -79,6 +79,17 @@ Use `void_attrs` to generate the Stimulus `data-action` attribute (or write
       **void_attrs("void-change", "search#filter") %>
 ```
 
+## Development warnings
+
+In the development environment the gem loads `@voidable/ui/dev`, so misused `<void-*>` markup (a wrong attribute, a value outside the allowed set, a child in the wrong parent) is reported in the browser console, including markup your views and Turbo Streams render at runtime. The install generator pins it for development only and adds `<%= voidable_dev_tags %>` after `javascript_importmap_tags` in the layouts it writes (Vite apps get `if (import.meta.env.DEV) import("@voidable/ui/dev")` in `application.js`); add the helper by hand to a layout you already have. It renders nothing in other environments.
+
+```ruby
+# config/initializers/voidable.rb
+Voidable::Hotwire.dev_warnings = false   # off everywhere
+Voidable::Hotwire.dev_warnings = true    # on, even outside development
+Voidable::Hotwire.dev_warnings = :throw  # thrown errors, for system tests
+```
+
 ## License
 
 MIT

@@ -35,6 +35,8 @@ Void UI (`@voidable/ui` {{.Version}}, {{.Count}} elements) is a set of `<void-*>
 
 5. **Booleans are present or absent.** `<void-button disabled>` is disabled; `disabled="false"` is still disabled because the attribute is present. To turn a boolean off, leave the attribute out (in JSX write `disabled={false}`). The only attributes that read the string `"false"` are the ones whose reference says so, currently {{.FalseList}}. A boolean whose default is `true` and does not say so cannot be switched off from markup; set the property from script (`el.prop = false`).
 
+6. **Turn on the development warnings and read the console.** `voidable check` only sees source files; `@voidable/ui/dev` runs in the page and also catches markup a server or framework produces at runtime. Import it in development builds only (`import '@voidable/ui/dev';`, or with an import map and no bundler `import '@voidable/ui/dev.js'`; the Rails, LiveView and Laravel packages enable it in development for you). It logs one `[voidable]` `console.warn` per problem, each naming the element, what is wrong, the valid alternatives and a "did you mean": an unknown attribute, a value outside the allowed set, `disabled="false"`, a child in the wrong parent or a required child that is missing, a `void-*` tag that is not defined, a listener for an event nothing dispatches. After you load the page, read the browser console (or the output of your headless browser) and fix every `[voidable]` line; none is noise. In a test suite, `configure({ throw: true })` from `@voidable/ui/dev` turns them into thrown errors. Never import it in production.
+
 ## Composition
 
 Elements render into the light DOM: there is no shadow root, so your own CSS applies and children stay in the document.

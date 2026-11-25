@@ -25,6 +25,7 @@ module Voidable
         if autoloader?
           pins = Voidable::Hotwire::CDN::AUTOLOADER_PINS.map { |name, url| %(pin "#{name}", to: "#{url}") }
           pins << %(pin "@voidable/ui-hotwire", to: "#{Voidable::Hotwire::CDN::UI_HOTWIRE_URL}")
+          pins << dev_pin
           append_to_file importmap, "\n# Voidable UI (autoloader: components load when their tag first appears)\n#{pins.join("\n")}\n"
           say "Pinned @voidable/ui/autoloader, lit and @voidable/ui-hotwire in importmap", :green
         else
@@ -33,8 +34,9 @@ module Voidable
             # Voidable UI
             pin "@voidable/ui", to: "#{Voidable::Hotwire::CDN::UI_URL}"
             pin "@voidable/ui-hotwire", to: "#{Voidable::Hotwire::CDN::UI_HOTWIRE_URL}"
+            #{dev_pin}
           RUBY
-          say "Pinned @voidable/ui and @voidable/ui-hotwire in importmap", :green
+          say "Pinned @voidable/ui and @voidable/ui-hotwire in importmap (and @voidable/ui/dev in development)", :green
         end
       end
 
@@ -147,6 +149,15 @@ module Voidable
 
             JS
           end
+          if vite?
+            header += <<~JS
+              // Console warnings for misused <void-*> markup (a wrong attribute, a value
+              // outside the allowed set, a child in the wrong parent). Development only:
+              // the production build drops this import.
+              if (import.meta.env.DEV) import("@voidable/ui/dev");
+
+            JS
+          end
           prepend_to_file js_entrypoint, header
         end
         if vite? && !contents.include?("voidable-layout.js")
@@ -199,6 +210,12 @@ module Voidable
       end
 
       private
+
+      # The development warnings: pinned in development only; the layout's
+      # `voidable_dev_tags` imports it (Vite apps import it from application.js).
+      def dev_pin
+        %(pin "@voidable/ui/dev", to: "#{Voidable::Hotwire::CDN::UI_DEV_URL}" if Rails.env.development?  # console warnings for misused <void-*> markup)
+      end
 
       def app_name
         Rails.application.class.module_parent_name.underscore

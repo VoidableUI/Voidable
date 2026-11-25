@@ -11,13 +11,22 @@
   "sideEffects": [
     "./dist/index.js",
     "./dist/autoloader.js",
-    "./dist/components/*.js"
+    "./dist/dev.js",
+    "./dist/components/*.js",
+    "./src/index.ts",
+    "./src/autoloader.ts",
+    "./src/dev/index.ts",
+    "./src/components/*.ts"
   ],
   "license": "MIT",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
+    },
+    "./dev": {
+      "types": "./dist/dev/index.d.ts",
+      "default": "./dist/dev.js"
     },
     "./autoloader": {
       "types": "./dist/autoloader.d.ts",
@@ -63,7 +72,7 @@
   "customElements": "dist/custom-elements.json",
   "web-types": "./dist/web-types.json",
   "scripts": {
-    "build": "rm -rf dist && cem analyze && node cem/autoloader-table.js && vite build && node cem/generate.js && node cem/check-types.js",
+    "build": "rm -rf dist && cem analyze && node cem/autoloader-table.js && node cem/dev-table.js && vite build && node cem/generate.js && node cem/check-types.js",
     "test": "vitest run",
     "typecheck": "tsc --noEmit && tsc -p type-tests/react && tsc -p type-tests/solid && tsc -p type-tests/solid2 && tsc -p type-tests/svelte && tsc -p type-tests/vue"
   },

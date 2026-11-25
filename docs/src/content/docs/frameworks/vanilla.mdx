@@ -92,3 +92,15 @@ button.textContent = 'Dynamic button';
 button.addEventListener('void-click', () => alert('clicked'));
 document.body.appendChild(button);
 ```
+
+## Development warnings
+
+A misspelled attribute, a value outside the allowed set or a child in the wrong parent does nothing and says nothing. Import the development entry once, in development only, and the browser console reports each mistake with the element, the valid alternatives and a "did you mean":
+
+```js
+if (import.meta.env.DEV) import('@voidable/ui/dev');
+```
+
+With an import map and no bundler, add `<script type="module">import '@voidable/ui/dev.js';</script>` to your development layout only.
+
+It is never part of `@voidable/ui` itself, so production builds are unchanged. See [Development warnings](/getting-started/development-warnings/) for what it reports and how to make warnings throw in tests.

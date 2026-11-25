@@ -33,6 +33,10 @@ type declaration struct {
 	Attributes    []attribute `json:"attributes"`
 	Events        []event     `json:"events"`
 	Slots         []slot      `json:"slots"`
+
+	VoidParents  []string          `json:"voidParents"`
+	VoidRequires []string          `json:"voidRequires"`
+	VoidHints    map[string]string `json:"voidHints"`
 }
 
 type slot struct {
@@ -106,6 +110,7 @@ func Decode(manifestJSON, summaryJSON []byte) (*domain.Catalog, error) {
 
 func element(path string, d declaration) domain.Element {
 	e := domain.Element{Tag: d.TagName, Class: d.Name, Module: path, Description: d.Description}
+	e.AllowedParents, e.RequiredChildren, e.AttrHints = d.VoidParents, d.VoidRequires, d.VoidHints
 	for _, a := range d.Attributes {
 		kind, values, nullable := domain.ParseType(a.Type.Text)
 		e.Attributes = append(e.Attributes, domain.Attribute{

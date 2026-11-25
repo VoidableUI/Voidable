@@ -1193,6 +1193,8 @@ import iconLogout from '@tabler/icons/outline/logout.svg?raw';
 
     <script>
       import '@voidable/ui';
+      // Development warnings, `astro dev` only.
+      if (import.meta.env.DEV) import('@voidable/ui/dev');
 
       const toggle = document.getElementById('theme-toggle')!;
       const themeSwitch = document.getElementById('theme-switch') as any;

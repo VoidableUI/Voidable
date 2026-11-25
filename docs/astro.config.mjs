@@ -15,6 +15,8 @@ export default defineConfig({
   vite: {
     resolve: {
       alias: {
+        // Before '@voidable/ui', which would otherwise swallow it as a prefix.
+        '@voidable/ui/dev': new URL('../packages/ui/src/dev/index.ts', import.meta.url).pathname,
         '@voidable/ui': new URL('../packages/ui/src/index.ts', import.meta.url).pathname,
         '@voidable/theme': new URL('../packages/theme/src/index.css', import.meta.url).pathname,
       },
@@ -65,6 +67,7 @@ export default defineConfig({
             { label: 'Introduction', slug: 'getting-started/introduction' },
             { label: 'Installation', slug: 'getting-started/installation' },
             { label: 'Loading components', slug: 'getting-started/loading' },
+            { label: 'Development warnings', slug: 'getting-started/development-warnings' },
             { label: 'Design Philosophy', slug: 'getting-started/design-philosophy' },
             { label: 'Component Authoring', slug: 'getting-started/component-authoring' },
             { label: 'Theming', slug: 'getting-started/theming' },

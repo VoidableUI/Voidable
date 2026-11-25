@@ -764,7 +764,7 @@ const ogImage = new URL('/og.png', canonical).href;
           </div>
           <div class="feature-card">
             <div class="feature-card-title">Agent-friendly markup</div>
-            <p class="feature-card-desc">Semantic void-* custom elements with reflected attributes. Stable selectors for Playwright, AI agents, screen readers.</p>
+            <p class="feature-card-desc">Semantic void-* custom elements with reflected attributes. Stable selectors for Playwright, AI agents, screen readers. In development, the console says what a wrong attribute, value or child silently did, so the agent that wrote it can fix it.</p>
           </div>
           <div class="feature-card">
             <div class="feature-card-title">Accessible by derivation</div>
@@ -958,6 +958,8 @@ const ogImage = new URL('/og.png', canonical).href;
 
     <script>
       import '@voidable/ui';
+      // Development warnings, `astro dev` only.
+      if (import.meta.env.DEV) import('@voidable/ui/dev');
 
       const html = document.documentElement;
       document.getElementById('theme-toggle')!.addEventListener('click', () => {

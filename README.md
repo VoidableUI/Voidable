@@ -30,6 +30,8 @@ import '@voidable/ui';
 </void-field>
 ```
 
+In development, `import '@voidable/ui/dev'` (a separate entry, never part of the bundle above) makes a misspelled attribute, an invalid value or a child in the wrong parent say so in the browser console; see [Development warnings](https://voidable.dev/getting-started/development-warnings/).
+
 To load components on demand instead of registering all of them, import `@voidable/ui/autoloader` (see [Loading components](https://voidable.dev/getting-started/loading/)). Without a bundler, use a stylesheet link and a CDN module import; see the [`@voidable/ui` README](packages/ui/README.md#usage-without-a-bundler). Framework guides are in the [docs](https://voidable.dev/frameworks/react/).
 
 ## Packages

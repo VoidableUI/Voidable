@@ -83,3 +83,15 @@ export default defineConfig({
 - No wrapper components or special bindings are needed — Qwik handles custom elements and their properties natively.
 - Component definitions must be loaded via `useVisibleTask$` with a dynamic import because Lit requires browser APIs unavailable during SSR.
 - Qwik's lazy-loading and resumability work alongside the component definitions without conflict.
+
+## Development warnings
+
+A misspelled attribute, a value outside the allowed set or a child in the wrong parent does nothing and says nothing. Import the development entry once, in development only, and the browser console reports each mistake with the element, the valid alternatives and a "did you mean":
+
+```js
+if (import.meta.env.DEV) import('@voidable/ui/dev');
+```
+
+Put it in `root.tsx` (or any module that runs in the browser), next to the `@voidable/ui` import.
+
+It is never part of `@voidable/ui` itself, so production builds are unchanged. See [Development warnings](/getting-started/development-warnings/) for what it reports and how to make warnings throw in tests.

@@ -76,3 +76,15 @@ For dynamic switching, use a client-side script:
     window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
 </script>
 ```
+
+## Development warnings
+
+A misspelled attribute, a value outside the allowed set or a child in the wrong parent does nothing and says nothing. Import the development entry once, in development only, and the browser console reports each mistake with the element, the valid alternatives and a "did you mean":
+
+```js
+if (import.meta.env.DEV) import('@voidable/ui/dev');
+```
+
+Put it in the same client `<script>` that imports `@voidable/ui`; Astro replaces `import.meta.env.DEV` at build time, so the production script has no trace of it.
+
+It is never part of `@voidable/ui` itself, so production builds are unchanged. See [Development warnings](/getting-started/development-warnings/) for what it reports and how to make warnings throw in tests.

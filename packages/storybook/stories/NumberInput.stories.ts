@@ -1,4 +1,5 @@
 import { html } from 'lit';
+import { ifDefined } from 'lit/directives/if-defined.js';
 import type { Meta, StoryObj } from '@storybook/web-components-vite';
 import '@voidable/ui';
 import '@voidable/theme';
@@ -30,8 +31,8 @@ const meta: Meta = {
   render: (args) => html`
     <void-number-input
       .value=${args.value ?? 0}
-      min=${args.min ?? ''}
-      max=${args.max ?? ''}
+      min=${ifDefined(args.min)}
+      max=${ifDefined(args.max)}
       step=${args.step ?? 1}
       precision=${args.precision ?? -1}
       size=${args.size || 'md'}

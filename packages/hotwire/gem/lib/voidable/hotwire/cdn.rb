@@ -24,6 +24,11 @@ module Voidable
       # into every component). Raw files import `lit` by bare name, so lit's
       # three entry points are pinned too, to the same +esm URLs the +esm
       # bundle of @voidable/ui itself uses.
+      # Development warnings (@voidable/ui/dev): one self-contained file with no
+      # imports, so the raw dist file works as a pin. Only ever imported in
+      # development (see Helpers#voidable_dev_tags).
+      UI_DEV_URL = "#{BASE}/@voidable/ui@#{NPM_VERSION}/dist/dev.js".freeze
+
       UI_AUTOLOADER_URL = "#{BASE}/@voidable/ui@#{NPM_VERSION}/dist/autoloader.js".freeze
       LIT_URL = "#{BASE}/lit@3/+esm".freeze
       LIT_DECORATORS_URL = "#{BASE}/lit@3/decorators.js/+esm".freeze

@@ -5,4 +5,6 @@ import Default from '@astrojs/starlight/components/Head.astro';
 <Default><slot /></Default>
 <script>
 import '@voidable/ui';
+// Development warnings, `astro dev` only: the production site never loads them.
+if (import.meta.env.DEV) import('@voidable/ui/dev');
 </script>

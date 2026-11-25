@@ -114,3 +114,13 @@ When using Vite to bundle your assets (the standard Laravel + Livewire setup), t
   @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 ```
+
+## Development warnings
+
+A misspelled attribute, an invalid value or a child in the wrong parent does nothing and says nothing. In Laravel, `@voidableScripts` also loads `@voidable/ui/dev` when `voidable.dev_warnings` is on, which by default is the `local` environment only (`VOIDABLE_DEV_WARNINGS=false` turns it off, `VOIDABLE_DEV_WARNINGS=throw` makes warnings throw for browser tests). Without Laravel, import it from your bundle in development only:
+
+```js
+if (import.meta.env.DEV) import('@voidable/ui/dev');
+```
+
+It also checks what Livewire and Blade render at runtime. See [Development warnings](/getting-started/development-warnings/).

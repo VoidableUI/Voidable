@@ -695,3 +695,20 @@ The shared error messages partial uses `void-alert`:
 | Flash / validation errors | `void-alert` with `color="error"` |
 | Account deletion | `void-dialog` with danger zone section |
 | Navigation links | `void-button` with `variant="ghost"` |
+
+## Development warnings
+
+`voidable-hotwire` loads `@voidable/ui/dev` in the **development environment only**, so a misspelled attribute, an invalid value or a child in the wrong parent shows up as a `[voidable]` warning in the browser console, including markup your ERB and Turbo Streams render at runtime. `rails generate voidable:install` sets it up:
+
+- importmap: `pin "@voidable/ui/dev"` (development only) and `<%= voidable_dev_tags %>` after `javascript_importmap_tags` in the layout. The helper renders nothing in other environments.
+- Vite: `if (import.meta.env.DEV) import("@voidable/ui/dev");` in `application.js`.
+
+Change it in `config/initializers/voidable.rb`:
+
+```ruby
+Voidable::Hotwire.dev_warnings = false   # off everywhere
+Voidable::Hotwire.dev_warnings = true    # on, even outside development
+Voidable::Hotwire.dev_warnings = :throw  # thrown errors, for system tests
+```
+
+See [Development warnings](/getting-started/development-warnings/) for what it reports.
