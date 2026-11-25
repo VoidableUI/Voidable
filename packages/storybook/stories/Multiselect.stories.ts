@@ -9,7 +9,20 @@ const meta: Meta = {
   parameters: {
     docs: {
       description: {
-        component: 'Multi-value picker for tag selection, permission assignment, and filter fields that allow several simultaneous choices. Selected values appear as removable chips.',
+        component: `Multi-value picker for tag selection, permission assignment, and filter fields that allow several simultaneous choices. Selected values appear as removable chips.
+
+**Keyboard**
+
+Pattern: select-only combobox with a multiselectable listbox. The trigger is the combobox.
+
+| Key | Action |
+|-----|--------|
+| Enter / Space / Down Arrow / Up Arrow | Open the list |
+| Home / End | Open on the first / last option; when open, highlight it |
+| Down Arrow / Up Arrow (open) | Highlight the next / previous option (wraps) |
+| Enter / Space (open) | Toggle the highlighted option; the list stays open |
+| Characters (open) | Jump to the next option starting with them |
+| Escape / Tab | Close the list |`,
       },
     },
   },
@@ -98,6 +111,17 @@ export const Disabled: Story = {
       <void-option value="react">React</void-option>
       <void-option value="vue">Vue</void-option>
       <void-option value="svelte">Svelte</void-option>
+    </void-multiselect>
+  `,
+};
+
+export const DisabledOption: Story = {
+  render: () => html`
+    <void-multiselect placeholder="Select skills...">
+      <void-option value="css">CSS</void-option>
+      <void-option value="js">JavaScript</void-option>
+      <void-option value="go" disabled>Go (unavailable)</void-option>
+      <void-option value="rust">Rust</void-option>
     </void-multiselect>
   `,
 };

@@ -9,7 +9,17 @@ const meta: Meta = {
   parameters: {
     docs: {
       description: {
-        component: 'Compact single-select control for view switchers, time-range pickers, and chart type toggles where options are mutually exclusive and few in number. Renders as a connected button group with an active indicator.',
+        component: `Compact single-select control for view switchers, time-range pickers, and chart type toggles where options are mutually exclusive and few in number. Renders as a connected button group with an active indicator.
+
+**Keyboard**
+
+Pattern: radio group. One tab stop (the checked item, else the first enabled); selection follows focus.
+
+| Key | Action |
+|-----|--------|
+| Right Arrow / Down Arrow | Select the next item (wraps; first when none is selected) |
+| Left Arrow / Up Arrow | Select the previous item (wraps; last when none is selected) |
+| Space | Select the focused item |`,
       },
     },
   },

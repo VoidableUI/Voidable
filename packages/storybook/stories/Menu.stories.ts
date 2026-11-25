@@ -10,7 +10,19 @@ const meta: Meta = {
   parameters: {
     docs: {
       description: {
-        component: 'Standalone visible menu panel for command palettes, side panels, and searchable action lists. Renders always-open rather than as a triggered dropdown.',
+        component: `Standalone visible menu panel for command palettes, side panels, and searchable action lists. Renders always-open rather than as a triggered dropdown.
+
+**Keyboard**
+
+Pattern: menu. The items are one tab stop; keys are handled on the menu, never on the document.
+
+| Key | Action |
+|-----|--------|
+| Down Arrow / Up Arrow | Focus the next / previous item (wraps); from the search field, the first / last |
+| Home / End | Focus the first / last item |
+| Characters | Jump to the next item starting with them (not when searchable) |
+| Enter / Space | Activate the item |
+| Escape | Close the menu |`,
       },
     },
   },

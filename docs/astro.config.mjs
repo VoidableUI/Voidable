@@ -74,6 +74,7 @@ export default defineConfig({
           label: 'Components',
           items: [
             { label: 'Overview', slug: 'components/overview' },
+            { label: 'Keyboard and ARIA', slug: 'components/keyboard' },
             { label: 'Storybook', link: '/storybook/', attrs: { target: '_blank' } },
           ],
         },
