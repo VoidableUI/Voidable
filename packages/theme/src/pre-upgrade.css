@@ -26,9 +26,12 @@
  * one wins. Only tokens that already exist are used.
  *
  * Components with explicit parts (#52: dialog, drawer, popover, hover card,
- * dropdown menu, tooltip, tabs, card, alert, accordion, collapsible, panel, banner, toast, error fallback) need little here: their
+ * dropdown menu, tooltip, tabs, card, alert, accordion, collapsible, panel,
+ * banner, toast, error fallback, combobox, multiselect) need little here: their
  * regions are elements the author wrote, styled the same before and after
- * upgrade, so only what the script reveals (overlay content) is hidden.
+ * upgrade, so only what the script reveals (overlay content, an option list)
+ * is hidden. `void-select` needs nothing: the author's native `<select>` is the
+ * control, styled and working before upgrade.
  */
 
 /* ── Closed overlays ───────────────────────────────────────────────────────
@@ -46,10 +49,8 @@ void-popover:not(:defined) > void-popover-content,
 void-hover-card:not(:defined) > void-hover-card-content,
 void-dropdown-menu:not(:defined) > void-dropdown-menu-content,
 void-tooltip:not(:defined) > void-tooltip-content,
-void-select:not(:defined) > option,
-void-select:not(:defined) > optgroup,
-void-multiselect:not(:defined) > *,
-void-combobox:not(:defined) > * {
+void-multiselect:not(:defined) > void-multiselect-content,
+void-combobox:not(:defined) > void-combobox-content {
   display: none;
 }
 
@@ -116,9 +117,6 @@ void-field:not(:defined)[error]:not([error=""])::after {
    One line of text-sm at leading-normal, vertical padding space-2 and a 1px
    border: the height of the native control the component renders. */
 void-input:not(:defined),
-void-multiselect:not(:defined),
-void-combobox:not(:defined),
-void-select:not(:defined),
 void-number-input:not(:defined),
 void-date-picker:not(:defined),
 void-action-input:not(:defined),
@@ -131,13 +129,28 @@ void-tags-input:not(:defined) {
   min-height: calc(var(--void-space-2) * 2 + var(--void-text-sm) * var(--void-leading-normal) + 2px); /* token-ok: total height with the 1px border on each side (border-box) */
 }
 
-:is(void-input, void-multiselect, void-combobox, void-select, void-number-input, void-date-picker, void-action-input, void-tags-input)[size="sm"]:not(:defined) {
+:is(void-input, void-number-input, void-date-picker, void-action-input, void-tags-input)[size="sm"]:not(:defined) {
   min-height: calc(var(--void-space-1) * 2 + var(--void-text-xs) * var(--void-leading-normal) + 2px); /* token-ok: total height with the 1px border on each side (border-box) */
 }
 
-:is(void-input, void-multiselect, void-combobox, void-select, void-number-input, void-date-picker, void-action-input, void-tags-input)[size="lg"]:not(:defined) {
+:is(void-input, void-number-input, void-date-picker, void-action-input, void-tags-input)[size="lg"]:not(:defined) {
   min-height: calc(var(--void-space-3) * 2 + var(--void-text-base) * var(--void-leading-normal) + 2px); /* token-ok: total height with the 1px border on each side (border-box) */
 }
+
+/* The pickers render their field before the content part they hold: the box
+   of that field, at the control height the field uses. */
+void-multiselect:not(:defined),
+void-combobox:not(:defined) {
+  display: block;
+  box-sizing: border-box;
+  background: var(--void-field-surface);
+  border: var(--void-control-border-width) solid var(--void-field-border);
+  border-radius: var(--void-control-radius);
+  min-height: var(--void-control-height);
+}
+
+:is(void-multiselect, void-combobox)[size="sm"]:not(:defined) { min-height: var(--void-control-height-sm); }
+:is(void-multiselect, void-combobox)[size="lg"]:not(:defined) { min-height: var(--void-control-height-lg); }
 
 /* Three rows unless `rows` says otherwise (typed attr() where supported). */
 void-textarea:not(:defined) {

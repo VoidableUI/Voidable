@@ -4,11 +4,13 @@
             <void-input type="search" name="search" value="{{ $search }}" wire:model.live="search"></void-input>
         </void-field>
         <void-field label="Status">
-            <void-select name="status" value="{{ $status }}" wire:model.live="status">
-                <option value="">All</option>
-                <option value="active">Active</option>
-                <option value="invited">Invited</option>
-                <option value="suspended">Suspended</option>
+            <void-select value="{{ $status }}">
+                <select name="status" wire:model.live="status">
+                    <option value="">All</option>
+                    <option value="active">Active</option>
+                    <option value="invited">Invited</option>
+                    <option value="suspended">Suspended</option>
+                </select>
             </void-select>
         </void-field>
     </div>

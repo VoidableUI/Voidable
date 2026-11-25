@@ -212,19 +212,19 @@ defmodule VoidableUI.Components.InteractiveFormTest do
   # ==========================================================================
 
   describe "select" do
-    test "renders void-select tag with slot content" do
+    test "renders void-select around the native select written inside it (#52)" do
       assigns = %{}
 
       html =
         rendered_to_string(~H"""
         <VoidableUI.Components.select>
-          <option value="a">A</option>
+          <select name="plan" required><option value="a">A</option></select>
         </VoidableUI.Components.select>
         """)
 
       assert html =~ "<void-select"
       assert html =~ "</void-select>"
-      assert html =~ ~s(<option value="a">A</option>)
+      assert html =~ ~s(<select name="plan" required><option value="a">A</option></select>)
     end
 
     test "renders with named attributes" do
@@ -232,14 +232,12 @@ defmodule VoidableUI.Components.InteractiveFormTest do
 
       html =
         rendered_to_string(~H"""
-        <VoidableUI.Components.select name="country" value="us" placeholder="Pick..." size="sm" error="Required">
-          <option value="us">US</option>
+        <VoidableUI.Components.select value="us" size="sm" error="Required">
+          <select name="country"><option value="us">US</option></select>
         </VoidableUI.Components.select>
         """)
 
-      assert html =~ ~s(name="country")
       assert html =~ ~s(value="us")
-      assert html =~ ~s(placeholder="Pick...")
       assert html =~ ~s(size="sm")
       assert html =~ ~s(error="Required")
     end
@@ -249,45 +247,19 @@ defmodule VoidableUI.Components.InteractiveFormTest do
 
       html =
         rendered_to_string(~H"""
-        <VoidableUI.Components.select events><option value="x">X</option></VoidableUI.Components.select>
+        <VoidableUI.Components.select events><select><option value="x">X</option></select></VoidableUI.Components.select>
         """)
 
       assert html =~ ~s(phx-hook="VoidEvent")
       assert html =~ ~s(data-void-events="void-change")
     end
 
-    test "boolean attrs render when true" do
+    test "nil default attrs are not rendered, and the form attributes are not its own" do
       assigns = %{}
 
       html =
         rendered_to_string(~H"""
-        <VoidableUI.Components.select disabled={true} required={true}>
-          <option value="x">X</option>
-        </VoidableUI.Components.select>
-        """)
-
-      assert html =~ "disabled"
-      assert html =~ "required"
-    end
-
-    test "boolean attrs omitted when false (default)" do
-      assigns = %{}
-
-      html =
-        rendered_to_string(~H"""
-        <VoidableUI.Components.select><option value="x">X</option></VoidableUI.Components.select>
-        """)
-
-      refute html =~ "disabled"
-      refute html =~ "required"
-    end
-
-    test "nil default attrs are not rendered" do
-      assigns = %{}
-
-      html =
-        rendered_to_string(~H"""
-        <VoidableUI.Components.select><option value="x">X</option></VoidableUI.Components.select>
+        <VoidableUI.Components.select><select><option value="x">X</option></select></VoidableUI.Components.select>
         """)
 
       refute html =~ ~r/void-select[^>]*\svalue=/
@@ -295,6 +267,7 @@ defmodule VoidableUI.Components.InteractiveFormTest do
       refute html =~ ~r/void-select[^>]*\ssize=/
       refute html =~ ~r/void-select[^>]*\serror=/
       refute html =~ ~r/void-select[^>]*\splaceholder=/
+      refute html =~ ~r/void-select[^>]*\s(disabled|required)/
     end
 
     test "passes through global attributes" do
@@ -302,7 +275,7 @@ defmodule VoidableUI.Components.InteractiveFormTest do
 
       html =
         rendered_to_string(~H"""
-        <VoidableUI.Components.select id="sel" class="wide"><option value="x">X</option></VoidableUI.Components.select>
+        <VoidableUI.Components.select id="sel" class="wide"><select><option value="x">X</option></select></VoidableUI.Components.select>
         """)
 
       assert html =~ ~s(id="sel")
@@ -691,7 +664,9 @@ defmodule VoidableUI.Components.InteractiveFormTest do
       html =
         rendered_to_string(~H"""
         <VoidableUI.Components.combobox>
-          <VoidableUI.Components.option value="a">A</VoidableUI.Components.option>
+          <void-combobox-content>
+            <VoidableUI.Components.option value="a">A</VoidableUI.Components.option>
+          </void-combobox-content>
         </VoidableUI.Components.combobox>
         """)
 
@@ -706,7 +681,9 @@ defmodule VoidableUI.Components.InteractiveFormTest do
       html =
         rendered_to_string(~H"""
         <VoidableUI.Components.combobox value="b" placeholder="Search..." name="search" size="lg" error="Not found">
-          <VoidableUI.Components.option value="b">B</VoidableUI.Components.option>
+          <void-combobox-content>
+            <VoidableUI.Components.option value="b">B</VoidableUI.Components.option>
+          </void-combobox-content>
         </VoidableUI.Components.combobox>
         """)
 
@@ -723,7 +700,9 @@ defmodule VoidableUI.Components.InteractiveFormTest do
       html =
         rendered_to_string(~H"""
         <VoidableUI.Components.combobox events>
-          <VoidableUI.Components.option value="x">X</VoidableUI.Components.option>
+          <void-combobox-content>
+            <VoidableUI.Components.option value="x">X</VoidableUI.Components.option>
+          </void-combobox-content>
         </VoidableUI.Components.combobox>
         """)
 
@@ -737,7 +716,9 @@ defmodule VoidableUI.Components.InteractiveFormTest do
       html =
         rendered_to_string(~H"""
         <VoidableUI.Components.combobox disabled={true}>
-          <VoidableUI.Components.option value="x">X</VoidableUI.Components.option>
+          <void-combobox-content>
+            <VoidableUI.Components.option value="x">X</VoidableUI.Components.option>
+          </void-combobox-content>
         </VoidableUI.Components.combobox>
         """)
 
@@ -750,7 +731,9 @@ defmodule VoidableUI.Components.InteractiveFormTest do
       html =
         rendered_to_string(~H"""
         <VoidableUI.Components.combobox>
-          <VoidableUI.Components.option value="x">X</VoidableUI.Components.option>
+          <void-combobox-content>
+            <VoidableUI.Components.option value="x">X</VoidableUI.Components.option>
+          </void-combobox-content>
         </VoidableUI.Components.combobox>
         """)
 
@@ -763,7 +746,9 @@ defmodule VoidableUI.Components.InteractiveFormTest do
       html =
         rendered_to_string(~H"""
         <VoidableUI.Components.combobox>
-          <VoidableUI.Components.option value="x">X</VoidableUI.Components.option>
+          <void-combobox-content>
+            <VoidableUI.Components.option value="x">X</VoidableUI.Components.option>
+          </void-combobox-content>
         </VoidableUI.Components.combobox>
         """)
 
@@ -780,7 +765,9 @@ defmodule VoidableUI.Components.InteractiveFormTest do
       html =
         rendered_to_string(~H"""
         <VoidableUI.Components.combobox id="cb" class="search">
-          <VoidableUI.Components.option value="x">X</VoidableUI.Components.option>
+          <void-combobox-content>
+            <VoidableUI.Components.option value="x">X</VoidableUI.Components.option>
+          </void-combobox-content>
         </VoidableUI.Components.combobox>
         """)
 
@@ -800,7 +787,9 @@ defmodule VoidableUI.Components.InteractiveFormTest do
       html =
         rendered_to_string(~H"""
         <VoidableUI.Components.multiselect>
-          <VoidableUI.Components.option value="a">A</VoidableUI.Components.option>
+          <void-multiselect-content>
+            <VoidableUI.Components.option value="a">A</VoidableUI.Components.option>
+          </void-multiselect-content>
         </VoidableUI.Components.multiselect>
         """)
 
@@ -815,7 +804,9 @@ defmodule VoidableUI.Components.InteractiveFormTest do
       html =
         rendered_to_string(~H"""
         <VoidableUI.Components.multiselect placeholder="Pick items" name="items" size="sm" error="Required">
-          <VoidableUI.Components.option value="a">A</VoidableUI.Components.option>
+          <void-multiselect-content>
+            <VoidableUI.Components.option value="a">A</VoidableUI.Components.option>
+          </void-multiselect-content>
         </VoidableUI.Components.multiselect>
         """)
 
@@ -831,7 +822,9 @@ defmodule VoidableUI.Components.InteractiveFormTest do
       html =
         rendered_to_string(~H"""
         <VoidableUI.Components.multiselect events>
-          <VoidableUI.Components.option value="x">X</VoidableUI.Components.option>
+          <void-multiselect-content>
+            <VoidableUI.Components.option value="x">X</VoidableUI.Components.option>
+          </void-multiselect-content>
         </VoidableUI.Components.multiselect>
         """)
 
@@ -845,7 +838,9 @@ defmodule VoidableUI.Components.InteractiveFormTest do
       html =
         rendered_to_string(~H"""
         <VoidableUI.Components.multiselect disabled={true}>
-          <VoidableUI.Components.option value="x">X</VoidableUI.Components.option>
+          <void-multiselect-content>
+            <VoidableUI.Components.option value="x">X</VoidableUI.Components.option>
+          </void-multiselect-content>
         </VoidableUI.Components.multiselect>
         """)
 
@@ -858,7 +853,9 @@ defmodule VoidableUI.Components.InteractiveFormTest do
       html =
         rendered_to_string(~H"""
         <VoidableUI.Components.multiselect>
-          <VoidableUI.Components.option value="x">X</VoidableUI.Components.option>
+          <void-multiselect-content>
+            <VoidableUI.Components.option value="x">X</VoidableUI.Components.option>
+          </void-multiselect-content>
         </VoidableUI.Components.multiselect>
         """)
 
@@ -871,7 +868,9 @@ defmodule VoidableUI.Components.InteractiveFormTest do
       html =
         rendered_to_string(~H"""
         <VoidableUI.Components.multiselect>
-          <VoidableUI.Components.option value="x">X</VoidableUI.Components.option>
+          <void-multiselect-content>
+            <VoidableUI.Components.option value="x">X</VoidableUI.Components.option>
+          </void-multiselect-content>
         </VoidableUI.Components.multiselect>
         """)
 
@@ -887,7 +886,9 @@ defmodule VoidableUI.Components.InteractiveFormTest do
       html =
         rendered_to_string(~H"""
         <VoidableUI.Components.multiselect id="ms1" class="multi">
-          <VoidableUI.Components.option value="x">X</VoidableUI.Components.option>
+          <void-multiselect-content>
+            <VoidableUI.Components.option value="x">X</VoidableUI.Components.option>
+          </void-multiselect-content>
         </VoidableUI.Components.multiselect>
         """)
 

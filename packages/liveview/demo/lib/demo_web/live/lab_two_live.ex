@@ -34,9 +34,12 @@ defmodule DemoWeb.LabTwoLive do
           <V.input id="two-note" name="note" value={@note} />
         </V.field>
         <V.field label="Choice">
-          <V.select id="two-choice" name="choice" value={@choice} placeholder="Choose…">
-            <option value="x">Ex</option>
-            <option value="y">Why</option>
+          <V.select id="two-choice" value={@choice}>
+            <select name="choice">
+              <option value="" disabled selected hidden>Choose…</option>
+              <option value="x">Ex</option>
+              <option value="y">Why</option>
+            </select>
           </V.select>
         </V.field>
       </form>

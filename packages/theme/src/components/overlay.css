@@ -35,8 +35,8 @@ void-popover-content,
 void-dropdown-menu-content,
 void-hover-card-content,
 void-tooltip-content,
-.void-combobox-dropdown,
-.void-multiselect-dropdown,
+void-combobox-content,
+void-multiselect-content,
 .void-date-picker-dropdown {
   --void-overlay-gap: var(--void-space-2);
   position: fixed;
@@ -99,8 +99,8 @@ void-tooltip-content,
   void-dropdown-menu-content,
   void-hover-card-content,
   void-tooltip-content,
-  .void-combobox-dropdown,
-  .void-multiselect-dropdown,
+  void-combobox-content,
+  void-multiselect-content,
   .void-date-picker-dropdown
 ):popover-open {
   opacity: 1;
@@ -111,8 +111,8 @@ void-tooltip-content,
   void-dropdown-menu-content,
   void-hover-card-content,
   void-tooltip-content,
-  .void-combobox-dropdown,
-  .void-multiselect-dropdown,
+  void-combobox-content,
+  void-multiselect-content,
   .void-date-picker-dropdown
 ) {
   opacity: 0;
@@ -128,8 +128,8 @@ void-tooltip-content,
   void-dropdown-menu-content,
   void-hover-card-content,
   void-tooltip-content,
-  .void-combobox-dropdown,
-  .void-multiselect-dropdown,
+  void-combobox-content,
+  void-multiselect-content,
   .void-date-picker-dropdown
 ):not([popover]):not([hidden]) {
   opacity: 1;
@@ -141,8 +141,8 @@ void-tooltip-content,
     void-dropdown-menu-content,
     void-hover-card-content,
     void-tooltip-content,
-    .void-combobox-dropdown,
-    .void-multiselect-dropdown,
+    void-combobox-content,
+    void-multiselect-content,
     .void-date-picker-dropdown
   ):popover-open {
     opacity: 0;
@@ -202,8 +202,8 @@ void-drawer[open]::part(surface)::backdrop {
   void-dropdown-menu-content,
   void-hover-card-content,
   void-tooltip-content,
-  .void-combobox-dropdown,
-  .void-multiselect-dropdown,
+  void-combobox-content,
+  void-multiselect-content,
   .void-date-picker-dropdown {
     border: 1px solid CanvasText;
   }

@@ -108,6 +108,16 @@ type Element struct {
 	// Removed is advice for tags this component's parts replaced (from
 	// voidParts.legacy.tags), keyed by the removed tag.
 	Removed map[string]string `json:"-"`
+	// Native is the native control the author writes inside the component
+	// (voidNative in the manifest: `<select>` in `<void-select>`), or nil.
+	Native *NativeControl `json:"native,omitempty"`
+}
+
+// NativeControl is a native element a component enhances in place: Tag must
+// be inside it, and Fix is the correct markup when it is missing.
+type NativeControl struct {
+	Tag string `json:"tag"`
+	Fix string `json:"fix"`
 }
 
 // Attribute returns the attribute with the given (exact) name.

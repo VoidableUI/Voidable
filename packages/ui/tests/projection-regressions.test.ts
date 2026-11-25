@@ -213,42 +213,42 @@ describe('void-dropdown-menu explicit parts', () => {
 
 describe('void-combobox projection', () => {
   it('offers options added after connect', async () => {
-    const el = mount<LitElement>('<void-combobox><void-option value="a">Alpha</void-option></void-combobox>');
+    const el = mount<LitElement>('<void-combobox><void-combobox-content><void-option value="a">Alpha</void-option></void-combobox-content></void-combobox>');
     await settle(el);
     const opt = document.createElement('void-option');
     opt.setAttribute('value', 'b');
     opt.textContent = 'Beta';
-    el.appendChild(opt);
+    el.querySelector('void-combobox-content')!.appendChild(opt);
     await settle(el);
     el.querySelector<HTMLInputElement>('.void-combobox-input')!.dispatchEvent(new Event('focus'));
     await settle(el);
-    expect(el.querySelectorAll('.void-combobox-option').length).toBe(2);
+    expect(el.querySelectorAll('void-option[role=option]').length).toBe(2);
   });
 });
 
 describe('void-multiselect projection', () => {
   it('offers options added after connect', async () => {
-    const el = mount<LitElement>('<void-multiselect><void-option value="a">Alpha</void-option></void-multiselect>');
+    const el = mount<LitElement>('<void-multiselect><void-multiselect-content><void-option value="a">Alpha</void-option></void-multiselect-content></void-multiselect>');
     await settle(el);
     const opt = document.createElement('void-option');
     opt.setAttribute('value', 'b');
     opt.textContent = 'Beta';
-    el.appendChild(opt);
+    el.querySelector('void-multiselect-content')!.appendChild(opt);
     await settle(el);
     el.querySelector<HTMLElement>('.void-multiselect-trigger')!.click();
     await settle(el);
-    expect(el.querySelectorAll('.void-multiselect-option').length).toBe(2);
+    expect(el.querySelectorAll('void-option[role=option]').length).toBe(2);
   });
 });
 
-describe('void-select projection', () => {
-  it('projects options added after connect into the native select', async () => {
-    const el = mount<LitElement>('<void-select value="b"><option value="a">A</option></void-select>');
+describe('void-select (enhances the native select in place, #52)', () => {
+  it('applies the value once an option added after connect has it', async () => {
+    const el = mount<LitElement>('<void-select value="b"><select><option value="a">A</option></select></void-select>');
     await settle(el);
     const opt = document.createElement('option');
     opt.value = 'b';
     opt.textContent = 'B';
-    el.appendChild(opt);
+    el.querySelector('select')!.appendChild(opt);
     await settle(el);
     const select = el.querySelector('select')!;
     expect(select.options.length).toBe(2);
@@ -256,7 +256,7 @@ describe('void-select projection', () => {
   });
 
   it('does not duplicate options on reconnect', async () => {
-    const el = mount<LitElement>('<void-select><option value="a">A</option></void-select>');
+    const el = mount<LitElement>('<void-select><select><option value="a">A</option></select></void-select>');
     await settle(el);
     el.remove();
     document.body.appendChild(el);

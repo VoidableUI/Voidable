@@ -15,8 +15,10 @@ Voidable controls work in the `<form>` you already have. Give a control a `name`
   </void-field>
   <void-switch name="alerts" value="yes" checked>Email alerts</void-switch>
   <void-multiselect aria-label="Labels" name="labels">
-    <void-option value="bug" selected>Bug</void-option>
-    <void-option value="docs">Docs</void-option>
+    <void-multiselect-content>
+      <void-option value="bug" selected>Bug</void-option>
+      <void-option value="docs">Docs</void-option>
+    </void-multiselect-content>
   </void-multiselect>
   <void-button type="submit" variant="filled">Save</void-button>
 </form>
@@ -31,6 +33,8 @@ A value can be submitted by only one thing, or it would arrive twice. Voidable c
 **Native controls** render one real input, select, textarea or range, and that element submits, validates and is disabled by the browser itself. The component forwards `name`, `value`, `disabled`, `required` and `form` to it. `form.elements.email` is the inner `<input>`, so existing code that reads it keeps working. `<void-radio-group>` and `<void-checkbox-group>` forward the same attributes to their children and submit nothing themselves.
 
 **Form-associated controls** have no single native control that carries their value (a switch, a date, a list of tags), so the host element is form-associated and submits through `ElementInternals`. Any text field they render inside has no `name`, so nothing is sent twice.
+
+**`<void-select>`** is neither: you write the native `<select>` inside it, with `name`, `required`, `disabled` and the options on that select, and the browser submits it. The component styles and names it and keeps its `value` and `void-change`; see [pickers](/guides/composition/#pickers).
 
 <FormControls />
 

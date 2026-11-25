@@ -12,10 +12,13 @@
 <div id="a-controls" style="display: grid; gap: 1rem; max-width: 40rem">
   <void-field label="Note"><void-input id="a-note" name="note"></void-input></void-field>
   <void-field label="Pick">
-    <void-select id="a-pick" name="pick" placeholder="Choose…">
-      <option value="a">Option a</option>
-      <option value="b">Option b</option>
-      <option value="c">Option c</option>
+    <void-select id="a-pick">
+      <select name="pick">
+        <option value="" disabled selected hidden>Choose…</option>
+        <option value="a">Option a</option>
+        <option value="b">Option b</option>
+        <option value="c">Option c</option>
+      </select>
     </void-select>
   </void-field>
   <void-switch id="a-news" name="news" value="yes">Newsletter</void-switch>

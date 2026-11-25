@@ -68,7 +68,7 @@ onChange(event: Event) {
 
 ## Forms
 
-Angular's built-in value accessors only fit native `<input>` and `<select>`. Import `VoidValueAccessor` next to `FormsModule` or `ReactiveFormsModule` and `ngModel`, `formControl` and `formControlName` work on every Void form control (input, textarea, select, checkbox, switch, number input, slider, combobox, multiselect, tags input, date picker, and the rest): no `ngDefaultControl` attribute is needed.
+Angular's built-in value accessors only fit native `<input>` and `<select>`. Import `VoidValueAccessor` next to `FormsModule` or `ReactiveFormsModule` and `ngModel`, `formControl` and `formControlName` work on every Void form control (input, textarea, checkbox, switch, number input, slider, combobox, multiselect, tags input, date picker, and the rest): no `ngDefaultControl` attribute is needed. `<void-select>` is the exception, because you write its native `<select>` yourself: bind that select with Angular's own accessor.
 
 ```ts
 import { Component, CUSTOM_ELEMENTS_SCHEMA, signal } from '@angular/core';
@@ -82,9 +82,11 @@ import { VoidValueAccessor } from '@voidable/ui/angular';
   template: `
     <void-input aria-label="Text input" [(ngModel)]="text"></void-input>
 
-    <void-select aria-label="Choose an option" [(ngModel)]="choice">
-      <option value="a">A</option>
-      <option value="b">B</option>
+    <void-select aria-label="Choose an option">
+      <select [(ngModel)]="choice">
+        <option value="a">A</option>
+        <option value="b">B</option>
+      </select>
     </void-select>
 
     <void-checkbox [(ngModel)]="agreed">I agree</void-checkbox>

@@ -46,7 +46,7 @@
         <void-dropdown-menu id="dd-hidden"><void-dropdown-menu-trigger><button id="dd-hidden-t">Menu</button></void-dropdown-menu-trigger><void-dropdown-menu-content><void-dropdown-menu-item id="dd-hidden-1">One</void-dropdown-menu-item><void-dropdown-menu-item>Two</void-dropdown-menu-item></void-dropdown-menu-content></void-dropdown-menu>
         <void-tooltip id="tt-hidden" delay="50"><void-tooltip-trigger><button id="tt-hidden-t">Tip</button></void-tooltip-trigger><void-tooltip-content>Tooltip text</void-tooltip-content></void-tooltip>
         <void-hover-card id="hc-hidden" open-delay="50" close-delay="50"><void-hover-card-trigger><a href="#hc" id="hc-hidden-t">Card</a></void-hover-card-trigger><void-hover-card-content><div class="hcc" style="width: 180px">hover card in overflow hidden</div></void-hover-card-content></void-hover-card>
-        <void-combobox id="cb-hidden" placeholder="Pick" style="width: 160px"><void-option value="react">React</void-option><void-option value="vue">Vue</void-option></void-combobox>
+        <void-combobox id="cb-hidden" placeholder="Pick" style="width: 160px"><void-combobox-content><void-option value="react">React</void-option><void-option value="vue">Vue</void-option></void-combobox-content></void-combobox>
         <void-date-picker id="dp-hidden" value="2026-11-10" style="width: 180px"></void-date-picker>
       </div>
     </div>
@@ -57,7 +57,7 @@
         <void-dropdown-menu id="dd-transform"><void-dropdown-menu-trigger><button id="dd-transform-t">Menu</button></void-dropdown-menu-trigger><void-dropdown-menu-content><void-dropdown-menu-item id="dd-transform-1">One</void-dropdown-menu-item><void-dropdown-menu-item>Two</void-dropdown-menu-item></void-dropdown-menu-content></void-dropdown-menu>
         <void-tooltip id="tt-transform" delay="50"><void-tooltip-trigger><button id="tt-transform-t">Tip</button></void-tooltip-trigger><void-tooltip-content>Tooltip text</void-tooltip-content></void-tooltip>
         <void-hover-card id="hc-transform" open-delay="50" close-delay="50"><void-hover-card-trigger><a href="#hc" id="hc-transform-t">Card</a></void-hover-card-trigger><void-hover-card-content><div class="hcc" style="width: 180px">hover card in a transformed box</div></void-hover-card-content></void-hover-card>
-        <void-combobox id="cb-transform" placeholder="Pick" style="width: 160px"><void-option value="react">React</void-option><void-option value="vue">Vue</void-option></void-combobox>
+        <void-combobox id="cb-transform" placeholder="Pick" style="width: 160px"><void-combobox-content><void-option value="react">React</void-option><void-option value="vue">Vue</void-option></void-combobox-content></void-combobox>
         <void-date-picker id="dp-transform" value="2026-11-10" style="width: 180px"></void-date-picker>
       </div>
     </div>
@@ -69,7 +69,7 @@
         <void-dropdown-menu id="dd-scroll"><void-dropdown-menu-trigger><button id="dd-scroll-t">Menu</button></void-dropdown-menu-trigger><void-dropdown-menu-content><void-dropdown-menu-item id="dd-scroll-1">One</void-dropdown-menu-item><void-dropdown-menu-item>Two</void-dropdown-menu-item></void-dropdown-menu-content></void-dropdown-menu>
         <void-tooltip id="tt-scroll" delay="50"><void-tooltip-trigger><button id="tt-scroll-t">Tip</button></void-tooltip-trigger><void-tooltip-content>Tooltip text</void-tooltip-content></void-tooltip>
         <void-hover-card id="hc-scroll" open-delay="50" close-delay="50"><void-hover-card-trigger><a href="#hc" id="hc-scroll-t">Card</a></void-hover-card-trigger><void-hover-card-content><div class="hcc" style="width: 180px">hover card in a scrolled box</div></void-hover-card-content></void-hover-card>
-        <void-combobox id="cb-scroll" placeholder="Pick" style="width: 160px"><void-option value="react">React</void-option><void-option value="vue">Vue</void-option></void-combobox>
+        <void-combobox id="cb-scroll" placeholder="Pick" style="width: 160px"><void-combobox-content><void-option value="react">React</void-option><void-option value="vue">Vue</void-option></void-combobox-content></void-combobox>
         <void-date-picker id="dp-scroll" value="2026-11-10" style="width: 180px"></void-date-picker>
       </div>
       <div style="height: 400px"></div>
@@ -126,8 +126,8 @@
     <void-popover id="pop"><void-popover-trigger><button id="pop-t">Popover</button></void-popover-trigger><void-popover-content><div class="pc" style="width: 200px">popover body <button id="pop-in">in</button></div></void-popover-content></void-popover>
     <void-tooltip id="tt" delay="50"><void-tooltip-trigger><button id="tt-t">Tip target</button></void-tooltip-trigger><void-tooltip-content>Tooltip text</void-tooltip-content></void-tooltip>
     <void-hover-card id="hc" open-delay="50" close-delay="50"><void-hover-card-trigger><a href="#hc" id="hc-t">Hover me</a></void-hover-card-trigger><void-hover-card-content><div class="hcc">Hover card content</div></void-hover-card-content></void-hover-card>
-    <void-combobox id="cb" placeholder="Pick"><void-option value="react">React</void-option><void-option value="vue">Vue</void-option></void-combobox>
-    <void-multiselect id="ms" placeholder="Pick many"><void-option value="css">CSS</void-option><void-option value="js">JS</void-option></void-multiselect>
+    <void-combobox id="cb" placeholder="Pick"><void-combobox-content><void-option value="react">React</void-option><void-option value="vue">Vue</void-option></void-combobox-content></void-combobox>
+    <void-multiselect id="ms" placeholder="Pick many"><void-multiselect-content><void-option value="css">CSS</void-option><void-option value="js">JS</void-option></void-multiselect-content></void-multiselect>
     <void-date-picker id="dp" value="2026-11-10"></void-date-picker>
   </section>
   <button id="after">after</button>

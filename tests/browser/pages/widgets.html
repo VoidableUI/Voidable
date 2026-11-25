@@ -41,7 +41,7 @@
 
   <void-field label="Volume"><void-slider id="slider" min="0" max="100" step="5" value="50"></void-slider></void-field>
 
-  <void-field label="Country"><void-select id="select" placeholder="Choose…"><option value="nz">New Zealand</option><option value="au">Australia</option><option value="fj">Fiji</option><option value="ar">Argentina</option></void-select></void-field>
+  <void-field label="Country"><void-select id="select"><select><option value="" disabled selected hidden>Choose…</option><option value="nz">New Zealand</option><option value="au">Australia</option><option value="fj">Fiji</option><option value="ar">Argentina</option></select></void-select></void-field>
 
   <void-menu id="menu" aria-label="Actions">
     <void-menu-content>
@@ -59,8 +59,8 @@ line 3</textarea>
 
   <void-field label="Start date"><void-date-picker id="date" value="2026-11-10"></void-date-picker></void-field>
 
-  <void-field label="Framework"><void-combobox id="combo" placeholder="Pick"><void-option value="react">React</void-option><void-option value="vue">Vue</void-option><void-option value="lit">Lit</void-option></void-combobox></void-field>
-  <void-field label="Skills"><void-multiselect id="multi" placeholder="Pick many"><void-option value="css">CSS</void-option><void-option value="js">JS</void-option><void-option value="html">HTML</void-option></void-multiselect></void-field>
+  <void-field label="Framework"><void-combobox id="combo" placeholder="Pick"><void-combobox-content><void-option value="react">React</void-option><void-option value="vue">Vue</void-option><void-option value="lit">Lit</void-option></void-combobox-content></void-combobox></void-field>
+  <void-field label="Skills"><void-multiselect id="multi" placeholder="Pick many"><void-multiselect-content><void-option value="css">CSS</void-option><void-option value="js">JS</void-option><void-option value="html">HTML</void-option></void-multiselect-content></void-multiselect></void-field>
   <button id="end">end</button>
 </main>
 <script>

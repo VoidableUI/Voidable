@@ -97,22 +97,28 @@ defmodule DemoWeb.FormShowcases do
     <div class="showcase-section">
       <h3>Default</h3>
       <VoidableUI.Components.select events>
-        <option value="">Select an option...</option>
-        <option value="a">Option A</option>
-        <option value="b">Option B</option>
-        <option value="c">Option C</option>
+        <select>
+          <option value="">Select an option...</option>
+          <option value="a">Option A</option>
+          <option value="b">Option B</option>
+          <option value="c">Option C</option>
+        </select>
       </VoidableUI.Components.select>
     </div>
     <div class="showcase-section">
       <h3>States</h3>
       <div style="display: flex; flex-direction: column; gap: 1rem;">
-        <VoidableUI.Components.select events disabled>
-          <option>Disabled select</option>
+        <VoidableUI.Components.select events>
+          <select disabled>
+            <option>Disabled select</option>
+          </select>
         </VoidableUI.Components.select>
         <VoidableUI.Components.select events error="Please select an option">
-          <option value="">Select an option...</option>
-          <option value="a">Option A</option>
-          <option value="b">Option B</option>
+          <select>
+            <option value="">Select an option...</option>
+            <option value="a">Option A</option>
+            <option value="b">Option B</option>
+          </select>
         </VoidableUI.Components.select>
       </div>
     </div>
@@ -120,13 +126,19 @@ defmodule DemoWeb.FormShowcases do
       <h3>Sizes</h3>
       <div style="display: flex; flex-direction: column; gap: 1rem;">
         <VoidableUI.Components.select events size="sm">
-          <option>Small</option>
+          <select>
+            <option>Small</option>
+          </select>
         </VoidableUI.Components.select>
         <VoidableUI.Components.select events>
-          <option>Medium</option>
+          <select>
+            <option>Medium</option>
+          </select>
         </VoidableUI.Components.select>
         <VoidableUI.Components.select events size="lg">
-          <option>Large</option>
+          <select>
+            <option>Large</option>
+          </select>
         </VoidableUI.Components.select>
       </div>
     </div>
@@ -306,24 +318,30 @@ defmodule DemoWeb.FormShowcases do
     <div class="showcase-section">
       <h3>Default</h3>
       <VoidableUI.Components.combobox events placeholder="Select a framework...">
-        <VoidableUI.Components.option value="react">React</VoidableUI.Components.option>
-        <VoidableUI.Components.option value="vue">Vue</VoidableUI.Components.option>
-        <VoidableUI.Components.option value="svelte">Svelte</VoidableUI.Components.option>
-        <VoidableUI.Components.option value="angular">Angular</VoidableUI.Components.option>
-        <VoidableUI.Components.option value="solid">Solid</VoidableUI.Components.option>
-        <VoidableUI.Components.option value="lit">Lit</VoidableUI.Components.option>
+        <void-combobox-content>
+          <VoidableUI.Components.option value="react">React</VoidableUI.Components.option>
+          <VoidableUI.Components.option value="vue">Vue</VoidableUI.Components.option>
+          <VoidableUI.Components.option value="svelte">Svelte</VoidableUI.Components.option>
+          <VoidableUI.Components.option value="angular">Angular</VoidableUI.Components.option>
+          <VoidableUI.Components.option value="solid">Solid</VoidableUI.Components.option>
+          <VoidableUI.Components.option value="lit">Lit</VoidableUI.Components.option>
+        </void-combobox-content>
       </VoidableUI.Components.combobox>
     </div>
     <div class="showcase-section">
       <h3>States</h3>
       <div style="display: flex; flex-direction: column; gap: 1rem;">
         <VoidableUI.Components.combobox events placeholder="Disabled" disabled>
-          <VoidableUI.Components.option value="react">React</VoidableUI.Components.option>
-          <VoidableUI.Components.option value="vue">Vue</VoidableUI.Components.option>
+          <void-combobox-content>
+            <VoidableUI.Components.option value="react">React</VoidableUI.Components.option>
+            <VoidableUI.Components.option value="vue">Vue</VoidableUI.Components.option>
+          </void-combobox-content>
         </VoidableUI.Components.combobox>
         <VoidableUI.Components.combobox events placeholder="With error" error="Please select an option">
-          <VoidableUI.Components.option value="react">React</VoidableUI.Components.option>
-          <VoidableUI.Components.option value="vue">Vue</VoidableUI.Components.option>
+          <void-combobox-content>
+            <VoidableUI.Components.option value="react">React</VoidableUI.Components.option>
+            <VoidableUI.Components.option value="vue">Vue</VoidableUI.Components.option>
+          </void-combobox-content>
         </VoidableUI.Components.combobox>
       </div>
     </div>
@@ -331,19 +349,25 @@ defmodule DemoWeb.FormShowcases do
       <h3>Sizes</h3>
       <div style="display: flex; flex-direction: column; gap: 1rem;">
         <VoidableUI.Components.combobox events size="sm" placeholder="Small">
-          <VoidableUI.Components.option value="a">Option A</VoidableUI.Components.option>
-          <VoidableUI.Components.option value="b">Option B</VoidableUI.Components.option>
-          <VoidableUI.Components.option value="c">Option C</VoidableUI.Components.option>
+          <void-combobox-content>
+            <VoidableUI.Components.option value="a">Option A</VoidableUI.Components.option>
+            <VoidableUI.Components.option value="b">Option B</VoidableUI.Components.option>
+            <VoidableUI.Components.option value="c">Option C</VoidableUI.Components.option>
+          </void-combobox-content>
         </VoidableUI.Components.combobox>
         <VoidableUI.Components.combobox events placeholder="Medium">
-          <VoidableUI.Components.option value="a">Option A</VoidableUI.Components.option>
-          <VoidableUI.Components.option value="b">Option B</VoidableUI.Components.option>
-          <VoidableUI.Components.option value="c">Option C</VoidableUI.Components.option>
+          <void-combobox-content>
+            <VoidableUI.Components.option value="a">Option A</VoidableUI.Components.option>
+            <VoidableUI.Components.option value="b">Option B</VoidableUI.Components.option>
+            <VoidableUI.Components.option value="c">Option C</VoidableUI.Components.option>
+          </void-combobox-content>
         </VoidableUI.Components.combobox>
         <VoidableUI.Components.combobox events size="lg" placeholder="Large">
-          <VoidableUI.Components.option value="a">Option A</VoidableUI.Components.option>
-          <VoidableUI.Components.option value="b">Option B</VoidableUI.Components.option>
-          <VoidableUI.Components.option value="c">Option C</VoidableUI.Components.option>
+          <void-combobox-content>
+            <VoidableUI.Components.option value="a">Option A</VoidableUI.Components.option>
+            <VoidableUI.Components.option value="b">Option B</VoidableUI.Components.option>
+            <VoidableUI.Components.option value="c">Option C</VoidableUI.Components.option>
+          </void-combobox-content>
         </VoidableUI.Components.combobox>
       </div>
     </div>
@@ -359,35 +383,43 @@ defmodule DemoWeb.FormShowcases do
     <div class="showcase-section">
       <h3>Default</h3>
       <VoidableUI.Components.multiselect events placeholder="Select frameworks...">
-        <VoidableUI.Components.option value="react">React</VoidableUI.Components.option>
-        <VoidableUI.Components.option value="vue">Vue</VoidableUI.Components.option>
-        <VoidableUI.Components.option value="svelte">Svelte</VoidableUI.Components.option>
-        <VoidableUI.Components.option value="angular">Angular</VoidableUI.Components.option>
-        <VoidableUI.Components.option value="solid">Solid</VoidableUI.Components.option>
-        <VoidableUI.Components.option value="lit">Lit</VoidableUI.Components.option>
+        <void-multiselect-content>
+          <VoidableUI.Components.option value="react">React</VoidableUI.Components.option>
+          <VoidableUI.Components.option value="vue">Vue</VoidableUI.Components.option>
+          <VoidableUI.Components.option value="svelte">Svelte</VoidableUI.Components.option>
+          <VoidableUI.Components.option value="angular">Angular</VoidableUI.Components.option>
+          <VoidableUI.Components.option value="solid">Solid</VoidableUI.Components.option>
+          <VoidableUI.Components.option value="lit">Lit</VoidableUI.Components.option>
+        </void-multiselect-content>
       </VoidableUI.Components.multiselect>
     </div>
     <div class="showcase-section">
       <h3>Preselected</h3>
       <VoidableUI.Components.multiselect events placeholder="Select frameworks...">
-        <VoidableUI.Components.option value="react" selected>React</VoidableUI.Components.option>
-        <VoidableUI.Components.option value="vue" selected>Vue</VoidableUI.Components.option>
-        <VoidableUI.Components.option value="svelte" selected>Svelte</VoidableUI.Components.option>
-        <VoidableUI.Components.option value="angular">Angular</VoidableUI.Components.option>
-        <VoidableUI.Components.option value="solid">Solid</VoidableUI.Components.option>
-        <VoidableUI.Components.option value="lit">Lit</VoidableUI.Components.option>
+        <void-multiselect-content>
+          <VoidableUI.Components.option value="react" selected>React</VoidableUI.Components.option>
+          <VoidableUI.Components.option value="vue" selected>Vue</VoidableUI.Components.option>
+          <VoidableUI.Components.option value="svelte" selected>Svelte</VoidableUI.Components.option>
+          <VoidableUI.Components.option value="angular">Angular</VoidableUI.Components.option>
+          <VoidableUI.Components.option value="solid">Solid</VoidableUI.Components.option>
+          <VoidableUI.Components.option value="lit">Lit</VoidableUI.Components.option>
+        </void-multiselect-content>
       </VoidableUI.Components.multiselect>
     </div>
     <div class="showcase-section">
       <h3>States</h3>
       <div style="display: flex; flex-direction: column; gap: 1rem;">
         <VoidableUI.Components.multiselect events placeholder="Disabled" disabled>
-          <VoidableUI.Components.option value="react">React</VoidableUI.Components.option>
-          <VoidableUI.Components.option value="vue">Vue</VoidableUI.Components.option>
+          <void-multiselect-content>
+            <VoidableUI.Components.option value="react">React</VoidableUI.Components.option>
+            <VoidableUI.Components.option value="vue">Vue</VoidableUI.Components.option>
+          </void-multiselect-content>
         </VoidableUI.Components.multiselect>
         <VoidableUI.Components.multiselect events placeholder="With error" error="Please select at least one option">
-          <VoidableUI.Components.option value="react">React</VoidableUI.Components.option>
-          <VoidableUI.Components.option value="vue">Vue</VoidableUI.Components.option>
+          <void-multiselect-content>
+            <VoidableUI.Components.option value="react">React</VoidableUI.Components.option>
+            <VoidableUI.Components.option value="vue">Vue</VoidableUI.Components.option>
+          </void-multiselect-content>
         </VoidableUI.Components.multiselect>
       </div>
     </div>
@@ -395,16 +427,22 @@ defmodule DemoWeb.FormShowcases do
       <h3>Sizes</h3>
       <div style="display: flex; flex-direction: column; gap: 1rem;">
         <VoidableUI.Components.multiselect events size="sm" placeholder="Small">
-          <VoidableUI.Components.option value="a">Option A</VoidableUI.Components.option>
-          <VoidableUI.Components.option value="b">Option B</VoidableUI.Components.option>
+          <void-multiselect-content>
+            <VoidableUI.Components.option value="a">Option A</VoidableUI.Components.option>
+            <VoidableUI.Components.option value="b">Option B</VoidableUI.Components.option>
+          </void-multiselect-content>
         </VoidableUI.Components.multiselect>
         <VoidableUI.Components.multiselect events placeholder="Medium">
-          <VoidableUI.Components.option value="a">Option A</VoidableUI.Components.option>
-          <VoidableUI.Components.option value="b">Option B</VoidableUI.Components.option>
+          <void-multiselect-content>
+            <VoidableUI.Components.option value="a">Option A</VoidableUI.Components.option>
+            <VoidableUI.Components.option value="b">Option B</VoidableUI.Components.option>
+          </void-multiselect-content>
         </VoidableUI.Components.multiselect>
         <VoidableUI.Components.multiselect events size="lg" placeholder="Large">
-          <VoidableUI.Components.option value="a">Option A</VoidableUI.Components.option>
-          <VoidableUI.Components.option value="b">Option B</VoidableUI.Components.option>
+          <void-multiselect-content>
+            <VoidableUI.Components.option value="a">Option A</VoidableUI.Components.option>
+            <VoidableUI.Components.option value="b">Option B</VoidableUI.Components.option>
+          </void-multiselect-content>
         </VoidableUI.Components.multiselect>
       </div>
     </div>

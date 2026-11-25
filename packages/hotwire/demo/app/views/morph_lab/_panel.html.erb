@@ -5,8 +5,10 @@
     </void-card-header>
     <void-card-body>
       <void-field label="Pick">
-        <void-select id="lab-select" name="pick" value="<%= lab["select"] %>">
-          <% lab["options"].each do |o| %><option value="<%= o %>">Option <%= o %> v<%= lab["version"] %></option><% end %>
+        <void-select id="lab-select" value="<%= lab["select"] %>">
+          <select name="pick">
+            <% lab["options"].each do |o| %><option value="<%= o %>">Option <%= o %> v<%= lab["version"] %></option><% end %>
+          </select>
         </void-select>
       </void-field>
       <void-checkbox-group id="lab-group" label="Toppings" name="toppings">

@@ -101,7 +101,7 @@ func TestSkillContentFromManifest(t *testing.T) {
 		{"references/snippets/heex.md", "<.dropdown_menu align=\"end\">"},
 		{"references/snippets/jsx.md", "<void-popover-trigger>"},
 		{"references/wrong-usages.md", "| `<void-gauge>` | `show-value` | `showvalue` |"},
-		{"references/wrong-usages.md", "| `<void-option>` | `<void-multiselect>`, `<void-combobox>` |"},
+		{"references/wrong-usages.md", "| `<void-option>` | `<void-combobox-content>`, `<void-multiselect-content>` |"},
 		{"references/wrong-usages.md", "accept `\"false\"` in markup"},
 		{"references/wrong-usages.md", "`icon` on `<void-error-fallback>`"},
 		{"references/elements.md", "| `<void-button>` |"},

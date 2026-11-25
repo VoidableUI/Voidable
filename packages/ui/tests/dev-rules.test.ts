@@ -32,7 +32,9 @@ const table: DevTable = {
   'void-sidebar': { m: 'sidebar', a: { collapsedwidth: 3, side: ['left', 'right'] }, e: [] },
   'void-select': { m: 'select', a: {}, e: ['void-change'] },
   'void-multiselect': { m: 'multiselect', a: {}, e: ['void-change'] },
-  'void-option': { m: 'multiselect', a: { value: 0 }, e: [], p: ['void-multiselect', 'void-combobox'] },
+  'void-option': { m: 'multiselect', a: { value: 0 }, e: [], p: ['void-combobox-content', 'void-multiselect-content'] },
+  'void-combobox-content': { m: 'combobox', a: {}, e: [], p: ['void-combobox'], c: 1 },
+  'void-multiselect-content': { m: 'multiselect', a: {}, e: [], p: ['void-multiselect'], c: 1 },
   'void-combobox': { m: 'combobox', a: {}, e: [] },
   'void-tabs': { m: 'tabs', a: {}, e: [], r: ['void-tab-panel'] },
   'void-tab-panel': { m: 'tabs', a: {}, e: [], p: ['void-tabs'] },
@@ -154,14 +156,21 @@ describe('parents and children', () => {
     const el = make('<void-select><void-option value="a">A</void-option></void-select>').firstElementChild!;
     const w = checkParent(table, el)!;
     expect(w.kind).toBe('wrong-parent');
-    expect(w.message).toContain('only works inside <void-multiselect> or <void-combobox>');
+    expect(w.message).toContain('only works inside <void-combobox-content> or <void-multiselect-content>');
     expect(w.message).toContain('it is inside <void-select>');
-    expect(w.message).toContain('takes native <option> children');
+    expect(w.message).toContain('takes a native <select>');
+  });
+
+  it('reports a void-option written straight into its picker (the form before #52)', () => {
+    const el = make('<void-combobox><void-option value="a">A</void-option></void-combobox>').querySelector('void-option')!;
+    const w = checkParent(table, el)!;
+    expect(w.kind).toBe('wrong-parent');
+    expect(w.message).toContain('<void-combobox-content>');
   });
 
   it('accepts the allowed parent at any depth', () => {
-    expect(checkParent(table, make('<void-multiselect><void-option></void-option></void-multiselect>').firstElementChild!)).toBeUndefined();
-    expect(checkParent(table, make('<void-combobox><div><void-option></void-option></div></void-combobox>').querySelector('void-option')!)).toBeUndefined();
+    expect(checkParent(table, make('<void-multiselect><void-multiselect-content><void-option></void-option></void-multiselect-content></void-multiselect>').firstElementChild!)).toBeUndefined();
+    expect(checkParent(table, make('<void-combobox><void-combobox-content><div><void-option></void-option></div></void-combobox-content></void-combobox>').querySelector('void-option')!)).toBeUndefined();
   });
 
   it('says there is no parent at all', () => {
@@ -305,7 +314,7 @@ describe('accessible names', () => {
   });
 
   it('ignores a tag that needs no name', () => {
-    expect(named('<void-select></void-select>')).toBeUndefined();
+    expect(named('<void-select><select></select></void-select>')).toBeUndefined();
   });
 
   it('is deduplicated once per element type', () => {

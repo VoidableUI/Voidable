@@ -70,9 +70,11 @@ Svelte's `bind:` cannot be used on custom elements: `<void-input bind:value={nam
 <void-input aria-label="Text input" value={text} onvoid-input={(e) => (text = e.detail.value)}></void-input>
 
 <void-select aria-label="Choose an option" value={choice} onvoid-change={(e) => (choice = e.detail.value)}>
-  <option value="a">A</option>
-  <option value="b">B</option>
-  <option value="c">C</option>
+  <select>
+    <option value="a">A</option>
+    <option value="b">B</option>
+    <option value="c">C</option>
+  </select>
 </void-select>
 
 <void-checkbox checked={agreed} onvoid-change={(e) => (agreed = e.detail.checked)}>I agree</void-checkbox>

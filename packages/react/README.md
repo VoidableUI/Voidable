@@ -72,9 +72,11 @@ Components with regions take explicit parts, exported next to them: `DialogTitle
 </DropdownMenu>
 ```
 
+Pickers take their options in a content part: `<Combobox name="country"><ComboboxContent><Option value="de">Germany</Option></ComboboxContent></Combobox>`, and the same with `Multiselect` and `MultiselectContent`.
+
 ### Forms
 
-Form controls take `name`, `value`, `required` and `disabled` and take part in a surrounding `<form>` (submission, `form.reset()`, `<fieldset disabled>`), whether they render a native control or are form-associated custom elements.
+Form controls take `name`, `value`, `required` and `disabled` and take part in a surrounding `<form>` (submission, `form.reset()`, `<fieldset disabled>`), whether they render a native control or are form-associated custom elements. `Select` is the exception: it wraps a native `<select>` you write inside it, and the form attributes go on that select (`<Select><select name="plan" required>...</select></Select>`).
 
 ### Next.js
 

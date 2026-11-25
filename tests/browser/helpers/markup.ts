@@ -61,9 +61,9 @@ export function projectionApp(s: AppState, p = ''): string {
     <void-card-body>
       <form id="${p}form">
         <label>Name <input name="n" class="ci"></label>
-        <void-select id="${p}s" name="s" aria-label="Select" value="${s.selectValue}">${s.options.map((o) => `<option value="${o}">opt ${o} ${s.v}</option>`).join('')}</void-select>
-        <void-combobox id="${p}cb" name="cb" placeholder="pick" aria-label="Combobox">${s.options.map((o) => `<void-option value="${o}">cb ${o} ${s.v}</void-option>`).join('')}</void-combobox>
-        <void-multiselect id="${p}ms" name="ms" placeholder="many" aria-label="Multiselect">${s.options.map((o) => `<void-option value="${o}">ms ${o} ${s.v}</void-option>`).join('')}</void-multiselect>
+        <void-select id="${p}s" aria-label="Select" value="${s.selectValue}"><select name="s">${s.options.map((o) => `<option value="${o}">opt ${o} ${s.v}</option>`).join('')}</select></void-select>
+        <void-combobox id="${p}cb" name="cb" placeholder="pick" aria-label="Combobox"><void-combobox-content>${s.options.map((o) => `<void-option value="${o}">cb ${o} ${s.v}</void-option>`).join('')}</void-combobox-content></void-combobox>
+        <void-multiselect id="${p}ms" name="ms" placeholder="many" aria-label="Multiselect"><void-multiselect-content>${s.options.map((o) => `<void-option value="${o}">ms ${o} ${s.v}</void-option>`).join('')}</void-multiselect-content></void-multiselect>
         <void-checkbox-group id="${p}cg" label="Group ${s.v}" name="cg">${Object.entries(s.checked).map(([k, c]) => `<void-checkbox id="${p}ck-${k}" value="${k}"${c ? ' checked' : ''}>check ${k} ${s.v}</void-checkbox>`).join('')}</void-checkbox-group>
         <void-radio-group id="${p}rg" label="Radio ${s.v}" name="rg" value="${s.radio}">${['x', 'y', 'z'].map((o) => `<void-radio value="${o}">radio ${o} ${s.v}</void-radio>`).join('')}</void-radio-group>
       </form>

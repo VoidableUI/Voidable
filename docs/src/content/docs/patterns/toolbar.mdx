@@ -11,14 +11,18 @@ export const toolbar = `
 <void-toolbar>
   <void-input type="search" placeholder="Search stations" aria-label="Search stations"></void-input>
   <void-select aria-label="Region">
-    <option>All regions</option>
-    <option>Arctic</option>
-    <option>Southern</option>
+    <select>
+      <option>All regions</option>
+      <option>Arctic</option>
+      <option>Southern</option>
+    </select>
   </void-select>
   <void-select aria-label="State">
-    <option>Any state</option>
-    <option>Online</option>
-    <option>Degraded</option>
+    <select>
+      <option>Any state</option>
+      <option>Online</option>
+      <option>Degraded</option>
+    </select>
   </void-select>
   <void-spacer></void-spacer>
   <span>44 stations</span>
@@ -30,9 +34,11 @@ export const toolbarErb = `
   <void-toolbar>
     <void-input type="search" name="q" value="<%= params[:q] %>"
                 placeholder="Search stations" aria-label="Search stations"></void-input>
-    <void-select name="region" aria-label="Region">
-      <option value="">All regions</option>
-      <%= options_for_select Station.regions.keys.map { [_1.humanize, _1] }, params[:region] %>
+    <void-select aria-label="Region">
+      <select name="region">
+        <option value="">All regions</option>
+        <%= options_for_select Station.regions.keys.map { [_1.humanize, _1] }, params[:region] %>
+      </select>
     </void-select>
     <void-spacer></void-spacer>
     <span><%= pluralize @stations.total_count, "station" %></span>

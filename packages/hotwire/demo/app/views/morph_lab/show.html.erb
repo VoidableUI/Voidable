@@ -28,8 +28,10 @@
   <void-field label="Seats"><void-number-input id="lab-seats" name="seats" min="1" max="10" value="2"></void-number-input></void-field>
   <void-field label="Framework">
     <void-combobox id="lab-fw" name="framework" placeholder="Pick">
-      <void-option value="react">React</void-option>
-      <void-option value="lit">Lit</void-option>
+      <void-combobox-content>
+        <void-option value="react">React</void-option>
+        <void-option value="lit">Lit</void-option>
+      </void-combobox-content>
     </void-combobox>
   </void-field>
   <void-button id="lab-save" type="submit">Save notes</void-button>

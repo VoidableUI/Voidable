@@ -58,7 +58,7 @@ The hook listens for the Voidable events named in `data-void-events` and forward
 
 ```heex
 <.dialog id="confirm" events={["void-close"]}><void-dialog-title>Delete?</void-dialog-title>…</.dialog>
-<.combobox name="city" events={["void-select"]}>…</.combobox>
+<.combobox name="city" events={["void-change"]}><void-combobox-content>…</void-combobox-content></.combobox>
 ```
 
 On plain tags, attach the hook yourself (it needs an id):

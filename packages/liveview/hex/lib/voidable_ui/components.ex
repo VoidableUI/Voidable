@@ -52,14 +52,16 @@ defmodule VoidableUI.Components do
   legitimate server updates (`open`, `value`, `error`, dynamic options or menu
   items), it is **not** applied automatically. Opt in per element, with a
   stable id, where the server renders the element once and the client owns it
-  afterwards, for example a `select` with static options:
+  afterwards, for example a `scroll_area` with static content:
 
-      <.select id="country" name="country" phx-update="ignore">
-        <option value="de">Germany</option>
-      </.select>
+      <.scroll_area id="terms" phx-update="ignore">
+        <p>…</p>
+      </.scroll_area>
 
-  Good candidates: `select`, `multiselect`, `menu`, `carousel` and
-  `collapsible` *when their content is static*. Avoid it on `dialog`/`drawer` (the server
+  Good candidates: `scroll_area` and `checkbox_group` *when their content is
+  static*. Components with explicit parts (the pickers `select`, `combobox` and
+  `multiselect` among them) need none: their children stay where you write
+  them. Avoid it on `dialog`/`drawer` (the server
   drives `open`), `input`, `checkbox`, `switch` and other value-bound controls.
 
   ## Booleans that default to true
@@ -473,15 +475,21 @@ defmodule VoidableUI.Components do
   # Select (interactive — void-change)
   # ---------------------------------------------------------------------------
 
-  @doc "Renders a `<void-select>` dropdown."
+  @doc """
+  Renders a `<void-select>` around the native `<select>` you write inside it: the select carries
+  `name`, `required`, `disabled` and the options, and is the form control (#52).
+
+      <.select>
+        <select name={@form[:plan].name}>
+          <option value="" disabled selected hidden>Choose a plan</option>
+          <option value="free">Free</option>
+        </select>
+      </.select>
+  """
   attr :id, :string, default: nil
-  attr :value, :string, default: nil
-  attr :disabled, :boolean, default: false
-  attr :required, :boolean, default: false
-  attr :name, :string, default: nil
+  attr :value, :string, default: nil, doc: "initial choice; without it the options' own selected decide"
   attr :size, :string, default: nil
   attr :error, :string, default: nil
-  attr :placeholder, :string, default: nil
   attr :events, :any, default: nil, doc: @events_doc
   attr :rest, :global
   slot :inner_block, required: true
@@ -489,14 +497,10 @@ defmodule VoidableUI.Components do
   def select(assigns) do
     ~H"""
     <void-select
-      id={@id || auto_id("void-select", {@name, @rest})}
+      id={@id || auto_id("void-select", @rest)}
       value={@value}
-      disabled={@disabled}
-      required={@required}
-      name={@name}
       size={@size}
       error={@error}
-      placeholder={@placeholder}
       phx-hook={void_hook(@events)}
       data-void-events={void_events(@events, "void-change")}
       {@rest}
@@ -639,16 +643,17 @@ defmodule VoidableUI.Components do
   # Option (static — child of multiselect/combobox)
   # ---------------------------------------------------------------------------
 
-  @doc "Renders a `<void-option>` inside a multiselect or combobox."
+  @doc "Renders a `<void-option>` inside `<void-combobox-content>` or `<void-multiselect-content>`."
   attr :value, :string, required: true
   attr :selected, :boolean, default: false
   attr :disabled, :boolean, default: false
+  attr :label, :string, default: nil, doc: "text shown once chosen, when the content is more than plain text"
   attr :rest, :global
   slot :inner_block, required: true
 
   def option(assigns) do
     ~H"""
-    <void-option value={@value} selected={@selected} disabled={@disabled} {@rest}>
+    <void-option value={@value} selected={@selected} disabled={@disabled} label={@label} {@rest}>
       {render_slot(@inner_block)}
     </void-option>
     """
@@ -658,7 +663,7 @@ defmodule VoidableUI.Components do
   # Multiselect (interactive — void-change)
   # ---------------------------------------------------------------------------
 
-  @doc "Renders a `<void-multiselect>` multi-value dropdown."
+  @doc "Renders a `<void-multiselect>` multi-value dropdown: a `<void-multiselect-content>` child holds the `<.option>`s."
   attr :id, :string, default: nil
   attr :placeholder, :string, default: nil
   attr :disabled, :boolean, default: false
@@ -1227,7 +1232,7 @@ defmodule VoidableUI.Components do
   # Combobox (interactive — void-change)
   # ---------------------------------------------------------------------------
 
-  @doc "Renders a `<void-combobox>` searchable dropdown."
+  @doc "Renders a `<void-combobox>` searchable dropdown: a `<void-combobox-content>` child holds the `<.option>`s."
   attr :id, :string, default: nil
   attr :value, :string, default: nil
   attr :placeholder, :string, default: nil

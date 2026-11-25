@@ -12,13 +12,15 @@ if (!customElements.get('void-multiselect')) {
 
 function createWithOptions(opts: Array<{ value: string; selected?: boolean; label: string }>): VoidMultiselect {
   const el = document.createElement('void-multiselect') as VoidMultiselect;
+  const content = document.createElement('void-multiselect-content');
   for (const opt of opts) {
     const o = document.createElement('void-option') as VoidOption;
     o.value = opt.value;
     if (opt.selected) o.selected = true;
     o.textContent = opt.label;
-    el.appendChild(o);
+    content.appendChild(o);
   }
+  el.appendChild(content);
   return el;
 }
 
@@ -127,7 +129,7 @@ describe('VoidMultiselect', () => {
       const trigger = el.querySelector('.void-multiselect-trigger') as HTMLElement;
       trigger.click();
       await el.updateComplete;
-      expect(el.querySelector('.void-multiselect-dropdown')).not.toBeNull();
+      expect(el.open).toBe(true);
       expect(el.querySelector('.void-multiselect-trigger')!.getAttribute('aria-expanded')).toBe('true');
       expect(el.hasAttribute('open')).toBe(true);
     });
@@ -138,7 +140,7 @@ describe('VoidMultiselect', () => {
       await el.updateComplete;
       trigger.click();
       await el.updateComplete;
-      expect(el.querySelector('.void-multiselect-dropdown')).toBeNull();
+      expect(el.open).toBe(false);
     });
 
     it('closes dropdown on Escape key', async () => {
@@ -147,7 +149,7 @@ describe('VoidMultiselect', () => {
       await el.updateComplete;
       document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
       await el.updateComplete;
-      expect(el.querySelector('.void-multiselect-dropdown')).toBeNull();
+      expect(el.open).toBe(false);
     });
 
     it('closes dropdown when clicking outside', async () => {
@@ -157,7 +159,7 @@ describe('VoidMultiselect', () => {
       document.body.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, button: 0 }));
       await el.updateComplete;
       await el.updateComplete;
-      expect(el.querySelector('.void-multiselect-dropdown')).toBeNull();
+      expect(el.open).toBe(false);
     });
   });
 
@@ -178,14 +180,14 @@ describe('VoidMultiselect', () => {
     });
 
     it('clicking option toggles it selected', async () => {
-      const options = el.querySelectorAll('.void-multiselect-option');
+      const options = el.querySelectorAll('void-option');
       (options[0] as HTMLElement).click();
       await el.updateComplete;
       expect(el.value).toContain('react');
     });
 
     it('clicking selected option deselects it', async () => {
-      const options = el.querySelectorAll('.void-multiselect-option');
+      const options = el.querySelectorAll('void-option');
       (options[0] as HTMLElement).click();
       await el.updateComplete;
       (options[0] as HTMLElement).click();
@@ -194,7 +196,7 @@ describe('VoidMultiselect', () => {
     });
 
     it('value getter returns all selected values', async () => {
-      const options = el.querySelectorAll('.void-multiselect-option');
+      const options = el.querySelectorAll('void-option');
       (options[0] as HTMLElement).click();
       await el.updateComplete;
       (options[1] as HTMLElement).click();
@@ -221,7 +223,7 @@ describe('VoidMultiselect', () => {
     it('dispatches void-change when option selected', async () => {
       let fired = false;
       el.addEventListener('void-change', () => { fired = true; });
-      const option = el.querySelector('.void-multiselect-option') as HTMLElement;
+      const option = el.querySelector('void-option') as HTMLElement;
       option.click();
       await el.updateComplete;
       expect(fired).toBe(true);
@@ -230,7 +232,7 @@ describe('VoidMultiselect', () => {
     it('void-change detail contains values array', async () => {
       let detail: { values: string[] } | null = null;
       el.addEventListener('void-change', (e) => { detail = (e as CustomEvent).detail; });
-      const option = el.querySelector('.void-multiselect-option') as HTMLElement;
+      const option = el.querySelector('void-option') as HTMLElement;
       option.click();
       await el.updateComplete;
       expect(Array.isArray(detail?.values)).toBe(true);
@@ -239,7 +241,7 @@ describe('VoidMultiselect', () => {
     it('void-change bubbles', async () => {
       let firedOnParent = false;
       document.body.addEventListener('void-change', () => { firedOnParent = true; }, { once: true });
-      const option = el.querySelector('.void-multiselect-option') as HTMLElement;
+      const option = el.querySelector('void-option') as HTMLElement;
       option.click();
       await el.updateComplete;
       expect(firedOnParent).toBe(true);
@@ -297,7 +299,7 @@ describe('VoidMultiselect', () => {
       const trigger = el.querySelector('.void-multiselect-trigger') as HTMLElement;
       trigger.click();
       await el.updateComplete;
-      expect(el.querySelector('.void-multiselect-dropdown')).toBeNull();
+      expect(el.open).toBe(false);
     });
 
     it('does not dispatch void-change when disabled', async () => {

@@ -97,16 +97,18 @@ const agreed = ref(false);
   <void-input aria-label="Text input" :value="text" @void-input="(e) => (text = e.detail.value)" />
 
   <void-select aria-label="Choose an option" :value="choice" @void-change="(e) => (choice = e.detail.value)">
-    <option value="a">A</option>
-    <option value="b">B</option>
-    <option value="c">C</option>
+    <select>
+      <option value="a">A</option>
+      <option value="b">B</option>
+      <option value="c">C</option>
+    </select>
   </void-select>
 
   <void-checkbox :checked="agreed" @void-change="(e) => (agreed = e.detail.checked)">I agree</void-checkbox>
 </template>
 ```
 
-Do not use `v-model` on `<void-*>` elements. The generated typings reject it (`modelValue` is not a property of the element), and at runtime it only appears to work on `<void-input>`, through the browser's native `input` event; on `<void-select>` and `<void-checkbox>` it never updates the ref.
+Do not use `v-model` on `<void-*>` elements. The generated typings reject it (`modelValue` is not a property of the element), and at runtime it only appears to work on `<void-input>`, through the browser's native `input` event; on `<void-checkbox>` it never updates the ref. The native `<select>` inside a `<void-select>` is the exception: it is a plain select, so `v-model` on it works.
 
 ## Theme
 

@@ -118,7 +118,29 @@ func (c *Checker) CheckTag(file string, t Tag) []Finding {
 		nf.File = file
 		out = append(out, nf)
 	}
+	if nf, ok := checkNative(el, t); ok {
+		nf.File = file
+		out = append(out, nf)
+	}
 	return out
+}
+
+// checkNative reports a component that enhances a native control written
+// inside it (#52: `<select>` in `<void-select>`) when the control is missing:
+// the form before, with native options straight in the component, is legacy
+// markup; nothing at all is a missing part. Content the scanner cannot see in
+// full (unclosed, or with template expressions) is not judged.
+func checkNative(el *Element, t Tag) (Finding, bool) {
+	n := el.Native
+	if n == nil || t.Mention || !t.Closed || t.Dynamic || !t.Content.Known || t.Content.Dynamic || contains(t.Content.Native, n.Tag) {
+		return Finding{}, false
+	}
+	if contains(t.Content.Native, "option") || contains(t.Content.Native, "optgroup") {
+		return Finding{Line: t.Line, Col: t.Col, Rule: RuleLegacyMarkup, Tag: t.Name,
+			Message: fmt.Sprintf("<%s> no longer takes options directly; %s", t.Name, n.Fix)}, true
+	}
+	return Finding{Line: t.Line, Col: t.Col, Rule: RuleMissingPart, Tag: t.Name,
+		Message: fmt.Sprintf("<%s> has no native <%s> inside, which it needs; %s", t.Name, n.Tag, n.Fix)}, true
 }
 
 type findingFn func(line, col int, rule Rule, attr, sugg, msg string, args ...any) Finding

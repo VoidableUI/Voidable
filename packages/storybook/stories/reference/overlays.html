@@ -42,19 +42,23 @@
     <void-section>
       <void-split>
         <void-field label="Region">
-          <void-select id="ov-select" name="region">
-            <option value="arctic">Arctic</option>
-            <option value="southern">Southern</option>
-            <option value="equatorial">Equatorial</option>
-            <option value="pacific">Pacific</option>
+          <void-select id="ov-select">
+            <select name="region">
+              <option value="arctic">Arctic</option>
+              <option value="southern">Southern</option>
+              <option value="equatorial">Equatorial</option>
+              <option value="pacific">Pacific</option>
+            </select>
           </void-select>
         </void-field>
         <void-field label="Station">
           <void-combobox id="ov-combobox" placeholder="Search stations">
-            <void-option value="kiruna">Kiruna</void-option>
-            <void-option value="svalbard">Svalbard</void-option>
-            <void-option value="troll">Troll</void-option>
-            <void-option value="tromso">Tromsø</void-option>
+            <void-combobox-content>
+              <void-option value="kiruna">Kiruna</void-option>
+              <void-option value="svalbard">Svalbard</void-option>
+              <void-option value="troll">Troll</void-option>
+              <void-option value="tromso">Tromsø</void-option>
+            </void-combobox-content>
           </void-combobox>
         </void-field>
       </void-split>

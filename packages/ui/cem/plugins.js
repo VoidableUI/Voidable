@@ -55,6 +55,7 @@ import {
   attributeHints,
   extraAttributes,
   eventDetails,
+  nativeControls,
   parts,
   requiredChildren,
 } from './supplement.js';
@@ -469,9 +470,18 @@ export function manifestSupplementPlugin() {
         const decl = get(tag, 'parentSetAttributes');
         decl.voidHostAttributes = [...new Set([...(decl.voidHostAttributes ?? []), ...names])].sort();
       }
+      // A parent may be a CSS-only part (the list part of a picker), which no class registers.
+      const partTags = new Set();
+      const collect = (list) => {
+        for (const part of list ?? []) {
+          partTags.add(part.tag);
+          collect(part.parts);
+        }
+      };
+      for (const spec of Object.values(parts)) collect(spec.parts);
       for (const [tag, parents] of Object.entries(allowedParents)) {
         get(tag).voidParents = parents;
-        checkTags('allowedParents', parents);
+        checkTags('allowedParents', parents.filter((t) => !partTags.has(t)));
       }
       for (const [tag, children] of Object.entries(requiredChildren)) {
         get(tag).voidRequires = children;
@@ -511,6 +521,11 @@ export function manifestSupplementPlugin() {
       }
 
       writeParts(byTag, get);
+
+      for (const [tag, native] of Object.entries(nativeControls)) {
+        if (!/^[a-z]+$/.test(native.tag) || !native.fix) throw new Error(`cem/supplement.js nativeControls: <${tag}> needs a native tag and a fix`);
+        get(tag, 'nativeControls').voidNative = native;
+      }
 
       for (const [tag, events] of Object.entries(eventDetails)) {
         const decl = get(tag);

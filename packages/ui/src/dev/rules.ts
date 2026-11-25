@@ -201,7 +201,7 @@ export function checkParent(table: DevTable, el: Element): DevWarning | undefine
   const parent = voidAncestor(el);
   const found = parent ? `it is inside <${parent.localName}>` : 'it has no void-* parent';
   const select =
-    parent?.localName === 'void-select' ? ' <void-select> takes native <option> children.' : '';
+    parent?.localName === 'void-select' ? ' <void-select> takes a native <select> with native <option>s inside.' : '';
   return warning(
     'wrong-parent',
     el.localName,
@@ -376,7 +376,17 @@ const INERT_CHILDREN = new Set(['template', 'script', 'style', 'void-projection-
 function ownChildren(owner: Element, transparent: readonly string[] | undefined): Node[] {
   const out: Node[] = [];
   const walk = (parent: Element) => {
+    // What the component renders beside its parts (the input of a combobox) sits between the
+    // projection markers, `<!--void-projection-->` and `<!--/void-projection-->`: not the author's.
+    let chrome = false;
     for (const n of Array.from(parent.childNodes)) {
+      if (n.nodeType === 8) {
+        const data = (n as Comment).data;
+        if (data === 'void-projection') chrome = true;
+        else if (data === '/void-projection') chrome = false;
+        continue;
+      }
+      if (chrome) continue;
       if (n.nodeType === 1 && transparent?.includes((n as Element).localName)) walk(n as Element);
       else out.push(n);
     }
@@ -507,6 +517,25 @@ export function checkControl(table: DevTable, el: Element): DevWarning | undefin
     );
   }
   return undefined;
+}
+
+/**
+ * A component that enhances a native control the author writes inside it
+ * (`<void-select>` around a `<select>`) without one: usually the old form,
+ * native options written straight into the component.
+ */
+export function checkNative(table: DevTable, el: Element): DevWarning | undefined {
+  const v = table[el.localName]?.v;
+  if (!v || !el.isConnected) return undefined;
+  for (const inner of Array.from(el.querySelectorAll(v.tag))) if (inner.closest(el.localName) === el) return undefined;
+  const loose = Array.from(el.children).some((c) => c.localName === 'option' || c.localName === 'optgroup');
+  return warning(
+    loose ? 'legacy-markup' : 'missing-part',
+    el.localName,
+    v.tag,
+    `${describe(el)} has no native <${v.tag}> inside${loose ? ': its options are written straight into it, which no longer works' : ''}. Instead ${v.fix}.`,
+    el,
+  );
 }
 
 /** A tag that explicit parts replaced (`<void-tab-panel>`). */

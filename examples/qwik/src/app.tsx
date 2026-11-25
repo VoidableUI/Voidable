@@ -54,15 +54,18 @@ export default component$(() => {
 
       <div class="component-section">
         <h2>Select</h2>
-        <void-select aria-label="Choose option"
-          placeholder="Choose option"
+        <void-select
+          aria-label="Choose option"
           onVoid-change$={(e: CustomEvent) =>
             logEvent('void-change', `Select: ${e.detail?.value ?? ''}`)
           }
         >
-          <option value="alpha">Alpha</option>
-          <option value="beta">Beta</option>
-          <option value="gamma">Gamma</option>
+          <select>
+            <option value="" disabled selected hidden>Choose option</option>
+            <option value="alpha">Alpha</option>
+            <option value="beta">Beta</option>
+            <option value="gamma">Gamma</option>
+          </select>
         </void-select>
       </div>
 

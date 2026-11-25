@@ -171,17 +171,17 @@ describe('the shared overlay stack', () => {
 
 describe('select-like panels', () => {
   it('a combobox panel closes on an outside press and stays out of the stack while closed', async () => {
-    document.body.innerHTML = '<void-combobox id="c"><void-option value="a">A</void-option></void-combobox>';
+    document.body.innerHTML = '<void-combobox id="c"><void-combobox-content><void-option value="a">A</void-option></void-combobox-content></void-combobox>';
     const c = document.getElementById('c') as HTMLElement & { updateComplete: Promise<unknown> };
     await flush(c);
     c.querySelector('input')!.dispatchEvent(new FocusEvent('focus'));
     await flush(c);
     expect(stack()).toEqual(['c']);
-    const panel = c.querySelector('.void-combobox-dropdown')!;
+    const panel = c.querySelector('void-combobox-content')!;
     expect(panel.getAttribute('data-void-side')).toBe('bottom');
     pointerdown(document.body);
     await flush(c);
-    expect(c.querySelector('.void-combobox-dropdown')).toBeNull();
+    expect((c as unknown as { open: boolean }).open).toBe(false);
     expect(stack()).toEqual([]);
   });
 });

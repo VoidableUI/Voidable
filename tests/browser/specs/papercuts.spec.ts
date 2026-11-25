@@ -95,12 +95,12 @@ test.describe('toggle-group initial value', () => {
 
 test.describe('host labelling', () => {
   const CASES: [string, string][] = [
-    ['void-select', '<option value="a">A</option>'],
+    ['void-select', '<select><option value="a">A</option></select>'],
     ['void-input', ''],
     ['void-textarea', ''],
     ['void-number-input', ''],
-    ['void-combobox', '<void-option value="a">A</void-option>'],
-    ['void-multiselect', '<void-option value="a">A</void-option>'],
+    ['void-combobox', '<void-combobox-content><void-option value="a">A</void-option></void-combobox-content>'],
+    ['void-multiselect', '<void-multiselect-content><void-option value="a">A</void-option></void-multiselect-content>'],
     ['void-date-picker', ''],
     ['void-slider', ''],
     ['void-tags-input', ''],

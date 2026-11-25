@@ -34,7 +34,7 @@ export function VoidableAlpine(Alpine: Alpine): void {
   // x-void-preserve directive: adds `wire:ignore` so Livewire's morph engine
   // skips the element and its Lit-rendered children. (`wire:ignore.self` only
   // protects the element's own attributes and still morphs children.)
-  // Usage: <void-select x-void-preserve>...</void-select>
+  // Usage: <void-select x-void-preserve><select>...</select></void-select>
   Alpine.directive('void-preserve', (el) => {
     // Livewire reads this attribute from the live element at morph time, so
     // setting it during Alpine init is early enough for every later update.

@@ -35,11 +35,12 @@ type declaration struct {
 	Events        []event     `json:"events"`
 	Slots         []slot      `json:"slots"`
 
-	VoidParents  []string          `json:"voidParents"`
-	VoidRequires []string          `json:"voidRequires"`
-	VoidHints    map[string]string `json:"voidHints"`
-	VoidParts    *partsJSON        `json:"voidParts"`
-	VoidName     *nameRule         `json:"voidName"`
+	VoidParents  []string              `json:"voidParents"`
+	VoidRequires []string              `json:"voidRequires"`
+	VoidHints    map[string]string     `json:"voidHints"`
+	VoidParts    *partsJSON            `json:"voidParts"`
+	VoidName     *nameRule             `json:"voidName"`
+	VoidNative   *domain.NativeControl `json:"voidNative"`
 }
 
 // partsJSON is voidParts as the manifest build writes it (packages/ui/cem/plugins.js).
@@ -165,6 +166,7 @@ func Decode(manifestJSON, summaryJSON []byte) (*domain.Catalog, error) {
 func element(path string, d declaration) domain.Element {
 	e := domain.Element{Tag: d.TagName, Class: d.Name, Module: path, Description: d.Description}
 	e.AllowedParents, e.RequiredChildren, e.AttrHints = d.VoidParents, d.VoidRequires, d.VoidHints
+	e.Native = d.VoidNative
 	if n := d.VoidName; n != nil {
 		e.Name = &domain.NameRule{Attributes: n.Attributes, Content: n.Content, Parts: n.Parts, Hint: n.Hint}
 		for _, a := range n.Ancestors {

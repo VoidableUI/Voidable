@@ -1,0 +1,28 @@
+<main style="max-width: 24rem; padding: 1rem; display: grid; gap: 1rem">
+  <void-field label="Plan">
+    <void-select id="select" value="pro">
+      <select name="plan">
+        <option value="" disabled selected hidden>Choose a plan</option>
+        <option value="free">Free</option>
+        <option value="pro">Pro</option>
+      </select>
+    </void-select>
+  </void-field>
+  <void-field label="Country">
+    <void-combobox id="combobox" name="country" placeholder="Search countries">
+      <void-combobox-content>
+        <void-option value="de">Germany</void-option>
+        <void-option value="fr" selected>France</void-option>
+      </void-combobox-content>
+    </void-combobox>
+  </void-field>
+  <void-field label="Labels">
+    <void-multiselect id="multiselect" name="labels" placeholder="Pick labels">
+      <void-multiselect-content>
+        <void-option value="bug">Bug</void-option>
+        <void-option value="docs">Docs</void-option>
+      </void-multiselect-content>
+    </void-multiselect>
+  </void-field>
+  <p id="after">After the pickers.</p>
+</main>

@@ -361,7 +361,6 @@ Remaining components, in the order to convert them (grouping and open questions 
 
 1. **Fields**: field, checkbox-group, radio-group, then checkbox and radio (label, description, error parts; the `label`/`helper`/`error` attributes are used everywhere, so this group needs an owner decision first).
 2. **Shadow internals**: tag, scroll-area (no parts; their rendered buttons and viewport move into a shadow root like the alert's dismiss button).
-3. **Pickers**: combobox, multiselect, option, select (the content part for options; select's native options are open).
 
 ### CSS Selector Strategy
 

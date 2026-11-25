@@ -20,8 +20,8 @@
   <void-dropdown-menu id="menu"><void-dropdown-menu-trigger><button id="menu-t">Menu</button></void-dropdown-menu-trigger><void-dropdown-menu-content><void-dropdown-menu-item>One</void-dropdown-menu-item><void-dropdown-menu-item>Two</void-dropdown-menu-item><void-dropdown-menu-item>Three</void-dropdown-menu-item></void-dropdown-menu-content></void-dropdown-menu>
   <void-tooltip id="tip" delay="50"><void-tooltip-trigger><button id="tip-t">Tip</button></void-tooltip-trigger><void-tooltip-content>A tooltip with some text in it</void-tooltip-content></void-tooltip>
   <void-hover-card id="card" open-delay="50" close-delay="50"><void-hover-card-trigger><a href="#card" id="card-t">Card</a></void-hover-card-trigger><void-hover-card-content><div class="hcc" style="width: 260px; height: 100px">hover card content</div></void-hover-card-content></void-hover-card>
-  <void-combobox id="combo" placeholder="Pick" style="width: 180px"><void-option value="react">React</void-option><void-option value="vue">Vue</void-option><void-option value="lit">Lit</void-option><void-option value="svelte">Svelte</void-option></void-combobox>
-  <void-multiselect id="multi" placeholder="Pick many" style="width: 180px"><void-option value="css">CSS</void-option><void-option value="js">JS</void-option><void-option value="html">HTML</void-option></void-multiselect>
+  <void-combobox id="combo" placeholder="Pick" style="width: 180px"><void-combobox-content><void-option value="react">React</void-option><void-option value="vue">Vue</void-option><void-option value="lit">Lit</void-option><void-option value="svelte">Svelte</void-option></void-combobox-content></void-combobox>
+  <void-multiselect id="multi" placeholder="Pick many" style="width: 180px"><void-multiselect-content><void-option value="css">CSS</void-option><void-option value="js">JS</void-option><void-option value="html">HTML</void-option></void-multiselect-content></void-multiselect>
   <void-date-picker id="date" value="2026-11-10" style="width: 180px"></void-date-picker>
 </div>
 <script>

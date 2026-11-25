@@ -27,6 +27,8 @@ export interface DevTag {
   c?: 1;
   /** What gives the element its accessible name (it must have one). */
   n?: DevName;
+  /** The native control the author writes inside it (`select` in `<void-select>`), with the correct markup. */
+  v?: { tag: string; fix: string };
 }
 
 /** The explicit parts of a component (or of a part that has parts of its own). */

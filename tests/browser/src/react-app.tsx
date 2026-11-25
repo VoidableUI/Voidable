@@ -81,12 +81,14 @@ function App() {
       <Switch id="r-on" name="on" checked={on} onVoidChange={log('on', (e) => setOn(e.detail.checked))}>
         On
       </Switch>
-      <Select id="r-country" name="country" aria-label="Country" value={country} onVoidChange={log('country', (e) => setCountry(e.detail.value))}>
-        {opts.map((o) => (
-          <option key={o} value={o}>
-            Opt {o}
-          </option>
-        ))}
+      <Select id="r-country" aria-label="Country" value={country} onVoidChange={log('country', (e) => setCountry(e.detail.value))}>
+        <select name="country">
+          {opts.map((o) => (
+            <option key={o} value={o}>
+              Opt {o}
+            </option>
+          ))}
+        </select>
       </Select>
       <RadioGroup id="r-plan" name="plan" label="Plan" value={plan} onVoidChange={log('plan', (e) => setPlan(e.detail.value))}>
         <Radio value="free">Free</Radio>

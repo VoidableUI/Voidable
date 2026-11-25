@@ -60,9 +60,11 @@
       </void-field>
 <% elsif attribute.reference? -%>
       <void-field label="<%= attribute.human_name %>">
-        <void-select name="<%= singular_table_name %>[<%= attribute.column_name %>]">
-          <option value="">Select...</option>
-          <%%= options_from_collection_for_select(<%= attribute.column_name.chomp("_id").classify %>.all, :id, :name, <%= singular_table_name %>.<%= attribute.column_name %>) %>
+        <void-select>
+          <select name="<%= singular_table_name %>[<%= attribute.column_name %>]">
+            <option value="">Select...</option>
+            <%%= options_from_collection_for_select(<%= attribute.column_name.chomp("_id").classify %>.all, :id, :name, <%= singular_table_name %>.<%= attribute.column_name %>) %>
+          </select>
         </void-select>
       </void-field>
 <% else -%>

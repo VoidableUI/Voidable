@@ -40,8 +40,10 @@ your controllers with `data-action`:
 <void-button data-action="void-click->form#submit">Save</void-button>
 
 <void-select aria-label="Choose an option" data-action="void-change->filter#update">
-  <option value="a">Option A</option>
-  <option value="b">Option B</option>
+  <select>
+    <option value="a">Option A</option>
+    <option value="b">Option B</option>
+  </select>
 </void-select>
 ```
 

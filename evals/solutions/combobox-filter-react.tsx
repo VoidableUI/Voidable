@@ -18,11 +18,13 @@ export default function App() {
       <form action="/tasks/42/assign" method="post" style={{ display: 'grid', gap: 'var(--void-space-4)' }}>
         <void-field label="Assignee">
           <void-combobox name="assignee" placeholder="Search team members" required>
-            {team.map((m) => (
-              <void-option key={m.id} value={m.id}>
-                {m.name}
-              </void-option>
-            ))}
+            <void-combobox-content>
+              {team.map((m) => (
+                <void-option key={m.id} value={m.id}>
+                  {m.name}
+                </void-option>
+              ))}
+            </void-combobox-content>
           </void-combobox>
         </void-field>
         <div>
