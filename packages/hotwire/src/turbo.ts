@@ -12,7 +12,9 @@
  * before children, so outer elements are parked first; every element puts the
  * same chrome back (same nodes, state, typed text and focus) in the microtask
  * after the morph. The rule itself lives in the base class, shared with the
- * Livewire and LiveView adapters; this module only connects it to Turbo.
+ * Livewire and LiveView adapters; this module only connects it to Turbo. An
+ * element whose server markup is identical to the server's previous render
+ * (`voidUnchanged`) is left out of the morph with its subtree.
  *
  * Usage:
  * ```js
@@ -21,7 +23,10 @@
  * ```
  */
 
-type Morphable = Element & { voidBeforeMorph?: (incoming?: Element | null) => boolean };
+type Morphable = Element & {
+  voidBeforeMorph?: (incoming?: Element | null) => boolean;
+  voidUnchanged?: (incoming: Element) => boolean;
+};
 
 export const VoidTurbo = {
   /** Start listening. Returns a function that removes the listener. */
@@ -31,6 +36,12 @@ export const VoidTurbo = {
       const next = event.detail?.newElement;
       // Only if the element is really about to be morphed (another listener may cancel it).
       if (!next || event.defaultPrevented || !el.tagName?.startsWith('VOID-')) return;
+      // The server sent exactly what it sent last time: the morph would change
+      // nothing the server controls, so Turbo skips the element and its subtree.
+      if (el.voidUnchanged?.(next)) {
+        event.preventDefault();
+        return;
+      }
       el.voidBeforeMorph?.(next);
     }) as EventListener;
 

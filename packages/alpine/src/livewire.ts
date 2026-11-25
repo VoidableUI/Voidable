@@ -21,7 +21,10 @@
  * ```
  */
 
-type VoidHost = Element & { voidBeforeMorph?: (incoming?: Element | null) => boolean };
+type VoidHost = Element & {
+  voidBeforeMorph?: (incoming?: Element | null) => boolean;
+  voidUnchanged?: (incoming: Element) => boolean;
+};
 
 export function registerLivewireHooks(): void {
   if (typeof window === 'undefined') return;
@@ -29,8 +32,13 @@ export function registerLivewireHooks(): void {
   const Livewire = (window as any).Livewire;
   if (!Livewire) return;
 
-  Livewire.hook('morph.updating', ({ el, toEl }: { el: VoidHost; toEl?: Element }) => {
+  Livewire.hook('morph.updating', ({ el, toEl, skip }: { el: VoidHost; toEl?: Element; skip?: () => void }) => {
     if (!el.tagName?.startsWith('VOID-')) return;
+    // The server sent exactly what it sent last time: skip the element and its subtree.
+    if (toEl && skip && el.voidUnchanged?.(toEl)) {
+      skip();
+      return;
+    }
     el.voidBeforeMorph?.(toEl);
   });
 }

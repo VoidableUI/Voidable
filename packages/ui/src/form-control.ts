@@ -276,6 +276,12 @@ function CoreFormControl<T extends Constructor<VoidElement>>(Base: T) {
       this.#defaultCaptured = true;
     }
 
+    /** The server rendered a new value: like a native control's value attribute, it becomes the reset default. */
+    protected override serverChangedCallback(names: ReadonlySet<string>): void {
+      super.serverChangedCallback(names);
+      if (names.has('value') || names.has('checked')) this.formCaptureDefault();
+    }
+
     protected formValidity(): FormValidityResult | null {
       return null;
     }

@@ -55,6 +55,21 @@ describe('registerLivewireHooks pre-morph hook', () => {
     expect(log.map(e => (e as unknown[])[0])).toEqual(['outer', 'inner']);
   });
 
+  it('skips an element whose server markup is unchanged (voidUnchanged), with its subtree', () => {
+    const hooks = setup();
+    const log: unknown[] = [];
+    const el = host('void-switch', log);
+    let unchanged = true;
+    el.voidUnchanged = () => unchanged;
+    let skipped = 0;
+    const toEl = document.createElement('void-switch');
+    hooks['morph.updating']({ el, toEl, skip: () => skipped++ });
+    expect([skipped, log.length]).toEqual([1, 0]);
+    unchanged = false;
+    hooks['morph.updating']({ el, toEl, skip: () => skipped++ });
+    expect([skipped, log.length]).toEqual([1, 1]);
+  });
+
   it('ignores non-void elements and void-* elements without the hook', () => {
     const hooks = setup();
     const log: unknown[] = [];

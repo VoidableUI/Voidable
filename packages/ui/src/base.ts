@@ -131,7 +131,10 @@ export class VoidElement extends LitElement {
    * connected). Each morph compares the incoming markup with it.
    */
   #server: Map<string, string> | null | undefined = undefined;
+  /** The server's last markup of this element (outerHTML), for voidUnchanged. */
+  #serverHTML: string | undefined = undefined;
   #morphQueued = false;
+  #serverChanged: Set<string> | null = null;
 
   /**
    * Client state that no reflected attribute carries and the server never
@@ -156,6 +159,11 @@ export class VoidElement extends LitElement {
       // The attributes present when the element first connects are the server's
       // (or the author's) markup: the baseline the first morph compares against.
       this.#server = this.#readServer(this);
+      // And the whole server markup, for voidUnchanged (serialising every
+      // element's subtree costs about a millisecond for a page of thousands).
+      // The document parser connects an element before its children: then
+      // this does not match, the first morph runs in full and records it.
+      this.#serverHTML = this.outerHTML;
       // A component that renders and declared no controller of its own (with
       // regions, in a field initializer) gets the region-less default, created
       // here rather than in the constructor so components with their own never
@@ -167,6 +175,14 @@ export class VoidElement extends LitElement {
     }
     super.connectedCallback();
   }
+
+  /**
+   * Moved within the document with `Element.moveBefore` (how projection parks
+   * and restores nodes around a morph): nothing to tear down or set up, so the
+   * browser runs this instead of disconnectedCallback plus connectedCallback.
+   * @internal
+   */
+  connectedMoveCallback(): void {}
 
   /** The property-backed attributes `el` carries, or null for none. */
   #readServer(el: Element): Map<string, string> | null {
@@ -354,6 +370,7 @@ export class VoidElement extends LitElement {
     if (projection && child && child.parentNode !== this && (projection.isProjected(child) || projection.isWrapEnd(child))) {
       return projection.insertBefore(node, child);
     }
+    if (projection && !child && projection.append(node)) return node;
     return super.insertBefore(node, child);
   }
 
@@ -468,6 +485,24 @@ export class VoidElement extends LitElement {
   }
 
   /**
+   * Supported check for adapters whose morpher can leave an element out (Turbo:
+   * cancelling `turbo:before-morph-element`; Livewire: `skip()`): returns true
+   * when `incoming`, the server's version of this element, is identical
+   * (attributes and content) to the server's previous render of it. Under the
+   * state rule such a morph would change nothing the server controls and keep
+   * everything else, so the element and its subtree can be skipped, which
+   * makes a morph of an unchanged page close to free. Otherwise it records
+   * `incoming` as the server's markup and returns false; call
+   * {@link voidBeforeMorph} next. Call it before anything modifies `incoming`.
+   */
+  voidUnchanged(incoming: Element): boolean {
+    const html = incoming.outerHTML;
+    if (html === this.#serverHTML && !this[PROJECTION_KEY]?.parked) return true;
+    this.#serverHTML = html;
+    return false;
+  }
+
+  /**
    * Re-projects after {@link voidBeforeMorph} without waiting for the scheduled
    * update. Resolves once the element has rendered. A no-op for elements that are
    * not parked.
@@ -526,17 +561,30 @@ export class VoidElement extends LitElement {
         }
       }
     }
-    if (meta.hook && !this.#morphQueued) {
+    if (changed) for (const name of changed) (this.#serverChanged ??= new Set()).add(name);
+    if ((meta.hook || this.#serverChanged) && !this.#morphQueued) {
       this.#morphQueued = true;
       // After the (synchronous) morph and the updates it caused.
       queueMicrotask(() => {
         void this.updateComplete.then(() => {
           this.#morphQueued = false;
-          if (this.isConnected) this.morphedCallback();
+          const names = this.#serverChanged;
+          this.#serverChanged = null;
+          if (!this.isConnected) return;
+          if (names) this.serverChangedCallback(names);
+          if (meta.hook) this.morphedCallback();
         });
       });
     }
   }
+
+  /**
+   * Called after a server-driven morph that changed some of this element's
+   * property-backed attributes (`names`), once the element has applied them.
+   * Form controls take the server's new value as their reset default here, as
+   * a native input's defaultValue follows its value attribute.
+   */
+  protected serverChangedCallback(_names: ReadonlySet<string>): void {}
 
   /**
    * Called once a server-driven morph of this element has finished, after the

@@ -24,8 +24,11 @@ function server(html: string): Element {
   return tpl.content.firstElementChild as Element;
 }
 
-function beforeMorph(el: Element, newElement: Element): void {
-  el.dispatchEvent(new CustomEvent('turbo:before-morph-element', { bubbles: true, cancelable: true, detail: { newElement } }));
+/** Fires Turbo's event; returns true when the adapter skipped the element (identical server markup). */
+function beforeMorph(el: Element, newElement: Element): boolean {
+  const event = new CustomEvent('turbo:before-morph-element', { bubbles: true, cancelable: true, detail: { newElement } });
+  el.dispatchEvent(event);
+  return event.defaultPrevented;
 }
 
 describe('VoidTurbo and host attributes', () => {
@@ -67,8 +70,12 @@ describe('VoidTurbo and host attributes', () => {
     const el = document.getElementById('n') as HTMLElement & { value: number };
     el.value = 7;
     await settle();
-    const same = server('<void-number-input id="n" value="3"></void-number-input>');
-    beforeMorph(el, same);
+    // Identical server markup: the element is skipped and keeps 7.
+    expect(beforeMorph(el, server('<void-number-input id="n" value="3"></void-number-input>'))).toBe(true);
+    expect(el.value).toBe(7);
+    // Other markup with the same value: the morph runs and keeps the client's 7.
+    const same = server('<void-number-input id="n" value="3" step="1"></void-number-input>');
+    expect(beforeMorph(el, same)).toBe(false);
     expect(same.getAttribute('value')).toBe('7');
     const changed = server('<void-number-input id="n" value="5"></void-number-input>');
     beforeMorph(el, changed);

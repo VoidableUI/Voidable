@@ -23,7 +23,8 @@ state of every reflected property (`open`, `checked`, `pressed`, `collapsed`,
 `value`, ...) and the component's own `role` / `tabindex` / `aria-*` survive
 while the server keeps rendering the same value, and the server wins as soon
 as it renders a different one. The rule lives in `@voidable/ui` and is the
-same for the Livewire and LiveView adapters.
+same for the Livewire and LiveView adapters. A component whose server markup
+is identical to the previous render is skipped with its subtree.
 
 To load each component only when its tag first appears (including tags that
 arrive in Turbo visits, streams and frames), import `@voidable/ui/autoloader`

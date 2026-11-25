@@ -298,6 +298,47 @@ describe('wrap regions under direct DOM edits (breadcrumbs)', () => {
     expect(items(bc)).toEqual(['b', 'x', 'c']);
   });
 
+  it('follows a Solid keyed swap (nextSibling read before two moves)', async () => {
+    const bc = await mount<Host>('<void-breadcrumbs><a>a</a><a>x</a><a>b</a><a>y</a></void-breadcrumbs>');
+    const [a, x, b, y] = Array.from(bc.querySelectorAll('a'));
+    // reconcileArrays: [a, x, b, y] -> [y, b, x, a]
+    let node = y.nextSibling;
+    bc.insertBefore(y, a.nextSibling);
+    bc.insertBefore(a, node);
+    node = b.nextSibling;
+    bc.insertBefore(b, x.nextSibling);
+    bc.insertBefore(x, node);
+    await settle();
+    expect(items(bc)).toEqual(['y', 'b', 'x', 'a']);
+  });
+
+  it('keeps the order of a run of items inserted before one reference (Solid)', async () => {
+    const bc = await mount<Host>('<void-breadcrumbs><a>a</a><a>h</a><a>d</a></void-breadcrumbs>');
+    const h = bc.querySelectorAll('a')[1];
+    const node = h.nextSibling;
+    for (const t of ['c', 'b']) {
+      const n = document.createElement('a');
+      n.textContent = t;
+      bc.insertBefore(n, node);
+    }
+    await settle();
+    expect(items(bc)).toEqual(['a', 'h', 'c', 'b', 'd']);
+  });
+
+  it('follows Svelte moves with anchor.before()', async () => {
+    const bc = await mount<Host>('<void-breadcrumbs><a>a</a><a>x</a><a>b</a><a>y</a></void-breadcrumbs>');
+    const anchor = document.createTextNode('');
+    bc.appendChild(anchor);
+    await settle();
+    const [a, , b, y] = Array.from(bc.querySelectorAll('a'));
+    // [a, x, b, y] -> [y, b, x, a]
+    a.before(y);
+    a.before(b);
+    anchor.before(a);
+    await settle();
+    expect(items(bc)).toEqual(['y', 'b', 'x', 'a']);
+  });
+
   it('a replaced item keeps its position', async () => {
     const bc = await mount<Host>('<void-breadcrumbs><a>a</a><a>b</a><a>c</a></void-breadcrumbs>');
     const y = document.createElement('a');
@@ -345,5 +386,47 @@ describe('field', () => {
     field.removeAttribute('error');
     await settle();
     expect(input().getAttribute('aria-invalid')).toBe(before);
+  });
+});
+
+describe('reset default follows the server', () => {
+  it('a value the server changed becomes what form.reset() restores', async () => {
+    const form = await mount<HTMLFormElement>('<form><void-number-input name="q" value="3"></void-number-input></form>');
+    const n = form.querySelector('void-number-input') as Host;
+    await morph(n, '<void-number-input name="q" value="5"></void-number-input>');
+    expect(n.value).toBe(5);
+    n.value = 9;
+    await settle();
+    form.reset();
+    await settle();
+    expect(n.value).toBe(5);
+  });
+
+  it('a value the client changed does not', async () => {
+    const form = await mount<HTMLFormElement>('<form><void-number-input name="q" value="3"></void-number-input></form>');
+    const n = form.querySelector('void-number-input') as Host;
+    n.value = 9;
+    await settle();
+    await morph(n, '<void-number-input name="q" value="3"></void-number-input>');
+    expect(n.value).toBe(9);
+    form.reset();
+    await settle();
+    expect(n.value).toBe(3);
+  });
+});
+
+describe('appending to a rendered host (Solid keyed lists)', () => {
+  it('an option inserted before null is in place at once, so later nextSibling reads are right', async () => {
+    const sel = await mount<Host>('<void-select name="s"><option value="a">a</option><option value="x">x</option><option value="b">b</option><option value="y">y</option></void-select>');
+    const [a, x, b, y] = Array.from(sel.querySelectorAll('option'));
+    // reconcileArrays: [a, x, b, y] -> [y, b, x, a]
+    let node = y.nextSibling;
+    sel.insertBefore(y, a.nextSibling);
+    sel.insertBefore(a, node);
+    node = b.nextSibling;
+    sel.insertBefore(b, x.nextSibling);
+    sel.insertBefore(x, node);
+    await settle();
+    expect(Array.from(sel.querySelectorAll('option')).map(o => o.value)).toEqual(['y', 'b', 'x', 'a']);
   });
 });

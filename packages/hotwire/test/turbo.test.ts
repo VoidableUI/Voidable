@@ -85,6 +85,27 @@ describe('VoidTurbo.start', () => {
     expect(dialog.open).toBe(false);
   });
 
+  it('skips an element whose server markup is identical to the previous render', async () => {
+    const c = await mount('<void-checkbox name="a">Agree</void-checkbox>');
+    stop = VoidTurbo.start();
+    const cancelled = (html: string) => {
+      const event = new CustomEvent('turbo:before-morph-element', { bubbles: true, cancelable: true, detail: { newElement: server(html) } });
+      c.dispatchEvent(event);
+      return event.defaultPrevented;
+    };
+    // (An element connected while its children were still being parsed records
+    // its markup at the first morph instead.)
+    await morph(c, '<void-checkbox name="a">Agree</void-checkbox>');
+    c.checked = true;
+    await settle();
+    expect(cancelled('<void-checkbox name="a">Agree</void-checkbox>')).toBe(true);
+    expect(c.checked).toBe(true);
+    // Changed content goes through the morph and becomes the new server markup.
+    await morph(c, '<void-checkbox name="a">Agree!</void-checkbox>');
+    expect(cancelled('<void-checkbox name="a">Agree!</void-checkbox>')).toBe(true);
+    expect(cancelled('<void-checkbox name="a">Agree</void-checkbox>')).toBe(false);
+  });
+
   it('keeps the client value when the server value is unchanged', async () => {
     const dialog = await mount('<void-dialog></void-dialog>');
     stop = VoidTurbo.start();
