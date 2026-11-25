@@ -10,6 +10,22 @@ import '../src/components/tabs.js';
 import '../src/components/combobox.js';
 import '../src/components/multiselect.js';
 import '../src/components/select.js';
+import '../src/components/popover.js';
+import '../src/components/hover-card.js';
+import '../src/components/card.js';
+import '../src/components/panel.js';
+import '../src/components/banner.js';
+import '../src/components/alert.js';
+import '../src/components/scroll-area.js';
+import '../src/components/nav-bar.js';
+import '../src/components/accordion.js';
+import '../src/components/collapsible.js';
+import '../src/components/radio.js';
+import '../src/components/checkbox.js';
+import '../src/components/radio-group.js';
+import '../src/components/checkbox-group.js';
+import '../src/components/tag.js';
+import '../src/components/carousel.js';
 
 /** Waits for MutationObserver callbacks and any Lit updates they trigger. */
 async function settle(el?: LitElement): Promise<void> {
@@ -88,6 +104,89 @@ describe('void-dialog projection', () => {
     el.appendChild(late);
     await settle(el);
     expect(late.parentElement?.classList.contains('void-dialog-body')).toBe(true);
+  });
+});
+
+describe('void-dialog: persistent declarative dialog (issue #4 production report)', () => {
+  type Dialog = LitElement & { open: boolean };
+
+  it('shows its content on every one of many open/close cycles', async () => {
+    document.body.innerHTML = `
+      <button id="opener">Open</button>
+      <void-dialog id="d" heading="Confirm">
+        <p id="msg">Are you sure?</p>
+        <button id="ok">OK</button>
+      </void-dialog>`;
+    const el = document.getElementById('d') as Dialog;
+    await settle(el);
+    const msg = el.querySelector('#msg')!;
+    let okClicks = 0;
+    el.querySelector('#ok')!.addEventListener('click', () => okClicks++);
+    for (let i = 0; i < 10; i++) {
+      el.open = true;
+      await settle(el);
+      const body = el.querySelector('.void-dialog-body')!;
+      expect(el.querySelector<HTMLElement>('.void-dialog-backdrop')!.hidden).toBe(false);
+      expect(body.querySelector('#msg')).toBe(msg);
+      expect(body.textContent).toContain('Are you sure?');
+      el.querySelector<HTMLElement>('#ok')!.click();
+      // alternate between the close button, Escape and setting the property
+      if (i % 3 === 0) el.querySelector<HTMLElement>('.void-dialog-close')!.click();
+      else if (i % 3 === 1) document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+      else el.open = false;
+      await settle(el);
+      expect(el.open).toBe(false);
+      expect(el.contains(msg)).toBe(true);
+    }
+    expect(okClicks).toBe(10);
+    expect(el.querySelectorAll('#msg').length).toBe(1);
+    expect(el.querySelectorAll('.void-dialog-body').length).toBe(1);
+  });
+
+  it('copes with a morph re-adding its original children to the host without duplicating them', async () => {
+    const el = mount<Dialog>('<void-dialog open><p id="a">A</p><p id="b">B</p></void-dialog>');
+    await settle(el);
+    const a = el.querySelector('#a')!;
+    const b = el.querySelector('#b')!;
+    // A morph that believes the host's children are [a, b] re-inserts them there.
+    el.appendChild(a);
+    el.appendChild(b);
+    await settle(el);
+    const body = el.querySelector('.void-dialog-body')!;
+    expect(Array.from(body.children)).toEqual([a, b]);
+    expect(el.querySelectorAll('p').length).toBe(2);
+  });
+
+  it('copes with a morph reordering the original children', async () => {
+    const el = mount<Dialog>('<void-dialog open><p id="a">A</p><p id="b">B</p></void-dialog>');
+    await settle(el);
+    const a = el.querySelector('#a')!;
+    const b = el.querySelector('#b')!;
+    // Reorder through the host, as a morph working against the server markup would.
+    el.insertBefore(b, a);
+    await settle(el);
+    expect(Array.from(el.querySelector('.void-dialog-body')!.children)).toEqual([b, a]);
+    el.appendChild(b);
+    await settle(el);
+    expect(Array.from(el.querySelector('.void-dialog-body')!.children)).toEqual([a, b]);
+    expect(el.querySelectorAll('p').length).toBe(2);
+  });
+
+  it('supports framework-style keyed child updates through the host', async () => {
+    const el = mount<Dialog>('<void-dialog open></void-dialog>');
+    await settle(el);
+    // What React/Solid do: treat the host as the parent of the nodes they render.
+    const one = document.createElement('li');
+    const two = document.createElement('li');
+    el.appendChild(one);
+    el.appendChild(two);
+    await settle(el);
+    const three = document.createElement('li');
+    expect(() => el.insertBefore(three, two)).not.toThrow();
+    expect(() => el.removeChild(one)).not.toThrow();
+    const four = document.createElement('li');
+    expect(() => el.replaceChild(four, two)).not.toThrow();
+    expect(Array.from(el.querySelector('.void-dialog-body')!.children)).toEqual([three, four]);
   });
 });
 
@@ -230,5 +329,132 @@ describe('void-select projection', () => {
     await settle(el);
     expect(el.querySelectorAll('select').length).toBe(1);
     expect(el.querySelector('select')!.options.length).toBe(1);
+  });
+});
+
+describe('void-popover projection', () => {
+  it('keeps the trigger first, projects the body and survives moves', async () => {
+    const el = mount<LitElement & { open: boolean }>('<void-popover><button id="t">T</button><p id="c">C</p></void-popover>');
+    await settle(el);
+    expect(el.firstElementChild?.id).toBe('t');
+    expect(el.querySelector('.void-popover-body #c')).not.toBeNull();
+    document.body.appendChild(document.createElement('div')).appendChild(el);
+    await settle(el);
+    expect(el.querySelectorAll('.void-popover-body').length).toBe(1);
+    el.querySelector<HTMLElement>('#t')!.click();
+    expect(el.open).toBe(true);
+    // clicks inside the body do not toggle
+    el.querySelector<HTMLElement>('#c')!.click();
+    expect(el.open).toBe(true);
+  });
+});
+
+describe('void-hover-card projection', () => {
+  it('projects trigger and body once and does not duplicate wrappers on reconnect', async () => {
+    const el = mount<LitElement>('<void-hover-card><a id="t">T</a><p id="c">C</p></void-hover-card>');
+    await settle(el);
+    el.remove();
+    document.body.appendChild(el);
+    await settle(el);
+    expect(el.querySelectorAll('.void-hover-card-trigger').length).toBe(1);
+    expect(el.querySelector('.void-hover-card-trigger #t')).not.toBeNull();
+    expect(el.querySelector('.void-hover-card-body #c')).not.toBeNull();
+  });
+});
+
+describe('container components project late children and survive reconnect', () => {
+  const cases: Array<[string, string]> = [
+    ['void-card', '.void-card-body'],
+    ['void-scroll-area', '.void-scroll-area-viewport'],
+    ['void-nav-bar', '.void-nav-bar-content'],
+    ['void-accordion-item', '.void-accordion-content'],
+    ['void-collapsible', '.void-collapsible-inner'],
+    ['void-checkbox-group', '.void-checkbox-group-items'],
+  ];
+  for (const [tag, selector] of cases) {
+    it(tag, async () => {
+      const el = mount<LitElement>(`<${tag}><span id="first">1</span></${tag}>`);
+      await settle(el);
+      expect(el.querySelector(`${selector} #first`)).not.toBeNull();
+      const late = document.createElement('span');
+      el.appendChild(late);
+      await settle(el);
+      expect(late.parentElement?.matches(selector)).toBe(true);
+      el.remove();
+      document.body.appendChild(el);
+      await settle(el);
+      expect(el.querySelectorAll(selector).length).toBe(1);
+      expect(el.querySelectorAll('#first').length).toBe(1);
+    });
+  }
+});
+
+describe('host-region components keep content when their chrome toggles', () => {
+  const cases: Array<[string, string]> = [
+    ['void-banner', 'dismissable'],
+    ['void-alert', 'dismissible'],
+    ['void-tag', 'removable'],
+    ['void-panel', 'label'],
+  ];
+  for (const [tag, prop] of cases) {
+    it(`${tag} (${prop})`, async () => {
+      const el = mount<LitElement>(`<${tag}><b id="c">content</b></${tag}>`);
+      await settle(el);
+      const c = el.querySelector('#c')!;
+      const host = el as unknown as Record<string, unknown>;
+      host[prop] = prop === 'label' ? 'Label' : true;
+      await settle(el);
+      host[prop] = prop === 'label' ? '' : false;
+      await settle(el);
+      host[prop] = prop === 'label' ? 'Again' : true;
+      await settle(el);
+      expect(el.querySelector('#c')).toBe(c);
+      expect(c.parentNode).toBe(el);
+    });
+  }
+
+  it('void-tag keeps content before the remove button', async () => {
+    const el = mount<LitElement>('<void-tag removable>Label</void-tag>');
+    await settle(el);
+    const close = el.querySelector('.void-tag-close')!;
+    const text = Array.from(el.childNodes).find(n => n.nodeType === Node.TEXT_NODE && n.textContent === 'Label')!;
+    expect(text.compareDocumentPosition(close) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
+  it('void-checkbox keeps label content after the control on reconnect', async () => {
+    const el = mount<LitElement>('<void-checkbox>Accept</void-checkbox>');
+    await settle(el);
+    el.remove();
+    document.body.appendChild(el);
+    await settle(el);
+    expect(el.querySelectorAll('input').length).toBe(1);
+    expect(el.textContent?.trim()).toBe('Accept');
+    expect(el.lastChild?.textContent).toBe('Accept');
+  });
+});
+
+describe('void-radio-group projection', () => {
+  it('gives radios added after connect the group name and checked state', async () => {
+    const el = mount<LitElement>('<void-radio-group name="g" value="b"><void-radio value="a">A</void-radio></void-radio-group>');
+    await settle(el);
+    const radio = document.createElement('void-radio') as LitElement & { value: string; name: string; checked: boolean };
+    radio.value = 'b';
+    el.appendChild(radio);
+    await settle(el);
+    expect(radio.parentElement?.classList.contains('void-radio-group-options')).toBe(true);
+    expect(radio.name).toBe('g');
+    expect(radio.checked).toBe(true);
+  });
+});
+
+describe('void-carousel projection', () => {
+  it('adds an indicator for a slide added after connect', async () => {
+    const el = mount<LitElement>('<void-carousel><void-carousel-slide>1</void-carousel-slide></void-carousel>');
+    await settle(el);
+    expect(el.querySelectorAll('.void-carousel-dot').length).toBe(1);
+    el.appendChild(document.createElement('void-carousel-slide'));
+    await settle(el);
+    expect(el.querySelectorAll('.void-carousel-track > void-carousel-slide').length).toBe(2);
+    expect(el.querySelectorAll('.void-carousel-dot').length).toBe(2);
   });
 });

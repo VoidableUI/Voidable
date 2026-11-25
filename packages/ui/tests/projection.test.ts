@@ -117,6 +117,17 @@ describe('ProjectionController', () => {
       expect(body(el).childNodes.length).toBe(2);
     });
 
+    it('projects children of an element that is upgraded after it was parsed', async () => {
+      document.body.innerHTML = '<projection-late-host><p id="x">x</p>text</projection-late-host>';
+      class ProjectionLateHost extends ProjectionPlainHost {}
+      customElements.define('projection-late-host', ProjectionLateHost);
+      const el = document.querySelector('projection-late-host') as ProjectionLateHost;
+      // happy-dom swaps in a new instance on define rather than upgrading in place,
+      // so only the resulting structure is asserted here.
+      await settle(el);
+      expect(el.querySelector(':scope > .body')!.innerHTML).toBe('<p id="x">x</p>text');
+    });
+
     it('handles children appended before the first render', async () => {
       const el = create();
       document.body.appendChild(el);
