@@ -1,0 +1,117 @@
+<main class="ref-page">
+  <header class="ref-head">
+    <div class="ref-head-text">
+      <span data-void-type="label">Account</span>
+      <h1 data-void-type="title">Settings</h1>
+    </div>
+  </header>
+
+  <div class="ref-settings">
+    <void-list class="ref-settings-nav" role="list" aria-label="Settings sections">
+      <void-list-item interactive selected>Profile</void-list-item>
+      <void-list-item interactive>Notifications</void-list-item>
+      <void-list-item interactive>Appearance</void-list-item>
+      <void-list-item interactive>API tokens</void-list-item>
+      <void-list-item interactive>Danger zone</void-list-item>
+    </void-list>
+
+    <div class="ref-settings-body">
+      <section class="ref-section">
+        <div class="ref-section-head">
+          <h2 data-void-type="heading">Profile</h2>
+          <span data-void-type="label">Visible to your team</span>
+        </div>
+        <div class="ref-stack">
+          <div class="ref-field-pair">
+            <void-field label="Name">
+              <void-input name="name" value="Runa Kvist"></void-input>
+            </void-field>
+            <void-field label="Email" helper="Alerts are sent here.">
+              <void-input name="email" type="email" value="runa@meridian.example"></void-input>
+            </void-field>
+          </div>
+          <div class="ref-actions">
+            <void-button variant="filled">Save profile</void-button>
+            <void-button variant="ghost">Cancel</void-button>
+          </div>
+        </div>
+      </section>
+
+      <section class="ref-section">
+        <div class="ref-section-head">
+          <h2 data-void-type="heading">Notifications</h2>
+        </div>
+        <div class="ref-rows">
+          <div class="ref-row">
+            <div class="ref-row-text"><span>Station goes offline</span><span data-void-type="caption">Sent immediately, at any hour.</span></div>
+            <void-switch checked aria-label="Station goes offline"></void-switch>
+          </div>
+          <div class="ref-row">
+            <div class="ref-row-text"><span>Pass moved or cancelled</span><span data-void-type="caption">One message per pass, with the reason.</span></div>
+            <void-switch checked aria-label="Pass moved or cancelled"></void-switch>
+          </div>
+          <div class="ref-row">
+            <div class="ref-row-text"><span>Weekly summary</span><span data-void-type="caption">Mondays at 08:00 in your time zone.</span></div>
+            <void-switch aria-label="Weekly summary"></void-switch>
+          </div>
+        </div>
+      </section>
+
+      <section class="ref-section">
+        <div class="ref-section-head">
+          <h2 data-void-type="heading">Appearance</h2>
+        </div>
+        <div class="ref-rows">
+          <div class="ref-row">
+            <div class="ref-row-text"><span>Colour scheme</span><span data-void-type="caption">System follows your device.</span></div>
+            <void-segmented-control value="dark" aria-label="Colour scheme">
+              <void-segmented-control-item value="system">System</void-segmented-control-item>
+              <void-segmented-control-item value="dark">Dark</void-segmented-control-item>
+              <void-segmented-control-item value="light">Light</void-segmented-control-item>
+            </void-segmented-control>
+          </div>
+          <div class="ref-row">
+            <div class="ref-row-text"><span>Time zone</span><span data-void-type="caption">Pass times are always also shown in UTC.</span></div>
+            <void-select aria-label="Time zone">
+              <option>Europe/Oslo</option>
+              <option>UTC</option>
+              <option>Pacific/Auckland</option>
+            </void-select>
+          </div>
+        </div>
+      </section>
+
+      <section class="ref-section">
+        <div class="ref-section-head">
+          <h2 data-void-type="heading">API tokens</h2>
+          <span data-void-type="label">2 active</span>
+        </div>
+        <div class="ref-rows">
+          <div class="ref-row">
+            <div class="ref-row-text"><span data-void-type="code">mrd_live_9f2c…e41a</span><span data-void-type="caption">Scheduler integration · last used 4 min ago</span></div>
+            <void-button variant="ghost" size="sm" color="error">Revoke</void-button>
+          </div>
+          <div class="ref-row">
+            <div class="ref-row-text"><span data-void-type="code">mrd_live_03ab…77d0</span><span data-void-type="caption">Grafana export · last used yesterday</span></div>
+            <void-button variant="ghost" size="sm" color="error">Revoke</void-button>
+          </div>
+        </div>
+        <div class="ref-actions">
+          <void-button>Create token</void-button>
+        </div>
+      </section>
+
+      <section class="ref-section">
+        <div class="ref-section-head">
+          <h2 data-void-type="heading">Danger zone</h2>
+        </div>
+        <div class="ref-rows">
+          <div class="ref-row">
+            <div class="ref-row-text"><span>Leave this organisation</span><span data-void-type="caption">You lose access to every station and schedule. An owner can invite you back.</span></div>
+            <void-button color="error">Leave</void-button>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+</main>
