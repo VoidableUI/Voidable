@@ -1,0 +1,45 @@
+<main style="padding: 2rem">
+  <h1>Activation</h1>
+  <button id="before">before</button>
+
+  <void-dropdown-menu id="dd">
+    <void-button slot="trigger" id="dd-t">Open menu</void-button>
+    <void-dropdown-menu-item id="dd-one">One</void-dropdown-menu-item>
+    <void-dropdown-menu-item id="dd-two">Two</void-dropdown-menu-item>
+  </void-dropdown-menu>
+
+  <void-popover id="pop">
+    <void-button slot="trigger" id="pop-t">Open popover</void-button>
+    <div style="width: 200px">Popover content</div>
+  </void-popover>
+
+  <void-button id="plain">Plain</void-button>
+  <void-button id="off" disabled>Off</void-button>
+  <void-button id="aria-off">Aria off</void-button>
+  <void-button id="link" variant="outline"><a id="link-a" href="#followed">A link</a></void-button>
+
+  <form id="form" action="#" onsubmit="event.preventDefault(); window.submits += 1; return false;">
+    <input id="f-name" name="name" value="x" aria-label="Name" />
+    <void-button id="submit" type="submit">Save</void-button>
+    <void-button id="reset" type="reset">Reset</void-button>
+    <void-button id="submit-off" type="submit" disabled>Save (off)</void-button>
+  </form>
+
+  <void-toggle id="tgl" aria-label="Bold">B</void-toggle>
+  <void-switch id="sw" aria-label="Wifi"></void-switch>
+  <void-hamburger id="ham" aria-label="Menu"></void-hamburger>
+  <void-checkbox id="cb" aria-label="Agree"></void-checkbox>
+  <button id="after">after</button>
+</main>
+<script>
+  window.submits = 0;
+  window.log = [];
+  for (const id of ['plain', 'off', 'aria-off', 'link', 'submit', 'reset', 'submit-off', 'dd-t', 'pop-t', 'tgl', 'sw', 'ham', 'cb', 'dd-one']) {
+    const el = document.getElementById(id);
+    el.addEventListener('click', () => window.log.push('click:' + id));
+    el.addEventListener('void-click', () => window.log.push('void-click:' + id));
+  }
+  // Set after upgrade: the button manages aria-disabled for its own disabled state, an author's later value stands.
+  customElements.whenDefined('void-button').then(() => requestAnimationFrame(() => document.getElementById('aria-off').setAttribute('aria-disabled', 'true')));
+  document.getElementById('link-a').addEventListener('click', (e) => e.preventDefault());
+</script>

@@ -36,6 +36,8 @@ const checked = (el: Element) => itemsOf(el).map((i) => i.getAttribute('aria-che
 function press(el: Element, key: string): KeyboardEvent {
   const e = new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true });
   el.dispatchEvent(e);
+  // Space activates on keyup, as on a native button.
+  if (key === ' ') el.dispatchEvent(new KeyboardEvent('keyup', { key: key, bubbles: true, cancelable: true }));
   return e;
 }
 

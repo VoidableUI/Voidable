@@ -191,6 +191,7 @@ describe('VoidRadio', () => {
 
     it('Space key sets checked to true', () => {
       el.dispatchEvent(new KeyboardEvent('keydown', { key: ' ', bubbles: true }));
+      el.dispatchEvent(new KeyboardEvent('keyup', { key: ' ', bubbles: true }));
       expect(el.checked).toBe(true);
     });
 
@@ -198,6 +199,7 @@ describe('VoidRadio', () => {
       let fired = false;
       el.addEventListener('void-change', () => { fired = true; });
       el.dispatchEvent(new KeyboardEvent('keydown', { key: ' ', bubbles: true }));
+      el.dispatchEvent(new KeyboardEvent('keyup', { key: ' ', bubbles: true }));
       expect(fired).toBe(true);
     });
 
@@ -205,6 +207,7 @@ describe('VoidRadio', () => {
       el.disabled = true;
       await el.updateComplete;
       el.dispatchEvent(new KeyboardEvent('keydown', { key: ' ', bubbles: true }));
+      el.dispatchEvent(new KeyboardEvent('keyup', { key: ' ', bubbles: true }));
       expect(el.checked).toBe(false);
     });
 

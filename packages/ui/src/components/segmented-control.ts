@@ -1,5 +1,6 @@
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
+import { KeyboardActivation } from '../keyboard-activation.js';
 import { InternalsFormControl, type FormSubmission } from '../form-control.js';
 import { edgeEnabled, stepEnabled } from '../keyboard.js';
 
@@ -7,6 +8,9 @@ type ItemGroup = Element & { value?: string; _syncItems?: () => void };
 
 /** Individual option within a VoidSegmentedControl button group. */
 export class VoidSegmentedControlItem extends VoidElement {
+  /** Space fires a real `click`, which the control turns into a selection. */
+  private _activation = new KeyboardActivation(this, { enter: false, disabled: () => this.disabled });
+
   /**
    * What the parent reports and submits when this segment is selected. Must be unique within the
    * control.
@@ -152,12 +156,6 @@ export class VoidSegmentedControl extends InternalsFormControl(VoidElement) {
     if (e.altKey || e.ctrlKey || e.metaKey || this.formDisabled) return;
     const items = this._items;
     const focused = (e.target as Element | null)?.closest?.('void-segmented-control-item') as VoidSegmentedControlItem | null;
-    if (e.key === ' ') {
-      if (!focused) return;
-      e.preventDefault();
-      this._select(focused);
-      return;
-    }
     const forward = e.key === 'ArrowRight' || e.key === 'ArrowDown';
     if (!forward && e.key !== 'ArrowLeft' && e.key !== 'ArrowUp') return;
     e.preventDefault();

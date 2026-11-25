@@ -1,10 +1,14 @@
 import { html } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
+import { KeyboardActivation } from '../keyboard-activation.js';
 import { InternalsFormControl, type FormSubmission } from '../form-control.js';
 
 /** On/off toggle for feature flags, notification preferences, and settings that take immediate effect. */
 export class VoidSwitch extends InternalsFormControl(VoidElement) {
+  /** Enter and Space fire a real `click`, as on a native button. */
+  private _activation = new KeyboardActivation(this, { disabled: () => this.formDisabled });
+
   /** Whether the switch is on. The attribute is the initial state and the form's reset target. */
   @property({ type: Boolean, reflect: true }) checked = false;
   /**
@@ -28,13 +32,11 @@ export class VoidSwitch extends InternalsFormControl(VoidElement) {
     this.setHostAttribute('tabindex', this.disabled ? '-1' : '0');
     this.setHostAttribute('aria-checked', String(this.checked));
     this.addEventListener('click', this._handleClick);
-    this.addEventListener('keydown', this._handleKeydown);
   }
 
   disconnectedCallback(): void {
     super.disconnectedCallback();
     this.removeEventListener('click', this._handleClick);
-    this.removeEventListener('keydown', this._handleKeydown);
   }
 
   updated(changed: Map<string, unknown>): void {
@@ -68,13 +70,6 @@ export class VoidSwitch extends InternalsFormControl(VoidElement) {
       composed: true,
       detail: { checked: this.checked },
     }));
-  };
-
-  private _handleKeydown = (e: KeyboardEvent): void => {
-    if ((e.key === ' ' || e.key === 'Enter') && !this.formDisabled) {
-      e.preventDefault();
-      this._handleClick();
-    }
   };
 
   render() {

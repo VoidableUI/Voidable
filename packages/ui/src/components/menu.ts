@@ -1,6 +1,7 @@
 import { html, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
+import { KeyboardActivation } from '../keyboard-activation.js';
 import { isPrintable, stepEnabled, Typeahead } from '../keyboard.js';
 import { ProjectionController } from '../projection.js';
 
@@ -226,6 +227,9 @@ if (!customElements.get('void-menu')) {
 
 /** One action in a `void-menu`: activating it (click, Enter or Space) fires `void-select` with its `value`. */
 export class VoidMenuItem extends VoidElement {
+  /** Enter and Space fire a real `click`, as on a native button. */
+  private _activation = new KeyboardActivation(this, { disabled: () => this.disabled });
+
   /**
    * Identifier the item reports in the `void-select` event's `detail.value`. Use it instead of matching
    * on the item's text.
@@ -251,13 +255,11 @@ export class VoidMenuItem extends VoidElement {
     // Roving tabindex: the owning menu makes one item its tab stop (see _setTabStop).
     this.setHostAttribute('tabindex', '-1');
     this.addEventListener('click', this._handleClick);
-    this.addEventListener('keydown', this._handleKeydown);
   }
 
   disconnectedCallback(): void {
     super.disconnectedCallback();
     this.removeEventListener('click', this._handleClick);
-    this.removeEventListener('keydown', this._handleKeydown);
   }
 
   updated(changed: Map<string, unknown>): void {
@@ -288,13 +290,6 @@ export class VoidMenuItem extends VoidElement {
       composed: true,
       detail: { value: this.value },
     }));
-  };
-
-  private _handleKeydown = (e: KeyboardEvent): void => {
-    if ((e.key === 'Enter' || e.key === ' ') && !this.disabled) {
-      e.preventDefault();
-      this._handleClick(e);
-    }
   };
 }
 
