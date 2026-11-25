@@ -2,59 +2,94 @@
  * DOM-patching callbacks that preserve web component client state during
  * LiveView's morphdom updates.
  *
+ * Client-managed attributes (`open`, `checked`, `aria-expanded`, ...) are kept
+ * only while the server keeps rendering the same value it rendered last time.
+ * When the server renders a different value (including dropping the
+ * attribute) the server wins, so `open={false}` on the server really closes a
+ * dialog the client opened.
+ *
  * Usage:
  * ```js
  * import { VoidDOM } from "@voidable/ui-liveview";
  * const liveSocket = new LiveSocket("/live", Socket, {
- *   dom: {
- *     onBeforeElUpdated(from, to) {
- *       VoidDOM.onBeforeElUpdated(from, to);
- *     },
- *   },
+ *   dom: VoidDOM, // onBeforeElUpdated + onNodeAdded
  * });
  * ```
  */
 
-/** ARIA attributes that web components manage on the client side. */
-const PRESERVE_ARIA: readonly string[] = [
+/** Attributes that web components manage on the client side. */
+const PRESERVE_ATTRS: readonly string[] = [
   "aria-expanded",
   "aria-selected",
   "aria-checked",
   "aria-hidden",
-];
-
-/** Boolean state attributes that web components toggle internally. */
-const PRESERVE_STATE: readonly string[] = [
   "open",
   "active",
   "checked",
   "selected",
 ];
 
+/**
+ * Last server-rendered value per attribute, stored on the element itself so
+ * that no state lives in module scope (Module Federation singletons).
+ */
+const SERVER_STATE = Symbol.for("@voidable/ui-liveview:server-attrs");
+
+type ServerAttrs = Record<string, string | null>;
+type WithState = Element & { [SERVER_STATE]?: ServerAttrs };
+
+function isVoid(el: Element): boolean {
+  return !!el.tagName?.startsWith("VOID-");
+}
+
+function snapshot(el: Element): ServerAttrs {
+  const attrs: ServerAttrs = {};
+  for (const name of PRESERVE_ATTRS) attrs[name] = el.getAttribute(name);
+  return attrs;
+}
+
 export const VoidDOM = {
   /**
-   * Call from `dom.onBeforeElUpdated` in your LiveSocket config.
+   * Call from `dom.onNodeAdded`: records the server-rendered attributes of a
+   * freshly inserted `void-*` element as the baseline for later patches.
+   */
+  onNodeAdded(el: Element): void {
+    if (el.nodeType === 1 && isVoid(el)) {
+      (el as WithState)[SERVER_STATE] = snapshot(el);
+    }
+  },
+
+  /**
+   * Call from `dom.onBeforeElUpdated`.
    *
-   * When LiveView patches the DOM via morphdom, client-managed attributes on
-   * `void-*` custom elements can be lost if they weren't in the server-rendered
-   * markup. This callback copies them from the outgoing element to the incoming
-   * one so the component keeps its visual state.
+   * `fromEl` is the live element, `toEl` the server-rendered one. For each
+   * client-managed attribute: if the server value is unchanged since the last
+   * render, `toEl` is made to carry the client's current value (so the patch
+   * is a no-op for it); if the server value changed, `toEl` is left alone and
+   * the server value is applied.
    */
   onBeforeElUpdated(fromEl: Element, toEl: Element): void {
-    if (!fromEl.tagName.startsWith("VOID-")) {
+    if (!isVoid(fromEl)) {
       return;
     }
 
-    for (const attr of PRESERVE_ARIA) {
-      if (fromEl.hasAttribute(attr) && !toEl.hasAttribute(attr)) {
-        toEl.setAttribute(attr, fromEl.getAttribute(attr)!);
+    const el = fromEl as WithState;
+    const prev = el[SERVER_STATE];
+    const next = snapshot(toEl);
+
+    for (const name of PRESERVE_ATTRS) {
+      // Without a baseline keep the client value, but never invent one.
+      const unchanged = prev ? prev[name] === next[name] : next[name] === null;
+      if (!unchanged) continue;
+
+      const client = fromEl.getAttribute(name);
+      if (client === null) {
+        toEl.removeAttribute(name);
+      } else {
+        toEl.setAttribute(name, client);
       }
     }
 
-    for (const attr of PRESERVE_STATE) {
-      if (fromEl.hasAttribute(attr) && !toEl.hasAttribute(attr)) {
-        toEl.setAttribute(attr, fromEl.getAttribute(attr)!);
-      }
-    }
+    el[SERVER_STATE] = next;
   },
 };

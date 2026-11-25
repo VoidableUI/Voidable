@@ -31,11 +31,14 @@ export function VoidableAlpine(Alpine: Alpine): void {
     });
   });
 
-  // x-void-preserve directive: marks a Voidable element so Livewire's morph
-  // engine does not clobber its internal state.
+  // x-void-preserve directive: adds `wire:ignore` so Livewire's morph engine
+  // skips the element and its Lit-rendered children. (`wire:ignore.self` only
+  // protects the element's own attributes and still morphs children.)
   // Usage: <void-select x-void-preserve>...</void-select>
   Alpine.directive('void-preserve', (el) => {
-    el.setAttribute('wire:ignore.self', '');
+    // Livewire reads this attribute from the live element at morph time, so
+    // setting it during Alpine init is early enough for every later update.
+    el.setAttribute('wire:ignore', '');
   });
 
   // $voidable magic: dispatch a CustomEvent to a Voidable component.

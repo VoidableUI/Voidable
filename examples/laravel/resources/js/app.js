@@ -6,4 +6,5 @@ document.addEventListener('alpine:init', () => {
     window.Alpine.plugin(VoidableAlpine);
 });
 
-registerLivewireHooks();
+// Livewire is not on window yet when this module runs; wait for its init event.
+document.addEventListener('livewire:init', registerLivewireHooks);

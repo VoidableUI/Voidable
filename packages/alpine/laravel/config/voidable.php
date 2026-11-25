@@ -1,7 +1,9 @@
 <?php
 
 return [
-    // Path to the compiled Voidable UI script (relative to public/)
+    // Path to the compiled Voidable UI script (relative to public/). It is
+    // emitted as <script type="module" src="..."> by @voidableScripts.
+    // Set to null when you load your JS through Vite (@vite) instead.
     'script_path' => 'build/assets/voidable-ui.js',
 
     // Path to the compiled theme CSS (relative to public/)
@@ -9,10 +11,10 @@ return [
     'theme_path' => 'build/assets/voidable-theme.css',
 
     // Alpine plugin auto-registration
-    // When true, @voidableScripts will include the Alpine plugin initialization
+    // Exposed to your bundle as window.voidableConfig.alpinePlugin (see README)
     'alpine_plugin' => true,
 
     // Livewire morph protection
-    // When true, registers Livewire hooks to preserve Voidable element state
+    // Exposed to your bundle as window.voidableConfig.livewireMorphProtection
     'livewire_morph_protection' => true,
 ];
