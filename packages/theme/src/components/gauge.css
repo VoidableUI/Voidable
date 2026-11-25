@@ -1,9 +1,16 @@
 /* ============================================================
    void-gauge — light DOM SVG, theme-driven
    ============================================================ */
+/* @tokens void-gauge
+   --void-gauge-size  Setting: the largest width of the gauge. It fills its container up to this and shrinks with it below; the height follows from the arc. */
 
+/* Fills its container up to a ceiling, like the donut; the height comes
+   from the SVG's own proportions (full, three-quarter or half circle). */
 void-gauge {
-  display: inline-block;
+  display: block;
+  box-sizing: border-box;
+  inline-size: 100%;
+  max-inline-size: var(--void-gauge-size, 13.75rem);
   font-family: var(--void-font-mono);
   color: var(--void-color-text);
 }
@@ -11,7 +18,7 @@ void-gauge {
 void-gauge svg {
   display: block;
   width: 100%;
-  height: 100%;
+  height: auto;
   overflow: visible;
 }
 

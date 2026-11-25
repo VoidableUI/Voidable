@@ -164,6 +164,8 @@
       <void-section gap="stack">
         <h2>Alerts and banners</h2>
         <void-stack>
+          <!-- Hidden: must not show. A display rule that beats the hidden attribute would put it back. -->
+          <void-alert hidden color="error" variant="filled"><void-alert-description>Hidden alert: if you can read this, the hidden attribute is being ignored.</void-alert-description></void-alert>
           <void-alert color="default" variant="subtle"><void-alert-description>Default, subtle: something worth a sentence.</void-alert-description></void-alert>
           <void-alert color="error" variant="subtle"><void-alert-description>Error, subtle: something worth a sentence.</void-alert-description></void-alert>
           <void-alert color="warning" variant="subtle"><void-alert-description>Warning, subtle: something worth a sentence.</void-alert-description></void-alert>
@@ -394,8 +396,8 @@
           <void-line-chart aria-label="Line chart" data-json-data="{&quot;labels&quot;:[&quot;Mon&quot;,&quot;Tue&quot;,&quot;Wed&quot;,&quot;Thu&quot;,&quot;Fri&quot;,&quot;Sat&quot;,&quot;Sun&quot;],&quot;series&quot;:[{&quot;name&quot;:&quot;Requests&quot;,&quot;values&quot;:[1200,1850,1620,2100,1980,1450,1100]},{&quot;name&quot;:&quot;Errors&quot;,&quot;values&quot;:[400,620,540,700,660,480,370]}]}"></void-line-chart>
         </void-split>
         <void-split>
-          <void-donut-chart aria-label="Donut chart" style="width: 220px; height: 220px" data-json-data="{&quot;segments&quot;:[{&quot;name&quot;:&quot;Organic&quot;,&quot;value&quot;:4820},{&quot;name&quot;:&quot;Referral&quot;,&quot;value&quot;:2310},{&quot;name&quot;:&quot;Direct&quot;,&quot;value&quot;:1950},{&quot;name&quot;:&quot;Paid&quot;,&quot;value&quot;:980}]}"></void-donut-chart>
-          <void-gauge value="67" unit="%" unit-inline show-value circular="triple" aria-label="Gauge" style="max-width: 240px"></void-gauge>
+          <void-donut-chart aria-label="Donut chart" data-json-data="{&quot;segments&quot;:[{&quot;name&quot;:&quot;Organic&quot;,&quot;value&quot;:4820},{&quot;name&quot;:&quot;Referral&quot;,&quot;value&quot;:2310},{&quot;name&quot;:&quot;Direct&quot;,&quot;value&quot;:1950},{&quot;name&quot;:&quot;Paid&quot;,&quot;value&quot;:980}]}"></void-donut-chart>
+          <void-gauge value="67" unit="%" unit-inline show-value circular="triple" aria-label="Gauge"></void-gauge>
         </void-split>
       </void-section>
   </void-page>
