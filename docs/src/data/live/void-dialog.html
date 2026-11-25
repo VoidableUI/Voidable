@@ -1,0 +1,5 @@
+<void-button variant="filled" onclick="this.nextElementSibling.open = true">Open dialog</void-button>
+<void-dialog heading="Delete project" size="sm">
+  <p>This cannot be undone.</p>
+  <void-button color="error" variant="filled" onclick="this.closest('void-dialog').open = false">Delete</void-button>
+</void-dialog>

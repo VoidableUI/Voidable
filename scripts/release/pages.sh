@@ -24,6 +24,9 @@ export VOIDABLE_BUNDLE_SIZE
 if [ -n "${VOIDABLE_VERSION:-}" ]; then export VOIDABLE_VERSION="v${VOIDABLE_VERSION#v}"; fi
 echo "docs: version ${VOIDABLE_VERSION:-(newest tag)}, bundle $VOIDABLE_BUNDLE_SIZE"
 
+# The component pages read the voidable tool's snippets (docs/src/lib/component-data.mjs).
+(cd tools/voidable && mise install go && VOIDABLE_SKIP_UI_BUILD=1 mise run build:go)
+
 pnpm --filter docs build
 pnpm --filter @voidable/storybook build
 

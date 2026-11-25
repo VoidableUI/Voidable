@@ -29,10 +29,24 @@ import { VoidOption } from './multiselect.js';
  * @fires {CustomEvent<{ reason: 'escape' | 'outside' | 'blur' | 'select' | 'parent' | 'api' }>} void-close - The option list is closing.
  */
 export class VoidCombobox extends InternalsFormControl(VoidElement) {
+  /**
+   * `value` of the chosen `void-option`. As an attribute it is the initial choice; read the `value`
+   * property for the current one.
+   */
   @property({ type: String }) value = '';
+  /**
+   * Hint shown in the search field while it is empty. Defaults to `Search...`. It is also the field's
+   * accessible name when no `void-field` label names it.
+   */
   @property({ type: String }) placeholder = 'Search...';
+  /** Stop the field opening and exclude the value from the form submission. */
   @property({ type: Boolean, reflect: true }) disabled = false;
+  /** Size step: `sm`, `md` (default), `lg`, `xl` or `xxl`. */
   @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' | 'xl' | 'xxl' = 'md';
+  /**
+   * Mark the field invalid: it gets the error styling and `aria-invalid`. The message itself is shown by
+   * the wrapping `void-field`.
+   */
   @property({ type: String, reflect: true }) error = '';
   @property({ type: String, reflect: true }) name = '';
   /** Whether the option list is showing. Reflected, so it can be read (and set) from markup. */

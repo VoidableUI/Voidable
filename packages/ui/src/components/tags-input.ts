@@ -7,14 +7,26 @@ export type TagValue = string | { text: string; color?: string };
 
 /** Multi-tag input field for email recipients, category labels, keyword tagging, and comma-separated value entry. */
 export class VoidTagsInput extends InternalsFormControl(VoidElement) {
+  /**
+   * The tags, as an array of strings or `{ text, color }` objects. Set it as a property from script, or
+   * as a JSON array in the attribute.
+   */
   @property({ type: Array }) value: TagValue[] = [];
+  /** Stop the field accepting input and removing tags, and exclude the values from the form submission. */
   @property({ type: Boolean, reflect: true }) disabled = false;
+  /** Show the tags but do not let the user add or remove any. Still submitted. */
   @property({ type: Boolean, reflect: true }) readonly = false;
+  /** Maximum number of tags. Once reached, the entry field is hidden. Unlimited by default. */
   @property({ type: Number }) max = Infinity;
+  /** Hint in the entry field. Defaults to `Add tag...`. */
   @property({ type: String }) placeholder = 'Add tag...';
+  /** Size step: `sm`, `md` (default) or `lg`. */
   @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' = 'md';
+  /** Status colour of the tags: `default`, `error`, `warning`, `caution`, `success`, `info` or `notice`. */
   @property({ type: String, reflect: true }) color: 'default' | 'error' | 'warning' | 'caution' | 'success' | 'info' | 'notice' = 'default';
+  /** How the tags are drawn: `outline` (default) or `filled`. */
   @property({ type: String, reflect: true }) variant: 'filled' | 'outline' = 'outline';
+  /** Accept the same tag more than once. Without it a tag that is already present is ignored. */
   @property({ type: Boolean, attribute: 'allow-duplicates' }) allowDuplicates = false;
 
   private _tagText(tag: TagValue): string {

@@ -20,9 +20,22 @@ export class VoidButton extends VoidElement {
    * for row actions, toolbars and the quiet button beside a primary one.
    */
   @property({ type: String, reflect: true }) variant: 'outline' | 'filled' | 'ghost' = 'outline';
+  /**
+   * Status colour: `default`, `error`, `warning`, `caution`, `success`, `info` or `notice`. Use `error`
+   * for a destructive action such as Delete.
+   */
   @property({ type: String, reflect: true }) color: 'default' | 'error' | 'warning' | 'caution' | 'success' | 'info' | 'notice' = 'default';
+  /**
+   * Stop the button reacting: clicks and Enter or Space do nothing and it leaves the tab order. A button
+   * inside a `<fieldset disabled>` is disabled too.
+   */
   @property({ type: Boolean, reflect: true }) disabled = false;
+  /**
+   * What it does to the surrounding form: `button` (default) nothing, `submit` submits the form (running
+   * validation), `reset` resets it. Set `submit` on the primary action of a form.
+   */
   @property({ type: String, reflect: true }) type: 'button' | 'submit' | 'reset' = 'button';
+  /** Size step: `sm`, `md` (default), `lg`, `xl` or `xxl`. Controls of the same step share one height. */
   @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' | 'xl' | 'xxl' = 'md';
 
   private _internals: ElementInternals | null = null;

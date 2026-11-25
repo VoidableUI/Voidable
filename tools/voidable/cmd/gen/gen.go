@@ -3,6 +3,7 @@ package gen
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -94,11 +95,22 @@ func NewCmd(lib LibraryProvider, g domain.Generator) *cobra.Command {
 
 func newSnippetCmd(lib LibraryProvider) *cobra.Command {
 	var lang, format string
+	var all bool
 	cmd := &cobra.Command{
 		Use:   "snippet <tag>",
-		Short: "Emit an example usage of one element (--lang html|jsx|heex|erb)",
-		Args:  cobra.ExactArgs(1),
+		Short: "Emit an example usage of one element (--lang html|jsx|heex|erb|blade)",
+		Args:  cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
+			if all {
+				l, err := lib(cmd.Context())
+				if err != nil {
+					return err
+				}
+				return writeAllSnippets(cmd.Context(), l, cmd.OutOrStdout())
+			}
+			if len(args) != 1 {
+				return errors.New("snippet needs a tag (or --all)")
+			}
 			f, err := render.ParseFormat(format)
 			if err != nil {
 				return err
@@ -118,7 +130,35 @@ func newSnippetCmd(lib LibraryProvider) *cobra.Command {
 			return render.Snippet(cmd.OutOrStdout(), sn, f)
 		},
 	}
-	cmd.Flags().StringVar(&lang, "lang", "html", "html, jsx, heex or erb")
+	cmd.Flags().StringVar(&lang, "lang", "html", "html, jsx, heex, erb or blade")
 	cmd.Flags().StringVar(&format, "format", "text", "text or json")
+	cmd.Flags().BoolVar(&all, "all", false, "Print every element's snippet in every language as one JSON object (tag -> lang -> code, plus markup: the HTML without event wiring); the docs site reads this")
 	return cmd
+}
+
+// writeAllSnippets prints {tag: {source, <lang>: code, ...}} for every
+// registered element in every snippet language. The docs site generates its
+// example tabs from this, so the site and `gen snippet` cannot disagree.
+func writeAllSnippets(ctx context.Context, l *domain.Library, w io.Writer) error {
+	out := map[string]map[string]string{}
+	for _, e := range l.Catalog().Registered().Elements {
+		m := map[string]string{}
+		for _, lg := range domain.SnippetLangs {
+			sn, err := l.Snippet(ctx, e.Tag, lg)
+			if err != nil {
+				return err
+			}
+			m[string(lg)] = sn.Code
+			m["source"] = string(sn.Source)
+		}
+		bare, err := l.Markup(ctx, e.Tag, domain.LangHTML)
+		if err != nil {
+			return err
+		}
+		m["markup"] = bare.Code
+		out[e.Tag] = m
+	}
+	enc := json.NewEncoder(w)
+	enc.SetIndent("", "  ")
+	return enc.Encode(out)
 }

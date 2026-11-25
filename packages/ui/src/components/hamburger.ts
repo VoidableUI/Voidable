@@ -4,7 +4,13 @@ import { VoidElement } from '../base.js';
 
 /** Animated open/close toggle for mobile navigation menus and collapsible sidebars. */
 export class VoidHamburger extends VoidElement {
+  /**
+   * Whether the menu it controls is open: draws the lines as a close cross and sets `aria-expanded`. It
+   * flips on every click and Enter or Space, and fires `void-toggle`; set it yourself when the menu
+   * closes some other way.
+   */
   @property({ type: Boolean, reflect: true }) active = false;
+  /** Size step: `sm`, `md` (default) or `lg`. */
   @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' = 'md';
 
   connectedCallback(): void {

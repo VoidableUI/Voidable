@@ -5,10 +5,18 @@ import { defaultTrueBoolean } from '../converters.js';
 
 /** Error state display for failed data fetches and unexpected runtime errors; includes an optional retry action. */
 export class VoidErrorFallback extends VoidElement {
+  /** Headline of the error state. Defaults to `Something went wrong`. */
   @property({ type: String }) heading = 'Something went wrong';
+  /** Detail shown under the headline, such as what failed or what to try. Optional. */
   @property({ type: String }) message = '';
+  /**
+   * Show a retry button. Clicking it fires `void-retry`; the element does not retry anything itself, so
+   * listen for the event and reload.
+   */
   @property({ type: Boolean, reflect: true }) retryable = false;
+  /** Text of the retry button. Defaults to `Try again`. Only used with `retryable`. */
   @property({ type: String, attribute: 'retry-label' }) retryLabel = 'Try again';
+  /** Show the warning icon above the headline. On by default; write `icon="false"` to hide it. */
   @property({ type: Boolean, converter: defaultTrueBoolean }) icon = true;
 
   connectedCallback(): void {

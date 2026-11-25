@@ -13,11 +13,26 @@ import { InternalsFormControl } from '../form-control.js';
  * the previous value. Use `both` (default) or `blur` to commit on blur.
  */
 export class VoidEditable extends InternalsFormControl(VoidElement) {
+  /**
+   * The committed text. As an attribute it is the initial value and the form's reset target. Text still
+   * being edited is not part of it until committed.
+   */
   @property({ type: String, reflect: true }) value = '';
+  /**
+   * Whether the field is in edit mode (an input) rather than showing text. Clicking, Enter or Space
+   * starts editing; Escape cancels and `void-cancel` fires.
+   */
   @property({ type: Boolean, reflect: true }) editing = false;
+  /** Stop the field entering edit mode and exclude the value from the form submission. */
   @property({ type: Boolean, reflect: true }) disabled = false;
+  /** Text shown while the value is empty and the field is not being edited. Defaults to `Click to edit`. */
   @property({ type: String }) placeholder = 'Click to edit';
+  /**
+   * How an edit is committed: `enter` only on Enter (blur cancels), `blur` only when focus leaves, or
+   * `both` (default).
+   */
   @property({ type: String, reflect: true, attribute: 'submit-mode' }) submitMode: 'blur' | 'enter' | 'both' = 'both';
+  /** Size step: `sm`, `md` (default) or `lg`. */
   @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' = 'md';
 
   private _previousValue = '';

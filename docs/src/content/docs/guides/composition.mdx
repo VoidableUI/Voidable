@@ -1,0 +1,54 @@
+---
+title: Composition and children
+description: Voidable renders into the light DOM, so your markup stays yours. How children are placed, which components need which parents, and what to avoid.
+---
+
+Voidable components render into the **light DOM**: there is no shadow root. Your children, your classes, your `id`s and your framework's bindings stay where you wrote them, in the same document the rest of the page uses. Global CSS reaches into components, `querySelector` finds their parts, and a test library sees their roles and text.
+
+```html
+<void-card heading="Monthly revenue">
+  <p id="kid">$48,200, up 12% on last month.</p>
+</void-card>
+```
+
+Once upgraded, that card contains its rendered parts and your paragraph in the body part:
+
+```html
+<void-card heading="Monthly revenue">
+  <div class="void-card-header">…the heading…</div>
+  <div class="void-card-body"><p id="kid">$48,200, up 12% on last month.</p></div>
+</void-card>
+```
+
+The paragraph is the same node you wrote. It was moved, not copied, so a reference to it, an event listener on it or an input inside it keeps working.
+
+## Where children go
+
+Each component decides where its children belong and moves them there. The **Children and placement** section of every [component page](/components/overview/) says what it takes. Two conventions cover most of it:
+
+- **Default children** go in the component's body. A `<void-card>`, `<void-panel>` or `<void-dialog>` puts them in its content area.
+- **Named placement** uses the `slot` attribute, as a convention rather than shadow DOM slots. `<void-popover>`, `<void-dropdown-menu>` and `<void-hover-card>` treat the child marked `slot="trigger"` as the element that opens them; everything else is the content.
+
+```html
+<void-popover>
+  <void-button slot="trigger">Details</void-button>
+  <p>Anchored content.</p>
+</void-popover>
+```
+
+Children can arrive at any time. A node you append after the component has rendered, or one a framework inserts later, is routed to the same place as the ones that were there at the start. Cloning a component (`cloneNode(true)`) or round-tripping it through `outerHTML` gives one set of rendered parts, not two.
+
+## Parents and required children
+
+Some components only work in the right container. `<void-accordion-item>` belongs in a `<void-accordion>`, `<void-option>` in a `<void-combobox>` or `<void-multiselect>`, `<void-tab-panel>` in `<void-tabs>`, and a `<void-select>` takes native `<option>` elements, not `<void-option>`. Each page lists these as **Children and placement**, and they come from the same data that `voidable check` and the [development warnings](/getting-started/development-warnings/) use, so a wrong parent is reported in the editor, in CI and in the console.
+
+## What to avoid
+
+- **Do not replace a component's `innerHTML`.** It removes the rendered parts. The component notices and re-renders them, but anything you wrote inside is gone. Append or remove children individually, or let your framework do it.
+- **Do not set `role`, `tabindex` or `aria-*` on the host unless the component's documentation says to.** The component manages them. A value you write that it also manages is left alone, and it puts back the ones it owns if something removes them.
+- **Do not rely on the rendered class names.** `void-card-body` is styling structure and may change; select by role, name and text as the [testing guide](/guides/testing/) describes.
+- **Do not wrap a component in another to restyle it.** Use the [theme tokens](/getting-started/tokens/), and see [patterns](/patterns/overview/) for page structure such as a shell, a page head or a toolbar.
+
+## Frameworks
+
+Because the DOM is ordinary, children from any framework or template engine land where you wrote them: JSX elements, Svelte `{#each}` blocks and Rails partials all become direct descendants of the component. The adapters for [React](/frameworks/react/), [Alpine](/frameworks/alpine/), [Hotwire](/frameworks/hotwire/) and [LiveView](/frameworks/liveview/) add event and morph handling on top; see [Server-rendered apps](/guides/server-rendered/) for what that protects.

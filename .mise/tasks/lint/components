@@ -1,0 +1,59 @@
+#!/usr/bin/env bash
+#MISE description="Fail when a component lacks a description, an attribute lacks a description, a component lacks a canonical example, or a docs-site data file names a tag that does not exist"
+#MISE depends=["build"]
+set -euo pipefail
+
+# The component reference pages on the docs site are generated from the
+# Custom Elements Manifest (descriptions come from the JSDoc in
+# packages/ui/src/components), the `voidable` tool's supplement snippets
+# (examples) and two data files in docs/src/data. This lint keeps the sources
+# complete, so a new component cannot reach the docs without an overview, a
+# described API and a real example:
+#
+#   description   the class JSDoc has a first paragraph
+#   attributes    every public attribute has a JSDoc description
+#   example       tools/voidable/.../supplement/snippets/<tag>.html exists
+#   group         docs/src/data/component-notes.json places the tag in a group
+#   keyboard      every tag in docs/src/data/keyboard.json is a real tag and has a
+#                 table on the keyboard page
+#   stale         no data entry names a tag the manifest does not have
+
+node --input-type=module - <<'EOF'
+import { readFileSync, existsSync } from 'node:fs';
+
+const manifest = JSON.parse(readFileSync('packages/ui/dist/custom-elements.json', 'utf8'));
+const notes = JSON.parse(readFileSync('docs/src/data/component-notes.json', 'utf8'));
+const keyboard = JSON.parse(readFileSync('docs/src/data/keyboard.json', 'utf8'));
+const snippets = 'tools/voidable/internal/infra/embedded/data/supplement/snippets';
+const groups = new Set(['forms', 'overlays', 'navigation', 'data-display', 'feedback', 'layout', 'charts']);
+
+const keyboardPage = readFileSync('docs/src/content/docs/components/keyboard.mdx', 'utf8');
+const problems = [];
+const tags = new Set();
+for (const mod of manifest.modules) {
+  for (const d of mod.declarations ?? []) {
+    if (!d.tagName) continue;
+    tags.add(d.tagName);
+    const t = d.tagName;
+    if (!(d.description ?? '').trim()) problems.push(`${t}: the class has no description (add a JSDoc above the class)`);
+    for (const a of d.attributes ?? []) {
+      if (!(a.description ?? '').trim()) problems.push(`${t}: attribute "${a.name}" has no description (add a JSDoc above the @property)`);
+    }
+    if (!existsSync(`${snippets}/${t}.html`)) problems.push(`${t}: no example (add ${snippets}/${t}.html)`);
+    const g = notes[t]?.group;
+    if (!groups.has(g)) problems.push(`${t}: no group in docs/src/data/component-notes.json (one of ${[...groups].join(', ')})`);
+  }
+}
+for (const t of Object.keys(notes)) if (!tags.has(t)) problems.push(`${t}: in component-notes.json but not in the manifest`);
+for (const t of Object.keys(keyboard)) {
+  if (!tags.has(t)) problems.push(`${t}: in keyboard.json but not in the manifest`);
+  else if (!keyboardPage.includes(`<KeyTable tag="${t}"`)) problems.push(`${t}: in keyboard.json but missing from components/keyboard.mdx (add a <KeyTable tag="${t}" />)`);
+}
+
+if (problems.length) {
+  console.error(problems.join('\n'));
+  console.error(`\n${problems.length} problem(s) in the component docs sources`);
+  process.exit(1);
+}
+console.log(`components ok (${tags.size} components)`);
+EOF

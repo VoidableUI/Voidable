@@ -59,8 +59,10 @@ func TestSkillShape(t *testing.T) {
 			t.Errorf("%s reference lacks its heading", e.Tag)
 		}
 	}
+	// Blade comments ({{-- --}}) legitimately appear in the Blade snippets.
+	unrendered := regexp.MustCompile(`\{\{[^-]`)
 	for _, f := range sk.Files {
-		if f.MIME != "text/markdown" || strings.Contains(string(f.Content), "{{") {
+		if f.MIME != "text/markdown" || unrendered.Match(f.Content) {
 			t.Errorf("%s: mime %q or unrendered template text", f.Path, f.MIME)
 		}
 	}

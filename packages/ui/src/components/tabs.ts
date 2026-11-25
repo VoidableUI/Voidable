@@ -9,8 +9,14 @@ let nextTabId = 0;
 
 /** Individual tab content panel within a VoidTabs component; `disabled` disables its tab. */
 export class VoidTabPanel extends VoidElement {
+  /**
+   * Key that identifies this panel: the `value` of the `void-tabs` it belongs to. Must be unique among
+   * the panels.
+   */
   @property({ type: String, reflect: true }) tab = '';
+  /** Text of the panel's tab button. The parent builds the tab list from the panels' labels. */
   @property({ type: String, reflect: true }) label = '';
+  /** Whether the panel is the visible one. Set by the parent from its `value`; do not set it yourself. */
   @property({ type: Boolean, reflect: true }) active = false;
   /** A disabled panel's tab is shown but cannot be selected or focused. */
   @property({ type: Boolean, reflect: true }) disabled = false;
@@ -57,7 +63,12 @@ if (!customElements.get('void-tab-panel')) {
  * last, Enter or Space select the focused tab; with `activation="auto"` moving focus selects the tab.
  */
 export class VoidTabs extends VoidElement {
+  /**
+   * The `tab` key of the selected panel. As an attribute it is the initial tab; selecting a tab updates
+   * it and fires `void-change`.
+   */
   @property({ type: String }) value = '';
+  /** Size step of the tab buttons: `sm`, `md` (default) or `lg`. */
   @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' = 'md';
   /**
    * `manual` (default): arrow keys move focus and Enter or Space select the focused tab.

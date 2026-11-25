@@ -12,9 +12,25 @@ import { ProjectionController } from '../projection.js';
  * are wired when they do.
  */
 export class VoidField extends VoidElement {
+  /**
+   * Visible label. It names the control inside (`for` on a native control, `aria-labelledby` otherwise),
+   * so use it instead of a `label` attribute on the control.
+   */
   @property({ type: String, reflect: true }) label = '';
+  /**
+   * Validation message shown under the control in the error colour. While it is set the control inside
+   * is marked `aria-invalid` and described by the message.
+   */
   @property({ type: String, reflect: true }) error = '';
+  /**
+   * Hint shown under the control when there is no `error`. It describes the control for assistive
+   * technology.
+   */
   @property({ type: String, reflect: true }) helper = '';
+  /**
+   * Draws an asterisk after the label. It is only the mark: put `required` on the control itself to make
+   * the browser enforce it.
+   */
   @property({ type: Boolean, reflect: true }) required = false;
 
   private _uid = Math.random().toString(36).slice(2);

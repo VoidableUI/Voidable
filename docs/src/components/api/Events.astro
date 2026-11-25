@@ -1,0 +1,31 @@
+---
+import { loadComponentData } from '../../lib/component-data.mjs';
+import { inline } from '../../lib/inline.mjs';
+
+interface Props { tag: string }
+const { tag } = Astro.props;
+const c = loadComponentData().byTag.get(tag)!;
+const describe = (e: any) => c.note.events?.[e.name] ?? e.description;
+---
+
+<p>
+  Every event is a <code>CustomEvent</code> that bubbles, so you can listen on the element or on any ancestor. Read what changed from <code>event.detail</code>.
+</p>
+<div class="vd-api-table">
+  <table>
+    <thead><tr><th>Event</th><th>Detail</th><th>Fires</th></tr></thead>
+    <tbody>
+      {c.events.map((e: any) => (
+        <tr>
+          <td><code>{e.name}</code></td>
+          <td>
+            {e.fields.length > 0
+              ? e.fields.map((f: any, i: number) => (<Fragment>{i > 0 && <br />}<code>{f.name}: {f.type}</code></Fragment>))
+              : e.detail ? <code>{e.detail}</code> : <span class="vd-api-none">none</span>}
+          </td>
+          <td set:html={inline(describe(e) ?? '')} />
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</div>

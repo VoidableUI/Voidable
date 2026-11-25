@@ -44,13 +44,32 @@ function niceStepLocal(raw: number): number {
   return niceFrac * mag;
 }
 
+/**
+ * Bar chart for comparing categories and series, drawn in SVG with animated bars. Give it `data`
+ * (`{ series: [{ name, values }], labels }`) from script; it has no children. The chart is an image to
+ * assistive technology, so set `aria-label` and state the key figures in the surrounding text.
+ */
 export class VoidBarChart extends VoidElement {
 
+  /** Height of the chart in pixels. Defaults to 220. The width fills the container. */
   @property({ type: Number, reflect: true }) height = 220;
+  /** Print each bar's value above it, abbreviated above 1000 (`1.2k`). */
   @property({ type: Boolean, attribute: 'show-values', reflect: true }) showValues = false;
+  /**
+   * How bars are drawn: `filled` (default, solid), `outline` (tinted fill with a border) or `wireframe`
+   * (border only).
+   */
   @property({ reflect: true }) variant: 'filled' | 'outline' | 'wireframe' = 'filled';
+  /**
+   * Accessible name of the chart, such as `Revenue by quarter`. The chart is an image to assistive
+   * technology, so set it and put the key figures in the text around it.
+   */
   @property({ attribute: 'aria-label' }) ariaLabel = '';
 
+  /**
+   * Animate the bars in one after another. On by default; `stagger="false"` animates them together, and
+   * a number sets the delay in milliseconds between bars.
+   */
   @property({
     converter: {
       fromAttribute(v: string | null) {
@@ -67,6 +86,11 @@ export class VoidBarChart extends VoidElement {
 
   private _data: BarChartData = { series: [] };
 
+  /**
+   * The chart's data: `{ series: [{ name, values, color?, colors? }], labels? }`. `values` are aligned with
+   * `labels` (the category names along the axis); `color` colours a whole series and `colors` overrides single
+   * bars. Property only: assign a new object to update the chart and animate to it.
+   */
   get data(): BarChartData { return this._data; }
   set data(next: BarChartData) {
     const prev = new Map(this._display);

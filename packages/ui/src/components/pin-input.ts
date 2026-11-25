@@ -6,14 +6,35 @@ import { InternalsFormControl } from '../form-control.js';
 
 /** Single-character input cells for OTP verification codes, PIN entry, and multi-digit confirmation fields. */
 export class VoidPinInput extends InternalsFormControl(VoidElement) {
+  /** Number of cells, so the number of characters in the code. Defaults to 6. */
   @property({ type: Number }) length: number = 6;
+  /**
+   * Visual grouping of the cells as comma-separated sizes, such as `3,3` for a code drawn as `123 456`.
+   * Display only; the value has no separator.
+   */
   @property({ type: String, reflect: true }) groups: string = '';
+  /**
+   * The characters entered so far, without separators. As an attribute it is the initial value (and the
+   * form's reset target); read the `value` property for the current one.
+   */
   @property({ type: String }) value: string = '';
+  /** Stop the cells accepting input and exclude the value from the form submission. */
   @property({ type: Boolean, reflect: true }) disabled: boolean = false;
+  /**
+   * Hide the entered characters as dots, like a password field. Use it for a PIN, not for a one-time
+   * code.
+   */
   @property({ type: Boolean, reflect: true }) mask: boolean = false;
+  /** Which characters the cells accept: `numeric` (default, digits only) or `alphanumeric`. */
   @property({ type: String, reflect: true }) type: 'numeric' | 'alphanumeric' = 'numeric';
+  /** Size step: `sm`, `md` (default) or `lg`. */
   @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' = 'md';
+  /**
+   * Status colour of the cells: `default`, `error`, `warning`, `caution`, `success`, `info` or `notice`.
+   * Use `error` after a wrong code.
+   */
   @property({ type: String, reflect: true }) color: 'default' | 'error' | 'warning' | 'caution' | 'success' | 'info' | 'notice' = 'default';
+  /** Character shown in every empty cell, such as `-`. */
   @property({ type: String }) placeholder: string = '';
 
   private get _effectiveLength(): number {

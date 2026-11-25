@@ -5,7 +5,15 @@ import { ProjectionController } from '../projection.js';
 
 /** Bordered or elevated content region for grouping related settings, dashboard sections, and detail blocks. */
 export class VoidPanel extends VoidElement {
+  /**
+   * Title drawn at the top of the panel. It is also the region's accessible name; without a label the
+   * region is unnamed.
+   */
   @property({ type: String, reflect: true }) label = '';
+  /**
+   * `default` is a quiet filled region, `bordered` draws a visible border, `elevated` lifts it with a
+   * shadow.
+   */
   @property({ type: String, reflect: true }) variant: 'default' | 'bordered' | 'elevated' = 'default';
 
   // Consumer content stays on the host, after the rendered label.

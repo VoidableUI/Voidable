@@ -3,89 +3,96 @@ title: Keyboard and ARIA
 description: How the composite widgets are operated from the keyboard and what they expose to assistive technology.
 ---
 
+import KeyTable from '../../../components/api/KeyTable.astro';
+
 The widgets that have more than one part (combobox, multiselect, tabs, menus, segmented control) follow the matching [WAI-ARIA Authoring Practices](https://www.w3.org/WAI/ARIA/apg/patterns/) pattern. The widget role sits on the element that holds focus, never on the `<void-*>` host around it, so assistive technology sees one widget with one name.
 
 Disabled options, tabs and items are skipped by every key below. Children can arrive after the component has rendered (a framework, a server-driven morph, a script that runs before the page is parsed); the roles, the tab stops and the labels are wired again when they do.
 
 Inside a `<void-dialog>`, Escape closes the open list or menu first; the dialog stays open until the next Escape. Escape and outside presses always go to the topmost open overlay only; see [Overlays](/components/overlays/) for stacking, focus return and the `void-open` / `void-close` events.
 
+The tables below are the same ones shown on each component's page; both read `docs/src/data/keyboard.json`.
+
 ## Combobox
 
-Pattern: [combobox with listbox popup](https://www.w3.org/WAI/ARIA/apg/patterns/combobox/) (editable, list autocomplete, manual selection). The native `<input>` is the `combobox` and keeps DOM focus; the highlighted option is exposed with `aria-activedescendant`. `aria-expanded` and `open` track the list.
-
-| Key | Action |
-|-----|--------|
-| Down Arrow | Opens the list, or highlights the next option (wraps). Opening starts on the chosen option, else the first |
-| Up Arrow | Opens the list on the last option, or highlights the previous option (wraps) |
-| Alt + Down Arrow | Opens the list without highlighting an option |
-| Enter | Chooses the highlighted option and closes the list. With no option highlighted the key is left alone, so a surrounding form submits |
-| Escape | Closes the list |
-| Home, End | Move the text cursor |
-| Tab | Closes the list and moves on without choosing |
-| Characters | Filter the options; nothing is highlighted until you arrow to it |
+<KeyTable tag="void-combobox" />
 
 ## Multiselect
 
-Pattern: [select-only combobox](https://www.w3.org/WAI/ARIA/apg/patterns/combobox/examples/combobox-select-only/) with a [multiselectable listbox](https://www.w3.org/WAI/ARIA/apg/patterns/listbox/) popup. The trigger is the `combobox` (focusable, `aria-haspopup="listbox"`, `aria-expanded`); the list is `aria-multiselectable` and the list stays open while options are toggled. The remove buttons on the selected pills are for the pointer; from the keyboard, toggle the option in the list.
-
-| Key | Action |
-|-----|--------|
-| Enter, Space, Down Arrow, Up Arrow | Open the list, highlighting the first selected option, else the first |
-| Home, End | Open the list on the first or last option |
-| Down Arrow, Up Arrow (open) | Highlight the next or previous option (wraps) |
-| Home, End (open) | Highlight the first or last option |
-| Enter, Space (open) | Toggle the highlighted option; the list stays open |
-| Characters (open) | Jump to the next option that starts with the typed text |
-| Escape | Closes the list |
-| Tab | Closes the list and moves on |
+<KeyTable tag="void-multiselect" />
 
 ## Tabs
 
-Pattern: [tabs with manual activation](https://www.w3.org/WAI/ARIA/apg/patterns/tabs/examples/tabs-manual/) (default) or [automatic activation](https://www.w3.org/WAI/ARIA/apg/patterns/tabs/examples/tabs-automatic/) with `activation="auto"`. The tab list is one tab stop (roving tabindex): the selected tab, or the first enabled tab while none is selected. Each tab controls its panel and each panel is labelled by its tab; the visible panel is itself a tab stop. Mark a `<void-tab-panel disabled>` to disable its tab.
-
-| Key | Action |
-|-----|--------|
-| Tab | Enters the tab list on its tab stop, then moves to the visible panel |
-| Right Arrow, Left Arrow | Move focus to the next or previous tab (wraps). With `activation="auto"` the tab is selected too |
-| Home, End | Move focus to the first or last tab (selects it with `activation="auto"`) |
-| Enter, Space | Select the focused tab (manual activation) |
+<KeyTable tag="void-tabs" />
 
 ## Segmented control
 
-Pattern: [radio group](https://www.w3.org/WAI/ARIA/apg/patterns/radio/). `role="radiogroup"` with `role="radio"` items and `aria-checked` from the first paint. One tab stop: the checked item, or the first enabled item while none is checked. Selection follows focus, so each arrow key fires `void-change`.
-
-| Key | Action |
-|-----|--------|
-| Tab, Shift + Tab | Move into and out of the group |
-| Right Arrow, Down Arrow | Select the next item (wraps). With nothing selected, the first |
-| Left Arrow, Up Arrow | Select the previous item (wraps). With nothing selected, the last |
-| Space | Selects the focused item |
+<KeyTable tag="void-segmented-control" />
 
 ## Menu
 
-Pattern: [menu](https://www.w3.org/WAI/ARIA/apg/patterns/menu/). The list inside `<void-menu>` is the `menu` and its items are `menuitem`s (groups are `group`s). The items are one tab stop, and the tab stop follows focus. Keys are handled on the menu, so arrow keys keep working in every other control on the page.
-
-| Key | Action |
-|-----|--------|
-| Down Arrow, Up Arrow | Move focus to the next or previous item (wraps). From a search field, Down Arrow goes to the first item and Up Arrow to the last |
-| Up Arrow on the first item | With `searchable`, returns to the search field |
-| Home, End | Move focus to the first or last item |
-| Characters | Jump to the next item that starts with the typed text (not with `searchable`, where typing filters) |
-| Enter, Space | Activate the item (`void-select`) |
-| Escape | Closes the menu |
+<KeyTable tag="void-menu" />
 
 ## Dropdown menu
 
-Pattern: [menu button](https://www.w3.org/WAI/ARIA/apg/patterns/menu-button/). The trigger gets `aria-haspopup="menu"`, `aria-expanded` and `aria-controls`; the panel is a `menu` labelled by the trigger. Items take focus from the keyboard handling, not from Tab.
+<KeyTable tag="void-dropdown-menu" />
 
-| Key | Action |
-|-----|--------|
-| Enter, Space (on the trigger) | Open the menu and focus the first item. A `<void-button>` or any other non-native trigger is supported |
-| Down Arrow (on the trigger) | Open the menu and focus the first item |
-| Up Arrow (on the trigger) | Open the menu and focus the last item |
-| Down Arrow, Up Arrow | Move to the next or previous item (wraps) |
-| Home, End | Move to the first or last item |
-| Characters | Jump to the next item that starts with the typed text |
-| Enter, Space (on an item) | Activate the item (`void-select`), close the menu and return focus to the trigger (not for items with `keep-open`) |
-| Escape | Closes the menu and returns focus to the trigger |
-| Tab | Closes the menu and moves on |
+## Other components
+
+Components built on a native control (input, textarea, select, checkbox, radio, slider, button) use that control's keys, which the browser provides. These add their own.
+
+### Calendar
+
+<KeyTable tag="void-calendar" />
+
+### Number input
+
+<KeyTable tag="void-number-input" />
+
+### Pin input
+
+<KeyTable tag="void-pin-input" />
+
+### Tags input
+
+<KeyTable tag="void-tags-input" />
+
+### Carousel
+
+<KeyTable tag="void-carousel" />
+
+### Toggle group
+
+<KeyTable tag="void-toggle-group" />
+
+### Switch
+
+<KeyTable tag="void-switch" />
+
+### Collapsible
+
+<KeyTable tag="void-collapsible" />
+
+### Dialog
+
+<KeyTable tag="void-dialog" />
+
+### Drawer
+
+<KeyTable tag="void-drawer" />
+
+### Popover
+
+<KeyTable tag="void-popover" />
+
+### Hover card
+
+<KeyTable tag="void-hover-card" />
+
+### Tooltip
+
+<KeyTable tag="void-tooltip" />
+
+### Date picker
+
+<KeyTable tag="void-date-picker" />
