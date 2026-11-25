@@ -116,7 +116,7 @@
     ]
   },
   "void-menu": {
-    "intro": "Pattern: [menu](https://www.w3.org/WAI/ARIA/apg/patterns/menu/). The list inside `<void-menu>` is the `menu` and its items are `menuitem`s (groups are `group`s). The items are one tab stop, and the tab stop follows focus. Keys are handled on the menu, so arrow keys keep working in every other control on the page.",
+    "intro": "Pattern: [menu](https://www.w3.org/WAI/ARIA/apg/patterns/menu/). The `<void-menu-content>` of `<void-menu>` is the `menu` and its items are `menuitem`s (groups are `group`s). The items are one tab stop, and the tab stop follows focus. Keys are handled on the menu, so arrow keys keep working in every other control on the page.",
     "rows": [
       {
         "keys": "Down Arrow, Up Arrow",
@@ -124,7 +124,7 @@
       },
       {
         "keys": "Up Arrow on the first item",
-        "action": "With `searchable`, returns to the search field"
+        "action": "With a `<void-menu-search>`, returns to the search field"
       },
       {
         "keys": "Home, End",
@@ -132,7 +132,7 @@
       },
       {
         "keys": "Characters",
-        "action": "Jump to the next item that starts with the typed text (not with `searchable`, where typing filters)"
+        "action": "Jump to the next item that starts with the typed text (not in a `<void-menu-search>`, where typing filters)"
       },
       {
         "keys": "Enter, Space",
@@ -266,6 +266,27 @@
       {
         "keys": "Up Arrow / Down Arrow",
         "action": "Previous or next slide (vertical carousels)"
+      },
+      {
+        "keys": "Enter, Space",
+        "action": "On a focused previous or next arrow, goes to that slide"
+      }
+    ]
+  },
+  "void-nav-menu": {
+    "intro": "Pattern: [menubar](https://www.w3.org/WAI/ARIA/apg/patterns/menubar/). Each entry is a button or a link; hovering opens its panel too.",
+    "rows": [
+      {
+        "keys": "Right Arrow / Left Arrow",
+        "action": "Moves focus to the next or previous entry, wrapping at the ends (Down Arrow / Up Arrow in a vertical menu)"
+      },
+      {
+        "keys": "Enter, Space",
+        "action": "On a button entry, opens or closes its panel; on a link, follows it"
+      },
+      {
+        "keys": "Escape",
+        "action": "Closes the open panel and returns focus to its entry"
       }
     ]
   },

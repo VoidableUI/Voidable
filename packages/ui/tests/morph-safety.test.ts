@@ -130,14 +130,15 @@ describe('chrome of components without regions', () => {
     await settle();
     expect(ind.querySelector('.void-indicator-dot')).toBe(dot);
 
-    const item = await mount<Host>('<void-nav-menu-item>Products<div id="c">x</div></void-nav-menu-item>');
-    const trigger = item.querySelector('.void-nav-menu-trigger')!;
-    expect(trigger.textContent).toBe('Products');
-    expect(item.querySelector('.void-nav-menu-content > #c')).not.toBeNull();
+    // The nav-menu item has explicit parts (#52): the author's nodes are the DOM, and a morph that strips the
+    // ARIA on the trigger control (consumer markup) gets it back.
+    const item = await mount<Host>('<void-nav-menu-item><void-nav-menu-trigger><button id="b">Products</button></void-nav-menu-trigger><void-nav-menu-content><div id="c">x</div></void-nav-menu-content></void-nav-menu-item>');
+    const trigger = item.querySelector('#b')!;
     item.voidBeforeMorph();
-    expect(serverShape(item)).toBe('Products<div id="c">x</div>');
+    expect(Array.from(item.children).map(c => c.localName)).toEqual(['void-nav-menu-trigger', 'void-nav-menu-content']);
+    expect(trigger.getAttribute('aria-haspopup')).toBe('true');
+    trigger.removeAttribute('aria-haspopup');
     await settle();
-    expect(item.querySelector('.void-nav-menu-trigger')).toBe(trigger);
     expect(trigger.getAttribute('aria-haspopup')).toBe('true');
 
     // The tooltip has explicit parts (#52): nothing to confine; a morph that
@@ -150,20 +151,14 @@ describe('chrome of components without regions', () => {
     expect(tip.querySelector('#b')!.getAttribute('aria-describedby')).toBe(tip.querySelector('void-tooltip-content')!.id);
   });
 
-  it('breadcrumbs: items are lifted out of their list items and put back into the same ones', async () => {
-    const bc = await mount<Host>('<void-breadcrumbs><a href="/">a</a><span>b</span></void-breadcrumbs>');
-    const lis = Array.from(bc.querySelectorAll('li'));
-    expect(lis).toHaveLength(2);
+  it('breadcrumbs have explicit parts (#52): the items are the author nodes, nothing is lifted or wrapped', async () => {
+    const bc = await mount<Host>('<void-breadcrumbs><void-breadcrumbs-item><a href="/">a</a></void-breadcrumbs-item><void-breadcrumbs-item aria-current="page">b</void-breadcrumbs-item></void-breadcrumbs>');
+    const items = Array.from(bc.children);
     bc.voidBeforeMorph();
-    expect(serverShape(bc)).toBe('<a href="/">a</a><span>b</span>');
+    expect(serverShape(bc)).toBe('<void-breadcrumbs-item><a href="/">a</a></void-breadcrumbs-item><void-breadcrumbs-item aria-current="page">b</void-breadcrumbs-item>');
     await settle();
-    expect(Array.from(bc.querySelectorAll('li'))).toEqual(lis);
-    expect(lis[1].getAttribute('aria-current')).toBe('page');
-    // A removed item takes its list item with it.
-    bc.querySelector('span')!.remove();
-    await settle();
-    expect(bc.querySelectorAll('li')).toHaveLength(1);
-    expect(bc.querySelector('li')!.getAttribute('aria-current')).toBe('page');
+    expect(Array.from(bc.children)).toEqual(items);
+    expect(bc.querySelector('li')).toBeNull();
   });
 });
 

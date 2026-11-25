@@ -70,10 +70,10 @@ export const eventDetails = {
  */
 export const allowedParents = {
   'void-option': ['void-multiselect', 'void-combobox'],
-  'void-carousel-slide': ['void-carousel'],
   'void-segmented-control-item': ['void-segmented-control'],
+  // An item also sits inside a group (its parent part is the content, anywhere above it).
+  'void-menu-item': ['void-menu-group'],
   'void-list-item': ['void-list'],
-  'void-nav-menu-item': ['void-nav-menu'],
 };
 
 /**
@@ -83,7 +83,6 @@ export const allowedParents = {
  * @type {Record<string, string[]>}
  */
 export const requiredChildren = {
-  'void-carousel': ['void-carousel-slide'],
   'void-segmented-control': ['void-segmented-control-item'],
 };
 
@@ -321,18 +320,164 @@ export const parts = {
       },
     ],
   },
+  'void-nav-menu': {
+    children: 'parts',
+    skeleton:
+      '<void-nav-menu><void-nav-menu-item><void-nav-menu-trigger><button type="button">Products</button></void-nav-menu-trigger><void-nav-menu-content><a href="/products/a">Product A</a></void-nav-menu-content></void-nav-menu-item><void-nav-menu-item active><void-nav-menu-trigger><a href="/docs">Docs</a></void-nav-menu-trigger></void-nav-menu-item></void-nav-menu>',
+    legacy: { children: 'write each entry as <void-nav-menu-item> with a <void-nav-menu-trigger> around one <button> or <a href>' },
+    parts: [
+      {
+        tag: 'void-nav-menu-item',
+        required: true,
+        children: 'parts',
+        ordered: true,
+        description: 'One entry of the menu bar: a trigger, and for a dropdown a content panel after it.',
+        legacy: {
+          attributes: { href: 'write the link as <void-nav-menu-trigger><a href="...">Label</a></void-nav-menu-trigger>' },
+          children: 'put the label in <void-nav-menu-trigger> around a <button> (or an <a href>), and the dropdown in <void-nav-menu-content>',
+        },
+        parts: [
+          {
+            tag: 'void-nav-menu-trigger',
+            required: true,
+            max: 1,
+            control: true,
+            description:
+              'Wraps the one element that is the entry: a <button> that opens a dropdown, or an <a href> that navigates; that element gets the menubar ARIA.',
+          },
+          { tag: 'void-nav-menu-content', max: 1, description: 'The dropdown panel (role="menu"), shown on hover, click or Enter on the trigger.' },
+        ],
+      },
+    ],
+  },
+  'void-breadcrumbs': {
+    children: 'parts',
+    skeleton:
+      '<void-breadcrumbs><void-breadcrumbs-item><a href="/">Home</a></void-breadcrumbs-item><void-breadcrumbs-item><a href="/docs">Docs</a></void-breadcrumbs-item><void-breadcrumbs-item aria-current="page">Page</void-breadcrumbs-item></void-breadcrumbs>',
+    legacy: { children: 'wrap each crumb (a link, or text for the current page) in <void-breadcrumbs-item> and put aria-current="page" on the current one' },
+    parts: [
+      {
+        tag: 'void-breadcrumbs-item',
+        required: true,
+        description:
+          'One crumb: a link, or the current page as text. Mark the current page with aria-current="page"; the theme draws the separators between items.',
+      },
+    ],
+  },
+  'void-menu': {
+    children: 'parts',
+    ordered: true,
+    skeleton:
+      '<void-menu open><void-menu-search><input type="search" placeholder="Search..." aria-label="Search"></void-menu-search><void-menu-content><void-menu-item value="new">New</void-menu-item></void-menu-content></void-menu>',
+    legacy: {
+      attributes: {
+        searchable: 'write a <void-menu-search> around an <input type="search"> before the content',
+        placeholder: 'write placeholder and aria-label on the input inside <void-menu-search>',
+      },
+      children: 'put the items and groups in <void-menu-content>',
+    },
+    parts: [
+      {
+        tag: 'void-menu-search',
+        max: 1,
+        control: true,
+        description: 'Wraps the one text field (an <input type="search">) that filters the items as the user types; present means the menu is searchable.',
+      },
+      {
+        tag: 'void-menu-content',
+        required: true,
+        max: 1,
+        children: 'parts',
+        description: 'The list (role="menu"): the items, and groups of items.',
+        parts: [
+          { tag: 'void-menu-item', description: 'One action of the menu.' },
+          { tag: 'void-menu-group', description: 'A labelled group of items.' },
+        ],
+      },
+      {
+        tag: 'void-menu-empty',
+        max: 1,
+        description: 'Shown instead of the default "No results found" while a search matches no item.',
+      },
+    ],
+  },
+  'void-menu-item': {
+    children: 'any',
+    ordered: true,
+    skeleton:
+      '<void-menu-item value="save"><void-menu-item-icon>+</void-menu-item-icon>Save<void-menu-item-shortcut>Ctrl+S</void-menu-item-shortcut></void-menu-item>',
+    legacy: {
+      attributes: {
+        icon: 'write <void-menu-item-icon>...</void-menu-item-icon> first in the item',
+        shortcut: 'write <void-menu-item-shortcut>Ctrl+S</void-menu-item-shortcut> last in the item',
+      },
+    },
+    parts: [
+      { tag: 'void-menu-item-icon', max: 1, description: 'A glyph or icon before the label; decorative (add aria-hidden="true").' },
+      { tag: 'void-menu-item-shortcut', max: 1, description: 'Text at the end of the row that advertises a keyboard shortcut. Display only: it does not bind the key.' },
+    ],
+  },
+  'void-menu-group': {
+    children: 'any',
+    skeleton:
+      '<void-menu-group><void-menu-group-label>File</void-menu-group-label><void-menu-item value="new">New</void-menu-item></void-menu-group>',
+    legacy: { attributes: { label: 'write the heading as <void-menu-group-label>...</void-menu-group-label> first in the group' } },
+    parts: [{ tag: 'void-menu-group-label', max: 1, description: 'Heading of the group; names it for assistive technology.' }],
+  },
+  'void-carousel': {
+    children: 'parts',
+    ordered: true,
+    skeleton:
+      '<void-carousel><void-carousel-content><void-carousel-item>One</void-carousel-item><void-carousel-item>Two</void-carousel-item></void-carousel-content><void-carousel-previous aria-label="Previous slide"></void-carousel-previous><void-carousel-next aria-label="Next slide"></void-carousel-next><void-carousel-indicators></void-carousel-indicators></void-carousel>',
+    legacy: {
+      attributes: {
+        controls: 'write <void-carousel-previous aria-label="Previous slide"></void-carousel-previous> and <void-carousel-next aria-label="Next slide"></void-carousel-next> after the content; leave them out for no arrows',
+        indicators: 'write an empty <void-carousel-indicators></void-carousel-indicators> after the content; leave it out for no dots',
+      },
+      tags: {
+        'void-carousel-slide': 'write each slide as <void-carousel-item> inside <void-carousel-content>',
+      },
+      children: 'put the slides in <void-carousel-content> as <void-carousel-item>',
+    },
+    parts: [
+      {
+        tag: 'void-carousel-content',
+        required: true,
+        max: 1,
+        children: 'parts',
+        description: 'The window the slides move in.',
+        parts: [
+          {
+            tag: 'void-carousel-item',
+            required: true,
+            description: 'One slide (role="group"); the carousel marks the slide being shown with active.',
+            attributes: [
+              { name: 'active', type: 'boolean', description: 'Set by <void-carousel> on the slide being shown.' },
+            ],
+          },
+        ],
+      },
+      { tag: 'void-carousel-previous', max: 1, description: 'Arrow button to the previous slide. Empty, it shows the theme arrow; give it an aria-label.' },
+      { tag: 'void-carousel-next', max: 1, description: 'Arrow button to the next slide. Empty, it shows the theme arrow; give it an aria-label.' },
+      {
+        tag: 'void-carousel-indicators',
+        max: 1,
+        children: 'any',
+        description: 'Leave it empty: the carousel fills it with one dot button per slide.',
+      },
+    ],
+  },
 };
 
 /**
- * Attributes a parent writes onto its children (carousel.ts marks the current
- * slide `active`; the theme reads it). They are state, not API, so they are not
- * declared attributes, but a validator must not report them. Merged into the
- * declaration's `voidHostAttributes` with the ones components set on themselves.
+ * Attributes a parent writes onto its children. They are state, not API, so they
+ * are not declared attributes, but a validator must not report them. Merged into
+ * the declaration's `voidHostAttributes` with the ones components set on
+ * themselves. (A parent writing onto a CSS-only part declares the attribute on
+ * the part instead, as `active` on a tabs trigger.)
  * @type {Record<string, string[]>}
  */
-export const parentSetAttributes = {
-  'void-carousel-slide': ['active'],
-};
+export const parentSetAttributes = {};
 
 // Shorthands for the entries below.
 const ARIA = ['aria-label', 'aria-labelledby', 'title'];
@@ -403,5 +548,7 @@ export const accessibleName = {
   // Named by its title part (#52), which is its own child; the native <dialog> in its shadow root is labelled by it.
   'void-dialog': { attributes: ARIA, parts: ['void-dialog-title'], hint: 'write its title as <void-dialog-title>' },
   'void-drawer': { attributes: ARIA, parts: ['void-drawer-title'], hint: 'write its title as <void-drawer-title>' },
+  'void-carousel-previous': { attributes: ARIA, content: true, hint: 'give it aria-label="Previous slide"' },
+  'void-carousel-next': { attributes: ARIA, content: true, hint: 'give it aria-label="Next slide"' },
   'void-avatar': { attributes: [...ARIA, 'alt', 'initials'], hint: 'set alt to the person\'s name (or initials)' },
 };

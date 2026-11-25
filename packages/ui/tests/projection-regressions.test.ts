@@ -157,36 +157,39 @@ describe('void-drawer explicit parts', () => {
   });
 });
 
-describe('void-menu projection', () => {
-  it('projects items when it starts closed', async () => {
+describe('void-menu explicit parts', () => {
+  it('keeps its items where they are when it starts closed, and across open and close', async () => {
     const el = mount<LitElement & { open: boolean }>(
-      '<void-menu><void-menu-item value="a">A</void-menu-item></void-menu>'
+      '<void-menu><void-menu-content><void-menu-item value="a">A</void-menu-item></void-menu-content></void-menu>'
     );
+    const item = el.querySelector('void-menu-item');
     await settle(el);
     el.open = true;
     await settle(el);
-    expect(el.querySelector('.void-menu-list void-menu-item')).not.toBeNull();
+    expect(el.querySelector('void-menu-content > void-menu-item')).toBe(item);
     el.open = false;
     await settle(el);
     el.open = true;
     await settle(el);
-    expect(el.querySelectorAll('.void-menu-list void-menu-item').length).toBe(1);
+    expect(el.querySelectorAll('void-menu-content > void-menu-item').length).toBe(1);
   });
 });
 
-describe('void-menu-item projection', () => {
+describe('void-menu-item explicit parts', () => {
   it('does not clone children on reconnect, so listeners survive', async () => {
-    const el = mount<LitElement>('<void-menu-item icon="*" shortcut="K"><b id="x">Label</b></void-menu-item>');
+    const el = mount<LitElement>(
+      '<void-menu-item><void-menu-item-icon>*</void-menu-item-icon><b id="x">Label</b><void-menu-item-shortcut>K</void-menu-item-shortcut></void-menu-item>'
+    );
     await settle(el);
     const b = el.querySelector('#x')!;
+    const before = [...el.children];
     let clicks = 0;
     b.addEventListener('click', () => clicks++);
     el.remove();
     document.body.appendChild(el);
     await settle(el);
     expect(el.querySelector('#x')).toBe(b);
-    expect(el.querySelectorAll('.void-menu-item-label').length).toBe(1);
-    expect(el.querySelectorAll('.void-menu-item-icon').length).toBe(1);
+    expect([...el.children]).toEqual(before);
     (b as HTMLElement).click();
     expect(clicks).toBe(1);
   });
@@ -292,7 +295,6 @@ describe('void-hover-card explicit parts', () => {
 describe('container components project late children and survive reconnect', () => {
   const cases: Array<[string, string]> = [
     ['void-scroll-area', '.void-scroll-area-viewport'],
-    ['void-nav-bar', '.void-nav-bar-content'],
     ['void-collapsible', '.void-collapsible-inner'],
     ['void-checkbox-group', '.void-checkbox-group-items'],
   ];
@@ -372,14 +374,17 @@ describe('void-radio-group projection', () => {
   });
 });
 
-describe('void-carousel projection', () => {
-  it('adds an indicator for a slide added after connect', async () => {
-    const el = mount<LitElement>('<void-carousel><void-carousel-slide>1</void-carousel-slide></void-carousel>');
+describe('void-carousel explicit parts', () => {
+  it('adds a dot for a slide added after connect, into the author indicators part', async () => {
+    const el = mount<LitElement>(
+      '<void-carousel><void-carousel-content><void-carousel-item>1</void-carousel-item></void-carousel-content><void-carousel-indicators></void-carousel-indicators></void-carousel>'
+    );
     await settle(el);
-    expect(el.querySelectorAll('.void-carousel-dot').length).toBe(1);
-    el.appendChild(document.createElement('void-carousel-slide'));
+    expect(el.querySelectorAll('void-carousel-indicators > button').length).toBe(1);
+    el.querySelector('void-carousel-content')!.appendChild(document.createElement('void-carousel-item'));
     await settle(el);
-    expect(el.querySelectorAll('.void-carousel-track > void-carousel-slide').length).toBe(2);
-    expect(el.querySelectorAll('.void-carousel-dot').length).toBe(2);
+    await settle(el);
+    expect(el.querySelectorAll('void-carousel-content > void-carousel-item').length).toBe(2);
+    expect(el.querySelectorAll('void-carousel-indicators > button').length).toBe(2);
   });
 });

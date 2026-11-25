@@ -160,7 +160,7 @@ describe('custom-elements.json', () => {
   it('describes the explicit parts of every component that has them, and no slots for those (#52)', () => {
     const withParts = declared.filter(({ decl }) => (decl as { voidParts?: unknown }).voidParts).map(({ decl }) => decl.tagName!).sort();
     expect(withParts).toEqual(
-      ['void-accordion', 'void-alert', 'void-card', 'void-dialog', 'void-drawer', 'void-dropdown-menu', 'void-hover-card', 'void-popover', 'void-tabs', 'void-tooltip'].sort(),
+      ['void-accordion', 'void-alert', 'void-breadcrumbs', 'void-card', 'void-carousel', 'void-dialog', 'void-drawer', 'void-dropdown-menu', 'void-hover-card', 'void-menu', 'void-menu-group', 'void-menu-item', 'void-nav-menu', 'void-popover', 'void-tabs', 'void-tooltip'].sort(),
     );
     for (const tag of withParts) {
       const decl = byTag.get(tag)!.decl as { slots?: unknown[]; voidParts: { parts: { tag: string }[] } };

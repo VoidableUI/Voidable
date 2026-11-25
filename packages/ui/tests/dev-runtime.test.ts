@@ -172,7 +172,7 @@ describe('the generated table', () => {
     expect(table['void-tabs-trigger'].c).toBe(1);
     expect(table['void-input'].x?.label).toContain('void-field');
     expect(table['void-file-upload'].h).toContain('dragging');
-    expect(table['void-carousel-slide'].h).toContain('active');
+    expect(table['void-carousel-item'].a.active).toBeDefined();
     expect(table['void-button'].a.color).toContain('error');
     const manifest = JSON.parse(readFileSync(resolve(__dirname, '../dist/custom-elements.json'), 'utf8'));
     const decl = manifest.modules.flatMap((m: { declarations?: { tagName?: string }[] }) => m.declarations ?? []).find((d: { tagName?: string }) => d.tagName === 'void-option');

@@ -66,7 +66,7 @@ defmodule VoidableUI.Components do
 
   Every boolean that defaults to true in the core component (`closable` on
   `dialog` and `drawer`, `dismissable` on `toast`, `bordered` on `nav_bar`,
-  `controls` and `indicators` on `carousel`, `show_input` on `color_picker`,
+  `show_input` on `color_picker`,
   `icon` on `error_fallback`) renders as `"true"` or `"false"`. The core
   component reads the string `"false"` as false, so the server can turn the
   attribute off and back on with an ordinary attribute patch.
@@ -806,7 +806,10 @@ defmodule VoidableUI.Components do
   # Breadcrumbs (static)
   # ---------------------------------------------------------------------------
 
-  @doc "Renders a `<void-breadcrumbs>` navigation trail."
+  @doc """
+  Renders a `<void-breadcrumbs>` navigation trail. Write one `<void-breadcrumbs-item>` per crumb (a link, or
+  text for the page you are on) and put `aria-current="page"` on the current one.
+  """
   attr :separator, :string, default: nil
   attr :rest, :global
   slot :inner_block, required: true
@@ -1625,12 +1628,16 @@ defmodule VoidableUI.Components do
   # Menu (interactive — void-select)
   # ---------------------------------------------------------------------------
 
-  @doc "Renders a `<void-menu>` command menu."
+  @doc """
+  Renders a `<void-menu>` command menu.
+
+  Write its parts as children, in this order: an optional `<void-menu-search>` around one
+  `<input type="search">` (present means searchable), `<void-menu-content>` holding the `menu_item`s and
+  `menu_group`s, and an optional `<void-menu-empty>` shown instead of the default "No results found".
+  """
   attr :id, :string, default: nil
   attr :open, :boolean, default: false
-  attr :searchable, :boolean, default: false
   attr :size, :string, default: nil
-  attr :placeholder, :string, default: nil
   attr :events, :any, default: nil, doc: @events_doc
   attr :rest, :global
   slot :inner_block, required: true
@@ -1640,9 +1647,7 @@ defmodule VoidableUI.Components do
     <void-menu
       id={@id || auto_id("void-menu", @rest)}
       open={@open}
-      searchable={@searchable}
       size={@size}
-      placeholder={@placeholder}
       phx-hook={void_hook(@events)}
       data-void-events={void_events(@events, "void-select")}
       {@rest}
@@ -1656,17 +1661,18 @@ defmodule VoidableUI.Components do
   # MenuItem (static)
   # ---------------------------------------------------------------------------
 
-  @doc "Renders a `<void-menu-item>` inside a menu."
+  @doc """
+  Renders a `<void-menu-item>` inside a menu's content. Its text is the label; an optional
+  `<void-menu-item-icon>` first and `<void-menu-item-shortcut>` last are written as children.
+  """
   attr :value, :string, default: nil
   attr :disabled, :boolean, default: false
-  attr :shortcut, :string, default: nil
-  attr :icon, :string, default: nil
   attr :rest, :global
   slot :inner_block, required: true
 
   def menu_item(assigns) do
     ~H"""
-    <void-menu-item value={@value} disabled={@disabled} shortcut={@shortcut} icon={@icon} {@rest}>
+    <void-menu-item value={@value} disabled={@disabled} {@rest}>
       {render_slot(@inner_block)}
     </void-menu-item>
     """
@@ -1676,14 +1682,16 @@ defmodule VoidableUI.Components do
   # MenuGroup (static)
   # ---------------------------------------------------------------------------
 
-  @doc "Renders a `<void-menu-group>` label inside a menu."
-  attr :label, :string, default: nil
+  @doc """
+  Renders a `<void-menu-group>` inside a menu's content. Write its heading as the first child,
+  `<void-menu-group-label>`, then the items.
+  """
   attr :rest, :global
   slot :inner_block, required: true
 
   def menu_group(assigns) do
     ~H"""
-    <void-menu-group label={@label} {@rest}>
+    <void-menu-group {@rest}>
       {render_slot(@inner_block)}
     </void-menu-group>
     """
@@ -1693,15 +1701,19 @@ defmodule VoidableUI.Components do
   # Carousel (interactive — void-change)
   # ---------------------------------------------------------------------------
 
-  @doc "Renders a `<void-carousel>` image/content slider."
+  @doc """
+  Renders a `<void-carousel>` image/content slider.
+
+  Write its parts as children, in this order: `<void-carousel-content>` holding one
+  `<void-carousel-item>` per slide, then the optional controls `carousel_previous`, `carousel_next` and an
+  empty `<void-carousel-indicators>` (a control is shown when written).
+  """
   attr :id, :string, default: nil
   attr :active, :integer, default: 0
   attr :loop, :boolean, default: false
   attr :autoplay, :boolean, default: false
   attr :interval, :integer, default: nil
   attr :size, :string, default: nil
-  attr :controls, :boolean, default: true
-  attr :indicators, :boolean, default: true
   attr :orientation, :string, default: nil
   attr :events, :any, default: nil, doc: @events_doc
   attr :rest, :global
@@ -1716,8 +1728,6 @@ defmodule VoidableUI.Components do
       autoplay={@autoplay}
       interval={@interval}
       size={@size}
-      controls={to_string(@controls)}
-      indicators={to_string(@indicators)}
       orientation={@orientation}
       phx-hook={void_hook(@events)}
       data-void-events={void_events(@events, "void-change")}
@@ -1729,18 +1739,32 @@ defmodule VoidableUI.Components do
   end
 
   # ---------------------------------------------------------------------------
-  # CarouselSlide (static)
+  # CarouselPrevious, CarouselNext (static)
   # ---------------------------------------------------------------------------
 
-  @doc "Renders a `<void-carousel-slide>` inside a carousel."
+  @doc """
+  Renders the `<void-carousel-previous>` arrow of a carousel. Give it an `aria-label`; with no content it shows
+  the theme arrow.
+  """
   attr :rest, :global
-  slot :inner_block, required: true
+  slot :inner_block
 
-  def carousel_slide(assigns) do
+  def carousel_previous(assigns) do
     ~H"""
-    <void-carousel-slide {@rest}>
-      {render_slot(@inner_block)}
-    </void-carousel-slide>
+    <void-carousel-previous {@rest}>{render_slot(@inner_block)}</void-carousel-previous>
+    """
+  end
+
+  @doc """
+  Renders the `<void-carousel-next>` arrow of a carousel. Give it an `aria-label`; with no content it shows the
+  theme arrow.
+  """
+  attr :rest, :global
+  slot :inner_block
+
+  def carousel_next(assigns) do
+    ~H"""
+    <void-carousel-next {@rest}>{render_slot(@inner_block)}</void-carousel-next>
     """
   end
 
@@ -2049,11 +2073,14 @@ defmodule VoidableUI.Components do
   # NavMenuItem (interactive — void-open, void-close)
   # ---------------------------------------------------------------------------
 
-  @doc "Renders a `<void-nav-menu-item>` navigation menu item."
+  @doc """
+  Renders a `<void-nav-menu-item>` navigation menu item. Write its parts as children:
+  `<void-nav-menu-trigger>` around one `<button>` (opens a dropdown) or `<a href>` (navigates), and for a
+  dropdown `<void-nav-menu-content>` after it.
+  """
   attr :id, :string, default: nil
   attr :open, :boolean, default: false
   attr :disabled, :boolean, default: false
-  attr :href, :string, default: nil
   attr :active, :boolean, default: false
   attr :events, :any, default: nil, doc: @events_doc
   attr :rest, :global
@@ -2065,7 +2092,6 @@ defmodule VoidableUI.Components do
       id={@id || auto_id("void-nav-menu-item", @rest)}
       open={@open}
       disabled={@disabled}
-      href={@href}
       active={@active}
       phx-hook={void_hook(@events)}
       data-void-events={void_events(@events, "void-open,void-close")}

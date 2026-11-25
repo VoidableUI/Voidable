@@ -44,10 +44,12 @@
   <void-field label="Country"><void-select id="select" placeholder="Choose…"><option value="nz">New Zealand</option><option value="au">Australia</option><option value="fj">Fiji</option><option value="ar">Argentina</option></void-select></void-field>
 
   <void-menu id="menu" aria-label="Actions">
-    <void-menu-item value="edit">Edit</void-menu-item>
-    <void-menu-item value="dup">Duplicate</void-menu-item>
-    <void-menu-item value="arch" disabled>Archive</void-menu-item>
-    <void-menu-item value="del">Delete</void-menu-item>
+    <void-menu-content>
+      <void-menu-item value="edit">Edit</void-menu-item>
+      <void-menu-item value="dup">Duplicate</void-menu-item>
+      <void-menu-item value="arch" disabled>Archive</void-menu-item>
+      <void-menu-item value="del">Delete</void-menu-item>
+    </void-menu-content>
   </void-menu>
   <textarea id="notes" aria-label="Notes">line 1
 line 2

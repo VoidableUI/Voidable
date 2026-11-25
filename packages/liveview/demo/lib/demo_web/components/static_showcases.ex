@@ -482,27 +482,27 @@ defmodule DemoWeb.StaticShowcases do
       <h3>Default</h3>
       <p>A navigation trail showing the current page location within a hierarchy.</p>
       <VoidableUI.Components.breadcrumbs>
-        <a href="#">Home</a>
-        <a href="#">Products</a>
-        <span>Details</span>
+        <void-breadcrumbs-item><a href="#">Home</a></void-breadcrumbs-item>
+        <void-breadcrumbs-item><a href="#">Products</a></void-breadcrumbs-item>
+        <void-breadcrumbs-item aria-current="page">Details</void-breadcrumbs-item>
       </VoidableUI.Components.breadcrumbs>
     </div>
     <div class="showcase-section">
       <h3>Custom Separator</h3>
       <VoidableUI.Components.breadcrumbs separator="&rsaquo;">
-        <a href="#">Home</a>
-        <a href="#">Docs</a>
-        <span>Getting Started</span>
+        <void-breadcrumbs-item><a href="#">Home</a></void-breadcrumbs-item>
+        <void-breadcrumbs-item><a href="#">Docs</a></void-breadcrumbs-item>
+        <void-breadcrumbs-item aria-current="page">Getting Started</void-breadcrumbs-item>
       </VoidableUI.Components.breadcrumbs>
     </div>
     <div class="showcase-section">
       <h3>Deep Nesting</h3>
       <VoidableUI.Components.breadcrumbs separator="/">
-        <a href="#">Home</a>
-        <a href="#">Settings</a>
-        <a href="#">Account</a>
-        <a href="#">Security</a>
-        <span>Two-Factor Auth</span>
+        <void-breadcrumbs-item><a href="#">Home</a></void-breadcrumbs-item>
+        <void-breadcrumbs-item><a href="#">Settings</a></void-breadcrumbs-item>
+        <void-breadcrumbs-item><a href="#">Account</a></void-breadcrumbs-item>
+        <void-breadcrumbs-item><a href="#">Security</a></void-breadcrumbs-item>
+        <void-breadcrumbs-item aria-current="page">Two-Factor Auth</void-breadcrumbs-item>
       </VoidableUI.Components.breadcrumbs>
     </div>
     """

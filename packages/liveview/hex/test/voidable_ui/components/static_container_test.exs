@@ -106,6 +106,46 @@ defmodule VoidableUI.Components.StaticContainerTest do
     assert html =~ "Home / About"
   end
 
+  test "breadcrumbs, menus and carousel are written with their parts as children, and render no attributes of the removed forms" do
+    assigns = %{}
+
+    html =
+      rendered_to_string(~H"""
+      <VoidableUI.Components.breadcrumbs>
+        <void-breadcrumbs-item><a href="/">Home</a></void-breadcrumbs-item>
+        <void-breadcrumbs-item aria-current="page">Page</void-breadcrumbs-item>
+      </VoidableUI.Components.breadcrumbs>
+      <VoidableUI.Components.menu open>
+        <void-menu-content>
+          <VoidableUI.Components.menu_group>
+            <void-menu-group-label>File</void-menu-group-label>
+            <VoidableUI.Components.menu_item value="new">New<void-menu-item-shortcut>Ctrl+N</void-menu-item-shortcut></VoidableUI.Components.menu_item>
+          </VoidableUI.Components.menu_group>
+        </void-menu-content>
+      </VoidableUI.Components.menu>
+      <VoidableUI.Components.carousel id="c">
+        <void-carousel-content><void-carousel-item>One</void-carousel-item></void-carousel-content>
+        <VoidableUI.Components.carousel_previous aria-label="Previous slide" />
+        <VoidableUI.Components.carousel_next aria-label="Next slide" />
+        <void-carousel-indicators></void-carousel-indicators>
+      </VoidableUI.Components.carousel>
+      <VoidableUI.Components.nav_menu_item id="n" active>
+        <void-nav-menu-trigger><a href="/docs">Docs</a></void-nav-menu-trigger>
+      </VoidableUI.Components.nav_menu_item>
+      """)
+
+    assert html =~ "<void-breadcrumbs-item"
+    assert html =~ "<void-menu-group-label>File</void-menu-group-label>"
+    assert html =~ ~s(value="new")
+    refute html =~ "searchable="
+    refute html =~ "shortcut="
+    refute html =~ "controls="
+    refute html =~ "indicators="
+    assert html =~ ~s(aria-label="Previous slide")
+    assert html =~ ~s(aria-label="Next slide")
+    assert html =~ ~s(<a href="/docs">Docs</a>)
+  end
+
   test "breadcrumbs omits nil separator" do
     assigns = %{}
 

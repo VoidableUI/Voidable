@@ -66,7 +66,8 @@ import type {
   VoidMenuItem,
   VoidMenuGroup,
   VoidCarousel,
-  VoidCarouselSlide,
+  VoidCarouselPrevious,
+  VoidCarouselNext,
   VoidCalendar,
   VoidDatePicker,
   VoidNumberInput,
@@ -832,23 +833,30 @@ export const Indicator = wrapWc<VoidIndicator, {
   position?: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left';
 }>('void-indicator', 'Indicator');
 
+/**
+ * ```tsx
+ * <Menu open>
+ *   <MenuSearch><input type="search" aria-label="Search" /></MenuSearch>
+ *   <MenuContent>
+ *     <MenuItem value="new"><MenuItemIcon aria-hidden>+</MenuItemIcon>New<MenuItemShortcut>Ctrl+N</MenuItemShortcut></MenuItem>
+ *     <MenuGroup><MenuGroupLabel>Recent</MenuGroupLabel><MenuItem value="a">A</MenuItem></MenuGroup>
+ *   </MenuContent>
+ *   <MenuEmpty>Nothing found</MenuEmpty>
+ * </Menu>
+ * ```
+ */
 export const Menu = wrapWc<VoidMenu, {
   open?: boolean;
-  searchable?: boolean;
   size?: 'sm' | 'md' | 'lg';
-  placeholder?: string;
 }>('void-menu', 'Menu');
 
 export const MenuItem = wrapWc<VoidMenuItem, {
+  /** Passed as `detail.value` of `void-select`. */
   value?: string;
   disabled?: boolean;
-  shortcut?: string;
-  icon?: string;
-} & VoidEvents<{ Select: { value: string } }>>('void-menu-item', 'MenuItem');
+} & VoidEvents<{ Select: { item: VoidMenuItem; value: string } }>>('void-menu-item', 'MenuItem');
 
-export const MenuGroup = wrapWc<VoidMenuGroup, {
-  label?: string;
-}>('void-menu-group', 'MenuGroup');
+export const MenuGroup = wrapWc<VoidMenuGroup, {}>('void-menu-group', 'MenuGroup');
 
 export const Carousel = wrapWc<VoidCarousel, {
   active?: number;
@@ -856,13 +864,12 @@ export const Carousel = wrapWc<VoidCarousel, {
   autoplay?: boolean;
   interval?: number;
   size?: 'sm' | 'md' | 'lg';
-  controls?: boolean;
-  indicators?: boolean;
   orientation?: 'horizontal' | 'vertical';
 } & VoidEvents<{ Change: { index: number; previous: number } }>>('void-carousel', 'Carousel');
 
-export const CarouselSlide = wrapWc<VoidCarouselSlide, {
-}>('void-carousel-slide', 'CarouselSlide');
+export const CarouselPrevious = wrapWc<VoidCarouselPrevious, {}>('void-carousel-previous', 'CarouselPrevious');
+
+export const CarouselNext = wrapWc<VoidCarouselNext, {}>('void-carousel-next', 'CarouselNext');
 
 export const Calendar = wrapWc<VoidCalendar, {
   value?: string;
@@ -1007,7 +1014,6 @@ export const NavMenu = wrapWc<VoidNavMenu, {
 export const NavMenuItem = wrapWc<VoidNavMenuItem, {
   open?: boolean;
   disabled?: boolean;
-  href?: string;
   active?: boolean;
 } & VoidEvents<{ Open: null; Close: null }>>('void-nav-menu-item', 'NavMenuItem');
 

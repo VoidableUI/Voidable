@@ -99,11 +99,6 @@ defmodule VoidableUI.Components.NativeAttributesTest do
       assert rendered_to_string(~H"<C.nav_bar>x</C.nav_bar>") =~ ~s(bordered="true")
       assert rendered_to_string(~H"<C.nav_bar bordered={false}>x</C.nav_bar>") =~ ~s(bordered="false")
 
-      carousel = rendered_to_string(~H"<C.carousel id='c' controls={false} indicators={false}>x</C.carousel>")
-      assert carousel =~ ~s(controls="false")
-      assert carousel =~ ~s(indicators="false")
-      assert rendered_to_string(~H"<C.carousel id='c'>x</C.carousel>") =~ ~s(controls="true")
-
       assert rendered_to_string(~H"<C.color_picker id='p' />") =~ ~s(show-input="true")
       assert rendered_to_string(~H"<C.color_picker id='p' show_input={false} />") =~ ~s(show-input="false")
 

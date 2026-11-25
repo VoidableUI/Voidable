@@ -1,10 +1,16 @@
-<void-menu open searchable aria-label="Commands">
-  <void-menu-group label="File">
-    <void-menu-item value="new" shortcut="Ctrl+N">New file</void-menu-item>
-    <void-menu-item value="open" shortcut="Ctrl+O">Open...</void-menu-item>
-  </void-menu-group>
-  <void-menu-group label="Edit">
-    <void-menu-item value="copy" shortcut="Ctrl+C">Copy</void-menu-item>
-    <void-menu-item value="paste" shortcut="Ctrl+V" disabled>Paste</void-menu-item>
-  </void-menu-group>
+<void-menu open aria-label="Commands">
+  <void-menu-search><input type="search" placeholder="Search..." aria-label="Search commands"></void-menu-search>
+  <void-menu-content>
+    <void-menu-group>
+      <void-menu-group-label>File</void-menu-group-label>
+      <void-menu-item value="new">New file<void-menu-item-shortcut>Ctrl+N</void-menu-item-shortcut></void-menu-item>
+      <void-menu-item value="open">Open...<void-menu-item-shortcut>Ctrl+O</void-menu-item-shortcut></void-menu-item>
+    </void-menu-group>
+    <void-menu-group>
+      <void-menu-group-label>Edit</void-menu-group-label>
+      <void-menu-item value="copy">Copy<void-menu-item-shortcut>Ctrl+C</void-menu-item-shortcut></void-menu-item>
+      <void-menu-item value="paste" disabled>Paste<void-menu-item-shortcut>Ctrl+V</void-menu-item-shortcut></void-menu-item>
+    </void-menu-group>
+  </void-menu-content>
+  <void-menu-empty>No commands match.</void-menu-empty>
 </void-menu>

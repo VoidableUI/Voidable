@@ -22,7 +22,7 @@ Frequency based on survey of 10 OSS libraries (shadcn, Radix, Chakra, Mantine, D
 |-----------|------|-------------|
 | ~~Dropdown Menu~~ | 9/10 | ✅ Shipped — `<void-dropdown-menu>` + `<void-dropdown-menu-item>` |
 | ~~Menu~~ | 8/10 | ✅ Shipped — `<void-menu>` + `<void-menu-item>` + `<void-menu-group>` |
-| ~~Carousel~~ | 8/10 | ✅ Shipped — `<void-carousel>` + `<void-carousel-slide>` |
+| ~~Carousel~~ | 8/10 | ✅ Shipped — `<void-carousel>` + `<void-carousel-item>` |
 | ~~Calendar / Date Picker~~ | 8/10 | ✅ Shipped — `<void-calendar>` + `<void-date-picker>` |
 | ~~Number Input~~ | 8/10 | ✅ Shipped — `<void-number-input>` |
 
