@@ -1,6 +1,6 @@
 import { html, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
-import { VoidElement } from '../base.js';
+import { VoidElement, ProjectionController } from '../base.js';
 
 /** Slide-out overlay panel for filters, detail views, and navigation menus; opens from any screen edge. */
 export class VoidDrawer extends VoidElement {
@@ -10,16 +10,14 @@ export class VoidDrawer extends VoidElement {
   @property({ type: String }) heading = '';
   @property({ type: Boolean, reflect: true }) closable = true;
 
-  private _userContent: Node[] = [];
-  private _didSetup = false;
+  protected readonly _projection = new ProjectionController(this, {
+    regions: [{ name: 'body', target: () => this.querySelector(':scope > .void-drawer-panel > .void-drawer-body') }],
+  });
 
   connectedCallback(): void {
     super.connectedCallback();
     this.setAttribute('role', 'dialog');
     this.setAttribute('aria-modal', 'true');
-    if (!this._didSetup) {
-      this._userContent = Array.from(this.childNodes);
-    }
     this.addEventListener('keydown', this._handleKeydown);
   }
 
@@ -34,15 +32,6 @@ export class VoidDrawer extends VoidElement {
       this.setAttribute('aria-label', this.heading);
     } else if (changed.has('heading') && !this.heading) {
       this.removeAttribute('aria-label');
-    }
-    if (!this._didSetup) {
-      this._didSetup = true;
-      const body = this.querySelector('.void-drawer-body');
-      if (body) {
-        for (const node of this._userContent) {
-          body.appendChild(node);
-        }
-      }
     }
   }
 
@@ -70,10 +59,10 @@ export class VoidDrawer extends VoidElement {
   }
 
   render() {
-    if (!this.open) return nothing;
+    // Always rendered so the projected body survives close/reopen; hidden while closed.
     return html`
-      <div class="void-drawer-backdrop" @click="${this._handleBackdropClick}" @keydown="${this._handleBackdropKeydown}"></div>
-      <div class="void-drawer-panel">
+      <div class="void-drawer-backdrop" ?hidden=${!this.open} @click="${this._handleBackdropClick}" @keydown="${this._handleBackdropKeydown}"></div>
+      <div class="void-drawer-panel" ?hidden=${!this.open}>
         <div class="void-drawer-header">
           ${this.heading ? html`<span class="void-drawer-heading">${this.heading}</span>` : nothing}
           ${this.closable ? html`<button type="button" class="void-drawer-close" aria-label="Close" @click="${this._close}">&times;</button>` : nothing}

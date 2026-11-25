@@ -107,10 +107,12 @@ describe('VoidDialog', () => {
       el.open = true;
       await el.updateComplete;
       expect(el.querySelector('.void-dialog-backdrop')).not.toBeNull();
+      expect(el.querySelector<HTMLElement>('.void-dialog-backdrop')!.hidden).toBe(false);
     });
 
-    it('does not render backdrop when open is false', async () => {
-      expect(el.querySelector('.void-dialog-backdrop')).toBeNull();
+    it('hides the backdrop when open is false', async () => {
+      // The backdrop stays in the DOM so projected content survives close/reopen.
+      expect(el.querySelector<HTMLElement>('.void-dialog-backdrop')!.hidden).toBe(true);
     });
 
     it('reflects open to attribute', async () => {

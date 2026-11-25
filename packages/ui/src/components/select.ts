@@ -1,6 +1,6 @@
 import { html } from 'lit';
 import { property } from 'lit/decorators.js';
-import { VoidElement } from '../base.js';
+import { VoidElement, ProjectionController } from '../base.js';
 
 /** Native dropdown for small option sets in forms where a simple pick-one is sufficient. */
 export class VoidSelect extends VoidElement {
@@ -12,29 +12,26 @@ export class VoidSelect extends VoidElement {
   @property({ type: String, reflect: true }) error = '';
   @property({ type: String, reflect: true }) placeholder = '';
 
-  private _options: Node[] = [];
-  private _didSetup = false;
-
-  connectedCallback(): void {
-    super.connectedCallback();
-    if (!this._didSetup) {
-      this._options = Array.from(this.childNodes);
-    }
-  }
+  // Consumer <option>/<optgroup> children are projected into the native <select>.
+  protected readonly _projection = new ProjectionController(this, {
+    regions: [{ name: 'options', target: () => this.querySelector(':scope > select') }],
+    onChange: () => this._syncValue(),
+  });
+  private _didSyncValue = false;
 
   protected override updated(_changed: Map<string, unknown>): void {
     super.updated(_changed);
-    if (!this._didSetup) {
-      this._didSetup = true;
-      const select = this.querySelector('select');
-      if (select) {
-        for (const node of this._options) {
-          select.appendChild(node);
-        }
-        if (this.value) {
-          select.value = this.value;
-        }
-      }
+    if (!this._didSyncValue) {
+      this._didSyncValue = true;
+      this._syncValue();
+    }
+  }
+
+  /** Re-applies `value` to the native select, e.g. once the matching option exists. */
+  private _syncValue(): void {
+    const select = this.querySelector<HTMLSelectElement>(':scope > select');
+    if (select && this.value) {
+      select.value = this.value;
     }
   }
 

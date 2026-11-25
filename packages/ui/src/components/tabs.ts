@@ -1,6 +1,6 @@
 import { html } from 'lit';
 import { property } from 'lit/decorators.js';
-import { VoidElement } from '../base.js';
+import { VoidElement, ProjectionController } from '../base.js';
 
 /** Individual tab content panel within a VoidTabs component. */
 export class VoidTabPanel extends VoidElement {
@@ -31,11 +31,21 @@ export class VoidTabs extends VoidElement {
   @property({ type: String }) value = '';
   @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' = 'md';
 
-  private _panels: VoidTabPanel[] = [];
+  // Panels stay direct children after the tab list; adding or removing one re-renders the tab buttons.
+  protected readonly _projection = new ProjectionController(this, {
+    regions: [{ name: 'panels', target: 'after' }],
+    onChange: () => {
+      this._syncPanels();
+      this.requestUpdate();
+    },
+  });
+
+  private get _panels(): VoidTabPanel[] {
+    return Array.from(this.querySelectorAll('void-tab-panel')) as VoidTabPanel[];
+  }
 
   connectedCallback(): void {
     super.connectedCallback();
-    this._panels = Array.from(this.querySelectorAll('void-tab-panel')) as VoidTabPanel[];
     this._syncPanels();
   }
 
