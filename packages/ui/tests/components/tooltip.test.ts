@@ -170,12 +170,39 @@ describe('VoidTooltip', () => {
       expect(trigger.getAttribute('aria-describedby')).toBe(tooltipId);
     });
 
-    it('aria-describedby removed when hidden', async () => {
+    it('trigger references the tooltip even while it is hidden', () => {
+      const tooltipId = (el as unknown as { _tooltipId: string })._tooltipId;
+      expect(trigger.getAttribute('aria-describedby')).toBe(tooltipId);
+    });
+
+    it('aria-describedby persists after the tooltip is hidden', async () => {
       el.dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
       await el.updateComplete;
       el.dispatchEvent(new FocusEvent('focusout', { bubbles: true }));
       await el.updateComplete;
-      expect(trigger.getAttribute('aria-describedby')).toBeNull();
+      const tooltipId = (el as unknown as { _tooltipId: string })._tooltipId;
+      expect(trigger.getAttribute('aria-describedby')).toBe(tooltipId);
+    });
+
+    it('bubble has no redundant aria-label', () => {
+      expect(el.querySelector('.void-tooltip-bubble')!.hasAttribute('aria-label')).toBe(false);
+    });
+
+    it('Escape dismisses a visible tooltip', async () => {
+      el.dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
+      await el.updateComplete;
+      expect(el.hasAttribute('visible')).toBe(true);
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+      await el.updateComplete;
+      expect(el.hasAttribute('visible')).toBe(false);
+    });
+
+    it('other keys do not dismiss the tooltip', async () => {
+      el.dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
+      await el.updateComplete;
+      trigger.dispatchEvent(new KeyboardEvent('keydown', { key: 'a', bubbles: true }));
+      await el.updateComplete;
+      expect(el.hasAttribute('visible')).toBe(true);
     });
   });
 

@@ -22,6 +22,7 @@ export class VoidTooltip extends VoidElement {
     this.addEventListener('mouseleave', this._onMouseLeave);
     this.addEventListener('focusin', this._onFocusIn);
     this.addEventListener('focusout', this._onFocusOut);
+    document.addEventListener('keydown', this._onKeydown);
   }
 
   disconnectedCallback(): void {
@@ -31,6 +32,7 @@ export class VoidTooltip extends VoidElement {
     this.removeEventListener('mouseleave', this._onMouseLeave);
     this.removeEventListener('focusin', this._onFocusIn);
     this.removeEventListener('focusout', this._onFocusOut);
+    document.removeEventListener('keydown', this._onKeydown);
   }
 
   protected override updated(): void {
@@ -52,13 +54,17 @@ export class VoidTooltip extends VoidElement {
 
     const trigger = this.children[0] as HTMLElement | undefined;
     if (trigger) {
-      if (this._visible) {
-        trigger.setAttribute('aria-describedby', this._tooltipId);
-      } else {
-        trigger.removeAttribute('aria-describedby');
-      }
+      trigger.setAttribute('aria-describedby', this._tooltipId);
     }
   }
+
+  private _onKeydown = (e: KeyboardEvent): void => {
+    if (e.key === 'Escape' && this._visible) {
+      clearTimeout(this._timerId);
+      this._visible = false;
+      this.requestUpdate();
+    }
+  };
 
   private _onMouseEnter = (): void => {
     clearTimeout(this._timerId);
@@ -87,7 +93,9 @@ export class VoidTooltip extends VoidElement {
   };
 
   render() {
-    return html`<span id="${this._tooltipId}" class="void-tooltip-bubble" role="tooltip" aria-label=${this.text}>${this.text}</span>`;
+    // The bubble is named by its text content, which the static lint rule cannot see.
+    // eslint-disable-next-line lit-a11y/accessible-name
+    return html`<span id="${this._tooltipId}" class="void-tooltip-bubble" role="tooltip">${this.text}</span>`;
   }
 }
 
