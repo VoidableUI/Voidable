@@ -23,6 +23,8 @@ Void UI (`@voidable/ui` {{.Version}}, {{.Count}} elements) is a set of `<void-*>
    import '@voidable/ui';
    ```
 
+   A page that uses only some of the elements can import `@voidable/ui/autoloader` instead (with an import map and no bundler: `@voidable/ui/autoloader.js`): it loads each element's module the first time its tag appears, including tags added later. The full import registers every element up front and is simpler when most are used.
+
    Dark is the default; set `data-theme="light"` on an ancestor for light mode and `data-shape="sharp"` for square corners. Colors and spacing come from `--void-*` custom properties; never hard-code colors.
 
 2. **Look a component up before you use it.** Run `voidable ref <tag>` (or call the `voidable_ref` MCP tool), or read `references/components/<tag>.md`. It lists every attribute with its type, allowed values and default, the events with their `detail` shape, the slots, and an example. `references/elements.md` is the index of all elements with a one-line purpose. If an element or attribute is not listed, it does not exist: do not invent it.
