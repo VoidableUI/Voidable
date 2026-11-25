@@ -22,6 +22,11 @@ VoidTurbo.start(); // returns a function that detaches the listeners
 across Turbo morphs while the server keeps rendering the same value, and lets
 the server win as soon as it renders a different one.
 
+To load each component only when its tag first appears (including tags that
+arrive in Turbo visits, streams and frames), import `@voidable/ui/autoloader`
+instead of `@voidable/ui`; see
+[Loading components](https://voidable.dev/getting-started/loading/).
+
 ## Usage
 
 Stimulus handles custom events natively, so wire Voidable events straight to

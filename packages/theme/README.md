@@ -32,6 +32,10 @@ Without a bundler, link the stylesheet directly (the entry point pulls in the ot
 
 In a JavaScript entry point processed by a bundler (for example Vite), `import '@voidable/theme';` also works.
 
+## Before components load
+
+Until a component's script has loaded, its tag is an unknown element and the page can flash or jump. `src/pre-upgrade.css`, part of the main entry, styles the not-yet-defined state with `:not(:defined)` rules: closed overlays, inactive tab panels and option lists stay hidden, and the space of inputs, selects, tab lists and similar is reserved. The rules stop applying when the element is defined. See [Loading components](https://voidable.dev/getting-started/loading/#before-a-component-loads).
+
 ## Dark mode
 
 Dark is the default (true black surfaces). Set the `data-theme` attribute on `<html>` to choose a theme explicitly:

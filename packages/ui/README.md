@@ -29,6 +29,20 @@ import '@voidable/ui';
 
 Prefer smaller bundles? Import single components: `import '@voidable/ui/components/button'`.
 
+Or load components on demand. The autoloader registers nothing up front: it watches the document for `<void-*>` tags (including ones added later by Turbo, LiveView, Livewire or your own code) and imports each component the first time its tag appears.
+
+```js
+import '@voidable/ui/autoloader';
+```
+
+```js
+import { ready } from '@voidable/ui/autoloader';
+
+await ready(); // every <void-*> element on the page is defined
+```
+
+It suits server-rendered pages and pages whose components vary by route. If your pages use most of the library, the full import above is simpler and has no per-component startup latency. With an import map and no bundler, the subpath needs its file name (`@voidable/ui/autoloader.js`); see [Loading components](https://voidable.dev/getting-started/loading/).
+
 ## Usage without a bundler
 
 A bare `import '@voidable/theme'` cannot work in a browser, because the theme is CSS and the package entry point is not a URL. Use a stylesheet link for the theme and a CDN that resolves the `lit` dependency for the components:

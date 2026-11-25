@@ -25,6 +25,10 @@ Add the Hex package to `mix.exs`. It shares its version number with the npm pack
   ]
 end`} />
 
+## Load the components
+
+`import '@voidable/ui'` registers every component up front. LiveView pages usually use a few, and patches add more over time; `import '@voidable/ui/autoloader'` fetches each component the first time its tag appears in the page or in a patch. Without a bundler, vendor the files with `voidable install` and import `@voidable/ui/autoloader.js` through the import map it prints. See [Loading components](/getting-started/loading/).
+
 ## Register the LiveView hook
 
 Add the `VoidEvent` hook to your LiveSocket:
