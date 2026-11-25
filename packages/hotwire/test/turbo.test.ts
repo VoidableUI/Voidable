@@ -98,8 +98,8 @@ describe('VoidTurbo.start', () => {
     stop = VoidTurbo.start();
 
     c.setAttribute('checked', '');
-    const applied = morph(c, el('<void-checkbox selected></void-checkbox>'), ['checked', 'selected']);
-    expect(applied).toEqual(['selected']);
+    const applied = morph(c, el('<void-checkbox indeterminate></void-checkbox>'), ['checked', 'indeterminate']);
+    expect(applied).toEqual(['indeterminate']);
   });
 
   it('does not touch non-preserved attributes or non-void elements', () => {
@@ -108,7 +108,7 @@ describe('VoidTurbo.start', () => {
     document.body.appendChild(div);
     stop = VoidTurbo.start();
 
-    expect(morph(btn, el('<void-button variant="x"></void-button>'), ['variant'])).toEqual(['variant']);
+    expect(morph(btn, el('<void-button variant="filled"></void-button>'), ['variant'])).toEqual(['variant']);
     expect(morph(div, el('<div open></div>'), ['open'])).toEqual(['open']);
   });
 });
