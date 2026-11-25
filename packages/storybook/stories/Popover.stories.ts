@@ -22,6 +22,10 @@ const meta: Meta = {
       control: { type: 'select' },
       options: ['top', 'bottom', 'left', 'right'],
     },
+    align: {
+      control: { type: 'select' },
+      options: ['start', 'center', 'end'],
+    },
     trigger: {
       control: { type: 'select' },
       options: ['click', 'manual'],
@@ -110,4 +114,23 @@ export const ManualTrigger: Story = {
       </div>
     `;
   },
+};
+
+export const Alignment: Story = {
+  render: () => html`
+    <div style="padding: 6rem 2rem; display: flex; justify-content: space-between;">
+      <void-popover open position="bottom" align="start">
+        <button style="padding: 0.5rem 1rem; cursor: pointer;">Start</button>
+        <div>Aligned to the start edge</div>
+      </void-popover>
+      <void-popover open position="bottom" align="center">
+        <button style="padding: 0.5rem 1rem; cursor: pointer;">Center</button>
+        <div>Centered on the trigger</div>
+      </void-popover>
+      <void-popover open position="bottom" align="end">
+        <button style="padding: 0.5rem 1rem; cursor: pointer;">End</button>
+        <div>Aligned to the end edge</div>
+      </void-popover>
+    </div>
+  `,
 };

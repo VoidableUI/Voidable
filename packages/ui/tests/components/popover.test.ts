@@ -290,4 +290,28 @@ describe('VoidPopover', () => {
       expect(el.createRenderRoot()).toBe(el);
     });
   });
+
+  describe('align', () => {
+    it('defaults to "start"', () => {
+      expect(createElement().align).toBe('start');
+    });
+
+    it.each(['start', 'center', 'end'] as const)('reflects align="%s"', async (value) => {
+      const el = createWithChildren();
+      document.body.appendChild(el);
+      el.align = value;
+      await el.updateComplete;
+      expect(el.getAttribute('align')).toBe(value);
+      el.remove();
+    });
+
+    it('reads the align attribute', async () => {
+      const el = createWithChildren();
+      el.setAttribute('align', 'end');
+      document.body.appendChild(el);
+      await el.updateComplete;
+      expect(el.align).toBe('end');
+      el.remove();
+    });
+  });
 });

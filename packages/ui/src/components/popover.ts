@@ -5,6 +5,7 @@ import { VoidElement } from '../base.js';
 export class VoidPopover extends VoidElement {
   @property({ type: Boolean, reflect: true }) open = false;
   @property({ type: String, reflect: true }) position: 'top' | 'bottom' | 'left' | 'right' = 'bottom';
+  @property({ type: String, reflect: true }) align: 'start' | 'center' | 'end' = 'start';
   @property({ type: String, reflect: true }) trigger: 'click' | 'manual' = 'click';
 
   private _triggerEl: Element | null = null;
