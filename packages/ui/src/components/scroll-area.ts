@@ -1,31 +1,19 @@
 import { html } from 'lit';
 import { property } from 'lit/decorators.js';
-import { VoidElement } from '../base.js';
+import { VoidElement, ProjectionController } from '../base.js';
 
 /** Scrollable container with styled scrollbars for long content areas, code blocks, and chat histories. */
 export class VoidScrollArea extends VoidElement {
   @property({ type: String }) maxHeight = '';
   @property({ type: String, reflect: true }) direction: 'vertical' | 'horizontal' | 'both' = 'vertical';
 
-  private _userContent: Node[] = [];
-  private _didSetup = false;
-
-  connectedCallback(): void {
-    super.connectedCallback();
-    if (!this._didSetup) {
-      this._userContent = Array.from(this.childNodes);
-    }
-  }
+  // Consumer content is projected into the scroll viewport.
+  protected readonly _projection = new ProjectionController(this, {
+    regions: [{ name: 'viewport', target: () => this.querySelector(':scope > .void-scroll-area-viewport') }],
+  });
 
   protected override updated(_changed: Map<string, unknown>): void {
     super.updated(_changed);
-    if (!this._didSetup) {
-      this._didSetup = true;
-      const viewport = this.querySelector('.void-scroll-area-viewport')!;
-      for (const node of this._userContent) {
-        viewport.appendChild(node);
-      }
-    }
     this.style.setProperty('--void-scroll-area-max-height', this.maxHeight || '');
   }
 

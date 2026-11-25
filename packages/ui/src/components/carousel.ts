@@ -1,6 +1,6 @@
 import { html } from 'lit';
 import { property } from 'lit/decorators.js';
-import { VoidElement } from '../base.js';
+import { VoidElement, ProjectionController } from '../base.js';
 
 /** Individual slide within a VoidCarousel; wraps any content for display in the carousel sequence. */
 export class VoidCarouselSlide extends VoidElement {
@@ -28,14 +28,17 @@ export class VoidCarousel extends VoidElement {
 
   private _slides: VoidCarouselSlide[] = [];
   private _autoplayTimer: ReturnType<typeof setInterval> | null = null;
-  private _userContent: Node[] = [];
   private _didSetup = false;
-
+  // Consumer slides are projected into the track; adding or removing one re-renders controls and indicators.
+  protected readonly _projection = new ProjectionController(this, {
+    regions: [{ name: 'slides', target: () => this.querySelector(':scope > .void-carousel-viewport > .void-carousel-track') }],
+    onChange: () => {
+      this._slides = Array.from(this.querySelectorAll('void-carousel-slide')) as VoidCarouselSlide[];
+      this.requestUpdate();
+    },
+  });
   connectedCallback(): void {
     super.connectedCallback();
-    if (!this._didSetup) {
-      this._userContent = Array.from(this.childNodes);
-    }
     this.setAttribute('role', 'region');
     this.setAttribute('aria-roledescription', 'carousel');
     this.addEventListener('mouseenter', this._onMouseEnter);
@@ -58,12 +61,6 @@ export class VoidCarousel extends VoidElement {
 
     if (!this._didSetup) {
       this._didSetup = true;
-      const track = this.querySelector('.void-carousel-track');
-      if (track) {
-        for (const node of this._userContent) {
-          track.appendChild(node);
-        }
-      }
       needsRerender = true;
     }
 

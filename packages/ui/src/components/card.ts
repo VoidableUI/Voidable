@@ -1,6 +1,6 @@
 import { html, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
-import { VoidElement } from '../base.js';
+import { VoidElement, ProjectionController } from '../base.js';
 
 /** Content grouping container for dashboard widgets, product listings, and media previews. */
 export class VoidCard extends VoidElement {
@@ -8,26 +8,10 @@ export class VoidCard extends VoidElement {
   @property({ type: String, reflect: true }) variant: 'default' | 'elevated' | 'outlined' = 'default';
   @property({ type: String, reflect: true }) padding: 'none' | 'sm' | 'md' | 'lg' = 'md';
 
-  private _userContent: Node[] = [];
-  private _didSetup = false;
-
-  connectedCallback(): void {
-    super.connectedCallback();
-    if (!this._didSetup) {
-      this._userContent = Array.from(this.childNodes);
-    }
-  }
-
-  protected override updated(_changed: Map<string, unknown>): void {
-    super.updated(_changed);
-    if (!this._didSetup) {
-      this._didSetup = true;
-      const body = this.querySelector('.void-card-body')!;
-      for (const node of this._userContent) {
-        body.appendChild(node);
-      }
-    }
-  }
+  // Consumer content is projected into the card body.
+  protected readonly _projection = new ProjectionController(this, {
+    regions: [{ name: 'body', target: () => this.querySelector(':scope > .void-card-body') }],
+  });
 
   render() {
     return html`${this.heading

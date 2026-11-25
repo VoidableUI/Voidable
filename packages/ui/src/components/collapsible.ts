@@ -1,6 +1,6 @@
 import { html } from 'lit';
 import { property } from 'lit/decorators.js';
-import { VoidElement } from '../base.js';
+import { VoidElement, ProjectionController } from '../base.js';
 
 /** Simple expand/collapse panel for FAQ sections, spoiler text, and progressive disclosure of secondary content. */
 export class VoidCollapsible extends VoidElement {
@@ -9,28 +9,10 @@ export class VoidCollapsible extends VoidElement {
   @property({ type: Boolean, reflect: true }) disabled = false;
 
   private _id = Math.random().toString(36).slice(2);
-  private _userContent: Node[] = [];
-  private _didSetup = false;
-
-  connectedCallback(): void {
-    super.connectedCallback();
-    if (!this._didSetup) {
-      this._userContent = Array.from(this.childNodes);
-    }
-  }
-
-  protected override updated(changed: Map<string, unknown>): void {
-    super.updated(changed);
-    if (!this._didSetup) {
-      this._didSetup = true;
-      const inner = this.querySelector('.void-collapsible-inner');
-      if (inner) {
-        for (const node of this._userContent) {
-          inner.appendChild(node);
-        }
-      }
-    }
-  }
+  // Consumer content is projected into the collapsible content region.
+  protected readonly _projection = new ProjectionController(this, {
+    regions: [{ name: 'content', target: () => this.querySelector(':scope > .void-collapsible-content > .void-collapsible-inner') }],
+  });
 
   private _handleClick = (e: Event): void => {
     e.preventDefault();

@@ -1,6 +1,6 @@
 import { html, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
-import { VoidElement } from '../base.js';
+import { VoidElement, ProjectionController } from '../base.js';
 import type { VoidRadio } from './radio.js';
 
 /** Mutually exclusive option group for plan pickers, survey questions, and preference settings. */
@@ -10,16 +10,18 @@ export class VoidRadioGroup extends VoidElement {
   @property({ type: String }) name = '';
   @property({ type: String, reflect: true }) orientation: 'vertical' | 'horizontal' = 'vertical';
 
-  private _userContent: Node[] = [];
-  private _didSetup = false;
-
+  // Consumer radios are projected into the options container; late radios get the group's name and value.
+  protected readonly _projection = new ProjectionController(this, {
+    regions: [{ name: 'options', target: () => this.querySelector(':scope > .void-radio-group-options') }],
+    onChange: () => {
+      this._syncNames();
+      this._syncChecked();
+    },
+  });
   connectedCallback(): void {
     super.connectedCallback();
     this.setAttribute('role', 'radiogroup');
     if (this.label) this.setAttribute('aria-label', this.label);
-    if (!this._didSetup) {
-      this._userContent = Array.from(this.childNodes);
-    }
     this.addEventListener('void-change', this._handleChildChange as EventListener);
   }
 
@@ -36,18 +38,14 @@ export class VoidRadioGroup extends VoidElement {
     if (changed.has('name')) {
       this._syncNames();
     }
-    if (!this._didSetup) {
-      this._didSetup = true;
-      const group = this.querySelector('.void-radio-group-options');
-      if (group) {
-        for (const node of this._userContent) {
-          group.appendChild(node);
-        }
-      }
+    if (!this._didSync) {
+      this._didSync = true;
       this._syncNames();
       this._syncChecked();
     }
   }
+
+  private _didSync = false;
 
   private _radios(): VoidRadio[] {
     return Array.from(this.querySelectorAll('void-radio')) as VoidRadio[];
