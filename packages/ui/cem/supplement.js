@@ -240,7 +240,7 @@ export const parts = {
               {
                 name: 'active',
                 type: 'boolean',
-                description: 'Set by <void-tabs> on the selected tab. Render it on the selected tab in server markup so the page looks right before the script loads.',
+                description: 'Set by the tabs on the selected tab. Render it on the selected tab in server markup so the page looks right before the script loads.',
               },
             ],
           },
