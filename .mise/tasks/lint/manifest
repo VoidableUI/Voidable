@@ -4,17 +4,22 @@
 set -euo pipefail
 
 # Reads packages/ui/dist/custom-elements.json (built by `mise run build`) and
-# checks every registered tag against three hand-written surfaces:
+# checks every registered tag against three hand-written surfaces. Comments
+# are stripped first, and quoted tag names only count in a registration
+# position, so event names (`'void-input'`) and doc examples do not satisfy
+# the check:
 #
-#   story   a `<void-x` usage or a quoted 'void-x' (meta `component:`,
-#           createElement) in packages/storybook/stories/*.stories.*
-#   react   a quoted 'void-x' tag literal in packages/react/src (the wrapWc /
-#           createElement tag argument)
-#   hex     a `<void-x` usage in packages/liveview/hex/lib/**/*.ex
+#   story   a rendered `</void-x>` closing tag, a Storybook meta
+#           `component: 'void-x'`, or `createElement('void-x')` in
+#           packages/storybook/stories/*.stories.*
+#   react   a wrapper registration `('void-x', 'DisplayName')` (the wrapWc
+#           call) or `createElement('void-x', …)` in packages/react/src
+#   hex     a `<void-x` tag rendered inside a ~H""" HEEx template in
+#           packages/liveview/hex/lib/**/*.ex
 #
-# Known gaps live in .mise/manifest-drift-allowlist.txt. The check fails on
-# any gap not in the allowlist, and on allowlist entries that are no longer
-# gaps (or name unknown tags), so the list can only shrink.
+# Known gaps live in .mise/manifest-drift-allowlist.txt. Any gap not listed
+# fails. Listed entries that are no longer gaps print a warning asking for
+# the line to be deleted (a parallel change may have closed the gap).
 
 node --input-type=module - <<'EOF'
 import { readFileSync, readdirSync, existsSync, statSync } from 'node:fs';
@@ -45,27 +50,36 @@ function files(dir, test) {
 }
 const read = (list) => list.map((f) => readFileSync(f, 'utf8')).join('\n');
 
-const escape = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-const usesTag = (text, tag) => new RegExp(`<${escape(tag)}(?=[\\s>/])`).test(text);
-const quotesTag = (text, tag) => new RegExp(`(['"\`])${escape(tag)}\\1`).test(text);
+// Block comments and whole-line // comments (not `//` inside URLs on code lines).
+const stripJsComments = (s) => s.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
+// Only what HEEx templates render: the bodies of ~H""" ... """ sigils.
+const heexTemplates = (s) => [...s.matchAll(/~H"""([\s\S]*?)"""/g)].map((m) => m[1].replace(/<%!--[\s\S]*?--%>/g, '')).join('\n');
 
-const surfaces = {
-  story: { text: read(files('packages/storybook/stories', (n) => /\.stories\.[jt]sx?$/.test(n))), has: (t, tag) => usesTag(t, tag) || quotesTag(t, tag) },
-  react: { text: read(files('packages/react/src', (n) => /\.[jt]sx?$/.test(n))), has: quotesTag },
-  hex: { text: read(files('packages/liveview/hex/lib', (n) => /\.exs?$/.test(n))), has: usesTag },
+const esc = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+const q = `['"\`]`;
+const matchers = {
+  story: (tag) => new RegExp(`</${esc(tag)}>|component:\\s*${q}${esc(tag)}${q}|createElement\\(\\s*${q}${esc(tag)}${q}`),
+  react: (tag) => new RegExp(`\\(\\s*${q}${esc(tag)}${q}\\s*,\\s*${q}[A-Z]\\w*${q}\\s*\\)|createElement\\(\\s*${q}${esc(tag)}${q}\\s*,`),
+  hex: (tag) => new RegExp(`<${esc(tag)}(?=[\\s>/])`),
 };
 
-for (const [name, s] of Object.entries(surfaces)) {
-  if (!s.text) {
-    console.error(`ERROR: no source files found for surface "${name}"`);
+const surfaces = {
+  story: stripJsComments(read(files('packages/storybook/stories', (n) => /\.stories\.[jt]sx?$/.test(n)))),
+  react: stripJsComments(read(files('packages/react/src', (n) => /\.[jt]sx?$/.test(n)))),
+  hex: heexTemplates(read(files('packages/liveview/hex/lib', (n) => /\.ex$/.test(n)))),
+};
+
+for (const [name, text] of Object.entries(surfaces)) {
+  if (!text.trim()) {
+    console.error(`ERROR: no source found for surface "${name}"`);
     process.exit(1);
   }
 }
 
 const gaps = new Set();
 for (const tag of tags) {
-  for (const [name, s] of Object.entries(surfaces)) {
-    if (!s.has(s.text, tag)) gaps.add(`${name} ${tag}`);
+  for (const [name, text] of Object.entries(surfaces)) {
+    if (!matchers[name](tag).test(text)) gaps.add(`${name} ${tag}`);
   }
 }
 
@@ -84,21 +98,18 @@ readFileSync(ALLOWLIST, 'utf8').split('\n').forEach((raw, i) => {
 const unexpected = [...gaps].filter((g) => !allowed.has(g));
 const stale = [...allowed.keys()].filter((g) => !gaps.has(g));
 
-let failed = false;
+if (stale.length) {
+  console.warn(`WARNING: ${stale.length} allowlist entr(ies) in ${ALLOWLIST} are no longer gaps; delete them:`);
+  for (const g of stale) console.warn(`  line ${allowed.get(g)}: ${g}`);
+}
 if (unexpected.length) {
-  failed = true;
   console.error(`ERROR: ${unexpected.length} tag(s) missing from a surface (add the story/wrapper/component):`);
   for (const g of unexpected) console.error(`  ${g}`);
+  process.exit(1);
 }
-if (stale.length) {
-  failed = true;
-  console.error(`ERROR: ${stale.length} allowlist entr(ies) in ${ALLOWLIST} are no longer gaps; delete them:`);
-  for (const g of stale) console.error(`  line ${allowed.get(g)}: ${g}`);
-}
-if (failed) process.exit(1);
 
 console.log(
   `Manifest drift lint passed: ${tags.length} tags checked against stories, React wrappers and hex components ` +
-    `(${allowed.size} known gap(s) allowlisted in ${ALLOWLIST})`,
+    `(${allowed.size - stale.length} known gap(s) allowlisted in ${ALLOWLIST})`,
 );
 EOF
