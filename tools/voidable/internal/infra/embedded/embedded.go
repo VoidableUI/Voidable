@@ -50,6 +50,34 @@ type rules struct {
 	Hints   map[string]map[string]string `json:"hints"`
 
 	FalseString map[string][]string `json:"falseString"`
+
+	Styled []styled `json:"styled"`
+}
+
+// styled is one CSS-only element as rules.json writes it.
+type styled struct {
+	Tag         string       `json:"tag"`
+	Description string       `json:"description"`
+	Attributes  []styledAttr `json:"attributes"`
+}
+
+type styledAttr struct {
+	Name        string `json:"name"`
+	Type        string `json:"type"`
+	Default     string `json:"default"`
+	Description string `json:"description"`
+}
+
+func (s styled) element() domain.Element {
+	e := domain.Element{Tag: s.Tag, Module: "@voidable/theme", Description: s.Description, CSSOnly: true}
+	for _, a := range s.Attributes {
+		kind, values, nullable := domain.ParseType(a.Type)
+		e.Attributes = append(e.Attributes, domain.Attribute{
+			Name: a.Name, Type: a.Type, Kind: kind, Values: values, Nullable: nullable,
+			Default: a.Default, Description: a.Description,
+		})
+	}
+	return e
 }
 
 // Supplement reads rules.json and snippets/<tag>.html.
@@ -63,6 +91,12 @@ func (Source) Supplement(_ context.Context) (*domain.Supplement, error) {
 		return nil, fmt.Errorf("decode supplement: %w", err)
 	}
 	sup := &domain.Supplement{Note: r.Note, Parents: r.Parents, Hints: r.Hints, FalseString: r.FalseString, Snippets: map[string]string{}}
+	for _, s := range r.Styled {
+		if !strings.HasPrefix(s.Tag, "void-") {
+			return nil, fmt.Errorf("decode supplement: styled element %q is not a void-* tag", s.Tag)
+		}
+		sup.Styled = append(sup.Styled, s.element())
+	}
 	entries, err := fs.ReadDir(supplementFS, "data/supplement/snippets")
 	if err != nil {
 		return nil, fmt.Errorf("read snippets: %w", err)

@@ -113,7 +113,11 @@ func attrDefault(a domain.Attribute) string {
 }
 
 func refText(p *printer, r *domain.Reference) {
-	p.f("<%s> %s: %s\n", r.Tag, r.Class, r.Description)
+	if r.CSSOnly {
+		p.f("<%s> CSS only (styled by @voidable/theme; no JavaScript, no properties, no events): %s\n", r.Tag, r.Description)
+	} else {
+		p.f("<%s> %s: %s\n", r.Tag, r.Class, r.Description)
+	}
 	if len(r.Attributes) > 0 {
 		p.f("%s", "attrs:\n")
 		for _, a := range r.Attributes {
@@ -176,6 +180,9 @@ func refText(p *printer, r *domain.Reference) {
 
 func refMarkdown(p *printer, r *domain.Reference) {
 	p.f("## `<%s>`\n\n%s\n\n", r.Tag, r.Description)
+	if r.CSSOnly {
+		p.f("%s", "CSS only: `@voidable/theme` styles this tag and nothing registers it, so it needs no JavaScript and has no properties or events. Write it as plain markup in every framework.\n\n")
+	}
 	if len(r.Attributes) > 0 {
 		p.f("%s", "| Attribute | Type | Default | Description |\n|---|---|---|---|\n")
 		for _, a := range r.Attributes {

@@ -25,6 +25,9 @@ func NewLibrary(ctx context.Context, ms ManifestSource, ss SupplementSource, p F
 			return nil, err
 		}
 	}
+	if cat, err = cat.With(sup.Styled); err != nil {
+		return nil, err
+	}
 	for tag, names := range sup.FalseString {
 		el, ok := cat.Element(tag)
 		if !ok {
@@ -81,6 +84,10 @@ func (l *Library) Reference(ctx context.Context, tag string) (*Reference, error)
 		return nil, err
 	}
 	r := &Reference{Element: *e, Parents: l.sup.Parents[e.Tag], Example: sn}
+	if e.CSSOnly {
+		// Nothing is missing from the manifest: the element is not in it.
+		return r, nil
+	}
 	if len(e.Slots) == 0 {
 		r.Missing = append(r.Missing, "slots")
 	}
