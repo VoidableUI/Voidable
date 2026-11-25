@@ -16,10 +16,12 @@ import (
 	installcmd "github.com/VoidableUI/Voidable/tools/voidable/cmd/install"
 	mcpcmd "github.com/VoidableUI/Voidable/tools/voidable/cmd/mcp"
 	refcmd "github.com/VoidableUI/Voidable/tools/voidable/cmd/ref"
+	skillcmd "github.com/VoidableUI/Voidable/tools/voidable/cmd/skill"
 	"github.com/VoidableUI/Voidable/tools/voidable/internal/domain"
 	"github.com/VoidableUI/Voidable/tools/voidable/internal/infra/embedded"
 	"github.com/VoidableUI/Voidable/tools/voidable/internal/infra/render"
 	"github.com/VoidableUI/Voidable/tools/voidable/internal/infra/scan"
+	"github.com/VoidableUI/Voidable/tools/voidable/internal/infra/skillgen"
 )
 
 // Version is set from main.go, which receives it via -ldflags.
@@ -37,6 +39,14 @@ func (s *services) library(ctx context.Context) (*domain.Library, error) {
 		s.lib, s.err = domain.NewLibrary(ctx, src, src, scan.Fragments{})
 	})
 	return s.lib, s.err
+}
+
+func (s *services) skill(ctx context.Context) (*domain.Skill, error) {
+	lib, err := s.library(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return skillgen.New(lib).Skill(ctx)
 }
 
 func (s *services) checker(ctx context.Context) (*domain.Checker, error) {
@@ -62,14 +72,25 @@ func NewRootCmd() *cobra.Command {
 		refcmd.NewCmd(svc.library),
 		checkcmd.NewCmd(svc.checker),
 		gencmd.NewCmd(svc.library, render.NewGenerator(embedded.Templates())),
-		mcpcmd.NewCmd(func(ctx context.Context) (*domain.Library, *domain.Checker, error) {
+		mcpcmd.NewCmd(func(ctx context.Context) (*domain.Library, *domain.Checker, *domain.Skill, error) {
 			lib, err := svc.library(ctx)
 			if err != nil {
-				return nil, nil, err
+				return nil, nil, nil, err
 			}
 			c, err := svc.checker(ctx)
-			return lib, c, err
+			if err != nil {
+				return nil, nil, nil, err
+			}
+			sk, err := svc.skill(ctx)
+			return lib, c, sk, err
 		}, Version),
+		skillcmd.NewCmd(func(ctx context.Context) (domain.SkillSource, error) {
+			lib, err := svc.library(ctx)
+			if err != nil {
+				return nil, err
+			}
+			return skillgen.New(lib), nil
+		}),
 		installcmd.NewCmd(embedded.Source{}),
 	)
 	return cmd

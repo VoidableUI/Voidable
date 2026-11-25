@@ -47,7 +47,11 @@ func TestStdioSession(t *testing.T) {
 	inR, inW := io.Pipe()
 	outR, outW := io.Pipe()
 	done := make(chan error, 1)
-	go func() { done <- Serve(ctx, NewServer(newServices(t), "test"), inR, outW); _ = outW.Close() }()
+	srv, err := NewServer(newServices(t), "test")
+	if err != nil {
+		t.Fatal(err)
+	}
+	go func() { done <- Serve(ctx, srv, inR, outW); _ = outW.Close() }()
 	lines := bufio.NewScanner(outR)
 	lines.Buffer(make([]byte, 1<<20), 1<<22)
 

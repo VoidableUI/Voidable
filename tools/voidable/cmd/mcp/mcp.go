@@ -13,21 +13,24 @@ import (
 )
 
 // ServicesProvider yields the services the MCP tools call.
-type ServicesProvider func(ctx context.Context) (*domain.Library, *domain.Checker, error)
+type ServicesProvider func(ctx context.Context) (*domain.Library, *domain.Checker, *domain.Skill, error)
 
 // NewCmd creates the mcp subcommand.
 func NewCmd(svc ServicesProvider, version string) *cobra.Command {
 	return &cobra.Command{
 		Use:   "mcp",
-		Short: "Serve voidable_ref, voidable_check and voidable_snippet over MCP (stdio)",
+		Short: "Serve voidable_ref, voidable_check, voidable_snippet and the voidable skill over MCP (stdio)",
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			// stdout carries JSON-RPC; logs go to stderr.
 			slog.SetDefault(slog.New(slog.NewTextHandler(os.Stderr, nil)))
-			lib, chk, err := svc(cmd.Context())
+			lib, chk, sk, err := svc(cmd.Context())
 			if err != nil {
 				return err
 			}
-			s := mcpinfra.NewServer(mcpinfra.Services{Library: lib, Checker: chk}, version)
+			s, err := mcpinfra.NewServer(mcpinfra.Services{Library: lib, Checker: chk, Skill: sk}, version)
+			if err != nil {
+				return err
+			}
 			return mcpinfra.Serve(cmd.Context(), s, cmd.InOrStdin(), cmd.OutOrStdout())
 		},
 	}

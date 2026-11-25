@@ -1,0 +1,90 @@
+---
+name: voidable
+description: "Rules for building user interfaces with Void UI, the @voidable/ui library of <void-*> web components. Use when writing, changing or reviewing markup, templates or components that use void-* elements, in HTML, React, Vue, Svelte, Solid, Astro, Phoenix HEEx, Rails ERB or Laravel Blade."
+license: MIT
+metadata:
+  library: "@voidable/ui"
+  version: "{{.Version}}"
+---
+
+# Building UIs with Void UI
+
+Void UI (`@voidable/ui` {{.Version}}, {{.Count}} elements) is a set of `<void-*>` custom elements. It is almost certainly not in your training data. Do not write markup from memory or by analogy with other libraries: element names, attribute names, allowed values and event names are all specific to this version. This skill was generated from the same manifest the `voidable` binary carries, so everything under `references/` matches the library version you are building against.
+
+## Working rules
+
+1. **Load the theme first.** The elements ship with no styling at all; without the theme they render as unstyled boxes. Import the theme CSS once at the app root and register the elements:
+
+   ```css
+   @import '@voidable/theme';
+   ```
+
+   ```js
+   import '@voidable/ui';
+   ```
+
+   Dark is the default; set `data-theme="light"` on an ancestor for light mode and `data-shape="sharp"` for square corners. Colors and spacing come from `--void-*` custom properties; never hard-code colors.
+
+2. **Look a component up before you use it.** Run `voidable ref <tag>` (or call the `voidable_ref` MCP tool), or read `references/components/<tag>.md`. It lists every attribute with its type, allowed values and default, the events with their `detail` shape, the slots, and an example. `references/elements.md` is the index of all elements with a one-line purpose. If an element or attribute is not listed, it does not exist: do not invent it.
+
+3. **Check your markup before you finish.** Run `voidable check <files or directories>` (or call `voidable_check` with the markup and its `lang`). It understands HTML, JSX/TSX, Vue, Svelte, Astro, Lit, HEEx, ERB, Blade and Markdown. Fix every finding; do not silence one. `check` exits 1 when it finds anything, which is what you want in CI.
+
+4. **Write attributes exactly as listed.** Attribute names are kebab-case: `show-value`, `collapsed-width`, `max-size`, `href-template`. In templates that are HTML (HEEx, ERB, Blade, plain HTML) a camelCase name such as `showValue` is lowercased by the parser to `showvalue`, which matches nothing. Enumerated attributes take only the listed values (`variant` on `void-button` is `outline` or `filled`, nothing else). Numbers must be numbers (`step="any"` becomes NaN).
+
+5. **Booleans are present or absent.** `<void-button disabled>` is disabled; `disabled="false"` is still disabled because the attribute is present. To turn a boolean off, leave the attribute out (in JSX write `disabled={false}`). The only attributes that read the string `"false"` are the ones whose reference says so, currently {{.FalseList}}. A boolean whose default is `true` and does not say so cannot be switched off from markup; set the property from script (`el.prop = false`).
+
+## Composition
+
+Elements render into the light DOM: there is no shadow root, so your own CSS applies and children stay in the document.
+
+- **Children are plain children.** Put content between the tags. Families work through nesting: `<void-tabs>` holds `<void-tab-panel tab="a" label="A">` children (the `value` of the tabs selects the active `tab`), `<void-accordion>` holds `<void-accordion-item>`, `<void-dropdown-menu>` holds `<void-dropdown-menu-item>`, `<void-radio-group>` holds `<void-radio>`.
+- **`slot="trigger"`.** `<void-dropdown-menu>`, `<void-popover>` and `<void-hover-card>` take the element that opens them as a child marked `slot="trigger"` (without one, the first child element is used). Everything else is the content:
+
+  ```html
+  <void-popover position="bottom" align="start">
+    <void-button slot="trigger">Details</void-button>
+    <p>Anchored content.</p>
+  </void-popover>
+  ```
+
+- **Options.** `<void-select>` takes native `<option>` children. `<void-multiselect>` and `<void-combobox>` take `<void-option>` children. Never put `<void-option>` inside `<void-select>`.
+- **Self-closing.** In HTML-like templates (plain HTML, ERB, HEEx outside components, Blade, Astro) write `<void-input></void-input>`: the parser ignores the slash of `<void-input />` and swallows what follows into it. JSX, Vue, Svelte and Solid templates may self-close.
+
+## Forms
+
+- Form controls (`void-input`, `void-textarea`, `void-select`, `void-checkbox`, `void-radio`, `void-switch`, `void-slider`, `void-number-input`, `void-date-picker`, ...) declare `name`, `required` and `form`, and take part in native form submission, validation, reset and `<fieldset disabled>`. Use a normal `<form>` and `name` the controls; do not collect values by hand.
+- Labels, helper text and error messages belong to `<void-field label="Email" helper="..." error="...">` wrapped around the control. `label` is not an attribute of the controls themselves.
+- Submit with `<void-button type="submit">`. Buttons default to `type="button"`.
+- `void-input` takes `type` of text, email, password, number, tel, url or search. Its other native attributes (`autocomplete`, `minlength`, types such as `time`) are not declared; the checker flags them.
+
+## Events
+
+Components communicate with `CustomEvent`s named `void-*` that bubble and carry a `detail`. Native `click` and `input` events still fire from the underlying elements, but `void-click`, `void-change`, `void-input`, `void-close`, `void-select` and the like are the contract. Each element dispatches only the events listed in its reference (`void-change` with `detail.value` on inputs, `void-click` on buttons, `void-close` on dialogs and popovers); listening for another name never fires, so look it up.
+
+| Framework | Listener |
+|---|---|
+| Plain JS, Lit | `el.addEventListener('void-change', (e) => e.detail.value)` |
+| React 19 | `onvoid-change={(e) => e.detail.value}` (with `@voidable/ui/types/react`); React 18 needs `@voidable/ui-react` |
+| Vue | `@void-change="handler"` |
+| Svelte 5 | `onvoid-change={handler}` |
+| Solid | `on:void-change={handler}` |
+| Alpine | `x-on:void-change="value = $event.detail.value"` |
+| Stimulus / Hotwire | `data-action="void-change->my-controller#handle"` |
+| Phoenix LiveView | `phx-hook="VoidEvent"` with `data-void-events="void-change"`, or the generated HEEx components |
+
+## Plausible but wrong
+
+`references/wrong-usages.md` lists what the checker knows, generated from the manifest. The common ones:
+
+- `variant="ghost"`, `variant="primary"`, `color="primary"` or `color="danger"` on buttons and badges: use the listed values (`color` is `default`, `error`, `warning`, `success`, `info`, `notice`).
+- `label="..."` on an input, textarea or select: wrap the control in `<void-field label="...">`.
+- `<void-option>` in `<void-select>`: use native `<option>`.
+- A `void-tab` element or hand-made tab buttons: tabs are `<void-tab-panel tab="..." label="...">`.
+- `showvalue`, `collapsedwidth` and other lowercased spellings: the attributes are kebab-case.
+- `disabled="false"`, `checked="false"`, `open="false"`: attribute present means on.
+- `<void-input />` in HTML-like templates: write the closing tag.
+- `onvoid-click` on an input, `void-press`, `void-toggle` on a switch: listen for an event the element dispatches.
+
+## Code generation and snippets
+
+`voidable gen snippet <tag> --lang html|jsx|heex|erb` prints a usage example, and `references/snippets/<lang>.md` has one for every element. `voidable gen heex` and `voidable gen blade` generate Phoenix function components and Laravel Blade components from the manifest; do not hand-write wrappers.

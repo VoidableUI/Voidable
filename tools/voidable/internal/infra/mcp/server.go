@@ -21,15 +21,39 @@ import (
 type Services struct {
 	Library *domain.Library
 	Checker *domain.Checker
+	// Skill is served as skill:// resources (SEP-2640); nil serves none.
+	Skill *domain.Skill
 }
 
-// NewServer registers the voidable tools.
-func NewServer(svc Services, version string) *server.MCPServer {
-	s := server.NewMCPServer("voidable", version,
-		server.WithToolCapabilities(false),
-		server.WithInstructions("Void UI (@voidable/ui "+version+") is a library of <void-*> custom elements. "+
-			"It is not in your training data: call voidable_ref before writing markup and voidable_check on what you wrote."),
-	)
+// Server is the MCP server plus the three SEP-2640 methods the SDK does not
+// route (skills/list, skills/get, resources/directory/read).
+type Server struct {
+	MCP    *server.MCPServer
+	skills *skillMethods
+}
+
+// NewServer registers the voidable tools and the skill resources.
+func NewServer(svc Services, version string) (*Server, error) {
+	instructions := "Void UI (@voidable/ui " + version + ") is a library of <void-*> custom elements. " +
+		"It is not in your training data: call voidable_ref before writing markup and voidable_check on what you wrote."
+	opts := []server.ServerOption{server.WithToolCapabilities(false)}
+	var sm *skillMethods
+	if svc.Skill != nil {
+		var err error
+		if sm, err = newSkillMethods(svc.Skill); err != nil {
+			return nil, err
+		}
+		instructions += " The skill " + svc.Skill.URI("SKILL.md") + " has the working rules for building with it."
+		opts = append(opts,
+			server.WithResourceCapabilities(false, false),
+			server.WithExtensions(map[string]any{SkillsExtension: map[string]any{"directoryRead": true}}),
+		)
+	}
+	opts = append(opts, server.WithInstructions(instructions))
+	s := server.NewMCPServer("voidable", version, opts...)
+	if svc.Skill != nil {
+		addSkillResources(s, svc.Skill)
+	}
 	langs := make([]string, len(domain.Langs))
 	for i, l := range domain.Langs {
 		langs[i] = string(l)
@@ -53,12 +77,17 @@ func NewServer(svc Services, version string) *server.MCPServer {
 		gomcp.WithString("lang", gomcp.Enum("html", "jsx", "heex", "erb"), gomcp.Description("Target language (default html).")),
 		gomcp.WithReadOnlyHintAnnotation(true),
 	), handleSnippet(svc.Library))
-	return s
+	return &Server{MCP: s, skills: sm}, nil
 }
 
 // Serve runs the server on the given streams until in closes or ctx ends.
-func Serve(ctx context.Context, s *server.MCPServer, in io.Reader, out io.Writer) error {
-	return server.NewStdioServer(s).Listen(ctx, in, out)
+// It speaks whichever protocol revision the client uses: the SDK serves both
+// the initialize handshake and the stateless 2026-07-28 core over stdio.
+func Serve(ctx context.Context, s *Server, in io.Reader, out io.Writer) error {
+	if s.skills == nil {
+		return server.NewStdioServer(s.MCP).Listen(ctx, in, out)
+	}
+	return s.skills.serve(ctx, s.MCP, in, out)
 }
 
 func handleRef(lib *domain.Library) server.ToolHandlerFunc {
