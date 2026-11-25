@@ -112,7 +112,7 @@ test.describe('four overlays deep: drawer > dialog > popover > dropdown-menu', (
     await expectPerceivable(page.locator('#l4-a'));
     await expectPerceivable(page.locator('#l3-btn'));
     expect(await page.evaluate(() => [...document.querySelectorAll(':popover-open')].length), 'the popover and the menu are in the top layer').toBe(2);
-    expect(await page.evaluate(() => document.querySelectorAll('dialog:modal').length), 'the drawer and the dialog are modal').toBe(2);
+    expect(await page.evaluate(() => [...document.querySelectorAll('void-dialog, void-drawer')].filter((h) => h.shadowRoot?.querySelector('dialog')?.matches(':modal')).length), 'the drawer and the dialog are modal').toBe(2);
     expect(await scrollLocked(page)).toBe(true);
     // Real input still reaches the top layer: Arrow keys walk the menu, a click on its item chooses it.
     await page.keyboard.press('ArrowDown');
@@ -156,7 +156,7 @@ test.describe('four overlays deep: drawer > dialog > popover > dropdown-menu', (
     for (const l of levels) await expect.poll(() => isOpen(page, l.id), `${l.id} closed with the drawer`).toBe(false);
     expect((await closesOf(page)).map((e) => `${e.id}:${e.reason}:${e.cancelable}`)).toEqual(['l4:parent:false', 'l3:parent:false', 'l2:parent:false', 'l1:api:false']);
     expect(await scrollLocked(page)).toBe(false);
-    expect(await page.evaluate(() => document.querySelectorAll(':popover-open, dialog:modal, [inert]').length)).toBe(0);
+    expect(await page.evaluate(() => document.querySelectorAll(':popover-open, [inert]').length + [...document.querySelectorAll('void-dialog, void-drawer')].filter((h) => h.shadowRoot?.querySelector('dialog')?.matches(':modal')).length)).toBe(0);
     await expect.poll(() => focusedId(page)).toBe('open-1');
   });
 
@@ -279,7 +279,7 @@ test.describe('overlays inside overflow: hidden, transformed and scrolled boxes'
         const host = kind === 'dialog' ? `#mdlg-${box}` : `#mdrw-${box}`;
         await page.locator(opener).scrollIntoViewIfNeeded();
         await page.locator(opener).click();
-        const panel = page.locator(`${host} > dialog`);
+        const panel = page.locator(`${host} [part="surface"]`);
         await expect(panel).toBeVisible();
         await expectPerceivable(page.locator(`${host} .mc`));
         const vp = page.viewportSize()!;
@@ -298,7 +298,7 @@ test.describe('overlays inside overflow: hidden, transformed and scrolled boxes'
         } else {
           expect(r!.height, 'a drawer spans the viewport height').toBeGreaterThanOrEqual(vp.height - 1);
         }
-        expect(await page.evaluate((h) => document.querySelector(h + ' > dialog')!.matches(':modal'), host)).toBe(true);
+        expect(await page.evaluate((h) => document.querySelector(h)!.shadowRoot!.querySelector('dialog')!.matches(':modal'), host)).toBe(true);
         await page.keyboard.press('Escape');
         await expect.poll(() => isOpen(page, host.slice(1))).toBe(false);
       });
@@ -849,7 +849,7 @@ test.describe('through a morph with an overlay open', () => {
           expect(await page.evaluate(() => (document.getElementById('d') as any).open), `dialog open after repeat ${i + 1}`).toBe(true);
           expect(await insideOf(page, 'd'), 'focus stays in the dialog').toBe(true);
           expect(await scrollLocked(page), 'still locked').toBe(true);
-          expect(await page.evaluate(() => document.querySelectorAll('dialog:modal').length)).toBe(1);
+          expect(await page.evaluate(() => [...document.querySelectorAll('void-dialog, void-drawer')].filter((h) => h.shadowRoot?.querySelector('dialog')?.matches(':modal')).length)).toBe(1);
         }
         await page.keyboard.press('Escape');
         await expect.poll(() => page.evaluate(() => (document.getElementById('d') as any).open)).toBe(false);
@@ -899,7 +899,7 @@ test.describe('through a morph with an overlay open', () => {
         await expect.poll(() => page.evaluate(() => (document.getElementById('d') as any).open)).toBe(true);
         await expect.poll(() => insideOf(page, 'd')).toBe(true);
         expect(await scrollLocked(page)).toBe(true);
-        expect(await page.evaluate(() => document.querySelector('#d > dialog')!.matches(':modal'))).toBe(true);
+        expect(await page.evaluate(() => document.getElementById('d')!.shadowRoot!.querySelector('dialog')!.matches(':modal'))).toBe(true);
         // And one that stops rendering it open closes it again, with the lock.
         await morph(page, page$(3));
         await expect.poll(() => scrollLocked(page)).toBe(false);

@@ -17,7 +17,7 @@ async function mount(props: Partial<VoidDialog> = {}, content = '<void-dialog-ti
 }
 
 const panel = (el: Element) => el.shadowRoot!.querySelector('dialog') as HTMLDialogElement;
-const closeButton = (el: Element) => el.shadowRoot?.querySelector<HTMLButtonElement>('[part="close"]') ?? null;
+const closeButton = (el: Element) => el.shadowRoot?.querySelector<HTMLButtonElement>('button') ?? null;
 
 function opener(id = 'opener'): HTMLButtonElement {
   const b = document.createElement('button');

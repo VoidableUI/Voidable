@@ -19,7 +19,7 @@ async function mount(props: Partial<VoidDrawer> = {}, content = '<void-drawer-ti
 }
 
 const panel = (el: Element) => el.shadowRoot!.querySelector('dialog') as HTMLDialogElement;
-const closeButton = (el: Element) => el.shadowRoot?.querySelector<HTMLButtonElement>('[part="close"]') ?? null;
+const closeButton = (el: Element) => el.shadowRoot?.querySelector<HTMLButtonElement>('button') ?? null;
 
 afterEach(cleanup);
 

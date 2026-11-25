@@ -32,7 +32,7 @@ describe.each(['void-dialog', 'void-drawer'])('%s closable attribute', (tag) => 
     return el;
   }
   const closeButton = (el: Element) => {
-    const b = el.shadowRoot?.querySelector<HTMLElement>('[part="close"]');
+    const b = el.shadowRoot?.querySelector<HTMLElement>('button');
     return b && !b.hidden ? b : null;
   };
 

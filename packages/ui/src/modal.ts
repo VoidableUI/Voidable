@@ -67,8 +67,9 @@ export class VoidModal extends VoidElement {
     if (changed.has('closable')) {
       const close = this._chrome().querySelector('button')!;
       close.hidden = !this.closable;
-      // The theme's ::part(close) display rule outranks the UA [hidden] rule.
-      close.style.display = this.closable ? '' : 'none';
+      // Out of ::part(close) while hidden: the theme's display rule comes from
+      // the outer tree and would outrank the [hidden] rule and any inline style.
+      close.setAttribute('part', this.closable ? 'close' : '');
     }
   }
 

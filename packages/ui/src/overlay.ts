@@ -909,7 +909,20 @@ export class OverlayController implements ReactiveController {
     const form = e.target as HTMLFormElement | null;
     const submitter = (e as SubmitEvent).submitter as HTMLButtonElement | null;
     const method = submitter?.getAttribute('formmethod') ?? form?.getAttribute('method');
-    if (method?.toLowerCase() === 'dialog') this._formClosing = true;
+    if (method?.toLowerCase() !== 'dialog') return;
+    this._formClosing = true;
+    // A form slotted into a shadow-root <dialog> (void-dialog's parts) has no
+    // <dialog> ancestor in its own tree, so the browser does not close one for
+    // it: do what it would, once the submit event has run its course.
+    const surface = this._surface as HTMLDialogElement | null;
+    if (!surface || !form || form.closest('dialog')) return;
+    queueMicrotask(() => {
+      if (e.defaultPrevented || !surface.open) {
+        this._formClosing = false;
+        return;
+      }
+      surface.close(submitter?.value ?? '');
+    });
   };
 
   /** The native dialog closed without us (`method="dialog"` form, `dialog.close()` by other code). */
