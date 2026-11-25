@@ -14,8 +14,6 @@ afterEach(() => {
 });
 
 const cases: Array<[tag: string, attribute: string, prop: string]> = [
-  ['void-carousel', 'controls', 'controls'],
-  ['void-carousel', 'indicators', 'indicators'],
   ['void-nav-bar', 'bordered', 'bordered'],
   ['void-gauge', 'show-value', 'showValue'],
   ['void-gauge', 'tick-min', 'tickMin'],

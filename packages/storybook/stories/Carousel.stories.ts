@@ -30,19 +30,22 @@ export const Default: Story = {
       ?autoplay=${args.autoplay}
       interval=${args.interval ?? 5000}
       size=${args.size ?? 'md'}
-      controls=${String(args.controls ?? true)}
-      indicators=${String(args.indicators ?? true)}
       orientation=${args.orientation ?? 'horizontal'}
     >
-      <void-carousel-slide>
-        <div style="${slideStyle} background: var(--void-color-bg-elevated);">Slide 1</div>
-      </void-carousel-slide>
-      <void-carousel-slide>
-        <div style="${slideStyle} background: var(--void-color-bg-secondary);">Slide 2</div>
-      </void-carousel-slide>
-      <void-carousel-slide>
-        <div style="${slideStyle} background: var(--void-color-bg-elevated);">Slide 3</div>
-      </void-carousel-slide>
+      <void-carousel-content>
+        <void-carousel-item>
+          <div style="${slideStyle} background: var(--void-color-bg-elevated);">Slide 1</div>
+        </void-carousel-item>
+        <void-carousel-item>
+          <div style="${slideStyle} background: var(--void-color-bg-secondary);">Slide 2</div>
+        </void-carousel-item>
+        <void-carousel-item>
+          <div style="${slideStyle} background: var(--void-color-bg-elevated);">Slide 3</div>
+        </void-carousel-item>
+      </void-carousel-content>
+      <void-carousel-previous aria-label="Previous slide"></void-carousel-previous>
+      <void-carousel-next aria-label="Next slide"></void-carousel-next>
+      <void-carousel-indicators></void-carousel-indicators>
     </void-carousel>
   `,
 };
@@ -56,19 +59,22 @@ export const WithLoop: Story = {
       ?autoplay=${args.autoplay}
       interval=${args.interval ?? 5000}
       size=${args.size ?? 'md'}
-      controls=${String(args.controls ?? true)}
-      indicators=${String(args.indicators ?? true)}
       orientation=${args.orientation ?? 'horizontal'}
     >
-      <void-carousel-slide>
-        <div style="${slideStyle} background: var(--void-color-bg-elevated);">Slide 1</div>
-      </void-carousel-slide>
-      <void-carousel-slide>
-        <div style="${slideStyle} background: var(--void-color-bg-secondary);">Slide 2</div>
-      </void-carousel-slide>
-      <void-carousel-slide>
-        <div style="${slideStyle} background: var(--void-color-bg-elevated);">Slide 3</div>
-      </void-carousel-slide>
+      <void-carousel-content>
+        <void-carousel-item>
+          <div style="${slideStyle} background: var(--void-color-bg-elevated);">Slide 1</div>
+        </void-carousel-item>
+        <void-carousel-item>
+          <div style="${slideStyle} background: var(--void-color-bg-secondary);">Slide 2</div>
+        </void-carousel-item>
+        <void-carousel-item>
+          <div style="${slideStyle} background: var(--void-color-bg-elevated);">Slide 3</div>
+        </void-carousel-item>
+      </void-carousel-content>
+      <void-carousel-previous aria-label="Previous slide"></void-carousel-previous>
+      <void-carousel-next aria-label="Next slide"></void-carousel-next>
+      <void-carousel-indicators></void-carousel-indicators>
     </void-carousel>
   `,
 };
@@ -76,15 +82,20 @@ export const WithLoop: Story = {
 export const Autoplay: Story = {
   render: () => html`
     <void-carousel autoplay loop interval="3000">
-      <void-carousel-slide>
-        <div style="${slideStyle} background: var(--void-color-bg-elevated);">Auto 1</div>
-      </void-carousel-slide>
-      <void-carousel-slide>
-        <div style="${slideStyle} background: var(--void-color-bg-secondary);">Auto 2</div>
-      </void-carousel-slide>
-      <void-carousel-slide>
-        <div style="${slideStyle} background: var(--void-color-bg-elevated);">Auto 3</div>
-      </void-carousel-slide>
+      <void-carousel-content>
+        <void-carousel-item>
+          <div style="${slideStyle} background: var(--void-color-bg-elevated);">Auto 1</div>
+        </void-carousel-item>
+        <void-carousel-item>
+          <div style="${slideStyle} background: var(--void-color-bg-secondary);">Auto 2</div>
+        </void-carousel-item>
+        <void-carousel-item>
+          <div style="${slideStyle} background: var(--void-color-bg-elevated);">Auto 3</div>
+        </void-carousel-item>
+      </void-carousel-content>
+      <void-carousel-previous aria-label="Previous slide"></void-carousel-previous>
+      <void-carousel-next aria-label="Next slide"></void-carousel-next>
+      <void-carousel-indicators></void-carousel-indicators>
     </void-carousel>
   `,
 };
@@ -92,31 +103,38 @@ export const Autoplay: Story = {
 export const Vertical: Story = {
   render: () => html`
     <void-carousel orientation="vertical" loop style="height: 8rem;">
-      <void-carousel-slide>
-        <div style="${slideStyle} background: var(--void-color-bg-elevated); height: 100%; font-size: 1rem;">Top</div>
-      </void-carousel-slide>
-      <void-carousel-slide>
-        <div style="${slideStyle} background: var(--void-color-bg-secondary); height: 100%; font-size: 1rem;">Middle</div>
-      </void-carousel-slide>
-      <void-carousel-slide>
-        <div style="${slideStyle} background: var(--void-color-bg-elevated); height: 100%; font-size: 1rem;">Bottom</div>
-      </void-carousel-slide>
+      <void-carousel-content>
+        <void-carousel-item>
+          <div style="${slideStyle} background: var(--void-color-bg-elevated); height: 100%; font-size: 1rem;">Top</div>
+        </void-carousel-item>
+        <void-carousel-item>
+          <div style="${slideStyle} background: var(--void-color-bg-secondary); height: 100%; font-size: 1rem;">Middle</div>
+        </void-carousel-item>
+        <void-carousel-item>
+          <div style="${slideStyle} background: var(--void-color-bg-elevated); height: 100%; font-size: 1rem;">Bottom</div>
+        </void-carousel-item>
+      </void-carousel-content>
+      <void-carousel-previous aria-label="Previous slide"></void-carousel-previous>
+      <void-carousel-next aria-label="Next slide"></void-carousel-next>
+      <void-carousel-indicators></void-carousel-indicators>
     </void-carousel>
   `,
 };
 
 export const NoControls: Story = {
   render: () => html`
-    <void-carousel .controls=${false}>
-      <void-carousel-slide>
-        <div style="${slideStyle} background: var(--void-color-bg-elevated);">Slide 1</div>
-      </void-carousel-slide>
-      <void-carousel-slide>
-        <div style="${slideStyle} background: var(--void-color-bg-secondary);">Slide 2</div>
-      </void-carousel-slide>
-      <void-carousel-slide>
-        <div style="${slideStyle} background: var(--void-color-bg-elevated);">Slide 3</div>
-      </void-carousel-slide>
+    <void-carousel>
+      <void-carousel-content>
+        <void-carousel-item>
+          <div style="${slideStyle} background: var(--void-color-bg-elevated);">Slide 1</div>
+        </void-carousel-item>
+        <void-carousel-item>
+          <div style="${slideStyle} background: var(--void-color-bg-secondary);">Slide 2</div>
+        </void-carousel-item>
+        <void-carousel-item>
+          <div style="${slideStyle} background: var(--void-color-bg-elevated);">Slide 3</div>
+        </void-carousel-item>
+      </void-carousel-content>
     </void-carousel>
   `,
 };
@@ -125,28 +143,43 @@ export const Sizes: Story = {
   render: () => html`
     <div style="display: flex; flex-direction: column; gap: 2rem;">
       <void-carousel size="sm" loop>
-        <void-carousel-slide>
-          <div style="${slideStyle} background: var(--void-color-bg-elevated); height: 8rem; font-size: 1rem;">Small</div>
-        </void-carousel-slide>
-        <void-carousel-slide>
-          <div style="${slideStyle} background: var(--void-color-bg-secondary); height: 8rem; font-size: 1rem;">Small 2</div>
-        </void-carousel-slide>
+        <void-carousel-content>
+          <void-carousel-item>
+            <div style="${slideStyle} background: var(--void-color-bg-elevated); height: 8rem; font-size: 1rem;">Small</div>
+          </void-carousel-item>
+          <void-carousel-item>
+            <div style="${slideStyle} background: var(--void-color-bg-secondary); height: 8rem; font-size: 1rem;">Small 2</div>
+          </void-carousel-item>
+        </void-carousel-content>
+        <void-carousel-previous aria-label="Previous slide"></void-carousel-previous>
+        <void-carousel-next aria-label="Next slide"></void-carousel-next>
+        <void-carousel-indicators></void-carousel-indicators>
       </void-carousel>
       <void-carousel size="md" loop>
-        <void-carousel-slide>
-          <div style="${slideStyle} background: var(--void-color-bg-elevated);">Medium</div>
-        </void-carousel-slide>
-        <void-carousel-slide>
-          <div style="${slideStyle} background: var(--void-color-bg-secondary);">Medium 2</div>
-        </void-carousel-slide>
+        <void-carousel-content>
+          <void-carousel-item>
+            <div style="${slideStyle} background: var(--void-color-bg-elevated);">Medium</div>
+          </void-carousel-item>
+          <void-carousel-item>
+            <div style="${slideStyle} background: var(--void-color-bg-secondary);">Medium 2</div>
+          </void-carousel-item>
+        </void-carousel-content>
+        <void-carousel-previous aria-label="Previous slide"></void-carousel-previous>
+        <void-carousel-next aria-label="Next slide"></void-carousel-next>
+        <void-carousel-indicators></void-carousel-indicators>
       </void-carousel>
       <void-carousel size="lg" loop>
-        <void-carousel-slide>
-          <div style="${slideStyle} background: var(--void-color-bg-elevated); height: 16rem; font-size: 2rem;">Large</div>
-        </void-carousel-slide>
-        <void-carousel-slide>
-          <div style="${slideStyle} background: var(--void-color-bg-secondary); height: 16rem; font-size: 2rem;">Large 2</div>
-        </void-carousel-slide>
+        <void-carousel-content>
+          <void-carousel-item>
+            <div style="${slideStyle} background: var(--void-color-bg-elevated); height: 16rem; font-size: 2rem;">Large</div>
+          </void-carousel-item>
+          <void-carousel-item>
+            <div style="${slideStyle} background: var(--void-color-bg-secondary); height: 16rem; font-size: 2rem;">Large 2</div>
+          </void-carousel-item>
+        </void-carousel-content>
+        <void-carousel-previous aria-label="Previous slide"></void-carousel-previous>
+        <void-carousel-next aria-label="Next slide"></void-carousel-next>
+        <void-carousel-indicators></void-carousel-indicators>
       </void-carousel>
     </div>
   `,

@@ -1,10 +1,15 @@
-import { html } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
-import { ProjectionController } from '../projection.js';
 import { defaultTrueBoolean } from '../converters.js';
 
-/** Top application navigation bar for branding, primary links, and user account controls. */
+/**
+ * Top application navigation bar for branding, primary links, and user account controls.
+ *
+ * The bar is a row: what you write inside it is laid out by the theme as it stands, with no part elements and
+ * nothing rendered. Use the patterns beside it for the usual contents: `<void-brand>` for the name or logo,
+ * `<void-nav-links>` for the links (mark the current page with `aria-current="page"`) and `<void-spacer>` to
+ * push what follows to the far end.
+ */
 export class VoidNavBar extends VoidElement {
   /** Stay at the top of the viewport while the page scrolls. */
   @property({ type: Boolean, reflect: true }) sticky = false;
@@ -13,18 +18,9 @@ export class VoidNavBar extends VoidElement {
   /** `default` sits on the page; `elevated` uses the raised surface colour. */
   @property({ type: String, reflect: true }) variant: 'default' | 'elevated' = 'default';
 
-  // Consumer content is projected into the content wrapper.
-  protected readonly _projection = new ProjectionController(this, {
-    regions: [{ name: 'content', target: () => this.querySelector(':scope > .void-nav-bar-content') }],
-  });
-
   connectedCallback(): void {
     super.connectedCallback();
     this.setHostAttribute('role', 'navigation');
-  }
-
-  render() {
-    return html`<div class="void-nav-bar-content"></div>`;
   }
 }
 

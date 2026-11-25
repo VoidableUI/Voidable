@@ -57,7 +57,7 @@ export { VoidSegmentedControl, VoidSegmentedControlItem } from './components/seg
 export { VoidStat } from './components/stat.js';
 
 export { VoidCalendar, VoidDatePicker } from './components/calendar.js';
-export { VoidCarousel, VoidCarouselSlide } from './components/carousel.js';
+export { VoidCarousel, VoidCarouselPrevious, VoidCarouselNext } from './components/carousel.js';
 export { VoidDropdownMenu, VoidDropdownMenuItem } from './components/dropdown-menu.js';
 export { VoidIndicator } from './components/indicator.js';
 export { VoidMenu, VoidMenuItem, VoidMenuGroup } from './components/menu.js';

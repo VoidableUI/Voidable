@@ -1,33 +1,20 @@
-import { html } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
-import { ProjectionController } from '../projection.js';
 
-/** Navigation trail for deep page hierarchies in dashboards, e-commerce category trees, and file browsers. */
+/**
+ * Navigation trail for deep page hierarchies in dashboards, e-commerce category trees, and file browsers.
+ *
+ * Write one `<void-breadcrumbs-item>` per crumb, each holding a link (or plain text for the page you are on).
+ * Mark the current page with `aria-current="page"` on its item. The items are CSS-only parts and the trail
+ * renders nothing of its own: the separators are drawn by the theme between the items, so reordering, keying or
+ * morphing the items needs nothing from the component.
+ */
 export class VoidBreadcrumbs extends VoidElement {
   /**
-   * Character drawn between the crumbs. Defaults to `/`. Each child element becomes one crumb; the last
-   * is marked as the current page.
+   * Character drawn between the crumbs. Defaults to `/`. It is drawn by CSS and hidden from assistive
+   * technology.
    */
   @property({ type: String }) separator = '/';
-
-  // Each child element becomes one list item: projected into the list, in an
-  // <li> of its own that the component owns.
-  protected readonly _projection = new ProjectionController(this, {
-    regions: [
-      {
-        name: 'items',
-        target: () => this.querySelector(':scope > .void-breadcrumbs-list'),
-        accepts: node => node.nodeType === Node.ELEMENT_NODE,
-        wrap: () => {
-          const li = this.ownerDocument.createElement('li');
-          li.className = 'void-breadcrumbs-item';
-          return li;
-        },
-      },
-    ],
-    onChange: () => this.requestUpdate(),
-  });
 
   connectedCallback(): void {
     super.connectedCallback();
@@ -35,19 +22,12 @@ export class VoidBreadcrumbs extends VoidElement {
     this.setHostAttribute('aria-label', 'Breadcrumb');
   }
 
-  protected override updated(_changed: Map<string, unknown>): void {
-    super.updated(_changed);
-    const items = Array.from(this.querySelectorAll(':scope > .void-breadcrumbs-list > .void-breadcrumbs-item'));
-    items.forEach((li, index) => {
-      if (li.getAttribute('data-separator') !== this.separator) li.setAttribute('data-separator', this.separator);
-      const last = index === items.length - 1;
-      if (last && li.getAttribute('aria-current') !== 'page') li.setAttribute('aria-current', 'page');
-      else if (!last && li.hasAttribute('aria-current')) li.removeAttribute('aria-current');
-    });
-  }
-
-  render() {
-    return html`<ol class="void-breadcrumbs-list"></ol>`;
+  protected override updated(changed: Map<string, unknown>): void {
+    super.updated(changed);
+    if (changed.has('separator')) {
+      // A CSS string, read by `content` in breadcrumbs.css.
+      this.setHostStyle('--_void-breadcrumbs-separator', JSON.stringify(this.separator)); // style-ok
+    }
   }
 }
 

@@ -86,17 +86,9 @@ void-error-fallback:not(:defined):empty:not([heading])::after {
 }
 
 /* ── Carousel ──────────────────────────────────────────────────────────────
-   Slides sit side by side after upgrade; unstyled they would stack. */
-void-carousel:not(:defined) > void-carousel-slide:not(:first-of-type) {
-  display: none;
-}
-
-/* The indicator row below the viewport. */
-void-carousel:not(:defined):not([indicators="false"])::after {
-  content: '';
-  display: block;
-  height: 2rem; /* token-ok: indicator row, as carousel.css */
-}
+   The content part is a clipped row and the items are 100% wide (carousel.css),
+   the arrows are absolutely placed and the indicators part reserves the height
+   of a dot, so the carousel is laid out before upgrade as it is after. */
 
 /* ── Field ─────────────────────────────────────────────────────────────────
    Label, helper and error are attributes: show them where the component will

@@ -1,9 +1,13 @@
-import { html, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
-import { ProjectionController } from '../projection.js';
+import { PartsController, triggerControl } from '../parts.js';
 
-/** Horizontal navigation bar with dropdown sub-menus for site headers, application nav bars, and mega-menu layouts. */
+/**
+ * Horizontal navigation bar with dropdown sub-menus for site headers, application nav bars, and mega-menu layouts.
+ *
+ * A row of `<void-nav-menu-item>`s. Arrow keys move between the items' triggers, Escape closes an open panel and
+ * returns focus to its trigger.
+ */
 export class VoidNavMenu extends VoidElement {
   /**
    * `horizontal` (default) lays the items out in a row with Left and Right arrow keys; `vertical` stacks
@@ -39,8 +43,7 @@ export class VoidNavMenu extends VoidElement {
 
   private _handleItemOpen = (e: CustomEvent): void => {
     const target = e.target as VoidNavMenuItem;
-    const items = this._getItems();
-    for (const item of items) {
+    for (const item of this._getItems()) {
       if (item !== target && item.open) {
         item.open = false;
         item.dispatchEvent(new CustomEvent('void-close', { bubbles: true, composed: true }));
@@ -57,28 +60,17 @@ export class VoidNavMenu extends VoidElement {
     const prevKey = isHorizontal ? 'ArrowLeft' : 'ArrowUp';
 
     if (e.key === nextKey || e.key === prevKey) {
-      e.preventDefault();
-      const triggers = items.map(item => item.querySelector('.void-nav-menu-trigger') as HTMLElement).filter(Boolean);
+      const triggers = items.map(item => item._control()).filter((c): c is HTMLElement => !!c);
       const idx = triggers.indexOf(document.activeElement as HTMLElement);
+      // Only from a trigger: arrow keys inside an open panel are the panel's own.
+      if (idx < 0) return;
+      e.preventDefault();
       if (e.key === nextKey) {
         (triggers[idx + 1] ?? triggers[0])?.focus();
       } else {
         (triggers[idx - 1] ?? triggers[triggers.length - 1])?.focus();
       }
-    }
-
-    if (e.key === 'Enter' || e.key === ' ') {
-      const activeEl = document.activeElement as HTMLElement;
-      const item = activeEl?.closest?.('void-nav-menu-item') as VoidNavMenuItem | null;
-      if (item && this.contains(item) && !item.href) {
-        e.preventDefault();
-        item.open = !item.open;
-        if (item.open) {
-          item.dispatchEvent(new CustomEvent('void-open', { bubbles: true, composed: true }));
-        } else {
-          item.dispatchEvent(new CustomEvent('void-close', { bubbles: true, composed: true }));
-        }
-      }
+      return;
     }
 
     if (e.key === 'Escape') {
@@ -86,15 +78,17 @@ export class VoidNavMenu extends VoidElement {
         if (item.open) {
           item.open = false;
           item.dispatchEvent(new CustomEvent('void-close', { bubbles: true, composed: true }));
-          const trigger = item.querySelector('.void-nav-menu-trigger') as HTMLElement;
-          trigger?.focus();
+          item._control()?.focus();
         }
       }
     }
   };
 
+  /** The items of this menu (not of a menu nested inside one of its panels). */
   private _getItems(): VoidNavMenuItem[] {
-    return Array.from(this.querySelectorAll<VoidNavMenuItem>(':scope > void-nav-menu-item'));
+    return Array.from(this.querySelectorAll<VoidNavMenuItem>('void-nav-menu-item')).filter(
+      item => item.closest('void-nav-menu') === this,
+    );
   }
 }
 
@@ -102,50 +96,79 @@ if (!customElements.get('void-nav-menu')) {
   customElements.define('void-nav-menu', VoidNavMenu);
 }
 
-/** Individual navigation item with optional dropdown content panel for sub-menus and mega-menu layouts. */
+/**
+ * One entry of a `<void-nav-menu>`: a `<void-nav-menu-trigger>` around one control (a `<button>` for an entry that
+ * opens a panel, an `<a href>` for one that navigates) and, for a panel, a `<void-nav-menu-content>` after it.
+ *
+ * Hovering the item opens its panel after a short delay; a click, Enter or Space on a button trigger opens it
+ * too (the browser turns Enter and Space on a button into one `click`, so each key activates exactly once). A
+ * link trigger always navigates. The panel closes when the pointer leaves, on Escape, on a press outside or when
+ * focus leaves the item.
+ *
+ * @fires {CustomEvent} void-open - The panel opened.
+ * @fires {CustomEvent} void-close - The panel closed.
+ */
 export class VoidNavMenuItem extends VoidElement {
   /**
-   * Whether the item's dropdown panel is showing. A click or Enter on the trigger toggles it, firing
-   * `void-open` or `void-close`.
+   * Whether the item's panel is showing. A click or Enter on the trigger toggles it, firing `void-open` or
+   * `void-close`.
    */
   @property({ type: Boolean, reflect: true }) open = false;
   /** Dim the item and stop it opening or navigating. */
   @property({ type: Boolean, reflect: true }) disabled = false;
   /**
-   * Make the trigger a link to this URL. An item with an `href` navigates instead of opening a dropdown;
-   * leave it out for an item that has a panel.
-   */
-  @property({ type: String }) href = '';
-  /**
-   * Mark the item as the current section: it is drawn with an underline. Set it on the item that matches
-   * the page.
+   * Mark the item as the current section: it is drawn with an underline, and a link trigger gets
+   * `aria-current="page"`. Set it on the item that matches the page.
    */
   @property({ type: Boolean, reflect: true }) active = false;
 
   private _openTimerId: ReturnType<typeof setTimeout> | undefined;
   private _closeTimerId: ReturnType<typeof setTimeout> | undefined;
-  /** Decided at the first render and kept, so the trigger container is never re-created. */
-  private _asLink: boolean | null = null;
+  /** The panel was opened by hovering, so a click keeps it open instead of closing it. */
+  private _openedByHover = false;
 
-  // Non-empty text goes into the trigger; child elements form the dropdown content.
-  protected readonly _projection = new ProjectionController(this, {
-    regions: [
-      {
-        name: 'label',
-        target: () => this.querySelector(':scope > .void-nav-menu-trigger'),
-        accepts: node => node.nodeType === Node.TEXT_NODE && !!node.textContent?.trim(),
-      },
-      {
-        name: 'content',
-        target: () => this.querySelector(':scope > .void-nav-menu-content'),
-        accepts: node => node.nodeType === Node.ELEMENT_NODE,
-      },
-    ],
-    onChange: () => this.requestUpdate(),
+  protected readonly _parts = new PartsController(this, {
+    tags: ['void-nav-menu-trigger', 'void-nav-menu-content'],
+    onChange: () => this._wire(),
   });
 
+  /** The control inside the trigger part. @internal */
+  _control(): HTMLElement | null {
+    return triggerControl(this._parts.one('void-nav-menu-trigger'));
+  }
+
+  private _content(): HTMLElement | null {
+    return this._parts.one('void-nav-menu-content');
+  }
+
   private get _hasContent(): boolean {
-    return this._projection.nodes('content').length > 0;
+    return !!this._content();
+  }
+
+  /** A link navigates; it never toggles the panel. */
+  private _isLink(control: Element | null): boolean {
+    return !!control?.matches('a[href]');
+  }
+
+  /** Writes the menubar ARIA on the control and links it to the panel. Idempotent. */
+  private _wire(): void {
+    const control = this._control();
+    const content = this._content();
+    if (control) {
+      this._parts.provide(control, 'role', 'menuitem');
+      if (content) {
+        this._parts.set(control, 'aria-haspopup', 'true');
+        this._parts.set(control, 'aria-expanded', String(this.open));
+        this._parts.set(control, 'aria-controls', this._parts.id(content, 'void-nav-menu-content'));
+      }
+      if (this.active && this._isLink(control)) this._parts.set(control, 'aria-current', 'page');
+      if (this.disabled) {
+        this._parts.set(control, 'aria-disabled', 'true');
+        if (control.matches('button, void-button, input')) this._parts.set(control, 'disabled', true);
+        else this._parts.set(control, 'tabindex', '-1');
+      }
+    }
+    if (content) this._parts.provide(content, 'role', 'menu');
   }
 
   connectedCallback(): void {
@@ -153,6 +176,8 @@ export class VoidNavMenuItem extends VoidElement {
     this.setHostAttribute('role', 'none');
     this.addEventListener('mouseenter', this._onMouseEnter);
     this.addEventListener('mouseleave', this._onMouseLeave);
+    this.addEventListener('click', this._onClick);
+    this.addEventListener('focusout', this._onFocusOut);
     document.addEventListener('mousedown', this._onOutsideClick);
   }
 
@@ -162,46 +187,39 @@ export class VoidNavMenuItem extends VoidElement {
     clearTimeout(this._closeTimerId);
     this.removeEventListener('mouseenter', this._onMouseEnter);
     this.removeEventListener('mouseleave', this._onMouseLeave);
+    this.removeEventListener('click', this._onClick);
+    this.removeEventListener('focusout', this._onFocusOut);
     document.removeEventListener('mousedown', this._onOutsideClick);
   }
 
   protected override updated(changed: Map<string, unknown>): void {
     super.updated(changed);
-    // Whether there is dropdown content is only known once children are projected.
-    const content = this.querySelector(':scope > .void-nav-menu-content');
-    const trigger = this.querySelector(':scope > .void-nav-menu-trigger');
-    const has = this._hasContent;
-    if (content && content.hasAttribute('hidden') === has) content.toggleAttribute('hidden', !has);
-    if (trigger) {
-      if (has) {
-        trigger.setAttribute('aria-haspopup', 'true');
-        trigger.setAttribute('aria-expanded', String(this.open));
-      } else {
-        trigger.removeAttribute('aria-haspopup');
-        trigger.removeAttribute('aria-expanded');
-      }
-    }
+    if (changed.has('open') || changed.has('disabled') || changed.has('active')) this._parts.sync();
   }
 
-  render() {
-    this._asLink ??= !!this.href;
-    const tabindex = this.disabled ? '-1' : '0';
-    // The trigger is named by the consumer's text, projected into it, which the static lint rule cannot see.
-    const trigger = this._asLink
-      ? // eslint-disable-next-line lit-a11y/accessible-name
-        html`<a class="void-nav-menu-trigger" role="menuitem" href=${this.href || nothing} tabindex=${tabindex}
-          aria-disabled=${this.disabled ? 'true' : nothing}></a>`
-      : // eslint-disable-next-line lit-a11y/accessible-name
-        html`<button type="button" class="void-nav-menu-trigger" role="menuitem" tabindex=${tabindex}
-          ?disabled=${this.disabled} aria-disabled=${this.disabled ? 'true' : nothing}></button>`;
-    return html`${trigger}<div class="void-nav-menu-content" role="menu" hidden
-      @mouseenter=${this._onContentEnter} @mouseleave=${this._onContentLeave}></div>`;
-  }
+  /** A click (or the click Enter and Space make on a button) on the trigger toggles the panel. */
+  private _onClick = (e: Event): void => {
+    const trigger = this._parts.one('void-nav-menu-trigger');
+    if (!trigger || !trigger.contains(e.target as Node)) return;
+    const control = this._control();
+    if (this.disabled || !this._hasContent || this._isLink(control)) return;
+    clearTimeout(this._openTimerId);
+    if (!this.open) {
+      this._openedByHover = false;
+      this._openDropdown();
+    } else if (this._openedByHover) {
+      // The hover already opened it: the click pins it open.
+      this._openedByHover = false;
+    } else {
+      this._closeDropdown();
+    }
+  };
 
   private _onMouseEnter = (): void => {
     if (this.disabled || !this._hasContent) return;
     clearTimeout(this._closeTimerId);
     this._openTimerId = setTimeout(() => {
+      if (!this.open) this._openedByHover = true;
       this._openDropdown();
     }, 150);
   };
@@ -214,14 +232,9 @@ export class VoidNavMenuItem extends VoidElement {
     }, 300);
   };
 
-  private _onContentEnter = (): void => {
-    clearTimeout(this._closeTimerId);
-  };
-
-  private _onContentLeave = (): void => {
-    this._closeTimerId = setTimeout(() => {
-      this._closeDropdown();
-    }, 300);
+  private _onFocusOut = (e: FocusEvent): void => {
+    const to = e.relatedTarget as Node | null;
+    if (this.open && to && !this.contains(to)) this._closeDropdown();
   };
 
   private _onOutsideClick = (e: MouseEvent): void => {

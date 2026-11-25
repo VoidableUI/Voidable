@@ -230,6 +230,12 @@ func (s *state) scanRegion(r region) []domain.Tag {
 				t.ParentIndex = base + stack[k].tag
 				break
 			}
+			// A framework component (<.void_menu_item>, <x-voidable::menu-item>) between this tag and the
+			// void-* element above it renders a void-* element the scan cannot see: the parent is unknown,
+			// not that element above.
+			if stack[k].kind == kindComponent {
+				break
+			}
 		}
 		for _, f := range stack {
 			switch f.kind {

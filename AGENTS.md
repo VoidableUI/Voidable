@@ -355,12 +355,9 @@ Checklist per component: parts in the supplement and the manifest; implicit form
 
 Remaining components, in the order to convert them (grouping and open questions in the composition guide's inventory):
 
-3. **Navigation**: nav-menu and nav-menu-item, nav-bar, breadcrumbs.
-4. **Menus**: menu, menu-item, menu-group (icon and shortcut as parts or attributes is open).
-5. **Carousel**: carousel and carousel-slide (renaming the slide to `-item` is open).
-6. **Fields**: field, checkbox-group, radio-group, then checkbox and radio (label, description, error parts; the `label`/`helper`/`error` attributes are used everywhere, so this group needs an owner decision first).
-7. **Shadow internals**: tag, scroll-area (no parts; their rendered buttons and viewport move into a shadow root like the alert's dismiss button).
-8. **Pickers**: combobox, multiselect, option, select (the content part for options; select's native options are open).
+1. **Fields**: field, checkbox-group, radio-group, then checkbox and radio (label, description, error parts; the `label`/`helper`/`error` attributes are used everywhere, so this group needs an owner decision first).
+2. **Shadow internals**: tag, scroll-area (no parts; their rendered buttons and viewport move into a shadow root like the alert's dismiss button).
+3. **Pickers**: combobox, multiselect, option, select (the content part for options; select's native options are open).
 
 ### CSS Selector Strategy
 

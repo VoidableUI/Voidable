@@ -1,23 +1,63 @@
-import { html } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
-import { ProjectionController } from '../projection.js';
-import { defaultTrueBoolean } from '../converters.js';
+import { KeyboardActivation } from '../keyboard-activation.js';
+import { PartsController } from '../parts.js';
 
-/** Individual slide within a VoidCarousel; wraps any content for display in the carousel sequence. */
-export class VoidCarouselSlide extends VoidElement {
+/**
+ * Previous-slide control of a `<void-carousel>`: a button the theme draws as an arrow over the slides. Write it
+ * as an empty element with an `aria-label` ("Previous slide"); any content you put inside replaces the arrow.
+ * It is aria-disabled on the first slide unless the carousel has `loop`.
+ */
+export class VoidCarouselPrevious extends VoidElement {
+  /** Enter and Space fire a real `click`, as on a native button. */
+  protected readonly _activation = new KeyboardActivation(this, {
+    disabled: () => this.getAttribute('aria-disabled') === 'true',
+  });
+
   connectedCallback(): void {
     super.connectedCallback();
-    this.setHostAttribute('role', 'group');
-    this.setHostAttribute('aria-roledescription', 'slide');
+    this.setHostAttribute('role', 'button');
+    this.setHostAttribute('tabindex', '0');
   }
 }
 
-if (!customElements.get('void-carousel-slide')) {
-  customElements.define('void-carousel-slide', VoidCarouselSlide);
+if (!customElements.get('void-carousel-previous')) {
+  customElements.define('void-carousel-previous', VoidCarouselPrevious);
 }
 
-/** Scrollable content gallery for product photo viewers, onboarding flows, and featured content sliders. */
+/**
+ * Next-slide control of a `<void-carousel>`: a button the theme draws as an arrow over the slides. Write it as an
+ * empty element with an `aria-label` ("Next slide"); any content you put inside replaces the arrow. It is
+ * aria-disabled on the last slide unless the carousel has `loop`.
+ */
+export class VoidCarouselNext extends VoidElement {
+  /** Enter and Space fire a real `click`, as on a native button. */
+  protected readonly _activation = new KeyboardActivation(this, {
+    disabled: () => this.getAttribute('aria-disabled') === 'true',
+  });
+
+  connectedCallback(): void {
+    super.connectedCallback();
+    this.setHostAttribute('role', 'button');
+    this.setHostAttribute('tabindex', '0');
+  }
+}
+
+if (!customElements.get('void-carousel-next')) {
+  customElements.define('void-carousel-next', VoidCarouselNext);
+}
+
+/**
+ * Scrollable content gallery for product photo viewers, onboarding flows, and featured content sliders.
+ *
+ * Its regions are parts, in this order: the `<void-carousel-content>` holding the `<void-carousel-item>`s (the
+ * slides), then the optional controls: `<void-carousel-previous>` and `<void-carousel-next>` (arrows) and
+ * `<void-carousel-indicators>` (a row of dots). A control is shown when you write it and absent when you do not.
+ * The component moves nothing: the content and the items are CSS-only parts the theme slides with a custom
+ * property, and the dots are the only nodes it creates, inside your empty `<void-carousel-indicators>`.
+ *
+ * @fires {CustomEvent<{ index: number; previous: number }>} void-change - The shown slide changed.
+ */
 export class VoidCarousel extends VoidElement {
   /**
    * Zero-based index of the slide being shown. Set it to jump to a slide; the arrows, indicators and
@@ -38,27 +78,89 @@ export class VoidCarousel extends VoidElement {
   @property({ type: Number }) interval = 5000;
   /** Size step of the carousel: `sm`, `md` (default) or `lg`. */
   @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' = 'md';
-  /** Show the previous and next buttons. On by default; write `controls="false"` to hide them. */
-  @property({ type: Boolean, reflect: true, converter: defaultTrueBoolean }) controls = true;
-  /** Show the row of slide dots. On by default; write `indicators="false"` to hide them. */
-  @property({ type: Boolean, reflect: true, converter: defaultTrueBoolean }) indicators = true;
   /**
    * Direction slides advance: `horizontal` (default, Left and Right arrow keys) or `vertical` (Up and
    * Down).
    */
   @property({ type: String, reflect: true }) orientation: 'horizontal' | 'vertical' = 'horizontal';
 
-  private _slides: VoidCarouselSlide[] = [];
   private _autoplayTimer: ReturnType<typeof setInterval> | null = null;
-  private _didSetup = false;
-  // Consumer slides are projected into the track; adding or removing one re-renders controls and indicators.
-  protected readonly _projection = new ProjectionController(this, {
-    regions: [{ name: 'slides', target: () => this.querySelector(':scope > .void-carousel-viewport > .void-carousel-track') }],
-    onChange: () => {
-      this._slides = Array.from(this.querySelectorAll('void-carousel-slide')) as VoidCarouselSlide[];
-      this.requestUpdate();
-    },
+  private readonly _labels = new WeakMap<Element, string>();
+  /** Watches the dots, which the parts controller does not know: a morph that empties the indicators gets them back. */
+  private _dots: MutationObserver | null = null;
+
+  protected readonly _parts = new PartsController(this, {
+    tags: [
+      'void-carousel-content',
+      'void-carousel-item',
+      'void-carousel-previous',
+      'void-carousel-next',
+      'void-carousel-indicators',
+    ],
+    onChange: () => this._wire(),
   });
+
+  /** The slides, in document order. */
+  private get _slides(): HTMLElement[] {
+    return this._parts.all('void-carousel-item');
+  }
+
+  /** Wires the slides, the arrows and the dots to the current slide. Idempotent. */
+  private _wire(): void {
+    const slides = this._slides;
+    const count = slides.length;
+    const content = this._parts.one('void-carousel-content');
+    if (content) this._parts.provide(content, 'aria-live', 'polite');
+    slides.forEach((slide, i) => {
+      this._parts.provide(slide, 'role', 'group');
+      this._parts.provide(slide, 'aria-roledescription', 'slide');
+      // The numbering follows the slides as they come and go; a label the author wrote is never replaced.
+      const label = `Slide ${i + 1} of ${count}`;
+      const current = slide.getAttribute('aria-label');
+      if (current === null || current === this._labels.get(slide)) {
+        this._parts.set(slide, 'aria-label', label);
+        this._labels.set(slide, label);
+      }
+      this._parts.set(slide, 'active', i === this.active);
+    });
+    const atStart = !this.loop && this.active === 0;
+    const atEnd = !this.loop && this.active === count - 1;
+    const prev = this._parts.one('void-carousel-previous');
+    const next = this._parts.one('void-carousel-next');
+    if (prev) {
+      this._parts.set(prev, 'aria-disabled', atStart ? 'true' : null);
+    }
+    if (next) {
+      this._parts.set(next, 'aria-disabled', atEnd ? 'true' : null);
+    }
+    this._syncDots(count);
+    this.setHostStyle('--void-carousel-offset', String(this.active));
+  }
+
+  /** One dot (`<button role="tab">`) per slide inside the author's empty indicators part. */
+  private _syncDots(count: number): void {
+    const indicators = this._parts.one('void-carousel-indicators');
+    if (!indicators) return;
+    this._parts.provide(indicators, 'role', 'tablist');
+    this._parts.provide(indicators, 'aria-label', 'Slide indicators');
+    const dots = Array.from(indicators.children).filter((c): c is HTMLButtonElement => c.localName === 'button');
+    while (dots.length > count) dots.pop()!.remove();
+    while (dots.length < count) {
+      const dot = document.createElement('button');
+      dot.type = 'button';
+      dot.setAttribute('role', 'tab');
+      indicators.appendChild(dot);
+      dots.push(dot);
+    }
+    dots.forEach((dot, i) => {
+      const selected = i === this.active;
+      if (dot.getAttribute('aria-selected') !== String(selected)) dot.setAttribute('aria-selected', String(selected));
+      if (dot.hasAttribute('active') !== selected) dot.toggleAttribute('active', selected);
+      const label = `Go to slide ${i + 1}`;
+      if (dot.getAttribute('aria-label') !== label) dot.setAttribute('aria-label', label);
+    });
+  }
+
   connectedCallback(): void {
     super.connectedCallback();
     this.setHostAttribute('role', 'region');
@@ -66,6 +168,11 @@ export class VoidCarousel extends VoidElement {
     this.addEventListener('mouseenter', this._onMouseEnter);
     this.addEventListener('mouseleave', this._onMouseLeave);
     this.addEventListener('keydown', this._onKeydown);
+    this.addEventListener('click', this._onClick);
+    this._dots ??= new MutationObserver(records => {
+      if (records.some(r => (r.target as Element).localName === 'void-carousel-indicators')) this._parts.requestSync();
+    });
+    this._dots.observe(this, { childList: true, subtree: true });
   }
 
   disconnectedCallback(): void {
@@ -74,40 +181,17 @@ export class VoidCarousel extends VoidElement {
     this.removeEventListener('mouseenter', this._onMouseEnter);
     this.removeEventListener('mouseleave', this._onMouseLeave);
     this.removeEventListener('keydown', this._onKeydown);
+    this.removeEventListener('click', this._onClick);
+    this._dots?.disconnect();
   }
 
   protected override updated(changed: Map<string, unknown>): void {
     super.updated(changed);
-
-    let needsRerender = false;
-
-    if (!this._didSetup) {
-      this._didSetup = true;
-      needsRerender = true;
-    }
-
-    this._slides = Array.from(this.querySelectorAll('void-carousel-slide')) as VoidCarouselSlide[];
-    this._syncSlides();
+    this._parts.sync();
 
     if (changed.has('autoplay') || changed.has('interval')) {
       this._stopAutoplay();
       if (this.autoplay) this._startAutoplay();
-    }
-
-    this.setHostStyle('--void-carousel-offset', String(this.active));
-
-    if (needsRerender) this.requestUpdate();
-  }
-
-  private _syncSlides(): void {
-    for (let i = 0; i < this._slides.length; i++) {
-      const slide = this._slides[i];
-      slide.setAttribute('aria-label', `Slide ${i + 1} of ${this._slides.length}`);
-      if (i === this.active) {
-        slide.setAttribute('active', '');
-      } else {
-        slide.removeAttribute('active');
-      }
     }
   }
 
@@ -126,7 +210,7 @@ export class VoidCarousel extends VoidElement {
     if (index === previous) return;
 
     this.active = index;
-    this.requestUpdate();
+    this._parts.sync();
 
     this.dispatchEvent(new CustomEvent('void-change', {
       bubbles: true,
@@ -143,9 +227,16 @@ export class VoidCarousel extends VoidElement {
     this._goTo(this.active + 1);
   };
 
-  private _goToSlide(index: number): void {
-    this._goTo(index);
-  }
+  /** Clicks on this carousel's arrows and dots (delegated, so replaced controls keep working). */
+  private _onClick = (e: Event): void => {
+    const target = e.target as Element;
+    const control = target.closest('void-carousel-previous, void-carousel-next, void-carousel-indicators > button');
+    if (!control || !this._parts.owns(control)) return;
+    if (control.getAttribute('aria-disabled') === 'true') return;
+    if (control.localName === 'void-carousel-previous') this._prev();
+    else if (control.localName === 'void-carousel-next') this._next();
+    else this._goTo(Array.from(control.parentElement!.children).indexOf(control));
+  };
 
   private _startAutoplay(): void {
     if (this._autoplayTimer) return;
@@ -182,57 +273,6 @@ export class VoidCarousel extends VoidElement {
       this._next();
     }
   };
-
-  render() {
-    const count = this._slides.length;
-    const atStart = !this.loop && this.active === 0;
-    const atEnd = !this.loop && this.active === count - 1;
-
-    return html`
-      <div class="void-carousel-viewport">
-        <div class="void-carousel-track" aria-live="polite"></div>
-      </div>
-      ${this.controls ? html`
-        <button
-          type="button"
-          class="void-carousel-prev"
-          aria-label="Previous slide"
-          ?disabled=${atStart}
-          @click=${this._prev}
-        >
-          <svg viewBox="0 0 16 16" fill="none" aria-hidden="true">
-            <path d="M10 4L6 8l4 4" stroke="currentColor" stroke-width="var(--void-icon-stroke-width)" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </button>
-        <button
-          type="button"
-          class="void-carousel-next"
-          aria-label="Next slide"
-          ?disabled=${atEnd}
-          @click=${this._next}
-        >
-          <svg viewBox="0 0 16 16" fill="none" aria-hidden="true">
-            <path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="var(--void-icon-stroke-width)" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </button>
-      ` : ''}
-      ${this.indicators ? html`
-        <div class="void-carousel-indicators" role="tablist" aria-label="Slide indicators">
-          ${this._slides.map((_, i) => html`
-            <button
-              type="button"
-              class="void-carousel-dot"
-              role="tab"
-              aria-selected=${i === this.active ? 'true' : 'false'}
-              aria-label="Go to slide ${i + 1}"
-              ?active=${i === this.active}
-              @click=${() => this._goToSlide(i)}
-            ></button>
-          `)}
-        </div>
-      ` : ''}
-    `;
-  }
 }
 
 if (!customElements.get('void-carousel')) {
@@ -241,7 +281,8 @@ if (!customElements.get('void-carousel')) {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'void-carousel-slide': VoidCarouselSlide;
     'void-carousel': VoidCarousel;
+    'void-carousel-previous': VoidCarouselPrevious;
+    'void-carousel-next': VoidCarouselNext;
   }
 }

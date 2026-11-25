@@ -221,17 +221,18 @@
   },
   "void-menu": {
     "group": "overlays",
-    "children": "Takes `void-menu-item` children, optionally grouped in `void-menu-group`."
+    "children": "Explicit parts, in order: an optional `void-menu-search` around one `<input type=\"search\">` (present means searchable), `void-menu-content` holding the `void-menu-item`s and `void-menu-group`s, and an optional `void-menu-empty` that replaces the default \"No results found\" while a search matches nothing."
   },
   "void-menu-group": {
     "group": "overlays",
-    "children": "Takes `void-menu-item` children. The `label` attribute is the group heading."
+    "children": "A `void-menu-group-label` heading first, then `void-menu-item` children. The label names the group."
   },
   "void-menu-item": {
     "group": "overlays",
     "events": {
-      "void-select": "Fires when the item is activated. `detail.value` is its `value`."
-    }
+      "void-select": "Fires when the item is activated. `detail.value` is its `value` and `detail.item` the item."
+    },
+    "children": "The label text, with an optional `void-menu-item-icon` before it and `void-menu-item-shortcut` after it (display only: it does not bind the key)."
   },
   "void-popover": {
     "group": "overlays",
@@ -251,7 +252,7 @@
   },
   "void-breadcrumbs": {
     "group": "navigation",
-    "children": "A list of links in order, with the current page as the last item (a `span` or a link with `aria-current`)."
+    "children": "One `void-breadcrumbs-item` per crumb, in order, each holding a link (or text for the current page). Put `aria-current=\"page\"` on the item of the current page. The separators are drawn by the theme."
   },
   "void-hamburger": {
     "group": "navigation",
@@ -273,7 +274,7 @@
       "void-open": "Fires when the item opens its panel.",
       "void-close": "Fires when the item closes its panel."
     },
-    "children": "The label text, then (to open a panel) the panel content, such as a list of links. With `href` it is a plain link and takes no panel."
+    "children": "Two parts: `void-nav-menu-trigger`, wrapping the one control (a `<button>` that opens a panel, or an `<a href>` that navigates), and for a panel `void-nav-menu-content` with the links. Hover, click, Enter and Space open the panel; a link trigger just navigates."
   },
   "void-pagination": {
     "group": "navigation",
@@ -310,11 +311,13 @@
     "events": {
       "void-change": "Fires when the visible slide changes. `detail.index` is the new slide and `detail.previous` the one before."
     },
-    "children": "Takes `void-carousel-slide` children, one per slide."
+    "children": "Explicit parts, in order: `void-carousel-content` holding one `void-carousel-item` per slide, then the optional controls `void-carousel-previous`, `void-carousel-next` (empty, with an `aria-label`) and an empty `void-carousel-indicators` that the carousel fills with dots. A control is shown when you write it."
   },
-  "void-carousel-slide": {
-    "group": "data-display",
-    "children": "The content of one slide: text, an image, any markup."
+  "void-carousel-previous": {
+    "group": "data-display"
+  },
+  "void-carousel-next": {
+    "group": "data-display"
   },
   "void-indicator": {
     "group": "data-display"

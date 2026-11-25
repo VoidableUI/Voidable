@@ -2,20 +2,27 @@ void-carousel {
   display: block;
   position: relative;
   font-family: var(--void-font-sans);
+  --_void-carousel-control: 2rem;
+  --_void-carousel-glyph: 0.4rem;
+  --_void-carousel-dot: 0.5rem;
 }
 
-.void-carousel-viewport {
+/* ── Slides: the content part is the window, the items slide inside it ── */
+
+void-carousel-content {
+  display: flex;
   overflow: hidden;
   order: -1;
 }
 
-.void-carousel-track {
-  display: flex;
+void-carousel-item {
+  flex: 0 0 100%;
+  min-width: 0;
+  overflow: hidden;
   transition: transform var(--void-duration-slow) var(--void-ease-in-out);
 }
 
-void-carousel[orientation="horizontal"] .void-carousel-track {
-  flex-direction: row;
+void-carousel[orientation="horizontal"] void-carousel-item {
   transform: translateX(calc(var(--void-carousel-offset, 0) * -100%));
 }
 
@@ -24,39 +31,31 @@ void-carousel[orientation="vertical"] {
   flex-direction: column;
 }
 
-void-carousel[orientation="vertical"] .void-carousel-viewport {
+void-carousel[orientation="vertical"] void-carousel-content {
   flex: 1;
   min-height: 0;
+  flex-direction: column;
 }
 
-void-carousel[orientation="vertical"] .void-carousel-track {
-  flex-direction: column;
+void-carousel[orientation="vertical"] void-carousel-item {
+  min-height: 0;
   height: 100%;
   transform: translateY(calc(var(--void-carousel-offset, 0) * -100%));
 }
 
-void-carousel[orientation="vertical"] void-carousel-slide {
-  min-height: 0;
-  height: 100%;
-}
+/* ── Previous / next: the parts are the buttons; the arrow is drawn when they are empty ── */
 
-void-carousel-slide {
-  flex: 0 0 100%;
-  min-width: 0;
-  overflow: hidden;
-}
-
-/* ── Prev / Next controls ── */
-
-.void-carousel-prev,
-.void-carousel-next {
-  appearance: none;
+void-carousel-previous,
+void-carousel-next {
   position: absolute;
-  top: 50%;
+  inset-block-start: 50%;
   transform: translateY(-50%);
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  width: var(--_void-carousel-control);
+  height: var(--_void-carousel-control);
+  box-sizing: border-box;
   border: 1px solid var(--void-color-border);
   border-radius: var(--void-radius-full);
   background: var(--void-color-bg);
@@ -68,85 +67,104 @@ void-carousel-slide {
   z-index: 1;
 }
 
-.void-carousel-prev {
-  left: var(--void-space-2);
+void-carousel-previous {
+  inset-inline-start: var(--void-space-2);
 }
 
-.void-carousel-next {
-  right: var(--void-space-2);
+void-carousel-next {
+  inset-inline-end: var(--void-space-2);
 }
 
-.void-carousel-prev svg,
-.void-carousel-next svg {
-  width: 1rem;
-  height: 1rem;
+/* The default arrow: a chevron of two borders, as thick as the icon stroke. */
+void-carousel-previous:empty::before,
+void-carousel-next:empty::before {
+  content: "";
+  width: var(--_void-carousel-glyph);
+  height: var(--_void-carousel-glyph);
+  border-style: solid;
+  border-color: currentColor;
+  border-width: 0;
+  border-inline-start-width: calc(var(--void-icon-stroke-width) * 1px);
+  border-block-end-width: calc(var(--void-icon-stroke-width) * 1px);
 }
 
-.void-carousel-prev:hover:not(:disabled),
-.void-carousel-next:hover:not(:disabled) {
+void-carousel-previous:empty::before {
+  transform: translateX(25%) rotate(45deg);
+}
+
+void-carousel-next:empty::before {
+  transform: translateX(-25%) rotate(225deg);
+}
+
+void-carousel-previous:hover:not([aria-disabled="true"]),
+void-carousel-next:hover:not([aria-disabled="true"]) {
   background: var(--void-color-bg-hover);
   border-color: var(--void-color-border-strong);
 }
 
-.void-carousel-prev:focus-visible,
-.void-carousel-next:focus-visible {
+void-carousel-previous:focus-visible,
+void-carousel-next:focus-visible {
   outline: var(--void-focus-ring-width) solid var(--void-focus-ring-color);
   outline-offset: var(--void-focus-ring-offset);
 }
 
-.void-carousel-prev:disabled,
-.void-carousel-next:disabled {
+void-carousel-previous[aria-disabled="true"],
+void-carousel-next[aria-disabled="true"] {
   opacity: 0.4;
   cursor: not-allowed;
 }
 
 /* ── Vertical orientation controls ── */
 
-void-carousel[orientation="vertical"] .void-carousel-prev,
-void-carousel[orientation="vertical"] .void-carousel-next {
+void-carousel[orientation="vertical"] void-carousel-previous,
+void-carousel[orientation="vertical"] void-carousel-next {
   position: static;
   transform: none;
   align-self: center;
 }
 
-void-carousel[orientation="vertical"] .void-carousel-prev {
+void-carousel[orientation="vertical"] void-carousel-previous {
   order: -2;
 }
 
-void-carousel[orientation="vertical"] .void-carousel-next {
+void-carousel[orientation="vertical"] void-carousel-next {
   order: 1;
 }
 
-void-carousel[orientation="vertical"] .void-carousel-prev svg {
-  transform: rotate(90deg);
+void-carousel[orientation="vertical"] void-carousel-previous:empty::before {
+  transform: translateY(25%) rotate(135deg);
 }
 
-void-carousel[orientation="vertical"] .void-carousel-next svg {
-  transform: rotate(90deg);
+void-carousel[orientation="vertical"] void-carousel-next:empty::before {
+  transform: translateY(-25%) rotate(315deg);
 }
 
-void-carousel[orientation="vertical"] .void-carousel-indicators {
+void-carousel[orientation="vertical"] void-carousel-indicators {
   position: absolute;
-  right: var(--void-space-2);
-  top: 50%;
+  inset-inline-end: var(--void-space-2);
+  inset-block-start: 50%;
   transform: translateY(-50%);
   flex-direction: column;
   padding: var(--void-space-3);
   z-index: 1;
 }
 
-/* ── Dot indicators ── */
+/* ── Dot indicators: the part holds one generated button per slide ── */
 
-.void-carousel-indicators {
+void-carousel-indicators {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: var(--void-space-2);
   padding: var(--void-space-3) 0;
+  /* The dots are made after upgrade; the empty part already holds their height. */
+  min-height: var(--_void-carousel-dot);
 }
 
-.void-carousel-dot {
+void-carousel-indicators > button {
   appearance: none;
+  width: var(--_void-carousel-dot);
+  height: var(--_void-carousel-dot);
   border: none;
   background: var(--void-color-border);
   border-radius: var(--void-radius-full);
@@ -156,81 +174,30 @@ void-carousel[orientation="vertical"] .void-carousel-indicators {
               transform var(--void-duration-fast) var(--void-ease-in-out);
 }
 
-.void-carousel-dot:hover {
+void-carousel-indicators > button:hover {
   background: var(--void-color-text-secondary);
 }
 
-.void-carousel-dot:focus-visible {
+void-carousel-indicators > button:focus-visible {
   outline: var(--void-focus-ring-width) solid var(--void-focus-ring-color);
   outline-offset: var(--void-focus-ring-offset);
 }
 
-.void-carousel-dot[aria-selected="true"] {
+void-carousel-indicators > button[aria-selected="true"] {
   background: var(--void-color-accent);
+  transform: scale(1.25);
 }
 
 /* ── Sizes ── */
 
-/* sm */
-void-carousel[size="sm"] .void-carousel-prev,
-void-carousel[size="sm"] .void-carousel-next {
-  width: 1.5rem;
-  height: 1.5rem;
+void-carousel[size="sm"] {
+  --_void-carousel-control: 1.5rem;
+  --_void-carousel-glyph: 0.3rem;
+  --_void-carousel-dot: 0.375rem;
 }
 
-void-carousel[size="sm"] .void-carousel-prev svg,
-void-carousel[size="sm"] .void-carousel-next svg {
-  width: 0.75rem;
-  height: 0.75rem;
-}
-
-void-carousel[size="sm"] .void-carousel-dot {
-  width: 0.375rem;
-  height: 0.375rem;
-}
-
-void-carousel[size="sm"] .void-carousel-dot[aria-selected="true"] {
-  transform: scale(1.25);
-}
-
-/* md (default) */
-void-carousel[size="md"] .void-carousel-prev,
-void-carousel[size="md"] .void-carousel-next,
-void-carousel:not([size]) .void-carousel-prev,
-void-carousel:not([size]) .void-carousel-next {
-  width: 2rem;
-  height: 2rem;
-}
-
-void-carousel[size="md"] .void-carousel-dot,
-void-carousel:not([size]) .void-carousel-dot {
-  width: 0.5rem;
-  height: 0.5rem;
-}
-
-void-carousel[size="md"] .void-carousel-dot[aria-selected="true"],
-void-carousel:not([size]) .void-carousel-dot[aria-selected="true"] {
-  transform: scale(1.25);
-}
-
-/* lg */
-void-carousel[size="lg"] .void-carousel-prev,
-void-carousel[size="lg"] .void-carousel-next {
-  width: 2.5rem;
-  height: 2.5rem;
-}
-
-void-carousel[size="lg"] .void-carousel-prev svg,
-void-carousel[size="lg"] .void-carousel-next svg {
-  width: 1.25rem;
-  height: 1.25rem;
-}
-
-void-carousel[size="lg"] .void-carousel-dot {
-  width: 0.625rem;
-  height: 0.625rem;
-}
-
-void-carousel[size="lg"] .void-carousel-dot[aria-selected="true"] {
-  transform: scale(1.25);
+void-carousel[size="lg"] {
+  --_void-carousel-control: 2.5rem;
+  --_void-carousel-glyph: 0.5rem;
+  --_void-carousel-dot: 0.625rem;
 }

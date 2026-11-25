@@ -28,29 +28,35 @@ export const Default: Story = {
   render: (args) => html`
     <void-nav-menu orientation=${args.orientation}>
       <void-nav-menu-item>
-        Products
-        <div style="display: flex; flex-direction: column; gap: var(--void-space-1);">
-          <a href="#" style="padding: var(--void-space-2); border-radius: var(--void-radius-md); color: var(--void-color-text); text-decoration: none;">Analytics</a>
-          <a href="#" style="padding: var(--void-space-2); border-radius: var(--void-radius-md); color: var(--void-color-text); text-decoration: none;">Automation</a>
-          <a href="#" style="padding: var(--void-space-2); border-radius: var(--void-radius-md); color: var(--void-color-text); text-decoration: none;">Security</a>
-        </div>
+        <void-nav-menu-trigger><button type="button">Products</button></void-nav-menu-trigger>
+        <void-nav-menu-content>
+          <div style="display: flex; flex-direction: column; gap: var(--void-space-1);">
+            <a href="#" style="padding: var(--void-space-2); border-radius: var(--void-radius-md); color: var(--void-color-text); text-decoration: none;">Analytics</a>
+            <a href="#" style="padding: var(--void-space-2); border-radius: var(--void-radius-md); color: var(--void-color-text); text-decoration: none;">Automation</a>
+            <a href="#" style="padding: var(--void-space-2); border-radius: var(--void-radius-md); color: var(--void-color-text); text-decoration: none;">Security</a>
+          </div>
+        </void-nav-menu-content>
       </void-nav-menu-item>
       <void-nav-menu-item>
-        Solutions
-        <div style="display: flex; flex-direction: column; gap: var(--void-space-1);">
-          <a href="#" style="padding: var(--void-space-2); border-radius: var(--void-radius-md); color: var(--void-color-text); text-decoration: none;">Enterprise</a>
-          <a href="#" style="padding: var(--void-space-2); border-radius: var(--void-radius-md); color: var(--void-color-text); text-decoration: none;">Startups</a>
-        </div>
+        <void-nav-menu-trigger><button type="button">Solutions</button></void-nav-menu-trigger>
+        <void-nav-menu-content>
+          <div style="display: flex; flex-direction: column; gap: var(--void-space-1);">
+            <a href="#" style="padding: var(--void-space-2); border-radius: var(--void-radius-md); color: var(--void-color-text); text-decoration: none;">Enterprise</a>
+            <a href="#" style="padding: var(--void-space-2); border-radius: var(--void-radius-md); color: var(--void-color-text); text-decoration: none;">Startups</a>
+          </div>
+        </void-nav-menu-content>
       </void-nav-menu-item>
       <void-nav-menu-item>
-        Resources
-        <div style="display: flex; flex-direction: column; gap: var(--void-space-1);">
-          <a href="#" style="padding: var(--void-space-2); border-radius: var(--void-radius-md); color: var(--void-color-text); text-decoration: none;">Documentation</a>
-          <a href="#" style="padding: var(--void-space-2); border-radius: var(--void-radius-md); color: var(--void-color-text); text-decoration: none;">Blog</a>
-          <a href="#" style="padding: var(--void-space-2); border-radius: var(--void-radius-md); color: var(--void-color-text); text-decoration: none;">Community</a>
-        </div>
+        <void-nav-menu-trigger><button type="button">Resources</button></void-nav-menu-trigger>
+        <void-nav-menu-content>
+          <div style="display: flex; flex-direction: column; gap: var(--void-space-1);">
+            <a href="#" style="padding: var(--void-space-2); border-radius: var(--void-radius-md); color: var(--void-color-text); text-decoration: none;">Documentation</a>
+            <a href="#" style="padding: var(--void-space-2); border-radius: var(--void-radius-md); color: var(--void-color-text); text-decoration: none;">Blog</a>
+            <a href="#" style="padding: var(--void-space-2); border-radius: var(--void-radius-md); color: var(--void-color-text); text-decoration: none;">Community</a>
+          </div>
+        </void-nav-menu-content>
       </void-nav-menu-item>
-      <void-nav-menu-item href="/pricing">Pricing</void-nav-menu-item>
+      <void-nav-menu-item><void-nav-menu-trigger><a href="/pricing">Pricing</a></void-nav-menu-trigger></void-nav-menu-item>
     </void-nav-menu>
   `,
 };
@@ -59,21 +65,25 @@ export const WithActiveItem: Story = {
   render: () => html`
     <void-nav-menu>
       <void-nav-menu-item>
-        Products
-        <div style="display: flex; flex-direction: column; gap: var(--void-space-1);">
-          <a href="#" style="padding: var(--void-space-2); color: var(--void-color-text); text-decoration: none;">Analytics</a>
-          <a href="#" style="padding: var(--void-space-2); color: var(--void-color-text); text-decoration: none;">Automation</a>
-        </div>
+        <void-nav-menu-trigger><button type="button">Products</button></void-nav-menu-trigger>
+        <void-nav-menu-content>
+          <div style="display: flex; flex-direction: column; gap: var(--void-space-1);">
+            <a href="#" style="padding: var(--void-space-2); color: var(--void-color-text); text-decoration: none;">Analytics</a>
+            <a href="#" style="padding: var(--void-space-2); color: var(--void-color-text); text-decoration: none;">Automation</a>
+          </div>
+        </void-nav-menu-content>
       </void-nav-menu-item>
       <void-nav-menu-item active>
-        Solutions
-        <div style="display: flex; flex-direction: column; gap: var(--void-space-1);">
-          <a href="#" style="padding: var(--void-space-2); color: var(--void-color-text); text-decoration: none;">Enterprise</a>
-          <a href="#" style="padding: var(--void-space-2); color: var(--void-color-text); text-decoration: none;">Startups</a>
-        </div>
+        <void-nav-menu-trigger><button type="button">Solutions</button></void-nav-menu-trigger>
+        <void-nav-menu-content>
+          <div style="display: flex; flex-direction: column; gap: var(--void-space-1);">
+            <a href="#" style="padding: var(--void-space-2); color: var(--void-color-text); text-decoration: none;">Enterprise</a>
+            <a href="#" style="padding: var(--void-space-2); color: var(--void-color-text); text-decoration: none;">Startups</a>
+          </div>
+        </void-nav-menu-content>
       </void-nav-menu-item>
-      <void-nav-menu-item href="/pricing">Pricing</void-nav-menu-item>
-      <void-nav-menu-item href="/about" disabled>About</void-nav-menu-item>
+      <void-nav-menu-item><void-nav-menu-trigger><a href="/pricing">Pricing</a></void-nav-menu-trigger></void-nav-menu-item>
+      <void-nav-menu-item disabled><void-nav-menu-trigger><a href="/about">About</a></void-nav-menu-trigger></void-nav-menu-item>
     </void-nav-menu>
   `,
 };
@@ -81,16 +91,18 @@ export const WithActiveItem: Story = {
 export const Vertical: Story = {
   render: () => html`
     <void-nav-menu orientation="vertical" width="8rem">
-      <void-nav-menu-item active href="/dashboard">Dashboard</void-nav-menu-item>
+      <void-nav-menu-item active><void-nav-menu-trigger><a href="/dashboard">Dashboard</a></void-nav-menu-trigger></void-nav-menu-item>
       <void-nav-menu-item>
-        Settings
-        <div style="display: flex; flex-direction: column; gap: var(--void-space-1);">
-          <a href="#" style="padding: var(--void-space-2); color: var(--void-color-text); text-decoration: none;">Profile</a>
-          <a href="#" style="padding: var(--void-space-2); color: var(--void-color-text); text-decoration: none;">Security</a>
-          <a href="#" style="padding: var(--void-space-2); color: var(--void-color-text); text-decoration: none;">Billing</a>
-        </div>
+        <void-nav-menu-trigger><button type="button">Settings</button></void-nav-menu-trigger>
+        <void-nav-menu-content>
+          <div style="display: flex; flex-direction: column; gap: var(--void-space-1);">
+            <a href="#" style="padding: var(--void-space-2); color: var(--void-color-text); text-decoration: none;">Profile</a>
+            <a href="#" style="padding: var(--void-space-2); color: var(--void-color-text); text-decoration: none;">Security</a>
+            <a href="#" style="padding: var(--void-space-2); color: var(--void-color-text); text-decoration: none;">Billing</a>
+          </div>
+        </void-nav-menu-content>
       </void-nav-menu-item>
-      <void-nav-menu-item href="/support">Support</void-nav-menu-item>
+      <void-nav-menu-item><void-nav-menu-trigger><a href="/support">Support</a></void-nav-menu-trigger></void-nav-menu-item>
     </void-nav-menu>
   `,
 };
@@ -99,37 +111,39 @@ export const MegaMenu: Story = {
   render: () => html`
     <void-nav-menu>
       <void-nav-menu-item>
-        Products
-        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--void-space-4); min-width: 36rem; padding: var(--void-space-2);">
-          <div>
-            <div style="font-weight: var(--void-weight-semibold); font-size: var(--void-text-xs); color: var(--void-color-text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: var(--void-space-2);">Platform</div>
-            <div style="display: flex; flex-direction: column; gap: var(--void-space-1);">
-              <a href="#" style="padding: var(--void-space-1) 0; color: var(--void-color-text); text-decoration: none; font-size: var(--void-text-sm);">Analytics</a>
-              <a href="#" style="padding: var(--void-space-1) 0; color: var(--void-color-text); text-decoration: none; font-size: var(--void-text-sm);">Automation</a>
-              <a href="#" style="padding: var(--void-space-1) 0; color: var(--void-color-text); text-decoration: none; font-size: var(--void-text-sm);">Integrations</a>
+        <void-nav-menu-trigger><button type="button">Products</button></void-nav-menu-trigger>
+        <void-nav-menu-content>
+          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--void-space-4); min-width: 36rem; padding: var(--void-space-2);">
+            <div>
+              <div style="font-weight: var(--void-weight-semibold); font-size: var(--void-text-xs); color: var(--void-color-text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: var(--void-space-2);">Platform</div>
+              <div style="display: flex; flex-direction: column; gap: var(--void-space-1);">
+                <a href="#" style="padding: var(--void-space-1) 0; color: var(--void-color-text); text-decoration: none; font-size: var(--void-text-sm);">Analytics</a>
+                <a href="#" style="padding: var(--void-space-1) 0; color: var(--void-color-text); text-decoration: none; font-size: var(--void-text-sm);">Automation</a>
+                <a href="#" style="padding: var(--void-space-1) 0; color: var(--void-color-text); text-decoration: none; font-size: var(--void-text-sm);">Integrations</a>
+              </div>
+            </div>
+            <div>
+              <div style="font-weight: var(--void-weight-semibold); font-size: var(--void-text-xs); color: var(--void-color-text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: var(--void-space-2);">Security</div>
+              <div style="display: flex; flex-direction: column; gap: var(--void-space-1);">
+                <a href="#" style="padding: var(--void-space-1) 0; color: var(--void-color-text); text-decoration: none; font-size: var(--void-text-sm);">SSO</a>
+                <a href="#" style="padding: var(--void-space-1) 0; color: var(--void-color-text); text-decoration: none; font-size: var(--void-text-sm);">Audit Logs</a>
+                <a href="#" style="padding: var(--void-space-1) 0; color: var(--void-color-text); text-decoration: none; font-size: var(--void-text-sm);">Compliance</a>
+              </div>
+            </div>
+            <div>
+              <div style="font-weight: var(--void-weight-semibold); font-size: var(--void-text-xs); color: var(--void-color-text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: var(--void-space-2);">Resources</div>
+              <div style="display: flex; flex-direction: column; gap: var(--void-space-1);">
+                <a href="#" style="padding: var(--void-space-1) 0; color: var(--void-color-text); text-decoration: none; font-size: var(--void-text-sm);">Documentation</a>
+                <a href="#" style="padding: var(--void-space-1) 0; color: var(--void-color-text); text-decoration: none; font-size: var(--void-text-sm);">API Reference</a>
+                <a href="#" style="padding: var(--void-space-1) 0; color: var(--void-color-text); text-decoration: none; font-size: var(--void-text-sm);">Changelog</a>
+              </div>
             </div>
           </div>
-          <div>
-            <div style="font-weight: var(--void-weight-semibold); font-size: var(--void-text-xs); color: var(--void-color-text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: var(--void-space-2);">Security</div>
-            <div style="display: flex; flex-direction: column; gap: var(--void-space-1);">
-              <a href="#" style="padding: var(--void-space-1) 0; color: var(--void-color-text); text-decoration: none; font-size: var(--void-text-sm);">SSO</a>
-              <a href="#" style="padding: var(--void-space-1) 0; color: var(--void-color-text); text-decoration: none; font-size: var(--void-text-sm);">Audit Logs</a>
-              <a href="#" style="padding: var(--void-space-1) 0; color: var(--void-color-text); text-decoration: none; font-size: var(--void-text-sm);">Compliance</a>
-            </div>
-          </div>
-          <div>
-            <div style="font-weight: var(--void-weight-semibold); font-size: var(--void-text-xs); color: var(--void-color-text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: var(--void-space-2);">Resources</div>
-            <div style="display: flex; flex-direction: column; gap: var(--void-space-1);">
-              <a href="#" style="padding: var(--void-space-1) 0; color: var(--void-color-text); text-decoration: none; font-size: var(--void-text-sm);">Documentation</a>
-              <a href="#" style="padding: var(--void-space-1) 0; color: var(--void-color-text); text-decoration: none; font-size: var(--void-text-sm);">API Reference</a>
-              <a href="#" style="padding: var(--void-space-1) 0; color: var(--void-color-text); text-decoration: none; font-size: var(--void-text-sm);">Changelog</a>
-            </div>
-          </div>
-        </div>
+        </void-nav-menu-content>
       </void-nav-menu-item>
-      <void-nav-menu-item href="/pricing">Pricing</void-nav-menu-item>
-      <void-nav-menu-item href="/docs">Docs</void-nav-menu-item>
-      <void-nav-menu-item href="/blog">Blog</void-nav-menu-item>
+      <void-nav-menu-item><void-nav-menu-trigger><a href="/pricing">Pricing</a></void-nav-menu-trigger></void-nav-menu-item>
+      <void-nav-menu-item><void-nav-menu-trigger><a href="/docs">Docs</a></void-nav-menu-trigger></void-nav-menu-item>
+      <void-nav-menu-item><void-nav-menu-trigger><a href="/blog">Blog</a></void-nav-menu-trigger></void-nav-menu-item>
     </void-nav-menu>
   `,
 };

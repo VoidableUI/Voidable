@@ -1,19 +1,12 @@
 void-breadcrumbs {
-  display: block;
-  font-family: var(--void-font-sans);
-}
-
-.void-breadcrumbs-list {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  list-style: none;
-  padding: 0;
-  margin: 0;
   gap: var(--void-space-2);
+  font-family: var(--void-font-sans);
 }
 
-.void-breadcrumbs-item {
+void-breadcrumbs-item {
   display: inline-flex;
   align-items: center;
   font-family: var(--void-type-label-family);
@@ -25,21 +18,23 @@ void-breadcrumbs {
   color: var(--void-type-label-color);
 }
 
-.void-breadcrumbs-item + .void-breadcrumbs-item::before {
-  content: attr(data-separator, "/");
-  margin-right: var(--void-space-2);
+/* The separator is generated content (hidden from assistive technology by the empty alternative text), so
+   items come and go, reorder and re-render without the component touching them. */
+void-breadcrumbs-item + void-breadcrumbs-item::before {
+  content: var(--_void-breadcrumbs-separator, "/") / "";
+  margin-inline-end: var(--void-space-2);
   color: var(--void-color-text-muted);
 }
 
-.void-breadcrumbs-item:last-child {
+void-breadcrumbs-item[aria-current] {
   color: var(--void-color-text);
 }
 
-.void-breadcrumbs-item a {
+void-breadcrumbs-item a {
   color: inherit;
   text-decoration: none;
 }
 
-.void-breadcrumbs-item a:hover {
+void-breadcrumbs-item a:hover {
   color: var(--void-color-text);
 }

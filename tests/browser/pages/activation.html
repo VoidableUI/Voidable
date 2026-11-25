@@ -10,6 +10,13 @@
     </void-dropdown-menu-content>
   </void-dropdown-menu>
 
+  <void-nav-menu id="nav">
+    <void-nav-menu-item id="nav-item">
+      <void-nav-menu-trigger><button id="nav-t" type="button">Products</button></void-nav-menu-trigger>
+      <void-nav-menu-content><a id="nav-link" href="#a">Analytics</a></void-nav-menu-content>
+    </void-nav-menu-item>
+  </void-nav-menu>
+
   <void-popover id="pop">
     <void-popover-trigger><void-button id="pop-t">Open popover</void-button></void-popover-trigger>
     <void-popover-content><div style="width: 200px">Popover content</div></void-popover-content>
@@ -46,7 +53,7 @@
 <script>
   window.submits = 0;
   window.log = [];
-  for (const id of ['plain', 'off', 'aria-off', 'link', 'submit', 'reset', 'submit-off', 'dd-t', 'pop-t', 'hc-t', 'tip-t', 'tgl', 'sw', 'ham', 'cb', 'dd-one', 'dd-two']) {
+  for (const id of ['plain', 'off', 'aria-off', 'link', 'submit', 'reset', 'submit-off', 'dd-t', 'nav-t', 'pop-t', 'hc-t', 'tip-t', 'tgl', 'sw', 'ham', 'cb', 'dd-one', 'dd-two']) {
     const el = document.getElementById(id);
     el.addEventListener('click', () => window.log.push('click:' + id));
     el.addEventListener('void-click', () => window.log.push('void-click:' + id));
