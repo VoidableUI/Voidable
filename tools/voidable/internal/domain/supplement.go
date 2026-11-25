@@ -18,6 +18,9 @@ type Supplement struct {
 	// styles and no JavaScript registers (the patterns and the media
 	// surface). They are not in the manifest, so they are declared here.
 	Styled []Element `json:"styled"`
+	// Removed maps a tag that explicit parts replaced (void-tab-panel) to the
+	// fix. Built from the manifest's voidParts.legacy.tags.
+	Removed map[string]string `json:"removed,omitempty"`
 }
 
 // Node is a parsed snippet node. Tag is empty for a text node.

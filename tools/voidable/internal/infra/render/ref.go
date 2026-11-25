@@ -113,7 +113,9 @@ func attrDefault(a domain.Attribute) string {
 }
 
 func refText(p *printer, r *domain.Reference) {
-	if r.CSSOnly {
+	if r.CSSOnly && r.PartOf != "" {
+		p.f("<%s> CSS-only part of <%s> (no JavaScript; the component wires it): %s\n", r.Tag, r.PartOf, r.Description)
+	} else if r.CSSOnly {
 		p.f("<%s> CSS only (styled by @voidable/theme; no JavaScript, no properties, no events): %s\n", r.Tag, r.Description)
 	} else {
 		p.f("<%s> %s: %s\n", r.Tag, r.Class, r.Description)
@@ -165,6 +167,12 @@ func refText(p *printer, r *domain.Reference) {
 			p.f(" %s # %s\n", name, s.Description)
 		}
 	}
+	if r.Parts != nil {
+		partsText(p, r.Parts, " ")
+		if r.Parts.Skeleton != "" {
+			p.f("markup: %s\n", r.Parts.Skeleton)
+		}
+	}
 	if len(r.Parents) > 0 {
 		p.f("parents: %s\n", strings.Join(r.Parents, ", "))
 	}
@@ -184,8 +192,13 @@ func refText(p *printer, r *domain.Reference) {
 
 func refMarkdown(p *printer, r *domain.Reference) {
 	p.f("## `<%s>`\n\n%s\n\n", r.Tag, r.Description)
-	if r.CSSOnly {
+	if r.CSSOnly && r.PartOf != "" {
+		p.f("CSS-only part of `<%s>`: `@voidable/theme` styles it and nothing registers it; `<%s>` finds it and wires it up. Write it as plain markup in every framework.\n\n", r.PartOf, r.PartOf)
+	} else if r.CSSOnly {
 		p.f("%s", "CSS only: `@voidable/theme` styles this tag and nothing registers it, so it needs no JavaScript and has no properties or events. Write it as plain markup in every framework.\n\n")
+	}
+	if r.Parts != nil {
+		partsMarkdown(p, r.Parts)
 	}
 	if len(r.Attributes) > 0 {
 		p.f("%s", "| Attribute | Type | Default | Description |\n|---|---|---|---|\n")
@@ -275,4 +288,68 @@ func mdCode(s string) string {
 		return ""
 	}
 	return "`" + mdEscape(s) + "`"
+}
+
+// partsRule says how a component takes its parts, in one line.
+func partsRule(ps *domain.Parts) string {
+	rule := "parts mixed with other content"
+	if ps.Children == "parts" {
+		rule = "only these parts as children"
+	}
+	if ps.Ordered {
+		rule += ", in this order"
+	}
+	if len(ps.Transparent) > 0 {
+		rule += " (a " + strings.Join(ps.Transparent, ", ") + " may wrap them)"
+	}
+	return rule
+}
+
+func partFlags(x domain.Part) string {
+	var flags []string
+	if x.Required {
+		flags = append(flags, "required")
+	}
+	if x.Max == 1 {
+		flags = append(flags, "one")
+	} else if x.Max > 1 {
+		flags = append(flags, fmt.Sprintf("at most %d", x.Max))
+	} else {
+		flags = append(flags, "any number")
+	}
+	if x.Control {
+		flags = append(flags, "wraps one control")
+	}
+	if x.CSSOnly {
+		flags = append(flags, "CSS-only")
+	}
+	return strings.Join(flags, ", ")
+}
+
+func partsText(p *printer, ps *domain.Parts, pad string) {
+	p.f("%sparts: %s\n", strings.TrimPrefix(pad, " "), partsRule(ps))
+	for _, x := range ps.Parts {
+		p.f("%s <%s> (%s) # %s\n", pad, x.Tag, partFlags(x), x.Description)
+		if x.Own != nil {
+			partsText(p, x.Own, pad+"  ")
+		}
+	}
+}
+
+func partsMarkdown(p *printer, ps *domain.Parts) {
+	p.f("Parts (%s):\n\n| Part | | Description |\n|---|---|---|\n", partsRule(ps))
+	var rows func(list []domain.Part, depth int)
+	rows = func(list []domain.Part, depth int) {
+		for _, x := range list {
+			p.f("| %s`<%s>` | %s | %s |\n", strings.Repeat("&emsp;", depth), x.Tag, partFlags(x), mdEscape(x.Description))
+			if x.Own != nil {
+				rows(x.Own.Parts, depth+1)
+			}
+		}
+	}
+	rows(ps.Parts, 0)
+	p.f("%s", "\n")
+	if ps.Skeleton != "" {
+		p.f("Markup: `%s`\n\n", ps.Skeleton)
+	}
 }

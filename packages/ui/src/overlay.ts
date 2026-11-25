@@ -96,6 +96,16 @@ export interface OverlayOptions {
    * for the kind, `false` to leave focus where it is.
    */
   initialFocus?: (reason: OverlayOpenReason) => HTMLElement | null | false;
+  /**
+   * Writes (`null` removes) an attribute the controller manages on an element
+   * the author wrote (trigger ARIA on the trigger's control, placement
+   * attributes on a content part). Components with explicit parts pass their
+   * PartsController's `set`, so the attributes survive morphs. Default: plain
+   * `setAttribute` / `removeAttribute`.
+   */
+  attr?: (el: Element, name: string, value: string | null) => void;
+  /** Same as `attr` for inline style properties (anchor names, positioner coordinates). */
+  style?: (el: HTMLElement, property: string, value: string | null) => void;
 }
 
 /** Same as a native `<dialog>`'s `cancel`: not cancelable for programmatic changes. */
@@ -117,9 +127,10 @@ export function isTabbable(el: Element): el is HTMLElement {
 }
 
 function isRendered(el: Element): boolean {
+  if (el.closest('[hidden]')) return false;
   const check = (el as Element & { checkVisibility?: (o?: object) => boolean }).checkVisibility;
   if (typeof check === 'function') return check.call(el, { visibilityProperty: true });
-  return !el.closest('[hidden]');
+  return true;
 }
 
 /** Tabbable elements inside `root`, in document order. */
@@ -144,6 +155,19 @@ function matchesSafe(el: Element, selector: string): boolean | null {
 }
 
 const supportsPopover = (el: HTMLElement): boolean => typeof el.showPopover === 'function';
+
+const plainAttr = (el: Element, name: string, value: string | null): void => {
+  if (value === null) {
+    if (el.hasAttribute(name)) el.removeAttribute(name);
+  } else if (el.getAttribute(name) !== value) {
+    el.setAttribute(name, value);
+  }
+};
+
+const plainStyle = (el: HTMLElement, property: string, value: string | null): void => {
+  if (value === null) el.style.removeProperty(property);
+  else if (el.style.getPropertyValue(property) !== value) el.style.setProperty(property, value);
+};
 
 /** Whether the surface is currently shown the way the controller shows it. */
 function isShown(surface: HTMLElement, modal: boolean): boolean {
@@ -478,12 +502,16 @@ export class OverlayController implements ReactiveController {
   private _reshowing = false;
   /** Focus was inside the surface at some point while open. */
   private _hadFocus = false;
+  private readonly _attr: (el: Element, name: string, value: string | null) => void;
+  private readonly _css: (el: HTMLElement, property: string, value: string | null) => void;
 
   constructor(host: ReactiveControllerHost & HTMLElement, options: OverlayOptions) {
     this.host = host;
     this.kind = options.kind;
     this._o = options;
     this._modal = options.kind === 'modal';
+    this._attr = options.attr ?? plainAttr;
+    this._css = options.style ?? plainStyle;
     (host as ControlledHost)[CONTROLLER_KEY] = this;
     host.addController(this);
   }
@@ -545,7 +573,7 @@ export class OverlayController implements ReactiveController {
   /** Whether a pointer event happened inside the overlay (host, trigger or surface, not a modal's backdrop). */
   containsEvent(e: Event): boolean {
     const target = e.composedPath?.()[0] ?? e.target;
-    if (!(target instanceof Node) || !this.host.contains(target)) return false;
+    if (!(target instanceof Node) || !this._withinHost(target)) return false;
     const surface = this._surface;
     if (this._modal && surface && target === surface && 'clientX' in e) {
       const r = surface.getBoundingClientRect();
@@ -553,6 +581,23 @@ export class OverlayController implements ReactiveController {
       if (r.width && r.height && (x < r.left || x > r.right || y < r.top || y > r.bottom)) return false;
     }
     return true;
+  }
+
+  /** `node` is the host, inside it, or inside its shadow root (the internal `<dialog>` of a modal). */
+  private _withinHost(node: Node): boolean {
+    return this.host.contains(node) || !!this.host.shadowRoot?.contains(node);
+  }
+
+  /**
+   * `node` is inside the surface. A surface in the host's shadow root (a modal's
+   * internal `<dialog>`) shows the host's light-DOM children through its slot,
+   * so everything in the host counts as inside it.
+   */
+  inSurface(node: Node | null | undefined): boolean {
+    const surface = this._surface;
+    if (!node || !surface) return false;
+    if (surface.contains(node)) return true;
+    return surface.getRootNode() === this.host.shadowRoot && this._withinHost(node);
   }
 
   /** Re-runs placement now (JavaScript positioner only). */
@@ -606,7 +651,9 @@ export class OverlayController implements ReactiveController {
       previous.removeEventListener('focusin', this._onSurfaceFocus);
     }
     this._surface = surface;
-    if (!surface.id) surface.id = nextId(`${this.host.localName}-overlay`);
+    // Through the attribute hook, so a component with explicit parts owns the id
+    // (it is carried into the server's markup across a morph).
+    if (!surface.id) this._attr(surface, 'id', nextId(`${this.host.localName}-overlay`));
     surface.addEventListener('focusin', this._onSurfaceFocus);
     if (this._modal) {
       surface.addEventListener('cancel', this._onCancel);
@@ -614,7 +661,7 @@ export class OverlayController implements ReactiveController {
       surface.addEventListener('submit', this._onSubmit);
     } else {
       if (!supportsPopover(surface)) {
-        surface.removeAttribute('popover');
+        this._attr(surface, 'popover', null);
         if (!this._active) surface.hidden = true;
       }
       surface.addEventListener('toggle', this._onToggle);
@@ -708,7 +755,7 @@ export class OverlayController implements ReactiveController {
   private _reshow(surface: HTMLElement): void {
     const doc = this.host.ownerDocument;
     const focused = doc.activeElement as HTMLElement | null;
-    const keep = focused && surface.contains(focused) ? focused : null;
+    const keep = focused && this.inSurface(focused) ? focused : null;
     this._show(surface);
     if (keep && doc.activeElement !== keep && keep.isConnected) keep.focus({ preventScroll: true });
   }
@@ -753,7 +800,7 @@ export class OverlayController implements ReactiveController {
     if (reason === 'blur' || reason === 'hover') return false;
     if (reason === 'outside' && !this._modal) return false;
     const doc = this.host.ownerDocument;
-    if (focused && surface?.contains(focused)) return true;
+    if (focused && surface && this.inSurface(focused)) return true;
     // Lost (on nothing, or on a removed element) after having been inside.
     return this._hadFocus && (!focused || focused === doc.body || !focused.isConnected);
   }
@@ -788,16 +835,21 @@ export class OverlayController implements ReactiveController {
   }
 
   private _defaultModalFocus(surface: HTMLElement): HTMLElement {
-    const auto = Array.from(surface.querySelectorAll<HTMLElement>('[autofocus]')).find(el => canFocus(el));
-    if (auto) return auto;
-    const body = surface.querySelector('[data-void-projection]');
+    // A shadow-root surface shows the host's children: search those first.
+    const shadow = surface.getRootNode() === this.host.shadowRoot;
+    const roots: Element[] = shadow ? [this.host, surface] : [surface];
+    for (const root of roots) {
+      const auto = Array.from(root.querySelectorAll<HTMLElement>('[autofocus]')).find(el => canFocus(el));
+      if (auto) return auto;
+    }
+    const body = shadow ? this.host : surface.querySelector('[data-void-projection]');
     const content = body ? tabbables(body) : [];
     if (content.length) return content[0];
     return tabbables(surface)[0] ?? this._focusableSurface(surface);
   }
 
   private _focusableSurface(surface: HTMLElement): HTMLElement {
-    if (!surface.hasAttribute('tabindex')) surface.setAttribute('tabindex', '-1');
+    if (!surface.hasAttribute('tabindex')) this._attr(surface, 'tabindex', '-1');
     return surface;
   }
 
@@ -882,13 +934,11 @@ export class OverlayController implements ReactiveController {
     const trigger = this._o.trigger?.() ?? null;
     const previous = this._ariaTrigger;
     if (previous && previous !== trigger) {
-      for (const name of ['aria-haspopup', 'aria-expanded', 'aria-controls']) previous.removeAttribute(name);
+      for (const name of ['aria-haspopup', 'aria-expanded', 'aria-controls']) this._attr(previous, name, null);
     }
     this._ariaTrigger = trigger;
     if (!trigger) return;
-    const set = (name: string, value: string) => {
-      if (trigger.getAttribute(name) !== value) trigger.setAttribute(name, value);
-    };
+    const set = (name: string, value: string) => this._attr(trigger, name, value);
     set('aria-haspopup', this._o.haspopup);
     set('aria-expanded', String(this._active));
     if (this._surface?.id) set('aria-controls', this._surface.id);
@@ -901,18 +951,16 @@ export class OverlayController implements ReactiveController {
     const anchor = this._o.anchor?.() ?? null;
     if (!surface || !anchor || !this._active) return;
     const { side, align } = this._o.placement?.() ?? { side: 'bottom', align: 'start' };
-    if (surface.getAttribute('data-void-side') !== side) surface.setAttribute('data-void-side', side);
-    if (surface.getAttribute('data-void-align') !== align) surface.setAttribute('data-void-align', align);
+    this._attr(surface, 'data-void-side', side);
+    this._attr(surface, 'data-void-align', align);
     this._linkAnchor(anchor, surface);
     // Select-like panels are at least as wide as their field.
     const width = `${Math.round(anchor.getBoundingClientRect().width)}px`;
-    if (surface.style.getPropertyValue('--void-overlay-anchor-width') !== width) {
-      surface.style.setProperty('--void-overlay-anchor-width', width);
-    }
+    this._css(surface, '--void-overlay-anchor-width', width);
     const doc = this.host.ownerDocument;
     if (this._mode === null) this._mode = supportsAnchoring(doc) && supportsPopover(surface) ? 'anchor' : 'fixed';
     if (this._mode === 'anchor') {
-      surface.setAttribute('data-void-position', 'anchor');
+      this._attr(surface, 'data-void-position', 'anchor');
       this._registry.unposition(this);
       // Flip fallbacks cover most edges; if the result still leaves the viewport
       // (too wide for either alignment), hand over to the JavaScript positioner.
@@ -926,7 +974,7 @@ export class OverlayController implements ReactiveController {
         });
       }
     } else {
-      surface.setAttribute('data-void-position', 'fixed');
+      this._attr(surface, 'data-void-position', 'fixed');
       this._placeFixed();
       this._registry.position(this);
     }
@@ -946,13 +994,13 @@ export class OverlayController implements ReactiveController {
     if (this._anchorEl && this._anchorEl !== anchor) this._clearAnchor(this._anchorEl);
     this._anchorEl = anchor;
     if (anchor === this.host && this._o.hostStyle) this._o.hostStyle('anchor-name', name);
-    else if ((anchor as HTMLElement).style?.getPropertyValue('anchor-name') !== name) (anchor as HTMLElement).style?.setProperty('anchor-name', name);
-    if (surface.style.getPropertyValue('position-anchor') !== name) surface.style.setProperty('position-anchor', name);
+    else if ((anchor as HTMLElement).style) this._css(anchor as HTMLElement, 'anchor-name', name);
+    this._css(surface, 'position-anchor', name);
   }
 
   private _clearAnchor(el: Element): void {
     if (el === this.host && this._o.hostStyle) this._o.hostStyle('anchor-name', null);
-    else (el as HTMLElement).style?.removeProperty('anchor-name');
+    else if ((el as HTMLElement).style) this._css(el as HTMLElement, 'anchor-name', null);
   }
 
   private _placeFixed(): void {
@@ -974,9 +1022,9 @@ export class OverlayController implements ReactiveController {
       gap,
       rtl
     );
-    surface.style.setProperty('--void-overlay-x', `${placed.x}px`);
-    surface.style.setProperty('--void-overlay-y', `${placed.y}px`);
-    if (surface.getAttribute('data-void-placed') !== placed.side) surface.setAttribute('data-void-placed', placed.side);
+    this._css(surface, '--void-overlay-x', `${placed.x}px`);
+    this._css(surface, '--void-overlay-y', `${placed.y}px`);
+    this._attr(surface, 'data-void-placed', placed.side);
   }
 }
 

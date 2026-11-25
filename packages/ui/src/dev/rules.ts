@@ -243,6 +243,8 @@ export function checkDefined(
   // A CSS-only element (a page pattern): the theme styles it, nothing defines it.
   if (styled.includes(tag)) return undefined;
   const known = table[tag];
+  // A CSS-only part (#52): the same.
+  if (known?.c) return undefined;
   if (known) {
     const how = autoloading
       ? `The autoloader did not load it; check the console for a failed import of "${known.m}".`
@@ -288,4 +290,159 @@ export function checkEvent(table: DevTable, target: EventTarget, type: string): 
 /** Dedupe key: once per element type, kind and attribute (or child, or event name). */
 export function keyOf(w: DevWarning): string {
   return `${w.kind}|${w.tag}|${w.subject}`;
+}
+
+// ── Explicit parts (#52) ──────────────────────────────────────────────────────
+
+/** Elements that never count as content of a component (and are never reported as unknown children). */
+const INERT_CHILDREN = new Set(['template', 'script', 'style', 'void-projection-park']);
+
+/** The children of `owner` that count as its own: through transparent wrappers (a `<form>`), in order. */
+function ownChildren(owner: Element, transparent: readonly string[] | undefined): Node[] {
+  const out: Node[] = [];
+  const walk = (parent: Element) => {
+    for (const n of Array.from(parent.childNodes)) {
+      if (n.nodeType === 1 && transparent?.includes((n as Element).localName)) walk(n as Element);
+      else out.push(n);
+    }
+  };
+  walk(owner);
+  return out;
+}
+
+const fix = (q: { s: string }) => `Correct markup: ${q.s}`;
+/** `<a>, <b> and <c>`. */
+const allOf = (items: readonly string[]) => {
+  const list = items.map((t) => `<${t}>`);
+  return list.length < 2 ? list.join('') : `${list.slice(0, -1).join(', ')} and ${list[list.length - 1]}`;
+};
+
+/**
+ * Problems with the parts of `el` (a component, or a part with parts of its
+ * own): a required part that is missing, a child that is not a part where the
+ * component takes only parts (usually the implicit form the parts replaced:
+ * a bare button for a trigger, loose text for a body), a part repeated more
+ * often than allowed, parts out of order.
+ */
+export function checkParts(table: DevTable, el: Element): DevWarning[] {
+  const q = table[el.localName]?.q;
+  if (!q || !el.isConnected) return [];
+  const out: DevWarning[] = [];
+  const where = describe(el);
+  const names = q.n.map((p) => p.t);
+  const children = ownChildren(el, q.t);
+  const counts = new Map<string, number>();
+  let last = -1;
+  let ordered = true;
+  for (const n of children) {
+    if (n.nodeType === 3) {
+      if (q.k === 'parts' && (n.textContent ?? '').trim()) {
+        const text = (n.textContent ?? '').trim();
+        out.push(
+          warning(
+            'unknown-child',
+            el.localName,
+            '#text',
+            `${where} has text outside its parts ("${text.length > 24 ? `${text.slice(0, 24)}...` : text}"), which is not shown where you expect.${q.l ? ` Instead ${q.l}.` : ''} ${fix(q)}`,
+            el,
+          ),
+        );
+      }
+      continue;
+    }
+    if (n.nodeType !== 1) continue;
+    const child = n as Element;
+    const tag = child.localName;
+    const i = names.indexOf(tag);
+    if (i < 0) {
+      // A part of another component is reported once, by the wrong-parent check.
+      if (q.k === 'parts' && !INERT_CHILDREN.has(tag) && !table[tag]?.p) {
+        out.push(
+          warning(
+            'unknown-child',
+            el.localName,
+            tag,
+            `${describe(child)} is not a part of <${el.localName}>, which takes only ${allOf(names)}.${q.l ? ` Instead ${q.l}.` : ''} ${fix(q)}`,
+            child,
+          ),
+        );
+      }
+      continue;
+    }
+    counts.set(tag, (counts.get(tag) ?? 0) + 1);
+    if (i < last) ordered = false;
+    last = Math.max(last, i);
+  }
+  for (const part of q.n) {
+    const count = counts.get(part.t) ?? 0;
+    if (part.r && count === 0) {
+      out.push(
+        warning(
+          'missing-part',
+          el.localName,
+          part.t,
+          `${where} has no <${part.t}>, which it needs.${q.l ? ` If you wrote the content directly inside it: ${q.l}.` : ''} ${fix(q)}`,
+          el,
+        ),
+      );
+    }
+    if (part.x && count > part.x) {
+      out.push(
+        warning(
+          'part-misuse',
+          el.localName,
+          part.t,
+          `${where} has ${count} <${part.t}> parts; it takes at most ${part.x}, and the others are ignored. ${fix(q)}`,
+          el,
+        ),
+      );
+    }
+  }
+  if (q.o && !ordered) {
+    out.push(
+      warning(
+        'part-misuse',
+        el.localName,
+        'order',
+        `${where}: its parts are out of order, so they read in the wrong order (screen readers and Tab follow the markup). Write them as ${allOf(names.filter((t) => counts.has(t))).replace(' and ', ', ')}, in that order. ${fix(q)}`,
+        el,
+      ),
+    );
+  }
+  return out;
+}
+
+/** A part that wraps one control (`<void-popover-trigger>`) holding none, or more than one. */
+export function checkControl(table: DevTable, el: Element): DevWarning | undefined {
+  const tag = table[el.localName];
+  if (!tag?.c || !tag.p) return undefined;
+  for (const ownerTag of tag.p) {
+    const spec = table[ownerTag]?.q?.n.find((p) => p.t === el.localName);
+    if (!spec?.c) continue;
+    const elements = el.children.length;
+    const text = Array.from(el.childNodes).some((n) => n.nodeType === 3 && (n.textContent ?? '').trim());
+    if (elements === 1 && !text) return undefined;
+    const q = table[ownerTag]!.q!;
+    return warning(
+      'unknown-child',
+      el.localName,
+      elements ? 'controls' : 'control',
+      `${describe(el)} must wrap exactly one element, the control that gets the ARIA (a <void-button>, a <button>, a link); it has ${elements === 0 ? (text ? 'only text' : 'nothing') : `${elements} elements`}. ${fix(q)}`,
+      el,
+    );
+  }
+  return undefined;
+}
+
+/** A tag that explicit parts replaced (`<void-tab-panel>`). */
+export function checkRemoved(removed: Readonly<Record<string, string>>, el: Element): DevWarning | undefined {
+  const advice = removed[el.localName];
+  if (!advice) return undefined;
+  return warning(
+    'legacy-markup',
+    el.localName,
+    el.localName,
+    `${describe(el)} no longer exists, so it does nothing. Instead ${advice}.`,
+    el,
+  );
 }

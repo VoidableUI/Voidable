@@ -118,4 +118,14 @@ type Tag struct {
 	SelfClosing bool        `json:"selfClosing,omitempty"`
 	// Parent is the nearest enclosing `void-*` element, if any.
 	Parent string `json:"parent,omitempty"`
+	// ParentIndex is the index of that element among the tags the scanner
+	// returned for the same source, or -1.
+	ParentIndex int `json:"-"`
+	// Closed is true when the scanner found the element's end tag, so its
+	// children are all known.
+	Closed bool `json:"-"`
+	// Dynamic is true when the element's content holds template expressions
+	// (`{children}`, `<%= %>`, `@foreach`, `${...}`): parts may come from them,
+	// so missing parts are not reported.
+	Dynamic bool `json:"-"`
 }

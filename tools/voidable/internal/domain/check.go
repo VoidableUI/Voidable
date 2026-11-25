@@ -20,6 +20,14 @@ const (
 	RuleInvalidParent    Rule = "invalid-parent"
 	RuleUnknownEvent     Rule = "unknown-event"
 	RuleSelfClosing      Rule = "self-closing"
+	// RuleMissingPart: a component lacks a required part (#52).
+	RuleMissingPart Rule = "missing-part"
+	// RuleUnknownChild: a component that takes only parts has another void-* child.
+	RuleUnknownChild Rule = "unknown-child"
+	// RulePartMisuse: a part is repeated more often than allowed, or out of order.
+	RulePartMisuse Rule = "part-misuse"
+	// RuleLegacyMarkup: a tag that explicit parts replaced.
+	RuleLegacyMarkup Rule = "legacy-markup"
 )
 
 // Finding is one problem in a source file.
@@ -61,6 +69,7 @@ func (c *Checker) Check(ctx context.Context, file string, src []byte, lang Lang)
 	for _, t := range tags {
 		out = append(out, c.CheckTag(file, t)...)
 	}
+	out = append(out, c.CheckParts(file, tags)...)
 	sort.SliceStable(out, func(i, j int) bool {
 		if out[i].Line != out[j].Line {
 			return out[i].Line < out[j].Line
@@ -78,6 +87,9 @@ func (c *Checker) CheckTag(file string, t Tag) []Finding {
 	}
 	el, ok := cat.Element(t.Name)
 	if !ok {
+		if advice, removed := c.lib.sup.Removed[t.Name]; removed {
+			return []Finding{f(t.Line, t.Col, RuleLegacyMarkup, "", "", "<%s> no longer exists; %s", t.Name, advice)}
+		}
 		s := Suggest(t.Name, cat.Tags())
 		msg := fmt.Sprintf("unknown element <%s>", t.Name)
 		if s != "" {
@@ -264,4 +276,87 @@ func isGlobalProperty(name string) bool {
 		return true
 	}
 	return false
+}
+
+// CheckParts validates the explicit parts (#52) of every component in one
+// scanned source: a required part that is missing, a void-* child that is not
+// a part where the component takes only parts (usually the implicit form the
+// parts replaced: a bare <void-button> where a trigger part belongs), a part
+// repeated more often than allowed, and parts out of order. A component whose
+// end tag was not found, or whose content holds template expressions (its
+// parts may come from them), is not checked for missing parts.
+func (c *Checker) CheckParts(file string, tags []Tag) []Finding {
+	children := make([][]int, len(tags))
+	for i, t := range tags {
+		if t.ParentIndex >= 0 && t.ParentIndex < len(tags) {
+			children[t.ParentIndex] = append(children[t.ParentIndex], i)
+		}
+	}
+	var out []Finding
+	for i, t := range tags {
+		el, ok := c.lib.cat.Element(t.Name)
+		if !ok || el.Parts == nil {
+			continue
+		}
+		p := el.Parts
+		fix := ""
+		if p.Skeleton != "" {
+			fix = "; correct markup: " + p.Skeleton
+		}
+		legacy := ""
+		if p.Legacy != nil && p.Legacy.Children != "" {
+			legacy = "; " + p.Legacy.Children
+		}
+		f := func(rule Rule, msg string, args ...any) Finding {
+			return Finding{File: file, Line: t.Line, Col: t.Col, Rule: rule, Tag: t.Name, Message: fmt.Sprintf(msg, args...)}
+		}
+		counts := map[string]int{}
+		last, ordered := -1, true
+		for _, ci := range children[i] {
+			child := tags[ci]
+			part, idx := p.Part(child.Name)
+			if part == nil {
+				// A removed tag is reported once, by legacy-markup.
+				_, removed := c.lib.sup.Removed[child.Name]
+				// A part of another component is reported once, by invalid-parent.
+				_, misplaced := c.lib.sup.Parents[child.Name]
+				if p.Children == "parts" && !removed && !misplaced {
+					out = append(out, Finding{
+						File: file, Line: child.Line, Col: child.Col, Rule: RuleUnknownChild, Tag: child.Name,
+						Message: fmt.Sprintf("<%s> is not a part of <%s>, which takes only %s%s%s", child.Name, t.Name, joinTags(p.Tags()), legacy, fix),
+					})
+				}
+				continue
+			}
+			counts[child.Name]++
+			if idx < last {
+				ordered = false
+			}
+			if idx > last {
+				last = idx
+			}
+		}
+		if t.Closed && !t.Dynamic {
+			for _, part := range p.Parts {
+				if part.Required && counts[part.Tag] == 0 {
+					out = append(out, f(RuleMissingPart, "<%s> has no <%s>, which it needs%s%s", t.Name, part.Tag, legacy, fix))
+				}
+			}
+		}
+		for _, part := range p.Parts {
+			if part.Max > 0 && counts[part.Tag] > part.Max {
+				out = append(out, f(RulePartMisuse, "<%s> has %d <%s> parts; it takes at most %d%s", t.Name, counts[part.Tag], part.Tag, part.Max, fix))
+			}
+		}
+		if p.Ordered && !ordered {
+			var present []string
+			for _, tag := range p.Tags() {
+				if counts[tag] > 0 {
+					present = append(present, tag)
+				}
+			}
+			out = append(out, f(RulePartMisuse, "the parts of <%s> are out of order; write them as %s, in that order%s", t.Name, joinTags(present), fix))
+		}
+	}
+	return out
 }

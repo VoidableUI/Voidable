@@ -84,6 +84,8 @@ const REPAIR_LIMIT = 10;
 const REPAIR_WINDOW = 1000;
 /** Set by `@voidable/ui/dev` when it is loaded (an app imports it in development only). */
 const DEV_KEY = Symbol.for('voidable.dev');
+/** Same key as parts.ts's MORPH_PARTICIPANTS (a registered symbol, so base needs no import of parts.ts). */
+const MORPH_PARTICIPANTS: unique symbol = Symbol.for('@voidable/ui:morph-participants');
 type DevHook = { report?: (warning: { kind: string; tag: string; subject: string; message: string; element?: Element }) => void };
 
 /**
@@ -116,6 +118,8 @@ type DevHook = { report?: (warning: { kind: string; tag: string; subject: string
 export class VoidElement extends LitElement {
   /** @internal The element's projection controller (see ProjectionController). */
   declare [PROJECTION_KEY]?: ProjectionController;
+  /** @internal Controllers that carry what they wrote on parts into the server's markup (see parts.ts). */
+  declare [MORPH_PARTICIPANTS]?: Array<{ voidBeforeMorph(incoming: Element): void }>;
 
   /** Owned host attributes: last value this component wrote (null = it removed it). */
   #ownAttrs: Map<string, string | null> | null = null;
@@ -487,6 +491,8 @@ export class VoidElement extends LitElement {
       // back in): put it back into its server shape too, so the morph compares
       // server markup on both sides.
       if (incoming instanceof VoidElement) incoming[PROJECTION_KEY]?.unproject();
+      // Explicit parts (parts.ts): what the component wrote on its parts goes onto theirs.
+      for (const p of this[MORPH_PARTICIPANTS] ?? []) p.voidBeforeMorph(incoming);
       this.#reconcileIncoming(incoming);
       this.#carryOwnedAttributes(incoming);
     }

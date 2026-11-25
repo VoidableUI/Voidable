@@ -62,7 +62,7 @@ describe('the shared overlay stack', () => {
   it('adds document listeners only while something is open', async () => {
     const add = vi.spyOn(document, 'addEventListener');
     const remove = vi.spyOn(document, 'removeEventListener');
-    document.body.innerHTML = '<void-popover id="p"><button slot="trigger">t</button><p>x</p></void-popover><void-popover id="q"><button slot="trigger">t</button><p>x</p></void-popover>';
+    document.body.innerHTML = '<void-popover id="p"><void-popover-trigger><button>t</button></void-popover-trigger><void-popover-content><p>x</p></void-popover-content></void-popover><void-popover id="q"><void-popover-trigger><button>t</button></void-popover-trigger><void-popover-content><p>x</p></void-popover-content></void-popover>';
     const p = document.getElementById('p') as VoidPopover;
     const q = document.getElementById('q') as VoidPopover;
     await flush(p, q);
@@ -86,12 +86,22 @@ describe('the shared overlay stack', () => {
 
   it('Escape and outside presses close only the topmost overlay', async () => {
     document.body.innerHTML = `
-      <void-drawer id="dr"><button id="db">x</button>
-        <void-dialog id="dl"><button id="lb">y</button>
-          <void-popover id="po"><button slot="trigger" id="pt">t</button><button id="pb">z</button>
-            <void-dropdown-menu id="dd"><button slot="trigger" id="dt">m</button><void-dropdown-menu-item id="di">i</void-dropdown-menu-item></void-dropdown-menu>
-          </void-popover>
-        </void-dialog>
+      <void-drawer id="dr">
+        <void-drawer-body>
+          <button id="db">x</button>
+                  <void-dialog id="dl">
+                    <void-dialog-body>
+                      <button id="lb">y</button>
+                                <void-popover id="po">
+                                  <void-popover-trigger><button id="pt">t</button></void-popover-trigger>
+                                  <void-popover-content>
+                                    <button id="pb">z</button>
+                                                                      <void-dropdown-menu id="dd"><void-dropdown-menu-trigger><button id="dt">m</button></void-dropdown-menu-trigger><void-dropdown-menu-content><void-dropdown-menu-item id="di">i</void-dropdown-menu-item></void-dropdown-menu-content></void-dropdown-menu>
+                                  </void-popover-content>
+                                </void-popover>
+                    </void-dialog-body>
+                  </void-dialog>
+        </void-drawer-body>
       </void-drawer>`;
     const dr = document.getElementById('dr') as VoidDrawer;
     const dl = document.getElementById('dl') as VoidDialog;
@@ -121,7 +131,7 @@ describe('the shared overlay stack', () => {
   });
 
   it('a modal opening closes non-modal overlays it is not inside', async () => {
-    document.body.innerHTML = '<void-popover id="p"><button slot="trigger">t</button><p>x</p></void-popover><void-dialog id="d"><input></void-dialog>';
+    document.body.innerHTML = '<void-popover id="p"><void-popover-trigger><button>t</button></void-popover-trigger><void-popover-content><p>x</p></void-popover-content></void-popover><void-dialog id="d"><void-dialog-body><input></void-dialog-body></void-dialog>';
     const p = document.getElementById('p') as VoidPopover;
     const d = document.getElementById('d') as VoidDialog;
     p.open = true;
@@ -136,8 +146,8 @@ describe('the shared overlay stack', () => {
   });
 
   it('returns focus to the trigger of the overlay that hid the opener', async () => {
-    document.body.innerHTML = `<void-dropdown-menu id="dd"><button slot="trigger" id="dt">m</button><void-dropdown-menu-item id="di">Delete…</void-dropdown-menu-item></void-dropdown-menu>
-      <void-dialog id="d"><button id="ok">OK</button></void-dialog>`;
+    document.body.innerHTML = `<void-dropdown-menu id="dd"><void-dropdown-menu-trigger><button id="dt">m</button></void-dropdown-menu-trigger><void-dropdown-menu-content><void-dropdown-menu-item id="di">Delete…</void-dropdown-menu-item></void-dropdown-menu-content></void-dropdown-menu>
+      <void-dialog id="d"><void-dialog-actions><button id="ok">OK</button></void-dialog-actions></void-dialog>`;
     const dd = document.getElementById('dd') as VoidDropdownMenu;
     const d = document.getElementById('d') as VoidDialog;
     await flush(dd, d);
