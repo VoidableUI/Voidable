@@ -111,7 +111,7 @@ A **skin** is a file in `packages/theme/src/skins/` selected with `data-void-ski
 ### Three tiers, and when a component token exists
 
 1. **Knobs**: the inputs (`knobs.css`). A theme sets these and nothing else.
-2. **Semantic tokens**: derived from the knobs in `tokens.css`. They include the **role tokens**, what a kind of component is drawn with: `--void-container-*` (surface, border, border-width, radius, shadow, padding), `--void-float-*` (the same, for what lies over the page), `--void-control-*` (radius, border, border-width, and the height/padding/text steps), `--void-field-*` (surface, border), `--void-item-*-selected` (surface, ink) and `--void-rule`, `--void-rule-between`, `--void-rule-edge`, `--void-rule-head` (whole border shorthands, so `none` removes a line).
+2. **Semantic tokens**: derived from the knobs in `tokens.css`. They include the **role tokens**, what a kind of component is drawn with: `--void-container-*` (surface, border, border-width, radius, shadow, padding), `--void-float-*` (the same, for what lies over the page), `--void-control-*` (radius, border, border-width, and the height/padding/text steps), `--void-field-*` (surface, border), `--void-item-*-selected` (surface, ink) and `--void-rule`, `--void-rule-between`, `--void-rule-edge`, `--void-rule-head`, `--void-rule-frame` (whole border shorthands, so `none` removes a line).
 3. **Component tokens**: per-component override points, `--void-<component>-<part?>-<property>-<state?>`. The vocabulary is fixed in `build/skins.js` (`PARTS`, `PROPERTIES`, `STATES`, `ROLES`); parts are the part-element words (`header`, `footer`, `title`, `body`, `actions`, `trigger`, `content`, `item`, `label`, `icon`, `value`).
 
 Rules for component tokens:

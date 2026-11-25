@@ -41,9 +41,11 @@ void-card[variant="elevated"] {
   box-shadow: var(--void-float-shadow);
 }
 
+/* No fill and no shadow: only a line, the frame rule (a skin's container
+   edge may be invisible, and a bordered card is nothing but its edge). */
 void-card[variant="bordered"] {
   background: transparent;
-  border: var(--_void-card-border-width) solid var(--void-color-border);
+  border: var(--void-rule-frame);
   box-shadow: none;
 }
 
@@ -53,10 +55,16 @@ void-card-header {
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
+  /* The header is as tall as a large control (44px by default), rule
+     included, and its lines sit in the middle of it. A header with only a
+     title, one with a badge and one with a small button are then the same
+     height, where each used to be as tall as its tallest child plus padding. */
+  align-content: center;
+  min-height: var(--void-control-height-lg);
   column-gap: var(--void-space-3);
   row-gap: var(--void-space-1);
   border-radius: var(--_void-card-inner-radius) var(--_void-card-inner-radius) 0 0;
-  padding: var(--void-space-3) var(--_void-card-padding);
+  padding: var(--void-space-2) var(--_void-card-padding);
   border-bottom: var(--void-rule-head);
 }
 
@@ -83,6 +91,15 @@ void-card-description {
 void-card-body {
   display: block;
   padding: var(--_void-card-padding);
+}
+
+/* Blocks written straight into the body (a paragraph, then a field) sit a
+   step apart. The scoped reset removes every margin, so without this a label
+   sat directly under the sentence above it. Only block-level content is
+   named: text with inline markup, and a row of buttons, are left alone. For
+   another rhythm, wrap the content in void-stack. */
+void-card-body > :where(p, ul, ol, dl, pre, blockquote, form, fieldset, table, figure, div, section, h2, h3, h4, h5, h6, void-field, void-stack, void-alert, void-banner, void-rows, void-description-list, void-checkbox-group, void-radio-group, void-table, void-card, void-panel, void-list, void-divider, void-figures, void-split, void-input, void-textarea, void-select, void-combobox, void-progress) + :where(p, ul, ol, dl, pre, blockquote, form, fieldset, table, figure, div, section, h2, h3, h4, h5, h6, void-field, void-stack, void-alert, void-banner, void-rows, void-description-list, void-checkbox-group, void-radio-group, void-table, void-card, void-panel, void-list, void-divider, void-figures, void-split, void-input, void-textarea, void-select, void-combobox, void-progress) {
+  margin-block-start: var(--void-gap-inside);
 }
 
 void-card-footer {

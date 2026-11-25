@@ -110,13 +110,13 @@ void-action-input void-tooltip {
 /* Separator lines between btn and input */
 /* Default: button on the right */
 void-action-input .void-action-input-btn {
-  border-left: 1px solid var(--void-color-border);
+  border-left: var(--void-rule-between);
 }
 
 /* Button on the left */
 void-action-input[position="left"] .void-action-input-btn {
   border-left: none;
-  border-right: 1px solid var(--void-color-border);
+  border-right: var(--void-rule-between);
 }
 
 /* Color variants */

@@ -67,6 +67,86 @@ void-select select option {
   color: var(--void-color-text);
 }
 
+/* ── The open list ──
+   The list of a native select is drawn by the browser, and by default it
+   knows nothing of the theme: a system-grey panel with a system-blue
+   highlight. Where the browser lets CSS draw it (appearance: base-select,
+   Chromium 135 and Safari 27; not Firefox, where the rule above is all
+   there is), the list is a float like the menu and the combobox list.
+   Both the select and its picker have to opt in. Nothing here depends on
+   the markup inside the select; the component stays a native control. */
+@supports (appearance: base-select) {
+  void-select select,
+  void-select select::picker(select) {
+    appearance: base-select;
+  }
+
+  /* base-select lays the button out as a flex row with an arrow of its
+     own; the host already draws the arrow. */
+  void-select select {
+    align-items: center;
+  }
+
+  void-select select::picker-icon {
+    display: none;
+  }
+
+  void-select select::picker(select) {
+    box-sizing: border-box;
+    min-inline-size: anchor-size(inline);
+    margin-block: var(--void-space-1);
+    padding: var(--void-space-1);
+    border: var(--void-float-border-width) solid var(--void-float-border);
+    border-radius: var(--void-float-radius);
+    background: var(--void-float-surface);
+    box-shadow: var(--void-float-shadow);
+    color: var(--void-color-text);
+    font-family: var(--void-font-sans);
+    font-size: var(--_void-field-text);
+  }
+
+  void-select select option {
+    display: flex;
+    align-items: center;
+    gap: var(--void-space-2);
+    min-block-size: var(--void-control-height);
+    padding: 0 var(--void-control-padding);
+    border-radius: var(--void-control-radius);
+    background: transparent;
+    color: var(--void-color-text);
+    cursor: pointer;
+    outline: none;
+  }
+
+  /* The pointer and the keyboard highlight the same way: the hover fill,
+     not the system's blue. */
+  void-select select option:is(:hover, :focus-visible) {
+    background: var(--void-color-bg-hover);
+    color: var(--void-color-text);
+  }
+
+  void-select select option:focus-visible {
+    outline: var(--void-focus-ring-width) solid var(--void-focus-ring-color);
+    outline-offset: calc(-1 * var(--void-focus-ring-width));
+  }
+
+  /* The chosen option is marked by the tick alone, at the far end. */
+  void-select select option:checked {
+    font-weight: var(--void-weight-medium);
+  }
+
+  void-select select option::checkmark {
+    order: 1;
+    margin-inline-start: auto;
+    color: var(--void-color-text-secondary);
+  }
+
+  void-select select option:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
 void-select[error]:not([error=""]) select {
   border-color: var(--void-color-error);
 }

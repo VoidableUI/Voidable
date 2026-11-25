@@ -60,7 +60,7 @@ export const isSurfaceScope = (selector) => /void-media|void-glass|data-void-sur
 // ── The grammar of token names ───────────────────────────────────────
 // --void-<component>-<part?>-<property>-<state?>, and --void-<role>-<property>-<state?>.
 
-export const PROPERTIES = ['surface', 'ink', 'border', 'border-width', 'radius', 'shadow', 'rule', 'rule-edge', 'rule-head', 'rule-between', 'gap', 'padding', 'padding-block', 'padding-inline', 'height', 'width', 'size', 'font-size', 'font-weight'];
+export const PROPERTIES = ['surface', 'ink', 'border', 'border-width', 'radius', 'shadow', 'rule', 'rule-edge', 'rule-head', 'rule-between', 'rule-frame', 'gap', 'padding', 'padding-block', 'padding-inline', 'height', 'width', 'size', 'font-size', 'font-weight'];
 export const STATES = ['hover', 'active', 'selected', 'disabled', 'invalid', 'open', 'focus'];
 export const PARTS = ['header', 'footer', 'title', 'body', 'actions', 'trigger', 'content', 'item', 'label', 'icon', 'value'];
 export const ROLES = ['container', 'float', 'control', 'field', 'item', 'rule'];

@@ -34,6 +34,13 @@
   /* Dividers are seams inside a container, not lines around it. */
   --void-alpha-divider: calc(0.07 + 0.05 * var(--void-chrome-level));
 
+  /* ── Rhythm ── */
+
+  /* Sections are tiles here, and tiles sit evenly: a section is as far from
+     the next as from the figures or the page head before it. The larger
+     section gap is for sections that are only a heading on the page. */
+  --void-gap-section: var(--void-gap-group);
+
   /* ── Shape and elevation ── */
 
   /* Containers are rounder than the controls in them. */
@@ -74,6 +81,18 @@
   --void-section-padding: calc(var(--void-container-padding) * 1.2);
   --void-section-radius: var(--void-radius-xl);
   --void-section-shadow: var(--_void-loft-shadow);
+  /* An edge you cannot see, for forced colours, where the fill and the
+     shadow are gone: every tile of this skin keeps one. */
+  --void-section-border-width: var(--void-container-border-width);
+
+  /* The actions that close a form are a tile too: a bar under the last
+     section, not two buttons adrift below it. */
+  --void-page-actions-surface: var(--void-color-surface);
+  --void-page-actions-padding-block: var(--void-space-3);
+  --void-page-actions-padding-inline: calc(var(--void-container-padding) * 1.2);
+  --void-page-actions-radius: var(--void-radius-xl);
+  --void-page-actions-shadow: var(--_void-loft-shadow);
+  --void-page-actions-border-width: var(--void-container-border-width);
 
   /* Figures are separate tiles, not a ruled row. */
   --void-figures-gap: var(--void-gap-inside);
@@ -82,6 +101,7 @@
   --void-figure-radius: var(--void-radius-xl);
   --void-figure-surface: var(--void-color-surface);
   --void-figure-shadow: var(--_void-loft-shadow);
+  --void-figure-border-width: var(--void-container-border-width);
 
   /* The outline button is a raised button: its label identifies it, so
      its edge may be soft. */

@@ -195,6 +195,16 @@ ${any}::after {
   padding: 0;
 }
 
+/* \`hidden\` hides. Every component and pattern sets a display of its own,
+   and any of those beats the browser's \`[hidden] { display: none }\`, so an
+   alert, a row or a part with the attribute stayed on screen. Stated once
+   here for every theme element and what it contains, and important: in this
+   lowest layer that beats every display rule above it, the theme's and an
+   application's. \`hidden="until-found"\` keeps the browser's behaviour. */
+${any}[hidden]:not([hidden="until-found"]) {
+  display: none !important;
+}
+
 /* Native controls and scrollbars inside follow the colour scheme in force. */
 :where(${roots}) {
   color-scheme: var(--void-color-scheme);

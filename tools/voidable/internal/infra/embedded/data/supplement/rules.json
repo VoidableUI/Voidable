@@ -311,7 +311,7 @@
     },
     {
       "tag": "void-glass",
-      "description": "Glass panel: a translucent, blurred surface in the page colour scheme, for a form or status panel over an image. Solid where backdrop-filter is unavailable or reduced transparency is requested. data-void-surface=\"glass\" gives any component the same surface.",
+      "description": "Glass panel: a translucent, blurred surface for a form or status panel over an image: dark in both colour schemes inside void-media, in the page colour scheme elsewhere. Solid where backdrop-filter is unavailable or reduced transparency is requested. data-void-surface=\"glass\" gives any component the same surface.",
       "attributes": []
     }
   ]

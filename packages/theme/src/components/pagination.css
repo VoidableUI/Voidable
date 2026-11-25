@@ -11,8 +11,18 @@ void-pagination {
   --_void-tone-hover: color-mix(in srgb, var(--_void-tone) 8%, transparent);
 }
 
+/* The row never forces its container wider than it is: the buttons give up
+   width first (down to the smallest step, which is still a 24px target), and
+   only then does the row wrap. Nine large buttons used to be 428px of fixed
+   width, wider than a phone. */
+void-pagination {
+  display: block;
+  min-width: 0;
+}
+
 void-pagination nav {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: var(--void-space-1);
   font-family: var(--void-font-sans);
@@ -26,7 +36,8 @@ void-pagination nav {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: var(--_void-pagination-size);
+  flex: 0 1 var(--_void-pagination-size);
+  min-width: min(var(--_void-pagination-size), var(--void-control-height-sm));
   height: var(--_void-pagination-size);
   padding: 0 var(--void-space-1);
   font-family: var(--void-font-sans);
@@ -71,7 +82,8 @@ void-pagination nav {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: var(--_void-pagination-size);
+  flex: 0 1 var(--_void-pagination-size);
+  min-width: min(var(--_void-pagination-size), var(--void-control-height-sm));
   color: var(--void-color-text-muted);
   font-size: var(--_void-pagination-font-size);
   user-select: none;

@@ -134,7 +134,7 @@ You do nothing for this. It is done by redefining the same tokens the components
 
 ## Glass
 
-`<void-glass>` is a panel of blurred, translucent material. Unlike text on the scrim, glass follows the **page's colour scheme**: dark glass on a dark page, light glass on a light page. It is opaque enough (76% in light, 86% in dark) that text on it passes 4.5:1 over a black or a white image without counting on the blur.
+`<void-glass>` is a panel of blurred, translucent material. Inside a `void-media` (or any `data-void-surface="media"` region) it is **dark glass in both colour schemes**: the image is dark under its scrim and everything written on it is off-white, so a panel there belongs to the image, not to the page. Anywhere else, over the page itself, glass follows the page's colour scheme. `data-theme="light"` or `"dark"` on the panel chooses explicitly. It is opaque enough (76% in light, 86% in dark) that text on it passes 4.5:1 over a black or a white image without counting on the blur.
 
 export const glass = `
 <void-media ratio="16:9" place="end" scrim="none">

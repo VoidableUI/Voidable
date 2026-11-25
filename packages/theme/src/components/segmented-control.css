@@ -5,6 +5,15 @@ void-segmented-control {
 
   display: inline-flex;
   align-items: center;
+  /* Never wider than what holds it: with more segments than fit, the
+     control scrolls sideways inside its own border instead of pushing the
+     page wider than the screen. */
+  box-sizing: border-box;
+  max-width: 100%;
+  overflow-x: auto;
+  scrollbar-width: none;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: inline proximity;
   /* Border plus padding plus item equals the shared control height. */
   padding: 2px;
   background: var(--void-color-surface);
@@ -13,9 +22,15 @@ void-segmented-control {
   gap: 2px;
 }
 
+void-segmented-control::-webkit-scrollbar {
+  display: none;
+}
+
 void-segmented-control-item {
   display: inline-grid;
   place-content: center;
+  flex: none;
+  scroll-snap-align: center;
   min-height: calc(var(--_void-segment-height) - 6px);
   padding: 0 var(--_void-segment-padding);
   border-radius: max(0px, calc(var(--void-control-radius) - 2px));

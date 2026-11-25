@@ -1,9 +1,18 @@
 /* ============================================================
    void-donut-chart — light DOM SVG, theme-driven
    ============================================================ */
+/* @tokens void-donut-chart
+   --void-donut-chart-size  Setting: the largest width (and height) of the chart. It fills its container up to this and shrinks with it below. */
 
+/* A square that fills its container up to a ceiling. Without the ceiling
+   the SVG (width: 100%) grew to the full width of whatever held it, so a
+   donut beside a bar chart was several times its height. */
 void-donut-chart {
-  display: inline-block;
+  display: block;
+  box-sizing: border-box;
+  inline-size: 100%;
+  max-inline-size: var(--void-donut-chart-size, 13.75rem);
+  aspect-ratio: 1;
   font-family: var(--void-font-mono);
   color: var(--void-color-text);
 }

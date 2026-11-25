@@ -4,7 +4,7 @@
 // token files, which lint:contrast already checks), visible control
 // boundaries (WCAG 1.4.11), focus indicators, nested themes, the colour-scheme
 // media query, reduced motion and forced colours.
-import { test, expect, expectedFailure, load, settle, type Page } from '../helpers/test';
+import { test, expect, load, settle, type Page } from '../helpers/test';
 
 type Mode = { name: string; query: string; colorScheme?: 'light' | 'dark' };
 const MODES: Mode[] = [
@@ -103,7 +103,6 @@ for (const mode of MODES) {
     });
 
     test('every control has a visible boundary (3:1)', async ({ page }) => {
-      expectedFailure('untracked:date-picker-boundary', 'the date-picker input is drawn with --void-color-border (about 1.2 to 1.3:1) instead of the control border every other input uses (about 4:1)');
       await load(page, `/kitchen?${mode.query}`);
       const found = await boundaries(page);
       const low = Object.entries(found).filter(([, v]) => typeof v === 'string' || v < 3);
@@ -256,6 +255,9 @@ test.describe('reduced motion', () => {
     await page.locator('#s-nav void-accordion-item').first().getByRole('button').click();
     const slow = await page.evaluate(() =>
       document.getAnimations()
+        // An animation on a scroll timeline (the edge fade of a scrolling row) has no duration in
+        // time: it moves only as the user scrolls. Firefox reports a nominal one for it.
+        .filter((a) => a.timeline === document.timeline)
         .filter((a) => (Number(a.effect?.getComputedTiming().duration) || 0) > 50 && !(a.effect as KeyframeEffect).target?.closest('void-spinner'))
         .map((a) => `${(a.effect as KeyframeEffect).target?.tagName.toLowerCase()}.${(a.effect as KeyframeEffect).target?.className} ${(a as CSSTransition).transitionProperty ?? (a as CSSAnimation).animationName} ${a.effect?.getComputedTiming().duration}ms`),
     );

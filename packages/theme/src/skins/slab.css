@@ -51,6 +51,7 @@
   --void-rule: 1px solid var(--void-color-border-control);
   --void-rule-head: var(--_void-slab-heavy);
   --void-rule-edge: var(--_void-slab-heavy);
+  --void-rule-frame: var(--_void-slab-heavy);
 
   /* A container is a frame of ink on the page with a hard shadow. */
   --void-container-surface: var(--void-color-bg);
@@ -79,10 +80,15 @@
   --void-button-shadow: 2px 2px 0 var(--_void-slab-ink);
   --void-button-font-weight: var(--void-weight-semibold);
 
+  /* Chips are framed like everything else; the fill and the text carry the
+     tone. */
   --void-badge-radius: 0px;
+  --void-badge-border: var(--_void-slab-ink);
   --void-tag-radius: 0px;
+  --void-tag-border: var(--_void-slab-ink);
 
   --void-dialog-shadow: 8px 8px 0 var(--_void-slab-ink);
+  --void-toast-shadow: var(--void-float-shadow);
 
   /* An alert is framed like everything else; its fill carries the tone. */
   --void-alert-border: var(--_void-slab-ink);

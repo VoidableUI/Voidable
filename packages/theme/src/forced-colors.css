@@ -25,6 +25,23 @@
     border-color: ButtonText;
   }
 
+  /* Container boundaries. Forced colours removes fills and shadows, so a box
+     a skin draws with a lighter fill and a shadow (Loft's cards, section and
+     figure tiles, its bar) would have no boundary at all. Each of these (and
+     the section, figure and page-actions patterns, in their own files) has
+     an edge whose thickness is a token; where a skin has given it one, it is
+     drawn in a system colour, whatever colour (often transparent) the skin
+     chose. Where the thickness is 0, as for a section of the default theme,
+     there is still no box. lint:component-tokens refuses a skin that gives
+     one of them a fill or a shadow and no thickness. */
+  void-card,
+  void-panel,
+  void-stat,
+  void-alert,
+  void-nav-bar {
+    border-color: CanvasText;
+  }
+
   /* A ghost button draws nothing at rest, here too: its border takes the
      page colour, and shows on hover, focus and press, since the hover
      fill is a background and forced colours repaint that to Canvas. */

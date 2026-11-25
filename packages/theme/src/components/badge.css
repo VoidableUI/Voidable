@@ -6,7 +6,8 @@
    --void-badge-height     Least height and width. Applies at every size.
    --void-badge-padding    Inline padding.
    --void-badge-font-size  Size of the text.
-   --void-badge-radius     Corner radius: a pill by default, whatever the radius knob says. */
+   --void-badge-radius     Corner radius: a pill by default, whatever the radius knob says.
+   --void-badge-border     Edge colour of an outline badge, in place of a tint of its tone. */
 
 void-badge {
   --_void-tone: var(--void-color-accent);
@@ -19,7 +20,7 @@ void-badge {
   padding: 0 var(--_void-badge-padding);
   min-width: var(--_void-badge-height);
   min-height: var(--_void-badge-height);
-  border: 1px solid transparent;
+  border: var(--void-control-border-width) solid transparent;
   border-radius: var(--void-badge-radius, var(--void-radius-full));
   background: var(--_void-tone);
   color: var(--void-color-text-on-accent);
@@ -45,7 +46,7 @@ void-badge[color="highlight"] { --_void-tone: var(--void-color-highlight); }
    as text, and a faint edge. */
 void-badge[variant="outline"] {
   background: color-mix(in srgb, var(--_void-tone) var(--void-tone-tint), var(--void-color-control-fill));
-  border: 1px solid color-mix(in srgb, var(--_void-tone) 24%, transparent);
+  border: var(--void-control-border-width) solid var(--void-badge-border, color-mix(in srgb, var(--_void-tone) 24%, transparent));
   color: var(--_void-tone);
 }
 

@@ -4,7 +4,8 @@
    --void-tag-height     Least height.
    --void-tag-padding    Inline padding.
    --void-tag-font-size  Size of the text.
-   --void-tag-radius     Corner radius: a pill by default, whatever the radius knob says. */
+   --void-tag-radius     Corner radius: a pill by default, whatever the radius knob says.
+   --void-tag-border     Edge colour, of the plain tag and of a coloured one, in place of the hairline or the tint of its tone. */
 
 void-tag {
   --_void-tone: var(--void-color-accent);
@@ -19,7 +20,7 @@ void-tag {
   gap: var(--void-space-1);
   min-height: var(--_void-tag-height);
   padding: 0 var(--_void-tag-padding);
-  border: 1px solid var(--_void-tone-border);
+  border: var(--void-control-border-width) solid var(--void-tag-border, var(--_void-tone-border));
   border-radius: var(--void-tag-radius, var(--void-radius-full));
   background: var(--_void-tone-subtle);
   color: var(--void-color-text);

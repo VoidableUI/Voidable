@@ -86,6 +86,7 @@ A role is what a *kind* of component is drawn with. This is where a skin does mo
   --void-rule: 1px solid var(--void-color-border-control);
   --void-rule-head: var(--_void-slab-heavy);
   --void-rule-edge: var(--_void-slab-heavy);
+  --void-rule-frame: var(--_void-slab-heavy);
 
   /* A container is a frame of ink with a hard shadow. */
   --void-container-surface: var(--void-color-bg);
@@ -176,7 +177,7 @@ writeFileSync('mine.skin.css', expandSkin(readFileSync('mine.css', 'utf8'), 'min
 |---|---|
 | Contrast | `lint:contrast` evaluates every skin on the default knobs, on every theme and across the colour knobs, in both schemes. Every `…-surface` a skin assigns is checked with the `…-ink` of the same name when that is assigned too, otherwise with every text and status colour; control and field edges keep 3:1 |
 | Focus | The focus ring is a semantic token; a skin may recolour it (the lint checks 3:1) but not make it thinner than 2px. Forced-colours outlines are in the layer above the skins |
-| Forced colours | The `a11y` layer is above the `skins` layer. Keep a border where a box needs a boundary: a transparent border becomes visible in forced colours, a shadow does not |
+| Forced colours | The `a11y` layer is above the `skins` layer. Keep a border where a box needs a boundary: a transparent border becomes visible in forced colours, a shadow does not. Containers get theirs from `--void-container-border-width`; a pattern that is only a box when a skin makes it one (section, figure, page actions) has a `-border-width` token that is 0 until set, and `lint:component-tokens` refuses a skin that gives one a `-surface` or `-shadow` and leaves that width under 1px |
 | Reduced motion | A skin cannot set the animation scale, and a duration it assigns must multiply by it |
 | Control size | A height or size a skin assigns evaluates to at least 24px |
 | No reaching in | `lint:component-tokens` refuses a skin that is anything but one rule of custom properties |

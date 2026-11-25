@@ -13,7 +13,7 @@ void-panel {
 
 void-panel[variant="bordered"] {
   background: transparent;
-  border-color: var(--void-color-border);
+  border: var(--void-rule-frame);
   box-shadow: none;
 }
 

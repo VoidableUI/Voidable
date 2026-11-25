@@ -9,7 +9,9 @@
              both colour schemes; what was the page colour becomes a
              dark translucent shade.
    glass     void-glass, or data-void-surface="glass" on a component.
-             A translucent, blurred panel in the page's own scheme.
+             A translucent, blurred panel in the page's own scheme; over
+             a media surface it is dark in both schemes, as everything
+             else on the image is.
 
    lint:contrast evaluates both over a pure white and a pure black
    image, so the values below cannot drop text under 4.5:1.
@@ -92,6 +94,16 @@ void-glass,
   color: var(--void-color-text);
 }
 
+/* Glass over a media surface belongs to the image, not to the page. The
+   image is dark under its scrim and what is written on it is off-white in
+   both schemes; a panel in the page's light scheme there was 76% white
+   over a dark photograph, a flat grey block with dark text beside white
+   headlines and white buttons. So it takes the surface's scheme: dark
+   glass. data-theme on the panel itself still chooses otherwise. */
+:is(void-media, [data-void-surface="media"]) :is(void-glass, [data-void-surface="glass"]):not([data-theme]) {
+  --void-scheme-dark: 1;
+}
+
 /* Native controls and scrollbars inside glass follow the page too. */
 void-glass,
 [data-void-surface="glass"],
@@ -107,6 +119,10 @@ void-glass,
   :root:not([data-theme]) :is(void-glass, [data-void-surface="glass"]) {
     color-scheme: light;
   }
+}
+
+:is(void-media, [data-void-surface="media"]) :is(void-glass, [data-void-surface="glass"]):not([data-theme]) {
+  color-scheme: dark;
 }
 
 /* The panel itself. */

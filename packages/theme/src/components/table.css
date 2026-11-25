@@ -160,6 +160,17 @@ void-table[bordered] td {
   border: var(--void-rule);
 }
 
+/* The grid is thin lines; the line under the header and the frame round the
+   whole table are the head and frame rules, so a skin with heavy rules
+   draws them heavy (borders collapse, and the wider line wins). */
+void-table[bordered] th {
+  border-bottom: var(--void-table-rule-head, var(--void-rule-head));
+}
+
+void-table[bordered] table {
+  border: var(--void-rule-frame);
+}
+
 /* ── Inset: a table inside a card or panel ──
    The table bleeds out of the container's padding, so dividers, stripes and
    the hover fill run to the container's edge, and its columns pad back in by
@@ -355,7 +366,7 @@ void-table[stack="always"] {
 
   void-table[stack] thead tr[data-controls] {
     padding-block: var(--void-space-2);
-    border-bottom: 1px solid var(--void-color-border);
+    border-bottom: var(--void-table-rule-head, var(--void-rule-head));
   }
 
   /* One row is one block. */
@@ -444,7 +455,7 @@ void-table[stack="always"] {
   }
 
   void-table[stack][bordered] :is(tbody, tfoot) tr {
-    border: 1px solid var(--void-color-border);
+    border: var(--void-rule-frame);
     margin-block-end: var(--void-space-3);
   }
 

@@ -140,7 +140,9 @@
      The first of: explicit (data-theme), preferred (a theme or skin),
      system. --void-page-scheme-dark is the scheme of the page itself: a
      media surface forces --void-scheme-dark to 1 for what sits on the
-     image, and a glass panel inside it reads the page's to return. */
+     image, and a glass panel reads the page's (media/surface.css: a
+     panel outside a media surface, over the page, is in the page's
+     scheme; one on a media surface stays dark). */
   --void-page-scheme-dark: var(--void-scheme-explicit, var(--void-preferred-scheme-dark, var(--void-scheme-system)));
   --void-scheme-dark:      var(--void-page-scheme-dark);
   --void-color-scheme:     var(--void-color-scheme-explicit, var(--void-preferred-scheme, var(--void-color-scheme-system)));
@@ -218,7 +220,8 @@
      A scrim is the translucent dark layer between an image and the
      text over it. Its opacity starts at the lowest value that keeps
      4.5:1 for body text over a white image and only rises from there.
-     Glass is a translucent, blurred panel in the page's own scheme. */
+     Glass is a translucent, blurred panel in the page's own scheme
+     (dark when it lies on a media surface). */
   --void-scrim-alpha: calc(0.64 + 0.30 * clamp(0, var(--void-scrim-strength), 1));
   --void-color-scrim: oklch(0 0 0 / var(--void-scrim-alpha));
   --void-glass-alpha: max(calc(0.76 + 0.10 * var(--void-scheme-dark)), var(--void-glass-solid));
@@ -532,11 +535,14 @@
      colour), so `none` switches it off and `2px solid …` makes it
      heavy. between: items of one group (rows, cells, figures). edge:
      the line that opens and closes a group. head: under a heading (the
-     page head, a divided section, a card header, a table header). */
+     page head, a divided section, a card header, a table header).
+     frame: the line all the way round a box that has no fill of its own
+     (a bordered card or panel, a bordered table, a collapsible). */
   --void-rule:         1px solid var(--void-color-border);
   --void-rule-between: var(--void-rule);
   --void-rule-edge:    var(--void-rule);
   --void-rule-head:    var(--void-rule);
+  --void-rule-frame:   var(--void-rule);
 
   /* ── Charts ── */
   --void-chart-series-1: var(--void-color-accent);
