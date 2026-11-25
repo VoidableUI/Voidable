@@ -734,3 +734,141 @@ describe('VoidDatePicker', () => {
     });
   });
 });
+
+/* ============================================================
+   VoidCalendar accessibility (grid structure, roving tabindex, keys)
+   ============================================================ */
+
+describe('VoidCalendar accessibility', () => {
+  let el: VoidCalendar;
+
+  const key = (target: Element, k: string, init: KeyboardEventInit = {}) =>
+    target.dispatchEvent(new KeyboardEvent('keydown', { key: k, bubbles: true, cancelable: true, ...init }));
+  const tabStops = () => Array.from(el.querySelectorAll('.void-calendar-day[tabindex="0"]')) as HTMLElement[];
+  const day = (iso: string) => el.querySelector(`[data-date="${iso}"]`) as HTMLElement;
+
+  beforeEach(async () => {
+    el = document.createElement('void-calendar') as VoidCalendar;
+    el.value = '2024-06-15';
+    document.body.appendChild(el);
+    await el.updateComplete;
+  });
+
+  afterEach(() => {
+    el.remove();
+  });
+
+  it('has row / columnheader / gridcell structure', () => {
+    const grid = el.querySelector('[role="grid"]')!;
+    expect(grid.querySelectorAll('[role="row"]').length).toBe(7);
+    expect(grid.querySelectorAll('[role="columnheader"]').length).toBe(7);
+    expect(grid.querySelectorAll('[role="gridcell"]').length).toBe(42);
+    expect(day('2024-06-15').parentElement!.getAttribute('role')).toBe('gridcell');
+  });
+
+  it('puts aria-selected on the gridcell, not the button', () => {
+    expect(day('2024-06-15').parentElement!.getAttribute('aria-selected')).toBe('true');
+    expect(day('2024-06-14').parentElement!.getAttribute('aria-selected')).toBe('false');
+    expect(day('2024-06-15').hasAttribute('aria-selected')).toBe(false);
+  });
+
+  it('gives days a localised full-date accessible name', () => {
+    expect(day('2024-06-15').getAttribute('aria-label')).toBe('Saturday, June 15, 2024');
+  });
+
+  it('uses the component locale for day names', async () => {
+    el.locale = 'de-DE';
+    await el.updateComplete;
+    expect(day('2024-06-15').getAttribute('aria-label')).toBe('Samstag, 15. Juni 2024');
+  });
+
+  it('keeps exactly one tab stop after next/prev month navigation', async () => {
+    const [prev, next] = Array.from(el.querySelectorAll('.void-calendar-nav')) as HTMLElement[];
+    next.click();
+    await el.updateComplete;
+    expect(tabStops().map(b => b.dataset.date)).toEqual(['2024-07-15']);
+    prev.click();
+    prev.click();
+    await el.updateComplete;
+    expect(tabStops().map(b => b.dataset.date)).toEqual(['2024-05-15']);
+  });
+
+  it('clamps the tab stop to the shorter month', async () => {
+    el.value = '2024-01-31';
+    await el.updateComplete;
+    await el.updateComplete;
+    (el.querySelectorAll('.void-calendar-nav')[1] as HTMLElement).click();
+    await el.updateComplete;
+    expect(tabStops().map(b => b.dataset.date)).toEqual(['2024-02-29']);
+  });
+
+  it('keeps a tab stop after picking a month from the month picker', async () => {
+    (el.querySelector('.void-calendar-title') as HTMLElement).click();
+    await el.updateComplete;
+    (el.querySelectorAll('.void-calendar-month')[2] as HTMLElement).click();
+    await el.updateComplete;
+    expect(tabStops().map(b => b.dataset.date)).toEqual(['2024-03-15']);
+  });
+
+  it('PageDown / PageUp move by month and keep focus on the equivalent day', async () => {
+    key(day('2024-06-15'), 'PageDown');
+    await el.updateComplete;
+    expect(tabStops().map(b => b.dataset.date)).toEqual(['2024-07-15']);
+    expect(document.activeElement).toBe(day('2024-07-15'));
+    key(day('2024-07-15'), 'PageUp');
+    await el.updateComplete;
+    key(day('2024-06-15'), 'PageUp');
+    await el.updateComplete;
+    expect(tabStops().map(b => b.dataset.date)).toEqual(['2024-05-15']);
+  });
+
+  it('PageDown clamps day-of-month in shorter months', async () => {
+    el.value = '2024-01-31';
+    await el.updateComplete;
+    await el.updateComplete;
+    key(day('2024-01-31'), 'PageDown');
+    await el.updateComplete;
+    expect(tabStops().map(b => b.dataset.date)).toEqual(['2024-02-29']);
+  });
+
+  it('Shift+PageDown / Shift+PageUp move by year', async () => {
+    key(day('2024-06-15'), 'PageDown', { shiftKey: true });
+    await el.updateComplete;
+    expect(tabStops().map(b => b.dataset.date)).toEqual(['2025-06-15']);
+    key(day('2025-06-15'), 'PageUp', { shiftKey: true });
+    await el.updateComplete;
+    key(day('2024-06-15'), 'PageUp', { shiftKey: true });
+    await el.updateComplete;
+    expect(tabStops().map(b => b.dataset.date)).toEqual(['2023-06-15']);
+  });
+
+  it('Home / End go to week start and end (Sunday first)', async () => {
+    key(day('2024-06-15'), 'Home');
+    await el.updateComplete;
+    expect(tabStops().map(b => b.dataset.date)).toEqual(['2024-06-09']);
+    key(day('2024-06-09'), 'End');
+    await el.updateComplete;
+    expect(tabStops().map(b => b.dataset.date)).toEqual(['2024-06-15']);
+  });
+
+  it('Home / End respect first-day', async () => {
+    el.firstDay = 1;
+    await el.updateComplete;
+    key(day('2024-06-15'), 'Home');
+    await el.updateComplete;
+    expect(tabStops().map(b => b.dataset.date)).toEqual(['2024-06-10']);
+    key(day('2024-06-10'), 'End');
+    await el.updateComplete;
+    expect(tabStops().map(b => b.dataset.date)).toEqual(['2024-06-16']);
+  });
+
+  it('arrow keys across a month boundary keep one tab stop', async () => {
+    key(day('2024-06-15'), 'ArrowDown');
+    key(day('2024-06-22'), 'ArrowDown');
+    await el.updateComplete;
+    expect(tabStops().map(b => b.dataset.date)).toEqual(['2024-06-29']);
+    key(day('2024-06-29'), 'ArrowDown');
+    await el.updateComplete;
+    expect(tabStops().map(b => b.dataset.date)).toEqual(['2024-07-06']);
+  });
+});

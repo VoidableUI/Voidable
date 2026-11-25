@@ -105,8 +105,18 @@ void-calendar {
 }
 
 .void-calendar-days {
+  display: flex;
+  flex-direction: column;
+}
+
+.void-calendar-week {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
+}
+
+.void-calendar-cell {
+  display: flex;
+  justify-content: center;
 }
 
 .void-calendar-day {
