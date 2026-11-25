@@ -7,9 +7,9 @@ violations=0
 
 while IFS= read -r file; do
   # Check for inline style= attributes with visual properties (not --void-* custom properties)
-  if grep -Pn 'style="(?!--void-)' "$file" | grep -v '// style-ok' | grep -v '^\s*//' | grep -v '^\s*\*' | grep -q .; then
-    grep -Pn 'style="(?!--void-)' "$file" | grep -v '// style-ok' | grep -v '^\s*//' | grep -v '^\s*\*'
-    echo "ERROR: Inline style with visual properties in $file (use CSS class or --void-* custom property)"
+  if grep -Pn 'style="(?!--)' "$file" | grep -v '// style-ok' | grep -v '^\s*//' | grep -v '^\s*\*' | grep -q .; then
+    grep -Pn 'style="(?!--)' "$file" | grep -v '// style-ok' | grep -v '^\s*//' | grep -v '^\s*\*'
+    echo "ERROR: Inline style with visual properties in $file (use CSS class or a custom property)"
     violations=1
   fi
 

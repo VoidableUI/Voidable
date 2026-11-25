@@ -551,7 +551,7 @@ export class VoidGauge extends LitElement {
       bands.push(svg`
         <path
           class="void-gauge-zone"
-          style="--zone-color: ${z.color}; stroke-width: ${zoneThickness};"
+          style="--zone-color: ${z.color}; --gauge-stroke-width: ${zoneThickness};"
           d=${gaugeArc(cx, cy, r, this._angleAt(z.from), this._angleAt(z.to))}
         ></path>
       `);
@@ -639,7 +639,7 @@ export class VoidGauge extends LitElement {
           <path
             class="void-gauge-segment"
             d=${d}
-            style="--segment-color: ${color}; stroke-width: ${this.thickness};"
+            style="--segment-color: ${color}; --gauge-stroke-width: ${this.thickness};"
             data-segment-index=${origIdx}
           ></path>
         `);
@@ -800,7 +800,7 @@ export class VoidGauge extends LitElement {
              matching the unfilled portion of the gauge). -->
         <path
           class="void-gauge-track"
-          style="stroke-width: ${this.thickness};"
+          style="--gauge-stroke-width: ${this.thickness};"
           d=${gaugeArc(cx, cy, r, startAngle, endAngle)}
         ></path>
 
@@ -818,7 +818,7 @@ export class VoidGauge extends LitElement {
         ${hasFill && !this._hasSegments() ? svg`
           <path
             class="void-gauge-value"
-            style="--value-color: ${fillColor}; stroke-width: ${this.thickness};"
+            style="--value-color: ${fillColor}; --gauge-stroke-width: ${this.thickness};"
             d=${this.variant === 'outline'
               ? gaugeBand(cx, cy, r, this.thickness, startAngle, fillEndAngle)
               : gaugeArc(cx, cy, r, startAngle, fillEndAngle)}

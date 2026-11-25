@@ -332,7 +332,7 @@ export class VoidDonutChart extends LitElement {
     // Cursor on right half → tooltip pinned to left edge.
     const edgePad = 8;
     const cxCenter = this.size / 2;
-    let tx = this._hoverX < cxCenter
+    const tx = this._hoverX < cxCenter
       ? this.size - tooltipW - edgePad
       : edgePad;
     let ty = this._hoverY - tooltipH / 2;  // vertically centered on cursor

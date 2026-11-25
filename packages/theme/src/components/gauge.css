@@ -17,6 +17,7 @@ void-gauge svg {
 
 /* Background track — the empty arc */
 void-gauge .void-gauge-track {
+  stroke-width: var(--gauge-stroke-width);
   fill: none;
   stroke: var(--void-chart-grid);
   stroke-linecap: round;
@@ -26,6 +27,7 @@ void-gauge .void-gauge-track {
    meet cleanly without overlapping rounded "blobs" at the boundaries.
    This base rule covers the 'filled' variant (stroked centerline arcs). */
 void-gauge .void-gauge-zone {
+  stroke-width: var(--gauge-stroke-width);
   fill: none;
   stroke: var(--zone-color, var(--void-color-text-muted));
   stroke-linecap: butt;
@@ -57,6 +59,7 @@ void-gauge .void-gauge-zone-cap {
    a soft leading and trailing edge. Segments overlay on top with butt
    caps; the value-fill's round caps remain visible at the start/end. */
 void-gauge .void-gauge-value {
+  stroke-width: var(--gauge-stroke-width);
   fill: none;
   stroke: var(--value-color, var(--void-color-accent));
   stroke-linecap: round;
@@ -68,6 +71,7 @@ void-gauge .void-gauge-value {
    (.void-gauge-segment-cap) painted underneath in the first/last
    segment's color. */
 void-gauge .void-gauge-segment {
+  stroke-width: var(--gauge-stroke-width);
   fill: none;
   stroke: var(--segment-color, var(--void-color-accent));
   stroke-linecap: butt;
@@ -90,26 +94,26 @@ void-gauge .void-gauge-segment-cap {
 void-gauge[variant="outline"] .void-gauge-value {
   fill: color-mix(in srgb, var(--value-color, var(--void-color-accent)) 14%, transparent);
   stroke: color-mix(in srgb, var(--value-color, var(--void-color-accent)) 36%, transparent);
-  stroke-width: 1 !important;
+  stroke-width: var(--void-chart-stroke-hairline) !important;
 }
 
 void-gauge[variant="outline"] .void-gauge-segment {
   fill: color-mix(in srgb, var(--segment-color, var(--void-color-accent)) 14%, transparent);
   stroke: color-mix(in srgb, var(--segment-color, var(--void-color-accent)) 36%, transparent);
-  stroke-width: 1 !important;
+  stroke-width: var(--void-chart-stroke-hairline) !important;
 }
 
 void-gauge[variant="outline"] .void-gauge-segment-cap {
   fill: color-mix(in srgb, var(--segment-color, var(--void-color-accent)) 14%, transparent);
   stroke: color-mix(in srgb, var(--segment-color, var(--void-color-accent)) 36%, transparent);
-  stroke-width: 1;
+  stroke-width: var(--void-chart-stroke-hairline);
 }
 
 /* 'wireframe' variant — thin stroke, no opacity change */
 void-gauge[variant="wireframe"] .void-gauge-track,
 void-gauge[variant="wireframe"] .void-gauge-value,
 void-gauge[variant="wireframe"] .void-gauge-segment {
-  stroke-width: 1.5 !important;
+  stroke-width: var(--void-chart-stroke-thin) !important;
 }
 
 /* Gauges are inherently arc shapes — sharp/curvy doesn't apply.
@@ -122,12 +126,12 @@ void-gauge .void-gauge-tick {
 }
 
 void-gauge .void-gauge-tick-minor {
-  stroke-width: 1;
+  stroke-width: var(--void-chart-stroke-hairline);
   opacity: 0.5;
 }
 
 void-gauge .void-gauge-tick-major {
-  stroke-width: 2;
+  stroke-width: var(--void-chart-stroke-medium);
   opacity: 1;
 }
 
@@ -157,7 +161,7 @@ void-gauge .void-gauge-segment {
 void-gauge .void-gauge-tooltip-bg {
   fill: var(--void-color-bg-elevated);
   stroke: var(--void-color-border);
-  stroke-width: 1;
+  stroke-width: var(--void-chart-stroke-hairline);
 }
 
 void-gauge .void-gauge-tooltip-name {
