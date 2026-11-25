@@ -66,6 +66,13 @@ const ogImage = new URL('/og.png', canonical).href;
     <style>
       *, *::before, *::after {
         box-sizing: border-box;
+      }
+
+      /* Only the elements a browser gives a margin or padding of its own.
+         A reset of `*` is outside the theme's cascade layers and so beats
+         them: it took the padding off every void-button and every media
+         surface on this page. */
+      body, h1, h2, h3, h4, p, ul, ol, dl, dd, pre, figure, blockquote {
         margin: 0;
         padding: 0;
       }
@@ -144,6 +151,27 @@ const ogImage = new URL('/og.png', canonical).href;
         backdrop-filter: saturate(140%) blur(6px);
         -webkit-backdrop-filter: saturate(140%) blur(6px);
         border-bottom: 1px solid var(--void-color-border);
+        transition: background var(--void-duration-normal) var(--void-ease-in-out),
+                    border-color var(--void-duration-normal) var(--void-ease-in-out);
+      }
+
+      /* Over the hero the bar is part of the photograph: no fill, no rule,
+         and dark-scheme ink in both schemes (the script below the hero puts
+         data-theme="dark" on it while the hero is under it). In light mode
+         it used to be a white strip butted against a black image. The hero
+         slides up under the bar, so the image starts at the top of the
+         screen. Without the script nothing here applies and the bar is the
+         page's, as it is past the hero. */
+      .nav[data-over-hero] {
+        background: transparent;
+        border-bottom-color: transparent;
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+      }
+
+      :global(html[data-nav-overlays]) .hero {
+        margin-top: calc(var(--nav-height, 3.5rem) * -1);
+        --void-media-height: max(40rem, 100svh);
       }
 
       .nav-inner {
@@ -245,6 +273,11 @@ const ogImage = new URL('/og.png', canonical).href;
         font-size: var(--void-text-xs);
         color: var(--void-color-text-secondary);
         margin-bottom: var(--void-space-10);
+      }
+
+      /* With no version to show, the badge is padded evenly. */
+      .hero-badge:not(:has(.hero-badge-version)) {
+        padding-inline: var(--void-space-4);
       }
 
       .hero-badge-version {
@@ -670,6 +703,26 @@ const ogImage = new URL('/og.png', canonical).href;
       </void-media-content>
       <a class="hero-credit" href="/patterns/ui-over-imagery/#the-photographs">Photograph: NASA</a>
     </void-media>
+    <script is:inline>
+      // The bar lies over the hero until the hero has scrolled out from
+      // under it. Runs before first paint, so nothing flashes.
+      (() => {
+        const nav = document.querySelector('.nav');
+        const hero = document.querySelector('.hero');
+        if (!nav || !hero || !('IntersectionObserver' in window)) return;
+        const set = (over) => {
+          nav.toggleAttribute('data-over-hero', over);
+          if (over) nav.setAttribute('data-theme', 'dark');
+          else nav.removeAttribute('data-theme');
+        };
+        document.documentElement.style.setProperty('--nav-height', nav.offsetHeight + 'px');
+        document.documentElement.setAttribute('data-nav-overlays', '');
+        set(true);
+        new IntersectionObserver(([entry]) => set(entry.isIntersecting), {
+          rootMargin: `-${nav.offsetHeight}px 0px 0px 0px`,
+        }).observe(hero);
+      })();
+    </script>
 
     <!-- Frameworks -->
     <section class="frameworks">

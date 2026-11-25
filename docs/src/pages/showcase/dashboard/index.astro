@@ -28,6 +28,11 @@ import iconLogout from '@tabler/icons/outline/logout.svg?raw';
     <style>
       *, *::before, *::after {
         box-sizing: border-box;
+      }
+
+      /* Not `*`: an unlayered reset beats the theme's cascade layers and
+         takes the padding off its components. */
+      body, h1, h2, h3, h4, p, ul, ol, dl, dd, pre, figure, blockquote {
         margin: 0;
         padding: 0;
       }
@@ -792,7 +797,10 @@ import iconLogout from '@tabler/icons/outline/logout.svg?raw';
         /* Dash header: stack vertically */
         .dash-header {
           flex-direction: column;
+          flex-wrap: nowrap;
           align-items: flex-start;
+          /* The fixed height is for the row beside the sidebar header. */
+          height: auto;
           padding-left: var(--void-space-3);
           padding-right: var(--void-space-3);
         }
