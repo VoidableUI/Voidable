@@ -23,9 +23,9 @@ type Story = StoryObj;
 export const Default: Story = {
   render: (args) => html`
     <void-breadcrumbs separator=${args.separator || '/'}>
-      <a href="/">Home</a>
-      <a href="/products">Products</a>
-      <span>Details</span>
+      <void-breadcrumbs-item><a href="/">Home</a></void-breadcrumbs-item>
+      <void-breadcrumbs-item><a href="/products">Products</a></void-breadcrumbs-item>
+      <void-breadcrumbs-item aria-current="page">Details</void-breadcrumbs-item>
     </void-breadcrumbs>
   `,
 };
@@ -33,9 +33,9 @@ export const Default: Story = {
 export const CustomSeparator: Story = {
   render: () => html`
     <void-breadcrumbs separator="›">
-      <a href="/">Home</a>
-      <a href="/docs">Docs</a>
-      <span>Getting Started</span>
+      <void-breadcrumbs-item><a href="/">Home</a></void-breadcrumbs-item>
+      <void-breadcrumbs-item><a href="/docs">Docs</a></void-breadcrumbs-item>
+      <void-breadcrumbs-item aria-current="page">Getting Started</void-breadcrumbs-item>
     </void-breadcrumbs>
   `,
 };
@@ -43,8 +43,8 @@ export const CustomSeparator: Story = {
 export const TwoItems: Story = {
   render: () => html`
     <void-breadcrumbs>
-      <a href="/">Home</a>
-      <span>Current Page</span>
+      <void-breadcrumbs-item><a href="/">Home</a></void-breadcrumbs-item>
+      <void-breadcrumbs-item aria-current="page">Current Page</void-breadcrumbs-item>
     </void-breadcrumbs>
   `,
 };
@@ -52,7 +52,7 @@ export const TwoItems: Story = {
 export const SingleItem: Story = {
   render: () => html`
     <void-breadcrumbs>
-      <span>Home</span>
+      <void-breadcrumbs-item aria-current="page">Home</void-breadcrumbs-item>
     </void-breadcrumbs>
   `,
 };
@@ -60,11 +60,11 @@ export const SingleItem: Story = {
 export const DeepNesting: Story = {
   render: () => html`
     <void-breadcrumbs separator="/">
-      <a href="/">Home</a>
-      <a href="/settings">Settings</a>
-      <a href="/settings/account">Account</a>
-      <a href="/settings/account/security">Security</a>
-      <span>Two-Factor Auth</span>
+      <void-breadcrumbs-item><a href="/">Home</a></void-breadcrumbs-item>
+      <void-breadcrumbs-item><a href="/settings">Settings</a></void-breadcrumbs-item>
+      <void-breadcrumbs-item><a href="/settings/account">Account</a></void-breadcrumbs-item>
+      <void-breadcrumbs-item><a href="/settings/account/security">Security</a></void-breadcrumbs-item>
+      <void-breadcrumbs-item aria-current="page">Two-Factor Auth</void-breadcrumbs-item>
     </void-breadcrumbs>
   `,
 };

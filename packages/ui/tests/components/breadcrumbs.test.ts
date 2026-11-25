@@ -52,84 +52,54 @@ describe('VoidBreadcrumbs', () => {
     });
   });
 
-  describe('rendering', () => {
+
+  describe('structure', () => {
     let el: VoidBreadcrumbs;
 
     afterEach(() => {
       el?.remove();
     });
 
-    it('renders a .void-breadcrumbs-list ol element', async () => {
+    it('renders nothing of its own: the author items stay the children, in order', async () => {
+      el = document.createElement('void-breadcrumbs') as VoidBreadcrumbs;
+      el.innerHTML = '<void-breadcrumbs-item><a href="/">Home</a></void-breadcrumbs-item><void-breadcrumbs-item aria-current="page">Page</void-breadcrumbs-item>';
+      const before = Array.from(el.children);
+      document.body.appendChild(el);
+      await el.updateComplete;
+      expect(Array.from(el.children)).toEqual(before);
+      expect(el.querySelector('ol, li')).toBeNull();
+      expect(el.querySelector('[data-separator]')).toBeNull();
+      expect(customElements.get('void-breadcrumbs-item')).toBeUndefined();
+    });
+
+    it('does not mark a current page by itself: the author does with aria-current', async () => {
+      el = document.createElement('void-breadcrumbs') as VoidBreadcrumbs;
+      el.innerHTML = '<void-breadcrumbs-item>A</void-breadcrumbs-item><void-breadcrumbs-item>B</void-breadcrumbs-item>';
+      document.body.appendChild(el);
+      await el.updateComplete;
+      expect(el.querySelector('[aria-current]')).toBeNull();
+    });
+
+    it('sends the separator to the theme as a CSS string and follows changes', async () => {
       el = document.createElement('void-breadcrumbs') as VoidBreadcrumbs;
       document.body.appendChild(el);
       await el.updateComplete;
-      expect(el.querySelector('ol.void-breadcrumbs-list')).not.toBeNull();
-    });
-
-    it('wraps each child in a .void-breadcrumbs-item li', async () => {
-      el = document.createElement('void-breadcrumbs') as VoidBreadcrumbs;
-      el.innerHTML = '<a href="/">Home</a><a href="/products">Products</a><span>Details</span>';
-      document.body.appendChild(el);
-      await el.updateComplete;
-      const items = el.querySelectorAll('.void-breadcrumbs-item');
-      expect(items).toHaveLength(3);
-    });
-
-    it('sets aria-current="page" on last item only', async () => {
-      el = document.createElement('void-breadcrumbs') as VoidBreadcrumbs;
-      el.innerHTML = '<a href="/">Home</a><a href="/about">About</a><span>Contact</span>';
-      document.body.appendChild(el);
-      await el.updateComplete;
-      const items = el.querySelectorAll('.void-breadcrumbs-item');
-      expect(items[0].getAttribute('aria-current')).toBeNull();
-      expect(items[1].getAttribute('aria-current')).toBeNull();
-      expect(items[2].getAttribute('aria-current')).toBe('page');
-    });
-
-    it('sets data-separator attribute on each item', async () => {
-      el = document.createElement('void-breadcrumbs') as VoidBreadcrumbs;
-      el.innerHTML = '<a href="/">Home</a><span>Page</span>';
-      document.body.appendChild(el);
-      await el.updateComplete;
-      const items = el.querySelectorAll('.void-breadcrumbs-item');
-      for (const item of Array.from(items)) {
-        expect(item.getAttribute('data-separator')).toBe('/');
-      }
-    });
-
-    it('uses custom separator on data-separator attribute', async () => {
-      el = document.createElement('void-breadcrumbs') as VoidBreadcrumbs;
+      expect(el.style.getPropertyValue('--_void-breadcrumbs-separator')).toBe('"/"');
       el.separator = '›';
-      el.innerHTML = '<a href="/">Home</a><span>Page</span>';
-      document.body.appendChild(el);
       await el.updateComplete;
-      const items = el.querySelectorAll('.void-breadcrumbs-item');
-      for (const item of Array.from(items)) {
-        expect(item.getAttribute('data-separator')).toBe('›');
-      }
+      expect(el.style.getPropertyValue('--_void-breadcrumbs-separator')).toBe('"›"');
     });
 
-    it('updates data-separator on all items when separator property changes', async () => {
+    it('keeps the author items in a keyed reorder (the same nodes, the new order)', async () => {
       el = document.createElement('void-breadcrumbs') as VoidBreadcrumbs;
-      el.innerHTML = '<a href="/">Home</a><span>Page</span>';
+      el.innerHTML = '<void-breadcrumbs-item id="a">A</void-breadcrumbs-item><void-breadcrumbs-item id="b">B</void-breadcrumbs-item><void-breadcrumbs-item id="c">C</void-breadcrumbs-item>';
       document.body.appendChild(el);
       await el.updateComplete;
-      el.separator = '>';
+      const [a, b, c] = Array.from(el.children);
+      el.append(c!, a!, b!);
       await el.updateComplete;
-      const items = el.querySelectorAll('.void-breadcrumbs-item');
-      for (const item of Array.from(items)) {
-        expect(item.getAttribute('data-separator')).toBe('>');
-      }
-    });
-
-    it('preserves child content inside li wrappers', async () => {
-      el = document.createElement('void-breadcrumbs') as VoidBreadcrumbs;
-      el.innerHTML = '<a href="/home">Home</a><span>Current</span>';
-      document.body.appendChild(el);
-      await el.updateComplete;
-      const anchors = el.querySelectorAll('a');
-      expect(anchors).toHaveLength(1);
-      expect(anchors[0].getAttribute('href')).toBe('/home');
+      expect(Array.from(el.children).map(n => n.id)).toEqual(['c', 'a', 'b']);
+      expect(Array.from(el.children)).toEqual([c, a, b]);
     });
   });
 });

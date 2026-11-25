@@ -4,7 +4,13 @@
    --void-nav-bar-shadow   Shadow under the bar. */
 
 void-nav-bar {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: var(--void-gap-inside);
+  /* Content box, so the line under a bordered bar adds to the height as it did around the old inner row. */
+  box-sizing: content-box;
+  padding: var(--void-space-2) var(--void-space-4);
+  min-height: calc(var(--void-control-height) + var(--void-space-5) - 2 * var(--void-space-2));
   font-family: var(--void-font-sans);
   background: var(--void-nav-bar-surface, var(--void-color-bg));
   box-shadow: var(--void-nav-bar-shadow, none);
@@ -23,12 +29,4 @@ void-nav-bar[sticky] {
 void-nav-bar[variant="elevated"] {
   background: var(--void-nav-bar-surface, var(--void-color-bg-elevated));
   box-shadow: var(--void-nav-bar-shadow, var(--void-shadow-sm));
-}
-
-.void-nav-bar-content {
-  display: flex;
-  align-items: center;
-  gap: var(--void-gap-inside);
-  padding: var(--void-space-2) var(--void-space-4);
-  min-height: calc(var(--void-control-height) + var(--void-space-5));
 }

@@ -23,7 +23,12 @@ void-nav-menu[orientation="vertical"] void-nav-menu-item {
   display: flex;
 }
 
-.void-nav-menu-trigger {
+/* The trigger part wraps the control (a button or a link) and is not a box of its own. */
+void-nav-menu-trigger {
+  display: contents;
+}
+
+void-nav-menu-trigger > * {
   display: inline-flex;
   align-items: center;
   gap: var(--void-space-1);
@@ -45,26 +50,26 @@ void-nav-menu[orientation="vertical"] void-nav-menu-item {
     background var(--void-duration-fast) var(--void-ease-in-out);
 }
 
-.void-nav-menu-trigger:hover {
+void-nav-menu-trigger > *:hover {
   color: var(--void-color-text);
   background: var(--void-color-bg-hover);
 }
 
-.void-nav-menu-trigger:focus-visible {
+void-nav-menu-trigger > *:focus-visible {
   color: var(--void-color-text);
   outline: var(--void-focus-ring-width) solid var(--void-focus-ring-color);
   outline-offset: var(--void-focus-ring-offset); /* token-ok: intrinsic focus outline offset */
 }
 
-.void-nav-menu-trigger:active {
+void-nav-menu-trigger > *:active {
   background: var(--void-color-bg-hover);
 }
 
-void-nav-menu-item[active] .void-nav-menu-trigger {
+void-nav-menu-item[active] > void-nav-menu-trigger > * {
   color: var(--void-color-text);
 }
 
-void-nav-menu-item[active] .void-nav-menu-trigger::after {
+void-nav-menu-item[active] > void-nav-menu-trigger > *::after {
   content: '';
   position: absolute;
   bottom: 0;
@@ -75,7 +80,7 @@ void-nav-menu-item[active] .void-nav-menu-trigger::after {
   border-radius: var(--void-radius-full);
 }
 
-void-nav-menu[orientation="vertical"] void-nav-menu-item[active] .void-nav-menu-trigger::after {
+void-nav-menu[orientation="vertical"] void-nav-menu-item[active] > void-nav-menu-trigger > *::after {
   top: var(--void-space-2);
   bottom: var(--void-space-2);
   left: 0;
@@ -84,13 +89,13 @@ void-nav-menu[orientation="vertical"] void-nav-menu-item[active] .void-nav-menu-
   height: auto;
 }
 
-void-nav-menu-item[disabled] .void-nav-menu-trigger {
+void-nav-menu-item[disabled] > void-nav-menu-trigger > * {
   color: var(--void-color-text-disabled);
   cursor: default;
   pointer-events: none;
 }
 
-.void-nav-menu-content {
+void-nav-menu-content {
   position: absolute;
   top: 100%;
   left: 0;
@@ -104,25 +109,29 @@ void-nav-menu-item[disabled] .void-nav-menu-trigger {
   font-size: var(--void-control-text);
   color: var(--void-color-text);
   opacity: 0;
+  /* Closed, the panel is out of the tab order and the accessibility tree, not only invisible. */
+  visibility: hidden;
   pointer-events: none;
   transform: translateY(var(--void-space-1));
   transition:
     opacity var(--void-duration-fast) var(--void-ease-in-out),
-    transform var(--void-duration-fast) var(--void-ease-in-out);
+    transform var(--void-duration-fast) var(--void-ease-in-out),
+    visibility var(--void-duration-fast) var(--void-ease-in-out);
 }
 
-void-nav-menu-item[open] .void-nav-menu-content {
+void-nav-menu-item[open] > void-nav-menu-content {
   opacity: 1;
+  visibility: visible;
   pointer-events: auto;
   transform: translateY(0);
 }
 
-void-nav-menu[orientation="vertical"] .void-nav-menu-content {
+void-nav-menu[orientation="vertical"] void-nav-menu-content {
   top: 0;
   left: 100%;
   transform: translateX(var(--void-space-1));
 }
 
-void-nav-menu[orientation="vertical"] void-nav-menu-item[open] .void-nav-menu-content {
+void-nav-menu[orientation="vertical"] void-nav-menu-item[open] > void-nav-menu-content {
   transform: translateX(0);
 }
