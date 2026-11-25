@@ -27,6 +27,11 @@ cp "$root/packages/theme/dist/void.min.css" "$out/theme/void.min.css"
 cp "$root/packages/theme/dist/themes/"*.min.css "$out/theme/themes/"
 cp "$root/packages/theme/dist/skins/"*.min.css "$out/theme/skins/"
 
+# Which @voidable/ui version these files are: `voidable install` copies it next
+# to them, and the release checks it against the version it stamped.
+sed -n 's/.*"version": *"\([^"]*\)".*/\1/p' "$here/internal/infra/embedded/data/manifest/components.json" | head -1 > "$out/VERSION"
+[[ -s "$out/VERSION" ]] || { echo "build:assets: no version in components.json" >&2; exit 1; }
+
 cat > "$out/importmap.json" <<'JSON'
 {
   "imports": {

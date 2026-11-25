@@ -5,10 +5,15 @@ package main
 
 import "github.com/VoidableUI/Voidable/tools/voidable/internal/cli"
 
-// Version is set at build time via -ldflags to the @voidable/ui version.
-var Version = "dev"
+// Set at build time via -ldflags "-X main.Version=..." (see build:go and
+// scripts/release/binaries.mjs). Version is the unified release version.
+var (
+	Version = "dev"
+	Commit  = "unknown"
+	Date    = "unknown"
+)
 
 func main() {
-	cli.Version = Version
+	cli.Version, cli.Commit, cli.Date = Version, Commit, Date
 	cli.Execute()
 }
