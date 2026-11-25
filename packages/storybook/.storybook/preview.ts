@@ -3,6 +3,9 @@ import '@voidable/theme/themes/void.css';
 import '@voidable/theme/themes/dune.css';
 import '@voidable/theme/themes/console.css';
 import '@voidable/ui';
+// Development warnings: misused attributes, values and children reach the console, so a story that
+// misuses a component is caught by `mise run test:warnings` and by anyone looking at it.
+import '@voidable/ui/dev';
 
 import type { Preview } from '@storybook/web-components-vite';
 import { themes } from 'storybook/theming';

@@ -135,3 +135,16 @@ export class App {
 ```
 
 If you used the removed `@voidable/ui-angular` package, see [Migrating from the framework packages](/getting-started/migrating-from-framework-packages/).
+
+## Development warnings
+
+A misspelled attribute, a value outside the allowed set or a child in the wrong parent does nothing and says nothing (`CUSTOM_ELEMENTS_SCHEMA` switches off Angular's own checks for custom elements). Import the development entry once, in development only, and the browser console reports each mistake with the element, the valid alternatives and a "did you mean":
+
+```ts
+// main.ts
+import { isDevMode } from '@angular/core';
+
+if (isDevMode()) import('@voidable/ui/dev');
+```
+
+It is never part of `@voidable/ui` itself, so production builds are unchanged. See [Development warnings](/getting-started/development-warnings/) for what it reports and how to make warnings throw in tests.

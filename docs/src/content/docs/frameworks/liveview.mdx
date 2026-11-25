@@ -111,3 +111,14 @@ let liveSocket = new LiveSocket('/live', Socket, {
 ```heex
 <div id="map" phx-update="ignore">…</div>
 ```
+
+## Development warnings
+
+A misspelled attribute, an invalid value or a child in the wrong parent does nothing and says nothing. Render `VoidableUI.Dev.warnings` once in the root layout, after your app script:
+
+```heex
+<script defer phx-track-static type="text/javascript" src={~p"/assets/app.js"}></script>
+<VoidableUI.Dev.warnings />
+```
+
+It renders nothing outside the `:dev` environment, so a production page never loads it, and the browser console then reports each mistake with the element, the valid alternatives and a "did you mean", including markup LiveView patches in later. Configure it with `config :live_voidable, dev_warnings: false | true | :throw`. See [Development warnings](/getting-started/development-warnings/).

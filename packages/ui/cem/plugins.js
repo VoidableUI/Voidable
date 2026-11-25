@@ -25,6 +25,15 @@
 //    that a parent or the theme reads, bubbling ancestor events, detail types
 //    inference cannot see).
 //
+//    The same plugin writes `voidParents`, `voidRequires` and `voidHints` onto
+//    declarations (allowed ancestors, required children, advice for guessed
+//    attributes); the `voidable` tool and the dev-mode runtime warnings read them.
+//
+// 3b. hostAttributesPlugin: attributes a component sets on its own host with
+//    `setHostAttribute('name', ...)` that are not role, tabindex or aria-*
+//    (`dragging`, `visible`). They are not API, but a validator must not report
+//    them as unknown. Written as `voidHostAttributes`.
+//
 // 4. publishedManifestPlugin: makes the manifest describe what ships. Module
 //    paths point at dist/ entry modules; internal modules that are bundled
 //    into chunks (form-control, projection, chart helpers) are dropped and
@@ -32,7 +41,7 @@
 //    underscore/#-prefixed, computed-key and DOM/Lit lifecycle-override members
 //    are removed.
 
-import { ancestorEvents, extraAttributes, eventDetails } from './supplement.js';
+import { allowedParents, ancestorEvents, parentSetAttributes, attributeHints, extraAttributes, eventDetails, requiredChildren } from './supplement.js';
 
 /** @typedef {import('typescript')} TS */
 
@@ -399,9 +408,9 @@ export function manifestSupplementPlugin() {
     name: 'VOIDABLE - MANIFEST-SUPPLEMENT',
     packageLinkPhase({ customElementsManifest, context }) {
       const byTag = new Map(allClasses(customElementsManifest).filter((d) => d.tagName).map((d) => [d.tagName, d]));
-      const get = (tag) => {
+      const get = (tag, field) => {
         const decl = byTag.get(tag);
-        if (!decl) throw new Error(`cem/supplement.js names unknown tag <${tag}>`);
+        if (!decl) throw new Error(`cem/supplement.js ${field ? `(${field}) ` : ''}names unknown tag <${tag}>`);
         return decl;
       };
 
@@ -437,6 +446,31 @@ export function manifestSupplementPlugin() {
         }
       }
 
+      const checkTags = (field, tags) => {
+        for (const tag of tags) get(tag, field);
+      };
+      for (const [tag, names] of Object.entries(parentSetAttributes)) {
+        const decl = get(tag, 'parentSetAttributes');
+        decl.voidHostAttributes = [...new Set([...(decl.voidHostAttributes ?? []), ...names])].sort();
+      }
+      for (const [tag, parents] of Object.entries(allowedParents)) {
+        get(tag).voidParents = parents;
+        checkTags('allowedParents', parents);
+      }
+      for (const [tag, children] of Object.entries(requiredChildren)) {
+        get(tag).voidRequires = children;
+        checkTags('requiredChildren', children);
+      }
+      for (const [tag, hints] of Object.entries(attributeHints)) {
+        const decl = get(tag);
+        for (const name of Object.keys(hints)) {
+          if (decl.attributes?.some((a) => a.name === name)) {
+            throw new Error(`cem/supplement.js: <${tag}> has attribute "${name}"; remove the hint`);
+          }
+        }
+        decl.voidHints = hints;
+      }
+
       for (const [tag, events] of Object.entries(eventDetails)) {
         const decl = get(tag);
         for (const [name, detail] of Object.entries(events)) {
@@ -448,6 +482,36 @@ export function manifestSupplementPlugin() {
           event.type = { text: eventType(detail) };
         }
       }
+    },
+  };
+}
+
+const HOST_ATTR_SKIP = /^(role|tabindex|aria-.*)$/;
+
+export function hostAttributesPlugin() {
+  return {
+    name: 'VOIDABLE - HOST-ATTRIBUTES',
+    analyzePhase({ ts, node, moduleDoc }) {
+      if (!ts.isClassDeclaration(node)) return;
+      const classDoc = findClassDoc(ts, moduleDoc, node);
+      if (!classDoc) return;
+      const names = new Set();
+      const visit = (n) => {
+        if (
+          ts.isCallExpression(n) &&
+          ts.isPropertyAccessExpression(n.expression) &&
+          n.expression.name.text === 'setHostAttribute' &&
+          n.expression.expression.kind === ts.SyntaxKind.ThisKeyword &&
+          n.arguments[0] &&
+          ts.isStringLiteralLike(n.arguments[0]) &&
+          !HOST_ATTR_SKIP.test(n.arguments[0].text)
+        ) {
+          names.add(n.arguments[0].text);
+        }
+        ts.forEachChild(n, visit);
+      };
+      node.members.forEach(visit);
+      if (names.size) classDoc.voidHostAttributes = [...names].sort();
     },
   };
 }

@@ -1,0 +1,96 @@
+---
+title: Development warnings
+description: One import in development makes misused Voidable markup (a wrong attribute, an invalid value, a child in the wrong parent) say so in the console instead of silently doing nothing.
+---
+
+The commonest way to go wrong with a custom element library is to write something plausible that does nothing: `color="primary"` on a button, `label` on an input, `<void-option>` inside `<void-select>`, `disabled="false"`. The browser accepts all of it without a word. `@voidable/ui/dev` is the runtime half of the checks that `voidable check` does on source files: it watches the page and reports each mistake in the console, including markup a server or framework produces at runtime.
+
+```js
+import '@voidable/ui/dev';
+```
+
+Import it **in development only**. It is a separate entry point: `import '@voidable/ui'` (the full bundle), a single-component import and the autoloader never contain it, so production pays nothing.
+
+## What it reports
+
+Every message starts with `[voidable]`, names the element, says what is wrong, lists the valid alternatives and, where there is a close match, says what you probably meant.
+
+| Problem | Example message |
+| --- | --- |
+| Attribute the element does not declare | <code>&lt;void-sidebar collapsedwidth="64"&gt;: "collapsedwidth" is not an attribute of void-sidebar, so it does nothing. Did you mean "collapsed-width"?</code> |
+| Attribute people guess that does not exist | <code>&lt;void-input label="Email"&gt;: "label" is not an attribute of void-input, so it does nothing. Instead wrap the control in &lt;void-field label="..."&gt;.</code> |
+| Value outside the allowed set | <code>&lt;void-button color="primary"&gt;: "primary" is not a valid value for color, so it is ignored. Valid values: default, error, warning, caution, success, info, notice. Did you mean "default"?</code> |
+| Not a number | <code>&lt;void-slider max="ten"&gt;: "ten" is not a number, so max is ignored. Write a plain number such as max="10".</code> |
+| Boolean written as `"false"` | <code>&lt;void-button disabled="false"&gt;: disabled is a boolean attribute, on whenever it is present, so disabled="false" does not turn it off. Remove the attribute to turn it off.</code> |
+| Child in the wrong parent | <code>&lt;void-option&gt; only works inside &lt;void-multiselect&gt; or &lt;void-combobox&gt;, and it is inside &lt;void-select&gt;, so it is not used. &lt;void-select&gt; takes native &lt;option&gt; children.</code> |
+| Required child missing | <code>&lt;void-tabs&gt; has no &lt;void-tab-panel&gt; child, which it needs to show anything. Add at least one &lt;void-tab-panel&gt;.</code> |
+| Tag nothing defines | <code>&lt;void-buton&gt; is not a Void UI element and nothing defines it, so it does nothing. Did you mean &lt;void-button&gt;?</code> |
+| Component not imported | <code>&lt;void-sidebar&gt; is a Void UI element but it is not defined, so it renders as an unstyled, inert tag. Import it with import "@voidable/ui/components/sidebar.js", import "@voidable/ui", or use "@voidable/ui/autoloader".</code> |
+| Listener for an event nothing dispatches | <code>Listener for "void-chnage" on &lt;void-input&gt;: no Void UI element dispatches an event with that name, so it never fires. Did you mean "void-change"?</code> |
+
+Each distinct problem is reported once per element type and attribute (or child tag, or event name), not once per instance, so a table of 500 rows with the same mistake produces one line.
+
+### What it leaves alone
+
+Global HTML attributes, `aria-*`, `data-*`, `class`, `style`, `slot`, the attributes components set on themselves, and the attributes of other frameworks: `x-*` and `@event` (Alpine, Vue), `:prop`, `v-*`, `wire:*`, `phx-*`, `hx-*`, `ng-*`, `_ngcontent-*`, `data-turbo-*`, `client:*` and anything with a namespace colon. Undefined tags and missing children are judged only after the page has settled: nothing has loaded, defined a component or fetched a resource for half a second. A component the autoloader is still fetching is never reported. Elements that a morph (Turbo, Livewire, LiveView) parks while it runs are not judged either.
+
+Listeners are checked only for `void-*` event names that **no** component dispatches. A listener on a parent for an event a child dispatches is normal (events bubble), so a name that exists somewhere is never reported; whether a particular element dispatches it is left to [`voidable check`](/getting-started/component-authoring/), which knows the element's own events.
+
+## Where the knowledge comes from
+
+Nothing is listed by hand. The build writes a compact table from the Custom Elements Manifest: attributes with their allowed values, which booleans read `"false"`, the events each element dispatches, the parents and required children. A new attribute or component is checked the release it ships. The few facts the analyzer cannot see (allowed parents, required children, advice for guessed attributes) live in one file, `packages/ui/cem/supplement.js`, which both the manifest and the `voidable` tool read.
+
+## Enabling it
+
+| Setup | One line |
+| --- | --- |
+| Bundler (Vite, webpack, esbuild) | `if (import.meta.env.DEV) import('@voidable/ui/dev');` |
+| Import map, no bundler | `<script type="module">import '@voidable/ui/dev.js';</script>` (development layout only) |
+| CDN | `<script type="module" src="https://cdn.jsdelivr.net/npm/@voidable/ui/dist/dev.js"></script>` (add `@<version>` after `@voidable/ui` to pin) |
+| Rails (`voidable-hotwire`) | On in `development` by default: `<%= voidable_dev_tags %>` after `javascript_importmap_tags` (the install generator adds it) |
+| Phoenix LiveView | `<VoidableUI.Dev.warnings />` in the root layout; renders nothing outside `:dev` |
+| Laravel | `@voidableScripts` emits it when `VOIDABLE_DEV_WARNINGS` is true, which defaults to the `local` environment |
+| `voidable install` | Vendors `ui/dev.js`; add the `<script type="module">` line it prints to your development layout |
+| Storybook | `import '@voidable/ui/dev';` in `.storybook/preview.ts` |
+
+It imports nothing and has no dependencies, so the raw CDN file and an import map entry both work. Importing it twice is harmless.
+
+## In a test suite
+
+Turn warnings into thrown errors so a page that misuses a component fails the test:
+
+```js
+import { configure, check } from '@voidable/ui/dev';
+
+configure({ throw: true });
+
+// Check what a test rendered, synchronously, without waiting for the page to settle:
+check(container); // throws on the first problem, naming it
+```
+
+Set `window.VOIDABLE_DEV = { throw: true }` before the script loads to do the same without a module import (the Rails, LiveView and Laravel packages set it for you with `:throw` / `'throw'`). In `throw` mode every occurrence is reported, not once per element type.
+
+`check(root)` returns every problem under `root`, `warnings()` lists what has been reported, `settled()` resolves after the deferred checks have run, and `reset()` forgets what was reported.
+
+## Options
+
+```js
+import { configure } from '@voidable/ui/dev';
+
+configure({
+  throw: false,                     // throw VoidDevError instead of console.warn
+  onWarning: (w) => report(w),      // receive { kind, tag, subject, message, element }
+  ignoreTags: ['void-my-widget'],   // your own void-* elements
+  ignoreAttributes: ['legacy-attr', /^track-/],
+  ignoreEvents: ['void-my-event'],  // void-* events your own code dispatches
+  settleMs: 500,                    // quiet time before undefined tags and missing children are judged
+});
+```
+
+Shadow roots and detached trees are not part of the document: pass them to `observe(root)`.
+
+## Limits
+
+- It listens for `addEventListener` calls made after it loads, so import it before your own code.
+- Whether an element dispatches a particular event is not checked at runtime (bubbling makes it unreliable); `voidable check` does it on source.
+- A missing trigger on a popover or dropdown is not detected: the trigger may be any first child, so the runtime cannot tell an absent one from a late one.

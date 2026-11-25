@@ -83,4 +83,30 @@ class ServiceProviderTest extends TestCase
 
         $this->assertStringNotContainsString('<link', $html);
     }
+
+    public function test_dev_warnings_are_off_by_default_outside_local(): void
+    {
+        $this->assertFalse((bool) config('voidable.dev_warnings'));
+        $html = view('voidable::components.scripts')->render();
+
+        $this->assertStringNotContainsString('dev.js', $html);
+    }
+
+    public function test_dev_warnings_script_is_emitted_when_on(): void
+    {
+        config(['voidable.dev_warnings' => true]);
+        $html = view('voidable::components.scripts')->render();
+
+        $this->assertStringContainsString('<script type="module" src="https://cdn.jsdelivr.net/npm/@voidable/ui@latest/dist/dev.js">', $html);
+        $this->assertStringNotContainsString('VOIDABLE_DEV', $html);
+    }
+
+    public function test_dev_warnings_throw_mode_sets_the_config_first(): void
+    {
+        config(['voidable.dev_warnings' => 'throw']);
+        $html = view('voidable::components.scripts')->render();
+
+        $this->assertStringContainsString('window.VOIDABLE_DEV = { throw: true };', $html);
+        $this->assertLessThan(strpos($html, 'dev.js'), strpos($html, 'VOIDABLE_DEV'));
+    }
 }

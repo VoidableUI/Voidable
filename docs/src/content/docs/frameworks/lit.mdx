@@ -72,3 +72,15 @@ Voidable components render in Light DOM rather than Shadow DOM. This means:
 - No `::part()` or `::slotted()` selectors needed
 - CSS custom properties from `@voidable/theme` style everything out of the box
 - Your Lit components (which may use Shadow DOM) can still compose Voidable elements in their templates without style isolation issues
+
+## Development warnings
+
+A misspelled attribute, a value outside the allowed set or a child in the wrong parent does nothing and says nothing. Import the development entry once, in development only, and the browser console reports each mistake with the element, the valid alternatives and a "did you mean":
+
+```js
+if (import.meta.env.DEV) import('@voidable/ui/dev');
+```
+
+Put it next to the `import '@voidable/ui'` in your app entry. It also checks the `<void-*>` elements your own Lit components render.
+
+It is never part of `@voidable/ui` itself, so production builds are unchanged. See [Development warnings](/getting-started/development-warnings/) for what it reports and how to make warnings throw in tests.

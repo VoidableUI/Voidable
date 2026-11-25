@@ -111,6 +111,10 @@ Components inside a shadow root or a detached subtree are not part of the docume
 - **It does not replace a bundle for an app that uses most components.** If your pages use most of the library, the full import loads the same bytes in one request chain and has no startup latency per component. Prefer it, or per-component imports, there.
 - **Loading both is safe.** Every component guards its `customElements.define()`, so importing the full bundle and the autoloader on the same page registers each element once.
 
+### Finding components that are not loaded
+
+A tag whose module was never imported, or a typo such as `void-buton`, renders as an inert element without a word. With [`@voidable/ui/dev`](/getting-started/development-warnings/) the console names the tag and the import it needs, once the page has settled (a component the autoloader is still fetching is never reported).
+
 ## Before a component loads
 
 Until its module loads, `<void-tabs>` is an unknown element: the browser shows its children as plain text and reserves none of the space the component will fill. With a script at the end of the page, or loaded late, that shows as content that jumps when the component arrives.

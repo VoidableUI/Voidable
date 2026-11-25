@@ -55,6 +55,16 @@ import '@voidable/ui/autoloader';
 
 The autoloader suits server-rendered pages (Rails, Phoenix, Laravel) and pages whose components vary by route; prefer the full import when most pages use most components. See [Loading components](/getting-started/loading/) for how each works, the import map and CDN forms, and what the page looks like before a component loads.
 
+## Turn on the development warnings
+
+In development, one more import makes a misspelled attribute, an invalid value or a child in the wrong parent say so in the browser console instead of silently doing nothing:
+
+```js
+if (import.meta.env.DEV) import('@voidable/ui/dev');
+```
+
+It is a separate entry point, so production builds do not contain it. See [Development warnings](/getting-started/development-warnings/).
+
 ## Usage
 
 Once imported, use `<void-*>` elements directly in HTML or any template:

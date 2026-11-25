@@ -13,6 +13,8 @@ mise run storybook
 
 Opens Storybook at [http://localhost:6006](http://localhost:6006).
 
+Storybook loads `@voidable/ui/dev` (see `.storybook/preview.ts`), so a story that misuses a component says so in the browser console. `mise run warnings:sweep` loads every story and every docs page in headless Chromium and fails on any warning.
+
 ## Build
 
 ```bash

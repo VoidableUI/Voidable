@@ -79,6 +79,14 @@ type Element struct {
 	Properties  []Property  `json:"properties"`
 	Events      []Event     `json:"events"`
 	Slots       []Slot      `json:"slots,omitempty"`
+
+	// AllowedParents, RequiredChildren and AttrHints come from the manifest
+	// (voidParents, voidRequires, voidHints; the build writes them from
+	// packages/ui/cem/supplement.js). The library merges them into the
+	// Supplement so the checker, reference and skill read one place.
+	AllowedParents   []string          `json:"-"`
+	RequiredChildren []string          `json:"-"`
+	AttrHints        map[string]string `json:"-"`
 }
 
 // Attribute returns the attribute with the given (exact) name.

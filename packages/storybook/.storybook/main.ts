@@ -19,6 +19,8 @@ const config: StorybookConfig & { title: string } = {
     config.resolve = config.resolve ?? {};
     config.resolve.alias = {
       ...config.resolve.alias,
+      // Before '@voidable/ui', which would otherwise swallow it as a prefix.
+      '@voidable/ui/dev': resolve(__dirname, '../../ui/src/dev/index.ts'),
       '@voidable/ui': resolve(__dirname, '../../ui/src/index.ts'),
     };
     return config;

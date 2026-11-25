@@ -62,6 +62,17 @@ A bare `import '@voidable/theme'` cannot work in a browser, because the theme is
 
 In production, pin both URLs to the release you use by inserting `@<version>` after the package name. Every Voidable package shares one version number, so the theme and the components take the same one (see the [release notes](https://github.com/VoidableUI/Voidable/releases)).
 
+## Development warnings
+
+A misspelled attribute, a value outside the allowed set, `disabled="false"` or a child in the wrong parent does nothing and says nothing. In development, import the separate `dev` entry and the browser console reports each one with the element, the valid alternatives and a "did you mean":
+
+```js
+if (import.meta.env.DEV) import('@voidable/ui/dev');
+// no bundler, with an import map: <script type="module">import '@voidable/ui/dev.js'</script>
+```
+
+`import '@voidable/ui'`, a single-component import and the autoloader never contain it. What counts as valid is generated from the Custom Elements Manifest. In tests, `configure({ throw: true })` from `@voidable/ui/dev` turns warnings into thrown errors. See [Development warnings](https://voidable.dev/getting-started/development-warnings/).
+
 ## Server-side rendering
 
 Every module registers its custom element when it is imported, which needs `customElements` and `HTMLElement`. Import `@voidable/ui` only in the browser (for example in a client-only entry or behind a dynamic `import()`); the elements are not rendered on the server. Server-rendered markup that uses `<void-*>` tags upgrades once the module loads.

@@ -18,6 +18,7 @@
     <%%= stylesheet_link_tag "voidable-layout-topbar", "data-turbo-track": "reload" %>
     <%%= stylesheet_link_tag "voidable-devise", "data-turbo-track": "reload" %>
     <%%= javascript_importmap_tags %>
+    <%%= voidable_dev_tags %>
 <% end %>
   </head>
 

@@ -45,9 +45,7 @@ func (Source) Catalog(_ context.Context) (*domain.Catalog, error) {
 }
 
 type rules struct {
-	Note    string                       `json:"note"`
-	Parents map[string][]string          `json:"parents"`
-	Hints   map[string]map[string]string `json:"hints"`
+	Note string `json:"note"`
 
 	FalseString map[string][]string `json:"falseString"`
 }
@@ -62,7 +60,7 @@ func (Source) Supplement(_ context.Context) (*domain.Supplement, error) {
 	if err := json.Unmarshal(raw, &r); err != nil {
 		return nil, fmt.Errorf("decode supplement: %w", err)
 	}
-	sup := &domain.Supplement{Note: r.Note, Parents: r.Parents, Hints: r.Hints, FalseString: r.FalseString, Snippets: map[string]string{}}
+	sup := &domain.Supplement{Note: r.Note, FalseString: r.FalseString, Snippets: map[string]string{}}
 	entries, err := fs.ReadDir(supplementFS, "data/supplement/snippets")
 	if err != nil {
 		return nil, fmt.Errorf("read snippets: %w", err)

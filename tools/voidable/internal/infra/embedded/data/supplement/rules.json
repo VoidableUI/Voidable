@@ -1,15 +1,3 @@
 {
-  "note": "Hand-written knowledge the manifest does not carry yet (allowed parents, hints for attributes agents guess, canonical examples for a few components). Each entry belongs in the Custom Elements Manifest.",
-  "parents": {
-    "void-option": ["void-multiselect", "void-combobox"],
-    "void-dropdown-menu-item": ["void-dropdown-menu"],
-    "void-tab-panel": ["void-tabs"],
-    "void-carousel-slide": ["void-carousel"],
-    "void-segmented-control-item": ["void-segmented-control"]
-  },
-  "hints": {
-    "void-input": {"label": "wrap the control in <void-field label=\"...\">"},
-    "void-textarea": {"label": "wrap the control in <void-field label=\"...\">"},
-    "void-select": {"label": "wrap the control in <void-field label=\"...\">; options are native <option> children"}
-  }
+  "note": "Hand-written knowledge the manifest does not carry yet (canonical examples for a few components live in snippets/). Allowed parents, required children and hints for guessed attributes are in the manifest itself (voidParents, voidRequires, voidHints; source packages/ui/cem/supplement.js)."
 }

@@ -3,7 +3,11 @@ import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
 import { NativeFormControl } from '../form-control.js';
 
-/** Continuous value selection for volume controls, price range filters, and numeric range settings. */
+/**
+ * Continuous value selection for volume controls, price range filters, and numeric range settings.
+ * The host has no role: the native range input is the slider (value, min and max included) and carries
+ * the accessible name, which `<void-field>` supplies.
+ */
 export class VoidSlider extends NativeFormControl(VoidElement) {
   @property({ type: Number }) value: number = 50;
   @property({ type: Number }) min: number = 0;
@@ -13,26 +17,6 @@ export class VoidSlider extends NativeFormControl(VoidElement) {
   @property({ type: String, reflect: true }) name: string = '';
   @property({ type: Boolean, attribute: 'show-value', reflect: true }) showValue: boolean = false;
   @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' = 'md';
-
-  connectedCallback(): void {
-    super.connectedCallback();
-    this.setHostAttribute('role', 'slider');
-    this.setHostAttribute('aria-valuemin', String(this.min));
-    this.setHostAttribute('aria-valuemax', String(this.max));
-    this.setHostAttribute('aria-valuenow', String(this.value));
-  }
-
-  updated(changed: Map<string, unknown>): void {
-    if (changed.has('min')) {
-      this.setHostAttribute('aria-valuemin', String(this.min));
-    }
-    if (changed.has('max')) {
-      this.setHostAttribute('aria-valuemax', String(this.max));
-    }
-    if (changed.has('value') || changed.has('min') || changed.has('max')) {
-      this.setHostAttribute('aria-valuenow', String(this.value));
-    }
-  }
 
   private _fill(): number {
     return ((this.value - this.min) / (this.max - this.min)) * 100;

@@ -25,6 +25,23 @@ func NewLibrary(ctx context.Context, ms ManifestSource, ss SupplementSource, p F
 			return nil, err
 		}
 	}
+	// Parents and attribute hints live in the manifest; the supplement fields
+	// stay for hand-built test supplements and for anything the manifest lacks.
+	if sup.Parents == nil {
+		sup.Parents = map[string][]string{}
+	}
+	if sup.Hints == nil {
+		sup.Hints = map[string]map[string]string{}
+	}
+	for i := range cat.Elements {
+		el := &cat.Elements[i]
+		if len(el.AllowedParents) > 0 {
+			sup.Parents[el.Tag] = el.AllowedParents
+		}
+		if len(el.AttrHints) > 0 {
+			sup.Hints[el.Tag] = el.AttrHints
+		}
+	}
 	for tag, names := range sup.FalseString {
 		el, ok := cat.Element(tag)
 		if !ok {

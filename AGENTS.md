@@ -48,6 +48,10 @@ Without a theme package loaded, components are completely devoid of styling. `@v
 - **SolidJS / Vue / Svelte / Angular**: No package. A package survives only if it holds runtime behaviour a user cannot get from `@voidable/ui` plus its generated output, so these frameworks are served by configuration, documented in `docs/src/content/docs/frameworks/`, and by what the `@voidable/ui` build generates from the Custom Elements Manifest (`packages/ui/cem/generate.js`, never hand-maintained): typings at `@voidable/ui/types/{elements,react,solid,solid2,svelte,vue}` (Solid 2 is a separate entry because its JSX namespace lives in `@solidjs/web` and it dropped `on:`), and for Angular a component-agnostic `ControlValueAccessor` at `@voidable/ui/angular` (`VoidValueAccessor`, written in Angular's partial-compilation format from `cem/angular-accessor.*.template`; its selector and per-tag table come from the manifest). Angular's template type checker cannot check custom element bindings, so there are no Angular typings. Do not add a package for these frameworks; extend the generator.
 - **Hotwire / Alpine / LiveView**: Server-rendered stacks. Each adapter bridges Voidable custom events to the framework (Stimulus controller, `x-void-on` directive, LiveView hooks) and protects component state across DOM morphs.
 
+### Development warnings (`@voidable/ui/dev`)
+
+A separate entry (`packages/ui/src/dev/`, built to `dist/dev.js`, no imports) that warns through `console.warn` about misused `<void-*>` markup: unknown attributes, values outside the declared set, `attr="false"` on booleans, wrong parent or missing required child, undefined tags, listeners for events nothing dispatches. It is never imported by the root entry, a component or the autoloader (a test enforces this), so production pays nothing; apps import it in development only. What is valid comes from the Custom Elements Manifest through `cem/dev-table.js` (generated `src/dev/table.generated.ts`, not committed). Facts the analyzer cannot see (allowed parents, required children, advice for guessed attributes) live in `packages/ui/cem/supplement.js` and are written into the manifest as `voidParents`, `voidRequires`, `voidHints` (and `voidHostAttributes`, derived from `setHostAttribute` calls); the `voidable` Go tool reads the same fields. When you add a component, a parent/child family or a host attribute that is not role, tabindex or `aria-*`, the table follows from the manifest; run `mise run warnings:sweep` and fix every warning (a real mistake in the repo, or a false positive in the detector: fix the detector).
+
 ### Module Federation Support
 
 The library works as a normal npm import and is shareable as a singleton via Module Federation. This requires:
@@ -202,6 +206,7 @@ set -euo pipefail
 | `mise run evals -- <cmd>` | Agent evals CLI: `run`, `report`, `estimate`, `calibrate`, `list`, `contract` (live runs cost money; not in `ci`) |
 | `mise run evals:test` | Unit, scoring and contract tests of the eval harness (part of `ci`; browser tests skip without Chromium) |
 | `mise run evals:calibrate` | Score the reference solutions and rewrite `evals/results/calibration.json` |
+| `mise run warnings:sweep` | Load every Storybook story and every built docs page in headless Chromium (needs Chromium: `CHROMIUM_PATH`, default `/usr/bin/chromium`) with `@voidable/ui/dev` running and fail on any `[voidable]` warning. Not part of `ci`; run it after changing components, stories or docs markup |
 | `mise run docs` | Start docs dev server |
 | `mise run docs:build` | Build docs for deployment |
 

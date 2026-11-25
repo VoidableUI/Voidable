@@ -223,19 +223,36 @@ describe('VoidTagsInput', () => {
   });
 
   describe('ARIA', () => {
-    it('sets role="listbox" when connected', () => {
+    it('has no role while the entry field is there: that native input is the control', async () => {
       const el = createElement();
       document.body.appendChild(el);
-      expect(el.getAttribute('role')).toBe('listbox');
+      await el.updateComplete;
+      expect(el.querySelector('.void-tags-input-field')).not.toBeNull();
+      expect(el.hasAttribute('role')).toBe(false);
     });
 
-    it('tags have role="option"', async () => {
+    it('is a group of tags when there is no entry field (read-only), so a label has something to name', async () => {
+      const el = createElement();
+      el.value = ['tag1'];
+      el.readonly = true;
+      document.body.appendChild(el);
+      await el.updateComplete;
+      expect(el.querySelector('.void-tags-input-field')).toBeNull();
+      expect(el.getAttribute('role')).toBe('group');
+      el.readonly = false;
+      await el.updateComplete;
+      expect(el.hasAttribute('role')).toBe(false);
+    });
+
+    it('tags are plain text with a labelled remove button, not options of a listbox that is not there', async () => {
       const el = createElement();
       el.value = ['tag1'];
       document.body.appendChild(el);
       await el.updateComplete;
-      const tag = el.querySelector('.void-tags-input-tag');
-      expect(tag?.getAttribute('role')).toBe('option');
+      const tag = el.querySelector('.void-tags-input-tag')!;
+      expect(tag.hasAttribute('role')).toBe(false);
+      expect(tag.hasAttribute('aria-selected')).toBe(false);
+      expect(tag.querySelector('button')?.getAttribute('aria-label')).toBe('Remove tag1');
     });
   });
 });

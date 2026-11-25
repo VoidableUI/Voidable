@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+#MISE description="Load every Storybook story and docs page in headless Chromium with @voidable/ui/dev and fail on any warning (needs Chromium: CHROMIUM_PATH, default /usr/bin/chromium)"
+#MISE depends=["build", "docs_build"]
+set -euo pipefail
+
+node scripts/dev-warnings/sweep.mjs "$@"

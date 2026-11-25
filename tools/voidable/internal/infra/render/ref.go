@@ -158,7 +158,7 @@ func refText(p *printer, r *domain.Reference) {
 		}
 	}
 	if len(r.Parents) > 0 {
-		p.f("parents: %s [stand-in]\n", strings.Join(r.Parents, ", "))
+		p.f("parents: %s\n", strings.Join(r.Parents, ", "))
 	}
 	if len(r.Missing) > 0 {
 		p.f("not in manifest: %s\n", strings.Join(r.Missing, ", "))

@@ -30,6 +30,17 @@ const liveSocket = new LiveSocket("/live", Socket, {
 If you use esbuild without `node_modules`, import the source directly (the demo
 does: `import {VoidHooks, VoidDOM} from "../../../src/index.ts"`).
 
+## Development warnings
+
+Render `VoidableUI.Dev.warnings` once in the root layout, after your app script, to have misused `<void-*>` markup (a wrong attribute, a value outside the allowed set, a child in the wrong parent) reported in the browser console, including what LiveView patches in later:
+
+```heex
+<script defer phx-track-static type="text/javascript" src={~p"/assets/app.js"}></script>
+<VoidableUI.Dev.warnings />
+```
+
+It renders nothing outside the `:dev` environment. `config :live_voidable, dev_warnings: false | true | :throw` changes that.
+
 ## Events
 
 Interactive components render `phx-hook="VoidEvent"` and `data-void-events`.

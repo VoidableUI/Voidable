@@ -27,6 +27,10 @@ export const autoloader = createAutoloader({ tags, modules });
 
 autoloader.start();
 
+// Lets `@voidable/ui/dev` tell "still loading" from "never defined" without
+// importing this module (which would start it).
+(globalThis as Record<symbol, unknown>)[Symbol.for('voidable.autoloader')] = autoloader;
+
 /** Resolves when every `void-*` element currently on the page is defined. */
 export const ready = (): Promise<void> => autoloader.ready();
 

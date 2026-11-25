@@ -28,6 +28,9 @@ importers:
       eslint-plugin-lit-a11y:
         specifier: ^5.1.1
         version: 5.1.1(eslint@10.2.1(jiti@2.7.0))
+      playwright-core:
+        specifier: ^1.65.1
+        version: 1.65.1
       publint:
         specifier: ^0.3.25
         version: 0.3.25
