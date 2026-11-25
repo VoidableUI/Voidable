@@ -3,7 +3,7 @@ void-segmented-control {
   align-items: center;
   padding: 2px;
   background: var(--void-color-bg-secondary);
-  border: 1px solid var(--void-color-border);
+  border: 1px solid var(--void-color-border-control);
   border-radius: var(--void-radius-md);
   gap: 2px;
 }

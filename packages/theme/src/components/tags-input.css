@@ -21,7 +21,7 @@ void-tags-input[color="notice"]  { --tone: var(--void-color-notice); }
   padding: var(--void-space-2) var(--void-space-3);
   min-height: 2.25rem;
   background: var(--void-color-bg-secondary);
-  border: 1px solid var(--void-color-border);
+  border: 1px solid var(--void-color-border-control);
   border-radius: var(--void-radius-md);
   cursor: text;
   transition: border-color var(--void-duration-fast) var(--void-ease-in-out),
@@ -29,7 +29,7 @@ void-tags-input[color="notice"]  { --tone: var(--void-color-notice); }
 }
 
 .void-tags-input:hover {
-  border-color: var(--void-color-border-strong);
+  border-color: var(--void-color-border-control);
 }
 
 .void-tags-input:focus-within {

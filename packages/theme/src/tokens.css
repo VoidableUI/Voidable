@@ -26,6 +26,7 @@
   --void-color-border:        color-mix(in srgb, var(--void-white) 14%, transparent);
   --void-color-border-strong: color-mix(in srgb, var(--void-white) 22%, transparent);
   --void-color-border-focus:  color-mix(in srgb, var(--void-white) 55%, transparent);
+  --void-color-border-control: color-mix(in srgb, var(--void-white) 36%, transparent);
 
   /* Accent — monochrome */
   --void-color-accent:       var(--void-white);
@@ -79,6 +80,7 @@
   --void-color-border:        var(--void-stone-300);
   --void-color-border-strong: var(--void-stone-400);
   --void-color-border-focus:  var(--void-stone-600);
+  --void-color-border-control: var(--void-stone-450);
 
   /* Accent */
   --void-color-accent:       var(--void-stone-900);

@@ -1,7 +1,6 @@
 void-switch {
   --tone: var(--void-color-accent);
   --tone-subtle: color-mix(in srgb, var(--tone) 20%, transparent);
-  --tone-border: color-mix(in srgb, var(--tone) 40%, transparent);
 
   display: inline-flex;
   align-items: center;
@@ -16,7 +15,7 @@ void-switch {
   width: 2.25rem;
   height: 1.25rem;
   background: var(--tone-subtle);
-  border: 1px solid var(--tone-border);
+  border: 1px solid var(--void-color-border-control);
   border-radius: var(--void-radius-full);
   transition: background var(--void-duration-fast) var(--void-ease-in-out),
               border-color var(--void-duration-fast) var(--void-ease-in-out);
@@ -48,8 +47,8 @@ void-switch:focus-visible .void-switch-track {
   outline-offset: 2px;
 }
 
-void-switch:hover .void-switch-track {
-  border-color: var(--void-color-border-strong);
+void-switch:not([checked]):hover .void-switch-track {
+  border-color: var(--void-color-border-control);
 }
 
 void-switch[color="error"]   { --tone: var(--void-color-error); }
