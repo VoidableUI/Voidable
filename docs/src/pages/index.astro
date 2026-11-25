@@ -4,6 +4,7 @@ import iconBrandGithub from '@tabler/icons/outline/brand-github.svg?raw';
 import iconSun from '@tabler/icons/outline/sun.svg?raw';
 import iconMoon from '@tabler/icons/outline/moon.svg?raw';
 import { codeToHtml } from 'shiki';
+import { stats } from '../lib/stats';
 
 const cssCode = `/* Override one variable.
    Watch the entire library remap. */
@@ -27,8 +28,12 @@ const highlightedCss = await codeToHtml(cssCode, {
   theme: 'github-dark-default',
 });
 
-const version = import.meta.env.VOIDABLE_VERSION || 'v0.0.0';
-const bundleSize = import.meta.env.VOIDABLE_BUNDLE_SIZE || '<15 kB';
+// Counts, version and bundle size are derived at build time (see src/lib/stats.ts).
+const { version, bundleSize } = stats;
+const description = `Framework-agnostic web component library built with Lit 3. ${stats.elements} custom elements, Light DOM, zero visual CSS, token theming. ${stats.adapters} adapter packages for React, Vue, Solid, Svelte, Angular, Hotwire, Alpine, and LiveView, plus guides for Lit, Qwik, Astro, and vanilla JS.`;
+const siteTitle = 'Voidable. Devoid of style.';
+const canonical = new URL('/', Astro.site ?? 'https://voidable.dev').href;
+const ogImage = new URL('/og.png', canonical).href;
 ---
 
 <html lang="en" data-theme="dark">
@@ -36,7 +41,23 @@ const bundleSize = import.meta.env.VOIDABLE_BUNDLE_SIZE || '<15 kB';
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Voidable. Devoid of style.</title>
-    <meta name="description" content="A framework-agnostic web component library built with Lit 3. Light DOM, CSS token theming, 10 adapters for React, Vue, Solid, Svelte, Angular, Hotwire, Alpine, LiveView, Qwik, and Astro." />
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Voidable" />
+    <meta property="og:title" content={siteTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:locale" content="en" />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={siteTitle} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={siteTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+    <meta name="twitter:image:alt" content={siteTitle} />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -775,12 +796,12 @@ const bundleSize = import.meta.env.VOIDABLE_BUNDLE_SIZE || '<15 kB';
       <div class="hero-glow" aria-hidden="true"></div>
       <div class="hero-content">
         <div class="hero-badge">
-          <span class="hero-badge-version">{version}</span>
-          Now with Alpine/Laravel + Qwik adapters
+          {version && <span class="hero-badge-version">{version}</span>}
+          {stats.adapters} framework adapter packages
         </div>
         <h1>Devoid<br/>of style.</h1>
         <p class="hero-sub">
-          45+ Lit 3 web components with zero visual CSS.<br/>
+          {stats.elements} Lit 3 custom elements with zero visual CSS.<br/>
           Theming flows through tokens. You own the style.<br/>
           Use a modern theme with clean defaults or roll your own.
         </p>
@@ -1028,21 +1049,23 @@ const bundleSize = import.meta.env.VOIDABLE_BUNDLE_SIZE || '<15 kB';
     <section class="stats">
       <div class="stats-grid">
         <div class="stat-card">
-          <div class="stat-number">45+</div>
-          <div class="stat-label">web components</div>
+          <div class="stat-number">{stats.elements}</div>
+          <div class="stat-label">custom elements</div>
         </div>
         <div class="stat-card">
-          <div class="stat-number">10</div>
-          <div class="stat-label">framework adapters</div>
+          <div class="stat-number">{stats.adapters}</div>
+          <div class="stat-label">framework adapter packages</div>
         </div>
         <div class="stat-card">
           <div class="stat-number">0</div>
           <div class="stat-label">visual CSS in core</div>
         </div>
-        <div class="stat-card">
-          <div class="stat-number">{bundleSize}</div>
-          <div class="stat-label">gzipped runtime</div>
-        </div>
+        {bundleSize && (
+          <div class="stat-card">
+            <div class="stat-number">{bundleSize}</div>
+            <div class="stat-label">gzipped runtime</div>
+          </div>
+        )}
       </div>
     </section>
 
@@ -1065,11 +1088,12 @@ const bundleSize = import.meta.env.VOIDABLE_BUNDLE_SIZE || '<15 kB';
             <li><a href="/getting-started/introduction/">Docs</a></li>
             <li><a href="/storybook/">Storybook</a></li>
             <li><a href="https://github.com/VoidableUI/Voidable" target="_blank">GitHub</a></li>
+            <li><a href="https://www.npmjs.com/package/@voidable/ui" target="_blank">npm</a></li>
           </ul>
         </div>
         <div class="footer-bottom">
           <span>&copy; voidable.dev &middot; MIT</span>
-          <span>{version}</span>
+          <span>{version ?? ''}</span>
         </div>
       </div>
     </footer>

@@ -3,8 +3,9 @@ title: Component Overview
 ---
 
 import { LinkCard } from '@astrojs/starlight/components';
+import { stats } from '../../../lib/stats';
 
-Voidable ships 73 components organized by category. All components render in the Light DOM and are styled entirely through `@voidable/theme` CSS tokens.
+Voidable ships {stats.elements} custom elements across {stats.components} components (parent and child elements such as `<void-tabs>` and `<void-tab-panel>` count separately), organized by category. All components render in the Light DOM and are styled entirely through `@voidable/theme` CSS tokens.
 
 <LinkCard title="Interactive Storybook" href="/storybook/" description="Browse all components with live examples and controls." />
 
@@ -27,14 +28,14 @@ Voidable ships 73 components organized by category. All components render in the
 |-----------|-----|-------------|
 | Avatar | `<void-avatar>` | User identity display for comment threads and user lists; falls back to initials |
 | Badge | `<void-badge>` | Small status chip for issue trackers, tag systems, and state indicators |
-| List / ListItem | `<void-list>` | Structured item list for menus, option sets, and content feeds with optional dividers |
+| List / ListItem | `<void-list>` / `<void-list-item>` | Structured item list for menus, option sets, and content feeds with optional dividers |
 | Table | `<void-table>` | Styled data table for admin lists, report grids, and comparison layouts |
 | Tag | `<void-tag>` | Removable label chip for selected filters, applied tags, and multi-value inputs |
 | Breadcrumbs | `<void-breadcrumbs>` | Navigation trail for deep hierarchies in dashboards and file browsers |
 | StatusDot | `<void-status-dot>` | Presence indicator showing online/away/offline state in user lists and rosters |
 | Tooltip | `<void-tooltip>` | Hover hint for icon buttons and truncated text without cluttering the UI |
 | Popover | `<void-popover>` | Click-triggered anchored overlay for contextual detail and mini-forms |
-| Tabs / TabPanel | `<void-tabs>` | Tabbed navigation for settings pages and parallel content categories |
+| Tabs / TabPanel | `<void-tabs>` / `<void-tab-panel>` | Tabbed navigation for settings pages and parallel content categories |
 | Accordion | `<void-accordion>` / `<void-accordion-item>` | Collapsible sections for FAQs, settings panels, and long-form selective content |
 | Stepper | `<void-stepper>` | Multi-step progress tracker for onboarding flows and checkout funnels |
 | Pagination | `<void-pagination>` | Page navigation for data tables, search results, and content archives |
@@ -42,7 +43,16 @@ Voidable ships 73 components organized by category. All components render in the
 | Stat | `<void-stat>` | Key metric display for analytics dashboards with label, value, delta, and trend |
 | Calendar / DatePicker | `<void-calendar>` / `<void-date-picker>` | Date selection for booking flows and scheduling UIs with locale-aware formatting and min/max constraints |
 | HoverCard | `<void-hover-card>` | Rich content preview card that appears on hover for user profiles, link previews, and contextual information panels |
-| NavMenu / NavMenuItem | `<void-nav-menu>` | Horizontal navigation bar with dropdown sub-menus for site headers, application nav bars, and mega-menu layouts |
+| NavMenu / NavMenuItem | `<void-nav-menu>` / `<void-nav-menu-item>` | Horizontal navigation bar with dropdown sub-menus for site headers, application nav bars, and mega-menu layouts |
+
+## Charts
+
+| Component | Tag | Description |
+|-----------|-----|-------------|
+| BarChart | `<void-bar-chart>` | Animated bar chart for comparing categories and series, with per-bar colors, optional value labels, and filled, outline, or wireframe variants |
+| LineChart | `<void-line-chart>` | Line chart for trends over time with linear or step interpolation and multiple series |
+| DonutChart | `<void-donut-chart>` | Donut chart for part-to-whole breakdowns, with optional value labels and a total in the center |
+| Gauge | `<void-gauge>` | Radial gauge for a single value within a range, such as capacity or score, with full, semi, or three-quarter arcs and optional tick marks |
 
 ## Forms
 
@@ -56,7 +66,7 @@ Voidable ships 73 components organized by category. All components render in the
 | Combobox | `<void-combobox>` / `<void-option>` | Filterable dropdown for long option lists like country selectors and user pickers |
 | Checkbox | `<void-checkbox>` | Binary or indeterminate selection for form fields and data table row selection |
 | CheckboxGroup | `<void-checkbox-group>` | Grouped multi-option selection for preference forms and filter panels |
-| Radio / RadioGroup | `<void-radio>` | Mutually exclusive option selection for plan pickers and preference settings |
+| Radio / RadioGroup | `<void-radio>` / `<void-radio-group>` | Mutually exclusive option selection for plan pickers and preference settings |
 | Switch | `<void-switch>` | On/off toggle for feature flags and settings that take immediate effect |
 | Slider | `<void-slider>` | Continuous value selection for volume controls, price ranges, and numeric settings |
 | Field | `<void-field>` | Form field wrapper pairing an input with label, helper text, and validation error |
@@ -78,7 +88,7 @@ Voidable ships 73 components organized by category. All components render in the
 |-----------|-----|-------------|
 | Alert | `<void-alert>` | Inline contextual message for form validation, permission warnings, and status notices |
 | Banner | `<void-banner>` | Full-width site-level announcement for maintenance windows and promotional messaging |
-| Toast / ToastContainer | `<void-toast>` | Temporary notification popup for action confirmations and status feedback |
+| Toast / ToastContainer | `<void-toast>` / `<void-toast-container>` | Temporary notification popup for action confirmations and status feedback |
 | Progress | `<void-progress>` | Determinate or indeterminate progress bar for uploads and multi-step processes |
 | Spinner | `<void-spinner>` | Indeterminate loading indicator for async operations and inline fetching |
 | Skeleton | `<void-skeleton>` | Content placeholder during loading for cards and lists to prevent layout shift |
