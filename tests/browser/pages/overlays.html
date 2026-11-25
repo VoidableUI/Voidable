@@ -77,8 +77,20 @@
   <button id="after">after</button>
 </main>
 <script>
+  // void-open and void-close do not bubble, so listen in the capture phase.
   window.closes = [];
-  document.addEventListener('void-close', (e) => window.closes.push(e.target.id || e.target.tagName.toLowerCase()));
+  window.closeEvents = [];
+  document.addEventListener(
+    'void-close',
+    (e) => {
+      const id = e.target.id || e.target.tagName.toLowerCase();
+      window.closes.push(id);
+      window.closeEvents.push({ id, reason: e.detail && e.detail.reason, cancelable: e.cancelable });
+    },
+    true,
+  );
+  window.opens = [];
+  document.addEventListener('void-open', (e) => window.opens.push({ id: e.target.id, reason: e.detail && e.detail.reason }), true);
   window.selects = [];
   document.addEventListener('void-select', (e) => window.selects.push(e.target.id));
 </script>

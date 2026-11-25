@@ -48,11 +48,11 @@ describe('VoidToggle', () => {
 
   describe('attribute reflection', () => {
     it('reflects every public property to an attribute', async () => {
-      const el = await mount({ pressed: true, disabled: true, color: 'error', size: 'xl', variant: 'filled' });
+      const el = await mount({ pressed: true, disabled: true, color: 'error', size: 'lg', variant: 'filled' });
       expect(el.hasAttribute('pressed')).toBe(true);
       expect(el.hasAttribute('disabled')).toBe(true);
       expect(el.getAttribute('color')).toBe('error');
-      expect(el.getAttribute('size')).toBe('xl');
+      expect(el.getAttribute('size')).toBe('lg');
       expect(el.getAttribute('variant')).toBe('filled');
     });
 

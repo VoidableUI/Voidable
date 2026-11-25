@@ -55,9 +55,9 @@ describe('VoidCard', () => {
     });
 
     it('reflects outlined variant to attribute', async () => {
-      el.variant = 'outlined';
+      el.variant = 'bordered';
       await el.updateComplete;
-      expect(el.getAttribute('variant')).toBe('outlined');
+      expect(el.getAttribute('variant')).toBe('bordered');
     });
 
     it('reads variant from attribute', () => {
@@ -66,8 +66,8 @@ describe('VoidCard', () => {
     });
 
     it('reads outlined variant from attribute', () => {
-      el.setAttribute('variant', 'outlined');
-      expect(el.variant).toBe('outlined');
+      el.setAttribute('variant', 'bordered');
+      expect(el.variant).toBe('bordered');
     });
 
     it('reads default variant from attribute', () => {

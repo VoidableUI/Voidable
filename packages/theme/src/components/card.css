@@ -30,7 +30,7 @@ void-card[variant="elevated"] {
   box-shadow: var(--void-shadow-md);
 }
 
-void-card[variant="outlined"] {
+void-card[variant="bordered"] {
   background: transparent;
   border: 1px solid var(--void-color-border);
 }

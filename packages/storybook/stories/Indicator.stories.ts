@@ -17,7 +17,7 @@ const meta: Meta = {
   argTypes: {
     color: {
       control: { type: 'select' },
-      options: ['default', 'error', 'warning', 'caution', 'success', 'info', 'notice'],
+      options: ['default', 'error', 'warning', 'caution', 'success', 'info', 'notice', 'highlight'],
     },
     position: {
       control: { type: 'select' },
@@ -25,7 +25,7 @@ const meta: Meta = {
     },
     size: {
       control: { type: 'select' },
-      options: ['sm', 'md', 'lg', 'xl', 'xxl'],
+      options: ['sm', 'md', 'lg'],
     },
     count: { control: { type: 'number' } },
     ping: { control: { type: 'boolean' } },
@@ -72,8 +72,6 @@ export const Sizes: Story = {
       <void-indicator size="sm" color="error"></void-indicator>
       <void-indicator size="md" color="error"></void-indicator>
       <void-indicator size="lg" color="error"></void-indicator>
-      <void-indicator size="xl" color="error"></void-indicator>
-      <void-indicator size="xxl" color="error"></void-indicator>
     </div>
   `,
 };

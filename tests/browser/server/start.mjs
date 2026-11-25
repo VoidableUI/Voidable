@@ -24,13 +24,22 @@ const env = { ...process.env, PORT: String(app.port), ...app.env };
 
 // The toolchains pinned in mise.toml, ahead of whatever else is on PATH (a
 // system Ruby, say), so the app runs on the versions the repository declares.
+// Where mise has not installed a tool (CI installs Ruby, Erlang/Elixir and PHP
+// with their prebuilt setup actions, at the versions mise.toml pins, and runs
+// with MISE_TASK_RUN_AUTO_INSTALL=false), the tool already on PATH is used.
+const binaries = { ruby: 'ruby', erlang: 'erl', elixir: 'elixir', php: 'php' };
 for (const tool of app.tools ?? []) {
   const where = spawnSync('mise', ['where', tool], { cwd: app.cwd, encoding: 'utf8' });
-  if (where.status !== 0) {
-    console.error(`[${name}] mise cannot find ${tool}: ${where.stderr.trim()} (run \`mise install ${tool}\`)`);
+  if (where.status === 0) {
+    env.PATH = `${join(where.stdout.trim(), 'bin')}:${env.PATH}`;
+    continue;
+  }
+  const onPath = spawnSync('sh', ['-c', `command -v ${binaries[tool] ?? tool}`], { env, encoding: 'utf8' });
+  if (onPath.status !== 0) {
+    console.error(`[${name}] ${tool} is neither installed by mise nor on PATH (run \`mise install ${tool}\`): ${where.stderr.trim()}`);
     process.exit(1);
   }
-  env.PATH = `${join(where.stdout.trim(), 'bin')}:${env.PATH}`;
+  console.error(`[${name}] using ${tool} from PATH (${onPath.stdout.trim()}); mise has not installed it`);
 }
 
 // 1. This repository's built packages, as the app will load them.
@@ -49,15 +58,29 @@ for (const [file, spec] of Object.entries(app.assets ?? {})) {
   }
 }
 
-// 2. Prepare (install dependencies, create the database). A step is a command, or { write: [file, text] }.
+// 2. Prepare (install dependencies, create the database). A step is a command
+// ([cmd, args]), or { write: [file, text] }. A command that downloads from a
+// package registry (RubyGems, Hex, Packagist, npm) carries `retry: true` as a
+// third element: registries fail now and then, and one such failure must not
+// fail a run, so it is tried up to three times with a pause between attempts.
+const attempts = 3;
+const pause = (s) => spawnSync('sleep', [String(s)]);
 for (const step of app.prepare) {
   if (!Array.isArray(step)) {
     // Never overwrite a file a developer made (the Laravel example's .env).
     if (!existsSync(join(app.cwd, step.write[0]))) writeFileSync(join(app.cwd, step.write[0]), step.write[1]);
     continue;
   }
-  const [cmd, args] = step;
-  const r = spawnSync(cmd, args, { cwd: app.cwd, env, stdio: 'inherit' });
+  const [cmd, args, opts = {}] = step;
+  let r;
+  for (let attempt = 1; attempt <= (opts.retry ? attempts : 1); attempt++) {
+    r = spawnSync(cmd, args, { cwd: app.cwd, env, stdio: 'inherit' });
+    if (r.status === 0) break;
+    if (opts.retry && attempt < attempts) {
+      console.error(`[${name}] "${cmd} ${args.join(' ')}" failed with ${r.status ?? r.signal}; retrying in ${attempt * 10}s (attempt ${attempt + 1} of ${attempts})`);
+      pause(attempt * 10);
+    }
+  }
   if (r.status !== 0) {
     console.error(`[${name}] "${cmd} ${args.join(' ')}" failed with ${r.status ?? r.signal}`);
     process.exit(1);

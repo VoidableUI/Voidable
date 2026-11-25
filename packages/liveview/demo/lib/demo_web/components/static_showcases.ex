@@ -39,8 +39,6 @@ defmodule DemoWeb.StaticShowcases do
         <VoidableUI.Components.badge size="sm">9</VoidableUI.Components.badge>
         <VoidableUI.Components.badge>42</VoidableUI.Components.badge>
         <VoidableUI.Components.badge size="lg">New</VoidableUI.Components.badge>
-        <VoidableUI.Components.badge size="xl">XL</VoidableUI.Components.badge>
-        <VoidableUI.Components.badge size="xxl">XXL</VoidableUI.Components.badge>
       </div>
     </div>
     """
@@ -91,8 +89,6 @@ defmodule DemoWeb.StaticShowcases do
         <VoidableUI.Components.spinner size="sm" label="Loading small" />
         <VoidableUI.Components.spinner label="Loading medium" />
         <VoidableUI.Components.spinner size="lg" label="Loading large" />
-        <VoidableUI.Components.spinner size="xl" label="Loading xl" />
-        <VoidableUI.Components.spinner size="xxl" label="Loading xxl" />
       </div>
     </div>
     <div class="showcase-section">
@@ -200,8 +196,6 @@ defmodule DemoWeb.StaticShowcases do
         <VoidableUI.Components.avatar initials="KW" size="sm" />
         <VoidableUI.Components.avatar initials="KW" />
         <VoidableUI.Components.avatar initials="KW" size="lg" />
-        <VoidableUI.Components.avatar initials="KW" size="xl" />
-        <VoidableUI.Components.avatar initials="KW" size="xxl" />
       </div>
     </div>
     <div class="showcase-section">
@@ -269,8 +263,6 @@ defmodule DemoWeb.StaticShowcases do
         <VoidableUI.Components.progress value={60} size="sm" />
         <VoidableUI.Components.progress value={60} />
         <VoidableUI.Components.progress value={60} size="lg" />
-        <VoidableUI.Components.progress value={60} size="xl" />
-        <VoidableUI.Components.progress value={60} size="xxl" />
       </div>
     </div>
     <div class="showcase-section">
@@ -598,7 +590,7 @@ defmodule DemoWeb.StaticShowcases do
     </div>
     <div class="showcase-section">
       <h3>Outlined</h3>
-      <VoidableUI.Components.card variant="outlined">
+      <VoidableUI.Components.card variant="bordered">
         <void-card-header>
           <void-card-title>Integration Status</void-card-title>
         </void-card-header>

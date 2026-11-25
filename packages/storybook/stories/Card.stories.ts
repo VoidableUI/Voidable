@@ -20,7 +20,7 @@ const meta: Meta = {
     },
     variant: {
       control: { type: 'select' },
-      options: ['default', 'elevated', 'outlined'],
+      options: ['default', 'elevated', 'bordered'],
     },
     padding: {
       control: { type: 'select' },
@@ -78,7 +78,7 @@ export const Elevated: Story = {
 
 export const Outlined: Story = {
   render: () => html`
-    <void-card variant="outlined">
+    <void-card variant="bordered">
       <void-card-header>
         <void-card-title>Integration Status</void-card-title>
       </void-card-header>

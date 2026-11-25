@@ -68,13 +68,13 @@ export class VoidSegmentedControl extends InternalsFormControl(VoidElement) {
   @property({ type: String, reflect: true }) value = '';
   /** Stop the whole control reacting and exclude the value from the form submission. */
   @property({ type: Boolean, reflect: true }) disabled = false;
-  /** Size step: `sm`, `md` (default), `lg`, `xl` or `xxl`. */
-  @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' | 'xl' | 'xxl' = 'md';
+  /** Size step: `sm`, `md` (default) or `lg`. */
+  @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' = 'md';
   /**
-   * Status colour of the selected segment: `default`, `error`, `warning`, `success`, `info`, `notice` or
+   * Status colour of the selected segment: `default`, `error`, `warning`, `caution`, `success`, `info`, `notice` or
    * `highlight`.
    */
-  @property({ type: String, reflect: true }) color: 'default' | 'error' | 'warning' | 'success' | 'info' | 'notice' | 'highlight' = 'default';
+  @property({ type: String, reflect: true }) color: 'default' | 'error' | 'warning' | 'caution' | 'success' | 'info' | 'notice' | 'highlight' = 'default';
 
   private _observer: MutationObserver | null = null;
 

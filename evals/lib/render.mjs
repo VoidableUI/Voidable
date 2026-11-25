@@ -13,7 +13,7 @@
 // (Turbo responses, LiveView events, Livewire requests) are not exercised.
 import { build } from 'esbuild';
 import { spawnSync } from 'node:child_process';
-import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, readdirSync, renameSync, statSync, writeFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { dirname, join } from 'node:path';
 import { ASSETS, EVALS, FIXTURES, ROOT } from './paths.mjs';
@@ -34,12 +34,20 @@ export async function buildAssets({ force = false } = {}) {
   const stale = (out, dir) => !existsSync(out) || statSync(out).mtimeMs < newest(dir);
   const themeDir = dirname(require.resolve('@voidable/theme'));
   if (force || stale(ui, dirname(dist))) {
-    const entry = join(ASSETS, 'ui-entry.js');
+    // node --test runs the test files in parallel, and each finds the cache stale
+    // right after a build: every file rebuilds at once. Each process builds into
+    // its own files and renames the result into place, so a reader sees the old
+    // bundle or the new one, never one half-written by another process.
+    const entry = join(ASSETS, `ui-entry.${process.pid}.js`);
+    const tmp = `${ui}.${process.pid}.tmp`;
     writeFileSync(entry, "export * from '@voidable/ui';\n");
-    await build({ entryPoints: [entry], bundle: true, format: 'esm', outfile: ui, absWorkingDir: EVALS, logLevel: 'silent', nodePaths: [join(EVALS, 'node_modules')] });
+    await build({ entryPoints: [entry], bundle: true, format: 'esm', outfile: tmp, absWorkingDir: EVALS, logLevel: 'silent', nodePaths: [join(EVALS, 'node_modules')] });
+    renameSync(tmp, ui);
   }
   if (force || stale(theme, themeDir)) {
-    await build({ entryPoints: [require.resolve('@voidable/theme')], bundle: true, outfile: theme, logLevel: 'silent' });
+    const tmp = `${theme}.${process.pid}.tmp`;
+    await build({ entryPoints: [require.resolve('@voidable/theme')], bundle: true, outfile: tmp, logLevel: 'silent' });
+    renameSync(tmp, theme);
   }
   return { ui, theme, axe: require.resolve('axe-core/axe.min.js') };
 }

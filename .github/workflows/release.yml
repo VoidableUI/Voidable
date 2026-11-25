@@ -176,7 +176,17 @@ jobs:
 
       - uses: jdx/mise-action@5228313ee0372e111a38da051671ca30fc5a96db # v3.6.3
         with:
-          install_args: "node ruby"
+          install_args: node
+
+      # Prebuilt Ruby from setup-ruby: mise would compile it from source. The
+      # version is the one mise.toml pins.
+      - name: Read the Ruby version from mise.toml
+        id: versions
+        run: echo "ruby=$(mise config get tools.ruby)" >> "$GITHUB_OUTPUT"
+
+      - uses: ruby/setup-ruby@b3aaceaef7e0ee231b499e7b5f49c03fc1d32199 # v1.338.0
+        with:
+          ruby-version: ${{ steps.versions.outputs.ruby }}
 
       - name: Configure RubyGems credentials
         if: needs.plan.outputs.dry_run != 'true'
@@ -207,7 +217,24 @@ jobs:
 
       - uses: jdx/mise-action@5228313ee0372e111a38da051671ca30fc5a96db # v3.6.3
         with:
-          install_args: "node erlang elixir"
+          install_args: node
+
+      # Prebuilt Erlang and Elixir from setup-beam: mise would compile Erlang
+      # from source. The versions are the ones mise.toml pins ("1.19.5-otp-28"
+      # is split into the Elixir and OTP versions setup-beam takes).
+      - name: Read the Erlang and Elixir versions from mise.toml
+        id: versions
+        run: |
+          {
+            echo "otp=$(mise config get tools.erlang)"
+            echo "elixir=$(mise config get tools.elixir | sed 's/-otp-.*$//')"
+          } >> "$GITHUB_OUTPUT"
+
+      - uses: erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124 # v1.24.1
+        with:
+          otp-version: ${{ steps.versions.outputs.otp }}
+          elixir-version: ${{ steps.versions.outputs.elixir }}
+          version-type: strict
 
       - name: Test, build and publish the Hex package
         env:

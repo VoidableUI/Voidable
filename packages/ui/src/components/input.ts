@@ -37,10 +37,10 @@ export class VoidInput extends NativeFormControl(VoidElement) {
   /** Key the value is submitted under in the form's `FormData`. Without a name the field submits nothing. */
   @property({ type: String, reflect: true }) name = '';
   /**
-   * Size step: `sm`, `md` (default), `lg`, `xl` or `xxl`. Buttons and selects of the same step share its
+   * Size step: `sm`, `md` (default) or `lg`. Buttons and selects of the same step share its
    * height.
    */
-  @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' | 'xl' | 'xxl' = 'md';
+  @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' = 'md';
   /**
    * Mark the field invalid: it gets the error styling and `aria-invalid`. The message itself is shown by
    * the wrapping `void-field`, whose own `error` attribute sets this one, so set `error` on the field

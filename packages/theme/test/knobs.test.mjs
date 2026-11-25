@@ -9,7 +9,7 @@ import { test } from 'node:test';
 import { color, contrast, evaluate, hex, numeric, over } from '../build/css-eval.js';
 import { BUILDER_URL, builderUrl, describe, fontStacks, fromParams, hueName, knobs, parseKnob, rng, surprise, themeCss, toParams } from '../build/knobs.js';
 import { environment, knobsToDtcg, readTheme, resolve, toDtcg } from '../build/tokens.js';
-import { load } from '../scripts/build.mjs';
+import { load } from '../scripts/export-tokens.mjs';
 
 const { source, themes, skinTokens } = load();
 const defaults = source.knobs;

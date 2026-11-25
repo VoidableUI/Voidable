@@ -54,6 +54,7 @@ void-switch:not([checked]):hover .void-switch-track {
 void-switch[color="error"]   { --tone: var(--void-color-error); }
 void-switch[color="warning"] { --tone: var(--void-color-warning); }
 void-switch[color="caution"] { --tone: var(--void-color-caution); }
+void-switch[color="highlight"] { --tone: var(--void-color-highlight); }
 void-switch[color="success"] { --tone: var(--void-color-success); }
 void-switch[color="info"]    { --tone: var(--void-color-info); }
 void-switch[color="notice"]  { --tone: var(--void-color-notice); }
@@ -64,15 +65,7 @@ void-switch[size="sm"][checked] .void-switch-thumb { transform: translateX(0.75r
 
 void-switch[size="lg"] .void-switch-track { width: 2.75rem; height: 1.5rem; }
 void-switch[size="lg"] .void-switch-thumb { width: 1.125rem; height: 1.125rem; }
-void-switch[size="lg"][checked] .void-switch-thumb { transform: translateX(1.25rem); }
-
-void-switch[size="xl"] .void-switch-track { width: 3.25rem; height: 1.75rem; } /* token-ok: track size, not a control height */
-void-switch[size="xl"] .void-switch-thumb { width: 1.375rem; height: 1.375rem; }
-void-switch[size="xl"][checked] .void-switch-thumb { transform: translateX(1.5rem); }
-
-void-switch[size="xxl"] .void-switch-track { width: 3.75rem; height: 2rem; }
-void-switch[size="xxl"] .void-switch-thumb { width: 1.625rem; height: 1.625rem; }
-void-switch[size="xxl"][checked] .void-switch-thumb { transform: translateX(1.75rem); }
+void-switch[size="lg"][checked] .void-switch-thumb { transform: translateX(1.25rem); } /* token-ok: track size, not a control height */
 
 void-switch[disabled] {
   opacity: 0.5;

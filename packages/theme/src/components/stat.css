@@ -77,16 +77,6 @@ void-stat[size="lg"] {
   --void-stat-value-size: var(--void-text-4xl);
 }
 
-void-stat[size="xl"] {
-  --void-stat-padding: var(--void-space-8);
-  --void-stat-value-size: var(--void-text-5xl);
-}
-
-void-stat[size="xxl"] {
-  --void-stat-padding: var(--void-space-10);
-  --void-stat-value-size: calc(var(--void-text-5xl) * 1.3333);
-}
-
 void-stat[color="error"]     { --tone: var(--void-color-error); }
 void-stat[color="warning"]   { --tone: var(--void-color-warning); }
 void-stat[color="caution"]   { --tone: var(--void-color-caution); }

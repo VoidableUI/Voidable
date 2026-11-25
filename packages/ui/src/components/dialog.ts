@@ -22,8 +22,8 @@ import { VoidModal } from '../modal.js';
  * enclosing overlay closed) or `api` (the `open` attribute or property changed, including a server re-render).
  */
 export class VoidDialog extends VoidModal {
-  /** Width of the dialog panel: `sm`, `md` (default), `lg` or `xl`. */
-  @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' | 'xl' = 'md';
+  /** Width of the dialog panel: `sm`, `md` (default) or `lg`. */
+  @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' = 'md';
 }
 
 if (!customElements.get('void-dialog')) {

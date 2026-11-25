@@ -15,7 +15,7 @@ const meta: Meta = {
   },
   argTypes: {
     disabled: { control: 'boolean' },
-    size: { control: 'select', options: ['sm', 'md', 'lg', 'xl', 'xxl'] },
+    size: { control: 'select', options: ['sm', 'md', 'lg'] },
     error: { control: 'text' },
   },
 };
@@ -50,8 +50,6 @@ export const Sizes: Story = {
       <void-select size="sm"><option>Small</option></void-select>
       <void-select size="md"><option>Medium</option></void-select>
       <void-select size="lg"><option>Large</option></void-select>
-      <void-select size="xl"><option>XL</option></void-select>
-      <void-select size="xxl"><option>XXL</option></void-select>
     </div>
   `,
 };

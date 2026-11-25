@@ -18,8 +18,8 @@ const meta: Meta = {
     checked: { control: 'boolean' },
     disabled: { control: 'boolean' },
     indeterminate: { control: 'boolean' },
-    color: { control: 'select', options: ['default', 'error', 'warning', 'caution', 'success', 'info', 'notice'] },
-    size: { control: 'select', options: ['sm', 'md', 'lg', 'xl', 'xxl'] },
+    color: { control: 'select', options: ['default', 'error', 'warning', 'caution', 'success', 'info', 'notice', 'highlight'] },
+    size: { control: 'select', options: ['sm', 'md', 'lg'] },
   },
   render: (args) => html`
     <void-checkbox
@@ -64,8 +64,6 @@ export const Sizes: Story = {
       <void-checkbox size="sm">Small</void-checkbox>
       <void-checkbox size="md">Medium</void-checkbox>
       <void-checkbox size="lg">Large</void-checkbox>
-      <void-checkbox size="xl">Extra Large</void-checkbox>
-      <void-checkbox size="xxl">2X Large</void-checkbox>
     </div>
   `,
 };

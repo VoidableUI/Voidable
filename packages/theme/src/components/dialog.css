@@ -41,7 +41,6 @@ void-dialog[open]::part(surface) {
 void-dialog[size="sm"]::part(surface) { max-width: 24rem; }
 void-dialog[size="md"]::part(surface) { max-width: 32rem; }
 void-dialog[size="lg"]::part(surface) { max-width: 48rem; }
-void-dialog[size="xl"]::part(surface) { max-width: 64rem; }
 
 /* The title row: the close button sits at its far end. */
 void-dialog-title {

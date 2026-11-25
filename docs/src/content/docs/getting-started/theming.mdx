@@ -446,15 +446,81 @@ Full theme (recommended):
 @import '@voidable/theme';
 ```
 
-Individual layers:
+That resolves to one built file, `dist/void.css` (`dist/void.min.css` is the minified copy). It carries the tokens, the scoped reset, the `html` and `body` base, the type roles, every component and pattern, the pre-upgrade rules and the forced-colours rules, each in its own [cascade layer](#cascade-layers).
+
+Parts of it, when you want less:
 
 ```css
-@import '@voidable/theme/primitives'; /* fixed palettes and scales */
-@import '@voidable/theme/knobs';      /* the inputs */
-@import '@voidable/theme/tokens';     /* everything derived from them */
-@import '@voidable/theme/reset';
+@import '@voidable/theme/tokens';     /* primitives, knobs and everything derived, in one file */
+@import '@voidable/theme/reset';      /* the reset, scoped to void-* elements */
+@import '@voidable/theme/base';       /* html and body (margin, font, colour, background) */
 @import '@voidable/theme/type';       /* data-void-type roles */
+@import '@voidable/theme/core';       /* everything except base: touches nothing outside void-* */
+@import '@voidable/theme/themes/dune.css';
 ```
+
+The full theme sets `html` and `body` (margin, font, colour, background) through `base`, in the `components.void.reset` layer. Everything else in it matches only `void-*` elements and what they contain. Use `core` instead of the full theme if the page's `html` and `body` are yours to style.
+
+### Per-component CSS
+
+Every component and pattern also has its own file, generated from the same sources, so a page that uses three components need not load sixty:
+
+```css
+@import '@voidable/theme/tokens';
+@import '@voidable/theme/components/button.css';
+@import '@voidable/theme/components/input.css';
+@import '@voidable/theme/patterns/page.css';
+```
+
+Each file declares the layer order, carries the reset for its own tags, the rules for the not-yet-defined state and the forced-colours rules for that component, and pulls in the files of any component it renders (a combobox brings its listbox parts, for instance). Always load `tokens` first or alongside: the files use the tokens but do not repeat them. `dist/exports.json` lists every file and the tags it styles.
+
+The JavaScript side does not load CSS for you. Pair the two yourself: the components you import, or let the autoloader register, are the components whose CSS you link. Until a component's script runs, the pre-upgrade rules in its file keep the page from jumping, so the pairing is a matter of bytes, not of correctness.
+
+## Cascade layers
+
+The theme puts everything in named layers, declared once and in this order, lowest first. They are children of `components`, the layer Tailwind v4 and most other setups use for component styles:
+
+```css
+@layer theme, base,
+       components.void.reset, components.void.tokens, components.void.themes, components.void.type,
+       components.void.components, components.void.patterns, components.void.skins, components.void.a11y,
+       utilities;
+```
+
+- `components.void.reset`: the reset, scoped to `void-*` elements, and the `html` and `body` base.
+- `components.void.tokens`: primitives, knobs and the derived tokens.
+- `components.void.themes`: the theme files (they set knobs only).
+- `components.void.type`: the `data-void-type` roles.
+- `components.void.components` and `components.void.patterns`: every component and every CSS-only pattern.
+- `components.void.skins`: a [skin](#skins-beyond-the-knobs). It overrides derived tokens and restyles elements of components and patterns directly, so it has to beat both whatever their selectors' specificity.
+- `components.void.a11y`: forced-colours adjustments. Above the skins, so a skin can never hide a focus ring or a forced colour.
+
+`theme` and `base` are the framework layers under the theme (Tailwind's preflight is in `base`) and `utilities` is above it, so utility classes such as `rounded-none` or `p-8` win over a component's styles without `!important`. Your own rules written directly in `components` win over the theme's sublayers too.
+
+Why children of `components` and not top-level layers? A layer's position among the top-level layers is fixed by whichever `@layer` statement names it first. An app that loads Tailwind first (it declares `theme, base, components, utilities`) would otherwise get top-level `void.*` layers appended after `utilities`, and every Voidable component would beat every utility class. As children of `components` the order is the same whichever stylesheet loads first. Every stylesheet the theme ships repeats the statement.
+
+### Overriding styles
+
+Layered rules lose to unlayered ones, whatever their specificity, so your application stylesheet needs no `!important` and no selector tricks:
+
+```css
+/* app.css: not in a layer, so it wins over every layer of the theme */
+void-button {
+  border-radius: 999px;
+}
+
+void-card {
+  --void-card-padding: var(--void-space-8);
+}
+```
+
+Three things follow, and they are worth knowing:
+
+- **Put your own reset in a layer.** An unlayered reset (`* { margin: 0; padding: 0 }`, Meyer, a classic normalize) also beats the theme and will flatten component spacing. Load it into a layer below the theme instead: `@import 'reset.css' layer(base);`. Tailwind v4 preflight is already in `base`.
+- **`!important` is inverted between layers.** An important rule in an earlier layer beats an important rule in a later one, and any layered important beats an unlayered one. The theme uses `!important` in only two places (reduced motion and forced colours), both in the topmost layers; do not fight them with your own `!important`.
+- **Order of your own layers.** To put your own code between Voidable and Tailwind utilities, write it in the `components` layer itself (`@layer components { .my-card { ... } }`), which beats the theme's sublayers, or leave it unlayered.
+
+`[data-void-theme]` and `[data-theme]` regions cascade as before: the theme files set knobs, and the tokens derive from them on `:root`, `[data-theme]` and `[data-void-theme]`, so nested regions work in any layer arrangement.
 
 ## Browser support
 

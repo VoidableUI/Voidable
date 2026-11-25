@@ -11,12 +11,12 @@ export class VoidToggle extends VoidElement {
   /** Ignore clicks and keys, and take the toggle out of the tab order. */
   @property({ type: Boolean, reflect: true }) disabled = false;
   /**
-   * Status colour of the pressed state: `default`, `error`, `warning`, `caution`, `success`, `info` or
-   * `notice`.
+   * Status colour of the pressed state: `default`, `error`, `warning`, `caution`, `success`, `info`,
+   * `notice` or `highlight`.
    */
-  @property({ type: String, reflect: true }) color: 'default' | 'error' | 'warning' | 'caution' | 'success' | 'info' | 'notice' = 'default';
-  /** Size step: `sm`, `md` (default), `lg`, `xl` or `xxl`. */
-  @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' | 'xl' | 'xxl' = 'md';
+  @property({ type: String, reflect: true }) color: 'default' | 'error' | 'warning' | 'caution' | 'success' | 'info' | 'notice' | 'highlight' = 'default';
+  /** Size step: `sm`, `md` (default) or `lg`. */
+  @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' = 'md';
   /**
    * How the pressed state shows: `outline` (default) keeps the border and tints; `filled` fills the
    * toggle.

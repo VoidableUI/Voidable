@@ -1,132 +1,194 @@
-#!/usr/bin/env node
-// SPDX-License-Identifier: MIT
+// Builds @voidable/theme's published stylesheets from src/.
 //
-// Token export (`pnpm build` in packages/theme, part of `mise run build`).
-// Resolves every --void-* custom property for each shipped theme and skin,
-// in both colour schemes, and writes to dist/:
+//   node scripts/build.mjs                    everything: src/reset.css, then dist/
+//   node scripts/build.mjs --generated-only   only the generated source file (src/reset.css)
 //
-//   dtcg/<theme>.<scheme>.tokens.json   Design Tokens Community Group format
-//                                       (Format Module 2025.10), self-contained
-//   dtcg/voidable.resolver.json         a resolver document naming those files
-//   json/<theme>.<scheme>.json          { "--void-color-bg": "#000000", … }
-//   knobs.json                          the knobs as data: ranges, defaults,
-//                                       every theme's values, the builder URL
-//   names.js, names.d.ts                token, knob, theme and skin names
-//
-// The values are computed by build/css-eval.js, not by a browser, so the
-// build needs nothing but Node. test/chromium.test.mjs proves they equal
-// what Chromium computes from the same CSS.
-import { mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
-import { basename, dirname, join } from 'node:path';
-import { fileURLToPath } from 'node:url';
-import { BUILDER_URL, fontStacks, groups, knobs, skins } from '../build/knobs.js';
-import { environment, readSkin, readSource, readTheme, resolve, resolverDocument, toDtcg, toFlat } from '../build/tokens.js';
+// dist/ holds, each as `x.css` (readable) and `x.min.css`:
+//   void            everything: tokens, base, every component, pattern and chart
+//   core            the same without the optional base (html and body)
+//   tokens          layer order, primitives, knobs, derived tokens, surfaces, type roles
+//   base            the optional html/body defaults
+//   primitives, knobs, type, reset, layers   single parts
+//   components/<name>   one component, with what it needs to render on its own
+//   patterns/<name>     one group of CSS-only elements
+//   themes/<name>       one demonstration theme, in its layer
+//   skins/<name>        one skin (data-void-skin), in the layer above the patterns
+// plus exports.json. No source map: the bundle is flattened from many files and the
+// packaging lint rejects maps (they would point at sources the package does not publish
+// under those names); the unminified file is the readable form.
+import fs from 'node:fs';
+import path from 'node:path';
+import { bundleAsync } from 'lightningcss';
+import * as L from './lib.mjs';
 
-const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
-const SRC = join(ROOT, 'src');
-const DIST = join(ROOT, 'dist');
-const read = (f) => readFileSync(join(SRC, f), 'utf8');
+const { SRC, DIST } = L;
+const generatedOnly = process.argv.includes('--generated-only');
 
-/** Everything the export is computed from, read once. Shared with the tests. */
-export function load() {
-  const source = readSource({ primitives: read('primitives.css'), knobs: read('knobs.css'), tokens: read('tokens.css') });
-  const list = (dir) => readdirSync(join(SRC, dir)).filter((f) => f.endsWith('.css')).sort();
-  const themes = Object.fromEntries(list('themes').map((f) => [basename(f, '.css'), readTheme(read(`themes/${f}`))]));
-  const skinTokens = Object.fromEntries(list('skins').map((f) => [basename(f, '.css'), readSkin(read(`skins/${f}`))]));
-  return { source, themes, skinTokens };
-}
-
-/** Every exported configuration: each theme, then each skin on the default knobs, in dark and light. */
-export function configurations({ themes, skinTokens }) {
-  const out = [];
-  for (const scheme of ['dark', 'light']) {
-    for (const [name, values] of Object.entries(themes)) out.push({ id: name, kind: 'theme', scheme, knobs: values, skin: {} });
-    for (const [name, tokens] of Object.entries(skinTokens)) out.push({ id: name, kind: 'skin', scheme, knobs: {}, skin: tokens, skinName: name });
+// ── The one generated source file ───────────────────────────────────────────
+const FOCUS_RING = (S) => {
+  const roots = `:is(${S.join(', ')})`;
+  return `
+/* Forced colours: many components replace the outline with a shadow or a
+   border colour for focus, and forced colours drop shadows. Restore a real
+   outline on every theme element; it wins over every \`outline: none\`. */
+@media (forced-colors: active) {
+  :where(${roots}, ${roots} *):focus-visible {
+    outline: var(--void-focus-ring-width, 2px) solid Highlight !important;
+    outline-offset: var(--void-focus-ring-offset, 2px);
   }
-  return out;
+}
+`;
+};
+
+const allTags = [...L.allStyledTags()].sort();
+const resetSource = L.RESET_HEADER + L.resetCss(allTags) + FOCUS_RING(allTags);
+fs.writeFileSync(path.join(SRC, 'reset.css'), resetSource);
+if (generatedOnly) process.exit(0);
+
+// ── Analysis ────────────────────────────────────────────────────────────────
+const statement = L.readLayersStatement();
+const components = L.componentNames();
+const ownerOfTag = L.makeOwnerOfTag(components);
+const ownerOfClass = L.makeOwnerOfClass(components);
+
+const upgrade = L.splitByComponent(L.read(path.join(SRC, 'pre-upgrade.css')), 'pre-upgrade.css', ownerOfTag, ownerOfClass);
+const forced = L.splitByComponent(L.read(path.join(SRC, 'forced-colors.css')), 'forced-colors.css', ownerOfTag, ownerOfClass);
+const problems = [...upgrade.unmapped, ...forced.unmapped];
+if (upgrade.globals.length || forced.globals.length) {
+  for (const g of [...upgrade.globals, ...forced.globals]) problems.push(`global selector in a split file: ${g.selectors.join(', ')}`);
+}
+if (problems.length) {
+  console.error(`The theme build cannot place these selectors in a component:\n  ${problems.join('\n  ')}`);
+  process.exit(1);
 }
 
-export function build() {
-  const loaded = load();
-  const { source, themes, skinTokens } = loaded;
-  rmSync(DIST, { recursive: true, force: true });
-  mkdirSync(join(DIST, 'dtcg'), { recursive: true });
-  mkdirSync(join(DIST, 'json'), { recursive: true });
-  const json = (file, data) => writeFileSync(join(DIST, file), `${JSON.stringify(data, null, 2)}\n`);
+// ── Bundling (lightningcss, with in-memory entries) ─────────────────────────
+const virtual = new Map();
+const abs = (rel) => path.join(SRC, rel);
+const resolver = {
+  read: (file) => (virtual.has(file) ? virtual.get(file) : fs.readFileSync(file, 'utf8')),
+  resolve: (specifier, from) => (specifier.startsWith('virtual:') || path.isAbsolute(specifier) ? specifier : path.resolve(path.dirname(from), specifier)),
+};
 
-  const files = [];
-  let names = [];
-  for (const cfg of configurations(loaded)) {
-    const resolved = resolve(environment(source, cfg));
-    names = [...resolved.keys()];
-    const stem = `${cfg.id}.${cfg.scheme}`;
-    json(`dtcg/${stem}.tokens.json`, toDtcg(resolved, {
-      description: `Voidable ${cfg.kind} "${cfg.id}", ${cfg.scheme} colour scheme: every token, resolved.`,
-      extension: { [cfg.kind]: cfg.id, scheme: cfg.scheme },
-    }));
-    json(`json/${stem}.json`, toFlat(resolved));
-    files.push({ context: `${cfg.id}-${cfg.scheme}`, file: `${stem}.tokens.json` });
+/**
+ * Lightningcss splits the leading layer statement into pieces it leaves
+ * around the output. Put the canonical statement first and drop the rest;
+ * every layer is still declared, in order, by the first.
+ */
+const compact = (s) => s.replace(/\s+/g, ' ').replace(/, /g, ',').replace(/\s*;$/, ';');
+const withStatement = (css, minify) => {
+  const body = css.replace(/@layer\s[\w.,\s-]+;\s*/g, '').replace(/^\s+/, '');
+  return minify ? `${compact(statement)}${body}` : `${statement}\n\n${body}`;
+};
+
+async function bundle(name, entry, { minify, sourceMap = false }) {
+  const filename = `virtual:${name}`;
+  virtual.set(filename, entry);
+  const r = await bundleAsync({ filename, minify, sourceMap, projectRoot: DIST, resolver });
+  let css = r.code.toString();
+  css = withStatement(css, minify);
+  return { css, map: r.map ? r.map.toString() : null };
+}
+
+const sizes = [];
+async function emit(rel, entry, { map = false } = {}) {
+  const plain = await bundle(rel, entry, { minify: false });
+  const min = await bundle(rel, entry, { minify: true, sourceMap: map });
+  const out = path.join(DIST, rel);
+  fs.mkdirSync(path.dirname(out), { recursive: true });
+  fs.writeFileSync(`${out}.css`, plain.css);
+  let minCss = min.css;
+  if (map && min.map) {
+    minCss += `\n/*# sourceMappingURL=${path.basename(rel)}.min.css.map */\n`;
+    fs.writeFileSync(`${out}.min.css.map`, min.map);
   }
-  json('dtcg/voidable.resolver.json', resolverDocument(files, 'void-dark'));
-
-  json('knobs.json', {
-    builder: BUILDER_URL,
-    groups,
-    knobs: knobs.map((k) => ({ ...k, default: source.knobs[k.name] })),
-    fontStacks,
-    themes,
-    skins: skins.filter((s) => s.id in skinTokens),
-  });
-
-  const themeNames = Object.keys(themes);
-  const skinNames = Object.keys(skinTokens);
-  const knobNames = knobs.map((k) => k.name);
-  const arr = (list) => `[\n${list.map((n) => `  '${n}',`).join('\n')}\n]`;
-  writeFileSync(join(DIST, 'names.js'), `// Generated by scripts/build.mjs from the theme's CSS. Do not edit.
-
-/** Every custom property the theme defines. */
-export const tokenNames = ${arr(names)};
-
-/** The knobs: the inputs a theme sets. */
-export const knobNames = ${arr(knobNames)};
-
-/** The shipped themes: values of the data-void-theme attribute. */
-export const themeNames = ${arr(themeNames)};
-
-/** The shipped skins: values of the data-void-skin attribute. */
-export const skinNames = ${arr(skinNames)};
-
-/** \`var(--void-…)\` for a token name. */
-export const cssVar = (name) => \`var(\${name})\`;
-`);
-  const union = (list) => list.map((n) => `'${n}'`).join(' | ') || 'never';
-  writeFileSync(join(DIST, 'names.d.ts'), `// Generated by scripts/build.mjs from the theme's CSS. Do not edit.
-
-/** Every custom property the theme defines. */
-export type TokenName =
-${names.map((n) => `  | '${n}'`).join('\n')};
-
-/** The knobs: the inputs a theme sets. */
-export type KnobName = ${union(knobNames)};
-
-/** The shipped themes: values of the data-void-theme attribute. */
-export type ThemeName = ${union(themeNames)};
-
-/** The shipped skins: values of the data-void-skin attribute. */
-export type SkinName = ${union(skinNames)};
-
-export declare const tokenNames: readonly TokenName[];
-export declare const knobNames: readonly KnobName[];
-export declare const themeNames: readonly ThemeName[];
-export declare const skinNames: readonly SkinName[];
-
-/** \`var(--void-…)\` for a token name. */
-export declare function cssVar<T extends TokenName>(name: T): \`var(\${T})\`;
-`);
-  return { files: files.length, tokens: names.length };
+  fs.writeFileSync(`${out}.min.css`, minCss);
+  sizes.push({ file: rel, bytes: Buffer.byteLength(plain.css), min: Buffer.byteLength(minCss) });
 }
 
-if (process.argv[1] === fileURLToPath(import.meta.url)) {
-  const { files, tokens } = build();
-  console.log(`@voidable/theme: ${tokens} tokens resolved for ${files} theme and scheme combinations`);
+fs.rmSync(DIST, { recursive: true, force: true });
+fs.mkdirSync(DIST, { recursive: true });
+
+const imp = (rel, layer) => `@import '${abs(rel)}'${layer ? ` layer(${layer})` : ''};`;
+const impVirtual = (name, content, layer) => {
+  virtual.set(`virtual:${name}`, content);
+  return `@import 'virtual:${name}' layer(${layer});`;
+};
+const wrapReset = (tags) => L.resetCss([...tags].sort());
+
+// layers, primitives, knobs, type, base, reset
+await emit('layers', statement);
+await emit('primitives', `${statement}\n${imp('primitives.css', 'components.void.tokens')}`);
+await emit('knobs', `${statement}\n${imp('knobs.css', 'components.void.tokens')}`);
+await emit('type', `${statement}\n${imp('type.css', 'components.void.type')}`);
+await emit('base', `${statement}\n${imp('base.css', 'components.void.reset')}`);
+await emit('reset', `${statement}\n${imp('reset.css', 'components.void.reset')}`);
+
+// tokens: everything a component's rules read
+await emit(
+  'tokens',
+  [statement, imp('primitives.css', 'components.void.tokens'), imp('knobs.css', 'components.void.tokens'), imp('tokens.css', 'components.void.tokens'), imp('media/surface.css', 'components.void.patterns'), imp('type.css', 'components.void.type')].join('\n'),
+);
+
+// core and void
+await emit('core', `@import '${abs('core.css')}';`);
+await emit('void', `@import '${abs('core.css')}';\n${imp('base.css', 'components.void.reset')}`);
+
+// per component
+const exportsJson = { layers: L.voidLayers(), components: {}, patterns: {}, themes: [], skins: [] };
+const tagsOfFile = (rel) => L.tagsOfCss(L.read(abs(rel)), rel);
+for (const name of components) {
+  if (L.SHARED.has(name)) continue;
+  const chain = L.closure(name, ownerOfTag);
+  const files = chain.map((n) => `components/${n}.css`);
+  const tags = new Set();
+  for (const f of files) for (const t of tagsOfFile(f)) tags.add(t);
+  const upg = chain.map((n) => upgrade.byComponent.get(n) ?? '').join('');
+  const fc = chain.map((n) => forced.byComponent.get(n) ?? '').join('');
+  const parts = [statement, impVirtual(`reset-${name}`, wrapReset(tags), 'components.void.reset'), ...files.map((f) => imp(f, 'components.void.components'))];
+  if (upg) parts.push(impVirtual(`upgrade-${name}`, upg, 'components.void.components'));
+  if (fc) parts.push(impVirtual(`forced-${name}`, fc, 'components.void.a11y'));
+  await emit(`components/${name}`, parts.join('\n'));
+  exportsJson.components[name] = { requires: chain.filter((n) => n !== name), tags: [...tags].sort() };
 }
+
+// per pattern group
+const patternGroups = {
+  shell: ['patterns/shell.css'],
+  page: ['patterns/page.css'],
+  data: ['patterns/data.css'],
+  media: ['media/media.css'],
+  'app-shell': L.listCss('app-shell'),
+};
+for (const f of L.listCss('patterns')) {
+  const n = path.basename(f, '.css');
+  if (!patternGroups[n]) patternGroups[n] = [f];
+}
+for (const [name, files] of Object.entries(patternGroups)) {
+  if (!files.length) continue;
+  const tags = new Set();
+  for (const f of files) for (const t of tagsOfFile(f)) tags.add(t);
+  const parts = [statement];
+  if (tags.size) parts.push(impVirtual(`reset-pattern-${name}`, wrapReset(tags), 'components.void.reset'));
+  for (const f of files) parts.push(imp(f, 'components.void.patterns'));
+  await emit(`patterns/${name}`, parts.join('\n'));
+  exportsJson.patterns[name] = { tags: [...tags].sort() };
+}
+
+// themes
+for (const f of L.listCss('themes')) {
+  const n = path.basename(f, '.css');
+  await emit(`themes/${n}`, `${statement}\n${imp(f, 'components.void.themes')}`);
+  exportsJson.themes.push(n);
+}
+
+// skins
+for (const f of L.listCss('skins')) {
+  const n = path.basename(f, '.css');
+  await emit(`skins/${n}`, `${statement}\n${imp(f, 'components.void.skins')}`);
+  exportsJson.skins.push(n);
+}
+
+fs.writeFileSync(path.join(DIST, 'exports.json'), `${JSON.stringify(exportsJson, null, 2)}\n`);
+const full = sizes.find((s) => s.file === 'void');
+console.log(`@voidable/theme: ${sizes.length} stylesheets built. void.css ${(full.bytes / 1024).toFixed(1)} KB, void.min.css ${(full.min / 1024).toFixed(1)} KB`);

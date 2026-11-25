@@ -8,10 +8,10 @@ export class VoidProgress extends VoidElement {
   @property({ type: Number, reflect: true }) value: number = 0;
   /** Value that means complete. Defaults to 100. */
   @property({ type: Number, reflect: true }) max: number = 100;
-  /** Status colour of the bar: `default`, `error`, `warning`, `caution`, `success`, `info` or `notice`. */
-  @property({ type: String, reflect: true }) color: 'default' | 'error' | 'warning' | 'caution' | 'success' | 'info' | 'notice' = 'default';
-  /** Thickness step of the bar: `sm`, `md` (default), `lg`, `xl` or `xxl`. */
-  @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' | 'xl' | 'xxl' = 'md';
+  /** Status colour of the bar: `default`, `error`, `warning`, `caution`, `success`, `info`, `notice` or `highlight`. */
+  @property({ type: String, reflect: true }) color: 'default' | 'error' | 'warning' | 'caution' | 'success' | 'info' | 'notice' | 'highlight' = 'default';
+  /** Thickness step of the bar: `sm`, `md` (default) or `lg`. */
+  @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' = 'md';
   /** Show an animated bar for work of unknown length. It has no `aria-valuenow` while on. */
   @property({ type: Boolean, reflect: true }) indeterminate: boolean = false;
 

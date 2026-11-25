@@ -26,8 +26,8 @@ export class VoidStat extends VoidElement {
    * `notice` or `highlight`. Independent of the delta's `trend` colour.
    */
   @property({ type: String, reflect: true }) color: 'default' | 'error' | 'warning' | 'caution' | 'success' | 'info' | 'notice' | 'highlight' = 'default';
-  /** Size step: `sm`, `md` (default), `lg`, `xl` or `xxl`. */
-  @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' | 'xl' | 'xxl' = 'md';
+  /** Size step: `sm`, `md` (default) or `lg`. */
+  @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' = 'md';
 
   connectedCallback(): void {
     super.connectedCallback();

@@ -4,7 +4,7 @@
 // toast, opened and closed by every route a user has, repeatedly, nested.
 // A closed overlay must be invisible, out of the tab order and out of the
 // accessibility tree.
-import { test, expect, expectedFailure, load, settle, isPerceivable, focusedId, type Page } from '../helpers/test';
+import { test, expect, load, settle, isPerceivable, expectPerceivable, scrollLocked, focusedId, type Page } from '../helpers/test';
 
 test.beforeEach(async ({ page }) => {
   await load(page, '/overlays');
@@ -20,16 +20,19 @@ const setOpen = (page: Page, id: string, open: boolean) =>
 
 /** Asserts that nothing inside `selector` can be seen, tabbed to or found in the accessibility tree. */
 async function expectGone(page: Page, selector: string, text: RegExp) {
-  await expect.poll(() => isPerceivable(page.locator(selector).first()), { message: `${selector} is still visible` }).toBe(false);
-  const tree = await page.locator('body').ariaSnapshot();
-  expect(tree, `${selector} is still in the accessibility tree`).not.toMatch(text);
-  const inTabOrder = await page.evaluate((sel) => {
-    const root = document.querySelector(sel)!;
-    return [...root.querySelectorAll<HTMLElement>('a[href], button, input, select, textarea, [tabindex]')].some(
-      (el) => el.tabIndex >= 0 && !el.closest('[hidden], [inert]') && el.checkVisibility?.() !== false && !!el.getClientRects().length,
-    );
-  }, selector);
-  expect(inTabOrder, `something inside ${selector} is still focusable`).toBe(false);
+  // Overlays leave with a short exit transition, so wait for the end state.
+  await expect(async () => {
+    expect(await isPerceivable(page.locator(selector).first()), `${selector} is still visible`).toBe(false);
+    const tree = await page.locator('body').ariaSnapshot();
+    expect(tree, `${selector} is still in the accessibility tree`).not.toMatch(text);
+    const inTabOrder = await page.evaluate((sel) => {
+      const root = document.querySelector(sel)!;
+      return [...root.querySelectorAll<HTMLElement>('a[href], button, input, select, textarea, [tabindex]')].some(
+        (el) => el.tabIndex >= 0 && !el.closest('[hidden], [inert]') && el.checkVisibility?.() !== false && !!el.getClientRects().length,
+      );
+    }, selector);
+    expect(inTabOrder, `something inside ${selector} is still focusable`).toBe(false);
+  }).toPass();
 }
 
 test.describe('closed overlays', () => {
@@ -44,12 +47,10 @@ test.describe('closed overlays', () => {
   });
 
   test('hover-card body is hidden while closed', async ({ page }) => {
-    expectedFailure('#6', 'the closed card is only opacity: 0, so its content stays in the accessibility tree and its links in the tab order');
     await expectGone(page, '#hc .hcc', /Hover card content/);
   });
 
   test('the tab order skips every closed overlay', async ({ page }) => {
-    expectedFailure('#6', 'Tab lands on the link inside the closed hover card');
     await page.locator('#before').focus();
     const seen: string[] = [];
     for (let i = 0; i < 30; i++) {
@@ -58,7 +59,8 @@ test.describe('closed overlays', () => {
       seen.push(id);
       if (id === 'after') break;
     }
-    expect(seen).toEqual(['open-dlg', 'open-dlg-nc', 'open-drw', 'open-drw-nc', 'pop-start-t', 'pop-center-t', 'pop-end-t', 'pop-default-t', 'hc-t', 'dd-t', 'dd2-t', 'tt-t', 'after']);
+    // The hover card opens when its trigger takes focus, so its link is the next stop; every other closed overlay is skipped.
+    expect(seen).toEqual(['open-dlg', 'open-dlg-nc', 'open-drw', 'open-drw-nc', 'pop-start-t', 'pop-center-t', 'pop-end-t', 'pop-default-t', 'hc-t', 'hc-link', 'dd-t', 'dd2-t', 'tt-t', 'after']);
   });
 });
 
@@ -70,9 +72,9 @@ test.describe('dialog', () => {
       for (const route of routes) {
         await page.locator('#open-dlg').click();
         await expect(page.locator('#dlg .dlg-content')).toBeVisible();
-        expect(await isPerceivable(page.locator('#dlg-input'))).toBe(true);
+        await expectPerceivable(page.locator('#dlg-input'));
         await expect.poll(() => page.evaluate(() => document.getElementById('dlg')!.contains(document.activeElement))).toBe(true);
-        expect(await page.evaluate(() => getComputedStyle(document.body).overflow)).toBe('hidden');
+        expect(await scrollLocked(page), 'the page scroll is locked while the modal is open').toBe(true);
 
         if (route === 'close button') await page.locator('#dlg [part="close"]').click();
         if (route === 'Escape') await page.keyboard.press('Escape');
@@ -81,17 +83,14 @@ test.describe('dialog', () => {
 
         expect(await prop(page, 'dlg', 'open'), `closed by ${route}`).toBe(false);
         await expectGone(page, '#dlg .dlg-content', /Dialog body/);
-        expect(await page.evaluate(() => getComputedStyle(document.body).overflow)).not.toBe('hidden');
+        expect(await scrollLocked(page), 'the page scroll is unlocked after it closes').toBe(false);
         await page.evaluate(() => (window as any).closes.splice(0));
       }
     }
   });
 
   for (const route of ['close button', 'Escape', 'backdrop click'] as const) {
-    test(`closing by ${route} fires void-close exactly once`, async ({ page }) => {
-      if (route === 'Escape') {
-        expectedFailure('untracked:dialog-escape-double-close', 'Escape with focus inside the dialog fires void-close twice (backdrop and document listeners)', { browsers: ['firefox'] });
-      }
+    test(`closing by ${route} fires void-close exactly once, with its reason`, async ({ page }) => {
       await page.locator('#open-dlg').click();
       await expect.poll(() => page.evaluate(() => document.getElementById('dlg')!.contains(document.activeElement))).toBe(true);
       if (route === 'close button') await page.locator('#dlg [part="close"]').click();
@@ -99,7 +98,8 @@ test.describe('dialog', () => {
       if (route === 'backdrop click') await page.mouse.click(5, 5);
       await expect.poll(() => prop(page, 'dlg', 'open')).toBe(false);
       await settle(page);
-      expect(await page.evaluate(() => (window as any).closes)).toEqual(['dlg']);
+      const reason = { 'close button': 'close-button', Escape: 'escape', 'backdrop click': 'outside' }[route];
+      expect(await page.evaluate(() => (window as any).closeEvents)).toEqual([{ id: 'dlg', reason, cancelable: true }]);
     });
   }
 
@@ -107,8 +107,8 @@ test.describe('dialog', () => {
     await page.locator('#open-dlg').click();
     await expect(page.locator('#dlg')).toMatchAriaSnapshot(`
       - dialog "Edit profile":
-        - text: Edit profile
         - button "Close"
+        - heading "Edit profile" [level=2]
         - paragraph: Dialog body
         - textbox "Name"
         - button "OK"
@@ -127,18 +127,29 @@ test.describe('dialog', () => {
     await expectGone(page, '#dlg-nc .nc-content', /Cannot close/);
   });
 
-  test('Tab stays inside the open dialog', async ({ page }) => {
-    expectedFailure('#6', 'dialog has no focus trap: Tab walks out to the page behind');
+  test('Tab and Shift+Tab never reach the page behind the open dialog', async ({ page }) => {
     await page.locator('#open-dlg').click();
     await expect.poll(() => page.evaluate(() => document.getElementById('dlg')!.contains(document.activeElement))).toBe(true);
-    for (let i = 0; i < 6; i++) {
-      await page.keyboard.press('Tab');
-      expect(await page.evaluate(() => document.getElementById('dlg')!.contains(document.activeElement))).toBe(true);
+    // The page behind a modal is inert. Like a native <dialog>, focus may leave to the browser's own UI
+    // (document.activeElement is then <body>) but never lands on the page, and it comes back round to the dialog.
+    const visited = new Set<string>();
+    for (const key of ['Tab', 'Shift+Tab']) {
+      for (let i = 0; i < 8; i++) {
+        await page.keyboard.press(key);
+        const where = await page.evaluate(() => {
+          const a = document.activeElement;
+          if (!a || a === document.body) return 'browser';
+          return document.getElementById('dlg')!.contains(a) ? (a.id || a.className || a.tagName) : `PAGE:${a.id || a.tagName}`;
+        });
+        expect(where, `${key} ${i + 1}`).not.toMatch(/^PAGE:/);
+        visited.add(where);
+      }
     }
+    // The close button is in the dialog's shadow root, so document.activeElement is then the host.
+    expect([...visited]).toEqual(expect.arrayContaining(['dlg', 'dlg-input', 'dlg-ok']));
   });
 
   test('closing returns focus to the element that opened it', async ({ page }) => {
-    expectedFailure('#6', 'dialog does not restore focus on close; focus drops to <body>');
     await page.locator('#open-dlg').click();
     await expect.poll(() => page.evaluate(() => document.getElementById('dlg')!.contains(document.activeElement))).toBe(true);
     await page.keyboard.press('Escape');
@@ -171,7 +182,6 @@ test.describe('drawer', () => {
   });
 
   test('Escape closes it right after opening from its trigger', async ({ page }) => {
-    expectedFailure('#6', 'drawer does not move focus in and listens for Escape only on itself');
     await page.locator('#open-drw').click();
     await expect(page.locator('#drw .drw-content')).toBeVisible();
     await page.keyboard.press('Escape');
@@ -202,7 +212,7 @@ test.describe('nested overlays (drawer > dialog > dropdown-menu)', () => {
   test('every layer opens on top of the one below and is usable', async ({ page }) => {
     for (let round = 0; round < 3; round++) {
       await openAll(page);
-      expect(await isPerceivable(page.locator('#nested-dd void-dropdown-menu-item').first())).toBe(true);
+      await expectPerceivable(page.locator('#nested-dd void-dropdown-menu-item').first());
       await page.keyboard.press('ArrowDown');
       expect(await page.evaluate(() => document.activeElement?.tagName)).toBe('VOID-DROPDOWN-MENU-ITEM');
       await setOpen(page, 'nested-dd', false);
@@ -213,7 +223,6 @@ test.describe('nested overlays (drawer > dialog > dropdown-menu)', () => {
   });
 
   test('Escape closes only the innermost layer', async ({ page }) => {
-    expectedFailure('#6', 'one Escape closes the menu, the dialog and the drawer together');
     await openAll(page);
     await page.keyboard.press('ArrowDown');
     await page.keyboard.press('Escape');
@@ -235,7 +244,8 @@ test.describe('popover', () => {
         for (const route of ['Escape', 'outside click', 'trigger click', 'open = false'] as const) {
           await trigger.click();
           await expect(content).toBeVisible();
-          expect(await isPerceivable(content)).toBe(true);
+          await expectPerceivable(content);
+          await settle(page);
           const t = (await trigger.boundingBox())!;
           const p = (await page.locator(`#${id} > void-popover-content`).boundingBox())!;
           expect(p.y, 'opens below the trigger').toBeGreaterThanOrEqual(t.y + t.height - 1);
@@ -264,7 +274,6 @@ test.describe('popover', () => {
 
 test.describe('hover-card', () => {
   test('opens on hover and closes when the pointer leaves, repeatedly', async ({ page }) => {
-    expectedFailure('#6', 'after closing, the card content is still in the accessibility tree');
     for (let i = 0; i < 4; i++) {
       await page.locator('#hc-t').hover();
       await expect(page.locator('#hc .hcc')).toBeVisible();
@@ -285,10 +294,11 @@ test.describe('hover-card', () => {
   });
 
   test('opens on keyboard focus and closes on Escape', async ({ page }) => {
-    expectedFailure('#6', 'after Escape, the card content is still in the accessibility tree');
     await page.locator('#hc-t').focus();
     await expect(page.locator('#hc .hcc')).toBeVisible();
-    await expect(page.locator('#hc-t')).toHaveAttribute('aria-expanded', 'true');
+    await expect(page.locator('#hc')).toHaveAttribute('open', '');
+    // A hover card is supplementary, not a disclosure: its trigger carries no aria-expanded.
+    await expect(page.locator('#hc-t')).not.toHaveAttribute('aria-expanded', /.*/);
     await page.keyboard.press('Escape');
     await expect(page.locator('#hc')).not.toHaveAttribute('open', '');
     await expectGone(page, '#hc .hcc', /Hover card content/);
@@ -310,7 +320,7 @@ test.describe('dropdown-menu', () => {
             await trigger.click();
           }
           await expect(item).toBeVisible();
-          expect(await isPerceivable(item)).toBe(true);
+          await expectPerceivable(item);
           if (route === 'Escape') await page.keyboard.press('Escape');
           if (route === 'outside click') await page.mouse.click(1200, 20);
           if (route === 'trigger click') await trigger.click();
@@ -324,21 +334,27 @@ test.describe('dropdown-menu', () => {
 
     test(`${label}: arrow keys walk the enabled items and wrap`, async ({ page }) => {
       await page.locator(`#${id}-t`).click();
+      // Opening moves focus to the first item; the disabled third item is skipped and the walk wraps both ways.
+      await expect.poll(() => focusedId(page)).toBe(first);
       const walk: (string | null)[] = [];
-      for (const key of ['ArrowDown', 'ArrowDown', 'ArrowDown', 'ArrowUp']) {
+      for (const key of ['ArrowDown', 'ArrowDown', 'ArrowDown', 'ArrowUp', 'ArrowUp']) {
         await page.keyboard.press(key);
         walk.push(await focusedId(page));
       }
-      expect(walk).toEqual(slotted ? ['dd-1', 'dd-2', 'dd-1', 'dd-2'] : ['dd2-1', 'dd2-2', 'dd2-1', 'dd2-2']);
+      const [one, two] = slotted ? ['dd-1', 'dd-2'] : ['dd2-1', 'dd2-2'];
+      expect(walk).toEqual(slotted ? [two, one, two, one, two] : [two, one, two, one, two]);
     });
 
     test(`${label}: choosing an item fires void-select and closes the menu`, async ({ page }) => {
-      expectedFailure('#6', 'dropdown-menu stays open after an item is chosen');
       await page.locator(`#${id}-t`).click();
+      await expect.poll(() => focusedId(page)).toBe(first);
       await page.keyboard.press('ArrowDown');
       await page.keyboard.press('Enter');
-      expect(await page.evaluate(() => (window as any).selects)).toEqual([first]);
+      const second = slotted ? 'dd-2' : 'dd2-2';
+      expect(await page.evaluate(() => (window as any).selects)).toEqual([second]);
       expect(await prop(page, id, 'open')).toBe(false);
+      expect(await page.evaluate(() => (window as any).closeEvents)).toEqual([{ id, reason: 'select', cancelable: true }]);
+      await expect.poll(() => focusedId(page), 'focus returns to the trigger').toBe(`${id}-t`);
     });
 
     test(`${label}: the trigger announces the menu (aria-haspopup, aria-expanded)`, async ({ page }) => {
@@ -362,12 +378,12 @@ test.describe('tooltip', () => {
     const bubble = page.locator('#tt [role=tooltip]');
     for (let i = 0; i < 4; i++) {
       await page.locator('#tt-t').hover();
-      await expect(page.locator('#tt')).toHaveAttribute('visible', '');
+      await expect(page.locator('#tt')).toHaveAttribute('open', '');
       await expect(bubble).toBeVisible();
       await expect(bubble).toHaveText('Tooltip text');
       if (i % 2) await page.keyboard.press('Escape');
       else await page.mouse.move(1200, 20);
-      await expect(page.locator('#tt')).not.toHaveAttribute('visible', '');
+      await expect(page.locator('#tt')).not.toHaveAttribute('open', '');
       await expect.poll(() => isPerceivable(bubble)).toBe(false);
       await page.mouse.move(1200, 20);
     }
@@ -380,7 +396,7 @@ test.describe('tooltip', () => {
     await expect(page.locator('#tt-t')).toHaveAttribute('aria-describedby', id!);
     await expect(page.locator('#tt-t')).toHaveAccessibleDescription('Tooltip text');
     await page.locator('#after').focus();
-    await expect(page.locator('#tt')).not.toHaveAttribute('visible', '');
+    await expect(page.locator('#tt')).not.toHaveAttribute('open', '');
   });
 });
 

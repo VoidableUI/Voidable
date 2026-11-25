@@ -1,0 +1,38 @@
+/* The layer order of the whole theme, declared once and first.
+
+   Every file the theme ships declares this same statement before its own
+   rules, so the order is right whichever stylesheet the browser sees first.
+   A statement that repeats names already declared changes nothing.
+
+   The theme's layers are children of `components`, the layer Tailwind v4 and
+   most other setups put component styles in. Lowest to highest:
+
+     components.void.reset       the scoped reset and the optional base (html, body)
+     components.void.tokens      primitives, knobs, derived tokens and scheme
+     components.void.themes      the demonstration themes (they set knobs only)
+     components.void.type        the data-void-type roles
+     components.void.components  every void-* component, and its pre-upgrade state
+     components.void.patterns    CSS-only elements, media and glass, app-shell classes
+     components.void.skins       opt-in skins (data-void-skin): derived-token overrides,
+                                 then direct rules on components and patterns, so a
+                                 skin must beat both whatever the specificity
+     components.void.a11y        forced-colors adjustments, above the skins so a skin
+                                 never hides a focus ring or a forced colour
+
+   Why children of `components` and not layers of their own: a layer's place
+   among the top-level layers is fixed by whichever statement names it first.
+   If an app loads Tailwind first (it declares theme, base, components and
+   utilities), top-level `void.*` layers would land after `utilities` and beat
+   every utility class. As children of `components` the theme sits under
+   `utilities` and over `base` (the framework's reset) and `theme`, and under
+   the app's own rules written directly in `components`: the same order
+   whichever stylesheet loads first.
+
+   CSS an application writes outside any layer beats all of them, whatever
+   its specificity, so it needs no !important and no selector tricks.
+
+   `theme`, `base`, `components` and `utilities` are the names Tailwind v4
+   uses. Naming `theme` and `base` before the theme's layers and `utilities`
+   after them fixes where they sit whichever stylesheet loads first. Without
+   a framework they are empty. */
+@layer theme, base, components.void.reset, components.void.tokens, components.void.themes, components.void.type, components.void.components, components.void.patterns, components.void.skins, components.void.a11y, utilities;

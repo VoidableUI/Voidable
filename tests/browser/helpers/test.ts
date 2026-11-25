@@ -94,6 +94,13 @@ export async function isPerceivable(locator: Locator): Promise<boolean> {
   });
 }
 
+/** Waits until an overlay's entrance transition is over: the element is on screen and the topmost thing at its centre. */
+export const expectPerceivable = (locator: Locator, message?: string) =>
+  expect.poll(() => isPerceivable(locator), { message: message ?? 'not perceivable' }).toBe(true);
+
+/** Whether the page scroll is locked: overlays set `overflow: hidden` on <html> while a modal is open. */
+export const scrollLocked = (page: Page) => page.evaluate(() => getComputedStyle(document.documentElement).overflow === 'hidden');
+
 /** A short description of document.activeElement: `tag#id` or `tag[role]"label"`. */
 export async function focused(page: Page): Promise<string> {
   return page.evaluate(() => {

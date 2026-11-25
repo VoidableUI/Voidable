@@ -20,7 +20,7 @@ const meta: Meta = {
     mask: { control: 'boolean' },
     type: { control: 'select', options: ['numeric', 'alphanumeric'] },
     size: { control: 'select', options: ['sm', 'md', 'lg'] },
-    color: { control: 'select', options: ['default', 'error', 'warning', 'caution', 'success', 'info', 'notice'] },
+    color: { control: 'select', options: ['default', 'error', 'warning', 'caution', 'success', 'info', 'notice', 'highlight'] },
     placeholder: { control: 'text' },
   },
   render: (args) => html`

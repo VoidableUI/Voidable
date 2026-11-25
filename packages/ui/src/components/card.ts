@@ -10,8 +10,8 @@ import { VoidElement } from '../base.js';
  * loads and survives any morph or re-render.
  */
 export class VoidCard extends VoidElement {
-  /** Surface style: `default`, `elevated` (lifted, with a shadow) or `outlined` (a visible border). */
-  @property({ type: String, reflect: true }) variant: 'default' | 'elevated' | 'outlined' = 'default';
+  /** Surface style: `default`, `elevated` (lifted, with a shadow) or `bordered` (a visible border). */
+  @property({ type: String, reflect: true }) variant: 'default' | 'elevated' | 'bordered' = 'default';
   /**
    * Space around the card's parts: `none`, `sm`, `md` (default) or `lg`. Use `none` for edge-to-edge
    * content such as a table or an image.

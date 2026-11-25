@@ -41,8 +41,8 @@ export class VoidCombobox extends InternalsFormControl(VoidElement) {
   @property({ type: String }) placeholder = 'Search...';
   /** Stop the field opening and exclude the value from the form submission. */
   @property({ type: Boolean, reflect: true }) disabled = false;
-  /** Size step: `sm`, `md` (default), `lg`, `xl` or `xxl`. */
-  @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' | 'xl' | 'xxl' = 'md';
+  /** Size step: `sm`, `md` (default) or `lg`. */
+  @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' = 'md';
   /**
    * Mark the field invalid: it gets the error styling and `aria-invalid`. The message itself is shown by
    * the wrapping `void-field`.
