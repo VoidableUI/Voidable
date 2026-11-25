@@ -316,7 +316,7 @@ export const Badge = wrapWc<VoidBadge, {
 }>('void-badge', 'Badge');
 
 export const Button = wrapWc<VoidButton, {
-  variant?: 'outline' | 'filled';
+  variant?: 'outline' | 'filled' | 'ghost';
   color?: 'default' | 'error' | 'warning' | 'success' | 'info' | 'notice';
   disabled?: boolean;
   type?: 'button' | 'submit' | 'reset';
