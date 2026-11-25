@@ -28,12 +28,12 @@ How to find every Voidable element and read its state the way a user, an agent d
 | `void-color-picker` | — | none | value (reflected)<br>open (reflected) | no role or accessible name on the host |
 | `void-combobox` | inner | void-field label, on the inner role="combobox" input (aria-label falls back to the placeholder) | open (reflected)<br>aria-expanded on the inner combobox<br>role="option" with data-selected on the rendered options<br>value (property only: the attribute is the initial value and is not updated) | the current value is not reflected to an attribute: [value=...] selectors and attribute assertions see the initial value only<br>aria-selected on the rendered options marks the keyboard-active option, not the chosen one; the choice is only in data-selected<br>the void-option children are not the options a user sees: the list renders its own role="option" copies |
 | `void-compose-input` | — | none (inner textarea) | value (property only: the attribute is the initial value and is not updated) | the current value is not reflected to an attribute: [value=...] selectors and attribute assertions see the initial value only<br>no role or name on the host; the send button has no stable name |
-| `void-date-picker` | combobox | void-field label, on the inner input | value (reflected, YYYY-MM-DD)<br>open (reflected)<br>aria-expanded | the inner input is readonly: typing a date is impossible, so tests and users must page the calendar<br>the inner input carries aria-expanded without a role (axe aria-allowed-attr) |
-| `void-dialog` | dialog | heading attribute (aria-label) | open (reflected)<br>aria-modal="true" | role="dialog" stays on the host while closed (hidden content only)<br>focus is not returned to the opener on close; tests that check focus return need the app to do it |
+| `void-date-picker` | inner | void-field label, on the inner role="combobox" input (aria-label falls back to the placeholder) | value (reflected, YYYY-MM-DD)<br>open (reflected)<br>aria-expanded on the inner combobox<br>role="dialog" calendar popup | the inner input is readonly: typing a date is impossible, so tests and users must page the calendar |
+| `void-dialog` | inner | heading attribute (aria-labelledby on the inner native dialog), else aria-label on the host | open (reflected)<br>the inner native <dialog> is open and modal (:modal) while open | — |
 | `void-divider` | separator | label attribute | aria-orientation | — |
 | `void-donut-chart` | img | aria-label attribute | — | data is a property only; its shape ({ segments: [{ name, value }] }) is not in the manifest or `voidable ref` |
-| `void-drawer` | dialog | heading attribute (aria-label) | open (reflected)<br>aria-modal="true" | opening does not move focus into the drawer, and Escape is only handled while focus is inside it (void-dialog listens on the document)<br>focus is not returned to the opener on close |
-| `void-dropdown-menu` | inner | the trigger element | open (reflected)<br>aria-haspopup="menu" and aria-expanded on the trigger<br>role="menu" panel<br>role="menuitem" items | the menu panel has no accessible name |
+| `void-drawer` | inner | heading attribute (aria-labelledby on the inner native dialog), else aria-label on the host | open (reflected)<br>the inner native <dialog> is open and modal (:modal) while open | — |
+| `void-dropdown-menu` | inner | the trigger element | open (reflected)<br>aria-haspopup="menu" and aria-expanded on the trigger<br>role="menu" panel<br>role="menuitem" items | — |
 | `void-dropdown-menu-item` | menuitem | text content | disabled (reflected)<br>aria-disabled<br>destructive (reflected) | void-select carries the item element, not a value; identify items by text |
 | `void-editable` | — | none (inner input while editing) | value (reflected)<br>editing (reflected) | no role or accessible name on the host in display mode |
 | `void-error-fallback` | alert | heading attribute | — | — |
@@ -41,7 +41,7 @@ How to find every Voidable element and read its state the way a user, an agent d
 | `void-file-upload` | inner | void-field label is not applied to the file input; the drop zone is a button named "Drop files here or browse" | the chosen file names as text | files over max-size or not matching accept are dropped silently: no event, no error attribute, nothing to assert<br>no attribute reflects whether a file is chosen |
 | `void-gauge` | img | aria-label attribute | value (property only: the attribute is the initial value and is not updated) | the current value is not reflected to an attribute: [value=...] selectors and attribute assertions see the initial value only |
 | `void-hamburger` | button | fixed "Menu" / "Close menu" | active (reflected)<br>aria-expanded | the name is fixed and cannot say what it opens; aria-controls is not set |
-| `void-hover-card` | inner | the trigger element | open (reflected)<br>aria-expanded on the trigger | — |
+| `void-hover-card` | inner | the trigger element | open (reflected) | the card is a visual preview: the trigger gets no aria-expanded, and the card has no role |
 | `void-indicator` | status | fixed "notification" | count (reflected) | the name does not include the count |
 | `void-input` | inner | void-field label, on the inner input | value (attribute; the live value is the inner input value)<br>error (reflected) -> aria-invalid on the inner input<br>disabled (reflected) | — |
 | `void-line-chart` | img | aria-label attribute | — | data is a property only; its shape ({ series: [{ name, values }], labels }) is not in the manifest or `voidable ref` |
@@ -54,12 +54,12 @@ How to find every Voidable element and read its state the way a user, an agent d
 | `void-nav-bar` | navigation | none | — | role="navigation" on a top bar that usually holds search and account controls; a <nav> inside it makes a nested, unnamed landmark |
 | `void-nav-menu` | menubar | none | — | — |
 | `void-nav-menu-item` | none | text content, on the rendered menuitem | open (reflected)<br>active (reflected)<br>aria-expanded on the trigger | — |
-| `void-number-input` | — | void-field label or aria-label, on the inner spinbutton | value (reflected)<br>aria-valuenow on the inner spinbutton | — |
+| `void-number-input` | inner | label attribute, on the inner role="spinbutton" input | value (reflected)<br>aria-valuenow on the inner spinbutton | — |
 | `void-option` | — | text content | selected (reflected) | not the element users interact with (see void-combobox) |
 | `void-pagination` | inner | the rendered nav is named "Pagination"; buttons by page number, "Previous page", "Next page" | value (attribute)<br>aria-current="page" on the current page button or link | value is not reflected after a click: read aria-current instead |
 | `void-panel` | region | label attribute (aria-label) | — | without label it is an unnamed role="region" |
 | `void-pin-input` | group | fixed "PIN input" | value (property only: the attribute is the initial value and is not updated) | the current value is not reflected to an attribute: [value=...] selectors and attribute assertions see the initial value only |
-| `void-popover` | — | the trigger element | open (reflected) | the trigger gets no aria-expanded or aria-haspopup; the content has no role |
+| `void-popover` | — | the trigger element (aria-labelledby on the role="dialog" body) | open (reflected)<br>aria-haspopup="dialog", aria-expanded and aria-controls on the trigger | — |
 | `void-progress` | progressbar | none | aria-valuenow<br>aria-valuemin<br>aria-valuemax<br>value (reflected) | no accessible name |
 | `void-radio` | radio | text content | checked (reflected)<br>aria-checked | — |
 | `void-radio-group` | radiogroup | label attribute (aria-label) | value (property only: the attribute is the initial value and is not updated) | the current value is not reflected to an attribute: [value=...] selectors and attribute assertions see the initial value only |
@@ -69,7 +69,7 @@ How to find every Voidable element and read its state the way a user, an agent d
 | `void-select` | inner | void-field label, on the native select | value (property only: the attribute is the initial value and is not updated)<br>native select value | the current value is not reflected to an attribute: [value=...] selectors and attribute assertions see the initial value only |
 | `void-sidebar` | navigation | fixed "Sidebar navigation" unless aria-label is set | collapsed (reflected) | no responsive behaviour and no aria-expanded/aria-controls link to a toggle: collapsing is a width change only |
 | `void-skeleton` | presentation | none (aria-hidden) | — | the loading region gets no aria-busy; nothing announces loading |
-| `void-slider` | — | void-field label or aria-label, on the inner slider | aria-valuenow on the inner slider<br>value (property only: the attribute is the initial value and is not updated) | the current value is not reflected to an attribute: [value=...] selectors and attribute assertions see the initial value only |
+| `void-slider` | inner | void-field label, on the inner range input | aria-valuenow on the inner range input<br>value (property only: the attribute is the initial value and is not updated) | the current value is not reflected to an attribute: [value=...] selectors and attribute assertions see the initial value only |
 | `void-spinner` | status | label attribute (default "Loading") | — | — |
 | `void-stat` | figure | none | trend (reflected) | role="figure" without a name; the label is plain text, not linked to the value |
 | `void-status-dot` | status | status attribute ("Online", "Away", "Offline") | status (reflected) | — |
@@ -79,15 +79,15 @@ How to find every Voidable element and read its state the way a user, an agent d
 | `void-table` | — | none; the native <table> inside carries the table, row and cell roles | striped, hoverable, compact, bordered (reflected, presentational) | no caption or name support; a wide table overflows unless the author wraps it (void-scroll-area) |
 | `void-tabs` | inner | each void-tab-panel label becomes a role="tab" button | value (property only: the attribute is the initial value and is not updated)<br>aria-selected on the tabs<br>active on each void-tab-panel (reflected there) | the current value is not reflected to an attribute: [value=...] selectors and attribute assertions see the initial value only<br>the tablist has no accessible name |
 | `void-tag` | listitem | text content | removable (reflected) | role="listitem" outside any list unless the author adds one |
-| `void-tags-input` | — | void-field label or aria-label, on the inner text input | — | the tags are a property (value: TagValue[]), not reflected |
-| `void-textarea` | — | void-field label, on the inner textarea | value (attribute)<br>error (reflected) | — |
+| `void-tags-input` | inner | void-field label, on the inner entry input | — | the tags are a property (value: TagValue[]), not reflected |
+| `void-textarea` | inner | void-field label, on the inner textarea | value (attribute)<br>error (reflected) | — |
 | `void-toast` | status | text content (role="alert" for error and warning) | color (reflected) | no attribute says whether it is still showing; it is removed from the DOM after duration |
 | `void-toast-container` | region | fixed "Notifications" (aria-live="polite") | — | — |
 | `void-toggle` | button | text content | pressed (reflected)<br>aria-pressed | — |
 | `void-toggle-group` | group | none | value (reflected, comma list when multiple) | — |
 | `void-tooltip` | inner | the tooltip text (role="tooltip"), linked to the trigger by aria-describedby | — | — |
 
-## Gaps (57)
+## Gaps (51)
 
 - `void-accordion`: no group role or name; the items are only found by their heading buttons
 - `void-action-input`: the current value is not reflected to an attribute: [value=...] selectors and attribute assertions see the initial value only
@@ -108,19 +108,14 @@ How to find every Voidable element and read its state the way a user, an agent d
 - `void-compose-input`: the current value is not reflected to an attribute: [value=...] selectors and attribute assertions see the initial value only
 - `void-compose-input`: no role or name on the host; the send button has no stable name
 - `void-date-picker`: the inner input is readonly: typing a date is impossible, so tests and users must page the calendar
-- `void-date-picker`: the inner input carries aria-expanded without a role (axe aria-allowed-attr)
-- `void-dialog`: role="dialog" stays on the host while closed (hidden content only)
-- `void-dialog`: focus is not returned to the opener on close; tests that check focus return need the app to do it
 - `void-donut-chart`: data is a property only; its shape ({ segments: [{ name, value }] }) is not in the manifest or `voidable ref`
-- `void-drawer`: opening does not move focus into the drawer, and Escape is only handled while focus is inside it (void-dialog listens on the document)
-- `void-drawer`: focus is not returned to the opener on close
-- `void-dropdown-menu`: the menu panel has no accessible name
 - `void-dropdown-menu-item`: void-select carries the item element, not a value; identify items by text
 - `void-editable`: no role or accessible name on the host in display mode
 - `void-file-upload`: files over max-size or not matching accept are dropped silently: no event, no error attribute, nothing to assert
 - `void-file-upload`: no attribute reflects whether a file is chosen
 - `void-gauge`: the current value is not reflected to an attribute: [value=...] selectors and attribute assertions see the initial value only
 - `void-hamburger`: the name is fixed and cannot say what it opens; aria-controls is not set
+- `void-hover-card`: the card is a visual preview: the trigger gets no aria-expanded, and the card has no role
 - `void-indicator`: the name does not include the count
 - `void-line-chart`: data is a property only; its shape ({ series: [{ name, values }], labels }) is not in the manifest or `voidable ref`
 - `void-list-item`: interactive items stay role="listitem": "selected" has no ARIA equivalent
@@ -131,7 +126,6 @@ How to find every Voidable element and read its state the way a user, an agent d
 - `void-pagination`: value is not reflected after a click: read aria-current instead
 - `void-panel`: without label it is an unnamed role="region"
 - `void-pin-input`: the current value is not reflected to an attribute: [value=...] selectors and attribute assertions see the initial value only
-- `void-popover`: the trigger gets no aria-expanded or aria-haspopup; the content has no role
 - `void-progress`: no accessible name
 - `void-radio-group`: the current value is not reflected to an attribute: [value=...] selectors and attribute assertions see the initial value only
 - `void-scroll-area`: a scrollable region with no role, name or tabindex: keyboard users cannot scroll it (axe scrollable-region-focusable when it overflows)

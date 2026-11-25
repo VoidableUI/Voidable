@@ -138,7 +138,8 @@ describe('VoidCombobox', () => {
       const input = el.querySelector('.void-combobox-input') as HTMLInputElement;
       input.dispatchEvent(new FocusEvent('focus', { bubbles: true }));
       await el.updateComplete;
-      document.body.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+      document.body.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, button: 0 }));
+      await el.updateComplete;
       await el.updateComplete;
       expect(el.querySelector('.void-combobox-dropdown')).toBeNull();
     });

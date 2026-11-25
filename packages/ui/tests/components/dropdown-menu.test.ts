@@ -2,6 +2,7 @@
 import { describe, it, expect, afterEach } from 'vitest';
 import { VoidElement } from '../../src/base.js';
 import { VoidDropdownMenu, VoidDropdownMenuItem } from '../../src/components/dropdown-menu.js';
+import { cleanup, pointerdown, stack } from '../helpers/overlay.js';
 
 const TAG = 'void-dropdown-menu';
 const ITEM = 'void-dropdown-menu-item';
@@ -46,9 +47,7 @@ function press(key: string, target: EventTarget = document): KeyboardEvent {
   return e;
 }
 
-afterEach(() => {
-  document.body.innerHTML = '';
-});
+afterEach(cleanup);
 
 describe('VoidDropdownMenu', () => {
   describe('class', () => {
@@ -62,16 +61,18 @@ describe('VoidDropdownMenu', () => {
   });
 
   describe('defaults and reflection', () => {
-    it('open defaults to false and position to "bottom-start"', () => {
+    it('open defaults to false, position to "bottom" and align to "start"', () => {
       const el = document.createElement(TAG) as VoidDropdownMenu;
       expect(el.open).toBe(false);
-      expect(el.position).toBe('bottom-start');
+      expect(el.position).toBe('bottom');
+      expect(el.align).toBe('start');
     });
 
-    it('reflects open and position', async () => {
-      const el = await mount({ open: true, position: 'top-end' });
+    it('reflects open, position and align', async () => {
+      const el = await mount({ open: true, position: 'top', align: 'end' });
       expect(el.hasAttribute('open')).toBe(true);
-      expect(el.getAttribute('position')).toBe('top-end');
+      expect(el.getAttribute('position')).toBe('top');
+      expect(el.getAttribute('align')).toBe('end');
     });
 
     it('reads the open attribute', async () => {
@@ -139,23 +140,23 @@ describe('VoidDropdownMenu', () => {
       expect(el.hasAttribute('open')).toBe(true);
     });
 
-    it('closes on an outside mousedown', async () => {
+    it('closes on an outside press', async () => {
       const el = await mount({ open: true });
-      document.body.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+      pointerdown(document.body);
       expect(el.open).toBe(false);
     });
 
-    it('stays open on a mousedown inside the menu (panel or trigger)', async () => {
+    it('stays open on a press inside the menu (panel or trigger)', async () => {
       const el = await mount({ open: true });
-      menuItems(el)[0]!.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+      pointerdown(menuItems(el)[0]!);
       expect(el.open).toBe(true);
-      trigger(el).dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+      pointerdown(trigger(el));
       expect(el.open).toBe(true);
     });
 
-    it('ignores outside mousedown while already closed', async () => {
+    it('ignores outside presses while already closed', async () => {
       const el = await mount();
-      document.body.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+      pointerdown(document.body);
       expect(el.open).toBe(false);
     });
 
@@ -167,11 +168,16 @@ describe('VoidDropdownMenu', () => {
     });
 
     it('Escape closes an open menu and returns focus to the trigger', async () => {
-      const el = await mount({ open: true });
-      const e = press('Escape');
+      const el = await mount();
+      trigger(el).focus();
+      trigger(el).click();
+      await el.updateComplete;
+      expect(document.activeElement).toBe(menuItems(el)[0]);
+      const e = press('Escape', menuItems(el)[0]!);
       expect(el.open).toBe(false);
+      await el.updateComplete;
       expect(document.activeElement).toBe(trigger(el));
-      expect(e.defaultPrevented).toBe(false);
+      expect(e.defaultPrevented).toBe(true);
     });
 
     it('Escape on a closed menu does nothing (focus is left alone)', async () => {
@@ -184,19 +190,37 @@ describe('VoidDropdownMenu', () => {
       expect(document.activeElement).toBe(other);
     });
 
-    // BUG: choosing an item does not close the menu — void-select is dispatched but nothing
-    // sets open=false, so every consumer must close it manually. dropdown-menu.ts:~79-97 /
-    // VoidDropdownMenuItem._handleClick. Expected: selecting a non-disabled item closes the menu.
-    it.fails('closes when an item is selected', async () => {
+    it('closes when an item is selected (reason select)', async () => {
       const el = await mount({ open: true });
+      const reasons: string[] = [];
+      el.addEventListener('void-close', e => reasons.push((e as CustomEvent).detail.reason));
       menuItems(el)[0]!.click();
       expect(el.open).toBe(false);
+      expect(reasons).toEqual(['select']);
     });
 
-    it.fails('closes when an item is activated with the keyboard', async () => {
+    it('closes when an item is activated with the keyboard', async () => {
       const el = await mount({ open: true });
       press('Enter', menuItems(el)[0]!);
       expect(el.open).toBe(false);
+    });
+
+    it('stays open when a keep-open item is chosen', async () => {
+      const el = await mount({ open: true });
+      const item = menuItems(el)[1]!;
+      item.keepOpen = true;
+      await item.updateComplete;
+      expect(item.hasAttribute('keep-open')).toBe(true);
+      item.click();
+      press(' ', item);
+      expect(el.open).toBe(true);
+    });
+
+    it('a void-close listener can keep it open by cancelling', async () => {
+      const el = await mount({ open: true });
+      el.addEventListener('void-close', e => e.preventDefault());
+      menuItems(el)[0]!.click();
+      expect(el.open).toBe(true);
     });
 
     it('stays open when a disabled item is clicked', async () => {
@@ -263,6 +287,14 @@ describe('VoidDropdownMenu', () => {
       expect(el.open).toBe(false);
     });
 
+    it('ArrowUp on the trigger opens the menu on its last enabled item', async () => {
+      const el = await mount({}, [{ label: 'a' }, { label: 'b' }, { label: 'c', disabled: true }]);
+      trigger(el).focus();
+      press('ArrowUp', trigger(el));
+      await el.updateComplete;
+      expect(document.activeElement).toBe(menuItems(el)[1]);
+    });
+
     it('ArrowDown moves to the next item and wraps to the first', async () => {
       const el = await mount({ open: true });
       const items = menuItems(el);
@@ -275,7 +307,7 @@ describe('VoidDropdownMenu', () => {
       expect(document.activeElement).toBe(items[0]);
     });
 
-    it('ArrowUp moves to the previous item and wraps to the last', async () => {
+    it('ArrowUp moves to the previous item and wraps to the last; Home and End jump', async () => {
       const el = await mount({ open: true });
       const items = menuItems(el);
       items[1]!.focus();
@@ -333,16 +365,27 @@ describe('VoidDropdownMenu', () => {
       const el = await mount({ open: true }, [{ label: 'a', disabled: true }]);
       expect(() => press('ArrowDown', menuItems(el)[0]!)).not.toThrow();
     });
+
+    it('focus moving out of the menu (Tab) closes it', async () => {
+      const el = await mount();
+      const after = document.createElement('button');
+      document.body.appendChild(after);
+      trigger(el).click();
+      await el.updateComplete;
+      after.focus();
+      expect(el.open).toBe(false);
+    });
   });
 
   describe('lifecycle', () => {
-    it('removes its document listeners on disconnect', async () => {
+    it('leaves the overlay stack when removed while open (no document listeners stay behind)', async () => {
       const el = await mount({ open: true });
       el.remove();
-      press('Escape');
-      expect(el.open).toBe(true);
-      document.body.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
-      expect(el.open).toBe(true);
+      await Promise.resolve();
+      await Promise.resolve();
+      expect(stack()).toEqual([]);
+      const e = press('Escape', document.body);
+      expect(e.defaultPrevented).toBe(false);
     });
 
     it('still toggles once per trigger click after reconnecting', async () => {

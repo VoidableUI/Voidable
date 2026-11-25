@@ -58,18 +58,24 @@ document.addEventListener('click', (e) => {
 // Dialog close → if the user came from a row click, navigate back to
 // their saved index URL (Turbo restores the cached snapshot, preserving
 // pagination/scroll). On direct URL nav (no saved return), fall back to
-// the dialog's data-close-href.
+// the dialog's data-close-href. void-close does not bubble, so listen in the
+// capture phase; it fires before the dialog closes and can be cancelled, so
+// navigate only once the dialog has really closed.
 document.addEventListener('void-close', (e) => {
-  if (e.target.tagName !== 'VOID-DIALOG') return;
-  const href = e.target.getAttribute('data-close-href');
+  const dialog = e.target;
+  if (dialog.tagName !== 'VOID-DIALOG') return;
+  const href = dialog.getAttribute('data-close-href');
   if (!href) return;
-  const target = sessionStorage.getItem('voidable:return:' + window.location.pathname) || href;
-  if (window.Turbo) {
-    window.Turbo.visit(target);
-  } else {
-    window.location.href = target;
-  }
-});
+  queueMicrotask(() => {
+    if (e.defaultPrevented || dialog.open) return;
+    const target = sessionStorage.getItem('voidable:return:' + window.location.pathname) || href;
+    if (window.Turbo) {
+      window.Turbo.visit(target);
+    } else {
+      window.location.href = target;
+    }
+  });
+}, true);
 
 // Theme toggle
 (function() {

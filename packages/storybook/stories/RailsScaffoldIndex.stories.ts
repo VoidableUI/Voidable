@@ -94,7 +94,7 @@ const productRows = products.map(
         ${p.category}
       </td>
       <td style="text-align: right;">
-        <void-dropdown-menu position="bottom-end">
+        <void-dropdown-menu align="end">
           <void-button variant="ghost" size="sm">&#x22EF;</void-button>
           <void-dropdown-menu-item>View</void-dropdown-menu-item>
           <void-dropdown-menu-item>Edit</void-dropdown-menu-item>

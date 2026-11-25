@@ -7,7 +7,7 @@ The widgets that have more than one part (combobox, multiselect, tabs, menus, se
 
 Disabled options, tabs and items are skipped by every key below. Children can arrive after the component has rendered (a framework, a server-driven morph, a script that runs before the page is parsed); the roles, the tab stops and the labels are wired again when they do.
 
-Inside a `<void-dialog>`, Escape closes the open list or menu first; the dialog stays open until the next Escape.
+Inside a `<void-dialog>`, Escape closes the open list or menu first; the dialog stays open until the next Escape. Escape and outside presses always go to the topmost open overlay only; see [Overlays](/components/overlays/) for stacking, focus return and the `void-open` / `void-close` events.
 
 ## Combobox
 
@@ -86,6 +86,6 @@ Pattern: [menu button](https://www.w3.org/WAI/ARIA/apg/patterns/menu-button/). T
 | Down Arrow, Up Arrow | Move to the next or previous item (wraps) |
 | Home, End | Move to the first or last item |
 | Characters | Jump to the next item that starts with the typed text |
-| Enter, Space (on an item) | Activate the item (`void-select`) |
+| Enter, Space (on an item) | Activate the item (`void-select`), close the menu and return focus to the trigger (not for items with `keep-open`) |
 | Escape | Closes the menu and returns focus to the trigger |
 | Tab | Closes the menu and moves on |

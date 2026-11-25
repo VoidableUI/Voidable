@@ -154,7 +154,8 @@ describe('VoidMultiselect', () => {
       const trigger = el.querySelector('.void-multiselect-trigger') as HTMLElement;
       trigger.click();
       await el.updateComplete;
-      document.body.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+      document.body.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, button: 0 }));
+      await el.updateComplete;
       await el.updateComplete;
       expect(el.querySelector('.void-multiselect-dropdown')).toBeNull();
     });

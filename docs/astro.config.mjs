@@ -104,6 +104,7 @@ export default defineConfig({
             { label: 'Button', slug: 'components/button' },
             { label: 'Table', slug: 'components/table' },
             { label: 'Keyboard and ARIA', slug: 'components/keyboard' },
+            { label: 'Overlays', slug: 'components/overlays' },
             { label: 'Storybook', link: '/storybook/', attrs: { target: '_blank' } },
           ],
         },

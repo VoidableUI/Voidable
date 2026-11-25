@@ -167,7 +167,7 @@ describe('VoidPopover', () => {
     });
 
     it('closes when clicking outside', async () => {
-      document.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+      document.body.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, button: 0 }));
       await el.updateComplete;
       expect(el.open).toBe(false);
     });
@@ -175,16 +175,15 @@ describe('VoidPopover', () => {
     it('dispatches void-close on outside click', async () => {
       const events: Event[] = [];
       el.addEventListener('void-close', (e) => events.push(e));
-      document.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+      document.body.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, button: 0 }));
       await el.updateComplete;
       expect(events).toHaveLength(1);
+      expect((events[0] as CustomEvent).detail).toEqual({ reason: 'outside' });
     });
 
     it('does not close when clicking inside', async () => {
       const body = el.querySelector('.void-popover-body') as HTMLElement;
-      const inner = new MouseEvent('mousedown', { bubbles: true });
-      Object.defineProperty(inner, 'target', { value: body });
-      document.dispatchEvent(inner);
+      body.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, button: 0 }));
       await el.updateComplete;
       expect(el.open).toBe(true);
     });
@@ -267,20 +266,22 @@ describe('VoidPopover', () => {
       el.remove();
     });
 
-    it('void-close event bubbles', async () => {
+    it('void-close does not bubble (a popover closing inside a dialog is not the dialog closing)', async () => {
       const events: CustomEvent[] = [];
       el.addEventListener('void-close', (e) => events.push(e as CustomEvent));
+      let reachedBody = false;
+      document.body.addEventListener('void-close', () => { reachedBody = true; }, { once: true });
       document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
       await el.updateComplete;
-      expect(events[0].bubbles).toBe(true);
+      expect(events[0].bubbles).toBe(false);
+      expect(reachedBody).toBe(false);
     });
 
-    it('void-close event is composed', async () => {
-      const events: CustomEvent[] = [];
-      el.addEventListener('void-close', (e) => events.push(e as CustomEvent));
-      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    it('void-close from Escape is cancelable and carries the reason', async () => {
+      el.addEventListener('void-close', (e) => e.preventDefault(), { once: true });
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }));
       await el.updateComplete;
-      expect(events[0].composed).toBe(true);
+      expect(el.open).toBe(true);
     });
   });
 
@@ -312,6 +313,87 @@ describe('VoidPopover', () => {
       await el.updateComplete;
       expect(el.align).toBe('end');
       el.remove();
+    });
+  });
+
+  describe('overlay model', () => {
+    afterEach(() => {
+      document.body.innerHTML = '';
+    });
+
+    async function mounted(): Promise<VoidPopover> {
+      document.body.innerHTML = '<void-popover id="p"><button slot="trigger" id="t">Open</button><p>text</p><button id="inner">x</button></void-popover>';
+      const el = document.getElementById('p') as VoidPopover;
+      await el.updateComplete;
+      return el;
+    }
+
+    it('renders the body as a manual popover named by its trigger, with trigger ARIA', async () => {
+      const el = await mounted();
+      const body = el.querySelector('.void-popover-body')!;
+      const t = el.querySelector('#t')!;
+      // happy-dom has no Popover API: the controller falls back to [hidden] (browsers keep popover="manual").
+      if (typeof HTMLElement.prototype.showPopover === 'function') expect(body.getAttribute('popover')).toBe('manual');
+      else expect((body as HTMLElement).hidden).toBe(true);
+      expect(body.getAttribute('role')).toBe('dialog');
+      expect(body.getAttribute('aria-labelledby')).toBe('t');
+      expect(t.getAttribute('aria-haspopup')).toBe('dialog');
+      expect(t.getAttribute('aria-expanded')).toBe('false');
+      expect(t.getAttribute('aria-controls')).toBe(body.id);
+      (t as HTMLElement).click();
+      await el.updateComplete;
+      expect(t.getAttribute('aria-expanded')).toBe('true');
+    });
+
+    it('opening from the trigger moves focus in; Escape returns it to the trigger', async () => {
+      const el = await mounted();
+      const t = el.querySelector<HTMLElement>('#t')!;
+      t.focus();
+      t.click();
+      await el.updateComplete;
+      expect(document.activeElement?.id).toBe('inner');
+      document.activeElement!.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }));
+      await el.updateComplete;
+      await el.updateComplete;
+      expect(el.open).toBe(false);
+      expect(document.activeElement).toBe(t);
+    });
+
+    it('opening programmatically leaves focus alone', async () => {
+      const el = await mounted();
+      const other = document.createElement('input');
+      document.body.appendChild(other);
+      other.focus();
+      el.open = true;
+      await el.updateComplete;
+      expect(document.activeElement).toBe(other);
+    });
+
+    it('focus moving elsewhere closes it (reason blur)', async () => {
+      const el = await mounted();
+      const other = document.createElement('input');
+      document.body.appendChild(other);
+      el.querySelector<HTMLElement>('#t')!.click();
+      await el.updateComplete;
+      const reasons: string[] = [];
+      el.addEventListener('void-close', e => reasons.push((e as CustomEvent).detail.reason));
+      other.focus();
+      await el.updateComplete;
+      expect(el.open).toBe(false);
+      expect(reasons).toEqual(['blur']);
+      expect(document.activeElement).toBe(other);
+    });
+
+    it('writes the requested placement on the surface', async () => {
+      const el = await mounted();
+      el.position = 'top';
+      el.align = 'end';
+      el.open = true;
+      await el.updateComplete;
+      const body = el.querySelector('.void-popover-body')!;
+      expect(body.getAttribute('data-void-side')).toBe('top');
+      expect(body.getAttribute('data-void-align')).toBe('end');
+      expect(body.hasAttribute('data-void-position')).toBe(true);
     });
   });
 });

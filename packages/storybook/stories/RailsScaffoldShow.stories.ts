@@ -141,7 +141,7 @@ export const Default: Story = {
         ">Products / Widget Pro</p>
         <div style="display: flex; justify-content: space-between; align-items: center;">
           <h1 style="margin: 0; font-family: var(--void-font-sans); color: var(--void-color-text);">Widget Pro</h1>
-          <void-dropdown-menu position="bottom-end">
+          <void-dropdown-menu align="end">
             <void-button variant="outline" size="sm">Actions</void-button>
             <void-dropdown-menu-item>Edit</void-dropdown-menu-item>
             <hr>
@@ -177,7 +177,7 @@ export const WithNotice: Story = {
         ">Products / Widget Pro</p>
         <div style="display: flex; justify-content: space-between; align-items: center;">
           <h1 style="margin: 0; font-family: var(--void-font-sans); color: var(--void-color-text);">Widget Pro</h1>
-          <void-dropdown-menu position="bottom-end">
+          <void-dropdown-menu align="end">
             <void-button variant="outline" size="sm">Actions</void-button>
             <void-dropdown-menu-item>Edit</void-dropdown-menu-item>
             <hr>
@@ -209,7 +209,7 @@ export const WithDeleteConfirmation: Story = {
         ">Products / Widget Pro</p>
         <div style="display: flex; justify-content: space-between; align-items: center;">
           <h1 style="margin: 0; font-family: var(--void-font-sans); color: var(--void-color-text);">Widget Pro</h1>
-          <void-dropdown-menu position="bottom-end">
+          <void-dropdown-menu align="end">
             <void-button variant="outline" size="sm">Actions</void-button>
             <void-dropdown-menu-item>Edit</void-dropdown-menu-item>
             <hr>

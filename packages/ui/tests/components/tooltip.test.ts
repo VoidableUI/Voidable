@@ -31,6 +31,11 @@ describe('VoidTooltip', () => {
       expect(el.text).toBe('');
     });
 
+    it('align defaults to center and open to false', () => {
+      expect(el.align).toBe('center');
+      expect(el.open).toBe(false);
+    });
+
     it('position defaults to top', () => {
       expect(el.position).toBe('top');
     });
@@ -100,6 +105,7 @@ describe('VoidTooltip', () => {
     beforeEach(async () => {
       el = createElement();
       el.delay = 200;
+      el.appendChild(document.createElement('button'));
       document.body.appendChild(el);
       await el.updateComplete;
     });
@@ -110,15 +116,15 @@ describe('VoidTooltip', () => {
     });
 
     it('hidden by default', () => {
-      expect(el.hasAttribute('visible')).toBe(false);
+      expect(el.hasAttribute('open')).toBe(false);
     });
 
-    it('mouseenter after delay sets visible attribute', async () => {
+    it('mouseenter after delay opens it (open attribute)', async () => {
       vi.useFakeTimers();
       el.dispatchEvent(new MouseEvent('mouseenter', { bubbles: true }));
       vi.runAllTimers();
       await el.updateComplete;
-      expect(el.hasAttribute('visible')).toBe(true);
+      expect(el.hasAttribute('open')).toBe(true);
     });
 
     it('mouseleave removes visible attribute', async () => {
@@ -129,21 +135,21 @@ describe('VoidTooltip', () => {
       vi.useRealTimers();
       el.dispatchEvent(new MouseEvent('mouseleave', { bubbles: true }));
       await el.updateComplete;
-      expect(el.hasAttribute('visible')).toBe(false);
+      expect(el.hasAttribute('open')).toBe(false);
     });
 
-    it('focusin shows immediately', async () => {
-      el.dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
+    it('keyboard focus shows it immediately', async () => {
+      el.querySelector('button')!.focus();
       await el.updateComplete;
-      expect(el.hasAttribute('visible')).toBe(true);
+      expect(el.hasAttribute('open')).toBe(true);
     });
 
     it('focusout hides tooltip', async () => {
-      el.dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
+      el.querySelector('button')!.focus();
       await el.updateComplete;
-      el.dispatchEvent(new FocusEvent('focusout', { bubbles: true }));
+      el.querySelector('button')!.blur();
       await el.updateComplete;
-      expect(el.hasAttribute('visible')).toBe(false);
+      expect(el.hasAttribute('open')).toBe(false);
     });
   });
 
@@ -189,20 +195,21 @@ describe('VoidTooltip', () => {
     });
 
     it('Escape dismisses a visible tooltip', async () => {
-      el.dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
+      trigger.focus();
       await el.updateComplete;
-      expect(el.hasAttribute('visible')).toBe(true);
-      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+      expect(el.hasAttribute('open')).toBe(true);
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }));
       await el.updateComplete;
-      expect(el.hasAttribute('visible')).toBe(false);
+      await el.updateComplete;
+      expect(el.hasAttribute('open')).toBe(false);
     });
 
     it('other keys do not dismiss the tooltip', async () => {
-      el.dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
+      trigger.focus();
       await el.updateComplete;
       trigger.dispatchEvent(new KeyboardEvent('keydown', { key: 'a', bubbles: true }));
       await el.updateComplete;
-      expect(el.hasAttribute('visible')).toBe(true);
+      expect(el.hasAttribute('open')).toBe(true);
     });
   });
 

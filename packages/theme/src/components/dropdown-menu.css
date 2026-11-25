@@ -1,59 +1,28 @@
 void-dropdown-menu {
-  position: relative;
   display: inline-flex;
 }
 
-void-dropdown-menu > void-dropdown-menu-item,
-void-dropdown-menu > hr {
+/* Before the element upgrades, only the trigger shows. */
+void-dropdown-menu:not(:defined) > void-dropdown-menu-item,
+void-dropdown-menu:not(:defined) > hr {
   display: none;
 }
 
+/* A popover="manual" surface in the top layer; placement, gap, flipping and
+   transitions are shared (overlay.css). */
 .void-dropdown-menu-panel {
-  display: none;
-  position: absolute;
-  z-index: var(--void-z-dropdown);
+  --void-overlay-gap: var(--void-space-1);
   /* As wide as its longest item, not as narrow as its trigger. */
   width: max-content;
   min-width: 180px;
+  max-height: calc(100vh - 2 * var(--void-space-4));
+  overflow-y: auto;
   padding: var(--void-space-1) 0;
   background: var(--void-color-bg-elevated);
+  color: var(--void-color-text);
   border: 1px solid var(--void-color-border);
   border-radius: var(--void-radius-lg);
   box-shadow: var(--void-shadow-md);
-  transition: opacity var(--void-duration-fast) var(--void-ease-in-out);
-}
-
-/* Closed: the component keeps this element rendered and sets [hidden]. */
-.void-dropdown-menu-panel[hidden] {
-  display: none;
-}
-
-void-dropdown-menu[open] .void-dropdown-menu-panel {
-  display: block;
-}
-
-void-dropdown-menu[position='bottom-start'] .void-dropdown-menu-panel {
-  top: calc(100% + var(--void-space-1));
-  left: 0;
-}
-
-void-dropdown-menu[position='bottom-end'] .void-dropdown-menu-panel {
-  top: calc(100% + var(--void-space-1));
-  right: 0;
-  left: auto;
-}
-
-void-dropdown-menu[position='top-start'] .void-dropdown-menu-panel {
-  bottom: calc(100% + var(--void-space-1));
-  top: auto;
-  left: 0;
-}
-
-void-dropdown-menu[position='top-end'] .void-dropdown-menu-panel {
-  bottom: calc(100% + var(--void-space-1));
-  top: auto;
-  right: 0;
-  left: auto;
 }
 
 .void-dropdown-menu-panel hr {

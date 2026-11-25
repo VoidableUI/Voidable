@@ -22,6 +22,13 @@ const meta: Meta = {
       control: { type: 'select' },
       options: ['top', 'bottom', 'left', 'right'],
     },
+    align: {
+      control: { type: 'select' },
+      options: ['start', 'center', 'end'],
+    },
+    open: {
+      control: { type: 'boolean' },
+    },
     delay: {
       control: { type: 'number' },
     },
@@ -35,10 +42,12 @@ export const Default: Story = {
   args: {
     text: 'Hello, tooltip!',
     position: 'top',
+    align: 'center',
+    open: false,
     delay: 200,
   },
   render: (args) => html`
-    <void-tooltip text=${args.text} position=${args.position} .delay=${args.delay}>
+    <void-tooltip text=${args.text} position=${args.position} align=${args.align} ?open=${args.open} .delay=${args.delay}>
       <button style="padding: 0.5rem 1rem; cursor: pointer;">Hover me</button>
     </void-tooltip>
   `,

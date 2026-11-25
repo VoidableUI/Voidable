@@ -262,6 +262,7 @@ The docs Open Graph image is generated from `docs/scripts/og-image.svg` with `mi
 7. Components that host consumer children use `ProjectionController` (`packages/ui/src/projection.ts`), never a `childNodes` snapshot; region containers hold no Lit bindings.
 8. Form controls use the `NativeFormControl` or `InternalsFormControl` mixin (`packages/ui/src/form-control.ts`).
 9. Multi-word properties declare a kebab-case `attribute` (enforced by the manifest test).
+10. Overlays (anything that opens above the page) use `OverlayController` (`packages/ui/src/overlay.ts`): a native `<dialog>` with `showModal()` for modals, `popover="manual"` for everything else, CSS anchor positioning with the built-in JS positioner as fallback, and the shared stack for Escape, outside presses, focus return and the counted scroll lock. Never add document-level listeners or `z-index` stacking for an overlay. `void-open` / `void-close` come from the controller, carry a `reason` and do not bubble. Browser baseline: the Popover API (Chrome 114, Firefox 125, Safari 17); see `docs/src/content/docs/components/overlays.mdx`.
 
 ### CSS Selector Strategy
 

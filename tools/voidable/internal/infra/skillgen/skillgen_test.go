@@ -96,7 +96,7 @@ func TestSkillContentFromManifest(t *testing.T) {
 		{"SKILL.md", "`closable` on `<void-dialog>`, `closable` on `<void-drawer>`"},
 		{"references/components/void-popover.md", "| `trigger` | The element that toggles the popover"},
 		{"references/components/void-slider.md", "`show-value`"},
-		{"references/snippets/heex.md", "<.dropdown_menu position=\"bottom-end\">"},
+		{"references/snippets/heex.md", "<.dropdown_menu align=\"end\">"},
 		{"references/snippets/jsx.md", "slot=\"trigger\""},
 		{"references/wrong-usages.md", "| `<void-gauge>` | `show-value` | `showvalue` |"},
 		{"references/wrong-usages.md", "| `<void-option>` | `<void-multiselect>`, `<void-combobox>` |"},

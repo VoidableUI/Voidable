@@ -3,6 +3,7 @@ import { live } from 'lit/directives/live.js';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
 import { InternalsFormControl } from '../form-control.js';
+import { OverlayController, type OverlayCloseReason } from '../overlay.js';
 import { ProjectionController } from '../projection.js';
 import { edgeEnabled, stepEnabled, uid } from '../keyboard.js';
 import { VoidOption } from './multiselect.js';
@@ -19,6 +20,13 @@ import { VoidOption } from './multiselect.js';
  * highlighted option (without one, Enter is left alone so a surrounding form submits), Escape closes the
  * list (a second Escape reaches the surrounding dialog), Home and End move the text cursor, Tab closes the
  * list. Typing filters the options. Disabled options are skipped.
+ *
+ * The option list is shown in the top layer (never clipped by an `overflow` or `transform` ancestor) and placed
+ * under the input with CSS anchor positioning, flipping above it near the bottom of the viewport. A press
+ * outside closes it too; focus stays in the input.
+ *
+ * @fires {CustomEvent<{ reason: 'keyboard' | 'focus' | 'api' }>} void-open - The option list opened.
+ * @fires {CustomEvent<{ reason: 'escape' | 'outside' | 'blur' | 'select' | 'parent' | 'api' }>} void-close - The option list is closing.
  */
 export class VoidCombobox extends InternalsFormControl(VoidElement) {
   @property({ type: String }) value = '';
@@ -40,6 +48,18 @@ export class VoidCombobox extends InternalsFormControl(VoidElement) {
     onChange: () => this.requestUpdate(),
   });
 
+  protected readonly _overlay = new OverlayController(this, {
+    kind: 'listbox',
+    surface: () => this.querySelector<HTMLElement>(':scope > .void-combobox-dropdown'),
+    isOpen: () => this.open && !this.disabled,
+    setOpen: open => {
+      this.open = open;
+    },
+    anchor: () => this.querySelector(':scope > .void-combobox-input'),
+    // Focus stays in the input (aria-activedescendant).
+    initialFocus: () => false,
+  });
+
   private get _options(): VoidOption[] {
     return Array.from(this.querySelectorAll<VoidOption>('void-option'));
   }
@@ -48,18 +68,6 @@ export class VoidCombobox extends InternalsFormControl(VoidElement) {
   private get _visible(): VoidOption[] {
     const q = this._query.toLowerCase();
     return this._options.filter(opt => (opt.textContent?.trim().toLowerCase() ?? '').includes(q));
-  }
-
-  connectedCallback(): void {
-    super.connectedCallback();
-    document.addEventListener('click', this._onDocumentClick);
-    document.addEventListener('keydown', this._onDocumentKeydown);
-  }
-
-  disconnectedCallback(): void {
-    super.disconnectedCallback();
-    document.removeEventListener('click', this._onDocumentClick);
-    document.removeEventListener('keydown', this._onDocumentKeydown);
   }
 
   /**
@@ -113,7 +121,7 @@ export class VoidCombobox extends InternalsFormControl(VoidElement) {
         @blur=${this._onInputBlur}
       />
       ${open ? html`
-        <div class="void-combobox-dropdown" role="listbox" id=${this._listId} aria-label=${this.placeholder}>
+        <div class="void-combobox-dropdown" role="listbox" popover="manual" id=${this._listId} aria-label=${this.placeholder}>
           ${visible.length > 0
             ? visible.map((opt, i) => html`
                 <div
@@ -135,15 +143,16 @@ export class VoidCombobox extends InternalsFormControl(VoidElement) {
     `;
   }
 
-  private _close(): void {
-    this.open = false;
+  /** Closes the list through the overlay stack (so `void-close` carries the reason). */
+  private _close(reason: OverlayCloseReason = 'api'): void {
+    if (this.open) this._overlay.requestClose(reason);
     this._query = '';
     this._active = null;
   }
 
   private _onInputFocus = (): void => {
     if (this.disabled) return;
-    this.open = true;
+    this._overlay.requestOpen('focus');
     this._query = '';
     this._active = null;
   };
@@ -174,7 +183,7 @@ export class VoidCombobox extends InternalsFormControl(VoidElement) {
       e.preventDefault();
       if (!this.open) {
         this._query = '';
-        this.open = true;
+        this._overlay.requestOpen('keyboard');
         if (!e.altKey) {
           // Opening highlights the chosen option, else the first (Down) or last (Up) one.
           const visible = this._visible;
@@ -195,7 +204,7 @@ export class VoidCombobox extends InternalsFormControl(VoidElement) {
       if (this.open) {
         e.preventDefault();
         e.stopPropagation();
-        this._close();
+        this._close('escape');
       }
     }
   };
@@ -204,21 +213,13 @@ export class VoidCombobox extends InternalsFormControl(VoidElement) {
     setTimeout(() => {
       // Focus may have returned to the input meanwhile (a click on the list keeps it there).
       if (this.contains(document.activeElement) && document.activeElement?.tagName === 'INPUT') return;
-      this._close();
+      this._close('blur');
     }, 150);
-  };
-
-  private _onDocumentClick = (e: Event): void => {
-    if (!this.contains(e.target as Node)) this._close();
-  };
-
-  private _onDocumentKeydown = (e: KeyboardEvent): void => {
-    if (e.key === 'Escape' && this.open) this._close();
   };
 
   private _selectOption(opt: VoidOption): void {
     this.value = opt.value;
-    this._close();
+    this._close('select');
     this.dispatchEvent(new CustomEvent('void-change', { bubbles: true, composed: true, detail: { value: this.value } }));
   }
 }

@@ -100,6 +100,17 @@ export type { BarChartData, LineChartData, DonutChartData, GaugeData, GaugeZone 
 
 type TagValue = string | { text: string; color?: string };
 
+/** Why an overlay opened (`void-open` detail). */
+export type OverlayOpenReason = 'trigger' | 'keyboard' | 'hover' | 'focus' | 'api';
+/**
+ * Why an overlay closed (`void-close` detail). A close the user caused (`escape`, `outside`, `blur`,
+ * `trigger`, `close-button`, `select`, `hover`) can be cancelled with `event.preventDefault()`.
+ */
+export type OverlayCloseReason =
+  | 'escape' | 'outside' | 'blur' | 'trigger' | 'close-button' | 'select' | 'hover' | 'form' | 'parent' | 'api';
+/** The `void-open` / `void-close` pair every overlay fires (on the element itself; they do not bubble). */
+type OverlayEvents = { Open: { reason: OverlayOpenReason }; Close: { reason: OverlayCloseReason } };
+
 /**
  * Typed `onVoid*` props. Keys are the PascalCase custom-event suffix
  * (`Change` -> `onVoidChange` -> `void-change`), values are the `detail`
@@ -491,7 +502,9 @@ export const Multiselect = wrapWc<VoidMultiselect, {
   required?: boolean;
   /** The selected option values. */
   value?: string[];
-} & VoidEvents<{ Change: { values: string[] } }>>('void-multiselect', 'Multiselect');
+  /** Whether the option list is showing. */
+  open?: boolean;
+} & VoidEvents<{ Change: { values: string[] } } & OverlayEvents>>('void-multiselect', 'Multiselect');
 
 export const Option = wrapWc<VoidOption, {
   value?: string;
@@ -500,12 +513,16 @@ export const Option = wrapWc<VoidOption, {
   disabled?: boolean;
 }>('void-option', 'Option');
 
+/**
+ * A modal dialog (native `<dialog>` opened with `showModal()`). For a controlled dialog, keep `open` in
+ * state and set it to false in `onVoidClose`; call `event.preventDefault()` there to keep it open.
+ */
 export const Dialog = wrapWc<VoidDialog, {
   open?: boolean;
   heading?: string;
   size?: 'sm' | 'md' | 'lg' | 'xl';
   closable?: boolean;
-} & VoidEvents<{ Close: null }>>('void-dialog', 'Dialog');
+} & VoidEvents<OverlayEvents>>('void-dialog', 'Dialog');
 
 export const Tabs = wrapWc<VoidTabs, {
   value?: string;
@@ -567,7 +584,7 @@ export const Drawer = wrapWc<VoidDrawer, {
   size?: 'sm' | 'md' | 'lg';
   heading?: string;
   closable?: boolean;
-} & VoidEvents<{ Close: null }>>('void-drawer', 'Drawer');
+} & VoidEvents<OverlayEvents>>('void-drawer', 'Drawer');
 
 export const Card = wrapWc<VoidCard, {
   heading?: string;
@@ -595,13 +612,17 @@ export const Popover = wrapWc<VoidPopover, {
   trigger?: 'click' | 'manual';
   /** Alignment along the trigger edge. */
   align?: 'start' | 'center' | 'end';
-} & VoidEvents<{ Close: null }>>('void-popover', 'Popover');
+} & VoidEvents<OverlayEvents>>('void-popover', 'Popover');
 
 export const Tooltip = wrapWc<VoidTooltip, {
   text?: string;
   position?: 'top' | 'bottom' | 'left' | 'right';
+  /** Alignment along the trigger edge. */
+  align?: 'start' | 'center' | 'end';
   delay?: number;
-}>('void-tooltip', 'Tooltip');
+  /** Whether the tooltip is shown. */
+  open?: boolean;
+} & VoidEvents<OverlayEvents>>('void-tooltip', 'Tooltip');
 
 export const Banner = wrapWc<VoidBanner, {
   color?: 'default' | 'error' | 'warning' | 'caution' | 'success' | 'info' | 'notice';
@@ -684,7 +705,9 @@ export const Combobox = wrapWc<VoidCombobox, {
   name?: string;
   /** Form validation: the control must have a value. */
   required?: boolean;
-} & VoidEvents<{ Change: { value: string } }>>('void-combobox', 'Combobox');
+  /** Whether the option list is showing. */
+  open?: boolean;
+} & VoidEvents<{ Change: { value: string } } & OverlayEvents>>('void-combobox', 'Combobox');
 
 export const Slider = wrapWc<VoidSlider, {
   value?: number;
@@ -748,12 +771,17 @@ export const Sidebar = wrapWc<VoidSidebar, {
  */
 export const DropdownMenu = wrapWc<VoidDropdownMenu, {
   open?: boolean;
-  position?: 'bottom-start' | 'bottom-end' | 'top-start' | 'top-end';
-}>('void-dropdown-menu', 'DropdownMenu');
+  /** Side of the trigger the menu opens on (flips when there is no room). */
+  position?: 'top' | 'bottom' | 'left' | 'right';
+  /** Alignment along the trigger edge. */
+  align?: 'start' | 'center' | 'end';
+} & VoidEvents<OverlayEvents>>('void-dropdown-menu', 'DropdownMenu');
 
 export const DropdownMenuItem = wrapWc<VoidDropdownMenuItem, {
   disabled?: boolean;
   destructive?: boolean;
+  /** Keep the menu open when this item is chosen (checkbox-style items). */
+  keepOpen?: boolean;
 } & VoidEvents<{ Select: { item: VoidDropdownMenuItem } }>>('void-dropdown-menu-item', 'DropdownMenuItem');
 
 export const Toggle = wrapWc<VoidToggle, {
@@ -863,7 +891,7 @@ export const DatePicker = wrapWc<VoidDatePicker, {
   name?: string;
   /** Form validation: the control must have a value. */
   required?: boolean;
-} & VoidEvents<{ Change: { value: string; date: Date } }>>('void-date-picker', 'DatePicker');
+} & VoidEvents<{ Change: { value: string; date: Date } } & OverlayEvents>>('void-date-picker', 'DatePicker');
 
 export const NumberInput = wrapWc<VoidNumberInput, {
   value?: number;
@@ -934,9 +962,11 @@ export const Editable = wrapWc<VoidEditable, {
 export const HoverCard = wrapWc<VoidHoverCard, {
   open?: boolean;
   position?: 'top' | 'bottom' | 'left' | 'right';
+  /** Alignment along the trigger edge. */
+  align?: 'start' | 'center' | 'end';
   openDelay?: number;
   closeDelay?: number;
-} & VoidEvents<{ Open: null; Close: null }>>('void-hover-card', 'HoverCard');
+} & VoidEvents<OverlayEvents>>('void-hover-card', 'HoverCard');
 
 export const PinInput = wrapWc<VoidPinInput, {
   length?: number;

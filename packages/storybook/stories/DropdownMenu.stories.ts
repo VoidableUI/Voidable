@@ -22,9 +22,11 @@ Pattern: menu button. The trigger gets \`aria-haspopup\`, \`aria-expanded\` and 
 | Up Arrow (trigger) | Open and focus the last item |
 | Down Arrow / Up Arrow / Home / End | Move between items (wraps) |
 | Characters | Jump to the next item starting with them |
-| Enter / Space (item) | Activate the item |
+| Enter / Space (item) | Activate the item, close and return focus to the trigger (unless the item has \`keep-open\`) |
 | Escape | Close and return focus to the trigger |
-| Tab | Close and move on |`,
+| Tab | Close and move on |
+
+The panel opens in the top layer on the \`position\` side (\`top\`, \`bottom\`, \`left\`, \`right\`) with the \`align\` alignment (\`start\`, \`center\`, \`end\`) and flips at the viewport edges.`,
       },
     },
   },
@@ -69,25 +71,39 @@ export const WithDisabledItems: Story = {
 export const Positions: Story = {
   render: () => html`
     <div style="display: flex; gap: 16px; padding: 80px; flex-wrap: wrap; align-items: center;">
-      <void-dropdown-menu position="bottom-start">
+      <void-dropdown-menu position="bottom" align="start">
         <void-button slot="trigger">Bottom Start</void-button>
         <void-dropdown-menu-item>Item One</void-dropdown-menu-item>
         <void-dropdown-menu-item>Item Two</void-dropdown-menu-item>
       </void-dropdown-menu>
-      <void-dropdown-menu position="bottom-end">
+      <void-dropdown-menu position="bottom" align="end">
         <void-button slot="trigger">Bottom End</void-button>
         <void-dropdown-menu-item>Item One</void-dropdown-menu-item>
         <void-dropdown-menu-item>Item Two</void-dropdown-menu-item>
       </void-dropdown-menu>
-      <void-dropdown-menu position="top-start">
+      <void-dropdown-menu position="top" align="start">
         <void-button slot="trigger">Top Start</void-button>
         <void-dropdown-menu-item>Item One</void-dropdown-menu-item>
         <void-dropdown-menu-item>Item Two</void-dropdown-menu-item>
       </void-dropdown-menu>
-      <void-dropdown-menu position="top-end">
+      <void-dropdown-menu position="top" align="end">
         <void-button slot="trigger">Top End</void-button>
         <void-dropdown-menu-item>Item One</void-dropdown-menu-item>
         <void-dropdown-menu-item>Item Two</void-dropdown-menu-item>
+      </void-dropdown-menu>
+    </div>
+  `,
+};
+
+export const KeepOpenItems: Story = {
+  render: () => html`
+    <div style="padding: 40px;">
+      <void-dropdown-menu>
+        <void-button slot="trigger">View</void-button>
+        <void-dropdown-menu-item keep-open>Show grid</void-dropdown-menu-item>
+        <void-dropdown-menu-item keep-open>Show rulers</void-dropdown-menu-item>
+        <hr />
+        <void-dropdown-menu-item>Reset view</void-dropdown-menu-item>
       </void-dropdown-menu>
     </div>
   `,

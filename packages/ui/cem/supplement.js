@@ -106,6 +106,7 @@ export const attributeHints = {
     unit: 'use <void-figure> with data-void-type="value" and "unit" spans',
     caption: 'use <void-figure> with a data-void-type="caption" span',
   },
+  'void-tooltip': { visible: 'the shown state is the open attribute' },
 };
 
 /**
