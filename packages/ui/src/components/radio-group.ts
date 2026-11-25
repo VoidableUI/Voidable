@@ -1,13 +1,18 @@
 import { html, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
+import { NativeFormControl, setNativeChecked } from '../form-control.js';
 import type { VoidRadio } from './radio.js';
 
 /** Mutually exclusive option group for plan pickers, survey questions, and preference settings. */
-export class VoidRadioGroup extends VoidElement {
+/**
+ * Form strategy: pass-through. `name` is forwarded to the child void-radio
+ * elements, whose native radios submit; the group itself submits nothing.
+ */
+export class VoidRadioGroup extends NativeFormControl(VoidElement) {
   @property({ type: String }) label = '';
   @property({ type: String }) value = '';
-  @property({ type: String }) name = '';
+  @property({ type: String, reflect: true }) name = '';
   @property({ type: String, reflect: true }) orientation: 'vertical' | 'horizontal' = 'vertical';
 
   private _userContent: Node[] = [];
@@ -46,6 +51,17 @@ export class VoidRadioGroup extends VoidElement {
       }
       this._syncNames();
       this._syncChecked();
+    } else if (changed.has('value')) {
+      // Controlled value: programmatic sets update the radios without firing void-change.
+      this._syncChecked();
+    }
+  }
+
+  formRestore(state: unknown): void {
+    this.value = String(state ?? '');
+    for (const radio of this._radios()) {
+      radio.checked = radio.value === this.value;
+      setNativeChecked(radio.querySelector('input[type="radio"]'), radio.checked);
     }
   }
 

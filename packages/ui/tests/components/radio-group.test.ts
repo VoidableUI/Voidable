@@ -40,7 +40,7 @@ describe('VoidRadioGroup', () => {
 
   describe('class', () => {
     it('extends VoidElement', () => {
-      expect(Object.getPrototypeOf(VoidRadioGroup)).toBe(VoidElement);
+      expect(VoidRadioGroup.prototype).toBeInstanceOf(VoidElement);
     });
 
     it('is registered as void-radio-group', () => {
