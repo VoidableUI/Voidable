@@ -36,6 +36,8 @@
   <void-button id="off" disabled>Off</void-button>
   <void-button id="aria-off">Aria off</void-button>
   <void-button id="link" variant="outline"><a id="link-a" href="#followed">A link</a></void-button>
+  <void-button id="link2" size="lg"><a id="link2-a" href="#followed2">A real link</a></void-button>
+  <void-button id="link-off" disabled><a id="link-off-a" href="#nope">Off link</a></void-button>
 
   <form id="form" action="#" onsubmit="event.preventDefault(); window.submits += 1; return false;">
     <input id="f-name" name="name" value="x" aria-label="Name" />
@@ -53,7 +55,9 @@
 <script>
   window.submits = 0;
   window.log = [];
-  for (const id of ['plain', 'off', 'aria-off', 'link', 'submit', 'reset', 'submit-off', 'dd-t', 'nav-t', 'pop-t', 'hc-t', 'tip-t', 'tgl', 'sw', 'ham', 'cb', 'dd-one', 'dd-two']) {
+  window.hashes = 0;
+  addEventListener('hashchange', () => window.hashes++);
+  for (const id of ['plain', 'off', 'aria-off', 'link', 'link-off', 'submit', 'reset', 'submit-off', 'dd-t', 'nav-t', 'pop-t', 'hc-t', 'tip-t', 'tgl', 'sw', 'ham', 'cb', 'dd-one', 'dd-two']) {
     const el = document.getElementById(id);
     el.addEventListener('click', () => window.log.push('click:' + id));
     el.addEventListener('void-click', () => window.log.push('void-click:' + id));

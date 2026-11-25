@@ -55,27 +55,74 @@ describe('VoidBreadcrumbs', () => {
 
   describe('structure', () => {
     let el: VoidBreadcrumbs;
+    const trail = (inner: string) => {
+      el = document.createElement('void-breadcrumbs') as VoidBreadcrumbs;
+      el.innerHTML = `<void-breadcrumbs-list>${inner}</void-breadcrumbs-list>`;
+      document.body.appendChild(el);
+      return el;
+    };
+    const itemsOf = () => Array.from(el.querySelectorAll('void-breadcrumbs-item'));
 
     afterEach(() => {
       el?.remove();
     });
 
-    it('renders nothing of its own: the author items stay the children, in order', async () => {
+    it('renders nothing of its own: the author list and items stay the nodes, in order', async () => {
       el = document.createElement('void-breadcrumbs') as VoidBreadcrumbs;
-      el.innerHTML = '<void-breadcrumbs-item><a href="/">Home</a></void-breadcrumbs-item><void-breadcrumbs-item aria-current="page">Page</void-breadcrumbs-item>';
-      const before = Array.from(el.children);
+      el.innerHTML = '<void-breadcrumbs-list><void-breadcrumbs-item><a href="/">Home</a></void-breadcrumbs-item><void-breadcrumbs-item aria-current="page">Page</void-breadcrumbs-item></void-breadcrumbs-list>';
+      const list = el.firstElementChild!;
+      const before = Array.from(list.children);
       document.body.appendChild(el);
       await el.updateComplete;
-      expect(Array.from(el.children)).toEqual(before);
-      expect(el.querySelector('ol, li')).toBeNull();
+      expect(el.firstElementChild).toBe(list);
+      expect(Array.from(list.children)).toEqual(before);
+      expect(el.querySelector('ol, ul, li')).toBeNull();
       expect(el.querySelector('[data-separator]')).toBeNull();
+      expect(customElements.get('void-breadcrumbs-list')).toBeUndefined();
       expect(customElements.get('void-breadcrumbs-item')).toBeUndefined();
     });
 
-    it('does not mark a current page by itself: the author does with aria-current', async () => {
+    it('gives the list part role="list" and every item role="listitem"', async () => {
+      trail('<void-breadcrumbs-item><a href="/">A</a></void-breadcrumbs-item><void-breadcrumbs-item><a href="/b">B</a></void-breadcrumbs-item><void-breadcrumbs-item aria-current="page">C</void-breadcrumbs-item>');
+      await el.updateComplete;
+      expect(el.querySelector('void-breadcrumbs-list')!.getAttribute('role')).toBe('list');
+      expect(itemsOf().map(i => i.getAttribute('role'))).toEqual(['listitem', 'listitem', 'listitem']);
+    });
+
+    it('wires an item added later and takes the role off a removed one', async () => {
+      trail('<void-breadcrumbs-item>A</void-breadcrumbs-item>');
+      await el.updateComplete;
+      const list = el.querySelector('void-breadcrumbs-list')!;
+      const added = document.createElement('void-breadcrumbs-item');
+      list.appendChild(added);
+      await new Promise(r => setTimeout(r));
+      expect(added.getAttribute('role')).toBe('listitem');
+      added.remove();
+      await new Promise(r => setTimeout(r));
+      expect(added.hasAttribute('role')).toBe(false);
+    });
+
+    it('keeps roles through a keyed reorder (the same nodes, the new order)', async () => {
+      trail('<void-breadcrumbs-item id="a">A</void-breadcrumbs-item><void-breadcrumbs-item id="b">B</void-breadcrumbs-item><void-breadcrumbs-item id="c">C</void-breadcrumbs-item>');
+      await el.updateComplete;
+      const list = el.querySelector('void-breadcrumbs-list')!;
+      const [a, b, c] = Array.from(list.children);
+      list.append(c!, a!, b!);
+      await new Promise(r => setTimeout(r));
+      expect(Array.from(list.children)).toEqual([c, a, b]);
+      expect(itemsOf().every(i => i.getAttribute('role') === 'listitem')).toBe(true);
+    });
+
+    it('gives no role to an item outside the list part (the dev warning reports it)', async () => {
       el = document.createElement('void-breadcrumbs') as VoidBreadcrumbs;
-      el.innerHTML = '<void-breadcrumbs-item>A</void-breadcrumbs-item><void-breadcrumbs-item>B</void-breadcrumbs-item>';
+      el.innerHTML = '<void-breadcrumbs-item>Loose</void-breadcrumbs-item>';
       document.body.appendChild(el);
+      await el.updateComplete;
+      expect(el.querySelector('void-breadcrumbs-item')!.hasAttribute('role')).toBe(false);
+    });
+
+    it('does not mark a current page by itself: the author does with aria-current', async () => {
+      trail('<void-breadcrumbs-item>A</void-breadcrumbs-item><void-breadcrumbs-item>B</void-breadcrumbs-item>');
       await el.updateComplete;
       expect(el.querySelector('[aria-current]')).toBeNull();
     });
@@ -88,18 +135,6 @@ describe('VoidBreadcrumbs', () => {
       el.separator = '›';
       await el.updateComplete;
       expect(el.style.getPropertyValue('--_void-breadcrumbs-separator')).toBe('"›"');
-    });
-
-    it('keeps the author items in a keyed reorder (the same nodes, the new order)', async () => {
-      el = document.createElement('void-breadcrumbs') as VoidBreadcrumbs;
-      el.innerHTML = '<void-breadcrumbs-item id="a">A</void-breadcrumbs-item><void-breadcrumbs-item id="b">B</void-breadcrumbs-item><void-breadcrumbs-item id="c">C</void-breadcrumbs-item>';
-      document.body.appendChild(el);
-      await el.updateComplete;
-      const [a, b, c] = Array.from(el.children);
-      el.append(c!, a!, b!);
-      await el.updateComplete;
-      expect(Array.from(el.children).map(n => n.id)).toEqual(['c', 'a', 'b']);
-      expect(Array.from(el.children)).toEqual([c, a, b]);
     });
   });
 });

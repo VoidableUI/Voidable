@@ -499,27 +499,33 @@ defmodule DemoWeb.StaticShowcases do
       <h3>Default</h3>
       <p>A navigation trail showing the current page location within a hierarchy.</p>
       <VoidableUI.Components.breadcrumbs>
-        <void-breadcrumbs-item><a href="#">Home</a></void-breadcrumbs-item>
-        <void-breadcrumbs-item><a href="#">Products</a></void-breadcrumbs-item>
-        <void-breadcrumbs-item aria-current="page">Details</void-breadcrumbs-item>
+        <void-breadcrumbs-list>
+          <void-breadcrumbs-item><a href="#">Home</a></void-breadcrumbs-item>
+          <void-breadcrumbs-item><a href="#">Products</a></void-breadcrumbs-item>
+          <void-breadcrumbs-item aria-current="page">Details</void-breadcrumbs-item>
+        </void-breadcrumbs-list>
       </VoidableUI.Components.breadcrumbs>
     </div>
     <div class="showcase-section">
       <h3>Custom Separator</h3>
       <VoidableUI.Components.breadcrumbs separator="&rsaquo;">
-        <void-breadcrumbs-item><a href="#">Home</a></void-breadcrumbs-item>
-        <void-breadcrumbs-item><a href="#">Docs</a></void-breadcrumbs-item>
-        <void-breadcrumbs-item aria-current="page">Getting Started</void-breadcrumbs-item>
+        <void-breadcrumbs-list>
+          <void-breadcrumbs-item><a href="#">Home</a></void-breadcrumbs-item>
+          <void-breadcrumbs-item><a href="#">Docs</a></void-breadcrumbs-item>
+          <void-breadcrumbs-item aria-current="page">Getting Started</void-breadcrumbs-item>
+        </void-breadcrumbs-list>
       </VoidableUI.Components.breadcrumbs>
     </div>
     <div class="showcase-section">
       <h3>Deep Nesting</h3>
       <VoidableUI.Components.breadcrumbs separator="/">
-        <void-breadcrumbs-item><a href="#">Home</a></void-breadcrumbs-item>
-        <void-breadcrumbs-item><a href="#">Settings</a></void-breadcrumbs-item>
-        <void-breadcrumbs-item><a href="#">Account</a></void-breadcrumbs-item>
-        <void-breadcrumbs-item><a href="#">Security</a></void-breadcrumbs-item>
-        <void-breadcrumbs-item aria-current="page">Two-Factor Auth</void-breadcrumbs-item>
+        <void-breadcrumbs-list>
+          <void-breadcrumbs-item><a href="#">Home</a></void-breadcrumbs-item>
+          <void-breadcrumbs-item><a href="#">Settings</a></void-breadcrumbs-item>
+          <void-breadcrumbs-item><a href="#">Account</a></void-breadcrumbs-item>
+          <void-breadcrumbs-item><a href="#">Security</a></void-breadcrumbs-item>
+          <void-breadcrumbs-item aria-current="page">Two-Factor Auth</void-breadcrumbs-item>
+        </void-breadcrumbs-list>
       </VoidableUI.Components.breadcrumbs>
     </div>
     """

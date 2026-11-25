@@ -73,12 +73,69 @@ test.describe('a void-button activates like a native button', () => {
   });
 
   test('a link button follows its link with Enter and not with Space', async ({ page }) => {
-    await page.locator('#link').focus();
+    await page.locator('#link-a').focus();
     await page.keyboard.press('Space');
     expect(await log(page)).toEqual([]);
     await page.keyboard.press('Enter');
     // The anchor's own click (its default is prevented by the page), bubbling to the button: once.
     expect(await log(page)).toEqual(['click:link', 'void-click:link']);
+  });
+
+  test('a link button is one control: the link, with no role, tab stop or key handling on the host', async ({ page }) => {
+    const host = page.locator('#link');
+    for (const a of ['role', 'tabindex', 'aria-disabled', 'aria-pressed']) await expect(host).not.toHaveAttribute(a, /.*/);
+    await expect(page.getByRole('button', { name: 'A link' })).toHaveCount(0);
+    await expect(page.getByRole('link', { name: 'A link' })).toHaveCount(1);
+    // One Tab stop: from the control before it, the link is next, and the next stop is not inside the button.
+    await page.locator('#aria-off').focus();
+    await page.keyboard.press('Tab');
+    expect(await page.evaluate(() => document.activeElement?.id)).toBe('link-a');
+    await page.keyboard.press('Tab');
+    expect(await page.evaluate(() => !!document.activeElement?.closest('#link'))).toBe(false);
+    // A key sent to the host does nothing: the link takes it.
+    await page.locator('#link-a').focus();
+    expect(await page.evaluate(() => document.activeElement?.id)).toBe('link-a');
+  });
+
+  test('a click anywhere on a link button follows its link once', async ({ page }) => {
+    const host = page.locator('#link2');
+    const box = (await host.boundingBox())!;
+    // Corners, edges and the middle: the link fills the button.
+    for (const [x, y] of [[3, 3], [box.width / 2, 3], [box.width - 3, box.height - 3], [box.width / 2, box.height / 2]] as const) {
+      await page.evaluate(() => { location.hash = ''; (window as any).hashes = 0; });
+      await settle(page);
+      await page.evaluate(() => { (window as any).hashes = 0; });
+      await host.click({ position: { x, y } });
+      await expect.poll(() => page.evaluate(() => location.hash)).toBe('#followed2');
+      expect(await page.evaluate(() => (window as any).hashes), `click at ${x},${y}`).toBe(1);
+    }
+  });
+
+  test('a link button shows its focus ring when the link has focus, and the link draws none of its own', async ({ page }) => {
+    await page.locator('#aria-off').focus();
+    await page.keyboard.press('Tab');
+    const styles = await page.evaluate(() => {
+      const a = document.getElementById('link-a')!;
+      const host = a.parentElement!;
+      const h = getComputedStyle(host), l = getComputedStyle(a);
+      return { host: [h.outlineStyle, parseFloat(h.outlineWidth)], link: [l.outlineStyle, parseFloat(l.outlineWidth)] };
+    });
+    expect(styles.host[0]).toBe('solid');
+    expect(styles.host[1]).toBeGreaterThan(0);
+    expect(styles.link[0]).toBe('none');
+  });
+
+  test('a disabled link button: the link is announced as disabled, is not a tab stop and does not navigate', async ({ page }) => {
+    const a = page.locator('#link-off-a');
+    await expect(a).toHaveAttribute('aria-disabled', 'true');
+    await expect(a).toHaveAttribute('tabindex', '-1');
+    await expect(page.locator('#link-off')).not.toHaveAttribute('role', /.*/);
+    await page.locator('#link-off').click({ force: true });
+    await a.evaluate((el) => (el as HTMLElement).click());
+    await a.focus();
+    await page.keyboard.press('Enter');
+    expect(await page.evaluate(() => location.hash)).not.toBe('#nope');
+    expect(await log(page)).toEqual([]);
   });
 
   for (const id of ['tgl', 'sw', 'ham', 'cb'] as const) {

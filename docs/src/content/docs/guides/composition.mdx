@@ -120,7 +120,7 @@ What every component does today, and what it becomes. **Parts** components are c
 | nav-menu, nav-menu-item | Parts | `void-nav-menu-item` > `-trigger` (a button or a link), `-content` | Parts |
 | menu, menu-item, menu-group | Parts | `void-menu` > `-search`, `-content` (`void-menu-item` with `-icon`, `-shortcut`; `void-menu-group` with `-label`), `-empty` | Parts |
 | nav-bar | Parts | None of its own: `void-brand`, `void-nav-links` and `void-spacer` in the bar | No parts |
-| breadcrumbs | Parts | `void-breadcrumbs-item`, with separators drawn by CSS and the current page marked with `aria-current="page"` | Parts |
+| breadcrumbs | Parts | `void-breadcrumbs-list` holding `void-breadcrumbs-item`, with separators drawn by CSS and the current page marked with `aria-current="page"` | Parts |
 | carousel, carousel-slide | Parts | `void-carousel-content` > `void-carousel-item`, then the optional `-previous`, `-next` and `-indicators` | Parts |
 | field | Projects the control between rendered label, helper and error | `void-field-label`, the control, `void-field-description`, `void-field-error` | To convert (open: `label`/`helper`/`error` attributes are used everywhere) |
 | checkbox-group, radio-group | Projects options below a rendered legend (`label`) | `void-checkbox-group-label` / `void-radio-group-label`, then the options | To convert (open, with field) |
