@@ -24,12 +24,17 @@ Every message starts with `[voidable]`, names the element, says what is wrong, l
 | Boolean written as `"false"` | <code>&lt;void-button disabled="false"&gt;: disabled is a boolean attribute, on whenever it is present, so disabled="false" does not turn it off. Remove the attribute to turn it off.</code> |
 | Child in the wrong parent | <code>&lt;void-option&gt; only works inside &lt;void-multiselect&gt; or &lt;void-combobox&gt;, and it is inside &lt;void-select&gt;, so it is not used. &lt;void-select&gt; takes native &lt;option&gt; children.</code> |
 | Required child missing | <code>&lt;void-tabs&gt; has no &lt;void-tab-panel&gt; child, which it needs to show anything. Add at least one &lt;void-tab-panel&gt;.</code> |
+| Element with no accessible name | <code>&lt;void-button id="close"&gt; has no accessible name, so a screen reader announces it as nothing. Name it with aria-label, text inside it: an icon-only button needs an aria-label.</code> |
 | Tag nothing defines | <code>&lt;void-buton&gt; is not a Void UI element and nothing defines it, so it does nothing. Did you mean &lt;void-button&gt;?</code> |
 | Component not imported | <code>&lt;void-sidebar&gt; is a Void UI element but it is not defined, so it renders as an unstyled, inert tag. Import it with import "@voidable/ui/components/sidebar.js", import "@voidable/ui", or use "@voidable/ui/autoloader".</code> |
 | Listener for an event nothing dispatches | <code>Listener for "void-chnage" on &lt;void-input&gt;: no Void UI element dispatches an event with that name, so it never fires. Did you mean "void-change"?</code> |
 | A script keeps removing an attribute a component manages | <code>&lt;void-button&gt; role: something keeps removing this attribute, which the component manages; after 10 restorations within 1000 ms it is no longer put back. Find the script that removes it (a MutationObserver, a sanitiser) and leave the attribute alone.</code> |
 
 Each distinct problem is reported once per element type and attribute (or child tag, or event name), not once per instance, so a table of 500 rows with the same mistake produces one line.
+
+### Accessible names
+
+A button with only an icon, an input with no label, a dialog with no heading or an avatar with no name is announced as nothing. After the page has settled (so a field has wired its label onto the control it wraps), each element that needs a name is looked at in the live DOM and reported when none of these gives it one: a non-empty `aria-label`, `aria-labelledby`, `title` or the component's own attribute (`heading`, `alt`, `label`); text or a named icon inside it, for components a label can be written inside (button, toggle, switch, checkbox, radio); a name written on the control it renders; an enclosing `<void-field label>` or `<label>`; or a `<label for>` pointing at it. Which components need a name, and what names each, is data in `packages/ui/cem/supplement.js` (`accessibleName`), the same data `voidable check` reads, so it is reported there too as `missing-name`. A `placeholder` is not a name (a component that turns it into one itself, such as `void-action-input` and `void-multiselect`, is the exception).
 
 ### What it leaves alone
 
@@ -39,7 +44,7 @@ Listeners are checked only for `void-*` event names that **no** component dispat
 
 ## Where the knowledge comes from
 
-Nothing is listed by hand. The build writes a compact table from the Custom Elements Manifest: attributes with their allowed values, which booleans read `"false"`, the events each element dispatches, the parents and required children. A new attribute or component is checked the release it ships. The few facts the analyzer cannot see (allowed parents, required children, advice for guessed attributes) live in one file, `packages/ui/cem/supplement.js`, which both the manifest and the `voidable` tool read.
+Nothing is listed by hand. The build writes a compact table from the Custom Elements Manifest: attributes with their allowed values, which booleans read `"false"`, the events each element dispatches, the parents and required children. A new attribute or component is checked the release it ships. The few facts the analyzer cannot see (allowed parents, required children, advice for guessed attributes, which components need an accessible name) live in one file, `packages/ui/cem/supplement.js`, which both the manifest and the `voidable` tool read.
 
 ## Enabling it
 

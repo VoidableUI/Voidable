@@ -8,7 +8,7 @@ import { ProjectionController } from '../projection.js';
 /** Binary or indeterminate selection for form fields, data table row selection, and toggle-able settings. */
 export class VoidCheckbox extends NativeFormControl(VoidElement) {
   /** Enter and Space fire a real `click`, as on a native button. */
-  private _activation = new KeyboardActivation(this, { enter: false, disabled: () => this.formDisabled });
+  protected readonly _activation = new KeyboardActivation(this, { enter: false, disabled: () => this.formDisabled });
 
   /**
    * Whether the box is checked. Updated when the user toggles it; the attribute is the initial state and

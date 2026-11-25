@@ -15,6 +15,8 @@
 //   p  tags it must sit inside (anywhere above it)
 //   r  tags it cannot work without (somewhere below it)
 //   x  advice for attributes people guess that do not exist
+//   n  what names the element (supplement.js accessibleName): a attributes, c content names it,
+//      p ancestors as [tag, ...attributes], h the hint
 // Also exported: `styled`, the tags of the CSS-only elements (the page patterns
 // and the media surface). @voidable/theme styles them and nothing registers
 // them, so they are not in the manifest and must not be reported as unknown.
@@ -58,6 +60,12 @@ for (const mod of manifest.modules) {
     if (decl.voidParents?.length) entry.p = decl.voidParents;
     if (decl.voidRequires?.length) entry.r = decl.voidRequires;
     if (decl.voidHints && Object.keys(decl.voidHints).length) entry.x = decl.voidHints;
+    if (decl.voidName) {
+      const n = decl.voidName;
+      entry.n = { a: n.attributes, h: n.hint };
+      if (n.content) entry.n.c = 1;
+      if (n.ancestors?.length) entry.n.p = n.ancestors.map((x) => [x.tag, ...(x.attributes ?? [])]);
+    }
     tags[decl.tagName] = entry;
   }
 }

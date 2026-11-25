@@ -72,9 +72,9 @@ const tags = ref(['design', 'ship']);
 <template>
   <void-button variant="filled" @void-click="console.log('clicked')">Save</void-button>
 
-  <void-input :value="name" :disabled="false" @void-input="(e) => (name = e.detail.value)" />
+  <void-input aria-label="Text input" :value="name" :disabled="false" @void-input="(e) => (name = e.detail.value)" />
 
-  <void-tags-input :value="tags" />
+  <void-tags-input aria-label="Tags" :value="tags" />
 </template>
 ```
 
@@ -94,9 +94,9 @@ const agreed = ref(false);
 </script>
 
 <template>
-  <void-input :value="text" @void-input="(e) => (text = e.detail.value)" />
+  <void-input aria-label="Text input" :value="text" @void-input="(e) => (text = e.detail.value)" />
 
-  <void-select :value="choice" @void-change="(e) => (choice = e.detail.value)">
+  <void-select aria-label="Choose an option" :value="choice" @void-change="(e) => (choice = e.detail.value)">
     <option value="a">A</option>
     <option value="b">B</option>
     <option value="c">C</option>

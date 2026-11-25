@@ -49,9 +49,9 @@ Svelte sets a property when the element has one, so strings, booleans, numbers, 
 
 <void-button variant="filled" onvoid-click={() => console.log('clicked')}>Save</void-button>
 
-<void-input value={name} disabled={false} onvoid-input={(e) => (name = e.detail.value)}></void-input>
+<void-input aria-label="Text input" value={name} disabled={false} onvoid-input={(e) => (name = e.detail.value)}></void-input>
 
-<void-tags-input value={tags}></void-tags-input>
+<void-tags-input aria-label="Tags" value={tags}></void-tags-input>
 ```
 
 `e.detail` is typed from the element: `CustomEvent<{ value: string }>` for `void-input`, `{ checked: boolean }` for `void-checkbox`, and so on.
@@ -67,9 +67,9 @@ Svelte's `bind:` cannot be used on custom elements: `<void-input bind:value={nam
   let agreed = $state(false);
 </script>
 
-<void-input value={text} onvoid-input={(e) => (text = e.detail.value)}></void-input>
+<void-input aria-label="Text input" value={text} onvoid-input={(e) => (text = e.detail.value)}></void-input>
 
-<void-select value={choice} onvoid-change={(e) => (choice = e.detail.value)}>
+<void-select aria-label="Choose an option" value={choice} onvoid-change={(e) => (choice = e.detail.value)}>
   <option value="a">A</option>
   <option value="b">B</option>
   <option value="c">C</option>

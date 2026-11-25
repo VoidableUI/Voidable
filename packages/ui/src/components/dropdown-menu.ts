@@ -203,7 +203,7 @@ if (!customElements.get('void-dropdown-menu')) {
  */
 export class VoidDropdownMenuItem extends VoidElement {
   /** Enter and Space fire a real `click`, as on a native button. */
-  private _activation = new KeyboardActivation(this, { disabled: () => this.disabled });
+  protected readonly _activation = new KeyboardActivation(this, { disabled: () => this.disabled });
 
   /** Dim the item, skip it in keyboard navigation and stop it firing `void-select`. */
   @property({ type: Boolean, reflect: true }) disabled = false;

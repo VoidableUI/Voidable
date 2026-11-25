@@ -228,7 +228,7 @@ if (!customElements.get('void-menu')) {
 /** One action in a `void-menu`: activating it (click, Enter or Space) fires `void-select` with its `value`. */
 export class VoidMenuItem extends VoidElement {
   /** Enter and Space fire a real `click`, as on a native button. */
-  private _activation = new KeyboardActivation(this, { disabled: () => this.disabled });
+  protected readonly _activation = new KeyboardActivation(this, { disabled: () => this.disabled });
 
   /**
    * Identifier the item reports in the `void-select` event's `detail.value`. Use it instead of matching

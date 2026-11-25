@@ -52,7 +52,7 @@ export class VoidButton extends VoidElement {
    * Keyboard activation is a real `click`, as on a native button: Enter on keydown, Space on keyup. A link button
    * follows link semantics: Enter follows the link, Space does nothing.
    */
-  private _activation = new KeyboardActivation(this, {
+  protected readonly _activation = new KeyboardActivation(this, {
     disabled: () => this.formDisabled,
     space: () => !this._link,
     activate: () => (this._link ?? this).click(),

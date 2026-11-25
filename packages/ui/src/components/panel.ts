@@ -34,7 +34,8 @@ export class VoidPanel extends VoidElement {
     if (changed.has('label')) {
       if (this.label) {
         this.setHostAttribute('aria-label', this.label);
-      } else {
+      } else if (changed.get('label')) {
+        // Only a label that was set is taken back: an author's own `aria-label` stands.
         this.setHostAttribute('aria-label', null);
       }
     }

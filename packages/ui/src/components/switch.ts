@@ -7,7 +7,7 @@ import { InternalsFormControl, type FormSubmission } from '../form-control.js';
 /** On/off toggle for feature flags, notification preferences, and settings that take immediate effect. */
 export class VoidSwitch extends InternalsFormControl(VoidElement) {
   /** Enter and Space fire a real `click`, as on a native button. */
-  private _activation = new KeyboardActivation(this, { disabled: () => this.formDisabled });
+  protected readonly _activation = new KeyboardActivation(this, { disabled: () => this.formDisabled });
 
   /** Whether the switch is on. The attribute is the initial state and the form's reset target. */
   @property({ type: Boolean, reflect: true }) checked = false;

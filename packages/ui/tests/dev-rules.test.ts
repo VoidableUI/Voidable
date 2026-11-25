@@ -7,6 +7,7 @@ import {
   checkAttributes,
   checkDefined,
   checkEvent,
+  checkName,
   checkParent,
   checkRequired,
   isForeignAttribute,
@@ -35,6 +36,20 @@ const table: DevTable = {
   'void-combobox': { m: 'combobox', a: {}, e: [] },
   'void-tabs': { m: 'tabs', a: {}, e: [], r: ['void-tab-panel'] },
   'void-tab-panel': { m: 'tabs', a: {}, e: [], p: ['void-tabs'] },
+  'void-field': { m: 'field', a: { label: 0 }, e: [] },
+  'void-avatar': { m: 'avatar', a: { alt: 0, initials: 0 }, e: [], n: { a: ['aria-label', 'alt', 'initials'], h: 'set alt' } },
+  'void-dialog': { m: 'dialog', a: { heading: 0 }, e: [], n: { a: ['aria-label', 'aria-labelledby', 'heading'], h: 'give it a heading' } },
+  'void-checkbox': {
+    m: 'checkbox', a: {}, e: [],
+    n: { a: ['aria-label', 'aria-labelledby', 'title'], c: 1, p: [['void-field', 'label'], ['label']], h: 'put text inside it' },
+  },
+};
+// Named in the tests below: the button and the input need a name too.
+(table['void-button'] as { n?: unknown }).n = { a: ['aria-label', 'aria-labelledby', 'title'], c: 1, h: 'an icon-only button needs an aria-label' };
+(table['void-input'] as { n?: unknown }).n = {
+  a: ['aria-label', 'aria-labelledby', 'title'],
+  p: [['void-field', 'label'], ['label']],
+  h: 'wrap it in <void-field label="...">',
 };
 
 const make = (html: string): Element => {
@@ -217,5 +232,69 @@ describe('suggest', () => {
     expect(suggest('banana', ['color', 'size'])).toBeUndefined();
     expect(suggest('primary', ['default', 'error'])).toBeUndefined();
     expect(suggest('primary', ['default', 'error'], true)).toBe('default');
+  });
+});
+
+describe('accessible names', () => {
+  const ICON = '<svg viewBox="0 0 1 1"><path d="M0 0"/></svg>';
+  const named = (html: string) => {
+    make(html);
+    // The element under test is the first one the table says needs a name.
+    const el = Array.from(document.body.querySelectorAll('*')).find((e) => table[e.localName]?.n);
+    return el ? checkName(table, el) : undefined;
+  };
+
+  it.each([
+    ['text content', '<void-button>Save</void-button>'],
+    ['aria-label', `<void-button aria-label="Close">${ICON}</void-button>`],
+    ['aria-labelledby', '<div id="t">Title</div><void-button aria-labelledby="t"></void-button>'],
+    ['title', `<void-button title="Close">${ICON}</void-button>`],
+    ['an icon with its own name', '<void-button><svg aria-label="Close"></svg></void-button>'],
+    ['an image alt', '<void-button><img src="x.png" alt="Close"></void-button>'],
+    ['a field label', '<void-field label="Email"><void-input></void-input></void-field>'],
+    ['a native label around it', '<label>Email <void-input></void-input></label>'],
+    ['a label for its id', '<label for="e">Email</label><void-input id="e"></void-input>'],
+    ['a name on the control inside it', '<void-input><input aria-label="Email"></void-input>'],
+    ['avatar alt', '<void-avatar alt="Ada Lovelace"></void-avatar>'],
+    ['avatar initials', '<void-avatar initials="AL"></void-avatar>'],
+    ['dialog heading', '<void-dialog heading="Edit profile"></void-dialog>'],
+    ['dialog aria-label', '<void-dialog aria-label="Edit profile"></void-dialog>'],
+    ['checkbox text', '<void-checkbox>Accept the terms</void-checkbox>'],
+  ])('%s names it', (_what, html) => {
+    expect(named(html)).toBeUndefined();
+  });
+
+  it.each([
+    ['an icon-only button', `<void-button>${ICON}</void-button>`],
+    ['an empty aria-label', `<void-button aria-label=" ">${ICON}</void-button>`],
+    ['an input on its own', '<void-input></void-input>'],
+    ['an input in a field with no label', '<void-field><void-input></void-input></void-field>'],
+    ['an input with only a placeholder', '<void-input placeholder="Email"></void-input>'],
+    ['a dialog with no heading', '<void-dialog></void-dialog>'],
+    ['an avatar with nothing', '<void-avatar></void-avatar>'],
+    ['an empty checkbox', '<void-checkbox></void-checkbox>'],
+  ])('%s is reported', (_what, html) => {
+    const w = named(html);
+    expect(w?.kind).toBe('missing-name');
+    expect(w?.message).toContain('has no accessible name');
+  });
+
+  it('names the element and the way to name it', () => {
+    const w = named(`<void-button id="close">${ICON}</void-button>`)!;
+    expect(w.message).toContain('<void-button id="close">');
+    expect(w.message).toContain('aria-label');
+    expect(w.message).toContain('an icon-only button needs an aria-label');
+  });
+
+  it('says which attribute a component uses', () => {
+    expect(named('<void-dialog></void-dialog>')!.message).toContain('heading');
+  });
+
+  it('ignores a tag that needs no name', () => {
+    expect(named('<void-select></void-select>')).toBeUndefined();
+  });
+
+  it('is deduplicated once per element type', () => {
+    expect(keyOf(named('<void-input></void-input>')!)).toBe('missing-name|void-input|');
   });
 });

@@ -102,11 +102,11 @@ export const Readonly: Story = {
 export const WithUnit: Story = {
   render: () => html`
     <div style="display: flex; flex-direction: column; gap: var(--void-space-4); max-width: 18rem;">
-      <void-number-input value="25" unit="°C" min="-50" max="50"></void-number-input>
-      <void-number-input value="9.99" prefix="$" precision="2" step="0.01"></void-number-input>
-      <void-number-input value="50" unit="%" min="0" max="100"></void-number-input>
-      <void-number-input value="180" unit="°" min="0" max="360" step="15"></void-number-input>
-      <void-number-input value="1200" prefix="€" unit="/mo" precision="0"></void-number-input>
+      <void-number-input aria-label="Quantity" value="25" unit="°C" min="-50" max="50"></void-number-input>
+      <void-number-input aria-label="Quantity" value="9.99" prefix="$" precision="2" step="0.01"></void-number-input>
+      <void-number-input aria-label="Quantity" value="50" unit="%" min="0" max="100"></void-number-input>
+      <void-number-input aria-label="Quantity" value="180" unit="°" min="0" max="360" step="15"></void-number-input>
+      <void-number-input aria-label="Quantity" value="1200" prefix="€" unit="/mo" precision="0"></void-number-input>
     </div>
   `,
 };
@@ -120,7 +120,7 @@ export const StepAny: Story = {
     },
   },
   render: () => html`
-    <void-number-input step="any" value="2.375" style="max-width: 18rem;"></void-number-input>
+    <void-number-input aria-label="Quantity" step="any" value="2.375" style="max-width: 18rem;"></void-number-input>
   `,
 };
 

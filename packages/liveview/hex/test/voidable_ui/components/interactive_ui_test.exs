@@ -279,7 +279,7 @@ defmodule VoidableUI.Components.InteractiveUITest do
   # ===========================================================================
 
   describe "dialog" do
-    test "renders <void-dialog> with slot content" do
+    test "renders <void-dialog aria-label="Dialog"> with slot content" do
       assigns = %{}
 
       html =
@@ -390,7 +390,7 @@ defmodule VoidableUI.Components.InteractiveUITest do
   # ===========================================================================
 
   describe "drawer" do
-    test "renders <void-drawer> with slot content" do
+    test "renders <void-drawer aria-label="Drawer"> with slot content" do
       assigns = %{}
 
       html =

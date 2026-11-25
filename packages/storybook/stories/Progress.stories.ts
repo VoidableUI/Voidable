@@ -43,7 +43,7 @@ export const Default: Story = {
     indeterminate: false,
   },
   render: (args) => html`
-    <void-progress
+    <void-progress aria-label="Progress"
       value=${args.value}
       color=${args.color}
       size=${args.size}
@@ -55,12 +55,12 @@ export const Default: Story = {
 export const Colors: Story = {
   render: () => html`
     <div style="display: flex; flex-direction: column; gap: 0.75rem; width: 300px;">
-      <void-progress value="75" color="default"></void-progress>
-      <void-progress value="60" color="error"></void-progress>
-      <void-progress value="45" color="warning"></void-progress>
-      <void-progress value="90" color="success"></void-progress>
-      <void-progress value="55" color="info"></void-progress>
-      <void-progress value="30" color="notice"></void-progress>
+      <void-progress aria-label="Progress" value="75" color="default"></void-progress>
+      <void-progress aria-label="Progress" value="60" color="error"></void-progress>
+      <void-progress aria-label="Progress" value="45" color="warning"></void-progress>
+      <void-progress aria-label="Progress" value="90" color="success"></void-progress>
+      <void-progress aria-label="Progress" value="55" color="info"></void-progress>
+      <void-progress aria-label="Progress" value="30" color="notice"></void-progress>
     </div>
   `,
 };
@@ -68,9 +68,9 @@ export const Colors: Story = {
 export const Sizes: Story = {
   render: () => html`
     <div style="display: flex; flex-direction: column; gap: 0.75rem; width: 300px;">
-      <void-progress value="60" size="sm"></void-progress>
-      <void-progress value="60" size="md"></void-progress>
-      <void-progress value="60" size="lg"></void-progress>
+      <void-progress aria-label="Progress" value="60" size="sm"></void-progress>
+      <void-progress aria-label="Progress" value="60" size="md"></void-progress>
+      <void-progress aria-label="Progress" value="60" size="lg"></void-progress>
     </div>
   `,
 };
@@ -78,7 +78,7 @@ export const Sizes: Story = {
 export const Indeterminate: Story = {
   render: () => html`
     <div style="width: 300px;">
-      <void-progress indeterminate></void-progress>
+      <void-progress aria-label="Progress" indeterminate></void-progress>
     </div>
   `,
 };

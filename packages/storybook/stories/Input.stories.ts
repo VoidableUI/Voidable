@@ -22,7 +22,7 @@ const meta: Meta = {
     error: { control: 'text' },
   },
   render: (args) => html`
-    <void-input
+    <void-input aria-label="Text input"
       type=${args.type || 'text'}
       placeholder=${args.placeholder || 'Enter text...'}
       size=${args.size || 'md'}
@@ -45,9 +45,9 @@ export const WithError: Story = {
 export const Sizes: Story = {
   render: () => html`
     <div style="display: flex; flex-direction: column; gap: 12px; max-width: 400px;">
-      <void-input size="sm" placeholder="Small"></void-input>
-      <void-input size="md" placeholder="Medium"></void-input>
-      <void-input size="lg" placeholder="Large"></void-input>
+      <void-input aria-label="Small" size="sm" placeholder="Small"></void-input>
+      <void-input aria-label="Medium" size="md" placeholder="Medium"></void-input>
+      <void-input aria-label="Large" size="lg" placeholder="Large"></void-input>
     </div>
   `,
 };
@@ -63,11 +63,11 @@ export const Password: Story = {
 export const DateAndTimeTypes: Story = {
   render: () => html`
     <div style="display: flex; flex-direction: column; gap: 12px; max-width: 400px;">
-      <void-input type="date"></void-input>
-      <void-input type="time"></void-input>
-      <void-input type="datetime-local"></void-input>
-      <void-input type="month"></void-input>
-      <void-input type="week"></void-input>
+      <void-input aria-label="Text input" type="date"></void-input>
+      <void-input aria-label="Text input" type="time"></void-input>
+      <void-input aria-label="Text input" type="datetime-local"></void-input>
+      <void-input aria-label="Text input" type="month"></void-input>
+      <void-input aria-label="Text input" type="week"></void-input>
     </div>
   `,
 };
@@ -82,9 +82,9 @@ export const NativeAttributes: Story = {
   },
   render: () => html`
     <form style="display: flex; flex-direction: column; gap: 12px; max-width: 400px;" @submit=${(e: Event) => e.preventDefault()}>
-      <void-input name="username" autocomplete="username" autocapitalize="off" spellcheck="false" placeholder="Username"></void-input>
-      <void-input name="password" type="password" autocomplete="current-password" minlength="8" maxlength="64" placeholder="Password (8 to 64 characters)"></void-input>
-      <void-input name="code" autocomplete="one-time-code" inputmode="numeric" pattern="[0-9]{6}" enterkeyhint="done" placeholder="6 digit code"></void-input>
+      <void-input aria-label="Username" name="username" autocomplete="username" autocapitalize="off" spellcheck="false" placeholder="Username"></void-input>
+      <void-input aria-label="Password (8 to 64 characters)" name="password" type="password" autocomplete="current-password" minlength="8" maxlength="64" placeholder="Password (8 to 64 characters)"></void-input>
+      <void-input aria-label="6 digit code" name="code" autocomplete="one-time-code" inputmode="numeric" pattern="[0-9]{6}" enterkeyhint="done" placeholder="6 digit code"></void-input>
       <void-button type="submit">Sign in</void-button>
     </form>
   `,

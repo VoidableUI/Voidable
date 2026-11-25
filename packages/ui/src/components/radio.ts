@@ -8,7 +8,7 @@ import { ProjectionController } from '../projection.js';
 /** Single mutually exclusive option for forms and surveys; typically used inside VoidRadioGroup. */
 export class VoidRadio extends NativeFormControl(VoidElement) {
   /** Enter and Space fire a real `click`, as on a native button. */
-  private _activation = new KeyboardActivation(this, { enter: false, disabled: () => this.formDisabled });
+  protected readonly _activation = new KeyboardActivation(this, { enter: false, disabled: () => this.formDisabled });
 
   /** Whether this radio is the selected one. Checking one radio unchecks the others with the same `name`. */
   @property({ type: Boolean, reflect: true }) checked = false;

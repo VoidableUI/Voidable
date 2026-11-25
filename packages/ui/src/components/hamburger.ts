@@ -7,7 +7,7 @@ import { isInDisabledFieldset, watchDisabledAncestors } from '../form-control.js
 /** Animated open/close toggle for mobile navigation menus and collapsible sidebars. */
 export class VoidHamburger extends VoidElement {
   /** Enter and Space fire a real `click`, as on a native button. */
-  private _activation = new KeyboardActivation(this, { disabled: () => this.disabled || isInDisabledFieldset(this) });
+  protected readonly _activation = new KeyboardActivation(this, { disabled: () => isInDisabledFieldset(this) });
 
   /**
    * Whether the menu it controls is open: draws the lines as a close cross and sets `aria-expanded`. It

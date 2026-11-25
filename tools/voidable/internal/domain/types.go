@@ -88,6 +88,10 @@ type Element struct {
 	AllowedParents   []string          `json:"-"`
 	RequiredChildren []string          `json:"-"`
 	AttrHints        map[string]string `json:"-"`
+	// Name says what gives the element an accessible name (voidName in the
+	// manifest, source accessibleName in packages/ui/cem/supplement.js); nil
+	// when the element needs none.
+	Name *NameRule `json:"name,omitempty"`
 
 	// CSSOnly marks a styled element: a void-* tag that @voidable/theme
 	// styles and @voidable/ui never registers. It has no JavaScript, no
@@ -209,4 +213,27 @@ func (c *Catalog) Dispatchers(event string) []string {
 		}
 	}
 	return out
+}
+
+// NameRule says that an element must have an accessible name and what supplies
+// one. It is data from the manifest: the checker has no list of tags.
+type NameRule struct {
+	// Attributes of the element itself that name it. A non-empty or dynamic
+	// value counts.
+	Attributes []string `json:"attributes"`
+	// Content is true when the element's own text (or a named icon inside it)
+	// names it.
+	Content bool `json:"content,omitempty"`
+	// Ancestors name the element when an enclosing element has the tag and
+	// carries one of the attributes (none listed: the tag alone is enough).
+	// The tag `label` is the native element.
+	Ancestors []NameAncestor `json:"ancestors,omitempty"`
+	// Hint is one sentence on what to do about it.
+	Hint string `json:"hint,omitempty"`
+}
+
+// NameAncestor is one enclosing element that can name its descendant.
+type NameAncestor struct {
+	Tag        string   `json:"tag"`
+	Attributes []string `json:"attributes,omitempty"`
 }

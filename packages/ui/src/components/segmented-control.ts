@@ -9,7 +9,7 @@ type ItemGroup = Element & { value?: string; _syncItems?: () => void };
 /** Individual option within a VoidSegmentedControl button group. */
 export class VoidSegmentedControlItem extends VoidElement {
   /** Space fires a real `click`, which the control turns into a selection. */
-  private _activation = new KeyboardActivation(this, { enter: false, disabled: () => this.disabled });
+  protected readonly _activation = new KeyboardActivation(this, { enter: false, disabled: () => this.disabled });
 
   /**
    * What the parent reports and submits when this segment is selected. Must be unique within the

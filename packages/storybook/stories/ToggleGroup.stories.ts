@@ -30,20 +30,20 @@ const meta: Meta = {
       ?multiple=${args.multiple}
       ?disabled=${args.disabled}
     >
-      <void-toggle value="bold">
+      <void-toggle aria-label="Bold" value="bold">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
           <path d="M6 4h8a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"/>
           <path d="M6 12h9a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"/>
         </svg>
       </void-toggle>
-      <void-toggle value="italic">
+      <void-toggle aria-label="Italic" value="italic">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
           <line x1="19" y1="4" x2="10" y2="4"/>
           <line x1="14" y1="20" x2="5" y2="20"/>
           <line x1="15" y1="4" x2="9" y2="20"/>
         </svg>
       </void-toggle>
-      <void-toggle value="underline">
+      <void-toggle aria-label="Underline" value="underline">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
           <path d="M6 4v6a6 6 0 0 0 12 0V4"/>
           <line x1="4" y1="20" x2="20" y2="20"/>
@@ -151,26 +151,26 @@ export const Disabled: Story = {
 export const TextFormatting: Story = {
   render: () => html`
     <void-toggle-group multiple value="bold,italic">
-      <void-toggle value="bold">
+      <void-toggle aria-label="Bold" value="bold">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
           <path d="M6 4h8a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"/>
           <path d="M6 12h9a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"/>
         </svg>
       </void-toggle>
-      <void-toggle value="italic">
+      <void-toggle aria-label="Italic" value="italic">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
           <line x1="19" y1="4" x2="10" y2="4"/>
           <line x1="14" y1="20" x2="5" y2="20"/>
           <line x1="15" y1="4" x2="9" y2="20"/>
         </svg>
       </void-toggle>
-      <void-toggle value="underline">
+      <void-toggle aria-label="Underline" value="underline">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
           <path d="M6 4v6a6 6 0 0 0 12 0V4"/>
           <line x1="4" y1="20" x2="20" y2="20"/>
         </svg>
       </void-toggle>
-      <void-toggle value="strikethrough">
+      <void-toggle aria-label="Strikethrough" value="strikethrough">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
           <path d="M16 4H9a3 3 0 0 0-2.83 4"/>
           <path d="M14 12a4 4 0 0 1 0 8H6"/>

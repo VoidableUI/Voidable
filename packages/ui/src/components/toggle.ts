@@ -6,7 +6,7 @@ import { isInDisabledFieldset, watchDisabledAncestors } from '../form-control.js
 /** Pressable toggle button for toolbar actions and editor formatting controls with binary active/inactive state. */
 export class VoidToggle extends VoidElement {
   /** Enter and Space fire a real `click`, as on a native button. */
-  private _activation = new KeyboardActivation(this, { disabled: () => this.formDisabled });
+  protected readonly _activation = new KeyboardActivation(this, { disabled: () => this.formDisabled });
 
   /**
    * Whether the toggle is on. It flips on click, Enter or Space and fires `void-change` with `{ pressed
