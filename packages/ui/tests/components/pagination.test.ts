@@ -364,7 +364,35 @@ describe('VoidPagination', () => {
       expect(ev!.cancelable).toBe(true);
       expect(ev!.detail.value).toBe(6);
       expect(click.defaultPrevented).toBe(false);
+      // Link mode must not mutate value (it would rewrite the href before the browser follows it).
+      expect(el.value).toBe(5);
+    });
+
+    it('does not rewrite any href after a click that the browser will follow', async () => {
+      const el = await mount({ 'href-template': '?p={page}' });
+      const before = Array.from(el.querySelectorAll('a')).map(a => a.getAttribute('href'));
+      const link = Array.from(el.querySelectorAll<HTMLAnchorElement>('a')).find(a => a.textContent?.trim() === '6')!;
+      link.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, button: 0 }));
+      await el.updateComplete;
+      await new Promise(r => setTimeout(r, 10));
+      expect(Array.from(el.querySelectorAll('a')).map(a => a.getAttribute('href'))).toEqual(before);
+      expect(el.value).toBe(5);
+    });
+
+    it('catches value up after a router intercepts the click, but not in time to change the href', async () => {
+      const el = await mount({ 'href-template': '?p={page}' });
+      const link = Array.from(el.querySelectorAll<HTMLAnchorElement>('a')).find(a => a.textContent?.trim() === '6')!;
+      const hrefAtClick: Array<string | null> = [];
+      container.addEventListener('click', (e) => { e.preventDefault(); hrefAtClick.push(link.getAttribute('href')); });
+      link.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, button: 0 }));
+      await Promise.resolve();
+      await el.updateComplete;
+      expect(el.value).toBe(5);
+      await new Promise(r => setTimeout(r, 10));
+      await el.updateComplete;
+      expect(hrefAtClick).toEqual(['?p=6']);
       expect(el.value).toBe(6);
+      expect(el.querySelector('[aria-current="page"]')?.textContent?.trim()).toBe('6');
     });
 
     it('cancelling void-change prevents navigation and the value change', async () => {

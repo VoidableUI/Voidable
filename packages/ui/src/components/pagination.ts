@@ -32,7 +32,30 @@ export class VoidPagination extends VoidElement {
       e.preventDefault();
       return;
     }
-    if (!this._go(page, true)) e.preventDefault();
+    if (page < 1 || page > this.total) {
+      e.preventDefault();
+      return;
+    }
+    // Do not touch `value` here: Lit would re-render in the microtask and rewrite this
+    // anchor's href before the browser follows it, sending the user to the wrong page.
+    const ev = new CustomEvent('void-change', {
+      bubbles: true,
+      composed: true,
+      cancelable: true,
+      detail: { value: page },
+    });
+    this.dispatchEvent(ev);
+    if (ev.defaultPrevented) {
+      e.preventDefault();
+      return;
+    }
+    // Once the click has been fully dispatched the browser has already read the href and
+    // started navigating. If a router or Turbo Drive intercepted the click (defaultPrevented)
+    // the element survives the navigation, so catch `value` up in a later task. After a real
+    // navigation the new document sets its own value (and a bfcache restore keeps this page).
+    setTimeout(() => {
+      if (e.defaultPrevented && this.isConnected) this.value = page;
+    }, 0);
   }
 
   private _renderLinks(pages: Array<number | 'ellipsis'>) {
