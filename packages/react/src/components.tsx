@@ -477,6 +477,8 @@ export const Multiselect = wrapWc<VoidMultiselect, {
 export const Option = wrapWc<VoidOption, {
   value?: string;
   selected?: boolean;
+  /** Listed but cannot be highlighted or chosen. */
+  disabled?: boolean;
 }>('void-option', 'Option');
 
 export const Dialog = wrapWc<VoidDialog, {
@@ -489,12 +491,16 @@ export const Dialog = wrapWc<VoidDialog, {
 export const Tabs = wrapWc<VoidTabs, {
   value?: string;
   size?: 'sm' | 'md' | 'lg';
+  /** `manual` (default): Enter or Space select the focused tab; `auto`: arrow keys select it. */
+  activation?: 'manual' | 'auto';
 } & VoidEvents<{ Change: { value: string } }>>('void-tabs', 'Tabs');
 
 export const TabPanel = wrapWc<VoidTabPanel, {
   tab?: string;
   label?: string;
   active?: boolean;
+  /** The tab is shown but cannot be selected or focused. */
+  disabled?: boolean;
 }>('void-tab-panel', 'TabPanel');
 
 export const Accordion = wrapWc<VoidAccordion, {
