@@ -1,3 +1,6 @@
+/* @tokens void-toast
+   --void-toast-shadow  Shadow of a toast, which lies highest over the page. */
+
 /* While it holds toasts the container is a popover="manual" in the top layer;
    reset the UA popover box. */
 void-toast-container {
@@ -50,11 +53,16 @@ void-toast {
   /* Room at the end for the close button, so the message never runs
      under it. */
   padding: var(--void-space-3) var(--void-space-9) var(--void-space-3) var(--void-space-4);
-  background: var(--void-float-surface);
+  /* One edge all the way round, as every float has. The tone is a straight
+     stripe painted on the surface inside that edge and cut off by the
+     corners: a wider, differently coloured left border bent round the
+     corners into two hooks and replaced the frame a skin had drawn. */
+  background:
+    linear-gradient(var(--_void-tone), var(--_void-tone)) left / var(--void-space-0h) 100% no-repeat,
+    var(--void-float-surface);
   border: var(--void-float-border-width) solid var(--void-float-border);
-  border-left: 2px solid var(--_void-tone);
   border-radius: var(--void-float-radius);
-  box-shadow: var(--void-shadow-lg);
+  box-shadow: var(--void-toast-shadow, var(--void-shadow-lg));
   min-width: 20rem;
   max-width: 28rem;
   color: var(--void-color-text);

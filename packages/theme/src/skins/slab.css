@@ -83,6 +83,7 @@
   --void-tag-radius: 0px;
 
   --void-dialog-shadow: 8px 8px 0 var(--_void-slab-ink);
+  --void-toast-shadow: var(--void-float-shadow);
 
   /* An alert is framed like everything else; its fill carries the tone. */
   --void-alert-border: var(--_void-slab-ink);
