@@ -1,0 +1,98 @@
+---
+title: Page head
+description: void-page-head places a label or breadcrumbs, the h1, a description and the page actions, and moves the actions under the title on a narrow screen.
+---
+
+import Example from '../../../components/Example.astro';
+
+`<void-page-head>` is the first thing in a page: where you are, what this is, and what you can do here. The text sits on the left, the actions on the right on the last line of the text, and a hairline closes it.
+
+export const head = `
+<void-page-head>
+  <span data-void-type="label">Network / Stations</span>
+  <h1>Svalbard 1</h1>
+  <p>A 7.3 m antenna on Platåberget, in service since 2019.</p>
+  <void-actions>
+    <void-button variant="ghost">Export</void-button>
+    <void-button>Pause</void-button>
+    <void-button variant="filled">Schedule pass</void-button>
+  </void-actions>
+</void-page-head>`;
+
+export const headErb = `
+<void-page-head>
+  <span data-void-type="label">Network / Stations</span>
+  <h1><%= @station.name %></h1>
+  <p><%= @station.summary %></p>
+  <void-actions>
+    <void-button variant="ghost"><%= link_to "Export", station_path(@station, format: :csv) %></void-button>
+    <void-button><%= link_to "Pause", pause_station_path(@station), data: { turbo_method: :post } %></void-button>
+    <void-button variant="filled"><%= link_to "Schedule pass", new_station_pass_path(@station) %></void-button>
+  </void-actions>
+</void-page-head>`;
+
+export const headJsx = `
+<void-page-head>
+  <span data-void-type="label">Network / Stations</span>
+  <h1>{station.name}</h1>
+  <p>{station.summary}</p>
+  <void-actions>
+    <Button variant="ghost" onVoidClick={exportCsv}>Export</Button>
+    <Button onVoidClick={pause}>Pause</Button>
+    <Button variant="filled" onVoidClick={schedule}>Schedule pass</Button>
+  </void-actions>
+</void-page-head>`;
+
+<Example html={head} erb={headErb} jsx={headJsx} />
+
+## What goes in it
+
+In this order, all but the `<h1>` optional:
+
+1. **Where you are**: a `data-void-type="label"` span, or `<void-breadcrumbs>` when the levels are links.
+2. **The `<h1>`**. It is set in the `title` role. One per page.
+3. **A `<p>`**: one sentence, in the secondary text colour, no wider than a comfortable line.
+4. **`<void-actions>`**: at most one `filled` button, the thing most people came to do. Secondary actions are `outline`, and the quiet ones `ghost`.
+
+Below 48rem, two or more actions drop under the text and wrap; a single action stays beside the title.
+
+## Without the hairline
+
+`flush` removes the line and the space under it, for a page whose first block draws its own top line (a row of figures, a table) directly under the title.
+
+export const flush = `
+<void-page-head flush>
+  <h1>API tokens</h1>
+  <void-actions><void-button variant="filled">New token</void-button></void-actions>
+</void-page-head>`;
+
+export const flushErb = `
+<void-page-head flush>
+  <h1><%= t(".title") %></h1>
+  <void-actions>
+    <void-button variant="filled"><%= link_to t(".new"), new_token_path %></void-button>
+  </void-actions>
+</void-page-head>`;
+
+export const flushJsx = `
+<void-page-head flush>
+  <h1>API tokens</h1>
+  <void-actions>
+    <Button variant="filled" onVoidClick={createToken}>New token</Button>
+  </void-actions>
+</void-page-head>`;
+
+<Example html={flush} erb={flushErb} jsx={flushJsx} />
+
+## Actions on their own
+
+`<void-actions>` is a row of buttons that wraps. Use it wherever buttons sit together: the foot of a form (`justify="end"`), an empty state, a table cell, a dialog.
+
+| Element | Attribute | Values |
+|---|---|---|
+| `void-page-head` | `flush` | No hairline, no space under the head |
+| `void-actions` | `justify` | `start` (default), `end`, `center` |
+
+## Why this form
+
+The head is CSS only: it is a grid with two columns and no behaviour. It takes a real `<h1>` as a child and not a `heading="…"` attribute, so the document outline is in the markup you wrote, is there before any script runs, and can contain anything a heading can (a badge, an inline edit field).

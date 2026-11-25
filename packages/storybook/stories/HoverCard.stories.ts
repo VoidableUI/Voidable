@@ -41,7 +41,7 @@ export const Default: Story = {
         <a slot="trigger" href="#" style="font-weight: 600; text-decoration: underline; cursor: pointer;">@janedoe</a>
         <div style="display: flex; flex-direction: column; gap: 0.75rem; min-width: 18rem;">
           <div style="display: flex; align-items: center; gap: 0.75rem;">
-            <div style="width: 3rem; height: 3rem; border-radius: 50%; background: var(--void-color-bg-subtle); display: flex; align-items: center; justify-content: center; font-weight: 600;">JD</div>
+            <div style="width: 3rem; height: 3rem; border-radius: 50%; background: var(--void-color-bg-secondary); display: flex; align-items: center; justify-content: center; font-weight: 600;">JD</div>
             <div>
               <div style="font-weight: 600;">Jane Doe</div>
               <div style="opacity: 0.7; font-size: 0.85em;">@janedoe</div>
@@ -96,7 +96,7 @@ export const WithActions: Story = {
         <a slot="trigger" href="#" style="font-weight: 600; text-decoration: underline; cursor: pointer;">@alexsmith</a>
         <div style="display: flex; flex-direction: column; gap: 0.75rem; min-width: 18rem;">
           <div style="display: flex; align-items: center; gap: 0.75rem;">
-            <div style="width: 3rem; height: 3rem; border-radius: 50%; background: var(--void-color-bg-subtle); display: flex; align-items: center; justify-content: center; font-weight: 600;">AS</div>
+            <div style="width: 3rem; height: 3rem; border-radius: 50%; background: var(--void-color-bg-secondary); display: flex; align-items: center; justify-content: center; font-weight: 600;">AS</div>
             <div>
               <div style="font-weight: 600;">Alex Smith</div>
               <div style="opacity: 0.7; font-size: 0.85em;">Staff Engineer at Acme Corp</div>

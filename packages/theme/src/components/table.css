@@ -101,6 +101,27 @@ void-table [data-align="center"] {
   text-align: center;
 }
 
+/* data-numeric is the short form of data-align="end" for a column of numbers:
+   mark the header and the cells (the page patterns write it by hand). */
+void-table :is(th, td)[data-numeric] {
+  text-align: end;
+}
+
+/* Row actions written as <void-actions>: ghost buttons at the end of a row,
+   their labels (not their padding) on the table's edge. */
+void-table td > void-actions {
+  flex-wrap: nowrap;
+  gap: var(--void-space-1);
+}
+
+void-table td:last-child > void-actions {
+  justify-content: flex-end;
+}
+
+void-table:not([inset]) td:last-child > void-actions:has(> void-button[variant="ghost"]:last-child) {
+  margin-inline-end: calc(var(--void-control-padding-sm) * -1.25);
+}
+
 /* A column of row actions: ghost buttons, end-aligned, their labels
    (not their padding) on the table's edge. */
 void-table :is(th, td)[data-stack="actions"] {
@@ -425,7 +446,7 @@ void-table[stack="always"] {
   }
 
   /* Alignment belongs to a column of a table, not to a block. */
-  void-table[stack] [data-align] {
+  void-table[stack] :is([data-align], [data-numeric]) {
     text-align: start;
   }
 

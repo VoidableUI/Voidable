@@ -8,7 +8,7 @@ import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { VoidDevError, check, configure, reset, settled, warnings, type DevWarning } from '../src/dev/index.js';
 import { checkAttributes, checkEvent } from '../src/dev/rules.js';
-import { table } from '../src/dev/table.generated.js';
+import { styled, table } from '../src/dev/table.generated.js';
 
 const tick = () => new Promise<void>((r) => setTimeout(r, 0));
 let seen: DevWarning[] = [];
@@ -54,6 +54,21 @@ describe('@voidable/ui/dev', () => {
     expect(by['undefined-element:void-tabs'].message).toContain('@voidable/ui/components/tabs.js');
     expect(by['wrong-parent'].message).toContain('<void-multiselect> or <void-combobox>');
     expect(by['missing-child'].message).toContain('<void-tab-panel>');
+  });
+
+  it('does not call a CSS-only pattern element unknown, and still reports a real typo', async () => {
+    document.body.innerHTML =
+      '<void-shell><void-page><void-page-head></void-page-head><void-figures><void-figure></void-figure></void-figures></void-page></void-shell><void-pag></void-pag>';
+    await settled();
+    expect(seen.filter((w) => w.kind === 'undefined-element').map((w) => w.tag)).toEqual(['void-pag']);
+  });
+
+  it('takes the styled list from the voidable supplement, the one place that declares it', () => {
+    const rules = resolve(__dirname, '../../../tools/voidable/internal/infra/embedded/data/supplement/rules.json');
+    const declared = (JSON.parse(readFileSync(rules, 'utf8')).styled as { tag: string }[]).map((s) => s.tag).sort();
+    expect(declared.length).toBeGreaterThan(0);
+    expect([...styled]).toEqual(declared);
+    expect(styled.filter((t) => table[t])).toEqual([]);
   });
 
   it('warns about a listener for an event nothing dispatches', () => {

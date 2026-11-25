@@ -1,9 +1,13 @@
 #!/usr/bin/env bash
-#MISE description="Ensure every referenced --void-* custom property is defined in theme CSS or set from TypeScript"
+#MISE description="Ensure every --void-* custom property referenced in the theme, the components, the docs, the stories and the examples is defined in theme CSS or set from TypeScript"
 set -euo pipefail
 
 THEME_SRC="packages/theme/src"
 UI_SRC="packages/ui/src"
+# Places that only use tokens. A token misspelt here fails silently in the
+# browser (the declaration is dropped), and these are the files agents and
+# people copy from, so they are held to the same rule.
+CONSUMERS=(docs/src packages/storybook/stories examples)
 
 # Definitions: `--void-x:` declarations in theme CSS, plus custom properties
 # set from TypeScript (inline `style="--void-x: ..."`, setProperty('--void-x', ...) or
@@ -33,6 +37,9 @@ done < <(
   grep -rnPo --include='*.css' --include='*.ts' \
     "var\(\s*\K--void-[a-z0-9-]+|getPropertyValue\(\s*['\"]\K--void-[a-z0-9-]+" \
     "$THEME_SRC" "$UI_SRC" | sort -u
+  git ls-files -z -- "${CONSUMERS[@]}" \
+    | grep -zE '\.(css|ts|tsx|jsx|js|mjs|html|astro|mdx|md|vue|svelte|erb|heex|ex|php)$' \
+    | xargs -0 -r grep -nPo "var\(\s*\K--void-[a-z0-9-]+" /dev/null | sort -u
 )
 
 if [[ $violations -eq 0 ]]; then

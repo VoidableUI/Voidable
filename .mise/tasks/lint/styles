@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-#MISE description="Ensure UI components contain no visual styles (all styling in @voidable/theme)"
+#MISE description="Ensure UI components contain no visual styles (all styling in @voidable/theme) and the CSS-only elements stay unregistered"
 set -euo pipefail
 
 UI_SRC="packages/ui/src/components"
@@ -52,8 +52,38 @@ while IFS= read -r file; do
 
 done < <(find "$UI_SRC" -name '*.ts' -type f)
 
+# The patterns and the media surface are CSS only: void-* tags the theme
+# styles and nothing registers. A component that defined one of them would
+# make its styling depend on JavaScript again, so that is an error, as is
+# pattern CSS that reaches for a class only a rendered component provides.
+PATTERN_CSS=(packages/theme/src/patterns packages/theme/src/media)
+RULES="tools/voidable/internal/infra/embedded/data/supplement/rules.json"
+if [[ -f "$RULES" ]]; then
+  while IFS= read -r tag; do
+    [[ -z "$tag" ]] && continue
+    if grep -rnE "customElements\.define\(\s*['\"]${tag}['\"]" packages/ui/src packages/*/src 2>/dev/null | grep -q .; then
+      grep -rnE "customElements\.define\(\s*['\"]${tag}['\"]" packages/ui/src packages/*/src
+      echo "ERROR: <${tag}> is a CSS-only element (declared in ${RULES}) but is registered as a custom element"
+      violations=1
+    fi
+    if ! grep -rqE "(^|[^.[:alnum:]_-])${tag}([^[:alnum:]_-]|\$)" "${PATTERN_CSS[@]}"; then
+      echo "ERROR: <${tag}> is declared CSS-only in ${RULES} but no rule in ${PATTERN_CSS[*]} styles it"
+      violations=1
+    fi
+  done < <(node -e "for (const e of require('./${RULES}').styled ?? []) console.log(e.tag)")
+fi
+
+# Pattern CSS may style the classes of two components it frames (the nav
+# bar's content wrapper); any other .void-* class would tie a CSS-only
+# element to markup that exists only after a component has rendered.
+if grep -rnPo '\.void-(?!nav-bar-content\b)[a-z-]+' "${PATTERN_CSS[@]}" | grep -q .; then
+  grep -rnPo '\.void-(?!nav-bar-content\b)[a-z-]+' "${PATTERN_CSS[@]}"
+  echo "ERROR: pattern and media CSS must not depend on a component's rendered classes"
+  violations=1
+fi
+
 if [[ $violations -eq 0 ]]; then
-  echo "Style lint passed: no visual styles in UI components"
+  echo "Style lint passed: no visual styles in UI components; CSS-only elements stay CSS only"
 else
   exit 1
 fi

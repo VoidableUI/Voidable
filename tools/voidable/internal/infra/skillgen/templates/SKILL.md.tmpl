@@ -9,7 +9,7 @@ metadata:
 
 # Building UIs with Void UI
 
-Void UI (`@voidable/ui` {{.Version}}, {{.Count}} elements) is a set of `<void-*>` custom elements. It is almost certainly not in your training data. Do not write markup from memory or by analogy with other libraries: element names, attribute names, allowed values and event names are all specific to this version. This skill was generated from the same manifest the `voidable` binary carries, so everything under `references/` matches the library version you are building against.
+Void UI (`@voidable/ui` {{.Version}}, {{.Count}} elements) is a set of `<void-*>` elements: components that `@voidable/ui` registers, and CSS-only elements that `@voidable/theme` styles with no JavaScript (their reference says "CSS only"). It is almost certainly not in your training data. Do not write markup from memory or by analogy with other libraries: element names, attribute names, allowed values and event names are all specific to this version. This skill was generated from the same manifest the `voidable` binary carries, so everything under `references/` matches the library version you are building against.
 
 ## Working rules
 
@@ -31,11 +31,99 @@ Void UI (`@voidable/ui` {{.Version}}, {{.Count}} elements) is a set of `<void-*>
 
 3. **Check your markup before you finish.** Run `voidable check <files or directories>` (or call `voidable_check` with the markup and its `lang`). It understands HTML, JSX/TSX, Vue, Svelte, Astro, Lit, HEEx, ERB, Blade and Markdown. Fix every finding; do not silence one. `check` exits 1 when it finds anything, which is what you want in CI.
 
-4. **Write attributes exactly as listed.** Attribute names are kebab-case: `show-value`, `collapsed-width`, `max-size`, `href-template`. In templates that are HTML (HEEx, ERB, Blade, plain HTML) a camelCase name such as `showValue` is lowercased by the parser to `showvalue`, which matches nothing. Enumerated attributes take only the listed values (`variant` on `void-button` is `outline` or `filled`, nothing else). Numbers must be numbers (`step="any"` becomes NaN).
+4. **Write attributes exactly as listed.** Attribute names are kebab-case: `show-value`, `collapsed-width`, `max-size`, `href-template`. In templates that are HTML (HEEx, ERB, Blade, plain HTML) a camelCase name such as `showValue` is lowercased by the parser to `showvalue`, which matches nothing. Enumerated attributes take only the listed values (`variant` on `void-button` is `outline`, `filled` or `ghost`, nothing else). Numbers must be numbers (`step="any"` becomes NaN).
 
 5. **Booleans are present or absent.** `<void-button disabled>` is disabled; `disabled="false"` is still disabled because the attribute is present. To turn a boolean off, leave the attribute out (in JSX write `disabled={false}`). The only attributes that read the string `"false"` are the ones whose reference says so, currently {{.FalseList}}. A boolean whose default is `true` and does not say so cannot be switched off from markup; set the property from script (`el.prop = false`).
 
 6. **Turn on the development warnings and read the console.** `voidable check` only sees source files; `@voidable/ui/dev` runs in the page and also catches markup a server or framework produces at runtime. Import it in development builds only (`import '@voidable/ui/dev';`, or with an import map and no bundler `import '@voidable/ui/dev.js'`; the Rails, LiveView and Laravel packages enable it in development for you). It logs one `[voidable]` `console.warn` per problem, each naming the element, what is wrong, the valid alternatives and a "did you mean": an unknown attribute, a value outside the allowed set, `disabled="false"`, a child in the wrong parent or a required child that is missing, a `void-*` tag that is not defined, a listener for an event nothing dispatches. After you load the page, read the browser console (or the output of your headless browser) and fix every `[voidable]` line; none is noise. In a test suite, `configure({ throw: true })` from `@voidable/ui/dev` turns them into thrown errors. Never import it in production.
+
+## Pages: use the patterns, do not write layout CSS
+
+A screen is assembled from named patterns. They are CSS-only elements (styled by the theme, nothing to import or register, safe under any server morph), so write them as plain tags in every framework. Do not write `display: flex`, `max-width`, `padding`, margins or media queries for page structure: if you are about to, there is a pattern for it.
+
+```html
+<void-shell>
+  <void-nav-bar>
+    <void-brand><a href="/">Meridian</a></void-brand>
+    <void-nav-links>
+      <a href="/" aria-current="page">Overview</a>
+      <a href="/stations">Stations</a>
+    </void-nav-links>
+    <void-spacer></void-spacer>
+    <void-avatar initials="RK" size="sm"></void-avatar>
+  </void-nav-bar>
+  <main>
+    <void-page>
+      <void-page-head>
+        <span data-void-type="label">Network / Overview</span>
+        <h1>Ground network</h1>
+        <void-actions><void-button variant="filled">Add station</void-button></void-actions>
+      </void-page-head>
+      <void-figures>
+        <void-figure>
+          <span data-void-type="label">Downlink</span>
+          <span data-void-type="value">79.6 <span data-void-type="unit">TB</span></span>
+          <span data-void-type="caption">64% of the daily plan</span>
+        </void-figure>
+      </void-figures>
+      <void-section>
+        <void-section-head>
+          <h2>Upcoming passes</h2>
+          <span data-void-type="label">Next 6 hours</span>
+        </void-section-head>
+        <void-table><table>…</table></void-table>
+      </void-section>
+    </void-page>
+  </main>
+</void-shell>
+```
+
+| Need | Use |
+|---|---|
+| Frame of the app (bar or sidebar, then the page) | `void-shell` (`nav="top"`, `"side"` or `"overlay"`), with `void-nav-bar` or `void-sidebar`, `void-brand`, `void-nav-links`, `void-spacer` |
+| The page column, with its gutter and spacing | `void-page` inside `<main>` (`width="narrow"` for forms) |
+| Title, description and page actions | `void-page-head` holding a label or `void-breadcrumbs`, `<h1>`, `<p>`, `void-actions` |
+| A titled part of the page | `void-section` with `void-section-head` (`<h2>`, optional `<p>`, optional aside) |
+| Two columns that collapse on a phone | `void-split` (`ratio="2:1"`, `"1:2"`, `"aside"`) |
+| A vertical stack with a standard gap | `void-stack` (`gap` is `tight`, `inside`, `stack`, `group` or `section`) |
+| A number with a unit, caption, change or progress | `void-figure`, in a `void-figures` row; `void-delta` for the change |
+| Labels and values | `void-description-list` around a native `<dl>` of `<div><dt>…</dt><dd>…</dd></div>` |
+| One thing per line with a control or value at the end | `void-rows` > `void-row` > `void-row-text` + the control |
+| A state (running, failed, idle) | `<void-state color="success">Running</void-state>`: always with the word |
+| Controls above a table | `void-toolbar` (search, filters, `void-spacer`, ghost icon buttons) |
+| Nothing to show | `void-empty` (icon, `<h3>`, `<p>`, `void-actions`) |
+| A row of buttons | `void-actions` (`justify="end"` under a form) |
+| Hide something on a phone | `data-void-hide="narrow"` on any element (a table column, a secondary button) |
+
+Text has roles, applied with one attribute: `data-void-type="label"` (small uppercase mono name of a thing), `"value"`, `"unit"`, `"caption"`, `"heading"`, `"title"`, `"display"`, `"lede"`, `"body"`, `"code"`. Inside the patterns, native headings and paragraphs are styled for you: write `<h1>` in `void-page-head` and `<h2>` in `void-section-head` with no attribute. Never set `text-transform`, `letter-spacing` or a font size by hand.
+
+Space comes from tokens, in three steps: inside a group `--void-gap-tight|inside|stack` (8, 16, 24px), between groups `--void-gap-group` (40px), between sections `--void-gap-section` (72px). The patterns already apply them.
+
+In a table, mark number columns `data-numeric` on the `<th>` and `<td>`, and put row actions in `<void-actions>` holding `<void-button variant="ghost" size="sm">`.
+
+## UI over an image
+
+`void-media` is an image or video that fills its box with content laid over it. Everything inside it is on the on-media surface: text is off-white in both colour schemes, and buttons, inputs and badges restyle themselves, so write ordinary components and no colour overrides.
+
+```html
+<void-media place="bottom" height="lg">
+  <img src="/hero.jpg" alt="">
+  <void-media-content>
+    <h1>Every pass, on one screen</h1>
+    <p>One or two sentences.</p>
+    <void-actions>
+      <void-button variant="filled" size="lg">Get started</void-button>
+      <void-button size="lg">Read the docs</void-button>
+    </void-actions>
+  </void-media-content>
+</void-media>
+```
+
+- The scrim (the dark translucent layer that keeps text readable) is drawn by `void-media-content` behind itself, at a strength that keeps body text at 4.5:1 over a pure white image. Keep the default `scrim`; `scrim="none"` is only for an image you know is dark or for content inside `void-glass`. Never add `text-shadow` or your own overlay.
+- `place` is `bottom` (default), `top`, `start`, `end` or `center`. The image is cropped around `focal` (`top`, `bottom`, `start`, `end`), or an exact point with `style="--void-media-focal: 65% 40%"`.
+- `void-glass` is a translucent blurred panel for a form or status block over the image. `data-void-surface="glass"` gives a component (a card, a nav bar) the same surface; `data-void-surface="media"` marks a region you positioned over an image yourself.
+- Status-coloured text over an image belongs in a `void-badge variant="outline"` or inside `void-glass`, not bare on the photograph.
+- Use it for heroes, page headers and feature sections. Application screens stay on the page background.
 
 ## Composition
 
@@ -80,6 +168,8 @@ Components communicate with `CustomEvent`s named `void-*` that bubble and carry 
 
 `references/wrong-usages.md` lists what the checker knows, generated from the manifest. The common ones:
 
+- A `<div>` with flex, padding or a max-width for page structure, or a hand-built stat, label/value grid, status dot or empty state: use the patterns above.
+- `unit` or `caption` on `void-stat`: use `void-figure`. `align` on `void-split` or `void-actions`: it is `valign` and `justify`.
 - `variant="primary"`, `variant="solid"`, `color="primary"` or `color="danger"` on buttons and badges: use the listed values (`color` is `default`, `error`, `warning`, `success`, `info`, `notice`).
 - `label="..."` on an input, textarea or select: wrap the control in `<void-field label="...">`.
 - `<void-option>` in `<void-select>`: use native `<option>`.

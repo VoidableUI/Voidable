@@ -102,6 +102,10 @@ export const attributeHints = {
   'void-input': { label: 'wrap the control in <void-field label="...">' },
   'void-textarea': { label: 'wrap the control in <void-field label="...">' },
   'void-select': { label: 'wrap the control in <void-field label="...">; options are native <option> children' },
+  'void-stat': {
+    unit: 'use <void-figure> with data-void-type="value" and "unit" spans',
+    caption: 'use <void-figure> with a data-void-type="caption" span',
+  },
 };
 
 /**

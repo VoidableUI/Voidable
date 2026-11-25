@@ -1,0 +1,97 @@
+---
+title: Patterns
+description: The recurring pieces of an application screen (shell, page head, section, figures, description list, state, empty state, toolbar) as CSS-only elements, so pages are composed and no layout CSS is written.
+---
+
+Components are the controls. **Patterns** are what is between them: the frame of the application, the head of a page, a titled section, a row of figures, a list of labels and values. Every application needs them, and when a library does not name them each screen invents them again, slightly differently.
+
+Voidable names them. A screen is composed from patterns and components, and **you write no layout CSS**: no page padding, no max-width, no grid for the figures, no margin between sections.
+
+```html
+<void-shell>
+  <void-nav-bar>…</void-nav-bar>
+  <main>
+    <void-page>
+      <void-page-head>
+        <span data-void-type="label">Network</span>
+        <h1>Ground network</h1>
+        <void-actions><void-button variant="filled">Add station</void-button></void-actions>
+      </void-page-head>
+      <void-figures>…</void-figures>
+      <void-section>
+        <void-section-head><h2>Stations</h2></void-section-head>
+        <void-table>…</void-table>
+      </void-section>
+    </void-page>
+  </main>
+</void-shell>
+```
+
+## They are CSS only
+
+A pattern is a `void-*` tag that the theme styles and nothing registers. An unknown tag with a hyphen in its name is a valid HTML element, so a pattern:
+
+- needs no JavaScript, and is laid out before any script has run;
+- cannot be broken by a server morph (Turbo, LiveView, htmx), because there is nothing rendered inside it to protect;
+- is the same markup in every framework and every template language. There is nothing to import and nothing to wrap.
+
+Meaning comes from the native elements you put inside: `<main>`, `<h1>`, `<h2>`, `<dl>`, `<a>`. A pattern never replaces one of those; it arranges them.
+
+Patterns come with `@voidable/theme`. If you import the theme piece by piece, they are `@voidable/theme/src/patterns/*.css`.
+
+## The patterns
+
+| Pattern | Elements | Use it for |
+|---|---|---|
+| [App shell](/patterns/app-shell/) | `void-shell`, `void-brand`, `void-nav-links`, `void-spacer`, `void-page` | The frame: navigation, then one centred column |
+| [Page head](/patterns/page-head/) | `void-page-head`, `void-actions` | Where you are, and what you can do here |
+| [Section](/patterns/section/) | `void-section`, `void-section-head`, `void-split`, `void-stack` | A titled part of a page, and how parts sit together |
+| [Labels](/patterns/labels/) | `data-void-type="label"` | The small quiet name of a thing |
+| [Figure](/patterns/figure/) | `void-figures`, `void-figure`, `void-delta` | One number that matters, with its unit and caption |
+| [Description list](/patterns/description-list/) | `void-description-list`, `void-rows`, `void-row` | Labels and their values; one thing per line |
+| [State](/patterns/state/) | `void-state` | A state as a dot and a word |
+| [Empty state](/patterns/empty-state/) | `void-empty` | Nothing here yet, and what to do about it |
+| [Toolbar](/patterns/toolbar/) | `void-toolbar` | Search, filters and actions above a table |
+| [UI over imagery](/patterns/ui-over-imagery/) | `void-media`, `void-media-content`, `void-glass` | Text and controls over a photograph |
+
+## Rules that hold everywhere
+
+- **Space comes from the rhythm, not from you.** Blocks in a page are a group apart, sections a section apart, things in a section 16px apart. These distances are the [layout rhythm](/getting-started/theming/#layout-rhythm) tokens, so `--void-rhythm` and `--void-density` move a whole application at once.
+- **Nothing is boxed by default.** A section has no border, fill or shadow. Hairlines separate; boxes are for things that float (dialogs, menus, glass over an image).
+- **One breakpoint.** Below 48rem (768px) columns become one, figures become two across, page actions drop under the title and navigation links move to a row of their own that scrolls sideways. Every pattern is checked at 390px.
+- **Attributes take words, not sizes.** `gap="stack"`, `width="narrow"`, `columns="3"`. If a pattern does not offer what you need, that is a signal to look for a different pattern before writing CSS.
+
+## In a framework
+
+Patterns are plain tags, so JSX, ERB, HEEx, Blade, Vue and Svelte templates use them as written here. Each pattern page shows HTML, ERB and JSX. In the JSX examples the patterns are plain tags and the components (`Button`, `Input`, `Field`) are the wrapped ones from [`@voidable/ui-react`](/frameworks/react/).
+
+TypeScript does not know the tags in JSX until you declare them. Until the generated typings cover them, declare them once:
+
+```ts
+// void-patterns.d.ts
+import type { HTMLAttributes } from 'react';
+
+type Pattern = HTMLAttributes<HTMLElement> & { [attribute: string]: unknown };
+
+declare module 'react' {
+  namespace JSX {
+    interface IntrinsicElements {
+      'void-shell': Pattern; 'void-brand': Pattern; 'void-nav-links': Pattern; 'void-spacer': Pattern;
+      'void-page': Pattern; 'void-page-head': Pattern; 'void-actions': Pattern;
+      'void-section': Pattern; 'void-section-head': Pattern; 'void-split': Pattern; 'void-stack': Pattern;
+      'void-figures': Pattern; 'void-figure': Pattern; 'void-delta': Pattern; 'void-state': Pattern;
+      'void-description-list': Pattern; 'void-rows': Pattern; 'void-row': Pattern; 'void-row-text': Pattern;
+      'void-toolbar': Pattern; 'void-empty': Pattern;
+      'void-media': Pattern; 'void-media-content': Pattern; 'void-glass': Pattern;
+    }
+  }
+}
+```
+
+## For agents
+
+`voidable ref void-figure` prints a pattern's attributes, `voidable snippet void-figure --lang erb` prints its markup, and `voidable check` validates pattern markup like any other. The generated skill tells an agent to build pages from the patterns and not to write layout CSS.
+
+## Whole screens
+
+Five reference screens built only from patterns and components are in [Storybook](/storybook/?path=/story/reference-screens--overview) under Reference / Screens: an overview, a table with a toolbar, a form, settings, and a page that opens on a photograph. None of them has a stylesheet of its own.

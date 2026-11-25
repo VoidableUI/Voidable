@@ -112,7 +112,7 @@ func (r snippetRenderer) node(b *strings.Builder, n *Node, depth int, isRoot boo
 	}
 	name := n.Tag
 	el, isVoid := r.lib.cat.Element(n.Tag)
-	if r.lang == LangHEEx && isVoid {
+	if r.lang == LangHEEx && isVoid && !el.CSSOnly {
 		name = "." + FunctionName(n.Tag)
 	}
 	b.WriteString(ind + "<" + name)
@@ -163,7 +163,7 @@ func (r snippetRenderer) attr(el *Element, a NodeAttr) string {
 			name = "htmlFor"
 		}
 	case LangHEEx:
-		if el != nil {
+		if el != nil && !el.CSSOnly {
 			if ma, ok := el.Attribute(a.Name); ok {
 				name = AssignName(*ma)
 			}

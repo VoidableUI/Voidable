@@ -50,7 +50,7 @@ Without a theme package loaded, components are completely devoid of styling. `@v
 
 ### Development warnings (`@voidable/ui/dev`)
 
-A separate entry (`packages/ui/src/dev/`, built to `dist/dev.js`, no imports) that warns through `console.warn` about misused `<void-*>` markup: unknown attributes, values outside the declared set, `attr="false"` on booleans, wrong parent or missing required child, undefined tags, listeners for events nothing dispatches. It is never imported by the root entry, a component or the autoloader (a test enforces this), so production pays nothing; apps import it in development only. What is valid comes from the Custom Elements Manifest through `cem/dev-table.js` (generated `src/dev/table.generated.ts`, not committed). Facts the analyzer cannot see (allowed parents, required children, advice for guessed attributes) live in `packages/ui/cem/supplement.js` and are written into the manifest as `voidParents`, `voidRequires`, `voidHints` (and `voidHostAttributes`, derived from `setHostAttribute` calls); the `voidable` Go tool reads the same fields. When you add a component, a parent/child family or a host attribute that is not role, tabindex or `aria-*`, the table follows from the manifest; run `mise run warnings:sweep` and fix every warning (a real mistake in the repo, or a false positive in the detector: fix the detector).
+A separate entry (`packages/ui/src/dev/`, built to `dist/dev.js`, no imports) that warns through `console.warn` about misused `<void-*>` markup: unknown attributes, values outside the declared set, `attr="false"` on booleans, wrong parent or missing required child, undefined tags, listeners for events nothing dispatches. It is never imported by the root entry, a component or the autoloader (a test enforces this), so production pays nothing; apps import it in development only. What is valid comes from the Custom Elements Manifest through `cem/dev-table.js` (generated `src/dev/table.generated.ts`, not committed). Facts the analyzer cannot see (allowed parents, required children, advice for guessed attributes) live in `packages/ui/cem/supplement.js` and are written into the manifest as `voidParents`, `voidRequires`, `voidHints` (and `voidHostAttributes`, derived from `setHostAttribute` calls); the `voidable` Go tool reads the same fields. The CSS-only pattern elements (`void-shell`, `void-page`, ...) are not in the manifest: the Go tool's `rules.json` declares them in its `styled` list (with their own `parents` and `hints`), and `dev-table.js` reads that list into the generated table so the dev entry never calls them "not a Void UI element". When you add a component, a parent/child family or a host attribute that is not role, tabindex or `aria-*`, the table follows from the manifest; run `mise run warnings:sweep` and fix every warning (a real mistake in the repo, or a false positive in the detector: fix the detector).
 
 ### Module Federation Support
 
@@ -113,13 +113,15 @@ Computed from the knobs in plain CSS (`oklch()`, `color-mix()`, `calc()`; no bui
 - **Accent**, and **status colours**: error, warning, caution, success, info, notice, highlight (each with a subtle variant)
 - **Control size**: `--void-control-height*`, `--void-control-padding*`, `--void-control-text*`
 - **Layout rhythm**: `--void-gap-tight|inside|stack|group|section`, `--void-gutter`, `--void-measure*`
-- **Type roles**: `--void-type-<role>-*` for label, value, unit, caption, heading, title, body, code
+- **Type roles**: `--void-type-<role>-*` for label, value, unit, caption, heading, title, display, lede, body, code
+- **Surfaces over imagery**: `--void-scrim-strength`, `--void-scrim-alpha`, `--void-color-scrim`, `--void-scrim-fade`, `--void-glass-blur`, `--void-glass-solid`, `--void-color-control-fill`, `--void-color-page`
 - **Spacing, text sizes, radii, shadows, durations**
 
 How the derivation works, and the rules that keep it working:
 - The colour scheme is a number, `--void-scheme-dark` (1 or 0), set by `data-theme` or the system preference. Formulas blend between their dark and light results with it, so light mode is never a second hand-written block.
 - Every grey is one neutral foreground (`--void-fg`) at an alpha step. Do not add hand-picked grey values.
-- Derived tokens are declared on `:where(:root, [data-theme], [data-void-theme], [data-shape])`. A custom property computed from another is resolved where it is declared, so a knob set on a subtree only takes effect if that element carries `data-void-theme`.
+- Derived tokens are declared on `:where(:root, [data-theme], [data-void-theme], [data-shape], [data-void-surface], void-media, void-glass)`. A custom property computed from another is resolved where it is declared, so a knob set on a subtree only takes effect if that element carries `data-void-theme`.
+- A surface (on-media, glass) is a set of overrides of the *inputs* to those formulas (the scheme number, the alpha steps, `--void-color-bg`), declared on `void-media`, `void-glass` and `[data-void-surface]`. Components need no surface-specific CSS; never add one.
 - Never put a `var()` in `primitives.css` or `knobs.css`, and never put a raw value in a theme file.
 - **Dark mode** is the default (true black `#000000` page). **Light mode** via `[data-theme="light"]`.
 
@@ -153,9 +155,22 @@ And these:
 
 Consumers toggle shape globally (`<html data-shape="sharp">`) or locally on any ancestor.
 
+### Patterns (CSS-only elements)
+
+`packages/theme/src/patterns/` and `packages/theme/src/media/` style `void-*` tags that `@voidable/ui` never registers: the frame and parts of a page (`void-shell`, `void-brand`, `void-nav-links`, `void-spacer`, `void-page`, `void-page-head`, `void-actions`, `void-section`, `void-section-head`, `void-split`, `void-stack`, `void-figures`, `void-figure`, `void-delta`, `void-state`, `void-description-list`, `void-rows`, `void-row`, `void-row-text`, `void-toolbar`, `void-empty`) and UI over imagery (`void-media`, `void-media-content`, `void-glass`).
+
+- Build pages from them. Do not write page padding, max-widths, grids for figures or margins between sections.
+- A pattern has no behaviour, so it has no JavaScript. If something needs behaviour it is a component in `@voidable/ui`; if it only arranges or styles, it is a pattern. `lint:styles` fails if a pattern tag is registered.
+- Semantics come from native elements inside the pattern (`main`, `h1`, `h2`, `dl`, `a`). A pattern takes a real heading as a child, never a `heading` attribute.
+- Each pattern is declared in `tools/voidable/internal/infra/embedded/data/supplement/rules.json` under `styled` (tag, description, attributes) with a snippet in `snippets/<tag>.html`; a Go test keeps that list and the CSS in step in both directions. Add a pattern in all three places and give it a docs page under `docs/src/content/docs/patterns/` and a story in `packages/storybook/stories/Patterns.stories.ts`.
+- Do not name an attribute `align`: browsers still apply the legacy HTML `align` attribute to unknown elements. Use `valign` or `justify`.
+- Text over an image goes in `void-media-content` (which draws the scrim) or `void-glass`. Never use `text-shadow` or a hand-written gradient for legibility; `lint:contrast` proves 4.5:1 for those two and for nothing else.
+
 ### Reference Screens
 
-`packages/storybook/stories/reference/` holds four realistic screens (application overview, data table with toolbar, form, settings) built only from components, type roles and layout tokens, shown in Storybook under Reference/Screens. Judge any theme change by looking at them at 1440x900 and 390x844, in dark and light.
+`packages/storybook/stories/reference/` holds five realistic screens (application overview, data table with toolbar, form, settings, and a page that opens on a photograph with navigation and a glass panel over it) built only from components, patterns and type roles, shown in Storybook under Reference/Screens. No screen has CSS of its own. Judge any theme change by looking at them at 1440x900 and 390x844, in dark and light, under the Void, Dune and Console themes.
+
+Photographs for stories and docs live in `docs/public/media/` (Storybook serves the same directory at `media/`). Only freely licensed images, never hot-linked, each listed in `docs/public/media/CREDITS.txt`.
 
 ## Tooling
 
@@ -190,10 +205,10 @@ set -euo pipefail
 | `mise run liveview:demo` | Start the LiveView demo server |
 | `mise run ci` | Full CI pipeline: build, test, typecheck, lint, every `lint:*` task below and `release:test` |
 | `mise run lint` | ESLint with lit-a11y (WCAG checks on Lit templates) |
-| `mise run lint:tokens` | Ensure no raw values (colors, sizes, control heights, tracking, text case) in component CSS; values live in primitives.css, knobs.css and tokens.css |
-| `mise run lint:undefined-tokens` | Fail if a `--void-*` token is referenced but neither defined in theme CSS nor set from TypeScript |
-| `mise run lint:contrast` | Evaluate the derived colours and check WCAG contrast in dark and light for the default knobs, every theme file and the extremes of each colour knob; reject theme files that set anything but knobs |
-| `mise run lint:styles` | Ensure UI components contain no visual styles |
+| `mise run lint:tokens` | Ensure no raw values (colors, sizes, control heights, tracking, text case, backdrop blurs, scrim colours, text shadows) in component CSS; values live in primitives.css, knobs.css and tokens.css |
+| `mise run lint:undefined-tokens` | Fail if a `--void-*` token is referenced (in the theme, the components, the docs, the stories or the examples) but neither defined in theme CSS nor set from TypeScript |
+| `mise run lint:contrast` | Evaluate the derived colours and check WCAG contrast in dark and light for the default knobs, every theme file and the extremes of each colour knob, on the page, on the on-media surface and on glass (over white, grey and black images, across the scrim strength); reject theme files that set anything but knobs |
+| `mise run lint:styles` | Ensure UI components contain no visual styles and that the CSS-only pattern elements are styled by the theme and never registered |
 | `mise run lint:exports` | Verify every component has a subpath export, self-registers and is re-exported from the index |
 | `mise run lint:manifest` | Fail when a tag in the Custom Elements Manifest has no story, React wrapper or LiveView component (known gaps: `.mise/manifest-drift-allowlist.txt`) |
 | `mise run lint:versions` | Fail when a manifest holds a real version or a file hand-types a Voidable package version |

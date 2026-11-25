@@ -38,7 +38,7 @@ void-badge[color="highlight"] { --tone: var(--void-color-highlight); }
 /* Variants — outline is the status chip: a tint of the tone, the tone
    as text, and a faint edge. */
 void-badge[variant="outline"] {
-  background: color-mix(in srgb, var(--tone) var(--void-tone-tint), transparent);
+  background: color-mix(in srgb, var(--tone) var(--void-tone-tint), var(--void-color-control-fill));
   border: 1px solid color-mix(in srgb, var(--tone) 24%, transparent);
   color: var(--tone);
 }

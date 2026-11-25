@@ -5,15 +5,19 @@ import type { Meta, StoryObj } from '@storybook/web-components-vite';
 import '@voidable/ui';
 import '@voidable/theme';
 
-import layout from './reference/reference.css?raw';
 import nav from './reference/nav.html?raw';
 import overview from './reference/overview.html?raw';
 import table from './reference/table.html?raw';
 import form from './reference/form.html?raw';
 import settings from './reference/settings.html?raw';
+import live from './reference/live.html?raw';
 
-// Reference screens: four realistic application screens built only from
-// Voidable components, type roles (`data-void-type`) and layout tokens.
+// Reference screens: five realistic application screens built only from
+// Voidable components, the patterns (`void-shell`, `void-page`,
+// `void-page-head`, `void-section`, `void-figures`, `void-rows`,
+// `void-toolbar`, `void-description-list`, `void-state`, `void-media`,
+// `void-glass`) and type roles (`data-void-type`). No screen has any CSS
+// of its own: everything, layout included, comes from @voidable/theme.
 //
 // They are the subject for design review. Change a theme knob (or pick a
 // theme in the toolbar) and every screen follows; take screenshots of these
@@ -31,7 +35,7 @@ const meta: Meta = {
     docs: {
       description: {
         component:
-          'Realistic application screens used as the proof for the theme and as the subject for screenshot review. Everything visual comes from theme tokens; the only CSS written for these screens is layout.',
+          'Realistic application screens used as the proof for the theme and as the subject for screenshot review. They are built from components and the CSS-only patterns; no screen has any CSS of its own.',
       },
     },
   },
@@ -40,12 +44,16 @@ const meta: Meta = {
 export default meta;
 type Story = StoryObj;
 
+// The frame of every screen is a void-shell: the bar, then the page. The
+// live screen opens on a photograph, so its bar lies over the image
+// (nav="overlay") and carries the on-media surface.
 const screen = (page: string, body: string) => {
-  const navHtml = nav.replace(`data-nav="${page}"`, `data-nav="${page}" aria-current="page"`);
-  return html`
-    <style>${layout}</style>
-    <div class="ref-app">${unsafeHTML(navHtml)}${unsafeHTML(body)}</div>
-  `;
+  let navHtml = nav.replace(`data-nav="${page}"`, `data-nav="${page}" aria-current="page"`);
+  if (page === 'live') {
+    navHtml = navHtml.replace('<void-nav-bar>', '<void-nav-bar data-void-surface="media">');
+    return html`<void-shell nav="overlay">${unsafeHTML(navHtml)}${unsafeHTML(body)}</void-shell>`;
+  }
+  return html`<void-shell>${unsafeHTML(navHtml)}${unsafeHTML(body)}</void-shell>`;
 };
 
 // An overview: page head, alert, figures, a plain table with ghost row actions, and two lists.
@@ -68,6 +76,13 @@ export const Settings: Story = {
   render: () => screen('settings', settings),
 };
 
+// UI over a panoramic photograph: the bar over the image, a headline and
+// actions on the scrim, a status panel in glass, then the page.
+// Photograph: NASA, ISS040-E-080833 (public domain).
+export const LiveOverImagery: Story = {
+  render: () => screen('live', live),
+};
+
 // Every theme knob as a control. The knobs are set inline on a wrapper that
 // carries data-void-theme, so everything under it is derived again: this is
 // the same mechanism an application uses to retheme part of a page. Pick a
@@ -77,6 +92,7 @@ const screens: Record<string, [string, string]> = {
   'Data table': ['table', table],
   Form: ['form', form],
   Settings: ['settings', settings],
+  'Live, over imagery': ['live', live],
 };
 
 const range = (min: number, max: number, step: number) => ({ control: { type: 'range' as const, min, max, step } });

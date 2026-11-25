@@ -11,6 +11,9 @@ void-popover > :not(:first-child):not(.void-popover-body) {
   display: none;
   position: absolute;
   z-index: var(--void-z-dropdown);
+  /* As wide as its content, not as narrow as its trigger. */
+  width: max-content;
+  max-width: calc(100vw - 2 * var(--void-gutter));
   min-width: 12rem;
   background: var(--void-color-bg-elevated);
   border: 1px solid var(--void-color-border);

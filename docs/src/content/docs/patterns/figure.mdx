@@ -1,0 +1,154 @@
+---
+title: Figure
+description: void-figure shows one number that matters with its label, unit, caption, an optional change (void-delta) and an optional progress bar; void-figures lays several out in a hairline-divided row.
+---
+
+import Example from '../../../components/Example.astro';
+
+`<void-figure>` is one number that matters: its label, the value with its unit, and a caption that says what the number means. `<void-figures>` sets several in a row divided by hairlines, with one line above and one below. No boxes.
+
+export const figures = `
+<void-figures>
+  <void-figure>
+    <span data-void-type="label">Stations online</span>
+    <span data-void-type="value">41 <span data-void-type="unit">of 44</span></span>
+    <span data-void-type="caption">2 in maintenance, 1 degraded</span>
+  </void-figure>
+  <void-figure>
+    <span data-void-type="label">Passes today</span>
+    <span data-void-type="value">1,284</span>
+    <span data-void-type="caption"><void-delta trend="up">4.2%</void-delta> on last week</span>
+  </void-figure>
+  <void-figure>
+    <span data-void-type="label">Downlink</span>
+    <span data-void-type="value">79.6 <span data-void-type="unit">TB</span></span>
+    <void-progress value="64" size="sm" aria-label="Downlink, 64% of the daily plan"></void-progress>
+    <span data-void-type="caption">64% of the daily plan</span>
+  </void-figure>
+  <void-figure>
+    <span data-void-type="label">Median latency</span>
+    <span data-void-type="value">38 <span data-void-type="unit">ms</span></span>
+    <span data-void-type="caption"><void-delta trend="down" invert>4 ms</void-delta> on last week</span>
+  </void-figure>
+</void-figures>`;
+
+export const figuresErb = `
+<void-figures>
+  <% @figures.each do |figure| %>
+    <void-figure>
+      <span data-void-type="label"><%= figure.label %></span>
+      <span data-void-type="value">
+        <%= number_with_delimiter figure.value %>
+        <% if figure.unit %><span data-void-type="unit"><%= figure.unit %></span><% end %>
+      </span>
+      <% if figure.progress %>
+        <void-progress value="<%= figure.progress %>" size="sm"
+                       aria-label="<%= figure.label %>, <%= figure.progress %>% of plan"></void-progress>
+      <% end %>
+      <span data-void-type="caption">
+        <% if figure.change %>
+          <void-delta trend="<%= figure.trend %>"><%= figure.change %></void-delta>
+        <% end %>
+        <%= figure.caption %>
+      </span>
+    </void-figure>
+  <% end %>
+</void-figures>`;
+
+export const figuresJsx = `
+<void-figures>
+  {figures.map((figure) => (
+    <void-figure key={figure.label}>
+      <span data-void-type="label">{figure.label}</span>
+      <span data-void-type="value">
+        {figure.value} {figure.unit && <span data-void-type="unit">{figure.unit}</span>}
+      </span>
+      {figure.progress != null && (
+        <Progress value={figure.progress} size="sm" aria-label={figure.label + ', ' + figure.progress + '% of plan'} />
+      )}
+      <span data-void-type="caption">
+        {figure.change && <void-delta trend={figure.trend}>{figure.change}</void-delta>} {figure.caption}
+      </span>
+    </void-figure>
+  ))}
+</void-figures>`;
+
+<Example html={figures} erb={figuresErb} jsx={figuresJsx} />
+
+## The parts
+
+A figure's children are the [type roles](/getting-started/theming/#type-roles), in this order:
+
+| Part | Markup | |
+|---|---|---|
+| Label | `<span data-void-type="label">` | What is being counted. Required. |
+| Value | `<span data-void-type="value">` | The number, in tabular figures. Format it yourself (`1,284`, not `1284`). |
+| Unit | `<span data-void-type="unit">` **inside** the value | "TB", "ms", "of 44". Smaller and quieter, on the number's baseline. |
+| Progress | `<void-progress size="sm">` | Optional, when the number is a share of a known whole. Give it an `aria-label`. |
+| Caption | `<span data-void-type="caption">` | What the number means: a comparison, a breakdown, a time span. |
+| Change | `<void-delta>` inside the caption | Optional. An arrow and a colour around the amount. |
+
+A number with no caption is rarely worth a figure. "38 ms" says little; "38 ms, 4 ms better than last week" is information.
+
+## Change
+
+`<void-delta trend="up">` draws an arrow and colours the amount: green for up, red for down. When less is better (latency, errors, cost) add `invert` and the colours swap while the arrow still shows the direction. The arrow and the word carry the meaning; the colour only repeats it.
+
+export const delta = `
+<void-stack gap="tight">
+  <span><void-delta trend="up">4.2%</void-delta> passes, on last week</span>
+  <span><void-delta trend="down">12</void-delta> stations, on last week</span>
+  <span><void-delta trend="down" invert>4 ms</void-delta> latency, on last week</span>
+  <span><void-delta trend="flat">0</void-delta> no change</span>
+</void-stack>`;
+
+export const deltaErb = `
+<void-delta trend="<%= change.positive? ? "up" : "down" %>" <%= "invert" if metric.lower_is_better? %>>
+  <%= number_to_percentage change.abs, precision: 1 %>
+</void-delta>`;
+
+export const deltaJsx = `
+<void-delta trend={change > 0 ? 'up' : 'down'} invert={metric.lowerIsBetter || undefined}>
+  {Math.abs(change).toFixed(1)}%
+</void-delta>`;
+
+<Example html={delta} erb={deltaErb} jsx={deltaJsx} />
+
+## Sizes and columns
+
+`columns` sets how many figures share a row. Below 48rem there are always two, and an odd last figure takes the full width. For a smaller or larger number, set `data-size="sm"` or `"lg"` on the value.
+
+export const three = `
+<void-figures columns="3">
+  <void-figure>
+    <span data-void-type="label">Uptime</span>
+    <span data-void-type="value" data-size="sm">99.98 <span data-void-type="unit">%</span></span>
+    <span data-void-type="caption">last 30 days</span>
+  </void-figure>
+  <void-figure>
+    <span data-void-type="label">Antenna</span>
+    <span data-void-type="value" data-size="sm">7.3 <span data-void-type="unit">m</span></span>
+    <span data-void-type="caption">S, X and Ka band</span>
+  </void-figure>
+  <void-figure>
+    <span data-void-type="label">Wind</span>
+    <span data-void-type="value" data-size="sm">9 <span data-void-type="unit">m/s</span></span>
+    <span data-void-type="caption">limit 25 m/s</span>
+  </void-figure>
+</void-figures>`;
+
+<Example html={three} />
+
+| Element | Attribute | Values |
+|---|---|---|
+| `void-figures` | `columns` | `2`, `3`, `4` (default) |
+| `void-delta` | `trend` | `up`, `down`, `flat` (default) |
+| | `invert` | Less is better: down is green, up is red |
+
+A single `void-figure` works on its own too, in a glass panel or beside a chart.
+
+## Why this form, and `void-stat`
+
+The figure is CSS only, built from the type roles, because every part of it is text you already have on the server: nothing needs computing in the browser. It also means a part can hold anything (a link, a state, a second unit).
+
+The `void-stat` component stays for now; it takes `label`, `value` and `delta` as attributes and renders the same roles. It has no unit, caption or progress, so new screens should use `void-figure`.

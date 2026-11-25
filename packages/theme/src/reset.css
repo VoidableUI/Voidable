@@ -35,3 +35,12 @@ textarea,
 select {
   font: inherit;
 }
+
+/* A link in running text is the text colour, underlined: hierarchy
+   comes from opacity, and colour is left to status. :where() keeps the
+   specificity at zero, so any rule of yours or a framework's wins. */
+:where(a) {
+  color: inherit;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+}

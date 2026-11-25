@@ -82,6 +82,22 @@ export default defineConfig({
           autogenerate: { directory: 'frameworks' },
         },
         {
+          label: 'Patterns',
+          items: [
+            { label: 'Overview', slug: 'patterns/overview' },
+            { label: 'App shell', slug: 'patterns/app-shell' },
+            { label: 'Page head', slug: 'patterns/page-head' },
+            { label: 'Section', slug: 'patterns/section' },
+            { label: 'Labels', slug: 'patterns/labels' },
+            { label: 'Figure', slug: 'patterns/figure' },
+            { label: 'Description list', slug: 'patterns/description-list' },
+            { label: 'State', slug: 'patterns/state' },
+            { label: 'Empty state', slug: 'patterns/empty-state' },
+            { label: 'Toolbar', slug: 'patterns/toolbar' },
+            { label: 'UI over imagery', slug: 'patterns/ui-over-imagery' },
+          ],
+        },
+        {
           label: 'Components',
           items: [
             { label: 'Overview', slug: 'components/overview' },

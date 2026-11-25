@@ -15,6 +15,11 @@
 //   p  tags it must sit inside (anywhere above it)
 //   r  tags it cannot work without (somewhere below it)
 //   x  advice for attributes people guess that do not exist
+// Also exported: `styled`, the tags of the CSS-only elements (the page patterns
+// and the media surface). @voidable/theme styles them and nothing registers
+// them, so they are not in the manifest and must not be reported as unknown.
+// The list is read from the voidable tool's supplement (its `styled` section,
+// tools/voidable/.../rules.json), the one place that declares them.
 // It is a build artefact and is not committed.
 
 import { readFileSync, writeFileSync } from 'node:fs';
@@ -63,6 +68,13 @@ for (const [tag, entry] of Object.entries(tags)) {
   }
 }
 
+const stylesRules = resolve(root, '../../tools/voidable/internal/infra/embedded/data/supplement/rules.json');
+const styled = (JSON.parse(readFileSync(stylesRules, 'utf8')).styled ?? []).map((s) => s.tag).sort();
+for (const tag of styled) {
+  if (!/^void-/.test(tag)) throw new Error(`styled element ${tag} is not a void-* tag`);
+  if (tags[tag]) throw new Error(`${tag} is both a registered component and a styled element`);
+}
+
 const sorted = Object.fromEntries(Object.entries(tags).sort(([x], [y]) => x.localeCompare(y)));
 
 writeFileSync(
@@ -71,6 +83,9 @@ writeFileSync(
 import type { DevTable } from './types.js';
 
 export const table: DevTable = ${JSON.stringify(sorted)};
+
+/** CSS-only \`void-*\` tags: styled by the theme, never registered, never "unknown". */
+export const styled: readonly string[] = ${JSON.stringify(styled)};
 `,
 );
-console.log(`[cem] dev table: ${Object.keys(sorted).length} tags`);
+console.log(`[cem] dev table: ${Object.keys(sorted).length} tags, ${styled.length} styled`);

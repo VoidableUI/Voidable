@@ -118,3 +118,66 @@ h1#_top {
   color: var(--void-color-text);
   font-weight: var(--void-weight-medium);
 }
+
+/* A pattern at work (see components/Example.astro). Plain examples sit on
+   the docs page between two hairlines; framed ones are whole screens in a
+   bordered region with no padding of its own. */
+.vd-pattern {
+  padding: var(--void-space-6) 0;
+  margin-block: var(--void-gap-stack) var(--void-gap-inside);
+  border-block: 1px solid var(--void-color-border);
+  font-family: var(--void-font-sans);
+  font-size: var(--void-text-base);
+  line-height: var(--void-leading-normal);
+  color: var(--void-color-text);
+}
+
+.vd-pattern-frame {
+  padding: 0;
+  border: 1px solid var(--void-color-border);
+  border-radius: var(--void-radius-xl);
+  overflow: hidden;
+}
+
+/* A shell is as tall as the viewport; in an example it is as tall as its
+   frame, and its page column uses the frame's width. */
+.vd-pattern-frame void-shell {
+  min-height: 24rem;
+}
+
+.vd-pattern-frame void-shell[nav="side"] > void-sidebar {
+  position: static;
+  height: auto;
+  align-self: stretch;
+}
+
+.vd-pattern-frame void-shell > void-nav-bar {
+  position: static;
+}
+
+/* Photograph credit under an example or a figure. */
+.vd-credit {
+  font-size: var(--void-text-xs);
+  color: var(--void-color-text-secondary);
+  margin-block: var(--void-gap-tight) var(--void-gap-stack);
+}
+
+/* Measured contrast, shown as the crops it was measured on. */
+.vd-shots {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--void-gap-inside);
+  margin-block: var(--void-gap-stack);
+}
+
+.vd-shots img {
+  display: block;
+  width: 100%;
+  border-radius: var(--void-radius-lg);
+}
+
+@media (max-width: 50rem) {
+  .vd-shots {
+    grid-template-columns: 1fr;
+  }
+}

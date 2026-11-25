@@ -26,7 +26,13 @@ function block(src, headerRe) {
 }
 const primitives = decls(block(prim, /^:root\s*\{/m));
 const knobs = decls(block(knobsCss, /^:root\s*\{/m));
-const derived = decls(block(tok, /^:where\(:root, \[data-theme\], \[data-void-theme\], \[data-shape\]\)\s*\{/m));
+const derived = decls(block(tok, /^:where\(:root, \[data-theme\], \[data-void-theme\], \[data-shape\], \[data-void-surface\], void-media, void-glass\)\s*\{/m));
+// UI over imagery: the fixed inputs (tokens.css) and the two surfaces
+// (media/surface.css), which override derived tokens on their own element.
+const mediaInputs = decls(block(tok, /^:root\s*\{\s*--void-scrim-strength/m).replace(/^/, '--void-scrim-strength'));
+const surfaceCss = read('media/surface.css');
+const onMedia = decls(block(surfaceCss, /^void-media,\s*\[data-void-surface="media"\]\s*\{/m));
+const glass = decls(block(surfaceCss, /^void-glass,\s*\[data-void-surface="glass"\]\s*\{/m));
 
 // The derived block is the only place a token may depend on a knob: a
 // token derived on :root alone would not follow a knob set on a subtree.
@@ -151,12 +157,12 @@ const verbose = process.env.CONTRAST_VERBOSE === '1';
 const statuses = ['error', 'warning', 'caution', 'success', 'info', 'notice', 'highlight'];
 // every surface text can sit on; the page first
 const surfaces = ['bg', 'surface', 'bg-secondary', 'bg-elevated', 'bg-hover'];
-const roles = ['label', 'value', 'unit', 'caption', 'heading', 'title', 'body', 'code'];
+const roles = ['label', 'value', 'unit', 'caption', 'heading', 'title', 'display', 'lede', 'body', 'code'];
 
 function checkConfig(name, overrides, { quiet = false } = {}) {
   let local = 0;
   for (const [mode, dark] of [['dark', 1], ['light', 0]]) {
-    const env = { ...primitives, ...knobs, '--void-scheme-dark': String(dark), '--void-contrast-boost': '0', '--void-shape': '1', ...overrides, ...derived };
+    const env = { ...primitives, ...knobs, ...mediaInputs, '--void-scheme-dark': String(dark), '--void-page-scheme-dark': String(dark), '--void-contrast-boost': '0', '--void-shape': '1', ...overrides, ...derived };
     const raw = (token) => substitute(`var(${token})`, env);
     const page = color(raw('--void-color-bg'));
     // surfaces are opaque; anything translucent is composited over the page
@@ -211,9 +217,81 @@ function checkConfig(name, overrides, { quiet = false } = {}) {
   return local;
 }
 
+// ── UI over imagery ──────────────────────────────────────
+// Text on a media surface sits on the scrim, and the scrim sits on a
+// photograph nobody has seen. The guarantee is therefore made against
+// the worst backdrops there are: a pure white image, a pure black one
+// and mid grey. A glass panel is in the page's scheme, so it is checked
+// in both schemes, translucent and solid (reduced transparency).
+const backdrops = { white: { rgb: [255, 255, 255], a: 1 }, grey: { rgb: [128, 128, 128], a: 1 }, black: { rgb: [0, 0, 0], a: 1 } };
+function checkSurfaces(name, overrides, { quiet = false } = {}) {
+  let local = 0;
+  const check = (label, fg, bg, min) => {
+    const r = ratio(fg, bg);
+    const ok = r >= min;
+    if (!ok) { failures++; local++; }
+    if ((!ok && !quiet) || verbose) console.log(`${ok ? 'ok  ' : 'FAIL'} [${name}] ${label}: ${r.toFixed(2)} (min ${min})`);
+  };
+  const textChecks = (where, env, base) => {
+    const raw = (token) => substitute(`var(${token})`, env);
+    const c = (n) => color(raw(`--void-color-${n}`));
+    const tint = num(raw('--void-tone-tint'));
+    for (const t of ['text', 'text-secondary', 'text-muted', 'text-tertiary']) check(`${t} ${where}`, c(t), base, 4.5);
+    for (const r of roles) check(`type role ${r} ${where}`, color(raw(`--void-type-${r}-color`)), base, 4.5);
+    check(`border-control ${where}`, c('border-control'), base, 3);
+    check(`focus ring ${where}`, color(raw('--void-focus-ring-color')), base, 3);
+    check(`ghost button label on its hover fill ${where}`, c('text'), over({ rgb: c('accent').rgb, a: 0.08 }, base), 4.5);
+    return { c, tint, raw };
+  };
+  for (const [mode, dark] of [['dark', 1], ['light', 0]]) {
+    const baseEnv = { ...primitives, ...knobs, ...mediaInputs, '--void-scheme-dark': String(dark), '--void-page-scheme-dark': String(dark), '--void-contrast-boost': '0', '--void-shape': '1', ...overrides, ...derived };
+    for (const [bname, backdrop] of Object.entries(backdrops)) {
+      // on-media: the same in both page schemes, checked in both anyway
+      {
+        const env = { ...baseEnv, ...onMedia };
+        const raw = (token) => substitute(`var(${token})`, env);
+        const scrim = over(color(raw('--void-color-bg')), backdrop);
+        const where = `on the scrim over a ${bname} image (${mode} page)`;
+        const { c, tint } = textChecks(where, env, scrim);
+        // a field: its fill is the surface colour, on the scrim
+        const field = over(color(raw('--void-color-surface')), scrim);
+        check(`field text ${where}`, c('text'), field, 4.5);
+        check(`field placeholder ${where}`, c('text-muted'), field, 4.5);
+        // controls that draw no fill of their own may sit where the scrim
+        // has faded: their shade alone has to carry them
+        const fill = over(c('control-fill'), backdrop);
+        check(`outline button label on its fill over a bare ${bname} image (${mode} page)`, c('text'), fill, 4.5);
+        check(`outline button border on its fill over a bare ${bname} image (${mode} page)`, c('border-control'), fill, 3);
+        for (const st of ['accent', ...statuses]) {
+          check(`outline badge (${st}) on its fill over a bare ${bname} image (${mode} page)`, c(st), over({ rgb: c(st).rgb, a: tint }, fill), 4.5);
+        }
+        check(`filled button label on media (${mode} page)`, c('text-on-accent'), c('accent'), 4.5);
+      }
+      // glass, translucent and solid
+      for (const solidGlass of ['0', '1']) {
+        const env = { ...baseEnv, '--void-glass-solid': solidGlass, ...glass };
+        const raw = (token) => substitute(`var(${token})`, env);
+        const panel = over(color(raw('--void-color-bg')), backdrop);
+        const where = `on ${solidGlass === '1' ? 'solid ' : ''}glass over a ${bname} image (${mode})`;
+        const { c, tint } = textChecks(where, env, panel);
+        for (const st of statuses) {
+          check(`${st} text ${where}`, c(st), panel, 4.5);
+          check(`outline badge (${st}) ${where}`, c(st), over({ rgb: c(st).rgb, a: tint }, panel), 4.5);
+        }
+        check(`accent as text ${where}`, c('accent'), panel, 4.5);
+        check(`field text ${where}`, c('text'), over(color(raw('--void-color-surface')), panel), 4.5);
+        check(`field placeholder ${where}`, c('text-muted'), over(color(raw('--void-color-surface')), panel), 4.5);
+      }
+    }
+  }
+  return local;
+}
+
 // 1. the default knobs, and the default with the user's contrast preference
 checkConfig('default', {});
 checkConfig('default + prefers-contrast', { '--void-contrast-boost': '1' });
+checkSurfaces('default', {});
+checkSurfaces('default + prefers-contrast', { '--void-contrast-boost': '1' });
 
 // 2. every shipped theme: a theme whose knobs produce failing contrast fails CI
 const themesDir = dir + 'themes/';
@@ -224,6 +302,7 @@ for (const file of themes) {
   for (const k of Object.keys(set)) if (!(k in knobs)) fail(`themes/${file}: ${k} is not a knob; a theme may only set the knobs declared in knobs.css`);
   if (/[^-\w](?!--void-)[a-z-]+\s*:\s*[^;{}]+;/.test(src.replace(/--void-[\w-]+\s*:\s*[^;]+;/g, ''))) fail(`themes/${file}: a theme may only contain knob declarations`);
   checkConfig(`theme ${path.basename(file, '.css')}`, set);
+  checkSurfaces(`theme ${path.basename(file, '.css')}`, set);
 }
 
 // 3. the guarantee: no setting of a colour knob can take text below AA.
@@ -243,6 +322,22 @@ for (const chroma of ['0.01', '0.02', '0.04', '0.2']) for (let hue = 0; hue < 36
 for (const page of ['0.5', '1']) for (let hue = 0; hue < 360; hue += 30) {
   sweep(`page tint ${page}, accent hue ${hue}`, { '--void-neutral-chroma': '0.04', '--void-neutral-hue': String((hue + 180) % 360), '--void-page-tint': page, '--void-accent-chroma': '0.2', '--void-accent-hue': String(hue), '--void-contrast': '0' });
 }
+
+// 4. the scrim: no strength may take text on a media surface below AA,
+//    and the knobs that move text and surfaces are swept there as well.
+const surfaceSweep = (label, overrides) => { sweeps++; const n = checkSurfaces(label, overrides, { quiet: !verbose }); if (n) { sweepFailures++; console.log(`FAIL surface sweep [${label}]: ${n} pair(s) below the minimum (CONTRAST_VERBOSE=1 lists them)`); } };
+for (const strength of ['-1', '0', '0.5', '1', '5']) surfaceSweep(`scrim strength ${strength}`, { '--void-scrim-strength': strength });
+for (const contrast of ['-1', '0', '1', '5']) for (const chrome of ['-1', '0', '1', '5']) surfaceSweep(`surfaces, contrast ${contrast}, chrome ${chrome}`, { '--void-contrast': contrast, '--void-chrome': chrome });
+for (const chroma of ['0.1', '0.2', '0.3']) for (let hue = 0; hue < 360; hue += 30) surfaceSweep(`surfaces, accent chroma ${chroma}, hue ${hue}`, { '--void-accent-chroma': chroma, '--void-accent-hue': String(hue), '--void-contrast': '0' });
+for (const page of ['0.5', '1']) for (let hue = 0; hue < 360; hue += 60) surfaceSweep(`surfaces, page tint ${page}, neutral hue ${hue}`, { '--void-neutral-chroma': '0.04', '--void-neutral-hue': String(hue), '--void-page-tint': page, '--void-contrast': '0', '--void-chrome': '1' });
+
+// The surfaces must stay what the checks above assume they are.
+if (!/--void-scheme-dark:\s*1;/.test(block(surfaceCss, /^void-media,\s*\[data-void-surface="media"\]\s*\{/m))) fail('media/surface.css: the on-media surface must set --void-scheme-dark: 1');
+if (!/--void-scheme-dark:\s*var\(--void-page-scheme-dark\);/.test(block(surfaceCss, /^void-glass,\s*\[data-void-surface="glass"\]\s*\{/m))) fail('media/surface.css: glass must return to the page scheme (--void-scheme-dark: var(--void-page-scheme-dark))');
+const mediaCss = read('media/media.css');
+if (!/var\(--void-color-scrim\) var\(--void-scrim-fade\)/.test(mediaCss)) fail('media/media.css: the scrim gradient must reach var(--void-color-scrim) at var(--void-scrim-fade), where the content region begins');
+if (!/@media \(prefers-reduced-transparency: reduce\)\s*\{\s*:root\s*\{\s*--void-glass-solid:\s*1/.test(tok)) fail('tokens.css: prefers-reduced-transparency must set --void-glass-solid: 1');
+if (!/@supports not \(\(backdrop-filter[^{]*\{\s*:root\s*\{\s*--void-glass-solid:\s*1/.test(tok)) fail('tokens.css: browsers without backdrop-filter must get --void-glass-solid: 1');
 
 // ── the default button's border is the control boundary token ──
 // The button reflects color="default", so a bare void-button[color] selector

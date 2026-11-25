@@ -1,0 +1,258 @@
+/* ============================================================
+   void-media — a media surface (CSS only, no JavaScript)
+   An image or video that fills its box, with content laid over it.
+
+     <void-media place="bottom" height="lg">
+       <img src="…" alt="">
+       <void-media-content>
+         <h1>…</h1>
+         <p>…</p>
+       </void-media-content>
+     </void-media>
+
+   The scrim is drawn by the content region itself, so it is at full
+   strength behind the whole of the text however tall the text is, and
+   fades out beyond it. That is what makes the contrast defensible:
+   the text can never sit where the scrim has already faded.
+   ============================================================ */
+
+void-media {
+  --void-media-height: clamp(22rem, 60svh, 44rem);
+
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  grid-template: "media" minmax(0, 1fr) / minmax(0, 1fr);
+  min-height: var(--void-media-height);
+  overflow: hidden;
+  overflow: clip;
+  /* The backing shows until the image arrives and wherever it does
+     not reach; it is dark, so the text is legible before loading. */
+  background: var(--void-color-page);
+  color: var(--void-color-text);
+  font-family: var(--void-font-sans);
+}
+
+/* ── The media: fills the box, cropped around its focal point ── */
+void-media > :is(img, video, picture),
+void-media > picture > img {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  object-fit: cover;
+  object-position: var(--void-media-focal);
+}
+
+/* A video is decoration: with reduced motion it is hidden, and the
+   <img> placed before it (its poster) shows instead. */
+@media (prefers-reduced-motion: reduce) {
+  void-media > img ~ video {
+    display: none;
+  }
+}
+
+/* Focal point: which part of the image survives the crop. Presets
+   here; for an exact point set --void-media-focal: 65% 40% inline. */
+void-media[focal="top"]    { --void-media-focal: 50% 0%; }
+void-media[focal="bottom"] { --void-media-focal: 50% 100%; }
+void-media[focal="start"]  { --void-media-focal: 0% 50%; }
+void-media[focal="end"]    { --void-media-focal: 100% 50%; }
+void-media[focal="center"] { --void-media-focal: 50% 50%; }
+
+/* Height: a share of the viewport, or an aspect ratio. */
+void-media[height="sm"]     { --void-media-height: clamp(14rem, 36svh, 26rem); }
+void-media[height="lg"]     { --void-media-height: clamp(28rem, 82svh, 60rem); }
+void-media[height="screen"] { --void-media-height: 100svh; }
+
+void-media[ratio] { --void-media-height: 0px; }
+void-media[ratio="1:1"]  { aspect-ratio: 1; }
+void-media[ratio="4:3"]  { aspect-ratio: 4 / 3; }
+void-media[ratio="16:9"] { aspect-ratio: 16 / 9; }
+void-media[ratio="21:9"] { aspect-ratio: 21 / 9; }
+void-media[ratio="3:1"]  { aspect-ratio: 3; }
+
+/* ── The content region ──
+   A band or a column of the surface. Text inside it keeps a readable
+   measure; the region's own ::before is the scrim. */
+void-media-content {
+  --void-media-inset: var(--void-page-inset);
+  --scrim-to: to bottom;
+
+  grid-area: media;
+  position: relative;
+  isolation: isolate;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--void-gap-inside);
+  min-width: 0;
+  align-self: end;
+  padding: var(--void-gap-group) var(--void-media-inset);
+}
+
+void-media-content::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: calc(var(--void-scrim-fade) * -1) 0 0;
+  pointer-events: none;
+  /* Eased, not linear: nine stops, so no band shows where it ends. */
+  background: linear-gradient(
+    var(--scrim-to),
+    oklch(0 0 0 / 0) 0,
+    oklch(0 0 0 / calc(var(--void-scrim-alpha) * 0.043)) calc(var(--void-scrim-fade) * 0.125),
+    oklch(0 0 0 / calc(var(--void-scrim-alpha) * 0.157)) calc(var(--void-scrim-fade) * 0.25),
+    oklch(0 0 0 / calc(var(--void-scrim-alpha) * 0.318)) calc(var(--void-scrim-fade) * 0.375),
+    oklch(0 0 0 / calc(var(--void-scrim-alpha) * 0.5))   calc(var(--void-scrim-fade) * 0.5),
+    oklch(0 0 0 / calc(var(--void-scrim-alpha) * 0.682)) calc(var(--void-scrim-fade) * 0.625),
+    oklch(0 0 0 / calc(var(--void-scrim-alpha) * 0.843)) calc(var(--void-scrim-fade) * 0.75),
+    oklch(0 0 0 / calc(var(--void-scrim-alpha) * 0.957)) calc(var(--void-scrim-fade) * 0.875),
+    var(--void-color-scrim) var(--void-scrim-fade)
+  );
+}
+
+/* Text in the region: a display line, a lede, and a measure. */
+:is(void-media-content, void-media-content void-stack) > :is(h1, h2, h3, p) {
+  max-width: var(--void-measure);
+}
+
+:is(void-media-content, void-media-content void-stack):not(void-glass *) > h1 {
+  font-family: var(--void-type-display-family);
+  font-size: var(--void-type-display-size);
+  line-height: var(--void-type-display-leading);
+  font-weight: var(--void-type-display-weight);
+  letter-spacing: var(--void-type-display-tracking);
+  color: var(--void-type-display-color);
+  max-width: 16em;
+}
+
+:is(void-media-content, void-media-content void-stack):not(void-glass *) > :is(h2, h3) {
+  font-family: var(--void-type-title-family);
+  font-size: var(--void-type-title-size);
+  line-height: var(--void-type-title-leading);
+  font-weight: var(--void-type-title-weight);
+  letter-spacing: var(--void-type-title-tracking);
+  color: var(--void-type-title-color);
+}
+
+:is(void-media-content, void-media-content void-stack):not(void-glass *) > p {
+  font-family: var(--void-type-lede-family);
+  font-size: var(--void-type-lede-size);
+  line-height: var(--void-type-lede-leading);
+  font-weight: var(--void-type-lede-weight);
+  color: var(--void-type-lede-color);
+}
+
+/* ── Placement ── bottom is the default band. */
+void-media[place="top"] > void-media-content {
+  --scrim-to: to top;
+  align-self: start;
+}
+
+void-media[place="top"] > void-media-content::before {
+  inset: 0 0 calc(var(--void-scrim-fade) * -1);
+}
+
+void-media[place="center"] > void-media-content {
+  align-self: center;
+  justify-self: center;
+  align-items: center;
+  text-align: center;
+  padding-inline: var(--void-gutter);
+}
+
+/* Centred text gets a soft ellipse twice its own size: full strength
+   out to the corners of the text block, gone at the ellipse's edge. */
+void-media[place="center"] > void-media-content::before {
+  inset: -50%;
+  background: radial-gradient(
+    closest-side,
+    var(--void-color-scrim) 72%,
+    oklch(0 0 0 / calc(var(--void-scrim-alpha) * 0.843)) 76%,
+    oklch(0 0 0 / calc(var(--void-scrim-alpha) * 0.5)) 84%,
+    oklch(0 0 0 / calc(var(--void-scrim-alpha) * 0.157)) 93%,
+    oklch(0 0 0 / 0) 100%
+  );
+}
+
+@media (min-width: 48.0625rem) {
+  /* A column on one side, the image clear on the other. */
+  void-media:is([place="start"], [place="end"]) > void-media-content {
+    --scrim-to: to left;
+    align-self: stretch;
+    justify-self: start;
+    justify-content: center;
+    box-sizing: border-box;
+    width: min(100%, calc(var(--void-media-inset) + var(--void-measure) + var(--void-gap-group)));
+    padding-inline: var(--void-media-inset) var(--void-gap-group);
+  }
+
+  void-media:is([place="start"], [place="end"]) > void-media-content::before {
+    inset: 0 calc(var(--void-scrim-fade) * -1) 0 0;
+  }
+
+  void-media[place="end"] > void-media-content {
+    --scrim-to: to right;
+    justify-self: end;
+    padding-inline: var(--void-gap-group) var(--void-media-inset);
+  }
+
+  void-media[place="end"] > void-media-content::before {
+    inset: 0 0 0 calc(var(--void-scrim-fade) * -1);
+  }
+}
+
+/* ── Scrim variants ── gradient (above) is the default. */
+void-media[scrim="flat"] > void-media-content::before {
+  inset: -200vmax;
+  background: var(--void-color-scrim);
+}
+
+/* No scrim: for imagery you know is dark, or text in a glass panel. */
+void-media[scrim="none"] > void-media-content::before {
+  content: none;
+}
+
+/* ── Navigation over the image ── */
+void-media > void-nav-bar {
+  position: absolute;
+  inset: 0 0 auto;
+  z-index: 2;
+}
+
+/* ── stack: below 48rem the image sits on top and the content below
+   it, on the surface's dark backing ── */
+@media (max-width: 48rem) {
+  void-media[stack] {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    aspect-ratio: auto;
+  }
+
+  void-media[stack] > :is(img, video, picture) {
+    position: relative;
+    inset: auto;
+    height: auto;
+    aspect-ratio: 4 / 3;
+    max-height: 62svh;
+    -webkit-mask-image: linear-gradient(to bottom, black 62%, transparent);
+    mask-image: linear-gradient(to bottom, black 62%, transparent);
+  }
+
+  void-media[stack] > picture > img {
+    position: static;
+    aspect-ratio: 4 / 3;
+  }
+
+  void-media[stack] > void-media-content {
+    padding-top: 0;
+  }
+
+  void-media[stack] > void-media-content::before {
+    content: none;
+  }
+}

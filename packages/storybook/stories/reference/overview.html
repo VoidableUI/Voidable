@@ -1,155 +1,155 @@
-<main class="ref-page">
-  <header class="ref-head">
-    <div class="ref-head-text">
+<main>
+  <void-page>
+    <void-page-head>
       <span data-void-type="label">Network / Overview</span>
-      <h1 data-void-type="title">Ground network</h1>
-    </div>
-    <div class="ref-actions">
-      <void-button variant="ghost">Export</void-button>
-      <void-button>Schedule pass</void-button>
-      <void-button variant="filled">Add station</void-button>
-    </div>
-  </header>
+      <h1>Ground network</h1>
+      <void-actions>
+        <void-button variant="ghost">Export</void-button>
+        <void-button>Schedule pass</void-button>
+        <void-button variant="filled">Add station</void-button>
+      </void-actions>
+    </void-page-head>
 
-  <void-alert color="warning">
-    Tromsø 2 is running on its backup link. Passes scheduled there in the next six hours may be moved.
-  </void-alert>
+    <void-alert color="warning">
+      Tromsø 2 is running on its backup link. Passes scheduled there in the next six hours may be moved.
+    </void-alert>
 
-  <section class="ref-section" aria-label="Figures">
-    <div class="ref-figures">
-      <div class="ref-figure">
-        <span data-void-type="label">Stations online</span>
-        <span><span data-void-type="value">41</span> <span data-void-type="unit">of 44</span></span>
-        <span data-void-type="caption">2 in maintenance, 1 degraded</span>
-      </div>
-      <div class="ref-figure">
-        <span data-void-type="label">Passes today</span>
-        <span data-void-type="value">1,284</span>
-        <span data-void-type="caption">96 remaining before midnight UTC</span>
-      </div>
-      <div class="ref-figure">
-        <span data-void-type="label">Downlink</span>
-        <span><span data-void-type="value">79.6</span> <span data-void-type="unit">TB</span></span>
-        <void-progress value="64" size="sm" aria-label="Downlink against daily plan"></void-progress>
-        <span data-void-type="caption">64% of the daily plan</span>
-      </div>
-      <div class="ref-figure">
-        <span data-void-type="label">Median latency</span>
-        <span><span data-void-type="value">38</span> <span data-void-type="unit">ms</span></span>
-        <span data-void-type="caption">4 ms better than last week</span>
-      </div>
-    </div>
-  </section>
+    <void-section>
+      <void-figures>
+        <void-figure>
+          <span data-void-type="label">Stations online</span>
+          <span data-void-type="value">41 <span data-void-type="unit">of 44</span></span>
+          <span data-void-type="caption">2 in maintenance, 1 degraded</span>
+        </void-figure>
+        <void-figure>
+          <span data-void-type="label">Passes today</span>
+          <span data-void-type="value">1,284</span>
+          <span data-void-type="caption">96 remaining before midnight UTC</span>
+        </void-figure>
+        <void-figure>
+          <span data-void-type="label">Downlink</span>
+          <span data-void-type="value">79.6 <span data-void-type="unit">TB</span></span>
+          <void-progress value="64" size="sm" aria-label="Downlink against daily plan"></void-progress>
+          <span data-void-type="caption">64% of the daily plan</span>
+        </void-figure>
+        <void-figure>
+          <span data-void-type="label">Median latency</span>
+          <span data-void-type="value">38 <span data-void-type="unit">ms</span></span>
+          <span data-void-type="caption">4 ms better than last week</span>
+        </void-figure>
+      </void-figures>
+    </void-section>
 
-  <section class="ref-section">
-    <div class="ref-section-head">
-      <h2 data-void-type="heading">Upcoming passes</h2>
-      <span data-void-type="label">Next 6 hours · 5 of 37</span>
-    </div>
-    <void-table stack="48rem">
-      <table>
-        <thead>
-          <tr>
-            <th>State</th>
-            <th data-stack="title">Satellite</th>
-            <th>Station</th>
-            <th>Band</th>
-            <th data-align="end">Starts in</th>
-            <th data-align="end">Duration</th>
-            <th data-stack="actions">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td><span class="ref-inline"><void-status-dot status="online"></void-status-dot> tracking</span></td>
-            <td><div class="ref-cell-main"><span data-void-type="code">MRD-0412</span><span data-void-type="caption">Polar, 548 km</span></div></td>
-            <td>Svalbard 1</td>
-            <td>X</td>
-            <td>now</td>
-            <td>9 min 12 s</td>
-            <td><void-button variant="ghost" size="sm">View</void-button></td>
-          </tr>
-          <tr>
-            <td><span class="ref-inline"><void-status-dot status="away"></void-status-dot> queued</span></td>
-            <td><div class="ref-cell-main"><span data-void-type="code">MRD-0398</span><span data-void-type="caption">Polar, 552 km</span></div></td>
-            <td>Tromsø 2</td>
-            <td>S</td>
-            <td>14 min</td>
-            <td>7 min 40 s</td>
-            <td><void-button variant="ghost" size="sm">Move</void-button></td>
-          </tr>
-          <tr>
-            <td><span class="ref-inline"><void-status-dot status="away"></void-status-dot> queued</span></td>
-            <td><div class="ref-cell-main"><span data-void-type="code">MRD-0420</span><span data-void-type="caption">Inclined, 610 km</span></div></td>
-            <td>Punta Arenas</td>
-            <td>X</td>
-            <td>31 min</td>
-            <td>11 min 03 s</td>
-            <td><void-button variant="ghost" size="sm">Move</void-button></td>
-          </tr>
-          <tr>
-            <td><span class="ref-inline"><void-status-dot status="offline"></void-status-dot> held</span></td>
-            <td><div class="ref-cell-main"><span data-void-type="code">MRD-0377</span><span data-void-type="caption">Polar, 541 km</span></div></td>
-            <td>Awarua</td>
-            <td>Ka</td>
-            <td>1 h 02 min</td>
-            <td>8 min 55 s</td>
-            <td><void-button variant="ghost" size="sm">Release</void-button></td>
-          </tr>
-          <tr>
-            <td><span class="ref-inline"><void-status-dot status="away"></void-status-dot> queued</span></td>
-            <td><div class="ref-cell-main"><span data-void-type="code">MRD-0431</span><span data-void-type="caption">Inclined, 606 km</span></div></td>
-            <td>Hartebeesthoek</td>
-            <td>X</td>
-            <td>1 h 48 min</td>
-            <td>10 min 21 s</td>
-            <td><void-button variant="ghost" size="sm">Move</void-button></td>
-          </tr>
-        </tbody>
-      </table>
-    </void-table>
-  </section>
+    <void-section>
+      <void-section-head>
+        <h2>Upcoming passes</h2>
+        <span data-void-type="label">Next 6 hours · 5 of 37</span>
+      </void-section-head>
+      <void-table stack="48rem">
+        <table>
+          <thead>
+            <tr>
+              <th>State</th>
+              <th data-stack="title">Satellite</th>
+              <th>Station</th>
+              <th>Band</th>
+              <th data-align="end">Starts in</th>
+              <th data-align="end">Duration</th>
+              <th data-stack="actions">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><void-state color="success">tracking</void-state></td>
+              <td><void-row-text><span data-void-type="code">MRD-0412</span><span data-void-type="caption">Polar, 548 km</span></void-row-text></td>
+              <td>Svalbard 1</td>
+              <td>X</td>
+              <td>now</td>
+              <td>9 min 12 s</td>
+              <td><void-button variant="ghost" size="sm">View</void-button></td>
+            </tr>
+            <tr>
+              <td><void-state color="caution">queued</void-state></td>
+              <td><void-row-text><span data-void-type="code">MRD-0398</span><span data-void-type="caption">Polar, 552 km</span></void-row-text></td>
+              <td>Tromsø 2</td>
+              <td>S</td>
+              <td>14 min</td>
+              <td>7 min 40 s</td>
+              <td><void-button variant="ghost" size="sm">Move</void-button></td>
+            </tr>
+            <tr>
+              <td><void-state color="caution">queued</void-state></td>
+              <td><void-row-text><span data-void-type="code">MRD-0420</span><span data-void-type="caption">Inclined, 610 km</span></void-row-text></td>
+              <td>Punta Arenas</td>
+              <td>X</td>
+              <td>31 min</td>
+              <td>11 min 03 s</td>
+              <td><void-button variant="ghost" size="sm">Move</void-button></td>
+            </tr>
+            <tr>
+              <td><void-state>held</void-state></td>
+              <td><void-row-text><span data-void-type="code">MRD-0377</span><span data-void-type="caption">Polar, 541 km</span></void-row-text></td>
+              <td>Awarua</td>
+              <td>Ka</td>
+              <td>1 h 02 min</td>
+              <td>8 min 55 s</td>
+              <td><void-button variant="ghost" size="sm">Release</void-button></td>
+            </tr>
+            <tr>
+              <td><void-state color="caution">queued</void-state></td>
+              <td><void-row-text><span data-void-type="code">MRD-0431</span><span data-void-type="caption">Inclined, 606 km</span></void-row-text></td>
+              <td>Hartebeesthoek</td>
+              <td>X</td>
+              <td>1 h 48 min</td>
+              <td>10 min 21 s</td>
+              <td><void-button variant="ghost" size="sm">Move</void-button></td>
+            </tr>
+          </tbody>
+        </table>
+      </void-table>
+    </void-section>
 
-  <div class="ref-split">
-    <section class="ref-section">
-      <div class="ref-section-head">
-        <h2 data-void-type="heading">Capacity by region</h2>
-        <span data-void-type="label">Used today</span>
-      </div>
-      <div class="ref-rows">
-        <div class="ref-row">
-          <div class="ref-row-text"><span>Arctic</span><span data-void-type="caption">Svalbard 1, Svalbard 2, Tromsø 1, Tromsø 2</span></div>
-          <span><span data-void-type="value" data-size="sm">82</span> <span data-void-type="unit">%</span></span>
-        </div>
-        <div class="ref-row">
-          <div class="ref-row-text"><span>Southern</span><span data-void-type="caption">Punta Arenas, Awarua, Troll</span></div>
-          <span><span data-void-type="value" data-size="sm">57</span> <span data-void-type="unit">%</span></span>
-        </div>
-        <div class="ref-row">
-          <div class="ref-row-text"><span>Equatorial</span><span data-void-type="caption">Singapore, Mauritius, Hartebeesthoek</span></div>
-          <span><span data-void-type="value" data-size="sm">34</span> <span data-void-type="unit">%</span></span>
-        </div>
-      </div>
-    </section>
+    <void-split ratio="2:1">
+      <void-section>
+        <void-section-head>
+          <h2>Capacity by region</h2>
+          <span data-void-type="label">Used today</span>
+        </void-section-head>
+        <void-rows>
+          <void-row>
+            <void-row-text><span>Arctic</span><span data-void-type="caption">Svalbard 1, Svalbard 2, Tromsø 1, Tromsø 2</span></void-row-text>
+            <span data-void-type="value" data-size="sm">82 <span data-void-type="unit">%</span></span>
+          </void-row>
+          <void-row>
+            <void-row-text><span>Southern</span><span data-void-type="caption">Punta Arenas, Awarua, Troll</span></void-row-text>
+            <span data-void-type="value" data-size="sm">57 <span data-void-type="unit">%</span></span>
+          </void-row>
+          <void-row>
+            <void-row-text><span>Equatorial</span><span data-void-type="caption">Singapore, Mauritius, Hartebeesthoek</span></void-row-text>
+            <span data-void-type="value" data-size="sm">34 <span data-void-type="unit">%</span></span>
+          </void-row>
+        </void-rows>
+      </void-section>
 
-    <section class="ref-section">
-      <div class="ref-section-head">
-        <h2 data-void-type="heading">Recent events</h2>
-      </div>
-      <div class="ref-rows">
-        <div class="ref-row">
-          <div class="ref-row-text"><span>Backup link engaged</span><span data-void-type="caption">Tromsø 2 · 12 min ago</span></div>
-          <void-badge color="warning" variant="outline">Degraded</void-badge>
-        </div>
-        <div class="ref-row">
-          <div class="ref-row-text"><span>Firmware 4.18.2 rolled out</span><span data-void-type="caption">Arctic region · 2 h ago</span></div>
-          <void-badge color="success" variant="outline">Done</void-badge>
-        </div>
-        <div class="ref-row">
-          <div class="ref-row-text"><span>Antenna recalibration</span><span data-void-type="caption">Awarua · starts 03:00 UTC</span></div>
-          <void-badge variant="outline">Planned</void-badge>
-        </div>
-      </div>
-    </section>
-  </div>
+      <void-section>
+        <void-section-head>
+          <h2>Recent events</h2>
+        </void-section-head>
+        <void-rows>
+          <void-row>
+            <void-row-text><span>Backup link engaged</span><span data-void-type="caption">Tromsø 2 · 12 min ago</span></void-row-text>
+            <void-badge color="warning" variant="outline">Degraded</void-badge>
+          </void-row>
+          <void-row>
+            <void-row-text><span>Firmware 4.18.2 rolled out</span><span data-void-type="caption">Arctic region · 2 h ago</span></void-row-text>
+            <void-badge color="success" variant="outline">Done</void-badge>
+          </void-row>
+          <void-row>
+            <void-row-text><span>Antenna recalibration</span><span data-void-type="caption">Awarua · starts 03:00 UTC</span></void-row-text>
+            <void-badge variant="outline">Planned</void-badge>
+          </void-row>
+        </void-rows>
+      </void-section>
+    </void-split>
+  </void-page>
 </main>

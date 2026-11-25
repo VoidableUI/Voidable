@@ -1,0 +1,271 @@
+/* The patterns style the native elements placed inside them (h1, h2,
+   p, dl). Their browser margins are removed here, so the patterns do
+   not depend on the theme's reset being loaded. */
+:where(void-page-head, void-section, void-section-head, void-empty, void-media-content, void-stack, void-row-text, void-figure, void-glass) > :where(h1, h2, h3, h4, p),
+:where(void-description-list) :where(dl, dt, dd) {
+  margin: 0;
+}
+
+/* ── void-page: the content column ──
+   One centred column with a gutter that tightens on narrow screens.
+   Blocks inside it sit a group apart; sections sit a section apart.
+
+     <main>
+       <void-page>
+         <void-page-head>…</void-page-head>
+         <void-section>…</void-section>
+         <void-section>…</void-section>
+       </void-page>
+     </main>
+
+   width="narrow" is for forms and reading; "wide" and "full" for
+   dense tables and dashboards. */
+void-page {
+  --void-page-width: var(--void-measure-page);
+
+  display: flex;
+  flex-direction: column;
+  gap: var(--void-gap-group);
+  box-sizing: border-box;
+  width: 100%;
+  max-width: var(--void-page-width);
+  margin-inline: auto;
+  padding: var(--void-gap-group) var(--void-gutter) var(--void-gap-section);
+}
+
+void-page[width="narrow"] { --void-page-width: calc(var(--void-measure) * 1.25 + 2 * var(--void-gutter)); }
+void-page[width="wide"]   { --void-page-width: calc(var(--void-measure-page) * 1.3334); }
+void-page[width="full"]   { --void-page-width: none; }
+
+void-page > * {
+  min-width: 0;
+}
+
+/* A new section gets the larger gap; the head, an alert and the first
+   block under them stay a group apart. */
+:is(void-page, void-page > form) > :is(void-section, void-split) + :is(void-section, void-split) {
+  margin-top: calc(var(--void-gap-section) - var(--void-gap-group));
+}
+
+/* A form that wraps the page's sections keeps the page's rhythm. */
+void-page > form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--void-gap-group);
+}
+
+/* ── void-page-head: what this page is and what you can do here ──
+     <void-page-head>
+       <void-breadcrumbs>…</void-breadcrumbs>      or a label
+       <h1>Ground network</h1>
+       <p>One sentence about the page.</p>
+       <void-actions>…buttons…</void-actions>
+     </void-page-head>
+   The text stacks on the left; the actions sit at the bottom right,
+   on the title's line, and drop under the text when there is no room. */
+void-page-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  column-gap: var(--void-gap-inside);
+  align-items: end;
+  padding-bottom: var(--void-gap-inside);
+  border-bottom: 1px solid var(--void-color-border);
+}
+
+void-page-head > * {
+  grid-column: 1;
+  min-width: 0;
+}
+
+void-page-head > :not(void-actions) + :not(void-actions) {
+  margin-top: var(--void-gap-tight);
+}
+
+void-page-head > h1 {
+  font-family: var(--void-type-title-family);
+  font-size: var(--void-type-title-size);
+  line-height: var(--void-type-title-leading);
+  font-weight: var(--void-type-title-weight);
+  letter-spacing: var(--void-type-title-tracking);
+  color: var(--void-type-title-color);
+}
+
+void-page-head > p {
+  max-width: var(--void-measure);
+  font-size: var(--void-type-body-size);
+  line-height: var(--void-type-body-leading);
+  color: var(--void-color-text-secondary);
+}
+
+void-page-head > void-actions {
+  grid-column: 2;
+  grid-row: 1 / span 4;
+  align-self: end;
+}
+
+/* No rule under the head: for a page whose first block draws its own. */
+void-page-head[flush] {
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
+/* ── void-actions: a row of buttons ── */
+void-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--void-gap-tight);
+}
+
+/* `align` is a legacy HTML attribute that browsers still act on (it
+   sets text-align), so these elements use other names. */
+void-actions[justify="end"]    { justify-content: flex-end; }
+void-actions[justify="center"] { justify-content: center; }
+
+/* ── void-section: a titled part of a page ──
+     <void-section>
+       <void-section-head>
+         <h2>Upcoming passes</h2>
+         <p>Optional description.</p>
+         <span data-void-type="label">Next 6 hours</span>   an aside:
+       </void-section-head>                                 label, or
+       …content…                                            void-actions
+     </void-section>
+   No box and no shadow: the heading, then the content. `divided`
+   draws a hairline under the head for content that has no line of
+   its own (a form, a paragraph, a chart). */
+void-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--void-gap-inside);
+  min-width: 0;
+}
+
+void-section > * {
+  min-width: 0;
+}
+
+void-section-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  column-gap: var(--void-gap-inside);
+  align-items: baseline;
+}
+
+void-section-head > * {
+  grid-column: 1;
+  min-width: 0;
+}
+
+void-section > :is(h2, h3, h4),
+void-section-head > :is(h2, h3, h4) {
+  font-family: var(--void-type-heading-family);
+  font-size: var(--void-type-heading-size);
+  line-height: var(--void-type-heading-leading);
+  font-weight: var(--void-type-heading-weight);
+  letter-spacing: var(--void-type-heading-tracking);
+  color: var(--void-type-heading-color);
+}
+
+void-section-head > p {
+  margin-top: var(--void-space-1);
+  max-width: var(--void-measure);
+  font-size: var(--void-type-body-size);
+  line-height: var(--void-type-body-leading);
+  color: var(--void-color-text-secondary);
+}
+
+/* The aside: anything that is not the heading or its description. */
+void-section-head > :not(h2, h3, h4, p) {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  align-self: baseline;
+}
+
+void-section-head > void-actions {
+  align-self: center;
+}
+
+void-section[divided] > void-section-head {
+  padding-bottom: var(--void-gap-inside);
+  border-bottom: 1px solid var(--void-color-border);
+}
+
+/* A section whose content is several blocks (the groups of a form). */
+void-section[gap="stack"] { gap: var(--void-gap-stack); }
+void-section[gap="group"] { gap: var(--void-gap-group); }
+
+/* ── void-split: columns that collapse to one ──
+     <void-split ratio="2:1">…two children…</void-split>
+   ratio: 1:1 (default), 2:1, 1:2, and "aside" for a narrow fixed
+   column beside the content (a settings list, a filter panel). */
+void-split {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--void-gap-group);
+  align-items: start;
+}
+
+void-split[ratio="2:1"]   { grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); }
+void-split[ratio="1:2"]   { grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); }
+void-split[ratio="aside"] { grid-template-columns: 12rem minmax(0, 1fr); }
+void-split[valign="center"] { align-items: center; }
+void-split[valign="end"]    { align-items: end; }
+
+void-split > * {
+  min-width: 0;
+}
+
+/* A column of sections inside a split keeps the section rhythm. */
+void-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--void-gap-inside);
+  min-width: 0;
+}
+
+void-stack[gap="tight"]   { gap: var(--void-gap-tight); }
+void-stack[gap="stack"]   { gap: var(--void-gap-stack); }
+void-stack[gap="group"]   { gap: var(--void-gap-group); }
+void-stack[gap="section"] { gap: var(--void-gap-section); }
+
+/* Stays in view while the column beside it scrolls. */
+void-split > [sticky] {
+  position: sticky;
+  top: var(--void-gap-group);
+}
+
+@media (max-width: 48rem) {
+  /* One action stays beside the title; several drop under the text. */
+  void-page-head > void-actions:has(> :nth-child(2)) {
+    grid-column: 1 / -1;
+    grid-row: auto;
+    margin-top: var(--void-gap-inside);
+  }
+
+  void-split,
+  void-split[ratio] {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  void-split > [sticky] {
+    position: static;
+  }
+}
+
+@media (max-width: 30rem) {
+  /* An aside that is a row of buttons drops under the heading. */
+  void-section-head > void-actions {
+    grid-column: 1;
+    grid-row: auto;
+    margin-top: var(--void-gap-tight);
+  }
+}
+
+/* Anchored overlays keep the width of their trigger. They are inline
+   by default, but a flex or grid parent (a section, a stack, a row)
+   would stretch them, and the panel would then be placed against the
+   stretched box instead of the trigger. */
+:is(void-tooltip, void-hover-card, void-popover, void-dropdown-menu) {
+  width: fit-content;
+}

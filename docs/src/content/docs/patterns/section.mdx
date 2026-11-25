@@ -1,0 +1,179 @@
+---
+title: Section
+description: void-section is a titled part of a page with no box around it; void-split and void-stack arrange sections and blocks using the layout rhythm.
+---
+
+import Example from '../../../components/Example.astro';
+
+`<void-section>` is a titled part of a page: a head, then content. It has no border, no fill and no shadow. What separates one section from the next is space, and that space is the same everywhere because the page sets it.
+
+export const basic = `
+<void-section>
+  <void-section-head>
+    <h2>Upcoming passes</h2>
+    <p>Passes assigned to this station in the next 24 hours.</p>
+    <void-actions><void-button size="sm">Assign</void-button></void-actions>
+  </void-section-head>
+  <void-rows>
+    <void-row>
+      <void-row-text>
+        <span>MRD-0412</span>
+        <span data-void-type="caption">X band, 9 min 40 s</span>
+      </void-row-text>
+      <span data-void-type="code">14:02 UTC</span>
+    </void-row>
+    <void-row>
+      <void-row-text>
+        <span>MRD-0388</span>
+        <span data-void-type="caption">S band, 6 min 12 s</span>
+      </void-row-text>
+      <span data-void-type="code">14:31 UTC</span>
+    </void-row>
+  </void-rows>
+</void-section>`;
+
+export const basicErb = `
+<void-section>
+  <void-section-head>
+    <h2>Upcoming passes</h2>
+    <p>Passes assigned to this station in the next 24 hours.</p>
+    <void-actions>
+      <void-button size="sm"><%= link_to "Assign", new_station_pass_path(@station) %></void-button>
+    </void-actions>
+  </void-section-head>
+  <void-rows>
+    <% @passes.each do |pass| %>
+      <void-row>
+        <void-row-text>
+          <span><%= pass.satellite %></span>
+          <span data-void-type="caption"><%= pass.band %> band, <%= pass.duration_in_words %></span>
+        </void-row-text>
+        <span data-void-type="code"><%= l pass.starts_at, format: :utc_time %></span>
+      </void-row>
+    <% end %>
+  </void-rows>
+</void-section>`;
+
+export const basicJsx = `
+<void-section>
+  <void-section-head>
+    <h2>Upcoming passes</h2>
+    <p>Passes assigned to this station in the next 24 hours.</p>
+    <void-actions>
+      <Button size="sm" onVoidClick={assign}>Assign</Button>
+    </void-actions>
+  </void-section-head>
+  <void-rows>
+    {passes.map((pass) => (
+      <void-row key={pass.id}>
+        <void-row-text>
+          <span>{pass.satellite}</span>
+          <span data-void-type="caption">{pass.band} band, {pass.duration}</span>
+        </void-row-text>
+        <span data-void-type="code">{pass.startsAt}</span>
+      </void-row>
+    ))}
+  </void-rows>
+</void-section>`;
+
+<Example html={basic} erb={basicErb} jsx={basicJsx} />
+
+## The head
+
+`<void-section-head>` takes an `<h2>` (or `h3`, `h4`), an optional `<p>` under it, and optionally one thing at the far end: a label, a badge, a state, or `<void-actions>`. A section that needs only a title can use a bare `<h2>` and no head element.
+
+## Divided
+
+Content that draws its own top line (a table, rows, figures, a description list) needs nothing more. Content that does not (the fields of a form, a paragraph, a chart) takes `divided`, which draws a hairline under the head. `gap="stack"` spaces the fields of a form.
+
+export const form = `
+<void-section divided gap="stack">
+  <void-section-head>
+    <h2>Identity</h2>
+    <span data-void-type="label">Required</span>
+  </void-section-head>
+  <void-field label="Station name" helper="Shown in schedules and alerts.">
+    <void-input value="Kiruna 3"></void-input>
+  </void-field>
+  <void-field label="Site code">
+    <void-input value="KRN-3"></void-input>
+  </void-field>
+</void-section>`;
+
+export const formErb = `
+<void-section divided gap="stack">
+  <void-section-head>
+    <h2>Identity</h2>
+    <span data-void-type="label">Required</span>
+  </void-section-head>
+  <void-field label="Station name" helper="Shown in schedules and alerts."
+              error="<%= form.object.errors[:name].first %>">
+    <void-input name="station[name]" value="<%= form.object.name %>"></void-input>
+  </void-field>
+  <void-field label="Site code">
+    <void-input name="station[code]" value="<%= form.object.code %>"></void-input>
+  </void-field>
+</void-section>`;
+
+export const formJsx = `
+<void-section divided gap="stack">
+  <void-section-head>
+    <h2>Identity</h2>
+    <span data-void-type="label">Required</span>
+  </void-section-head>
+  <Field label="Station name" helper="Shown in schedules and alerts." error={errors.name}>
+    <Input name="name" value={station.name} onVoidInput={onName} />
+  </Field>
+  <Field label="Site code">
+    <Input name="code" value={station.code} onVoidInput={onCode} />
+  </Field>
+</void-section>`;
+
+<Example html={form} erb={formErb} jsx={formJsx} />
+
+## Side by side
+
+`<void-split>` puts two things in columns that become one column below 48rem. `<void-stack>` stacks things with a named gap.
+
+export const split = `
+<void-split ratio="2:1">
+  <void-section>
+    <h2>Activity</h2>
+    <p>The wider column.</p>
+  </void-section>
+  <void-section>
+    <h2>Notes</h2>
+    <p>The narrower one.</p>
+  </void-section>
+</void-split>`;
+
+export const splitErb = `
+<void-split ratio="2:1">
+  <%= render "activity", events: @events %>
+  <%= render "notes", notes: @notes %>
+</void-split>`;
+
+export const splitJsx = `
+<void-split ratio="2:1">
+  <Activity events={events} />
+  <Notes notes={notes} />
+</void-split>`;
+
+<Example html={split} erb={splitErb} jsx={splitJsx} />
+
+## Reference
+
+| Element | Attribute | Values |
+|---|---|---|
+| `void-section` | `divided` | Hairline under the head |
+| | `gap` | `inside` (default, 16px), `stack` (24px), `group` (40px) |
+| `void-split` | `ratio` | `1:1` (default), `2:1`, `1:2`, `aside` (a 12rem first column, for a settings list) |
+| | `valign` | `start` (default), `center`, `end` |
+| `void-stack` | `gap` | `tight` 8px, `inside` 16px (default), `stack` 24px, `group` 40px, `section` 72px |
+| | `sticky` | As a child of `void-split`: stays in view while the other column scrolls |
+
+The attribute is `valign` and not `align` because `align` is an old HTML attribute that browsers still honour on unknown elements: it would also set the text alignment of everything inside.
+
+## Why this form
+
+A section is CSS only: it is a flex column. It is not a card. Voidable's `void-card` and `void-panel` remain for things that are objects (something you can pick up, select or drag); the parts of a page are not objects, and boxing each of them is the fastest way to make a screen heavy.

@@ -20,7 +20,7 @@ body {
 
 .event-log p {
   margin: 0.25rem 0;
-  color: var(--void-color-on-surface, #e0e0e0);
+  color: var(--void-color-text, #e0e0e0);
 }
 
 .component-section {
