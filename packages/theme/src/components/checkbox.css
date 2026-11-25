@@ -6,7 +6,7 @@ void-checkbox {
   gap: var(--void-space-2);
   cursor: pointer;
   font-family: var(--void-font-sans);
-  font-size: var(--void-text-sm);
+  font-size: var(--void-control-text);
   color: var(--void-color-text);
   user-select: none;
 }
@@ -27,7 +27,7 @@ void-checkbox input[type="checkbox"] {
   width: 1.125rem;
   height: 1.125rem;
   border: 1.5px solid var(--void-color-border-control);
-  border-radius: var(--void-radius-sm);
+  border-radius: var(--void-radius-xs);
   background: transparent;
   color: var(--void-color-text-on-accent);
   transition: background var(--void-duration-fast) var(--void-ease-in-out),
@@ -44,8 +44,8 @@ void-checkbox:hover .void-checkbox-box {
 }
 
 void-checkbox:focus-visible .void-checkbox-box {
-  outline: 2px solid var(--void-color-border-focus);
-  outline-offset: 2px;
+  outline: var(--void-focus-ring-width) solid var(--void-focus-ring-color);
+  outline-offset: var(--void-focus-ring-offset);
 }
 
 void-checkbox[checked] .void-checkbox-box {

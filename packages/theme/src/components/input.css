@@ -1,19 +1,23 @@
 void-input {
+  --void-field-height: var(--void-control-height);
+  --void-field-padding: var(--void-control-padding);
+  --void-field-text: var(--void-control-text);
   display: flex;
   flex-direction: column;
-  gap: var(--void-space-1);
+  gap: var(--void-space-1h);
   font-family: var(--void-font-sans);
 }
 
 void-input input {
   width: 100%;
-  padding: var(--void-space-2) var(--void-space-3);
-  background: var(--void-color-bg-secondary);
+  height: var(--void-field-height);
+  padding: 0 var(--void-field-padding);
+  background: var(--void-color-surface);
   border: 1px solid var(--void-color-border-control);
   border-radius: var(--void-radius-md);
   color: var(--void-color-text);
   font-family: inherit;
-  font-size: var(--void-text-sm);
+  font-size: var(--void-field-text);
   line-height: var(--void-leading-normal);
   outline: none;
   transition: border-color var(--void-duration-fast) var(--void-ease-in-out),
@@ -48,10 +52,11 @@ void-input[error]:not([error=""]) input:focus {
 
 .void-input-error {
   color: var(--void-color-error);
-  font-size: var(--void-text-xs);
+  font-size: var(--void-type-caption-size);
+  line-height: var(--void-type-caption-leading);
 }
 
-void-input[size="sm"] input { padding: var(--void-space-1) var(--void-space-2); font-size: var(--void-text-xs); }
-void-input[size="lg"] input { padding: var(--void-space-3) var(--void-space-4); font-size: var(--void-text-base); }
-void-input[size="xl"] input { padding: var(--void-space-4) var(--void-space-5); font-size: var(--void-text-lg); }
-void-input[size="xxl"] input { padding: var(--void-space-5) var(--void-space-6); font-size: var(--void-text-xl); }
+void-input[size="sm"]  { --void-field-height: var(--void-control-height-sm);  --void-field-padding: var(--void-control-padding-sm);  --void-field-text: var(--void-control-text-sm); }
+void-input[size="lg"]  { --void-field-height: var(--void-control-height-lg);  --void-field-padding: var(--void-control-padding-lg);  --void-field-text: var(--void-control-text-lg); }
+void-input[size="xl"]  { --void-field-height: var(--void-control-height-xl);  --void-field-padding: var(--void-control-padding-xl);  --void-field-text: var(--void-control-text-xl); }
+void-input[size="xxl"] { --void-field-height: var(--void-control-height-xxl); --void-field-padding: var(--void-control-padding-xxl); --void-field-text: var(--void-control-text-xxl); }

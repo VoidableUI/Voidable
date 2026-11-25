@@ -12,9 +12,11 @@ void-list-item {
   display: flex;
   align-items: center;
   gap: var(--void-space-3);
-  padding: var(--void-space-2) var(--void-space-3);
-  font-size: var(--void-text-sm);
-  color: var(--void-color-text);
+  min-height: var(--void-control-height);
+  padding: var(--void-space-1) var(--void-control-padding);
+  border-radius: var(--void-radius-md);
+  font-size: var(--void-control-text);
+  color: var(--void-color-text-secondary);
 }
 
 void-list-item[interactive] {
@@ -24,11 +26,23 @@ void-list-item[interactive] {
 
 void-list-item[interactive]:hover {
   background: var(--void-color-bg-hover);
+  color: var(--void-color-text);
+}
+
+void-list-item[interactive]:focus-visible {
+  outline: var(--void-focus-ring-width) solid var(--void-focus-ring-color);
+  outline-offset: calc(-1 * var(--void-focus-ring-width));
+}
+
+/* Divided lists are rows of content, not a menu: square, full-strength text. */
+void-list[dividers] void-list-item {
+  border-radius: 0;
+  color: var(--void-color-text);
 }
 
 void-list-item[selected] {
-  background: color-mix(in srgb, var(--void-color-accent) 10%, transparent);
-  color: var(--void-color-accent);
+  background: var(--void-color-bg-hover);
+  color: var(--void-color-text);
 }
 
 void-list-item[disabled] {

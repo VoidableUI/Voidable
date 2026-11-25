@@ -43,8 +43,8 @@ void-switch[checked] .void-switch-thumb {
 }
 
 void-switch:focus-visible .void-switch-track {
-  outline: 2px solid var(--void-color-border-focus);
-  outline-offset: 2px;
+  outline: var(--void-focus-ring-width) solid var(--void-focus-ring-color);
+  outline-offset: var(--void-focus-ring-offset);
 }
 
 void-switch:not([checked]):hover .void-switch-track {
@@ -66,7 +66,7 @@ void-switch[size="lg"] .void-switch-track { width: 2.75rem; height: 1.5rem; }
 void-switch[size="lg"] .void-switch-thumb { width: 1.125rem; height: 1.125rem; }
 void-switch[size="lg"][checked] .void-switch-thumb { transform: translateX(1.25rem); }
 
-void-switch[size="xl"] .void-switch-track { width: 3.25rem; height: 1.75rem; }
+void-switch[size="xl"] .void-switch-track { width: 3.25rem; height: 1.75rem; } /* token-ok: track size, not a control height */
 void-switch[size="xl"] .void-switch-thumb { width: 1.375rem; height: 1.375rem; }
 void-switch[size="xl"][checked] .void-switch-thumb { transform: translateX(1.5rem); }
 

@@ -1,8 +1,13 @@
 void-segmented-control {
+  --void-segment-height: var(--void-control-height);
+  --void-segment-padding: var(--void-control-padding);
+  --void-segment-text: var(--void-control-text);
+
   display: inline-flex;
   align-items: center;
+  /* Border plus padding plus item equals the shared control height. */
   padding: 2px;
-  background: var(--void-color-bg-secondary);
+  background: var(--void-color-surface);
   border: 1px solid var(--void-color-border-control);
   border-radius: var(--void-radius-md);
   gap: 2px;
@@ -11,10 +16,12 @@ void-segmented-control {
 void-segmented-control-item {
   display: inline-grid;
   place-content: center;
-  padding: var(--void-space-1) var(--void-space-3);
-  border-radius: calc(var(--void-radius-md) - 2px);
+  min-height: calc(var(--void-segment-height) - 6px);
+  padding: 0 var(--void-segment-padding);
+  border-radius: max(0px, calc(var(--void-radius-md) - 2px));
   font-family: var(--void-font-sans);
-  font-size: var(--void-text-sm);
+  font-size: var(--void-segment-text);
+  white-space: nowrap;
   color: var(--void-color-text-secondary);
   cursor: pointer;
   user-select: none;
@@ -28,14 +35,13 @@ void-segmented-control-item:hover {
 }
 
 void-segmented-control-item:focus-visible {
-  outline: 2px solid var(--void-color-border-focus);
-  outline-offset: -2px;
+  outline: var(--void-focus-ring-width) solid var(--void-focus-ring-color);
+  outline-offset: calc(-1 * var(--void-focus-ring-width));
 }
 
 void-segmented-control-item[aria-checked="true"] {
-  background: var(--void-color-bg-elevated);
+  background: var(--void-color-bg-active);
   color: var(--void-color-text);
-  box-shadow: var(--void-shadow-sm);
 }
 
 void-segmented-control-item[disabled] {
@@ -43,22 +49,7 @@ void-segmented-control-item[disabled] {
   pointer-events: none;
 }
 
-void-segmented-control[size="sm"] void-segmented-control-item {
-  padding: 2px var(--void-space-2);
-  font-size: var(--void-text-xs);
-}
-
-void-segmented-control[size="lg"] void-segmented-control-item {
-  padding: var(--void-space-2) var(--void-space-4);
-  font-size: var(--void-text-base);
-}
-
-void-segmented-control[size="xl"] void-segmented-control-item {
-  padding: var(--void-space-3) var(--void-space-5);
-  font-size: var(--void-text-lg);
-}
-
-void-segmented-control[size="xxl"] void-segmented-control-item {
-  padding: var(--void-space-4) var(--void-space-6);
-  font-size: var(--void-text-xl);
-}
+void-segmented-control[size="sm"] { --void-segment-height: var(--void-control-height-sm); --void-segment-padding: var(--void-control-padding-sm); --void-segment-text: var(--void-control-text-sm); }
+void-segmented-control[size="lg"] { --void-segment-height: var(--void-control-height-lg); --void-segment-padding: var(--void-control-padding-lg); --void-segment-text: var(--void-control-text-lg); }
+void-segmented-control[size="xl"] { --void-segment-height: var(--void-control-height-xl); --void-segment-padding: var(--void-control-padding-xl); --void-segment-text: var(--void-control-text-xl); }
+void-segmented-control[size="xxl"] { --void-segment-height: var(--void-control-height-xxl); --void-segment-padding: var(--void-control-padding-xxl); --void-segment-text: var(--void-control-text-xxl); }

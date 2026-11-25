@@ -1,0 +1,16 @@
+/* Dune — warm, rounded, comfortable.
+   A terracotta accent, sand-tinted greys on a soft page, filled
+   containers, generous corners and larger controls and text. */
+[data-void-theme="dune"] {
+  --void-accent-hue: 40;
+  --void-accent-chroma: 0.15;
+  --void-neutral-hue: 70;
+  --void-neutral-chroma: 0.025;
+  --void-page-tint: 1;
+  --void-contrast: 0.3;
+  --void-chrome: 0.9;
+  --void-radius: 10px;
+  --void-density: 1.12;
+  --void-rhythm: 1.1;
+  --void-font-size: 0.9375rem;
+}

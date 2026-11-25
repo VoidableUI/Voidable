@@ -1,67 +1,235 @@
 /* ============================================================
    @voidable/theme — Tier 2 Semantic Tokens
-   Dark mode is the default. Surfaces are TRUE BLACK.
+   Everything here is derived from the knobs in knobs.css.
+   Dark is the default colour scheme; the page is true black or
+   true white and every grey is the neutral colour at an opacity.
+
+   Browser baseline: oklch(), color-mix() and calc() inside both
+   (Chrome 111, Firefox 113, Safari 16.2; all 2023). No build step,
+   no relative colour syntax, no light-dark().
    ============================================================ */
 
-/* ── Dark theme (default) ── */
+/* ── Colour scheme ──
+   One number says which scheme is in force; every colour below is a
+   single formula of it, so light is not a second hand-tuned block.
+   Dark stays the default when the OS expresses no preference; an
+   explicit data-theme always wins, on the root or on any subtree. */
 :root,
 [data-theme="dark"] {
   /* Native UI (scrollbars, form controls, autofill) follows the theme */
   color-scheme: dark;
+  --void-scheme-dark: 1;
+}
 
-  /* Surfaces */
-  --void-color-bg:           var(--void-black);
-  --void-color-bg-secondary: var(--void-dark-1);
-  --void-color-bg-elevated:  var(--void-dark-3);
-  --void-color-bg-hover:     var(--void-dark-4);
-  --void-color-bg-accent:    var(--void-dark-2);
-  --void-color-bg-overlay:   color-mix(in srgb, var(--void-black) 70%, transparent);
+[data-theme="light"] {
+  color-scheme: light;
+  --void-scheme-dark: 0;
+}
 
-  /* Text */
-  --void-color-text:           var(--void-stone-100);
-  --void-color-text-secondary: var(--void-stone-400);
-  --void-color-text-muted:     var(--void-stone-450);
-  --void-color-text-tertiary:  var(--void-stone-450);
-  --void-color-text-disabled:  var(--void-stone-600);
-  --void-color-text-on-accent: var(--void-black);
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme]) {
+    color-scheme: light;
+    --void-scheme-dark: 0;
+  }
+}
 
-  /* Borders */
-  --void-color-border:        color-mix(in srgb, var(--void-white) 14%, transparent);
-  --void-color-border-strong: color-mix(in srgb, var(--void-white) 22%, transparent);
-  --void-color-border-focus:  color-mix(in srgb, var(--void-white) 55%, transparent);
-  --void-color-border-control: color-mix(in srgb, var(--void-white) 36%, transparent);
+/* ── User preference: more contrast ──
+   Added to the contrast knob, so it applies whatever a theme set. */
+:root {
+  --void-contrast-boost: 0;
+}
 
-  /* Focus ring — shared by every :focus-visible indicator.
-     Colour is re-declared in the light block so it resolves per theme. */
+@media (prefers-contrast: more) {
+  :root {
+    --void-contrast-boost: 1;
+  }
+}
+
+/* ── User preference: reduced motion ──
+   The OS preference wins over the anim-scale knob wherever it was
+   set: on :root, by data-anim-speed, by a theme, or inline on a
+   data-void-theme subtree (hence !important). A user who asked their
+   OS for less motion should not get it back from an app default.
+   Apps that want a motion toggle should drive it from their own UI
+   and treat the OS preference as the initial value. This block lives
+   here, after knobs.css, so the knob's default cannot override it. */
+@media (prefers-reduced-motion: reduce) {
+  :root,
+  :root[data-anim-speed],
+  :root[data-void-theme],
+  :root [data-void-theme] { --void-anim-scale: 0 !important; }
+}
+
+/* ── Shape ──
+   data-shape is a preset for the radius knob: sharp zeroes every
+   radius under it, curvy restores the theme's radius. */
+:root,
+[data-shape="curvy"] {
+  --void-shape: 1;
+}
+
+[data-shape="sharp"] {
+  --void-shape: 0;
+}
+
+/* ── Derived tokens ──
+   var() is substituted where a custom property is declared, so
+   tokens derived on :root alone would not follow a knob changed on a
+   descendant. They are therefore declared on every element that can
+   carry a scheme, a theme or a shape. :where() keeps the specificity
+   at zero, so any override of a token still wins. */
+:where(:root, [data-theme], [data-void-theme], [data-shape]) {
+  /* ── Working values (internal; set the knobs instead) ── */
+  --void-contrast-level: clamp(0, var(--void-contrast) + var(--void-contrast-boost), 1);
+  --void-chrome-level:   clamp(0, var(--void-chrome), 1);
+  --void-page-level:     clamp(0, var(--void-page-tint), 1);
+  --void-neutral-c:      clamp(0, var(--void-neutral-chroma), 0.04);
+
+  /* The neutral foreground as "L C H": near-white on black, near-black
+     on white. Used as oklch(var(--void-fg) / alpha). */
+  --void-fg: calc(0.145 + 0.825 * var(--void-scheme-dark)) var(--void-neutral-c) var(--void-neutral-hue);
+
+  /* Opacity steps of the foreground. The first term of each is the
+     lowest value that keeps WCAG AA on every surface in that scheme
+     (white needs slightly more than black); the contrast knob only
+     ever adds to it. */
+  --void-alpha-muted:     calc(0.60 - 0.08 * var(--void-scheme-dark) + 0.25 * var(--void-contrast-level));
+  --void-alpha-secondary: calc(0.74 - 0.08 * var(--void-scheme-dark) + 0.20 * var(--void-contrast-level));
+  --void-alpha-disabled:  calc(0.38 + 0.12 * var(--void-contrast-level));
+  --void-alpha-control:   calc(0.47 - 0.08 * var(--void-scheme-dark) + 0.25 * var(--void-contrast-level));
+  --void-alpha-focus:     calc(0.80 + 0.20 * var(--void-contrast-level));
+  --void-alpha-divider:   calc(0.05 + 0.18 * var(--void-chrome-level) + 0.06 * var(--void-contrast-level));
+
+  /* ── Surfaces ──
+     The page is pure black or white unless the page-tint knob softens
+     it. Each step up is the foreground mixed into the page, and
+     opaque, so sticky headers and floating panels cover what is
+     beneath them. */
+  --void-color-bg:           oklch(
+    calc((1 - var(--void-scheme-dark)) * (1 - 0.03 * var(--void-page-level)) + var(--void-scheme-dark) * 0.2 * var(--void-page-level))
+    calc(var(--void-neutral-c) * var(--void-page-level) * (0.6 + 0.4 * var(--void-scheme-dark)))
+    var(--void-neutral-hue)
+  );
+  /* Container fill (cards, panels, stats): set by the chrome knob,
+     close to invisible by default. */
+  --void-color-surface:      color-mix(in srgb, oklch(var(--void-fg)) calc(8% * var(--void-chrome-level)), var(--void-color-bg));
+  /* A subtle step that is always visible: stripes, code, wells. */
+  --void-color-bg-secondary: color-mix(in srgb, oklch(var(--void-fg)) 4%, var(--void-color-bg));
+  /* Things that float over the page: menus, popovers, dialogs. Lifted
+     in dark; on white the shadow and ring do the lifting. */
+  --void-color-bg-elevated:  color-mix(in srgb, oklch(var(--void-fg)) calc(7% * var(--void-scheme-dark)), var(--void-color-bg));
+  --void-color-bg-hover:     color-mix(in srgb, oklch(var(--void-fg)) 8%, var(--void-color-bg));
+  --void-color-bg-active:    color-mix(in srgb, oklch(var(--void-fg)) 13%, var(--void-color-bg));
+  --void-color-bg-accent:    var(--void-color-bg-secondary);
+  --void-color-bg-overlay:   oklch(0 0 0 / calc(0.3 + 0.4 * var(--void-scheme-dark)));
+
+  /* ── Text ── */
+  --void-color-text:           oklch(var(--void-fg));
+  --void-color-text-secondary: oklch(var(--void-fg) / var(--void-alpha-secondary));
+  --void-color-text-muted:     oklch(var(--void-fg) / var(--void-alpha-muted));
+  --void-color-text-tertiary:  var(--void-color-text-muted);
+  --void-color-text-disabled:  oklch(var(--void-fg) / var(--void-alpha-disabled));
+  --void-color-text-on-accent: oklch(calc(1 - var(--void-scheme-dark)) 0 0);
+
+  /* ── Borders ──
+     Two strengths with two jobs. A divider separates content and is
+     decorative, so it may be faint. A control border is the only
+     boundary of an input or an outline button, so it keeps 3:1. */
+  --void-color-border:         oklch(var(--void-fg) / var(--void-alpha-divider));
+  --void-color-border-strong:  oklch(var(--void-fg) / calc(var(--void-alpha-divider) + 0.10));
+  --void-color-border-control: oklch(var(--void-fg) / var(--void-alpha-control));
+  --void-color-border-focus:   oklch(var(--void-fg) / var(--void-alpha-focus));
+
+  /* Focus ring — shared by every :focus-visible indicator. */
   --void-focus-ring-color:  var(--void-color-border-focus);
   --void-focus-ring-width:  2px;
   --void-focus-ring-offset: 2px;
 
-  /* Accent — monochrome */
-  --void-color-accent:       var(--void-white);
-  --void-color-accent-hover: var(--void-stone-200);
+  /* ── Accent ──
+     Lightness follows chroma: with no chroma the accent is the
+     foreground itself (inverse of the page); as chroma rises it moves
+     toward a mid tone that still carries 4.5:1 text in each scheme. */
+  --void-accent-c: clamp(0, var(--void-accent-chroma), 0.3);
+  --void-accent-l: calc(
+    var(--void-scheme-dark) * max(0.97 - 0.9 * var(--void-accent-c), 0.78)
+    + (1 - var(--void-scheme-dark)) * min(0.145 + 2 * var(--void-accent-c), 0.42)
+  );
+  --void-color-accent:       oklch(var(--void-accent-l) var(--void-accent-c) var(--void-accent-hue));
+  --void-color-accent-hover: color-mix(in srgb, var(--void-color-accent) 92%, var(--void-color-bg));
 
-  /* Status — primary */
-  --void-color-error:     var(--void-red-500);
-  --void-color-warning:   var(--void-orange-500);
-  --void-color-caution:   var(--void-amber-500);
-  --void-color-success:   var(--void-green-500);
-  --void-color-info:      var(--void-blue-500);
-  --void-color-notice:    var(--void-purple-500);
-  --void-color-highlight: var(--void-pink-500);
+  /* ── Status ──
+     A fixed set a theme may override but does not have to. Each is one
+     palette step on black and a darker one on white, chosen so the
+     colour keeps 4.5:1 as text on every surface and on its own tint
+     over every surface, and carries 4.5:1 text when used as a fill. */
+  /* On a tinted page the fixed steps lose contrast, so they move
+     toward white (dark) or black (light) as the page tint rises. */
+  --void-status-pole:  oklch(var(--void-scheme-dark) 0 0);
+  --void-status-shift: calc(22% * var(--void-page-level));
+  --void-color-error:     color-mix(in srgb, var(--void-status-pole) var(--void-status-shift), color-mix(in srgb, var(--void-red-400)    calc(100% * var(--void-scheme-dark)), var(--void-red-700)));
+  --void-color-warning:   color-mix(in srgb, var(--void-status-pole) var(--void-status-shift), color-mix(in srgb, var(--void-orange-400) calc(100% * var(--void-scheme-dark)), var(--void-orange-800)));
+  --void-color-caution:   color-mix(in srgb, var(--void-status-pole) var(--void-status-shift), color-mix(in srgb, var(--void-amber-400)  calc(100% * var(--void-scheme-dark)), var(--void-amber-800)));
+  --void-color-success:   color-mix(in srgb, var(--void-status-pole) var(--void-status-shift), color-mix(in srgb, var(--void-green-400)  calc(100% * var(--void-scheme-dark)), var(--void-green-800)));
+  --void-color-info:      color-mix(in srgb, var(--void-status-pole) var(--void-status-shift), color-mix(in srgb, var(--void-blue-400)   calc(100% * var(--void-scheme-dark)), var(--void-blue-700)));
+  --void-color-notice:    color-mix(in srgb, var(--void-status-pole) var(--void-status-shift), color-mix(in srgb, var(--void-purple-400) calc(100% * var(--void-scheme-dark)), var(--void-purple-700)));
+  --void-color-highlight: color-mix(in srgb, var(--void-status-pole) var(--void-status-shift), color-mix(in srgb, var(--void-pink-400)   calc(100% * var(--void-scheme-dark)), var(--void-pink-800)));
 
-  /* Status — subtle (14% color-mix) */
-  --void-color-error-subtle:     color-mix(in srgb, var(--void-color-error)     14%, transparent);
-  --void-color-warning-subtle:   color-mix(in srgb, var(--void-color-warning)   14%, transparent);
-  --void-color-caution-subtle:   color-mix(in srgb, var(--void-color-caution)   14%, transparent);
-  --void-color-success-subtle:   color-mix(in srgb, var(--void-color-success)   14%, transparent);
-  --void-color-info-subtle:      color-mix(in srgb, var(--void-color-info)      14%, transparent);
-  --void-color-notice-subtle:    color-mix(in srgb, var(--void-color-notice)    14%, transparent);
-  --void-color-highlight-subtle: color-mix(in srgb, var(--void-color-highlight) 14%, transparent);
+  /* Strength of the tone tints behind outline badges, alerts and
+     subtle status fills: 14% on black, 8% on white so tone-coloured
+     text on the tint keeps 4.5:1. */
+  --void-tone-tint: calc(8% + 6% * var(--void-scheme-dark));
 
-  /* Strength of the tone tints behind outline badges and stats. The light
-     blocks use less so tone-coloured text on the tint keeps 4.5:1. */
-  --void-tone-tint: 14%;
+  --void-color-error-subtle:     color-mix(in srgb, var(--void-color-error)     var(--void-tone-tint), transparent);
+  --void-color-warning-subtle:   color-mix(in srgb, var(--void-color-warning)   var(--void-tone-tint), transparent);
+  --void-color-caution-subtle:   color-mix(in srgb, var(--void-color-caution)   var(--void-tone-tint), transparent);
+  --void-color-success-subtle:   color-mix(in srgb, var(--void-color-success)   var(--void-tone-tint), transparent);
+  --void-color-info-subtle:      color-mix(in srgb, var(--void-color-info)      var(--void-tone-tint), transparent);
+  --void-color-notice-subtle:    color-mix(in srgb, var(--void-color-notice)    var(--void-tone-tint), transparent);
+  --void-color-highlight-subtle: color-mix(in srgb, var(--void-color-highlight) var(--void-tone-tint), transparent);
+
+  /* ── Elevation ──
+     Only for things that overlap the page. A hairline ring and a soft
+     dark shadow; on black the ring and the lifted surface do the
+     work, on white the shadow does. */
+  --void-shadow-sm: 0 1px 2px oklch(0 0 0 / calc(0.06 + 0.34 * var(--void-scheme-dark)));
+  --void-shadow-md: 0 6px 20px -4px oklch(0 0 0 / calc(0.12 + 0.48 * var(--void-scheme-dark)));
+  --void-shadow-lg: 0 16px 48px -8px oklch(0 0 0 / calc(0.16 + 0.54 * var(--void-scheme-dark)));
+  --void-shadow-xl: 0 32px 88px -12px oklch(0 0 0 / calc(0.20 + 0.60 * var(--void-scheme-dark)));
+  --void-ring-hair:        0 0 0 1px var(--void-color-border);
+  --void-ring-hair-strong: 0 0 0 1px var(--void-color-border-strong);
+
+  /* ── Spacing scale (density knob) ── */
+  --void-space-unit: calc(0.25rem * var(--void-density));
+  --void-space-0h: calc(var(--void-space-unit) * 0.5);
+  --void-space-1:  var(--void-space-unit);
+  --void-space-1h: calc(var(--void-space-unit) * 1.5);
+  --void-space-2:  calc(var(--void-space-unit) * 2);
+  --void-space-2h: calc(var(--void-space-unit) * 2.5);
+  --void-space-3:  calc(var(--void-space-unit) * 3);
+  --void-space-4:  calc(var(--void-space-unit) * 4);
+  --void-space-5:  calc(var(--void-space-unit) * 5);
+  --void-space-6:  calc(var(--void-space-unit) * 6);
+  --void-space-7:  calc(var(--void-space-unit) * 7);
+  --void-space-8:  calc(var(--void-space-unit) * 8);
+  --void-space-9:  calc(var(--void-space-unit) * 9);
+  --void-space-10: calc(var(--void-space-unit) * 10);
+  --void-space-12: calc(var(--void-space-unit) * 12);
+  --void-space-14: calc(var(--void-space-unit) * 14);
+  --void-space-15: calc(var(--void-space-unit) * 15);
+  --void-space-16: calc(var(--void-space-unit) * 16);
+  --void-space-20: calc(var(--void-space-unit) * 20);
+  --void-space-24: calc(var(--void-space-unit) * 24);
+  --void-space-28: calc(var(--void-space-unit) * 28);
+  --void-space-30: calc(var(--void-space-unit) * 30);
+  --void-space-32: calc(var(--void-space-unit) * 32);
+  --void-space-35: calc(var(--void-space-unit) * 35);
+  --void-space-40: calc(var(--void-space-unit) * 40);
+
+  --void-space-xs: var(--void-space-1);
+  --void-space-sm: var(--void-space-2);
+  --void-space-md: var(--void-space-3);
+  --void-space-lg: var(--void-space-4);
+  --void-space-xl: var(--void-space-6);
 
   /* Named spacing aliases */
   --void-spacing-xs: var(--void-space-xs);
@@ -69,148 +237,170 @@
   --void-spacing-md: var(--void-space-md);
   --void-spacing-lg: var(--void-space-lg);
   --void-spacing-xl: var(--void-space-xl);
+
+  /* ── Control size (density knob) ──
+     One height per size step, shared by every control, so a button,
+     an input and a select in a row line up. */
+  --void-control-height-sm:  calc(1.75rem * var(--void-density));
+  --void-control-height:     calc(2.25rem * var(--void-density));
+  --void-control-height-lg:  calc(2.75rem * var(--void-density));
+  --void-control-height-xl:  calc(3.25rem * var(--void-density));
+  --void-control-height-xxl: calc(4rem * var(--void-density));
+
+  /* Inline padding of a text field; buttons use a little more. */
+  --void-control-padding-sm:  calc(0.5rem * var(--void-density));
+  --void-control-padding:     calc(0.75rem * var(--void-density));
+  --void-control-padding-lg:  calc(1rem * var(--void-density));
+  --void-control-padding-xl:  calc(1.25rem * var(--void-density));
+  --void-control-padding-xxl: calc(1.5rem * var(--void-density));
+
+  --void-control-text-sm:  var(--void-text-sm);
+  --void-control-text:     var(--void-text-base);
+  --void-control-text-lg:  var(--void-text-md);
+  --void-control-text-xl:  var(--void-text-lg);
+  --void-control-text-xxl: var(--void-text-xl);
+
+  /* Padding of a table cell or list row, block then inline. */
+  --void-cell-padding-block:  calc(0.75rem * var(--void-density));
+  --void-cell-padding-inline: calc(0.75rem * var(--void-density));
+
+  /* Padding inside a container (card, panel, dialog). */
+  --void-container-padding: calc(1.25rem * var(--void-density));
+
+  /* ── Layout rhythm ──
+     Tight inside a group, generous between groups, more between
+     sections: the difference between the steps is where the airiness
+     comes from. tight is a label to its control; inside is items in a
+     row or a group; stack is blocks stacked in a group (fields in a
+     form). Those follow density. group, section and the page gutter
+     follow rhythm. */
+  --void-gap-tight:   calc(0.5rem * var(--void-density));
+  --void-gap-inside:  calc(1rem * var(--void-density));
+  --void-gap-stack:   calc(1.5rem * var(--void-density));
+  --void-gap-group:   calc(2.5rem * var(--void-rhythm));
+  --void-gap-section: calc(4.5rem * var(--void-rhythm));
+  --void-gutter:      clamp(1rem, calc(4vw * var(--void-rhythm)), calc(3rem * var(--void-rhythm)));
+  /* Line length for running text, and the width of a page column. */
+  --void-measure:      34rem;
+  --void-measure-page: 72rem;
+
+  /* ── Type scale (font-size knob) ── */
+  --void-text-2xs:  calc(var(--void-font-size) * 0.7143);
+  --void-text-xs:   calc(var(--void-font-size) * 0.8571);
+  --void-text-sm:   calc(var(--void-font-size) * 0.9286);
+  --void-text-base: var(--void-font-size);
+  --void-text-md:   calc(var(--void-font-size) * 1.1429);
+  --void-text-lg:   calc(var(--void-font-size) * 1.2857);
+  --void-text-xl:   calc(var(--void-font-size) * 1.4286);
+  --void-text-2xl:  calc(var(--void-font-size) * 1.7143);
+  --void-text-3xl:  calc(var(--void-font-size) * 2.1429);
+  --void-text-4xl:  calc(var(--void-font-size) * 2.5714);
+  --void-text-5xl:  calc(var(--void-font-size) * 3.4286);
+
+  /* ── Type roles ──
+     Named jobs for text. Components and the data-void-type attribute
+     read these, so restyling a role once restyles it everywhere. */
+
+  /* label: the small quiet name of a thing. Table headers, stat
+     labels, section meta, crumbs. */
+  --void-type-label-family:   var(--void-font-mono);
+  --void-type-label-size:     calc(var(--void-font-size) * 0.7857);
+  --void-type-label-leading:  1.4;
+  --void-type-label-weight:   var(--void-weight-medium);
+  --void-type-label-tracking: 0.08em;
+  --void-type-label-case:     uppercase;
+  --void-type-label-color:    var(--void-color-text-secondary);
+
+  /* value: the number or word a stat is about. */
+  --void-type-value-family:   var(--void-font-sans);
+  --void-type-value-size:     var(--void-text-3xl);
+  --void-type-value-size-sm:  var(--void-text-xl);
+  --void-type-value-size-lg:  var(--void-text-4xl);
+  --void-type-value-leading:  1.1;
+  --void-type-value-weight:   var(--void-weight-normal);
+  --void-type-value-tracking: -0.02em;
+  --void-type-value-numeric:  tabular-nums;
+  --void-type-value-color:    var(--void-color-text);
+
+  /* unit: set after a value ("TB", "ms", "of 44"). */
+  --void-type-unit-family:   var(--void-font-sans);
+  --void-type-unit-size:     var(--void-text-base);
+  --void-type-unit-weight:   var(--void-weight-normal);
+  --void-type-unit-tracking: 0em;
+  --void-type-unit-color:    var(--void-color-text-secondary);
+
+  /* caption: the supporting line under a value, a field or a row. */
+  --void-type-caption-family:  var(--void-font-sans);
+  --void-type-caption-size:    var(--void-text-xs);
+  --void-type-caption-leading: 1.5;
+  --void-type-caption-weight:  var(--void-weight-normal);
+  --void-type-caption-color:   var(--void-color-text-secondary);
+
+  /* heading: a section heading. title: the page title. */
+  --void-type-heading-family:   var(--void-font-sans);
+  --void-type-heading-size:     var(--void-text-lg);
+  --void-type-heading-leading:  1.3;
+  --void-type-heading-weight:   var(--void-weight-medium);
+  --void-type-heading-tracking: -0.01em;
+  --void-type-heading-color:    var(--void-color-text);
+
+  --void-type-title-family:   var(--void-type-heading-family);
+  --void-type-title-size:     var(--void-text-2xl);
+  --void-type-title-leading:  1.2;
+  --void-type-title-weight:   var(--void-type-heading-weight);
+  --void-type-title-tracking: -0.02em;
+  --void-type-title-color:    var(--void-color-text);
+
+  /* body: default running text. */
+  --void-type-body-family:  var(--void-font-sans);
+  --void-type-body-size:    var(--void-text-base);
+  --void-type-body-leading: var(--void-leading-normal);
+  --void-type-body-weight:  var(--void-weight-normal);
+  --void-type-body-color:   var(--void-color-text);
+
+  /* code: ids, configuration, anything typed exactly. */
+  --void-type-code-family:  var(--void-font-mono);
+  --void-type-code-size:    var(--void-text-sm);
+  --void-type-code-weight:  var(--void-weight-normal);
+  --void-type-code-numeric: tabular-nums;
+  --void-type-code-color:   var(--void-color-text);
+
+  /* ── Border radius (radius knob) ──
+     md is the control radius, the knob itself. Larger steps grow from
+     it but stop short of turning containers into ovals when the knob
+     is set to a pill. */
+  --void-radius-base: calc(var(--void-radius) * var(--void-shape));
+  --void-radius-xs:   min(calc(var(--void-radius-base) * 0.5), 5px);
+  --void-radius-sm:   min(calc(var(--void-radius-base) * 0.75), 10px);
+  --void-radius-md:   var(--void-radius-base);
+  --void-radius-lg:   min(calc(var(--void-radius-base) * 2), calc(var(--void-radius-base) + 8px), 24px);
+  --void-radius-xl:   min(calc(var(--void-radius-base) * 4), calc(var(--void-radius-base) + 16px), 32px);
+  --void-radius-full: calc(var(--void-radius-base) * 9999);
+
+  /* ── Motion — durations (anim-scale knob) ── */
+  --void-duration-fast:   calc(120ms * var(--void-anim-scale));
+  --void-duration-normal: calc(200ms * var(--void-anim-scale));
+  --void-duration-slow:   calc(300ms * var(--void-anim-scale));
+
+  /* ── Charts ── */
+  --void-chart-series-1: var(--void-color-accent);
+  --void-chart-series-2: var(--void-color-info);
+  --void-chart-series-3: var(--void-color-success);
+  --void-chart-series-4: var(--void-color-warning);
+  --void-chart-series-5: var(--void-color-error);
+  --void-chart-series-6: var(--void-color-notice);
+
+  --void-chart-grid:       var(--void-color-border);
+  --void-chart-axis:       var(--void-color-border-strong);
+  --void-chart-tick-label: var(--void-color-text-muted);
 }
 
-/* ── Light theme ──
-   SYNC: the declarations below exist twice, once for the explicit
-   [data-theme="light"] attribute and once inside the
-   prefers-color-scheme block that follows. Plain CSS cannot share one
-   declaration list between a selector and a media query, so edit both
-   blocks together (mise run lint:contrast verifies they match). */
-[data-theme="light"] {
-  /* Native UI (scrollbars, form controls, autofill) follows the theme */
-  color-scheme: light;
-
-  /* Surfaces — pure white base */
-  --void-color-bg:           var(--void-white);
-  --void-color-bg-secondary: var(--void-stone-100);
-  --void-color-bg-elevated:  var(--void-white);
-  --void-color-bg-hover:     var(--void-stone-200);
-  --void-color-bg-accent:    var(--void-stone-100);
-  --void-color-bg-overlay:   color-mix(in srgb, var(--void-black) 30%, transparent);
-
-  /* Text */
-  --void-color-text:           var(--void-stone-900);
-  --void-color-text-secondary: var(--void-stone-600);
-  --void-color-text-muted:     var(--void-stone-550);
-  --void-color-text-tertiary:  var(--void-stone-400);
-  --void-color-text-disabled:  var(--void-stone-300);
-  --void-color-text-on-accent: var(--void-white);
-
-  /* Borders */
-  --void-color-border:        var(--void-stone-300);
-  --void-color-border-strong: var(--void-stone-400);
-  --void-color-border-focus:  var(--void-stone-600);
-  --void-color-border-control: var(--void-stone-450);
-
-  --void-focus-ring-color:  var(--void-color-border-focus);
-
-  /* Accent */
-  --void-color-accent:       var(--void-stone-900);
-  --void-color-accent-hover: var(--void-stone-950);
-
-  /* Status — primary. -700 where -600 is below 4.5:1 as text on white /
-     bg-secondary (and as a fill under white text-on-accent); -600 where
-     it already passes (info, notice). */
-  --void-color-error:     var(--void-red-700);
-  --void-color-warning:   var(--void-orange-700);
-  --void-color-caution:   var(--void-amber-700);
-  --void-color-success:   var(--void-green-700);
-  --void-color-info:      var(--void-blue-600);
-  --void-color-notice:    var(--void-purple-600);
-  --void-color-highlight: var(--void-pink-700);
-
-  /* Status — subtle (8% color-mix for light backgrounds) */
-  --void-color-error-subtle:     color-mix(in srgb, var(--void-color-error)     8%, transparent);
-  --void-color-warning-subtle:   color-mix(in srgb, var(--void-color-warning)   8%, transparent);
-  --void-color-caution-subtle:   color-mix(in srgb, var(--void-color-caution)   8%, transparent);
-  --void-color-success-subtle:   color-mix(in srgb, var(--void-color-success)   8%, transparent);
-  --void-color-info-subtle:      color-mix(in srgb, var(--void-color-info)      8%, transparent);
-  --void-color-notice-subtle:    color-mix(in srgb, var(--void-color-notice)    8%, transparent);
-  --void-color-highlight-subtle: color-mix(in srgb, var(--void-color-highlight) 8%, transparent);
-
-  /* Tone tint strength (see the dark block) */
-  --void-tone-tint: 8%;
-}
-
-/* ── Light theme via OS preference ──
-   Applies only when no data-theme attribute is present on the root; an
-   explicit data-theme="dark" or "light" always wins. Dark stays the
-   default when the OS expresses no preference. SYNC with the block above. */
-@media (prefers-color-scheme: light) {
-  :root:not([data-theme]) {
-    /* Native UI (scrollbars, form controls, autofill) follows the theme */
-    color-scheme: light;
-
-    /* Surfaces — pure white base */
-    --void-color-bg:           var(--void-white);
-    --void-color-bg-secondary: var(--void-stone-100);
-    --void-color-bg-elevated:  var(--void-white);
-    --void-color-bg-hover:     var(--void-stone-200);
-    --void-color-bg-accent:    var(--void-stone-100);
-    --void-color-bg-overlay:   color-mix(in srgb, var(--void-black) 30%, transparent);
-
-    /* Text */
-    --void-color-text:           var(--void-stone-900);
-    --void-color-text-secondary: var(--void-stone-600);
-    --void-color-text-muted:     var(--void-stone-550);
-    --void-color-text-tertiary:  var(--void-stone-400);
-    --void-color-text-disabled:  var(--void-stone-300);
-    --void-color-text-on-accent: var(--void-white);
-
-    /* Borders */
-    --void-color-border:        var(--void-stone-300);
-    --void-color-border-strong: var(--void-stone-400);
-    --void-color-border-focus:  var(--void-stone-600);
-    --void-color-border-control: var(--void-stone-450);
-
-    --void-focus-ring-color:  var(--void-color-border-focus);
-
-    /* Accent */
-    --void-color-accent:       var(--void-stone-900);
-    --void-color-accent-hover: var(--void-stone-950);
-
-    /* Status — primary. -700 where -600 is below 4.5:1 as text on white /
-       bg-secondary (and as a fill under white text-on-accent); -600 where
-       it already passes (info, notice). */
-    --void-color-error:     var(--void-red-700);
-    --void-color-warning:   var(--void-orange-700);
-    --void-color-caution:   var(--void-amber-700);
-    --void-color-success:   var(--void-green-700);
-    --void-color-info:      var(--void-blue-600);
-    --void-color-notice:    var(--void-purple-600);
-    --void-color-highlight: var(--void-pink-700);
-
-    /* Status — subtle (8% color-mix for light backgrounds) */
-    --void-color-error-subtle:     color-mix(in srgb, var(--void-color-error)     8%, transparent);
-    --void-color-warning-subtle:   color-mix(in srgb, var(--void-color-warning)   8%, transparent);
-    --void-color-caution-subtle:   color-mix(in srgb, var(--void-color-caution)   8%, transparent);
-    --void-color-success-subtle:   color-mix(in srgb, var(--void-color-success)   8%, transparent);
-    --void-color-info-subtle:      color-mix(in srgb, var(--void-color-info)      8%, transparent);
-    --void-color-notice-subtle:    color-mix(in srgb, var(--void-color-notice)    8%, transparent);
-    --void-color-highlight-subtle: color-mix(in srgb, var(--void-color-highlight) 8%, transparent);
-
-    /* Tone tint strength (see the dark block) */
-    --void-tone-tint: 8%;
-  }
-}
-
-/* ── Nested themes ──
-   Text colour inherits, so a [data-theme] region inside a page of the other
-   theme would keep the page's text colour. Re-resolve it from the region's
-   own tokens (color-scheme is already set per theme above). The background
-   is deliberately not painted here: body paints it for the root, and a
+/* ── Scoped regions ──
+   Text colour and font inherit, so a region with its own scheme or
+   theme re-resolves them from its own tokens. The background is
+   deliberately not painted here: body paints it for the root, and a
    region's surfaces come from the components inside it. */
-[data-theme] {
+[data-theme],
+[data-void-theme] {
   color: var(--void-color-text);
-}
-
-/* ── Shape: sharp ── */
-[data-shape="sharp"] {
-  --void-radius-xs:   0;
-  --void-radius-sm:   0;
-  --void-radius-md:   0;
-  --void-radius-lg:   0;
-  --void-radius-xl:   0;
-  --void-radius-full: 0;
 }

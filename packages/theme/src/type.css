@@ -1,0 +1,86 @@
+/* ============================================================
+   @voidable/theme — Type roles
+   One attribute applies a role: <span data-void-type="label">.
+   Each role is a group of --void-type-<role>-* tokens (tokens.css);
+   components use the same tokens, so restyling a role in a theme
+   restyles it in tables, stats, fields and your own markup alike.
+   :where() keeps specificity at zero so any rule can override.
+   ============================================================ */
+
+:where([data-void-type="label"]) {
+  font-family: var(--void-type-label-family);
+  font-size: var(--void-type-label-size);
+  line-height: var(--void-type-label-leading);
+  font-weight: var(--void-type-label-weight);
+  letter-spacing: var(--void-type-label-tracking);
+  text-transform: var(--void-type-label-case);
+  color: var(--void-type-label-color);
+}
+
+:where([data-void-type="value"]) {
+  font-family: var(--void-type-value-family);
+  font-size: var(--void-type-value-size);
+  line-height: var(--void-type-value-leading);
+  font-weight: var(--void-type-value-weight);
+  letter-spacing: var(--void-type-value-tracking);
+  font-variant-numeric: var(--void-type-value-numeric);
+  color: var(--void-type-value-color);
+}
+
+:where([data-void-type="value"][data-size="sm"]) {
+  font-size: var(--void-type-value-size-sm);
+}
+
+:where([data-void-type="value"][data-size="lg"]) {
+  font-size: var(--void-type-value-size-lg);
+}
+
+:where([data-void-type="unit"]) {
+  font-family: var(--void-type-unit-family);
+  font-size: var(--void-type-unit-size);
+  font-weight: var(--void-type-unit-weight);
+  letter-spacing: var(--void-type-unit-tracking);
+  color: var(--void-type-unit-color);
+}
+
+:where([data-void-type="caption"]) {
+  font-family: var(--void-type-caption-family);
+  font-size: var(--void-type-caption-size);
+  line-height: var(--void-type-caption-leading);
+  font-weight: var(--void-type-caption-weight);
+  color: var(--void-type-caption-color);
+}
+
+:where([data-void-type="heading"]) {
+  font-family: var(--void-type-heading-family);
+  font-size: var(--void-type-heading-size);
+  line-height: var(--void-type-heading-leading);
+  font-weight: var(--void-type-heading-weight);
+  letter-spacing: var(--void-type-heading-tracking);
+  color: var(--void-type-heading-color);
+}
+
+:where([data-void-type="title"]) {
+  font-family: var(--void-type-title-family);
+  font-size: var(--void-type-title-size);
+  line-height: var(--void-type-title-leading);
+  font-weight: var(--void-type-title-weight);
+  letter-spacing: var(--void-type-title-tracking);
+  color: var(--void-type-title-color);
+}
+
+:where([data-void-type="body"]) {
+  font-family: var(--void-type-body-family);
+  font-size: var(--void-type-body-size);
+  line-height: var(--void-type-body-leading);
+  font-weight: var(--void-type-body-weight);
+  color: var(--void-type-body-color);
+}
+
+:where([data-void-type="code"]) {
+  font-family: var(--void-type-code-family);
+  font-size: var(--void-type-code-size);
+  font-weight: var(--void-type-code-weight);
+  font-variant-numeric: var(--void-type-code-numeric);
+  color: var(--void-type-code-color);
+}

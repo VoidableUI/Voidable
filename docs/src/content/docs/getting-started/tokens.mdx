@@ -10,10 +10,13 @@ Tokens ship in the `@voidable/theme` package. After importing it, all tokens are
 @import '@voidable/theme';
 ```
 
-The theme is organized into two tiers:
+The theme is organized into three layers:
 
-- **Primitives** (`primitives.css`) -- Raw scales with no semantic meaning. Color palettes, spacing steps, font stacks.
-- **Semantic tokens** (`tokens.css`) -- Purpose-driven aliases like `--void-color-bg` and `--void-color-text` that reference primitives and adapt based on the active theme.
+- **Primitives** (`primitives.css`) -- Fixed values with no semantic meaning: color palettes, weights, line heights, tracking, easings.
+- **Knobs** (`knobs.css`) -- About a dozen inputs (accent, neutral tint, contrast, chrome, radius, density, rhythm, font size and families, motion). See [Theming](/getting-started/theming/).
+- **Semantic tokens** (`tokens.css`) -- Purpose-driven tokens like `--void-color-bg` and `--void-color-text`, all derived from the knobs, in both color schemes.
+
+Values in the tables below are the results at the default knob settings.
 
 ---
 
@@ -149,76 +152,124 @@ Primitive color palettes are always available on `:root` regardless of the activ
 
 ## Semantic color tokens
 
-Semantic tokens carry purpose -- "the background color" rather than "stone-900". They change automatically between dark and light themes via the `data-theme` attribute on your root element.
+Semantic tokens carry purpose -- "the background color" rather than "stone-900". They are computed from the knobs and adapt to the color scheme set by the `data-theme` attribute.
 
 Dark mode is the **default**. Set `data-theme="light"` on `<html>` to activate light mode.
 
+Every grey is one **neutral foreground** color (near-white on black, near-black on white) at a different opacity over a pure page. Light mode is the same formulas with the other foreground, not a second hand-tuned set.
+
 ### Surface colors
 
-| Token | Dark value | Light value |
-|---|---|---|
-| `--void-color-bg` | `var(--void-black)` | `var(--void-white)` |
-| `--void-color-bg-secondary` | `var(--void-dark-1)` | `var(--void-stone-100)` |
-| `--void-color-bg-elevated` | `var(--void-dark-3)` | `var(--void-white)` |
-| `--void-color-bg-hover` | `var(--void-dark-4)` | `var(--void-stone-200)` |
-| `--void-color-bg-accent` | `var(--void-dark-2)` | `var(--void-stone-100)` |
-| `--void-color-bg-overlay` | `black 70% / transparent` | `black 30% / transparent` |
+Surfaces are opaque: the foreground mixed into the page color.
+
+| Token | Dark | Light | Use |
+|---|---|---|---|
+| `--void-color-bg` | `#000` | `#fff` | The page (tinted by `--void-page-tint`) |
+| `--void-color-surface` | 2.4% foreground | 2.4% foreground | Container fill: cards, panels, stats, fields. Follows `--void-chrome` (0 to 8%) |
+| `--void-color-bg-secondary` | 4% | 4% | A subtle step that is always visible: stripes, row hover, wells |
+| `--void-color-bg-elevated` | 7% | the page color | Things that float: menus, popovers, dialogs |
+| `--void-color-bg-hover` | 8% | 8% | Hover highlight |
+| `--void-color-bg-active` | 13% | 13% | Pressed, and the selected segment |
+| `--void-color-bg-accent` | alias of `bg-secondary` | | Kept for compatibility |
+| `--void-color-bg-overlay` | black at 70% | black at 30% | Backdrop behind dialogs and drawers |
 
 ### Text colors
 
-| Token | Dark value | Light value |
-|---|---|---|
-| `--void-color-text` | `var(--void-stone-100)` | `var(--void-stone-900)` |
-| `--void-color-text-secondary` | `var(--void-stone-400)` | `var(--void-stone-600)` |
-| `--void-color-text-muted` | `var(--void-stone-500)` | `var(--void-stone-500)` |
-| `--void-color-text-tertiary` | `var(--void-stone-450)` | `var(--void-stone-400)` |
-| `--void-color-text-disabled` | `var(--void-stone-600)` | `var(--void-stone-300)` |
-| `--void-color-text-on-accent` | `var(--void-black)` | `var(--void-white)` |
+| Token | Dark | Light | Contrast on the page |
+|---|---|---|---|
+| `--void-color-text` | foreground at 100% | 100% | about 19:1 |
+| `--void-color-text-secondary` | 70% | 78% | about 9:1 |
+| `--void-color-text-muted` | 57% | 65% | about 6:1 |
+| `--void-color-text-tertiary` | alias of `text-muted` | | |
+| `--void-color-text-disabled` | 40% | 40% | exempt (disabled) |
+| `--void-color-text-on-accent` | black | white | Text on an accent or status fill |
+
+The opacities rise with `--void-contrast`. Their floors keep 4.5:1 on every surface.
 
 ### Border colors
 
-| Token | Dark value | Light value |
-|---|---|---|
-| `--void-color-border` | `white 14% / transparent` | `var(--void-stone-300)` |
-| `--void-color-border-strong` | `white 22% / transparent` | `var(--void-stone-400)` |
-| `--void-color-border-focus` | `white 55% / transparent` | `var(--void-stone-600)` |
+Two strengths with two jobs.
+
+| Token | Dark | Light | Use |
+|---|---|---|---|
+| `--void-color-border` | foreground at 12% | 12% | A **divider**: separates content, decorative, follows `--void-chrome` |
+| `--void-color-border-strong` | 22% | 22% | A stronger divider, and the edge of floating panels |
+| `--void-color-border-control` | 44% | 52% | The boundary of an input or outline button. Keeps 3:1 on every surface; follows `--void-contrast` |
+| `--void-color-border-focus` | 84% | 84% | Focus indication |
+
+`--void-focus-ring-color`, `--void-focus-ring-width` (2px) and `--void-focus-ring-offset` (2px) are shared by every `:focus-visible` indicator.
 
 ### Accent colors
 
-| Token | Dark value | Light value |
+| Token | Dark | Light |
 |---|---|---|
-| `--void-color-accent` | `var(--void-white)` | `var(--void-stone-900)` |
-| `--void-color-accent-hover` | `var(--void-stone-200)` | `var(--void-stone-950)` |
+| `--void-color-accent` | near-white | near-black |
+| `--void-color-accent-hover` | accent mixed 8% toward the page | |
+
+With `--void-accent-chroma` above 0 the accent takes the hue of `--void-accent-hue`, at a lightness chosen per scheme so it keeps 4.5:1 both as text and under `text-on-accent`.
 
 ### Status colors
 
-Status tokens map to the primitive palettes. Dark mode uses the `-500` stop; light mode uses `-600` for better contrast on white backgrounds.
+A fixed set that a theme may override but does not have to. Each is one palette step on black and a darker one on white, chosen so the color keeps 4.5:1 as text on every surface and on its own tint.
 
 | Token | Dark value | Light value |
 |---|---|---|
-| `--void-color-error` | `var(--void-red-500)` | `var(--void-red-600)` |
-| `--void-color-warning` | `var(--void-amber-500)` | `var(--void-amber-600)` |
-| `--void-color-success` | `var(--void-green-500)` | `var(--void-green-600)` |
-| `--void-color-info` | `var(--void-blue-500)` | `var(--void-blue-600)` |
-| `--void-color-notice` | `var(--void-purple-500)` | `var(--void-purple-600)` |
-| `--void-color-highlight` | `var(--void-pink-500)` | `var(--void-pink-600)` |
+| `--void-color-error` | `var(--void-red-400)` | `var(--void-red-700)` |
+| `--void-color-warning` | `var(--void-orange-400)` | `var(--void-orange-800)` |
+| `--void-color-caution` | `var(--void-amber-400)` | `var(--void-amber-800)` |
+| `--void-color-success` | `var(--void-green-400)` | `var(--void-green-800)` |
+| `--void-color-info` | `var(--void-blue-400)` | `var(--void-blue-700)` |
+| `--void-color-notice` | `var(--void-purple-400)` | `var(--void-purple-700)` |
+| `--void-color-highlight` | `var(--void-pink-400)` | `var(--void-pink-800)` |
 
 ### Status subtle colors
 
-Subtle status colors use `color-mix()` to create low-opacity tinted backgrounds. Dark mode uses 14% opacity; light mode uses 8%.
+Subtle status colors are the status color at `--void-tone-tint`: 14% in dark, 8% in light.
 
-| Token | Dark value | Light value |
-|---|---|---|
-| `--void-color-error-subtle` | `error 14% / transparent` | `error 8% / transparent` |
-| `--void-color-warning-subtle` | `warning 14% / transparent` | `warning 8% / transparent` |
-| `--void-color-success-subtle` | `success 14% / transparent` | `success 8% / transparent` |
-| `--void-color-info-subtle` | `info 14% / transparent` | `info 8% / transparent` |
-| `--void-color-notice-subtle` | `notice 14% / transparent` | `notice 8% / transparent` |
-| `--void-color-highlight-subtle` | `highlight 14% / transparent` | `highlight 8% / transparent` |
+| Token | Value |
+|---|---|
+| `--void-color-error-subtle` | error at the tone tint |
+| `--void-color-warning-subtle` | warning at the tone tint |
+| `--void-color-caution-subtle` | caution at the tone tint |
+| `--void-color-success-subtle` | success at the tone tint |
+| `--void-color-info-subtle` | info at the tone tint |
+| `--void-color-notice-subtle` | notice at the tone tint |
+| `--void-color-highlight-subtle` | highlight at the tone tint |
 
 ---
 
 ## Spacing
+
+Every spacing token is a multiple of `--void-space-unit`, which is `0.25rem` times the `--void-density` knob. The values below are at density 1.
+
+### Control size
+
+One height per size step, shared by every control, so a button, an input and a select in a row line up.
+
+| Token | Value |
+|---|---|
+| `--void-control-height-sm` | `1.75rem` (28px) |
+| `--void-control-height` | `2.25rem` (36px) |
+| `--void-control-height-lg` | `2.75rem` (44px) |
+| `--void-control-height-xl` | `3.25rem` (52px) |
+| `--void-control-height-xxl` | `4rem` (64px) |
+| `--void-control-padding` (and `-sm`, `-lg`, `-xl`, `-xxl`) | `0.75rem` inline padding of a field; buttons use 1.25 times it |
+| `--void-control-text` (and `-sm`, `-lg`, `-xl`, `-xxl`) | `--void-text-base`; small is `--void-text-sm` |
+| `--void-cell-padding-block`, `--void-cell-padding-inline` | `0.75rem`: table cells |
+| `--void-container-padding` | `1.25rem`: cards, panels, dialogs |
+
+### Layout rhythm
+
+| Token | Value | Use |
+|---|---|---|
+| `--void-gap-tight` | `0.5rem` | A label to its control |
+| `--void-gap-inside` | `1rem` | Items in a row or a group |
+| `--void-gap-stack` | `1.5rem` | Blocks stacked in a group |
+| `--void-gap-group` | `2.5rem` | Between groups (follows `--void-rhythm`) |
+| `--void-gap-section` | `4.5rem` | Between sections (follows `--void-rhythm`) |
+| `--void-gutter` | `1rem` to `3rem` | Page side padding |
+| `--void-measure` | `34rem` | Line length for text |
+| `--void-measure-page` | `72rem` | Width of a page column |
 
 Spacing tokens use a numeric scale based on a 0.25rem (4px) grid. Named aliases provide T-shirt sizing for common use.
 
@@ -277,6 +328,8 @@ Defined in `tokens.css`, these mirror the named spacing primitives:
 ## Typography
 
 ### Text sizes
+
+Each size is `--void-font-size` (the knob, 14px by default) times a fixed ratio.
 
 | Token | Value |
 |---|---|
@@ -337,17 +390,19 @@ Defined in `tokens.css`, these mirror the named spacing primitives:
 
 ## Border radius
 
-| Token | Value |
-|---|---|
-| `--void-radius-none` | `0` |
-| `--void-radius-xs` | `4px` |
-| `--void-radius-sm` | `6px` |
-| `--void-radius-md` | `8px` |
-| `--void-radius-lg` | `12px` |
-| `--void-radius-xl` | `16px` |
-| `--void-radius-full` | `9999px` |
+Every radius scales from the `--void-radius` knob (4px by default), which is the radius of a control.
 
-The `data-shape="sharp"` attribute on a parent element resets all radius tokens to `0`, giving every component a sharp-cornered appearance:
+| Token | Value at 4px | Rule |
+|---|---|---|
+| `--void-radius-none` | `0` | |
+| `--void-radius-xs` | `2px` | half the knob, at most 5px: checkboxes, small marks |
+| `--void-radius-sm` | `3px` | three quarters, at most 10px |
+| `--void-radius-md` | `4px` | the knob: controls |
+| `--void-radius-lg` | `8px` | twice the knob, at most the knob plus 8px or 24px: cards, menus |
+| `--void-radius-xl` | `16px` | four times, at most the knob plus 16px or 32px: dialogs |
+| `--void-radius-full` | `9999px` | pills; `0` when the knob is 0 |
+
+The `data-shape="sharp"` attribute on a parent element zeroes every radius under it:
 
 ```html
 <html data-shape="sharp">
@@ -357,23 +412,23 @@ The `data-shape="sharp"` attribute on a parent element resets all radius tokens 
 
 ## Shadows
 
-Shadows use white-based `rgba` values for glow-style elevation on dark surfaces.
+Elevation is only for things that overlap the page: menus, popovers, dialogs, toasts. It is a lifted surface (`--void-color-bg-elevated`), a hairline, and a soft dark shadow. On black the surface and hairline do the work; on white the shadow does.
 
-| Token | Value |
+| Token | Value (dark / light opacity) |
 |---|---|
-| `--void-shadow-sm` | `0 1px 3px rgba(255,255,255,.14)` |
-| `--void-shadow-md` | `0 2px 6px rgba(255,255,255,.12), 0 10px 24px rgba(255,255,255,.20)` |
-| `--void-shadow-lg` | `0 4px 10px rgba(255,255,255,.16), 0 22px 50px rgba(255,255,255,.28)` |
-| `--void-shadow-xl` | `0 6px 14px rgba(255,255,255,.20), 0 40px 88px rgba(255,255,255,.38)` |
+| `--void-shadow-sm` | `0 1px 2px` black at 40% / 6% |
+| `--void-shadow-md` | `0 6px 20px -4px` black at 60% / 12% |
+| `--void-shadow-lg` | `0 16px 48px -8px` black at 70% / 16% |
+| `--void-shadow-xl` | `0 32px 88px -12px` black at 80% / 20% |
 
 ### Ring hairlines
 
-Subtle 1px ring effects for card edges and elevated surfaces:
+A 1px ring standing in for a border:
 
 | Token | Value |
 |---|---|
-| `--void-ring-hair` | `0 0 0 1px rgba(255,255,255,.06)` |
-| `--void-ring-hair-strong` | `0 0 0 1px rgba(255,255,255,.12)` |
+| `--void-ring-hair` | `0 0 0 1px var(--void-color-border)` |
+| `--void-ring-hair-strong` | `0 0 0 1px var(--void-color-border-strong)` |
 
 ---
 
@@ -383,7 +438,7 @@ Subtle 1px ring effects for card edges and elevated surfaces:
 
 | Token | Value |
 |---|---|
-| `--void-duration-fast` | `100ms` |
+| `--void-duration-fast` | `120ms` |
 | `--void-duration-normal` | `200ms` |
 | `--void-duration-slow` | `300ms` |
 
@@ -446,9 +501,9 @@ void-badge[color="success"] { --tone: var(--void-color-success); }
 Some components derive additional tones for subtle backgrounds and borders:
 
 ```css
-void-stat {
+void-alert {
   --tone: var(--void-color-accent);
-  --tone-subtle: color-mix(in srgb, var(--tone) 14%, transparent);
+  --tone-subtle: color-mix(in srgb, var(--tone) var(--void-tone-tint), transparent);
   --tone-border: color-mix(in srgb, var(--tone) 36%, transparent);
 
   background: var(--tone-subtle);
@@ -511,14 +566,10 @@ Tokens compose naturally. Build a status banner using semantic colors:
 }
 ```
 
-Override tokens at any scope to customize a subtree:
+Restyle a subtree by setting knobs on an element that carries `data-void-theme`:
 
-```css
-.branded-section {
-  --void-color-accent: #3b82f6;
-  --void-color-accent-hover: #2563eb;
-  --void-color-text-on-accent: #ffffff;
-}
+```html
+<section data-void-theme style="--void-accent-hue: 250; --void-accent-chroma: 0.16">…</section>
 ```
 
-Every Voidable component inside `.branded-section` will pick up the new accent color automatically.
+Every Voidable component inside it picks up the new accent, with hover, tint and text-on-accent colors derived to match. See [Theming](/getting-started/theming/).

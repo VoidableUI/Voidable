@@ -29,6 +29,24 @@
     border-color: ButtonText;
   }
 
+  /* A ghost button draws nothing at rest, here too: its border takes the
+     page colour, and shows on hover, focus and press, since the hover
+     fill is a background and forced colours repaint that to Canvas. */
+  void-button[variant="ghost"] {
+    border-color: Canvas;
+  }
+
+  void-button[variant="ghost"]:hover,
+  void-button[variant="ghost"]:focus-visible,
+  void-button[variant="ghost"]:active {
+    border-color: ButtonText;
+  }
+
+  void-button[variant="ghost"][disabled] {
+    border-color: Canvas;
+    color: GrayText;
+  }
+
   /* Checked / on states must differ from unchecked without a fill colour */
   void-checkbox[checked] .void-checkbox-box,
   void-checkbox[indeterminate] .void-checkbox-box,

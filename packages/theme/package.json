@@ -15,8 +15,11 @@
   "exports": {
     ".": "./src/index.css",
     "./primitives": "./src/primitives.css",
+    "./knobs": "./src/knobs.css",
     "./tokens": "./src/tokens.css",
-    "./reset": "./src/reset.css"
+    "./reset": "./src/reset.css",
+    "./type": "./src/type.css",
+    "./themes/*": "./src/themes/*"
   },
   "files": ["src"],
   "repository": {

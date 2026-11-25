@@ -1,0 +1,162 @@
+---
+// A small application screen used wherever the site shows a theme at work:
+// the home page, the theming guide and the knob playground. It is built only
+// from components, type roles (data-void-type) and layout tokens, so it
+// follows whatever theme the element around it carries.
+---
+
+<div class="demo not-content">
+  <div class="demo-head">
+    <div class="demo-head-text">
+      <span data-void-type="label">Network / Overview</span>
+      <span data-void-type="title">Ground network</span>
+    </div>
+    <div class="demo-actions">
+      <void-button variant="ghost">Export</void-button>
+      <void-button>Schedule</void-button>
+      <void-button variant="filled">Add station</void-button>
+    </div>
+  </div>
+
+  <div class="demo-figures">
+    <div class="demo-figure">
+      <span data-void-type="label">Stations online</span>
+      <span><span data-void-type="value">41</span> <span data-void-type="unit">of 44</span></span>
+      <span data-void-type="caption">2 in maintenance</span>
+    </div>
+    <div class="demo-figure">
+      <span data-void-type="label">Downlink</span>
+      <span><span data-void-type="value">79.6</span> <span data-void-type="unit">TB</span></span>
+      <span data-void-type="caption">64% of the daily plan</span>
+    </div>
+    <div class="demo-figure">
+      <span data-void-type="label">Median latency</span>
+      <span><span data-void-type="value">38</span> <span data-void-type="unit">ms</span></span>
+      <span data-void-type="caption">4 ms better than last week</span>
+    </div>
+  </div>
+
+  <div class="demo-form">
+    <void-field label="Station name" helper="Shown in schedules and alerts.">
+      <void-input value="Kiruna 3"></void-input>
+    </void-field>
+    <void-field label="Region">
+      <void-select>
+        <option selected>Arctic</option>
+        <option>Southern</option>
+        <option>Equatorial</option>
+      </void-select>
+    </void-field>
+    <div class="demo-row">
+      <void-checkbox-group>
+        <void-checkbox value="s" checked>S band</void-checkbox>
+        <void-checkbox value="x" checked>X band</void-checkbox>
+        <void-checkbox value="ka">Ka band</void-checkbox>
+      </void-checkbox-group>
+      <void-switch checked aria-label="Accept passes automatically"></void-switch>
+    </div>
+    <div class="demo-row">
+      <div class="demo-tags">
+        <void-badge variant="outline" color="success">Online</void-badge>
+        <void-badge variant="outline" color="warning">Degraded</void-badge>
+        <void-badge variant="outline" color="info">Maintenance</void-badge>
+        <void-badge variant="outline" color="error">Offline</void-badge>
+      </div>
+      <void-segmented-control value="normal" aria-label="Priority">
+        <void-segmented-control-item value="low">Low</void-segmented-control-item>
+        <void-segmented-control-item value="normal">Normal</void-segmented-control-item>
+        <void-segmented-control-item value="high">High</void-segmented-control-item>
+      </void-segmented-control>
+    </div>
+  </div>
+</div>
+
+<style>
+  .demo {
+    display: flex;
+    flex-direction: column;
+    gap: var(--void-gap-group);
+    container-type: inline-size;
+  }
+
+  .demo-head {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: var(--void-gap-inside);
+    flex-wrap: wrap;
+  }
+
+  .demo-head-text {
+    display: flex;
+    flex-direction: column;
+    gap: var(--void-space-1);
+  }
+
+  .demo-actions {
+    display: flex;
+    gap: var(--void-gap-tight);
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .demo-figures {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    border-top: 1px solid var(--void-color-border);
+    border-bottom: 1px solid var(--void-color-border);
+  }
+
+  .demo-figure {
+    display: flex;
+    flex-direction: column;
+    gap: var(--void-gap-tight);
+    padding: var(--void-space-5);
+  }
+
+  .demo-figure:first-child {
+    padding-left: 0;
+  }
+
+  .demo-figure + .demo-figure {
+    border-left: 1px solid var(--void-color-border);
+  }
+
+  .demo-form {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--void-gap-stack) var(--void-gap-inside);
+  }
+
+  .demo-row {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--void-gap-inside);
+    flex-wrap: wrap;
+  }
+
+  .demo-tags {
+    display: flex;
+    gap: var(--void-gap-tight);
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  @container (max-width: 30rem) {
+    .demo-figures {
+      grid-template-columns: 1fr;
+    }
+    .demo-figure {
+      padding-left: 0;
+    }
+    .demo-figure + .demo-figure {
+      border-left: 0;
+      border-top: 1px solid var(--void-color-border);
+    }
+    .demo-form {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

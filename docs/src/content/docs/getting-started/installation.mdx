@@ -26,10 +26,14 @@ Add the theme CSS to your app entry point. This loads all design tokens, primiti
 You can also import individual layers if you prefer granular control:
 
 ```css
-@import '@voidable/theme/primitives'; /* raw color scales */
-@import '@voidable/theme/tokens';     /* semantic tokens (dark/light) */
+@import '@voidable/theme/primitives'; /* fixed palettes and scales */
+@import '@voidable/theme/knobs';      /* the theme's inputs */
+@import '@voidable/theme/tokens';     /* tokens derived from the knobs (dark/light) */
 @import '@voidable/theme/reset';      /* minimal reset */
+@import '@voidable/theme/type';       /* data-void-type text roles */
 ```
+
+The tokens are computed from the knobs, so `knobs` must be imported before `tokens`. To change the look, set the knobs: see [Theming](/getting-started/theming/).
 
 ## Import components
 

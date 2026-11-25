@@ -1,0 +1,109 @@
+---
+title: Button
+description: The three button variants (filled, outline, ghost), their colours, sizes and states, with live examples.
+---
+
+`<void-button>` triggers an action. It has three variants of one size: at every size step they share a height and padding, so buttons in a row line up whatever their variant.
+
+<div class="vd-example not-content">
+  <div class="vd-row">
+    <void-button variant="filled">Save</void-button>
+    <void-button variant="outline">Schedule</void-button>
+    <void-button variant="ghost">Cancel</void-button>
+  </div>
+</div>
+
+```html
+<void-button variant="filled">Save</void-button>
+<void-button variant="outline">Schedule</void-button>
+<void-button variant="ghost">Cancel</void-button>
+```
+
+| Variant | Draws | Use for |
+|---|---|---|
+| `filled` | A solid fill in the accent colour | The one primary action in a view |
+| `outline` (default) | A control border, no fill at rest | Secondary actions |
+| `ghost` | Nothing at rest; a faint fill on hover, a stronger one when pressed | Row actions in a table, toolbars of icon buttons, the quiet action beside a primary one |
+
+## Ghost
+
+A ghost button has no border and no fill until it is hovered, so several of them in a row read as text, not as a row of boxes. Its label is the normal text colour, its focus ring is the same as every other button's, and in forced-colours mode it shows a border on hover and focus.
+
+<div class="vd-example not-content">
+  <div class="vd-row">
+    <void-button variant="ghost">Open</void-button>
+    <void-button variant="ghost">Pause</void-button>
+    <void-button variant="ghost" color="error">Remove</void-button>
+    <void-button variant="ghost" disabled>Disabled</void-button>
+    <void-button variant="ghost"><a href="#ghost">A link</a></void-button>
+    <void-button variant="ghost" aria-label="Refresh">
+      <svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13.5 8a5.5 5.5 0 1 1-1.6-3.9M13.5 2.5v2.6h-2.6"/></svg>
+    </void-button>
+  </div>
+  <div class="vd-row" style="justify-content: flex-end;">
+    <void-button variant="ghost">Cancel</void-button>
+    <void-button variant="filled">Save station</void-button>
+  </div>
+</div>
+
+```html
+<void-button variant="ghost">Open</void-button>
+<void-button variant="ghost" color="error">Remove</void-button>
+<void-button variant="ghost" disabled>Disabled</void-button>
+
+<!-- A link that looks like a button: put the anchor inside -->
+<void-button variant="ghost"><a href="/stations">A link</a></void-button>
+
+<!-- Icon only: give it an aria-label; it becomes square -->
+<void-button variant="ghost" aria-label="Refresh"><svg>…</svg></void-button>
+```
+
+With a `color`, a ghost button carries the colour in its label and its hover fill is a tint of that colour. Every label keeps 4.5:1 on every surface and on its own hover fill, in both colour schemes; `mise run lint:contrast` checks it.
+
+## Colours
+
+`color` takes `default`, `error`, `warning`, `success`, `info` and `notice`, on every variant.
+
+<div class="vd-example not-content">
+  <div class="vd-row">
+    <void-button variant="filled" color="success">Success</void-button>
+    <void-button variant="filled" color="error">Error</void-button>
+    <void-button variant="filled" color="warning">Warning</void-button>
+    <void-button variant="filled" color="info">Info</void-button>
+    <void-button variant="filled" color="notice">Notice</void-button>
+  </div>
+  <div class="vd-row">
+    <void-button color="success">Success</void-button>
+    <void-button color="error">Error</void-button>
+    <void-button color="warning">Warning</void-button>
+    <void-button color="info">Info</void-button>
+    <void-button color="notice">Notice</void-button>
+  </div>
+  <div class="vd-row">
+    <void-button variant="ghost" color="success">Success</void-button>
+    <void-button variant="ghost" color="error">Error</void-button>
+    <void-button variant="ghost" color="warning">Warning</void-button>
+    <void-button variant="ghost" color="info">Info</void-button>
+    <void-button variant="ghost" color="notice">Notice</void-button>
+  </div>
+</div>
+
+## Sizes
+
+`size` takes `sm`, `md` (default), `lg`, `xl` and `xxl`. The heights are the theme's control heights (28, 36, 44, 52 and 64px at the default density), shared with inputs and selects.
+
+<div class="vd-example not-content">
+  <div class="vd-row">
+    <void-button size="sm">Small</void-button>
+    <void-button>Medium</void-button>
+    <void-button size="lg">Large</void-button>
+    <void-input placeholder="An input, same height" style="width: 14rem"></void-input>
+    <void-button variant="ghost">Ghost</void-button>
+  </div>
+</div>
+
+## Theming
+
+A button has no values of its own. Its height, padding and text size come from `--void-control-*`, its radius from `--void-radius`, its colours from the accent and status tokens, so the [theme knobs](/getting-started/theming/) restyle it with everything else.
+
+All stories, with controls: [Button in Storybook](/storybook/?path=/docs/components-button--docs).

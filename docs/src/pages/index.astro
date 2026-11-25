@@ -1,32 +1,32 @@
 ---
 import '@voidable/theme';
+import '../../../packages/theme/src/themes/void.css';
+import '../../../packages/theme/src/themes/dune.css';
+import '../../../packages/theme/src/themes/console.css';
+import voidThemeCss from '../../../packages/theme/src/themes/void.css?raw';
+import duneThemeCss from '../../../packages/theme/src/themes/dune.css?raw';
+import consoleThemeCss from '../../../packages/theme/src/themes/console.css?raw';
 import iconBrandGithub from '@tabler/icons/outline/brand-github.svg?raw';
 import iconSun from '@tabler/icons/outline/sun.svg?raw';
 import iconMoon from '@tabler/icons/outline/moon.svg?raw';
-import { codeToHtml } from 'shiki';
+import ThemeDemo from '../components/ThemeDemo.astro';
 import { stats } from '../lib/stats';
 
-const cssCode = `/* Override one variable.
-   Watch the entire library remap. */
+// The three demonstration themes are shown as their real source: the knob
+// declarations are read from the theme files, so this page cannot drift.
+const knobLines = (css: string) =>
+  [...css.matchAll(/^\s*(--void-[\w-]+):\s*([^;]+);/gm)].map(([, name, value]) => ({ name, value: value.trim() }));
+const themes = [
+  { id: 'void', label: 'Void', blurb: 'The default: monochrome, hairlines, 4px corners.', knobs: knobLines(voidThemeCss) },
+  { id: 'dune', label: 'Dune', blurb: 'Warm, rounded, comfortable, on a soft page.', knobs: knobLines(duneThemeCss) },
+  { id: 'console', label: 'Console', blurb: 'Dense, square, monospace, signal green.', knobs: knobLines(consoleThemeCss) },
+];
 
-:root {
-  --void-color-accent: #3b82f6;
-  --void-color-accent-hover: #2563eb;
-  --void-radius-md: 8px;
-
-  --void-color-bg: #0a0e1a;
-  --void-color-text: #e5e7eb;
-}
-
-[data-shape="sharp"] {
-  --void-radius-md: 0;
-  --void-radius-lg: 0;
-}`;
-
-const highlightedCss = await codeToHtml(cssCode, {
-  lang: 'css',
-  theme: 'github-dark-default',
-});
+const esc = (text: string) => text.replace(/&/g, '&amp;').replace(/</g, '&lt;');
+const sourceOf = (t: (typeof themes)[number]) =>
+  `[data-void-theme="${t.id}"] {\n` +
+  t.knobs.map((k) => `  ${k.name}: <span class="v">${esc(k.value)}</span>;`).join('\n') +
+  '\n}';
 
 // Counts, version and bundle size are derived at build time (see src/lib/stats.ts).
 const { version, bundleSize } = stats;
@@ -87,10 +87,52 @@ const ogImage = new URL('/og.png', canonical).href;
         text-decoration: none;
       }
 
+      /* One column for the whole page: every section lines up on it. */
       .container {
-        max-width: 80rem;
+        max-width: calc(var(--void-measure-page) + 2 * var(--void-gutter));
         margin: 0 auto;
-        padding: 0 var(--void-space-10);
+        padding: 0 var(--void-gutter);
+      }
+
+      .section {
+        padding: var(--void-space-30) 0;
+        border-top: 1px solid var(--void-color-border);
+      }
+
+      .eyebrow {
+        font-family: var(--void-type-label-family);
+        font-size: var(--void-type-label-size);
+        font-weight: var(--void-type-label-weight);
+        text-transform: var(--void-type-label-case);
+        letter-spacing: var(--void-type-label-tracking);
+        color: var(--void-type-label-color);
+        margin-bottom: var(--void-space-4);
+      }
+
+      .section-heading {
+        font-size: clamp(2rem, 4.2vw, 3rem);
+        font-weight: var(--void-weight-medium);
+        letter-spacing: var(--void-tracking-tighter);
+        line-height: var(--void-leading-snug);
+        color: var(--void-color-text);
+      }
+
+      .section-sub {
+        font-size: var(--void-text-md);
+        color: var(--void-color-text-secondary);
+        line-height: var(--void-leading-relaxed);
+        margin-top: var(--void-space-5);
+        max-width: var(--void-measure);
+      }
+
+      .section-sub code {
+        font-family: var(--void-font-mono);
+        font-size: 0.875em;
+        color: var(--void-color-text);
+      }
+
+      .section-header {
+        margin-bottom: var(--void-space-16);
       }
 
       /* ── Nav ── */
@@ -108,14 +150,14 @@ const ogImage = new URL('/og.png', canonical).href;
         display: flex;
         align-items: center;
         gap: var(--void-space-7);
-        padding: var(--void-space-4) 0;
+        padding: var(--void-space-3) 0;
       }
 
       .nav-wordmark {
         font-family: var(--void-font-mono);
-        font-weight: var(--void-weight-bold);
+        font-weight: var(--void-weight-medium);
         font-size: var(--void-text-md);
-        letter-spacing: var(--void-tracking-tightest);
+        letter-spacing: var(--void-tracking-tight);
         color: var(--void-color-text);
       }
 
@@ -128,11 +170,10 @@ const ogImage = new URL('/og.png', canonical).href;
       .nav-links a {
         display: block;
         padding: var(--void-space-1h) var(--void-space-3);
-        font-size: var(--void-text-sm);
-        font-weight: var(--void-weight-normal);
+        font-size: var(--void-text-base);
         color: var(--void-color-text-secondary);
-        border-radius: var(--void-radius-sm);
-        transition: color 150ms;
+        border-radius: var(--void-radius-md);
+        transition: color var(--void-duration-fast);
       }
 
       .nav-links a:hover {
@@ -143,36 +184,16 @@ const ogImage = new URL('/og.png', canonical).href;
         margin-left: auto;
         display: flex;
         align-items: center;
-        gap: var(--void-space-3);
+        gap: var(--void-space-1);
       }
 
-      .nav-right void-button {
-        --tone-subtle: transparent;
-      }
-
-      .nav-github {
-        display: inline-flex;
-        align-items: center;
-        gap: var(--void-space-1h);
-        color: inherit;
-        text-decoration: none;
-      }
-
-      .nav-github-icon {
-        display: flex;
-        width: 14px;
-        height: 14px;
-      }
-      .nav-github-icon :global(svg) {
-        width: 100%;
-        height: 100%;
-      }
-
+      .nav-github-icon,
       .theme-icon {
         display: flex;
         width: var(--void-space-4);
         height: var(--void-space-4);
       }
+      .nav-github-icon :global(svg),
       .theme-icon :global(svg) {
         width: 100%;
         height: 100%;
@@ -191,17 +212,20 @@ const ogImage = new URL('/og.png', canonical).href;
       /* ── Hero ── */
       .hero {
         position: relative;
-        padding: var(--void-space-40) var(--void-space-10) var(--void-space-30);
+        padding: var(--void-space-35) 0 var(--void-space-30);
         text-align: center;
         overflow: hidden;
       }
 
+      /* A faint grid and a soft lift behind the headline, both drawn in
+         the text colour so they work on a black and on a white page. */
       .hero-grid {
         position: absolute;
         inset: 0;
+        --line: color-mix(in srgb, var(--void-color-text) 5%, transparent);
         background-image:
-          linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
-          linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+          linear-gradient(var(--line) 1px, transparent 1px),
+          linear-gradient(90deg, var(--line) 1px, transparent 1px);
         background-size: 64px 64px;
         mask-image: radial-gradient(ellipse 80% 60% at 50% 40%, black 30%, transparent 75%);
         -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 40%, black 30%, transparent 75%);
@@ -215,32 +239,29 @@ const ogImage = new URL('/og.png', canonical).href;
         transform: translateX(-50%);
         width: 1100px;
         height: 600px;
-        background: radial-gradient(ellipse at center, rgba(255, 255, 255, 0.10) 0%, transparent 60%);
+        background: radial-gradient(ellipse at center, color-mix(in srgb, var(--void-color-text) 7%, transparent) 0%, transparent 60%);
         pointer-events: none;
       }
 
       .hero-content {
         position: relative;
-        max-width: 80rem;
-        margin: 0 auto;
       }
 
       .hero-badge {
         display: inline-flex;
         align-items: center;
         gap: var(--void-space-2h);
-        padding: 0.3125rem var(--void-space-4) 0.3125rem var(--void-space-1h);
+        padding: var(--void-space-1) var(--void-space-4) var(--void-space-1) var(--void-space-1);
         border: 1px solid var(--void-color-border);
         border-radius: var(--void-radius-full);
         font-size: var(--void-text-xs);
         color: var(--void-color-text-secondary);
         margin-bottom: var(--void-space-10);
-        background: var(--void-color-bg-secondary);
       }
 
       .hero-badge-version {
         padding: 0.0625rem var(--void-space-2);
-        background: var(--void-color-border);
+        background: var(--void-color-bg-hover);
         border-radius: var(--void-radius-full);
         font-family: var(--void-font-mono);
         font-size: var(--void-text-2xs);
@@ -248,9 +269,8 @@ const ogImage = new URL('/og.png', canonical).href;
       }
 
       .hero h1 {
-        font-family: var(--void-font-sans);
-        font-weight: var(--void-weight-bold);
-        font-size: clamp(3.5rem, 11vw, 10.5rem);
+        font-weight: var(--void-weight-medium);
+        font-size: clamp(3.25rem, 9.5vw, 8rem);
         letter-spacing: var(--void-tracking-tightest);
         line-height: var(--void-leading-display);
         color: var(--void-color-text);
@@ -258,18 +278,18 @@ const ogImage = new URL('/og.png', canonical).href;
       }
 
       .hero-sub {
-        font-size: var(--void-text-xl);
+        font-size: var(--void-text-lg);
         color: var(--void-color-text-secondary);
-        line-height: var(--void-leading-normal);
-        max-width: 38.75rem;
-        margin: 0 auto var(--void-space-12);
+        line-height: var(--void-leading-relaxed);
+        max-width: 36rem;
+        margin: 0 auto var(--void-space-10);
       }
 
       .install-pill {
         display: inline-flex;
         align-items: center;
         gap: var(--void-space-2);
-        padding: var(--void-space-3) var(--void-space-4);
+        padding: var(--void-space-2h) var(--void-space-4);
         border: 1px solid var(--void-color-border);
         border-radius: var(--void-radius-md);
         font-family: var(--void-font-mono);
@@ -278,7 +298,7 @@ const ogImage = new URL('/og.png', canonical).href;
         margin-bottom: var(--void-space-8);
         background: transparent;
         cursor: pointer;
-        transition: color 150ms, border-color 150ms;
+        transition: color var(--void-duration-fast), border-color var(--void-duration-fast);
       }
 
       .install-pill:hover {
@@ -290,7 +310,8 @@ const ogImage = new URL('/og.png', canonical).href;
         color: var(--void-color-text-muted);
       }
 
-      .hero-actions {
+      .hero-actions,
+      .cta-actions {
         display: flex;
         gap: var(--void-space-3);
         justify-content: center;
@@ -298,131 +319,57 @@ const ogImage = new URL('/og.png', canonical).href;
         flex-wrap: wrap;
       }
 
-      .hero-actions a {
-        display: block;
-      }
-
-      .hero-actions a {
-        color: inherit;
-        text-decoration: none;
-      }
-
-      .hero-outline-btn {
-        --tone-subtle: transparent;
-      }
-      .hero-outline-btn a {
-        color: inherit;
-        text-decoration: none;
-      }
-
-      /* ── Frameworks / Marquee ── */
+      /* ── Frameworks ── */
       .frameworks {
-        padding: var(--void-space-15) var(--void-space-10);
+        padding: var(--void-space-12) 0;
         border-top: 1px solid var(--void-color-border);
-        border-bottom: 1px solid var(--void-color-border);
-      }
-
-      .frameworks-eyebrow {
         text-align: center;
-        color: var(--void-color-text-muted);
-        margin-bottom: var(--void-space-7);
-        font-size: var(--void-text-xs);
-        font-family: var(--void-font-mono);
-        text-transform: uppercase;
-        letter-spacing: var(--void-tracking-widest);
       }
 
       .framework-list {
         display: flex;
-        gap: var(--void-space-3);
+        gap: var(--void-space-1) var(--void-space-2);
         justify-content: center;
         flex-wrap: wrap;
-        max-width: 68.75rem;
-        margin: 0 auto;
       }
 
       .framework-pill {
-        padding: var(--void-space-2) var(--void-space-4);
+        padding: var(--void-space-1h) var(--void-space-3);
         font-size: var(--void-text-base);
-        font-weight: var(--void-weight-medium);
         color: var(--void-color-text-secondary);
-        font-family: var(--void-font-mono);
-        letter-spacing: var(--void-tracking-snug);
-        border: 1px solid var(--void-color-border);
-        border-radius: var(--void-radius-full);
-        transition: color 150ms, border-color 150ms;
+        border-radius: var(--void-radius-md);
+        transition: color var(--void-duration-fast), background var(--void-duration-fast);
       }
 
       a.framework-pill:hover {
         color: var(--void-color-text);
-        border-color: var(--void-color-border-strong);
+        background: var(--void-color-bg-hover);
       }
 
-      /* ── Feature Grid ── */
-      .feature-section {
-        padding: var(--void-space-30) var(--void-space-10);
-        max-width: 80rem;
-        margin: 0 auto;
-      }
-
-      .feature-header {
-        max-width: 45rem;
-        margin-bottom: var(--void-space-16);
-      }
-
-      .eyebrow {
-        font-family: var(--void-font-mono);
-        font-size: var(--void-text-xs);
-        font-weight: var(--void-weight-medium);
-        text-transform: uppercase;
-        letter-spacing: var(--void-tracking-widest);
-        color: var(--void-color-text-secondary);
-        margin-bottom: var(--void-space-4);
-      }
-
-      .feature-heading {
-        font-size: clamp(2.25rem, 5vw, 3.5rem);
-        font-weight: var(--void-weight-bold);
-        letter-spacing: var(--void-tracking-tight);
-        line-height: var(--void-leading-snug);
-        color: var(--void-color-text);
-      }
-
-      .feature-sub {
-        font-size: var(--void-text-md);
-        color: var(--void-color-text-secondary);
-        line-height: var(--void-leading-normal);
-        margin-top: var(--void-space-5);
-        max-width: 35rem;
-      }
-
+      /* ── Feature grid: cells divided by hairlines, no box ── */
       .feature-grid {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
-        gap: 1px;
-        background: var(--void-color-border);
-        border: 1px solid var(--void-color-border);
-        border-radius: var(--void-radius-xl);
-        overflow: hidden;
+        column-gap: var(--void-gap-group);
+        border-top: 1px solid var(--void-color-border);
       }
 
       .feature-card {
-        background: var(--void-color-bg);
-        padding: var(--void-space-9) var(--void-space-8);
+        padding: var(--void-space-8) 0;
+        border-bottom: 1px solid var(--void-color-border);
       }
 
       .feature-card-title {
-        font-weight: var(--void-weight-semibold);
+        font-weight: var(--void-weight-medium);
         font-size: var(--void-text-md);
         color: var(--void-color-text);
         margin-bottom: var(--void-space-2);
-        letter-spacing: var(--void-tracking-snug);
       }
 
       .feature-card-desc {
         font-size: var(--void-text-base);
         color: var(--void-color-text-secondary);
-        line-height: var(--void-leading-normal);
+        line-height: var(--void-leading-relaxed);
       }
 
       @media (max-width: 900px) {
@@ -437,167 +384,121 @@ const ogImage = new URL('/og.png', canonical).href;
         }
       }
 
-      /* ── Token Showcase ── */
-      .token-section {
-        padding: var(--void-space-30) var(--void-space-10);
-        border-top: 1px solid var(--void-color-border);
-      }
-
-      .token-grid {
-        max-width: 80rem;
-        margin: 0 auto;
+      /* ── Theming: pick a theme, read its source, watch it apply ── */
+      .theme-grid {
         display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: var(--void-space-20);
-        align-items: center;
+        grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+        gap: var(--void-space-16);
+        align-items: start;
       }
 
-      .token-heading {
-        font-size: clamp(2rem, 4vw, 3rem);
-        font-weight: var(--void-weight-bold);
-        letter-spacing: var(--void-tracking-tight);
-        line-height: var(--void-leading-snug);
-        margin-bottom: var(--void-space-6);
-        color: var(--void-color-text);
-      }
-
-      .token-description {
-        font-size: var(--void-text-md);
-        color: var(--void-color-text-secondary);
-        line-height: var(--void-leading-normal);
-        margin-bottom: var(--void-space-6);
-      }
-
-      .token-description code {
-        font-family: var(--void-font-mono);
-        font-size: 0.85em;
-        padding: 0.05em 0.35em;
-        background: var(--void-color-bg-secondary);
-        border: 1px solid var(--void-color-border);
-        border-radius: var(--void-radius-xs);
-      }
-
-      .token-row {
+      .theme-picker {
         display: flex;
-        align-items: center;
-        gap: var(--void-space-3);
-        padding: var(--void-space-2) 0;
+        flex-direction: column;
+        gap: var(--void-gap-inside);
+        margin-top: var(--void-space-10);
+      }
+
+      .theme-picker void-segmented-control {
+        align-self: flex-start;
+      }
+
+      .theme-blurb {
+        font-size: var(--void-text-base);
+        color: var(--void-color-text-secondary);
+      }
+
+      .theme-source {
+        margin: 0;
+        padding: var(--void-space-5) 0;
+        border-top: 1px solid var(--void-color-border);
         border-bottom: 1px solid var(--void-color-border);
-      }
-
-      .token-swatch {
-        width: 14px;
-        height: 14px;
-        border-radius: var(--void-radius-xs);
-        border: 1px solid var(--void-color-border);
-        flex-shrink: 0;
-      }
-
-      .token-name {
         font-family: var(--void-font-mono);
-        font-size: var(--void-text-xs);
+        font-size: var(--void-text-sm);
+        line-height: var(--void-leading-loose);
+        color: var(--void-color-text-secondary);
+        overflow-x: auto;
+        white-space: pre;
+      }
+
+      .theme-source[hidden] {
+        display: none;
+      }
+
+      .theme-source :global(.v) {
         color: var(--void-color-text);
       }
 
-      .token-value {
-        margin-left: auto;
-        font-family: var(--void-font-mono);
+      .theme-note {
         font-size: var(--void-text-xs);
-        color: var(--void-color-text-muted);
+        color: var(--void-color-text-secondary);
+        line-height: var(--void-leading-relaxed);
       }
 
-      .token-code-block {
-        margin: 0;
-        overflow: auto;
+      /* The demo is a themed region: it carries data-void-theme, so every
+         token below it is derived again from that theme's knobs, and it
+         paints its own page colour. */
+      .themed {
+        background: var(--void-color-bg);
+        color: var(--void-color-text);
+        font-family: var(--void-font-sans);
+        font-size: var(--void-text-base);
         border: 1px solid var(--void-color-border);
-        border-radius: var(--void-radius-lg);
-      }
-      .token-code-block :global(pre) {
-        margin: 0;
+        border-radius: var(--void-radius-xl);
         padding: var(--void-space-8);
-        background: var(--void-color-bg-secondary) !important;
-        font-family: var(--void-font-mono);
-        font-size: var(--void-text-xs);
-        line-height: var(--void-leading-loose);
-        white-space: pre;
-        overflow: auto;
-      }
-      .token-code-block :global(code) {
-        font-family: inherit;
-        font-size: inherit;
-        line-height: inherit;
+        transition: background var(--void-duration-normal), border-color var(--void-duration-normal);
       }
 
-      @media (max-width: 720px) {
-        .token-grid {
+      @media (max-width: 960px) {
+        .theme-grid {
           grid-template-columns: 1fr;
-          gap: var(--void-space-12);
+          gap: var(--void-space-10);
         }
       }
 
-      /* ── Live Components ── */
-      .components {
-        padding: var(--void-space-30) var(--void-space-10);
-        border-top: 1px solid var(--void-color-border);
+      @media (max-width: 560px) {
+        .themed {
+          padding: var(--void-space-5);
+        }
       }
 
-      .components-inner {
-        max-width: 80rem;
-        margin: 0 auto;
-      }
-
+      /* ── Components ── */
       .components-panel {
-        border: 1px solid var(--void-color-border);
-        border-radius: var(--void-radius-lg);
-        padding: var(--void-space-10);
         display: flex;
         flex-direction: column;
-        gap: var(--void-space-10);
+        gap: var(--void-gap-group);
       }
 
       .component-row-label {
-        font-family: var(--void-font-mono);
-        font-size: var(--void-text-2xs);
-        font-weight: var(--void-weight-medium);
-        text-transform: uppercase;
-        letter-spacing: var(--void-tracking-widest);
-        color: var(--void-color-text-secondary);
-        margin-bottom: var(--void-space-3);
+        font-family: var(--void-type-label-family);
+        font-size: var(--void-type-label-size);
+        font-weight: var(--void-type-label-weight);
+        text-transform: var(--void-type-label-case);
+        letter-spacing: var(--void-type-label-tracking);
+        color: var(--void-type-label-color);
+        margin-bottom: var(--void-space-4);
       }
 
       .component-row {
         display: flex;
         flex-wrap: wrap;
-        gap: var(--void-space-2);
+        gap: var(--void-gap-tight);
         align-items: center;
       }
       .component-row + .component-row {
-        margin-top: var(--void-space-2);
+        margin-top: var(--void-gap-tight);
       }
 
-      .form-panel {
-        border: 1px solid var(--void-color-border);
-        border-radius: var(--void-radius-lg);
-        overflow: hidden;
-      }
-      .form-panel-header {
-        padding: var(--void-space-6) var(--void-space-8);
-        border-bottom: 1px solid var(--void-color-border);
-        background: var(--void-color-bg-secondary);
+      .form-stepper {
+        padding-bottom: var(--void-gap-stack);
       }
       .form-grid {
         display: grid;
         grid-template-columns: 1fr 1fr;
-        gap: var(--void-space-6);
-        padding: var(--void-space-8);
+        gap: var(--void-gap-stack) var(--void-gap-inside);
       }
       .form-full {
         grid-column: 1 / -1;
-      }
-      .form-row {
-        display: flex;
-        flex-direction: column;
-        gap: var(--void-space-3);
       }
       .form-inline {
         display: flex;
@@ -606,7 +507,7 @@ const ogImage = new URL('/og.png', canonical).href;
       }
       .form-actions {
         display: flex;
-        gap: var(--void-space-3);
+        gap: var(--void-gap-tight);
         justify-content: flex-end;
       }
       @media (max-width: 720px) {
@@ -619,102 +520,77 @@ const ogImage = new URL('/og.png', canonical).href;
         }
       }
 
-      /* ── Stats ── */
-      .stats {
-        padding: var(--void-space-24) var(--void-space-10);
-        border-top: 1px solid var(--void-color-border);
-      }
-
+      /* ── Stats: figures on the page, divided by hairlines ── */
       .stats-grid {
-        max-width: 80rem;
-        margin: 0 auto;
         display: grid;
         grid-template-columns: repeat(4, 1fr);
-        gap: 1px;
-        background: var(--void-color-border);
-        border: 1px solid var(--void-color-border);
       }
 
       .stat-card {
-        background: var(--void-color-bg);
-        padding: var(--void-space-10) var(--void-space-7);
-        text-align: left;
+        display: flex;
+        flex-direction: column;
+        gap: var(--void-space-3);
+        padding: var(--void-space-2) var(--void-space-7);
+      }
+
+      .stat-card:first-child {
+        padding-left: 0;
+      }
+
+      .stat-card + .stat-card {
+        border-left: 1px solid var(--void-color-border);
       }
 
       .stat-number {
-        font-size: clamp(2.5rem, 5vw, 4rem);
-        font-weight: var(--void-weight-bold);
-        letter-spacing: var(--void-tracking-tighter);
+        font-family: var(--void-type-value-family);
+        font-size: clamp(2.25rem, 4.5vw, 3.5rem);
+        font-weight: var(--void-type-value-weight);
+        letter-spacing: var(--void-type-value-tracking);
+        font-variant-numeric: var(--void-type-value-numeric);
         line-height: var(--void-leading-none);
-        font-family: var(--void-font-mono);
         color: var(--void-color-text);
         white-space: nowrap;
-      }
-
-      .stat-label {
-        margin-top: var(--void-space-3);
-        font-size: var(--void-text-xs);
-        color: var(--void-color-text-muted);
-        text-transform: uppercase;
-        letter-spacing: var(--void-tracking-wider);
       }
 
       @media (max-width: 720px) {
         .stats-grid {
           grid-template-columns: repeat(2, 1fr);
+          row-gap: var(--void-space-10);
         }
-      }
-
-      @media (max-width: 400px) {
-        .stats-grid {
-          grid-template-columns: 1fr;
+        .stat-card:nth-child(odd) {
+          padding-left: 0;
+          border-left: 0;
         }
       }
 
       /* ── CTA ── */
       .cta {
-        padding: var(--void-space-35) var(--void-space-10);
+        padding: var(--void-space-35) 0;
         border-top: 1px solid var(--void-color-border);
         text-align: center;
       }
 
       .cta h2 {
-        font-size: clamp(2.5rem, 6vw, 4.5rem);
-        font-weight: var(--void-weight-bold);
+        font-size: clamp(2.25rem, 5.5vw, 4rem);
+        font-weight: var(--void-weight-medium);
         letter-spacing: var(--void-tracking-tighter);
-        line-height: var(--void-leading-none);
+        line-height: var(--void-leading-tight);
         color: var(--void-color-text);
-        margin-bottom: var(--void-space-7);
+        margin-bottom: var(--void-space-6);
       }
 
       .cta p {
         font-size: var(--void-text-md);
         color: var(--void-color-text-secondary);
-        line-height: var(--void-leading-normal);
+        line-height: var(--void-leading-relaxed);
         max-width: 30rem;
         margin: 0 auto var(--void-space-10);
       }
 
-      .cta-actions {
-        display: flex;
-        gap: var(--void-space-2h);
-        justify-content: center;
-        flex-wrap: wrap;
-      }
-      .cta-actions a {
-        color: inherit;
-        text-decoration: none;
-      }
-
       /* ── Footer ── */
       .footer {
-        padding: var(--void-space-16) var(--void-space-10) var(--void-space-10);
+        padding: var(--void-space-12) 0 var(--void-space-10);
         border-top: 1px solid var(--void-color-border);
-      }
-
-      .footer-inner {
-        max-width: 80rem;
-        margin: 0 auto;
       }
 
       .footer-top {
@@ -726,14 +602,6 @@ const ogImage = new URL('/og.png', canonical).href;
         margin-bottom: var(--void-space-8);
       }
 
-      .footer-wordmark {
-        font-family: var(--void-font-mono);
-        font-weight: var(--void-weight-bold);
-        font-size: var(--void-text-md);
-        letter-spacing: var(--void-tracking-tightest);
-        color: var(--void-color-text);
-      }
-
       .footer-links {
         display: flex;
         gap: var(--void-space-7);
@@ -743,7 +611,7 @@ const ogImage = new URL('/og.png', canonical).href;
       .footer-links a {
         font-size: var(--void-text-sm);
         color: var(--void-color-text-secondary);
-        transition: color 150ms;
+        transition: color var(--void-duration-fast);
       }
 
       .footer-links a:hover {
@@ -751,8 +619,6 @@ const ogImage = new URL('/og.png', canonical).href;
       }
 
       .footer-bottom {
-        padding-top: var(--void-space-6);
-        border-top: 1px solid var(--void-color-border);
         display: flex;
         justify-content: space-between;
         font-size: var(--void-text-xs);
@@ -770,17 +636,17 @@ const ogImage = new URL('/og.png', canonical).href;
           <span class="nav-wordmark">voidable</span>
           <ul class="nav-links">
             <li><a href="/getting-started/introduction/">Docs</a></li>
+            <li><a href="/getting-started/theming/">Theming</a></li>
             <li><a href="/storybook/">Components</a></li>
-            <li><a href="/frameworks/react/">Frameworks</a></li>
             <li><a href="/showcase/dashboard">Showcase</a></li>
           </ul>
           <div class="nav-right">
-            <void-button id="theme-toggle" variant="outline" size="md" aria-label="Toggle theme">
+            <void-button id="theme-toggle" variant="ghost" aria-label="Toggle theme">
               <span class="theme-icon theme-icon-sun" set:html={iconSun} />
               <span class="theme-icon theme-icon-moon" set:html={iconMoon} />
             </void-button>
-            <void-button variant="outline" size="md">
-              <a href="https://github.com/VoidableUI/Voidable" target="_blank" class="nav-github">
+            <void-button variant="ghost">
+              <a href="https://github.com/VoidableUI/Voidable" target="_blank">
                 <span class="nav-github-icon" set:html={iconBrandGithub} />
                 GitHub
               </a>
@@ -794,16 +660,15 @@ const ogImage = new URL('/og.png', canonical).href;
     <section class="hero">
       <div class="hero-grid" aria-hidden="true"></div>
       <div class="hero-glow" aria-hidden="true"></div>
-      <div class="hero-content">
+      <div class="container hero-content">
         <div class="hero-badge">
           {version && <span class="hero-badge-version">{version}</span>}
           {stats.adapters} framework adapter packages
         </div>
         <h1>Devoid<br/>of style.</h1>
         <p class="hero-sub">
-          {stats.elements} Lit 3 custom elements with zero visual CSS.<br/>
-          Theming flows through tokens. You own the style.<br/>
-          Use a modern theme with clean defaults or roll your own.
+          {stats.elements} Lit 3 custom elements with zero visual CSS.
+          A light, airy theme you can make your own by changing a dozen values.
         </p>
         <div class="install-pill" id="install-pill">
           <span class="install-pill-dollar">$</span>
@@ -811,128 +676,124 @@ const ogImage = new URL('/og.png', canonical).href;
         </div>
         <div class="hero-actions">
           <void-button variant="filled" size="lg"><a href="/getting-started/installation/">Get started</a></void-button>
-          <void-button variant="outline" size="lg" class="hero-outline-btn"><a href="/getting-started/introduction/">Documentation</a></void-button>
+          <void-button variant="outline" size="lg"><a href="/getting-started/theming/">Make a theme</a></void-button>
         </div>
       </div>
     </section>
 
     <!-- Frameworks -->
     <section class="frameworks">
-      <div class="frameworks-eyebrow">One library. Every framework.</div>
-      <div class="framework-list">
-        <a href="/frameworks/react/" class="framework-pill">React</a>
-        <a href="/frameworks/solid/" class="framework-pill">Solid</a>
-        <a href="/frameworks/vue/" class="framework-pill">Vue</a>
-        <a href="/frameworks/svelte/" class="framework-pill">Svelte</a>
-        <a href="/frameworks/angular/" class="framework-pill">Angular</a>
-        <a href="/frameworks/hotwire/" class="framework-pill">Hotwire</a>
-        <a href="/frameworks/alpine/" class="framework-pill">Alpine</a>
-        <a href="/frameworks/liveview/" class="framework-pill">LiveView</a>
-        <a href="/frameworks/qwik/" class="framework-pill">Qwik</a>
-        <a href="/frameworks/astro/" class="framework-pill">Astro</a>
-        <a href="/frameworks/lit/" class="framework-pill">Lit</a>
-        <a href="/frameworks/vanilla/" class="framework-pill">Vanilla</a>
+      <div class="container">
+        <div class="eyebrow">One library. Every framework.</div>
+        <div class="framework-list">
+          <a href="/frameworks/react/" class="framework-pill">React</a>
+          <a href="/frameworks/solid/" class="framework-pill">Solid</a>
+          <a href="/frameworks/vue/" class="framework-pill">Vue</a>
+          <a href="/frameworks/svelte/" class="framework-pill">Svelte</a>
+          <a href="/frameworks/angular/" class="framework-pill">Angular</a>
+          <a href="/frameworks/hotwire/" class="framework-pill">Hotwire</a>
+          <a href="/frameworks/alpine/" class="framework-pill">Alpine</a>
+          <a href="/frameworks/liveview/" class="framework-pill">LiveView</a>
+          <a href="/frameworks/qwik/" class="framework-pill">Qwik</a>
+          <a href="/frameworks/astro/" class="framework-pill">Astro</a>
+          <a href="/frameworks/lit/" class="framework-pill">Lit</a>
+          <a href="/frameworks/vanilla/" class="framework-pill">Vanilla</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Theming -->
+    <section class="section">
+      <div class="container">
+        <div class="theme-grid">
+          <div>
+            <div class="eyebrow">Theming</div>
+            <h2 class="section-heading">A dozen knobs.<br/>Every token follows.</h2>
+            <p class="section-sub">
+              Accent, neutral tint, contrast, chrome, radius, density, rhythm, type. Every colour, size and radius is derived from them in plain CSS, in dark and in light, with no build step. A theme is a file that sets the knobs and nothing else.
+            </p>
+            <div class="theme-picker">
+              <void-segmented-control id="theme-picker" value="void" aria-label="Demonstration theme">
+                {themes.map((t) => <void-segmented-control-item value={t.id}>{t.label}</void-segmented-control-item>)}
+              </void-segmented-control>
+              {themes.map((t, i) => (
+                <div data-theme-panel={t.id} hidden={i !== 0}>
+                  <p class="theme-blurb">{t.blurb}</p>
+                </div>
+              ))}
+              {themes.map((t, i) => (
+<pre class="theme-source" data-theme-panel={t.id} hidden={i !== 0}><code set:html={sourceOf(t)} /></pre>
+              ))}
+              <p class="theme-note">
+                This is the whole theme. Text contrast is checked for every theme in both colour schemes, so no setting takes it below 4.5:1.
+              </p>
+            </div>
+          </div>
+
+          <div class="themed" data-void-theme="void" data-themed>
+            <ThemeDemo />
+          </div>
+        </div>
       </div>
     </section>
 
     <!-- Feature Grid -->
-    <section class="feature-section">
-      <div class="feature-header">
-        <div class="eyebrow">Foundation</div>
-        <h2 class="feature-heading">Built on a single<br/>architectural decision.</h2>
-        <p class="feature-sub">Shadow DOM solves encapsulation. Voidable solves the opposite problem: components that are deliberately transparent to their environment.</p>
-      </div>
-      <div class="feature-grid">
-        <div class="feature-card">
-          <div class="feature-card-title">Light DOM rendering</div>
-          <p class="feature-card-desc">No Shadow DOM barrier. Your CSS reaches into every component without ::part() incantations.</p>
+    <section class="section">
+      <div class="container">
+        <div class="section-header">
+          <div class="eyebrow">Foundation</div>
+          <h2 class="section-heading">Built on a single<br/>architectural decision.</h2>
+          <p class="section-sub">Shadow DOM solves encapsulation. Voidable solves the opposite problem: components that are deliberately transparent to their environment.</p>
         </div>
-        <div class="feature-card">
-          <div class="feature-card-title">Token-driven theming</div>
-          <p class="feature-card-desc">Three-layer token system. Override CSS custom properties; the entire library remaps.</p>
-        </div>
-        <div class="feature-card">
-          <div class="feature-card-title">Federation-ready</div>
-          <p class="feature-card-desc">Singleton-safe customElements.define(). Same library loads once across federated modules.</p>
-        </div>
-        <div class="feature-card">
-          <div class="feature-card-title">Embedded-grade bundles</div>
-          <p class="feature-card-desc">Pairs with Solid + UnoCSS for bundle sizes that are IoT friendly. Tree-shakes to component-level granularity.</p>
-        </div>
-        <div class="feature-card">
-          <div class="feature-card-title">Agent-friendly markup</div>
-          <p class="feature-card-desc">Semantic void-* custom elements with reflected attributes. Stable selectors for Playwright, AI agents, screen readers.</p>
-        </div>
-        <div class="feature-card">
-          <div class="feature-card-title">Sharp / curvy shapes</div>
-          <p class="feature-card-desc">data-shape="sharp" zeros every radius globally or locally. Brand toggle without CSS rewrites.</p>
-        </div>
-      </div>
-    </section>
-
-    <!-- Token Showcase -->
-    <section class="token-section">
-      <div class="token-grid">
-        <div>
-          <div class="eyebrow">Theming</div>
-          <h2 class="token-heading">Tokens as<br/>the only API surface.</h2>
-          <p class="token-description">
-            Three layers. Primitives are raw: color scales, spacing, type, radii. Semantic tokens map to roles: <code>--void-color-bg</code>, <code>--void-color-text-secondary</code>, <code>--void-color-border-strong</code>. Component CSS references only tokens. Override any layer; the whole library follows.
-          </p>
-          <div class="token-rows">
-            <div class="token-row">
-              <span class="token-swatch" style="background: #000000;"></span>
-              <span class="token-name">--void-color-bg</span>
-              <span class="token-value">#000000</span>
-            </div>
-            <div class="token-row">
-              <span class="token-swatch" style="background: #0a0a0a;"></span>
-              <span class="token-name">--void-color-bg-secondary</span>
-              <span class="token-value">#0a0a0a</span>
-            </div>
-            <div class="token-row">
-              <span class="token-swatch" style="background: #f5f5f4;"></span>
-              <span class="token-name">--void-color-text</span>
-              <span class="token-value">stone-100</span>
-            </div>
-            <div class="token-row">
-              <span class="token-swatch" style="background: rgba(255,255,255,0.14);"></span>
-              <span class="token-name">--void-color-border</span>
-              <span class="token-value">white / 14%</span>
-            </div>
-            <div class="token-row">
-              <span class="token-swatch" style="background: #22c55e;"></span>
-              <span class="token-name">--void-color-success</span>
-              <span class="token-value">#22c55e</span>
-            </div>
-            <div class="token-row">
-              <span class="token-swatch" style="background: transparent; border-color: transparent;"></span>
-              <span class="token-name">--void-radius-lg</span>
-              <span class="token-value">12px</span>
-            </div>
-            <div class="token-row">
-              <span class="token-swatch" style="background: transparent; border-color: transparent;"></span>
-              <span class="token-name">--void-shadow-md</span>
-              <span class="token-value">white-glow</span>
-            </div>
+        <div class="feature-grid">
+          <div class="feature-card">
+            <div class="feature-card-title">Light DOM rendering</div>
+            <p class="feature-card-desc">No Shadow DOM barrier. Your CSS reaches into every component without ::part() incantations.</p>
           </div>
-        </div>
-        <div>
-          <div class="token-code-block" set:html={highlightedCss} />
+          <div class="feature-card">
+            <div class="feature-card-title">Knob-driven theming</div>
+            <p class="feature-card-desc">A dozen inputs derive every token. Set them on the page, or on any subtree, and everything inside follows.</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-card-title">Federation-ready</div>
+            <p class="feature-card-desc">Singleton-safe customElements.define(). Same library loads once across federated modules.</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-card-title">Embedded-grade bundles</div>
+            <p class="feature-card-desc">Pairs with Solid + UnoCSS for bundle sizes that are IoT friendly. Tree-shakes to component-level granularity.</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-card-title">Agent-friendly markup</div>
+            <p class="feature-card-desc">Semantic void-* custom elements with reflected attributes. Stable selectors for Playwright, AI agents, screen readers.</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-card-title">Accessible by derivation</div>
+            <p class="feature-card-desc">Contrast floors, focus rings, reduced motion and forced colours hold for every theme, because they are part of the formulas.</p>
+          </div>
         </div>
       </div>
     </section>
 
     <!-- Live Components -->
-    <section class="components">
-      <div class="components-inner">
-        <div class="eyebrow">Components</div>
-        <div class="components-panel">
+    <section class="section">
+      <div class="container">
+        <div class="section-header">
+          <div class="eyebrow">Components</div>
+          <h2 class="section-heading">Compact controls.<br/>Room between them.</h2>
+          <p class="section-sub">Controls share one height per size, so a row of them lines up. The space goes between groups, not inside components. The theme picked above applies here too.</p>
+        </div>
+        <div class="themed components-panel" data-void-theme="void" data-themed>
 
           <div>
             <div class="component-row-label">Buttons</div>
             <div class="component-row">
-              <void-button variant="filled">Default</void-button>
+              <void-button variant="filled">Filled</void-button>
+              <void-button variant="outline">Outline</void-button>
+              <void-button variant="ghost">Ghost</void-button>
+              <void-button variant="ghost" color="error">Ghost danger</void-button>
+              <void-button variant="outline" disabled>Disabled</void-button>
+            </div>
+            <div class="component-row">
               <void-button variant="filled" color="success">Success</void-button>
               <void-button variant="filled" color="error">Error</void-button>
               <void-button variant="filled" color="warning">Warning</void-button>
@@ -940,7 +801,6 @@ const ogImage = new URL('/og.png', canonical).href;
               <void-button variant="filled" color="notice">Notice</void-button>
             </div>
             <div class="component-row">
-              <void-button variant="outline">Default</void-button>
               <void-button variant="outline" color="success">Success</void-button>
               <void-button variant="outline" color="error">Error</void-button>
               <void-button variant="outline" color="warning">Warning</void-button>
@@ -973,11 +833,10 @@ const ogImage = new URL('/og.png', canonical).href;
 
           <div>
             <div class="component-row-label">Form</div>
-            <div class="form-panel">
-              <div class="form-panel-header">
-                <void-stepper steps="Account, Preferences, Review" value="1"></void-stepper>
-              </div>
-              <div class="form-grid">
+            <div class="form-stepper">
+              <void-stepper steps="Account, Preferences, Review" value="1"></void-stepper>
+            </div>
+            <div class="form-grid">
               <void-field label="Display name" helper="How others see you">
                 <void-input placeholder="Jane Smith" value="Jane Smith"></void-input>
               </void-field>
@@ -1006,16 +865,11 @@ const ogImage = new URL('/og.png', canonical).href;
                 </void-field>
               </div>
               <div class="form-full">
-                <void-field label="Avatar">
-                  <void-file-upload accept="image/*"></void-file-upload>
-                </void-field>
-              </div>
-              <div class="form-full form-row">
                 <void-field label="Volume">
                   <void-slider value="65" show-value></void-slider>
                 </void-field>
               </div>
-              <div class="form-full form-row">
+              <div class="form-full">
                 <void-checkbox-group>
                   <void-checkbox value="updates" checked>Product updates</void-checkbox>
                   <void-checkbox value="marketing">Marketing emails</void-checkbox>
@@ -1034,10 +888,9 @@ const ogImage = new URL('/og.png', canonical).href;
                 </void-field>
               </div>
               <div class="form-full form-actions">
-                <void-button variant="outline">Back</void-button>
+                <void-button variant="ghost">Back</void-button>
                 <void-button variant="filled">Continue</void-button>
               </div>
-            </div>
             </div>
           </div>
 
@@ -1046,46 +899,51 @@ const ogImage = new URL('/og.png', canonical).href;
     </section>
 
     <!-- Stats -->
-    <section class="stats">
-      <div class="stats-grid">
-        <div class="stat-card">
-          <div class="stat-number">{stats.elements}</div>
-          <div class="stat-label">custom elements</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-number">{stats.adapters}</div>
-          <div class="stat-label">framework adapter packages</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-number">0</div>
-          <div class="stat-label">visual CSS in core</div>
-        </div>
-        {bundleSize && (
+    <section class="section">
+      <div class="container">
+        <div class="stats-grid">
           <div class="stat-card">
-            <div class="stat-number">{bundleSize}</div>
-            <div class="stat-label">gzipped runtime</div>
+            <div class="stat-number">{stats.elements}</div>
+            <div data-void-type="label">custom elements</div>
           </div>
-        )}
+          <div class="stat-card">
+            <div class="stat-number">{stats.adapters}</div>
+            <div data-void-type="label">framework adapter packages</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number">0</div>
+            <div data-void-type="label">visual CSS in core</div>
+          </div>
+          {bundleSize && (
+            <div class="stat-card">
+              <div class="stat-number">{bundleSize}</div>
+              <div data-void-type="label">gzipped runtime</div>
+            </div>
+          )}
+        </div>
       </div>
     </section>
 
     <!-- CTA -->
     <section class="cta">
-      <h2>Ship structure.<br/>Create style.</h2>
-      <p>Read the docs, copy the install line, render a button. Ten minutes.</p>
-      <div class="cta-actions">
-        <void-button variant="filled" size="lg"><a href="/getting-started/introduction/">Read the docs</a></void-button>
-        <void-button variant="outline" size="lg" class="hero-outline-btn"><a href="https://github.com/VoidableUI/Voidable" target="_blank">Star on GitHub</a></void-button>
+      <div class="container">
+        <h2>Ship structure.<br/>Create style.</h2>
+        <p>Read the docs, copy the install line, render a button. Ten minutes.</p>
+        <div class="cta-actions">
+          <void-button variant="filled" size="lg"><a href="/getting-started/introduction/">Read the docs</a></void-button>
+          <void-button variant="outline" size="lg"><a href="https://github.com/VoidableUI/Voidable" target="_blank">Star on GitHub</a></void-button>
+        </div>
       </div>
     </section>
 
     <!-- Footer -->
     <footer class="footer">
-      <div class="footer-inner">
+      <div class="container">
         <div class="footer-top">
-          <span class="footer-wordmark">voidable</span>
+          <span class="nav-wordmark">voidable</span>
           <ul class="footer-links">
             <li><a href="/getting-started/introduction/">Docs</a></li>
+            <li><a href="/getting-started/theming/">Theming</a></li>
             <li><a href="/storybook/">Storybook</a></li>
             <li><a href="https://github.com/VoidableUI/Voidable" target="_blank">GitHub</a></li>
             <li><a href="https://www.npmjs.com/package/@voidable/ui" target="_blank">npm</a></li>
@@ -1101,12 +959,20 @@ const ogImage = new URL('/og.png', canonical).href;
     <script>
       import '@voidable/ui';
 
-      const themeToggle = document.getElementById('theme-toggle')!;
       const html = document.documentElement;
+      document.getElementById('theme-toggle')!.addEventListener('click', () => {
+        html.setAttribute('data-theme', html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+      });
 
-      themeToggle.addEventListener('click', () => {
-        const current = html.getAttribute('data-theme');
-        html.setAttribute('data-theme', current === 'dark' ? 'light' : 'dark');
+      // The theme picker sets data-void-theme on the themed regions and shows
+      // that theme's source. Nothing else changes: the theme files do the rest.
+      const picker = document.getElementById('theme-picker') as (HTMLElement & { value: string }) | null;
+      picker?.addEventListener('void-change', () => {
+        const theme = picker.value;
+        document.querySelectorAll('[data-themed]').forEach((el) => el.setAttribute('data-void-theme', theme));
+        document.querySelectorAll<HTMLElement>('[data-theme-panel]').forEach((el) => {
+          el.hidden = el.dataset.themePanel !== theme;
+        });
       });
     </script>
   </body>

@@ -6,7 +6,8 @@ void-radio-group {
 }
 
 .void-radio-group-label {
-  font-size: var(--void-text-sm);
+  font-size: var(--void-control-text-sm);
+  line-height: var(--void-leading-normal);
   font-weight: var(--void-weight-medium);
   color: var(--void-color-text);
 }

@@ -9,7 +9,6 @@ void-status-dot {
 
 void-status-dot[status="online"] {
   background: var(--void-color-success);
-  box-shadow: 0 0 6px var(--void-color-success);
 }
 
 void-status-dot[status="away"] {

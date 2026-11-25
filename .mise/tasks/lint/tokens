@@ -4,6 +4,10 @@ set -euo pipefail
 
 PRIMITIVES="packages/theme/src/primitives.css"
 TOKENS="packages/theme/src/tokens.css"
+# Files that define values rather than use them: the knobs and the themes
+# (which may only set knobs; lint:contrast enforces that).
+KNOBS="packages/theme/src/knobs.css"
+THEMES_DIR="packages/theme/src/themes/"
 THEME_SRC="packages/theme/src"
 UI_SRC="packages/ui/src"
 
@@ -19,7 +23,7 @@ check() {
   shift 3
   # Remaining args are additional grep -v filters
   for file in "${FILES[@]}"; do
-    [[ "$file" == "$PRIMITIVES" || "$file" == "$TOKENS" ]] && continue
+    [[ "$file" == "$PRIMITIVES" || "$file" == "$TOKENS" || "$file" == "$KNOBS" || "$file" == "$THEMES_DIR"* ]] && continue
     local result
     result=$(grep -Pn "$pattern" "$file" 2>/dev/null || true)
     [[ -z "$result" ]] && continue
@@ -92,6 +96,24 @@ check "Raw transition easing" \
 check "Raw stroke-width" \
   'stroke-width:\s*[0-9]' \
   "use var(--void-icon-stroke-width)" \
+  'var('
+
+# 10. Raw letter-spacing (em/px literal, not via var())
+check "Raw letter-spacing" \
+  'letter-spacing:\s*-?[0-9.]+(em|px|rem)\b' \
+  "use a type role (--void-type-*-tracking) or var(--void-tracking-*)" \
+  'var('
+
+# 11. Raw text-transform: case belongs to a type role, so a theme can change it
+check "Raw text-transform" \
+  'text-transform:\s*(uppercase|lowercase|capitalize)\b' \
+  "use a type role's case token, e.g. var(--void-type-label-case)" \
+  'var('
+
+# 12. Raw control heights: controls share one height per size step
+check "Raw control height" \
+  '(?<![\w-])(min-)?height:\s*(1\.75|2\.25|2\.75|3\.25)rem\b' \
+  "use var(--void-control-height*) so the control follows the density knob" \
   'var('
 
 if [[ $violations -eq 0 ]]; then

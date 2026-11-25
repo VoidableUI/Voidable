@@ -1,8 +1,10 @@
 void-pagination {
+  --void-pagination-size: var(--void-control-height);
+  --void-pagination-text: var(--void-control-text);
   --tone: var(--void-color-accent);
-  --tone-subtle: color-mix(in srgb, var(--tone) 14%, transparent);
-  --tone-border: color-mix(in srgb, var(--tone) 36%, transparent);
-  --tone-hover: color-mix(in srgb, var(--tone) 22%, transparent);
+  --tone-subtle: color-mix(in srgb, var(--tone) 13%, transparent);
+  --tone-border: transparent;
+  --tone-hover: color-mix(in srgb, var(--tone) 8%, transparent);
 }
 
 void-pagination nav {
@@ -20,11 +22,12 @@ void-pagination nav {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 2rem;
-  height: 2rem;
+  min-width: var(--void-pagination-size);
+  height: var(--void-pagination-size);
   padding: 0 var(--void-space-1);
   font-family: var(--void-font-sans);
-  font-size: var(--void-text-sm);
+  font-size: var(--void-pagination-text);
+  font-variant-numeric: tabular-nums;
   color: var(--void-color-text);
   box-sizing: border-box;
   text-decoration: none;
@@ -39,8 +42,8 @@ void-pagination nav {
 }
 
 .void-pagination-btn:focus-visible {
-  outline: 2px solid var(--void-color-accent);
-  outline-offset: 2px;
+  outline: var(--void-focus-ring-width) solid var(--void-focus-ring-color);
+  outline-offset: var(--void-focus-ring-offset);
 }
 
 .void-pagination-btn[aria-current="page"] {
@@ -64,22 +67,11 @@ void-pagination nav {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 2rem;
+  min-width: var(--void-pagination-size);
   color: var(--void-color-text-muted);
-  font-size: var(--void-text-sm);
+  font-size: var(--void-pagination-text);
   user-select: none;
 }
 
-void-pagination[size="sm"] .void-pagination-btn,
-void-pagination[size="sm"] .void-pagination-ellipsis {
-  min-width: 1.5rem;
-  height: 1.5rem;
-  font-size: var(--void-text-xs);
-}
-
-void-pagination[size="lg"] .void-pagination-btn,
-void-pagination[size="lg"] .void-pagination-ellipsis {
-  min-width: 2.5rem;
-  height: 2.5rem;
-  font-size: var(--void-text-base);
-}
+void-pagination[size="sm"] { --void-pagination-size: var(--void-control-height-sm); --void-pagination-text: var(--void-control-text-sm); }
+void-pagination[size="lg"] { --void-pagination-size: var(--void-control-height-lg); --void-pagination-text: var(--void-control-text-lg); }

@@ -2,10 +2,13 @@ void-divider {
   display: flex;
   align-items: center;
   gap: var(--void-space-3);
-  color: var(--void-color-text-muted);
-  font-family: var(--void-font-sans);
-  font-size: var(--void-text-xs);
-  font-weight: var(--void-weight-medium);
+  font-family: var(--void-type-label-family);
+  font-size: var(--void-type-label-size);
+  line-height: var(--void-type-label-leading);
+  font-weight: var(--void-type-label-weight);
+  letter-spacing: var(--void-type-label-tracking);
+  text-transform: var(--void-type-label-case);
+  color: var(--void-type-label-color);
 }
 
 /* Horizontal line via pseudo-elements */

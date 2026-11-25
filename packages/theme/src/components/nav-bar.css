@@ -15,14 +15,14 @@ void-nav-bar[sticky] {
 }
 
 void-nav-bar[variant="elevated"] {
-  background: var(--void-color-bg-secondary);
-  box-shadow: 0 1px 4px color-mix(in srgb, var(--void-color-text) 10%, transparent);
+  background: var(--void-color-bg-elevated);
+  box-shadow: var(--void-shadow-sm);
 }
 
 .void-nav-bar-content {
   display: flex;
   align-items: center;
-  gap: var(--void-space-4);
+  gap: var(--void-gap-inside);
   padding: var(--void-space-2) var(--void-space-4);
-  min-height: 3rem;
+  min-height: calc(var(--void-control-height) + var(--void-space-5));
 }

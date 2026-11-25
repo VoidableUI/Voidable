@@ -1,41 +1,52 @@
+/* A stat is three type roles stacked: label, value, caption (the
+   delta). Its container is a hairline with the chrome knob's fill; a
+   colour tints it. */
 void-stat {
   --tone: var(--void-color-accent);
-  --tone-subtle: color-mix(in srgb, var(--tone) var(--void-tone-tint), transparent);
-  --tone-border: color-mix(in srgb, var(--tone) 36%, transparent);
+  --tone-subtle: var(--void-color-surface);
+  --tone-border: var(--void-color-border);
+  --void-stat-padding: var(--void-container-padding);
+  --void-stat-value-size: var(--void-type-value-size);
 
   display: flex;
   flex-direction: column;
-  gap: var(--void-space-1);
-  padding: var(--void-space-4);
+  gap: var(--void-gap-tight);
+  padding: var(--void-stat-padding);
   border: 1px solid var(--tone-border);
   border-radius: var(--void-radius-lg);
   background: var(--tone-subtle);
 }
 
 .void-stat-label {
-  font-family: var(--void-font-sans);
-  font-size: var(--void-text-xs);
-  color: var(--void-color-text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
+  font-family: var(--void-type-label-family);
+  font-size: var(--void-type-label-size);
+  line-height: var(--void-type-label-leading);
+  font-weight: var(--void-type-label-weight);
+  letter-spacing: var(--void-type-label-tracking);
+  text-transform: var(--void-type-label-case);
+  color: var(--void-type-label-color);
 }
 
 .void-stat-value {
-  font-family: var(--void-font-mono);
-  font-size: var(--void-text-3xl);
-  font-weight: var(--void-weight-bold);
-  color: var(--void-color-text);
-  letter-spacing: -0.02em;
-  line-height: var(--void-leading-tight);
+  font-family: var(--void-type-value-family);
+  font-size: var(--void-stat-value-size);
+  line-height: var(--void-type-value-leading);
+  font-weight: var(--void-type-value-weight);
+  letter-spacing: var(--void-type-value-tracking);
+  font-variant-numeric: var(--void-type-value-numeric);
+  color: var(--void-type-value-color);
 }
 
 .void-stat-delta {
   display: inline-flex;
   align-items: center;
   gap: var(--void-space-1);
-  font-family: var(--void-font-mono);
-  font-size: var(--void-text-xs);
-  color: var(--void-color-text-secondary);
+  font-family: var(--void-type-caption-family);
+  font-size: var(--void-type-caption-size);
+  line-height: var(--void-type-caption-leading);
+  font-weight: var(--void-type-caption-weight);
+  font-variant-numeric: tabular-nums;
+  color: var(--void-type-caption-color);
 }
 
 void-stat[trend="up"]        .void-stat-delta { color: var(--void-color-success); }
@@ -50,35 +61,23 @@ void-stat[trend="highlight"] .void-stat-delta { color: var(--void-color-highligh
 
 /* Sizes */
 void-stat[size="sm"] {
-  padding: var(--void-space-3);
-}
-
-void-stat[size="sm"] .void-stat-value {
-  font-size: var(--void-text-2xl);
+  --void-stat-padding: var(--void-space-3);
+  --void-stat-value-size: var(--void-text-2xl);
 }
 
 void-stat[size="lg"] {
-  padding: var(--void-space-6);
-}
-
-void-stat[size="lg"] .void-stat-value {
-  font-size: var(--void-text-4xl);
+  --void-stat-padding: var(--void-space-6);
+  --void-stat-value-size: var(--void-text-4xl);
 }
 
 void-stat[size="xl"] {
-  padding: var(--void-space-8);
-}
-
-void-stat[size="xl"] .void-stat-value {
-  font-size: var(--void-text-5xl);
+  --void-stat-padding: var(--void-space-8);
+  --void-stat-value-size: var(--void-text-5xl);
 }
 
 void-stat[size="xxl"] {
-  padding: var(--void-space-10);
-}
-
-void-stat[size="xxl"] .void-stat-value {
-  font-size: 4rem; /* token-ok: display size beyond scale */
+  --void-stat-padding: var(--void-space-10);
+  --void-stat-value-size: calc(var(--void-text-5xl) * 1.3333);
 }
 
 void-stat[color="error"]     { --tone: var(--void-color-error); }
@@ -88,3 +87,9 @@ void-stat[color="success"]   { --tone: var(--void-color-success); }
 void-stat[color="info"]      { --tone: var(--void-color-info); }
 void-stat[color="notice"]    { --tone: var(--void-color-notice); }
 void-stat[color="highlight"] { --tone: var(--void-color-highlight); }
+
+/* The attribute is reflected, so the plain stat carries color="default". */
+void-stat[color]:not([color="default"]) {
+  --tone-subtle: color-mix(in srgb, var(--tone) var(--void-tone-tint), transparent);
+  --tone-border: color-mix(in srgb, var(--tone) 36%, transparent);
+}

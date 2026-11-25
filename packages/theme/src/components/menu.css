@@ -4,8 +4,8 @@ void-menu {
   font-family: var(--void-font-sans);
   background: var(--void-color-bg-elevated);
   border: 1px solid var(--void-color-border);
-  border-radius: var(--void-radius-md);
-  box-shadow: 0 4px 16px var(--void-color-bg-overlay);
+  border-radius: var(--void-radius-lg);
+  box-shadow: var(--void-shadow-md);
   overflow: hidden;
   min-width: 220px;
 }
@@ -23,7 +23,7 @@ void-menu[open] {
   border-bottom: 1px solid var(--void-color-border);
   color: var(--void-color-text);
   font-family: inherit;
-  font-size: var(--void-text-sm);
+  font-size: var(--void-control-text);
   line-height: var(--void-leading-normal);
   outline: none;
 }
@@ -51,7 +51,7 @@ void-menu-item {
   gap: var(--void-space-2);
   padding: var(--void-space-2) var(--void-space-3);
   font-family: var(--void-font-sans);
-  font-size: var(--void-text-sm);
+  font-size: var(--void-control-text);
   color: var(--void-color-text);
   cursor: pointer;
   user-select: none;
@@ -116,11 +116,13 @@ void-menu-group + void-menu-group {
 
 .void-menu-group-label {
   padding: var(--void-space-2) var(--void-space-3) var(--void-space-1);
-  font-size: var(--void-text-xs);
-  font-weight: var(--void-weight-medium);
-  color: var(--void-color-text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  font-family: var(--void-type-label-family);
+  font-size: var(--void-type-label-size);
+  line-height: var(--void-type-label-leading);
+  font-weight: var(--void-type-label-weight);
+  letter-spacing: var(--void-type-label-tracking);
+  text-transform: var(--void-type-label-case);
+  color: var(--void-type-label-color);
   user-select: none;
 }
 
