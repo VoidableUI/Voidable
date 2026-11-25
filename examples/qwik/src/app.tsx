@@ -31,7 +31,7 @@ export default component$(() => {
       <div class="component-section">
         <h2>Input</h2>
         <void-input
-          label="Name"
+          placeholder="Name"
           onVoid-change$={(e: CustomEvent) =>
             logEvent('void-change', `Input: ${e.detail?.value ?? ''}`)
           }
@@ -44,8 +44,8 @@ export default component$(() => {
       <div class="component-section">
         <h2>Switch</h2>
         <void-switch
-          onVoid-toggle$={(e: CustomEvent) =>
-            logEvent('void-toggle', `Switch: ${e.detail?.checked ?? ''}`)
+          onVoid-change$={(e: CustomEvent) =>
+            logEvent('void-change', `Switch: ${e.detail?.checked ?? ''}`)
           }
         >
           Toggle me
@@ -55,14 +55,14 @@ export default component$(() => {
       <div class="component-section">
         <h2>Select</h2>
         <void-select
-          label="Choose option"
+          placeholder="Choose option"
           onVoid-change$={(e: CustomEvent) =>
             logEvent('void-change', `Select: ${e.detail?.value ?? ''}`)
           }
         >
-          <void-option value="alpha">Alpha</void-option>
-          <void-option value="beta">Beta</void-option>
-          <void-option value="gamma">Gamma</void-option>
+          <option value="alpha">Alpha</option>
+          <option value="beta">Beta</option>
+          <option value="gamma">Gamma</option>
         </void-select>
       </div>
 

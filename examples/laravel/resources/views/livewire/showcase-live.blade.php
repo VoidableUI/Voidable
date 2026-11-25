@@ -23,7 +23,10 @@
     {{-- 3. void-switch with morph protection --}}
     <section class="mb-8">
         <h2 class="text-lg font-semibold mb-2">Switch with morph protection</h2>
-        <void-switch x-void-preserve label="Dark mode"></void-switch>
+        <label class="inline-flex items-center gap-2">
+            <void-switch x-void-preserve></void-switch>
+            Dark mode
+        </label>
         <p class="mt-2 text-sm text-gray-400">This switch preserves state during Livewire re-renders.</p>
     </section>
 
@@ -31,12 +34,13 @@
     <section class="mb-8">
         <h2 class="text-lg font-semibold mb-2">Select with event handling</h2>
         <void-select
+            x-void-preserve
             x-void-on:void-change="$wire.set('selectedOption', $event.detail.value)"
             placeholder="Choose a framework..."
         >
-            <void-option value="laravel">Laravel</void-option>
-            <void-option value="livewire">Livewire</void-option>
-            <void-option value="alpine">Alpine.js</void-option>
+            <option value="laravel">Laravel</option>
+            <option value="livewire">Livewire</option>
+            <option value="alpine">Alpine.js</option>
         </void-select>
         <p class="mt-2 text-sm text-gray-400">Selected: <span class="text-white">{{ $selectedOption }}</span></p>
     </section>
