@@ -1,5 +1,5 @@
 // @vitest-environment happy-dom
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { VoidElement } from '../../src/base.js';
 import { VoidNumberInput } from '../../src/components/number-input.js';
 
@@ -160,5 +160,103 @@ describe('VoidNumberInput', () => {
     await el.updateComplete;
     const decBtn = el.querySelector('.void-number-input-btn-dec') as HTMLButtonElement;
     expect(decBtn.disabled).toBe(true);
+  });
+});
+
+describe('VoidNumberInput stepper interaction', () => {
+  let el: VoidNumberInput;
+  const inc = () => el.querySelector('.void-number-input-btn-inc') as HTMLButtonElement;
+  const dec = () => el.querySelector('.void-number-input-btn-dec') as HTMLButtonElement;
+  const fire = (t: Element, type: string) => t.dispatchEvent(new Event(type, { bubbles: true, cancelable: true }));
+
+  beforeEach(async () => {
+    vi.useFakeTimers();
+    el = document.createElement('void-number-input') as VoidNumberInput;
+    el.value = 5;
+    el.min = 0;
+    el.max = 8;
+    document.body.appendChild(el);
+    await el.updateComplete;
+  });
+
+  afterEach(() => {
+    el.remove();
+    vi.useRealTimers();
+  });
+
+  it('keyboard activation (click with detail 0, as fired by Enter/Space) steps the value', async () => {
+    inc().click();
+    expect(el.value).toBe(6);
+    dec().click();
+    dec().click();
+    expect(el.value).toBe(4);
+  });
+
+  it('a pointer click (detail > 0) does not double-step after pointerdown', async () => {
+    fire(inc(), 'pointerdown');
+    fire(inc(), 'pointerup');
+    inc().dispatchEvent(new MouseEvent('click', { bubbles: true, detail: 1 }));
+    expect(el.value).toBe(6);
+  });
+
+  it('auto-repeats while held and stops on pointerup', () => {
+    el.max = 100;
+    fire(inc(), 'pointerdown');
+    vi.advanceTimersByTime(400 + 300 * 2);
+    const held = el.value;
+    expect(held).toBeGreaterThan(6);
+    fire(inc(), 'pointerup');
+    vi.advanceTimersByTime(3000);
+    expect(el.value).toBe(held);
+  });
+
+  for (const type of ['pointercancel', 'pointerleave']) {
+    it(`stops auto-repeat on ${type}`, () => {
+      el.max = 100;
+      fire(inc(), 'pointerdown');
+      vi.advanceTimersByTime(1000);
+      fire(inc(), type);
+      const v = el.value;
+      vi.advanceTimersByTime(3000);
+      expect(el.value).toBe(v);
+    });
+  }
+
+  it('stops auto-repeat when max is reached', async () => {
+    fire(inc(), 'pointerdown');
+    vi.advanceTimersByTime(5000);
+    expect(el.value).toBe(8);
+    expect(vi.getTimerCount()).toBe(0);
+    await el.updateComplete;
+    expect(inc().disabled).toBe(true);
+  });
+
+  it('stops auto-repeat when min is reached', () => {
+    fire(dec(), 'pointerdown');
+    vi.advanceTimersByTime(5000);
+    expect(el.value).toBe(0);
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
+  it('stops auto-repeat when the control becomes disabled mid-press', () => {
+    el.max = 100;
+    fire(inc(), 'pointerdown');
+    vi.advanceTimersByTime(1000);
+    el.disabled = true;
+    const v = el.value;
+    vi.advanceTimersByTime(3000);
+    expect(el.value).toBe(v);
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
+  it('stops auto-repeat on disconnect', () => {
+    el.max = 100;
+    fire(inc(), 'pointerdown');
+    vi.advanceTimersByTime(1000);
+    el.remove();
+    const v = el.value;
+    vi.advanceTimersByTime(3000);
+    expect(el.value).toBe(v);
+    expect(vi.getTimerCount()).toBe(0);
   });
 });
