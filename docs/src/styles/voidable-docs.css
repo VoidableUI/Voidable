@@ -63,3 +63,18 @@
 @import '../../../packages/theme/src/patterns/data.css';
 @import '../../../packages/theme/src/media/media.css';
 @import '../../../packages/theme/src/media/surface.css';
+/* Every component has a reference page, so every component needs its styles. */
+@import '../../../packages/theme/src/components/bar-chart.css';
+@import '../../../packages/theme/src/components/calendar.css';
+@import '../../../packages/theme/src/components/carousel.css';
+@import '../../../packages/theme/src/components/collapsible.css';
+@import '../../../packages/theme/src/components/color-picker.css';
+@import '../../../packages/theme/src/components/donut-chart.css';
+@import '../../../packages/theme/src/components/editable.css';
+@import '../../../packages/theme/src/components/gauge.css';
+@import '../../../packages/theme/src/components/hover-card.css';
+@import '../../../packages/theme/src/components/line-chart.css';
+@import '../../../packages/theme/src/components/nav-menu.css';
+@import '../../../packages/theme/src/components/pin-input.css';
+@import '../../../packages/theme/src/components/toggle-group.css';
+@import '../../../packages/theme/src/pre-upgrade.css';

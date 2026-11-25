@@ -1,0 +1,45 @@
+---
+// Role, accessible name, state handles and known limitations. The facts come
+// from evals/contract/contract.mjs, which the eval harness checks against the
+// manifest and a real browser, so this section cannot claim a role the element
+// does not have.
+import { loadComponentData, loadContract } from '../../lib/component-data.mjs';
+import { inline } from '../../lib/inline.mjs';
+
+interface Props { tag: string }
+const { tag } = Astro.props;
+const c = loadComponentData().byTag.get(tag)!;
+const contract = loadContract();
+const k = contract[tag];
+const role = !k ? null : k.role === 'inner' ? 'inner' : k.role;
+---
+
+<ul>
+  {
+    k && (
+      <Fragment>
+        <li>
+          <strong>Role:</strong>{' '}
+          {role === 'inner'
+            ? <Fragment>the host has no role; the element it renders inside carries the widget role, so assistive technology sees one widget with one name.</Fragment>
+            : role
+              ? <Fragment><code>role="{role}"</code> on the element itself.</Fragment>
+              : <Fragment>none: the host is a plain container and adds no role.</Fragment>}
+        </li>
+        <li><strong>Name:</strong> <Fragment set:html={inline(k.name === 'none' ? 'it takes no name of its own' : k.name)} />.</li>
+        {k.state?.length > 0 && <li><strong>State you can read without JavaScript:</strong> <Fragment set:html={k.state.map((s: string) => inline(s)).join('; ')} />.</li>}
+      </Fragment>
+    )
+  }
+  {c.note.a11y && <li set:html={inline(c.note.a11y)} />}
+</ul>
+{
+  k?.gaps?.length > 0 && (
+    <Fragment>
+      <p><strong>Known limitations</strong> (tracked from the selector contract; a fix removes the line):</p>
+      <ul>
+        {k.gaps.map((g: string) => <li set:html={inline(g.replace(/`/g, '`'))} />)}
+      </ul>
+    </Fragment>
+  )
+}

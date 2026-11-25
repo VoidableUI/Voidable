@@ -1,0 +1,26 @@
+---
+// One group of the component index: tag, name and one-line summary, linked to
+// the component's page. The group's components come from component-notes.json.
+import { componentGroups } from '../../lib/component-data.mjs';
+import { inline } from '../../lib/inline.mjs';
+
+interface Props { group: string }
+const g = componentGroups().find((x) => x.id === Astro.props.group);
+if (!g) throw new Error(`unknown component group ${Astro.props.group}`);
+---
+
+<p>{g.blurb}</p>
+<div class="vd-api-table">
+  <table>
+    <thead><tr><th>Component</th><th>Tag</th><th>What it is for</th></tr></thead>
+    <tbody>
+      {g.components.map((c: any) => (
+        <tr>
+          <td><a href={`/components/${c.slug}/`}>{c.title}</a></td>
+          <td><code>{`<${c.tag}>`}</code></td>
+          <td set:html={inline(c.summary)} />
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</div>

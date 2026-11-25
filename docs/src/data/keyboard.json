@@ -1,0 +1,338 @@
+{
+  "void-combobox": {
+    "intro": "Pattern: [combobox with listbox popup](https://www.w3.org/WAI/ARIA/apg/patterns/combobox/) (editable, list autocomplete, manual selection). The native `<input>` is the `combobox` and keeps DOM focus; the highlighted option is exposed with `aria-activedescendant`. `aria-expanded` and `open` track the list.",
+    "rows": [
+      {
+        "keys": "Down Arrow",
+        "action": "Opens the list, or highlights the next option (wraps). Opening starts on the chosen option, else the first"
+      },
+      {
+        "keys": "Up Arrow",
+        "action": "Opens the list on the last option, or highlights the previous option (wraps)"
+      },
+      {
+        "keys": "Alt + Down Arrow",
+        "action": "Opens the list without highlighting an option"
+      },
+      {
+        "keys": "Enter",
+        "action": "Chooses the highlighted option and closes the list. With no option highlighted the key is left alone, so a surrounding form submits"
+      },
+      {
+        "keys": "Escape",
+        "action": "Closes the list"
+      },
+      {
+        "keys": "Home, End",
+        "action": "Move the text cursor"
+      },
+      {
+        "keys": "Tab",
+        "action": "Closes the list and moves on without choosing"
+      },
+      {
+        "keys": "Characters",
+        "action": "Filter the options; nothing is highlighted until you arrow to it"
+      }
+    ]
+  },
+  "void-multiselect": {
+    "intro": "Pattern: [select-only combobox](https://www.w3.org/WAI/ARIA/apg/patterns/combobox/examples/combobox-select-only/) with a [multiselectable listbox](https://www.w3.org/WAI/ARIA/apg/patterns/listbox/) popup. The trigger is the `combobox` (focusable, `aria-haspopup=\"listbox\"`, `aria-expanded`); the list is `aria-multiselectable` and the list stays open while options are toggled. The remove buttons on the selected pills are for the pointer; from the keyboard, toggle the option in the list.",
+    "rows": [
+      {
+        "keys": "Enter, Space, Down Arrow, Up Arrow",
+        "action": "Open the list, highlighting the first selected option, else the first"
+      },
+      {
+        "keys": "Home, End",
+        "action": "Open the list on the first or last option"
+      },
+      {
+        "keys": "Down Arrow, Up Arrow (open)",
+        "action": "Highlight the next or previous option (wraps)"
+      },
+      {
+        "keys": "Home, End (open)",
+        "action": "Highlight the first or last option"
+      },
+      {
+        "keys": "Enter, Space (open)",
+        "action": "Toggle the highlighted option; the list stays open"
+      },
+      {
+        "keys": "Characters (open)",
+        "action": "Jump to the next option that starts with the typed text"
+      },
+      {
+        "keys": "Escape",
+        "action": "Closes the list"
+      },
+      {
+        "keys": "Tab",
+        "action": "Closes the list and moves on"
+      }
+    ]
+  },
+  "void-tabs": {
+    "intro": "Pattern: [tabs with manual activation](https://www.w3.org/WAI/ARIA/apg/patterns/tabs/examples/tabs-manual/) (default) or [automatic activation](https://www.w3.org/WAI/ARIA/apg/patterns/tabs/examples/tabs-automatic/) with `activation=\"auto\"`. The tab list is one tab stop (roving tabindex): the selected tab, or the first enabled tab while none is selected. Each tab controls its panel and each panel is labelled by its tab; the visible panel is itself a tab stop. Mark a `<void-tab-panel disabled>` to disable its tab.",
+    "rows": [
+      {
+        "keys": "Tab",
+        "action": "Enters the tab list on its tab stop, then moves to the visible panel"
+      },
+      {
+        "keys": "Right Arrow, Left Arrow",
+        "action": "Move focus to the next or previous tab (wraps). With `activation=\"auto\"` the tab is selected too"
+      },
+      {
+        "keys": "Home, End",
+        "action": "Move focus to the first or last tab (selects it with `activation=\"auto\"`)"
+      },
+      {
+        "keys": "Enter, Space",
+        "action": "Select the focused tab (manual activation)"
+      }
+    ]
+  },
+  "void-segmented-control": {
+    "intro": "Pattern: [radio group](https://www.w3.org/WAI/ARIA/apg/patterns/radio/). `role=\"radiogroup\"` with `role=\"radio\"` items and `aria-checked` from the first paint. One tab stop: the checked item, or the first enabled item while none is checked. Selection follows focus, so each arrow key fires `void-change`.",
+    "rows": [
+      {
+        "keys": "Tab, Shift + Tab",
+        "action": "Move into and out of the group"
+      },
+      {
+        "keys": "Right Arrow, Down Arrow",
+        "action": "Select the next item (wraps). With nothing selected, the first"
+      },
+      {
+        "keys": "Left Arrow, Up Arrow",
+        "action": "Select the previous item (wraps). With nothing selected, the last"
+      },
+      {
+        "keys": "Space",
+        "action": "Selects the focused item"
+      }
+    ]
+  },
+  "void-menu": {
+    "intro": "Pattern: [menu](https://www.w3.org/WAI/ARIA/apg/patterns/menu/). The list inside `<void-menu>` is the `menu` and its items are `menuitem`s (groups are `group`s). The items are one tab stop, and the tab stop follows focus. Keys are handled on the menu, so arrow keys keep working in every other control on the page.",
+    "rows": [
+      {
+        "keys": "Down Arrow, Up Arrow",
+        "action": "Move focus to the next or previous item (wraps). From a search field, Down Arrow goes to the first item and Up Arrow to the last"
+      },
+      {
+        "keys": "Up Arrow on the first item",
+        "action": "With `searchable`, returns to the search field"
+      },
+      {
+        "keys": "Home, End",
+        "action": "Move focus to the first or last item"
+      },
+      {
+        "keys": "Characters",
+        "action": "Jump to the next item that starts with the typed text (not with `searchable`, where typing filters)"
+      },
+      {
+        "keys": "Enter, Space",
+        "action": "Activate the item (`void-select`)"
+      },
+      {
+        "keys": "Escape",
+        "action": "Closes the menu"
+      }
+    ]
+  },
+  "void-dropdown-menu": {
+    "intro": "Pattern: [menu button](https://www.w3.org/WAI/ARIA/apg/patterns/menu-button/). The trigger gets `aria-haspopup=\"menu\"`, `aria-expanded` and `aria-controls`; the panel is a `menu` labelled by the trigger. Items take focus from the keyboard handling, not from Tab.",
+    "rows": [
+      {
+        "keys": "Enter, Space (on the trigger)",
+        "action": "Open the menu and focus the first item. A `<void-button>` or any other non-native trigger is supported"
+      },
+      {
+        "keys": "Down Arrow (on the trigger)",
+        "action": "Open the menu and focus the first item"
+      },
+      {
+        "keys": "Up Arrow (on the trigger)",
+        "action": "Open the menu and focus the last item"
+      },
+      {
+        "keys": "Down Arrow, Up Arrow",
+        "action": "Move to the next or previous item (wraps)"
+      },
+      {
+        "keys": "Home, End",
+        "action": "Move to the first or last item"
+      },
+      {
+        "keys": "Characters",
+        "action": "Jump to the next item that starts with the typed text"
+      },
+      {
+        "keys": "Enter, Space (on an item)",
+        "action": "Activate the item (`void-select`)"
+      },
+      {
+        "keys": "Escape",
+        "action": "Closes the menu and returns focus to the trigger"
+      },
+      {
+        "keys": "Tab",
+        "action": "Closes the menu and moves on"
+      }
+    ]
+  },
+  "void-calendar": {
+    "intro": "The focused day moves with the arrow keys and the selection follows Enter or Space.",
+    "rows": [
+      {
+        "keys": "Left Arrow / Right Arrow",
+        "action": "Moves focus to the previous or next day"
+      },
+      {
+        "keys": "Up Arrow / Down Arrow",
+        "action": "Moves focus to the same weekday in the previous or next week"
+      },
+      {
+        "keys": "Home / End",
+        "action": "Moves focus to the first or last day of the week (the week starts on `first-day`)"
+      },
+      {
+        "keys": "Page Up / Page Down",
+        "action": "Moves focus to the same day in the previous or next month"
+      },
+      {
+        "keys": "Shift + Page Up / Shift + Page Down",
+        "action": "Moves focus to the previous or next year"
+      },
+      {
+        "keys": "Enter / Space",
+        "action": "Chooses the focused day"
+      }
+    ]
+  },
+  "void-number-input": {
+    "rows": [
+      {
+        "keys": "Up Arrow",
+        "action": "Increases the value by `step` (by 1 when `step=\"any\"`)"
+      },
+      {
+        "keys": "Down Arrow",
+        "action": "Decreases the value by `step` (by 1 when `step=\"any\"`)"
+      }
+    ]
+  },
+  "void-pin-input": {
+    "intro": "Each digit has its own cell; focus moves between cells as you type.",
+    "rows": [
+      {
+        "keys": "Backspace",
+        "action": "Clears the cell; in an empty cell, moves to the previous cell and clears it"
+      },
+      {
+        "keys": "Delete",
+        "action": "Clears the cell"
+      },
+      {
+        "keys": "Left Arrow / Right Arrow",
+        "action": "Moves to the previous or next cell"
+      }
+    ]
+  },
+  "void-tags-input": {
+    "intro": "Keys in the text field.",
+    "rows": [
+      {
+        "keys": "Enter / Comma",
+        "action": "Adds the typed text as a tag"
+      },
+      {
+        "keys": "Backspace",
+        "action": "In an empty field, removes the last tag"
+      }
+    ]
+  },
+  "void-carousel": {
+    "intro": "With focus inside the carousel.",
+    "rows": [
+      {
+        "keys": "Left Arrow / Right Arrow",
+        "action": "Previous or next slide (horizontal carousels)"
+      },
+      {
+        "keys": "Up Arrow / Down Arrow",
+        "action": "Previous or next slide (vertical carousels)"
+      }
+    ]
+  },
+  "void-toggle-group": {
+    "intro": "Arrow keys move focus between the toggles; they do not press them.",
+    "rows": [
+      {
+        "keys": "Right Arrow / Left Arrow",
+        "action": "Moves focus to the next or previous toggle, wrapping at the ends (horizontal)"
+      },
+      {
+        "keys": "Down Arrow / Up Arrow",
+        "action": "Moves focus to the next or previous toggle, wrapping at the ends (vertical)"
+      },
+      {
+        "keys": "Enter / Space",
+        "action": "Presses the focused toggle"
+      }
+    ]
+  },
+  "void-switch": {
+    "rows": [
+      {
+        "keys": "Space / Enter",
+        "action": "Turns the switch on or off"
+      }
+    ]
+  },
+  "void-collapsible": {
+    "intro": "The heading is a button.",
+    "rows": [
+      {
+        "keys": "Enter / Space",
+        "action": "Opens or closes the section"
+      }
+    ]
+  },
+  "void-dialog": {
+    "rows": [
+      {
+        "keys": "Escape",
+        "action": "Closes the dialog and fires `void-close`, unless `closable=\"false\"`"
+      }
+    ]
+  },
+  "void-drawer": {
+    "rows": [
+      {
+        "keys": "Escape",
+        "action": "Closes the drawer and fires `void-close`, unless `closable=\"false\"`"
+      }
+    ]
+  },
+  "void-popover": {
+    "rows": [
+      {
+        "keys": "Escape",
+        "action": "Closes an open popover"
+      }
+    ]
+  },
+  "void-hover-card": {
+    "rows": [
+      {
+        "keys": "Escape",
+        "action": "Closes an open card"
+      }
+    ]
+  }
+}

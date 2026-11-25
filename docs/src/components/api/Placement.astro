@@ -1,0 +1,54 @@
+---
+// What the element takes as children and where it may be placed.
+import { loadComponentData } from '../../lib/component-data.mjs';
+import { inline } from '../../lib/inline.mjs';
+
+interface Props { tag: string }
+const { tag } = Astro.props;
+const data = loadComponentData();
+const c = data.byTag.get(tag)!;
+const link = (t: string) => (data.byTag.has(t) ? `/components/${t.replace(/^void-/, '')}/` : null);
+---
+
+{c.note.children && <p set:html={inline(c.note.children)} />}
+{
+  c.slots.length > 0 && (
+    <div class="vd-api-table">
+      <table>
+        <thead><tr><th>Slot</th><th>Description</th></tr></thead>
+        <tbody>
+          {c.slots.map((s: any) => (
+            <tr>
+              <td>{s.name ? <code>slot="{s.name}"</code> : <span>default</span>}</td>
+              <td set:html={inline(s.description)} />
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  )
+}
+<ul>
+  {
+    c.requires.length > 0 && (
+      <li>
+        Needs at least one {c.requires.map((t: string, i: number) => (<Fragment>{i > 0 && ', '}<a href={link(t)}><code>{t}</code></a></Fragment>))} child to be useful.
+      </li>
+    )
+  }
+  {
+    c.children.length > 0 && (
+      <li>
+        Child elements: {c.children.map((t: string, i: number) => (<Fragment>{i > 0 && ', '}<a href={link(t)}><code>{t}</code></a></Fragment>))}.
+      </li>
+    )
+  }
+  {
+    c.parents.length > 0 && (
+      <li>
+        Place it inside {c.parents.map((t: string, i: number) => (<Fragment>{i > 0 && ' or '}<a href={link(t)}><code>{t}</code></a></Fragment>))}, anywhere above it (a wrapper element in between is fine). Elsewhere it does nothing, and <code>voidable check</code> and the development warnings flag it.
+      </li>
+    )
+  }
+  {c.parents.length === 0 && <li>Can be placed anywhere in the page; it does not depend on a parent element.</li>}
+</ul>

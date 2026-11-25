@@ -132,6 +132,16 @@ h1#_top {
   color: var(--void-color-text);
 }
 
+/* A top bar is as wide as its content; on a phone let the example scroll
+   rather than the page. (Not on every example: it would clip open menus.) */
+.vd-api-table td:not(:last-child) code {
+  white-space: nowrap;
+}
+
+.vd-pattern:has(> void-nav-bar) {
+  overflow-x: auto;
+}
+
 .vd-pattern-frame {
   padding: 0;
   border: 1px solid var(--void-color-border);
@@ -180,4 +190,48 @@ h1#_top {
   .vd-shots {
     grid-template-columns: 1fr;
   }
+}
+
+/* Generated component pages: API tables scroll inside their own box on a
+   narrow screen instead of widening the page. */
+.vd-api-table {
+  overflow-x: auto;
+  margin-block: var(--void-gap-stack);
+}
+
+.vd-api-table table {
+  margin: 0;
+  width: 100%;
+  min-width: 36rem;
+}
+
+.vd-api-table td code {
+  overflow-wrap: anywhere;
+}
+
+.vd-api-none,
+.vd-api-note {
+  color: var(--void-color-text-secondary);
+}
+
+.vd-api-note {
+  font-size: var(--void-text-sm);
+  margin-block: var(--void-gap-tight);
+}
+
+/* Common mistakes: the wrong markup, then why. */
+.vd-api-mistakes {
+  display: grid;
+  gap: var(--void-gap-tight) var(--void-gap-inside);
+  margin-block: var(--void-gap-stack);
+}
+
+.vd-api-mistakes dt {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.vd-api-mistakes dd {
+  margin: 0 0 var(--void-gap-inside);
+  color: var(--void-color-text-secondary);
 }

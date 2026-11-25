@@ -1,0 +1,39 @@
+---
+// The live example and the copy-paste tabs for one component, from the
+// `voidable` tool's snippet data (the same strings `voidable gen snippet`
+// prints). A page can override what is rendered live (a dialog needs a button
+// to open it) through `live` in component-notes.json, and show the script a
+// property-only component needs (a chart's `data`) through `script`: the code
+// block on the page is the code that runs on the live example.
+import { Code } from '@astrojs/starlight/components';
+import Example from '../Example.astro';
+import { loadComponentData } from '../../lib/component-data.mjs';
+
+interface Props { tag: string }
+const { tag } = Astro.props;
+const c = loadComponentData().byTag.get(tag);
+if (!c?.snippets) throw new Error(`no snippets for ${tag}`);
+const s = c.snippets;
+const script: string | undefined = c.note.script;
+const runner = script
+  ? `customElements.whenDefined(${JSON.stringify(tag)}).then(() => { ${script.replace(/<\/script/gi, '<\\/script')} });`
+  : '';
+---
+
+<Example html={s.html} jsx={s.jsx} erb={s.erb} heex={s.heex} blade={s.blade} live={c.note.live ?? s.markup} />
+{
+  script && (
+    <>
+      <p class="vd-api-note">
+        <code>{tag}</code> takes its data as a property, so set it from script after the element exists. This is the code running on the example above.
+      </p>
+      <Code code={script} lang="js" />
+      <script is:inline set:html={runner} />
+    </>
+  )
+}
+{
+  s.source !== 'supplement' && (
+    <p class="vd-api-note">This example is generated from the manifest alone; the component has no hand-written canonical example yet.</p>
+  )
+}

@@ -1,0 +1,28 @@
+---
+// One keyboard table. Rows live in docs/src/data/keyboard.json, which the
+// component pages and the Keyboard and ARIA page both render.
+import { inline } from '../../lib/inline.mjs';
+import { loadComponentData } from '../../lib/component-data.mjs';
+
+interface Props {
+  tag: string;
+  /** Leave out the pattern paragraph (the Keyboard and ARIA page shows it itself). */
+  bare?: boolean;
+}
+const { tag, bare } = Astro.props;
+const k = loadComponentData().keyboard[tag];
+const rows: { keys: string; action: string }[] = k.rows;
+const intro: string | undefined = bare ? undefined : k.intro;
+---
+
+{intro && <p set:html={inline(intro)} />}
+<div class="vd-api-table">
+  <table>
+    <thead><tr><th>Key</th><th>Action</th></tr></thead>
+    <tbody>
+      {rows.map((r) => (
+        <tr><td set:html={inline(r.keys)} /><td set:html={inline(r.action)} /></tr>
+      ))}
+    </tbody>
+  </table>
+</div>

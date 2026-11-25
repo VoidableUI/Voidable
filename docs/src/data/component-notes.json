@@ -1,0 +1,433 @@
+{
+  "void-button": {
+    "group": "forms",
+    "events": {
+      "void-click": "Fires after an enabled button is activated, once any form submit or reset it does has run. Not fired while the button is disabled. A native `click` listener works too."
+    },
+    "children": "The label: text, or text with an icon. For an icon-only button put an `aria-label` on the button. A link can go inside to make a link that looks like a button."
+  },
+  "void-action-input": {
+    "group": "forms",
+    "events": {
+      "void-input": "Fires on every edit of the text. `detail.value` is the new text.",
+      "void-change": "Fires when the text is committed (the field loses focus after a change). `detail.value` is the text.",
+      "void-action": "Fires when the action button is pressed. `detail.value` is the current text."
+    }
+  },
+  "void-checkbox": {
+    "group": "forms",
+    "events": {
+      "void-change": "Fires when the user toggles the checkbox. `detail.checked` is the new state."
+    },
+    "children": "The label text."
+  },
+  "void-checkbox-group": {
+    "group": "forms",
+    "events": {
+      "void-change": "Fires when a checkbox in the group is toggled. `detail.values` lists the values of the checked boxes."
+    },
+    "children": "Takes `void-checkbox` children. The `label` attribute names the group."
+  },
+  "void-color-picker": {
+    "group": "forms",
+    "events": {
+      "void-change": "Fires when the colour changes by dragging, typing a hex value or choosing a swatch; `detail.value` is the hex string. It fires continuously while dragging."
+    }
+  },
+  "void-combobox": {
+    "group": "forms",
+    "events": {
+      "void-change": "Fires when the user chooses an option. `detail.value` is its value."
+    },
+    "children": "Takes `void-option` children, one per choice."
+  },
+  "void-compose-input": {
+    "group": "forms",
+    "events": {
+      "void-input": "Fires on every edit of the text. `detail.value` is the new text.",
+      "void-submit": "Fires when the user presses the send button or the send key. `detail.value` is the message; the field is cleared afterwards. Not fired when the field is empty or disabled."
+    }
+  },
+  "void-date-picker": {
+    "group": "forms",
+    "events": {
+      "void-change": "Fires when the user picks a day. `detail.value` is the ISO date and `detail.date` the same day as a `Date`."
+    }
+  },
+  "void-calendar": {
+    "group": "forms",
+    "events": {
+      "void-change": "Fires when the user picks a day. `detail.value` is the ISO date and `detail.date` the same day as a `Date`."
+    }
+  },
+  "void-editable": {
+    "group": "forms",
+    "events": {
+      "void-change": "Fires when the user commits an edit (Enter or leaving the field). `detail.value` is the new text.",
+      "void-cancel": "Fires when the user abandons an edit with Escape; the previous value stays."
+    }
+  },
+  "void-field": {
+    "group": "forms",
+    "children": "Exactly one control: a `void-input`, `void-select`, `void-textarea` or another form control. The `label`, `helper` and `error` attributes supply the text around it."
+  },
+  "void-file-upload": {
+    "group": "forms",
+    "events": {
+      "void-change": "Fires when the chosen files change, by dropping, browsing or removing one. `detail.files` is the list of accepted `File`s."
+    }
+  },
+  "void-input": {
+    "group": "forms",
+    "events": {
+      "void-input": "Fires on every keystroke. `detail.value` is the new text.",
+      "void-change": "Fires when the value is committed (the field loses focus after a change). `detail.value` is the text."
+    }
+  },
+  "void-multiselect": {
+    "group": "forms",
+    "events": {
+      "void-change": "Fires when an option is selected or deselected. `detail.values` lists every selected value."
+    },
+    "children": "Takes `void-option` children, one per choice. Mark the initial ones with `selected`."
+  },
+  "void-number-input": {
+    "group": "forms",
+    "events": {
+      "void-change": "Fires when the value changes by typing, the step buttons or the arrow keys. `detail.value` is the new number and `detail.previous` the old one."
+    }
+  },
+  "void-option": {
+    "group": "forms"
+  },
+  "void-pin-input": {
+    "group": "forms",
+    "events": {
+      "void-change": "Fires on every edit of the code. `detail.value` is the characters entered so far.",
+      "void-complete": "Fires once every cell is filled. `detail.value` is the full code."
+    }
+  },
+  "void-radio": {
+    "group": "forms",
+    "events": {
+      "void-change": "Fires when the user chooses this radio. `detail.value` is its value and `detail.checked` is true."
+    },
+    "children": "The label text."
+  },
+  "void-radio-group": {
+    "group": "forms",
+    "events": {
+      "void-change": "Fires when the user chooses a radio. `detail.value` is its value."
+    },
+    "children": "Takes `void-radio` children. The `label` attribute names the group."
+  },
+  "void-segmented-control": {
+    "group": "forms",
+    "events": {
+      "void-change": "Fires when the user chooses a segment. `detail.value` is its value."
+    },
+    "children": "Takes `void-segmented-control-item` children."
+  },
+  "void-segmented-control-item": {
+    "group": "forms",
+    "children": "The label text of one segment."
+  },
+  "void-select": {
+    "group": "forms",
+    "events": {
+      "void-change": "Fires when the user chooses an option. `detail.value` is its value."
+    },
+    "children": "Native `option` and `optgroup` elements, not `void-option`."
+  },
+  "void-slider": {
+    "group": "forms",
+    "events": {
+      "void-input": "Fires continuously while the thumb moves. `detail.value` is the current number.",
+      "void-change": "Fires when the user releases the thumb or uses the keyboard. `detail.value` is the number."
+    }
+  },
+  "void-switch": {
+    "group": "forms",
+    "events": {
+      "void-change": "Fires when the user flips the switch. `detail.checked` is the new state."
+    },
+    "children": "The label text."
+  },
+  "void-tags-input": {
+    "group": "forms",
+    "events": {
+      "void-change": "Fires when a tag is added or removed. `detail.value` is the full list of tags."
+    },
+    "children": "Takes no children."
+  },
+  "void-textarea": {
+    "group": "forms",
+    "events": {
+      "void-input": "Fires on every keystroke. `detail.value` is the new text.",
+      "void-change": "Fires when the value is committed (the field loses focus after a change). `detail.value` is the text."
+    }
+  },
+  "void-toggle": {
+    "group": "forms",
+    "events": {
+      "void-change": "Fires when the user presses the toggle. `detail.pressed` is the new state."
+    },
+    "children": "The label text or an icon (give an icon-only toggle an `aria-label`)."
+  },
+  "void-toggle-group": {
+    "group": "forms",
+    "events": {
+      "void-change": "Fires when the user presses a toggle. `detail.value` is an array of pressed values with `multiple`, otherwise the pressed value or an empty string."
+    },
+    "children": "Takes `void-toggle` children, each with a `value`."
+  },
+  "void-dialog": {
+    "group": "overlays",
+    "live": "<void-button variant=\"filled\" onclick=\"this.nextElementSibling.open = true\">Open dialog</void-button>\n<void-dialog heading=\"Delete project\" size=\"sm\">\n  <p>This cannot be undone.</p>\n  <void-button color=\"error\" variant=\"filled\" onclick=\"this.closest('void-dialog').open = false\">Delete</void-button>\n</void-dialog>",
+    "events": {
+      "void-close": "Fires when the dialog closes itself (the close button, Escape or a backdrop click)."
+    },
+    "children": "The dialog body: text, forms and buttons. The `heading` attribute is the title and the dialog's accessible name."
+  },
+  "void-drawer": {
+    "group": "overlays",
+    "live": "<void-button variant=\"filled\" onclick=\"this.nextElementSibling.open = true\">Open drawer</void-button>\n<void-drawer heading=\"Filters\" side=\"right\">\n  <p>Narrow the list by status and owner.</p>\n  <void-button variant=\"filled\" onclick=\"this.closest('void-drawer').open = false\">Apply filters</void-button>\n</void-drawer>",
+    "events": {
+      "void-close": "Fires when the drawer closes itself (the close button, Escape or a backdrop click)."
+    },
+    "children": "The drawer body: any content. The `heading` attribute is the title and the drawer's accessible name."
+  },
+  "void-dropdown-menu": {
+    "group": "overlays",
+    "children": "One element marked `slot=\"trigger\"` that opens the menu, then `void-dropdown-menu-item` children for the actions."
+  },
+  "void-dropdown-menu-item": {
+    "group": "overlays",
+    "events": {
+      "void-select": "Fires when the item is activated. `detail.item` is the item element; read its text or attributes to tell items apart."
+    }
+  },
+  "void-hover-card": {
+    "group": "overlays",
+    "events": {
+      "void-open": "Fires when the card opens, on hover or focus of the trigger.",
+      "void-close": "Fires when the card closes."
+    },
+    "children": "One element marked `slot=\"trigger\"`, then the card content."
+  },
+  "void-menu": {
+    "group": "overlays",
+    "children": "Takes `void-menu-item` children, optionally grouped in `void-menu-group`."
+  },
+  "void-menu-group": {
+    "group": "overlays",
+    "children": "Takes `void-menu-item` children. The `label` attribute is the group heading."
+  },
+  "void-menu-item": {
+    "group": "overlays",
+    "events": {
+      "void-select": "Fires when the item is activated. `detail.value` is its `value`."
+    }
+  },
+  "void-popover": {
+    "group": "overlays",
+    "events": {
+      "void-close": "Fires when the popover closes itself (Escape or a click outside)."
+    },
+    "children": "One element marked `slot=\"trigger\"`, then the popover content."
+  },
+  "void-tooltip": {
+    "group": "overlays",
+    "children": "The one element the tooltip describes. The tip text is the `text` attribute."
+  },
+  "void-breadcrumbs": {
+    "group": "navigation",
+    "children": "A list of links in order, with the current page as the last item (a `span` or a link with `aria-current`)."
+  },
+  "void-hamburger": {
+    "group": "navigation",
+    "events": {
+      "void-toggle": "Fires when the user presses the button. `detail.active` is the new state."
+    }
+  },
+  "void-nav-bar": {
+    "group": "navigation",
+    "children": "A brand, a set of links and controls, laid out in a row: `void-brand`, `void-nav-links`, `void-spacer` and buttons, as in the example."
+  },
+  "void-nav-menu": {
+    "group": "navigation",
+    "children": "Takes `void-nav-menu-item` children."
+  },
+  "void-nav-menu-item": {
+    "group": "navigation",
+    "events": {
+      "void-open": "Fires when the item opens its panel.",
+      "void-close": "Fires when the item closes its panel."
+    },
+    "children": "The label text, then (to open a panel) the panel content, such as a list of links. With `href` it is a plain link and takes no panel."
+  },
+  "void-pagination": {
+    "group": "navigation",
+    "events": {
+      "void-change": "Fires when the user picks a page. `detail.value` is the page number."
+    }
+  },
+  "void-sidebar": {
+    "group": "navigation",
+    "events": {
+      "void-toggle": "Fires when the sidebar collapses or expands. `detail.collapsed` is the new state."
+    },
+    "children": "The navigation content: links, `void-nav-links` or any markup."
+  },
+  "void-stepper": {
+    "group": "navigation"
+  },
+  "void-tabs": {
+    "group": "navigation",
+    "events": {
+      "void-change": "Fires when the user selects a tab. `detail.value` is the `tab` of the panel now shown."
+    },
+    "children": "Takes `void-tab-panel` children, one per tab."
+  },
+  "void-tab-panel": {
+    "group": "navigation",
+    "children": "The content of one tab. The `label` attribute is the tab's text and `tab` its identifier."
+  },
+  "void-avatar": {
+    "group": "data-display"
+  },
+  "void-badge": {
+    "group": "data-display",
+    "children": "Short text, a count or a status word."
+  },
+  "void-carousel": {
+    "group": "data-display",
+    "events": {
+      "void-change": "Fires when the visible slide changes. `detail.index` is the new slide and `detail.previous` the one before."
+    },
+    "children": "Takes `void-carousel-slide` children, one per slide."
+  },
+  "void-carousel-slide": {
+    "group": "data-display",
+    "children": "The content of one slide: text, an image, any markup."
+  },
+  "void-indicator": {
+    "group": "data-display"
+  },
+  "void-list": {
+    "group": "data-display",
+    "children": "Takes `void-list-item` children."
+  },
+  "void-list-item": {
+    "group": "data-display",
+    "events": {
+      "void-click": "Fires when an `interactive` item is activated."
+    }
+  },
+  "void-stat": {
+    "group": "data-display"
+  },
+  "void-status-dot": {
+    "group": "data-display"
+  },
+  "void-table": {
+    "group": "data-display"
+  },
+  "void-tag": {
+    "group": "data-display",
+    "events": {
+      "void-remove": "Fires when the user presses the remove button of a `removable` tag, just before the tag removes itself from the page."
+    },
+    "children": "Short text."
+  },
+  "void-alert": {
+    "group": "feedback",
+    "events": {
+      "void-dismiss": "Fires when the user presses the dismiss button of a `dismissible` alert, just before the alert removes itself from the page."
+    },
+    "children": "The message text and any inline markup, such as a link."
+  },
+  "void-banner": {
+    "group": "feedback",
+    "events": {
+      "void-close": "Fires when the user presses the close button of a `dismissable` banner, just before the banner removes itself from the page."
+    },
+    "children": "The message text and any inline markup, such as a link."
+  },
+  "void-error-fallback": {
+    "group": "feedback",
+    "events": {
+      "void-retry": "Fires when the user presses the retry button of a `retryable` fallback."
+    }
+  },
+  "void-progress": {
+    "group": "feedback"
+  },
+  "void-skeleton": {
+    "group": "feedback"
+  },
+  "void-spinner": {
+    "group": "feedback"
+  },
+  "void-toast": {
+    "group": "feedback",
+    "live": "<void-toast-container position=\"inline\">\n  <void-toast color=\"success\" heading=\"Saved\" duration=\"0\">Your changes were saved.</void-toast>\n</void-toast-container>",
+    "events": {
+      "void-close": "Fires when the toast closes, by timeout or the close button, just before it removes itself from the page."
+    },
+    "children": "The message text."
+  },
+  "void-toast-container": {
+    "group": "feedback",
+    "live": "<void-toast-container position=\"inline\">\n  <void-toast color=\"info\" duration=\"0\">The export will be ready in a minute.</void-toast>\n</void-toast-container>",
+    "children": "Takes `void-toast` children."
+  },
+  "void-accordion": {
+    "group": "layout",
+    "children": "Takes `void-accordion-item` children. Without `multiple`, opening one item closes the others."
+  },
+  "void-accordion-item": {
+    "group": "layout",
+    "events": {
+      "void-toggle": "Fires after the item opens or closes. `detail.open` is the new state."
+    },
+    "children": "Its `heading` attribute is the title shown on the button; the children are the body that opens and closes."
+  },
+  "void-card": {
+    "group": "layout",
+    "children": "The card body: any content. The title comes from the `heading` attribute."
+  },
+  "void-collapsible": {
+    "group": "layout",
+    "events": {
+      "void-toggle": "Fires after the section opens or closes. `detail.open` is the new state."
+    },
+    "children": "The body that opens and closes. The `heading` attribute is the title shown on the button."
+  },
+  "void-divider": {
+    "group": "layout"
+  },
+  "void-panel": {
+    "group": "layout",
+    "children": "The panel body: any content. The `label` attribute is the heading and the region's accessible name."
+  },
+  "void-scroll-area": {
+    "group": "layout",
+    "children": "Any content taller or wider than the area; it scrolls inside."
+  },
+  "void-bar-chart": {
+    "group": "charts",
+    "script": "const chart = document.querySelector('void-bar-chart');\nchart.data = {\n  labels: ['Q1', 'Q2', 'Q3', 'Q4'],\n  series: [\n    { name: '2025', values: [120, 180, 150, 210] },\n    { name: '2026', values: [150, 220, 190, 260] },\n  ],\n};"
+  },
+  "void-donut-chart": {
+    "group": "charts",
+    "script": "const chart = document.querySelector('void-donut-chart');\nchart.data = {\n  segments: [\n    { name: 'Search', value: 540 },\n    { name: 'Direct', value: 320 },\n    { name: 'Referral', value: 180 },\n  ],\n};"
+  },
+  "void-gauge": {
+    "group": "charts"
+  },
+  "void-line-chart": {
+    "group": "charts",
+    "script": "const chart = document.querySelector('void-line-chart');\nchart.data = {\n  labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],\n  series: [{ name: 'Visitors', values: [320, 410, 380, 520, 610, 450, 390] }],\n};"
+  }
+}
