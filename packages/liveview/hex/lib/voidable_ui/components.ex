@@ -5,11 +5,69 @@ defmodule VoidableUI.Components do
   Each function component renders the corresponding `<void-*>` custom element tag.
   Interactive components include `phx-hook="VoidEvent"` and `data-void-events`
   attributes to bridge CustomEvents to LiveView's `pushEvent`.
+
+  ## Ids
+
+  `phx-hook` needs a stable DOM id. When you do not pass `id`, one is derived
+  from the component kind, its `name` and its `phx-*` attributes, so it stays
+  the same across re-renders. Pass an explicit `id` when you render several
+  otherwise identical anonymous components on one page.
+
+  ## `phx-update="ignore"`
+
+  Many Voidable components move their light-DOM children into Lit-rendered
+  wrappers, which a LiveView patch can disturb. `phx-update="ignore"` protects
+  that structure, but LiveView then also skips every non-`data-*` attribute
+  update and all child updates for that element. Because that would block
+  legitimate server updates (`open`, `value`, `error`, dynamic options or menu
+  items), it is **not** applied automatically. Opt in per element, with a
+  stable id, where the server renders the element once and the client owns it
+  afterwards, for example a `select` with static options:
+
+      <.select id="country" name="country" phx-update="ignore">
+        <option value="de">Germany</option>
+      </.select>
+
+  Good candidates: `select`, `multiselect`, `dropdown_menu`, `menu`, `popover`,
+  `hover_card`, `tooltip`, `carousel`, `accordion_item` and `collapsible`
+  *when their content is static*. Avoid it on `dialog`/`drawer` (the server
+  drives `open`), `input`, `checkbox`, `switch` and other value-bound controls.
+
+  ## `closable={false}`
+
+  The core `closable` property is a Lit boolean that defaults to `true`, and a
+  boolean attribute can only ever say "true". `dialog` and `drawer` therefore
+  render `data-void-closable="true|false"`, which the `VoidEvent` hook applies
+  as the `closable` property on mount and on every update.
   """
 
   use Phoenix.Component
 
-  defp unique_id, do: System.unique_integer([:positive]) |> Integer.to_string()
+  # Stable id for components that need one (`phx-hook` requires an id).
+  #
+  # The id is derived from the component kind, its `name` and its `phx-*` /
+  # `data-testid` attributes, so it is identical on every re-render of the same
+  # element (a fresh id would make LiveView replace the node and re-mount its
+  # hook). Pass an explicit `id` when rendering several otherwise identical
+  # anonymous components on one page.
+  defp auto_id(prefix, seed) do
+    {name, rest} =
+      case seed do
+        {name, rest} -> {name, rest}
+        rest -> {nil, rest}
+      end
+
+    identity =
+      rest
+      |> Enum.filter(fn {key, _} ->
+        key = to_string(key)
+        String.starts_with?(key, "phx-") or key == "data-testid"
+      end)
+      |> Enum.map(fn {key, value} -> {to_string(key), value} end)
+      |> Enum.sort()
+
+    "#{prefix}-#{:erlang.phash2({prefix, name, identity})}"
+  end
 
   # ---------------------------------------------------------------------------
   # Badge (static)
@@ -47,7 +105,7 @@ defmodule VoidableUI.Components do
   def button(assigns) do
     ~H"""
     <void-button
-      id={@id || "void-button-#{unique_id()}"}
+      id={@id || auto_id("void-button", @rest)}
       variant={@variant}
       color={@color}
       disabled={@disabled}
@@ -135,7 +193,7 @@ defmodule VoidableUI.Components do
   def switch(assigns) do
     ~H"""
     <void-switch
-      id={@id || "void-switch-#{unique_id()}"}
+      id={@id || auto_id("void-switch", @rest)}
       checked={@checked}
       disabled={@disabled}
       color={@color}
@@ -179,7 +237,7 @@ defmodule VoidableUI.Components do
   def alert(assigns) do
     ~H"""
     <void-alert
-      id={@id || "void-alert-#{unique_id()}"}
+      id={@id || auto_id("void-alert", @rest)}
       color={@color}
       dismissible={@dismissible}
       variant={@variant}
@@ -207,7 +265,7 @@ defmodule VoidableUI.Components do
   def tag(assigns) do
     ~H"""
     <void-tag
-      id={@id || "void-tag-#{unique_id()}"}
+      id={@id || auto_id("void-tag", @rest)}
       color={@color}
       removable={@removable}
       size={@size}
@@ -283,7 +341,7 @@ defmodule VoidableUI.Components do
   def input(assigns) do
     ~H"""
     <void-input
-      id={@id || "void-input-#{unique_id()}"}
+      id={@id || auto_id("void-input", {@name, @rest})}
       type={@type}
       value={@value}
       placeholder={@placeholder}
@@ -321,7 +379,7 @@ defmodule VoidableUI.Components do
   def textarea(assigns) do
     ~H"""
     <void-textarea
-      id={@id || "void-textarea-#{unique_id()}"}
+      id={@id || auto_id("void-textarea", {@name, @rest})}
       value={@value}
       placeholder={@placeholder}
       disabled={@disabled}
@@ -358,7 +416,7 @@ defmodule VoidableUI.Components do
   def select(assigns) do
     ~H"""
     <void-select
-      id={@id || "void-select-#{unique_id()}"}
+      id={@id || auto_id("void-select", {@name, @rest})}
       value={@value}
       disabled={@disabled}
       required={@required}
@@ -394,7 +452,7 @@ defmodule VoidableUI.Components do
   def checkbox(assigns) do
     ~H"""
     <void-checkbox
-      id={@id || "void-checkbox-#{unique_id()}"}
+      id={@id || auto_id("void-checkbox", {@name, @rest})}
       checked={@checked}
       disabled={@disabled}
       indeterminate={@indeterminate}
@@ -429,7 +487,7 @@ defmodule VoidableUI.Components do
   def radio(assigns) do
     ~H"""
     <void-radio
-      id={@id || "void-radio-#{unique_id()}"}
+      id={@id || auto_id("void-radio", {@name, @rest})}
       checked={@checked}
       disabled={@disabled}
       name={@name}
@@ -461,7 +519,7 @@ defmodule VoidableUI.Components do
   def radio_group(assigns) do
     ~H"""
     <void-radio-group
-      id={@id || "void-radio-group-#{unique_id()}"}
+      id={@id || auto_id("void-radio-group", {@name, @rest})}
       label={@label}
       value={@value}
       name={@name}
@@ -536,7 +594,7 @@ defmodule VoidableUI.Components do
   def multiselect(assigns) do
     ~H"""
     <void-multiselect
-      id={@id || "void-multiselect-#{unique_id()}"}
+      id={@id || auto_id("void-multiselect", {@name, @rest})}
       placeholder={@placeholder}
       disabled={@disabled}
       size={@size}
@@ -567,11 +625,12 @@ defmodule VoidableUI.Components do
   def dialog(assigns) do
     ~H"""
     <void-dialog
-      id={@id || "void-dialog-#{unique_id()}"}
+      id={@id || auto_id("void-dialog", @rest)}
       open={@open}
       heading={@heading}
       size={@size}
       closable={@closable}
+      data-void-closable={to_string(@closable)}
       phx-hook="VoidEvent"
       data-void-events="void-close"
       {@rest}
@@ -595,7 +654,7 @@ defmodule VoidableUI.Components do
   def tabs(assigns) do
     ~H"""
     <void-tabs
-      id={@id || "void-tabs-#{unique_id()}"}
+      id={@id || auto_id("void-tabs", @rest)}
       value={@value}
       size={@size}
       phx-hook="VoidEvent"
@@ -657,7 +716,7 @@ defmodule VoidableUI.Components do
   def accordion_item(assigns) do
     ~H"""
     <void-accordion-item
-      id={@id || "void-accordion-item-#{unique_id()}"}
+      id={@id || auto_id("void-accordion-item", @rest)}
       heading={@heading}
       open={@open}
       phx-hook="VoidEvent"
@@ -743,7 +802,7 @@ defmodule VoidableUI.Components do
   def toast(assigns) do
     ~H"""
     <void-toast
-      id={@id || "void-toast-#{unique_id()}"}
+      id={@id || auto_id("void-toast", @rest)}
       color={@color}
       duration={@duration}
       dismissable={@dismissable}
@@ -807,12 +866,13 @@ defmodule VoidableUI.Components do
   def drawer(assigns) do
     ~H"""
     <void-drawer
-      id={@id || "void-drawer-#{unique_id()}"}
+      id={@id || auto_id("void-drawer", @rest)}
       open={@open}
       side={@side}
       size={@size}
       heading={@heading}
       closable={@closable}
+      data-void-closable={to_string(@closable)}
       phx-hook="VoidEvent"
       data-void-events="void-close"
       {@rest}
@@ -856,7 +916,7 @@ defmodule VoidableUI.Components do
   def popover(assigns) do
     ~H"""
     <void-popover
-      id={@id || "void-popover-#{unique_id()}"}
+      id={@id || auto_id("void-popover", @rest)}
       open={@open}
       position={@position}
       trigger={@trigger}
@@ -971,7 +1031,7 @@ defmodule VoidableUI.Components do
   def pagination(assigns) do
     ~H"""
     <void-pagination
-      id={@id || "void-pagination-#{unique_id()}"}
+      id={@id || auto_id("void-pagination", @rest)}
       total={@total}
       value={@value}
       siblings={@siblings}
@@ -1022,7 +1082,7 @@ defmodule VoidableUI.Components do
   def checkbox_group(assigns) do
     ~H"""
     <void-checkbox-group
-      id={@id || "void-checkbox-group-#{unique_id()}"}
+      id={@id || auto_id("void-checkbox-group", @rest)}
       label={@label}
       orientation={@orientation}
       phx-hook="VoidEvent"
@@ -1052,7 +1112,7 @@ defmodule VoidableUI.Components do
   def combobox(assigns) do
     ~H"""
     <void-combobox
-      id={@id || "void-combobox-#{unique_id()}"}
+      id={@id || auto_id("void-combobox", {@name, @rest})}
       value={@value}
       placeholder={@placeholder}
       disabled={@disabled}
@@ -1087,7 +1147,7 @@ defmodule VoidableUI.Components do
   def slider(assigns) do
     ~H"""
     <void-slider
-      id={@id || "void-slider-#{unique_id()}"}
+      id={@id || auto_id("void-slider", {@name, @rest})}
       value={@value}
       min={@min}
       max={@max}
@@ -1119,7 +1179,7 @@ defmodule VoidableUI.Components do
   def file_upload(assigns) do
     ~H"""
     <void-file-upload
-      id={@id || "void-file-upload-#{unique_id()}"}
+      id={@id || auto_id("void-file-upload", @rest)}
       accept={@accept}
       multiple={@multiple}
       disabled={@disabled}
@@ -1164,7 +1224,7 @@ defmodule VoidableUI.Components do
   def hamburger(assigns) do
     ~H"""
     <void-hamburger
-      id={@id || "void-hamburger-#{unique_id()}"}
+      id={@id || auto_id("void-hamburger", @rest)}
       active={@active}
       size={@size}
       phx-hook="VoidEvent"
@@ -1189,7 +1249,7 @@ defmodule VoidableUI.Components do
   def compose_input(assigns) do
     ~H"""
     <void-compose-input
-      id={@id || "void-compose-input-#{unique_id()}"}
+      id={@id || auto_id("void-compose-input", @rest)}
       value={@value}
       placeholder={@placeholder}
       disabled={@disabled}
@@ -1215,7 +1275,7 @@ defmodule VoidableUI.Components do
   def sidebar(assigns) do
     ~H"""
     <void-sidebar
-      id={@id || "void-sidebar-#{unique_id()}"}
+      id={@id || auto_id("void-sidebar", @rest)}
       width={@width}
       collapsed-width={@collapsed_width}
       phx-hook="VoidEvent"
@@ -1241,7 +1301,7 @@ defmodule VoidableUI.Components do
   def dropdown_menu(assigns) do
     ~H"""
     <void-dropdown-menu
-      id={@id || "void-dropdown-menu-#{unique_id()}"}
+      id={@id || auto_id("void-dropdown-menu", @rest)}
       open={@open}
       position={@position}
       phx-hook="VoidEvent"
@@ -1288,7 +1348,7 @@ defmodule VoidableUI.Components do
   def toggle(assigns) do
     ~H"""
     <void-toggle
-      id={@id || "void-toggle-#{unique_id()}"}
+      id={@id || auto_id("void-toggle", @rest)}
       pressed={@pressed}
       disabled={@disabled}
       color={@color}
@@ -1321,7 +1381,7 @@ defmodule VoidableUI.Components do
   def toggle_group(assigns) do
     ~H"""
     <void-toggle-group
-      id={@id || "void-toggle-group-#{unique_id()}"}
+      id={@id || auto_id("void-toggle-group", @rest)}
       value={@value}
       multiple={@multiple}
       disabled={@disabled}
@@ -1351,7 +1411,7 @@ defmodule VoidableUI.Components do
   def segmented_control(assigns) do
     ~H"""
     <void-segmented-control
-      id={@id || "void-segmented-control-#{unique_id()}"}
+      id={@id || auto_id("void-segmented-control", @rest)}
       value={@value}
       size={@size}
       phx-hook="VoidEvent"
@@ -1454,7 +1514,7 @@ defmodule VoidableUI.Components do
   def menu(assigns) do
     ~H"""
     <void-menu
-      id={@id || "void-menu-#{unique_id()}"}
+      id={@id || auto_id("void-menu", @rest)}
       open={@open}
       searchable={@searchable}
       size={@size}
@@ -1525,7 +1585,7 @@ defmodule VoidableUI.Components do
   def carousel(assigns) do
     ~H"""
     <void-carousel
-      id={@id || "void-carousel-#{unique_id()}"}
+      id={@id || auto_id("void-carousel", @rest)}
       active={@active}
       loop={@loop}
       autoplay={@autoplay}
@@ -1577,7 +1637,7 @@ defmodule VoidableUI.Components do
   def calendar(assigns) do
     ~H"""
     <void-calendar
-      id={@id || "void-calendar-#{unique_id()}"}
+      id={@id || auto_id("void-calendar", @rest)}
       value={@value}
       min={@min}
       max={@max}
@@ -1614,7 +1674,7 @@ defmodule VoidableUI.Components do
   def date_picker(assigns) do
     ~H"""
     <void-date-picker
-      id={@id || "void-date-picker-#{unique_id()}"}
+      id={@id || auto_id("void-date-picker", @rest)}
       value={@value}
       min={@min}
       max={@max}
@@ -1656,7 +1716,7 @@ defmodule VoidableUI.Components do
   def number_input(assigns) do
     ~H"""
     <void-number-input
-      id={@id || "void-number-input-#{unique_id()}"}
+      id={@id || auto_id("void-number-input", @rest)}
       value={@value}
       min={@min}
       max={@max}
@@ -1691,7 +1751,7 @@ defmodule VoidableUI.Components do
   def collapsible(assigns) do
     ~H"""
     <void-collapsible
-      id={@id || "void-collapsible-#{unique_id()}"}
+      id={@id || auto_id("void-collapsible", @rest)}
       heading={@heading}
       open={@open}
       disabled={@disabled}
@@ -1721,7 +1781,7 @@ defmodule VoidableUI.Components do
   def editable(assigns) do
     ~H"""
     <void-editable
-      id={@id || "void-editable-#{unique_id()}"}
+      id={@id || auto_id("void-editable", @rest)}
       value={@value}
       editing={@editing}
       disabled={@disabled}
@@ -1781,7 +1841,7 @@ defmodule VoidableUI.Components do
   def pin_input(assigns) do
     ~H"""
     <void-pin-input
-      id={@id || "void-pin-input-#{unique_id()}"}
+      id={@id || auto_id("void-pin-input", @rest)}
       length={@length}
       groups={@groups}
       value={@value}
@@ -1817,7 +1877,7 @@ defmodule VoidableUI.Components do
   def tags_input(assigns) do
     ~H"""
     <void-tags-input
-      id={@id || "void-tags-input-#{unique_id()}"}
+      id={@id || auto_id("void-tags-input", @rest)}
       disabled={@disabled}
       readonly={@readonly}
       max={@max}
@@ -1867,7 +1927,7 @@ defmodule VoidableUI.Components do
   def nav_menu_item(assigns) do
     ~H"""
     <void-nav-menu-item
-      id={@id || "void-nav-menu-item-#{unique_id()}"}
+      id={@id || auto_id("void-nav-menu-item", @rest)}
       open={@open}
       disabled={@disabled}
       href={@href}
@@ -1898,7 +1958,7 @@ defmodule VoidableUI.Components do
   def color_picker(assigns) do
     ~H"""
     <void-color-picker
-      id={@id || "void-color-picker-#{unique_id()}"}
+      id={@id || auto_id("void-color-picker", @rest)}
       value={@value}
       disabled={@disabled}
       size={@size}
@@ -1932,7 +1992,7 @@ defmodule VoidableUI.Components do
   def action_input(assigns) do
     ~H"""
     <void-action-input
-      id={@id || "void-action-input-#{unique_id()}"}
+      id={@id || auto_id("void-action-input", @rest)}
       value={@value}
       placeholder={@placeholder}
       disabled={@disabled}

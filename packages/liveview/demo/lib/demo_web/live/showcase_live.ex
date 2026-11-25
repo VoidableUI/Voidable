@@ -59,7 +59,7 @@ defmodule DemoWeb.ShowcaseLive do
 
   @impl true
   def mount(_params, _session, socket) do
-    {:ok, assign(socket, components: @components, page_title: "Voidable UI — Component Showcase")}
+    {:ok, assign(socket, components: @components, last_event: nil, page_title: "Voidable UI — Component Showcase")}
   end
 
   @impl true
@@ -74,6 +74,17 @@ defmodule DemoWeb.ShowcaseLive do
 
     {:noreply, socket}
   end
+
+  # Voidable events pushed by the `VoidEvent` hook arrive as
+  # `%{"id" => ..., "name" => ..., "event" => ..., "detail" => ...}` (the
+  # fields of `detail` are also available at the top level).
+  @impl true
+  def handle_event("void-" <> _ = event, params, socket) do
+    last = %{event: event, id: params["id"], name: params["name"], detail: params["detail"]}
+    {:noreply, assign(socket, :last_event, last)}
+  end
+
+  def handle_event(_event, _params, socket), do: {:noreply, socket}
 
   defp find_label(nil), do: nil
   defp find_label(slug) do
@@ -137,6 +148,11 @@ defmodule DemoWeb.ShowcaseLive do
             </div>
           </div>
         <% end %>
+        <p :if={@last_event} class="showcase-last-event">
+          Last event: <code><%= @last_event.event %></code>
+          <%= if @last_event.id do %>on <code>#<%= @last_event.id %></code><% end %>
+          <code><%= inspect(@last_event.detail) %></code>
+        </p>
       </main>
     </div>
     """

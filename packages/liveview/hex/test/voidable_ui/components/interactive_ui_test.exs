@@ -361,7 +361,7 @@ defmodule VoidableUI.Components.InteractiveUITest do
       assert html =~ "closable"
     end
 
-    test "omits closable when explicitly false" do
+    test "renders data-void-closable=false when closable is false" do
       assigns = %{}
 
       html =
@@ -369,7 +369,8 @@ defmodule VoidableUI.Components.InteractiveUITest do
         <VoidableUI.Components.dialog closable={false}>Body</VoidableUI.Components.dialog>
         """)
 
-      refute html =~ "closable"
+      assert html =~ ~s(data-void-closable="false")
+      refute html =~ ~r/ closable[ >\/=]/
     end
 
     test "passes through global attributes" do
@@ -473,7 +474,7 @@ defmodule VoidableUI.Components.InteractiveUITest do
       assert html =~ "closable"
     end
 
-    test "omits closable when explicitly false" do
+    test "renders data-void-closable=false when closable is false" do
       assigns = %{}
 
       html =
@@ -481,7 +482,8 @@ defmodule VoidableUI.Components.InteractiveUITest do
         <VoidableUI.Components.drawer closable={false}>Body</VoidableUI.Components.drawer>
         """)
 
-      refute html =~ "closable"
+      assert html =~ ~s(data-void-closable="false")
+      refute html =~ ~r/ closable[ >\/=]/
     end
 
     test "passes through global attributes" do

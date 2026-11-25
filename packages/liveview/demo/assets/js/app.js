@@ -23,7 +23,8 @@ import "phoenix_html"
 import {Socket} from "phoenix"
 import {LiveSocket} from "phoenix_live_view"
 import {hooks as colocatedHooks} from "phoenix-colocated/demo"
-import {VoidHooks, VoidDOM} from "./void-hooks.js"
+// Source of truth: packages/liveview/src (bundled by esbuild, no copy to keep in sync)
+import {VoidHooks, VoidDOM} from "../../../src/index.ts"
 import topbar from "../vendor/topbar.cjs"
 
 const csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")

@@ -14,6 +14,7 @@
 interface ViewHookInstance {
   el: HTMLElement;
   pushEvent(event: string, payload: object): void;
+  pushEventTo(target: unknown, event: string, payload: object): void;
   handleEvent(event: string, callback: (payload: object) => void): void;
   mounted?(): void;
   updated?(): void;
@@ -36,10 +37,50 @@ function parseEvents(el: HTMLElement): string[] {
   return (el.dataset.voidEvents || "").split(",").filter(Boolean);
 }
 
+/**
+ * Payload pushed to the server: the event `detail` fields (kept at the top
+ * level for backwards compatibility) plus context about the element.
+ */
+export function buildPayload(el: HTMLElement, event: string, detail: unknown): Record<string, unknown> {
+  const fields =
+    detail && typeof detail === "object" && !Array.isArray(detail)
+      ? (detail as Record<string, unknown>)
+      : {};
+  return {
+    ...fields,
+    id: el.id || null,
+    name: el.getAttribute("name"),
+    event,
+    detail: detail ?? {},
+  };
+}
+
+function push(hook: ViewHookInstance, event: string, payload: object): void {
+  // Honour phx-target (a component cid or a CSS selector), like phx-click does.
+  const target = hook.el.getAttribute("phx-target");
+  if (target) {
+    hook.pushEventTo(target, event, payload);
+  } else {
+    hook.pushEvent(event, payload);
+  }
+}
+
+/**
+ * Core `closable` is a Lit boolean that defaults to true; an attribute can
+ * never express false, so the server renders `data-void-closable` and we apply
+ * it as a property.
+ */
+function applyProps(el: HTMLElement): void {
+  const closable = el.dataset.voidClosable;
+  if (closable !== undefined) {
+    (el as HTMLElement & { closable?: boolean }).closable = closable !== "false";
+  }
+}
+
 function attachListeners(hook: VoidEventInstance, events: string[]): void {
   for (const event of events) {
     const handler = (e: Event) => {
-      hook.pushEvent(event, (e as CustomEvent).detail || {});
+      push(hook, event, buildPayload(hook.el, event, (e as CustomEvent).detail));
     };
     hook.el.addEventListener(event, handler);
     hook._listeners.push([event, handler]);
@@ -72,9 +113,11 @@ export const VoidHooks: Record<string, Partial<ViewHookInstance> & ThisType<Void
       this._boundEvents = [];
       const events = parseEvents(this.el);
       attachListeners(this, events);
+      applyProps(this.el);
     },
 
     updated(this: VoidEventInstance) {
+      applyProps(this.el);
       const next = parseEvents(this.el);
       const prev = this._boundEvents || [];
 
