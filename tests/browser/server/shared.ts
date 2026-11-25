@@ -80,6 +80,25 @@ export const signature = (page: Page, selector: string) =>
   );
 
 /**
+ * Adds a tag with real typing. A server round trip can reset text typed into a field while its
+ * patch lands (the liveview-typing-focus-lost defect), so the tag is typed again until its chip
+ * renders; Enter is never pressed when the chip is already there, so it is added once.
+ */
+export async function addTag(page: Page, tag: string): Promise<void> {
+  const chip = page.locator('#i-tags .void-tags-input-tag-text', { hasText: new RegExp(`^${tag}$`) });
+  await expect(async () => {
+    if (await chip.count()) return;
+    await page.locator('#i-tags input').click();
+    await page.keyboard.press('Control+a');
+    await page.keyboard.press('Delete');
+    await page.keyboard.type(tag);
+    await expect(page.locator('#i-tags input')).toHaveValue(tag, { timeout: 1000 });
+    await page.keyboard.press('Enter');
+    await expect(chip).toHaveCount(1, { timeout: 2000 });
+  }).toPass({ timeout: 20_000 });
+}
+
+/**
  * The whole sequence a user would walk through on the lab form that every app carries
  * (ids i-name, i-email, i-bio, i-country, i-remember, i-plan, i-vol, i-news, i-seats, i-date,
  * i-tags, i-fw and i-skills): fills every control with real pointer and keyboard input.
@@ -111,19 +130,9 @@ export async function fillLabForm(page: Page, opts: { skip?: string[] } = {}): P
     picked = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
   });
   await step('tags', async () => {
-    // The date step's server round trip can still be patching the form; wait for each tag to render
-    // before typing the next, so a patch cannot swallow keys.
-    const chips = page.locator('#i-tags .void-tags-input-tag');
     await expect(page.locator('#i-date [role=grid]')).toBeHidden();
-    await page.locator('#i-tags input').click();
-    await page.keyboard.type('alpha');
-    await expect(page.locator('#i-tags input')).toHaveValue('alpha');
-    await page.keyboard.press('Enter');
-    await expect(chips).toHaveCount(1);
-    await page.keyboard.type('beta');
-    await expect(page.locator('#i-tags input')).toHaveValue('beta');
-    await page.keyboard.press('Enter');
-    await expect(chips).toHaveCount(2);
+    await addTag(page, 'alpha');
+    await addTag(page, 'beta');
   });
   await step('framework', async () => {
     await page.locator('#i-fw input').click();

@@ -136,9 +136,7 @@ test.describe('server updates while the user is mid-interaction', () => {
     await page.locator('#i-remember').click();
     await page.locator('#i-plan void-radio[value=pro]').click();
     await page.locator('#i-news').click();
-    await page.locator('#i-tags input').click();
-    await page.keyboard.type('alpha');
-    await page.keyboard.press('Enter');
+    await addTag(page, 'alpha');
     await page.click('#timer-on');
     const start = Number((await text(page, '#ticks')).replace('Ticks ', ''));
     await ticksAbove(page, start + 5);
