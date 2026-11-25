@@ -61,3 +61,11 @@ void-indicator[size="xxl"] .void-indicator-dot { min-width: 14px; min-height: 14
 void-indicator[size="xxl"] .void-indicator-dot:not(:empty) { min-width: 28px; min-height: 28px; font-size: var(--void-text-base); }
 
 void-indicator[color="success"] .void-indicator-dot { box-shadow: 0 0 6px var(--void-color-success); }
+
+/* Reduced motion: no expanding ping ring; the dot itself stays visible */
+@media (prefers-reduced-motion: reduce) {
+  void-indicator[ping] .void-indicator-dot::before {
+    animation: none;
+    opacity: 0;
+  }
+}

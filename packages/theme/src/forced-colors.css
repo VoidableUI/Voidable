@@ -1,0 +1,50 @@
+/* ============================================================
+   @voidable/theme — Windows High Contrast / forced-colors support
+   Many components replace the outline with a box-shadow or a border
+   colour change for focus; forced-colors mode drops box-shadows and
+   remaps colours, so the focus indicator would disappear. Restore a
+   real outline and keep control state visible using system colours.
+   ============================================================ */
+
+@media (forced-colors: active) {
+  /* Focus: a real outline wins over every `outline: none` in the theme. */
+  :focus-visible {
+    outline: var(--void-focus-ring-width, 2px) solid Highlight !important;
+    outline-offset: var(--void-focus-ring-offset, 2px);
+  }
+
+  /* Control boundaries in explicit system colours (translucent
+     border colours would otherwise rely on UA remapping alone). */
+  void-input input,
+  void-textarea textarea,
+  void-select select,
+  void-segmented-control,
+  void-button,
+  .void-combobox-input,
+  .void-pin-cell,
+  .void-compose-input-wrapper,
+  .void-checkbox-box,
+  .void-radio-circle,
+  .void-switch-track {
+    border-color: ButtonText;
+  }
+
+  /* Checked / on states must differ from unchecked without a fill colour */
+  void-checkbox[checked] .void-checkbox-box,
+  void-checkbox[indeterminate] .void-checkbox-box,
+  void-radio[checked] .void-radio-circle,
+  void-switch[checked] .void-switch-track {
+    background: Highlight;
+    border-color: Highlight;
+    color: HighlightText;
+  }
+
+  .void-radio-dot,
+  void-switch[checked] .void-switch-thumb {
+    background: HighlightText;
+  }
+
+  .void-switch-thumb {
+    background: ButtonText;
+  }
+}

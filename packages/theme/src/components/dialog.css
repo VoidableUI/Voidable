@@ -69,6 +69,12 @@ void-dialog[size="xl"] .void-dialog-panel { max-width: 64rem; }
   opacity: 1;
 }
 
+.void-dialog-close:focus-visible {
+  opacity: 1;
+  outline: var(--void-focus-ring-width) solid var(--void-focus-ring-color);
+  outline-offset: var(--void-focus-ring-offset);
+}
+
 .void-dialog-body {
   padding: var(--void-space-5);
   font-family: var(--void-font-sans);

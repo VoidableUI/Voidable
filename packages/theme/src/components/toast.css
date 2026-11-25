@@ -72,3 +72,9 @@ void-toast[color='info']    { --tone: var(--void-color-info); }
 .void-toast-close:hover {
   opacity: 1;
 }
+
+.void-toast-close:focus-visible {
+  opacity: 1;
+  outline: var(--void-focus-ring-width) solid currentColor;
+  outline-offset: var(--void-focus-ring-offset);
+}

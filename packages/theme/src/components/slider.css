@@ -65,11 +65,13 @@ void-slider input[type="range"]::-moz-range-thumb:hover {
 }
 
 void-slider input[type="range"]:focus-visible::-webkit-slider-thumb {
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--void-color-accent) 40%, transparent);
+  box-shadow: 0 0 0 var(--void-focus-ring-offset) var(--void-color-bg),
+              0 0 0 calc(var(--void-focus-ring-offset) + var(--void-focus-ring-width)) var(--void-focus-ring-color);
 }
 
 void-slider input[type="range"]:focus-visible::-moz-range-thumb {
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--void-color-accent) 40%, transparent);
+  box-shadow: 0 0 0 var(--void-focus-ring-offset) var(--void-color-bg),
+              0 0 0 calc(var(--void-focus-ring-offset) + var(--void-focus-ring-width)) var(--void-focus-ring-color);
 }
 
 .void-slider-value {

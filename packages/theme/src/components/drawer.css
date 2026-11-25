@@ -124,6 +124,12 @@ void-drawer[side="bottom"][size="lg"] .void-drawer-panel {
   opacity: 1;
 }
 
+.void-drawer-close:focus-visible {
+  opacity: 1;
+  outline: var(--void-focus-ring-width) solid currentColor;
+  outline-offset: var(--void-focus-ring-offset);
+}
+
 .void-drawer-body {
   padding: var(--void-space-4);
   overflow-y: auto;

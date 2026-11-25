@@ -7,7 +7,7 @@ void-button {
   --tone: var(--void-color-accent);
   --tone-text: var(--tone);
   --tone-subtle: color-mix(in srgb, var(--tone) 14%, transparent);
-  --tone-border: color-mix(in srgb, var(--tone) 36%, transparent);
+  --tone-border: var(--void-color-border-control);
   --tone-hover: color-mix(in srgb, var(--tone) 22%, transparent);
 
   /* Layout */
@@ -70,6 +70,12 @@ void-button[color="caution"] { --tone: var(--void-color-caution); }
 void-button[color="success"] { --tone: var(--void-color-success); }
 void-button[color="info"]    { --tone: var(--void-color-info); }
 void-button[color="notice"]  { --tone: var(--void-color-notice); }
+
+/* Coloured buttons keep a tone-derived border; only the default
+   (accent) button uses the control boundary token. */
+void-button[color] {
+  --tone-border: color-mix(in srgb, var(--tone) 36%, transparent);
+}
 
 /* Size variants */
 void-button[size="sm"] {

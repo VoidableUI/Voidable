@@ -50,3 +50,9 @@ void-tag[size="xxl"] { font-size: var(--void-text-lg); padding: 0.3125rem var(--
 .void-tag-close:hover {
   opacity: 1;
 }
+
+.void-tag-close:focus-visible {
+  opacity: 1;
+  outline: var(--void-focus-ring-width) solid currentColor;
+  outline-offset: var(--void-focus-ring-offset);
+}

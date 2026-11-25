@@ -12,7 +12,7 @@ void-number-input {
   display: inline-flex;
   align-items: stretch;
   font-family: var(--void-font-sans);
-  border: 1px solid var(--void-color-border);
+  border: 1px solid var(--void-color-border-control);
   border-radius: var(--void-radius-md);
   background: var(--void-color-bg-secondary);
   overflow: hidden;
@@ -26,7 +26,7 @@ void-number-input:focus-within {
 }
 
 void-number-input:hover:not(:focus-within) {
-  border-color: var(--void-color-border-strong);
+  border-color: var(--void-color-border-control);
 }
 
 /* The native input inside */

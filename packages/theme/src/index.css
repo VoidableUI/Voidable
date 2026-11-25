@@ -75,3 +75,6 @@
 @import './components/line-chart.css';
 @import './components/donut-chart.css';
 @import './components/gauge.css';
+
+/* Accessibility: forced-colors (keep last so it wins) */
+@import './forced-colors.css';

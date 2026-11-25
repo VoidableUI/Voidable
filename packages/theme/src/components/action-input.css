@@ -12,7 +12,7 @@ void-action-input {
   display: inline-flex;
   align-items: stretch;
   font-family: var(--void-font-sans);
-  border: 1px solid var(--void-color-border);
+  border: 1px solid var(--void-color-border-control);
   border-radius: var(--void-radius-md);
   background: var(--void-color-bg-secondary);
   transition: border-color var(--void-duration-fast) var(--void-ease-in-out),
@@ -25,7 +25,7 @@ void-action-input:focus-within {
 }
 
 void-action-input:hover:not(:focus-within) {
-  border-color: var(--void-color-border-strong);
+  border-color: var(--void-color-border-control);
 }
 
 /* Border-radius on children (no overflow:hidden so tooltip can escape) */
