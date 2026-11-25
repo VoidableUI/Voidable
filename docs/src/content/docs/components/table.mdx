@@ -1,0 +1,274 @@
+---
+title: Table
+description: A native table that stacks into labelled blocks when its container is narrow, scrolls as a labelled region when it stays tabular, and never clips a menu. Live examples at narrow widths.
+---
+
+`<void-table>` wraps a native `<table>`. It sits on the page: hairline dividers, small uppercase column labels, regular-weight values, no boxes. You write the table; the element decides how it looks (`striped`, `hoverable`, `compact`, `bordered`, `inset`), what it does when its container is narrow (`stack`) and what it does when the table is wider than its container (`scrollable`).
+
+<div class="vd-example not-content">
+  <void-table hoverable>
+    <table>
+      <thead>
+        <tr><th>Name</th><th>Role</th><th>Status</th><th data-align="end">Seats</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Alice Morgan</td><td>Engineer</td><td>Active</td><td>4</td></tr>
+        <tr><td>Ben Okafor</td><td>Designer</td><td>Active</td><td>2</td></tr>
+        <tr><td>Clara Shen</td><td>Product</td><td>On leave</td><td>12</td></tr>
+      </tbody>
+    </table>
+  </void-table>
+</div>
+
+```html
+<void-table hoverable>
+  <table>
+    <thead>
+      <tr><th>Name</th><th>Role</th><th>Status</th><th data-align="end">Seats</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Alice Morgan</td><td>Engineer</td><td>Active</td><td>4</td></tr>
+    </tbody>
+  </table>
+</void-table>
+```
+
+`data-align="end"` on a header cell right-aligns a numeric column.
+
+## Stack: rows as blocks when the container is narrow
+
+`stack` turns each row into a block of label and value pairs while the table's **container** (not the viewport) is narrower than a breakpoint. The label of every value is the text of its column's header cell, so nothing is repeated on the cells. Below, the same markup in a wide and a narrow box:
+
+<div class="vd-example not-content">
+  <div class="vd-box" style="max-width: 36rem">
+    <void-table stack hoverable>
+      <table>
+        <thead>
+          <tr><th data-stack="title">Station</th><th>State</th><th>Region</th><th data-align="end">Passes</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Svalbard 1</td><td>online</td><td>Arctic</td><td>212</td></tr>
+          <tr><td>Punta Arenas</td><td>online</td><td>Southern</td><td>176</td></tr>
+        </tbody>
+      </table>
+    </void-table>
+  </div>
+  <div class="vd-box" style="max-width: 20rem">
+    <void-table stack hoverable>
+      <table>
+        <thead>
+          <tr><th data-stack="title">Station</th><th>State</th><th>Region</th><th data-align="end">Passes</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Svalbard 1</td><td>online</td><td>Arctic</td><td>212</td></tr>
+          <tr><td>Punta Arenas</td><td>online</td><td>Southern</td><td>176</td></tr>
+        </tbody>
+      </table>
+    </void-table>
+  </div>
+</div>
+
+```html
+<void-table stack hoverable>
+  <table>
+    <thead>
+      <tr><th data-stack="title">Station</th><th>State</th><th>Region</th><th data-align="end">Passes</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Svalbard 1</td><td>online</td><td>Arctic</td><td>212</td></tr>
+    </tbody>
+  </table>
+</void-table>
+```
+
+| `stack` | Stacks |
+|---|---|
+| absent | Never: always a table |
+| present, no value | While the container is narrower than `--void-table-stack-at` (40rem) |
+| a CSS length (`stack="48rem"`) | While the container is narrower than that |
+| `always` | At every width |
+
+The breakpoint is a container query, so a table in a sidebar stacks before the same table in the main column. To change it for every table, set `--void-table-stack-at` on any ancestor or in your theme. A table written with `stack` makes its element a size container (`container-type: inline-size`): give it a width of its own when it is a flex item.
+
+### Column roles
+
+`data-stack` on a header cell sets what its column becomes in the block. The attribute is copied to the cells of the column, so you write it once.
+
+| `data-stack` | In the stacked block |
+|---|---|
+| `title` | The block's heading: first, larger, no label |
+| `select` | A row checkbox, beside the title |
+| `actions` | Buttons grouped at the end, aligned to the block's edge; no label |
+| `hide` | The column is left out |
+| absent | A label over a value |
+
+<div class="vd-example not-content">
+  <div class="vd-box" style="max-width: 22rem">
+    <void-table stack hoverable>
+      <table>
+        <thead>
+          <tr>
+            <th data-stack="select"><void-checkbox aria-label="Select all stations"></void-checkbox></th>
+            <th data-stack="title">Station</th>
+            <th>State</th>
+            <th>Region</th>
+            <th data-align="end">Passes</th>
+            <th data-align="end" data-stack="hide">Uptime</th>
+            <th data-stack="actions">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><void-checkbox aria-label="Select Svalbard 1"></void-checkbox></td>
+            <td>Svalbard 1</td><td>online</td><td>Arctic</td><td>212</td><td>99.98%</td>
+            <td><void-button variant="ghost" size="sm">Open</void-button><void-button variant="ghost" size="sm">Pause</void-button></td>
+          </tr>
+          <tr>
+            <td><void-checkbox aria-label="Select Troll"></void-checkbox></td>
+            <td>Troll</td><td>offline</td><td>Southern</td><td>0</td><td>91.03%</td>
+            <td><void-button variant="ghost" size="sm">Open</void-button><void-button variant="ghost" size="sm" color="error">Remove</void-button></td>
+          </tr>
+        </tbody>
+      </table>
+    </void-table>
+  </div>
+</div>
+
+Header cells that hold a control (a select-all checkbox, a sort button) stay visible above the blocks, so selection and sorting keep working in both presentations. The other header cells leave the screen and stay in the page for assistive technology.
+
+### Labels
+
+The label is the header text unless you write one. `data-label` on a header cell replaces it for the column (an empty one shows no label), and `data-label` on a single cell wins over both. A server template that renders `data-label` on every cell works without the component loaded; the component only fills in what is missing, keeps it current when rows are added, removed or reordered, and puts it back after a DOM morph.
+
+### Accessibility
+
+A stacked row is still a table row to assistive technology. Browsers can drop table semantics when the `display` of table elements changes, so a table with `stack` carries explicit `table`, `rowgroup`, `row`, `columnheader`, `rowheader` and `cell` roles (a role you wrote is kept). The label of a pair is in the accessible name of its cell, so a screen reader reads "State online" whether it moves cell by cell or reads on. A column marked `hide` is removed from the page, for everyone.
+
+## Scroll region: a table that stays a table
+
+Nothing in `<void-table>` clips by default, so a table that is wider than its container overflows the page. Add `scrollable` to make the table a horizontal scroll region:
+
+- While it actually overflows it becomes focusable (`tabindex="0"`, `role="region"`) and takes its accessible name from `label`, else the `<caption>`, else an `aria-label` you wrote; without a name a warning is logged. Arrow keys scroll it.
+- Its edges fade where there is more to scroll to.
+- Cells stay on one line.
+
+<div class="vd-example not-content">
+  <div class="vd-box" style="max-width: 30rem">
+    <void-table scrollable label="People">
+      <table>
+        <thead>
+          <tr><th>Name</th><th>Role</th><th>Team</th><th>Location</th><th>Started</th><th>Level</th><th>Manager</th><th>Salary</th><th data-stack="actions">Actions</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Alice Morgan</td><td>Engineer</td><td>Platform</td><td>Berlin</td><td>Jan 2023</td><td>Senior</td><td>Ben Okafor</td><td>120,000</td>
+            <td>
+              <void-dropdown-menu position="bottom-end">
+                <void-button slot="trigger" variant="ghost" size="sm" aria-label="Actions for Alice Morgan">More</void-button>
+                <void-dropdown-menu-item>Edit</void-dropdown-menu-item>
+                <void-dropdown-menu-item>Duplicate</void-dropdown-menu-item>
+                <void-dropdown-menu-item destructive>Delete</void-dropdown-menu-item>
+              </void-dropdown-menu>
+            </td>
+          </tr>
+          <tr>
+            <td>Ben Okafor</td><td>Designer</td><td>Product</td><td>Lagos</td><td>Mar 2023</td><td>Lead</td><td>Clara Shen</td><td>110,000</td>
+            <td>
+              <void-dropdown-menu position="bottom-end">
+                <void-button slot="trigger" variant="ghost" size="sm" aria-label="Actions for Ben Okafor">More</void-button>
+                <void-dropdown-menu-item>Edit</void-dropdown-menu-item>
+                <void-dropdown-menu-item>Duplicate</void-dropdown-menu-item>
+                <void-dropdown-menu-item destructive>Delete</void-dropdown-menu-item>
+              </void-dropdown-menu>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </void-table>
+  </div>
+</div>
+
+```html
+<void-table scrollable label="People">
+  <table>…</table>
+</void-table>
+```
+
+`stack` and `scrollable` combine: below the breakpoint rows stack; above it a table that is too wide scrolls instead of overflowing the page.
+
+### Menus, popovers and tooltips are not clipped
+
+A table without `scrollable` clips nothing, so a menu opened from its last row is fully visible. A scroll region has to clip, and the overlay components place their panel with `position: absolute` inside their own host, so while one is open (a dropdown menu, popover, hover card, tooltip or date picker whose host is `open` or `visible`) the region grows downward to contain the panel and scrolls it into view sideways. Open the menu on the last row above: it is whole and clickable, and when it closes the region returns to its size. This is the only script in the element that exists because of clipping; it is unnecessary once overlays render in the browser's top layer.
+
+### Sticky header and first column
+
+`sticky-header` keeps the header row in view, `sticky-column` keeps the first column in view while the table scrolls sideways (a hairline marks its edge once content slides under it). `max-height` makes the region scroll vertically too, which is what the header sticks to; without it the header sticks to the page, below `--void-table-sticky-top`.
+
+<div class="vd-example not-content">
+  <div class="vd-box" style="max-width: 30rem">
+    <void-table scrollable sticky-header sticky-column max-height="9rem" label="People">
+      <table>
+        <thead>
+          <tr><th>Name</th><th>Role</th><th>Team</th><th>Location</th><th>Started</th><th>Level</th><th>Manager</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Alice Morgan</td><td>Engineer</td><td>Platform</td><td>Berlin</td><td>Jan 2023</td><td>Senior</td><td>Ben Okafor</td></tr>
+          <tr><td>Ben Okafor</td><td>Designer</td><td>Product</td><td>Lagos</td><td>Mar 2023</td><td>Lead</td><td>Clara Shen</td></tr>
+          <tr><td>Clara Shen</td><td>Product</td><td>Product</td><td>Seoul</td><td>Jul 2022</td><td>Director</td><td>Eva Lindström</td></tr>
+          <tr><td>David Park</td><td>Engineer</td><td>Platform</td><td>Austin</td><td>Nov 2023</td><td>Mid</td><td>Alice Morgan</td></tr>
+          <tr><td>Eva Lindström</td><td>QA</td><td>Quality</td><td>Malmö</td><td>Feb 2021</td><td>Lead</td><td>Clara Shen</td></tr>
+        </tbody>
+      </table>
+    </void-table>
+  </div>
+</div>
+
+```html
+<void-table scrollable sticky-header sticky-column max-height="20rem" label="People">…</void-table>
+```
+
+## Inset: a table inside a card or panel
+
+A card pads its content, which doubles the padding of a table's first and last columns and stops its dividers short of the card's edge. `inset` bleeds the table out of the container's padding (`--void-card-padding`, else `--void-container-padding`) and pads its first and last columns back in by the same amount, so dividers, stripes and hover fills run to the edge and the text stays on the content edge.
+
+<div class="vd-example not-content">
+  <void-card heading="Team">
+    <void-table inset hoverable>
+      <table>
+        <thead>
+          <tr><th>Name</th><th>Role</th><th data-align="end">Seats</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Alice Morgan</td><td>Engineer</td><td>4</td></tr>
+          <tr><td>Ben Okafor</td><td>Designer</td><td>2</td></tr>
+        </tbody>
+      </table>
+    </void-table>
+  </void-card>
+</div>
+
+```html
+<void-card heading="Team">
+  <void-table inset hoverable>…</void-table>
+</void-card>
+```
+
+## Density
+
+Cell padding, the spacing of stacked blocks and the row actions follow the theme's [`--void-density`](/getting-started/theming/) knob, like every control. `compact` is a fixed tighter padding for dense reports.
+
+## Attributes
+
+| Attribute | Type | What it does |
+|---|---|---|
+| `striped`, `hoverable`, `compact`, `bordered` | boolean | Row and cell treatments |
+| `inset` | boolean | A table inside a card or panel |
+| `stack` | string | Stack rows into blocks while the container is narrow (see above) |
+| `scrollable` | boolean | Horizontal scroll region, focusable and labelled while it overflows, with fading edges |
+| `sticky-header`, `sticky-column` | boolean | Keep the header row or the first column in view |
+| `max-height` | CSS length | Height at which a scrollable table scrolls vertically |
+| `label` | string | Accessible name of the scroll region (default: the caption) |
+
+On header cells: `data-stack` (`title`, `select`, `actions`, `hide`), `data-align` (`end`, `center`) and `data-label`. Tokens, all set on `void-table` and open to any ancestor or theme: `--void-table-padding-block`, `--void-table-padding-inline`, `--void-table-stack-at`, `--void-table-tile` (least width of one pair when stacked), `--void-table-surface` (what sticky cells are painted with), `--void-table-fade`, `--void-table-sticky-top`.
+
+All stories, with controls: [Table in Storybook](/storybook/?path=/docs/components-table--docs).

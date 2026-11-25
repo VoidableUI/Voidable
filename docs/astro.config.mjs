@@ -47,6 +47,7 @@ export default defineConfig({
       customCss: ['./src/styles/voidable-docs.css', './src/styles/fonts.css', './src/styles/starlight-bridge.css', './src/styles/demos.css'],
       components: {
         Head: './src/components/Head.astro',
+        Footer: './src/components/Footer.astro',
       },
       social: [
         {
@@ -85,6 +86,7 @@ export default defineConfig({
           items: [
             { label: 'Overview', slug: 'components/overview' },
             { label: 'Button', slug: 'components/button' },
+            { label: 'Table', slug: 'components/table' },
             { label: 'Keyboard and ARIA', slug: 'components/keyboard' },
             { label: 'Storybook', link: '/storybook/', attrs: { target: '_blank' } },
           ],

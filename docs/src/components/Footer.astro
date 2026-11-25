@@ -1,0 +1,14 @@
+---
+import Default from '@astrojs/starlight/components/Footer.astro';
+---
+
+<Default><slot /></Default>
+<script>
+// Defines every Void UI element on the page, so the live examples behave as
+// they do in an app. A bare `import '@voidable/ui'` is dropped from the build
+// (the alias points at the workspace sources, which the package's `sideEffects`
+// list does not cover), so the module is used.
+import * as ui from '@voidable/ui';
+
+document.documentElement.dataset.voidElements = String(Object.keys(ui).length);
+</script>

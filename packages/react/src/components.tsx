@@ -619,6 +619,25 @@ export const Table = wrapWc<VoidTable, {
   hoverable?: boolean;
   compact?: boolean;
   bordered?: boolean;
+  /** For a table in a card or panel: dividers run to the container's edge, text stays on its content edge. */
+  inset?: boolean;
+  /**
+   * Stack each row into label and value pairs while the table's container is narrow: an empty
+   * string for the theme's breakpoint, a CSS length (`"48rem"`) for this table's, `"always"` for
+   * every width. Leave undefined for a table at every width. Column roles go on header cells
+   * with `data-stack` (`title`, `select`, `actions`, `hide`).
+   */
+  stack?: string;
+  /** Horizontal scroll region; focusable and labelled while it overflows, with faded edges. */
+  scrollable?: boolean;
+  /** Keep the header row in view (against the table's own scroll with `maxHeight`, else the page). */
+  stickyHeader?: boolean;
+  /** Keep the first column in view while scrolling sideways. */
+  stickyColumn?: boolean;
+  /** Height at which a scrollable table scrolls vertically (a CSS length). */
+  maxHeight?: string;
+  /** Accessible name of the scroll region (default: the caption). */
+  label?: string;
 }>('void-table', 'Table');
 
 export const Pagination = wrapWc<VoidPagination, {
