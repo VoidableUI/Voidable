@@ -23,7 +23,7 @@ import { VoidHooks, VoidDOM } from "@voidable/ui-liveview";
 
 const liveSocket = new LiveSocket("/live", Socket, {
   hooks: { ...VoidHooks },
-  dom: VoidDOM, // onBeforeElUpdated + onNodeAdded
+  dom: VoidDOM, // onBeforeElUpdated
 });
 ```
 
@@ -59,10 +59,13 @@ LiveComponent.
 
 ## State across patches
 
-`VoidDOM` keeps client-managed attributes (`open`, `checked`, `selected`,
-`aria-*`) only while the server keeps rendering the same value it rendered
-last time. When the server renders a different value, the server wins, so
-`open={false}` really closes a dialog the client opened.
+`VoidDOM` calls each component's pre-morph hook during morphdom patches:
+client state of every reflected property (`open`, `checked`, `pressed`,
+`collapsed`, `value`, ...) is kept only while the server keeps rendering the
+same value it rendered last time. When the server renders a different value,
+the server wins, so `open={false}` really closes a dialog the client opened.
+The rule lives in `@voidable/ui` and is the same for the Turbo and Livewire
+adapters.
 
 ## Ids and `phx-update="ignore"`
 

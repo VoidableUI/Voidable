@@ -3,37 +3,7 @@ title: Table
 description: A native table that stacks into labelled blocks when its container is narrow, scrolls as a labelled region when it stays tabular, and never clips a menu. Live examples at narrow widths.
 ---
 
-`<void-table>` wraps a native `<table>`. It sits on the page: hairline dividers, small uppercase column labels, regular-weight values, no boxes. You write the table; the element decides how it looks (`striped`, `hoverable`, `compact`, `bordered`, `inset`), what it does when its container is narrow (`stack`) and what it does when the table is wider than its container (`scrollable`).
-
-<div class="vd-example not-content">
-  <void-table hoverable>
-    <table>
-      <thead>
-        <tr><th>Name</th><th>Role</th><th>Status</th><th data-align="end">Seats</th></tr>
-      </thead>
-      <tbody>
-        <tr><td>Alice Morgan</td><td>Engineer</td><td>Active</td><td>4</td></tr>
-        <tr><td>Ben Okafor</td><td>Designer</td><td>Active</td><td>2</td></tr>
-        <tr><td>Clara Shen</td><td>Product</td><td>On leave</td><td>12</td></tr>
-      </tbody>
-    </table>
-  </void-table>
-</div>
-
-```html
-<void-table hoverable>
-  <table>
-    <thead>
-      <tr><th>Name</th><th>Role</th><th>Status</th><th data-align="end">Seats</th></tr>
-    </thead>
-    <tbody>
-      <tr><td>Alice Morgan</td><td>Engineer</td><td>Active</td><td>4</td></tr>
-    </tbody>
-  </table>
-</void-table>
-```
-
-`data-align="end"` on a header cell right-aligns a numeric column.
+The table sits on the page: hairline dividers, small uppercase column labels, regular-weight values, no boxes. You write the table; the element decides the rest.
 
 ## Stack: rows as blocks when the container is narrow
 
@@ -253,17 +223,7 @@ A card pads its content, which doubles the padding of a table's first and last c
 
 Cell padding, the spacing of stacked blocks and the row actions follow the theme's [`--void-density`](/getting-started/theming/) knob, like every control. `compact` is a fixed tighter padding for dense reports.
 
-## Attributes
-
-| Attribute | Type | What it does |
-|---|---|---|
-| `striped`, `hoverable`, `compact`, `bordered` | boolean | Row and cell treatments |
-| `inset` | boolean | A table inside a card or panel |
-| `stack` | string | Stack rows into blocks while the container is narrow (see above) |
-| `scrollable` | boolean | Horizontal scroll region, focusable and labelled while it overflows, with fading edges |
-| `sticky-header`, `sticky-column` | boolean | Keep the header row or the first column in view |
-| `max-height` | CSS length | Height at which a scrollable table scrolls vertically |
-| `label` | string | Accessible name of the scroll region (default: the caption) |
+## Header cells and tokens
 
 On header cells: `data-stack` (`title`, `select`, `actions`, `hide`), `data-align` (`end`, `center`) and `data-label`. Tokens, all set on `void-table` and open to any ancestor or theme: `--void-table-padding-block`, `--void-table-padding-inline`, `--void-table-stack-at`, `--void-table-tile` (least width of one pair when stacked), `--void-table-surface` (what sticky cells are painted with), `--void-table-fade`, `--void-table-sticky-top`.
 

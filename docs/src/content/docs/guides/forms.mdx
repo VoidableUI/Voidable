@@ -1,0 +1,94 @@
+---
+title: Forms
+description: How Voidable controls submit, reset, validate and disable inside a native form, and the few places where they differ from an input.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+import FormControls from '../../../components/api/FormControls.astro';
+
+Voidable controls work in the `<form>` you already have. Give a control a `name`, put it inside a form, and `new FormData(form)` and an ordinary submit carry its value. There is no form library to adopt, no registration step, and no controlled-component state to mirror.
+
+```html
+<form action="/settings" method="post">
+  <void-field label="Email" required>
+    <void-input type="email" name="email" required autocomplete="email"></void-input>
+  </void-field>
+  <void-switch name="alerts" value="yes" checked>Email alerts</void-switch>
+  <void-multiselect name="labels">
+    <void-option value="bug" selected>Bug</void-option>
+    <void-option value="docs">Docs</void-option>
+  </void-multiselect>
+  <void-button type="submit" variant="filled">Save</void-button>
+</form>
+```
+
+Submitting this form with `alerts` on and `bug` selected sends `email=…&alerts=yes&labels=bug`. Turn the switch off and `alerts` is absent, exactly as an unchecked checkbox is.
+
+## Two ways a control submits
+
+A value can be submitted by only one thing, or it would arrive twice. Voidable components render into the light DOM, so a native `<input>` that a component renders is a real descendant of your form. That gives two strategies, and every form control uses one of them:
+
+**Native controls** render one real input, select, textarea or range, and that element submits, validates and is disabled by the browser itself. The component forwards `name`, `value`, `disabled`, `required` and `form` to it. `form.elements.email` is the inner `<input>`, so existing code that reads it keeps working. `<void-radio-group>` and `<void-checkbox-group>` forward the same attributes to their children and submit nothing themselves.
+
+**Form-associated controls** have no single native control that carries their value (a switch, a date, a list of tags), so the host element is form-associated and submits through `ElementInternals`. Any text field they render inside has no `name`, so nothing is sent twice.
+
+<FormControls />
+
+<Aside>
+In a browser without `ElementInternals` (and in happy-dom), the form-associated controls still work as UI and still reset with the form, but they submit nothing. Every current browser supports it.
+</Aside>
+
+### What each control sends
+
+| Control | Submitted |
+| --- | --- |
+| `void-input`, `void-textarea`, `void-select`, `void-slider`, `void-action-input` | The text or number, as the native control would. |
+| `void-checkbox`, `void-radio` | The `value` (default `on`) while checked, nothing otherwise. |
+| `void-switch` | The `value` (default `on`) while checked, nothing otherwise. |
+| `void-multiselect` | One entry per selected option, all under the same name. |
+| `void-tags-input` | One entry per tag, including text typed in the field but not yet added. |
+| `void-toggle-group` | With `multiple`, one entry per pressed toggle; otherwise the pressed value, or nothing. |
+| `void-combobox`, `void-color-picker`, `void-pin-input`, `void-editable` | The value as a string; an empty control sends an empty string, as an empty text input does. |
+| `void-segmented-control` | The chosen value, or nothing when none is chosen. |
+| `void-calendar`, `void-date-picker` | The date as `YYYY-MM-DD`, whatever `format` shows. |
+| `void-number-input` | The number as a string, including text still being typed that parses. |
+| `void-file-upload` | The accepted files. |
+
+A control with no `name` submits nothing, as a native one does.
+
+## Reset
+
+`form.reset()` and a `type="reset"` button put every control back to the state it had when it first rendered, as they do for native inputs. A later `el.value = …` from script does not move that target. Resetting does not fire `void-change`.
+
+## Disabled controls
+
+`disabled` on a control, or on a `<fieldset disabled>` around it, stops the control reacting and removes it from the submission. A control inside a disabled fieldset is disabled without any attribute of its own.
+
+## Validation
+
+`required` works on every form control and uses the browser's own constraint validation: `form.checkValidity()` is false while a required control is empty, `:invalid` matches it, and `requestSubmit()` stops and reports the first invalid control. On a native control the browser's message appears; a form-associated control reports a `valueMissing` state with its own control as the anchor. `void-checkbox-group` with `required` means at least one box is checked.
+
+`<void-button type="submit">` submits through `form.requestSubmit()`, so validation runs and `submit` events fire.
+
+To show your own message, set `error` on the surrounding field. While it is set, the control inside is marked `aria-invalid` and described by the message, and removing the attribute clears both.
+
+```html
+<void-field label="Email" error="Enter a valid email address">
+  <void-input type="email" name="email"></void-input>
+</void-field>
+```
+
+## Controls outside the form
+
+The `form` attribute associates a control with a form by id, as it does for native controls: `<void-switch name="outside" form="settings">` submits with `<form id="settings">` wherever it sits in the page.
+
+## Reading values in script
+
+Use `FormData` or `form.elements`, not a component property, so the code does not care which strategy a control uses. For reacting to changes, listen to `void-change` (see [Events](/guides/events/)). A control sets its form value before it dispatches `void-change`, so a handler can call `form.requestSubmit()` and the new value is already there, which is what an auto-submitting filter form needs.
+
+## Things that differ from a native input
+
+- **`value` as an attribute is the initial value.** It sets the starting state and the reset target. The live value is the element's `value` property; the attribute is not updated as the user types. For forms, read the `FormData`, not the attribute.
+- **`<void-toggle-group>` owns its children's state.** Pressing is recorded in the group's `value`; a `pressed` attribute on a child toggle is overwritten when the group syncs. Put the initial state in the group's `value`, for example `value="bold,italic"`.
+- **Booleans written as `"false"`.** `disabled="false"` is still disabled. The few attributes that default to on, such as `show-input` on the colour picker, are the exception and accept `="false"`; they are listed on the [components overview](/components/overview/#attributes-shared-across-components).
+- **Labels belong to `<void-field>`.** There is no `label` attribute on a control (except groups, where it names the group). The field names the control it wraps.

@@ -39,16 +39,40 @@ function niceStepLocal(raw: number): number {
   return niceFrac * mag;
 }
 
+/**
+ * Line chart for trends over time with one or more series, linear or stepped, drawn in SVG with an animated
+ * entry. Give it `data` (`{ series: [{ name, values }], labels }`) from script; it has no children. The chart
+ * is an image to assistive technology, so set `aria-label` and state the key figures in the surrounding text.
+ */
 export class VoidLineChart extends VoidElement {
 
+  /** Height of the chart in pixels. Defaults to 220. The width fills the container. */
   @property({ type: Number, reflect: true }) height = 220;
+  /** Print each point's value above it, abbreviated above 1000 (`1.2k`). */
   @property({ type: Boolean, attribute: 'show-values', reflect: true }) showValues = false;
+  /**
+   * How the area under each line is drawn: `outline` (default, a light tint), `filled` (a stronger tint)
+   * or `wireframe` (no area, just the line).
+   */
   @property({ reflect: true }) variant: 'filled' | 'outline' | 'wireframe' = 'outline';
+  /**
+   * How points are joined: `linear` (default, straight segments) or `step` (a horizontal run, then a
+   * vertical jump).
+   */
   @property({ reflect: true }) interpolation: 'linear' | 'step' = 'linear';
+  /**
+   * Accessible name of the chart, such as `Visitors per day`. The chart is an image to assistive
+   * technology, so set it and put the key figures in the text around it.
+   */
   @property({ attribute: 'aria-label' }) ariaLabel = '';
 
   private _data: LineChartData = { series: [] };
 
+  /**
+   * The chart's data: `{ series: [{ name, values, color? }], labels? }`. `values` are aligned with `labels`
+   * (the names along the horizontal axis); `color` overrides a series' colour. Property only: assign a new
+   * object to update the chart and animate to it.
+   */
   get data(): LineChartData { return this._data; }
   set data(next: LineChartData) {
     const prev = new Map(this._display);

@@ -4,9 +4,19 @@ import { VoidElement } from '../base.js';
 
 /** Page navigation for data tables, search result lists, and content archives. */
 export class VoidPagination extends VoidElement {
+  /** Number of pages. Defaults to 1. */
   @property({ type: Number }) total = 1;
+  /**
+   * Current page, 1-based. Choosing a page fires a cancelable `void-change` and then updates `value`;
+   * cancel the event to keep the page unchanged.
+   */
   @property({ type: Number, reflect: true }) value = 1;
+  /**
+   * Page buttons shown on each side of the current page before the list collapses to ellipses. Defaults
+   * to 1.
+   */
   @property({ type: Number }) siblings = 1;
+  /** Size step: `sm`, `md` (default) or `lg`. */
   @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' = 'md';
   /** Opt-in link mode: URL with a `{page}` placeholder, e.g. `/posts?page={page}`. */
   @property({ type: String, attribute: 'href-template', reflect: true }) hrefTemplate = '';

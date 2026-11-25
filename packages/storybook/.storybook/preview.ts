@@ -2,6 +2,12 @@ import '@voidable/theme';
 import '@voidable/theme/themes/void.css';
 import '@voidable/theme/themes/dune.css';
 import '@voidable/theme/themes/console.css';
+import '@voidable/theme/themes/orbit.css';
+import '@voidable/theme/themes/capsule.css';
+import '@voidable/theme/themes/aurora.css';
+import '@voidable/theme/themes/iris.css';
+import '@voidable/theme/themes/paper.css';
+import '@voidable/theme/skins/loft.css';
 import '@voidable/ui';
 // Development warnings: misused attributes, values and children reach the console, so a story that
 // misuses a component is caught by `mise run test:warnings` and by anyone looking at it.
@@ -19,18 +25,30 @@ const preview: Preview = {
         title: 'Colour scheme',
       },
     },
-    // The demonstration themes: each is a file that only sets theme knobs.
+    // The shipped themes: each is a file that only sets theme knobs.
     voidTheme: {
       toolbar: {
         icon: 'paintbrush',
-        items: ['void', 'dune', 'console'],
+        items: ['void', 'dune', 'console', 'orbit', 'capsule', 'aurora', 'iris', 'paper'],
         title: 'Theme',
+      },
+    },
+    // Skins change structure, not only values, and combine with any theme.
+    voidSkin: {
+      toolbar: {
+        icon: 'component',
+        items: [
+          { value: 'none', title: 'Hairline (default)' },
+          { value: 'loft', title: 'Loft skin' },
+        ],
+        title: 'Skin',
       },
     },
   },
   initialGlobals: {
     theme: 'dark',
     voidTheme: 'void',
+    voidSkin: 'none',
   },
   decorators: [
     (storyFn, context) => {
@@ -39,6 +57,9 @@ const preview: Preview = {
       const root = document.documentElement;
       root.setAttribute('data-theme', theme);
       root.setAttribute('data-void-theme', voidTheme);
+      const voidSkin = context.globals['voidSkin'] ?? 'none';
+      if (voidSkin === 'none') root.removeAttribute('data-void-skin');
+      else root.setAttribute('data-void-skin', voidSkin);
       // The page colour comes from the theme, so a tinted page shows too.
       root.style.background = 'var(--void-color-bg)';
       return storyFn();

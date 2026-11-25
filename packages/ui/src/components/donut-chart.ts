@@ -32,9 +32,19 @@ function formatValue(v: number): string {
   return Math.round(v).toString();
 }
 
+/**
+ * Donut chart for part-to-whole breakdowns, drawn in SVG with animated segments and an optional total in the
+ * centre. Give it `data` (`{ segments: [{ name, value }] }`) from script; it has no children. The chart is an
+ * image to assistive technology, so set `aria-label` and state the key figures in the surrounding text.
+ */
 export class VoidDonutChart extends VoidElement {
 
+  /** Width and height of the chart in pixels. Defaults to 220. */
   @property({ type: Number, reflect: true }) size = 220;
+  /**
+   * Inner radius as a fraction of the outer radius, from 0 (a pie) to just under 1 (a thin ring).
+   * Defaults to 0.6.
+   */
   @property({ type: Number }) inner = 0.6;
   /** Visible gap between segments. `false`/`0` = seamless (segments touch).
       `true` = 1% of the total arc consumed by gaps (the sensible default
@@ -54,13 +64,27 @@ export class VoidDonutChart extends VoidElement {
       },
     },
   }) gaps: boolean | number = false;
+  /**
+   * How segments are drawn: `filled` (default), `outline` (tinted with a border) or `wireframe` (border
+   * only).
+   */
   @property({ reflect: true }) variant: 'filled' | 'outline' | 'wireframe' = 'filled';
+  /** Print each segment's value on its arc, abbreviated above 1000 (`1.2k`). */
   @property({ type: Boolean, attribute: 'show-values', reflect: true }) showValues = false;
+  /** Print the sum of the segments in the centre of the ring. */
   @property({ type: Boolean, attribute: 'show-total', reflect: true }) showTotal = false;
+  /**
+   * Accessible name of the chart, such as `Traffic by source`. The chart is an image to assistive
+   * technology, so set it and put the key figures in the text around it.
+   */
   @property({ attribute: 'aria-label' }) ariaLabel = '';
 
   private _data: DonutChartData = { segments: [] };
 
+  /**
+   * The chart's data: `{ segments: [{ name, value, color? }] }`. Each segment's share of the ring is its
+   * `value` over the sum of all values. Property only: assign a new object to update the chart and animate to it.
+   */
   get data(): DonutChartData { return this._data; }
   set data(next: DonutChartData) {
     const prevSegments = this._data.segments;

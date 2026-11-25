@@ -4,7 +4,7 @@ import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
 import { InternalsFormControl } from '../form-control.js';
 import { OverlayController, type OverlayCloseReason } from '../overlay.js';
-import { ProjectionController } from '../projection.js';
+import { ProjectionController, isFocusParked } from '../projection.js';
 import { edgeEnabled, stepEnabled, uid } from '../keyboard.js';
 import { VoidOption } from './multiselect.js';
 
@@ -29,10 +29,24 @@ import { VoidOption } from './multiselect.js';
  * @fires {CustomEvent<{ reason: 'escape' | 'outside' | 'blur' | 'select' | 'parent' | 'api' }>} void-close - The option list is closing.
  */
 export class VoidCombobox extends InternalsFormControl(VoidElement) {
+  /**
+   * `value` of the chosen `void-option`. As an attribute it is the initial choice; read the `value`
+   * property for the current one.
+   */
   @property({ type: String }) value = '';
+  /**
+   * Hint shown in the search field while it is empty. Defaults to `Search...`. It is also the field's
+   * accessible name when no `void-field` label names it.
+   */
   @property({ type: String }) placeholder = 'Search...';
+  /** Stop the field opening and exclude the value from the form submission. */
   @property({ type: Boolean, reflect: true }) disabled = false;
+  /** Size step: `sm`, `md` (default), `lg`, `xl` or `xxl`. */
   @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' | 'xl' | 'xxl' = 'md';
+  /**
+   * Mark the field invalid: it gets the error styling and `aria-invalid`. The message itself is shown by
+   * the wrapping `void-field`.
+   */
   @property({ type: String, reflect: true }) error = '';
   @property({ type: String, reflect: true }) name = '';
   /** Whether the option list is showing. Reflected, so it can be read (and set) from markup. */
@@ -68,15 +82,6 @@ export class VoidCombobox extends InternalsFormControl(VoidElement) {
   private get _visible(): VoidOption[] {
     const q = this._query.toLowerCase();
     return this._options.filter(opt => (opt.textContent?.trim().toLowerCase() ?? '').includes(q));
-  }
-
-  /**
-   * The open list is transient UI state, not something the server renders: a morph whose
-   * markup does not carry `open` (it never does) must not close a list the user is using.
-   */
-  override voidBeforeMorph(incoming?: Element | null): boolean {
-    if (incoming && this.open && !incoming.hasAttribute('open')) incoming.setAttribute('open', '');
-    return super.voidBeforeMorph(incoming);
   }
 
   protected override willUpdate(changed: Map<string, unknown>): void {
@@ -151,7 +156,9 @@ export class VoidCombobox extends InternalsFormControl(VoidElement) {
   }
 
   private _onInputFocus = (): void => {
-    if (this.disabled) return;
+    // Focus coming back after a morph moved the input (browsers without
+    // Element.moveBefore) keeps what the user typed.
+    if (this.disabled || isFocusParked(this)) return;
     this._overlay.requestOpen('focus');
     this._query = '';
     this._active = null;

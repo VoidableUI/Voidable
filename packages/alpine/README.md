@@ -28,6 +28,12 @@ import { registerLivewireHooks } from '@voidable/ui-alpine';
 registerLivewireHooks();
 ```
 
+The hook calls each component's pre-morph hook during Livewire morphs: client
+state of every reflected property (`open`, `checked`, `pressed`, `collapsed`,
+`value`, ...) survives while the server keeps rendering the same value, and
+the server wins as soon as it renders a different one. A component whose
+server markup is identical to the previous render is skipped with its subtree.
+
 ## Usage
 
 ### Event bridging with `x-void-on`

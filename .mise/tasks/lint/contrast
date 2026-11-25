@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-#MISE description="Check WCAG contrast of the derived theme tokens, in dark and light, for the default knobs, every shipped theme and the extremes of every colour knob"
+#MISE description="Check WCAG contrast of the derived theme tokens, in dark and light, for the default knobs, every shipped theme and skin, and the extremes of every colour knob"
 set -euo pipefail
 
 node - <<'NODE'
@@ -159,10 +159,10 @@ const statuses = ['error', 'warning', 'caution', 'success', 'info', 'notice', 'h
 const surfaces = ['bg', 'surface', 'bg-secondary', 'bg-elevated', 'bg-hover'];
 const roles = ['label', 'value', 'unit', 'caption', 'heading', 'title', 'display', 'lede', 'body', 'code'];
 
-function checkConfig(name, overrides, { quiet = false } = {}) {
+function checkConfig(name, overrides, { quiet = false, skin = {} } = {}) {
   let local = 0;
   for (const [mode, dark] of [['dark', 1], ['light', 0]]) {
-    const env = { ...primitives, ...knobs, ...mediaInputs, '--void-scheme-dark': String(dark), '--void-page-scheme-dark': String(dark), '--void-contrast-boost': '0', '--void-shape': '1', ...overrides, ...derived };
+    const env = { ...primitives, ...knobs, ...mediaInputs, '--void-scheme-dark': String(dark), '--void-page-scheme-dark': String(dark), '--void-contrast-boost': '0', '--void-shape': '1', ...overrides, ...derived, ...skin };
     const raw = (token) => substitute(`var(${token})`, env);
     const page = color(raw('--void-color-bg'));
     // surfaces are opaque; anything translucent is composited over the page
@@ -305,6 +305,31 @@ for (const file of themes) {
   checkSurfaces(`theme ${path.basename(file, '.css')}`, set);
 }
 
+// 2b. every shipped skin. A skin overrides derived tokens (the first rule of
+//     its file, which may hold nothing else), so it can break what the knobs
+//     guarantee: it is checked on the default knobs, on every theme and
+//     across the colour knobs. Its tokens do not reach the media and glass
+//     surfaces, which derive their own.
+const skinsDir = dir + 'skins/';
+const skins = fs.existsSync(skinsDir) ? fs.readdirSync(skinsDir).filter((f) => f.endsWith('.css')) : [];
+let skinSweeps = 0;
+for (const file of skins) {
+  const src = fs.readFileSync(skinsDir + file, 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
+  const first = /^[^{}@]*\{([^{}]*)\}/.exec(src.trim());
+  const name = path.basename(file, '.css');
+  if (!first) { fail(`skins/${file}: a skin starts with one rule of token overrides`); continue; }
+  if (first[1].replace(/--void-[\w-]+\s*:\s*[^;{}]+;/g, '').trim()) fail(`skins/${file}: the first rule may only set --void-* properties; element styles go in the rules after it`);
+  const skin = decls(first[1]);
+  for (const k of Object.keys(skin)) if (k in knobs) fail(`skins/${file}: ${k} is a knob; a skin overrides derived tokens and leaves the knobs to the theme`);
+  checkConfig(`skin ${name}`, {}, { skin });
+  checkConfig(`skin ${name} + prefers-contrast`, { '--void-contrast-boost': '1' }, { skin });
+  for (const t of themes) checkConfig(`skin ${name} on theme ${path.basename(t, '.css')}`, decls(fs.readFileSync(themesDir + t, 'utf8').replace(/\/\*[\s\S]*?\*\//g, '')), { skin });
+  const skinSweep = (label, overrides) => { skinSweeps++; const n = checkConfig(label, overrides, { quiet: !verbose, skin }); if (n) { console.log(`FAIL skin sweep [${label}]: ${n} pair(s) below the minimum (CONTRAST_VERBOSE=1 lists them)`); } };
+  for (const contrast of ['0', '1']) for (const chrome of ['0', '1']) skinSweep(`skin ${name}, contrast ${contrast}, chrome ${chrome}`, { '--void-contrast': contrast, '--void-chrome': chrome });
+  for (const chroma of ['0.1', '0.2', '0.3']) for (let hue = 0; hue < 360; hue += 30) skinSweep(`skin ${name}, accent chroma ${chroma}, hue ${hue}`, { '--void-accent-chroma': chroma, '--void-accent-hue': String(hue), '--void-contrast': '0' });
+  for (const chroma of ['0', '0.04']) for (let hue = 0; hue < 360; hue += 30) skinSweep(`skin ${name}, neutral chroma ${chroma}, hue ${hue}`, { '--void-neutral-chroma': chroma, '--void-neutral-hue': String(hue), '--void-contrast': '0', '--void-chrome': '1' });
+}
+
 // 3. the guarantee: no setting of a colour knob can take text below AA.
 //    Sweep each knob to its extremes (values outside the range are clamped
 //    by the derivation, so the far-out values are part of the sweep).
@@ -321,6 +346,11 @@ for (const chroma of ['0.01', '0.02', '0.04', '0.2']) for (let hue = 0; hue < 36
 }
 for (const page of ['0.5', '1']) for (let hue = 0; hue < 360; hue += 30) {
   sweep(`page tint ${page}, accent hue ${hue}`, { '--void-neutral-chroma': '0.04', '--void-neutral-hue': String((hue + 180) % 360), '--void-page-tint': page, '--void-accent-chroma': '0.2', '--void-accent-hue': String(hue), '--void-contrast': '0' });
+}
+
+// the most saturated accents on a tinted page, on every hue
+for (const chroma of ['0.25', '0.3']) for (const page of ['0.5', '1']) for (let hue = 0; hue < 360; hue += 15) for (const chrome of ['0.3', '1']) {
+  sweep(`page tint ${page}, accent chroma ${chroma}, hue ${hue}, chrome ${chrome}`, { '--void-page-tint': page, '--void-accent-chroma': chroma, '--void-accent-hue': String(hue), '--void-chrome': chrome, '--void-contrast': '0' });
 }
 
 // 4. the scrim: no strength may take text on a media surface below AA,
@@ -357,5 +387,5 @@ for (const [what, re] of [
 }
 
 if (failures) { console.log(`Contrast check failed: ${failures} problem(s)`); process.exit(1); }
-console.log(`Contrast check passed: default, ${themes.length} theme(s) and ${sweeps} knob settings, dark and light`);
+console.log(`Contrast check passed: default, ${themes.length} theme(s), ${skins.length} skin(s) and ${sweeps + skinSweeps} knob settings, dark and light`);
 NODE

@@ -19,13 +19,15 @@ import { ProjectionController, triggerRegion } from '../projection.js';
  * Cancelable when the user caused it.
  */
 export class VoidHoverCard extends VoidElement {
-  /** Whether the card is shown. */
+  /** Whether the card is shown. It opens and closes itself from hover, focus and Escape; set it to drive it from script. */
   @property({ type: Boolean, reflect: true }) open = false;
   /** Side of the trigger the card opens on; it flips to the opposite side when there is no room. */
   @property({ type: String, reflect: true }) position: 'top' | 'bottom' | 'left' | 'right' = 'bottom';
   /** Alignment with the trigger along that side. */
   @property({ type: String, reflect: true }) align: 'start' | 'center' | 'end' = 'center';
+  /** Milliseconds the pointer rests on the trigger before the card opens (keyboard focus opens it at once). Defaults to 300. */
   @property({ type: Number, attribute: 'open-delay' }) openDelay = 300;
+  /** Milliseconds after pointer and focus have left the trigger and card before it closes. Defaults to 300. */
   @property({ type: Number, attribute: 'close-delay' }) closeDelay = 300;
 
   // The trigger (slot="trigger", else the first element child) goes into the trigger wrapper; everything else goes into the body.

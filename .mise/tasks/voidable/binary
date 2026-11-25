@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+#MISE description="Build tools/voidable/build/voidable alone (no lint or tests); the docs site reads its snippets"
+#MISE depends=["build"]
+set -euo pipefail
+
+cd tools/voidable
+# Install only what tools/voidable/mise.toml adds, explicitly, because CI runs
+# with MISE_TASK_RUN_AUTO_INSTALL=false.
+mise install go
+# `build` already built @voidable/ui; reuse its manifest.
+VOIDABLE_SKIP_UI_BUILD=1 mise run build:go

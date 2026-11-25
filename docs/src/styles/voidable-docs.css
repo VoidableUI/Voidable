@@ -5,6 +5,14 @@
 @import '../../../packages/theme/src/themes/void.css';
 @import '../../../packages/theme/src/themes/dune.css';
 @import '../../../packages/theme/src/themes/console.css';
+@import '../../../packages/theme/src/themes/orbit.css';
+@import '../../../packages/theme/src/themes/capsule.css';
+@import '../../../packages/theme/src/themes/aurora.css';
+@import '../../../packages/theme/src/themes/iris.css';
+@import '../../../packages/theme/src/themes/paper.css';
+@import '../../../packages/theme/src/skins/loft.css';
+/* Shared overlay rules (top layer, anchoring, transitions); before the components that refine them. */
+@import '../../../packages/theme/src/components/overlay.css';
 @import '../../../packages/theme/src/components/badge.css';
 @import '../../../packages/theme/src/components/button.css';
 @import '../../../packages/theme/src/components/divider.css';
@@ -63,3 +71,18 @@
 @import '../../../packages/theme/src/patterns/data.css';
 @import '../../../packages/theme/src/media/media.css';
 @import '../../../packages/theme/src/media/surface.css';
+/* Every component has a reference page, so every component needs its styles. */
+@import '../../../packages/theme/src/components/bar-chart.css';
+@import '../../../packages/theme/src/components/calendar.css';
+@import '../../../packages/theme/src/components/carousel.css';
+@import '../../../packages/theme/src/components/collapsible.css';
+@import '../../../packages/theme/src/components/color-picker.css';
+@import '../../../packages/theme/src/components/donut-chart.css';
+@import '../../../packages/theme/src/components/editable.css';
+@import '../../../packages/theme/src/components/gauge.css';
+@import '../../../packages/theme/src/components/hover-card.css';
+@import '../../../packages/theme/src/components/line-chart.css';
+@import '../../../packages/theme/src/components/nav-menu.css';
+@import '../../../packages/theme/src/components/pin-input.css';
+@import '../../../packages/theme/src/components/toggle-group.css';
+@import '../../../packages/theme/src/pre-upgrade.css';

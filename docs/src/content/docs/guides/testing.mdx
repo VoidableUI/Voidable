@@ -1,0 +1,58 @@
+---
+title: Testing
+description: Find Voidable components by role and name, read their state from attributes, and wait for their events, using the selector and state contract the project's own evals are written against.
+---
+
+import ContractTable from '../../../components/api/ContractTable.astro';
+
+Because components render into the light DOM and carry real ARIA roles, you test them the way a user would: by role, accessible name and visible text. You do not need to reach into a component's internals, call its JavaScript, or know which class names it renders.
+
+These examples use Playwright; Testing Library, Cypress and WebDriver locators work the same way.
+
+```js
+// A field's label names the control inside it
+await page.getByLabel('Email').fill('a@b.co');
+
+// Switches, checkboxes, buttons and tabs have their roles
+await page.getByRole('switch', { name: 'Email alerts' }).click();
+await page.getByRole('checkbox', { name: 'I accept' }).check();
+await page.getByRole('button', { name: 'Save' }).click();
+await page.getByRole('tab', { name: 'Activity' }).click();
+
+// A void-select wraps a native select
+await page.getByLabel('Plan').selectOption('pro');
+
+// A dialog is named by its heading
+await page.getByRole('button', { name: 'Open' }).click();
+await expect(page.getByRole('dialog', { name: 'Delete project' })).toBeVisible();
+```
+
+Check state through **reflected attributes**, which mirror what the component is doing, or through ARIA:
+
+```js
+await expect(page.getByRole('switch', { name: 'Email alerts' })).toHaveAttribute('aria-checked', 'true');
+await expect(page.locator('void-dialog')).toHaveAttribute('open', '');
+await expect(page.getByRole('button', { name: 'Shipping' })).toHaveAttribute('aria-expanded', 'true');
+```
+
+To check what a form would send, read it as the browser does:
+
+```js
+const body = await page.evaluate(() => Object.fromEntries(new FormData(document.querySelector('form'))));
+expect(body).toMatchObject({ email: 'a@b.co', alerts: 'on' });
+```
+
+## Wait for events, not time
+
+Every interaction that changes a value dispatches a `void-*` event that bubbles. Wait for it instead of sleeping (see [Events](/guides/events/)).
+
+## Two rules
+
+- **Prefer the contract to class names.** `void-card-body` and other rendered classes are styling structure and can change. Roles, names, reflected attributes and event names are the stable surface.
+- **A `value` attribute is the initial value.** Many controls reflect their live state to an attribute (`open`, `checked`, `active`, `selected`), but a text value is read from the control: use `inputValue()` or `FormData`, not `[value=…]`.
+
+## The contract
+
+`evals/CONTRACT.md` in the repository lists, for every element, its role, where its accessible name comes from, its state handles and its **gaps**: places where a test cannot find the element or observe its state reliably today. The gaps are findings for the library, not workarounds, and they are listed on each component's page under accessibility. The table below is generated from the same file.
+
+<ContractTable />

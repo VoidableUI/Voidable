@@ -12,6 +12,10 @@
     "*.css"
   ],
   "license": "MIT",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "test": "node --test test/"
+  },
   "exports": {
     ".": "./src/index.css",
     "./primitives": "./src/primitives.css",
@@ -19,9 +23,17 @@
     "./tokens": "./src/tokens.css",
     "./reset": "./src/reset.css",
     "./type": "./src/type.css",
-    "./themes/*": "./src/themes/*"
+    "./themes/*": "./src/themes/*",
+    "./skins/*": "./src/skins/*",
+    "./dtcg/*": "./dist/dtcg/*",
+    "./json/*": "./dist/json/*",
+    "./knobs.json": "./dist/knobs.json",
+    "./names": {
+      "types": "./dist/names.d.ts",
+      "default": "./dist/names.js"
+    }
   },
-  "files": ["src"],
+  "files": ["src", "dist"],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/VoidableUI/Voidable.git",

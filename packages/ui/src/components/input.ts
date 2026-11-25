@@ -9,13 +9,43 @@ import { NativeFormControl } from '../form-control.js';
 export class VoidInput extends NativeFormControl(VoidElement) {
   /** Native input type. Every text-like type is forwarded to the native control. */
   @property({ type: String, reflect: true }) type: 'text' | 'email' | 'password' | 'number' | 'tel' | 'url' | 'search' | 'date' | 'datetime-local' | 'month' | 'time' | 'week' = 'text';
+  /**
+   * The text in the field. As an attribute it is the initial value (and the form's reset target); read
+   * or set the `value` property for the current text.
+   */
   @property({ type: String }) value = '';
+  /**
+   * Hint text shown while the field is empty. It is not a label: wrap the input in `void-field
+   * label="..."`.
+   */
   @property({ type: String, reflect: true }) placeholder = '';
+  /**
+   * Stop the field accepting input and exclude it from the form submission. Also disabled by an
+   * enclosing `<fieldset disabled>`.
+   */
   @property({ type: Boolean, reflect: true }) disabled = false;
+  /**
+   * Show the value but do not let the user edit it. Unlike `disabled`, a readonly field is focusable,
+   * selectable and still submitted.
+   */
   @property({ type: Boolean, reflect: true }) readonly = false;
+  /**
+   * The control must have a value before its form can be submitted. An empty control is invalid
+   * (`valueMissing`) and the browser reports it, as for a native field.
+   */
   @property({ type: Boolean, reflect: true }) required = false;
+  /** Key the value is submitted under in the form's `FormData`. Without a name the field submits nothing. */
   @property({ type: String, reflect: true }) name = '';
+  /**
+   * Size step: `sm`, `md` (default), `lg`, `xl` or `xxl`. Buttons and selects of the same step share its
+   * height.
+   */
   @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' | 'xl' | 'xxl' = 'md';
+  /**
+   * Mark the field invalid: it gets the error styling and `aria-invalid`. The message itself is shown by
+   * the wrapping `void-field`, whose own `error` attribute sets this one, so set `error` on the field
+   * rather than here.
+   */
   @property({ type: String, reflect: true }) error = '';
 
   /** Autofill hint forwarded to the native control (`autocomplete`), e.g. `current-password`, `one-time-code`, `email`. */

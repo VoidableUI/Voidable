@@ -10,8 +10,14 @@ import { InternalsFormControl, type FormSubmission } from '../form-control.js';
  * name, which `<void-field>` supplies), and the stepper buttons are its own buttons.
  */
 export class VoidNumberInput extends InternalsFormControl(VoidElement) {
+  /**
+   * The number. As an attribute it is the initial value; it is kept within `min` and `max` once the user
+   * commits an edit.
+   */
   @property({ type: Number, reflect: true }) value: number = 0;
+  /** Lowest allowed value. Unbounded by default. */
   @property({ type: Number }) min: number = Number.NEGATIVE_INFINITY;
+  /** Highest allowed value. Unbounded by default. */
   @property({ type: Number }) max: number = Number.POSITIVE_INFINITY;
   /** Increment applied by the stepper buttons and arrow keys. `any` matches the native
       input: no step constraint on typed values, and the buttons step by 1. */
@@ -21,15 +27,37 @@ export class VoidNumberInput extends InternalsFormControl(VoidElement) {
       toAttribute: (v: number | 'any') => String(v),
     },
   }) step: number | 'any' = 1;
+  /** Number of decimals to round to; `0` gives integers. Unset (the default) leaves the value as entered. */
   @property({ type: Number }) precision: number = -1;
+  /** Stop the field and its stepper buttons reacting and exclude the value from the form submission. */
   @property({ type: Boolean, reflect: true }) disabled: boolean = false;
+  /** Show the value but do not let the user change it; the field is still focusable and submitted. */
   @property({ type: Boolean, reflect: true }) readonly: boolean = false;
+  /** Size step: `sm`, `md` (default) or `lg`. */
   @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' = 'md';
+  /** Status colour: `default`, `error`, `warning`, `caution`, `success`, `info` or `notice`. */
   @property({ type: String, reflect: true }) color: 'default' | 'error' | 'warning' | 'caution' | 'success' | 'info' | 'notice' = 'default';
+  /** Hint text shown while the field is empty. */
   @property({ type: String }) placeholder: string = '';
+  /**
+   * Where the increment and decrement buttons go: `sides` (default, one each side), `right` (stacked at
+   * the right) or `none` (arrow keys only).
+   */
   @property({ type: String, reflect: true }) controls: 'sides' | 'right' | 'none' = 'sides';
+  /**
+   * Accessible name of the field when it is not inside a `void-field`. Defaults to `Number input`, so
+   * set it.
+   */
   @property({ type: String }) label: string = '';
+  /**
+   * Text drawn before the number inside the field, such as a currency symbol `$`. Display only; it is
+   * not part of the value.
+   */
   @property({ type: String }) prefix: string = '';
+  /**
+   * Text drawn after the number inside the field, such as `kg`. Display only; it is not part of the
+   * value.
+   */
   @property({ type: String }) unit: string = '';
 
   private _pressTimer: ReturnType<typeof setTimeout> | null = null;
@@ -38,6 +66,9 @@ export class VoidNumberInput extends InternalsFormControl(VoidElement) {
   private _repeatCount: number = 0;
   /** Text the user typed since the last commit; null when the field shows `value`. */
   private _pendingText: string | null = null;
+
+  /** Typed text survives re-renders and morphs until committed, unless the server changes `value`. */
+  static override clientState = { _pendingText: 'value' };
 
   @query('.void-number-input-field') private _input!: HTMLInputElement;
 
@@ -247,7 +278,7 @@ export class VoidNumberInput extends InternalsFormControl(VoidElement) {
         class="void-number-input-field"
         type="text"
         inputmode=${this.precision === 0 ? 'numeric' : 'decimal'}
-        .value=${live(this._format(this.value))}
+        .value=${live(this._pendingText ?? this._format(this.value))}
         placeholder=${this.placeholder}
         ?disabled=${this.disabled}
         ?readonly=${this.readonly}

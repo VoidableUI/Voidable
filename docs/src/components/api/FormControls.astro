@@ -1,0 +1,32 @@
+---
+// Which controls use which form strategy, from the manifest's mixins.
+import { loadComponentData } from '../../lib/component-data.mjs';
+
+const { components } = loadComponentData();
+const link = (c: any) => `/components/${c.tag.replace(/^void-/, '')}/`;
+const groups = [
+  { label: 'Native controls', kind: 'native' },
+  { label: 'Form-associated controls', kind: 'internals' },
+];
+---
+
+<div class="vd-api-table">
+  <table>
+    <thead><tr>{groups.map((g) => <th>{g.label}</th>)}</tr></thead>
+    <tbody>
+      <tr>
+        {
+          groups.map((g) => (
+            <td>
+              {components
+                .filter((c: any) => c.form === g.kind)
+                .map((c: any, i: number) => (
+                  <Fragment>{i > 0 && ', '}<a href={link(c)}><code>{c.tag}</code></a></Fragment>
+                ))}
+            </td>
+          ))
+        }
+      </tr>
+    </tbody>
+  </table>
+</div>

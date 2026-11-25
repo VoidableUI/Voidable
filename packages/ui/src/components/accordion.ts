@@ -5,6 +5,7 @@ import { ProjectionController } from '../projection.js';
 
 /** Collapsible section container for FAQs, settings panels, and long-form content organized into expandable items. */
 export class VoidAccordion extends VoidElement {
+  /** Let several items stay open at once. Without it, opening an item closes the others in the accordion. */
   @property({ type: Boolean, reflect: true }) multiple = false;
 }
 
@@ -14,7 +15,15 @@ if (!customElements.get('void-accordion')) {
 
 /** Individual collapsible item within a VoidAccordion; renders a heading trigger and toggleable content body. */
 export class VoidAccordionItem extends VoidElement {
+  /**
+   * Text of the heading button that toggles the item. Set it as an attribute; the item's children are
+   * the content that opens and closes.
+   */
   @property({ type: String }) heading = '';
+  /**
+   * Whether the content is shown. Add the attribute to start open; it is updated when the user toggles
+   * the item.
+   */
   @property({ type: Boolean, reflect: true }) open = false;
 
   private _id = Math.random().toString(36).slice(2);

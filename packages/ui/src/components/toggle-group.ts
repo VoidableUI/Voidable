@@ -5,11 +5,20 @@ import type { VoidToggle } from './toggle.js';
 
 /** Multi-button toggle set for text editor toolbars and filter chips where one or many options can be active. */
 export class VoidToggleGroup extends InternalsFormControl(VoidElement) {
+  /**
+   * Comma-separated `value`s of the pressed toggles (`bold,italic`), or the single pressed value. As an
+   * attribute it is the initial state and the form's reset target.
+   */
   @property({ type: String, reflect: true }) value = '';
+  /** Let several toggles be pressed at once. Without it pressing one releases the others. */
   @property({ type: Boolean, reflect: true }) multiple = false;
+  /** Stop every toggle reacting and exclude the value from the form submission. */
   @property({ type: Boolean, reflect: true }) disabled = false;
+  /** Size step: `sm`, `md` (default) or `lg`. */
   @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' = 'md';
+  /** Status colour of the pressed toggles: `default`, `error`, `warning`, `success`, `info` or `notice`. */
   @property({ type: String, reflect: true }) color: 'default' | 'error' | 'warning' | 'success' | 'info' | 'notice' = 'default';
+  /** Lay the toggles out in a `horizontal` row (default) or a `vertical` column. */
   @property({ type: String, reflect: true }) orientation: 'horizontal' | 'vertical' = 'horizontal';
 
   connectedCallback(): void {
@@ -47,18 +56,30 @@ export class VoidToggleGroup extends InternalsFormControl(VoidElement) {
     return this.value.split(',').map(v => v.trim()).filter(Boolean);
   }
 
+  /** A morph may have replaced or added toggles that do not show the group's value yet. */
+  protected override morphedCallback(): void {
+    this._syncToggles();
+  }
+
   private _syncToggles(): void {
     const selected = this._selectedValues();
-    for (const toggle of this._toggles()) {
-      const val = toggle.getAttribute('value') || '';
-      toggle.pressed = selected.includes(val);
-      if (this.disabled) {
-        toggle.disabled = true;
-      }
-      toggle.size = this.size;
-      if (this.color !== 'default') {
-        toggle.color = this.color;
-      }
+    for (const toggle of this._toggles()) this._applyTo(toggle, selected);
+  }
+
+  /** @internal Gives one toggle the group's state; toggles call it when they connect after the group (a blocking script in the head, framework rendering). */
+  _syncToggle(toggle: VoidToggle): void {
+    if (toggle.closest('void-toggle-group') === this) this._applyTo(toggle, this._selectedValues());
+  }
+
+  private _applyTo(toggle: VoidToggle, selected: string[]): void {
+    const val = toggle.getAttribute('value') || '';
+    toggle.pressed = selected.includes(val);
+    if (this.disabled) {
+      toggle.disabled = true;
+    }
+    toggle.size = this.size;
+    if (this.color !== 'default') {
+      toggle.color = this.color;
     }
   }
 

@@ -178,7 +178,7 @@ describe('owned host attributes', () => {
     expect(next.getAttribute('tabindex')).toBe('-1');
   });
 
-  it('carries reflected attributes still at their default, not client-changed reflected state', async () => {
+  it('carries reflected defaults and client-changed reflected state the server did not change', async () => {
     const sw = await mount<Host>('<void-switch>N</void-switch>');
     sw.checked = true;
     await settle();
@@ -186,8 +186,7 @@ describe('owned host attributes', () => {
     sw.voidBeforeMorph(next);
     expect(next.getAttribute('size')).toBe('md');
     expect(next.getAttribute('color')).toBe('default');
-    // checked is client state: it goes through the adapters' server-wins logic.
-    expect(next.hasAttribute('checked')).toBe(false);
+    expect(next.hasAttribute('checked')).toBe(true);
   });
 
   it('puts an owned attribute back when something else removes it', async () => {

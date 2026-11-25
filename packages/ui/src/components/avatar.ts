@@ -4,9 +4,16 @@ import { VoidElement } from '../base.js';
 
 /** User identity display for comment threads, user lists, and profile cards; falls back to initials when no image is provided. */
 export class VoidAvatar extends VoidElement {
+  /** URL of the image. When it is empty, or the image fails to load, the avatar shows `initials` instead. */
   @property({ type: String, reflect: true }) src: string = '';
+  /**
+   * Accessible name of the avatar, normally the person's name. Without it the name falls back to
+   * `initials`.
+   */
   @property({ type: String, reflect: true }) alt: string = '';
+  /** One to three letters shown when there is no image. Used as the accessible name when `alt` is empty. */
   @property({ type: String, reflect: true }) initials: string = '';
+  /** Size step: `sm`, `md` (default), `lg`, `xl` or `xxl`. */
   @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' | 'xl' | 'xxl' = 'md';
 
   connectedCallback(): void {

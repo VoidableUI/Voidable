@@ -1,0 +1,16 @@
+/* Capsule — everything is a pill.
+   Fully rounded controls, no accent colour, faint chrome and a little
+   more room than the default. */
+[data-void-theme="capsule"] {
+  --void-accent-hue: 270;
+  --void-accent-chroma: 0;
+  --void-neutral-hue: 270;
+  --void-neutral-chroma: 0.006;
+  --void-page-tint: 0;
+  --void-contrast: 0.2;
+  --void-chrome: 0.2;
+  --void-radius: 999px;
+  --void-density: 1.05;
+  --void-rhythm: 1.15;
+  --void-font-size: 0.875rem;
+}

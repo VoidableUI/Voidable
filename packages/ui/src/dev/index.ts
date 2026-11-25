@@ -9,7 +9,9 @@
 // otherwise fail silently: an attribute the element does not declare, a value
 // outside the declared set, `disabled="false"`, a child in the wrong parent or a
 // required child that is missing, a `void-*` tag nothing defines, a listener
-// for a `void-*` event nothing dispatches. Each message names the element, what
+// for a `void-*` event nothing dispatches, a script that keeps removing an
+// attribute a component manages (reported by the component, which stops
+// restoring it). Each message names the element, what
 // is wrong, the valid alternatives and a "did you mean" where one is close.
 // Each distinct problem is reported once per element type and attribute (or
 // child, or event name), so 500 table rows do not flood the console.
@@ -292,7 +294,9 @@ export function reset(): void {
 
 function start(): void {
   if (typeof document === 'undefined' || (globalThis as Record<symbol, unknown>)[STARTED]) return;
-  (globalThis as Record<symbol, unknown>)[STARTED] = { settled, check, warnings };
+  // `report` is how components reach this module without importing it: they
+  // look it up under the same symbol and call it only when it is there.
+  (globalThis as Record<symbol, unknown>)[STARTED] = { settled, check, warnings, report };
   if (globalThis.VOIDABLE_DEV) configure(globalThis.VOIDABLE_DEV);
   watchActivity();
   patchEvents();

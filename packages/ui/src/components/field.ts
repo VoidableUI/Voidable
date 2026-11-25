@@ -3,6 +3,9 @@ import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
 import { ProjectionController } from '../projection.js';
 
+/** Recorded in data-void-field-invalid when the control had no aria-invalid of its own. */
+const NO_VALUE = '';
+
 /**
  * Form field wrapper that pairs an input with its label, helper text, and validation error.
  *
@@ -12,9 +15,25 @@ import { ProjectionController } from '../projection.js';
  * are wired when they do.
  */
 export class VoidField extends VoidElement {
+  /**
+   * Visible label. It names the control inside (`for` on a native control, `aria-labelledby` otherwise),
+   * so use it instead of a `label` attribute on the control.
+   */
   @property({ type: String, reflect: true }) label = '';
+  /**
+   * Validation message shown under the control in the error colour. While it is set the control inside
+   * is marked `aria-invalid` and described by the message.
+   */
   @property({ type: String, reflect: true }) error = '';
+  /**
+   * Hint shown under the control when there is no `error`. It describes the control for assistive
+   * technology.
+   */
   @property({ type: String, reflect: true }) helper = '';
+  /**
+   * Draws an asterisk after the label. It is only the mark: put `required` on the control itself to make
+   * the browser enforce it.
+   */
   @property({ type: Boolean, reflect: true }) required = false;
 
   private _uid = Math.random().toString(36).slice(2);
@@ -77,17 +96,18 @@ export class VoidField extends VoidElement {
     const rest = (prev.getAttribute('aria-describedby') ?? '').split(/\s+/).filter(t => t && !ids.has(t));
     if (rest.length) prev.setAttribute('aria-describedby', rest.join(' '));
     else prev.removeAttribute('aria-describedby');
-    if (prev.hasAttribute('data-void-field-invalid')) {
-      prev.removeAttribute('aria-invalid');
-      prev.removeAttribute('data-void-field-invalid');
-    }
+    this._restoreInvalid(prev);
     this._labelledControl = null;
   }
 
   private _wireControl(): void {
     const control = this._findControl();
     if (this._labelledControl && this._labelledControl !== control) this._unwireControl();
-    if (!control) return;
+    if (!control) {
+      // Nothing to label (the content is text only): drop the link to a control that left.
+      this.querySelector(':scope > .void-field-label')?.removeAttribute('for');
+      return;
+    }
     this._labelledControl = control;
 
     const label = this.querySelector('.void-field-label');
@@ -114,12 +134,23 @@ export class VoidField extends VoidElement {
     else control.removeAttribute('aria-describedby');
 
     if (this.error) {
-      if (!control.hasAttribute('aria-invalid')) control.setAttribute('data-void-field-invalid', '');
+      // Remember what the control said before (a Void control's own aria-invalid="false"), to put it back.
+      if (!control.hasAttribute('data-void-field-invalid')) {
+        control.setAttribute('data-void-field-invalid', control.getAttribute('aria-invalid') ?? NO_VALUE);
+      }
       control.setAttribute('aria-invalid', 'true');
-    } else if (control.hasAttribute('data-void-field-invalid')) {
-      control.removeAttribute('aria-invalid');
-      control.removeAttribute('data-void-field-invalid');
+    } else {
+      this._restoreInvalid(control);
     }
+  }
+
+  /** Puts back the control's own aria-invalid (or removes it) once the field no longer has an error. */
+  private _restoreInvalid(control: Element): void {
+    const previous = control.getAttribute('data-void-field-invalid');
+    if (previous === null) return;
+    if (previous === NO_VALUE) control.removeAttribute('aria-invalid');
+    else control.setAttribute('aria-invalid', previous);
+    control.removeAttribute('data-void-field-invalid');
   }
 
   render() {

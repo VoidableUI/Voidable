@@ -7,7 +7,12 @@ type ItemGroup = Element & { value?: string; _syncItems?: () => void };
 
 /** Individual option within a VoidSegmentedControl button group. */
 export class VoidSegmentedControlItem extends VoidElement {
+  /**
+   * What the parent reports and submits when this segment is selected. Must be unique within the
+   * control.
+   */
   @property({ type: String, reflect: true }) value = '';
+  /** Show the segment but skip it in keyboard navigation and refuse selection. */
   @property({ type: Boolean, reflect: true }) disabled = false;
 
   connectedCallback(): void {
@@ -56,9 +61,19 @@ if (!customElements.get('void-segmented-control-item')) {
  * items; with nothing selected, the first or the last); Space selects the focused item.
  */
 export class VoidSegmentedControl extends InternalsFormControl(VoidElement) {
+  /**
+   * `value` of the selected item. Selection follows focus, so each arrow key changes it and fires
+   * `void-change`. As an attribute it is the initial value and the form's reset target.
+   */
   @property({ type: String, reflect: true }) value = '';
+  /** Stop the whole control reacting and exclude the value from the form submission. */
   @property({ type: Boolean, reflect: true }) disabled = false;
+  /** Size step: `sm`, `md` (default), `lg`, `xl` or `xxl`. */
   @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' | 'xl' | 'xxl' = 'md';
+  /**
+   * Status colour of the selected segment: `default`, `error`, `warning`, `success`, `info`, `notice` or
+   * `highlight`.
+   */
   @property({ type: String, reflect: true }) color: 'default' | 'error' | 'warning' | 'success' | 'info' | 'notice' | 'highlight' = 'default';
 
   private _observer: MutationObserver | null = null;
@@ -90,6 +105,11 @@ export class VoidSegmentedControl extends InternalsFormControl(VoidElement) {
   }
 
   private _itemsSynced = false;
+
+  /** A morph may have replaced or added items that do not show the control's value yet. */
+  protected override morphedCallback(): void {
+    this._syncItems();
+  }
 
   /** The selected value, or nothing when no segment is selected. */
   protected formSubmission(): FormSubmission {

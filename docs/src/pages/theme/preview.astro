@@ -1,0 +1,87 @@
+---
+// The application the theme builder shows, as a page of its own. The builder
+// loads it in an iframe, because only a real viewport answers the media
+// queries of the patterns (a 390px-wide iframe is a phone) and because the
+// knobs can then be set where a theme sets them, on :root: what the builder
+// shows is exactly what the copied CSS does.
+//
+// The screens are the reference screens of the Storybook, the same files:
+// components and patterns only, no CSS of their own.
+import '@voidable/theme';
+import '../../../../packages/theme/src/skins/loft.css';
+import nav from '../../../../packages/storybook/stories/reference/nav.html?raw';
+import overview from '../../../../packages/storybook/stories/reference/overview.html?raw';
+import table from '../../../../packages/storybook/stories/reference/table.html?raw';
+import form from '../../../../packages/storybook/stories/reference/form.html?raw';
+import settings from '../../../../packages/storybook/stories/reference/settings.html?raw';
+import live from '../../../../packages/storybook/stories/reference/live.html?raw';
+
+const bodies: Record<string, string> = { overview, table, form, settings, live };
+// The photographs are served from the site root here.
+const absolute = (html: string) => html.replaceAll('src="media/', 'src="/media/');
+const screens = Object.entries(bodies).map(([id, body]) => {
+  let bar = nav.replace(`data-nav="${id}"`, `data-nav="${id}" aria-current="page"`);
+  if (id === 'live') bar = bar.replace('<void-nav-bar>', '<void-nav-bar data-void-surface="media">');
+  return { id, overlay: id === 'live', html: bar + absolute(body) };
+});
+---
+
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>Theme preview · Voidable</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+    <style is:global>
+      /* The frame is small; the builder scales it. Scrollbars would take
+         width from the 390px phone, so they are hidden; the page scrolls. */
+      html { scrollbar-width: none; }
+      [data-screen][hidden] { display: none; }
+    </style>
+  </head>
+  <body>
+    {screens.map((s, i) => (
+      <void-shell nav={s.overlay ? 'overlay' : undefined} data-screen={s.id} hidden={i !== 0} set:html={s.html} />
+    ))}
+
+    <script>
+      import * as ui from '@voidable/ui';
+      document.documentElement.dataset.voidElements = String(Object.keys(ui).length);
+
+      const shells = [...document.querySelectorAll<HTMLElement>('[data-screen]')];
+      const ids = shells.map((s) => s.dataset.screen!);
+      const byNav: Record<string, string> = {};
+      for (const a of document.querySelectorAll<HTMLAnchorElement>('[data-nav]')) byNav[a.getAttribute('href')!] = a.dataset.nav!;
+
+      /** Show one screen. The builder calls this; so do the links in the bar. */
+      function show(id: string, notify = false) {
+        if (!ids.includes(id)) return;
+        for (const s of shells) s.hidden = s.dataset.screen !== id;
+        window.scrollTo(0, 0);
+        document.documentElement.dataset.screen = id;
+        if (notify) window.parent.postMessage({ type: 'void-preview-screen', screen: id }, location.origin);
+      }
+      (window as unknown as { showScreen: typeof show }).showScreen = show;
+
+      // The bar's links are in-page: they switch screens, as the app would navigate.
+      document.addEventListener('click', (e) => {
+        const a = (e.target as Element).closest?.('a[href^="#"]');
+        if (!a) return;
+        e.preventDefault();
+        const id = byNav[a.getAttribute('href')!];
+        if (id) show(id, true);
+      });
+      // Nothing in the preview submits anywhere.
+      document.addEventListener('submit', (e) => e.preventDefault());
+
+      const initial = new URLSearchParams(location.search).get('screen');
+      if (initial) show(initial);
+      document.documentElement.dataset.ready = '';
+      window.parent.postMessage({ type: 'void-preview-ready' }, location.origin);
+    </script>
+  </body>
+</html>

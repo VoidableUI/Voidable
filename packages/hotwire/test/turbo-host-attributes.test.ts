@@ -24,16 +24,9 @@ function server(html: string): Element {
   return tpl.content.firstElementChild as Element;
 }
 
-function beforeMorph(el: Element, newElement: Element): void {
-  el.dispatchEvent(new CustomEvent('turbo:before-morph-element', { bubbles: true, cancelable: true, detail: { newElement } }));
-}
-
-function attributeKept(el: Element, attributeName: string): boolean {
-  const event = new CustomEvent('turbo:before-morph-attribute', {
-    bubbles: true,
-    cancelable: true,
-    detail: { attributeName, mutationType: 'remove' },
-  });
+/** Fires Turbo's event; returns true when the adapter skipped the element (identical server markup). */
+function beforeMorph(el: Element, newElement: Element): boolean {
+  const event = new CustomEvent('turbo:before-morph-element', { bubbles: true, cancelable: true, detail: { newElement } });
   el.dispatchEvent(event);
   return event.defaultPrevented;
 }
@@ -52,20 +45,22 @@ describe('VoidTurbo and host attributes', () => {
     expect(next.getAttribute('size')).toBe('md');
   });
 
-  it('keeps the server-wins rule for client state (checked)', async () => {
+  it('carries client state the server did not change, and lets a server change win', async () => {
     document.body.innerHTML = '<void-switch id="s">N</void-switch>';
     await settle();
     stop = VoidTurbo.start();
     const sw = document.getElementById('s')!;
     sw.click();
     await settle();
-    // The server keeps rendering it unchecked: the user's checked survives.
-    beforeMorph(sw, server('<void-switch id="s">N</void-switch>'));
-    expect(attributeKept(sw, 'checked')).toBe(true);
-    // The server renders it checked, then unchecked again: the server wins.
+    // The server keeps rendering it unchecked: the user's checked is carried onto newElement.
+    const same = server('<void-switch id="s">N</void-switch>');
+    beforeMorph(sw, same);
+    expect(same.hasAttribute('checked')).toBe(true);
+    // The server renders it unchecked after rendering it checked: that is a change, it wins.
     beforeMorph(sw, server('<void-switch id="s" checked>N</void-switch>'));
-    beforeMorph(sw, server('<void-switch id="s">N</void-switch>'));
-    expect(attributeKept(sw, 'checked')).toBe(false);
+    const off = server('<void-switch id="s">N</void-switch>');
+    beforeMorph(sw, off);
+    expect(off.hasAttribute('checked')).toBe(false);
   });
 
   it('keeps a reflected value the user changed while the server value is unchanged', async () => {
@@ -75,9 +70,15 @@ describe('VoidTurbo and host attributes', () => {
     const el = document.getElementById('n') as HTMLElement & { value: number };
     el.value = 7;
     await settle();
-    beforeMorph(el, server('<void-number-input id="n" value="3"></void-number-input>'));
-    expect(attributeKept(el, 'value')).toBe(true);
-    beforeMorph(el, server('<void-number-input id="n" value="5"></void-number-input>'));
-    expect(attributeKept(el, 'value')).toBe(false);
+    // Identical server markup: the element is skipped and keeps 7.
+    expect(beforeMorph(el, server('<void-number-input id="n" value="3"></void-number-input>'))).toBe(true);
+    expect(el.value).toBe(7);
+    // Other markup with the same value: the morph runs and keeps the client's 7.
+    const same = server('<void-number-input id="n" value="3" step="1"></void-number-input>');
+    expect(beforeMorph(el, same)).toBe(false);
+    expect(same.getAttribute('value')).toBe('7');
+    const changed = server('<void-number-input id="n" value="5"></void-number-input>');
+    beforeMorph(el, changed);
+    expect(changed.getAttribute('value')).toBe('5');
   });
 });

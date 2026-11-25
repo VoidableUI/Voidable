@@ -15,7 +15,7 @@ How to find every Voidable element and read its state the way a user, an agent d
 | `void-avatar` | img | alt attribute | — | without alt the host is role="img" with an empty aria-label: an unnamed image (axe image-alt / role-img-alt) |
 | `void-badge` | status | text content | color (reflected) | every badge is role="status", a live region: a table of status badges is a page of live regions, and a decorative badge cannot opt out |
 | `void-banner` | banner | text content | dismissable (reflected) | role="banner" is the page header landmark; a second banner, or one inside <main>, is invalid |
-| `void-bar-chart` | img | aria-label attribute | — | data is a property only and its shape ({ series: [{ name, values }], labels }) is not in the manifest or `voidable ref`; the drawn values are not exposed as text |
+| `void-bar-chart` | img | aria-label attribute | — | data is a property only (its shape is in the manifest and `voidable ref`); the drawn values are not exposed as text |
 | `void-breadcrumbs` | navigation | fixed "Breadcrumb" | — | — |
 | `void-button` | button | text content or aria-label | disabled (reflected)<br>aria-disabled | — |
 | `void-calendar` | group | fixed "Calendar"; the grid is named "<Month> <Year>" | value (reflected, YYYY-MM-DD)<br>aria-selected on the day cell | day buttons are named with a long date ("Tuesday, November 3, 2026") that depends on locale |
@@ -31,7 +31,7 @@ How to find every Voidable element and read its state the way a user, an agent d
 | `void-date-picker` | inner | void-field label, on the inner role="combobox" input (aria-label falls back to the placeholder) | value (reflected, YYYY-MM-DD)<br>open (reflected)<br>aria-expanded on the inner combobox<br>role="dialog" calendar popup | the inner input is readonly: typing a date is impossible, so tests and users must page the calendar |
 | `void-dialog` | inner | heading attribute (aria-labelledby on the inner native dialog), else aria-label on the host | open (reflected)<br>the inner native <dialog> is open and modal (:modal) while open | — |
 | `void-divider` | separator | label attribute | aria-orientation | — |
-| `void-donut-chart` | img | aria-label attribute | — | data is a property only; its shape ({ segments: [{ name, value }] }) is not in the manifest or `voidable ref` |
+| `void-donut-chart` | img | aria-label attribute | — | data is a property only (its shape is in the manifest and `voidable ref`); the drawn values are not exposed as text |
 | `void-drawer` | inner | heading attribute (aria-labelledby on the inner native dialog), else aria-label on the host | open (reflected)<br>the inner native <dialog> is open and modal (:modal) while open | — |
 | `void-dropdown-menu` | inner | the trigger element | open (reflected)<br>aria-haspopup="menu" and aria-expanded on the trigger<br>role="menu" panel<br>role="menuitem" items | — |
 | `void-dropdown-menu-item` | menuitem | text content | disabled (reflected)<br>aria-disabled<br>destructive (reflected) | void-select carries the item element, not a value; identify items by text |
@@ -44,7 +44,7 @@ How to find every Voidable element and read its state the way a user, an agent d
 | `void-hover-card` | inner | the trigger element | open (reflected) | the card is a visual preview: the trigger gets no aria-expanded, and the card has no role |
 | `void-indicator` | status | fixed "notification" | count (reflected) | the name does not include the count |
 | `void-input` | inner | void-field label, on the inner input | value (attribute; the live value is the inner input value)<br>error (reflected) -> aria-invalid on the inner input<br>disabled (reflected) | — |
-| `void-line-chart` | img | aria-label attribute | — | data is a property only; its shape ({ series: [{ name, values }], labels }) is not in the manifest or `voidable ref` |
+| `void-line-chart` | img | aria-label attribute | — | data is a property only (its shape is in the manifest and `voidable ref`); the drawn values are not exposed as text |
 | `void-list` | list | none | — | — |
 | `void-list-item` | listitem | text content | selected (reflected)<br>disabled (reflected) | interactive items stay role="listitem": "selected" has no ARIA equivalent |
 | `void-menu` | inner | none | open (reflected)<br>role="menu" rendered inside | the menu has no accessible name |
@@ -96,7 +96,7 @@ How to find every Voidable element and read its state the way a user, an agent d
 - `void-avatar`: without alt the host is role="img" with an empty aria-label: an unnamed image (axe image-alt / role-img-alt)
 - `void-badge`: every badge is role="status", a live region: a table of status badges is a page of live regions, and a decorative badge cannot opt out
 - `void-banner`: role="banner" is the page header landmark; a second banner, or one inside <main>, is invalid
-- `void-bar-chart`: data is a property only and its shape ({ series: [{ name, values }], labels }) is not in the manifest or `voidable ref`; the drawn values are not exposed as text
+- `void-bar-chart`: data is a property only (its shape is in the manifest and `voidable ref`); the drawn values are not exposed as text
 - `void-calendar`: day buttons are named with a long date ("Tuesday, November 3, 2026") that depends on locale
 - `void-card`: heading is rendered as text, not a heading element, so a card cannot be found by its title with getByRole("heading")
 - `void-carousel`: no accessible name
@@ -108,7 +108,7 @@ How to find every Voidable element and read its state the way a user, an agent d
 - `void-compose-input`: the current value is not reflected to an attribute: [value=...] selectors and attribute assertions see the initial value only
 - `void-compose-input`: no role or name on the host; the send button has no stable name
 - `void-date-picker`: the inner input is readonly: typing a date is impossible, so tests and users must page the calendar
-- `void-donut-chart`: data is a property only; its shape ({ segments: [{ name, value }] }) is not in the manifest or `voidable ref`
+- `void-donut-chart`: data is a property only (its shape is in the manifest and `voidable ref`); the drawn values are not exposed as text
 - `void-dropdown-menu-item`: void-select carries the item element, not a value; identify items by text
 - `void-editable`: no role or accessible name on the host in display mode
 - `void-file-upload`: files over max-size or not matching accept are dropped silently: no event, no error attribute, nothing to assert
@@ -117,7 +117,7 @@ How to find every Voidable element and read its state the way a user, an agent d
 - `void-hamburger`: the name is fixed and cannot say what it opens; aria-controls is not set
 - `void-hover-card`: the card is a visual preview: the trigger gets no aria-expanded, and the card has no role
 - `void-indicator`: the name does not include the count
-- `void-line-chart`: data is a property only; its shape ({ series: [{ name, values }], labels }) is not in the manifest or `voidable ref`
+- `void-line-chart`: data is a property only (its shape is in the manifest and `voidable ref`); the drawn values are not exposed as text
 - `void-list-item`: interactive items stay role="listitem": "selected" has no ARIA equivalent
 - `void-menu`: the menu has no accessible name
 - `void-multiselect`: the selected values are a property only (value: string[]), not reflected (#23)
