@@ -154,8 +154,8 @@ else {
     } else if (!fs.existsSync(path.join(L.ROOT, t))) fail(`package.json exports["${key}"] -> ${t}: file does not exist`);
   }
   for (const key of ['./components/*', './patterns/*', './themes/*']) if (!pkg.exports[key]) fail(`package.json exports["${key}"] is missing`);
-  if (!pkg.files?.includes('dist') || !pkg.files?.includes('src')) fail('package.json "files" must include both dist (the built stylesheets) and src (the sources the source map points at)');
-  if (!fs.existsSync(path.join(DIST, 'void.min.css.map'))) fail('dist/void.min.css.map is missing (the sources ship, so the map ships)');
+  if (!pkg.files?.includes('dist') || !pkg.files?.includes('src')) fail('package.json "files" must include both dist (the built stylesheets) and src (the sources)');
+  if (fs.existsSync(path.join(DIST, 'void.min.css.map'))) fail('dist/void.min.css.map exists: the packaging lint rejects source maps');
 }
 
 if (errors.length) {

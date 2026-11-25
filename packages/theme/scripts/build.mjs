@@ -12,7 +12,9 @@
 //   components/<name>   one component, with what it needs to render on its own
 //   patterns/<name>     one group of CSS-only elements
 //   themes/<name>       one demonstration theme, in its layer
-// plus void.min.css.map (the sources ship, so the map points at them) and exports.json.
+// plus exports.json. No source map: the bundle is flattened from many files and the
+// packaging lint rejects maps (they would point at sources the package does not publish
+// under those names); the unminified file is the readable form.
 import fs from 'node:fs';
 import path from 'node:path';
 import { bundleAsync } from 'lightningcss';
@@ -129,7 +131,7 @@ await emit(
 
 // core and void
 await emit('core', `@import '${abs('core.css')}';`);
-await emit('void', `@import '${abs('core.css')}';\n${imp('base.css', 'void.reset')}`, { map: true });
+await emit('void', `@import '${abs('core.css')}';\n${imp('base.css', 'void.reset')}`);
 
 // per component
 const exportsJson = { layers: L.voidLayers(), components: {}, patterns: {}, themes: [] };
