@@ -25,7 +25,7 @@ Void UI (`@voidable/ui` {{.Version}}, {{.Count}} elements) is a set of `<void-*>
 
    A page that uses only some of the elements can import `@voidable/ui/autoloader` instead (with an import map and no bundler: `@voidable/ui/autoloader.js`): it loads each element's module the first time its tag appears, including tags added later. The full import registers every element up front and is simpler when most are used.
 
-   Dark is the default; set `data-theme="light"` on an ancestor for light mode and `data-shape="sharp"` for square corners. Colors and spacing come from `--void-*` custom properties; never hard-code colors.
+   Dark is the default; set `data-theme="light"` on an ancestor for light mode and `data-shape="sharp"` for square corners. Colors and spacing come from `--void-*` custom properties; never hard-code colors. To change the look, see "Retheming" below: set the knobs, never individual tokens.
 
 2. **Look a component up before you use it.** Run `voidable ref <tag>` (or call the `voidable_ref` MCP tool), or read `references/components/<tag>.md`. It lists every attribute with its type, allowed values and default, the events with their `detail` shape, the slots, and an example. `references/elements.md` is the index of all elements with a one-line purpose. If an element or attribute is not listed, it does not exist: do not invent it.
 
@@ -124,6 +124,59 @@ In a table, mark number columns `data-numeric` on the `<th>` and `<td>`, and put
 - `void-glass` is a translucent blurred panel for a form or status block over the image. `data-void-surface="glass"` gives a component (a card, a nav bar) the same surface; `data-void-surface="media"` marks a region you positioned over an image yourself.
 - Status-coloured text over an image belongs in a `void-badge variant="outline"` or inside `void-glass`, not bare on the photograph.
 - Use it for heroes, page headers and feature sections. Application screens stay on the page background.
+
+## Retheming: set the knobs, and hand the user a link
+
+The whole look is derived from fourteen custom properties, the **knobs**. To change the look (a brand colour, rounder corners, a denser or airier layout, another typeface), set knobs and nothing else. Do not override individual `--void-color-*` or spacing tokens, do not write per-component CSS, and do not write a second block for light mode: both colour schemes follow from the same knobs, and no knob value can take text below 4.5:1.
+
+```css
+/* acme.css: a complete theme. Import it after '@voidable/theme'. */
+:root {
+  --void-accent-hue: 162;
+  --void-accent-chroma: 0.19;
+  --void-radius: 8px;
+  --void-rhythm: 1.1;
+}
+```
+
+| Knob | Default | Range | Changes |
+|---|---|---|---|
+| `--void-accent-hue` | `250` | 0 to 360 | Hue of the accent, an OKLCH angle: 30 red, 60 orange, 90 yellow, 150 green, 200 teal, 250 blue, 300 purple, 350 pink |
+| `--void-accent-chroma` | `0` | 0 to 0.25 | How colourful the accent is. 0 is no accent colour (primary buttons are black on white, white on black); 0.10 to 0.20 is a coloured accent |
+| `--void-neutral-hue` | `60` | 0 to 360 | Hue of the greys (text, lines, surfaces) |
+| `--void-neutral-chroma` | `0.004` | 0 to 0.04 | Tint of the greys. 0 is pure grey; 0.02 is clearly tinted |
+| `--void-page-tint` | `0` | 0 to 1 | 0 is a pure black or white page; 1 is a soft tinted page |
+| `--void-contrast` | `0.2` | 0 to 1 | Strength of secondary text and control borders; 0 already meets WCAG AA |
+| `--void-chrome` | `0.3` | 0 to 1 | Strength of divider lines and container fills |
+| `--void-radius` | `4px` | 0px to 20px, or 999px | Corner radius of a control; other radii scale from it. 999px makes controls pills |
+| `--void-density` | `1` | 0.75 to 1.25 | Control height (36px at 1), padding, the spacing scale |
+| `--void-rhythm` | `1` | 0.6 to 1.4 | Space between groups and sections |
+| `--void-font-size` | `0.875rem` | 0.75rem to 1.0625rem | Body text size; other sizes scale from it |
+| `--void-font-sans` | Inter | a font-family list | Typeface of the interface (the theme ships no font files) |
+| `--void-font-mono` | JetBrains Mono | a font-family list | Typeface of labels, code and ids |
+| `--void-anim-scale` | `1` | 0 to 2 | Multiplies every duration; 0 switches animation off |
+
+- Set them on `:root` for the whole page, or on any element that carries `data-void-theme` (with a name or empty) to restyle a subtree. A knob set on an element without that attribute does nothing.
+- Eight themes ship as knob-only files, `@voidable/theme/themes/<name>.css`, applied with `<html data-void-theme="name">`: `void` (the default), `dune` (warm, rounded), `console` (dense, square, monospace), `orbit` (monochrome, very airy), `capsule` (pill controls), `aurora` (vivid green), `iris` (violet, tinted page), `paper` (serif, editorial). Start from the nearest one and change a few knobs.
+- For a soft, card-based look with shadows instead of hairlines, add the Loft skin: `@import '@voidable/theme/skins/loft.css';` and `<html data-void-skin="loft">`. It combines with any knobs.
+- The knobs as data (ranges, defaults, each shipped theme's values) are in `@voidable/theme/knobs.json`. Resolved tokens for design tools are in `@voidable/theme/dtcg/<theme>.<scheme>.tokens.json` (DTCG 2025.10) and `@voidable/theme/json/<theme>.<scheme>.json`.
+
+**Show the user your theme before you apply it.** The theme builder at `https://voidable.dev/theme/` renders any knob values on five real application screens, in dark and light, and its URL carries the theme. Every knob is a query parameter named after it without the `--void-` prefix; a bare number takes the knob's unit (`radius=8` is 8px, `font-size=0.9375` is 0.9375rem). Knobs you leave out keep their defaults. When you propose a theme, give the user the link next to the CSS:
+
+```
+https://voidable.dev/theme/?accent-hue=162&accent-chroma=0.19&radius=8&rhythm=1.1
+```
+
+| Parameter | Value |
+|---|---|
+| `accent-hue`, `accent-chroma`, `neutral-hue`, `neutral-chroma`, `page-tint`, `contrast`, `chrome`, `radius`, `density`, `rhythm`, `font-size`, `anim-scale` | The knob's value, as a number |
+| `font-sans`, `font-mono` | A URL-encoded font-family list, or a key: `inter`, `system`, `humanist`, `geometric`, `rounded`, `serif`, `mono` for `font-sans`; `jetbrains`, `system` for `font-mono` |
+| `theme` | A shipped theme to start from (`theme=dune&radius=0`); the other parameters override it |
+| `skin` | `loft` |
+| `name` | A name for the theme: the builder then writes `[data-void-theme="name"]` instead of `:root` |
+| `screen`, `scheme`, `device` | What to show first: `overview`, `table`, `form`, `settings` or `live`; `dark`, `light` or `both`; `desktop` or `phone` |
+
+The user can adjust the knobs there and copy the resulting CSS back to you; it is the same dozen lines.
 
 ## Composition
 

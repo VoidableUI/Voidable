@@ -102,7 +102,11 @@ The inputs a theme sets. To retheme, change these and nothing else:
 | `--void-font-size`, `--void-font-sans`, `--void-font-mono` | `0.875rem`, Inter, JetBrains Mono | Type |
 | `--void-anim-scale` | `1` | Multiplies durations |
 
-A **theme** is a file in `packages/theme/src/themes/` with one `[data-void-theme="name"]` rule that sets knobs only (`lint:contrast` rejects anything else). `void`, `dune` and `console` ship as examples.
+A **theme** is a file in `packages/theme/src/themes/` with one `[data-void-theme="name"]` rule that sets knobs only (`lint:contrast` rejects anything else). Eight ship: `void`, `dune`, `console`, `orbit`, `capsule`, `aurora`, `iris`, `paper`. Each file starts with a comment of the form `/* Name — one line.`, which the theme builder shows.
+
+A **skin** is a file in `packages/theme/src/skins/` selected with `data-void-skin="name"` (on `<html>`, or beside `data-void-theme`). It changes structure, which knobs cannot: its first rule may only override `--void-*` tokens (the token export and `lint:contrast` read it, and the lint checks it on every theme and across the colour knobs); the rules after it restyle elements, and each of those is a missing override point to be replaced by a component token (#46). `loft` ships. A skin never edits a file under `components/`.
+
+The knobs are also data: `packages/theme/build/knobs.js` holds each knob's range, step, unit and URL parameter, the font stacks, the link format of the theme builder (`builderUrl`, `fromParams`), the theme-file writer, the prose description and the random theme. The builder page, the token export and `@voidable/theme/knobs.json` read it, and a test fails if its knob list, the knob table in the `voidable` skill template or `knobs.css` disagree. Add or change a knob in `knobs.css`, `build/knobs.js` and `tools/voidable/internal/infra/skillgen/templates/SKILL.md.tmpl` together.
 
 ### Layer 3 — Derived Tokens (`@voidable/theme/tokens`)
 
@@ -124,6 +128,14 @@ How the derivation works, and the rules that keep it working:
 - A surface (on-media, glass) is a set of overrides of the *inputs* to those formulas (the scheme number, the alpha steps, `--void-color-bg`), declared on `void-media`, `void-glass` and `[data-void-surface]`. Components need no surface-specific CSS; never add one.
 - Never put a `var()` in `primitives.css` or `knobs.css`, and never put a raw value in a theme file.
 - **Dark mode** is the default (true black `#000000` page). **Light mode** via `[data-theme="light"]`.
+
+### Token export
+
+`packages/theme` has a build (`scripts/build.mjs`, part of `mise run build`) that resolves every `--void-*` property for each theme and skin in both schemes and writes `dist/`: `dtcg/<theme>.<scheme>.tokens.json` (Design Tokens Community Group Format Module 2025.10), `dtcg/voidable.resolver.json`, `json/<theme>.<scheme>.json` (flat, CSS values), `knobs.json` and `names.js`/`names.d.ts`; exported as `@voidable/theme/dtcg/*`, `/json/*`, `/knobs.json` and `/names`. The values come from the evaluator in `build/css-eval.js` (`var()`, `calc()`, `min/max/clamp`, `oklch()`, `color-mix(in srgb)`, shadows), so the build needs no browser; `test/chromium.test.mjs` compares every exported value with what Chromium computes and fails in CI when no Chromium is found. The evaluator throws on CSS it does not implement: when you use a new construct in `tokens.css`, teach it to the evaluator.
+
+### Theme builder
+
+`docs/src/pages/theme/index.astro` (voidable.dev/theme/) is the builder: knob controls, the reference screens in iframes (`theme/preview.astro`, the Storybook's reference HTML files), a live contrast readout, and the theme as CSS, a link, a prompt and DTCG JSON. Its behaviour is `docs/src/lib/theme-builder.ts`. A link to it is a theme: each knob is the query parameter named after it without `--void-`. The home page's picker and the theming guide link into it with `?theme=<name>`; do not add a second set of knob sliders elsewhere.
 
 ## Design Values
 
@@ -168,7 +180,7 @@ Consumers toggle shape globally (`<html data-shape="sharp">`) or locally on any 
 
 ### Reference Screens
 
-`packages/storybook/stories/reference/` holds five realistic screens (application overview, data table with toolbar, form, settings, and a page that opens on a photograph with navigation and a glass panel over it) built only from components, patterns and type roles, shown in Storybook under Reference/Screens. No screen has CSS of its own. Judge any theme change by looking at them at 1440x900 and 390x844, in dark and light, under the Void, Dune and Console themes.
+`packages/storybook/stories/reference/` holds five realistic screens (application overview, data table with toolbar, form, settings, and a page that opens on a photograph with navigation and a glass panel over it) built only from components, patterns and type roles, shown in Storybook under Reference/Screens. No screen has CSS of its own. Judge any theme change by looking at them at 1440x900 and 390x844, in dark and light, under the Void, Dune and Console themes and the Loft skin.
 
 Photographs for stories and docs live in `docs/public/media/` (Storybook serves the same directory at `media/`). Only freely licensed images, never hot-linked, each listed in `docs/public/media/CREDITS.txt`.
 
@@ -207,7 +219,7 @@ set -euo pipefail
 | `mise run lint` | ESLint with lit-a11y (WCAG checks on Lit templates) |
 | `mise run lint:tokens` | Ensure no raw values (colors, sizes, control heights, tracking, text case, backdrop blurs, scrim colours, text shadows) in component CSS; values live in primitives.css, knobs.css and tokens.css |
 | `mise run lint:undefined-tokens` | Fail if a `--void-*` token is referenced (in the theme, the components, the docs, the stories or the examples) but neither defined in theme CSS nor set from TypeScript |
-| `mise run lint:contrast` | Evaluate the derived colours and check WCAG contrast in dark and light for the default knobs, every theme file and the extremes of each colour knob, on the page, on the on-media surface and on glass (over white, grey and black images, across the scrim strength); reject theme files that set anything but knobs |
+| `mise run lint:contrast` | Evaluate the derived colours and check WCAG contrast in dark and light for the default knobs, every theme file, every skin and the extremes of each colour knob, on the page, on the on-media surface and on glass (over white, grey and black images, across the scrim strength); reject theme files that set anything but knobs |
 | `mise run lint:styles` | Ensure UI components contain no visual styles and that the CSS-only pattern elements are styled by the theme and never registered |
 | `mise run lint:exports` | Verify every component has a subpath export, self-registers and is re-exported from the index |
 | `mise run lint:manifest` | Fail when a tag in the Custom Elements Manifest has no story, React wrapper or LiveView component (known gaps: `.mise/manifest-drift-allowlist.txt`) |
