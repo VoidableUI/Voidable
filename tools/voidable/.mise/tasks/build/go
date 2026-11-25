@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+#MISE description="Build the voidable binary (CGO disabled) into build/"
+#MISE depends=["build:manifest"]
+set -euo pipefail
+# Use the mise-pinned Go even when another go precedes it on PATH (mise sets GOROOT).
+if [[ -n "${GOROOT:-}" ]]; then export PATH="$GOROOT/bin:$PATH"; fi
+
+cd "$(dirname "$0")/../../.."
+version="$(sed -n 's/.*"version": *"\([^"]*\)".*/\1/p' internal/infra/embedded/data/manifest/components.json | head -1)"
+CGO_ENABLED=0 go build -trimpath -ldflags="-s -w -X main.Version=${version:-dev}" ${GO_TAGS:+-tags "$GO_TAGS"} -o build/voidable .
+ls -l build/voidable

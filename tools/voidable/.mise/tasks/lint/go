@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+#MISE description="Run golangci-lint"
+set -euo pipefail
+# Use the mise-pinned Go even when another go precedes it on PATH (mise sets GOROOT).
+if [[ -n "${GOROOT:-}" ]]; then export PATH="$GOROOT/bin:$PATH"; fi
+
+cd "$(dirname "$0")/../../.."
+golangci-lint run ./...

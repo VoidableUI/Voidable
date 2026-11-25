@@ -119,13 +119,12 @@ Without Livewire, use Alpine.js directly for client-side interactivity:
 ### Tabs
 
 ```blade
-<void-tabs x-data="{ active: 'overview' }" x-on:void-change="active = $event.detail.value">
-    <void-tab value="overview" x-bind:selected="active === 'overview'">Overview</void-tab>
-    <void-tab value="settings" x-bind:selected="active === 'settings'">Settings</void-tab>
+<void-tabs value="overview" x-data="{ active: 'overview' }" x-on:void-change="active = $event.detail.value">
+    <void-tab-panel tab="overview" label="Overview">Overview content</void-tab-panel>
+    <void-tab-panel tab="settings" label="Settings">Settings content</void-tab-panel>
 </void-tabs>
 
-<div x-show="active === 'overview'">Overview content</div>
-<div x-show="active === 'settings'">Settings content</div>
+<p x-text="'Active tab: ' + active"></p>
 ```
 
 ### Form Controls

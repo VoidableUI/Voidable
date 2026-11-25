@@ -1,0 +1,123 @@
+package skillgen
+
+import (
+	"context"
+	"regexp"
+	"strings"
+	"testing"
+
+	"github.com/VoidableUI/Voidable/tools/voidable/internal/domain"
+	"github.com/VoidableUI/Voidable/tools/voidable/internal/infra/embedded"
+	"github.com/VoidableUI/Voidable/tools/voidable/internal/infra/scan"
+)
+
+func build(t *testing.T) (*domain.Skill, *domain.Library) {
+	t.Helper()
+	src := embedded.Source{}
+	lib, err := domain.NewLibrary(context.Background(), src, src, scan.Fragments{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	sk, err := New(lib).Skill(context.Background())
+	if err != nil {
+		t.Fatal(err)
+	}
+	return sk, lib
+}
+
+func TestSkillShape(t *testing.T) {
+	sk, lib := build(t)
+	if sk.Name != "voidable" {
+		t.Fatalf("name = %q", sk.Name)
+	}
+	entry, err := sk.Entry() // checks SKILL.md frontmatter and name == path
+	if err != nil {
+		t.Fatal(err)
+	}
+	if entry.Frontmatter["metadata"].(map[string]any)["version"] != lib.Version() {
+		t.Errorf("metadata.version = %v, want %s", entry.Frontmatter["metadata"], lib.Version())
+	}
+	if len(entry.Resources) > 512 {
+		t.Errorf("%d resources exceed the SEP-2640 limit of 512", len(entry.Resources))
+	}
+	total := 0
+	for _, r := range entry.Resources {
+		total += r.Size
+	}
+	if total > 16<<20 {
+		t.Errorf("%d bytes exceed the SEP-2640 limit of 16 MiB", total)
+	}
+
+	// Every element has its own reference file, and every file is plain Markdown.
+	for _, e := range lib.Catalog().Elements {
+		f, ok := sk.File("references/components/" + e.Tag + ".md")
+		if !ok {
+			t.Errorf("no reference for %s", e.Tag)
+			continue
+		}
+		if !strings.Contains(string(f.Content), "## `<"+e.Tag+">`") {
+			t.Errorf("%s reference lacks its heading", e.Tag)
+		}
+	}
+	for _, f := range sk.Files {
+		if f.MIME != "text/markdown" || strings.Contains(string(f.Content), "{{") {
+			t.Errorf("%s: mime %q or unrendered template text", f.Path, f.MIME)
+		}
+	}
+
+	// Every relative reference in SKILL.md points at a file of the skill.
+	md, _ := sk.File("SKILL.md")
+	for _, m := range regexp.MustCompile("`(references/[\\w./-]+)`").FindAllStringSubmatch(string(md.Content), -1) {
+		p := m[1]
+		if strings.Contains(p, "<") {
+			continue
+		}
+		if _, ok := sk.File(p); !ok {
+			t.Errorf("SKILL.md refers to %s, which the skill does not contain", p)
+		}
+	}
+	for _, lang := range domain.SnippetLangs {
+		if _, ok := sk.File("references/snippets/" + string(lang) + ".md"); !ok {
+			t.Errorf("no snippets for %s", lang)
+		}
+	}
+}
+
+func TestSkillContentFromManifest(t *testing.T) {
+	sk, _ := build(t)
+	read := func(p string) string {
+		f, ok := sk.File(p)
+		if !ok {
+			t.Fatalf("no %s", p)
+		}
+		return string(f.Content)
+	}
+	for _, c := range []struct{ file, want string }{
+		{"SKILL.md", "`closable` on `<void-dialog>` and `closable` on `<void-drawer>`"},
+		{"references/components/void-popover.md", "| `trigger` | The element that toggles the popover"},
+		{"references/components/void-slider.md", "`show-value`"},
+		{"references/snippets/heex.md", "<.dropdown_menu position=\"bottom-end\">"},
+		{"references/snippets/jsx.md", "slot=\"trigger\""},
+		{"references/wrong-usages.md", "| `<void-gauge>` | `show-value` | `showvalue` |"},
+		{"references/wrong-usages.md", "| `<void-option>` | `<void-multiselect>`, `<void-combobox>` |"},
+		{"references/wrong-usages.md", "cannot be turned off from markup"},
+		{"references/elements.md", "| `<void-button>` |"},
+	} {
+		if got := read(c.file); !strings.Contains(got, c.want) {
+			t.Errorf("%s lacks %q", c.file, c.want)
+		}
+	}
+}
+
+func TestSkillDeterministic(t *testing.T) {
+	a, _ := build(t)
+	b, _ := build(t)
+	if len(a.Files) != len(b.Files) {
+		t.Fatal("file counts differ")
+	}
+	for i := range a.Files {
+		if a.Files[i].Path != b.Files[i].Path || string(a.Files[i].Content) != string(b.Files[i].Content) {
+			t.Errorf("%s differs between builds", a.Files[i].Path)
+		}
+	}
+}

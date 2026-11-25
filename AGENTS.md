@@ -168,6 +168,8 @@ set -euo pipefail
 | `mise run release:plan` | Print whether HEAD releases, the unified version and why |
 | `mise run release:dry-run` | Build, pack and verify every package at the planned version; publishes nothing |
 | `mise run release:test` | Unit tests for the release scripts (bump rules, plan, version lint) |
+| `mise run voidable:ci` | Lint, test and build the Go CLI in `tools/voidable` (installs the pinned Go on demand; `VOIDABLE_SKIP_GO=1` skips it and `lint:markup`) |
+| `mise run lint:markup` | `voidable check` over docs, stories, examples and adapter templates; open product decisions are in `.voidable/markup-allowlist.txt` |
 | `mise run docs` | Start docs dev server |
 | `mise run docs:build` | Build docs for deployment |
 

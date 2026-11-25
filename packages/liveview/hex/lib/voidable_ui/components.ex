@@ -1474,7 +1474,6 @@ defmodule VoidableUI.Components do
   attr :size, :string, default: nil
   attr :count, :integer, default: nil
   attr :ping, :boolean, default: false
-  attr :overlay, :boolean, default: false
   attr :position, :string, default: nil
   attr :rest, :global
   slot :inner_block, required: true
@@ -1486,7 +1485,6 @@ defmodule VoidableUI.Components do
       size={@size}
       count={@count}
       ping={@ping}
-      overlay={@overlay}
       position={@position}
       {@rest}
     >
