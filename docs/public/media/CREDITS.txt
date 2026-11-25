@@ -1,0 +1,38 @@
+Photographs in this directory
+
+All six are NASA photographs taken from images.nasa.gov. NASA imagery is
+generally not subject to copyright in the United States and may be used
+without permission for informational and educational purposes, provided
+no endorsement by NASA is implied (https://www.nasa.gov/nasa-brand-center/images-and-media/).
+Each record was checked: none names a third-party copyright holder.
+The files here are resized and recompressed copies.
+
+limb.jpg       NASA ID iss073e0257194. "Noctilucent clouds are pictured above
+               the North Pacific Ocean", International Space Station,
+               28 June 2025. Credit: NASA.
+               https://images.nasa.gov/details/iss073e0257194
+
+sunrise.jpg    NASA ID iss040e080833. "Earth Observation" (sunrise over the
+               Earth's limb), Expedition 40, International Space Station,
+               26 July 2014. Credit: NASA.
+               https://images.nasa.gov/details/iss040e080833
+
+storm.jpg      NASA ID iss072e617674. "Storm clouds rise above the South
+               Pacific Ocean northwest of New Zealand", International Space
+               Station, 1 February 2025. Credit: NASA.
+               https://images.nasa.gov/details/iss072e617674
+
+aleutians.jpg  NASA ID iss074e0008922. "Snow-capped mountain tops of Alaska's
+               Aleutian Islands pierce through the clouds", International
+               Space Station, 12 December 2025. Credit: NASA.
+               https://images.nasa.gov/details/iss074e0008922
+
+ice.jpg        NASA ID GSFC_20171208_Archive_e000911. "Mountain Peaks"
+               (Thurston Island, Antarctica), Operation IceBridge,
+               5 November 2014. Credit: NASA/Jim Yungel.
+               https://images.nasa.gov/details/GSFC_20171208_Archive_e000911
+
+city.jpg       NASA ID iss040e091208. "Earth Observation" (city lights of
+               California at night), Expedition 40, International Space
+               Station, 10 August 2014. Credit: NASA/Reid Wiseman.
+               https://images.nasa.gov/details/iss040e091208

@@ -1,79 +1,79 @@
-<main class="ref-page" data-width="narrow">
-  <header class="ref-head">
-    <div class="ref-head-text">
+<main>
+  <void-page width="narrow">
+    <void-page-head>
       <span data-void-type="label">Stations / New</span>
-      <h1 data-void-type="title">Add a station</h1>
-      <p class="ref-lede" data-void-type="body">A station joins the schedule once its first calibration pass succeeds. You can change everything here later.</p>
-    </div>
-  </header>
+      <h1>Add a station</h1>
+      <p>A station joins the schedule once its first calibration pass succeeds. You can change everything here later.</p>
+    </void-page-head>
 
-  <form class="ref-form" onsubmit="return false">
-    <section class="ref-fieldset" aria-label="Identity">
-      <h2 data-void-type="heading">Identity</h2>
-      <void-field label="Name" required helper="Shown in schedules and alerts.">
-        <void-input name="name" value="Kiruna 3"></void-input>
-      </void-field>
-      <div class="ref-field-pair">
-        <void-field label="Region">
-          <void-select name="region">
-            <option>Arctic</option>
-            <option>Southern</option>
-            <option>Equatorial</option>
-          </void-select>
+    <form onsubmit="return false">
+      <void-section gap="stack">
+        <h2>Identity</h2>
+        <void-field label="Name" required helper="Shown in schedules and alerts.">
+          <void-input name="name" value="Kiruna 3"></void-input>
         </void-field>
-        <void-field label="Site code" error="This code is already used by Kiruna 1.">
-          <void-input name="code" value="KRN"></void-input>
+        <void-split>
+          <void-field label="Region">
+            <void-select name="region">
+              <option>Arctic</option>
+              <option>Southern</option>
+              <option>Equatorial</option>
+            </void-select>
+          </void-field>
+          <void-field label="Site code" error="This code is already used by Kiruna 1.">
+            <void-input name="code" value="KRN"></void-input>
+          </void-field>
+        </void-split>
+        <void-field label="Notes" helper="Access instructions, contacts, anything the operator on call should know.">
+          <void-textarea name="notes" rows="3" placeholder="Optional"></void-textarea>
         </void-field>
-      </div>
-      <void-field label="Notes" helper="Access instructions, contacts, anything the operator on call should know.">
-        <void-textarea name="notes" rows="3" placeholder="Optional"></void-textarea>
-      </void-field>
-    </section>
+      </void-section>
 
-    <section class="ref-fieldset" aria-label="Antenna">
-      <h2 data-void-type="heading">Antenna</h2>
-      <div class="ref-field-pair">
-        <void-field label="Dish diameter">
-          <void-number-input name="diameter" value="7.3" step="0.1" min="1" max="40" unit="m" label="Dish diameter"></void-number-input>
+      <void-section gap="stack">
+        <h2>Antenna</h2>
+        <void-split>
+          <void-field label="Dish diameter">
+            <void-number-input name="diameter" value="7.3" step="0.1" min="1" max="40" unit="m" label="Dish diameter"></void-number-input>
+          </void-field>
+          <void-field label="Minimum elevation">
+            <void-number-input name="elevation" value="5" min="0" max="45" unit="°" label="Minimum elevation"></void-number-input>
+          </void-field>
+        </void-split>
+        <void-field label="Bands">
+          <void-checkbox-group orientation="horizontal">
+            <void-checkbox value="s" checked>S band</void-checkbox>
+            <void-checkbox value="x" checked>X band</void-checkbox>
+            <void-checkbox value="ka">Ka band</void-checkbox>
+          </void-checkbox-group>
         </void-field>
-        <void-field label="Minimum elevation">
-          <void-number-input name="elevation" value="5" min="0" max="45" unit="°" label="Minimum elevation"></void-number-input>
-        </void-field>
-      </div>
-      <void-field label="Bands">
-        <void-checkbox-group orientation="horizontal">
-          <void-checkbox value="s" checked>S band</void-checkbox>
-          <void-checkbox value="x" checked>X band</void-checkbox>
-          <void-checkbox value="ka">Ka band</void-checkbox>
-        </void-checkbox-group>
-      </void-field>
-      <void-radio-group label="Tracking" name="tracking" value="program">
-        <void-radio value="program">Program track, from orbital elements</void-radio>
-        <void-radio value="auto">Autotrack, from the received signal</void-radio>
-      </void-radio-group>
-    </section>
+        <void-radio-group label="Tracking" name="tracking" value="program">
+          <void-radio value="program">Program track, from orbital elements</void-radio>
+          <void-radio value="auto">Autotrack, from the received signal</void-radio>
+        </void-radio-group>
+      </void-section>
 
-    <section class="ref-fieldset" aria-label="Scheduling">
-      <h2 data-void-type="heading">Scheduling</h2>
-      <div class="ref-rows">
-        <div class="ref-row">
-          <div class="ref-row-text"><span>Accept passes automatically</span><span data-void-type="caption">The scheduler may assign passes without an operator confirming each one.</span></div>
-          <void-switch checked aria-label="Accept passes automatically"></void-switch>
-        </div>
-        <div class="ref-row">
-          <div class="ref-row-text"><span>Priority</span><span data-void-type="caption">Used when two stations can take the same pass.</span></div>
-          <void-segmented-control value="normal" aria-label="Priority">
-            <void-segmented-control-item value="low">Low</void-segmented-control-item>
-            <void-segmented-control-item value="normal">Normal</void-segmented-control-item>
-            <void-segmented-control-item value="high">High</void-segmented-control-item>
-          </void-segmented-control>
-        </div>
-      </div>
-    </section>
+      <void-section gap="stack">
+        <h2>Scheduling</h2>
+        <void-rows>
+          <void-row>
+            <void-row-text><span>Accept passes automatically</span><span data-void-type="caption">The scheduler may assign passes without an operator confirming each one.</span></void-row-text>
+            <void-switch checked aria-label="Accept passes automatically"></void-switch>
+          </void-row>
+          <void-row>
+            <void-row-text><span>Priority</span><span data-void-type="caption">Used when two stations can take the same pass.</span></void-row-text>
+            <void-segmented-control value="normal" aria-label="Priority">
+              <void-segmented-control-item value="low">Low</void-segmented-control-item>
+              <void-segmented-control-item value="normal">Normal</void-segmented-control-item>
+              <void-segmented-control-item value="high">High</void-segmented-control-item>
+            </void-segmented-control>
+          </void-row>
+        </void-rows>
+      </void-section>
 
-    <div class="ref-form-actions">
-      <void-button variant="ghost">Cancel</void-button>
-      <void-button variant="filled" type="submit">Save station</void-button>
-    </div>
-  </form>
+      <void-actions justify="end">
+        <void-button variant="ghost">Cancel</void-button>
+        <void-button variant="filled" type="submit">Save station</void-button>
+      </void-actions>
+    </form>
+  </void-page>
 </main>

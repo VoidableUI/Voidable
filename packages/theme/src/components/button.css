@@ -9,10 +9,10 @@ void-button {
   /* Tone system — base defaults to accent (monochrome white/black) */
   --tone: var(--void-color-accent);
   --tone-text: var(--void-color-text);
-  --tone-subtle: transparent;
+  --tone-subtle: var(--void-color-control-fill);
   --tone-border: var(--void-color-border-control);
-  --tone-hover: color-mix(in srgb, var(--tone) 8%, transparent);
-  --tone-active: color-mix(in srgb, var(--tone) 13%, transparent);
+  --tone-hover: color-mix(in srgb, var(--tone) 8%, var(--void-color-control-fill));
+  --tone-active: color-mix(in srgb, var(--tone) 13%, var(--void-color-control-fill));
 
   /* Size — each size step sets these three and nothing else */
   --void-button-height: var(--void-control-height);
@@ -83,6 +83,8 @@ void-button[variant="filled"]:active {
 /* Ghost variant — nothing drawn at rest: for row actions, toolbars
    and the quiet button beside a primary one. */
 void-button[variant="ghost"] {
+  --tone-hover: color-mix(in srgb, var(--tone) 8%, transparent);
+  --tone-active: color-mix(in srgb, var(--tone) 13%, transparent);
   background: transparent;
   border-color: transparent;
 }
@@ -108,10 +110,10 @@ void-button[color="notice"]  { --tone: var(--void-color-notice); }
    attribute is reflected, so the default button carries
    color="default". */
 void-button[color]:not([color="default"]) {
-  --tone-subtle: color-mix(in srgb, var(--tone) var(--void-tone-tint), transparent);
+  --tone-subtle: color-mix(in srgb, var(--tone) var(--void-tone-tint), var(--void-color-control-fill));
   --tone-border: color-mix(in srgb, var(--tone) 50%, transparent);
-  --tone-hover: color-mix(in srgb, var(--tone) calc(var(--void-tone-tint) * 1.5), transparent);
-  --tone-active: color-mix(in srgb, var(--tone) calc(var(--void-tone-tint) * 2), transparent);
+  --tone-hover: color-mix(in srgb, var(--tone) calc(var(--void-tone-tint) * 1.5), var(--void-color-control-fill));
+  --tone-active: color-mix(in srgb, var(--tone) calc(var(--void-tone-tint) * 2), var(--void-color-control-fill));
 }
 
 /* A coloured ghost button carries its colour in the label, and its

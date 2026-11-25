@@ -1,6 +1,7 @@
 void-table {
   --void-table-padding-block: var(--void-cell-padding-block);
   --void-table-padding-inline: var(--void-cell-padding-inline);
+  --void-table-inset: 0px;
 
   display: block;
   font-family: var(--void-font-sans);
@@ -40,11 +41,32 @@ void-table td {
    with the content edge instead of being inset from it. Tables that
    paint rows or cells (striped, hoverable, bordered) keep the inset. */
 void-table:not([bordered], [striped], [hoverable]) :is(th, td):first-child {
-  padding-inline-start: 0;
+  padding-inline-start: var(--void-table-inset);
 }
 
 void-table:not([bordered], [striped], [hoverable]) :is(th, td):last-child {
-  padding-inline-end: 0;
+  padding-inline-end: var(--void-table-inset);
+}
+
+/* Inside a container that has no padding of its own (a card whose
+   table runs edge to edge), the first and last columns are inset by
+   the container's padding instead. */
+void-table[inset] {
+  --void-table-inset: var(--void-container-padding);
+}
+
+void-table[inset]:is([bordered], [striped], [hoverable]) :is(th, td):first-child {
+  padding-inline-start: var(--void-table-inset);
+}
+
+void-table[inset]:is([bordered], [striped], [hoverable]) :is(th, td):last-child {
+  padding-inline-end: var(--void-table-inset);
+}
+
+/* The last row of an inset table needs no line: the container's edge
+   is right below it. */
+void-table[inset] tbody tr:last-child td {
+  border-bottom: 0;
 }
 
 void-table[striped] tbody tr:nth-child(even) {
@@ -67,4 +89,24 @@ void-table[compact] {
 void-table[bordered] th,
 void-table[bordered] td {
   border: 1px solid var(--void-color-border);
+}
+
+/* A column of numbers: mark the header and the cells data-numeric. */
+void-table :is(th, td)[data-numeric] {
+  text-align: end;
+}
+
+/* Row actions: ghost buttons at the end of a row, pulled outward by
+   their own padding so the labels line up with the table's edge. */
+void-table td > void-actions {
+  flex-wrap: nowrap;
+  gap: var(--void-space-1);
+}
+
+void-table td:last-child > void-actions {
+  justify-content: flex-end;
+}
+
+void-table:not([bordered], [striped], [hoverable], [inset]) td:last-child > void-actions:has(> void-button[variant="ghost"]:last-child) {
+  margin-inline-end: calc(var(--void-control-padding-sm) * -1.25);
 }

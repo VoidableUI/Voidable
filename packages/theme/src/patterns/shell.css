@@ -1,0 +1,288 @@
+/* ============================================================
+   Patterns — the recurring pieces of an application screen.
+   Every element in this directory is CSS only: an unregistered
+   void-* tag that the theme styles. Nothing to import, nothing to
+   upgrade, nothing a server morph can break. Semantics come from the
+   native elements you put inside (main, h1, h2, dl, a).
+   ============================================================ */
+
+/* ── void-shell: the frame of an application ──
+     <void-shell>                    top bar, then the page
+       <void-nav-bar>…</void-nav-bar>
+       <main>…</main>
+     </void-shell>
+
+     <void-shell nav="side">         sidebar beside the page
+     <void-shell nav="overlay">      bar laid over the top of the page
+                                     (for a page that opens on a
+                                     media surface) */
+void-shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100svh;
+  background: var(--void-color-bg);
+  color: var(--void-color-text);
+  font-family: var(--void-font-sans);
+}
+
+void-shell > main {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* The bar's content lines up with the page column below it. */
+void-shell > void-nav-bar .void-nav-bar-content {
+  padding-inline: var(--void-page-inset);
+  flex-wrap: wrap;
+}
+
+/* ── Side navigation ── */
+void-shell[nav="side"] {
+  flex-direction: row;
+  align-items: flex-start;
+}
+
+void-shell[nav="side"] > void-sidebar {
+  position: sticky;
+  top: 0;
+  height: 100svh;
+  gap: var(--void-gap-stack);
+  padding: var(--void-gap-stack) var(--void-gap-inside);
+  overflow-y: auto;
+}
+
+void-shell[nav="side"] > main {
+  align-self: stretch;
+}
+
+/* ── Overlay navigation ──
+   The bar and the page share one grid cell, so the bar lies over the
+   top of the page. It carries the on-media surface (off-white text,
+   its own scrim) because the first thing under it is an image. */
+void-shell[nav="overlay"] {
+  display: grid;
+  grid-template: "shell" minmax(0, 1fr) / minmax(0, 1fr);
+}
+
+void-shell[nav="overlay"] > * {
+  grid-area: shell;
+}
+
+void-shell[nav="overlay"] > void-nav-bar {
+  align-self: start;
+  z-index: var(--void-z-sticky);
+}
+
+/* A media surface that opens the page keeps its content clear of
+   the bar lying over it. */
+void-shell[nav="overlay"] {
+  --void-shell-bar-height: calc(var(--void-control-height) + var(--void-space-5));
+}
+
+void-shell[nav="overlay"] > main > void-media:first-child > void-media-content {
+  padding-top: calc(var(--void-shell-bar-height) + var(--void-gap-group));
+}
+
+@media (max-width: 48rem) {
+  void-shell[nav="overlay"] {
+    --void-shell-bar-height: calc(var(--void-control-height) + var(--void-control-height-sm) + var(--void-space-6));
+  }
+
+  /* Stacked, the content is under the image, not under the bar. */
+  void-shell[nav="overlay"] > main > void-media[stack]:first-child > void-media-content {
+    padding-top: 0;
+  }
+}
+
+/* Where the browser can tie an animation to scrolling, the bar stays
+   with you and becomes a blurred bar once the image has scrolled by.
+   Elsewhere it stays at the top of the page and scrolls away. */
+@supports (animation-timeline: scroll()) {
+  void-shell[nav="overlay"] > void-nav-bar {
+    position: sticky;
+    top: 0;
+    animation: void-shell-bar-settle linear both;
+    animation-timeline: scroll(root block);
+    animation-range: 2rem 12rem;
+  }
+
+  void-shell[nav="overlay"] > void-nav-bar::before {
+    animation: void-shell-bar-scrim linear both;
+    animation-timeline: scroll(root block);
+    animation-range: 2rem 12rem;
+  }
+
+  @keyframes void-shell-bar-settle {
+    to {
+      background: var(--void-color-control-fill);
+      -webkit-backdrop-filter: blur(var(--void-glass-blur));
+      backdrop-filter: blur(var(--void-glass-blur));
+    }
+  }
+
+  @keyframes void-shell-bar-scrim {
+    to { opacity: 0; }
+  }
+}
+
+/* ── void-nav-links: the links of a bar or a sidebar ──
+     <void-nav-links>
+       <a href="/" aria-current="page">Overview</a>
+       <a href="/stations">Stations</a>
+     </void-nav-links>
+   In a bar it is a row that scrolls sideways when it runs out of
+   room; in a sidebar it is a column. */
+void-nav-links {
+  display: flex;
+  align-items: center;
+  gap: var(--void-space-1);
+  min-width: 0;
+  font-family: var(--void-font-sans);
+}
+
+void-nav-links > a {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--void-gap-tight);
+  flex: none;
+  min-height: var(--void-control-height-sm);
+  padding: 0 var(--void-control-padding);
+  border-radius: var(--void-radius-md);
+  color: var(--void-color-text-secondary);
+  font-size: var(--void-type-body-size);
+  line-height: var(--void-leading-tight);
+  text-decoration: none;
+  white-space: nowrap;
+  transition: color var(--void-duration-fast) var(--void-ease-in-out),
+              background var(--void-duration-fast) var(--void-ease-in-out);
+}
+
+void-nav-links > a:hover {
+  color: var(--void-color-text);
+}
+
+void-nav-links > a[aria-current="page"] {
+  background: var(--void-color-bg-hover);
+  color: var(--void-color-text);
+}
+
+void-nav-links > a:focus-visible {
+  outline: var(--void-focus-ring-width) solid var(--void-focus-ring-color);
+  outline-offset: calc(var(--void-focus-ring-offset) * -1);
+}
+
+void-nav-links[orientation="vertical"],
+void-sidebar void-nav-links {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+void-nav-links[orientation="vertical"] > a,
+void-sidebar void-nav-links > a {
+  min-height: var(--void-control-height);
+}
+
+/* A label above a group of links in a sidebar. */
+void-nav-links > [data-void-type="label"] {
+  padding: var(--void-gap-tight) var(--void-control-padding) var(--void-space-1);
+}
+
+/* Pushes what follows it to the far end of a bar or a toolbar. */
+void-spacer {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+@media (max-width: 48rem) {
+  /* In a bar the links drop to a row of their own and scroll
+     sideways, so no link is ever cut off or hidden. */
+  void-nav-bar void-nav-links {
+    order: 1;
+    flex: 0 0 calc(100% + 2 * var(--void-control-padding));
+    margin-inline: calc(var(--void-control-padding) * -1);
+    overflow-x: auto;
+    scrollbar-width: none;
+    overscroll-behavior-x: contain;
+  }
+
+  void-nav-bar void-nav-links::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* The sidebar becomes a bar across the top; its links scroll
+     sideways the same way. */
+  void-shell[nav="side"] {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  void-shell[nav="side"] > void-sidebar {
+    position: static;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    width: auto;
+    height: auto;
+    gap: var(--void-gap-tight) var(--void-gap-inside);
+    padding: var(--void-gap-tight) var(--void-gutter);
+    border-inline: 0;
+    border-bottom: 1px solid var(--void-color-border);
+    overflow: visible;
+  }
+
+  void-shell[nav="side"] > void-sidebar void-nav-links {
+    order: 1;
+    flex: 0 0 calc(100% + 2 * var(--void-control-padding));
+    flex-direction: row;
+    align-items: center;
+    margin-inline: calc(var(--void-control-padding) * -1);
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  void-shell[nav="side"] > void-sidebar void-nav-links > a {
+    min-height: var(--void-control-height-sm);
+  }
+
+  void-shell[nav="side"] > void-sidebar void-nav-links > [data-void-type="label"] {
+    display: none;
+  }
+}
+
+/* ── void-brand: the product's name (and mark) in a bar ──
+     <void-brand><a href="/">Meridian</a></void-brand> */
+void-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--void-gap-tight);
+  flex: none;
+  font-family: var(--void-type-heading-family);
+  font-size: var(--void-type-body-size);
+  font-weight: var(--void-type-heading-weight);
+  letter-spacing: var(--void-type-heading-tracking);
+  color: var(--void-color-text);
+  white-space: nowrap;
+}
+
+void-brand > a {
+  display: inherit;
+  align-items: inherit;
+  gap: inherit;
+  color: inherit;
+  text-decoration: none;
+}
+
+/* ── Responsive visibility ──
+   data-void-hide="narrow" removes an element below 48rem (a table
+   column, a secondary action); "wide" removes it above. */
+@media (max-width: 48rem) {
+  [data-void-hide="narrow"] {
+    display: none !important;
+  }
+}
+
+@media (min-width: 48.0625rem) {
+  [data-void-hide="wide"] {
+    display: none !important;
+  }
+}

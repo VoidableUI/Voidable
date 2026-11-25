@@ -69,6 +69,23 @@
   color: var(--void-type-title-color);
 }
 
+:where([data-void-type="display"]) {
+  font-family: var(--void-type-display-family);
+  font-size: var(--void-type-display-size);
+  line-height: var(--void-type-display-leading);
+  font-weight: var(--void-type-display-weight);
+  letter-spacing: var(--void-type-display-tracking);
+  color: var(--void-type-display-color);
+}
+
+:where([data-void-type="lede"]) {
+  font-family: var(--void-type-lede-family);
+  font-size: var(--void-type-lede-size);
+  line-height: var(--void-type-lede-leading);
+  font-weight: var(--void-type-lede-weight);
+  color: var(--void-type-lede-color);
+}
+
 :where([data-void-type="body"]) {
   font-family: var(--void-type-body-family);
   font-size: var(--void-type-body-size);

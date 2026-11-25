@@ -14,6 +14,8 @@ const config: StorybookConfig & { title: string } = {
     '../stories/**/*.stories.@(js|ts)',
   ],
   addons: ['@storybook/addon-docs', '@storybook/addon-a11y'],
+  // The photographs used by the media stories live once, in the docs site.
+  staticDirs: [{ from: '../../../docs/public/media', to: '/media' }],
   framework: '@storybook/web-components-vite',
   async viteFinal(config) {
     config.resolve = config.resolve ?? {};

@@ -67,6 +67,15 @@
 @import './components/color-picker.css';
 @import './components/action-input.css';
 
+/* Patterns: CSS-only elements for the recurring pieces of a screen */
+@import './patterns/shell.css';
+@import './patterns/page.css';
+@import './patterns/data.css';
+
+/* UI over imagery: the media surface, on-media and glass */
+@import './media/media.css';
+@import './media/surface.css';
+
 /* App-shell layout primitives */
 @import './app-shell/detail.css';
 @import './app-shell/modal-actions.css';
