@@ -33,11 +33,6 @@ export const scenarios: Scenario[] = [
     id: 'link-button-one-control',
     title: 'A link button is one control, not a button around a link',
     page: '/sr-buttons',
-    knownIssue: {
-      key: 'untracked:link-button-nested-interactive',
-      detail:
-        '<void-button><a href> puts role="button" and tabindex="0" on the host around the link, so the accessibility tree has a button named "Read the documentation" containing a link of the same name: two nested interactive controls (axe nested-interactive), announced twice and with two tab stops.',
-    },
     steps: [
       {
         check: async (page) => {

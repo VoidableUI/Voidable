@@ -7,7 +7,6 @@
 // "expected to fail but passed", and the expectedFailure() calls (and the
 // entry here, once nothing uses it) are deleted in the same change.
 export const KNOWN_ISSUES = {
-  'untracked:link-button-nested-interactive': 'void-button around a link is a button containing a link',
 } as const;
 
 export type KnownIssue = keyof typeof KNOWN_ISSUES;

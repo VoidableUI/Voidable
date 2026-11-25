@@ -280,18 +280,17 @@ describe('VoidButton', () => {
       expect(clicks).toBe(0);
     });
 
-    it('a link button follows its link with Enter and ignores Space', () => {
+    it('a link button has no keyboard handling of its own: the link takes the keys', () => {
       const a = document.createElement('a');
       a.href = '#x';
       a.addEventListener('click', (e) => e.preventDefault());
       el.appendChild(a);
       const seen: string[] = [];
-      a.addEventListener('click', () => seen.push('a'));
+      el.addEventListener('click', () => seen.push('click'));
       el.dispatchEvent(new KeyboardEvent('keydown', { key: ' ', bubbles: true }));
       el.dispatchEvent(new KeyboardEvent('keyup', { key: ' ', bubbles: true }));
-      expect(seen).toEqual([]);
       el.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
-      expect(seen).toEqual(['a']);
+      expect(seen).toEqual([]);
     });
 
     it('other keys do not dispatch void-click', () => {
@@ -299,6 +298,154 @@ describe('VoidButton', () => {
       el.addEventListener('void-click', () => { fired = true; });
       el.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true }));
       expect(fired).toBe(false);
+    });
+  });
+
+  describe('link button (a link or a native button as the content)', () => {
+    const settle = () => new Promise<void>((r) => setTimeout(r));
+    let el: VoidButton;
+
+    function linkButton(inner = '<a href="#docs">Docs</a>'): VoidButton {
+      el = createElement();
+      el.innerHTML = inner;
+      document.body.appendChild(el);
+      return el;
+    }
+    const link = () => el.querySelector('a, button') as HTMLElement;
+
+    it('is presentational: no role, no tabindex, no aria-disabled on the host', async () => {
+      linkButton();
+      await el.updateComplete;
+      for (const a of ['role', 'tabindex', 'aria-disabled', 'aria-pressed']) expect(el.hasAttribute(a)).toBe(false);
+    });
+
+    it('leaves the link as it is while enabled', async () => {
+      linkButton();
+      await el.updateComplete;
+      expect(link().getAttribute('href')).toBe('#docs');
+      expect(link().hasAttribute('aria-disabled')).toBe(false);
+      expect(link().hasAttribute('tabindex')).toBe(false);
+    });
+
+    it('treats a native button as the one control too', async () => {
+      linkButton('<button type="button">Go</button>');
+      await el.updateComplete;
+      expect(el.hasAttribute('role')).toBe(false);
+      expect(el.hasAttribute('tabindex')).toBe(false);
+    });
+
+    it('is a normal button for text, and an <a> without href is not a link', async () => {
+      linkButton('<a>Not a link</a>');
+      await el.updateComplete;
+      expect(el.getAttribute('role')).toBe('button');
+      expect(el.getAttribute('tabindex')).toBe('0');
+    });
+
+    it('becomes a link button when the link arrives after first render, and a button again when it leaves', async () => {
+      el = createElement();
+      el.textContent = 'Docs';
+      document.body.appendChild(el);
+      await el.updateComplete;
+      expect(el.getAttribute('role')).toBe('button');
+      el.textContent = '';
+      const a = document.createElement('a');
+      a.href = '#d';
+      a.textContent = 'Docs';
+      el.appendChild(a);
+      await settle();
+      expect(el.hasAttribute('role')).toBe(false);
+      expect(el.hasAttribute('tabindex')).toBe(false);
+      a.remove();
+      await settle();
+      expect(el.getAttribute('role')).toBe('button');
+      expect(el.getAttribute('tabindex')).toBe('0');
+    });
+
+    it('follows an href added to a bare <a> later', async () => {
+      linkButton('<a>Docs</a>');
+      await el.updateComplete;
+      link().setAttribute('href', '#d');
+      await settle();
+      expect(el.hasAttribute('role')).toBe(false);
+    });
+
+    it('disabled: the link is aria-disabled and out of the tab order, the host stays presentational', async () => {
+      linkButton();
+      el.disabled = true;
+      await el.updateComplete;
+      expect(link().getAttribute('aria-disabled')).toBe('true');
+      expect(link().getAttribute('tabindex')).toBe('-1');
+      for (const a of ['role', 'tabindex', 'aria-disabled']) expect(el.hasAttribute(a)).toBe(false);
+    });
+
+    it('disabled: a click on the link does not navigate or reach listeners', async () => {
+      linkButton();
+      el.disabled = true;
+      await el.updateComplete;
+      let reached = 0;
+      document.addEventListener('click', () => reached++, { once: true });
+      const click = new MouseEvent('click', { bubbles: true, cancelable: true });
+      link().dispatchEvent(click);
+      expect(click.defaultPrevented).toBe(true);
+      expect(reached).toBe(0);
+    });
+
+    it('enabling again takes back exactly what disabling wrote', async () => {
+      linkButton();
+      el.disabled = true;
+      await el.updateComplete;
+      el.disabled = false;
+      await el.updateComplete;
+      expect(link().hasAttribute('aria-disabled')).toBe(false);
+      expect(link().hasAttribute('tabindex')).toBe(false);
+    });
+
+    it('disabled leaves an aria-disabled or tabindex the author wrote alone when enabling', async () => {
+      linkButton('<a href="#d" tabindex="0" aria-disabled="false">Docs</a>');
+      el.disabled = true;
+      await el.updateComplete;
+      el.disabled = false;
+      await el.updateComplete;
+      expect(link().getAttribute('tabindex')).toBe('0');
+      expect(link().getAttribute('aria-disabled')).toBe('false');
+    });
+
+    it('disabled disables a native button inside, and enabling restores it', async () => {
+      linkButton('<button type="button">Go</button>');
+      el.disabled = true;
+      await el.updateComplete;
+      expect((link() as HTMLButtonElement).disabled).toBe(true);
+      el.disabled = false;
+      await el.updateComplete;
+      expect((link() as HTMLButtonElement).disabled).toBe(false);
+    });
+
+    it('a <fieldset disabled> disables the link too', async () => {
+      const fs = document.createElement('fieldset');
+      document.body.append(fs);
+      el = createElement();
+      el.innerHTML = '<a href="#d">Docs</a>';
+      fs.append(el);
+      fs.setAttribute('disabled', '');
+      await settle();
+      expect(link().getAttribute('aria-disabled')).toBe('true');
+      fs.removeAttribute('disabled');
+      await settle();
+      expect(link().hasAttribute('aria-disabled')).toBe(false);
+      fs.remove();
+    });
+
+    it('disabling a replaced link leaves nothing on the old one', async () => {
+      linkButton();
+      el.disabled = true;
+      await el.updateComplete;
+      const old = link();
+      const next = document.createElement('a');
+      next.href = '#n';
+      old.replaceWith(next);
+      await settle();
+      expect(old.hasAttribute('aria-disabled')).toBe(false);
+      expect(next.getAttribute('aria-disabled')).toBe('true');
     });
   });
 

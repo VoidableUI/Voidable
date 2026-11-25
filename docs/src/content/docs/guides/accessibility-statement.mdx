@@ -58,7 +58,6 @@ These are real, current findings, not a complete audit.
 - `void-nav-menu` holds plain links inside a `menubar`, which axe reports as missing required children.
 - The `void-color-picker` host is a focusable widget around native controls.
 - `void-banner` is `role="banner"`, a page landmark, even when it is used as a notice inside `<main>`.
-- A `void-button` around a link (a link button) is a button around a link: two nested interactive controls. The screen-reader scenario `link-button-one-control` records it as an expected failure (`untracked:link-button-nested-interactive` in `tests/browser/helpers/known-issues.ts`).
 - The viewport of `void-scroll-area` cannot be scrolled by keyboard unless its content is focusable.
 - Several targets are smaller than 24 by 24 CSS pixels: sidebar and breadcrumb links, carousel indicators, the compact colour input.
 

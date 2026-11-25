@@ -33,8 +33,8 @@ export const CONTRACT = {
   'void-breadcrumbs': { role: 'navigation', name: 'fixed "Breadcrumb"', state: ['void-breadcrumbs-list is role="list" and each void-breadcrumbs-item in it role="listitem"', 'aria-current="page" on the void-breadcrumbs-item part the author marks'], gaps: ['the landmark name is fixed English; there is no attribute to change it'] },
   'void-button': {
     role: 'button',
-    name: 'text content or aria-label',
-    state: ['disabled (reflected)', 'aria-disabled="true" while disabled (own or a disabled fieldset), absent otherwise'],
+    name: 'text content or aria-label; a link button (an <a href> or <button> inside) is presentational: no role, no tabindex, the inner link or button is the control and is named by its own text',
+    state: ['disabled (reflected)', 'aria-disabled="true" while disabled (own or a disabled fieldset), absent otherwise; on a link button it goes on the inner <a> (with tabindex="-1"), a native <button> inside gets disabled'],
     probe: { html: '<void-button disabled>Save</void-button>', expect: { host: { 'aria-disabled': 'true' } } },
     gaps: ['not form-associated: it submits and resets its closest form like a native button but is not in form.elements'],
   },
