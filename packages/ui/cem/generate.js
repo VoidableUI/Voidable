@@ -13,9 +13,11 @@
 //   components.json               summary: component/tag counts and tag list
 //   types/elements.d.ts           shared per-tag property, attribute and event maps
 //   types/react.d.ts              React 19 JSX.IntrinsicElements augmentation
-//   types/solid.d.ts              Solid JSX.IntrinsicElements augmentation
+//   types/solid.d.ts              Solid 1 JSX.IntrinsicElements augmentation
+//   types/solid2.d.ts             Solid 2 (@solidjs/web) JSX.IntrinsicElements augmentation
 //   types/vue.d.ts                Vue GlobalComponents augmentation
 //   types/svelte.d.ts             Svelte 5 SvelteHTMLElements augmentation
+//   angular/index.{js,d.ts}       Angular ControlValueAccessor for the form controls (runtime)
 
 import { readFileSync, readdirSync, statSync, writeFileSync, mkdirSync } from 'node:fs';
 import { dirname, join, relative, resolve } from 'node:path';
@@ -409,12 +411,18 @@ ${perTag((el) => `VoidReactProps<${q(el.tagName)}, ${eventHandlers(el, (n) => `o
 // Solid sets props on custom elements as properties; \`on:<event>\` attaches a
 // native listener with the exact (case-sensitive) event name. \`prop:\`,
 // \`attr:\` and \`bool:\` force property, attribute or boolean-attribute writes.
+// Plain camelCase names do not reach the element (the compiler lowercases the
+// attribute name, so \`showValues\` becomes \`showvalues\`), so only
+// all-lowercase properties are typed as plain props; camelCase ones need
+// \`prop:\` (checked in a browser against Solid 1.9).
 write(
   'types/solid.d.ts',
   `// ${HEADER}
 // Usage: import type {} from '@voidable/ui/types/solid';
 import type { JSX } from 'solid-js';
 ${typesImport}
+
+type VoidSolidPlain<P> = { [K in keyof P as K extends Lowercase<K & string> ? K : never]?: P[K] };
 
 type VoidSolidNamespaced<T extends keyof VoidElementTagNameMap> =
   { [K in keyof VoidElementProperties[T] & string as \`prop:\${K}\`]?: VoidElementProperties[T][K] } &
@@ -423,7 +431,7 @@ type VoidSolidNamespaced<T extends keyof VoidElementTagNameMap> =
 
 type VoidSolidProps<T extends keyof VoidElementTagNameMap, H> =
   Omit<JSX.HTMLAttributes<VoidElementTagNameMap[T]>, keyof VoidElementProperties[T]> &
-  VoidElementProperties[T] &
+  VoidSolidPlain<VoidElementProperties[T]> &
   VoidSolidNamespaced<T> &
   H;
 
@@ -486,9 +494,113 @@ ${perTag((el) => `VoidVueElement<${q(el.tagName)}, ${eventHandlers(el, (n) => `o
 `,
 );
 
+// Solid 2 moved the JSX namespace from 'solid-js' to '@solidjs/web', removed
+// the `on:` namespace (custom events need a `ref` that calls addEventListener,
+// typed through `VoidElementEvents`) and sets plain attributes as HTML
+// attributes: only strings, numbers and booleans survive that, so object and
+// array properties are typed as `prop:` only and a plain `data={...}` is a type
+// error instead of a silent no-op. Plain camelCase names are lowercased by the
+// compiler (as in Solid 1), so those need `prop:` too.
+write(
+  'types/solid2.d.ts',
+  `// ${HEADER}
+// Usage: import type {} from '@voidable/ui/types/solid2';  (Solid 2+)
+import type { JSX } from '@solidjs/web';
+${typesImport}
+
+type VoidSolid2Primitive = string | number | boolean;
+type VoidSolid2Plain<P> = {
+  [K in keyof P as K extends Lowercase<K & string> ? (NonNullable<P[K]> extends VoidSolid2Primitive ? K : never) : never]?: P[K];
+};
+
+type VoidSolid2Props<T extends keyof VoidElementTagNameMap> =
+  Omit<JSX.HTMLAttributes<VoidElementTagNameMap[T]>, keyof VoidElementProperties[T] | \`prop:\${string}\`> &
+  VoidSolid2Plain<VoidElementProperties[T]> &
+  { [K in keyof VoidElementProperties[T] & string as \`prop:\${K}\`]?: VoidElementProperties[T][K] };
+
+declare module '@solidjs/web' {
+  namespace JSX {
+    interface IntrinsicElements {
+${perTag((el) => `VoidSolid2Props<${q(el.tagName)}>`)}
+    }
+  }
+}
+`,
+);
+
+// ---------------------------------------------------------------------------
+// Angular forms integration (runtime, not types)
+// ---------------------------------------------------------------------------
+//
+// Angular's template type checker never sees custom element bindings, so there
+// is nothing to type. What the typings cannot give Angular is forms support:
+// ngModel, formControl and formControlName need a ControlValueAccessor, and the
+// stock ones only fit native <input>/<select>. One component-agnostic directive
+// serves every Void form control; the per-tag facts it needs (which property
+// holds the value, which `void-*` event carries the new one, what an empty
+// value is) are derived here from the manifest: an element is a form control
+// when it uses the NativeFormControl or InternalsFormControl mixin and fires
+// `void-change`, and the detail key of that event names the value.
+
+/** Value written for `null`, from the TypeScript type of the detail key. */
+function emptyValueFor(type) {
+  if (/\[\]$/.test(type)) return '[]';
+  if (type === 'boolean') return 'false';
+  if (type === 'number') return '0';
+  return "''";
+}
+
+/** @type {Record<string, { prop: string, key: string, events: string[], empty: string }>} */
+const formControls = {};
+for (const mod of manifest.modules) {
+  for (const decl of mod.declarations ?? []) {
+    if (decl.kind !== 'class' || !decl.tagName) continue;
+    if (!(decl.mixins ?? []).some((m) => m.name === 'NativeFormControl' || m.name === 'InternalsFormControl')) continue;
+    const change = (decl.events ?? []).find((e) => e.name === 'void-change');
+    if (!change) continue;
+    const fields = new Set((decl.members ?? []).filter((m) => m.kind === 'field').map((m) => m.name));
+    const detail = Object.fromEntries(
+      [...(change.type?.text ?? '').matchAll(/(\w+): ([^;}]+?)\s*(?:;|\})/g)].map((m) => [m[1], m[2]]),
+    );
+    // `value` and `checked` together (radio) is ambiguous: a radio is driven by its group.
+    const key = 'value' in detail && 'checked' in detail ? null : ['checked', 'value', 'values'].find((k) => k in detail);
+    const prop = key === 'values' ? 'value' : key;
+    if (!key || !fields.has(prop)) continue;
+    formControls[decl.tagName] = {
+      prop,
+      key,
+      events: (decl.events ?? []).map((e) => e.name).filter((n) => n === 'void-input' || n === 'void-change'),
+      empty: emptyValueFor(detail[key].replace(/\s+/g, ' ').split('|')[0].trim()),
+    };
+  }
+}
+const controlTags = Object.keys(formControls).sort();
+if (controlTags.length === 0) throw new Error('no form controls found in the manifest');
+const controlSelector = controlTags
+  .flatMap((t) => [`${t}[ngModel]`, `${t}[formControl]`, `${t}[formControlName]`])
+  .join(', ');
+const controlTable = controlTags
+  .map((t) => `  ${q(t)}: { prop: ${q(formControls[t].prop)}, key: ${q(formControls[t].key)}, empty: () => ${formControls[t].empty} },`)
+  .join('\n');
+const controlListeners = [...new Set(controlTags.flatMap((t) => formControls[t].events))]
+  .sort()
+  .map((n) => `${q(n)}: 'handleEvent($event)'`)
+  .join(', ');
+
+const fill = (file) =>
+  readFileSync(resolve(root, 'cem', file), 'utf8')
+    .replaceAll('@@HEADER@@', HEADER)
+    .replaceAll('@@TABLE@@', controlTable)
+    .replaceAll('@@SELECTOR@@', controlSelector)
+    .replaceAll('@@LISTENERS@@', controlListeners)
+    .replaceAll('@@COUNT@@', String(controlTags.length));
+write('angular/index.js', fill('angular-accessor.js.template'));
+write('angular/index.d.ts', fill('angular-accessor.d.ts.template'));
+
 const eventCount = elements.reduce((n, el) => n + el.events.length, 0);
 console.log(
   `[cem] ${elements.length} tags from ${components.length} modules, ` +
     `${elements.reduce((n, el) => n + el.attributes.length, 0)} attributes, ${eventCount} events -> ` +
-    'vscode.html-custom-data.json, web-types.json, components.json, types/{elements,react,solid,svelte,vue}.d.ts',
+    'vscode.html-custom-data.json, web-types.json, components.json, types/{elements,react,solid,solid2,svelte,vue}.d.ts, ' +
+    `angular/index.{js,d.ts} (${controlTags.length} form controls)`,
 );

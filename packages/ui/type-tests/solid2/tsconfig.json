@@ -1,0 +1,17 @@
+{
+  "extends": "../../../../tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "jsx": "preserve",
+    "jsxImportSource": "@solidjs/web",
+    "types": [],
+    "skipLibCheck": false,
+    // @voidable/ui is a symlink to packages/ui, so its typings resolve imports from
+    // there, where Solid 2 is not installed (ui itself uses Solid 1).
+    "paths": {
+      "@solidjs/web": ["./node_modules/@solidjs/web"],
+      "solid-js": ["./node_modules/solid-js"]
+    }
+  },
+  "files": ["fixture.tsx"]
+}

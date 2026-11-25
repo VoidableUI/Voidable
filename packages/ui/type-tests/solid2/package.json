@@ -1,0 +1,13 @@
+{
+  "name": "@voidable/type-test-solid2",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Type-level test of @voidable/ui/types/solid2. Its own workspace package because Solid 2 cannot share node_modules with the Solid 1 used by ../solid.",
+  "type": "module",
+  "devDependencies": {
+    "@solidjs/web": "^2.0.4",
+    "@voidable/ui": "workspace:*",
+    "solid-js": "^2.0.4",
+    "typescript": "^6.0.0"
+  }
+}

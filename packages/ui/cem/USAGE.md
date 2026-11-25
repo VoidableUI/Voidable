@@ -9,10 +9,12 @@ The `@voidable/ui` build writes a [Custom Elements Manifest](https://github.com/
 | `@voidable/ui/vscode.html-custom-data.json` | `dist/vscode.html-custom-data.json` | VS Code HTML custom data: completions and hover docs for tags, attributes and attribute values. |
 | `@voidable/ui/components.json` | `dist/components.json` | Summary: `componentCount`, `tagCount`, `tags`, `components` (`[{ module, tags }]`), `eventNames`, `elements`. |
 | `@voidable/ui/types/react` | `dist/types/react.d.ts` | React 19 `JSX.IntrinsicElements` for every `<void-*>` tag. |
-| `@voidable/ui/types/solid` | `dist/types/solid.d.ts` | Solid `JSX.IntrinsicElements`. |
+| `@voidable/ui/types/solid` | `dist/types/solid.d.ts` | Solid 1 `JSX.IntrinsicElements`. |
+| `@voidable/ui/types/solid2` | `dist/types/solid2.d.ts` | Solid 2 (`@solidjs/web`) `JSX.IntrinsicElements`. |
 | `@voidable/ui/types/svelte` | `dist/types/svelte.d.ts` | Svelte 5 `SvelteHTMLElements`. |
 | `@voidable/ui/types/vue` | `dist/types/vue.d.ts` | Vue `GlobalComponents`. |
-| `@voidable/ui/types/elements` | `dist/types/elements.d.ts` | Shared maps the four above build on: `VoidElementTagNameMap`, `VoidElementProperties`, `VoidElementAttributeNames`, `VoidElementEvents`. |
+| `@voidable/ui/angular` | `dist/angular/index.{js,d.ts}` | Not types: the Angular `ControlValueAccessor` (`VoidValueAccessor`) for every form control. Runtime code, generated from the manifest. |
+| `@voidable/ui/types/elements` | `dist/types/elements.d.ts` | Shared maps the typings above build on: `VoidElementTagNameMap`, `VoidElementProperties`, `VoidElementAttributeNames`, `VoidElementEvents`. |
 
 ## Framework typings
 
@@ -35,11 +37,16 @@ Property types come straight from the element classes. Attribute values are type
 | Framework | Event handler | Notes |
 |---|---|---|
 | React | `onvoid-change={(e) => e.detail.value}` | Needs **React 19** and `@types/react` 19. React 18 does not set properties or attach custom-event handlers on custom elements, so under `@types/react` 18 every `<void-*>` tag reports the missing requirement. Use `@voidable/ui-react` with React 18. `class` is accepted alongside `className`. |
-| Solid | `on:void-change={(e) => …}` | `prop:`, `attr:` and `bool:` prefixes are typed per element. |
+| Solid 1 | `on:void-change={(e) => …}` | `prop:`, `attr:` and `bool:` prefixes are typed per element. |
+| Solid 2 | `ref={on('void-input', 'void-change', (e) => …)}` | Solid 2 has no `on:`; see the Solid guide for the typed `on` helper. Object and array properties are `prop:` only. Needs `types/solid2`, not `types/solid`. |
 | Svelte 5 | `onvoid-change={(e) => …}` | |
 | Vue | `@void-change="…"` in templates, `onVoidChange` in render functions | `slot` is accepted. |
 
-These frameworks are optional peer dependencies of `@voidable/ui` (`@types/react >=19`, `solid-js >=1.8`, `svelte >=5`, `vue >=3.5`). Install only the one you use.
+These frameworks are optional peer dependencies of `@voidable/ui` (`@types/react >=19`, `solid-js >=1.8`, `svelte >=5`, `vue >=3.5`, `@angular/core` and `@angular/forms` `>=19`). Install only the one you use.
+
+## Angular
+
+Angular's template type checker does not see custom element bindings, so there is no Angular typings entry. `@voidable/ui/angular` exports `VoidValueAccessor`, a standalone directive whose selector covers `ngModel`, `formControl` and `formControlName` on every form control (an element using the `NativeFormControl` or `InternalsFormControl` mixin that fires `void-change`). The per-tag table of value property, event detail key and empty value is derived from the manifest by `generate.js`; the file is in Angular's partial-compilation format so the Angular CLI links it in the consumer's build.
 
 ## VS Code
 
