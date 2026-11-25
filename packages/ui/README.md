@@ -8,6 +8,8 @@ Core web components for Voidable UI, a framework-agnostic component library buil
 npm install @voidable/ui @voidable/theme
 ```
 
+[Lit](https://lit.dev) 3 is a peer dependency, so your app and every Voidable package share one copy of it. npm, pnpm and Bun install it for you. With Yarn, add it yourself: `yarn add lit`.
+
 ## Usage with a bundler
 
 Import the theme (CSS) and the components (registers every `<void-*>` element) in your app entry point. This needs a bundler that handles CSS imports, such as Vite.
@@ -25,7 +27,7 @@ import '@voidable/ui';
 </void-field>
 ```
 
-Prefer smaller bundles? Import single components: `import '@voidable/ui/button'`.
+Prefer smaller bundles? Import single components: `import '@voidable/ui/components/button'`.
 
 ## Usage without a bundler
 
@@ -45,6 +47,10 @@ A bare `import '@voidable/theme'` cannot work in a browser, because the theme is
 ```
 
 In production, pin both URLs to the release you use by inserting `@<version>` after the package name. Every Voidable package shares one version number, so the theme and the components take the same one (see the [release notes](https://github.com/VoidableUI/Voidable/releases)).
+
+## Server-side rendering
+
+Every module registers its custom element when it is imported, which needs `customElements` and `HTMLElement`. Import `@voidable/ui` only in the browser (for example in a client-only entry or behind a dynamic `import()`); the elements are not rendered on the server. Server-rendered markup that uses `<void-*>` tags upgrades once the module loads.
 
 ## Component attributes
 

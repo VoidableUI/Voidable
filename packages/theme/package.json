@@ -1,7 +1,16 @@
 {
   "name": "@voidable/theme",
   "version": "0.0.0",
+  "description": "CSS custom properties, design tokens, reset and component styles for Voidable UI",
+  "keywords": ["css", "design-tokens", "theme", "custom-properties", "dark-mode", "design-system", "void-ui"],
+  "homepage": "https://voidable.dev",
+  "bugs": {
+    "url": "https://github.com/VoidableUI/Voidable/issues"
+  },
   "type": "module",
+  "sideEffects": [
+    "*.css"
+  ],
   "license": "MIT",
   "exports": {
     ".": "./src/index.css",
@@ -12,7 +21,10 @@
   "files": ["src"],
   "repository": {
     "type": "git",
-    "url": "https://github.com/VoidableUI/Voidable",
+    "url": "git+https://github.com/VoidableUI/Voidable.git",
     "directory": "packages/theme"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

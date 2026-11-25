@@ -13,6 +13,8 @@ export const pin = stats.versionNumber ? `@${stats.versionNumber}` : '';
 npm install @voidable/ui @voidable/theme
 ```
 
+Lit 3 is a peer dependency of `@voidable/ui`, so your app shares a single copy of it with every Voidable package. npm, pnpm and Bun install it automatically; with Yarn run `yarn add lit` as well.
+
 ## Import the theme
 
 Add the theme CSS to your app entry point. This loads all design tokens, primitives, and component styles:

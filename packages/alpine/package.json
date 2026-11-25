@@ -1,7 +1,14 @@
 {
   "name": "@voidable/ui-alpine",
   "version": "0.0.0",
+  "description": "Alpine.js plugin for Voidable UI web components",
+  "keywords": ["alpine", "alpinejs", "livewire", "web-components", "custom-elements", "void-ui"],
+  "homepage": "https://voidable.dev",
+  "bugs": {
+    "url": "https://github.com/VoidableUI/Voidable/issues"
+  },
   "type": "module",
+  "sideEffects": false,
   "license": "MIT",
   "exports": {
     ".": {
@@ -29,7 +36,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/VoidableUI/Voidable",
+    "url": "git+https://github.com/VoidableUI/Voidable.git",
     "directory": "packages/alpine"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

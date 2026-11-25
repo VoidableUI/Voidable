@@ -1,7 +1,14 @@
 {
   "name": "@voidable/ui-react",
   "version": "0.0.0",
+  "description": "React wrappers and hooks for Voidable UI web components",
+  "keywords": ["react", "web-components", "custom-elements", "wrapper", "void-ui"],
+  "homepage": "https://voidable.dev",
+  "bugs": {
+    "url": "https://github.com/VoidableUI/Voidable/issues"
+  },
   "type": "module",
+  "sideEffects": true,
   "license": "MIT",
   "exports": {
     ".": {
@@ -33,7 +40,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/VoidableUI/Voidable",
+    "url": "git+https://github.com/VoidableUI/Voidable.git",
     "directory": "packages/react"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

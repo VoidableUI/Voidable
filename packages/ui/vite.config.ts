@@ -4,7 +4,7 @@ import { readdirSync } from 'node:fs';
 import { resolve } from 'node:path';
 
 // Build each component as its own entry so consumers can import
-// individual components (e.g. import "@voidable/ui/button") and get
+// individual components (e.g. import "@voidable/ui/components/button") and get
 // the tree-shaking benefits of subpath imports.
 const componentEntries = readdirSync('src/components')
   .filter((file) => file.endsWith('.ts'))
