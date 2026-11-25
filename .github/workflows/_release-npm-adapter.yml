@@ -1,0 +1,196 @@
+# SPDX-License-Identifier: MIT
+#
+# Reusable release pipeline for the npm adapter packages (react, vue, solid,
+# svelte, angular, alpine, hotwire, liveview). Called from the thin
+# release-ui-<name>.yml workflows, which own the triggers, path filters and
+# the concurrency group.
+name: Release npm Adapter (reusable)
+
+on:
+  workflow_call:
+    inputs:
+      package:
+        description: npm package name, e.g. @voidable/ui-react
+        type: string
+        required: true
+      directory:
+        description: Package directory, e.g. packages/react
+        type: string
+        required: true
+      tag_prefix:
+        description: Git tag prefix, e.g. ui-react-v
+        type: string
+        required: true
+      tag_paths:
+        description: Comma-separated paths that count as a change for the tagger
+        type: string
+        required: true
+      check_script:
+        description: Package script run after the build in CI (test or typecheck)
+        type: string
+        default: test
+      build_core_in_ci:
+        description: Build @voidable/ui before building the package in the CI job
+        type: boolean
+        default: true
+      build_core_in_release:
+        description: Build @voidable/ui before publishing
+        type: boolean
+        default: true
+      pin_core_version:
+        description: Rewrite workspace:* to the published @voidable/ui version before publishing
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          fetch-depth: 0
+
+      - uses: jdx/mise-action@5228313ee0372e111a38da051671ca30fc5a96db # v3.6.3
+        with:
+          install_args: "node npm:pnpm"
+        env:
+          MISE_NOT_FOUND_AUTO_INSTALL: "false"
+
+      - name: Install and build
+        env:
+          PACKAGE: ${{ inputs.package }}
+          BUILD_CORE: ${{ inputs.build_core_in_ci }}
+        run: |
+          pnpm install
+          if [ "$BUILD_CORE" = "true" ]; then
+            pnpm --filter @voidable/ui build
+          fi
+          pnpm --filter "$PACKAGE" build
+
+      - name: Check
+        env:
+          PACKAGE: ${{ inputs.package }}
+          CHECK_SCRIPT: ${{ inputs.check_script }}
+        run: pnpm --filter "$PACKAGE" "$CHECK_SCRIPT"
+
+  tag:
+    name: Create Tag
+    runs-on: ubuntu-latest
+    needs: build
+    permissions:
+      contents: write
+    outputs:
+      new_tag: ${{ steps.tag_version.outputs.new_tag }}
+      changelog: ${{ steps.tag_version.outputs.changelog }}
+      should_release: ${{ steps.check_tag.outputs.should_release }}
+
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          fetch-depth: 0
+
+      - name: Bump version and create tag
+        id: tag_version
+        uses: Work-Fort/github-tag-action@1646d43eb5b675393a4e9ed36ae55ef35e0c07b2 # v6.3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          default_bump: false
+          release_branches: master
+          tag_prefix: ${{ inputs.tag_prefix }}
+          paths: ${{ inputs.tag_paths }}
+
+      - name: Check if new tag was created
+        id: check_tag
+        run: |
+          if [ -n "$TAG" ]; then
+            echo "should_release=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "should_release=false" >> "$GITHUB_OUTPUT"
+          fi
+        env:
+          TAG: ${{ steps.tag_version.outputs.new_tag }}
+
+  release:
+    name: Publish to npm
+    runs-on: ubuntu-latest
+    needs: tag
+    permissions:
+      contents: write
+      id-token: write
+    if: needs.tag.outputs.should_release == 'true'
+
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          ref: ${{ needs.tag.outputs.new_tag }}
+
+      - uses: jdx/mise-action@5228313ee0372e111a38da051671ca30fc5a96db # v3.6.3
+        with:
+          install_args: "node npm:pnpm"
+        env:
+          MISE_NOT_FOUND_AUTO_INSTALL: "false"
+
+      - name: Build and publish
+        id: publish
+        env:
+          TAG: ${{ needs.tag.outputs.new_tag }}
+          TAG_PREFIX: ${{ inputs.tag_prefix }}
+          PACKAGE: ${{ inputs.package }}
+          DIRECTORY: ${{ inputs.directory }}
+          BUILD_CORE: ${{ inputs.build_core_in_release }}
+          PIN_CORE: ${{ inputs.pin_core_version }}
+        run: |
+          VERSION="${TAG#"$TAG_PREFIX"}"
+          SLUG="${PACKAGE#@voidable/}"
+          echo "slug=$SLUG" >> "$GITHUB_OUTPUT"
+          pnpm install
+          if [ "$BUILD_CORE" = "true" ]; then
+            pnpm --filter @voidable/ui build
+          fi
+          cd "$DIRECTORY"
+          npm pkg set version="$VERSION"
+          if [ "$PIN_CORE" = "true" ]; then
+            UI_VERSION=$(npm view @voidable/ui version)
+            sed -i "s|\"workspace:\*\"|\"^$UI_VERSION\"|g" package.json
+          fi
+          pnpm run build
+          npm publish --provenance --access public
+          npm pack
+          mv voidable-"$SLUG"-*.tgz ../..
+
+      - name: Create release notes
+        env:
+          TAG: ${{ needs.tag.outputs.new_tag }}
+          TAG_PREFIX: ${{ inputs.tag_prefix }}
+          PACKAGE: ${{ inputs.package }}
+          CHANGELOG: ${{ needs.tag.outputs.changelog }}
+        run: |
+          VERSION="${TAG#"$TAG_PREFIX"}"
+          cat > release-notes.md << EOF
+          # ${PACKAGE} v${VERSION}
+
+          ## What's Changed
+
+          ${CHANGELOG}
+
+          ## Installation
+
+          \`\`\`bash
+          npm install ${PACKAGE}@${VERSION}
+          \`\`\`
+          EOF
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2.6.2
+        with:
+          tag_name: ${{ needs.tag.outputs.new_tag }}
+          name: "${{ inputs.package }} ${{ needs.tag.outputs.new_tag }}"
+          body_path: release-notes.md
+          draft: false
+          prerelease: false
+          files: voidable-${{ steps.publish.outputs.slug }}-*.tgz
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
