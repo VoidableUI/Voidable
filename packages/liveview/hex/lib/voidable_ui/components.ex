@@ -35,10 +35,9 @@ defmodule VoidableUI.Components do
 
   ## `closable={false}`
 
-  The core `closable` property is a Lit boolean that defaults to `true`, and a
-  boolean attribute can only ever say "true". `dialog` and `drawer` therefore
-  render `data-void-closable="true|false"`, which the `VoidEvent` hook applies
-  as the `closable` property on mount and on every update.
+  `dialog` and `drawer` render `closable="true"` or `closable="false"`; the
+  core component reads the string `"false"` as false, so the server can turn
+  `closable` off and back on with an ordinary attribute patch.
   """
 
   use Phoenix.Component
@@ -629,8 +628,7 @@ defmodule VoidableUI.Components do
       open={@open}
       heading={@heading}
       size={@size}
-      closable={@closable}
-      data-void-closable={to_string(@closable)}
+      closable={to_string(@closable)}
       phx-hook="VoidEvent"
       data-void-events="void-close"
       {@rest}
@@ -871,8 +869,7 @@ defmodule VoidableUI.Components do
       side={@side}
       size={@size}
       heading={@heading}
-      closable={@closable}
-      data-void-closable={to_string(@closable)}
+      closable={to_string(@closable)}
       phx-hook="VoidEvent"
       data-void-events="void-close"
       {@rest}

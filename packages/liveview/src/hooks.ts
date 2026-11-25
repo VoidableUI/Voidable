@@ -65,18 +65,6 @@ function push(hook: ViewHookInstance, event: string, payload: object): void {
   }
 }
 
-/**
- * Core `closable` is a Lit boolean that defaults to true; an attribute can
- * never express false, so the server renders `data-void-closable` and we apply
- * it as a property.
- */
-function applyProps(el: HTMLElement): void {
-  const closable = el.dataset.voidClosable;
-  if (closable !== undefined) {
-    (el as HTMLElement & { closable?: boolean }).closable = closable !== "false";
-  }
-}
-
 function attachListeners(hook: VoidEventInstance, events: string[]): void {
   for (const event of events) {
     const handler = (e: Event) => {
@@ -113,11 +101,9 @@ export const VoidHooks: Record<string, Partial<ViewHookInstance> & ThisType<Void
       this._boundEvents = [];
       const events = parseEvents(this.el);
       attachListeners(this, events);
-      applyProps(this.el);
     },
 
     updated(this: VoidEventInstance) {
-      applyProps(this.el);
       const next = parseEvents(this.el);
       const prev = this._boundEvents || [];
 

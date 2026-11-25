@@ -1,6 +1,7 @@
 import { html, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
+import { defaultTrueBoolean } from '../converters.js';
 import { ProjectionController } from '../projection.js';
 
 /** Modal overlay for confirmations, detail views, and multi-step forms that require user attention before continuing. */
@@ -8,7 +9,8 @@ export class VoidDialog extends VoidElement {
   @property({ type: Boolean, reflect: true }) open = false;
   @property({ type: String }) heading = '';
   @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' | 'xl' = 'md';
-  @property({ type: Boolean }) closable = true;
+  /** Set `closable="false"` in markup to hide the close button and ignore Escape and backdrop clicks. */
+  @property({ type: Boolean, converter: defaultTrueBoolean }) closable = true;
 
   protected readonly _projection = new ProjectionController(this, {
     regions: [{ name: 'body', target: () => this.querySelector(':scope > .void-dialog-backdrop .void-dialog-body') }],

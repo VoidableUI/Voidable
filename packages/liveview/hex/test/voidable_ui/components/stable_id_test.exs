@@ -46,18 +46,19 @@ defmodule VoidableUI.Components.StableIdTest do
     assert id_of(html) == "mine"
   end
 
-  test "dialog and drawer render data-void-closable for both values" do
+  test "dialog and drawer render closable as \"true\" or \"false\"" do
     assigns = %{}
 
     open = rendered_to_string(~H"<VoidableUI.Components.dialog>x</VoidableUI.Components.dialog>")
-    assert open =~ ~s(data-void-closable="true")
+    assert open =~ ~s(closable="true")
 
     drawer =
       rendered_to_string(
         ~H"<VoidableUI.Components.drawer closable={false}>x</VoidableUI.Components.drawer>"
       )
 
-    assert drawer =~ ~s(data-void-closable="false")
+    assert drawer =~ ~s(closable="false")
+    refute drawer =~ "data-void-closable"
   end
 
   test "phx-update passes through to the element when opted in" do

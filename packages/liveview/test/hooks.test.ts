@@ -48,17 +48,6 @@ describe('VoidEvent hook', () => {
     expect(hook.pushEventTo).toHaveBeenCalledWith('3', 'void-click', expect.objectContaining({ id: 'b' }));
   });
 
-  it('applies data-void-closable as the closable property on mount and update', () => {
-    const { el, hook } = mountHook(
-      '<void-dialog id="d" data-void-closable="false" phx-hook="VoidEvent" data-void-events="void-close"></void-dialog>',
-    );
-    expect((el as any).closable).toBe(false);
-
-    el.dataset.voidClosable = 'true';
-    hook.updated();
-    expect((el as any).closable).toBe(true);
-  });
-
   it('detaches listeners on destroy', () => {
     const { el, hook } = mountHook(
       '<void-button id="b" phx-hook="VoidEvent" data-void-events="void-click"></void-button>',

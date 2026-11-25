@@ -1,6 +1,7 @@
 import { html, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
+import { defaultTrueBoolean } from '../converters.js';
 import { ProjectionController } from '../projection.js';
 
 /** Slide-out overlay panel for filters, detail views, and navigation menus; opens from any screen edge. */
@@ -9,7 +10,8 @@ export class VoidDrawer extends VoidElement {
   @property({ type: String, reflect: true }) side: 'left' | 'right' | 'top' | 'bottom' = 'right';
   @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' = 'md';
   @property({ type: String }) heading = '';
-  @property({ type: Boolean, reflect: true }) closable = true;
+  /** Set `closable="false"` in markup to hide the close button and ignore Escape and overlay clicks. */
+  @property({ type: Boolean, reflect: true, converter: defaultTrueBoolean }) closable = true;
 
   protected readonly _projection = new ProjectionController(this, {
     regions: [{ name: 'body', target: () => this.querySelector(':scope > .void-drawer-panel > .void-drawer-body') }],

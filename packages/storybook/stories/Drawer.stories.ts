@@ -52,7 +52,7 @@ export const Default: Story = {
       side=${args.side}
       size=${args.size}
       heading=${args.heading}
-      ?closable=${args.closable}
+      closable=${String(args.closable)}
     >
       <p>This is the drawer body content. Place any content here.</p>
     </void-drawer>
@@ -114,7 +114,7 @@ export const WithoutHeading: Story = {
 
 export const NotClosable: Story = {
   render: () => html`
-    <void-drawer open side="right" heading="Required Step" ?closable=${false}>
+    <void-drawer open side="right" heading="Required Step" closable="false">
       <p>This drawer cannot be closed by the user. You must complete the required action.</p>
     </void-drawer>
   `,

@@ -60,6 +60,5 @@ element. See the `VoidableUI.Components` moduledoc for guidance.
 
 ## `closable={false}`
 
-`dialog` and `drawer` render `data-void-closable`, which the `VoidEvent` hook
-applies as the `closable` property (a boolean attribute cannot express
-`false`).
+`dialog` and `drawer` render `closable="false"`, which the core components
+read as false (any other value, or no attribute, means true).

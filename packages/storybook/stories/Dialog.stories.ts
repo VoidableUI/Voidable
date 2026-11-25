@@ -99,7 +99,7 @@ export const NotClosable: Story = {
     };
     return html`
       <button @click="${toggle}" style="padding: 0.5rem 1rem; cursor: pointer;">Open Non-Closable Dialog</button>
-      <void-dialog heading="Required Action" ?closable="${false}">
+      <void-dialog heading="Required Action" closable="false">
         <p>You must complete this action before continuing. Press the button below to confirm.</p>
         <div style="margin-top: 1rem;">
           <button @click="${dismiss}" style="padding: 0.5rem 1rem; cursor: pointer;">I Understand</button>
