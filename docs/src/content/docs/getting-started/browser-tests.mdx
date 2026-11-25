@@ -18,6 +18,8 @@ mise run test:browser -- specs/forms.spec.ts --project=firefox
 
 Locally an engine that cannot start is skipped with a warning. In CI every engine must run. Where WebKit cannot run on your distribution, start Playwright's server in its Docker image and point `VOID_WEBKIT_WS` at it.
 
+Overlays get their own stress spec. With real mouse and keyboard input it nests four overlays (drawer, dialog, popover, menu), opens them inside clipped, transformed and scrolled containers, opens each one at all four viewport corners at 1440x900 and 390x844, checks where focus goes when the opener has been removed, that a page can cancel a `void-close`, which `detail.reason` each way of closing reports, that fifty open and close cycles leave no nodes, listeners, top-layer entries or scroll lock behind, and that an open overlay survives a Turbo, morphdom or Alpine morph.
+
 ## The server-backed suites
 
 `mise run test:server` starts real applications on the built packages and drives them in Chromium:
@@ -28,7 +30,7 @@ Locally an engine that cannot start is skipped with a warning. In CI every engin
 | Phoenix LiveView | `packages/liveview/demo` | live navigation and patches, `phx-change` forms, server timers, server-opened overlays, the event bridge hooks |
 | Laravel Livewire | `examples/laravel` | `wire:navigate`, `wire:poll`, `wire:click`, server-driven values and overlays, the Alpine event bridge |
 
-Each app is described in `tests/browser/server/apps.mjs` and started by `tests/browser/server/start.mjs`, which bundles the built packages into the app, prepares it (dependencies, database) and runs it. `VOID_SERVER_APPS=phoenix mise run test:server` runs one. Each needs its toolchain from `mise.toml` (Ruby, Erlang and Elixir, or PHP). The same specs check what a user would: typed text and focus that survive a server update, an open overlay that stays open, a value the server changes winning over the user's, and the same controls submitting the same values.
+Each app is described in `tests/browser/server/apps.mjs` and started by `tests/browser/server/start.mjs`, which bundles the built packages into the app, prepares it (dependencies, database) and runs it. `VOID_SERVER_APPS=phoenix mise run test:server` runs one. Each needs its toolchain from `mise.toml` (Ruby, Erlang and Elixir, or PHP), taken from mise when it is installed there and from `PATH` otherwise. Steps that fetch packages (bundler, hex, composer) are retried up to three times. The apps use ports 4520, 4530 and 4540; `VOID_RAILS_PORT`, `VOID_PHOENIX_PORT` and `VOID_LARAVEL_PORT` change them, so two checkouts can run side by side. The same specs check what a user would: typed text and focus that survive a server update, an open overlay that stays open, a value the server changes winning over the user's, and the same controls submitting the same values.
 
 ## Known defects
 
@@ -36,4 +38,4 @@ A test for a defect that is not fixed asserts the correct behaviour and starts w
 
 ## In CI
 
-The `browser`, `server` (Rails), `phoenix` and `laravel` jobs of `.github/workflows/ci.yml` run on every pull request. The release workflow calls the same file, so nothing is tagged or published unless every one of them passed.
+The `browser`, `server` (Rails), `phoenix` and `laravel` jobs of `.github/workflows/ci.yml` run on every pull request. The release workflow calls the same file, so nothing is tagged or published unless every one of them passed. CI installs Ruby, Erlang/Elixir and PHP with `ruby/setup-ruby`, `erlef/setup-beam` and `shivammathur/setup-php`, which download prebuilt toolchains, at the versions pinned in `mise.toml`.

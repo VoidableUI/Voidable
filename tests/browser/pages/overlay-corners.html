@@ -1,0 +1,31 @@
+<style>
+  /* One set of triggers, pinned to a viewport corner chosen by ?corner=tl|tr|bl|br. */
+  #set { position: fixed; display: flex; flex-direction: column; gap: 4px; align-items: flex-start; margin: 0; }
+  body[data-corner="tl"] #set { top: 0; left: 0; }
+  body[data-corner="tr"] #set { top: 0; right: 0; align-items: flex-end; }
+  body[data-corner="bl"] #set { bottom: 0; left: 0; }
+  body[data-corner="br"] #set { bottom: 0; right: 0; align-items: flex-end; }
+  /* Only one overlay's trigger is shown at a time, so each one is the only thing in the corner. */
+  #set > * { display: none; }
+  body[data-only="pop"] #set > #pop,
+  body[data-only="menu"] #set > #menu,
+  body[data-only="tip"] #set > #tip,
+  body[data-only="card"] #set > #card,
+  body[data-only="combo"] #set > #combo,
+  body[data-only="multi"] #set > #multi,
+  body[data-only="date"] #set > #date { display: block; }
+</style>
+<div id="set">
+  <void-popover id="pop"><button slot="trigger" id="pop-t">Popover</button><div class="pc" style="width: 240px; height: 120px">popover body <button id="pop-in">in</button></div></void-popover>
+  <void-dropdown-menu id="menu"><button slot="trigger" id="menu-t">Menu</button><void-dropdown-menu-item>One</void-dropdown-menu-item><void-dropdown-menu-item>Two</void-dropdown-menu-item><void-dropdown-menu-item>Three</void-dropdown-menu-item></void-dropdown-menu>
+  <void-tooltip id="tip" text="A tooltip with some text in it" delay="50"><button id="tip-t">Tip</button></void-tooltip>
+  <void-hover-card id="card" open-delay="50" close-delay="50"><a href="#card" slot="trigger" id="card-t">Card</a><div class="hcc" style="width: 260px; height: 100px">hover card content</div></void-hover-card>
+  <void-combobox id="combo" placeholder="Pick" style="width: 180px"><void-option value="react">React</void-option><void-option value="vue">Vue</void-option><void-option value="lit">Lit</void-option><void-option value="svelte">Svelte</void-option></void-combobox>
+  <void-multiselect id="multi" placeholder="Pick many" style="width: 180px"><void-option value="css">CSS</void-option><void-option value="js">JS</void-option><void-option value="html">HTML</void-option></void-multiselect>
+  <void-date-picker id="date" value="2026-11-10" style="width: 180px"></void-date-picker>
+</div>
+<script>
+  const q = new URLSearchParams(location.search);
+  document.body.dataset.corner = q.get('corner') || 'tl';
+  document.body.dataset.only = q.get('only') || 'pop';
+</script>

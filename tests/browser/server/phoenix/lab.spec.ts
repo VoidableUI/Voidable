@@ -4,7 +4,7 @@
 // /lab/two) with the built @voidable/ui and @voidable/ui-liveview packages and
 // the live_voidable Hex package from this repository. Every test gets a new
 // browser context and so a new LiveView.
-import { test, expect, expectedFailure, settle, ready, fillLabForm, formEntries, mark, kept, type Page } from '../shared';
+import { test, expect, expectedFailure, settle, ready, fillLabForm, addTag, formEntries, mark, kept, type Page } from '../shared';
 
 /** Opens the lab and waits for the LiveView to connect (the dead render has upgraded by then too). */
 async function lab(page: Page, path = '/lab') {
@@ -136,9 +136,7 @@ test.describe('server updates while the user is mid-interaction', () => {
     await page.locator('#i-remember').click();
     await page.locator('#i-plan void-radio[value=pro]').click();
     await page.locator('#i-news').click();
-    await page.locator('#i-tags input').click();
-    await page.keyboard.type('alpha');
-    await page.keyboard.press('Enter');
+    await addTag(page, 'alpha');
     await page.click('#timer-on');
     const start = Number((await text(page, '#ticks')).replace('Ticks ', ''));
     await ticksAbove(page, start + 5);
