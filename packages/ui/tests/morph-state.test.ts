@@ -24,6 +24,7 @@ import '../src/components/alert.js';
 import '../src/components/field.js';
 import '../src/components/input.js';
 import '../src/components/popover.js';
+import '../src/components/dialog.js';
 
 type Host = VoidElement & Record<string, unknown>;
 
@@ -428,5 +429,35 @@ describe('appending to a rendered host (Solid keyed lists)', () => {
     sel.insertBefore(x, node);
     await settle();
     expect(Array.from(sel.querySelectorAll('option')).map(o => o.value)).toEqual(['y', 'b', 'x', 'a']);
+  });
+});
+
+describe('overlay open state (what the Livewire hook hands to the morph)', () => {
+  it('keeps a dialog the user opened open through a re-render that does not mention it', async () => {
+    const live = await mount<Host>('<void-dialog heading="D">x</void-dialog>');
+    live.setAttribute('open', '');
+    await settle();
+    const toEl = server('<void-dialog heading="D">x</void-dialog>');
+    live.voidBeforeMorph(toEl);
+    expect(toEl.hasAttribute('open')).toBe(true);
+  });
+
+  it('closes it when the server stops rendering open (server wins)', async () => {
+    const live = await mount<Host>('<void-dialog heading="D" open>x</void-dialog>');
+    const toEl = server('<void-dialog heading="D">x</void-dialog>');
+    live.voidBeforeMorph(toEl);
+    expect(toEl.hasAttribute('open')).toBe(false);
+  });
+
+  it('opens it when the server starts rendering open, and keeps a user close while the server repeats itself', async () => {
+    const live = await mount<Host>('<void-dialog heading="D">x</void-dialog>');
+    const first = await morph(live, '<void-dialog heading="D" open>x</void-dialog>');
+    expect(first.hasAttribute('open')).toBe(true);
+    expect(live.hasAttribute('open')).toBe(true);
+    live.removeAttribute('open'); // the user closed it
+    await settle();
+    const again = server('<void-dialog heading="D" open>x</void-dialog>');
+    live.voidBeforeMorph(again);
+    expect(again.hasAttribute('open')).toBe(false);
   });
 });

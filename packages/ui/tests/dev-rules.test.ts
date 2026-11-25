@@ -177,6 +177,15 @@ describe('undefined tags', () => {
     expect(w.message).toContain('Did you mean <void-button>?');
   });
 
+  it('is quiet for a CSS-only styled element, and still suggests it for a typo', () => {
+    const styled = ['void-page-head', 'void-shell'];
+    const el = make('<void-page-head></void-page-head>');
+    expect(checkDefined(table, el, false, styled)).toBeUndefined();
+    expect(checkDefined(table, el, false)).toBeDefined();
+    const typo = checkDefined(table, make('<void-pag-head></void-pag-head>'), false, styled)!;
+    expect(typo.message).toContain('Did you mean <void-page-head>?');
+  });
+
   it('is quiet for a defined element and for non-void tags', () => {
     customElements.define('void-input', class extends HTMLElement {});
     expect(checkDefined(table, make('<void-input></void-input>'), false)).toBeUndefined();

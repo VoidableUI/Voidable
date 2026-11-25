@@ -1,0 +1,76 @@
+---
+title: Labels
+description: The label recipe, data-void-type="label", is the small quiet name of a thing (small monospace capitals in the secondary colour). Where to use it and where not to.
+---
+
+import Example from '../../../components/Example.astro';
+
+A **label** is the small, quiet name of a thing: the word above a number, a column heading, the breadcrumb above a title, the note at the end of a section head. It is the detail that most gives a Voidable screen its character: small monospace capitals, widely spaced, in the secondary text colour.
+
+It is one attribute on any element.
+
+export const label = `
+<void-stack gap="tight">
+  <span data-void-type="label">Stations online</span>
+  <span data-void-type="value">41 <span data-void-type="unit">of 44</span></span>
+  <span data-void-type="caption">2 in maintenance, 1 degraded</span>
+</void-stack>`;
+
+export const labelErb = `
+<void-stack gap="tight">
+  <span data-void-type="label"><%= t(".stations_online") %></span>
+  <span data-void-type="value">
+    <%= @network.online_count %>
+    <span data-void-type="unit">of <%= @network.station_count %></span>
+  </span>
+  <span data-void-type="caption"><%= @network.summary %></span>
+</void-stack>`;
+
+export const labelJsx = `
+<void-stack gap="tight">
+  <span data-void-type="label">Stations online</span>
+  <span data-void-type="value">
+    {network.online} <span data-void-type="unit">of {network.total}</span>
+  </span>
+  <span data-void-type="caption">{network.summary}</span>
+</void-stack>`;
+
+<Example html={label} erb={labelErb} jsx={labelJsx} />
+
+## Where a label goes
+
+| Place | Markup |
+|---|---|
+| Above a figure | `<span data-void-type="label">` as the first child of `void-figure` |
+| Above a page title, as a location | First child of `void-page-head` |
+| At the far end of a section head, as a note | `<span data-void-type="label">Last 24 hours</span>` in `void-section-head` |
+| Above a group of links in a sidebar | A label span between the links in `void-nav-links` |
+| The name in a description list | Automatic: every `<dt>` in `void-description-list` is a label |
+| A column heading | Automatic: every `<th>` in `void-table` is a label |
+
+## Where it does not
+
+- **Not for a form field's label.** `void-field` draws its own, in sentence case at body size: a field label is read to be understood, and capitals are slower to read.
+- **Not for a sentence.** A label is one to three words. Longer text set in spaced capitals stops being quiet.
+- **Not for emphasis.** It is the least prominent text on the screen, by design. For emphasis use weight or the `heading` role.
+- **Not for a state.** "Online" is a [state](/patterns/state/) or a badge; it needs a signal other than its typography.
+
+## Write it in sentence case
+
+Write `Stations online` in the markup; the theme applies the capitals (`text-transform`). A screen reader then reads a phrase and not a string of letters, and a theme that turns the capitals off (`--void-type-label-case: none`) gets correct text.
+
+## Restyling it
+
+The recipe is a type role: seven tokens that the knobs and themes can change in one place. The Console theme, for example, changes nothing here and still looks different, because the family and size derive from its knobs.
+
+```css
+:root {
+  --void-type-label-family: var(--void-font-sans);   /* not monospace */
+  --void-type-label-case: none;                      /* no capitals */
+  --void-type-label-tracking: 0;
+}
+```
+
+## Why this form
+
+A label is a recipe (an attribute on your element) and not an element of its own, because it is typography and nothing else: it has no layout and no children to arrange, and it must go on elements that already have a meaning (`<dt>`, `<th>`, `<span>`, `<legend>`). The other type roles work the same way; see [type roles](/getting-started/theming/#type-roles).

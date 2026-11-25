@@ -1,3 +1,318 @@
 {
-  "note": "Hand-written knowledge the manifest does not carry yet (canonical examples for a few components live in snippets/). Allowed parents, required children and hints for guessed attributes are in the manifest itself (voidParents, voidRequires, voidHints; source packages/ui/cem/supplement.js)."
+  "note": "Hand-written knowledge the manifest does not carry yet (canonical examples for a few components live in snippets/). Allowed parents, required children and hints for guessed attributes are in the manifest itself (voidParents, voidRequires, voidHints; source packages/ui/cem/supplement.js). Styled elements are CSS-only void-* tags that @voidable/theme styles and nothing registers; the manifest does not hold them, so each declares its own allowed parents here.",
+  "styled": [
+    {
+      "tag": "void-shell",
+      "description": "Frame of an application: a void-nav-bar or void-sidebar, then <main>. The first thing in <body>.",
+      "attributes": [
+        {
+          "name": "nav",
+          "type": "'top' | 'side' | 'overlay'",
+          "default": "top",
+          "description": "top: bar above the page. side: void-sidebar beside it (a bar across the top below 48rem). overlay: bar laid over the top of the page, for a page that opens on a void-media"
+        }
+      ]
+    },
+    {
+      "tag": "void-brand",
+      "description": "Product name (and mark) in a nav bar or sidebar; put an <a> inside to link it home.",
+      "attributes": []
+    },
+    {
+      "tag": "void-nav-links",
+      "description": "Links of a void-nav-bar or void-sidebar: <a> children, the current one marked aria-current=\"page\". A row that scrolls sideways when it runs out of room; a column in a sidebar.",
+      "attributes": [
+        {
+          "name": "orientation",
+          "type": "'horizontal' | 'vertical'",
+          "default": "horizontal",
+          "description": "vertical stacks the links (automatic inside void-sidebar)"
+        }
+      ]
+    },
+    {
+      "tag": "void-spacer",
+      "description": "Empty flexible gap: pushes what follows it to the far end of a void-nav-bar or void-toolbar.",
+      "attributes": []
+    },
+    {
+      "tag": "void-page",
+      "description": "Content column of a page, inside <main>: centred, with a gutter, its blocks a group apart and its void-section children a section apart. Never write page padding or max-width by hand.",
+      "hints": {
+        "size": "use width"
+      },
+      "attributes": [
+        {
+          "name": "width",
+          "type": "'default' | 'narrow' | 'wide' | 'full'",
+          "default": "default",
+          "description": "narrow for forms and reading; wide and full for dense tables and dashboards"
+        }
+      ]
+    },
+    {
+      "tag": "void-page-head",
+      "description": "Head of a page, first child of void-page: a label or void-breadcrumbs, an <h1>, an optional <p>, and void-actions. Text left, actions bottom right; a hairline under it.",
+      "attributes": [
+        {
+          "name": "flush",
+          "type": "boolean",
+          "default": "",
+          "description": "no hairline and no padding under the head"
+        }
+      ]
+    },
+    {
+      "tag": "void-actions",
+      "description": "Row of buttons that wraps: page actions, form buttons, row actions in a table cell.",
+      "hints": {
+        "align": "use justify (align is a legacy HTML attribute that sets text-align)"
+      },
+      "attributes": [
+        {
+          "name": "justify",
+          "type": "'start' | 'end' | 'center'",
+          "default": "start",
+          "description": "where the buttons sit in the row (end for the buttons of a form)"
+        }
+      ]
+    },
+    {
+      "tag": "void-section",
+      "description": "Titled part of a page: a void-section-head (or a bare <h2>), then content. No box and no shadow.",
+      "attributes": [
+        {
+          "name": "divided",
+          "type": "boolean",
+          "default": "",
+          "description": "hairline under the head, for content with no line of its own (a form, a paragraph, a chart)"
+        },
+        {
+          "name": "gap",
+          "type": "'inside' | 'stack' | 'group'",
+          "default": "inside",
+          "description": "space between the blocks in the section; stack for the fields of a form"
+        }
+      ]
+    },
+    {
+      "tag": "void-section-head",
+      "description": "Head of a void-section: an <h2> (or h3/h4), an optional <p>, and an optional aside (a data-void-type=\"label\" span, a badge, or void-actions) that sits at the far end.",
+      "attributes": []
+    },
+    {
+      "tag": "void-split",
+      "description": "Two columns that collapse to one below 48rem.",
+      "hints": {
+        "align": "use valign (align is a legacy HTML attribute that sets text-align)"
+      },
+      "attributes": [
+        {
+          "name": "ratio",
+          "type": "'1:1' | '2:1' | '1:2' | 'aside'",
+          "default": "1:1",
+          "description": "aside is a narrow fixed first column beside the content (a settings list)"
+        },
+        {
+          "name": "valign",
+          "type": "'start' | 'center' | 'end'",
+          "default": "start",
+          "description": "vertical alignment of the two columns"
+        }
+      ]
+    },
+    {
+      "tag": "void-stack",
+      "description": "Vertical stack with a named gap from the layout rhythm.",
+      "attributes": [
+        {
+          "name": "gap",
+          "type": "'tight' | 'inside' | 'stack' | 'group' | 'section'",
+          "default": "inside",
+          "description": "tight 8px, inside 16px, stack 24px, group 40px, section 72px at the default knobs"
+        },
+        {
+          "name": "sticky",
+          "type": "boolean",
+          "default": "",
+          "description": "as a child of void-split: stays in view while the other column scrolls"
+        }
+      ]
+    },
+    {
+      "tag": "void-figures",
+      "description": "Row of void-figure children divided by hairlines. Two columns below 48rem.",
+      "attributes": [
+        {
+          "name": "columns",
+          "type": "'2' | '3' | '4'",
+          "default": "4",
+          "description": "figures per row"
+        }
+      ]
+    },
+    {
+      "tag": "void-figure",
+      "description": "One number that matters. Children in order: a data-void-type=\"label\" span, a data-void-type=\"value\" span holding the number and a data-void-type=\"unit\" span, an optional void-progress, a data-void-type=\"caption\" span (which may hold a void-delta).",
+      "attributes": []
+    },
+    {
+      "tag": "void-delta",
+      "description": "A change with its direction: an arrow and a colour around the text (\"4.2%\").",
+      "attributes": [
+        {
+          "name": "trend",
+          "type": "'up' | 'down' | 'flat'",
+          "default": "flat",
+          "description": "direction of the change"
+        },
+        {
+          "name": "invert",
+          "type": "boolean",
+          "default": "",
+          "description": "less is better: down is green and up is red"
+        }
+      ]
+    },
+    {
+      "tag": "void-state",
+      "description": "A state as a coloured dot and a word. The word is the content and is required, so colour is never the only signal.",
+      "hints": {
+        "status": "use color",
+        "variant": "use color"
+      },
+      "attributes": [
+        {
+          "name": "color",
+          "type": "'default' | 'success' | 'info' | 'warning' | 'caution' | 'error' | 'notice'",
+          "default": "default",
+          "description": "default is grey (idle, off, unknown)"
+        },
+        {
+          "name": "pulse",
+          "type": "boolean",
+          "default": "",
+          "description": "animated ring: something happening now"
+        }
+      ]
+    },
+    {
+      "tag": "void-description-list",
+      "description": "Labels and their values. Wraps a native <dl> whose pairs are each a <div> holding a <dt> and a <dd>.",
+      "attributes": [
+        {
+          "name": "layout",
+          "type": "'rows' | 'grid'",
+          "default": "rows",
+          "description": "rows: label left, value right, a hairline between pairs. grid: label over value, pairs side by side"
+        },
+        {
+          "name": "columns",
+          "type": "'1' | '2' | '3' | '4'",
+          "default": "",
+          "description": "columns of pairs (rows: 1 or 2; grid: 1 to 4, default 2)"
+        }
+      ]
+    },
+    {
+      "tag": "void-rows",
+      "description": "List of void-row children with a hairline between them: settings, events, anything that is one thing per line and not tabular.",
+      "attributes": []
+    },
+    {
+      "tag": "void-row",
+      "description": "One row of void-rows: a void-row-text on the left, a value or one control on the right.",
+      "parents": [
+        "void-rows"
+      ],
+      "attributes": []
+    },
+    {
+      "tag": "void-row-text",
+      "description": "Two lines of text: a main line and a data-void-type=\"caption\" line. In a void-row or a table cell.",
+      "attributes": []
+    },
+    {
+      "tag": "void-toolbar",
+      "description": "Row of controls above a table or list: search field, filters, void-spacer, then ghost icon buttons. Wraps.",
+      "attributes": []
+    },
+    {
+      "tag": "void-empty",
+      "description": "Empty state: an optional icon (<svg> or <i>), a heading (<h3>), a <p>, and optional void-actions. Centred.",
+      "attributes": [
+        {
+          "name": "bordered",
+          "type": "boolean",
+          "default": "",
+          "description": "dashed hairline around it, for an empty area inside a page that is otherwise full"
+        },
+        {
+          "name": "size",
+          "type": "'sm' | 'md'",
+          "default": "md",
+          "description": "sm has less padding"
+        }
+      ]
+    },
+    {
+      "tag": "void-media",
+      "description": "Media surface: an <img>, <picture> or <video> that fills the box, with a void-media-content laid over it. Everything inside is on the on-media surface (off-white text in both colour schemes). For heroes, headers and feature sections, not application screens.",
+      "hints": {
+        "src": "put an <img src> (or <picture>, <video>) inside as the first child",
+        "position": "use place"
+      },
+      "attributes": [
+        {
+          "name": "place",
+          "type": "'bottom' | 'top' | 'start' | 'end' | 'center'",
+          "default": "bottom",
+          "description": "where the content sits; the scrim follows it"
+        },
+        {
+          "name": "height",
+          "type": "'sm' | 'md' | 'lg' | 'screen'",
+          "default": "md",
+          "description": "share of the viewport height"
+        },
+        {
+          "name": "ratio",
+          "type": "'1:1' | '4:3' | '16:9' | '21:9' | '3:1'",
+          "default": "",
+          "description": "aspect ratio instead of a height"
+        },
+        {
+          "name": "scrim",
+          "type": "'gradient' | 'flat' | 'none'",
+          "default": "gradient",
+          "description": "gradient: full strength behind the content, fading out beyond it. flat: the whole image. none: only for imagery you know is dark, or content in void-glass"
+        },
+        {
+          "name": "focal",
+          "type": "'center' | 'top' | 'bottom' | 'start' | 'end'",
+          "default": "center",
+          "description": "which part of the image survives the crop; for an exact point set --void-media-focal: 65% 40% in style"
+        },
+        {
+          "name": "stack",
+          "type": "boolean",
+          "default": "",
+          "description": "below 48rem the image sits on top and the content below it"
+        }
+      ]
+    },
+    {
+      "tag": "void-media-content",
+      "description": "Content region of a void-media: an <h1> (set large), a <p>, void-actions, a void-glass panel. Draws the scrim behind itself.",
+      "parents": [
+        "void-media"
+      ],
+      "attributes": []
+    },
+    {
+      "tag": "void-glass",
+      "description": "Glass panel: a translucent, blurred surface in the page colour scheme, for a form or status panel over an image. Solid where backdrop-filter is unavailable or reduced transparency is requested. data-void-surface=\"glass\" gives any component the same surface.",
+      "attributes": []
+    }
+  ]
 }

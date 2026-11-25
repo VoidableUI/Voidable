@@ -81,6 +81,8 @@ export {
 
 export type {
   VoidEvents,
+  OverlayOpenReason,
+  OverlayCloseReason,
   BarChartData,
   LineChartData,
   DonutChartData,

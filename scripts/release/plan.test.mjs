@@ -90,6 +90,26 @@ test('bumps from the last unified tag, counting only package paths', () => {
   assert.equal(planIn(r.dir).release, 'true');
 });
 
+test('demo apps are not released: a feat or fix touching only a demo does not count', () => {
+  const r = scratchRepo();
+  r.commit('packages/ui/a', 'feat(ui): a');
+  r.run('tag', 'v0.8.0');
+  r.commit('packages/hotwire/demo/app/x.erb', 'feat(hotwire): demo-only feature');
+  r.commit('packages/hotwire/demo-vite/app/y', 'fix(hotwire): demo-vite-only fix');
+  r.commit('packages/liveview/demo/lib/z.ex', 'fix(liveview): liveview-demo-only fix');
+  r.commit('tests/browser/specs/a.spec.ts', 'fix(test): test-only fix');
+  assert.equal(planIn(r.dir).release, 'false');
+  // The same commit also touching a published path does release.
+  const dir = r.dir;
+  mkdirSync(join(dir, 'packages/hotwire/demo/app'), { recursive: true });
+  mkdirSync(join(dir, 'packages/hotwire/src'), { recursive: true });
+  writeFileSync(join(dir, 'packages/hotwire/demo/app/q.erb'), 'q');
+  writeFileSync(join(dir, 'packages/hotwire/src/q.ts'), 'q');
+  r.run('add', '-A');
+  r.run('commit', '-q', '-m', 'fix(hotwire): demo and source together');
+  assert.equal(planIn(r.dir).release, 'true');
+});
+
 test('a commit that already carries its tag resumes at that version', () => {
   const r = scratchRepo();
   r.commit('packages/ui/a', 'feat(ui): a');

@@ -96,7 +96,7 @@ func TestSkillContentFromManifest(t *testing.T) {
 		{"SKILL.md", "`closable` on `<void-dialog>`, `closable` on `<void-drawer>`"},
 		{"references/components/void-popover.md", "| `trigger` | The element that toggles the popover"},
 		{"references/components/void-slider.md", "`show-value`"},
-		{"references/snippets/heex.md", "<.dropdown_menu position=\"bottom-end\">"},
+		{"references/snippets/heex.md", "<.dropdown_menu align=\"end\">"},
 		{"references/snippets/jsx.md", "slot=\"trigger\""},
 		{"references/wrong-usages.md", "| `<void-gauge>` | `show-value` | `showvalue` |"},
 		{"references/wrong-usages.md", "| `<void-option>` | `<void-multiselect>`, `<void-combobox>` |"},
@@ -119,6 +119,37 @@ func TestSkillDeterministic(t *testing.T) {
 	for i := range a.Files {
 		if a.Files[i].Path != b.Files[i].Path || string(a.Files[i].Content) != string(b.Files[i].Content) {
 			t.Errorf("%s differs between builds", a.Files[i].Path)
+		}
+	}
+}
+
+// The skill teaches retheming with knobs and the theme builder's link format,
+// so an agent can hand a user a link to the theme it proposes. The knob list
+// is checked against knobs.css by packages/theme/test/knobs.test.mjs.
+func TestSkillTeachesRetheming(t *testing.T) {
+	sk, _ := build(t)
+	f, _ := sk.File("SKILL.md")
+	md := string(f.Content)
+	for _, knob := range []string{
+		"accent-hue", "accent-chroma", "neutral-hue", "neutral-chroma", "page-tint", "contrast", "chrome",
+		"radius", "density", "rhythm", "font-size", "font-sans", "font-mono", "anim-scale",
+	} {
+		if !strings.Contains(md, "`--void-"+knob+"`") {
+			t.Errorf("SKILL.md does not document the knob --void-%s", knob)
+		}
+		if !strings.Contains(md, "`"+knob+"`") {
+			t.Errorf("SKILL.md does not name the builder parameter %s", knob)
+		}
+	}
+	for _, want := range []string{
+		"https://voidable.dev/theme/",
+		"https://voidable.dev/theme/?accent-hue=162&accent-chroma=0.19&radius=8&rhythm=1.1",
+		"`theme`", "`skin`", "`name`", "`screen`, `scheme`, `device`",
+		"data-void-theme", "data-void-skin=\"loft\"",
+		"@voidable/theme/skins/loft.css", "@voidable/theme/knobs.json",
+	} {
+		if !strings.Contains(md, want) {
+			t.Errorf("SKILL.md lacks %q", want)
 		}
 	}
 }

@@ -14,6 +14,10 @@ type Supplement struct {
 	// FalseString maps a tag to the default-true boolean attributes whose
 	// converter reads "false" as false (the manifest does not say).
 	FalseString map[string][]string `json:"falseString"`
+	// Styled lists the CSS-only elements: void-* tags that @voidable/theme
+	// styles and no JavaScript registers (the patterns and the media
+	// surface). They are not in the manifest, so they are declared here.
+	Styled []Element `json:"styled"`
 }
 
 // Node is a parsed snippet node. Tag is empty for a text node.

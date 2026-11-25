@@ -70,13 +70,13 @@ describe('void-dialog projection', () => {
     expect(el.querySelector('.void-dialog-body #c')).not.toBeNull();
   });
 
-  it('hides the backdrop while closed instead of removing it', async () => {
+  it('keeps the native dialog rendered but closed while closed instead of removing it', async () => {
     const el = mount<LitElement & { open: boolean }>('<void-dialog><p>Body</p></void-dialog>');
     await settle(el);
-    expect(el.querySelector<HTMLElement>('.void-dialog-backdrop')!.hidden).toBe(true);
+    expect(el.querySelector<HTMLDialogElement>('dialog.void-dialog-panel')!.open).toBe(false);
     el.open = true;
     await settle(el);
-    expect(el.querySelector<HTMLElement>('.void-dialog-backdrop')!.hidden).toBe(false);
+    expect(el.querySelector<HTMLDialogElement>('dialog.void-dialog-panel')!.open).toBe(true);
   });
 
   it('keeps consumer listeners and does not duplicate on move', async () => {
@@ -126,7 +126,7 @@ describe('void-dialog: persistent declarative dialog (issue #4 production report
       el.open = true;
       await settle(el);
       const body = el.querySelector('.void-dialog-body')!;
-      expect(el.querySelector<HTMLElement>('.void-dialog-backdrop')!.hidden).toBe(false);
+      expect(el.querySelector<HTMLDialogElement>('dialog.void-dialog-panel')!.open).toBe(true);
       expect(body.querySelector('#msg')).toBe(msg);
       expect(body.textContent).toContain('Are you sure?');
       el.querySelector<HTMLElement>('#ok')!.click();

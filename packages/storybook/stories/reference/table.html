@@ -1,152 +1,152 @@
-<main class="ref-page">
-  <header class="ref-head">
-    <div class="ref-head-text">
+<main>
+  <void-page>
+    <void-page-head>
       <span data-void-type="label">Network / Stations</span>
-      <h1 data-void-type="title">Stations</h1>
-    </div>
-    <div class="ref-actions">
-      <void-button variant="filled">Add station</void-button>
-    </div>
-  </header>
+      <h1>Stations</h1>
+      <void-actions>
+        <void-button variant="filled">Add station</void-button>
+      </void-actions>
+    </void-page-head>
 
-  <section class="ref-section">
-    <div class="ref-toolbar">
-      <void-input class="ref-toolbar-search" type="search" placeholder="Search stations" aria-label="Search stations"></void-input>
-      <void-select aria-label="Region">
-        <option>All regions</option>
-        <option>Arctic</option>
-        <option>Southern</option>
-        <option>Equatorial</option>
-      </void-select>
-      <void-segmented-control value="all" aria-label="State">
-        <void-segmented-control-item value="all">All</void-segmented-control-item>
-        <void-segmented-control-item value="online">Online</void-segmented-control-item>
-        <void-segmented-control-item value="attention">Attention</void-segmented-control-item>
-      </void-segmented-control>
-      <div class="ref-toolbar-end">
+    <void-section>
+      <void-toolbar>
+        <void-input type="search" placeholder="Search stations" aria-label="Search stations"></void-input>
+        <void-select aria-label="Region">
+          <option>All regions</option>
+          <option>Arctic</option>
+          <option>Southern</option>
+          <option>Equatorial</option>
+        </void-select>
+        <void-segmented-control value="all" aria-label="State">
+          <void-segmented-control-item value="all">All</void-segmented-control-item>
+          <void-segmented-control-item value="online">Online</void-segmented-control-item>
+          <void-segmented-control-item value="attention">Attention</void-segmented-control-item>
+        </void-segmented-control>
+        <void-spacer></void-spacer>
         <void-button variant="ghost" aria-label="Refresh">
-          <svg class="ref-icon" viewBox="0 0 16 16" aria-hidden="true"><path d="M13.5 8a5.5 5.5 0 1 1-1.6-3.9M13.5 2.5v2.6h-2.6"/></svg>
+          <svg viewBox="0 0 16 16" aria-hidden="true" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M13.5 8a5.5 5.5 0 1 1-1.6-3.9M13.5 2.5v2.6h-2.6"/></svg>
         </void-button>
         <void-button variant="ghost" aria-label="Choose columns">
-          <svg class="ref-icon" viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 3h11v10h-11zM6.2 3v10M9.8 3v10"/></svg>
+          <svg viewBox="0 0 16 16" aria-hidden="true" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 3h11v10h-11zM6.2 3v10M9.8 3v10"/></svg>
         </void-button>
         <void-button variant="ghost" aria-label="Download as CSV">
-          <svg class="ref-icon" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2.5v8M4.8 7.6 8 10.8l3.2-3.2M2.5 13.5h11"/></svg>
+          <svg viewBox="0 0 16 16" aria-hidden="true" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2.5v8M4.8 7.6 8 10.8l3.2-3.2M2.5 13.5h11"/></svg>
         </void-button>
-      </div>
-    </div>
+      </void-toolbar>
 
-    <void-table hoverable>
-      <table>
-        <thead>
-          <tr>
-            <th><void-checkbox aria-label="Select all stations"></void-checkbox></th>
-            <th>Station</th>
-            <th>State</th>
-            <th class="ref-hide-narrow">Region</th>
-            <th class="ref-hide-narrow">Bands</th>
-            <th class="ref-num">Passes</th>
-            <th class="ref-num ref-hide-narrow">Downlink</th>
-            <th class="ref-num ref-hide-narrow">Uptime</th>
-            <th class="ref-num"><span class="ref-hide-narrow">Actions</span></th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td><void-checkbox checked aria-label="Select Svalbard 1"></void-checkbox></td>
-            <td><div class="ref-cell-main"><span>Svalbard 1</span><span data-void-type="caption">78.23° N, 15.39° E</span></div></td>
-            <td><span class="ref-inline"><void-status-dot status="online"></void-status-dot> online</span></td>
-            <td class="ref-hide-narrow">Arctic</td>
-            <td class="ref-hide-narrow"><span class="ref-inline"><void-tag size="sm">S</void-tag><void-tag size="sm">X</void-tag><void-tag size="sm">Ka</void-tag></span></td>
-            <td class="ref-num">212</td>
-            <td class="ref-num ref-hide-narrow">14.2 TB</td>
-            <td class="ref-num ref-hide-narrow">99.98%</td>
-            <td><div class="ref-row-actions"><void-button variant="ghost" size="sm">Open</void-button><void-button variant="ghost" size="sm" class="ref-hide-narrow">Pause</void-button></div></td>
-          </tr>
-          <tr>
-            <td><void-checkbox aria-label="Select Svalbard 2"></void-checkbox></td>
-            <td><div class="ref-cell-main"><span>Svalbard 2</span><span data-void-type="caption">78.23° N, 15.41° E</span></div></td>
-            <td><span class="ref-inline"><void-status-dot status="online"></void-status-dot> online</span></td>
-            <td class="ref-hide-narrow">Arctic</td>
-            <td class="ref-hide-narrow"><span class="ref-inline"><void-tag size="sm">S</void-tag><void-tag size="sm">X</void-tag></span></td>
-            <td class="ref-num">198</td>
-            <td class="ref-num ref-hide-narrow">12.9 TB</td>
-            <td class="ref-num ref-hide-narrow">99.95%</td>
-            <td><div class="ref-row-actions"><void-button variant="ghost" size="sm">Open</void-button><void-button variant="ghost" size="sm" class="ref-hide-narrow">Pause</void-button></div></td>
-          </tr>
-          <tr>
-            <td><void-checkbox aria-label="Select Tromsø 2"></void-checkbox></td>
-            <td><div class="ref-cell-main"><span>Tromsø 2</span><span data-void-type="caption">69.66° N, 18.94° E</span></div></td>
-            <td><void-badge color="warning" variant="outline">Degraded</void-badge></td>
-            <td class="ref-hide-narrow">Arctic</td>
-            <td class="ref-hide-narrow"><span class="ref-inline"><void-tag size="sm">S</void-tag><void-tag size="sm">X</void-tag></span></td>
-            <td class="ref-num">141</td>
-            <td class="ref-num ref-hide-narrow">8.1 TB</td>
-            <td class="ref-num ref-hide-narrow">97.40%</td>
-            <td><div class="ref-row-actions"><void-button variant="ghost" size="sm">Open</void-button><void-button variant="ghost" size="sm" class="ref-hide-narrow">Pause</void-button></div></td>
-          </tr>
-          <tr>
-            <td><void-checkbox aria-label="Select Punta Arenas"></void-checkbox></td>
-            <td><div class="ref-cell-main"><span>Punta Arenas</span><span data-void-type="caption">53.16° S, 70.91° W</span></div></td>
-            <td><span class="ref-inline"><void-status-dot status="online"></void-status-dot> online</span></td>
-            <td class="ref-hide-narrow">Southern</td>
-            <td class="ref-hide-narrow"><span class="ref-inline"><void-tag size="sm">X</void-tag><void-tag size="sm">Ka</void-tag></span></td>
-            <td class="ref-num">176</td>
-            <td class="ref-num ref-hide-narrow">11.6 TB</td>
-            <td class="ref-num ref-hide-narrow">99.91%</td>
-            <td><div class="ref-row-actions"><void-button variant="ghost" size="sm">Open</void-button><void-button variant="ghost" size="sm" class="ref-hide-narrow">Pause</void-button></div></td>
-          </tr>
-          <tr>
-            <td><void-checkbox aria-label="Select Awarua"></void-checkbox></td>
-            <td><div class="ref-cell-main"><span>Awarua</span><span data-void-type="caption">46.53° S, 168.38° E</span></div></td>
-            <td><void-badge color="info" variant="outline">Maintenance</void-badge></td>
-            <td class="ref-hide-narrow">Southern</td>
-            <td class="ref-hide-narrow"><span class="ref-inline"><void-tag size="sm">S</void-tag><void-tag size="sm">Ka</void-tag></span></td>
-            <td class="ref-num">0</td>
-            <td class="ref-num ref-hide-narrow">0 TB</td>
-            <td class="ref-num ref-hide-narrow">98.72%</td>
-            <td><div class="ref-row-actions"><void-button variant="ghost" size="sm">Open</void-button><void-button variant="ghost" size="sm" class="ref-hide-narrow">Resume</void-button></div></td>
-          </tr>
-          <tr>
-            <td><void-checkbox aria-label="Select Troll"></void-checkbox></td>
-            <td><div class="ref-cell-main"><span>Troll</span><span data-void-type="caption">72.01° S, 2.53° E</span></div></td>
-            <td><void-badge color="error" variant="outline">Offline</void-badge></td>
-            <td class="ref-hide-narrow">Southern</td>
-            <td class="ref-hide-narrow"><span class="ref-inline"><void-tag size="sm">X</void-tag></span></td>
-            <td class="ref-num">0</td>
-            <td class="ref-num ref-hide-narrow">0 TB</td>
-            <td class="ref-num ref-hide-narrow">91.03%</td>
-            <td><div class="ref-row-actions"><void-button variant="ghost" size="sm">Open</void-button><void-button variant="ghost" size="sm" color="error" class="ref-hide-narrow">Remove</void-button></div></td>
-          </tr>
-          <tr>
-            <td><void-checkbox aria-label="Select Singapore"></void-checkbox></td>
-            <td><div class="ref-cell-main"><span>Singapore</span><span data-void-type="caption">1.35° N, 103.82° E</span></div></td>
-            <td><span class="ref-inline"><void-status-dot status="online"></void-status-dot> online</span></td>
-            <td class="ref-hide-narrow">Equatorial</td>
-            <td class="ref-hide-narrow"><span class="ref-inline"><void-tag size="sm">S</void-tag><void-tag size="sm">X</void-tag></span></td>
-            <td class="ref-num">88</td>
-            <td class="ref-num ref-hide-narrow">5.4 TB</td>
-            <td class="ref-num ref-hide-narrow">99.99%</td>
-            <td><div class="ref-row-actions"><void-button variant="ghost" size="sm">Open</void-button><void-button variant="ghost" size="sm" class="ref-hide-narrow">Pause</void-button></div></td>
-          </tr>
-          <tr>
-            <td><void-checkbox aria-label="Select Hartebeesthoek"></void-checkbox></td>
-            <td><div class="ref-cell-main"><span>Hartebeesthoek</span><span data-void-type="caption">25.89° S, 27.69° E</span></div></td>
-            <td><span class="ref-inline"><void-status-dot status="online"></void-status-dot> online</span></td>
-            <td class="ref-hide-narrow">Equatorial</td>
-            <td class="ref-hide-narrow"><span class="ref-inline"><void-tag size="sm">S</void-tag><void-tag size="sm">X</void-tag><void-tag size="sm">Ka</void-tag></span></td>
-            <td class="ref-num">104</td>
-            <td class="ref-num ref-hide-narrow">6.8 TB</td>
-            <td class="ref-num ref-hide-narrow">99.87%</td>
-            <td><div class="ref-row-actions"><void-button variant="ghost" size="sm">Open</void-button><void-button variant="ghost" size="sm" class="ref-hide-narrow">Pause</void-button></div></td>
-          </tr>
-        </tbody>
-      </table>
-    </void-table>
+      <void-table hoverable stack="56rem">
+        <table>
+          <thead>
+            <tr>
+              <th data-stack="select"><void-checkbox aria-label="Select all stations"></void-checkbox></th>
+              <th data-stack="title">Station</th>
+              <th>State</th>
+              <th>Region</th>
+              <th>Bands</th>
+              <th data-align="end">Passes</th>
+              <th data-align="end" data-stack="hide">Downlink</th>
+              <th data-align="end" data-stack="hide">Uptime</th>
+              <th data-stack="actions">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><void-checkbox checked aria-label="Select Svalbard 1"></void-checkbox></td>
+              <td><void-row-text><span>Svalbard 1</span><span data-void-type="caption">78.23° N, 15.39° E</span></void-row-text></td>
+              <td><void-state color="success">online</void-state></td>
+              <td>Arctic</td>
+              <td><void-actions><void-tag size="sm">S</void-tag><void-tag size="sm">X</void-tag><void-tag size="sm">Ka</void-tag></void-actions></td>
+              <td>212</td>
+              <td>14.2 TB</td>
+              <td>99.98%</td>
+              <td><void-button variant="ghost" size="sm">Open</void-button><void-button variant="ghost" size="sm">Pause</void-button></td>
+            </tr>
+            <tr>
+              <td><void-checkbox aria-label="Select Svalbard 2"></void-checkbox></td>
+              <td><void-row-text><span>Svalbard 2</span><span data-void-type="caption">78.23° N, 15.41° E</span></void-row-text></td>
+              <td><void-state color="success">online</void-state></td>
+              <td>Arctic</td>
+              <td><void-actions><void-tag size="sm">S</void-tag><void-tag size="sm">X</void-tag></void-actions></td>
+              <td>198</td>
+              <td>12.9 TB</td>
+              <td>99.95%</td>
+              <td><void-button variant="ghost" size="sm">Open</void-button><void-button variant="ghost" size="sm">Pause</void-button></td>
+            </tr>
+            <tr>
+              <td><void-checkbox aria-label="Select Tromsø 2"></void-checkbox></td>
+              <td><void-row-text><span>Tromsø 2</span><span data-void-type="caption">69.66° N, 18.94° E</span></void-row-text></td>
+              <td><void-badge color="warning" variant="outline">Degraded</void-badge></td>
+              <td>Arctic</td>
+              <td><void-actions><void-tag size="sm">S</void-tag><void-tag size="sm">X</void-tag></void-actions></td>
+              <td>141</td>
+              <td>8.1 TB</td>
+              <td>97.40%</td>
+              <td><void-button variant="ghost" size="sm">Open</void-button><void-button variant="ghost" size="sm">Pause</void-button></td>
+            </tr>
+            <tr>
+              <td><void-checkbox aria-label="Select Punta Arenas"></void-checkbox></td>
+              <td><void-row-text><span>Punta Arenas</span><span data-void-type="caption">53.16° S, 70.91° W</span></void-row-text></td>
+              <td><void-state color="success">online</void-state></td>
+              <td>Southern</td>
+              <td><void-actions><void-tag size="sm">X</void-tag><void-tag size="sm">Ka</void-tag></void-actions></td>
+              <td>176</td>
+              <td>11.6 TB</td>
+              <td>99.91%</td>
+              <td><void-button variant="ghost" size="sm">Open</void-button><void-button variant="ghost" size="sm">Pause</void-button></td>
+            </tr>
+            <tr>
+              <td><void-checkbox aria-label="Select Awarua"></void-checkbox></td>
+              <td><void-row-text><span>Awarua</span><span data-void-type="caption">46.53° S, 168.38° E</span></void-row-text></td>
+              <td><void-badge color="info" variant="outline">Maintenance</void-badge></td>
+              <td>Southern</td>
+              <td><void-actions><void-tag size="sm">S</void-tag><void-tag size="sm">Ka</void-tag></void-actions></td>
+              <td>0</td>
+              <td>0 TB</td>
+              <td>98.72%</td>
+              <td><void-button variant="ghost" size="sm">Open</void-button><void-button variant="ghost" size="sm">Resume</void-button></td>
+            </tr>
+            <tr>
+              <td><void-checkbox aria-label="Select Troll"></void-checkbox></td>
+              <td><void-row-text><span>Troll</span><span data-void-type="caption">72.01° S, 2.53° E</span></void-row-text></td>
+              <td><void-badge color="error" variant="outline">Offline</void-badge></td>
+              <td>Southern</td>
+              <td><void-actions><void-tag size="sm">X</void-tag></void-actions></td>
+              <td>0</td>
+              <td>0 TB</td>
+              <td>91.03%</td>
+              <td><void-button variant="ghost" size="sm">Open</void-button><void-button variant="ghost" size="sm" color="error">Remove</void-button></td>
+            </tr>
+            <tr>
+              <td><void-checkbox aria-label="Select Singapore"></void-checkbox></td>
+              <td><void-row-text><span>Singapore</span><span data-void-type="caption">1.35° N, 103.82° E</span></void-row-text></td>
+              <td><void-state color="success">online</void-state></td>
+              <td>Equatorial</td>
+              <td><void-actions><void-tag size="sm">S</void-tag><void-tag size="sm">X</void-tag></void-actions></td>
+              <td>88</td>
+              <td>5.4 TB</td>
+              <td>99.99%</td>
+              <td><void-button variant="ghost" size="sm">Open</void-button><void-button variant="ghost" size="sm">Pause</void-button></td>
+            </tr>
+            <tr>
+              <td><void-checkbox aria-label="Select Hartebeesthoek"></void-checkbox></td>
+              <td><void-row-text><span>Hartebeesthoek</span><span data-void-type="caption">25.89° S, 27.69° E</span></void-row-text></td>
+              <td><void-state color="success">online</void-state></td>
+              <td>Equatorial</td>
+              <td><void-actions><void-tag size="sm">S</void-tag><void-tag size="sm">X</void-tag><void-tag size="sm">Ka</void-tag></void-actions></td>
+              <td>104</td>
+              <td>6.8 TB</td>
+              <td>99.87%</td>
+              <td><void-button variant="ghost" size="sm">Open</void-button><void-button variant="ghost" size="sm">Pause</void-button></td>
+            </tr>
+          </tbody>
+        </table>
+      </void-table>
 
-    <div class="ref-table-foot">
-      <span data-void-type="caption">1 selected · showing 8 of 44 stations</span>
-      <void-pagination total="6" value="1" size="sm"></void-pagination>
-    </div>
-  </section>
+      <void-toolbar>
+        <span data-void-type="caption">1 selected · showing 8 of 44 stations</span>
+        <void-spacer></void-spacer>
+        <void-pagination total="6" value="1" size="sm"></void-pagination>
+      </void-toolbar>
+    </void-section>
+  </void-page>
 </main>

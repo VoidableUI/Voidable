@@ -116,6 +116,24 @@ check "Raw control height" \
   "use var(--void-control-height*) so the control follows the density knob" \
   'var('
 
+# 13. Raw backdrop blur: glass has one blur radius, and a place where it is switched off
+check "Raw backdrop-filter" \
+  'backdrop-filter:\s*+(?!none)' \
+  "use blur(var(--void-glass-blur)), so reduced transparency and the solid fallback apply" \
+  'var(--void-glass-blur)'
+
+# 14. Raw scrim: a translucent black or white is a scrim or a shade, and its
+#     opacity is what lint:contrast defends. Derive it from --void-scrim-alpha,
+#     --void-color-scrim or --void-color-control-fill instead.
+check "Raw translucent black or white" \
+  'oklch\(\s*[01]\s+0\s+0\s*/\s*(0?\.[0-9]+|[0-9]+%)\s*\)' \
+  "use var(--void-color-scrim), var(--void-color-control-fill) or an alpha derived from --void-scrim-alpha"
+
+# 15. Raw text-shadow: text over imagery is made readable by the scrim, never by a shadow
+check "Raw text-shadow" \
+  'text-shadow:\s*+(?!none)' \
+  "put the text in void-media-content (which draws a scrim) or in void-glass"
+
 if [[ $violations -eq 0 ]]; then
   echo "Token lint passed: all values use design tokens"
 else

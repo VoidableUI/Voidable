@@ -96,6 +96,11 @@ function sourceEvents(): Map<string, Set<string>> {
         if (!out.has(name)) out.set(name, new Set());
         out.get(name)!.add(node.arguments[0].text);
       }
+      // The shared overlay controller dispatches void-open and void-close on the host that owns one.
+      if (name && ts.isNewExpression(node) && node.expression.getText() === 'OverlayController') {
+        if (!out.has(name)) out.set(name, new Set());
+        out.get(name)!.add('void-open').add('void-close');
+      }
       ts.forEachChild(node, (child) => visit(child, name));
     };
     visit(sf, null);

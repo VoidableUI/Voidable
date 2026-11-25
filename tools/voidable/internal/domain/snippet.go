@@ -89,12 +89,28 @@ type snippetRenderer struct {
 	root *Element
 }
 
-// firstEvent returns the root's first event and an example detail access.
+// firstEvent returns the root's most useful event and an example detail access:
+// the first event that is not an overlay's void-open / void-close (a dropdown's
+// void-select, say), else void-close, else the first event.
 func (r snippetRenderer) firstEvent() (*Event, string) {
 	if len(r.root.Events) == 0 {
 		return nil, ""
 	}
 	ev := &r.root.Events[0]
+	rank := func(name string) int {
+		switch name {
+		case "void-open":
+			return 2
+		case "void-close":
+			return 1
+		}
+		return 0
+	}
+	for i := range r.root.Events {
+		if rank(r.root.Events[i].Name) < rank(ev.Name) {
+			ev = &r.root.Events[i]
+		}
+	}
 	access := "e.detail"
 	if len(ev.Fields) > 0 {
 		access += "." + ev.Fields[0].Name
@@ -112,7 +128,7 @@ func (r snippetRenderer) node(b *strings.Builder, n *Node, depth int, isRoot boo
 	}
 	name := n.Tag
 	el, isVoid := r.lib.cat.Element(n.Tag)
-	if r.lang == LangHEEx && isVoid {
+	if r.lang == LangHEEx && isVoid && !el.CSSOnly {
 		name = "." + FunctionName(n.Tag)
 	}
 	b.WriteString(ind + "<" + name)
@@ -163,7 +179,7 @@ func (r snippetRenderer) attr(el *Element, a NodeAttr) string {
 			name = "htmlFor"
 		}
 	case LangHEEx:
-		if el != nil {
+		if el != nil && !el.CSSOnly {
 			if ma, ok := el.Attribute(a.Name); ok {
 				name = AssignName(*ma)
 			}

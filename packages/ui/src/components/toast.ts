@@ -107,17 +107,65 @@ declare global {
   }
 }
 
-/** Container that manages toast positioning and provides a static show() helper for programmatic toast display. */
+/**
+ * Container that manages toast positioning and provides a static show() helper for programmatic toast display.
+ *
+ * While it holds toasts it is shown in the top layer (a `popover="manual"`), so toasts are never clipped or buried by
+ * the page's stacking contexts. A toast added while a modal dialog is open raises the container above the dialog; it
+ * is visible there, but the page outside the dialog (the container included) stays inert until the dialog closes.
+ */
 export class VoidToastContainer extends VoidElement {
   /** Where the container sits. The corner and centre values overlay the page at a fixed position; `inline` keeps the container in normal flow so toasts push content instead of covering it. */
   @property({ type: String, reflect: true })
   position: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left' | 'top-center' | 'bottom-center' | 'inline' = 'bottom-right';
+
+  private _observer: MutationObserver | null = null;
 
   connectedCallback() {
     super.connectedCallback();
     this.setHostAttribute('role', 'region');
     this.setHostAttribute('aria-label', 'Notifications');
     this.setHostAttribute('aria-live', 'polite');
+    if (typeof this.showPopover === 'function') this.setHostAttribute('popover', 'manual');
+    this._observer ??= new MutationObserver(records => this._syncShown(records.some(r => r.addedNodes.length > 0)));
+    this._observer.observe(this, { childList: true });
+    this._syncShown(true);
+  }
+
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    this._observer?.disconnect();
+  }
+
+  /** Shown while it holds a toast; raised to the top of the top layer when one is added. */
+  private _syncShown(added: boolean): void {
+    if (typeof this.showPopover !== 'function' || !this.isConnected) return;
+    const has = !!this.querySelector(':scope > void-toast');
+    let shown = false;
+    try {
+      shown = this.matches(':popover-open');
+    } catch {
+      shown = false;
+    }
+    let modal = false;
+    try {
+      modal = added && !!this.ownerDocument.querySelector('dialog:modal');
+    } catch {
+      modal = false;
+    }
+    try {
+      if (has && shown && modal) {
+        // Re-showing moves it above overlays opened since (a modal dialog).
+        this.hidePopover();
+        this.showPopover();
+      } else if (has && !shown) {
+        this.showPopover();
+      } else if (!has && shown) {
+        this.hidePopover();
+      }
+    } catch {
+      // Not a popover in this engine, or disconnected meanwhile.
+    }
   }
 
   static show(options: {

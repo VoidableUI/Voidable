@@ -1,0 +1,26 @@
+<div id="lab-panel">
+  <void-card id="lab-card" heading="Panel <%= lab["version"] %>">
+    <void-field label="Pick">
+      <void-select id="lab-select" name="pick" value="<%= lab["select"] %>">
+        <% lab["options"].each do |o| %><option value="<%= o %>">Option <%= o %> v<%= lab["version"] %></option><% end %>
+      </void-select>
+    </void-field>
+    <void-checkbox-group id="lab-group" label="Toppings" name="toppings">
+      <void-checkbox id="lab-olives" value="olives">Olives</void-checkbox>
+      <void-checkbox id="lab-basil" value="basil" checked>Basil</void-checkbox>
+    </void-checkbox-group>
+    <void-tabs id="lab-tabs">
+      <void-tab-panel tab="one" label="One">Panel one v<%= lab["version"] %></void-tab-panel>
+      <void-tab-panel tab="two" label="Two">Panel two v<%= lab["version"] %></void-tab-panel>
+    </void-tabs>
+    <void-dropdown-menu id="lab-menu">
+      <button slot="trigger" id="lab-menu-trigger" type="button">Actions v<%= lab["version"] %></button>
+      <void-dropdown-menu-item>Rename</void-dropdown-menu-item>
+      <void-dropdown-menu-item>Archive</void-dropdown-menu-item>
+    </void-dropdown-menu>
+    <void-button id="lab-open-dialog" onclick="document.getElementById('lab-dialog').open = true">Open dialog</void-button>
+  </void-card>
+  <void-dialog id="lab-dialog" heading="Dialog v<%= lab["version"] %>"<%= " open" if lab["dialog"] %>>
+    <p class="lab-dialog-body">Dialog body v<%= lab["version"] %></p>
+  </void-dialog>
+</div>

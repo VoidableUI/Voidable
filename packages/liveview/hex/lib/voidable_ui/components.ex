@@ -630,7 +630,13 @@ defmodule VoidableUI.Components do
   # Dialog (interactive — void-close)
   # ---------------------------------------------------------------------------
 
-  @doc "Renders a `<void-dialog>` modal."
+  @doc """
+  Renders a `<void-dialog>` modal (a native `<dialog>` opened with `showModal()`).
+
+  Pushes `void-close` with `%{"reason" => reason}` (`escape`, `outside`, `close-button`, `form`,
+  `api`, ...). Render `open={false}` to close it from the server; a dialog the user opened stays
+  open through re-renders that keep `open={false}` unchanged.
+  """
   attr :id, :string, default: nil
   attr :open, :boolean, default: false
   attr :heading, :string, default: nil
@@ -872,7 +878,7 @@ defmodule VoidableUI.Components do
   # Drawer (interactive — void-close)
   # ---------------------------------------------------------------------------
 
-  @doc "Renders a `<void-drawer>` slide-out panel."
+  @doc "Renders a `<void-drawer>` slide-out panel (modal, like `dialog/1`); pushes `void-close` with its `reason`."
   attr :id, :string, default: nil
   attr :open, :boolean, default: false
   attr :side, :string, default: nil
@@ -926,7 +932,8 @@ defmodule VoidableUI.Components do
   @doc "Renders a `<void-popover>` floating panel."
   attr :id, :string, default: nil
   attr :open, :boolean, default: false
-  attr :position, :string, default: nil
+  attr :position, :string, default: nil, doc: "top, bottom, left or right (flips when there is no room)"
+  attr :align, :string, default: nil, doc: "start, center or end"
   attr :trigger, :string, default: nil
   attr :rest, :global
   slot :inner_block, required: true
@@ -937,6 +944,7 @@ defmodule VoidableUI.Components do
       id={@id || auto_id("void-popover", @rest)}
       open={@open}
       position={@position}
+      align={@align}
       trigger={@trigger}
       phx-hook="VoidEvent"
       data-void-events="void-close"
@@ -954,13 +962,14 @@ defmodule VoidableUI.Components do
   @doc "Renders a `<void-tooltip>` hover tip."
   attr :text, :string, default: nil
   attr :position, :string, default: nil
+  attr :align, :string, default: nil, doc: "start, center or end"
   attr :delay, :integer, default: nil
   attr :rest, :global
   slot :inner_block, required: true
 
   def tooltip(assigns) do
     ~H"""
-    <void-tooltip text={@text} position={@position} delay={@delay} {@rest}>
+    <void-tooltip text={@text} position={@position} align={@align} delay={@delay} {@rest}>
       {render_slot(@inner_block)}
     </void-tooltip>
     """
@@ -1012,11 +1021,31 @@ defmodule VoidableUI.Components do
   # Table (static)
   # ---------------------------------------------------------------------------
 
-  @doc "Renders a `<void-table>` wrapper."
+  @doc """
+  Renders a `<void-table>` around a native `<table>`.
+
+  `stack` stacks each row into label and value pairs while the table's container is narrow:
+  `stack={true}` uses the theme's breakpoint, a CSS length (`stack="48rem"`) sets this table's,
+  `stack="always"` stacks at every width. Put `data-stack="title"`, `"select"`, `"actions"` or
+  `"hide"` on a header cell to set the role of its column in the stacked block. The label of each
+  value is the header text; nothing is repeated on the cells.
+
+  `scrollable` makes the table a horizontal scroll region that is focusable and labelled while it
+  overflows (`label`, else the `<caption>`); `max_height` adds vertical scrolling for
+  `sticky_header`, and `sticky_column` keeps the first column in view. `inset` is for a table
+  inside a card or panel.
+  """
   attr :striped, :boolean, default: false
   attr :hoverable, :boolean, default: false
   attr :compact, :boolean, default: false
   attr :bordered, :boolean, default: false
+  attr :inset, :boolean, default: false
+  attr :stack, :any, default: nil, doc: "`true`, a CSS length or `\"always\"`"
+  attr :scrollable, :boolean, default: false
+  attr :sticky_header, :boolean, default: false
+  attr :sticky_column, :boolean, default: false
+  attr :max_height, :string, default: nil
+  attr :label, :string, default: nil
   attr :rest, :global
   slot :inner_block, required: true
 
@@ -1027,6 +1056,13 @@ defmodule VoidableUI.Components do
       hoverable={@hoverable}
       compact={@compact}
       bordered={@bordered}
+      inset={@inset}
+      stack={@stack}
+      scrollable={@scrollable}
+      sticky-header={@sticky_header}
+      sticky-column={@sticky_column}
+      max-height={@max_height}
+      label={@label}
       {@rest}
     >
       {render_slot(@inner_block)}
@@ -1312,7 +1348,8 @@ defmodule VoidableUI.Components do
   @doc "Renders a `<void-dropdown-menu>` dropdown."
   attr :id, :string, default: nil
   attr :open, :boolean, default: false
-  attr :position, :string, default: nil
+  attr :position, :string, default: nil, doc: "top, bottom, left or right (flips when there is no room)"
+  attr :align, :string, default: nil, doc: "start, center or end"
   attr :rest, :global
   slot :inner_block, required: true
 
@@ -1322,6 +1359,7 @@ defmodule VoidableUI.Components do
       id={@id || auto_id("void-dropdown-menu", @rest)}
       open={@open}
       position={@position}
+      align={@align}
       phx-hook="VoidEvent"
       data-void-events="void-select"
       {@rest}
@@ -1338,12 +1376,13 @@ defmodule VoidableUI.Components do
   @doc "Renders a `<void-dropdown-menu-item>` inside a dropdown menu."
   attr :disabled, :boolean, default: false
   attr :destructive, :boolean, default: false
+  attr :keep_open, :boolean, default: false, doc: "keep the menu open when this item is chosen"
   attr :rest, :global
   slot :inner_block, required: true
 
   def dropdown_menu_item(assigns) do
     ~H"""
-    <void-dropdown-menu-item disabled={@disabled} destructive={@destructive} {@rest}>
+    <void-dropdown-menu-item disabled={@disabled} destructive={@destructive} keep-open={@keep_open} {@rest}>
       {render_slot(@inner_block)}
     </void-dropdown-menu-item>
     """
@@ -1820,6 +1859,7 @@ defmodule VoidableUI.Components do
   @doc "Renders a `<void-hover-card>` hover-triggered card."
   attr :open, :boolean, default: false
   attr :position, :string, default: nil
+  attr :align, :string, default: nil, doc: "start, center or end"
   attr :open_delay, :integer, default: nil
   attr :close_delay, :integer, default: nil
   attr :rest, :global
@@ -1830,6 +1870,7 @@ defmodule VoidableUI.Components do
     <void-hover-card
       open={@open}
       position={@position}
+      align={@align}
       open-delay={@open_delay}
       close-delay={@close_delay}
       {@rest}

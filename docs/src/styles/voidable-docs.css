@@ -5,6 +5,12 @@
 @import '../../../packages/theme/src/themes/void.css';
 @import '../../../packages/theme/src/themes/dune.css';
 @import '../../../packages/theme/src/themes/console.css';
+@import '../../../packages/theme/src/themes/orbit.css';
+@import '../../../packages/theme/src/themes/capsule.css';
+@import '../../../packages/theme/src/themes/aurora.css';
+@import '../../../packages/theme/src/themes/iris.css';
+@import '../../../packages/theme/src/themes/paper.css';
+@import '../../../packages/theme/src/skins/loft.css';
 @import '../../../packages/theme/src/components/badge.css';
 @import '../../../packages/theme/src/components/button.css';
 @import '../../../packages/theme/src/components/divider.css';
@@ -58,3 +64,8 @@
 @import '../../../packages/theme/src/components/tags-input.css';
 @import '../../../packages/theme/src/components/action-input.css';
 @import '../../../packages/theme/src/components/menu.css';
+@import '../../../packages/theme/src/patterns/shell.css';
+@import '../../../packages/theme/src/patterns/page.css';
+@import '../../../packages/theme/src/patterns/data.css';
+@import '../../../packages/theme/src/media/media.css';
+@import '../../../packages/theme/src/media/surface.css';

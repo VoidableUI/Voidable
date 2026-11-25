@@ -25,6 +25,9 @@ func NewLibrary(ctx context.Context, ms ManifestSource, ss SupplementSource, p F
 			return nil, err
 		}
 	}
+	if cat, err = cat.With(sup.Styled); err != nil {
+		return nil, err
+	}
 	// Parents and attribute hints live in the manifest; the supplement fields
 	// stay for hand-built test supplements and for anything the manifest lacks.
 	if sup.Parents == nil {
@@ -98,6 +101,10 @@ func (l *Library) Reference(ctx context.Context, tag string) (*Reference, error)
 		return nil, err
 	}
 	r := &Reference{Element: *e, Parents: l.sup.Parents[e.Tag], Example: sn}
+	if e.CSSOnly {
+		// Nothing is missing from the manifest: the element is not in it.
+		return r, nil
+	}
 	if len(e.Slots) == 0 {
 		r.Missing = append(r.Missing, "slots")
 	}

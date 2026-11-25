@@ -1,0 +1,310 @@
+---
+title: UI over imagery
+description: Put text, controls and glass panels over a photograph with void-media. The scrim keeps body text at 4.5:1 over any image, measured from rendered pixels; glass falls back to a solid panel.
+---
+
+import Example from '../../../components/Example.astro';
+
+A wide photograph with an interface floating over it is one of the best-looking things a page can do, and one of the easiest to get wrong: the text is readable over the dark half of the picture and lost over the bright half. Voidable makes it a pattern with a guarantee. **Text placed in a media surface keeps a contrast of at least 4.5:1 over any image**, including a pure white one, with no work from you.
+
+Three CSS-only elements do it:
+
+- `<void-media>` is the **media surface**: an image or video that fills its box.
+- `<void-media-content>` is the region your content goes in. It draws the **scrim**: the dark, translucent layer between the image and the text.
+- `<void-glass>` is a **glass panel**: a translucent, blurred surface for a form or a status panel.
+
+export const hero = `
+<void-media ratio="16:9" style="--void-media-focal: 50% 30%">
+  <img src="/media/sunrise.jpg" alt="">
+  <void-media-content>
+    <span data-void-type="label">Meridian ground network</span>
+    <h2>Every pass, on one screen</h2>
+    <p>Schedule, track and downlink across forty-four stations.</p>
+    <void-actions>
+      <void-button variant="filled">Get started</void-button>
+      <void-button>Read the docs</void-button>
+    </void-actions>
+  </void-media-content>
+</void-media>`;
+
+export const heroErb = `
+<void-media ratio="16:9" style="--void-media-focal: 50% 30%">
+  <%= image_tag "sunrise.jpg", alt: "", fetchpriority: "high" %>
+  <void-media-content>
+    <span data-void-type="label"><%= t(".eyebrow") %></span>
+    <h2><%= t(".headline") %></h2>
+    <p><%= t(".lede") %></p>
+    <void-actions>
+      <void-button variant="filled"><%= link_to "Get started", new_registration_path %></void-button>
+      <void-button><%= link_to "Read the docs", docs_path %></void-button>
+    </void-actions>
+  </void-media-content>
+</void-media>`;
+
+export const heroJsx = `
+<void-media ratio="16:9" style={{ '--void-media-focal': '50% 30%' }}>
+  <img src="/media/sunrise.jpg" alt="" fetchPriority="high" />
+  <void-media-content>
+    <span data-void-type="label">Meridian ground network</span>
+    <h2>Every pass, on one screen</h2>
+    <p>Schedule, track and downlink across forty-four stations.</p>
+    <void-actions>
+      <Button variant="filled" onVoidClick={start}>Get started</Button>
+      <Button onVoidClick={openDocs}>Read the docs</Button>
+    </void-actions>
+  </void-media-content>
+</void-media>`;
+
+<Example frame="frame" html={hero} erb={heroErb} jsx={heroJsx} />
+
+<p class="vd-credit">Photograph: NASA, sunrise over the Earth's limb from the International Space Station, Expedition 40 (iss040e080833).</p>
+
+## The media surface
+
+Put an `<img>`, `<picture>` or `<video>` first, then one `<void-media-content>`. The media fills the box and is cropped to fit (`object-fit: cover`).
+
+**Height.** `height` is a share of the viewport: `sm`, `md` (default, about 60%), `lg` (about 80%) or `screen`. Or give the surface a shape with `ratio`: `1:1`, `4:3`, `16:9`, `21:9`, `3:1`. The surface grows if its content needs more room; content is never clipped.
+
+**Focal point.** A wide photograph cropped to a phone keeps only its middle. Say which part must survive: `focal="top"`, `bottom`, `start`, `end`, or an exact point with `style="--void-media-focal: 65% 40%"` (65% across, 40% down).
+
+**Loading.** Until the image arrives the surface shows its backing, which is the page's dark colour, so the text is readable from the first paint and nothing moves when the image appears. For an image at the top of a page add `fetchpriority="high"`; further down, `loading="lazy"`. Give decorative photographs `alt=""`; describe one that carries information.
+
+**Video.** Put an `<img>` before the `<video autoplay muted loop playsinline>`: it is the poster, and with `prefers-reduced-motion` the video is hidden and the image stays.
+
+**Narrow screens.** A headline and two buttons can cover most of a small image. `stack` moves the content under the image below 48rem, on the surface's dark backing, and fades the bottom of the image into it.
+
+## The scrim
+
+A **scrim** is a translucent dark layer between a picture and the text on it. The usual scrim is a gradient fixed to the bottom third of the image, which works until the text is taller than the gradient. Here the content region draws its own scrim, so:
+
+- behind all of the text the scrim is at **full strength**, however tall the text is;
+- beyond the text it **fades out** over `--void-scrim-fade` (10rem), eased over nine steps so no edge shows;
+- it follows `place`: up from the bottom, down from the top, in from the side, or a soft ellipse behind centred text.
+
+| Token | Default | |
+|---|---|---|
+| `--void-scrim-strength` | `0` | 0 to 1. `0` is the lightest scrim that still keeps 4.5:1 over a white image. Raise it for a calmer, darker band; it cannot be lowered. |
+| `--void-scrim-fade` | `10rem` | The distance over which the scrim fades out beyond the content. On a small surface (a tile, a card) shorten it, for example `3rem`, or the scrim covers the whole picture. |
+| `--void-color-scrim` | derived | The scrim colour at full strength: black at 64% opacity at strength 0, 94% at strength 1. |
+
+`scrim="flat"` darkens the whole image evenly, for a picture that is busy everywhere. `scrim="none"` removes it: use it only when the content is in a glass panel, or for an image you control and know is dark.
+
+export const strong = `
+<void-media ratio="21:9" place="start" style="--void-scrim-strength: 0.5">
+  <img src="/media/ice.jpg" alt="">
+  <void-media-content>
+    <h2>Thurston Island</h2>
+    <p>A bright image, with the scrim at strength 0.5.</p>
+  </void-media-content>
+</void-media>`;
+
+export const strongErb = `
+<void-media ratio="21:9" place="start" style="--void-scrim-strength: 0.5">
+  <%= image_tag @station.photo, alt: "" %>
+  <void-media-content>
+    <h2><%= @station.name %></h2>
+    <p><%= @station.summary %></p>
+  </void-media-content>
+</void-media>`;
+
+export const strongJsx = `
+<void-media ratio="21:9" place="start" style={{ '--void-scrim-strength': 0.5 }}>
+  <img src={station.photo} alt="" />
+  <void-media-content>
+    <h2>{station.name}</h2>
+    <p>{station.summary}</p>
+  </void-media-content>
+</void-media>`;
+
+<Example frame="frame" html={strong} erb={strongErb} jsx={strongJsx} />
+
+<p class="vd-credit">Photograph: NASA/Jim Yungel, Thurston Island, Antarctica, Operation IceBridge (GSFC_20171208_Archive_e000911).</p>
+
+## The on-media surface
+
+Everything inside `void-media` is on the **on-media surface**: text is off-white in both colour schemes (a photograph does not turn light because the page did), secondary text is stronger than on a page, and components restyle themselves:
+
+- an `outline` button and a field get a dark translucent fill, so their text does not depend on the scrim;
+- status colours and the accent are lightened so a coloured badge or link still reads;
+- the focus ring is solid white.
+
+You do nothing for this. It is done by redefining the same tokens the components already use, so every component works on an image, including ones written after this page.
+
+`data-void-surface="media"` gives the same surface to an element that is over an image but not inside a `void-media`, such as a navigation bar.
+
+## Glass
+
+`<void-glass>` is a panel of blurred, translucent material. Unlike text on the scrim, glass follows the **page's colour scheme**: dark glass on a dark page, light glass on a light page. It is opaque enough (76% in light, 86% in dark) that text on it passes 4.5:1 over a black or a white image without counting on the blur.
+
+export const glass = `
+<void-media ratio="16:9" place="end" scrim="none">
+  <img src="/media/storm.jpg" alt="">
+  <void-media-content>
+    <void-glass>
+      <void-stack>
+        <void-section-head>
+          <h2>Link</h2>
+          <void-badge variant="outline" color="success">Locked</void-badge>
+        </void-section-head>
+        <void-description-list>
+          <dl>
+            <div><dt>Signal</dt><dd>−84.2 dBm</dd></div>
+            <div><dt>Rate</dt><dd>312 Mbit/s</dd></div>
+            <div><dt>Elevation</dt><dd>41.6°</dd></div>
+          </dl>
+        </void-description-list>
+        <void-actions justify="end">
+          <void-button variant="filled" size="sm">Open pass</void-button>
+        </void-actions>
+      </void-stack>
+    </void-glass>
+  </void-media-content>
+</void-media>`;
+
+export const glassErb = `
+<void-media ratio="16:9" place="end" scrim="none">
+  <%= image_tag "storm.jpg", alt: "" %>
+  <void-media-content>
+    <void-glass>
+      <void-stack>
+        <void-section-head>
+          <h2>Link</h2>
+          <void-badge variant="outline" color="<%= @link.locked? ? "success" : "warning" %>">
+            <%= @link.state.humanize %>
+          </void-badge>
+        </void-section-head>
+        <void-description-list>
+          <dl>
+            <% @link.readings.each do |name, value| %>
+              <div><dt><%= name %></dt><dd><%= value %></dd></div>
+            <% end %>
+          </dl>
+        </void-description-list>
+        <void-actions justify="end">
+          <void-button variant="filled" size="sm"><%= link_to "Open pass", @pass %></void-button>
+        </void-actions>
+      </void-stack>
+    </void-glass>
+  </void-media-content>
+</void-media>`;
+
+export const glassJsx = `
+<void-media ratio="16:9" place="end" scrim="none">
+  <img src="/media/storm.jpg" alt="" />
+  <void-media-content>
+    <void-glass>
+      <void-stack>
+        <void-section-head>
+          <h2>Link</h2>
+          <Badge variant="outline" color={link.locked ? 'success' : 'warning'}>{link.state}</Badge>
+        </void-section-head>
+        <void-description-list>
+          <dl>
+            {link.readings.map(([name, value]) => (
+              <div key={name}><dt>{name}</dt><dd>{value}</dd></div>
+            ))}
+          </dl>
+        </void-description-list>
+        <void-actions justify="end">
+          <Button variant="filled" size="sm" onVoidClick={openPass}>Open pass</Button>
+        </void-actions>
+      </void-stack>
+    </void-glass>
+  </void-media-content>
+</void-media>`;
+
+<Example frame="frame" html={glass} erb={glassErb} jsx={glassJsx} />
+
+<p class="vd-credit">Photograph: NASA, storm clouds above the South Pacific from the International Space Station (iss072e617674).</p>
+
+### The solid fallback
+
+Glass becomes a **solid panel**, with no blur and no transparency, when:
+
+- the browser has no `backdrop-filter`;
+- the reader has asked for reduced transparency (`prefers-reduced-transparency: reduce`);
+- you set `--void-glass-solid: 1`, for example on a device where blur is too slow.
+
+Nothing else changes: the panel keeps its size, hairline and shadow. `--void-glass-blur` (24px) is the blur radius. `data-void-surface="glass"` puts any element on glass.
+
+Use glass for a small panel that floats over a picture. It is not a general card style: on a plain page there is nothing behind it to blur.
+
+## Navigation over the image
+
+For a page that opens on a photograph, `<void-shell nav="overlay">` lays the bar over the top of the image. Give the bar `data-void-surface="media"`; it draws its own short scrim from the top.
+
+```html
+<void-shell nav="overlay">
+  <void-nav-bar data-void-surface="media">
+    <void-brand><a href="/">Meridian</a></void-brand>
+    <void-nav-links>…</void-nav-links>
+  </void-nav-bar>
+  <main>
+    <void-media height="lg" stack>
+      <img src="/media/sunrise.jpg" alt="" fetchpriority="high">
+      <void-media-content>…</void-media-content>
+    </void-media>
+    <void-page>…the rest of the page…</void-page>
+  </main>
+</void-shell>
+```
+
+The content of the first `void-media` is kept clear of the bar. Where the browser supports scroll-driven animations (Chromium, Safari 26), the bar stays at the top as you scroll and settles into a blurred bar once the image has passed; elsewhere it scrolls away with the page. The fifth [reference screen](/storybook/?path=/story/reference-screens--live-over-imagery) is built this way.
+
+## The contrast, measured
+
+The guarantee is checked twice.
+
+**By calculation, on every commit.** `mise run lint:contrast` computes every text and control colour on the on-media surface and on glass (translucent and solid, both colour schemes) against a white, a mid-grey and a black image, for the default theme, each shipped theme, `prefers-contrast: more`, and a sweep of the knobs and of the scrim strength. A theme cannot take any of them under 4.5:1 (3:1 for control borders).
+
+**From rendered pixels.** The figures below come from screenshots taken in Chromium: each piece of text was rendered, its box recorded, the text hidden, and the contrast computed between the text colour and **every pixel** behind it. The number given is the worst single pixel, not an average. The run covered Void, Dune and Console, dark and light, at 1440px and 390px, over six photographs and four synthetic images (white, grey, black, and random noise): 7,080 measurements, none below 4.5:1, the lowest 5.04:1.
+
+| Text on the scrim, default strength | Worst pixel, over a white image |
+|---|---|
+| Headline (display) | 6.10:1 |
+| Paragraph (lede), caption, label | 5.07:1 |
+| Ghost button label | 6.10:1 |
+| Outline button label | 17.08:1 |
+| Field placeholder | 9.33:1 |
+| Outline badges (default, success, error) | 10.09, 9.21, 7.11:1 |
+
+| Text on glass | Worst pixel (light glass over black, dark glass over white) |
+|---|---|
+| Body text | 11.10:1 |
+| Caption, label | 8.42:1 |
+| Status text (error, info) | 5.76, 5.84:1 |
+| Outline badges (success, error) | 5.38, 5.04:1 |
+
+| Photograph | Worst pixel under body-size text |
+|---|---|
+| `ice.jpg` (snow and cloud, the brightest) | 7.12:1 |
+| `aleutians.jpg` (snow peaks through cloud) | 5.43:1 |
+| `city.jpg` (city lights at night) | 5.22:1 |
+| `storm.jpg` (white storm cloud) | 5.11:1 |
+| `limb.jpg`, `sunrise.jpg` | 5.07:1 |
+
+A white image is the worst case by construction: the scrim's opacity at strength 0 is set so that the weakest text on it lands just above 4.5:1 there, and every real photograph is darker somewhere.
+
+Two limits to know. The guarantee covers text **inside** `void-media-content` or `void-glass`; text you position over the image yourself is on its own. And `scrim="none"` switches the guarantee off, by request.
+
+## Reference
+
+| Element | Attribute | Values |
+|---|---|---|
+| `void-media` | `place` | `bottom` (default), `top`, `start`, `end`, `center` |
+| | `height` | `sm`, `md` (default), `lg`, `screen` |
+| | `ratio` | `1:1`, `4:3`, `16:9`, `21:9`, `3:1` |
+| | `scrim` | `gradient` (default), `flat`, `none` |
+| | `focal` | `center` (default), `top`, `bottom`, `start`, `end`; or `--void-media-focal` |
+| | `stack` | Below 48rem, image on top and content under it |
+| `void-media-content` | | One per surface. An `<h1>` is set in the `display` role, a `<p>` in `lede`. |
+| `void-glass` | | A glass panel |
+| any element | `data-void-surface` | `media` or `glass` |
+
+## The photographs
+
+The six photographs under `/media/` on this site and in Storybook are NASA images from [images.nasa.gov](https://images.nasa.gov), which NASA does not copyright; they are served from this site and not hot-linked. Their NASA IDs and credits are in [`CREDITS.txt`](/media/CREDITS.txt). Their use here does not imply endorsement by NASA.
+
+## Why this form
+
+All of it is CSS: a grid cell, a pseudo-element and a set of token overrides. That is what lets a server-rendered hero be correct in its first paint, and it is why the contrast can be checked by a lint: the scrim is a formula in a stylesheet, not the result of a script sampling an image in the browser.

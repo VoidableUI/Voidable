@@ -42,6 +42,28 @@ Event props follow the pattern `onVoid{EventName}` in camelCase:
 <Switch onVoidChange={(e) => setChecked(e.detail.checked)} />
 ```
 
+### Controlled overlays
+
+Keep `open` in state and let the overlay report closes. `void-close` carries the reason (`escape`, `outside`, `select`, ...) and can be cancelled when the user caused it; see [Overlays](/components/overlays/).
+
+```tsx
+const [open, setOpen] = useState(false);
+
+<Button onVoidClick={() => setOpen(true)}>Edit</Button>
+<Dialog
+  open={open}
+  heading="Edit project"
+  onVoidClose={(e) => {
+    if (e.detail.reason === 'escape' && dirty) e.preventDefault();
+    else setOpen(false);
+  }}
+>
+  …
+</Dialog>
+```
+
+`void-open` and `void-close` fire on the overlay itself and do not bubble, so an `onVoidClose` on a dialog never sees a popover or menu inside it closing.
+
 ## Theme hook
 
 Track the current theme reactively with `useTheme`:

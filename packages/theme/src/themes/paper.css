@@ -1,0 +1,18 @@
+/* Paper — editorial.
+   A serif on off-white paper, an ink-blue accent, almost no chrome,
+   larger text and wide margins. The serif is one the operating system
+   already has, so there is nothing to load. */
+[data-void-theme="paper"] {
+  --void-accent-hue: 258;
+  --void-accent-chroma: 0.12;
+  --void-neutral-hue: 85;
+  --void-neutral-chroma: 0.012;
+  --void-page-tint: 1;
+  --void-contrast: 0.4;
+  --void-chrome: 0.1;
+  --void-radius: 2px;
+  --void-density: 1.04;
+  --void-rhythm: 1.25;
+  --void-font-size: 1rem;
+  --void-font-sans: 'Iowan Old Style', 'Palatino Linotype', 'URW Palladio L', P052, serif;
+}

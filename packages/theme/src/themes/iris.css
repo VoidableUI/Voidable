@@ -1,0 +1,16 @@
+/* Iris — violet, tinted through.
+   A violet accent, greys that carry the same hue onto a softly tinted
+   page, filled containers and 6px corners. */
+[data-void-theme="iris"] {
+  --void-accent-hue: 288;
+  --void-accent-chroma: 0.17;
+  --void-neutral-hue: 288;
+  --void-neutral-chroma: 0.016;
+  --void-page-tint: 0.6;
+  --void-contrast: 0.25;
+  --void-chrome: 0.6;
+  --void-radius: 6px;
+  --void-density: 1;
+  --void-rhythm: 1;
+  --void-font-size: 0.875rem;
+}

@@ -91,6 +91,29 @@ Components that take a `color` accept `default`, `error`, `warning`, `success`, 
 `void-slider`, `void-file-upload`, `void-nav-bar`, `void-bar-chart`, `void-gauge`, and more.
 The full list is in the [component overview](https://voidable.dev/components/overview/).
 
+## Tables
+
+`void-table` wraps a native `<table>` and decides how it behaves when space is short:
+
+```html
+<void-table stack hoverable>
+  <table>
+    <thead>
+      <tr><th data-stack="title">Name</th><th>Role</th><th data-align="end">Seats</th><th data-stack="actions">Actions</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Ada</td><td>Admin</td><td>4</td><td><void-button variant="ghost" size="sm">Edit</void-button></td></tr>
+    </tbody>
+  </table>
+</void-table>
+```
+
+- `stack` turns each row into a block of label and value pairs while the table's *container* (not the viewport) is narrower than a breakpoint: `stack` alone uses the theme's (`--void-table-stack-at`, 40rem), `stack="48rem"` sets one, `stack="always"` always stacks. The header text is the label of every value; `data-stack` on a header cell makes its column the block's `title`, a row `select` checkbox, the `actions` or `hide`s it.
+- `scrollable` makes a table that stays tabular a horizontal scroll region that is focusable and labelled (`label`, else the `<caption>`) while it overflows, with faded edges; `sticky-header`, `sticky-column` and `max-height` pin the header or first column. Without `scrollable` nothing clips, so a menu opened from the last row is fully visible.
+- `inset` fits a table inside a card or panel; `striped`, `hoverable`, `compact` and `bordered` are row treatments.
+
+A stacked row keeps its table semantics for assistive technology (explicit `table`, `row` and `cell` roles). See the [table page](https://voidable.dev/components/table/) for live examples.
+
 ## Keyboard and ARIA
 
 The composite widgets follow the matching [WAI-ARIA Authoring Practices](https://www.w3.org/WAI/ARIA/apg/patterns/) pattern. The widget role sits on the element that holds focus, not on the `<void-*>` host. Disabled options, tabs and items are skipped. Children added after the first render are wired when they arrive. Inside a `<void-dialog>`, Escape closes the open list or menu first. The same tables, with more detail, are on the [docs site](https://voidable.dev/components/keyboard/).
@@ -152,9 +175,15 @@ The composite widgets follow the matching [WAI-ARIA Authoring Practices](https:/
 | Up Arrow (trigger) | Open and focus the last item |
 | Down Arrow / Up Arrow / Home / End | Move between items (wraps) |
 | Characters | Jump to the next item starting with them |
-| Enter / Space (item) | Activate the item |
+| Enter / Space (item) | Activate the item, close and return focus to the trigger (unless the item has `keep-open`) |
 | Escape | Close and return focus to the trigger |
 | Tab | Close and move on |
+
+## Overlays
+
+Dialog and drawer are native `<dialog>` elements opened with `showModal()`, so the page behind them is inert, focus moves in, and focus returns to the opener when they close. Popover, hover card, dropdown menu, tooltip, the picker lists and the toast container are `popover="manual"` elements in the top layer, placed next to their trigger with CSS anchor positioning (with a built-in fallback) and flipped at the viewport edges, never clipped by an `overflow` or `transform` ancestor. Open overlays form one stack: Escape and outside presses close only the topmost one, and the page scroll lock is counted.
+
+Every overlay takes `open`, `position` and `align` where it is anchored, and fires `void-open` and `void-close` with a `reason` (`escape`, `outside`, `select`, `api`, ...). These two events do not bubble, and `void-close` can be cancelled when the user caused it. Browser baseline: the Popover API (Chrome 114, Firefox 125, Safari 17). Details on the [docs site](https://voidable.dev/components/overlays/).
 
 ## Documentation
 

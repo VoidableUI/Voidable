@@ -47,6 +47,7 @@ export default defineConfig({
       customCss: ['./src/styles/voidable-docs.css', './src/styles/fonts.css', './src/styles/starlight-bridge.css', './src/styles/demos.css'],
       components: {
         Head: './src/components/Head.astro',
+        Footer: './src/components/Footer.astro',
       },
       social: [
         {
@@ -71,9 +72,11 @@ export default defineConfig({
             { label: 'Design Philosophy', slug: 'getting-started/design-philosophy' },
             { label: 'Component Authoring', slug: 'getting-started/component-authoring' },
             { label: 'Theming', slug: 'getting-started/theming' },
+            { label: 'Theme builder', link: '/theme/' },
             { label: 'Design Tokens', slug: 'getting-started/tokens' },
             { label: 'Migrating from the framework packages', slug: 'getting-started/migrating-from-framework-packages' },
             { label: 'Measuring agent-friendliness', slug: 'getting-started/agent-evals' },
+            { label: 'Testing in real browsers', slug: 'getting-started/browser-tests' },
           ],
         },
         {
@@ -81,11 +84,29 @@ export default defineConfig({
           autogenerate: { directory: 'frameworks' },
         },
         {
+          label: 'Patterns',
+          items: [
+            { label: 'Overview', slug: 'patterns/overview' },
+            { label: 'App shell', slug: 'patterns/app-shell' },
+            { label: 'Page head', slug: 'patterns/page-head' },
+            { label: 'Section', slug: 'patterns/section' },
+            { label: 'Labels', slug: 'patterns/labels' },
+            { label: 'Figure', slug: 'patterns/figure' },
+            { label: 'Description list', slug: 'patterns/description-list' },
+            { label: 'State', slug: 'patterns/state' },
+            { label: 'Empty state', slug: 'patterns/empty-state' },
+            { label: 'Toolbar', slug: 'patterns/toolbar' },
+            { label: 'UI over imagery', slug: 'patterns/ui-over-imagery' },
+          ],
+        },
+        {
           label: 'Components',
           items: [
             { label: 'Overview', slug: 'components/overview' },
             { label: 'Button', slug: 'components/button' },
+            { label: 'Table', slug: 'components/table' },
             { label: 'Keyboard and ARIA', slug: 'components/keyboard' },
+            { label: 'Overlays', slug: 'components/overlays' },
             { label: 'Storybook', link: '/storybook/', attrs: { target: '_blank' } },
           ],
         },

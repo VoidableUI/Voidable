@@ -3,6 +3,7 @@ import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
 import { InternalsFormControl, type FormSubmission } from '../form-control.js';
 import { edgeEnabled, isPrintable, stepEnabled, Typeahead, uid } from '../keyboard.js';
+import { OverlayController, type OverlayCloseReason, type OverlayOpenReason } from '../overlay.js';
 import { ProjectionController } from '../projection.js';
 
 /** Selectable option child element for VoidMultiselect and VoidCombobox. */
@@ -40,6 +41,13 @@ if (!customElements.get('void-option')) {
  * Home and End jump to the first or last option, Enter or Space toggle the highlighted option, typing
  * characters jumps to the next option starting with them, Escape closes the list (a second Escape reaches
  * the surrounding dialog), Tab closes it and moves on. Disabled options are skipped.
+ *
+ * The option list is shown in the top layer (never clipped by an `overflow` or `transform` ancestor) and placed
+ * under the trigger with CSS anchor positioning, flipping above it near the bottom of the viewport. A press
+ * outside closes it too.
+ *
+ * @fires {CustomEvent<{ reason: 'trigger' | 'keyboard' | 'api' }>} void-open - The option list opened.
+ * @fires {CustomEvent<{ reason: 'trigger' | 'escape' | 'outside' | 'blur' | 'parent' | 'api' }>} void-close - The option list is closing.
  */
 export class VoidMultiselect extends InternalsFormControl(VoidElement) {
   @property({ type: String }) placeholder = 'Select...';
@@ -58,6 +66,18 @@ export class VoidMultiselect extends InternalsFormControl(VoidElement) {
   protected readonly _projection = new ProjectionController(this, {
     regions: [{ name: 'options', target: 'after' }],
     onChange: () => this.requestUpdate(),
+  });
+
+  protected readonly _overlay = new OverlayController(this, {
+    kind: 'listbox',
+    surface: () => this.querySelector<HTMLElement>(':scope > .void-multiselect-dropdown'),
+    isOpen: () => this.open && !this.formDisabled,
+    setOpen: open => {
+      this.open = open;
+    },
+    anchor: () => this.querySelector(':scope > .void-multiselect-trigger'),
+    // The trigger keeps focus (aria-activedescendant) and carries its own ARIA.
+    initialFocus: () => false,
   });
 
   private get _options(): VoidOption[] {
@@ -83,15 +103,11 @@ export class VoidMultiselect extends InternalsFormControl(VoidElement) {
   connectedCallback(): void {
     super.connectedCallback();
     this.addEventListener('focusout', this._onFocusOut);
-    document.addEventListener('click', this._onDocumentClick);
-    document.addEventListener('keydown', this._onDocumentKeydown);
   }
 
   disconnectedCallback(): void {
     super.disconnectedCallback();
     this.removeEventListener('focusout', this._onFocusOut);
-    document.removeEventListener('click', this._onDocumentClick);
-    document.removeEventListener('keydown', this._onDocumentKeydown);
   }
 
   protected override willUpdate(changed: Map<string, unknown>): void {
@@ -152,6 +168,7 @@ export class VoidMultiselect extends InternalsFormControl(VoidElement) {
         <div
           class="void-multiselect-dropdown"
           role="listbox"
+          popover="manual"
           id=${this._listId}
           aria-label=${this.placeholder}
           aria-multiselectable="true"
@@ -184,13 +201,14 @@ export class VoidMultiselect extends InternalsFormControl(VoidElement) {
   private _onTriggerClick = (e: Event): void => {
     if (this.formDisabled) return;
     e.stopPropagation();
-    if (this.open) this._close();
-    else this._openList('none');
+    if (this.open) this._close('trigger');
+    else this._openList('none', 'trigger');
   };
 
   /** Opens the list; the highlight starts on the first selected option, the first or last option, or nowhere. */
-  private _openList(start: 'selected' | 'first' | 'last' | 'none'): void {
-    this.open = true;
+  private _openList(start: 'selected' | 'first' | 'last' | 'none', reason: OverlayOpenReason = 'keyboard'): void {
+    this._overlay.requestOpen(reason);
+    if (!this.open) return;
     const options = this._options;
     const disabled = options.map(o => o.disabled);
     let i = -1;
@@ -204,9 +222,9 @@ export class VoidMultiselect extends InternalsFormControl(VoidElement) {
     this.requestUpdate();
   }
 
-  private _close(): void {
-    this.open = false;
-    this._active = null;
+  /** Closes the list through the overlay stack (so `void-close` carries the reason). */
+  private _close(reason: OverlayCloseReason = 'api'): void {
+    if (this.open) this._overlay.requestClose(reason);
   }
 
   private _moveActive(i: number): void {
@@ -260,10 +278,10 @@ export class VoidMultiselect extends InternalsFormControl(VoidElement) {
       case 'Escape':
         e.preventDefault();
         e.stopPropagation();
-        this._close();
+        this._close('escape');
         break;
       case 'Tab':
-        this._close();
+        this._close('blur');
         break;
       default:
         if (isPrintable(e)) {
@@ -282,15 +300,7 @@ export class VoidMultiselect extends InternalsFormControl(VoidElement) {
 
   /** Focus left the widget (Tab, or a click elsewhere): close the list. */
   private _onFocusOut = (e: FocusEvent): void => {
-    if (this.open && !this.contains(e.relatedTarget as Node | null)) this._close();
-  };
-
-  private _onDocumentClick = (e: Event): void => {
-    if (!this.contains(e.target as Node)) this._close();
-  };
-
-  private _onDocumentKeydown = (e: KeyboardEvent): void => {
-    if (e.key === 'Escape' && this.open) this._close();
+    if (this.open && !this.contains(e.relatedTarget as Node | null)) this._close('blur');
   };
 
   private _toggleOption(opt: VoidOption): void {

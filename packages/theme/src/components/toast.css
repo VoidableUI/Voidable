@@ -1,13 +1,25 @@
+/* While it holds toasts the container is a popover="manual" in the top layer;
+   reset the UA popover box. */
 void-toast-container {
   position: fixed;
+  inset: auto;
   bottom: 0;
   right: 0;
+  margin: 0;
+  border: none;
+  background: transparent;
+  color: inherit;
+  overflow: visible;
   z-index: var(--void-z-toast);
   display: flex;
   flex-direction: column;
   gap: var(--void-space-2);
   padding: var(--void-space-4);
   pointer-events: none;
+}
+
+void-toast-container[popover]:not(:popover-open) {
+  display: none;
 }
 
 void-toast-container[position='top-right'] { top: 0; right: 0; bottom: auto; left: auto; }
@@ -35,7 +47,9 @@ void-toast {
   display: flex;
   flex-direction: column;
   gap: var(--void-space-1);
-  padding: var(--void-space-3) var(--void-space-4);
+  /* Room at the end for the close button, so the message never runs
+     under it. */
+  padding: var(--void-space-3) var(--void-space-9) var(--void-space-3) var(--void-space-4);
   background: var(--void-color-bg-elevated);
   border: 1px solid var(--void-color-border);
   border-left: 2px solid var(--tone);

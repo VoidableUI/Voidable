@@ -1,0 +1,396 @@
+/* ── void-figure: one number that matters ──
+     <void-figure>
+       <span data-void-type="label">Downlink</span>
+       <span data-void-type="value">79.6 <span data-void-type="unit">TB</span></span>
+       <void-progress value="64" size="sm" aria-label="…"></void-progress>
+       <span data-void-type="caption"><void-delta trend="up">4%</void-delta> on last week</span>
+     </void-figure>
+   Its parts are the type roles, in this order: label, value (with
+   its unit inside), an optional progress bar, caption. */
+void-figure {
+  display: flex;
+  flex-direction: column;
+  gap: var(--void-gap-tight);
+  min-width: 0;
+  font-family: var(--void-font-sans);
+}
+
+void-figure > [data-void-type="value"] {
+  display: block;
+}
+
+/* The unit follows the number on its baseline. The space between
+   them is set in the number's size, which is too wide: pull it in. */
+[data-void-type="value"] > [data-void-type="unit"] {
+  margin-inline-start: -0.3em;
+}
+
+void-figure > void-progress {
+  margin-block: var(--void-space-1);
+}
+
+/* ── void-figures: figures in a hairline-divided row ──
+     <void-figures columns="4">…void-figure children…</void-figures>
+   columns: 2, 3 or 4 (default). Below 48rem it is two columns and an
+   odd last figure takes the full width. */
+void-figures {
+  --void-figures-columns: 4;
+
+  display: grid;
+  grid-template-columns: repeat(var(--void-figures-columns), minmax(0, 1fr));
+  border-block: 1px solid var(--void-color-border);
+}
+
+void-figures[columns="2"] { --void-figures-columns: 2; }
+void-figures[columns="3"] { --void-figures-columns: 3; }
+
+void-figures > void-figure {
+  padding: var(--void-gap-inside);
+  border-inline-start: 1px solid var(--void-color-border);
+}
+
+/* The first figure of each row sits on the content edge. */
+void-figures:not([columns]) > void-figure:nth-child(4n + 1),
+void-figures[columns="4"] > void-figure:nth-child(4n + 1),
+void-figures[columns="3"] > void-figure:nth-child(3n + 1),
+void-figures[columns="2"] > void-figure:nth-child(2n + 1) {
+  padding-inline-start: 0;
+  border-inline-start: 0;
+}
+
+void-figures:not([columns]) > void-figure:nth-child(n + 5),
+void-figures[columns="4"] > void-figure:nth-child(n + 5),
+void-figures[columns="3"] > void-figure:nth-child(n + 4),
+void-figures[columns="2"] > void-figure:nth-child(n + 3) {
+  border-top: 1px solid var(--void-color-border);
+}
+
+@media (max-width: 48rem) {
+  void-figures,
+  void-figures[columns] {
+    --void-figures-columns: 2;
+  }
+
+  void-figures > void-figure:nth-child(n) {
+    padding-inline-start: var(--void-gap-inside);
+    border-inline-start: 1px solid var(--void-color-border);
+    border-top: 0;
+  }
+
+  void-figures > void-figure:nth-child(2n + 1) {
+    padding-inline-start: 0;
+    border-inline-start: 0;
+  }
+
+  void-figures > void-figure:nth-child(n + 3) {
+    border-top: 1px solid var(--void-color-border);
+  }
+
+  void-figures > void-figure:last-child:nth-child(2n + 1) {
+    grid-column: 1 / -1;
+  }
+}
+
+/* ── void-delta: a change, with its direction ──
+     <void-delta trend="up">4.2%</void-delta>
+   The arrow carries the direction, so colour is not the only signal.
+   trend: up, down, flat. By default up is good (green) and down is
+   bad (red); `invert` swaps that for figures where less is better. */
+void-delta {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.25em;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  color: var(--void-color-text-secondary);
+}
+
+void-delta::before {
+  content: "→";
+}
+
+void-delta[trend="up"]::before   { content: "↑"; }
+void-delta[trend="down"]::before { content: "↓"; }
+
+void-delta[trend="up"],
+void-delta[trend="down"][invert] {
+  color: var(--void-color-success);
+}
+
+void-delta[trend="down"],
+void-delta[trend="up"][invert] {
+  color: var(--void-color-error);
+}
+
+/* ── void-state: a state, as a dot and a word ──
+     <void-state color="success">Tracking</void-state>
+   The word is the content and is always there, so colour is never the
+   only signal. color: default (grey), success, info, warning,
+   caution, error, notice. `pulse` marks something happening now. */
+void-state {
+  --tone: var(--void-color-text-disabled);
+
+  display: inline-flex;
+  align-items: center;
+  gap: var(--void-gap-tight);
+  white-space: nowrap;
+}
+
+void-state::before {
+  content: "";
+  flex: none;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: var(--void-radius-full);
+  background: var(--tone);
+}
+
+void-state[color="success"] { --tone: var(--void-color-success); }
+void-state[color="info"]    { --tone: var(--void-color-info); }
+void-state[color="warning"] { --tone: var(--void-color-warning); }
+void-state[color="caution"] { --tone: var(--void-color-caution); }
+void-state[color="error"]   { --tone: var(--void-color-error); }
+void-state[color="notice"]  { --tone: var(--void-color-notice); }
+
+void-state[pulse]::before {
+  animation: void-state-pulse calc(1.6s * var(--void-anim-scale)) var(--void-ease-in-out) infinite;
+}
+
+@keyframes void-state-pulse {
+  0%   { box-shadow: 0 0 0 0 color-mix(in srgb, var(--tone) 55%, transparent); }
+  70%  { box-shadow: 0 0 0 0.375rem color-mix(in srgb, var(--tone) 0%, transparent); }
+  100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--tone) 0%, transparent); }
+}
+
+/* ── void-description-list: labels and their values ──
+   Wraps a native <dl>, as void-table wraps a <table>. Each pair is a
+   <div> holding a <dt> and a <dd>.
+
+     <void-description-list>
+       <dl>
+         <div><dt>Region</dt><dd>eu-north-2</dd></div>
+         <div><dt>Antenna</dt><dd>7.3 m</dd></div>
+       </dl>
+     </void-description-list>
+
+   Default: one pair per row, label left and value right, a hairline
+   between rows. layout="grid" stacks each label over its value and
+   sets the pairs in columns ("2", "3" or "4"). */
+void-description-list {
+  display: block;
+  font-family: var(--void-font-sans);
+  font-size: var(--void-type-body-size);
+}
+
+void-description-list > dl {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  border-top: 1px solid var(--void-color-border);
+}
+
+void-description-list > dl > div {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--void-gap-inside);
+  padding-block: var(--void-cell-padding-block);
+  border-bottom: 1px solid var(--void-color-border);
+  min-width: 0;
+}
+
+void-description-list dt {
+  flex: none;
+  font-family: var(--void-type-label-family);
+  font-size: var(--void-type-label-size);
+  line-height: var(--void-type-label-leading);
+  font-weight: var(--void-type-label-weight);
+  letter-spacing: var(--void-type-label-tracking);
+  text-transform: var(--void-type-label-case);
+  color: var(--void-type-label-color);
+}
+
+void-description-list dd {
+  min-width: 0;
+  color: var(--void-color-text);
+  font-variant-numeric: tabular-nums;
+  text-align: end;
+  overflow-wrap: anywhere;
+}
+
+/* Rows in two columns, for a wide page with many short pairs. */
+void-description-list:not([layout="grid"])[columns="2"] > dl {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: var(--void-gap-group);
+}
+
+/* Grid: label over value, pairs side by side, no row lines. */
+void-description-list[layout="grid"] > dl {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--void-gap-stack) var(--void-gap-inside);
+  border-top: 0;
+}
+
+void-description-list[layout="grid"][columns="1"] > dl { grid-template-columns: minmax(0, 1fr); }
+void-description-list[layout="grid"][columns="3"] > dl { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+void-description-list[layout="grid"][columns="4"] > dl { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+
+void-description-list[layout="grid"] > dl > div {
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  gap: var(--void-space-1);
+  padding-block: 0;
+  border-bottom: 0;
+}
+
+void-description-list[layout="grid"] dd {
+  text-align: start;
+}
+
+@media (max-width: 48rem) {
+  void-description-list:not([layout="grid"])[columns="2"] > dl {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  void-description-list[layout="grid"]:is([columns="3"], [columns="4"]) > dl {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* ── void-rows: a list of rows, text left and a value or control right ──
+     <void-rows>
+       <void-row>
+         <void-row-text>
+           <span>Maintenance alerts</span>
+           <span data-void-type="caption">Email the on-call engineer.</span>
+         </void-row-text>
+         <void-switch checked></void-switch>
+       </void-row>
+     </void-rows>
+   For settings, event lists and anything that is one thing per line
+   but is not tabular. */
+void-rows {
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid var(--void-color-border);
+  font-family: var(--void-font-sans);
+}
+
+void-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--void-gap-inside);
+  padding-block: var(--void-gap-inside);
+  border-bottom: 1px solid var(--void-color-border);
+  min-width: 0;
+}
+
+void-row-text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--void-space-1);
+  min-width: 0;
+  max-width: var(--void-measure);
+}
+
+void-row > :not(void-row-text) {
+  flex: none;
+}
+
+/* The same two lines in a table cell sit closer together. */
+void-table void-row-text {
+  gap: 0;
+}
+
+/* ── void-toolbar: the controls above a table or a list ──
+     <void-toolbar>
+       <void-input type="search" placeholder="Search"></void-input>
+       <void-select>…</void-select>
+       <void-spacer></void-spacer>
+       <void-button variant="ghost" aria-label="Refresh">…</void-button>
+     </void-toolbar>
+   One row that wraps. A search field takes the room it needs and no
+   more; void-spacer pushes what follows to the far end. */
+void-toolbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--void-gap-tight);
+  min-width: 0;
+}
+
+void-toolbar > :is(void-input, void-action-input) {
+  flex: 1 1 12rem;
+  max-width: 20rem;
+}
+
+void-toolbar > :is(void-select, void-combobox, void-multiselect) {
+  flex: 0 1 11rem;
+  width: auto;
+}
+
+/* Text in a toolbar (a count, a selection summary) is quiet. */
+void-toolbar > :is(span, p) {
+  color: var(--void-color-text-secondary);
+  font-size: var(--void-type-body-size);
+}
+
+/* ── void-empty: nothing here yet ──
+     <void-empty>
+       <svg aria-hidden="true">…</svg>            optional icon
+       <h3>No stations match</h3>
+       <p>Try another region, or clear the filters.</p>
+       <void-actions>…</void-actions>              optional
+     </void-empty>
+   Centred, quiet, and roomy. `bordered` draws a dashed hairline
+   around it, for an empty area inside a page that is otherwise full. */
+void-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--void-gap-tight);
+  padding: var(--void-gap-section) var(--void-gap-inside);
+  text-align: center;
+  font-family: var(--void-font-sans);
+}
+
+void-empty > :is(svg, i, img) {
+  width: 1.5rem;
+  height: 1.5rem;
+  margin-bottom: var(--void-gap-tight);
+  color: var(--void-color-text-muted);
+  font-size: 1.5rem; /* token-ok: icon-font glyph box, matches width */
+  fill: none;
+  stroke: currentColor;
+  stroke-width: var(--void-icon-stroke-width);
+}
+
+void-empty > :is(h2, h3, h4) {
+  font-family: var(--void-type-heading-family);
+  font-size: var(--void-type-body-size);
+  line-height: var(--void-type-heading-leading);
+  font-weight: var(--void-type-heading-weight);
+  color: var(--void-type-heading-color);
+}
+
+void-empty > p {
+  max-width: 26rem;
+  font-size: var(--void-type-body-size);
+  line-height: var(--void-type-body-leading);
+  color: var(--void-color-text-secondary);
+}
+
+void-empty > void-actions {
+  justify-content: center;
+  margin-top: var(--void-gap-inside);
+}
+
+void-empty[bordered] {
+  border: 1px dashed var(--void-color-border-strong);
+  border-radius: var(--void-radius-lg);
+}
+
+void-empty[size="sm"] {
+  padding-block: var(--void-gap-group);
+}

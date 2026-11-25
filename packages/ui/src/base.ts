@@ -584,7 +584,9 @@ export class VoidElement extends LitElement {
    * Form controls take the server's new value as their reset default here, as
    * a native input's defaultValue follows its value attribute.
    */
-  protected serverChangedCallback(_names: ReadonlySet<string>): void {}
+  protected serverChangedCallback(names: ReadonlySet<string>): void {
+    void names;
+  }
 
   /**
    * Called once a server-driven morph of this element has finished, after the

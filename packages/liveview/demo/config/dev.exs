@@ -9,14 +9,18 @@ import Config
 config :demo, DemoWeb.Endpoint,
   # Binding to loopback ipv4 address prevents access from other machines.
   # Change to `ip: {0, 0, 0, 0}` to allow access from other machines.
-  http: [ip: {127, 0, 0, 1}],
+  http: [ip: {127, 0, 0, 1}, port: String.to_integer(System.get_env("PORT") || "4000")],
   check_origin: false,
   code_reloader: true,
   debug_errors: true,
   secret_key_base: "gk/8lKYQMEimSmk91veVCb0FnoSITry8Xl2YFcIzbPhHtNJUBIFhpiFXoxhN6DN4",
-  watchers: [
-    esbuild: {Esbuild, :install_and_run, [:demo, ~w(--sourcemap=inline --watch)]}
-  ]
+  # The browser tests (VOIDABLE_LOCAL=1) build the assets once instead of watching them.
+  watchers:
+    (if System.get_env("VOIDABLE_LOCAL") do
+       []
+     else
+       [esbuild: {Esbuild, :install_and_run, [:demo, ~w(--sourcemap=inline --watch)]}]
+     end)
 
 # ## SSL Support
 #

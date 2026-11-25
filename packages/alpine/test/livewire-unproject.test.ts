@@ -78,4 +78,8 @@ describe('registerLivewireHooks pre-morph hook', () => {
     expect(log).toEqual([]);
     expect(() => hooks['morph.updating']({ el: document.createElement('void-badge'), toEl: document.createElement('void-badge') })).not.toThrow();
   });
+
+  // The open state of overlays follows the state rule in the base class; its
+  // cases (kept through a repeat, server wins, a user close kept) are tested
+  // with real dialogs in @voidable/ui (tests/morph-state.test.ts).
 });

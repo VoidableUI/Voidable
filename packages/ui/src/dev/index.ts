@@ -36,7 +36,7 @@ import {
   checkRequired,
   keyOf,
 } from './rules.js';
-import { table } from './table.generated.js';
+import { styled, table } from './table.generated.js';
 import type { DevWarning } from './types.js';
 
 export type { DevWarning, WarningKind } from './types.js';
@@ -181,7 +181,7 @@ async function flushDeferred(): Promise<void> {
   const autoloading = (globalThis as Record<symbol, unknown>)[AUTOLOADER] !== undefined;
   for (const el of batch) {
     if (!el.isConnected) continue;
-    report(checkDefined(table, el, autoloading));
+    report(checkDefined(table, el, autoloading, styled));
     report(checkParent(table, el));
     for (const w of checkRequired(table, el)) report(w);
   }

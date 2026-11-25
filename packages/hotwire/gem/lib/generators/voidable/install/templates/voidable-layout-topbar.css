@@ -113,11 +113,6 @@ a { color: inherit; text-decoration: none; }
   font-size: var(--void-text-base);
 }
 
-.app-nav-right void-popover[position="bottom"] .void-popover-body {
-  left: auto;
-  right: 0;
-}
-
 .settings-menu {
   display: flex;
   flex-direction: column;

@@ -232,9 +232,16 @@ export function checkRequired(table: DevTable, el: Element): DevWarning[] {
 }
 
 /** A `void-*` tag with no definition, once the page has settled. */
-export function checkDefined(table: DevTable, el: Element, autoloading: boolean): DevWarning | undefined {
+export function checkDefined(
+  table: DevTable,
+  el: Element,
+  autoloading: boolean,
+  styled: readonly string[] = [],
+): DevWarning | undefined {
   const tag = el.localName;
   if (!tag.startsWith('void-') || customElements.get(tag)) return undefined;
+  // A CSS-only element (a page pattern): the theme styles it, nothing defines it.
+  if (styled.includes(tag)) return undefined;
   const known = table[tag];
   if (known) {
     const how = autoloading
@@ -248,7 +255,7 @@ export function checkDefined(table: DevTable, el: Element, autoloading: boolean)
       el,
     );
   }
-  const near = suggest(tag, Object.keys(table));
+  const near = suggest(tag, [...Object.keys(table), ...styled]);
   return warning(
     'undefined-element',
     tag,

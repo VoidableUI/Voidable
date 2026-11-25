@@ -61,13 +61,13 @@ describe('recovery after the markers are removed (morph)', () => {
     morphChildren(el, '<p id="dc">two</p><button id="db">ok</button>');
     await settle(el);
     expect(markers(el).length).toBe(2);
-    expect(el.querySelectorAll('.void-dialog-backdrop').length).toBe(1);
+    expect(el.querySelectorAll('dialog.void-dialog-panel').length).toBe(1);
     expect(el.querySelector('.void-dialog-close')).not.toBeNull();
     expect(ids(el.querySelector('.void-dialog-body'))).toEqual(['dc', 'db']);
     expect(el.querySelector('#dc')!.textContent).toBe('two');
     el.open = true;
     await settle(el);
-    expect(el.querySelector<HTMLElement>('.void-dialog-backdrop')!.hidden).toBe(false);
+    expect(el.querySelector<HTMLDialogElement>('dialog.void-dialog-panel')!.open).toBe(true);
     // conditional template parts keep working after recovery
     el.closable = false;
     await settle(el);
@@ -132,7 +132,7 @@ describe('recovery after the markers are removed (morph)', () => {
     Node.prototype.removeChild.call(el, start);
     await settle(el);
     expect(markers(el).length).toBe(2);
-    expect(el.querySelectorAll('.void-dialog-backdrop').length).toBe(1);
+    expect(el.querySelectorAll('dialog.void-dialog-panel').length).toBe(1);
     expect(el.querySelectorAll('#c').length).toBe(1);
     expect(el.querySelector('.void-dialog-body #c')).not.toBeNull();
   });
@@ -195,7 +195,7 @@ describe('cloneNode / outerHTML of a rendered host', () => {
     clone.id = 'clone';
     document.body.appendChild(clone);
     await settle(clone);
-    expect(clone.querySelectorAll('.void-dialog-backdrop').length).toBe(1);
+    expect(clone.querySelectorAll('dialog.void-dialog-panel').length).toBe(1);
     expect(clone.querySelectorAll('.void-dialog-close').length).toBe(1);
     expect(markers(clone).length).toBe(2);
     const body = clone.querySelector('.void-dialog-body')!;
@@ -242,7 +242,7 @@ describe('cloneNode / outerHTML of a rendered host', () => {
     document.body.appendChild(clone);
     await settle(clone);
     await settle(clone.querySelector('void-card') as LitElement);
-    expect(clone.querySelectorAll('.void-dialog-backdrop').length).toBe(1);
+    expect(clone.querySelectorAll('dialog.void-dialog-panel').length).toBe(1);
     expect(clone.querySelectorAll('void-card').length).toBe(1);
     expect(clone.querySelectorAll('.void-card-header').length).toBe(1);
     expect(clone.querySelectorAll('#inner').length).toBe(1);
@@ -267,18 +267,18 @@ describe('textContent and replaceChildren on a rendered host', () => {
   it('textContent replaces only the dialog content, keeping the chrome', async () => {
     const el = mount('<void-dialog open heading="D">hello</void-dialog>');
     await settle(el);
-    const backdrop = el.querySelector('.void-dialog-backdrop');
+    const panel = el.querySelector('dialog.void-dialog-panel');
     for (const text of ['world', 'again', 'third']) {
       el.textContent = text;
       await settle(el);
-      expect(el.querySelector('.void-dialog-backdrop')).toBe(backdrop);
+      expect(el.querySelector('dialog.void-dialog-panel')).toBe(panel);
       expect(el.querySelector('.void-dialog-body')!.textContent).toBe(text);
       expect(el.querySelector('.void-dialog-close')).not.toBeNull();
     }
     el.textContent = '';
     await settle(el);
     expect(el.querySelector('.void-dialog-body')!.childNodes.length).toBe(0);
-    expect(el.querySelector('.void-dialog-backdrop')).toBe(backdrop);
+    expect(el.querySelector('dialog.void-dialog-panel')).toBe(panel);
   });
 
   it('textContent on menu-item, tag and checkbox keeps their rendered parts', async () => {
@@ -312,12 +312,12 @@ describe('textContent and replaceChildren on a rendered host', () => {
   it('replaceChildren replaces consumer content with nodes and strings', async () => {
     const el = mount('<void-dialog open><p>old</p></void-dialog>');
     await settle(el);
-    const backdrop = el.querySelector('.void-dialog-backdrop');
+    const panel = el.querySelector('dialog.void-dialog-panel');
     const p = document.createElement('p');
     p.id = 'n';
     el.replaceChildren(p, 'tail');
     await settle(el);
-    expect(el.querySelector('.void-dialog-backdrop')).toBe(backdrop);
+    expect(el.querySelector('dialog.void-dialog-panel')).toBe(panel);
     const body = el.querySelector('.void-dialog-body')!;
     expect(body.firstChild).toBe(p);
     expect(body.textContent).toBe('tail');

@@ -1,0 +1,165 @@
+---
+title: Description list
+description: void-description-list lays out a native dl of labels and values as hairline rows or as a grid; void-rows is the same idea for one thing per line with a control.
+---
+
+import Example from '../../../components/Example.astro';
+
+`<void-description-list>` shows labels and their values: the details of a record. It wraps a native `<dl>`, so the pairing of each name with its value is in the markup for a screen reader, and the pattern only lays it out.
+
+export const rows = `
+<void-description-list>
+  <dl>
+    <div><dt>Region</dt><dd>Arctic</dd></div>
+    <div><dt>Position</dt><dd>78.23° N, 15.39° E</dd></div>
+    <div><dt>Antenna</dt><dd>7.3 m</dd></div>
+    <div><dt>Site code</dt><dd data-void-type="code">SVB-1</dd></div>
+  </dl>
+</void-description-list>`;
+
+export const rowsErb = `
+<void-description-list>
+  <dl>
+    <div><dt>Region</dt><dd><%= @station.region %></dd></div>
+    <div><dt>Position</dt><dd><%= @station.coordinates %></dd></div>
+    <div><dt>Antenna</dt><dd><%= @station.antenna_diameter %> m</dd></div>
+    <div><dt>Site code</dt><dd data-void-type="code"><%= @station.code %></dd></div>
+  </dl>
+</void-description-list>`;
+
+export const rowsJsx = `
+<void-description-list>
+  <dl>
+    {details.map(([name, value]) => (
+      <div key={name}>
+        <dt>{name}</dt>
+        <dd>{value}</dd>
+      </div>
+    ))}
+  </dl>
+</void-description-list>`;
+
+<Example html={rows} erb={rowsErb} jsx={rowsJsx} />
+
+Each pair is a `<div>` holding a `<dt>` and a `<dd>`; HTML allows that grouping inside a `<dl>`, and it is what lets a pair be one row or one cell. Every `<dt>` is set as a [label](/patterns/labels/). A value that is an identifier takes `data-void-type="code"`.
+
+## As a grid
+
+`layout="grid"` puts the label over the value and the pairs side by side, for the summary at the top of a record. `columns` is 1 to 4; below 48rem it is two.
+
+export const grid = `
+<void-description-list layout="grid" columns="4">
+  <dl>
+    <div><dt>Region</dt><dd>Arctic</dd></div>
+    <div><dt>Antenna</dt><dd>7.3 m</dd></div>
+    <div><dt>Bands</dt><dd>S, X, Ka</dd></div>
+    <div><dt>Uptime</dt><dd>99.98%</dd></div>
+    <div><dt>Passes today</dt><dd>212</dd></div>
+    <div><dt>Downlink today</dt><dd>14.2 TB</dd></div>
+    <div><dt>State</dt><dd><void-state color="success">Online</void-state></dd></div>
+    <div><dt>Site code</dt><dd data-void-type="code">SVB-1</dd></div>
+  </dl>
+</void-description-list>`;
+
+export const gridErb = `
+<void-description-list layout="grid" columns="4">
+  <dl>
+    <% @station.summary_pairs.each do |name, value| %>
+      <div><dt><%= name %></dt><dd><%= value %></dd></div>
+    <% end %>
+    <div>
+      <dt>State</dt>
+      <dd><void-state color="<%= @station.state_color %>"><%= @station.state.humanize %></void-state></dd>
+    </div>
+  </dl>
+</void-description-list>`;
+
+export const gridJsx = `
+<void-description-list layout="grid" columns="4">
+  <dl>
+    {pairs.map(([name, value]) => (
+      <div key={name}><dt>{name}</dt><dd>{value}</dd></div>
+    ))}
+    <div>
+      <dt>State</dt>
+      <dd><void-state color={station.stateColor}>{station.state}</void-state></dd>
+    </div>
+  </dl>
+</void-description-list>`;
+
+<Example html={grid} erb={gridErb} jsx={gridJsx} />
+
+## Rows with a control
+
+When each line is a thing with a control and not a name with a value (a setting with a switch, an event with a time), use `<void-rows>`. The text goes in `<void-row-text>`: a main line and a caption.
+
+export const settings = `
+<void-rows>
+  <void-row>
+    <void-row-text>
+      <span>Accept passes automatically</span>
+      <span data-void-type="caption">New passes are scheduled without review.</span>
+    </void-row-text>
+    <void-switch checked aria-label="Accept passes automatically"></void-switch>
+  </void-row>
+  <void-row>
+    <void-row-text>
+      <span>Weather hold</span>
+      <span data-void-type="caption">Pause scheduling above 25 m/s wind.</span>
+    </void-row-text>
+    <void-switch aria-label="Weather hold"></void-switch>
+  </void-row>
+</void-rows>`;
+
+export const settingsErb = `
+<void-rows>
+  <% @settings.each do |setting| %>
+    <void-row>
+      <void-row-text>
+        <span><%= setting.title %></span>
+        <span data-void-type="caption"><%= setting.description %></span>
+      </void-row-text>
+      <void-switch name="settings[<%= setting.key %>]" aria-label="<%= setting.title %>"
+                   <%= "checked" if setting.enabled? %>></void-switch>
+    </void-row>
+  <% end %>
+</void-rows>`;
+
+export const settingsJsx = `
+<void-rows>
+  {settings.map((setting) => (
+    <void-row key={setting.key}>
+      <void-row-text>
+        <span>{setting.title}</span>
+        <span data-void-type="caption">{setting.description}</span>
+      </void-row-text>
+      <Switch
+        checked={setting.enabled || undefined}
+        aria-label={setting.title}
+        onVoidChange={(event) => update(setting.key, event.detail.checked)}
+      />
+    </void-row>
+  ))}
+</void-rows>`;
+
+<Example html={settings} erb={settingsErb} jsx={settingsJsx} />
+
+`void-row-text` also works in a table cell, for a name with a line of detail under it.
+
+## Reference
+
+| Element | Attribute | Values |
+|---|---|---|
+| `void-description-list` | `layout` | `rows` (default): label left, value right, a hairline between pairs. `grid`: label over value. |
+| | `columns` | Rows: `1` (default) or `2`. Grid: `1` to `4`, default `2`. |
+
+## Which one
+
+- Names and values of **one record**: a description list.
+- **Many records** with the same fields: a `void-table`.
+- **One thing per line** with a control or a time: `void-rows`.
+- **One number** that deserves attention: a [figure](/patterns/figure/).
+
+## Why this form
+
+It is CSS only and it wraps a real `<dl>` instead of taking `label` and `value` attributes on child elements. The list semantics come from the browser, values can be any markup, and the server renders plain HTML.

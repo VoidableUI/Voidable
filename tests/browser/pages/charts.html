@@ -1,0 +1,20 @@
+<main id="root" style="display: grid; grid-template-columns: repeat(2, 240px); gap: 24px; padding: 24px">
+  <void-gauge id="gauge" value="20" show-value aria-label="Load" style="width: 220px"></void-gauge>
+</main>
+<script>
+  // specs/charts.spec.ts: adds one chart with the given data and resolves once
+  // it has rendered. --void-anim-scale: 0 turns the entrance animation off, so
+  // what is measured is the final drawing.
+  window.addChart = async (tag, id, data) => {
+    await customElements.whenDefined(tag);
+    const el = document.createElement(tag);
+    el.id = id;
+    el.setAttribute('aria-label', id);
+    el.style.cssText = 'display: block; width: 220px; height: 200px; --void-anim-scale: 0';
+    document.getElementById('root').append(el);
+    el.data = data;
+    await window.__settle(el);
+    // The entrance starts from a frame callback after connecting; let it render.
+    await window.__settle(el);
+  };
+</script>

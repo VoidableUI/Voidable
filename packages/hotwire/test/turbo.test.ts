@@ -47,30 +47,32 @@ async function mount<T extends Element = HTMLElement & Record<string, any>>(html
 
 describe('VoidTurbo.start', () => {
   it('calls voidBeforeMorph with Turbo\'s newElement for void-* elements only', () => {
-    document.body.innerHTML = '<void-x></void-x><div></div>';
+    document.body.innerHTML = '<void-badge></void-badge><div></div>';
     const calls: Array<[string, Element | null | undefined]> = [];
     for (const el of Array.from(document.body.children)) {
+      (el as any).voidUnchanged = () => false;
       (el as any).voidBeforeMorph = (incoming?: Element | null) => {
         calls.push([el.localName, incoming]);
         return false;
       };
     }
     stop = VoidTurbo.start();
-    const next = server('<void-x></void-x>');
+    const next = server('<void-badge></void-badge>');
     for (const el of Array.from(document.body.children)) {
       el.dispatchEvent(new CustomEvent('turbo:before-morph-element', { bubbles: true, cancelable: true, detail: { newElement: next } }));
     }
-    expect(calls).toEqual([['void-x', next]]);
+    expect(calls).toEqual([['void-badge', next]]);
   });
 
   it('leaves an element alone when another listener cancelled its morph', () => {
-    document.body.innerHTML = '<void-x></void-x>';
+    document.body.innerHTML = '<void-badge></void-badge>';
     const el = document.body.firstElementChild as any;
     let called = 0;
+    el.voidUnchanged = () => false;
     el.voidBeforeMorph = () => (called++, false);
     document.addEventListener('turbo:before-morph-element', e => e.preventDefault(), { capture: true, once: true });
     stop = VoidTurbo.start();
-    el.dispatchEvent(new CustomEvent('turbo:before-morph-element', { bubbles: true, cancelable: true, detail: { newElement: server('<void-x></void-x>') } }));
+    el.dispatchEvent(new CustomEvent('turbo:before-morph-element', { bubbles: true, cancelable: true, detail: { newElement: server('<void-badge></void-badge>') } }));
     expect(called).toBe(0);
   });
 

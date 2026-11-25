@@ -1,10 +1,34 @@
+/* ============================================================
+   void-table: a native <table> that sits on the page.
+
+   Tokens (all set here, so any ancestor or theme can change them):
+     --void-table-padding-block|inline  cell padding (follows --void-density)
+     --void-table-edge                  padding at the table's first and last column
+     --void-table-surface               what sticky cells are painted with
+     --void-table-stack-at              container width below which [stack] stacks
+     --void-table-tile                  least width of one label/value pair when stacked
+     --void-table-row-size              height assumed for a stacked row of a long table that is out of view
+     --void-table-fade                  width of the scroll-edge fade
+     --void-table-sticky-top            offset of a sticky header from the top
+     --void-table-max-height            height at which [scrollable] scrolls vertically
+   ============================================================ */
+
 void-table {
   --void-table-padding-block: var(--void-cell-padding-block);
   --void-table-padding-inline: var(--void-cell-padding-inline);
+  --void-table-edge: 0;
+  --void-table-surface: var(--void-color-bg);
+  --void-table-stack-at: 40rem;
+  --void-table-tile: 9rem;
+  --void-table-row-size: 12rem;
+  --void-table-fade: var(--void-space-8);
+  --void-table-sticky-top: 0;
+  --void-table-max-height: none;
 
+  /* visible: nothing here clips a menu, popover or tooltip opened from a cell.
+     Scrolling is opt-in with [scrollable]. */
   display: block;
   font-family: var(--void-font-sans);
-  overflow-x: auto;
 }
 
 void-table table {
@@ -13,6 +37,19 @@ void-table table {
   font-size: var(--void-type-body-size);
   /* Digits line up down a column without any per-cell markup. */
   font-variant-numeric: tabular-nums;
+}
+
+/* A caption names the table; quiet, above it. */
+void-table caption {
+  caption-side: top;
+  text-align: start;
+  font-family: var(--void-type-label-family);
+  font-size: var(--void-type-label-size);
+  line-height: var(--void-type-label-leading);
+  letter-spacing: var(--void-type-label-tracking);
+  text-transform: var(--void-type-label-case);
+  color: var(--void-type-label-color);
+  padding-block-end: var(--void-space-2);
 }
 
 /* Header cells are labels: the small quiet name of a column. */
@@ -36,15 +73,66 @@ void-table td {
   border-bottom: 1px solid var(--void-color-border);
 }
 
-/* A plain table sits on the page: its first and last columns align
-   with the content edge instead of being inset from it. Tables that
-   paint rows or cells (striped, hoverable, bordered) keep the inset. */
-void-table:not([bordered], [striped], [hoverable]) :is(th, td):first-child {
-  padding-inline-start: 0;
+/* A plain table sits on the page: its first and last columns align with the
+   content edge instead of being inset from it (--void-table-edge is 0).
+   Tables that paint rows or cells (striped, hoverable, bordered) keep the
+   inset, and an [inset] table pads to its container's content edge. */
+void-table:is([striped], [hoverable], [bordered]) {
+  --void-table-edge: var(--void-table-padding-inline);
 }
 
-void-table:not([bordered], [striped], [hoverable]) :is(th, td):last-child {
-  padding-inline-end: 0;
+void-table :is(th, td):first-child {
+  padding-inline-start: var(--void-table-edge);
+}
+
+void-table :is(th, td):last-child {
+  padding-inline-end: var(--void-table-edge);
+}
+
+/* Numeric columns: data-align="end" on the header cell (copied to the cells
+   by the component) or on any cell. */
+void-table [data-align="end"] {
+  text-align: end;
+}
+
+void-table [data-align="center"] {
+  text-align: center;
+}
+
+/* data-numeric is the short form of data-align="end" for a column of numbers:
+   mark the header and the cells (the page patterns write it by hand). */
+void-table :is(th, td)[data-numeric] {
+  text-align: end;
+}
+
+/* Row actions written as <void-actions>: ghost buttons at the end of a row,
+   their labels (not their padding) on the table's edge. */
+void-table td > void-actions {
+  flex-wrap: nowrap;
+  gap: var(--void-space-1);
+}
+
+void-table td:last-child > void-actions {
+  justify-content: flex-end;
+}
+
+void-table:not([inset]) td:last-child > void-actions:has(> void-button[variant="ghost"]:last-child) {
+  margin-inline-end: calc(var(--void-control-padding-sm) * -1.25);
+}
+
+/* A column of row actions: ghost buttons, end-aligned, their labels
+   (not their padding) on the table's edge. */
+void-table :is(th, td)[data-stack="actions"] {
+  text-align: end;
+  white-space: nowrap;
+}
+
+void-table td[data-stack="actions"] > * + * {
+  margin-inline-start: var(--void-space-1);
+}
+
+void-table td[data-stack="actions"]:last-child > :last-child {
+  margin-inline-end: calc(var(--void-control-padding-sm) * -1.25);
 }
 
 void-table[striped] tbody tr:nth-child(even) {
@@ -67,4 +155,305 @@ void-table[compact] {
 void-table[bordered] th,
 void-table[bordered] td {
   border: 1px solid var(--void-color-border);
+}
+
+/* ── Inset: a table inside a card or panel ──
+   The table bleeds out of the container's padding, so dividers, stripes and
+   the hover fill run to the container's edge, and its columns pad back in by
+   the same amount, so text stays on the container's content edge. */
+void-table[inset] {
+  --void-table-inset: var(--void-card-padding, var(--void-container-padding));
+  --void-table-edge: var(--void-table-inset);
+  --void-table-surface: var(--void-color-surface);
+
+  margin-inline: calc(var(--void-table-inset) * -1);
+}
+
+/* ── Scroll region ──
+   The host is the region: [scrollable] clips sideways and scrolls. The
+   component makes it focusable and named only while it really overflows, and
+   reports more-to-scroll-to with data-overflow-start / -end. */
+void-table[scrollable] {
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: var(--void-color-border-strong) transparent;
+}
+
+void-table[scrollable][max-height] {
+  overflow-y: auto;
+  max-height: var(--void-table-max-height);
+}
+
+void-table[scrollable]:focus-visible {
+  outline: var(--void-focus-ring-width) solid var(--void-focus-ring-color);
+  outline-offset: calc(var(--void-focus-ring-width) * -1);
+}
+
+/* The fade would clip the focus ring: while focused, the ring is the cue. */
+void-table[scrollable]:focus-visible {
+  mask-image: none !important;
+}
+
+/* Cells stay on one line: a region that scrolls is for tables wider than it. */
+void-table[scrollable] :is(th, td) {
+  white-space: nowrap;
+}
+
+/* Edge fades: the content dissolves where there is more to scroll to. */
+void-table[scrollable][data-overflow-end]:not([data-overflow-start]) {
+  mask-image: linear-gradient(to right, currentcolor calc(100% - var(--void-table-fade)), transparent);
+}
+
+void-table[scrollable][data-overflow-start]:not([data-overflow-end]) {
+  mask-image: linear-gradient(to right, transparent, currentcolor var(--void-table-fade));
+}
+
+void-table[scrollable][data-overflow-start][data-overflow-end] {
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    currentcolor var(--void-table-fade),
+    currentcolor calc(100% - var(--void-table-fade)),
+    transparent
+  );
+}
+
+void-table[scrollable]:dir(rtl)[data-overflow-end]:not([data-overflow-start]) {
+  mask-image: linear-gradient(to left, currentcolor calc(100% - var(--void-table-fade)), transparent);
+}
+
+void-table[scrollable]:dir(rtl)[data-overflow-start]:not([data-overflow-end]) {
+  mask-image: linear-gradient(to left, transparent, currentcolor var(--void-table-fade));
+}
+
+void-table[scrollable]:dir(rtl)[data-overflow-start][data-overflow-end] {
+  mask-image: linear-gradient(
+    to left,
+    transparent,
+    currentcolor var(--void-table-fade),
+    currentcolor calc(100% - var(--void-table-fade)),
+    transparent
+  );
+}
+
+/* The sticky column is the start edge: no fade there, only its hairline. */
+void-table[scrollable][sticky-column][data-overflow-start][data-overflow-end] {
+  mask-image: linear-gradient(to right, currentcolor calc(100% - var(--void-table-fade)), transparent);
+}
+
+void-table[scrollable][sticky-column][data-overflow-start]:not([data-overflow-end]) {
+  mask-image: none;
+}
+
+void-table[scrollable][sticky-column]:dir(rtl)[data-overflow-start][data-overflow-end] {
+  mask-image: linear-gradient(to left, currentcolor calc(100% - var(--void-table-fade)), transparent);
+}
+
+/* ── Sticky header and first column ──
+   Sticky cells are painted with the surface (nothing may show through), and
+   collapsed borders do not travel with a sticky cell, so the table separates. */
+void-table:is([sticky-header], [sticky-column]) table {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+void-table[sticky-header] thead th {
+  position: sticky;
+  top: var(--void-table-sticky-top);
+  z-index: 2;
+  background-color: var(--void-table-surface);
+}
+
+void-table[sticky-column] :is(th, td):first-child {
+  position: sticky;
+  inset-inline-start: 0;
+  z-index: 1;
+  background-color: var(--void-table-surface);
+}
+
+void-table[sticky-column] thead th:first-child {
+  z-index: 3;
+}
+
+/* Striped and hovered rows tint the sticky cell too. */
+void-table[sticky-column][striped] tbody tr:nth-child(even) > :first-child,
+void-table[sticky-column][hoverable] tbody tr:hover > :first-child {
+  background-image: linear-gradient(var(--void-color-bg-secondary), var(--void-color-bg-secondary));
+}
+
+/* A hairline marks the sticky column's edge once content slides under it. */
+void-table[sticky-column][data-overflow-start] :is(th, td):first-child {
+  box-shadow: inset -1px 0 0 var(--void-color-border);
+}
+
+void-table[sticky-column][data-overflow-start]:dir(rtl) :is(th, td):first-child {
+  box-shadow: inset 1px 0 0 var(--void-color-border);
+}
+
+/* ── Stacked presentation ──
+   [stack] makes the host a size container whose font-size is the breakpoint
+   (--void-table-stack-at), so one rule set serves any breakpoint: the query
+   below reads "narrower than 1em" and em is the container's own font-size.
+   Everything inside resets font-size from tokens, so nothing else sees it.
+   Each row becomes a block of label and value pairs; the label of a pair is
+   the column's header text, copied to the cell as data-label.
+
+   Header cells stay in the page for assistive technology (clipped, not
+   hidden), except those that hold a control (select all, sort buttons),
+   which stay visible as a bar above the blocks. */
+void-table[stack] {
+  container-type: inline-size;
+  font-size: var(--void-table-stack-at);
+}
+
+void-table[stack="always"] {
+  --void-table-stack-at: 100000px;
+}
+
+@container (max-width: 1em) {
+  void-table[stack] :is(table, caption, thead, tbody, tfoot, tr, th, td) {
+    display: block;
+  }
+
+  void-table[stack] :is(th, td) {
+    padding: 0;
+    border: 0;
+    text-align: start;
+    min-width: 0;
+    background: none;
+  }
+
+  /* Header cells: out of sight, still announced. Cells with controls stay. */
+  void-table[stack] thead th {
+    position: absolute;
+    inline-size: 1px;
+    block-size: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  void-table[stack] thead tr {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--void-space-2);
+    padding-inline: var(--void-table-edge);
+  }
+
+  void-table[stack] thead th[data-controls] {
+    position: static;
+    inline-size: auto;
+    block-size: auto;
+    overflow: visible;
+    clip-path: none;
+  }
+
+  void-table[stack] thead tr[data-controls] {
+    padding-block: var(--void-space-2);
+    border-bottom: 1px solid var(--void-color-border);
+  }
+
+  /* One row is one block. */
+  void-table[stack] :is(tbody, tfoot) tr {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(var(--void-table-tile), 100%), 1fr));
+    gap: var(--void-space-3) var(--void-gap-inside);
+    padding: var(--void-space-4) var(--void-table-edge);
+    border-bottom: 1px solid var(--void-color-border);
+  }
+
+  /* A long table does not lay out the blocks that are out of view, so it stacks
+     without a long frame. (Table rows cannot be skipped; grid rows can.) */
+  void-table[stack][data-long] :is(tbody, tfoot) tr {
+    content-visibility: auto;
+    contain-intrinsic-size: auto var(--void-table-row-size);
+  }
+
+  /* A pair: the column's label over the cell's value. */
+  void-table[stack] td[data-label]:not([data-label=""], [data-stack="title"], [data-stack="select"], [data-stack="actions"])::before {
+    content: attr(data-label);
+    display: block;
+    margin-block-end: var(--void-space-0h);
+    font-family: var(--void-type-label-family);
+    font-size: var(--void-type-label-size);
+    line-height: var(--void-type-label-leading);
+    font-weight: var(--void-type-label-weight);
+    letter-spacing: var(--void-type-label-tracking);
+    text-transform: var(--void-type-label-case);
+    color: var(--void-type-label-color);
+  }
+
+  /* The block's title: first, the full width, no label. */
+  void-table[stack] td[data-stack="title"] {
+    grid-column: 1 / -1;
+    order: -1;
+    font-size: var(--void-text-md);
+    line-height: var(--void-type-body-leading);
+  }
+
+  /* A row checkbox sits beside the title. */
+  void-table[stack][data-stack-title] td[data-stack="select"] {
+    /* Placed against the row's content area (its grid area), not its padding edge. */
+    position: absolute;
+    inset-block-start: var(--void-space-4);
+    inset-inline-start: 0;
+    order: -2;
+  }
+
+  void-table[stack][data-stack-select] td[data-stack="title"] {
+    padding-inline-start: var(--void-space-8);
+  }
+
+  void-table[stack] td[data-stack="select"] {
+    grid-column: 1 / -1;
+    order: -2;
+  }
+
+  /* Actions: last, the full width, ghost buttons on the block's edge. */
+  void-table[stack] td[data-stack="actions"] {
+    grid-column: 1 / -1;
+    order: 99;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    gap: var(--void-space-1);
+    margin-inline-start: calc(var(--void-control-padding-sm) * -1.25);
+  }
+
+  void-table[stack] td[data-stack="actions"] > * + * {
+    margin-inline-start: 0;
+  }
+
+  void-table[stack] td[data-stack="actions"] > :last-child {
+    margin-inline-end: 0;
+  }
+
+  void-table[stack] :is(th, td)[data-stack="hide"] {
+    display: none;
+  }
+
+  /* Alignment belongs to a column of a table, not to a block. */
+  void-table[stack] :is([data-align], [data-numeric]) {
+    text-align: start;
+  }
+
+  void-table[stack][bordered] :is(tbody, tfoot) tr {
+    border: 1px solid var(--void-color-border);
+    margin-block-end: var(--void-space-3);
+  }
+
+  void-table[stack] :is(th, td):first-child,
+  void-table[stack] :is(th, td):last-child {
+    padding-inline: 0;
+  }
+
+  /* Sticky parts belong to the tabular presentation. */
+  void-table[stack][sticky-header] thead th,
+  void-table[stack][sticky-column] :is(th, td):first-child {
+    position: static;
+    box-shadow: none;
+  }
 }

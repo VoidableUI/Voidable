@@ -4,6 +4,7 @@
 package domain
 
 import (
+	"fmt"
 	"sort"
 	"strings"
 )
@@ -87,6 +88,12 @@ type Element struct {
 	AllowedParents   []string          `json:"-"`
 	RequiredChildren []string          `json:"-"`
 	AttrHints        map[string]string `json:"-"`
+
+	// CSSOnly marks a styled element: a void-* tag that @voidable/theme
+	// styles and @voidable/ui never registers. It has no JavaScript, no
+	// properties and no events, and is not in the manifest; the supplement
+	// declares it.
+	CSSOnly bool `json:"cssOnly,omitempty"`
 }
 
 // Attribute returns the attribute with the given (exact) name.
@@ -146,6 +153,33 @@ func NewCatalog(version string, els []Element) *Catalog {
 		c.byTag[e.Tag] = i
 	}
 	return c
+}
+
+// With returns a catalog that also holds extra (for the CSS-only elements
+// the supplement declares). A tag that is already present is an error.
+func (c *Catalog) With(extra []Element) (*Catalog, error) {
+	if len(extra) == 0 {
+		return c, nil
+	}
+	for _, e := range extra {
+		if _, ok := c.byTag[strings.ToLower(e.Tag)]; ok {
+			return nil, fmt.Errorf("%w: supplement declares %s, which the manifest already registers", ErrManifest, e.Tag)
+		}
+	}
+	return NewCatalog(c.Version, append(append([]Element(nil), c.Elements...), extra...)), nil
+}
+
+// Registered returns a catalog of the elements @voidable/ui registers,
+// without the CSS-only ones (code generators wrap behaviour, and there is
+// none to wrap).
+func (c *Catalog) Registered() *Catalog {
+	var els []Element
+	for _, e := range c.Elements {
+		if !e.CSSOnly {
+			els = append(els, e)
+		}
+	}
+	return NewCatalog(c.Version, els)
 }
 
 // Element looks up a tag.

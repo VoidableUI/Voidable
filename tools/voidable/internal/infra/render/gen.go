@@ -50,6 +50,9 @@ func (g *Generator) Generate(_ context.Context, name string, cat *domain.Catalog
 	if !ok {
 		return nil, fmt.Errorf("%w %q (have %s)", domain.ErrUnknownTarget, name, strings.Join(g.Targets(), ", "))
 	}
+	// Generated wrappers are for registered elements; a CSS-only element
+	// is plain markup in every framework.
+	cat = cat.Registered()
 	tpl, err := template.New(name+".tmpl").Funcs(funcs).ParseFS(g.templates, name+".tmpl")
 	if err != nil {
 		return nil, fmt.Errorf("parse template %s: %w", name, err)

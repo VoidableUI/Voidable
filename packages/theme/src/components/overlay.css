@@ -1,0 +1,208 @@
+/* ============================================================
+   Overlays — shared rules for every surface Void UI shows in the
+   top layer.
+
+   Modal surfaces (dialog, drawer) are native <dialog> elements
+   opened with showModal(); non-modal surfaces (popover, dropdown
+   menu, hover card, tooltip, select-like panels, date-picker popup)
+   are popover="manual" elements. The component sets on each anchored
+   surface:
+
+     data-void-side / data-void-align   requested placement
+     data-void-position="anchor"        placed by CSS anchor positioning
+                                        (the component links the anchor
+                                        with anchor-name/position-anchor)
+     data-void-position="fixed"         placed by the component's
+                                        JavaScript positioner, which
+                                        writes --void-overlay-x/-y
+                                        (browsers without anchor
+                                        positioning, and edge cases the
+                                        CSS fallbacks cannot fit)
+
+   --void-overlay-gap is the distance from the anchor; the JavaScript
+   positioner reads it, so it is registered as a <length>.
+   ============================================================ */
+
+@property --void-overlay-gap {
+  syntax: '<length>';
+  inherits: true;
+  initial-value: 0px; /* token-ok: registration default, overridden below */
+}
+
+/* The UA box of [popover] is centred with a border and padding; the
+   component CSS styles the surface itself. */
+.void-popover-body,
+.void-dropdown-menu-panel,
+.void-hover-card-body,
+.void-tooltip-bubble,
+.void-combobox-dropdown,
+.void-multiselect-dropdown,
+.void-date-picker-dropdown {
+  --void-overlay-gap: var(--void-space-2);
+  position: fixed;
+  inset: auto;
+  margin: 0;
+  box-sizing: border-box;
+  max-inline-size: calc(100vw - 2 * var(--void-overlay-gap));
+  /* Below any top-layer element when the Popover API is missing. */
+  z-index: var(--void-z-dropdown);
+}
+
+/* ── CSS anchor positioning ─────────────────────────────────── */
+
+[data-void-position='anchor'] {
+  position-try-fallbacks: flip-block, flip-inline, flip-block flip-inline;
+}
+
+[data-void-position='anchor'][data-void-side='bottom'] { margin-block-start: var(--void-overlay-gap); }
+[data-void-position='anchor'][data-void-side='top']    { margin-block-end: var(--void-overlay-gap); }
+[data-void-position='anchor'][data-void-side='left']   { margin-inline-end: var(--void-overlay-gap); }
+[data-void-position='anchor'][data-void-side='right']  { margin-inline-start: var(--void-overlay-gap); }
+
+[data-void-position='anchor'][data-void-side='bottom'][data-void-align='start']  { position-area: block-end span-inline-end; }
+[data-void-position='anchor'][data-void-side='bottom'][data-void-align='center'] { position-area: block-end center; }
+[data-void-position='anchor'][data-void-side='bottom'][data-void-align='end']    { position-area: block-end span-inline-start; }
+[data-void-position='anchor'][data-void-side='top'][data-void-align='start']     { position-area: block-start span-inline-end; }
+[data-void-position='anchor'][data-void-side='top'][data-void-align='center']    { position-area: block-start center; }
+[data-void-position='anchor'][data-void-side='top'][data-void-align='end']       { position-area: block-start span-inline-start; }
+[data-void-position='anchor'][data-void-side='left'][data-void-align='start']    { position-area: inline-start span-block-end; }
+[data-void-position='anchor'][data-void-side='left'][data-void-align='center']   { position-area: inline-start center; }
+[data-void-position='anchor'][data-void-side='left'][data-void-align='end']      { position-area: inline-start span-block-start; }
+[data-void-position='anchor'][data-void-side='right'][data-void-align='start']   { position-area: inline-end span-block-end; }
+[data-void-position='anchor'][data-void-side='right'][data-void-align='center']  { position-area: inline-end center; }
+[data-void-position='anchor'][data-void-side='right'][data-void-align='end']     { position-area: inline-end span-block-start; }
+
+/* ── JavaScript positioner (fallback) ───────────────────────── */
+
+[data-void-position='fixed'] {
+  position: fixed;
+  inset: auto;
+  margin: 0;
+  left: var(--void-overlay-x);
+  top: var(--void-overlay-y);
+}
+
+/* ── Entry and exit transitions ─────────────────────────────────
+   Non-modal surfaces fade; transition-behavior: allow-discrete keeps
+   them rendered (and in the top layer, with `overlay`) until the exit
+   transition ends, and @starting-style gives the entry a start state.
+   Browsers without these simply show and hide at once. */
+
+:is(
+  .void-popover-body,
+  .void-dropdown-menu-panel,
+  .void-hover-card-body,
+  .void-tooltip-bubble,
+  .void-combobox-dropdown,
+  .void-multiselect-dropdown,
+  .void-date-picker-dropdown
+):popover-open {
+  opacity: 1;
+}
+
+:is(
+  .void-popover-body,
+  .void-dropdown-menu-panel,
+  .void-hover-card-body,
+  .void-tooltip-bubble,
+  .void-combobox-dropdown,
+  .void-multiselect-dropdown,
+  .void-date-picker-dropdown
+) {
+  opacity: 0;
+  transition:
+    opacity var(--void-duration-fast) var(--void-ease-out),
+    display var(--void-duration-fast) allow-discrete,
+    overlay var(--void-duration-fast) allow-discrete;
+}
+
+/* Without the Popover API the component toggles [hidden] instead. */
+:is(
+  .void-popover-body,
+  .void-dropdown-menu-panel,
+  .void-hover-card-body,
+  .void-tooltip-bubble,
+  .void-combobox-dropdown,
+  .void-multiselect-dropdown,
+  .void-date-picker-dropdown
+):not([popover]):not([hidden]) {
+  opacity: 1;
+}
+
+@starting-style {
+  :is(
+    .void-popover-body,
+    .void-dropdown-menu-panel,
+    .void-hover-card-body,
+    .void-tooltip-bubble,
+    .void-combobox-dropdown,
+    .void-multiselect-dropdown,
+    .void-date-picker-dropdown
+  ):popover-open {
+    opacity: 0;
+  }
+}
+
+/* Modal surfaces: native <dialog> in the top layer with a ::backdrop. */
+.void-dialog-panel,
+.void-drawer-panel {
+  transition:
+    opacity var(--void-duration-normal) var(--void-ease-out),
+    translate var(--void-duration-normal) var(--void-ease-out),
+    scale var(--void-duration-normal) var(--void-ease-out),
+    display var(--void-duration-normal) allow-discrete,
+    overlay var(--void-duration-normal) allow-discrete;
+}
+
+.void-dialog-panel::backdrop,
+.void-drawer-panel::backdrop {
+  background: var(--void-color-bg-overlay);
+  opacity: 0;
+  transition:
+    opacity var(--void-duration-normal) var(--void-ease-out),
+    display var(--void-duration-normal) allow-discrete,
+    overlay var(--void-duration-normal) allow-discrete;
+}
+
+.void-dialog-panel[open]::backdrop,
+.void-drawer-panel[open]::backdrop {
+  opacity: 1;
+}
+
+@starting-style {
+  .void-dialog-panel[open]::backdrop,
+  .void-drawer-panel[open]::backdrop {
+    opacity: 0;
+  }
+}
+
+/* Reduced motion: durations already scale to zero (primitives); also
+   drop movement so nothing slides or scales in. */
+@media (prefers-reduced-motion: reduce) {
+  .void-dialog-panel,
+  .void-drawer-panel {
+    translate: none !important;
+    scale: none !important;
+  }
+}
+
+/* Forced colours: surfaces keep a visible edge and the backdrop does
+   not wash out the dialog. */
+@media (forced-colors: active) {
+  .void-dialog-panel,
+  .void-drawer-panel,
+  .void-popover-body,
+  .void-dropdown-menu-panel,
+  .void-hover-card-body,
+  .void-tooltip-bubble,
+  .void-combobox-dropdown,
+  .void-multiselect-dropdown,
+  .void-date-picker-dropdown {
+    border: 1px solid CanvasText;
+  }
+
+  .void-dialog-panel::backdrop,
+  .void-drawer-panel::backdrop {
+    background: transparent;
+  }
+}

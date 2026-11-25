@@ -1,0 +1,42 @@
+<main style="padding: 2rem; max-width: 760px">
+  <h1>Form</h1>
+  <form id="f" action="/echo" method="get">
+    <void-field label="Full name"><void-input id="i-name" name="user[name]"></void-input></void-field>
+    <void-field label="Email"><void-input id="i-email" type="email" name="user[email]"></void-input></void-field>
+    <void-field label="Bio"><void-textarea id="i-bio" name="user[bio]"></void-textarea></void-field>
+    <void-field label="Country"><void-select id="i-country" name="user[country]" placeholder="Choose…"><option value="nz">New Zealand</option><option value="au">Australia</option><option value="fj">Fiji</option></void-select></void-field>
+    <void-checkbox id="i-remember" name="user[remember_me]" value="1">Remember me</void-checkbox>
+    <void-checkbox-group id="i-langs" label="Languages" name="user[langs][]"><void-checkbox value="en">English</void-checkbox><void-checkbox value="mi">Māori</void-checkbox><void-checkbox value="fr">French</void-checkbox></void-checkbox-group>
+    <void-radio-group id="i-plan" label="Plan" name="user[plan]"><void-radio value="free">Free</void-radio><void-radio value="pro">Pro</void-radio><void-radio value="team">Team</void-radio></void-radio-group>
+    <void-field label="Volume"><void-slider id="i-vol" name="volume" min="0" max="100" step="5" value="50"></void-slider></void-field>
+    <void-field label="Search"><void-action-input id="i-search" name="q" action-label="Go"></void-action-input></void-field>
+    <fieldset id="fs">
+      <legend>Preferences</legend>
+      <void-switch id="i-news" name="newsletter" value="yes">Newsletter</void-switch>
+      <void-field label="Seats"><void-number-input id="i-seats" name="seats" min="1" max="10" value="2"></void-number-input></void-field>
+      <void-field label="Start date"><void-date-picker id="i-date" name="start"></void-date-picker></void-field>
+      <void-field label="PIN"><void-pin-input id="i-pin" name="pin" length="4"></void-pin-input></void-field>
+      <void-field label="Tags"><void-tags-input id="i-tags" name="tags"></void-tags-input></void-field>
+      <void-field label="Colour"><void-color-picker id="i-color" name="color" value="#ff0000" show-input></void-color-picker></void-field>
+      <void-toggle-group id="i-fmt" name="fmt" multiple aria-label="Format"><void-toggle value="bold">Bold</void-toggle><void-toggle value="italic">Italic</void-toggle></void-toggle-group>
+      <void-segmented-control id="i-view" name="view" value="list" aria-label="View"><void-segmented-control-item value="list">List</void-segmented-control-item><void-segmented-control-item value="grid">Grid</void-segmented-control-item></void-segmented-control>
+      <void-field label="Framework"><void-combobox id="i-fw" name="framework" placeholder="Pick"><void-option value="react">React</void-option><void-option value="vue">Vue</void-option><void-option value="lit">Lit</void-option></void-combobox></void-field>
+      <void-field label="Skills"><void-multiselect id="i-skills" name="skills" placeholder="Pick many"><void-option value="css">CSS</void-option><void-option value="js">JS</void-option><void-option value="html">HTML</void-option></void-multiselect></void-field>
+      <void-editable id="i-title" name="title" value="Untitled"></void-editable>
+      <void-file-upload id="i-file" name="doc"></void-file-upload>
+    </fieldset>
+    <void-calendar id="i-cal" name="cal" value="2026-11-10"></void-calendar>
+    <void-button id="b-submit" type="submit" variant="filled">Save</void-button>
+    <void-button id="b-reset" type="reset">Reset</void-button>
+  </form>
+</main>
+<script>
+  window.submits = [];
+  const entries = (fd) => [...fd].map(([k, v]) => [k, v instanceof File ? `File(${v.name},${v.size})` : v]);
+  document.getElementById('f').addEventListener('submit', (e) => {
+    if (window.letSubmit) return;
+    e.preventDefault();
+    window.submits.push({ submitter: e.submitter ? e.submitter.id || e.submitter.tagName : null, data: entries(new FormData(e.target)) });
+  });
+  window.formData = () => entries(new FormData(document.getElementById('f')));
+</script>

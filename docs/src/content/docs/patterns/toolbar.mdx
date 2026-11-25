@@ -1,0 +1,112 @@
+---
+title: Toolbar
+description: void-toolbar is the row of search, filters and actions above a table or list. It sizes its fields, wraps on a narrow screen and needs no CSS.
+---
+
+import Example from '../../../components/Example.astro';
+
+`<void-toolbar>` is the row of controls above a table or a list: a search field, filters, a count, then actions at the far end. It gives the search field room, keeps the filters compact, and wraps when it runs out of width.
+
+export const toolbar = `
+<void-toolbar>
+  <void-input type="search" placeholder="Search stations" aria-label="Search stations"></void-input>
+  <void-select aria-label="Region">
+    <option>All regions</option>
+    <option>Arctic</option>
+    <option>Southern</option>
+  </void-select>
+  <void-select aria-label="State">
+    <option>Any state</option>
+    <option>Online</option>
+    <option>Degraded</option>
+  </void-select>
+  <void-spacer></void-spacer>
+  <span>44 stations</span>
+  <void-button variant="ghost">Export</void-button>
+</void-toolbar>`;
+
+export const toolbarErb = `
+<%= form_with url: stations_path, method: :get, data: { turbo_frame: "stations" } do |form| %>
+  <void-toolbar>
+    <void-input type="search" name="q" value="<%= params[:q] %>"
+                placeholder="Search stations" aria-label="Search stations"></void-input>
+    <void-select name="region" aria-label="Region">
+      <option value="">All regions</option>
+      <%= options_for_select Station.regions.keys.map { [_1.humanize, _1] }, params[:region] %>
+    </void-select>
+    <void-spacer></void-spacer>
+    <span><%= pluralize @stations.total_count, "station" %></span>
+    <void-button variant="ghost"><%= link_to "Export", stations_path(format: :csv) %></void-button>
+  </void-toolbar>
+<% end %>`;
+
+export const toolbarJsx = `
+<void-toolbar>
+  <Input type="search" placeholder="Search stations" aria-label="Search stations"
+         value={query} onVoidInput={(event) => setQuery(event.detail.value)} />
+  <Select aria-label="Region" value={region} onVoidChange={(event) => setRegion(event.detail.value)}>
+    <option value="">All regions</option>
+    {regions.map((r) => <option key={r} value={r}>{r}</option>)}
+  </Select>
+  <void-spacer />
+  <span>{stations.length} stations</span>
+  <Button variant="ghost" onVoidClick={exportCsv}>Export</Button>
+</void-toolbar>`;
+
+<Example html={toolbar} erb={toolbarErb} jsx={toolbarJsx} />
+
+## Order
+
+Left to right, from what narrows the list to what acts on it:
+
+1. **Search**, first, because it is used most.
+2. **Filters**: selects, a segmented control, a multiselect.
+3. **`<void-spacer>`**: everything after it sits at the far end.
+4. **A count** in a `<span>`: it is set small and quiet, in tabular figures.
+5. **Actions on the list**: `ghost` buttons. The page's primary action belongs in the [page head](/patterns/page-head/), not here.
+
+Every control needs a name. There is no room for visible labels in a toolbar, so give each field an `aria-label`; the placeholder is not a label.
+
+## With a table
+
+Put the toolbar and the table in one section. The toolbar has no line of its own: the table's header line closes it.
+
+export const withTable = `
+<void-section>
+  <void-toolbar>
+    <void-input type="search" placeholder="Search stations" aria-label="Search stations"></void-input>
+    <void-spacer></void-spacer>
+    <span>3 of 44</span>
+  </void-toolbar>
+  <void-table>
+    <table>
+      <thead><tr><th>Station</th><th>State</th><th data-numeric>Passes</th><th></th></tr></thead>
+      <tbody>
+        <tr>
+          <td><void-row-text><span>Svalbard 1</span><span data-void-type="caption">Arctic</span></void-row-text></td>
+          <td><void-state color="success">Online</void-state></td>
+          <td data-numeric>212</td>
+          <td><void-actions justify="end"><void-button variant="ghost" size="sm">Open</void-button></void-actions></td>
+        </tr>
+        <tr>
+          <td><void-row-text><span>Tromsø 2</span><span data-void-type="caption">Arctic</span></void-row-text></td>
+          <td><void-state color="warning">Degraded</void-state></td>
+          <td data-numeric>96</td>
+          <td><void-actions justify="end"><void-button variant="ghost" size="sm">Open</void-button></void-actions></td>
+        </tr>
+      </tbody>
+    </table>
+  </void-table>
+</void-section>`;
+
+<Example html={withTable} />
+
+In a table, `data-numeric` on a `<th>` and its `<td>`s sets a column of numbers at the end of the cell in tabular figures, `void-row-text` gives a cell two lines, and `void-actions` in the last cell holds the row's `ghost` buttons. On a narrow screen, drop the columns that matter least with `data-void-hide="narrow"` on their header and cells.
+
+## On a narrow screen
+
+The row wraps when it runs out of width: the search field keeps at least 12rem and the rest flows onto the next line. A toolbar with more than three filters should move them into a `void-popover` behind one "Filters" button.
+
+## Why this form
+
+A toolbar is CSS only: a wrapping flex row that knows which of its children are fields. It is not a component because it has no state of its own; the search and the filters belong to your form, your framework or your server.

@@ -18,3 +18,4 @@ packages/alpine/laravel/vendor/
 .phpunit.result.cache
 packages/ui/src/autoloader-table.generated.ts
 packages/ui/src/dev/table.generated.ts
+coverage/

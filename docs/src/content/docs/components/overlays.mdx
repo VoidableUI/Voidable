@@ -1,0 +1,120 @@
+---
+title: Overlays
+description: How dialogs, drawers, popovers, menus, tooltips and picker lists open, close, stack, take focus and position themselves.
+---
+
+Every overlay in Voidable uses one model: `<void-dialog>`, `<void-drawer>`, `<void-popover>`, `<void-hover-card>`, `<void-dropdown-menu>`, `<void-tooltip>`, the option lists of `<void-combobox>` and `<void-multiselect>`, the calendar of `<void-date-picker>`, and `<void-toast-container>`. They are built on the platform:
+
+- **Modal overlays** (dialog, drawer) render a native `<dialog>` and open it with `showModal()`. The browser makes the rest of the page inert, so Tab cannot reach it and assistive technology does not see it. The panel sits in the top layer above everything, and the `::backdrop` dims the page.
+- **Non-modal overlays** (popover, hover card, dropdown menu, tooltip, the picker lists, the toast container) are `popover="manual"` elements shown in the top layer. An `overflow: hidden`, `transform` or `z-index` ancestor can no longer clip them or put them underneath something else.
+- **Placement** uses CSS anchor positioning: the overlay is tied to its trigger with `anchor-name` and `position-anchor`, placed with `position-area` and flipped to the other side with `position-try-fallbacks` when there is no room. Where anchor positioning is missing, or where the CSS result would still overflow the viewport, a small built-in positioner takes over (see [Browser support](#browser-support)).
+
+## Markup
+
+The API is declarative and the same everywhere:
+
+```html
+<void-dialog heading="Delete project" open>…</void-dialog>
+<void-dialog heading="Must answer" closable="false">…</void-dialog>
+
+<void-popover position="bottom" align="end">
+  <void-button slot="trigger">Details</void-button>
+  <p>Popover content</p>
+</void-popover>
+
+<void-dropdown-menu position="bottom" align="end">
+  <void-button slot="trigger">Actions</void-button>
+  <void-dropdown-menu-item>Edit</void-dropdown-menu-item>
+  <void-dropdown-menu-item keep-open>Pin to top</void-dropdown-menu-item>
+</void-dropdown-menu>
+
+<void-tooltip text="Copy" position="top" align="center"><button aria-label="Copy">…</button></void-tooltip>
+```
+
+- `open` (attribute and property) opens and closes every overlay. Tooltip, hover card, combobox, multiselect and date picker reflect it too.
+- `position` is the side of the trigger (`top`, `bottom`, `left`, `right`), and `align` is the alignment along that side (`start`, `center`, `end`). Both flip at the viewport edges.
+- `closable="false"` on a dialog or drawer removes the close button and ignores Escape and backdrop presses. The dialog then closes only when you set `open` to false.
+- `slot="trigger"` marks the element that opens a popover, hover card or dropdown menu.
+- A dropdown menu closes when an item is chosen and returns focus to its trigger. Add `keep-open` to an item, for example a checkbox-style toggle, to keep the menu open.
+
+## Events
+
+Each overlay fires `void-open` when it opens and `void-close` when it closes. Both carry a `reason` in their `detail`:
+
+| `void-open` reason | Meaning |
+|--------------------|---------|
+| `trigger` | A click on the trigger |
+| `keyboard` | A key on the trigger (Enter, Space, the arrow keys) |
+| `hover`, `focus` | Pointer hover or keyboard focus (tooltip, hover card, combobox) |
+| `api` | `open` was set by script, by markup or by a server morph |
+
+| `void-close` reason | Meaning |
+|---------------------|---------|
+| `escape` | Escape |
+| `outside` | A press outside the overlay, including the backdrop of a modal |
+| `blur` | Focus moved out of a non-modal overlay (Tab) |
+| `trigger` | A second click on the trigger |
+| `close-button` | The close button of a dialog or drawer |
+| `select` | An item or a date was chosen |
+| `hover` | The pointer left a tooltip or hover card |
+| `form` | A `<form method="dialog">` inside the dialog was submitted |
+| `parent` | The overlay it sits in closed, or a modal opened over it |
+| `api` | `open` was set to false by script, by markup or by a server morph |
+
+`void-close` is fired **before** the overlay closes. When the user caused the close (every reason except `form`, `parent` and `api`), the event is cancelable: call `event.preventDefault()` to keep the overlay open, for example to confirm that unsaved changes should be discarded.
+
+Like the native `toggle` and `close` events, `void-open` and `void-close` fire on the overlay itself and **do not bubble**. A popover closing inside a dialog therefore never looks like the dialog closing. Listen on the element, or on an ancestor in the capture phase:
+
+```js
+dialog.addEventListener('void-close', (e) => {
+  if (e.detail.reason === 'escape' && form.dirty && !confirm('Discard changes?')) e.preventDefault();
+});
+document.addEventListener('void-close', (e) => log(e.target, e.detail.reason), true);
+```
+
+## Stacking
+
+Open overlays form a stack. Escape and outside presses always go to the **topmost** overlay only. With a select in a popover in a dialog in a drawer, each Escape closes one layer. A press inside an overlay never closes the overlays it is nested in.
+
+- Closing an overlay closes the overlays nested inside it first (reason `parent`).
+- Opening a modal closes the non-modal overlays that it is not inside (reason `parent`). An open dropdown does not float above a dialog that was opened from somewhere else.
+- The page scroll lock is counted, not toggled. It is set on `<html>` when the first modal opens and removed when the last one closes, with `scrollbar-gutter: stable` so that the layout does not shift.
+- The shared listeners for keys, presses and focus are attached to the document only while an overlay is open.
+
+## Focus
+
+- **Modal overlays** move focus inside when they open: to the element with `autofocus`, otherwise to the first focusable element of the content, otherwise to the close button, otherwise to the panel. Focus stays inside while they are open, because the browser makes the page behind them inert. When they close, focus returns to the element that opened them. If that element was removed in the meantime (a server morph replaced it, say), focus goes to an element with the same `id`, then to the trigger of the overlay that contained it, then into the next overlay still open.
+- **Dropdown menu** follows the [menu button pattern](https://www.w3.org/WAI/ARIA/apg/patterns/menu-button/). Opening it focuses the first item (the last one with Up Arrow), and Escape or choosing an item returns focus to the trigger. Tab closes it and moves on.
+- **Popover** is a non-modal `role="dialog"` named by its trigger. It moves focus into its content when it has something focusable and returns focus to the trigger on Escape. Tab out of it closes it.
+- **Tooltip** follows the [tooltip pattern](https://www.w3.org/WAI/ARIA/apg/patterns/tooltip/). It never takes focus, describes its trigger with `aria-describedby`, appears on hover after `delay` and at once on keyboard focus, and hides on Escape.
+- **Hover card** never takes focus. It opens on hover or keyboard focus of the trigger and hides on Escape, and it does not reopen until the trigger is focused again.
+- **Combobox, multiselect and date picker** keep focus where the pattern puts it. For combobox and multiselect that is the field, which shows the highlighted option through `aria-activedescendant` (see [Keyboard and ARIA](/components/keyboard/)). The date picker moves focus into the calendar and returns it to the field.
+
+A closed overlay is not rendered (`display: none` through the closed `<dialog>` or popover), so it cannot be focused or seen, and assistive technology does not expose it. Triggers get `aria-haspopup`, `aria-expanded` and `aria-controls`.
+
+## Server-driven pages
+
+Overlays survive morphs from Turbo 8, Phoenix LiveView and Livewire (with the [Hotwire](/frameworks/hotwire/), [LiveView](/frameworks/liveview/) and [Alpine](/frameworks/alpine/) adapters):
+
+- An overlay the user opened stays open through a re-render that does not change what the server renders. A modal stays modal, and focus, the caret and typed text in it are kept.
+- When the server stops rendering `open`, the overlay closes (reason `api`) and focus returns as described above. When the server starts rendering `open`, the overlay opens and takes focus.
+- New content in an open overlay is shown in place, and the trigger ARIA is applied again to a replaced trigger.
+
+## Theming
+
+The shared rules live in `@voidable/theme` (`components/overlay.css`). Overlays fade in from `@starting-style` and leave with `transition-behavior: allow-discrete`, so the exit transition runs before the top layer releases the element. Dialogs also scale and drawers slide. With `prefers-reduced-motion: reduce` only the fade is kept. In forced-colors mode, overlays get a system-colour border and the backdrop is transparent. The gap between trigger and overlay is the `--void-overlay-gap` custom property, and select-like lists are at least as wide as their field.
+
+## Browser support
+
+The baseline is browsers that have the Popover API: Chrome and Edge 114+, Firefox 125+ and Safari 17+ (Baseline 2024). Older browsers still open and close every overlay, because the panel falls back to the `hidden` attribute and the built-in positioner, but non-modal overlays are then not in the top layer.
+
+| Feature | Chrome / Edge | Firefox | Safari | Without it |
+|---------|---------------|---------|--------|------------|
+| `<dialog>`, `showModal()` | 37 | 98 | 15.4 | (required) |
+| Popover API | 114 | 125 | 17 | `hidden` attribute and fixed positioning |
+| CSS anchor positioning | 125 | 147 | 26 | Built-in positioner (flips and clamps to the viewport) |
+| `@starting-style` | 117 | 129 | 17.5 | No entry transition |
+| `transition-behavior: allow-discrete` | 117 | partial | 17.4 | No exit transition |
+| `overlay` transition property | 117 | no | no | Exit transition may end early |
+
+The built-in positioner is also used when the CSS placement would overflow the viewport, which happens when every fallback position is too tight. Voidable does not rely on `closedby`, `popover="hint"`, `interestfor`, `CloseWatcher` or `moveBefore`. Escape, outside presses and focus handling are implemented once, the same in every engine, which also makes every close cancelable and gives it a reason.

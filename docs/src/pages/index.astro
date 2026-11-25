@@ -209,42 +209,30 @@ const ogImage = new URL('/og.png', canonical).href;
         }
       }
 
-      /* ── Hero ── */
+      /* ── Hero ──
+         A media surface (void-media): the Earth's limb from orbit, a line of
+         light in a black sky, low in the frame like a horizon under the
+         headline. The photograph is black wherever the text sits, so the
+         surface needs no scrim; the text is off-white in both colour
+         schemes because it is on the image, not on the page. */
       .hero {
-        position: relative;
-        padding: var(--void-space-35) 0 var(--void-space-30);
-        text-align: center;
-        overflow: hidden;
+        --void-media-height: max(40rem, calc(100svh - 3.5rem));
+        --void-media-focal: 50% 100%;
       }
 
-      /* A faint grid and a soft lift behind the headline, both drawn in
-         the text colour so they work on a black and on a white page. */
-      .hero-grid {
-        position: absolute;
-        inset: 0;
-        --line: color-mix(in srgb, var(--void-color-text) 5%, transparent);
-        background-image:
-          linear-gradient(var(--line) 1px, transparent 1px),
-          linear-gradient(90deg, var(--line) 1px, transparent 1px);
-        background-size: 64px 64px;
-        mask-image: radial-gradient(ellipse 80% 60% at 50% 40%, black 30%, transparent 75%);
-        -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 40%, black 30%, transparent 75%);
-        pointer-events: none;
-      }
-
-      .hero-glow {
-        position: absolute;
-        top: -100px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 1100px;
-        height: 600px;
-        background: radial-gradient(ellipse at center, color-mix(in srgb, var(--void-color-text) 7%, transparent) 0%, transparent 60%);
-        pointer-events: none;
-      }
-
+      /* The children below carry their own spacing. */
       .hero-content {
-        position: relative;
+        gap: 0;
+        padding-block: var(--void-space-12) var(--void-space-35);
+      }
+
+      .hero-credit {
+        position: absolute;
+        z-index: 1;
+        inset: auto var(--void-gutter) var(--void-space-4) auto;
+        font-family: var(--void-font-mono);
+        font-size: var(--void-text-2xs);
+        color: var(--void-color-text-muted);
       }
 
       .hero-badge {
@@ -604,7 +592,8 @@ const ogImage = new URL('/og.png', canonical).href;
 
       .footer-links {
         display: flex;
-        gap: var(--void-space-7);
+        flex-wrap: wrap;
+        gap: var(--void-space-3) var(--void-space-7);
         list-style: none;
       }
 
@@ -636,7 +625,8 @@ const ogImage = new URL('/og.png', canonical).href;
           <span class="nav-wordmark">voidable</span>
           <ul class="nav-links">
             <li><a href="/getting-started/introduction/">Docs</a></li>
-            <li><a href="/getting-started/theming/">Theming</a></li>
+            <li><a href="/theme/">Theme builder</a></li>
+            <li><a href="/patterns/overview/">Patterns</a></li>
             <li><a href="/storybook/">Components</a></li>
             <li><a href="/showcase/dashboard">Showcase</a></li>
           </ul>
@@ -657,10 +647,9 @@ const ogImage = new URL('/og.png', canonical).href;
     </nav>
 
     <!-- Hero -->
-    <section class="hero">
-      <div class="hero-grid" aria-hidden="true"></div>
-      <div class="hero-glow" aria-hidden="true"></div>
-      <div class="container hero-content">
+    <void-media class="hero" place="center" scrim="none">
+      <img src="/media/limb-horizon.jpg" alt="" fetchpriority="high" />
+      <void-media-content class="hero-content">
         <div class="hero-badge">
           {version && <span class="hero-badge-version">{version}</span>}
           {stats.adapters} framework adapter packages
@@ -676,10 +665,11 @@ const ogImage = new URL('/og.png', canonical).href;
         </div>
         <div class="hero-actions">
           <void-button variant="filled" size="lg"><a href="/getting-started/installation/">Get started</a></void-button>
-          <void-button variant="outline" size="lg"><a href="/getting-started/theming/">Make a theme</a></void-button>
+          <void-button variant="outline" size="lg"><a href="/theme/">Make a theme</a></void-button>
         </div>
-      </div>
-    </section>
+      </void-media-content>
+      <a class="hero-credit" href="/patterns/ui-over-imagery/#the-photographs">Photograph: NASA</a>
+    </void-media>
 
     <!-- Frameworks -->
     <section class="frameworks">
@@ -724,8 +714,12 @@ const ogImage = new URL('/og.png', canonical).href;
               {themes.map((t, i) => (
 <pre class="theme-source" data-theme-panel={t.id} hidden={i !== 0}><code set:html={sourceOf(t)} /></pre>
               ))}
+              <void-actions>
+                <void-button variant="filled"><a id="theme-open" href="/theme/?theme=void">Open it in the theme builder</a></void-button>
+                <void-button variant="ghost"><a href="/getting-started/theming/">What each knob does</a></void-button>
+              </void-actions>
               <p class="theme-note">
-                This is the whole theme. Text contrast is checked for every theme in both colour schemes, so no setting takes it below 4.5:1.
+                This is the whole theme. Turn the knobs yourself in the builder and leave with your own. Text contrast is checked for every theme in both colour schemes, so no setting takes it below 4.5:1.
               </p>
             </div>
           </div>
@@ -943,7 +937,9 @@ const ogImage = new URL('/og.png', canonical).href;
           <span class="nav-wordmark">voidable</span>
           <ul class="footer-links">
             <li><a href="/getting-started/introduction/">Docs</a></li>
+            <li><a href="/theme/">Theme builder</a></li>
             <li><a href="/getting-started/theming/">Theming</a></li>
+            <li><a href="/patterns/overview/">Patterns</a></li>
             <li><a href="/storybook/">Storybook</a></li>
             <li><a href="https://github.com/VoidableUI/Voidable" target="_blank">GitHub</a></li>
             <li><a href="https://www.npmjs.com/package/@voidable/ui" target="_blank">npm</a></li>
@@ -975,6 +971,8 @@ const ogImage = new URL('/og.png', canonical).href;
         document.querySelectorAll<HTMLElement>('[data-theme-panel]').forEach((el) => {
           el.hidden = el.dataset.themePanel !== theme;
         });
+        // The builder opens on the theme being looked at.
+        document.getElementById('theme-open')?.setAttribute('href', `/theme/?theme=${theme}`);
       });
     </script>
   </body>

@@ -1,0 +1,98 @@
+<main>
+  <void-media height="lg" stack style="--void-media-focal: 50% 36%">
+    <img src="media/sunrise.jpg" alt="" fetchpriority="high" decoding="async">
+    <void-media-content>
+      <void-split ratio="2:1" valign="end">
+        <void-stack>
+          <void-state color="success" pulse><span data-void-type="label">Pass in progress</span></void-state>
+          <h1>MRD-0412 over Svalbard</h1>
+          <p>Tracking since 14:02 UTC. Downlink is nominal on X band, with 6 min 40 s until loss of signal.</p>
+          <void-actions>
+            <void-button variant="filled" size="lg">Open pass</void-button>
+            <void-button size="lg">All passes</void-button>
+          </void-actions>
+        </void-stack>
+        <void-glass>
+          <void-stack>
+            <void-section-head>
+              <h2>Link</h2>
+              <void-badge color="success" variant="outline">Locked</void-badge>
+            </void-section-head>
+            <void-description-list>
+              <dl>
+                <div><dt>Signal</dt><dd>−84.2 dBm</dd></div>
+                <div><dt>Elevation</dt><dd>41.7°</dd></div>
+                <div><dt>Doppler</dt><dd>+12.4 kHz</dd></div>
+                <div><dt>Rate</dt><dd>312 Mbit/s</dd></div>
+              </dl>
+            </void-description-list>
+            <void-progress value="58" size="sm" aria-label="Pass progress"></void-progress>
+            <span data-void-type="caption">58% of the pass · 9.1 GB received</span>
+          </void-stack>
+        </void-glass>
+      </void-split>
+    </void-media-content>
+  </void-media>
+
+  <void-page>
+    <void-figures>
+      <void-figure>
+        <span data-void-type="label">Tracking now</span>
+        <span data-void-type="value">3 <span data-void-type="unit">of 41</span></span>
+        <span data-void-type="caption">Svalbard 1, Troll, Singapore</span>
+      </void-figure>
+      <void-figure>
+        <span data-void-type="label">Downlink rate</span>
+        <span data-void-type="value">884 <span data-void-type="unit">Mbit/s</span></span>
+        <span data-void-type="caption"><void-delta trend="up">6%</void-delta> on the last hour</span>
+      </void-figure>
+      <void-figure>
+        <span data-void-type="label">Next acquisition</span>
+        <span data-void-type="value">14 <span data-void-type="unit">min</span></span>
+        <span data-void-type="caption">MRD-0398 at Tromsø 2</span>
+      </void-figure>
+      <void-figure>
+        <span data-void-type="label">Frame errors</span>
+        <span data-void-type="value">0.02 <span data-void-type="unit">%</span></span>
+        <span data-void-type="caption"><void-delta trend="down" invert>0.01</void-delta> since the last pass</span>
+      </void-figure>
+    </void-figures>
+
+    <void-split ratio="2:1">
+      <void-section>
+        <void-section-head>
+          <h2>In view</h2>
+          <span data-void-type="label">3 passes</span>
+        </void-section-head>
+        <void-rows>
+          <void-row>
+            <void-row-text><span data-void-type="code">MRD-0412</span><span data-void-type="caption">Svalbard 1 · X band · 41.7° elevation</span></void-row-text>
+            <void-state color="success" pulse>tracking</void-state>
+          </void-row>
+          <void-row>
+            <void-row-text><span data-void-type="code">MRD-0388</span><span data-void-type="caption">Troll · S band · 12.3° elevation</span></void-row-text>
+            <void-state color="success" pulse>tracking</void-state>
+          </void-row>
+          <void-row>
+            <void-row-text><span data-void-type="code">MRD-0420</span><span data-void-type="caption">Singapore · X band · 5.1° elevation</span></void-row-text>
+            <void-state color="caution">acquiring</void-state>
+          </void-row>
+        </void-rows>
+      </void-section>
+
+      <void-section>
+        <void-section-head>
+          <h2>Station</h2>
+        </void-section-head>
+        <void-description-list>
+          <dl>
+            <div><dt>Site</dt><dd>Svalbard 1</dd></div>
+            <div><dt>Antenna</dt><dd>7.3 m</dd></div>
+            <div><dt>Bands</dt><dd>S, X, Ka</dd></div>
+            <div><dt>Uptime</dt><dd>99.98%</dd></div>
+          </dl>
+        </void-description-list>
+      </void-section>
+    </void-split>
+  </void-page>
+</main>

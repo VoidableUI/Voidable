@@ -1,0 +1,58 @@
+<main style="padding: 1rem; max-width: 1000px">
+  <h1>Composite widgets</h1>
+  <button id="start">start</button>
+
+  <void-tabs id="tabs" value="one">
+    <void-tab-panel tab="one" label="One">Panel one <a href="#p1" id="p1-link">link</a></void-tab-panel>
+    <void-tab-panel tab="two" label="Two">Panel two</void-tab-panel>
+    <void-tab-panel tab="three" label="Three">Panel three</void-tab-panel>
+  </void-tabs>
+
+  <void-tabs id="tabs-unset">
+    <void-tab-panel tab="a" label="Alpha">Alpha panel</void-tab-panel>
+    <void-tab-panel tab="b" label="Beta">Beta panel</void-tab-panel>
+  </void-tabs>
+
+  <void-accordion id="acc">
+    <void-accordion-item id="acc-1" heading="Section 1">Content 1</void-accordion-item>
+    <void-accordion-item id="acc-2" heading="Section 2">Content 2</void-accordion-item>
+    <void-accordion-item id="acc-3" heading="Section 3">Content 3</void-accordion-item>
+  </void-accordion>
+
+  <void-segmented-control id="seg" value="list" aria-label="View">
+    <void-segmented-control-item value="list">List</void-segmented-control-item>
+    <void-segmented-control-item value="grid">Grid</void-segmented-control-item>
+    <void-segmented-control-item value="map">Map</void-segmented-control-item>
+  </void-segmented-control>
+  <void-segmented-control id="seg-none" aria-label="Unset view">
+    <void-segmented-control-item value="a">A</void-segmented-control-item>
+    <void-segmented-control-item value="b">B</void-segmented-control-item>
+    <void-segmented-control-item value="c">C</void-segmented-control-item>
+  </void-segmented-control>
+
+  <void-field label="Volume"><void-slider id="slider" min="0" max="100" step="5" value="50"></void-slider></void-field>
+
+  <void-field label="Country"><void-select id="select" placeholder="Choose…"><option value="nz">New Zealand</option><option value="au">Australia</option><option value="fj">Fiji</option><option value="ar">Argentina</option></void-select></void-field>
+
+  <void-menu id="menu" aria-label="Actions">
+    <void-menu-item value="edit">Edit</void-menu-item>
+    <void-menu-item value="dup">Duplicate</void-menu-item>
+    <void-menu-item value="arch" disabled>Archive</void-menu-item>
+    <void-menu-item value="del">Delete</void-menu-item>
+  </void-menu>
+  <textarea id="notes" aria-label="Notes">line 1
+line 2
+line 3</textarea>
+
+  <void-calendar id="cal" value="2026-11-10"></void-calendar>
+
+  <void-field label="Start date"><void-date-picker id="date" value="2026-11-10"></void-date-picker></void-field>
+
+  <void-field label="Framework"><void-combobox id="combo" placeholder="Pick"><void-option value="react">React</void-option><void-option value="vue">Vue</void-option><void-option value="lit">Lit</void-option></void-combobox></void-field>
+  <void-field label="Skills"><void-multiselect id="multi" placeholder="Pick many"><void-option value="css">CSS</void-option><void-option value="js">JS</void-option><void-option value="html">HTML</void-option></void-multiselect></void-field>
+  <button id="end">end</button>
+</main>
+<script>
+  window.events = [];
+  for (const type of ['void-change', 'void-select']) document.addEventListener(type, (e) => window.events.push(`${type}:${e.target.id || e.target.tagName.toLowerCase()}:${JSON.stringify(e.detail?.value ?? null)}`));
+</script>

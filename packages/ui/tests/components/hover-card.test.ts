@@ -157,8 +157,8 @@ describe('VoidHoverCard', () => {
       vi.runAllTimers();
       await el.updateComplete;
       expect(events).toHaveLength(1);
-      expect(events[0].bubbles).toBe(true);
-      expect(events[0].composed).toBe(true);
+      expect(events[0].detail).toEqual({ reason: 'hover' });
+      expect(events[0].bubbles).toBe(false);
     });
 
     it('dispatches void-close when closed via trigger mouseleave', async () => {
@@ -173,8 +173,8 @@ describe('VoidHoverCard', () => {
       vi.runAllTimers();
       await el.updateComplete;
       expect(events).toHaveLength(1);
-      expect(events[0].bubbles).toBe(true);
-      expect(events[0].composed).toBe(true);
+      expect(events[0].detail).toEqual({ reason: 'hover' });
+      expect(events[0].bubbles).toBe(false);
     });
   });
 
@@ -226,22 +226,19 @@ describe('VoidHoverCard', () => {
       el.remove();
     });
 
-    it('trigger has aria-haspopup="dialog"', () => {
-      const wrapper = el.querySelector('.void-hover-card-trigger');
-      expect(wrapper?.getAttribute('aria-haspopup')).toBe('dialog');
+    it('puts no popup ARIA on the trigger: the card is supplementary, not a dialog', () => {
+      const wrapper = el.querySelector('.void-hover-card-trigger')!;
+      expect(wrapper.hasAttribute('aria-haspopup')).toBe(false);
+      expect(el.querySelector('.void-hover-card-body')!.hasAttribute('role')).toBe(false);
     });
 
-    it('trigger has aria-expanded matching open state', async () => {
-      const wrapper = el.querySelector('.void-hover-card-trigger');
-      expect(wrapper?.getAttribute('aria-expanded')).toBe('false');
+    it('the closed card is hidden, so links inside it cannot take focus', async () => {
+      const body = el.querySelector<HTMLElement>('.void-hover-card-body')!;
+      if (typeof body.showPopover === 'function') expect(body.getAttribute('popover')).toBe('manual');
+      else expect(body.hidden).toBe(true);
       el.open = true;
       await el.updateComplete;
-      expect(wrapper?.getAttribute('aria-expanded')).toBe('true');
-    });
-
-    it('body has role="dialog"', () => {
-      const body = el.querySelector('.void-hover-card-body');
-      expect(body?.getAttribute('role')).toBe('dialog');
+      expect(body.hidden).toBe(false);
     });
   });
 

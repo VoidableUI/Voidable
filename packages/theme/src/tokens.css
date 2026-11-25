@@ -19,17 +19,23 @@
   /* Native UI (scrollbars, form controls, autofill) follows the theme */
   color-scheme: dark;
   --void-scheme-dark: 1;
+  /* The scheme of the page itself. A media surface forces
+     --void-scheme-dark to 1 for what sits on the image; a glass panel
+     inside it reads this to return to the page's scheme. */
+  --void-page-scheme-dark: 1;
 }
 
 [data-theme="light"] {
   color-scheme: light;
   --void-scheme-dark: 0;
+  --void-page-scheme-dark: 0;
 }
 
 @media (prefers-color-scheme: light) {
   :root:not([data-theme]) {
     color-scheme: light;
     --void-scheme-dark: 0;
+    --void-page-scheme-dark: 0;
   }
 }
 
@@ -60,6 +66,32 @@
   :root [data-void-theme] { --void-anim-scale: 0 !important; }
 }
 
+/* ── UI over imagery ──
+   Fixed inputs for the media surface, its scrim and glass panels
+   (media/*.css). They are not theme knobs: how strong a scrim must be
+   depends on the photograph, not on the theme.
+
+   --void-scrim-strength runs from 0 to 1 like the contrast knob: 0 is
+   the lightest scrim that still keeps body text at 4.5:1 over a pure
+   white image, 1 is close to opaque. --void-glass-solid is 1 where a
+   translucent panel must be solid (no backdrop-filter, or the user
+   asked for reduced transparency). */
+:root {
+  --void-scrim-strength: 0;
+  --void-scrim-fade: 10rem;
+  --void-glass-blur: 24px;
+  --void-glass-solid: 0;
+  --void-media-focal: 50% 50%;
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  :root { --void-glass-solid: 1; }
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  :root { --void-glass-solid: 1; }
+}
+
 /* ── Shape ──
    data-shape is a preset for the radius knob: sharp zeroes every
    radius under it, curvy restores the theme's radius. */
@@ -76,9 +108,10 @@
    var() is substituted where a custom property is declared, so
    tokens derived on :root alone would not follow a knob changed on a
    descendant. They are therefore declared on every element that can
-   carry a scheme, a theme or a shape. :where() keeps the specificity
-   at zero, so any override of a token still wins. */
-:where(:root, [data-theme], [data-void-theme], [data-shape]) {
+   carry a scheme, a theme, a shape or a surface (media, glass).
+   :where() keeps the specificity at zero, so any override of a token
+   still wins. */
+:where(:root, [data-theme], [data-void-theme], [data-shape], [data-void-surface], void-media, void-glass) {
   /* ── Working values (internal; set the knobs instead) ── */
   --void-contrast-level: clamp(0, var(--void-contrast) + var(--void-contrast-boost), 1);
   --void-chrome-level:   clamp(0, var(--void-chrome), 1);
@@ -105,11 +138,15 @@
      it. Each step up is the foreground mixed into the page, and
      opaque, so sticky headers and floating panels cover what is
      beneath them. */
-  --void-color-bg:           oklch(
+  --void-color-page:         oklch(
     calc((1 - var(--void-scheme-dark)) * (1 - 0.03 * var(--void-page-level)) + var(--void-scheme-dark) * 0.2 * var(--void-page-level))
     calc(var(--void-neutral-c) * var(--void-page-level) * (0.6 + 0.4 * var(--void-scheme-dark)))
     var(--void-neutral-hue)
   );
+  /* What things sit on. The page colour, except on a media surface or
+     a glass panel, where it is a translucent shade of it and every
+     surface below therefore lets the image through. */
+  --void-color-bg:           var(--void-color-page);
   /* Container fill (cards, panels, stats): set by the chrome knob,
      close to invisible by default. */
   --void-color-surface:      color-mix(in srgb, oklch(var(--void-fg)) calc(8% * var(--void-chrome-level)), var(--void-color-bg));
@@ -117,7 +154,11 @@
   --void-color-bg-secondary: color-mix(in srgb, oklch(var(--void-fg)) 4%, var(--void-color-bg));
   /* Things that float over the page: menus, popovers, dialogs. Lifted
      in dark; on white the shadow and ring do the lifting. */
-  --void-color-bg-elevated:  color-mix(in srgb, oklch(var(--void-fg)) calc(7% * var(--void-scheme-dark)), var(--void-color-bg));
+  --void-color-bg-elevated:  color-mix(in srgb, oklch(var(--void-fg)) calc(7% * var(--void-scheme-dark)), var(--void-color-page));
+  /* The resting fill of a control that draws no fill of its own
+     (outline button, outline badge). Nothing on the page; a dark shade
+     on a media surface, so the control reads on any photograph. */
+  --void-color-control-fill: transparent;
   --void-color-bg-hover:     color-mix(in srgb, oklch(var(--void-fg)) 8%, var(--void-color-bg));
   --void-color-bg-active:    color-mix(in srgb, oklch(var(--void-fg)) 13%, var(--void-color-bg));
   --void-color-bg-accent:    var(--void-color-bg-secondary);
@@ -140,6 +181,15 @@
   --void-color-border-control: oklch(var(--void-fg) / var(--void-alpha-control));
   --void-color-border-focus:   oklch(var(--void-fg) / var(--void-alpha-focus));
 
+  /* ── Scrim and glass ──
+     A scrim is the translucent dark layer between an image and the
+     text over it. Its opacity starts at the lowest value that keeps
+     4.5:1 for body text over a white image and only rises from there.
+     Glass is a translucent, blurred panel in the page's own scheme. */
+  --void-scrim-alpha: calc(0.64 + 0.30 * clamp(0, var(--void-scrim-strength), 1));
+  --void-color-scrim: oklch(0 0 0 / var(--void-scrim-alpha));
+  --void-glass-alpha: max(calc(0.76 + 0.10 * var(--void-scheme-dark)), var(--void-glass-solid));
+
   /* Focus ring — shared by every :focus-visible indicator. */
   --void-focus-ring-color:  var(--void-color-border-focus);
   --void-focus-ring-width:  2px;
@@ -154,7 +204,13 @@
     var(--void-scheme-dark) * max(0.97 - 0.9 * var(--void-accent-c), 0.78)
     + (1 - var(--void-scheme-dark)) * min(0.145 + 2 * var(--void-accent-c), 0.42)
   );
-  --void-color-accent:       oklch(var(--void-accent-l) var(--void-accent-c) var(--void-accent-hue));
+  /* On a media surface or glass the backdrop is unknown, so a coloured
+     accent moves toward white (dark) or black (light), as the status
+     colours do. On the page it is zero, except for the most saturated
+     accents (chroma above 0.2) on a tinted page, which would otherwise
+     fall just short of 4.5:1 as text on the lifted surfaces. */
+  --void-accent-shift: calc(400% * var(--void-page-level) * max(0, var(--void-accent-c) - 0.2));
+  --void-color-accent:       color-mix(in srgb, oklch(var(--void-scheme-dark) 0 0) var(--void-accent-shift), oklch(var(--void-accent-l) var(--void-accent-c) var(--void-accent-hue)));
   --void-color-accent-hover: color-mix(in srgb, var(--void-color-accent) 92%, var(--void-color-bg));
 
   /* ── Status ──
@@ -283,6 +339,9 @@
   /* Line length for running text, and the width of a page column. */
   --void-measure:      34rem;
   --void-measure-page: 72rem;
+  /* Inline padding that lines a full-width block (a bar, a media
+     surface) up with the page column: use it as padding-inline. */
+  --void-page-inset: max(var(--void-gutter), calc((100% - var(--void-measure-page)) / 2 + var(--void-gutter)));
 
   /* ── Type scale (font-size knob) ── */
   --void-text-2xs:  calc(var(--void-font-size) * 0.7143);
@@ -350,6 +409,21 @@
   --void-type-title-weight:   var(--void-type-heading-weight);
   --void-type-title-tracking: -0.02em;
   --void-type-title-color:    var(--void-color-text);
+
+  /* display: the one large line of a hero or a media surface. */
+  --void-type-display-family:   var(--void-type-heading-family);
+  --void-type-display-size:     clamp(var(--void-text-4xl), 5.2vw, calc(var(--void-font-size) * 4.5714));
+  --void-type-display-leading:  1.05;
+  --void-type-display-weight:   var(--void-type-heading-weight);
+  --void-type-display-tracking: -0.03em;
+  --void-type-display-color:    var(--void-color-text);
+
+  /* lede: the sentence or two under a title. */
+  --void-type-lede-family:  var(--void-font-sans);
+  --void-type-lede-size:    var(--void-text-md);
+  --void-type-lede-leading: var(--void-leading-relaxed);
+  --void-type-lede-weight:  var(--void-weight-normal);
+  --void-type-lede-color:   var(--void-color-text-secondary);
 
   /* body: default running text. */
   --void-type-body-family:  var(--void-font-sans);
