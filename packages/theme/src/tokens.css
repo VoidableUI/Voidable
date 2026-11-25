@@ -6,6 +6,9 @@
 /* ── Dark theme (default) ── */
 :root,
 [data-theme="dark"] {
+  /* Native UI (scrollbars, form controls, autofill) follows the theme */
+  color-scheme: dark;
+
   /* Surfaces */
   --void-color-bg:           var(--void-black);
   --void-color-bg-secondary: var(--void-dark-1);
@@ -64,8 +67,16 @@
   --void-spacing-xl: var(--void-space-xl);
 }
 
-/* ── Light theme ── */
+/* ── Light theme ──
+   SYNC: the declarations below exist twice, once for the explicit
+   [data-theme="light"] attribute and once inside the
+   prefers-color-scheme block that follows. Plain CSS cannot share one
+   declaration list between a selector and a media query, so edit both
+   blocks together (scripts/check-contrast.py verifies they match). */
 [data-theme="light"] {
+  /* Native UI (scrollbars, form controls, autofill) follows the theme */
+  color-scheme: light;
+
   /* Surfaces — pure white base */
   --void-color-bg:           var(--void-white);
   --void-color-bg-secondary: var(--void-stone-100);
@@ -113,6 +124,65 @@
   --void-color-info-subtle:      color-mix(in srgb, var(--void-color-info)      8%, transparent);
   --void-color-notice-subtle:    color-mix(in srgb, var(--void-color-notice)    8%, transparent);
   --void-color-highlight-subtle: color-mix(in srgb, var(--void-color-highlight) 8%, transparent);
+}
+
+/* ── Light theme via OS preference ──
+   Applies only when no data-theme attribute is present on the root; an
+   explicit data-theme="dark" or "light" always wins. Dark stays the
+   default when the OS expresses no preference. SYNC with the block above. */
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme]) {
+    /* Native UI (scrollbars, form controls, autofill) follows the theme */
+    color-scheme: light;
+
+    /* Surfaces — pure white base */
+    --void-color-bg:           var(--void-white);
+    --void-color-bg-secondary: var(--void-stone-100);
+    --void-color-bg-elevated:  var(--void-white);
+    --void-color-bg-hover:     var(--void-stone-200);
+    --void-color-bg-accent:    var(--void-stone-100);
+    --void-color-bg-overlay:   color-mix(in srgb, var(--void-black) 30%, transparent);
+
+    /* Text */
+    --void-color-text:           var(--void-stone-900);
+    --void-color-text-secondary: var(--void-stone-600);
+    --void-color-text-muted:     var(--void-stone-500);
+    --void-color-text-tertiary:  var(--void-stone-400);
+    --void-color-text-disabled:  var(--void-stone-300);
+    --void-color-text-on-accent: var(--void-white);
+
+    /* Borders */
+    --void-color-border:        var(--void-stone-300);
+    --void-color-border-strong: var(--void-stone-400);
+    --void-color-border-focus:  var(--void-stone-600);
+    --void-color-border-control: var(--void-stone-450);
+
+    --void-focus-ring-color:  var(--void-color-border-focus);
+
+    /* Accent */
+    --void-color-accent:       var(--void-stone-900);
+    --void-color-accent-hover: var(--void-stone-950);
+
+    /* Status — primary. -700 where -600 is below 4.5:1 as text on white /
+       bg-secondary (and as a fill under white text-on-accent); -600 where
+       it already passes (info, notice). */
+    --void-color-error:     var(--void-red-700);
+    --void-color-warning:   var(--void-orange-700);
+    --void-color-caution:   var(--void-amber-700);
+    --void-color-success:   var(--void-green-700);
+    --void-color-info:      var(--void-blue-600);
+    --void-color-notice:    var(--void-purple-600);
+    --void-color-highlight: var(--void-pink-700);
+
+    /* Status — subtle (8% color-mix for light backgrounds) */
+    --void-color-error-subtle:     color-mix(in srgb, var(--void-color-error)     8%, transparent);
+    --void-color-warning-subtle:   color-mix(in srgb, var(--void-color-warning)   8%, transparent);
+    --void-color-caution-subtle:   color-mix(in srgb, var(--void-color-caution)   8%, transparent);
+    --void-color-success-subtle:   color-mix(in srgb, var(--void-color-success)   8%, transparent);
+    --void-color-info-subtle:      color-mix(in srgb, var(--void-color-info)      8%, transparent);
+    --void-color-notice-subtle:    color-mix(in srgb, var(--void-color-notice)    8%, transparent);
+    --void-color-highlight-subtle: color-mix(in srgb, var(--void-color-highlight) 8%, transparent);
+  }
 }
 
 /* ── Shape: sharp ── */
