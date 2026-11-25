@@ -7,16 +7,21 @@ void-nav-bar {
   display: flex;
   align-items: center;
   gap: var(--void-gap-inside);
-  /* Content box, so the line under a bordered bar adds to the height as it did around the old inner row. */
-  box-sizing: content-box;
+  /* One box, one calculation: the border-box height is the old inner row's
+     (control height + space-5), plus the line under a bordered bar, which sat
+     outside that row. Splitting it into a content-box min-height and padding
+     rounds the two separately and shifts the bar by a fraction of a pixel. */
+  box-sizing: border-box;
   padding: var(--void-space-2) var(--void-space-4);
-  min-height: calc(var(--void-control-height) + var(--void-space-5) - 2 * var(--void-space-2));
+  min-block-size: calc(var(--void-control-height) + var(--void-space-5) + var(--_void-nav-bar-rule-width, 0px));
   font-family: var(--void-font-sans);
   background: var(--void-nav-bar-surface, var(--void-color-bg));
   box-shadow: var(--void-nav-bar-shadow, none);
 }
 
 void-nav-bar[bordered]:not([bordered="false"]) {
+  /* The line's thickness, for the height above (the container border width: 1px, 2px in Slab). */
+  --_void-nav-bar-rule-width: var(--void-container-border-width);
   border-bottom: var(--void-nav-bar-rule, var(--void-rule));
 }
 
