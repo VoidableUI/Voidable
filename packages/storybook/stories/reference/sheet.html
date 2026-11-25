@@ -164,24 +164,24 @@
       <void-section gap="stack">
         <h2>Alerts and banners</h2>
         <void-stack>
-          <void-alert color="default" variant="subtle">Default, subtle: something worth a sentence.</void-alert>
-          <void-alert color="error" variant="subtle">Error, subtle: something worth a sentence.</void-alert>
-          <void-alert color="warning" variant="subtle">Warning, subtle: something worth a sentence.</void-alert>
-          <void-alert color="caution" variant="subtle">Caution, subtle: something worth a sentence.</void-alert>
-          <void-alert color="success" variant="subtle">Success, subtle: something worth a sentence.</void-alert>
-          <void-alert color="info" variant="subtle">Info, subtle: something worth a sentence.</void-alert>
-          <void-alert color="notice" variant="subtle">Notice, subtle: something worth a sentence.</void-alert>
-          <void-alert color="highlight" variant="subtle">Highlight, subtle: something worth a sentence.</void-alert>
+          <void-alert color="default" variant="subtle"><void-alert-description>Default, subtle: something worth a sentence.</void-alert-description></void-alert>
+          <void-alert color="error" variant="subtle"><void-alert-description>Error, subtle: something worth a sentence.</void-alert-description></void-alert>
+          <void-alert color="warning" variant="subtle"><void-alert-description>Warning, subtle: something worth a sentence.</void-alert-description></void-alert>
+          <void-alert color="caution" variant="subtle"><void-alert-description>Caution, subtle: something worth a sentence.</void-alert-description></void-alert>
+          <void-alert color="success" variant="subtle"><void-alert-description>Success, subtle: something worth a sentence.</void-alert-description></void-alert>
+          <void-alert color="info" variant="subtle"><void-alert-description>Info, subtle: something worth a sentence.</void-alert-description></void-alert>
+          <void-alert color="notice" variant="subtle"><void-alert-description>Notice, subtle: something worth a sentence.</void-alert-description></void-alert>
+          <void-alert color="highlight" variant="subtle"><void-alert-description>Highlight, subtle: something worth a sentence.</void-alert-description></void-alert>
         </void-stack>
         <void-stack>
-          <void-alert color="default" variant="filled">Default, filled: something worth a sentence.</void-alert>
-          <void-alert color="error" variant="filled">Error, filled: something worth a sentence.</void-alert>
-          <void-alert color="warning" variant="filled">Warning, filled: something worth a sentence.</void-alert>
-          <void-alert color="caution" variant="filled">Caution, filled: something worth a sentence.</void-alert>
-          <void-alert color="success" variant="filled">Success, filled: something worth a sentence.</void-alert>
-          <void-alert color="info" variant="filled">Info, filled: something worth a sentence.</void-alert>
-          <void-alert color="notice" variant="filled">Notice, filled: something worth a sentence.</void-alert>
-          <void-alert color="highlight" variant="filled">Highlight, filled: something worth a sentence.</void-alert>
+          <void-alert color="default" variant="filled"><void-alert-description>Default, filled: something worth a sentence.</void-alert-description></void-alert>
+          <void-alert color="error" variant="filled"><void-alert-description>Error, filled: something worth a sentence.</void-alert-description></void-alert>
+          <void-alert color="warning" variant="filled"><void-alert-description>Warning, filled: something worth a sentence.</void-alert-description></void-alert>
+          <void-alert color="caution" variant="filled"><void-alert-description>Caution, filled: something worth a sentence.</void-alert-description></void-alert>
+          <void-alert color="success" variant="filled"><void-alert-description>Success, filled: something worth a sentence.</void-alert-description></void-alert>
+          <void-alert color="info" variant="filled"><void-alert-description>Info, filled: something worth a sentence.</void-alert-description></void-alert>
+          <void-alert color="notice" variant="filled"><void-alert-description>Notice, filled: something worth a sentence.</void-alert-description></void-alert>
+          <void-alert color="highlight" variant="filled"><void-alert-description>Highlight, filled: something worth a sentence.</void-alert-description></void-alert>
         </void-stack>
         <void-stack>
           <void-banner color="error" variant="subtle">Banner error, subtle.</void-banner>
@@ -346,9 +346,9 @@
       <void-section gap="stack">
         <h2>Navigation</h2>
         <void-stack>
-          <void-tabs value="a" size="sm"><void-tab-panel tab="a" label="Alpha">Panel sm</void-tab-panel><void-tab-panel tab="b" label="Beta">Beta</void-tab-panel><void-tab-panel tab="c" label="Gamma">Gamma</void-tab-panel></void-tabs>
-          <void-tabs value="a" size="md"><void-tab-panel tab="a" label="Alpha">Panel md</void-tab-panel><void-tab-panel tab="b" label="Beta">Beta</void-tab-panel><void-tab-panel tab="c" label="Gamma">Gamma</void-tab-panel></void-tabs>
-          <void-tabs value="a" size="lg"><void-tab-panel tab="a" label="Alpha">Panel lg</void-tab-panel><void-tab-panel tab="b" label="Beta">Beta</void-tab-panel><void-tab-panel tab="c" label="Gamma">Gamma</void-tab-panel></void-tabs>
+          <void-tabs value="a" size="sm"><void-tabs-list><void-tabs-trigger value="a">Alpha</void-tabs-trigger><void-tabs-trigger value="b">Beta</void-tabs-trigger><void-tabs-trigger value="c">Gamma</void-tabs-trigger></void-tabs-list><void-tabs-content value="a">Panel sm</void-tabs-content><void-tabs-content value="b">Beta</void-tabs-content><void-tabs-content value="c">Gamma</void-tabs-content></void-tabs>
+          <void-tabs value="a" size="md"><void-tabs-list><void-tabs-trigger value="a">Alpha</void-tabs-trigger><void-tabs-trigger value="b">Beta</void-tabs-trigger><void-tabs-trigger value="c">Gamma</void-tabs-trigger></void-tabs-list><void-tabs-content value="a">Panel md</void-tabs-content><void-tabs-content value="b">Beta</void-tabs-content><void-tabs-content value="c">Gamma</void-tabs-content></void-tabs>
+          <void-tabs value="a" size="lg"><void-tabs-list><void-tabs-trigger value="a">Alpha</void-tabs-trigger><void-tabs-trigger value="b">Beta</void-tabs-trigger><void-tabs-trigger value="c">Gamma</void-tabs-trigger></void-tabs-list><void-tabs-content value="a">Panel lg</void-tabs-content><void-tabs-content value="b">Beta</void-tabs-content><void-tabs-content value="c">Gamma</void-tabs-content></void-tabs>
           <void-breadcrumbs separator="/"><a href="#a">Home</a><a href="#b">Stations</a><span>Kiruna 3</span></void-breadcrumbs>
           <void-pagination total="20" value="6" size="sm"></void-pagination>
           <void-pagination total="20" value="6" size="md"></void-pagination>
@@ -360,14 +360,14 @@
       <void-section gap="stack">
         <h2>Containers, lists and tables</h2>
         <void-split>
-          <void-card heading="Card default" variant="default">A card of variant default with a sentence of content.</void-card>
-          <void-card heading="Card elevated" variant="elevated">A card of variant elevated with a sentence of content.</void-card>
-          <void-card heading="Card bordered" variant="bordered">A card of variant bordered with a sentence of content.</void-card>
-          <void-card heading="Card padding sm" padding="sm">Small padding.</void-card>
+          <void-card variant="default"><void-card-header><void-card-title>Card default</void-card-title></void-card-header><void-card-body>A card of variant default with a sentence of content.</void-card-body></void-card>
+          <void-card variant="elevated"><void-card-header><void-card-title>Card elevated</void-card-title></void-card-header><void-card-body>A card of variant elevated with a sentence of content.</void-card-body></void-card>
+          <void-card variant="bordered"><void-card-header><void-card-title>Card bordered</void-card-title></void-card-header><void-card-body>A card of variant bordered with a sentence of content.</void-card-body></void-card>
+          <void-card padding="sm"><void-card-header><void-card-title>Card padding sm</void-card-title></void-card-header><void-card-body>Small padding.</void-card-body></void-card>
         </void-split>
         <void-accordion>
-          <void-accordion-item heading="First section" open>Content of the first section.</void-accordion-item>
-          <void-accordion-item heading="Second section">Content of the second section.</void-accordion-item>
+          <void-accordion-item open><void-accordion-trigger>First section</void-accordion-trigger><void-accordion-content>Content of the first section.</void-accordion-content></void-accordion-item>
+          <void-accordion-item><void-accordion-trigger>Second section</void-accordion-trigger><void-accordion-content>Content of the second section.</void-accordion-content></void-accordion-item>
         </void-accordion>
         <void-list dividers>
           <void-list-item>Item one</void-list-item>
