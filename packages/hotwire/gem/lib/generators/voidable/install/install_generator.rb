@@ -1,4 +1,4 @@
-require "voidable/hotwire/versions"
+require "voidable/hotwire/cdn"
 
 module Voidable
   module Generators
@@ -23,8 +23,8 @@ module Voidable
         append_to_file importmap, <<~RUBY
 
           # Voidable UI
-          pin "@voidable/ui", to: "#{Voidable::Hotwire::Versions::UI_URL}"
-          pin "@voidable/ui-hotwire", to: "#{Voidable::Hotwire::Versions::UI_HOTWIRE_URL}"
+          pin "@voidable/ui", to: "#{Voidable::Hotwire::CDN::UI_URL}"
+          pin "@voidable/ui-hotwire", to: "#{Voidable::Hotwire::CDN::UI_HOTWIRE_URL}"
         RUBY
         say "Pinned @voidable/ui and @voidable/ui-hotwire in importmap", :green
       end

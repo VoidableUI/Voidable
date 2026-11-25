@@ -29,8 +29,12 @@ import "@voidable/ui"
 VoidTurbo.start()
 ```
 
-The CDN versions the gem pins live in one place:
-`Voidable::Hotwire::Versions` (`lib/voidable/hotwire/versions.rb`).
+The gem pins `@voidable/ui`, `@voidable/ui-hotwire` and `@voidable/theme`
+from the CDN at the gem's own version: every Voidable package is released
+together under one version number, so `voidable-hotwire` 0.8.0 pins the 0.8.0
+npm packages (`Voidable::Hotwire::CDN`, derived from `Voidable::Hotwire::VERSION`).
+Installed from a git checkout or a path, where the version is the unreleased
+placeholder 0.0.0, it pins the latest published packages instead.
 
 ### With jsbundling-rails
 

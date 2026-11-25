@@ -1,4 +1,4 @@
-require "voidable/hotwire/versions"
+require "voidable/hotwire/cdn"
 
-pin "@voidable/ui", to: Voidable::Hotwire::Versions::UI_URL
-pin "@voidable/ui-hotwire", to: Voidable::Hotwire::Versions::UI_HOTWIRE_URL
+pin "@voidable/ui", to: Voidable::Hotwire::CDN::UI_URL
+pin "@voidable/ui-hotwire", to: Voidable::Hotwire::CDN::UI_HOTWIRE_URL
