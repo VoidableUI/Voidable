@@ -26,8 +26,11 @@ module Voidable
       # bundle of @voidable/ui itself uses.
       # Development warnings (@voidable/ui/dev): one self-contained file with no
       # imports, so the raw dist file works as a pin. Only ever imported in
-      # development (see Helpers#voidable_dev_tags).
-      UI_DEV_URL = "#{BASE}/@voidable/ui@#{NPM_VERSION}/dist/dev.js".freeze
+      # development (see Helpers#voidable_dev_tags). Pinned to the gem's own
+      # release only: an unreleased checkout has no published file to point at
+      # (the latest release may predate it), so it gets no pin, and
+      # voidable_dev_tags renders nothing until the app pins its own copy.
+      UI_DEV_URL = (VERSION == "0.0.0" ? nil : "#{BASE}/@voidable/ui@#{VERSION}/dist/dev.js").freeze
 
       UI_AUTOLOADER_URL = "#{BASE}/@voidable/ui@#{NPM_VERSION}/dist/autoloader.js".freeze
       LIT_URL = "#{BASE}/lit@3/+esm".freeze

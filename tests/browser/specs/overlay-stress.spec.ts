@@ -7,7 +7,7 @@
 // that must leave nothing behind (nodes, listeners, top layer, scroll lock),
 // also through a Turbo morph. specs/overlays.spec.ts covers each component's
 // own behaviour; this file covers what they do together and over time.
-import { test, expect, expectedFailure, load, settle, expectPerceivable, scrollLocked, focusedId, type Locator, type Page } from '../helpers/test';
+import { test, expect, load, settle, expectPerceivable, scrollLocked, focusedId, type Locator, type Page } from '../helpers/test';
 
 declare global {
   interface Window {
@@ -329,22 +329,16 @@ test.describe('at every corner of the viewport', () => {
       for (const corner of corners) {
         for (const [kind, k] of Object.entries(kinds)) {
           test(`${kind} opened from the ${{ tl: 'top left', tr: 'top right', bl: 'bottom left', br: 'bottom right' }[corner]} corner stays on screen, clear of its trigger`, async ({ page }) => {
-            // The tooltip and the hover card keep their default side when it is full: they land on their trigger.
-            if (kind === 'tip' && (corner === 'tl' || corner === 'tr')) {
-              expectedFailure('untracked:tooltip-hover-card-no-flip', 'a tooltip on a trigger at the top edge opens upward, off the top, and is pushed back over its trigger instead of flipping below it');
-            }
-            if (kind === 'card' && (corner === 'bl' || corner === 'br')) {
-              expectedFailure('untracked:tooltip-hover-card-no-flip', 'a hover card on a trigger at the bottom edge opens downward and is pushed back over its trigger instead of flipping above it');
-            }
-            // Firefox: a panel that anchor positioning has to flip to stay on screen ends its entrance transition at opacity 0.
-            const flips = ['pop', 'menu', 'combo', 'multi', 'date'].includes(kind) && (corner[0] === 'b' || (corner[1] === 'r' && ['pop', 'menu', 'date'].includes(kind)));
-            if (flips) {
-              expectedFailure('untracked:firefox-flipped-overlay-invisible', `${kind} flipped by position-try-fallbacks to stay in the viewport stays at opacity 0, so it is invisible`, { browsers: ['firefox'] });
-            }
             await load(page, `/overlay-corners?corner=${corner}&only=${kind}`);
             const trigger = page.locator(k.trigger);
             if (k.how === 'click') await trigger.click();
-            else await trigger.hover();
+            else {
+              // The pointer starts at (0, 0), inside a trigger in the top left
+              // corner, where the browser may report the enter before the
+              // component listens: come in from the middle of the page.
+              await page.mouse.move(vp.width / 2, vp.height / 2);
+              await trigger.hover();
+            }
             const panel = page.locator(k.panel);
             await expect(panel).toBeVisible();
             await expectPerceivable(panel);
@@ -858,8 +852,6 @@ test.describe('through a morph with an overlay open', () => {
       });
 
       test('focus on an item of an open menu stays there through a morph', async ({ page }) => {
-        // Fixed for Turbo and Alpine by the morph review changes; morphdom still loses it in WebKit.
-        if (engine === 'morphdom') expectedFailure('untracked:webkit-morph-drops-menu-focus', 'the focused item of an open dropdown-menu loses focus (document.activeElement becomes <body>) when a morphdom morph runs, though the menu stays open', { browsers: ['webkit'] });
         await page.locator('#m-t').click();
         await expect.poll(() => focusedId(page)).toBe('m-1');
         for (let i = 0; i < 3; i++) {

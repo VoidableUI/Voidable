@@ -133,6 +133,24 @@ describe('VoidTurbo.start', () => {
     expect(dialog.open).toBe(true);
   });
 
+  it('a server open wins when start() was called twice (two entry points), on the first morph of a fresh page', async () => {
+    const dialog = await mount('<void-dialog></void-dialog>');
+    stop = VoidTurbo.start();
+    const again = VoidTurbo.start();
+    expect(again).toBe(stop);
+    await morph(dialog, '<void-dialog open></void-dialog>');
+    expect(dialog.hasAttribute('open')).toBe(true);
+    expect(dialog.open).toBe(true);
+  });
+
+  it('a second voidBeforeMorph with the same incoming element does not undo a server change', async () => {
+    const dialog = await mount('<void-dialog></void-dialog>');
+    const next = server('<void-dialog open></void-dialog>');
+    (dialog as any).voidBeforeMorph(next);
+    (dialog as any).voidBeforeMorph(next);
+    expect(next.hasAttribute('open')).toBe(true);
+  });
+
   it('decides per attribute', async () => {
     const c = await mount('<void-checkbox>c</void-checkbox>');
     stop = VoidTurbo.start();

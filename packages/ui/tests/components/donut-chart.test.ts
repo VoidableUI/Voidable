@@ -190,8 +190,15 @@ describe('VoidDonutChart', () => {
       const el = await mount<VoidDonutChart>(TAG, { data: { segments: [{ name: 'only', value: 5 }] } });
       const [seg] = segs(el);
       expect(seg).toBeDefined();
-      const n = nums(seg!.getAttribute('d')!);
-      expect(`${n[0]},${n[1]}`).not.toBe(`${n[7]},${n[8]}`);
+      const d = seg!.getAttribute('d')!;
+      // Closed circles, no radial line (L) that would show as a seam.
+      expect(d).not.toContain('L');
+      expect(d.match(/Z/g)).toHaveLength(2);
+    });
+
+    it('with gaps on, a single 100% segment still closes the ring', async () => {
+      const el = await mount<VoidDonutChart>(TAG, { gaps: 5, data: { segments: [{ name: 'only', value: 5 }, { name: 'none', value: 0 }] } });
+      expect(segs(el)[0]!.getAttribute('d')).not.toContain('L');
     });
 
     it('still draws valid segments when another value is NaN', async () => {

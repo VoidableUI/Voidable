@@ -50,6 +50,12 @@ void-tooltip-content,
 
 /* ── CSS anchor positioning ─────────────────────────────────── */
 
+/* Centred placements span the whole cross axis (span-all, which centres the
+   surface on its anchor): with `center` the area is only as wide as the
+   anchor, so a surface wider than a small trigger overflows it in every
+   fallback, no fallback fits and the surface stays on its full side, over
+   its trigger (a tooltip at the top edge, a hover card at the bottom). */
+
 [data-void-position='anchor'] {
   position-try-fallbacks: flip-block, flip-inline, flip-block flip-inline;
 }
@@ -60,16 +66,16 @@ void-tooltip-content,
 [data-void-position='anchor'][data-void-side='right']  { margin-inline-start: var(--void-overlay-gap); }
 
 [data-void-position='anchor'][data-void-side='bottom'][data-void-align='start']  { position-area: block-end span-inline-end; }
-[data-void-position='anchor'][data-void-side='bottom'][data-void-align='center'] { position-area: block-end center; }
+[data-void-position='anchor'][data-void-side='bottom'][data-void-align='center'] { position-area: block-end span-all; }
 [data-void-position='anchor'][data-void-side='bottom'][data-void-align='end']    { position-area: block-end span-inline-start; }
 [data-void-position='anchor'][data-void-side='top'][data-void-align='start']     { position-area: block-start span-inline-end; }
-[data-void-position='anchor'][data-void-side='top'][data-void-align='center']    { position-area: block-start center; }
+[data-void-position='anchor'][data-void-side='top'][data-void-align='center']    { position-area: block-start span-all; }
 [data-void-position='anchor'][data-void-side='top'][data-void-align='end']       { position-area: block-start span-inline-start; }
 [data-void-position='anchor'][data-void-side='left'][data-void-align='start']    { position-area: inline-start span-block-end; }
-[data-void-position='anchor'][data-void-side='left'][data-void-align='center']   { position-area: inline-start center; }
+[data-void-position='anchor'][data-void-side='left'][data-void-align='center']   { position-area: inline-start span-all; }
 [data-void-position='anchor'][data-void-side='left'][data-void-align='end']      { position-area: inline-start span-block-start; }
 [data-void-position='anchor'][data-void-side='right'][data-void-align='start']   { position-area: inline-end span-block-end; }
-[data-void-position='anchor'][data-void-side='right'][data-void-align='center']  { position-area: inline-end center; }
+[data-void-position='anchor'][data-void-side='right'][data-void-align='center']  { position-area: inline-end span-all; }
 [data-void-position='anchor'][data-void-side='right'][data-void-align='end']     { position-area: inline-end span-block-start; }
 
 /* ── JavaScript positioner (fallback) ───────────────────────── */

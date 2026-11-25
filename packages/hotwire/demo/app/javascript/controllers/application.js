@@ -7,8 +7,7 @@ application.debug = false
 window.Stimulus   = application
 
 // Voidable events work with plain data-action="void-click->x#y"; no
-// controller registration is needed. VoidTurbo protects client state on morphs.
-import { VoidTurbo } from "@voidable/ui-hotwire"
-VoidTurbo.start()
+// controller registration is needed. VoidTurbo (started in application.js)
+// protects client state on morphs.
 
 export { application }

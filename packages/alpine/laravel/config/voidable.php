@@ -23,9 +23,12 @@ return [
     'dev_warnings' => env('VOIDABLE_DEV_WARNINGS', env('APP_ENV', 'production') === 'local'),
 
     // Where the development warnings script comes from: a self-contained file with
-    // no imports. Point it at a pinned CDN version or your own copy (the
-    // @voidable/ui package ships it as dist/dev.js).
-    'dev_script' => 'https://cdn.jsdelivr.net/npm/@voidable/ui@latest/dist/dev.js',
+    // no imports (the @voidable/ui package ships it as dist/dev.js). By default
+    // the copy published with this package's own release on jsDelivr; null when
+    // the release cannot be told (a path or dev-branch install), and then no
+    // script is emitted. Set VOIDABLE_DEV_SCRIPT to your own copy or a pinned URL,
+    // or import '@voidable/ui/dev' from your development bundle instead.
+    'dev_script' => env('VOIDABLE_DEV_SCRIPT', \Voidable\Laravel\VoidableServiceProvider::devScriptUrl()),
 
     // Livewire morph protection
     // Exposed to your bundle as window.voidableConfig.livewireMorphProtection

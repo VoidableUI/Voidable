@@ -631,8 +631,8 @@ describe('internals strategy with ElementInternals (fake)', () => {
     expect(form.querySelector('void-tags-input')!.getAttribute('aria-disabled')).toBe('true');
     setFieldsetDisabled(fs, false);
     await settle(form);
-    expect(form.querySelector('void-switch')!.getAttribute('aria-disabled')).toBe('false');
-    expect(form.querySelector('void-tags-input')!.getAttribute('aria-disabled')).toBe('false');
+    expect(form.querySelector('void-switch')!.hasAttribute('aria-disabled')).toBe(false);
+    expect(form.querySelector('void-tags-input')!.hasAttribute('aria-disabled')).toBe(false);
   });
 
   it('formResetCallback restores initial values without void-change', async () => {
@@ -851,7 +851,7 @@ describe('review: fieldset disabled (finding 5)', () => {
     expect(hosts.map((h) => `${h.getAttribute('aria-disabled')}/${h.getAttribute('tabindex')}`)).toEqual(['true/-1', 'true/-1', 'true/-1']);
     setFieldsetDisabled(fs, false);
     await settle(form);
-    expect(hosts.map((h) => `${h.getAttribute('aria-disabled')}/${h.getAttribute('tabindex')}`)).toEqual(['false/0', 'false/0', 'false/0']);
+    expect(hosts.map((h) => `${h.getAttribute('aria-disabled')}/${h.getAttribute('tabindex')}`)).toEqual(['null/0', 'null/0', 'null/0']);
   });
 });
 
@@ -1034,7 +1034,7 @@ describe('native-backed: disabled groups and form attribute', () => {
     (form.querySelector('void-checkbox-group') as VoidCheckboxGroup).toggleAttribute('disabled', false);
     await settle(form);
     expect([...new FormData(form).entries()]).toEqual([['h', 'z']]);
-    expect(form.querySelector('void-checkbox')!.getAttribute('aria-disabled')).toBe('false');
+    expect(form.querySelector('void-checkbox')!.hasAttribute('aria-disabled')).toBe(false);
   });
 
   it('forwards the form attribute to the native control (and through groups)', async () => {

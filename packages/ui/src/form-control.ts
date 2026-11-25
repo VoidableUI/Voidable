@@ -86,6 +86,42 @@ export function isInDisabledFieldset(el: Element): boolean {
   return false;
 }
 
+/** Hosts that follow a `<fieldset disabled>` without being form-associated, per document. */
+const fieldsetWatchers = new WeakMap<Node, { observer: MutationObserver; hosts: Map<Element, () => void> }>();
+
+/**
+ * Calls `onChange` whenever a `<fieldset>` around `host` is disabled or
+ * enabled, for components that are not form-associated but must stop reacting
+ * there as a native button does. One observer per document serves every such
+ * host (a page of a thousand buttons does not create a thousand observers);
+ * moving a host into or out of a fieldset reconnects it, which the component
+ * handles itself. Returns the function that stops watching, for
+ * disconnectedCallback.
+ */
+export function watchDisabledAncestors(host: Element, onChange: () => void): () => void {
+  if (typeof MutationObserver === 'undefined') return () => {};
+  const root = host.getRootNode();
+  let watcher = fieldsetWatchers.get(root);
+  if (!watcher) {
+    const hosts = new Map<Element, () => void>();
+    const observer = new MutationObserver((records) => {
+      const fieldsets = new Set<Node>();
+      for (const r of records) if ((r.target as Element).tagName === 'FIELDSET') fieldsets.add(r.target);
+      if (!fieldsets.size) return;
+      for (const [el, fn] of hosts) {
+        for (const f of fieldsets) if (f.contains(el)) { fn(); break; }
+      }
+    });
+    observer.observe(root, { attributes: true, attributeFilter: ['disabled'], subtree: true });
+    fieldsetWatchers.set(root, (watcher = { observer, hosts }));
+  }
+  watcher.hosts.set(host, onChange);
+  const w = watcher;
+  return () => {
+    w.hosts.delete(host);
+  };
+}
+
 function clone<T>(v: T): T {
   return (Array.isArray(v) ? [...v] : v) as T;
 }
@@ -180,6 +216,10 @@ function CoreFormControl<T extends Constructor<VoidElement>>(Base: T) {
     /** Like :user-invalid — only expose aria-invalid after interaction or a failed submit. */
     #interacted = false;
     #ancestorObserver: MutationObserver | null = null;
+    /** The validation anchor of the current invalid state, which focus on the host is passed on to. */
+    #validationAnchor: HTMLElement | undefined = undefined;
+    /** The host carries tabindex="-1" because this mixin made it focusable for validation. */
+    #focusableForValidity = false;
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     constructor(...args: any[]) {
@@ -197,6 +237,7 @@ function CoreFormControl<T extends Constructor<VoidElement>>(Base: T) {
         hostUpdated: () => this.formSync(),
       });
       this.addEventListener('invalid', this.#onInvalid);
+      this.addEventListener('focus', this.#onHostFocus);
     }
 
     connectedCallback(): void {
@@ -328,9 +369,9 @@ function CoreFormControl<T extends Constructor<VoidElement>>(Base: T) {
       const entries = Array.isArray(submission)
         ? submission.map((v: string | File) => (typeof v === 'string' ? v : [v.name, v.size, v.lastModified]))
         : submission;
-      // Machine-readable disabled state (own, fieldset or group).
+      // Machine-readable disabled state (own, fieldset or group); absent when enabled.
       if (disabled) this.#setAria('aria-disabled', 'true');
-      else if (this.hasAttribute('aria-disabled')) this.#setAria('aria-disabled', 'false');
+      else if (this.hasAttribute('aria-disabled')) this.#setAria('aria-disabled', null);
 
       const key = JSON.stringify([
         this.name, entries, state, disabled, required, this.#interacted,
@@ -351,8 +392,13 @@ function CoreFormControl<T extends Constructor<VoidElement>>(Base: T) {
         }
       }
       if (internals) {
-        if (validity) internals.setValidity(validity.flags, validity.message, this.#anchor(validity));
-        else internals.setValidity({});
+        if (validity) {
+          internals.setValidity(validity.flags, validity.message, this.#anchor(validity));
+        } else {
+          internals.setValidity({});
+          this.#validationAnchor = undefined;
+          this.#hostFocusable(false);
+        }
       }
       // Only hosts that carry a role are what assistive tech reads.
       if (this.hasAttribute('role')) {
@@ -363,12 +409,31 @@ function CoreFormControl<T extends Constructor<VoidElement>>(Base: T) {
 
     #anchor(validity: FormValidityResult): HTMLElement | undefined {
       const anchor = validity.anchor && validity.anchor.isConnected ? validity.anchor : undefined;
-      if (anchor) return anchor;
-      // No focusable descendant: let the host itself take focus so the browser
-      // can show the message instead of silently refusing to submit.
-      if (!this.hasAttribute('tabindex')) this.setHostAttribute('tabindex', '-1');
-      return undefined;
+      this.#validationAnchor = anchor;
+      // Chromium focuses the anchor when it reports the control; Firefox
+      // focuses the host itself and, if the host cannot take focus, reports
+      // "the invalid form control is not focusable" and shows no message. So
+      // an invalid host is focusable (not in the tab order) and passes the
+      // focus on to its anchor.
+      this.#hostFocusable(true);
+      return anchor;
     }
+
+    #hostFocusable(on: boolean): void {
+      if (on) {
+        if (this.#focusableForValidity || this.hasAttribute('tabindex')) return;
+        this.#focusableForValidity = true;
+        this.setHostAttribute('tabindex', '-1');
+      } else if (this.#focusableForValidity) {
+        this.#focusableForValidity = false;
+        if (this.getAttribute('tabindex') === '-1') this.setHostAttribute('tabindex', null);
+      }
+    }
+
+    #onHostFocus = (e: FocusEvent): void => {
+      const anchor = this.#validationAnchor;
+      if (e.target === this && anchor && anchor !== this && anchor.isConnected) anchor.focus();
+    };
 
     /**
      * Host attributes rather than ElementInternals ARIA defaults: Void UI keeps
@@ -565,8 +630,13 @@ export function InternalsFormControl<T extends Constructor<VoidElement>>(Base: T
       return v === undefined || v === null ? null : String(v);
     }
 
+    /** The first focusable descendant that is rendered (a `display: none` file input cannot take focus). */
     protected formValidationAnchor(): HTMLElement | undefined {
-      return this.querySelector<HTMLElement>(FOCUSABLE) ?? undefined;
+      for (const el of Array.from(this.querySelectorAll<HTMLElement>(FOCUSABLE))) {
+        const shown = typeof el.checkVisibility === 'function' ? el.checkVisibility() : el.getClientRects().length > 0;
+        if (shown) return el;
+      }
+      return undefined;
     }
 
     protected override formValidity(): FormValidityResult | null {

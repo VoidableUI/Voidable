@@ -9,6 +9,9 @@ import { NativeFormControl } from '../form-control.js';
  * the accessible name, which `<void-field>` supplies.
  */
 export class VoidSlider extends NativeFormControl(VoidElement) {
+  /** The host's `aria-label` / `aria-labelledby` name the inner control. */
+  static override labelTarget = 'input';
+
   /**
    * Current position, between `min` and `max`. Defaults to 50. As an attribute it is the initial value;
    * read the `value` property for the current one.

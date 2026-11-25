@@ -1,18 +1,19 @@
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
-import { isInDisabledFieldset } from '../form-control.js';
+import { isInDisabledFieldset, watchDisabledAncestors } from '../form-control.js';
 
 /** Action trigger for forms, dialogs, and toolbars; supports semantic color variants. */
 export class VoidButton extends VoidElement {
-  /**
-   * Form-associated so the button knows its form owner (including the `form`
-   * attribute, via ElementInternals) and is told about `<fieldset disabled>`
-   * ancestors. It never calls setFormValue: like a native button it
-   * contributes no value. `type="submit"` calls form.requestSubmit() (which
-   * runs validation and fires `submit`), `type="reset"` calls form.reset(),
-   * `type="button"` does nothing to the form.
+  /*
+   * Not form-associated. Its form is the one it sits in; `type="submit"` calls
+   * form.requestSubmit() (which runs validation and fires `submit`),
+   * `type="reset"` calls form.reset(), `type="button"` does nothing to the
+   * form, and like a native button it contributes no value. A
+   * `<fieldset disabled>` ancestor is observed. A form-associated host would
+   * be what holds focus after a click, and LiveView never patches the
+   * children of a focused form control, so the label of a clicked button
+   * (`Count {@count}`, `Saving…`) would not update while it has focus.
    */
-  static formAssociated = true;
 
   /**
    * Visual weight. `outline` (default) is a bordered button, `filled` is the
@@ -38,35 +39,30 @@ export class VoidButton extends VoidElement {
   /** Size step: `sm`, `md` (default) or `lg`. Controls of the same step share one height. */
   @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' = 'md';
 
-  private _internals: ElementInternals | null = null;
+  /** Watches every ancestor's `disabled` attribute (a `<fieldset disabled>`). */
+  private _unwatch: (() => void) | null = null;
 
-  constructor() {
-    super();
-    try {
-      this._internals = this.attachInternals();
-    } catch {
-      // attachInternals not supported (e.g., happy-dom).
-    }
-  }
-
-  /** Return the associated form, via ElementInternals or DOM traversal. */
+  /** The form the button sits in. */
   private get _form(): HTMLFormElement | null {
-    return this._internals?.form ?? this.closest('form');
+    return this.closest('form');
   }
 
   connectedCallback(): void {
     super.connectedCallback();
     this.setHostAttribute('role', 'button');
     this.setHostAttribute('tabindex', '0');
-    this.setHostAttribute('aria-disabled', String(this.disabled));
     this.addEventListener('click', this._handleClick);
     this.addEventListener('keydown', this._handleKeydown);
+    this._syncDisabledState(this.formDisabled);
+    this._unwatch = watchDisabledAncestors(this, () => this._syncDisabledState(this.formDisabled));
   }
 
   disconnectedCallback(): void {
     super.disconnectedCallback();
     this.removeEventListener('click', this._handleClick);
     this.removeEventListener('keydown', this._handleKeydown);
+    this._unwatch?.();
+    this._unwatch = null;
   }
 
   updated(changed: Map<string, unknown>): void {
@@ -80,13 +76,9 @@ export class VoidButton extends VoidElement {
     return this.disabled || isInDisabledFieldset(this);
   }
 
-  /** Called by the browser when an ancestor fieldset's disabled state changes. */
-  formDisabledCallback(disabled: boolean): void {
-    this._syncDisabledState(disabled || this.formDisabled);
-  }
-
   private _syncDisabledState(disabled: boolean): void {
-    this.setHostAttribute('aria-disabled', String(disabled));
+    // Absent when enabled, as on every other control.
+    this.setHostAttribute('aria-disabled', disabled ? 'true' : null);
     this.setHostAttribute('tabindex', disabled ? '-1' : '0');
   }
 

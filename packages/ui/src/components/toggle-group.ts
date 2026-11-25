@@ -7,7 +7,9 @@ import type { VoidToggle } from './toggle.js';
 export class VoidToggleGroup extends InternalsFormControl(VoidElement) {
   /**
    * Comma-separated `value`s of the pressed toggles (`bold,italic`), or the single pressed value. As an
-   * attribute it is the initial state and the form's reset target.
+   * attribute it is the initial state and the form's reset target. Without it (or with an empty one) the
+   * toggles that carry `pressed` in the markup set the initial value (the first of them unless
+   * `multiple`); a non-empty `value` wins over their `pressed`.
    */
   @property({ type: String, reflect: true }) value = '';
   /** Let several toggles be pressed at once. Without it pressing one releases the others. */
@@ -23,6 +25,7 @@ export class VoidToggleGroup extends InternalsFormControl(VoidElement) {
 
   connectedCallback(): void {
     super.connectedCallback();
+    if (!this.hasUpdated) this._adoptPressed(this._toggles());
     this.setHostAttribute('role', 'group');
     this.addEventListener('void-change', this._handleChildChange as EventListener);
     this.addEventListener('keydown', this._handleKeydown);
@@ -68,7 +71,27 @@ export class VoidToggleGroup extends InternalsFormControl(VoidElement) {
 
   /** @internal Gives one toggle the group's state; toggles call it when they connect after the group (a blocking script in the head, framework rendering). */
   _syncToggle(toggle: VoidToggle): void {
-    if (toggle.closest('void-toggle-group') === this) this._applyTo(toggle, this._selectedValues());
+    if (toggle.closest('void-toggle-group') !== this) return;
+    if (!this.hasUpdated) this._adoptPressed([toggle]);
+    this._applyTo(toggle, this._selectedValues());
+  }
+
+  /**
+   * Before the first render, with no value of its own from the markup, the
+   * group takes its value from toggles written with `pressed` (server
+   * markup often marks the pressed toggle rather than the group).
+   */
+  private _adoptPressed(toggles: VoidToggle[]): void {
+    if (this.getAttribute('value')) return;
+    const selected = this._selectedValues();
+    for (const toggle of toggles) {
+      const val = toggle.getAttribute('value') || '';
+      if (!val || !toggle.hasAttribute('pressed') || selected.includes(val)) continue;
+      if (!this.multiple && selected.length) break;
+      selected.push(val);
+    }
+    const next = selected.join(',');
+    if (next !== this.value) this.value = next;
   }
 
   private _applyTo(toggle: VoidToggle, selected: string[]): void {

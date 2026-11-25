@@ -29,9 +29,22 @@ end`} />
 
 `import '@voidable/ui'` registers every component up front. LiveView pages usually use a few, and patches add more over time; `import '@voidable/ui/autoloader'` fetches each component the first time its tag appears in the page or in a patch. Without a bundler, vendor the files with `voidable install` and import `@voidable/ui/autoloader.js` through the import map it prints. See [Loading components](/getting-started/loading/).
 
-## Register the LiveView hook
+## Use LiveView's own bindings
 
-Add the `VoidEvent` hook to your LiveSocket:
+Components are plain elements to LiveView, so its bindings work on them: `phx-click` on a `void-button`, `void-tag`, `void-card`, a dropdown or menu item, or a `void-tabs-trigger`; `phx-change` and `phx-submit` on the `<form>` around the controls, which all submit under their `name` (a `void-button type="submit"` submits the form). Start there:
+
+```heex
+<form phx-change="validate" phx-submit="save">
+  <.field label="Email"><.input name="email" value={@email} /></.field>
+  <.button type="submit">Save</.button>
+</form>
+
+<.button phx-click="archive" phx-value-id={@id}>Archive</.button>
+```
+
+## Bridge other Voidable events
+
+For an event no binding covers (a dialog the user closed, `void-select` from a combobox), add the `VoidEvent` hook to your LiveSocket:
 
 ```js
 import { VoidHooks } from '@voidable/ui-liveview';
@@ -41,29 +54,20 @@ let liveSocket = new LiveSocket('/live', Socket, {
 });
 ```
 
-The hook listens for Voidable custom events on the element and forwards them to the server via `pushEvent`.
-
-## Usage in HEEx templates
-
-Attach the hook with `phx-hook` and add `phx-update="ignore"` to prevent LiveView from clobbering client-managed state:
+The hook listens for the Voidable events named in `data-void-events` and forwards each to the server with `pushEvent`, after the browser has finished handling it, so a `phx-click` on the same element still runs first. With the `live_voidable` components (`import VoidableUI.Components`), opt in per element with `events`: `events` bridges all of the component's events, `events={["void-close"]}` only those. Without it no hook is attached:
 
 ```heex
-<void-button
-  variant="filled"
-  phx-hook="VoidEvent"
-  phx-update="ignore"
-  data-void-events="void-click"
->
-  Submit
-</void-button>
-
-<void-input
-  placeholder="Search"
-  phx-hook="VoidEvent"
-  phx-update="ignore"
-  data-void-events="void-change"
-></void-input>
+<.dialog id="confirm" events={["void-close"]}><void-dialog-title>Delete?</void-dialog-title>…</.dialog>
+<.combobox name="city" events={["void-select"]}>…</.combobox>
 ```
+
+On plain tags, attach the hook yourself (it needs an id):
+
+```heex
+<void-dialog id="confirm" phx-hook="VoidEvent" data-void-events="void-close"><void-dialog-title>Delete?</void-dialog-title>…</void-dialog>
+```
+
+You do not need `phx-update="ignore"`: see [DOM preservation](#dom-preservation).
 
 ## Handle events on the server
 
@@ -100,6 +104,7 @@ let liveSocket = new LiveSocket('/live', Socket, {
 
 - **The component's own DOM.** Before the morph compares an element, the adapter calls its `voidBeforeMorph()` hook: the structure the component rendered (native inputs, wrappers, icons, list items) is set aside and the element is left looking like its server markup, so the morph only diffs what the server sent. Right after the morph the same nodes go back, so nothing is rebuilt: a field you are typing in keeps its focus, caret, text and scroll position, an unfocused field keeps what was typed, and scroll positions, slider positions and chart state are kept. In browsers with `Element.moveBefore` (Chromium, recent Firefox) the nodes never leave the document; elsewhere they are put back with the same focus, caret, text and scroll, and the only difference is that `blur` and `focus` events fire.
 - **The server's changes win; the client's state survives otherwise.** For every reflected property of every component (`open`, `checked`, `pressed`, `collapsed`, `active`, `value`, `indeterminate`, ...), the element remembers what the server last rendered. An attribute the server changed since then, including one it removed, is applied; every other one keeps the client's value. So a dialog, drawer or accordion item the user opened (a dialog or drawer still modal, with focus and typed text inside; see [Overlays](/components/overlays/#server-driven-pages)), a toggle they pressed, a collapsed sidebar or the carousel's current slide survive a morph that does not change them, and the server can still close, uncheck or move them by rendering a different value. Groups that keep their state in their children (toggle-group, segmented-control, radio-group, checkbox-group, tabs) re-apply it to children the morph added or replaced. Text typed but not committed yet (number-input, editable) survives until it is committed, unless the server changes the value. A value the server changes also becomes the form control's reset default, as a native input's default follows its `value` attribute.
+- **What you are typing is yours while focus is in the field.** A patch that arrives while you type (the echo of an earlier `phx-change`, which is a few keys behind) never rewrites the text of the field you are in, as a browser never rewrites a native field from its `value` attribute; the server's value is applied by the next patch after focus has left, if it changed. LiveView also patches a clone of an element it has locked while waiting for a reply and then copies the clone back, often as two patches in one go; components accept both, so nothing typed is lost and focus never leaves the field.
 - **A selection the server removed falls back** instead of going blank: tabs whose selected panel is gone select the panel the server's `value` names, else the first enabled one; a select whose picked option is gone takes the server's `value`, else the first enabled option.
 - **Attributes the component manages on itself** (`role`, `tabindex`, `aria-checked` and the like) are carried onto the incoming element whenever the server markup does not set them, so the morph leaves them alone. Anything the server markup sets is applied. If a page script keeps removing one of them, the component stops putting it back after ten attempts within a second (`@voidable/ui/dev` reports it).
 - **Without the adapter** (a plain idiomorph or morphdom call, `innerHTML` on a parent, a framework replacing children) components still end up correct: one that loses its rendered DOM renders it again, attributes it manages are put back, and a cloned or re-parsed copy of a rendered element (a page-cache snapshot) renders exactly one set of its DOM. Focus and selection inside a rebuilt component are lost in that case.

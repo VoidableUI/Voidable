@@ -22,5 +22,15 @@
 <%= form_with url: morph_lab_path, method: :patch, id: "lab-form" do %>
   <void-field label="Notes"><void-input id="lab-notes" name="notes" value="<%= @lab["notes"] %>"></void-input></void-field>
   <void-switch id="lab-news" name="news" value="yes">Newsletter</void-switch>
+  <%# More text entry, for typing while refresh morphs arrive (not saved). %>
+  <void-field label="Email"><void-input id="lab-email" type="email" name="email"></void-input></void-field>
+  <void-field label="Bio"><void-textarea id="lab-bio" name="bio"></void-textarea></void-field>
+  <void-field label="Seats"><void-number-input id="lab-seats" name="seats" min="1" max="10" value="2"></void-number-input></void-field>
+  <void-field label="Framework">
+    <void-combobox id="lab-fw" name="framework" placeholder="Pick">
+      <void-option value="react">React</void-option>
+      <void-option value="lit">Lit</void-option>
+    </void-combobox>
+  </void-field>
   <void-button id="lab-save" type="submit">Save notes</void-button>
 <% end %>

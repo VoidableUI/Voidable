@@ -15,7 +15,7 @@ import { Application } from '@hotwired/stimulus';
 import { VoidTurbo } from '@voidable/ui-hotwire';
 
 Application.start();
-VoidTurbo.start(); // returns a function that detaches the listeners
+VoidTurbo.start(); // idempotent; returns a function that detaches the listener
 ```
 
 `VoidTurbo` calls each component's pre-morph hook during Turbo morphs: the

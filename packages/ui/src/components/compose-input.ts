@@ -4,6 +4,11 @@ import { VoidElement } from '../base.js';
 
 /** Rich text entry area for messaging UIs, comment boxes, and social post composers. */
 export class VoidComposeInput extends VoidElement {
+  /** The host's `aria-label` / `aria-labelledby` name the inner control. */
+  static override labelTarget = 'textarea';
+
+  /** While focus is inside, a morph does not apply the server's value over what the user is typing. */
+  static override editState = ['value'];
   /** The draft text. It is cleared after each send. */
   @property({ type: String }) value = '';
   /** Hint shown while the box is empty. Defaults to `Type a message...`. */

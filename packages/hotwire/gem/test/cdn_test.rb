@@ -17,9 +17,12 @@ class CDNTest < Minitest::Test
     assert_equal "https://cdn.jsdelivr.net/npm/@voidable/theme@#{expected}/dist/void.min.css", C::THEME_CSS_URL
   end
 
-  def test_dev_entry_is_a_raw_standalone_file
-    expected = V == "0.0.0" ? "latest" : V
-    assert_equal "https://cdn.jsdelivr.net/npm/@voidable/ui@#{expected}/dist/dev.js", C::UI_DEV_URL
+  def test_dev_entry_is_a_raw_standalone_file_of_this_release_never_latest
+    if V == "0.0.0"
+      assert_nil C::UI_DEV_URL
+    else
+      assert_equal "https://cdn.jsdelivr.net/npm/@voidable/ui@#{V}/dist/dev.js", C::UI_DEV_URL
+    end
   end
 
   def test_autoloader_is_pinned_as_a_raw_file_with_lit_pinned_beside_it

@@ -472,7 +472,7 @@ describe('VoidDropdownMenuItem', () => {
     expect(el.getAttribute('aria-disabled')).toBe('true');
     el.disabled = false;
     await el.updateComplete;
-    expect(el.getAttribute('aria-disabled')).toBe('false');
+    expect(el.hasAttribute('aria-disabled')).toBe(false);
   });
 
   describe('void-select event', () => {

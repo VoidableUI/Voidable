@@ -3,8 +3,20 @@ defmodule VoidableUI.Components do
   HEEx function components for all Voidable web components.
 
   Each function component renders the corresponding `<void-*>` custom element tag.
-  Interactive components include `phx-hook="VoidEvent"` and `data-void-events`
-  attributes to bridge CustomEvents to LiveView's `pushEvent`.
+
+  ## Events
+
+  Use LiveView's own bindings first: `phx-click` on a button, tag, card or
+  menu item, and `phx-change` / `phx-submit` on the form around the controls
+  (every control submits under its `name`). For a Voidable event the server
+  needs that no binding covers (a dialog the user closed, a tab the user
+  selected outside a form), pass `events`: `true` pushes every event the
+  component dispatches, a list such as `events={["void-close"]}` (or a
+  comma-separated string) only those. The component then renders
+  `phx-hook="VoidEvent"` and `data-void-events`, and each event arrives as
+  `handle_event("void-close", %{"id" => ..., "name" => ..., "detail" => ...}, socket)`.
+  Without `events` no hook is attached, so nothing is pushed that the server
+  must handle.
 
   ## Ids
 
@@ -62,6 +74,23 @@ defmodule VoidableUI.Components do
 
   use Phoenix.Component
 
+  @events_doc """
+  Voidable events to push to the LiveView through the `VoidEvent` hook: `true`
+  for every event the component dispatches, or a list (or comma-separated
+  string) of event names. Off by default.
+  """
+
+  # The data-void-events value for `events`, or nil (no hook) when it is unset.
+  defp void_events(nil, _all), do: nil
+  defp void_events(false, _all), do: nil
+  defp void_events(true, all), do: all
+  defp void_events([], _all), do: nil
+  defp void_events(names, _all) when is_list(names), do: Enum.join(names, ",")
+  defp void_events("", _all), do: nil
+  defp void_events(names, _all) when is_binary(names), do: names
+
+  defp void_hook(events), do: if(void_events(events, ""), do: "VoidEvent")
+
   # Stable id for components that need one (`phx-hook` requires an id).
   #
   # The id is derived from the component kind, its `name` and its `phx-*` /
@@ -118,6 +147,7 @@ defmodule VoidableUI.Components do
   attr :disabled, :boolean, default: false
   attr :type, :string, default: nil
   attr :size, :string, default: nil
+  attr :events, :any, default: nil, doc: @events_doc
   attr :rest, :global
   slot :inner_block, required: true
 
@@ -130,8 +160,8 @@ defmodule VoidableUI.Components do
       disabled={@disabled}
       type={@type}
       size={@size}
-      phx-hook="VoidEvent"
-      data-void-events="void-click"
+      phx-hook={void_hook(@events)}
+      data-void-events={void_events(@events, "void-click")}
       {@rest}
     >
       {render_slot(@inner_block)}
@@ -207,6 +237,7 @@ defmodule VoidableUI.Components do
   attr :disabled, :boolean, default: false
   attr :color, :string, default: nil
   attr :size, :string, default: nil
+  attr :events, :any, default: nil, doc: @events_doc
   attr :rest, :global
 
   def switch(assigns) do
@@ -217,8 +248,8 @@ defmodule VoidableUI.Components do
       disabled={@disabled}
       color={@color}
       size={@size}
-      phx-hook="VoidEvent"
-      data-void-events="void-change"
+      phx-hook={void_hook(@events)}
+      data-void-events={void_events(@events, "void-change")}
       {@rest}
     />
     """
@@ -250,6 +281,7 @@ defmodule VoidableUI.Components do
   attr :color, :string, default: nil
   attr :dismissible, :boolean, default: false
   attr :variant, :string, default: nil
+  attr :events, :any, default: nil, doc: @events_doc
   attr :rest, :global
   slot :inner_block, required: true
 
@@ -260,8 +292,8 @@ defmodule VoidableUI.Components do
       color={@color}
       dismissible={@dismissible}
       variant={@variant}
-      phx-hook="VoidEvent"
-      data-void-events="void-dismiss"
+      phx-hook={void_hook(@events)}
+      data-void-events={void_events(@events, "void-dismiss")}
       {@rest}
     >
       {render_slot(@inner_block)}
@@ -278,6 +310,7 @@ defmodule VoidableUI.Components do
   attr :color, :string, default: nil
   attr :removable, :boolean, default: false
   attr :size, :string, default: nil
+  attr :events, :any, default: nil, doc: @events_doc
   attr :rest, :global
   slot :inner_block, required: true
 
@@ -288,8 +321,8 @@ defmodule VoidableUI.Components do
       color={@color}
       removable={@removable}
       size={@size}
-      phx-hook="VoidEvent"
-      data-void-events="void-remove"
+      phx-hook={void_hook(@events)}
+      data-void-events={void_events(@events, "void-remove")}
       {@rest}
     >
       {render_slot(@inner_block)}
@@ -359,6 +392,7 @@ defmodule VoidableUI.Components do
   attr :minlength, :integer, default: nil
   attr :maxlength, :integer, default: nil
   attr :pattern, :string, default: nil
+  attr :events, :any, default: nil, doc: @events_doc
   attr :rest, :global, include: ~w(inputmode enterkeyhint autocapitalize spellcheck)
 
   def input(assigns) do
@@ -378,8 +412,8 @@ defmodule VoidableUI.Components do
       minlength={@minlength}
       maxlength={@maxlength}
       pattern={@pattern}
-      phx-hook="VoidEvent"
-      data-void-events="void-input,void-change"
+      phx-hook={void_hook(@events)}
+      data-void-events={void_events(@events, "void-input,void-change")}
       {@rest}
     />
     """
@@ -404,6 +438,7 @@ defmodule VoidableUI.Components do
   attr :autocomplete, :string, default: nil
   attr :minlength, :integer, default: nil
   attr :maxlength, :integer, default: nil
+  attr :events, :any, default: nil, doc: @events_doc
   attr :rest, :global, include: ~w(inputmode enterkeyhint autocapitalize spellcheck)
 
   def textarea(assigns) do
@@ -423,8 +458,8 @@ defmodule VoidableUI.Components do
       autocomplete={@autocomplete}
       minlength={@minlength}
       maxlength={@maxlength}
-      phx-hook="VoidEvent"
-      data-void-events="void-input,void-change"
+      phx-hook={void_hook(@events)}
+      data-void-events={void_events(@events, "void-input,void-change")}
       {@rest}
     />
     """
@@ -443,6 +478,7 @@ defmodule VoidableUI.Components do
   attr :size, :string, default: nil
   attr :error, :string, default: nil
   attr :placeholder, :string, default: nil
+  attr :events, :any, default: nil, doc: @events_doc
   attr :rest, :global
   slot :inner_block, required: true
 
@@ -457,8 +493,8 @@ defmodule VoidableUI.Components do
       size={@size}
       error={@error}
       placeholder={@placeholder}
-      phx-hook="VoidEvent"
-      data-void-events="void-change"
+      phx-hook={void_hook(@events)}
+      data-void-events={void_events(@events, "void-change")}
       {@rest}
     >
       {render_slot(@inner_block)}
@@ -479,6 +515,7 @@ defmodule VoidableUI.Components do
   attr :value, :string, default: nil
   attr :color, :string, default: nil
   attr :size, :string, default: nil
+  attr :events, :any, default: nil, doc: @events_doc
   attr :rest, :global
   slot :inner_block
 
@@ -493,8 +530,8 @@ defmodule VoidableUI.Components do
       value={@value}
       color={@color}
       size={@size}
-      phx-hook="VoidEvent"
-      data-void-events="void-change"
+      phx-hook={void_hook(@events)}
+      data-void-events={void_events(@events, "void-change")}
       {@rest}
     >
       {render_slot(@inner_block)}
@@ -514,6 +551,7 @@ defmodule VoidableUI.Components do
   attr :value, :string, default: nil
   attr :color, :string, default: nil
   attr :size, :string, default: nil
+  attr :events, :any, default: nil, doc: @events_doc
   attr :rest, :global
   slot :inner_block
 
@@ -527,8 +565,8 @@ defmodule VoidableUI.Components do
       value={@value}
       color={@color}
       size={@size}
-      phx-hook="VoidEvent"
-      data-void-events="void-change"
+      phx-hook={void_hook(@events)}
+      data-void-events={void_events(@events, "void-change")}
       {@rest}
     >
       {render_slot(@inner_block)}
@@ -546,6 +584,7 @@ defmodule VoidableUI.Components do
   attr :value, :string, default: nil
   attr :name, :string, default: nil
   attr :orientation, :string, default: nil
+  attr :events, :any, default: nil, doc: @events_doc
   attr :rest, :global
   slot :inner_block, required: true
 
@@ -557,8 +596,8 @@ defmodule VoidableUI.Components do
       value={@value}
       name={@name}
       orientation={@orientation}
-      phx-hook="VoidEvent"
-      data-void-events="void-change"
+      phx-hook={void_hook(@events)}
+      data-void-events={void_events(@events, "void-change")}
       {@rest}
     >
       {render_slot(@inner_block)}
@@ -622,6 +661,7 @@ defmodule VoidableUI.Components do
   attr :size, :string, default: nil
   attr :error, :string, default: nil
   attr :name, :string, default: nil
+  attr :events, :any, default: nil, doc: @events_doc
   attr :rest, :global
   slot :inner_block, required: true
 
@@ -634,8 +674,8 @@ defmodule VoidableUI.Components do
       size={@size}
       error={@error}
       name={@name}
-      phx-hook="VoidEvent"
-      data-void-events="void-change"
+      phx-hook={void_hook(@events)}
+      data-void-events={void_events(@events, "void-change")}
       {@rest}
     >
       {render_slot(@inner_block)}
@@ -661,6 +701,7 @@ defmodule VoidableUI.Components do
   attr :open, :boolean, default: false
   attr :size, :string, default: nil
   attr :closable, :boolean, default: true
+  attr :events, :any, default: nil, doc: @events_doc
   attr :rest, :global
   slot :inner_block, required: true
 
@@ -671,8 +712,8 @@ defmodule VoidableUI.Components do
       open={@open}
       size={@size}
       closable={to_string(@closable)}
-      phx-hook="VoidEvent"
-      data-void-events="void-close"
+      phx-hook={void_hook(@events)}
+      data-void-events={void_events(@events, "void-close")}
       {@rest}
     >
       {render_slot(@inner_block)}
@@ -694,6 +735,7 @@ defmodule VoidableUI.Components do
   attr :value, :string, default: nil
   attr :size, :string, default: nil
   attr :activation, :string, default: nil
+  attr :events, :any, default: nil, doc: @events_doc
   attr :rest, :global
   slot :inner_block, required: true
 
@@ -704,8 +746,8 @@ defmodule VoidableUI.Components do
       value={@value}
       size={@size}
       activation={@activation}
-      phx-hook="VoidEvent"
-      data-void-events="void-change"
+      phx-hook={void_hook(@events)}
+      data-void-events={void_events(@events, "void-change")}
       {@rest}
     >
       {render_slot(@inner_block)}
@@ -742,6 +784,7 @@ defmodule VoidableUI.Components do
   """
   attr :id, :string, default: nil
   attr :open, :boolean, default: false
+  attr :events, :any, default: nil, doc: @events_doc
   attr :rest, :global
   slot :inner_block, required: true
 
@@ -750,8 +793,8 @@ defmodule VoidableUI.Components do
     <void-accordion-item
       id={@id || auto_id("void-accordion-item", @rest)}
       open={@open}
-      phx-hook="VoidEvent"
-      data-void-events="void-toggle"
+      phx-hook={void_hook(@events)}
+      data-void-events={void_events(@events, "void-toggle")}
       {@rest}
     >
       {render_slot(@inner_block)}
@@ -827,6 +870,7 @@ defmodule VoidableUI.Components do
   attr :duration, :integer, default: nil
   attr :dismissable, :boolean, default: true
   attr :heading, :string, default: nil
+  attr :events, :any, default: nil, doc: @events_doc
   attr :rest, :global
   slot :inner_block, required: true
 
@@ -838,8 +882,8 @@ defmodule VoidableUI.Components do
       duration={@duration}
       dismissable={to_string(@dismissable)}
       heading={@heading}
-      phx-hook="VoidEvent"
-      data-void-events="void-close"
+      phx-hook={void_hook(@events)}
+      data-void-events={void_events(@events, "void-close")}
       {@rest}
     >
       {render_slot(@inner_block)}
@@ -890,6 +934,7 @@ defmodule VoidableUI.Components do
   attr :side, :string, default: nil
   attr :size, :string, default: nil
   attr :closable, :boolean, default: true
+  attr :events, :any, default: nil, doc: @events_doc
   attr :rest, :global
   slot :inner_block, required: true
 
@@ -901,8 +946,8 @@ defmodule VoidableUI.Components do
       side={@side}
       size={@size}
       closable={to_string(@closable)}
-      phx-hook="VoidEvent"
-      data-void-events="void-close"
+      phx-hook={void_hook(@events)}
+      data-void-events={void_events(@events, "void-close")}
       {@rest}
     >
       {render_slot(@inner_block)}
@@ -943,6 +988,7 @@ defmodule VoidableUI.Components do
   attr :position, :string, default: nil, doc: "top, bottom, left or right (flips when there is no room)"
   attr :align, :string, default: nil, doc: "start, center or end"
   attr :trigger, :string, default: nil
+  attr :events, :any, default: nil, doc: @events_doc
   attr :rest, :global
   slot :inner_block, required: true
 
@@ -954,8 +1000,8 @@ defmodule VoidableUI.Components do
       position={@position}
       align={@align}
       trigger={@trigger}
-      phx-hook="VoidEvent"
-      data-void-events="void-close"
+      phx-hook={void_hook(@events)}
+      data-void-events={void_events(@events, "void-close")}
       {@rest}
     >
       {render_slot(@inner_block)}
@@ -1087,6 +1133,7 @@ defmodule VoidableUI.Components do
   attr :value, :integer, default: nil
   attr :siblings, :integer, default: nil
   attr :size, :string, default: nil
+  attr :events, :any, default: nil, doc: @events_doc
   attr :rest, :global
 
   def pagination(assigns) do
@@ -1097,8 +1144,8 @@ defmodule VoidableUI.Components do
       value={@value}
       siblings={@siblings}
       size={@size}
-      phx-hook="VoidEvent"
-      data-void-events="void-change"
+      phx-hook={void_hook(@events)}
+      data-void-events={void_events(@events, "void-change")}
       {@rest}
     />
     """
@@ -1137,6 +1184,7 @@ defmodule VoidableUI.Components do
   attr :id, :string, default: nil
   attr :label, :string, default: nil
   attr :orientation, :string, default: nil
+  attr :events, :any, default: nil, doc: @events_doc
   attr :rest, :global
   slot :inner_block, required: true
 
@@ -1146,8 +1194,8 @@ defmodule VoidableUI.Components do
       id={@id || auto_id("void-checkbox-group", @rest)}
       label={@label}
       orientation={@orientation}
-      phx-hook="VoidEvent"
-      data-void-events="void-change"
+      phx-hook={void_hook(@events)}
+      data-void-events={void_events(@events, "void-change")}
       {@rest}
     >
       {render_slot(@inner_block)}
@@ -1167,6 +1215,7 @@ defmodule VoidableUI.Components do
   attr :size, :string, default: nil
   attr :error, :string, default: nil
   attr :name, :string, default: nil
+  attr :events, :any, default: nil, doc: @events_doc
   attr :rest, :global
   slot :inner_block, required: true
 
@@ -1180,8 +1229,8 @@ defmodule VoidableUI.Components do
       size={@size}
       error={@error}
       name={@name}
-      phx-hook="VoidEvent"
-      data-void-events="void-change"
+      phx-hook={void_hook(@events)}
+      data-void-events={void_events(@events, "void-change")}
       {@rest}
     >
       {render_slot(@inner_block)}
@@ -1203,6 +1252,7 @@ defmodule VoidableUI.Components do
   attr :name, :string, default: nil
   attr :show_value, :boolean, default: false
   attr :size, :string, default: nil
+  attr :events, :any, default: nil, doc: @events_doc
   attr :rest, :global
 
   def slider(assigns) do
@@ -1217,8 +1267,8 @@ defmodule VoidableUI.Components do
       name={@name}
       show-value={@show_value}
       size={@size}
-      phx-hook="VoidEvent"
-      data-void-events="void-input,void-change"
+      phx-hook={void_hook(@events)}
+      data-void-events={void_events(@events, "void-input,void-change")}
       {@rest}
     />
     """
@@ -1235,6 +1285,7 @@ defmodule VoidableUI.Components do
   attr :disabled, :boolean, default: false
   attr :max_size, :integer, default: nil
   attr :error, :string, default: nil
+  attr :events, :any, default: nil, doc: @events_doc
   attr :rest, :global
 
   def file_upload(assigns) do
@@ -1246,8 +1297,8 @@ defmodule VoidableUI.Components do
       disabled={@disabled}
       max-size={@max_size}
       error={@error}
-      phx-hook="VoidEvent"
-      data-void-events="void-change"
+      phx-hook={void_hook(@events)}
+      data-void-events={void_events(@events, "void-change")}
       {@rest}
     />
     """
@@ -1280,6 +1331,7 @@ defmodule VoidableUI.Components do
   attr :id, :string, default: nil
   attr :active, :boolean, default: false
   attr :size, :string, default: nil
+  attr :events, :any, default: nil, doc: @events_doc
   attr :rest, :global
 
   def hamburger(assigns) do
@@ -1288,8 +1340,8 @@ defmodule VoidableUI.Components do
       id={@id || auto_id("void-hamburger", @rest)}
       active={@active}
       size={@size}
-      phx-hook="VoidEvent"
-      data-void-events="void-toggle"
+      phx-hook={void_hook(@events)}
+      data-void-events={void_events(@events, "void-toggle")}
       {@rest}
     />
     """
@@ -1305,6 +1357,7 @@ defmodule VoidableUI.Components do
   attr :placeholder, :string, default: nil
   attr :disabled, :boolean, default: false
   attr :maxlength, :integer, default: nil
+  attr :events, :any, default: nil, doc: @events_doc
   attr :rest, :global
 
   def compose_input(assigns) do
@@ -1315,8 +1368,8 @@ defmodule VoidableUI.Components do
       placeholder={@placeholder}
       disabled={@disabled}
       maxlength={@maxlength}
-      phx-hook="VoidEvent"
-      data-void-events="void-input,void-submit"
+      phx-hook={void_hook(@events)}
+      data-void-events={void_events(@events, "void-input,void-submit")}
       {@rest}
     />
     """
@@ -1330,6 +1383,7 @@ defmodule VoidableUI.Components do
   attr :id, :string, default: nil
   attr :width, :string, default: nil
   attr :collapsed_width, :string, default: nil
+  attr :events, :any, default: nil, doc: @events_doc
   attr :rest, :global
   slot :inner_block, required: true
 
@@ -1339,8 +1393,8 @@ defmodule VoidableUI.Components do
       id={@id || auto_id("void-sidebar", @rest)}
       width={@width}
       collapsed-width={@collapsed_width}
-      phx-hook="VoidEvent"
-      data-void-events="void-toggle"
+      phx-hook={void_hook(@events)}
+      data-void-events={void_events(@events, "void-toggle")}
       {@rest}
     >
       {render_slot(@inner_block)}
@@ -1357,6 +1411,7 @@ defmodule VoidableUI.Components do
   attr :open, :boolean, default: false
   attr :position, :string, default: nil, doc: "top, bottom, left or right (flips when there is no room)"
   attr :align, :string, default: nil, doc: "start, center or end"
+  attr :events, :any, default: nil, doc: @events_doc
   attr :rest, :global
   slot :inner_block, required: true
 
@@ -1367,8 +1422,8 @@ defmodule VoidableUI.Components do
       open={@open}
       position={@position}
       align={@align}
-      phx-hook="VoidEvent"
-      data-void-events="void-select"
+      phx-hook={void_hook(@events)}
+      data-void-events={void_events(@events, "void-select")}
       {@rest}
     >
       {render_slot(@inner_block)}
@@ -1407,6 +1462,7 @@ defmodule VoidableUI.Components do
   attr :color, :string, default: nil
   attr :size, :string, default: nil
   attr :variant, :string, default: nil
+  attr :events, :any, default: nil, doc: @events_doc
   attr :rest, :global
   slot :inner_block, required: true
 
@@ -1419,8 +1475,8 @@ defmodule VoidableUI.Components do
       color={@color}
       size={@size}
       variant={@variant}
-      phx-hook="VoidEvent"
-      data-void-events="void-change"
+      phx-hook={void_hook(@events)}
+      data-void-events={void_events(@events, "void-change")}
       {@rest}
     >
       {render_slot(@inner_block)}
@@ -1440,6 +1496,7 @@ defmodule VoidableUI.Components do
   attr :size, :string, default: nil
   attr :color, :string, default: nil
   attr :orientation, :string, default: nil
+  attr :events, :any, default: nil, doc: @events_doc
   attr :rest, :global
   slot :inner_block, required: true
 
@@ -1453,8 +1510,8 @@ defmodule VoidableUI.Components do
       size={@size}
       color={@color}
       orientation={@orientation}
-      phx-hook="VoidEvent"
-      data-void-events="void-change"
+      phx-hook={void_hook(@events)}
+      data-void-events={void_events(@events, "void-change")}
       {@rest}
     >
       {render_slot(@inner_block)}
@@ -1470,6 +1527,7 @@ defmodule VoidableUI.Components do
   attr :id, :string, default: nil
   attr :value, :string, default: nil
   attr :size, :string, default: nil
+  attr :events, :any, default: nil, doc: @events_doc
   attr :rest, :global
   slot :inner_block, required: true
 
@@ -1479,8 +1537,8 @@ defmodule VoidableUI.Components do
       id={@id || auto_id("void-segmented-control", @rest)}
       value={@value}
       size={@size}
-      phx-hook="VoidEvent"
-      data-void-events="void-change"
+      phx-hook={void_hook(@events)}
+      data-void-events={void_events(@events, "void-change")}
       {@rest}
     >
       {render_slot(@inner_block)}
@@ -1573,6 +1631,7 @@ defmodule VoidableUI.Components do
   attr :searchable, :boolean, default: false
   attr :size, :string, default: nil
   attr :placeholder, :string, default: nil
+  attr :events, :any, default: nil, doc: @events_doc
   attr :rest, :global
   slot :inner_block, required: true
 
@@ -1584,8 +1643,8 @@ defmodule VoidableUI.Components do
       searchable={@searchable}
       size={@size}
       placeholder={@placeholder}
-      phx-hook="VoidEvent"
-      data-void-events="void-select"
+      phx-hook={void_hook(@events)}
+      data-void-events={void_events(@events, "void-select")}
       {@rest}
     >
       {render_slot(@inner_block)}
@@ -1644,6 +1703,7 @@ defmodule VoidableUI.Components do
   attr :controls, :boolean, default: true
   attr :indicators, :boolean, default: true
   attr :orientation, :string, default: nil
+  attr :events, :any, default: nil, doc: @events_doc
   attr :rest, :global
   slot :inner_block, required: true
 
@@ -1659,8 +1719,8 @@ defmodule VoidableUI.Components do
       controls={to_string(@controls)}
       indicators={to_string(@indicators)}
       orientation={@orientation}
-      phx-hook="VoidEvent"
-      data-void-events="void-change"
+      phx-hook={void_hook(@events)}
+      data-void-events={void_events(@events, "void-change")}
       {@rest}
     >
       {render_slot(@inner_block)}
@@ -1697,6 +1757,7 @@ defmodule VoidableUI.Components do
   attr :size, :string, default: nil
   attr :locale, :string, default: nil
   attr :first_day, :integer, default: nil
+  attr :events, :any, default: nil, doc: @events_doc
   attr :rest, :global
 
   def calendar(assigns) do
@@ -1710,8 +1771,8 @@ defmodule VoidableUI.Components do
       size={@size}
       locale={@locale}
       first-day={@first_day}
-      phx-hook="VoidEvent"
-      data-void-events="void-change"
+      phx-hook={void_hook(@events)}
+      data-void-events={void_events(@events, "void-change")}
       {@rest}
     />
     """
@@ -1734,6 +1795,7 @@ defmodule VoidableUI.Components do
   attr :placeholder, :string, default: nil
   attr :format, :string, default: nil
   attr :color, :string, default: nil
+  attr :events, :any, default: nil, doc: @events_doc
   attr :rest, :global
 
   def date_picker(assigns) do
@@ -1751,8 +1813,8 @@ defmodule VoidableUI.Components do
       placeholder={@placeholder}
       format={@format}
       color={@color}
-      phx-hook="VoidEvent"
-      data-void-events="void-change"
+      phx-hook={void_hook(@events)}
+      data-void-events={void_events(@events, "void-change")}
       {@rest}
     />
     """
@@ -1776,6 +1838,7 @@ defmodule VoidableUI.Components do
   attr :placeholder, :string, default: nil
   attr :controls, :string, default: nil
   attr :label, :string, default: nil
+  attr :events, :any, default: nil, doc: @events_doc
   attr :rest, :global
 
   def number_input(assigns) do
@@ -1794,8 +1857,8 @@ defmodule VoidableUI.Components do
       placeholder={@placeholder}
       controls={@controls}
       label={@label}
-      phx-hook="VoidEvent"
-      data-void-events="void-change"
+      phx-hook={void_hook(@events)}
+      data-void-events={void_events(@events, "void-change")}
       {@rest}
     />
     """
@@ -1810,6 +1873,7 @@ defmodule VoidableUI.Components do
   attr :heading, :string, default: nil
   attr :open, :boolean, default: false
   attr :disabled, :boolean, default: false
+  attr :events, :any, default: nil, doc: @events_doc
   attr :rest, :global
   slot :inner_block, required: true
 
@@ -1820,8 +1884,8 @@ defmodule VoidableUI.Components do
       heading={@heading}
       open={@open}
       disabled={@disabled}
-      phx-hook="VoidEvent"
-      data-void-events="void-toggle"
+      phx-hook={void_hook(@events)}
+      data-void-events={void_events(@events, "void-toggle")}
       {@rest}
     >
       {render_slot(@inner_block)}
@@ -1841,6 +1905,7 @@ defmodule VoidableUI.Components do
   attr :placeholder, :string, default: nil
   attr :submit_mode, :string, default: nil
   attr :size, :string, default: nil
+  attr :events, :any, default: nil, doc: @events_doc
   attr :rest, :global
 
   def editable(assigns) do
@@ -1853,8 +1918,8 @@ defmodule VoidableUI.Components do
       placeholder={@placeholder}
       submit-mode={@submit_mode}
       size={@size}
-      phx-hook="VoidEvent"
-      data-void-events="void-change,void-cancel"
+      phx-hook={void_hook(@events)}
+      data-void-events={void_events(@events, "void-change,void-cancel")}
       {@rest}
     />
     """
@@ -1903,6 +1968,7 @@ defmodule VoidableUI.Components do
   attr :size, :string, default: nil
   attr :color, :string, default: nil
   attr :placeholder, :string, default: nil
+  attr :events, :any, default: nil, doc: @events_doc
   attr :rest, :global
 
   def pin_input(assigns) do
@@ -1918,8 +1984,8 @@ defmodule VoidableUI.Components do
       size={@size}
       color={@color}
       placeholder={@placeholder}
-      phx-hook="VoidEvent"
-      data-void-events="void-change,void-complete"
+      phx-hook={void_hook(@events)}
+      data-void-events={void_events(@events, "void-change,void-complete")}
       {@rest}
     />
     """
@@ -1939,6 +2005,7 @@ defmodule VoidableUI.Components do
   attr :color, :string, default: nil
   attr :variant, :string, default: nil
   attr :allow_duplicates, :boolean, default: false
+  attr :events, :any, default: nil, doc: @events_doc
   attr :rest, :global
 
   def tags_input(assigns) do
@@ -1953,8 +2020,8 @@ defmodule VoidableUI.Components do
       color={@color}
       variant={@variant}
       allow-duplicates={@allow_duplicates}
-      phx-hook="VoidEvent"
-      data-void-events="void-change"
+      phx-hook={void_hook(@events)}
+      data-void-events={void_events(@events, "void-change")}
       {@rest}
     />
     """
@@ -1988,6 +2055,7 @@ defmodule VoidableUI.Components do
   attr :disabled, :boolean, default: false
   attr :href, :string, default: nil
   attr :active, :boolean, default: false
+  attr :events, :any, default: nil, doc: @events_doc
   attr :rest, :global
   slot :inner_block, required: true
 
@@ -1999,8 +2067,8 @@ defmodule VoidableUI.Components do
       disabled={@disabled}
       href={@href}
       active={@active}
-      phx-hook="VoidEvent"
-      data-void-events="void-open,void-close"
+      phx-hook={void_hook(@events)}
+      data-void-events={void_events(@events, "void-open,void-close")}
       {@rest}
     >
       {render_slot(@inner_block)}
@@ -2020,6 +2088,7 @@ defmodule VoidableUI.Components do
   attr :show_input, :boolean, default: true
   attr :variant, :string, default: nil
   attr :open, :boolean, default: false
+  attr :events, :any, default: nil, doc: @events_doc
   attr :rest, :global
 
   def color_picker(assigns) do
@@ -2032,8 +2101,8 @@ defmodule VoidableUI.Components do
       show-input={to_string(@show_input)}
       variant={@variant}
       open={@open}
-      phx-hook="VoidEvent"
-      data-void-events="void-change"
+      phx-hook={void_hook(@events)}
+      data-void-events={void_events(@events, "void-change")}
       {@rest}
     />
     """
@@ -2059,6 +2128,7 @@ defmodule VoidableUI.Components do
   attr :minlength, :integer, default: nil
   attr :maxlength, :integer, default: nil
   attr :pattern, :string, default: nil
+  attr :events, :any, default: nil, doc: @events_doc
   attr :rest, :global, include: ~w(inputmode enterkeyhint autocapitalize spellcheck)
 
   def action_input(assigns) do
@@ -2079,8 +2149,8 @@ defmodule VoidableUI.Components do
       minlength={@minlength}
       maxlength={@maxlength}
       pattern={@pattern}
-      phx-hook="VoidEvent"
-      data-void-events="void-input,void-change,void-action"
+      phx-hook={void_hook(@events)}
+      data-void-events={void_events(@events, "void-input,void-change,void-action")}
       {@rest}
     />
     """

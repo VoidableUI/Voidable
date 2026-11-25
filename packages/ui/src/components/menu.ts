@@ -264,7 +264,7 @@ export class VoidMenuItem extends VoidElement {
     super.updated(changed);
     if (changed.has('disabled')) {
       this.setHostAttribute('tabindex', '-1');
-      this.setHostAttribute('aria-disabled', String(this.disabled));
+      this.setHostAttribute('aria-disabled', this.disabled ? 'true' : null);
     }
   }
 

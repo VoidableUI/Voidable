@@ -7,6 +7,9 @@ import { defaultTrueBoolean } from '../converters.js';
 
 /** Color selection control with spectrum area, hue slider, hex input, and preset swatches for theme customization and design tools. */
 export class VoidColorPicker extends InternalsFormControl(VoidElement) {
+  /** The host's `aria-label` / `aria-labelledby` name the inner control. */
+  static override labelTarget = '.void-color-picker-input, .void-color-picker-compact-input';
+
   /**
    * Selected colour as a hex string (six digits after the hash). Defaults to black. As an attribute it is the
    * initial value and the form's reset target.

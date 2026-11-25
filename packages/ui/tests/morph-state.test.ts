@@ -26,6 +26,7 @@ import '../src/components/field.js';
 import '../src/components/input.js';
 import '../src/components/popover.js';
 import '../src/components/dialog.js';
+import '../src/components/checkbox.js';
 
 type Host = VoidElement & Record<string, unknown>;
 
@@ -483,4 +484,91 @@ describe('tabs under LiveView placeholders', () => {
     tabs.voidBeforeMorph(next);
     expect(Array.from(next.querySelectorAll('void-tabs-content')).map(p => p.id)).toEqual(live);
   });
+});
+
+describe('morphs that arrive while the element is parked, or that hand over a copy of a rendered element', () => {
+  it('a second voidBeforeMorph before re-projection applies the rule to the new incoming element and stays parked', async () => {
+    const sw = await mount('<void-switch>News</void-switch>');
+    const first = server('<void-switch>News</void-switch>');
+    expect(sw.voidBeforeMorph(first)).toBe(true);
+    // The server changed `checked` in the second patch of the same task: it wins.
+    const second = server('<void-switch checked>News</void-switch>');
+    expect(sw.voidBeforeMorph(second)).toBe(true);
+    morphAttributes(sw, second);
+    await settle();
+    expect(sw.checked).toBe(true);
+    expect(sw.querySelectorAll('.void-switch-track').length).toBeLessThanOrEqual(1);
+  });
+
+  it('a detached clone of a rendered element is put back into its server shape and carries no server change', async () => {
+    const field = await mount('<void-field label="Name"><void-input name="n"></void-input></void-field>');
+    const input = field.querySelector('void-input') as Host;
+    input.value = 'typed';
+    await settle();
+    // LiveView clones a locked element with everything it rendered, patches the clone and later morphs the live element to it.
+    const clone = field.cloneNode(true) as Host;
+    expect(clone.querySelector('[data-void-chrome]')).not.toBeNull();
+    field.voidBeforeMorph(clone);
+    expect(Array.from(clone.childNodes).some(n => n.nodeType === Node.COMMENT_NODE && (n as Comment).data.includes('void-projection'))).toBe(false);
+    expect(clone.querySelector(':scope > [data-void-chrome]')).toBeNull();
+    expect(clone.querySelector(':scope > void-input')).not.toBeNull();
+    await settle();
+    expect(field.querySelectorAll('void-input').length).toBe(1);
+    expect((field.querySelector('void-input') as Host).value).toBe('typed');
+  });
+
+  it('a copy that carries client state does not make it the server baseline', async () => {
+    const dlg = await mount('<void-dialog><void-dialog-title>D</void-dialog-title><void-dialog-body>Body</void-dialog-body></void-dialog>');
+    dlg.open = true;
+    await settle();
+    const clone = dlg.cloneNode(true) as Element;
+    dlg.voidBeforeMorph(clone);
+    morphAttributes(dlg, clone);
+    await settle();
+    expect(dlg.open).toBe(true);
+    // The server still renders no `open`: unchanged, so the user's open dialog stays open.
+    const again = server('<void-dialog><void-dialog-title>D</void-dialog-title><void-dialog-body>Body</void-dialog-body></void-dialog>');
+    dlg.voidBeforeMorph(again);
+    morphAttributes(dlg, again);
+    await settle();
+    expect(dlg.open).toBe(true);
+    dlg.open = false;
+    await settle();
+  });
+});
+
+describe('a server value of what the user is editing waits while focus is inside (editState)', () => {
+  it('keeps the typed text when the echo of an older keystroke arrives, and applies a server change after focus left', async () => {
+    const el = await mount<Host>('<void-input value="ab"></void-input>');
+    const control = el.querySelector('input')!;
+    control.focus();
+    control.value = 'abcd';
+    control.dispatchEvent(new Event('input', { bubbles: true }));
+    const echo = server('<void-input value="abc"></void-input>');
+    el.voidBeforeMorph(echo);
+    morphAttributes(el, echo);
+    await settle();
+    expect(control.value).toBe('abcd');
+    expect(el.value).toBe('abcd');
+    control.blur();
+    const later = server('<void-input value="from the server"></void-input>');
+    el.voidBeforeMorph(later);
+    morphAttributes(el, later);
+    await settle();
+    expect(el.value).toBe('from the server');
+  });
+});
+
+describe('boolean ARIA the server turns off', () => {
+  for (const tag of ['void-switch', 'void-checkbox', 'void-radio', 'void-button', 'void-toggle', 'void-number-input']) {
+    it(`${tag} drops aria-disabled when a morph re-enables it, rather than leaving "false"`, async () => {
+      const el = await mount<Host>(`<${tag} disabled name="n">X</${tag}>`);
+      const enabled = server(`<${tag} name="n">X</${tag}>`);
+      el.voidBeforeMorph(enabled);
+      morphAttributes(el, enabled);
+      await settle();
+      expect(el.disabled).toBe(false);
+      expect(el.hasAttribute('aria-disabled')).toBe(false);
+    });
+  }
 });

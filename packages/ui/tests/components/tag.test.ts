@@ -41,9 +41,24 @@ describe('VoidTag', () => {
   });
 
   describe('ARIA', () => {
-    it('sets role="listitem" when connected', () => {
+    it('has no role outside a list', () => {
       const el = createElement();
       document.body.appendChild(el);
+      expect(el.hasAttribute('role')).toBe(false);
+    });
+
+    it('is a listitem inside role="list" and inside void-list, and drops it when moved out', () => {
+      const list = document.createElement('div');
+      list.setAttribute('role', 'list');
+      document.body.appendChild(list);
+      const el = createElement();
+      list.appendChild(el);
+      expect(el.getAttribute('role')).toBe('listitem');
+      document.body.appendChild(el);
+      expect(el.hasAttribute('role')).toBe(false);
+      const vlist = document.createElement('void-list');
+      document.body.appendChild(vlist);
+      vlist.appendChild(el);
       expect(el.getAttribute('role')).toBe('listitem');
     });
   });

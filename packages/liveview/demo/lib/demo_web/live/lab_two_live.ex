@@ -40,7 +40,33 @@ defmodule DemoWeb.LabTwoLive do
           </V.select>
         </V.field>
       </form>
-      <V.button id="two-count" variant="filled" phx-click="count">Count {@count}</V.button>
+      <V.button id="two-count" variant="filled" phx-click="count" events>Count {@count}</V.button>
+      <%!-- phx-click and phx-submit on the elements people put them on, without the event bridge. --%>
+      <section id="clicks" style="display: flex; gap: 1rem; align-items: flex-start; flex-wrap: wrap">
+        <V.button id="click-button" phx-click="count">Plain button</V.button>
+        <V.tag id="click-tag" phx-click="count">Tag</V.tag>
+        <V.card id="click-card" phx-click="count"><void-card-body><p>Card</p></void-card-body></V.card>
+        <V.dropdown_menu id="click-dd">
+          <void-dropdown-menu-trigger><button id="click-dd-trigger" type="button">Menu</button></void-dropdown-menu-trigger>
+          <void-dropdown-menu-content>
+            <V.dropdown_menu_item id="click-dd-item" value="item" phx-click="count">Dropdown item</V.dropdown_menu_item>
+          </void-dropdown-menu-content>
+        </V.dropdown_menu>
+        <V.menu id="click-menu" open>
+          <V.menu_item id="click-menu-item" phx-click="count">Menu item</V.menu_item>
+        </V.menu>
+        <V.tabs id="click-tabs">
+          <void-tabs-list>
+            <void-tabs-trigger value="a">First</void-tabs-trigger>
+            <void-tabs-trigger value="b" phx-click="count">Second</void-tabs-trigger>
+          </void-tabs-list>
+          <void-tabs-content value="a">First panel</void-tabs-content>
+          <void-tabs-content value="b">Second panel</void-tabs-content>
+        </V.tabs>
+        <form id="click-form" phx-submit="count">
+          <V.button id="click-submit" type="submit">Submit</V.button>
+        </form>
+      </section>
       <p id="two-note-echo">Server has note "{@note}" and choice "{@choice}"</p>
     </main>
     """

@@ -7,6 +7,11 @@ import { NativeFormControl } from '../form-control.js';
 
 /** Single-line text entry for login forms, search fields, and structured data capture. */
 export class VoidInput extends NativeFormControl(VoidElement) {
+  /** The host's `aria-label` / `aria-labelledby` name the inner control. */
+  static override labelTarget = 'input';
+
+  /** While focus is inside, a morph does not apply the server's value over what the user is typing. */
+  static override editState = ['value'];
   /** Native input type. Every text-like type is forwarded to the native control. */
   @property({ type: String, reflect: true }) type: 'text' | 'email' | 'password' | 'number' | 'tel' | 'url' | 'search' | 'date' | 'datetime-local' | 'month' | 'time' | 'week' = 'text';
   /**

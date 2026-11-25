@@ -53,7 +53,7 @@ export class VoidBarChart extends VoidElement {
 
   /** Height of the chart in pixels. Defaults to 220. The width fills the container. */
   @property({ type: Number, reflect: true }) height = 220;
-  /** Print each bar's value above it, abbreviated above 1000 (`1.2k`). */
+  /** Print each bar's value above it (below it for a negative value), abbreviated above 1000 (`1.2k`). */
   @property({ type: Boolean, attribute: 'show-values', reflect: true }) showValues = false;
   /**
    * How bars are drawn: `filled` (default, solid), `outline` (tinted fill with a border) or `wireframe`
@@ -89,7 +89,9 @@ export class VoidBarChart extends VoidElement {
   /**
    * The chart's data: `{ series: [{ name, values, color?, colors? }], labels? }`. `values` are aligned with
    * `labels` (the category names along the axis); `color` colours a whole series and `colors` overrides single
-   * bars. Property only: assign a new object to update the chart and animate to it.
+   * bars. Negative values are bars below a zero baseline: the value axis then spans the lowest value as
+   * well, and a baseline is drawn at zero. Property only: assign a new object to update the chart and
+   * animate to it.
    */
   get data(): BarChartData { return this._data; }
   set data(next: BarChartData) {
@@ -199,8 +201,12 @@ export class VoidBarChart extends VoidElement {
     const numCategories = Math.max(...series.map(s => s.values.length));
     const allValues = series.flatMap(s => s.values).filter(Number.isFinite);
     const maxValue = Math.max(...allValues, 0);
-    const domainMax = niceStepLocal(maxValue * 1.1) || 1;
-    const yScale = new LinearScale([0, domainMax], [topMargin + innerHeight, topMargin]);
+    const minValue = Math.min(...allValues, 0);
+    // Bars grow from zero: up for positive values, down for negative ones.
+    const domainMin = minValue < 0 ? -niceStepLocal(-minValue * 1.1) : 0;
+    const domainMax = maxValue > 0 || domainMin === 0 ? niceStepLocal(maxValue * 1.1) || 1 : 0;
+    const yScale = new LinearScale([domainMin, domainMax], [topMargin + innerHeight, topMargin]);
+    const zeroY = yScale.scale(0);
     const xScale = new BandScale(numCategories, [leftMargin, leftMargin + innerWidth], 0.2);
     const yTicks = yScale.ticks(5);
 
@@ -219,6 +225,10 @@ export class VoidBarChart extends VoidElement {
           })}
         </g>
 
+        ${domainMin < 0
+          ? svg`<line class="void-bar-chart-baseline" x1=${leftMargin} x2=${leftMargin + innerWidth} y1=${zeroY} y2=${zeroY}></line>`
+          : nothing}
+
         <g class="void-bar-chart-y-axis">
           ${yTicks.map(tick => {
             const y = yScale.scale(tick);
@@ -234,8 +244,9 @@ export class VoidBarChart extends VoidElement {
               ${s.values.map((_, bi) => {
                 const display = this._display.get(this._key(si, bi)) ?? 0;
                 const barX = xScale.scale(bi) + subBandWidth * si;
-                const barY = yScale.scale(display);
-                const barH = Math.max(0, (topMargin + innerHeight) - barY);
+                const valueY = yScale.scale(display);
+                const barY = Math.min(valueY, zeroY);
+                const barH = Math.abs(zeroY - valueY);
                 const barColor = s.colors?.[bi];
                 return svg`<rect
                   class="void-bar-chart-bar"
@@ -258,8 +269,9 @@ export class VoidBarChart extends VoidElement {
                   ${s.values.map((_, bi) => {
                     const display = this._display.get(this._key(si, bi)) ?? 0;
                     const barX = xScale.scale(bi) + subBandWidth * si + (subBandWidth - 2) / 2;
-                    const barY = yScale.scale(display);
-                    return svg`<text x=${barX} y=${barY - 6} text-anchor="middle">${formatValue(display)}</text>`;
+                    const valueY = yScale.scale(display);
+                    const y = display < 0 ? valueY + 14 : valueY - 6;
+                    return svg`<text x=${barX} y=${y} text-anchor="middle">${formatValue(display)}</text>`;
                   })}
                 </g>
               `;

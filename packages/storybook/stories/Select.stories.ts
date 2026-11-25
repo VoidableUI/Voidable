@@ -61,3 +61,19 @@ export const Disabled: Story = {
     </void-select>
   `,
 };
+
+export const LabelledByAriaLabel: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story: 'Without a visible label, `aria-label` (or `aria-labelledby`) on the host names the native select inside, as on every component that renders its own control.',
+      },
+    },
+  },
+  render: () => html`
+    <void-select aria-label="Sort by">
+      <option value="new">Newest</option>
+      <option value="old">Oldest</option>
+    </void-select>
+  `,
+};

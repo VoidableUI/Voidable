@@ -27,11 +27,24 @@ module Voidable
       #
       # `Voidable::Hotwire.dev_warnings = :throw` turns warnings into thrown
       # errors, for system tests that fail on console errors.
+      #
+      # It also renders nothing when the import map has no `@voidable/ui/dev`
+      # pin (an unreleased gem checkout pins none), rather than importing a
+      # name the browser cannot resolve.
       def voidable_dev_tags
         return "".html_safe unless Voidable::Hotwire.dev_warnings?
+        return "".html_safe unless voidable_dev_pinned?
 
         config = Voidable::Hotwire.dev_warnings == :throw ? %(<script>window.VOIDABLE_DEV = { throw: true };</script>\n).html_safe : "".html_safe
         config + javascript_import_module_tag("@voidable/ui/dev")
+      end
+
+      private
+
+      def voidable_dev_pinned?
+        return true unless defined?(Rails) && Rails.application.respond_to?(:importmap)
+
+        Rails.application.importmap.packages.key?("@voidable/ui/dev")
       end
     end
   end

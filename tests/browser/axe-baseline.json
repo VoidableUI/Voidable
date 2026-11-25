@@ -2,7 +2,6 @@
   "_notes": {
     "_": "Reviewed known violations. Each rule says why it is accepted for now and where it is tracked. Counts are violating nodes per rule per component; see specs/axe.spec.ts.",
     "aria-required-children": "Untracked: void-nav-menu (menubar) holds plain links.",
-    "aria-required-parent": "Untracked: void-tag is role=listitem even outside a list.",
     "label": "Untracked: the compact void-color-picker's hex input has no label.",
     "landmark-banner-is-top-level": "Untracked: void-banner is role=banner, a page landmark, even when used as an in-page notice inside <main>.",
     "nested-interactive": "Untracked duplicate roles: the color-picker host is a focusable widget around native controls; a void-button wrapping an <a> (link button) is a button around a link.",
@@ -22,9 +21,6 @@
   "kitchen dark": {
     "aria-required-children": {
       "void-nav-menu-item": 1
-    },
-    "aria-required-parent": {
-      "void-tag": 3
     },
     "label": {
       "void-color-picker": 1
@@ -50,9 +46,6 @@
   "kitchen light": {
     "aria-required-children": {
       "void-nav-menu-item": 1
-    },
-    "aria-required-parent": {
-      "void-tag": 3
     },
     "label": {
       "void-color-picker": 1

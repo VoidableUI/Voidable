@@ -131,7 +131,8 @@ describe('voidBeforeMorph()', () => {
     const el = mount('<void-collapsible><p>c</p></void-collapsible>');
     await settle(el);
     expect(el.voidBeforeMorph()).toBe(true);
-    expect(el.voidBeforeMorph()).toBe(false);
+    // Re-entrant: a second call before re-projection finds it still parked.
+    expect(el.voidBeforeMorph()).toBe(true);
     await settle(el);
     expect(el.querySelectorAll('.void-collapsible-inner').length).toBe(1);
   });

@@ -54,7 +54,11 @@ export class VoidHoverCard extends VoidElement {
 
   private _openTimerId: ReturnType<typeof setTimeout> | undefined;
   private _closeTimerId: ReturnType<typeof setTimeout> | undefined;
-  /** Closed with Escape: focus returning to the trigger must not reopen it. */
+  /**
+   * Closed with Escape while focus was inside: the focus that returns to the
+   * trigger must not reopen it. Only that one focus; keyboard focus that
+   * arrives later (the card was closed from hover) opens it as usual.
+   */
   private _dismissed = false;
 
   private _wire(): void {
@@ -93,7 +97,9 @@ export class VoidHoverCard extends VoidElement {
   }
 
   private _onClose = (e: Event): void => {
-    if (e.target === this && (e as CustomEvent<{ reason: string }>).detail?.reason === 'escape') this._dismissed = true;
+    if (e.target !== this || (e as CustomEvent<{ reason: string }>).detail?.reason !== 'escape') return;
+    const active = this.ownerDocument.activeElement;
+    this._dismissed = !!active && active !== this.ownerDocument.body && this.contains(active);
   };
 
   /** The pointer moved onto the trigger or the card (from somewhere that was neither, or from the other). */
@@ -128,7 +134,11 @@ export class VoidHoverCard extends VoidElement {
     clearTimeout(this._closeTimerId);
     if (zone === 'content') return;
     clearTimeout(this._openTimerId);
-    if (!this._dismissed) this._overlay.requestOpen('focus');
+    if (this._dismissed) {
+      this._dismissed = false;
+      return;
+    }
+    this._overlay.requestOpen('focus');
   };
 
   private _onFocusOut = (e: FocusEvent): void => {

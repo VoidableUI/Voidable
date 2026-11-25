@@ -316,6 +316,8 @@ void-date-picker {
 
 .void-date-picker-input {
   width: 100%;
+  /* Room for a date beside the calendar button, which must never sit over the text. */
+  min-width: calc(var(--void-space-8) + 10ch);
   padding: var(--void-space-2) var(--void-space-8) var(--void-space-2) var(--void-space-3);
   background: var(--void-color-surface);
   border: 1px solid var(--void-color-border);

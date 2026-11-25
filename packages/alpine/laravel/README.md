@@ -174,11 +174,11 @@ The `void_attrs` helper generates Alpine.js attributes for wiring Voidable event
 | `alpine_plugin` | `true` | Exposed as `window.voidableConfig.alpinePlugin` for your bundle |
 | `livewire_morph_protection` | `true` | Exposed as `window.voidableConfig.livewireMorphProtection` for your bundle |
 | `dev_warnings` | `true` in `local`, else `false` | Load `@voidable/ui/dev` from `@voidableScripts` (`'throw'` turns warnings into errors) |
-| `dev_script` | jsDelivr `@voidable/ui@latest/dist/dev.js` | Where the development warnings script comes from |
+| `dev_script` | jsDelivr `@voidable/ui@<this release>/dist/dev.js`, or none for a path or dev-branch install (`VOIDABLE_DEV_SCRIPT`) | Where the development warnings script comes from |
 
 ## Development warnings
 
-`@voidableScripts` also loads `@voidable/ui/dev` when `voidable.dev_warnings` is on, which by default it is for the `local` environment only: misused `<void-*>` markup (a wrong attribute, a value outside the allowed set, a child in the wrong parent) is then reported in the browser console, including what Livewire renders later. Set `VOIDABLE_DEV_WARNINGS=false` to turn it off or `VOIDABLE_DEV_WARNINGS=throw` to turn warnings into thrown errors for browser tests. `voidable.dev_script` is where the file comes from (a self-contained file, `@voidable/ui/dist/dev.js`; point it at a pinned version or your own copy).
+`@voidableScripts` also loads `@voidable/ui/dev` when `voidable.dev_warnings` is on, which by default it is for the `local` environment only: misused `<void-*>` markup (a wrong attribute, a value outside the allowed set, a child in the wrong parent) is then reported in the browser console, including what Livewire renders later. Set `VOIDABLE_DEV_WARNINGS=false` to turn it off or `VOIDABLE_DEV_WARNINGS=throw` to turn warnings into thrown errors for browser tests. `voidable.dev_script` is where the file comes from (a self-contained file, `@voidable/ui/dist/dev.js`): by default the copy published with this package's release, never `@latest`. An install whose version is not a release (a path repository, `dev-main`) gets no script; set `VOIDABLE_DEV_SCRIPT` to your own copy, or import `@voidable/ui/dev` from your development bundle.
 
 ## Requirements
 

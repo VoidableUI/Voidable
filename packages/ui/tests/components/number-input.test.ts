@@ -23,8 +23,46 @@ describe('VoidNumberInput', () => {
     expect(el).toBeInstanceOf(VoidElement);
   });
 
-  it('default value is 0', () => {
-    expect(el.value).toBe(0);
+  it('is empty by default: value null, an empty field, no aria-valuenow, submits an empty string', async () => {
+    await el.updateComplete;
+    expect(el.value).toBe(null);
+    expect(el.hasAttribute('value')).toBe(false);
+    const input = el.querySelector('input')!;
+    expect(input.value).toBe('');
+    expect(input.hasAttribute('aria-valuenow')).toBe(false);
+    expect((el as unknown as { formSubmission(): unknown }).formSubmission()).toBe('');
+  });
+
+  it('steps from empty to min going up and to max going down', async () => {
+    el.min = 1;
+    el.max = 10;
+    await el.updateComplete;
+    el.querySelector<HTMLInputElement>('input')!.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp', bubbles: true }));
+    expect(el.value).toBe(1);
+    el.value = null;
+    await el.updateComplete;
+    el.querySelector<HTMLInputElement>('input')!.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+    expect(el.value).toBe(10);
+  });
+
+  it('clearing the field and leaving it empties the value', async () => {
+    el.value = 4;
+    await el.updateComplete;
+    const input = el.querySelector('input')!;
+    input.value = '';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    input.dispatchEvent(new Event('blur'));
+    expect(el.value).toBe(null);
+    await el.updateComplete;
+    expect(el.hasAttribute('value')).toBe(false);
+  });
+
+  it('an empty value attribute is an empty field', async () => {
+    el.setAttribute('value', '');
+    await el.updateComplete;
+    expect(el.value).toBe(null);
+    el.setAttribute('value', '3');
+    expect(el.value).toBe(3);
   });
 
   it('default step is 1', () => {
@@ -49,7 +87,10 @@ describe('VoidNumberInput', () => {
     expect(el.hasAttribute('aria-valuenow')).toBe(false);
     const input = el.querySelector('input')!;
     expect(input.getAttribute('role')).toBe('spinbutton');
-    expect(input.getAttribute('aria-valuenow')).toBe(String(el.value));
+    expect(input.hasAttribute('aria-valuenow')).toBe(false);
+    el.value = 2;
+    await el.updateComplete;
+    expect(input.getAttribute('aria-valuenow')).toBe('2');
   });
 
   it('reports finite bounds on the input and follows changes', async () => {

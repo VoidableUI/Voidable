@@ -23,6 +23,13 @@ void-bar-chart .void-bar-chart-grid line {
   shape-rendering: crispEdges;
 }
 
+/* The zero line when values go negative: bars grow up and down from it. */
+void-bar-chart .void-bar-chart-baseline {
+  stroke: var(--void-color-text-muted);
+  stroke-width: var(--void-chart-stroke-hairline);
+  shape-rendering: crispEdges;
+}
+
 /* Axis tick labels */
 void-bar-chart .void-bar-chart-y-axis text,
 void-bar-chart .void-bar-chart-x-axis text {

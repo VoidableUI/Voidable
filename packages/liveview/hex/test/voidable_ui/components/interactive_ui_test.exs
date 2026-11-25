@@ -22,12 +22,12 @@ defmodule VoidableUI.Components.InteractiveUITest do
       assert html =~ "Click me"
     end
 
-    test "includes VoidEvent hook and data-void-events" do
+    test "includes VoidEvent hook and data-void-events with events" do
       assigns = %{}
 
       html =
         rendered_to_string(~H"""
-        <VoidableUI.Components.button>OK</VoidableUI.Components.button>
+        <VoidableUI.Components.button events>OK</VoidableUI.Components.button>
         """)
 
       assert html =~ ~s(phx-hook="VoidEvent")
@@ -115,12 +115,12 @@ defmodule VoidableUI.Components.InteractiveUITest do
       assert html =~ "Warning!"
     end
 
-    test "includes VoidEvent hook and data-void-events" do
+    test "includes VoidEvent hook and data-void-events with events" do
       assigns = %{}
 
       html =
         rendered_to_string(~H"""
-        <VoidableUI.Components.alert>Msg</VoidableUI.Components.alert>
+        <VoidableUI.Components.alert events>Msg</VoidableUI.Components.alert>
         """)
 
       assert html =~ ~s(phx-hook="VoidEvent")
@@ -203,12 +203,12 @@ defmodule VoidableUI.Components.InteractiveUITest do
       assert html =~ "Elixir"
     end
 
-    test "includes VoidEvent hook and data-void-events" do
+    test "includes VoidEvent hook and data-void-events with events" do
       assigns = %{}
 
       html =
         rendered_to_string(~H"""
-        <VoidableUI.Components.tag>Tag</VoidableUI.Components.tag>
+        <VoidableUI.Components.tag events>Tag</VoidableUI.Components.tag>
         """)
 
       assert html =~ ~s(phx-hook="VoidEvent")
@@ -292,12 +292,12 @@ defmodule VoidableUI.Components.InteractiveUITest do
       assert html =~ "Dialog body"
     end
 
-    test "includes VoidEvent hook and data-void-events" do
+    test "includes VoidEvent hook and data-void-events with events" do
       assigns = %{}
 
       html =
         rendered_to_string(~H"""
-        <VoidableUI.Components.dialog>Body</VoidableUI.Components.dialog>
+        <VoidableUI.Components.dialog events>Body</VoidableUI.Components.dialog>
         """)
 
       assert html =~ ~s(phx-hook="VoidEvent")
@@ -402,12 +402,12 @@ defmodule VoidableUI.Components.InteractiveUITest do
       assert html =~ "Drawer body"
     end
 
-    test "includes VoidEvent hook and data-void-events" do
+    test "includes VoidEvent hook and data-void-events with events" do
       assigns = %{}
 
       html =
         rendered_to_string(~H"""
-        <VoidableUI.Components.drawer>Body</VoidableUI.Components.drawer>
+        <VoidableUI.Components.drawer events>Body</VoidableUI.Components.drawer>
         """)
 
       assert html =~ ~s(phx-hook="VoidEvent")
@@ -515,12 +515,12 @@ defmodule VoidableUI.Components.InteractiveUITest do
       assert html =~ "Popover content"
     end
 
-    test "includes VoidEvent hook and data-void-events" do
+    test "includes VoidEvent hook and data-void-events with events" do
       assigns = %{}
 
       html =
         rendered_to_string(~H"""
-        <VoidableUI.Components.popover>Content</VoidableUI.Components.popover>
+        <VoidableUI.Components.popover events>Content</VoidableUI.Components.popover>
         """)
 
       assert html =~ ~s(phx-hook="VoidEvent")
@@ -603,12 +603,12 @@ defmodule VoidableUI.Components.InteractiveUITest do
       assert html =~ "Saved!"
     end
 
-    test "includes VoidEvent hook and data-void-events" do
+    test "includes VoidEvent hook and data-void-events with events" do
       assigns = %{}
 
       html =
         rendered_to_string(~H"""
-        <VoidableUI.Components.toast>Msg</VoidableUI.Components.toast>
+        <VoidableUI.Components.toast events>Msg</VoidableUI.Components.toast>
         """)
 
       assert html =~ ~s(phx-hook="VoidEvent")
@@ -693,12 +693,12 @@ defmodule VoidableUI.Components.InteractiveUITest do
       assert html =~ "Tab panels here"
     end
 
-    test "includes VoidEvent hook and data-void-events" do
+    test "includes VoidEvent hook and data-void-events with events" do
       assigns = %{}
 
       html =
         rendered_to_string(~H"""
-        <VoidableUI.Components.tabs>Tabs</VoidableUI.Components.tabs>
+        <VoidableUI.Components.tabs events>Tabs</VoidableUI.Components.tabs>
         """)
 
       assert html =~ ~s(phx-hook="VoidEvent")
@@ -760,12 +760,12 @@ defmodule VoidableUI.Components.InteractiveUITest do
       assert html =~ "Details here"
     end
 
-    test "includes VoidEvent hook and data-void-events" do
+    test "includes VoidEvent hook and data-void-events with events" do
       assigns = %{}
 
       html =
         rendered_to_string(~H"""
-        <VoidableUI.Components.accordion_item>Content</VoidableUI.Components.accordion_item>
+        <VoidableUI.Components.accordion_item events>Content</VoidableUI.Components.accordion_item>
         """)
 
       assert html =~ ~s(phx-hook="VoidEvent")
@@ -844,12 +844,12 @@ defmodule VoidableUI.Components.InteractiveUITest do
       assert html =~ "<void-pagination"
     end
 
-    test "includes VoidEvent hook and data-void-events" do
+    test "includes VoidEvent hook and data-void-events with events" do
       assigns = %{}
 
       html =
         rendered_to_string(~H"""
-        <VoidableUI.Components.pagination />
+        <VoidableUI.Components.pagination events />
         """)
 
       assert html =~ ~s(phx-hook="VoidEvent")
@@ -912,12 +912,12 @@ defmodule VoidableUI.Components.InteractiveUITest do
       assert html =~ "<void-hamburger"
     end
 
-    test "includes VoidEvent hook and data-void-events" do
+    test "includes VoidEvent hook and data-void-events with events" do
       assigns = %{}
 
       html =
         rendered_to_string(~H"""
-        <VoidableUI.Components.hamburger />
+        <VoidableUI.Components.hamburger events />
         """)
 
       assert html =~ ~s(phx-hook="VoidEvent")
@@ -978,6 +978,50 @@ defmodule VoidableUI.Components.InteractiveUITest do
 
       assert html =~ ~s(id="burger")
       assert html =~ ~s(class="nav-toggle")
+    end
+  end
+
+  describe "the event bridge is opt-in" do
+    test "no hook and no event list without events, so phx-click on the element is LiveView's alone" do
+      assigns = %{}
+
+      html =
+        rendered_to_string(~H"""
+        <VoidableUI.Components.button phx-click="count">Count</VoidableUI.Components.button>
+        <VoidableUI.Components.input name="q" />
+        <VoidableUI.Components.dialog open={false} heading="D">Body</VoidableUI.Components.dialog>
+        """)
+
+      refute html =~ "phx-hook"
+      refute html =~ "data-void-events"
+      assert html =~ ~s(phx-click="count")
+    end
+
+    test "a list or a comma-separated string names the events to push" do
+      assigns = %{}
+
+      html =
+        rendered_to_string(~H"""
+        <VoidableUI.Components.input name="q" events={["void-change"]} />
+        <VoidableUI.Components.dialog heading="D" events="void-close">Body</VoidableUI.Components.dialog>
+        """)
+
+      assert html =~ ~s(data-void-events="void-change")
+      assert html =~ ~s(data-void-events="void-close")
+      refute html =~ "void-input,void-change"
+      assert length(String.split(html, ~s(phx-hook="VoidEvent"))) == 3
+    end
+
+    test "false and an empty list attach nothing" do
+      assigns = %{}
+
+      html =
+        rendered_to_string(~H"""
+        <VoidableUI.Components.button events={false}>A</VoidableUI.Components.button>
+        <VoidableUI.Components.button events={[]}>B</VoidableUI.Components.button>
+        """)
+
+      refute html =~ "phx-hook"
     end
   end
 end

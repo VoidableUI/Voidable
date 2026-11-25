@@ -43,8 +43,22 @@ It renders nothing outside the `:dev` environment. `config :live_voidable, dev_w
 
 ## Events
 
-Interactive components render `phx-hook="VoidEvent"` and `data-void-events`.
-Each listed event is pushed to the server as a LiveView event of the same name:
+Use LiveView's own bindings first: `phx-click` works on `button`, `tag`,
+`card`, `dropdown_menu_item`, `menu_item` and a `<void-tabs-trigger>`,
+and `phx-change` / `phx-submit` on the form around the controls, which all
+submit under their `name`.
+
+For a Voidable event no binding covers, opt in per element with `events`:
+`events` bridges all of the component's events, `events={["void-close"]}` only
+those. The component then renders `phx-hook="VoidEvent"` and
+`data-void-events`; without `events` it renders neither. Each bridged event is
+pushed to the server as a LiveView event of the same name, after the browser
+has handled it (so a `phx-click` on the same element runs first):
+
+```heex
+<.dialog id="confirm" events={["void-close"]}><void-dialog-title>Delete?</void-dialog-title>...</.dialog>
+```
+
 
 ```elixir
 def handle_event("void-change", %{"id" => id, "name" => name, "detail" => detail}, socket) do
@@ -74,6 +88,13 @@ Components that need an id derive a stable one from their kind, `name` and
 components. `phx-update="ignore"` protects the children Voidable components
 relocate, but also blocks all server attribute updates, so it is opt-in per
 element. See the `VoidableUI.Components` moduledoc for guidance.
+
+## Typing through patches
+
+A patch that arrives while the user types (the echo of an earlier
+`phx-change`, a few keys behind) does not rewrite the field with focus in it,
+and the clone LiveView patches while it waits for a reply is put back without
+losing a key: nothing typed is lost and focus stays in the field.
 
 ## Booleans that default to true
 

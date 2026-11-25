@@ -151,3 +151,30 @@ export async function fillLabForm(page: Page, opts: { skip?: string[] } = {}): P
   });
   return picked;
 }
+
+/**
+ * Types `text` into the control matched by `selector` one key at a time with
+ * `delay` ms between keys (the pace of a fast typist, so server round trips
+ * overlap) and reports what survived: the value before and after, and how
+ * many keystrokes found focus somewhere else. Focus is checked after every key.
+ */
+export async function typeFast(page: Page, selector: string, text: string, delay = 30) {
+  const control = page.locator(selector);
+  await control.click();
+  await control.press('End');
+  const initial = await control.inputValue();
+  let away = 0;
+  for (const key of text) {
+    await page.keyboard.type(key);
+    if (!(await control.evaluate((el) => el === document.activeElement))) away++;
+    await page.waitForTimeout(delay);
+  }
+  await settle(page);
+  return { initial, value: await control.inputValue(), away };
+}
+
+/** Removes Element.prototype.moveBefore before any script runs, so parked nodes take the reinsert path (Safari's). */
+export const withoutMoveBefore = (page: Page) =>
+  page.addInitScript(() => {
+    delete (Element.prototype as { moveBefore?: unknown }).moveBefore;
+  });

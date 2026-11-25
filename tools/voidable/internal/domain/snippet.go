@@ -238,7 +238,7 @@ func (r snippetRenderer) eventTail() string {
 	case LangHTML:
 		return fmt.Sprintf("<script type=\"module\">\n  document.querySelector('%s')\n    .addEventListener('%s', (e) => console.log(%s));\n</script>\n", r.root.Tag, ev.Name, access)
 	case LangHEEx:
-		return fmt.Sprintf("<%%!-- The component sets phx-hook=\"VoidEvent\"; handle_event(\"%s\", %s, socket) receives the detail. --%%>\n", ev.Name, elixirDetail(ev))
+		return fmt.Sprintf("<%%!-- Use phx-click / phx-change where they apply; else add events={[\"%s\"]} to bridge it (the VoidEvent hook), and handle_event(\"%s\", %s, socket) receives the detail. --%%>\n", ev.Name, ev.Name, elixirDetail(ev))
 	case LangBlade:
 		return fmt.Sprintf("{{-- Alpine: add x-void-on:%s=\"handle($event.detail)\" to the tag, or void_attrs('%s', 'handler') from voidable/laravel. --}}\n", ev.Name, ev.Name)
 	case LangERB:
