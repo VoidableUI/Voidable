@@ -8,6 +8,12 @@
  * attribute) the server wins, so `open={false}` on the server really closes a
  * dialog the client opened.
  *
+ * `onBeforeElUpdated` also calls each `void-*` element's `voidUnproject()`
+ * pre-morph hook, so morphdom compares the element's own children with the
+ * server markup instead of the chrome the component rendered around them.
+ * morphdom visits parents before children, so outer elements are unprojected
+ * first; every element re-projects itself in the microtask after the patch.
+ *
  * Usage:
  * ```js
  * import { VoidDOM } from "@voidable/ui-liveview";
@@ -36,7 +42,7 @@ const PRESERVE_ATTRS: readonly string[] = [
 const SERVER_STATE = Symbol.for("@voidable/ui-liveview:server-attrs");
 
 type ServerAttrs = Record<string, string | null>;
-type WithState = Element & { [SERVER_STATE]?: ServerAttrs };
+type WithState = Element & { [SERVER_STATE]?: ServerAttrs; voidUnproject?: () => boolean };
 
 function isVoid(el: Element): boolean {
   return !!el.tagName?.startsWith("VOID-");
@@ -91,5 +97,8 @@ export const VoidDOM = {
     }
 
     el[SERVER_STATE] = next;
+
+    // After the client attributes are read (unprojecting moves children only).
+    el.voidUnproject?.();
   },
 };

@@ -7,6 +7,13 @@
  * When the server renders a different value (including removing the
  * attribute), the server wins.
  *
+ * It also calls each `void-*` element's `voidUnproject()` pre-morph hook, so
+ * the morph compares the element's own children with the server markup instead
+ * of the chrome the component rendered around them. Turbo morphs parents before
+ * children, so outer elements are unprojected first; every element re-projects
+ * itself (same chrome, same state, focus kept) in the microtask after the
+ * morph.
+ *
  * Usage:
  * ```js
  * import { VoidTurbo } from '@voidable/ui-hotwire';
@@ -26,6 +33,7 @@ const PRESERVE_ATTRS = [
 ];
 
 type ServerAttrs = Record<string, string | null>;
+type Unprojectable = Element & { voidUnproject?: () => boolean };
 
 function isVoid(el: Element | null | undefined): el is Element {
   return !!el?.tagName?.startsWith('VOID-');
@@ -71,6 +79,11 @@ export const VoidTurbo = {
 
       preserve.set(el, keep);
       lastServer.set(el, incoming);
+
+      // After the server state is recorded (unprojecting only moves children;
+      // host attributes and properties are untouched), and only if the element
+      // is really about to be morphed.
+      if (!event.defaultPrevented) (el as Unprojectable).voidUnproject?.();
     }) as EventListener;
 
     const onBeforeMorphAttribute = ((event: CustomEvent<{ attributeName: string }>) => {
