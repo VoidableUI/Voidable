@@ -34,3 +34,16 @@ rm -rf _site
 mkdir -p _site
 cp -r docs/dist/. _site/
 cp -r storybook-static _site/storybook
+
+# The visual review gallery of this commit, at /gallery/ (tests/browser/shots): every
+# reference page in every theme and skin, dark and light, at 1440 and 390 px. It needs
+# Chromium; the images are stored as lossless WebP. A failure here must not stop the docs
+# deploying, so it is a warning and the site goes out without /gallery/.
+if [ "${VOIDABLE_SKIP_GALLERY:-}" != "1" ]; then
+  if node tests/browser/shots/capture.mjs --out tmp/shots/site --gallery _site/gallery --webp; then
+    echo "gallery: $(du -sh _site/gallery | cut -f1) at /gallery/"
+  else
+    echo "::warning::the visual review gallery could not be built; deploying the site without /gallery/" >&2
+    rm -rf _site/gallery
+  fi
+fi

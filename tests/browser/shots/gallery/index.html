@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title><!--TITLE--></title>
+<link rel="stylesheet" href="void.css">
+<link rel="stylesheet" href="gallery.css">
+<script src="ui.js"></script>
+<!--DATA-->
+</head>
+<body>
+<void-shell>
+  <void-nav-bar>
+    <void-brand><a href="#">Visual review</a></void-brand>
+    <void-spacer></void-spacer>
+    <void-button id="scheme" variant="ghost" aria-label="Colour scheme of this page">Light</void-button>
+  </void-nav-bar>
+  <main id="main">
+    <void-page>
+      <void-page-head>
+        <span data-void-type="label" id="eyebrow"></span>
+        <h1 id="title"></h1>
+        <p id="meta"></p>
+      </void-page-head>
+      <void-alert id="notice" color="info" hidden></void-alert>
+      <void-figures id="summary"></void-figures>
+      <void-toolbar id="filters" role="group" aria-label="Filters"></void-toolbar>
+      <div id="grid" class="gallery-grid"></div>
+      <void-empty id="none" hidden>
+        <h3>Nothing matches</h3>
+        <p>Change or clear the filters.</p>
+      </void-empty>
+    </void-page>
+  </main>
+</void-shell>
+
+<div id="viewer" class="viewer" role="dialog" aria-modal="true" aria-labelledby="viewer-title" hidden>
+  <header class="viewer-bar">
+    <div class="viewer-heading">
+      <h2 id="viewer-title"></h2>
+      <span id="viewer-status"></span>
+    </div>
+    <void-segmented-control id="viewer-views" aria-label="View" size="sm"></void-segmented-control>
+    <void-actions>
+      <void-button id="viewer-prev" size="sm" aria-label="Previous image">Prev</void-button>
+      <span id="viewer-count" data-void-type="caption"></span>
+      <void-button id="viewer-next" size="sm" aria-label="Next image">Next</void-button>
+      <void-button id="viewer-close" size="sm" variant="filled">Close</void-button>
+    </void-actions>
+  </header>
+  <div id="viewer-body" class="viewer-body" tabindex="0" role="region" aria-label="Image"></div>
+  <p class="viewer-keys" data-void-type="caption">Arrow keys: previous and next image. 1 to 5: change the view. Escape: close.</p>
+</div>
+<script src="app.js" defer></script>
+</body>
+</html>

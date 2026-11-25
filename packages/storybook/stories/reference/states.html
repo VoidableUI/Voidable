@@ -1,0 +1,131 @@
+<main>
+  <void-page>
+    <void-page-head>
+      <span data-void-type="label">Reference / States</span>
+      <h1>Interaction states</h1>
+      <p>The same controls at rest, hovered, focused with the keyboard, pressed, disabled and invalid. The capture forces the pseudo-classes named by data-force (Chromium DevTools protocol), so the states are drawn deliberately, not by chance.</p>
+    </void-page-head>
+
+    <void-section gap="stack">
+      <void-section>
+        <span data-void-type="label">Rest</span>
+        <void-actions>
+          <void-button variant="filled">Filled</void-button>
+          <void-button>Outline</void-button>
+          <void-button variant="ghost">Ghost</void-button>
+          <void-button variant="filled" color="error">Danger</void-button>
+          <void-input value="Input" aria-label="Input"></void-input>
+          <void-select aria-label="Select"><option>Select</option><option>Two</option></void-select>
+          <void-checkbox checked>Checked</void-checkbox>
+          <void-checkbox>Unchecked</void-checkbox>
+          <void-radio name="st-rest" value="a" checked>Radio</void-radio>
+          <void-switch checked aria-label="Switch"></void-switch>
+          <void-toggle>Toggle</void-toggle>
+          <void-segmented-control value="a" aria-label="Segmented"><void-segmented-control-item value="a">One</void-segmented-control-item><void-segmented-control-item value="b">Two</void-segmented-control-item></void-segmented-control>
+          <void-tag removable>Tag</void-tag>
+          <a href="#link">A link</a>
+        </void-actions>
+      </void-section>
+
+      <void-section>
+        <span data-void-type="label">Hover</span>
+        <void-actions data-force="hover">
+          <void-button variant="filled">Filled</void-button>
+          <void-button>Outline</void-button>
+          <void-button variant="ghost">Ghost</void-button>
+          <void-button variant="filled" color="error">Danger</void-button>
+          <void-input value="Input" aria-label="Input"></void-input>
+          <void-select aria-label="Select"><option>Select</option><option>Two</option></void-select>
+          <void-checkbox checked>Checked</void-checkbox>
+          <void-checkbox>Unchecked</void-checkbox>
+          <void-radio name="st-hover" value="a" checked>Radio</void-radio>
+          <void-switch checked aria-label="Switch"></void-switch>
+          <void-toggle>Toggle</void-toggle>
+          <void-segmented-control value="a" aria-label="Segmented"><void-segmented-control-item value="a">One</void-segmented-control-item><void-segmented-control-item value="b">Two</void-segmented-control-item></void-segmented-control>
+          <void-tag removable>Tag</void-tag>
+          <a href="#link">A link</a>
+        </void-actions>
+      </void-section>
+
+      <void-section>
+        <span data-void-type="label">Focus visible</span>
+        <void-actions data-force="focus-visible">
+          <void-button variant="filled">Filled</void-button>
+          <void-button>Outline</void-button>
+          <void-button variant="ghost">Ghost</void-button>
+          <void-button variant="filled" color="error">Danger</void-button>
+          <void-input value="Input" aria-label="Input"></void-input>
+          <void-select aria-label="Select"><option>Select</option><option>Two</option></void-select>
+          <void-checkbox checked>Checked</void-checkbox>
+          <void-checkbox>Unchecked</void-checkbox>
+          <void-radio name="st-focus" value="a" checked>Radio</void-radio>
+          <void-switch checked aria-label="Switch"></void-switch>
+          <void-toggle>Toggle</void-toggle>
+          <void-segmented-control value="a" aria-label="Segmented"><void-segmented-control-item value="a">One</void-segmented-control-item><void-segmented-control-item value="b">Two</void-segmented-control-item></void-segmented-control>
+          <void-tag removable>Tag</void-tag>
+          <a href="#link">A link</a>
+        </void-actions>
+      </void-section>
+
+      <void-section>
+        <span data-void-type="label">Active (pressed)</span>
+        <void-actions data-force="hover active">
+          <void-button variant="filled">Filled</void-button>
+          <void-button>Outline</void-button>
+          <void-button variant="ghost">Ghost</void-button>
+          <void-button variant="filled" color="error">Danger</void-button>
+          <void-input value="Input" aria-label="Input"></void-input>
+          <void-select aria-label="Select"><option>Select</option><option>Two</option></void-select>
+          <void-checkbox checked>Checked</void-checkbox>
+          <void-checkbox>Unchecked</void-checkbox>
+          <void-radio name="st-active" value="a" checked>Radio</void-radio>
+          <void-switch checked aria-label="Switch"></void-switch>
+          <void-toggle>Toggle</void-toggle>
+          <void-segmented-control value="a" aria-label="Segmented"><void-segmented-control-item value="a">One</void-segmented-control-item><void-segmented-control-item value="b">Two</void-segmented-control-item></void-segmented-control>
+          <void-tag removable>Tag</void-tag>
+          <a href="#link">A link</a>
+        </void-actions>
+      </void-section>
+
+      <void-section>
+        <span data-void-type="label">Disabled</span>
+        <void-actions>
+          <void-button variant="filled" disabled>Filled</void-button>
+          <void-button disabled>Outline</void-button>
+          <void-button variant="ghost" disabled>Ghost</void-button>
+          <void-button variant="filled" color="error" disabled>Danger</void-button>
+          <void-input value="Input" aria-label="Input" disabled></void-input>
+          <void-select aria-label="Select" disabled><option>Select</option><option>Two</option></void-select>
+          <void-checkbox checked disabled>Checked</void-checkbox>
+          <void-checkbox disabled>Unchecked</void-checkbox>
+          <void-radio name="st-disabled" value="a" checked disabled>Radio</void-radio>
+          <void-switch checked aria-label="Switch" disabled></void-switch>
+          <void-toggle disabled>Toggle</void-toggle>
+          <void-segmented-control value="a" aria-label="Segmented" disabled><void-segmented-control-item value="a">One</void-segmented-control-item><void-segmented-control-item value="b">Two</void-segmented-control-item></void-segmented-control>
+          <void-tag removable>Tag</void-tag>
+          <a href="#link">A link</a>
+        </void-actions>
+      </void-section>
+
+      <void-section>
+        <span data-void-type="label">Invalid</span>
+        <void-actions>
+          <void-button variant="filled">Filled</void-button>
+          <void-button>Outline</void-button>
+          <void-button variant="ghost">Ghost</void-button>
+          <void-button variant="filled" color="error">Danger</void-button>
+          <void-input value="Input" aria-label="Input" error="This value is not accepted."></void-input>
+          <void-select aria-label="Select" error="This value is not accepted."><option>Select</option><option>Two</option></void-select>
+          <void-checkbox checked aria-invalid="true">Checked</void-checkbox>
+          <void-checkbox aria-invalid="true">Unchecked</void-checkbox>
+          <void-radio name="st-invalid" value="a" checked>Radio</void-radio>
+          <void-switch checked aria-label="Switch"></void-switch>
+          <void-toggle>Toggle</void-toggle>
+          <void-segmented-control value="a" aria-label="Segmented"><void-segmented-control-item value="a">One</void-segmented-control-item><void-segmented-control-item value="b">Two</void-segmented-control-item></void-segmented-control>
+          <void-tag removable>Tag</void-tag>
+          <a href="#link">A link</a>
+        </void-actions>
+      </void-section>
+    </void-section>
+  </void-page>
+</main>

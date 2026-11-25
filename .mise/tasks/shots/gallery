@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+#MISE description="Build a gallery from capture directories: mise run shots:gallery -- --head DIR [--base DIR] --out DIR"
+set -euo pipefail
+exec node tests/browser/shots/gallery.mjs "$@"

@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+#MISE description="Photograph the reference pages (every theme and skin, dark and light, 1440 and 390 px) and build the review gallery in tmp/shots/gallery"
+#MISE depends=["build"]
+set -euo pipefail
+
+# Filters (comma lists): --page overview,form  --theme void,paper  --skin loft  --scheme dark  --width 390
+#   --smoke (the small subset)  --jobs N  --out DIR  --gallery DIR  --root CHECKOUT
+# Needs Chromium: mise run test:browser:install (VOID_BROWSERS=chromium to fetch only that).
+# "Visual review" in CONTRIBUTING.md has the details.
+exec node tests/browser/shots/capture.mjs --out tmp/shots/latest --gallery tmp/shots/gallery "$@"
