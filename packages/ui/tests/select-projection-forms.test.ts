@@ -203,3 +203,42 @@ describe('void-select value adoption and synchronous sync', () => {
     expect(el.value).toBe('b');
   });
 });
+
+describe('void-select when the selected option is removed', () => {
+  it('falls back to the first enabled option; property, native select and form value agree; no void-change', async () => {
+    const form = await mount(`<void-select name="s" value="b">${options}<option value="c">C</option></void-select>`);
+    const el = form.querySelector('void-select') as VoidSelect;
+    const native = form.querySelector('select')!;
+    expect(el.value).toBe('b');
+    let changes = 0;
+    el.addEventListener('void-change', () => { changes++; });
+    Array.from(native.options).find((o) => o.value === 'b')!.remove();
+    await settle(form);
+    expect(el.value).toBe('a');
+    expect(native.value).toBe('a');
+    expect(new FormData(form).get('s')).toBe('a');
+    expect(changes).toBe(0);
+  });
+
+  it('falls back to the placeholder (empty value) when there is one', async () => {
+    const form = await mount(`<void-select name="s" placeholder="Pick" value="b">${options}</void-select>`);
+    const el = form.querySelector('void-select') as VoidSelect;
+    const native = form.querySelector('select')!;
+    expect(el.value).toBe('b');
+    Array.from(native.options).find((o) => o.value === 'b')!.remove();
+    await settle(form);
+    expect(el.value).toBe('');
+    expect(native.value).toBe('');
+  });
+
+  it('becomes empty when every option is removed', async () => {
+    const form = await mount(`<void-select name="s" value="a">${options}</void-select>`);
+    const el = form.querySelector('void-select') as VoidSelect;
+    const native = form.querySelector('select')!;
+    for (const o of Array.from(native.options)) o.remove();
+    await settle(form);
+    expect(el.value).toBe('');
+    expect(native.selectedIndex).toBe(-1);
+    expect(new FormData(form).get('s')).toBe('');
+  });
+});

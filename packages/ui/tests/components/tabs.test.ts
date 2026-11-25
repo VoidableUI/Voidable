@@ -55,12 +55,15 @@ describe('VoidTabPanel', () => {
     document.body.removeChild(el);
   });
 
-  it('sets id from tab attribute on connect', async () => {
+  it('does not overwrite a consumer-set id with the tab name', async () => {
     const el = document.createElement('void-tab-panel') as VoidTabPanel;
+    el.id = 'my-panel';
     el.tab = 'my-tab';
     document.body.appendChild(el);
     await el.updateComplete;
-    expect(el.id).toBe('my-tab');
+    el.tab = 'other';
+    await el.updateComplete;
+    expect(el.id).toBe('my-panel');
     document.body.removeChild(el);
   });
 
@@ -145,9 +148,34 @@ describe('VoidTabs', () => {
       expect(tabs[1].getAttribute('aria-selected')).toBe('false');
     });
 
-    it('active tab has aria-controls matching panel tab id', () => {
-      const tabs = el.querySelectorAll('.void-tabs-tab');
-      expect(tabs[0].getAttribute('aria-controls')).toBe('one');
+    it('wires aria-controls and aria-labelledby both ways', () => {
+      const tabs = Array.from(el.querySelectorAll('.void-tabs-tab'));
+      const panels = Array.from(el.querySelectorAll('void-tab-panel'));
+      tabs.forEach((tab, i) => {
+        expect(tab.id).not.toBe('');
+        expect(panels[i].id).not.toBe('');
+        expect(tab.getAttribute('aria-controls')).toBe(panels[i].id);
+        expect(panels[i].getAttribute('aria-labelledby')).toBe(tab.id);
+      });
+    });
+
+    it('uses a consumer-set panel id for aria-controls', async () => {
+      const panel = el.querySelector('void-tab-panel')!;
+      panel.id = 'mine';
+      el.requestUpdate();
+      await el.updateComplete;
+      expect(el.querySelector('.void-tabs-tab')!.getAttribute('aria-controls')).toBe('mine');
+      expect(panel.id).toBe('mine');
+    });
+
+    it('generates ids that are unique across tab sets that reuse tab names', async () => {
+      const other = createTabs('one', [{ tab: 'one', label: 'First' }, { tab: 'two', label: 'Second' }]);
+      document.body.appendChild(other);
+      await other.updateComplete;
+      const ids = [...el.querySelectorAll('[id]'), ...other.querySelectorAll('[id]')].map(e => e.id);
+      expect(new Set(ids).size).toBe(ids.length);
+      expect(ids.length).toBeGreaterThanOrEqual(8);
+      document.body.removeChild(other);
     });
 
     it('tab button text shows label', () => {

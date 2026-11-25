@@ -31,6 +31,8 @@ export class VoidSelect extends NativeFormControl(VoidElement) {
   private _placeholderOption: HTMLOptionElement | null = null;
   /** The value captured as the reset target, to tell whether anything has moved it since. */
   private _defaultValue: string | undefined = undefined;
+  /** The value last seen on an option, to tell a removed selection from a value that has no option yet. */
+  private _matchedValue: string | null = null;
 
   protected override willUpdate(changed: Map<string, unknown>): void {
     super.willUpdate(changed);
@@ -66,6 +68,7 @@ export class VoidSelect extends NativeFormControl(VoidElement) {
     if (!select) return;
     const pristine = this._defaultValue !== undefined && this.value === this._defaultValue;
     this._syncPlaceholder(select);
+    this._reconcileRemovedSelection(select);
     if (!this.value && !this.placeholder && select.value) {
       this.value = select.value;
     }
@@ -78,6 +81,24 @@ export class VoidSelect extends NativeFormControl(VoidElement) {
     }
     // Last, so toggling default-selected attributes cannot change the selection.
     this._applyValue();
+  }
+
+  /**
+   * When the option the value points at has been removed, fall back the way a native
+   * select does (the placeholder if there is one, else the first enabled option, else
+   * nothing) so the property, the native select and the submitted value agree. A value
+   * that never had an option (options still being parsed or rendered) is left alone.
+   * The change is programmatic, so no void-change is dispatched.
+   */
+  private _reconcileRemovedSelection(select: HTMLSelectElement): void {
+    const options = Array.from(select.options);
+    if (options.some((o) => o.value === this.value)) {
+      this._matchedValue = this.value;
+      return;
+    }
+    if (this._matchedValue === null || this._matchedValue !== this.value) return;
+    this.value = this.placeholder ? '' : (options.find((o) => !o.disabled)?.value ?? '');
+    this._matchedValue = options.some((o) => o.value === this.value) ? this.value : null;
   }
 
   /** Inserts, updates or removes the placeholder option; drops stale copies (from a morph, clone or recovery). */

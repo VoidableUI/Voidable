@@ -3,6 +3,9 @@ import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
 import { ProjectionController } from '../projection.js';
 
+// Counter for generated ids; unique across every tabs instance on the page.
+let nextTabId = 0;
+
 /** Individual tab content panel within a VoidTabs component. */
 export class VoidTabPanel extends VoidElement {
   @property({ type: String, reflect: true }) tab = '';
@@ -12,14 +15,15 @@ export class VoidTabPanel extends VoidElement {
   connectedCallback(): void {
     super.connectedCallback();
     this.setAttribute('role', 'tabpanel');
-    if (this.tab) this.id = this.tab;
   }
 
   protected override updated(_changed: Map<string, unknown>): void {
     super.updated(_changed);
     this.setAttribute('role', 'tabpanel');
-    if (_changed.has('tab') && this.tab) this.id = this.tab;
   }
+
+  /** @internal Number used to derive this panel's generated tab id; assigned on first use. */
+  _tabKey = 0;
 
 }
 
@@ -53,7 +57,29 @@ export class VoidTabs extends VoidElement {
   private _syncPanels(): void {
     for (const panel of this._panels) {
       panel.active = panel.tab === this.value;
+      this._wire(panel);
     }
+  }
+
+  /** The id of the panel's tab button; stable for the lifetime of the panel. */
+  private _tabId(panel: VoidTabPanel): string {
+    if (!panel._tabKey) panel._tabKey = ++nextTabId;
+    return `void-tab-${panel._tabKey}`;
+  }
+
+  /** The panel's id: a consumer-set id is kept, otherwise one is generated once. */
+  private _panelId(panel: VoidTabPanel): string {
+    if (!panel.id) {
+      if (!panel._tabKey) panel._tabKey = ++nextTabId;
+      panel.id = `void-tab-panel-${panel._tabKey}`;
+    }
+    return panel.id;
+  }
+
+  /** Wire the panel back to its tab button (the button points at the panel via aria-controls). */
+  private _wire(panel: VoidTabPanel): void {
+    this._panelId(panel);
+    panel.setAttribute('aria-labelledby', this._tabId(panel));
   }
 
   protected override updated(_changed: Map<string, unknown>): void {
@@ -71,8 +97,9 @@ export class VoidTabs extends VoidElement {
             type="button"
             class="void-tabs-tab"
             role="tab"
+            id=${this._tabId(panel)}
             aria-selected=${panel.tab === this.value ? 'true' : 'false'}
-            aria-controls=${panel.tab}
+            aria-controls=${this._panelId(panel)}
             ?active=${panel.tab === this.value}
             tabindex=${panel.tab === this.value ? '0' : '-1'}
             @click=${() => this._onTabClick(panel)}
