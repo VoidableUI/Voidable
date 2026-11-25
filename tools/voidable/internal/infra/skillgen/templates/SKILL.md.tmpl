@@ -76,7 +76,7 @@ Components communicate with `CustomEvent`s named `void-*` that bubble and carry 
 
 `references/wrong-usages.md` lists what the checker knows, generated from the manifest. The common ones:
 
-- `variant="ghost"`, `variant="primary"`, `color="primary"` or `color="danger"` on buttons and badges: use the listed values (`color` is `default`, `error`, `warning`, `success`, `info`, `notice`).
+- `variant="primary"`, `variant="solid"`, `color="primary"` or `color="danger"` on buttons and badges: use the listed values (`color` is `default`, `error`, `warning`, `success`, `info`, `notice`).
 - `label="..."` on an input, textarea or select: wrap the control in `<void-field label="...">`.
 - `<void-option>` in `<void-select>`: use native `<option>`.
 - A `void-tab` element or hand-made tab buttons: tabs are `<void-tab-panel tab="..." label="...">`.

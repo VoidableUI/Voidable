@@ -46,8 +46,8 @@ func TestCheckFixtures(t *testing.T) {
 			`form.blade.php:7:5: [unknown-element] unknown element <void-buton> (did you mean <void-button>?)`,
 		}, []string{"heading", "x-void-on", "open", "closable", "boolean-false"}},
 		{"App.tsx", []string{
-			`App.tsx:5:22: [invalid-value] variant="ghost" is not valid on <void-button>; allowed: outline|filled`,
-			`App.tsx:5:40: [unknown-event] <void-button> does not dispatch void-change; it dispatches void-click`,
+			`App.tsx:5:22: [invalid-value] variant="primary" is not valid on <void-button>; allowed: outline|filled|ghost`,
+			`App.tsx:5:42: [unknown-event] <void-button> does not dispatch void-change; it dispatches void-click`,
 		}, []string{"collapsedWidth", "collapsed-width", "className", "void-toggle", "self-closing", "placeholder"}},
 		{"index.astro", []string{
 			`index.astro:5:37: [unknown-attribute] unknown attribute value on <void-tab-panel>; valid: tab, label, active`,
@@ -101,7 +101,7 @@ func TestRefAndGen(t *testing.T) {
 		want []string
 	}{
 		{[]string{"ref"}, []string{"elements.", "void-button Action trigger"}},
-		{[]string{"ref", "void-button", "--format", "markdown"}, []string{"## `<void-button>`", "| `variant` | `outline\\|filled` |"}},
+		{[]string{"ref", "void-button", "--format", "markdown"}, []string{"## `<void-button>`", "| `variant` | `outline\\|filled\\|ghost` |"}},
 		{[]string{"ref", "void-button", "--format", "json"}, []string{`"tag": "void-button"`, `"values": [`}},
 		{[]string{"ref", "--size"}, []string{"text     index", "78 elements"}},
 		{[]string{"gen", "snippet", "void-dialog", "--lang", "jsx"}, []string{`<void-dialog heading="Delete project" size="sm" onvoid-close=`, `<void-button color="error" variant="filled">Delete</void-button>`}},

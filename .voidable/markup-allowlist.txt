@@ -5,10 +5,6 @@
 #
 # Format: <rule> <tag> <attr>[=<value>] <max>
 
-# DELETE once the ghost variant is in the manifest (owner decision: it will
-# become a real void-button variant, being added on a separate branch). The
-# usages stay as they are.
-invalid-value void-button variant=ghost 100
 
 # void-input forwards native input attributes and types that it does not
 # declare. Decide whether to declare them, so types, manifest and behaviour agree.
