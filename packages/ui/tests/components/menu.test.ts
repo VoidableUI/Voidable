@@ -87,8 +87,13 @@ describe('VoidMenu', () => {
       el.remove();
     });
 
-    it('sets role="menu" on host', () => {
-      expect(el.getAttribute('role')).toBe('menu');
+    it('puts role="menu" on the list (the host has no role, so a search field is not a menu child)', () => {
+      expect(el.hasAttribute('role')).toBe(false);
+      expect(el.querySelector('.void-menu-list')!.getAttribute('role')).toBe('menu');
+    });
+
+    it('has no listbox between the menu and its items', () => {
+      expect(el.querySelector('[role="listbox"]')).toBeNull();
     });
   });
 
@@ -128,7 +133,8 @@ describe('VoidMenu', () => {
     it('closes on Escape key', async () => {
       el.open = true;
       await el.updateComplete;
-      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+      const item = el.querySelector<HTMLElement>('void-menu-item')!;
+      item.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
       await el.updateComplete;
       expect(el.open).toBe(false);
     });
@@ -229,40 +235,89 @@ describe('VoidMenu', () => {
       el.remove();
     });
 
-    it('ArrowDown focuses first item from none', () => {
-      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
-      const items = el.querySelectorAll('void-menu-item');
-      expect(document.activeElement).toBe(items[0]);
+    const items = () => Array.from(el.querySelectorAll<VoidMenuItem>('void-menu-item'));
+    const press = (target: Element, key: string) => {
+      const e = new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true });
+      target.dispatchEvent(e);
+      return e;
+    };
+
+    it('exactly one item is the tab stop (roving tabindex)', () => {
+      expect(items().map(i => i.getAttribute('tabindex'))).toEqual(['0', '-1', '-1']);
     });
 
-    it('ArrowDown moves focus to next item', () => {
-      const items = el.querySelectorAll<HTMLElement>('void-menu-item');
-      items[0].focus();
-      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
-      expect(document.activeElement).toBe(items[1]);
+    it('the tab stop follows focus', () => {
+      items()[2]!.focus();
+      expect(items().map(i => i.getAttribute('tabindex'))).toEqual(['-1', '-1', '0']);
     });
 
-    it('ArrowUp wraps to last item from first', () => {
-      const items = el.querySelectorAll<HTMLElement>('void-menu-item');
-      items[0].focus();
-      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp', bubbles: true }));
-      expect(document.activeElement).toBe(items[2]);
+    it('a late item does not add a second tab stop', async () => {
+      const late = document.createElement('void-menu-item') as VoidMenuItem;
+      late.textContent = 'Delta';
+      el.appendChild(late);
+      await el.updateComplete;
+      await late.updateComplete;
+      await new Promise(r => setTimeout(r));
+      expect(items().filter(i => i.getAttribute('tabindex') === '0')).toHaveLength(1);
     });
 
-    it('ArrowDown wraps to first item from last', () => {
-      const items = el.querySelectorAll<HTMLElement>('void-menu-item');
-      items[2].focus();
-      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
-      expect(document.activeElement).toBe(items[0]);
+    it('ArrowDown moves focus to the next item and prevents default', () => {
+      items()[0]!.focus();
+      const e = press(items()[0]!, 'ArrowDown');
+      expect(document.activeElement).toBe(items()[1]);
+      expect(e.defaultPrevented).toBe(true);
+    });
+
+    it('ArrowUp wraps to the last item from the first', () => {
+      items()[0]!.focus();
+      press(items()[0]!, 'ArrowUp');
+      expect(document.activeElement).toBe(items()[2]);
+    });
+
+    it('ArrowDown wraps to the first item from the last', () => {
+      items()[2]!.focus();
+      press(items()[2]!, 'ArrowDown');
+      expect(document.activeElement).toBe(items()[0]);
+    });
+
+    it('Home and End focus the first and last item', () => {
+      items()[1]!.focus();
+      press(items()[1]!, 'End');
+      expect(document.activeElement).toBe(items()[2]);
+      press(items()[2]!, 'Home');
+      expect(document.activeElement).toBe(items()[0]);
+    });
+
+    it('typing jumps to the next item starting with the characters', () => {
+      items()[0]!.focus();
+      press(items()[0]!, 'c');
+      expect(document.activeElement).toBe(items()[2]);
     });
 
     it('skips disabled items', async () => {
-      const items = el.querySelectorAll<VoidMenuItem>('void-menu-item');
-      items[1].disabled = true;
+      items()[1]!.disabled = true;
       await el.updateComplete;
-      items[0].focus();
-      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
-      expect(document.activeElement).toBe(items[2]);
+      items()[0]!.focus();
+      press(items()[0]!, 'ArrowDown');
+      expect(document.activeElement).toBe(items()[2]);
+    });
+
+    it('does not touch arrow keys pressed elsewhere on the page (a textarea, say)', () => {
+      const area = document.createElement('textarea');
+      document.body.appendChild(area);
+      area.focus();
+      const e = new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true, cancelable: true });
+      area.dispatchEvent(e);
+      expect(e.defaultPrevented).toBe(false);
+      expect(document.activeElement).toBe(area);
+      area.remove();
+    });
+
+    it('ignores keys while closed', async () => {
+      el.open = false;
+      await el.updateComplete;
+      const e = press(items()[0]!, 'ArrowDown');
+      expect(e.defaultPrevented).toBe(false);
     });
   });
 
@@ -326,11 +381,11 @@ describe('VoidMenuItem', () => {
       expect(el.getAttribute('role')).toBe('menuitem');
     });
 
-    it('sets tabindex="0" when not disabled', () => {
-      expect(el.getAttribute('tabindex')).toBe('0');
+    it('is not a tab stop by itself (the menu roves tabindex)', () => {
+      expect(el.getAttribute('tabindex')).toBe('-1');
     });
 
-    it('sets tabindex="-1" when disabled', async () => {
+    it('stays at tabindex="-1" when disabled', async () => {
       el.disabled = true;
       await el.updateComplete;
       expect(el.getAttribute('tabindex')).toBe('-1');

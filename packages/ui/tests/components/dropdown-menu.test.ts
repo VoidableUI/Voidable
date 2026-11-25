@@ -207,15 +207,14 @@ describe('VoidDropdownMenu', () => {
   });
 
   describe('trigger ARIA', () => {
-    // BUG: the trigger is never given aria-haspopup or aria-expanded, so assistive tech cannot tell
-    // it opens a menu or whether it is open. dropdown-menu.ts:11-30. Expected: aria-haspopup="menu"
-    // and aria-expanded tracking `open`.
-    it.fails('marks the trigger with aria-haspopup="menu"', async () => {
+    it('marks the trigger with aria-haspopup="menu" and points aria-controls at the panel', async () => {
       const el = await mount();
       expect(trigger(el).getAttribute('aria-haspopup')).toBe('menu');
+      expect(trigger(el).getAttribute('aria-controls')).toBe(el.querySelector('.void-dropdown-menu-panel')!.id);
+      expect(el.querySelector('.void-dropdown-menu-panel')!.getAttribute('aria-labelledby')).toBe(trigger(el).id);
     });
 
-    it.fails('keeps aria-expanded on the trigger in sync with open', async () => {
+    it('keeps aria-expanded on the trigger in sync with open', async () => {
       const el = await mount();
       expect(trigger(el).getAttribute('aria-expanded')).toBe('false');
       trigger(el).click();
@@ -224,22 +223,55 @@ describe('VoidDropdownMenu', () => {
     });
   });
 
-  describe('arrow key navigation (focus is approximate in happy-dom)', () => {
-    it('ArrowDown focuses the first item when none is focused, and prevents default', async () => {
-      const el = await mount({ open: true });
-      const e = press('ArrowDown');
-      expect(document.activeElement).toBe(menuItems(el)[0]);
+  describe('keyboard (focus is approximate in happy-dom)', () => {
+    it('ArrowDown on the trigger opens the menu and focuses the first item', async () => {
+      const el = await mount();
+      trigger(el).focus();
+      const e = press('ArrowDown', trigger(el));
+      await el.updateComplete;
+      expect(el.open).toBe(true);
       expect(e.defaultPrevented).toBe(true);
+      await Promise.resolve();
+      expect(document.activeElement).toBe(menuItems(el)[0]);
+    });
+
+    it('ArrowUp on the trigger opens the menu and focuses the last item', async () => {
+      const el = await mount();
+      trigger(el).focus();
+      press('ArrowUp', trigger(el));
+      await el.updateComplete;
+      await Promise.resolve();
+      expect(document.activeElement).toBe(menuItems(el)[2]);
+    });
+
+    it('Enter and Space on a trigger that is not natively activated open the menu', async () => {
+      const el = await mount({}, DEFAULT_ITEMS, false);
+      const custom = document.createElement('void-button');
+      custom.id = 'trigger';
+      custom.setAttribute('slot', 'trigger');
+      el.prepend(custom);
+      await el.updateComplete;
+      press('Enter', custom);
+      expect(el.open).toBe(true);
+      press(' ', custom);
+      expect(el.open).toBe(false);
+    });
+
+    it('does not double-toggle on a native button trigger (its Enter and Space already click)', async () => {
+      const el = await mount();
+      press('Enter', trigger(el));
+      expect(el.open).toBe(false);
     });
 
     it('ArrowDown moves to the next item and wraps to the first', async () => {
       const el = await mount({ open: true });
       const items = menuItems(el);
       items[0]!.focus();
-      press('ArrowDown');
+      const e = press('ArrowDown', items[0]!);
       expect(document.activeElement).toBe(items[1]);
+      expect(e.defaultPrevented).toBe(true);
       items[2]!.focus();
-      press('ArrowDown');
+      press('ArrowDown', items[2]!);
       expect(document.activeElement).toBe(items[0]);
     });
 
@@ -247,36 +279,59 @@ describe('VoidDropdownMenu', () => {
       const el = await mount({ open: true });
       const items = menuItems(el);
       items[1]!.focus();
-      press('ArrowUp');
+      press('ArrowUp', items[1]!);
       expect(document.activeElement).toBe(items[0]);
-      press('ArrowUp');
+      press('ArrowUp', items[0]!);
       expect(document.activeElement).toBe(items[2]);
     });
 
-    it('ArrowUp focuses the last item when none is focused', async () => {
+    it('Home and End focus the first and last item', async () => {
       const el = await mount({ open: true });
-      press('ArrowUp');
-      expect(document.activeElement).toBe(menuItems(el)[2]);
+      const items = menuItems(el);
+      items[1]!.focus();
+      press('End', items[1]!);
+      expect(document.activeElement).toBe(items[2]);
+      press('Home', items[2]!);
+      expect(document.activeElement).toBe(items[0]);
+    });
+
+    it('typing jumps to the next item starting with the characters', async () => {
+      const el = await mount({ open: true });
+      const items = menuItems(el);
+      items[0]!.focus();
+      press('d', items[0]!);
+      expect(document.activeElement).toBe(items[1]);
     });
 
     it('skips disabled items', async () => {
       const el = await mount({ open: true }, [{ label: 'a' }, { label: 'b', disabled: true }, { label: 'c' }]);
       const items = menuItems(el);
       items[0]!.focus();
-      press('ArrowDown');
+      press('ArrowDown', items[0]!);
       expect(document.activeElement).toBe(items[2]);
     });
 
-    it('does nothing while the menu is closed', async () => {
-      const el = await mount();
-      const e = press('ArrowDown');
-      expect(document.activeElement).not.toBe(menuItems(el)[0]);
+    it('Tab closes the menu and is not prevented', async () => {
+      const el = await mount({ open: true });
+      const items = menuItems(el);
+      items[0]!.focus();
+      const e = press('Tab', items[0]!);
+      expect(el.open).toBe(false);
       expect(e.defaultPrevented).toBe(false);
     });
 
+    it('does not take over arrow keys elsewhere on the page while open (a textarea, say)', async () => {
+      await mount({ open: true });
+      const area = document.createElement('textarea');
+      document.body.appendChild(area);
+      area.focus();
+      expect(press('ArrowDown', area).defaultPrevented).toBe(false);
+      expect(document.activeElement).toBe(area);
+    });
+
     it('does nothing (and does not throw) when every item is disabled', async () => {
-      await mount({ open: true }, [{ label: 'a', disabled: true }]);
-      expect(() => press('ArrowDown')).not.toThrow();
+      const el = await mount({ open: true }, [{ label: 'a', disabled: true }]);
+      expect(() => press('ArrowDown', menuItems(el)[0]!)).not.toThrow();
     });
   });
 
@@ -339,20 +394,18 @@ describe('VoidDropdownMenuItem', () => {
     expect(el.hasAttribute('destructive')).toBe(true);
   });
 
-  it('has role="menuitem" and tabindex="0"', async () => {
+  it('has role="menuitem" and takes focus from the menu, not from Tab (tabindex="-1")', async () => {
     const el = await item();
     expect(el.getAttribute('role')).toBe('menuitem');
-    expect(el.getAttribute('tabindex')).toBe('0');
+    expect(el.getAttribute('tabindex')).toBe('-1');
   });
 
-  it('exposes disabled via aria-disabled and tabindex="-1", and recovers', async () => {
+  it('exposes disabled via aria-disabled, and recovers', async () => {
     const el = await item({ disabled: true });
     expect(el.getAttribute('aria-disabled')).toBe('true');
-    expect(el.getAttribute('tabindex')).toBe('-1');
     el.disabled = false;
     await el.updateComplete;
     expect(el.getAttribute('aria-disabled')).toBe('false');
-    expect(el.getAttribute('tabindex')).toBe('0');
   });
 
   describe('void-select event', () => {

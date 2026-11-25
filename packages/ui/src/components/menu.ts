@@ -1,9 +1,20 @@
 import { html, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
+import { isPrintable, stepEnabled, Typeahead } from '../keyboard.js';
 import { ProjectionController } from '../projection.js';
 
-/** Always-visible menu panel for command palettes, side panels, and searchable action lists. */
+/**
+ * Always-visible menu panel for command palettes, side panels, and searchable action lists.
+ *
+ * Follows the WAI-ARIA menu pattern: the list is the `role="menu"` (the host has no role, so the search
+ * field is not a menu child) and the items are `menuitem`s, one tab stop at a time (roving tabindex).
+ * Keys are handled on the menu itself, never on the document. Keyboard: ArrowDown and ArrowUp move between
+ * items (wrapping, skipping disabled and filtered-out ones; with `searchable`, ArrowDown from the search
+ * field goes to the first item and ArrowUp from the first item returns to the field), Home and End jump to
+ * the first and last item, typing jumps to the next item starting with the characters (not when
+ * `searchable`), Enter or Space activate the item (`void-select`), Escape closes the menu.
+ */
 export class VoidMenu extends VoidElement {
   @property({ type: Boolean, reflect: true }) open = false;
   @property({ type: Boolean, reflect: true }) searchable = false;
@@ -15,19 +26,32 @@ export class VoidMenu extends VoidElement {
     regions: [{ name: 'list', target: () => this.querySelector(':scope > .void-menu-list') }],
   });
 
+  private readonly _typeahead = new Typeahead();
+  private _observer: MutationObserver | null = null;
+
   connectedCallback(): void {
     super.connectedCallback();
-    this.setHostAttribute('role', 'menu');
-    document.addEventListener('keydown', this._handleKeydown);
+    // Keys are handled on the menu itself (never on the document), so arrow keys keep
+    // working in every other control on the page.
+    this.addEventListener('keydown', this._handleKeydown);
+    this.addEventListener('focusin', this._handleFocusIn);
+    // Items arrive late (framework rendering, morphs) and change when filtered: keep the tab stop valid.
+    this._observer ??= new MutationObserver(() => this._syncTabStop());
+    this._observer.observe(this, { childList: true, subtree: true, attributes: true, attributeFilter: ['hidden', 'disabled'] });
+    this._syncTabStop();
   }
 
   disconnectedCallback(): void {
     super.disconnectedCallback();
-    document.removeEventListener('keydown', this._handleKeydown);
+    this.removeEventListener('keydown', this._handleKeydown);
+    this.removeEventListener('focusin', this._handleFocusIn);
+    this._observer?.disconnect();
+    this._typeahead.reset();
   }
 
   protected override updated(changed: Map<string, unknown>): void {
     super.updated(changed);
+    this._syncTabStop();
 
     if (changed.has('open') && this.open && this.searchable) {
       requestAnimationFrame(() => {
@@ -37,29 +61,71 @@ export class VoidMenu extends VoidElement {
     }
   }
 
+  /** Items that can take focus: enabled and not filtered out, in document order. */
+  private get _focusableItems(): VoidMenuItem[] {
+    return (Array.from(this.querySelectorAll('void-menu-item')) as VoidMenuItem[]).filter(
+      item => !item.disabled && !item.closest('[hidden]'),
+    );
+  }
+
+  /** Roving tabindex: one item (the one last focused, else the first) is the menu's tab stop. */
+  private _syncTabStop(current?: VoidMenuItem | null): void {
+    const items = this._focusableItems;
+    const stop = current && items.includes(current)
+      ? current
+      : items.find(i => i.getAttribute('tabindex') === '0') ?? items[0];
+    for (const item of this.querySelectorAll('void-menu-item') as NodeListOf<VoidMenuItem>) {
+      if (typeof item._setTabStop === 'function') item._setTabStop(item === stop);
+    }
+  }
+
+  private _handleFocusIn = (e: FocusEvent): void => {
+    const item = (e.target as Element).closest('void-menu-item') as VoidMenuItem | null;
+    if (item) this._syncTabStop(item);
+  };
+
   private _handleKeydown = (e: KeyboardEvent): void => {
     if (!this.open) return;
+    const target = e.target as HTMLElement;
 
     if (e.key === 'Escape') {
       e.preventDefault();
+      // Closes this menu only: a surrounding dialog must not see the same Escape.
+      e.stopPropagation();
       this.open = false;
       this._clearSearch();
       return;
     }
+    if (e.altKey || e.ctrlKey || e.metaKey) return;
 
-    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
-      e.preventDefault();
-      const items = Array.from(
-        this.querySelectorAll<HTMLElement>('void-menu-item:not([disabled]):not([hidden])')
-      );
-      if (!items.length) return;
-      const idx = items.indexOf(document.activeElement as HTMLElement);
-      if (e.key === 'ArrowDown') {
-        (items[idx + 1] ?? items[0]).focus();
-      } else {
-        (items[idx - 1] ?? items[items.length - 1]).focus();
+    const items = this._focusableItems;
+    const inSearch = target.classList.contains('void-menu-search');
+    const current = items.indexOf(target.closest('void-menu-item') as VoidMenuItem);
+    const disabled = items.map(() => false);
+    let next: HTMLElement | undefined;
+
+    if (e.key === 'ArrowDown') {
+      next = inSearch || current < 0 ? items[0] : items[stepEnabled(disabled, current, 1)];
+    } else if (e.key === 'ArrowUp') {
+      if (this.searchable && current === 0) next = this.querySelector<HTMLElement>('.void-menu-search') ?? undefined;
+      else next = inSearch || current < 0 ? items[items.length - 1] : items[stepEnabled(disabled, current, -1)];
+    } else if (e.key === 'Home' && !inSearch) {
+      next = items[0];
+    } else if (e.key === 'End' && !inSearch) {
+      next = items[items.length - 1];
+    } else if (isPrintable(e) && !inSearch && current >= 0 && !(e.key === ' ')) {
+      // Type-ahead among the visible items (the search field takes typing itself).
+      const i = this._typeahead.match(e.key, items.map(it => it.textContent ?? ''), disabled, current);
+      if (i >= 0) {
+        e.preventDefault();
+        items[i]!.focus();
       }
+      return;
+    } else {
+      return;
     }
+    e.preventDefault();
+    next?.focus();
   };
 
   private _onSearchInput = (e: Event): void => {
@@ -134,10 +200,11 @@ export class VoidMenu extends VoidElement {
           type="text"
           placeholder=${this.placeholder}
           autocomplete="off"
+          aria-label=${this.placeholder}
           @input=${this._onSearchInput}
         />
       ` : nothing}
-      <div class="void-menu-list" role="listbox" aria-label="Menu options" ?hidden=${!this.open}></div>
+      <div class="void-menu-list" role="menu" aria-label=${this.getAttribute('aria-label') || 'Menu'} ?hidden=${!this.open}></div>
     `;
   }
 }
@@ -159,7 +226,8 @@ export class VoidMenuItem extends VoidElement {
   connectedCallback(): void {
     super.connectedCallback();
     this.setHostAttribute('role', 'menuitem');
-    this.setHostAttribute('tabindex', this.disabled ? '-1' : '0');
+    // Roving tabindex: the owning menu makes one item its tab stop (see _setTabStop).
+    this.setHostAttribute('tabindex', '-1');
     this.addEventListener('click', this._handleClick);
     this.addEventListener('keydown', this._handleKeydown);
   }
@@ -173,9 +241,14 @@ export class VoidMenuItem extends VoidElement {
   updated(changed: Map<string, unknown>): void {
     super.updated(changed);
     if (changed.has('disabled')) {
-      this.setHostAttribute('tabindex', this.disabled ? '-1' : '0');
+      this.setHostAttribute('tabindex', '-1');
       this.setHostAttribute('aria-disabled', String(this.disabled));
     }
+  }
+
+  /** @internal Set by the owning menu: whether this item is the menu's tab stop. */
+  _setTabStop(stop: boolean): void {
+    this.setHostAttribute('tabindex', stop && !this.disabled ? '0' : '-1');
   }
 
   render() {
