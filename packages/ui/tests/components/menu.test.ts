@@ -13,29 +13,33 @@ if (!customElements.get('void-menu-group')) {
   customElements.define('void-menu-group', VoidMenuGroup);
 }
 
-function createMenu(items: Array<{ value: string; label: string; disabled?: boolean }>): VoidMenu {
+function createMenu(items: Array<{ value: string; label: string; disabled?: boolean }>, searchable = false): VoidMenu {
   const el = document.createElement('void-menu') as VoidMenu;
+  if (searchable) {
+    const search = document.createElement('void-menu-search');
+    const input = document.createElement('input');
+    input.type = 'search';
+    input.setAttribute('aria-label', 'Search');
+    search.appendChild(input);
+    el.appendChild(search);
+  }
+  const content = document.createElement('void-menu-content');
   for (const item of items) {
     const mi = document.createElement('void-menu-item') as VoidMenuItem;
     mi.value = item.value;
     mi.textContent = item.label;
     if (item.disabled) mi.disabled = true;
-    el.appendChild(mi);
+    content.appendChild(mi);
   }
+  el.appendChild(content);
   return el;
 }
 
 function createGroupedMenu(): VoidMenu {
   const el = document.createElement('void-menu') as VoidMenu;
-  const g1 = document.createElement('void-menu-group') as VoidMenuGroup;
-  g1.label = 'File';
-  const i1 = document.createElement('void-menu-item') as VoidMenuItem;
-  i1.value = 'new'; i1.textContent = 'New File';
-  const i2 = document.createElement('void-menu-item') as VoidMenuItem;
-  i2.value = 'open'; i2.textContent = 'Open File';
-  g1.appendChild(i1);
-  g1.appendChild(i2);
-  el.appendChild(g1);
+  el.innerHTML =
+    '<void-menu-content><void-menu-group><void-menu-group-label>File</void-menu-group-label>' +
+    '<void-menu-item value="new">New File</void-menu-item><void-menu-item value="open">Open File</void-menu-item></void-menu-group></void-menu-content>';
   return el;
 }
 
@@ -61,16 +65,8 @@ describe('VoidMenu', () => {
       expect(el.open).toBe(false);
     });
 
-    it('searchable defaults to false', () => {
-      expect(el.searchable).toBe(false);
-    });
-
     it('size defaults to "md"', () => {
       expect(el.size).toBe('md');
-    });
-
-    it('placeholder defaults to "Search..."', () => {
-      expect(el.placeholder).toBe('Search...');
     });
   });
 
@@ -79,6 +75,7 @@ describe('VoidMenu', () => {
 
     beforeEach(async () => {
       el = document.createElement('void-menu') as VoidMenu;
+      el.innerHTML = '<void-menu-content></void-menu-content>';
       document.body.appendChild(el);
       await el.updateComplete;
     });
@@ -89,7 +86,7 @@ describe('VoidMenu', () => {
 
     it('puts role="menu" on the list (the host has no role, so a search field is not a menu child)', () => {
       expect(el.hasAttribute('role')).toBe(false);
-      expect(el.querySelector('.void-menu-list')!.getAttribute('role')).toBe('menu');
+      expect(el.querySelector('void-menu-content')!.getAttribute('role')).toBe('menu');
     });
 
     it('has no listbox between the menu and its items', () => {
@@ -113,15 +110,16 @@ describe('VoidMenu', () => {
       el.remove();
     });
 
-    it('hides the list when closed', () => {
-      // The list stays in the DOM so projected items survive close/reopen.
-      expect(el.querySelector<HTMLElement>('.void-menu-list')!.hidden).toBe(true);
-    });
-
-    it('shows the list when open', async () => {
+    it('is hidden by the theme through the open attribute, and its parts stay where they are', async () => {
+      const content = el.querySelector('void-menu-content')!;
+      const items = Array.from(el.querySelectorAll('void-menu-item'));
+      expect(el.hasAttribute('open')).toBe(false);
       el.open = true;
       await el.updateComplete;
-      expect(el.querySelector<HTMLElement>('.void-menu-list')!.hidden).toBe(false);
+      el.open = false;
+      await el.updateComplete;
+      expect(el.querySelector('void-menu-content')).toBe(content);
+      expect(Array.from(el.querySelectorAll('void-menu-item'))).toEqual(items);
     });
 
     it('reflects open attribute', async () => {
@@ -148,8 +146,7 @@ describe('VoidMenu', () => {
         { value: 'alpha', label: 'Alpha' },
         { value: 'bravo', label: 'Bravo' },
         { value: 'charlie', label: 'Charlie' },
-      ]);
-      el.searchable = true;
+      ], true);
       el.open = true;
       document.body.appendChild(el);
       await el.updateComplete;
@@ -159,18 +156,20 @@ describe('VoidMenu', () => {
       el.remove();
     });
 
-    it('renders search input when searchable', () => {
-      expect(el.querySelector('.void-menu-search')).not.toBeNull();
+    it('the search part wraps the author field, which the menu links to the list', () => {
+      const input = el.querySelector('void-menu-search > input') as HTMLInputElement;
+      expect(input).not.toBeNull();
+      expect(input.getAttribute('aria-controls')).toBe(el.querySelector('void-menu-content')!.id);
     });
 
-    it('does not render search input when not searchable', async () => {
-      el.searchable = false;
-      await el.updateComplete;
-      expect(el.querySelector('.void-menu-search')).toBeNull();
+    it('without a search part there is no search and typing in the list only jumps', async () => {
+      el.querySelector('void-menu-search')!.remove();
+      await new Promise(r => setTimeout(r));
+      expect(el.querySelector('input')).toBeNull();
     });
 
     it('filters items based on text input', async () => {
-      const input = el.querySelector('.void-menu-search') as HTMLInputElement;
+      const input = el.querySelector('void-menu-search > input') as HTMLInputElement;
       input.value = 'bravo';
       input.dispatchEvent(new InputEvent('input', { bubbles: true }));
       await el.updateComplete;
@@ -180,7 +179,7 @@ describe('VoidMenu', () => {
     });
 
     it('filtering is case-insensitive', async () => {
-      const input = el.querySelector('.void-menu-search') as HTMLInputElement;
+      const input = el.querySelector('void-menu-search > input') as HTMLInputElement;
       input.value = 'ALPHA';
       input.dispatchEvent(new InputEvent('input', { bubbles: true }));
       await el.updateComplete;
@@ -188,27 +187,46 @@ describe('VoidMenu', () => {
       expect(items.length).toBe(1);
     });
 
-    it('shows empty state when no match', async () => {
-      const input = el.querySelector('.void-menu-search') as HTMLInputElement;
+    it('marks the menu empty when no item matches, and clears it when items match again', async () => {
+      const input = el.querySelector('void-menu-search > input') as HTMLInputElement;
       input.value = 'zzz';
       input.dispatchEvent(new InputEvent('input', { bubbles: true }));
       await el.updateComplete;
-      expect(el.querySelector('.void-menu-empty')).not.toBeNull();
-    });
-
-    it('removes empty state when items match again', async () => {
-      const input = el.querySelector('.void-menu-search') as HTMLInputElement;
-      input.value = 'zzz';
-      input.dispatchEvent(new InputEvent('input', { bubbles: true }));
-      await el.updateComplete;
+      expect(el.hasAttribute('empty')).toBe(true);
       input.value = '';
       input.dispatchEvent(new InputEvent('input', { bubbles: true }));
       await el.updateComplete;
-      expect(el.querySelector('.void-menu-empty')).toBeNull();
+      expect(el.hasAttribute('empty')).toBe(false);
+      expect(el.querySelectorAll('void-menu-item[hidden]').length).toBe(0);
+    });
+
+    it('creates no node for the empty state: an author part replaces the default text', async () => {
+      const empty = document.createElement('void-menu-empty');
+      empty.textContent = 'Nothing here';
+      el.appendChild(empty);
+      const before = Array.from(el.querySelectorAll('*'));
+      const input = el.querySelector('void-menu-search > input') as HTMLInputElement;
+      input.value = 'zzz';
+      input.dispatchEvent(new InputEvent('input', { bubbles: true }));
+      await el.updateComplete;
+      expect(Array.from(el.querySelectorAll('*'))).toEqual(before);
+    });
+
+    it('does not unhide an item the author hid when the search is cleared', async () => {
+      const first = el.querySelector('void-menu-item')!;
+      const input = el.querySelector('void-menu-search > input') as HTMLInputElement;
+      input.value = 'bravo';
+      input.dispatchEvent(new InputEvent('input', { bubbles: true }));
+      await el.updateComplete;
+      expect(first.hasAttribute('hidden')).toBe(true);
+      input.value = '';
+      input.dispatchEvent(new InputEvent('input', { bubbles: true }));
+      await el.updateComplete;
+      expect(first.hasAttribute('hidden')).toBe(false);
     });
 
     it('filters by value attribute too', async () => {
-      const input = el.querySelector('.void-menu-search') as HTMLInputElement;
+      const input = el.querySelector('void-menu-search > input') as HTMLInputElement;
       input.value = 'charlie';
       input.dispatchEvent(new InputEvent('input', { bubbles: true }));
       await el.updateComplete;
@@ -355,12 +373,9 @@ describe('VoidMenuItem', () => {
       expect(el.disabled).toBe(false);
     });
 
-    it('shortcut defaults to empty string', () => {
-      expect(el.shortcut).toBe('');
-    });
-
-    it('icon defaults to empty string', () => {
-      expect(el.icon).toBe('');
+    it('has no icon or shortcut property: those are parts', () => {
+      expect('icon' in el).toBe(false);
+      expect('shortcut' in el).toBe(false);
     });
   });
 
@@ -413,11 +428,16 @@ describe('VoidMenuItem', () => {
       el.remove();
     });
 
-    it('dispatches void-select on click', () => {
-      let detail: { value: string } | null = null;
+    it('dispatches void-select on click with the item and its value, as dropdown-menu-item does', () => {
+      let detail: { item: unknown; value: string } | null = null;
       el.addEventListener('void-select', (e) => { detail = (e as CustomEvent).detail; });
       el.click();
       expect(detail?.value).toBe('test-val');
+      expect(detail?.item).toBe(el);
+    });
+
+    it('reflects value as an attribute', async () => {
+      expect(el.getAttribute('value')).toBe('test-val');
     });
 
     it('void-select bubbles', () => {
@@ -470,24 +490,12 @@ describe('VoidMenuGroup', () => {
     });
   });
 
-  describe('default property values', () => {
-    let el: VoidMenuGroup;
-
-    beforeEach(() => {
-      el = document.createElement('void-menu-group') as VoidMenuGroup;
-    });
-
-    it('label defaults to empty string', () => {
-      expect(el.label).toBe('');
-    });
-  });
-
   describe('ARIA attributes', () => {
     let el: VoidMenuGroup;
 
     beforeEach(async () => {
       el = document.createElement('void-menu-group') as VoidMenuGroup;
-      el.label = 'Actions';
+      el.innerHTML = '<void-menu-group-label>Actions</void-menu-group-label><void-menu-item>One</void-menu-item>';
       document.body.appendChild(el);
       await el.updateComplete;
     });
@@ -500,33 +508,23 @@ describe('VoidMenuGroup', () => {
       expect(el.getAttribute('role')).toBe('group');
     });
 
-    it('sets aria-label from label property', () => {
-      expect(el.getAttribute('aria-label')).toBe('Actions');
-    });
-  });
-
-  describe('rendering', () => {
-    let el: VoidMenuGroup;
-
-    beforeEach(async () => {
-      el = document.createElement('void-menu-group') as VoidMenuGroup;
-      el.label = 'File';
-      document.body.appendChild(el);
-      await el.updateComplete;
+    it('is named by its label part, which gets an id only when it has none', () => {
+      const label = el.querySelector('void-menu-group-label')!;
+      expect(label.id).not.toBe('');
+      expect(el.getAttribute('aria-labelledby')).toBe(label.id);
     });
 
-    afterEach(() => {
-      el.remove();
+    it('keeps an id the author wrote on the label', async () => {
+      const g = document.createElement('void-menu-group') as VoidMenuGroup;
+      g.innerHTML = '<void-menu-group-label id="mine">Mine</void-menu-group-label>';
+      document.body.appendChild(g);
+      await g.updateComplete;
+      expect(g.getAttribute('aria-labelledby')).toBe('mine');
+      g.remove();
     });
 
-    it('renders group label', () => {
-      const labelEl = el.querySelector('.void-menu-group-label');
-      expect(labelEl).not.toBeNull();
-      expect(labelEl!.textContent).toBe('File');
-    });
-
-    it('renders items container', () => {
-      expect(el.querySelector('.void-menu-group-items')).not.toBeNull();
+    it('renders nothing of its own', () => {
+      expect(Array.from(el.children).map(c => c.localName)).toEqual(['void-menu-group-label', 'void-menu-item']);
     });
   });
 
