@@ -27,7 +27,7 @@ How to find every Voidable element and read its state the way a user, an agent d
 | `void-checkbox-group` | group | label attribute (aria-label) | disabled (reflected) | the selected values are a property only (value: string[]); read them from the child checkboxes |
 | `void-collapsible` | inner | its void-collapsible-trigger part, which is the button | open (reflected)<br>aria-expanded on the trigger part | — |
 | `void-color-picker` | — | aria-label / aria-labelledby on the host, moved onto the inner hex input | value (reflected)<br>open (reflected) | no role on the host |
-| `void-combobox` | inner | void-field label or aria-label / aria-labelledby on the host (moved onto it), on the inner role="combobox" input (aria-label falls back to the placeholder) | open (reflected)<br>aria-expanded on the inner combobox<br>role="option" with data-selected on the rendered options<br>value (property only: the attribute is the initial value and is not updated) | the current value is not reflected to an attribute: [value=...] selectors and attribute assertions see the initial value only<br>aria-selected on the rendered options marks the keyboard-active option, not the chosen one; the choice is only in data-selected<br>the void-option children are not the options a user sees: the list renders its own role="option" copies |
+| `void-combobox` | inner | void-field label or aria-label / aria-labelledby on the host (moved onto it), on the inner role="combobox" input (aria-label falls back to the placeholder) | open (reflected)<br>aria-expanded and aria-activedescendant on the inner combobox<br>role="listbox" on the void-combobox-content part<br>role="option" on the void-option children, aria-selected="true" on the chosen one, active on the highlighted one, hidden on the ones the text filters out<br>value (property only: the attribute is the initial value and is not updated) | the current value is not reflected to an attribute: [value=...] selectors and attribute assertions see the initial value only |
 | `void-compose-input` | — | void-field label or aria-label / aria-labelledby on the host (moved onto it), on the inner textarea | value (property only: the attribute is the initial value and is not updated) | the current value is not reflected to an attribute: [value=...] selectors and attribute assertions see the initial value only<br>no role on the host; the send button has no stable name |
 | `void-date-picker` | inner | void-field label or aria-label / aria-labelledby on the host (moved onto it), on the inner role="combobox" input (aria-label falls back to the placeholder) | value (reflected, YYYY-MM-DD)<br>open (reflected)<br>aria-expanded on the inner combobox<br>role="dialog" calendar popup | the inner input is readonly: typing a date is impossible, so tests and users must page the calendar (a click on the field opens it with focus kept in the field; ArrowDown or the calendar button moves into it) |
 | `void-dialog` | inner | its void-dialog-title part (the native dialog in its shadow root is labelled by it), else aria-label on the host | open (reflected)<br>the native <dialog> in its shadow root is open and modal (:modal) while open | the role="dialog" element is the native <dialog> in the shadow root, and the parts are slotted into it, not its DOM descendants: getByRole("dialog").getByRole(...) finds nothing inside; scope by the host instead (locator("void-dialog[open]").getByRole(...)) |
@@ -51,12 +51,12 @@ How to find every Voidable element and read its state the way a user, an agent d
 | `void-menu` | — | aria-label on the host, copied to the void-menu-content part (default "Menu") | open (reflected)<br>role="menu" on the void-menu-content part<br>empty attribute on the host while a search matches nothing | — |
 | `void-menu-group` | group | its void-menu-group-label part (aria-labelledby) | — | — |
 | `void-menu-item` | menuitem | text content | value (reflected)<br>disabled (reflected)<br>aria-disabled | — |
-| `void-multiselect` | inner | void-field label or aria-label / aria-labelledby on the host (moved onto it), on the inner combobox | open (reflected)<br>aria-expanded on the inner combobox<br>role="option" + aria-selected on rendered options | the selected values are a property only (value: string[]), not reflected (#23) |
+| `void-multiselect` | inner | void-field label or aria-label / aria-labelledby on the host (moved onto it), on the inner combobox | open (reflected)<br>aria-expanded and aria-activedescendant on the inner combobox<br>role="listbox" + aria-multiselectable on the void-multiselect-content part<br>role="option" on the void-option children, aria-selected="true" on the chosen ones, active on the highlighted one | the selected values are a property only (value: string[]), not reflected (#23) |
 | `void-nav-bar` | navigation | none | — | role="navigation" on a top bar that usually holds search and account controls; a <nav> inside it makes a nested, unnamed landmark |
 | `void-nav-menu` | menubar | none | — | — |
 | `void-nav-menu-item` | none | the control in its void-nav-menu-trigger part (a button or a link) | open (reflected)<br>active (reflected)<br>aria-expanded, aria-haspopup and aria-controls on a button trigger<br>aria-current="page" on a link trigger when active | — |
 | `void-number-input` | inner | void-field label or aria-label / aria-labelledby on the host (moved onto it), else the label attribute, on the inner role="spinbutton" input | value (reflected; absent when the field is empty)<br>aria-valuenow on the inner spinbutton (absent when empty) | — |
-| `void-option` | — | text content | selected (reflected) | not the element users interact with (see void-combobox) |
+| `void-option` | — | text content | role="option", written by the picker whose content part holds it<br>selected (reflected)<br>aria-selected="true" when chosen<br>active (highlighted)<br>disabled (reflected)<br>aria-disabled | selected is the initial choice: the current choice is aria-selected, not the attribute |
 | `void-pagination` | inner | the rendered nav is named "Pagination"; buttons by page number, "Previous page", "Next page" | value (attribute)<br>aria-current="page" on the current page button or link | value is not reflected after a click: read aria-current instead |
 | `void-panel` | region | its void-panel-title part (aria-labelledby), or aria-label | — | without a title part or an aria-label it is an unnamed role="region" |
 | `void-pin-input` | group | fixed "PIN input" | value (property only: the attribute is the initial value and is not updated) | the current value is not reflected to an attribute: [value=...] selectors and attribute assertions see the initial value only |
@@ -67,7 +67,7 @@ How to find every Voidable element and read its state the way a user, an agent d
 | `void-scroll-area` | — | none | — | a scrollable region with no role, name or tabindex: keyboard users cannot scroll it (axe scrollable-region-focusable when it overflows) |
 | `void-segmented-control` | radiogroup | aria-label from the author | value (reflected) | — |
 | `void-segmented-control-item` | radio | text content | aria-checked | — |
-| `void-select` | inner | void-field label or aria-label / aria-labelledby on the host (moved onto it), on the native select | value (property only: the attribute is the initial value and is not updated)<br>native select value | the current value is not reflected to an attribute: [value=...] selectors and attribute assertions see the initial value only |
+| `void-select` | inner | void-field label or aria-label / aria-labelledby on the host (moved onto it), on the native select written inside it | value (property only: the attribute is the initial value and is not updated)<br>native select value and :checked option | the current value is not reflected to an attribute: [value=...] selectors and attribute assertions see the initial value only |
 | `void-sidebar` | navigation | fixed "Sidebar navigation" unless aria-label is set | collapsed (reflected) | no responsive behaviour and no aria-expanded/aria-controls link to a toggle: collapsing is a width change only |
 | `void-skeleton` | presentation | none (aria-hidden) | — | the loading region gets no aria-busy; nothing announces loading |
 | `void-slider` | inner | void-field label or aria-label / aria-labelledby on the host (moved onto it), on the inner range input | aria-valuenow on the inner range input<br>value (property only: the attribute is the initial value and is not updated) | the current value is not reflected to an attribute: [value=...] selectors and attribute assertions see the initial value only |
@@ -87,7 +87,7 @@ How to find every Voidable element and read its state the way a user, an agent d
 | `void-toggle-group` | group | aria-label from the author | value (reflected, comma list when multiple; without one, taken from toggles written with pressed) | — |
 | `void-tooltip` | inner | its void-tooltip-content part (role="tooltip"), linked to the trigger control by aria-describedby | open (reflected) | — |
 
-## Gaps (52)
+## Gaps (50)
 
 - `void-accordion`: no group role or name; the items are only found by their trigger buttons
 - `void-action-input`: the current value is not reflected to an attribute: [value=...] selectors and attribute assertions see the initial value only
@@ -105,8 +105,6 @@ How to find every Voidable element and read its state the way a user, an agent d
 - `void-checkbox-group`: the selected values are a property only (value: string[]); read them from the child checkboxes
 - `void-color-picker`: no role on the host
 - `void-combobox`: the current value is not reflected to an attribute: [value=...] selectors and attribute assertions see the initial value only
-- `void-combobox`: aria-selected on the rendered options marks the keyboard-active option, not the chosen one; the choice is only in data-selected
-- `void-combobox`: the void-option children are not the options a user sees: the list renders its own role="option" copies
 - `void-compose-input`: the current value is not reflected to an attribute: [value=...] selectors and attribute assertions see the initial value only
 - `void-compose-input`: no role on the host; the send button has no stable name
 - `void-date-picker`: the inner input is readonly: typing a date is impossible, so tests and users must page the calendar (a click on the field opens it with focus kept in the field; ArrowDown or the calendar button moves into it)
@@ -125,7 +123,7 @@ How to find every Voidable element and read its state the way a user, an agent d
 - `void-list-item`: interactive items stay role="listitem": "selected" has no ARIA equivalent
 - `void-multiselect`: the selected values are a property only (value: string[]), not reflected (#23)
 - `void-nav-bar`: role="navigation" on a top bar that usually holds search and account controls; a <nav> inside it makes a nested, unnamed landmark
-- `void-option`: not the element users interact with (see void-combobox)
+- `void-option`: selected is the initial choice: the current choice is aria-selected, not the attribute
 - `void-pagination`: value is not reflected after a click: read aria-current instead
 - `void-panel`: without a title part or an aria-label it is an unnamed role="region"
 - `void-pin-input`: the current value is not reflected to an attribute: [value=...] selectors and attribute assertions see the initial value only
