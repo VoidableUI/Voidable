@@ -1,4 +1,5 @@
-export { VoidElement } from './base.js';
+export { VoidElement, ProjectionController } from './base.js';
+export type { ProjectionOptions, ProjectionRegion, ProjectionTarget } from './base.js';
 export { VoidBadge } from './components/badge.js';
 export { VoidButton } from './components/button.js';
 export { VoidDivider } from './components/divider.js';
