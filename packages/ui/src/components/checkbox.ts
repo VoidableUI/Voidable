@@ -1,9 +1,10 @@
-import { html } from 'lit';
+import { html, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
+import { NativeFormControl, setNativeChecked } from '../form-control.js';
 
 /** Binary or indeterminate selection for form fields, data table row selection, and toggle-able settings. */
-export class VoidCheckbox extends VoidElement {
+export class VoidCheckbox extends NativeFormControl(VoidElement) {
   @property({ type: Boolean, reflect: true }) checked = false;
   @property({ type: Boolean, reflect: true }) disabled = false;
   @property({ type: Boolean, reflect: true }) indeterminate = false;
@@ -56,7 +57,7 @@ export class VoidCheckbox extends VoidElement {
 
   render() {
     return html`
-      <input type="checkbox" .checked=${this.checked} .indeterminate=${this.indeterminate} ?disabled=${this.disabled} name=${this.name} value=${this.value} tabindex="-1" aria-hidden="true" />
+      <input type="checkbox" .checked=${this.checked} .indeterminate=${this.indeterminate} ?disabled=${this.disabled} name=${this.name || nothing} value=${this.value || nothing} tabindex="-1" aria-hidden="true" />
       <span class="void-checkbox-box">
         ${this.checked ? html`<svg viewBox="0 0 12 12" fill="none"><path d="M2.5 6l2.5 2.5 4.5-5" stroke="currentColor" stroke-width="var(--void-icon-stroke-width)" stroke-linecap="round" stroke-linejoin="round"/></svg>` : ''}
         ${this.indeterminate && !this.checked ? html`<svg viewBox="0 0 12 12" fill="none"><path d="M3 6h6" stroke="currentColor" stroke-width="var(--void-icon-stroke-width)" stroke-linecap="round"/></svg>` : ''}
@@ -64,8 +65,18 @@ export class VoidCheckbox extends VoidElement {
     `;
   }
 
+  /** Form reset target is the checked state; the native checkbox submits. */
+  formSnapshot(): unknown {
+    return this.checked;
+  }
+
+  formRestore(state: unknown): void {
+    this.checked = Boolean(state);
+    setNativeChecked(this.querySelector('input[type="checkbox"]'), this.checked);
+  }
+
   private _handleClick = (e: Event): void => {
-    if (this.disabled) {
+    if (this.formDisabled) {
       e.stopImmediatePropagation();
       return;
     }
@@ -77,7 +88,7 @@ export class VoidCheckbox extends VoidElement {
   };
 
   private _handleKeydown = (e: KeyboardEvent): void => {
-    if (e.key === ' ' && !this.disabled) {
+    if (e.key === ' ' && !this.formDisabled) {
       e.preventDefault();
       this._handleClick(e);
     }

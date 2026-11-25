@@ -1,9 +1,10 @@
-import { html } from 'lit';
+import { html, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
+import { NativeFormControl, setNativeChecked } from '../form-control.js';
 
 /** Single mutually exclusive option for forms and surveys; typically used inside VoidRadioGroup. */
-export class VoidRadio extends VoidElement {
+export class VoidRadio extends NativeFormControl(VoidElement) {
   @property({ type: Boolean, reflect: true }) checked = false;
   @property({ type: Boolean, reflect: true }) disabled = false;
   @property({ type: String, reflect: true }) name = '';
@@ -51,16 +52,33 @@ export class VoidRadio extends VoidElement {
 
   render() {
     return html`
-      <input type="radio" .checked=${this.checked} ?disabled=${this.disabled} name=${this.name} value=${this.value} tabindex="-1" aria-hidden="true" />
+      <input type="radio" .checked=${this.checked} ?disabled=${this.disabled} name=${this.name || nothing} value=${this.value || nothing} tabindex="-1" aria-hidden="true" />
       <span class="void-radio-circle">
         ${this.checked ? html`<span class="void-radio-dot"></span>` : ''}
       </span>
     `;
   }
 
+  /** Form reset target is the checked state; the native radio submits. */
+  formSnapshot(): unknown {
+    return this.checked;
+  }
+
+  formResetCallback(): void {
+    // Inside a void-radio-group the group owns the checked state.
+    if (this.closest('void-radio-group')) return;
+    super.formResetCallback();
+  }
+
+  formRestore(state: unknown): void {
+    this.checked = Boolean(state);
+    setNativeChecked(this.querySelector('input[type="radio"]'), this.checked);
+  }
+
   private _handleClick = (e: Event): void => {
-    if (this.disabled || this.checked) {
-      if (this.disabled) e.stopImmediatePropagation();
+    const disabled = this.formDisabled;
+    if (disabled || this.checked) {
+      if (disabled) e.stopImmediatePropagation();
       return;
     }
     this.checked = true;
@@ -70,7 +88,7 @@ export class VoidRadio extends VoidElement {
   };
 
   private _handleKeydown = (e: KeyboardEvent): void => {
-    if (e.key === ' ' && !this.disabled) {
+    if (e.key === ' ' && !this.formDisabled) {
       e.preventDefault();
       this._handleClick(e);
     }

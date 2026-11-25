@@ -4,15 +4,30 @@ import { VoidElement } from '../base.js';
 import type { VoidCheckbox } from './checkbox.js';
 
 /** Grouped multi-option selection for preference forms, filter panels, and permission editors. */
+/**
+ * Form strategy: pass-through. `name` is forwarded to the child void-checkbox
+ * elements, whose native checkboxes submit one entry per checked box; the
+ * group itself submits nothing and each checkbox resets itself.
+ */
 export class VoidCheckboxGroup extends VoidElement {
   @property({ type: String, reflect: true }) label = '';
   @property({ type: String, reflect: true }) orientation: 'vertical' | 'horizontal' = 'vertical';
+  /** Field name forwarded to every child checkbox. */
+  @property({ type: String, reflect: true }) name = '';
 
   private _userContent: Node[] = [];
   private _didSetup = false;
 
   get value(): string[] {
     return Array.from(this.querySelectorAll('void-checkbox')).filter((el) => (el as VoidCheckbox).checked).map((el) => (el as VoidCheckbox).value);
+  }
+
+  /** Check exactly the child checkboxes whose value is listed. Does not fire void-change. */
+  set value(values: string[]) {
+    const wanted = new Set(values ?? []);
+    for (const el of Array.from(this.querySelectorAll('void-checkbox')) as VoidCheckbox[]) {
+      el.checked = wanted.has(el.value);
+    }
   }
 
   connectedCallback(): void {
@@ -39,6 +54,9 @@ export class VoidCheckboxGroup extends VoidElement {
         this.removeAttribute('aria-label');
       }
     }
+    if (changed.has('name')) {
+      this._syncNames();
+    }
     if (!this._didSetup) {
       this._didSetup = true;
       const container = this.querySelector('.void-checkbox-group-items');
@@ -47,6 +65,14 @@ export class VoidCheckboxGroup extends VoidElement {
           container.appendChild(node);
         }
       }
+      this._syncNames();
+    }
+  }
+
+  private _syncNames(): void {
+    if (!this.name) return;
+    for (const el of Array.from(this.querySelectorAll('void-checkbox')) as VoidCheckbox[]) {
+      el.name = this.name;
     }
   }
 

@@ -12,7 +12,7 @@ function createElement(): VoidTextarea {
 describe('VoidTextarea', () => {
   describe('class', () => {
     it('extends VoidElement', () => {
-      expect(Object.getPrototypeOf(VoidTextarea)).toBe(VoidElement);
+      expect(VoidTextarea.prototype).toBeInstanceOf(VoidElement);
     });
 
     it('is registered as void-textarea', () => {

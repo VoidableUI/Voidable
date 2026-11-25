@@ -1,9 +1,10 @@
 import { html } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
+import { NativeFormControl, setNativeValue } from '../form-control.js';
 
 /** Single-line text entry for login forms, search fields, and structured data capture. */
-export class VoidInput extends VoidElement {
+export class VoidInput extends NativeFormControl(VoidElement) {
   @property({ type: String, reflect: true }) type: 'text' | 'email' | 'password' | 'number' | 'tel' | 'url' | 'search' = 'text';
   @property({ type: String }) value = '';
   @property({ type: String, reflect: true }) placeholder = '';
@@ -35,6 +36,11 @@ export class VoidInput extends VoidElement {
       />
       ${this.error ? html`<span class="void-input-error">${this.error}</span>` : ''}
     `;
+  }
+
+  formRestore(state: unknown): void {
+    this.value = String(state ?? '');
+    setNativeValue(this.querySelector('input'), this.value);
   }
 
   private _onInput(e: Event): void {

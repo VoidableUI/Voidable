@@ -12,7 +12,7 @@ function createElement(): VoidRadio {
 describe('VoidRadio', () => {
   describe('class', () => {
     it('extends VoidElement', () => {
-      expect(Object.getPrototypeOf(VoidRadio)).toBe(VoidElement);
+      expect(VoidRadio.prototype).toBeInstanceOf(VoidElement);
     });
 
     it('is registered as void-radio', () => {

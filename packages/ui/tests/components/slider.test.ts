@@ -12,7 +12,7 @@ function createElement(): VoidSlider {
 describe('VoidSlider', () => {
   describe('class', () => {
     it('extends VoidElement', () => {
-      expect(Object.getPrototypeOf(VoidSlider)).toBe(VoidElement);
+      expect(VoidSlider.prototype).toBeInstanceOf(VoidElement);
     });
 
     it('is registered as void-slider', () => {

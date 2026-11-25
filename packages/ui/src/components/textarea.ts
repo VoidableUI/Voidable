@@ -1,9 +1,10 @@
 import { html } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
+import { NativeFormControl, setNativeValue } from '../form-control.js';
 
 /** Multi-line text entry for comment fields, description inputs, and freeform text that needs more than one line. */
-export class VoidTextarea extends VoidElement {
+export class VoidTextarea extends NativeFormControl(VoidElement) {
   @property({ type: String }) value = '';
   @property({ type: String, reflect: true }) placeholder = '';
   @property({ type: Boolean, reflect: true }) disabled = false;
@@ -38,6 +39,11 @@ export class VoidTextarea extends VoidElement {
       ></textarea>
       ${this.error ? html`<span class="void-textarea-error">${this.error}</span>` : ''}
     `;
+  }
+
+  formRestore(state: unknown): void {
+    this.value = String(state ?? '');
+    setNativeValue(this.querySelector('textarea'), this.value);
   }
 
   private _onInput(e: Event): void {

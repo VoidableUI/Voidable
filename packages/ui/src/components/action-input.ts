@@ -1,9 +1,10 @@
 import { html } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
+import { NativeFormControl, setNativeValue } from '../form-control.js';
 
 /** Input field with an attached icon button — used for copy-to-clipboard inputs, search boxes, and similar patterns. */
-export class VoidActionInput extends VoidElement {
+export class VoidActionInput extends NativeFormControl(VoidElement) {
   @property({ type: String }) value = '';
   @property({ type: String, reflect: true }) placeholder = '';
   @property({ type: Boolean, reflect: true }) disabled = false;
@@ -41,6 +42,11 @@ export class VoidActionInput extends VoidElement {
       default:
         return html`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="var(--void-icon-stroke-width)" stroke-linecap="round" stroke-linejoin="round" width="1em" height="1em"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 10a7 7 0 1 0 14 0a7 7 0 1 0 -14 0"/><path d="M21 21l-6 -6"/></svg>`;
     }
+  }
+
+  formRestore(state: unknown): void {
+    this.value = String(state ?? '');
+    setNativeValue(this.querySelector('.void-action-input-field'), this.value);
   }
 
   private _onInput(e: Event): void {

@@ -1,9 +1,10 @@
 import { html } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
+import { NativeFormControl, setNativeValue } from '../form-control.js';
 
 /** Continuous value selection for volume controls, price range filters, and numeric range settings. */
-export class VoidSlider extends VoidElement {
+export class VoidSlider extends NativeFormControl(VoidElement) {
   @property({ type: Number }) value: number = 50;
   @property({ type: Number }) min: number = 0;
   @property({ type: Number }) max: number = 100;
@@ -35,6 +36,11 @@ export class VoidSlider extends VoidElement {
 
   private _fill(): number {
     return ((this.value - this.min) / (this.max - this.min)) * 100;
+  }
+
+  formRestore(state: unknown): void {
+    this.value = Number(state);
+    setNativeValue(this.querySelector('input[type="range"]'), String(this.value));
   }
 
   private _onInput(e: Event): void {
