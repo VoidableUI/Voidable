@@ -45,10 +45,20 @@ describe('VoidToast', () => {
       expect(el.getAttribute('color')).toBe('error');
     });
 
-    it('reflects dismissable to attribute', async () => {
+    it('reflects dismissable=false as the string "false" so markup round-trips', async () => {
       el.dismissable = false;
       await el.updateComplete;
-      expect(el.hasAttribute('dismissable')).toBe(false);
+      expect(el.getAttribute('dismissable')).toBe('false');
+    });
+
+    it('turns dismissable off from markup with dismissable="false"', async () => {
+      const off = document.createElement('void-toast') as VoidToast;
+      off.setAttribute('dismissable', 'false');
+      document.body.appendChild(off);
+      await off.updateComplete;
+      expect(off.dismissable).toBe(false);
+      expect(off.querySelector('.void-toast-close')).toBeNull();
+      off.remove();
     });
   });
 
@@ -332,5 +342,26 @@ describe('VoidToast roles and timer pausing', () => {
     el.dispatchEvent(new MouseEvent('mouseleave'));
     vi.advanceTimersByTime(100000);
     expect(el.isConnected).toBe(true);
+  });
+});
+
+describe('toast() helper', () => {
+  afterEach(() => { document.body.innerHTML = ''; });
+
+  it('shows a toast through the page container, creating one when missing', async () => {
+    const { toast } = await import('../../src/components/toast.js');
+    const t = toast({ message: 'Saved', color: 'caution', dismissable: false });
+    expect(t).toBeInstanceOf(VoidToast);
+    expect(t.parentElement?.tagName).toBe('VOID-TOAST-CONTAINER');
+    expect(t.textContent).toBe('Saved');
+    expect(t.color).toBe('caution');
+    expect(t.dismissable).toBe(false);
+  });
+
+  it('accepts position="inline" on the container', async () => {
+    document.body.innerHTML = '<void-toast-container position="inline"></void-toast-container>';
+    const c = document.body.firstElementChild as VoidToastContainer;
+    await c.updateComplete;
+    expect(c.position).toBe('inline');
   });
 });

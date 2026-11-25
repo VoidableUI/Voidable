@@ -4,7 +4,7 @@ void-nav-bar {
   background: var(--void-color-bg);
 }
 
-void-nav-bar[bordered] {
+void-nav-bar[bordered]:not([bordered="false"]) {
   border-bottom: 1px solid var(--void-color-border);
 }
 

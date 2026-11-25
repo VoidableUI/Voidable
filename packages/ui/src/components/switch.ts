@@ -9,7 +9,7 @@ export class VoidSwitch extends InternalsFormControl(VoidElement) {
   @property({ type: Boolean, reflect: true }) disabled = false;
   /** Submitted under `name` while checked (like a native checkbox). */
   @property({ type: String, reflect: true }) value = 'on';
-  @property({ type: String, reflect: true }) color: 'default' | 'error' | 'warning' | 'success' | 'info' | 'notice' = 'default';
+  @property({ type: String, reflect: true }) color: 'default' | 'error' | 'warning' | 'caution' | 'success' | 'info' | 'notice' = 'default';
   @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' | 'xl' | 'xxl' = 'md';
 
   connectedCallback(): void {

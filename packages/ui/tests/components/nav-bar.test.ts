@@ -71,10 +71,19 @@ describe('VoidNavBar', () => {
       expect(el.hasAttribute('sticky')).toBe(false);
     });
 
-    it('reflects bordered to attribute', async () => {
+    it('reflects bordered=false as the string "false" so markup round-trips', async () => {
       el.bordered = false;
       await el.updateComplete;
-      expect(el.hasAttribute('bordered')).toBe(false);
+      expect(el.getAttribute('bordered')).toBe('false');
+    });
+
+    it('turns bordered off from markup with bordered="false"', async () => {
+      const off = document.createElement('void-nav-bar') as VoidNavBar;
+      off.setAttribute('bordered', 'false');
+      document.body.appendChild(off);
+      await off.updateComplete;
+      expect(off.bordered).toBe(false);
+      off.remove();
     });
 
     it('reflects variant to attribute', async () => {

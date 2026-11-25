@@ -260,3 +260,51 @@ describe('VoidNumberInput stepper interaction', () => {
     expect(vi.getTimerCount()).toBe(0);
   });
 });
+
+describe('VoidNumberInput step="any"', () => {
+  async function mountAny(): Promise<VoidNumberInput> {
+    document.body.innerHTML = '<void-number-input step="any" value="2"></void-number-input>';
+    const el = document.body.firstElementChild as VoidNumberInput;
+    await el.updateComplete;
+    return el;
+  }
+
+  it('reads "any" from the attribute instead of NaN', async () => {
+    expect((await mountAny()).step).toBe('any');
+  });
+
+  it('steps by 1 with the stepper buttons and arrow keys, never NaN', async () => {
+    const el = await mountAny();
+    const field = el.querySelector('input') as HTMLInputElement;
+    el.querySelector<HTMLButtonElement>('.void-number-input-btn-inc')!.click();
+    await el.updateComplete;
+    expect(el.value).toBe(3);
+    field.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+    field.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+    await el.updateComplete;
+    expect(el.value).toBe(1);
+    expect(el.innerHTML).not.toContain('NaN');
+  });
+
+  it('keeps typed decimals', async () => {
+    const el = await mountAny();
+    const field = el.querySelector('input') as HTMLInputElement;
+    field.value = '2.375';
+    field.dispatchEvent(new Event('change', { bubbles: true }));
+    await el.updateComplete;
+    expect(el.value).toBe(2.375);
+  });
+});
+
+describe('VoidNumberInput precision', () => {
+  it('rounds committed values to the precision (precision="0" gives integers)', async () => {
+    document.body.innerHTML = '<void-number-input precision="0" value="1"></void-number-input>';
+    const el = document.body.firstElementChild as VoidNumberInput;
+    await el.updateComplete;
+    const field = el.querySelector('input') as HTMLInputElement;
+    field.value = '2.6';
+    field.dispatchEvent(new Event('change', { bubbles: true }));
+    await el.updateComplete;
+    expect(el.value).toBe(3);
+  });
+});

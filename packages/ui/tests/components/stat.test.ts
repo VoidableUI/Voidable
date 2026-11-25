@@ -161,3 +161,32 @@ describe('VoidStat', () => {
     });
   });
 });
+
+describe('VoidStat description', () => {
+  const description = (el: Element) => el.querySelector('.void-stat-description');
+
+  it('renders no description line by default', async () => {
+    expect(description(await mount({ value: '12' }))).toBeNull();
+  });
+
+  it('renders the description under the value', async () => {
+    const el = await mount({ value: '12', delta: '+3', description: 'vs. last month' });
+    expect(description(el)!.textContent).toBe('vs. last month');
+    expect(el.getAttribute('description')).toBe('vs. last month');
+  });
+
+  it('reads the description attribute from markup', async () => {
+    document.body.innerHTML = '<void-stat value="12" description="per day"></void-stat>';
+    const el = document.body.firstElementChild as VoidStat;
+    await el.updateComplete;
+    expect(description(el)!.textContent).toBe('per day');
+  });
+
+  it('accepts color caution and highlight', async () => {
+    const el = await mount({ color: 'caution' });
+    expect(el.getAttribute('color')).toBe('caution');
+    el.color = 'highlight';
+    await el.updateComplete;
+    expect(el.getAttribute('color')).toBe('highlight');
+  });
+});

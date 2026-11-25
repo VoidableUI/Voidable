@@ -1,16 +1,17 @@
 import { html, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
+import { defaultTrueBoolean } from '../converters.js';
 
 /** Temporary notification for action confirmations, error alerts, and copy-to-clipboard feedback. */
 export class VoidToast extends VoidElement {
   @property({ type: String, reflect: true })
-  color: 'default' | 'error' | 'warning' | 'success' | 'info' = 'default';
+  color: 'default' | 'error' | 'warning' | 'caution' | 'success' | 'info' = 'default';
 
   @property({ type: Number })
   duration = 5000;
 
-  @property({ type: Boolean, reflect: true })
+  @property({ type: Boolean, reflect: true, converter: defaultTrueBoolean })
   dismissable = true;
 
   @property({ type: String })
@@ -108,8 +109,9 @@ declare global {
 
 /** Container that manages toast positioning and provides a static show() helper for programmatic toast display. */
 export class VoidToastContainer extends VoidElement {
+  /** Where the container sits. The corner and centre values overlay the page at a fixed position; `inline` keeps the container in normal flow so toasts push content instead of covering it. */
   @property({ type: String, reflect: true })
-  position: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left' | 'top-center' | 'bottom-center' = 'bottom-right';
+  position: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left' | 'top-center' | 'bottom-center' | 'inline' = 'bottom-right';
 
   connectedCallback() {
     super.connectedCallback();
@@ -139,6 +141,26 @@ export class VoidToastContainer extends VoidElement {
     container.appendChild(toast);
     return toast;
   }
+}
+
+/** Options for {@link toast}. */
+export interface ToastOptions {
+  message: string;
+  heading?: string;
+  color?: VoidToast['color'];
+  /** Milliseconds before the toast closes itself; 0 keeps it until dismissed. */
+  duration?: number;
+  dismissable?: boolean;
+}
+
+/**
+ * Show a toast. Finds the page's `<void-toast-container>` (creating one at the
+ * default position when there is none) and returns the new `<void-toast>`.
+ * Same as `VoidToastContainer.show`, importable as a plain function:
+ * `import { toast } from '@voidable/ui'`.
+ */
+export function toast(options: ToastOptions): VoidToast {
+  return VoidToastContainer.show(options);
 }
 
 if (!customElements.get('void-toast-container')) {

@@ -2,7 +2,7 @@ import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
 import { isInDisabledFieldset } from '../form-control.js';
 
-/** Action trigger for forms, dialogs, and toolbars; supports loading states and semantic color variants. */
+/** Action trigger for forms, dialogs, and toolbars; supports semantic color variants. */
 export class VoidButton extends VoidElement {
   /**
    * Form-associated so the button knows its form owner (including the `form`
@@ -15,7 +15,7 @@ export class VoidButton extends VoidElement {
   static formAssociated = true;
 
   @property({ type: String, reflect: true }) variant: 'outline' | 'filled' = 'outline';
-  @property({ type: String, reflect: true }) color: 'default' | 'error' | 'warning' | 'success' | 'info' | 'notice' = 'default';
+  @property({ type: String, reflect: true }) color: 'default' | 'error' | 'warning' | 'caution' | 'success' | 'info' | 'notice' = 'default';
   @property({ type: Boolean, reflect: true }) disabled = false;
   @property({ type: String, reflect: true }) type: 'button' | 'submit' | 'reset' = 'button';
   @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' | 'xl' | 'xxl' = 'md';

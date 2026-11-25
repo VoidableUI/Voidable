@@ -94,7 +94,7 @@ func (b *Builder) skillMD(cat *domain.Catalog) (string, error) {
 	}
 	list := "none"
 	if len(closable) > 0 {
-		list = strings.Join(closable, " and ")
+		list = joinAnd(closable)
 	}
 	t, err := template.New("SKILL.md").Parse(skillTemplate)
 	if err != nil {
@@ -227,4 +227,15 @@ func sortedKeys[V any](m map[string]V) []string {
 	}
 	sort.Strings(out)
 	return out
+}
+
+// joinAnd joins items as "a", "a and b" or "a, b and c".
+func joinAnd(items []string) string {
+	switch len(items) {
+	case 0:
+		return ""
+	case 1:
+		return items[0]
+	}
+	return strings.Join(items[:len(items)-1], ", ") + " and " + items[len(items)-1]
 }

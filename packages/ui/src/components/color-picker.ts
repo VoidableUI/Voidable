@@ -3,6 +3,7 @@ import { live } from 'lit/directives/live.js';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
 import { InternalsFormControl } from '../form-control.js';
+import { defaultTrueBoolean } from '../converters.js';
 
 /** Color selection control with spectrum area, hue slider, hex input, and preset swatches for theme customization and design tools. */
 export class VoidColorPicker extends InternalsFormControl(VoidElement) {
@@ -10,7 +11,7 @@ export class VoidColorPicker extends InternalsFormControl(VoidElement) {
   @property({ type: Boolean, reflect: true }) disabled: boolean = false;
   @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' = 'md';
   @property({ type: Array }) swatches: string[] = [];
-  @property({ type: Boolean, attribute: 'show-input', reflect: true }) showInput: boolean = true;
+  @property({ type: Boolean, attribute: 'show-input', reflect: true, converter: defaultTrueBoolean }) showInput: boolean = true;
   @property({ type: String, reflect: true }) variant: 'default' | 'compact' = 'default';
   @property({ type: Boolean, reflect: true }) open: boolean = false;
 

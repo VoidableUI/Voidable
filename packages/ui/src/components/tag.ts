@@ -5,7 +5,7 @@ import { ProjectionController } from '../projection.js';
 
 /** Removable label chip for selected filters, applied tags, and multi-value inputs. */
 export class VoidTag extends VoidElement {
-  @property({ type: String, reflect: true }) color: 'default' | 'error' | 'warning' | 'success' | 'info' | 'notice' = 'default';
+  @property({ type: String, reflect: true }) color: 'default' | 'error' | 'warning' | 'caution' | 'success' | 'info' | 'notice' = 'default';
   @property({ type: Boolean, reflect: true }) removable = false;
   @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' | 'xl' | 'xxl' = 'md';
 

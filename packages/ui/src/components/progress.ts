@@ -6,7 +6,7 @@ import { VoidElement } from '../base.js';
 export class VoidProgress extends VoidElement {
   @property({ type: Number, reflect: true }) value: number = 0;
   @property({ type: Number, reflect: true }) max: number = 100;
-  @property({ type: String, reflect: true }) color: 'default' | 'error' | 'warning' | 'success' | 'info' | 'notice' = 'default';
+  @property({ type: String, reflect: true }) color: 'default' | 'error' | 'warning' | 'caution' | 'success' | 'info' | 'notice' = 'default';
   @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' | 'xl' | 'xxl' = 'md';
   @property({ type: Boolean, reflect: true }) indeterminate: boolean = false;
 

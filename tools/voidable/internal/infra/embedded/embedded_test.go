@@ -10,16 +10,17 @@ import (
 	"testing"
 )
 
-// TestFalseStringMatchesSource keeps the supplement's falseString list in
-// step with the components that use the defaultTrueBoolean converter. It
-// skips when the repository's packages/ui sources are not next to the tool.
+// TestFalseStringMatchesSource checks that the manifest marks exactly the
+// attributes of components that use the defaultTrueBoolean converter as
+// reading "false" (the manifest build derives the flag from source). It skips
+// when the repository's packages/ui sources are not next to the tool.
 func TestFalseStringMatchesSource(t *testing.T) {
 	dir := filepath.Join("..", "..", "..", "..", "..", "packages", "ui", "src", "components")
 	files, err := filepath.Glob(filepath.Join(dir, "*.ts"))
 	if err != nil || len(files) == 0 {
 		t.Skip("packages/ui sources not found")
 	}
-	prop := regexp.MustCompile(`@property\(\{([^}]*converter: defaultTrueBoolean[^}]*)\}\)\s+(\w+)`)
+	prop := regexp.MustCompile(`@property\(\{([^}]*converter: defaultTrueBoolean[^}]*)\}\)\s+(?:override\s+)?(\w+)`)
 	attrName := regexp.MustCompile(`attribute: '([^']+)'`)
 	want := map[string][]string{}
 	for _, f := range files {
@@ -36,9 +37,17 @@ func TestFalseStringMatchesSource(t *testing.T) {
 			want[tag] = append(want[tag], name)
 		}
 	}
-	sup, err := Source{}.Supplement(context.Background())
+	cat, err := Source{}.Catalog(context.Background())
 	if err != nil {
 		t.Fatal(err)
+	}
+	have := map[string][]string{}
+	for _, el := range cat.Elements {
+		for _, a := range el.Attributes {
+			if a.FalseString {
+				have[el.Tag] = append(have[el.Tag], a.Name)
+			}
+		}
 	}
 	norm := func(m map[string][]string) []string {
 		var out []string
@@ -50,8 +59,8 @@ func TestFalseStringMatchesSource(t *testing.T) {
 		sort.Strings(out)
 		return out
 	}
-	got, exp := strings.Join(norm(sup.FalseString), " "), strings.Join(norm(want), " ")
+	got, exp := strings.Join(norm(have), " "), strings.Join(norm(want), " ")
 	if got != exp {
-		t.Errorf("rules.json falseString = [%s], components using defaultTrueBoolean = [%s]", got, exp)
+		t.Errorf("manifest falseString attributes = [%s], components using defaultTrueBoolean = [%s]", got, exp)
 	}
 }

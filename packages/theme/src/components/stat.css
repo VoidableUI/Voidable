@@ -38,6 +38,13 @@ void-stat {
   color: var(--void-color-text-secondary);
 }
 
+.void-stat-description {
+  font-family: var(--void-font-sans);
+  font-size: var(--void-text-sm);
+  color: var(--void-color-text-secondary);
+  line-height: var(--void-leading-normal);
+}
+
 void-stat[trend="up"]        .void-stat-delta { color: var(--void-color-success); }
 void-stat[trend="down"]      .void-stat-delta { color: var(--void-color-error); }
 void-stat[trend="error"]     .void-stat-delta { color: var(--void-color-error); }
