@@ -10,7 +10,9 @@
   "type": "module",
   "sideEffects": [
     "./dist/index.js",
-    "./dist/components/*.js"
+    "./dist/components/*.js",
+    "./src/index.ts",
+    "./src/components/*.ts"
   ],
   "license": "MIT",
   "exports": {
