@@ -1,0 +1,43 @@
+---
+title: Accessibility
+description: What Voidable does for accessibility by default, what you still have to supply, and the known limitations, listed per component.
+---
+
+import ContractTable from '../../../components/api/ContractTable.astro';
+
+Components are built on the platform: native controls where there is one, ARIA roles and states where there is not, and keyboard handling for every interactive widget. This page says what you get, what you still have to provide, and where it falls short today.
+
+## What you get
+
+- **Native controls underneath.** `<void-input>`, `<void-textarea>`, `<void-select>`, `<void-slider>`, `<void-checkbox>` and `<void-radio>` render a real `<input>`, `<textarea>` or `<select>`. Focus, selection, autofill, the on-screen keyboard and screen-reader behaviour are the browser's.
+- **Roles and states on the element.** A `<void-switch>` is `role="switch"` with `aria-checked`, a `<void-dialog>` is `role="dialog"` with `aria-modal`, a `<void-progress>` is `role="progressbar"` with `aria-valuenow`. The role, name source and state handles of every component are in the table below and on its page.
+- **Keyboard support.** Interactive components handle the keys their pattern calls for. The keys are listed on the [keyboard page](/components/keyboard/) and in each component's page.
+- **Labels and errors wired for you.** A `<void-field>` names the control inside it (`for` on a native control, `aria-labelledby` otherwise), describes it with the helper text, and while `error` is set marks it `aria-invalid` and describes it with the message.
+- **Light DOM.** Assistive technology and browser extensions see ordinary elements; there is no shadow boundary for `aria-labelledby` or `for` to fail to cross.
+- **Motion and colour scheme follow the user's preferences.** The theme reads `prefers-reduced-motion` and `prefers-color-scheme` in its tokens.
+
+## What you still have to provide
+
+A component cannot know what your page means. These are yours:
+
+- **An accessible name for anything that has no text.** Give an icon-only `<void-button>` an `aria-label`, a chart an `aria-label` and the key figures in text beside it, a `<void-carousel>` and a `<void-menu>` an `aria-label`, and a `<void-panel>` a `label`. A control without a visible label goes in a `<void-field label="…">`.
+- **Meaningful headings and landmarks.** A card's `heading` is styled text, not an `<h2>`; use your own heading element where the page outline needs one.
+- **Live status where you need it.** Loading, saving and error messages that appear without focus moving should be announced: the [toast container](/components/toast-container/) and [alert](/components/alert/) are live regions; a skeleton is not.
+- **Focus management around your own flows.** An open dialog moves focus to its first focusable element and closes on Escape (unless `closable="false"`); returning focus to the control that opened it, and where focus goes after your own actions, is up to your code.
+
+## Known limitations
+
+The project tracks, per component, where a test or an assistive technology cannot find an element or read its state reliably. These are findings in the library, not guidance to work around, and each disappears from this table when it is fixed. The same text appears on each component's page.
+
+<ContractTable gaps />
+
+## Roles and names
+
+<ContractTable />
+
+## Checking your own pages
+
+- Run the [development warnings](/getting-started/development-warnings/) in development: they catch misused attributes and missing children.
+- Run `voidable check` over your templates in CI.
+- Run an automated checker such as axe-core against the rendered page. The project's [agent evals](/getting-started/agent-evals/) do, and count any serious violation against the generated page.
+- Use the page with a keyboard alone, and with a screen reader, before you ship a new flow. Automated checks find a fraction of the problems.

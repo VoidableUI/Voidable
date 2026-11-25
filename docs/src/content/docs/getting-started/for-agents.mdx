@@ -1,0 +1,45 @@
+---
+title: For AI agents
+description: "What an AI coding agent needs to build with Voidable correctly: where the machine-readable docs are, the tool that checks markup, and the rules that avoid the usual mistakes."
+---
+
+Voidable is built to be written by agents as well as people, and everything on this site is generated from, or checked against, the same data an agent can query directly. This page is the short route.
+
+## Read the docs as text
+
+| What | Where |
+| --- | --- |
+| What the library is and where the complete text is | [`/llms.txt`](/llms.txt) |
+| Every page in full, including the reference for every component | [`/llms-full.txt`](/llms-full.txt) |
+| One component | `/components/<name>/`: for example [`/components/button/`](/components/button/) |
+| The patterns for page structure | [`/patterns/overview/`](/patterns/overview/) |
+
+Each component page has the same sections: a description, a live example with its HTML, JSX, ERB, HEEx and Blade source, an attribute table (type, values, default), events with their `detail`, where children go, how it behaves in a form, its keyboard keys, accessibility notes and the common mistakes. The tables are generated from the library's Custom Elements Manifest, so they match the code that ships.
+
+## Use the `voidable` tool
+
+The `voidable` command-line tool carries the same knowledge, offline, and checks what you write. It is built from `tools/voidable` in the repository with `mise run build:go`.
+
+| Command | Does |
+| --- | --- |
+| `voidable ref` | One line per element. `voidable ref void-select` prints its attributes with types, allowed values and defaults, events, parents and an example. |
+| `voidable check <file or dir>` | Finds unknown elements and attributes, invalid values, a boolean written as `"false"` and children in the wrong parent. One problem per line as `file:line:col`; exit 1 when there are any. Reads HTML, ERB, HEEx, Blade, JSX, Astro, Vue, Svelte, Lit and Markdown. |
+| `voidable gen snippet <tag> --lang html\|jsx\|erb\|heex\|blade` | Prints a working example of one element in the language you are writing. |
+| `voidable mcp` | Serves the same three as MCP tools (`voidable_ref`, `voidable_check`, `voidable_snippet`) plus the skill, over stdio. |
+| `voidable skill install` | Writes the Agent Skill into `.claude/skills/voidable`, for clients that load skills from disk. |
+
+Run `voidable check` on every file you write, and fix what it reports before showing the result. Run `import '@voidable/ui/dev'` in development so the browser reports what static checking cannot (see [Development warnings](/getting-started/development-warnings/)).
+
+## Rules that avoid the common mistakes
+
+- **Use components for controls, patterns for layout.** Page structure (a shell, a page head, a section, a toolbar, a label and value) comes from [patterns](/patterns/overview/). Do not write layout CSS for them.
+- **Look attributes up; do not guess.** `color="primary"` on a button, a `label` attribute on an input (use `<void-field label>`), and `<void-option>` inside `<void-select>` (which takes native `<option>`) all do nothing. Every component page has a **Common mistakes** section, and `voidable ref` is the same data.
+- **A boolean attribute is on when present.** `disabled="false"` is still disabled. Remove the attribute. The few that default to on accept `="false"`; they are [listed here](/components/overview/#attributes-shared-across-components).
+- **A control is a form control.** Give it a `name` and put it in a `<form>` (see [Forms](/guides/forms/)). Do not mirror its value into script state.
+- **Listen to `void-*` events,** not to clicks on internals. See [Events](/guides/events/).
+- **Do not style with raw values.** Colours, spacing and type come from the [tokens](/getting-started/tokens/).
+- **Test by role and name.** [Testing](/guides/testing/) lists how to find each element.
+
+## How well it works
+
+Whether agents build working interfaces with Voidable is measured, not assumed. See [Measuring agent-friendliness](/getting-started/agent-evals/).

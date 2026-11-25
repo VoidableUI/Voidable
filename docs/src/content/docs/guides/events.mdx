@@ -1,0 +1,58 @@
+---
+title: Events
+description: Every Voidable event is a bubbling, composed CustomEvent named void-something with its data in detail. How to listen in each framework, and the full list.
+---
+
+import AllEvents from '../../../components/api/AllEvents.astro';
+
+Components tell your app what happened by dispatching `CustomEvent`s whose names start with `void-`. They all follow the same rules:
+
+- **They bubble and are composed**, so you can listen on the element or on any ancestor, which makes one listener on a `<form>` or a container enough for many controls.
+- **What changed is in `event.detail`**, an object whose fields are listed per event below and on each [component page](/components/overview/).
+- **`void-input` is per edit, `void-change` is a commit.** On text fields, `void-input` fires on every keystroke and `void-change` when the value is committed. On controls with no in-between state, such as a switch, checkbox or select, `void-change` is the one event.
+- **The native events still fire.** Controls that render a native input also let the browser's own `input` and `change` events bubble, so existing handlers work. Prefer `void-*`, whose `detail` is the same on every control.
+- **Setting a property from script does not dispatch.** `el.value = 'x'` is not a user action, so no `void-change` follows. Only the user's interaction (and the control's own methods that stand in for it) fires events.
+
+A misspelt event name never fires, and nothing complains; the [development warnings](/getting-started/development-warnings/) report a listener for a `void-*` name that no component dispatches.
+
+## Listening
+
+<div class="vd-api-table">
+
+| Where | How |
+| --- | --- |
+| Plain JavaScript | `el.addEventListener('void-change', (e) => console.log(e.detail.value))` |
+| Lit | `@void-change=${(e) => …}` in the template |
+| Svelte 5 | `onvoid-change={(e) => …}` |
+| React | `<Input onVoidChange={(e) => …} />` from `@voidable/ui-react` |
+| Alpine / Livewire | `x-void-on:void-change="handler($event.detail)"` |
+| Rails (Stimulus) | `data-action="void-change->search#filter"` |
+| Phoenix LiveView | the `VoidEvent` hook forwards events to the server with `pushEvent` |
+
+</div>
+
+The [framework pages](/frameworks/react/) have the details, including typing and the helpers that write these attributes for you.
+
+Event delegation works as it does for any bubbling event:
+
+```js
+document.querySelector('form').addEventListener('void-change', (e) => {
+  console.log(e.target.localName, e.detail);
+});
+```
+
+## Reading state in a test
+
+Because the events bubble and carry their data, a test can wait for one instead of sleeping:
+
+```js
+const changed = new Promise((resolve) => el.addEventListener('void-change', resolve, { once: true }));
+el.click();
+console.log((await changed).detail);
+```
+
+See [Testing](/guides/testing/) for finding components by role and name.
+
+## All events
+
+<AllEvents />
