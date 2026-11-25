@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+#MISE description="Download the browsers the real-browser suite runs on (pass --with-deps on Debian/Ubuntu to add system libraries)"
+#MISE depends=["install"]
+set -euo pipefail
+
+cd tests/browser
+exec ./node_modules/.bin/playwright install "$@" chromium firefox webkit

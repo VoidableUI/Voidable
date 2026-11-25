@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+#MISE description="Run the real-browser suite (Playwright: Chromium, Firefox, WebKit) against the built packages"
+#MISE depends=["build"]
+set -euo pipefail
+
+# Extra arguments go to Playwright, for example:
+#   mise run test:browser -- --project=chromium specs/forms.spec.ts
+#   VOID_BROWSERS=chromium mise run test:browser
+# Browsers come from `mise run test:browser:install`; tests/browser/README.md has the details.
+cd tests/browser
+exec ./node_modules/.bin/playwright test "$@"
