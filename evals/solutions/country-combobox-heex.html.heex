@@ -1,0 +1,17 @@
+<main style="max-width: 28rem; margin: 0 auto; padding: var(--void-space-4);">
+  <h1>Shipping address</h1>
+  <.form for={%{}} as={:address} action="/address" style="display: grid; gap: var(--void-space-4);">
+    <void-field label="Full name">
+      <void-input name="address[name]" value={@address.name} required></void-input>
+    </void-field>
+    <void-field label="Country">
+      <void-combobox name="address[country]" value={@address.country} placeholder="Search countries" required>
+        <void-option :for={c <- @countries} value={c.code}>{c.name}</void-option>
+      </void-combobox>
+    </void-field>
+    <void-field label="Postal code">
+      <void-input name="address[postal_code]" value={@address.postal_code}></void-input>
+    </void-field>
+    <div><void-button type="submit" variant="filled">Save address</void-button></div>
+  </.form>
+</main>

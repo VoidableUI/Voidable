@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+#MISE description="Agent evals CLI (evals/bin/evals.mjs): run, report, estimate, calibrate, list. Costs money in live mode; not part of ci"
+set -euo pipefail
+
+# Examples (evals/README.md has the details):
+#   mise run evals -- list
+#   mise run evals -- run --tasks pilot --mode stub
+#   ANTHROPIC_API_KEY=... mise run evals -- run --tasks pilot --models claude-haiku-5-5
+#   mise run evals -- estimate <run-id> --reps 3 --models claude-haiku-5-5,claude-sonnet-5-5
+#   mise run evals -- report <run-id> [<run-id>...] --baseline --label "..."
+cd evals
+exec node bin/evals.mjs "$@"

@@ -1,0 +1,58 @@
+<style>
+  .shell { display: flex; min-height: 100vh; }
+  .shell-body { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+  .shell-sidebar nav ul { list-style: none; margin: 0; padding: var(--void-space-2); display: grid; gap: var(--void-space-1); }
+  .shell-sidebar a { display: block; padding: var(--void-space-2) var(--void-space-3); color: inherit; text-decoration: none; border-radius: var(--void-radius-md); }
+  .shell-sidebar a[aria-current="page"] { background: var(--void-color-bg-hover); }
+  .shell-brand { padding: var(--void-space-4); font-weight: var(--void-font-weight-semibold); }
+  .topbar { display: flex; gap: var(--void-space-3); align-items: center; padding: var(--void-space-2) var(--void-space-4); }
+  .topbar void-field { flex: 1; max-width: 24rem; }
+  .menu-button { display: none; }
+  main { padding: var(--void-space-4); }
+  @media (max-width: 767px) {
+    .menu-button { display: inline-flex; }
+    .shell-sidebar { position: fixed; inset: 0 auto 0 0; z-index: var(--void-z-overlay, 10); transform: translateX(-100%); visibility: hidden; }
+    .shell.menu-open .shell-sidebar { transform: none; visibility: visible; }
+  }
+</style>
+<div class="shell" id="shell">
+  <void-sidebar class="shell-sidebar" aria-label="Main">
+    <div class="shell-brand">Orbit</div>
+    <nav aria-label="Primary">
+      <ul>
+        <li><a href="/dashboard">Dashboard</a></li>
+        <li><a href="/projects" aria-current="page">Projects</a></li>
+        <li><a href="/team">Team</a></li>
+        <li><a href="/settings">Settings</a></li>
+      </ul>
+    </nav>
+  </void-sidebar>
+  <div class="shell-body">
+    <void-nav-bar>
+      <div class="topbar">
+        <void-hamburger class="menu-button" id="menu-button"></void-hamburger>
+        <void-field label="Search">
+          <void-input type="search" name="q" placeholder="Search projects"></void-input>
+        </void-field>
+        <% if @current_user.avatar_url %>
+          <void-avatar src="<%= @current_user.avatar_url %>" alt="<%= @current_user.name %>"></void-avatar>
+        <% else %>
+          <void-avatar initials="<%= @current_user.name.split.map { |w| w[0] }.join %>" alt="<%= @current_user.name %>"></void-avatar>
+        <% end %>
+      </div>
+    </void-nav-bar>
+    <main>
+      <h1>Projects</h1>
+      <ul>
+        <% @projects.each do |project| %>
+          <li><%= link_to project.name, project_path(project) %></li>
+        <% end %>
+      </ul>
+    </main>
+  </div>
+</div>
+<script>
+  document.getElementById('menu-button').addEventListener('void-toggle', (e) => {
+    document.getElementById('shell').classList.toggle('menu-open', e.detail.active);
+  });
+</script>

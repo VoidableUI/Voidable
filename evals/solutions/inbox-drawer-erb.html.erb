@@ -1,0 +1,41 @@
+<main style="max-width: 40rem; margin: 0 auto; padding: var(--void-space-4);">
+  <h1>Inbox</h1>
+  <ul style="list-style: none; padding: 0; display: grid; gap: var(--void-space-2);">
+    <% @messages.each do |message| %>
+      <li>
+        <button type="button" class="message" data-message-id="<%= message.id %>" style="all: unset; cursor: pointer; display: flex; gap: var(--void-space-3); align-items: center; width: 100%;">
+          <void-avatar size="sm" initials="<%= message.from.split.map { |w| w[0] }.join %>" alt=""></void-avatar>
+          <span>
+            <strong><%= message.subject %></strong><br>
+            <span><%= message.from %>: <%= message.preview %></span>
+          </span>
+        </button>
+      </li>
+    <% end %>
+  </ul>
+</main>
+
+<% @messages.each do |message| %>
+  <template id="message-<%= message.id %>" data-subject="<%= message.subject %>">
+    <p>From <%= message.from %></p>
+    <p><%= message.body %></p>
+  </template>
+<% end %>
+<void-drawer id="reader" side="right"></void-drawer>
+
+<script>
+  const reader = document.getElementById('reader');
+  let opener = null;
+  document.addEventListener('click', (e) => {
+    const button = e.target.closest('.message');
+    if (!button) return;
+    opener = button;
+    const tpl = document.getElementById(`message-${button.dataset.messageId}`);
+    reader.heading = tpl.dataset.subject;
+    reader.replaceChildren(tpl.content.cloneNode(true));
+    reader.open = true;
+    // The drawer does not take focus or listen for Escape outside itself.
+    requestAnimationFrame(() => reader.querySelector('button')?.focus());
+  });
+  reader.addEventListener('void-close', () => opener?.focus());
+</script>

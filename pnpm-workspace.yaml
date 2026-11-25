@@ -3,3 +3,4 @@ packages:
   - packages/ui/type-tests/solid2
   - examples/*
   - docs
+  - evals

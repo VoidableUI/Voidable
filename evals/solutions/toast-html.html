@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Profile</title>
+  <style>
+    main { max-width: 32rem; margin: 0 auto; padding: var(--void-space-4); }
+    form { display: grid; gap: var(--void-space-4); }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Profile</h1>
+    <form id="profile">
+      <void-field label="Name">
+        <void-input name="name"></void-input>
+      </void-field>
+      <div><void-button type="submit" variant="filled">Save</void-button></div>
+    </form>
+  </main>
+  <void-toast-container position="bottom-right"></void-toast-container>
+  <script type="module">
+    import { VoidToastContainer } from '@voidable/ui';
+    document.getElementById('profile').addEventListener('submit', (e) => {
+      e.preventDefault();
+      VoidToastContainer.show({ message: 'Profile saved', color: 'success', duration: 4000 });
+    });
+  </script>
+</body>
+</html>

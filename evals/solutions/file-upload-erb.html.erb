@@ -1,0 +1,9 @@
+<main style="max-width: 32rem; margin: 0 auto; padding: var(--void-space-4);">
+  <h1>Import contacts</h1>
+  <%= form_with url: "/contacts/imports", multipart: true, style: "display: grid; gap: var(--void-space-4);" do %>
+    <void-field label="Contacts file" helper="CSV, up to 5 MB">
+      <void-file-upload name="import[file]" accept=".csv,text/csv" max-size="5242880" required></void-file-upload>
+    </void-field>
+    <div><void-button type="submit" variant="filled">Import</void-button></div>
+  <% end %>
+</main>

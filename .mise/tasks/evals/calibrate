@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+#MISE description="Score every task's reference solution and rewrite evals/results/calibration.json (needs evals:setup)"
+set -euo pipefail
+
+cd evals
+exec node bin/evals.mjs calibrate "$@"

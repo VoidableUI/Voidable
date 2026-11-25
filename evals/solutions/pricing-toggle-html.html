@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Pricing</title>
+  <style>
+    main { max-width: 64rem; margin: 0 auto; padding: var(--void-space-6) var(--void-space-4); display: grid; gap: var(--void-space-6); justify-items: center; }
+    .plans { width: 100%; display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: var(--void-space-4); }
+    .price { font-size: var(--void-font-size-2xl); margin: var(--void-space-2) 0; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Pricing</h1>
+    <void-segmented-control id="period" value="monthly" aria-label="Billing period">
+      <void-segmented-control-item value="monthly">Monthly</void-segmented-control-item>
+      <void-segmented-control-item value="yearly">Yearly</void-segmented-control-item>
+    </void-segmented-control>
+    <div class="plans">
+      <void-card heading="Starter">
+        <p class="price" data-monthly="$9/mo" data-yearly="$90/yr">$9/mo</p>
+        <void-button>Choose Starter</void-button>
+      </void-card>
+      <void-card heading="Team" variant="elevated">
+        <void-badge color="info">Most popular</void-badge>
+        <p class="price" data-monthly="$29/mo" data-yearly="$290/yr">$29/mo</p>
+        <void-button variant="filled">Choose Team</void-button>
+      </void-card>
+      <void-card heading="Business">
+        <p class="price" data-monthly="$79/mo" data-yearly="$790/yr">$79/mo</p>
+        <void-button>Choose Business</void-button>
+      </void-card>
+    </div>
+  </main>
+  <script type="module">
+    document.getElementById('period').addEventListener('void-change', (e) => {
+      for (const p of document.querySelectorAll('.price')) p.textContent = p.dataset[e.detail.value];
+    });
+  </script>
+</body>
+</html>

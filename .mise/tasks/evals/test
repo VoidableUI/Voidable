@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+#MISE description="Unit tests of the agent eval harness (no API calls; browser tests skip without Chromium and the voidable binary)"
+#MISE depends=["build"]
+#MISE wait_for=["voidable:ci"]
+set -euo pipefail
+
+cd evals
+node --test test/
