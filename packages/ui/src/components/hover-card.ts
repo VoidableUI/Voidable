@@ -3,7 +3,12 @@ import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
 import { ProjectionController, triggerRegion } from '../projection.js';
 
-/** Rich content preview card that appears on hover for user profiles, link previews, and contextual information panels. */
+/**
+ * Rich content preview card that appears on hover for user profiles, link previews, and contextual information panels.
+ *
+ * @slot trigger - The element that shows the card on hover or focus. Mark it with `slot="trigger"`; without one, the first child element is used.
+ * @slot - Card content.
+ */
 export class VoidHoverCard extends VoidElement {
   @property({ type: Boolean, reflect: true }) open = false;
   @property({ type: String, reflect: true }) position: 'top' | 'bottom' | 'left' | 'right' = 'bottom';

@@ -8,7 +8,7 @@ import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { resolve } from 'node:path';
 import ts from 'typescript';
 import type { PropertyDeclaration, ReactiveElement } from 'lit';
-import { ancestorEvents, childAttributes } from '../cem/supplement.js';
+import { ancestorEvents, extraAttributes } from '../cem/supplement.js';
 
 // Registers every element (each module calls customElements.define).
 const modules = import.meta.glob('../src/components/*.ts', { eager: true });
@@ -133,6 +133,20 @@ describe('custom-elements.json', () => {
     expect(declared.length).toBe(byTag.size); // no duplicate tags
   });
 
+  it('documents slot="trigger" on every component with a projected trigger', () => {
+    const dir = resolve(root, 'src/components');
+    const withTrigger = readdirSync(dir)
+      .filter((f) => f.endsWith('.ts'))
+      .filter((f) => /triggerRegion\(\s*'trigger'/.test(readFileSync(resolve(dir, f), 'utf8')))
+      .map((f) => `void-${f.replace(/\.ts$/, '')}`)
+      .sort();
+    expect(withTrigger).toEqual(['void-dropdown-menu', 'void-hover-card', 'void-popover']);
+    for (const tag of withTrigger) {
+      const slots = (byTag.get(tag)?.decl as { slots?: { name: string }[] } | undefined)?.slots ?? [];
+      expect(slots.map((s) => s.name).sort(), tag).toEqual(['', 'trigger']);
+    }
+  });
+
   it('points modules and references at shipped dist files', () => {
     const shipped = (p: string) => p === 'dist/index.js' || p === 'dist/base.js' || /^dist\/components\/[^/]+\.js$/.test(p);
     for (const m of manifest.modules) expect(shipped(m.path), m.path).toBe(true);
@@ -166,7 +180,7 @@ describe('custom-elements.json', () => {
     const reactive = [...cls.elementProperties.entries()].filter(
       (e): e is [string, PropertyDeclaration] => typeof e[0] === 'string' && !e[1].state,
     );
-    const supplemented = new Set((childAttributes[tag as keyof typeof childAttributes] ?? []).map((a) => a.name));
+    const supplemented = new Set((extraAttributes[tag as keyof typeof extraAttributes] ?? []).map((a) => a.name));
 
     it('maps to the registering class and module', () => {
       expect(decl?.name).toBe(cls.name);

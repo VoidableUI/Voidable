@@ -3,7 +3,12 @@ import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
 import { ProjectionController, triggerRegion } from '../projection.js';
 
-/** Anchored overlay for contextual detail and mini-forms that need more room than a tooltip. */
+/**
+ * Anchored overlay for contextual detail and mini-forms that need more room than a tooltip.
+ *
+ * @slot trigger - The element that toggles the popover. Mark it with `slot="trigger"`; without one, the first child element is used.
+ * @slot - Popover content.
+ */
 export class VoidPopover extends VoidElement {
   @property({ type: Boolean, reflect: true }) open = false;
   @property({ type: String, reflect: true }) position: 'top' | 'bottom' | 'left' | 'right' = 'bottom';

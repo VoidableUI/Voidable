@@ -3,7 +3,12 @@ import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
 import { ProjectionController, triggerRegion } from '../projection.js';
 
-/** Trigger-anchored action menu for table row actions, toolbar overflow menus, and context menus. */
+/**
+ * Trigger-anchored action menu for table row actions, toolbar overflow menus, and context menus.
+ *
+ * @slot trigger - The element that opens the menu. Mark it with `slot="trigger"`; without one, the first child element is used.
+ * @slot - The menu items (`<void-dropdown-menu-item>`).
+ */
 export class VoidDropdownMenu extends VoidElement {
   @property({ type: Boolean, reflect: true }) open = false;
   @property({ type: String, reflect: true }) position: 'bottom-start' | 'bottom-end' | 'top-start' | 'top-end' = 'bottom-start';

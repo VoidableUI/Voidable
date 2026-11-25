@@ -31,7 +31,7 @@
 //    underscore/#-prefixed, computed-key and DOM/Lit lifecycle-override members
 //    are removed.
 
-import { ancestorEvents, childAttributes, eventDetails } from './supplement.js';
+import { ancestorEvents, extraAttributes, eventDetails } from './supplement.js';
 
 /** @typedef {import('typescript')} TS */
 
@@ -396,7 +396,7 @@ export function manifestSupplementPlugin() {
         return decl;
       };
 
-      for (const [tag, attrs] of Object.entries(childAttributes)) {
+      for (const [tag, attrs] of Object.entries(extraAttributes)) {
         const decl = get(tag);
         decl.attributes ??= [];
         for (const a of attrs) {

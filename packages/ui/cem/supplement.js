@@ -10,16 +10,28 @@
 // the manifest tooling.
 
 /**
- * Attributes a parent reads from a child that has no matching property.
+ * Public attributes with no matching reactive property, so the analyzer cannot
+ * see them: attributes a parent reads from a child, and host attributes that
+ * only the theme CSS matches.
  * @type {Record<string, { name: string, type: string, description: string }[]>}
  */
-export const childAttributes = {
+export const extraAttributes = {
   // toggle-group.ts reads `toggle.getAttribute('value')` from each child.
   'void-toggle': [
     {
       name: 'value',
       type: 'string',
       description: 'Value this toggle contributes to a parent `<void-toggle-group>`.',
+    },
+  ],
+  // card.css: `void-card[scrollable]` opts in to an internal scrollbar; no JS reads it.
+  'void-card': [
+    {
+      name: 'scrollable',
+      type: 'boolean',
+      description:
+        'Let the card shrink and scroll its content inside a height-constrained flex or grid parent. ' +
+        'Without it the card keeps its content height and never scrolls.',
     },
   ],
 };
