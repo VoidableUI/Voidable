@@ -11,7 +11,7 @@ void-dropdown-menu > hr {
 .void-dropdown-menu-panel {
   display: none;
   position: absolute;
-  z-index: var(--void-z-dropdown, 100);
+  z-index: var(--void-z-dropdown);
   min-width: 180px;
   padding: var(--void-space-1) 0;
   background: var(--void-color-bg-elevated);

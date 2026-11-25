@@ -241,7 +241,7 @@ void-color-picker {
   border: 1px solid var(--void-color-border);
   border-radius: var(--void-radius-lg);
   padding: var(--void-space-3);
-  box-shadow: var(--void-shadow-lg, 0 4px 12px var(--void-color-bg-overlay));
+  box-shadow: var(--void-shadow-lg);
 }
 
 /* ── Size variants ── */

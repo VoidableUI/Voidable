@@ -139,7 +139,8 @@ set -euo pipefail
 | `mise run clean` | Remove build artifacts and node_modules |
 | `mise run ci` | Full CI pipeline: build, test, typecheck, lint, token lint |
 | `mise run lint` | ESLint with lit-a11y (WCAG checks on Lit templates) |
-| `mise run lint_tokens` | Ensure no raw color values outside primitives.css |
+| `mise run lint:tokens` | Ensure no raw values (colors, sizes, etc.) outside primitives.css |
+| `mise run lint:undefined-tokens` | Fail if a `--void-*` token is referenced but neither defined in theme CSS nor set from TypeScript |
 | `mise run docs` | Start docs dev server |
 | `mise run docs:build` | Build docs for deployment |
 
