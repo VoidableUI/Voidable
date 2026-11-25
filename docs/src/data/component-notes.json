@@ -184,32 +184,38 @@
   "void-dialog": {
     "group": "overlays",
     "events": {
-      "void-close": "Fires when the dialog closes itself (the close button, Escape or a backdrop click)."
+      "void-open": "Fires when the dialog opens. `detail.reason` is `api`: the dialog opens only when you set `open`. It does not bubble.",
+      "void-close": "Fires before the dialog closes, on the dialog only (it does not bubble). `detail.reason` is `escape`, `outside` (the backdrop), `close-button`, `form` (a `method=\"dialog\"` form), `parent` or `api`. Call `preventDefault()` to keep it open when the user caused the close (`escape`, `outside`, `close-button`)."
     },
-    "children": "The dialog body: text, forms and buttons. The `heading` attribute is the title and the dialog's accessible name."
+    "children": "The dialog body: text, forms and buttons. The `heading` attribute is the title and the dialog's accessible name (without one, set `aria-label`). Focus moves to the first `[autofocus]` element, else the first focusable element, else the close button, and returns to the opener on close."
   },
   "void-drawer": {
     "group": "overlays",
     "events": {
-      "void-close": "Fires when the drawer closes itself (the close button, Escape or a backdrop click)."
+      "void-open": "Fires when the drawer opens. `detail.reason` is `api`. It does not bubble.",
+      "void-close": "Fires before the drawer closes, on the drawer only (it does not bubble). `detail.reason` is `escape`, `outside` (the backdrop), `close-button`, `form`, `parent` or `api`. Call `preventDefault()` to keep it open when the user caused the close."
     },
-    "children": "The drawer body: any content. The `heading` attribute is the title and the drawer's accessible name."
+    "children": "The drawer body: any content. The `heading` attribute is the title and the drawer's accessible name (without one, set `aria-label`). Focus is handled as in the dialog."
   },
   "void-dropdown-menu": {
     "group": "overlays",
-    "children": "One element marked `slot=\"trigger\"` that opens the menu, then `void-dropdown-menu-item` children for the actions."
+    "children": "One element marked `slot=\"trigger\"` that opens the menu, then `void-dropdown-menu-item` children for the actions. Choosing an item closes the menu and returns focus to the trigger; give an item `keep-open` to leave it open.",
+    "events": {
+      "void-open": "Fires when the menu opens. `detail.reason` is `trigger`, `keyboard` or `api`. It does not bubble.",
+      "void-close": "Fires before the menu closes, on the menu only (it does not bubble). `detail.reason` is `trigger`, `select`, `escape`, `outside`, `blur`, `parent` or `api`; `preventDefault()` keeps it open when the user caused the close."
+    }
   },
   "void-dropdown-menu-item": {
     "group": "overlays",
     "events": {
-      "void-select": "Fires when the item is activated. `detail.item` is the item element; read its text or attributes to tell items apart."
+      "void-select": "Fires when the item is activated by click, Enter or Space; it bubbles to the menu. `detail.item` is the item element; read its text or attributes to tell items apart. A disabled item does not fire it."
     }
   },
   "void-hover-card": {
     "group": "overlays",
     "events": {
-      "void-open": "Fires when the card opens, on hover or focus of the trigger.",
-      "void-close": "Fires when the card closes."
+      "void-open": "Fires when the card opens, on hover or focus of the trigger (`detail.reason` is `hover`, `focus` or `api`). It does not bubble.",
+      "void-close": "Fires when the card closes (`detail.reason` is `hover`, `blur`, `escape`, `parent` or `api`). It does not bubble."
     },
     "children": "One element marked `slot=\"trigger\"`, then the card content."
   },
@@ -230,13 +236,18 @@
   "void-popover": {
     "group": "overlays",
     "events": {
-      "void-close": "Fires when the popover closes itself (Escape or a click outside)."
+      "void-open": "Fires when the popover opens. `detail.reason` is `trigger` or `api`. It does not bubble.",
+      "void-close": "Fires before the popover closes, on the popover only (it does not bubble). `detail.reason` is `trigger`, `escape`, `outside`, `blur` (focus left it), `parent` or `api`; `preventDefault()` keeps it open when the user caused the close."
     },
     "children": "One element marked `slot=\"trigger\"`, then the popover content."
   },
   "void-tooltip": {
     "group": "overlays",
-    "children": "The one element the tooltip describes. The tip text is the `text` attribute."
+    "children": "The one element the tooltip describes; it gets `aria-describedby`. The tip text is the `text` attribute. Put nothing in it the user must read: it appears only on hover or keyboard focus.",
+    "events": {
+      "void-open": "Fires when the tooltip appears, on hover or keyboard focus (`detail.reason` is `hover`, `focus` or `api`). It does not bubble.",
+      "void-close": "Fires when the tooltip hides (`detail.reason` is `hover`, `blur`, `escape`, `parent` or `api`). It does not bubble."
+    }
   },
   "void-breadcrumbs": {
     "group": "navigation",

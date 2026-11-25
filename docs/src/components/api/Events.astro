@@ -5,11 +5,15 @@ import { inline } from '../../lib/inline.mjs';
 interface Props { tag: string }
 const { tag } = Astro.props;
 const c = loadComponentData().byTag.get(tag)!;
+const isOverlay = (e: any) => e.name === 'void-open' || e.name === 'void-close';
+const bubbling = c.events.filter((e: any) => !isOverlay(e));
 const describe = (e: any) => c.note.events?.[e.name] ?? e.description;
 ---
 
 <p>
-  Every event is a <code>CustomEvent</code> that bubbles, so you can listen on the element or on any ancestor. Read what changed from <code>event.detail</code>.
+  {bubbling.length > 0 && <Fragment>{c.events.length > bubbling.length ? 'Except for void-open and void-close, every' : 'Every'} event is a <code>CustomEvent</code> that bubbles, so you can listen on the element or on any ancestor. </Fragment>}
+  {c.events.length > bubbling.length && <Fragment><code>void-open</code> and <code>void-close</code> fire on the element itself and do <strong>not</strong> bubble; listen on the element, or in the capture phase on an ancestor. Their <code>detail.reason</code> says why, and <code>void-close</code> is cancelable when the user caused it (see <a href="/components/overlays/#events">Overlays</a>). </Fragment>}
+  Read what changed from <code>event.detail</code>.
 </p>
 <div class="vd-api-table">
   <table>

@@ -1,13 +1,13 @@
 ---
 title: Events
-description: Every Voidable event is a bubbling, composed CustomEvent named void-something with its data in detail. How to listen in each framework, and the full list.
+description: Every Voidable event is a composed CustomEvent named void-something with its data in detail; all bubble except the overlays' void-open and void-close. How to listen in each framework, and the full list.
 ---
 
 import AllEvents from '../../../components/api/AllEvents.astro';
 
 Components tell your app what happened by dispatching `CustomEvent`s whose names start with `void-`. They all follow the same rules:
 
-- **They bubble and are composed**, so you can listen on the element or on any ancestor, which makes one listener on a `<form>` or a container enough for many controls.
+- **They bubble and are composed**, so you can listen on the element or on any ancestor, which makes one listener on a `<form>` or a container enough for many controls. The one exception is `void-open` and `void-close` from overlays (dialog, drawer, popover, hover card, dropdown menu, tooltip, combobox, multiselect, date picker): like the native `toggle` and `close` events they fire on the overlay only and do not bubble, so a popover closing inside a dialog never looks like the dialog closing. Listen on the element, or on an ancestor in the capture phase; they also carry a `reason` and `void-close` is cancelable when the user caused it. See [Overlays](/components/overlays/#events).
 - **What changed is in `event.detail`**, an object whose fields are listed per event below and on each [component page](/components/overview/).
 - **`void-input` is per edit, `void-change` is a commit.** On text fields, `void-input` fires on every keystroke and `void-change` when the value is committed. On controls with no in-between state, such as a switch, checkbox or select, `void-change` is the one event.
 - **The native events still fire.** Controls that render a native input also let the browser's own `input` and `change` events bubble, so existing handlers work. Prefer `void-*`, whose `detail` is the same on every control.
@@ -33,7 +33,7 @@ A misspelt event name never fires, and nothing complains; the [development warni
 
 The [framework pages](/frameworks/react/) have the details, including typing and the helpers that write these attributes for you.
 
-Event delegation works as it does for any bubbling event:
+Event delegation works as it does for any bubbling event (not for `void-open` and `void-close`, see above):
 
 ```js
 document.querySelector('form').addEventListener('void-change', (e) => {
