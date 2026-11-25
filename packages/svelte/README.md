@@ -19,7 +19,7 @@ npm install @voidable/ui-svelte @voidable/ui @voidable/theme svelte
   // $theme is 'dark' | 'light' (readable store)
 </script>
 
-<void-button variant="filled" color="primary">Click me</void-button>
+<void-button variant="filled" color="success">Click me</void-button>
 <p>Current theme: {$theme}</p>
 ```
 
@@ -27,8 +27,10 @@ Svelte handles `<void-*>` custom elements natively in templates.
 
 ## Documentation
 
-- [Storybook](https://voidableui.github.io/Voidable/)
+- [Docs](https://voidable.dev/frameworks/svelte/)
+- [Storybook](https://voidable.dev/storybook/)
 - [GitHub](https://github.com/VoidableUI/Voidable)
+- [npm](https://www.npmjs.com/package/@voidable/ui-svelte)
 
 ## License
 

@@ -4,8 +4,11 @@ Storybook for Voidable UI components. This package is private and not published 
 
 ## Development
 
+From the repository root, run everything through mise (never call pnpm directly):
+
 ```bash
-pnpm --filter @voidable/storybook dev
+mise run install
+mise run storybook
 ```
 
 Opens Storybook at [http://localhost:6006](http://localhost:6006).
@@ -13,10 +16,13 @@ Opens Storybook at [http://localhost:6006](http://localhost:6006).
 ## Build
 
 ```bash
-pnpm --filter @voidable/storybook build
+mise run storybook_build
 ```
+
+The task is defined in `.mise/tasks/storybook:build`; run `mise tasks` to see the exact name your mise version exposes. The static site is written to `storybook-static/` at the repository root.
 
 ## Documentation
 
-- [Live Storybook](https://voidableui.github.io/Voidable/)
+- [Live Storybook](https://voidable.dev/storybook/)
+- [Docs](https://voidable.dev)
 - [GitHub](https://github.com/VoidableUI/Voidable)

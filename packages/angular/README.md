@@ -10,7 +10,19 @@ npm install @voidable/ui-angular @voidable/ui @voidable/theme
 
 ## Setup
 
-Import `VoidableModule` to enable custom element schemas:
+Load the theme in your global stylesheet and register the components once in `main.ts`:
+
+```css
+/* src/styles.css */
+@import '@voidable/theme';
+```
+
+```ts
+// src/main.ts
+import '@voidable/ui';
+```
+
+Angular rejects unknown tags unless the component's module or standalone component declares `CUSTOM_ELEMENTS_SCHEMA`. For NgModule apps, `VoidableModule` bundles it:
 
 ```ts
 import { VoidableModule } from '@voidable/ui-angular';
@@ -21,15 +33,17 @@ import { VoidableModule } from '@voidable/ui-angular';
 export class AppModule {}
 ```
 
+For standalone components, add `schemas: [CUSTOM_ELEMENTS_SCHEMA]` to the component.
+
 ## Usage
 
 ```ts
-import '@voidable/ui';
-import '@voidable/theme';
+import { Component, inject } from '@angular/core';
 import { ThemeService } from '@voidable/ui-angular';
 
 @Component({
-  template: `<void-button variant="filled" color="primary">Click me</void-button>`,
+  selector: 'app-root',
+  template: `<void-button variant="filled" color="success">Save</void-button>`,
 })
 export class MyComponent {
   private theme = inject(ThemeService);
@@ -37,10 +51,14 @@ export class MyComponent {
 }
 ```
 
+`color` accepts `default`, `error`, `warning`, `success`, `info` or `notice`.
+
 ## Documentation
 
-- [Storybook](https://voidableui.github.io/Voidable/)
+- [Docs](https://voidable.dev/frameworks/angular/)
+- [Storybook](https://voidable.dev/storybook/)
 - [GitHub](https://github.com/VoidableUI/Voidable)
+- [npm](https://www.npmjs.com/package/@voidable/ui-angular)
 
 ## License
 
