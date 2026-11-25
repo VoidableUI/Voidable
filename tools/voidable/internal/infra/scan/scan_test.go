@@ -76,6 +76,8 @@ func TestScan(t *testing.T) {
 			`void-card{client:load:directive variant:attr=elevated set:html:directive=x!}@1:1`},
 		{"angular", domain.LangHTML, `<void-select [value]="v" (void-change)="on($event)" [attr.size]="s" *ngIf="x">`,
 			`void-select{value:property=v void-change:event=on($event) size:bound=s! *ngIf:directive=x}@1:1`},
+		{"angular forms directives", domain.LangHTML, `<void-select formControlName="s" [formControl]="c" [(ngModel)]="m" ngDefaultControl>`,
+			`void-select{formControlName:directive=s [formControl]:directive=c [(ngModel)]:directive=m ngDefaultControl:directive}@1:1`},
 		{"nesting", domain.LangHTML, `<void-select><void-option>A</void-option></void-select><void-multiselect><void-option></void-option></void-multiselect>`,
 			`void-select{}@1:1 | void-option[void-select]{}@1:14 | void-multiselect{}@1:56 | void-option[void-multiselect]{}@1:74`},
 		{"self-closing does not nest", domain.LangJSX, `<void-input /><void-option />`,

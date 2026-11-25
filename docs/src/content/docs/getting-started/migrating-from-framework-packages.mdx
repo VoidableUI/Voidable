@@ -1,0 +1,37 @@
+---
+title: Migrating from the framework packages
+description: What replaced @voidable/ui-vue, @voidable/ui-solid, @voidable/ui-svelte and @voidable/ui-angular.
+---
+
+`@voidable/ui-vue`, `@voidable/ui-solid`, `@voidable/ui-svelte` and `@voidable/ui-angular` are no longer published. Each contained only a theme helper (and, for Angular, a module that does not work), so nothing was lost: the framework guides show the replacement, and the typings and form support now ship in `@voidable/ui`. The last published versions remain on npm.
+
+## What to change
+
+```bash
+npm uninstall @voidable/ui-vue @voidable/ui-solid @voidable/ui-svelte @voidable/ui-angular
+```
+
+Keep `@voidable/ui` and `@voidable/theme`. Then, per framework:
+
+| You used | Replace it with |
+|----------|-----------------|
+| `@voidable/ui-vue` `useTheme()` | A small composable, copied from the [Vue guide](/frameworks/vue/#theme) |
+| `@voidable/ui-solid` `useTheme()` | A small function, copied from the [Solid guide](/frameworks/solid/#theme) |
+| `@voidable/ui-svelte` `theme` store | A small store, copied from the [Svelte guide](/frameworks/svelte/#theme) |
+| `@voidable/ui-angular` `ThemeService` | `injectTheme()`, copied from the [Angular guide](/frameworks/angular/#theme) |
+| `@voidable/ui-angular` `VoidableModule` | `schemas: [CUSTOM_ELEMENTS_SCHEMA]` on each component that uses `<void-*>` tags |
+
+Every helper does what the package did: it observes the `data-theme` attribute on `<html>` and exposes the value reactively.
+
+## Things that were missing and are not any more
+
+- **Typings.** `@voidable/ui` generates typings for Vue, Solid (1 and 2) and Svelte from the component manifest. Add one line to `tsconfig.json` (`types: ["@voidable/ui/types/vue"]`, `.../solid`, `.../solid2` or `.../svelte`) and every `<void-*>` tag is checked: property names, values and the `detail` of each `void-*` event. See your framework's guide.
+- **Angular forms.** `@voidable/ui/angular` exports `VoidValueAccessor`, which makes `ngModel`, `formControl` and `formControlName` work on every Void form control.
+
+## Angular: why `@voidable/ui-angular` could not be kept
+
+The package shipped Angular decorators as plain JavaScript, never compiled by the Angular compiler. In an Angular CLI application that means `imports: [VoidableModule]` fails the build with `NG2012: Component imports must be standalone components, directives, pipes, or must be NgModules`, and injecting `ThemeService` throws at runtime (`The injectable needs to be compiled using the JIT compiler, but '@angular/compiler' is not available`). Its peer range also stopped at Angular 21. If you used `schemas: [CUSTOM_ELEMENTS_SCHEMA]` directly, as the previous Angular guide recommended for standalone components, you only need to remove the unused imports.
+
+## What stays the same
+
+The element tags, attributes, properties, events and the `@voidable/ui` and `@voidable/theme` packages are unchanged. `@voidable/ui-react`, `@voidable/ui-alpine`, `@voidable/ui-hotwire` and `@voidable/ui-liveview` are unaffected.

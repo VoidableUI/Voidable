@@ -2,20 +2,32 @@
 title: Vue
 ---
 
-Vue handles custom elements natively. The `@voidable/ui-vue` package provides a `useTheme` composable.
+Vue renders custom elements natively, so Vue needs no adapter package: `@voidable/ui` plus one compiler option plus its generated typings is the whole setup. Everything below was run in a Vue 3.5 app built with Vite and driven in a browser.
 
 ## Install
 
 ```bash
-npm install @voidable/ui @voidable/theme @voidable/ui-vue
+npm install @voidable/ui @voidable/theme
 ```
 
-## Vite config
+Register the elements and load the theme once, in your entry file:
 
-Tell Vue's template compiler to treat `void-*` tags as custom elements:
+```ts
+// src/main.ts
+import '@voidable/ui';
+import '@voidable/theme';
+import { createApp } from 'vue';
+import App from './App.vue';
 
-```js
-// vite.config.js
+createApp(App).mount('#app');
+```
+
+## Compiler option
+
+Tell Vue's template compiler that `void-*` tags are custom elements, so it does not try to resolve them as Vue components:
+
+```ts
+// vite.config.ts
 import vue from '@vitejs/plugin-vue';
 
 export default {
@@ -31,44 +43,93 @@ export default {
 };
 ```
 
+## Typings
+
+`@voidable/ui/types/vue` registers every `<void-*>` tag with `GlobalComponents`, with typed properties and typed `void-*` events. Load it from `tsconfig.json` and turn on strict templates so unknown attribute names are errors too:
+
+```jsonc
+// tsconfig.json
+{
+  "compilerOptions": { "types": ["vite/client", "@voidable/ui/types/vue"] },
+  "vueCompilerOptions": { "strictTemplates": true }
+}
+```
+
+Type-check with `vue-tsc --noEmit`. With these two settings a misspelled attribute name, a value outside an attribute's type (a size that does not exist, a string where a number is expected), a `@void-*` event the element does not fire and a handler whose `detail` has the wrong shape are all rejected. Without `strictTemplates`, wrong values are still rejected but an unknown attribute name is not.
+
 ## Usage
 
-Use `<void-*>` elements directly in Vue templates:
+Set properties with `:`, listen to `void-*` events with `@`. Strings, booleans, numbers, arrays and objects (such as the `data` of the chart elements) are all set as properties, so they arrive with their type intact:
 
 ```vue
-<template>
-  <void-button variant="filled" @void-click="handleClick">
-    Save
-  </void-button>
-
-  <void-input :value="name" @void-change="name = $event.detail.value" />
-</template>
-
-<script setup>
-import '@voidable/ui';
+<script setup lang="ts">
 import { ref } from 'vue';
 
 const name = ref('');
-function handleClick() {
-  console.log('clicked');
-}
-</script>
-```
-
-## Theme composable
-
-Track the active theme reactively:
-
-```vue
-<script setup>
-import { useTheme } from '@voidable/ui-vue';
-
-const theme = useTheme(); // Readonly<Ref<'dark' | 'light'>>
+const tags = ref(['design', 'ship']);
 </script>
 
 <template>
-  <span>Current theme: {{ theme }}</span>
+  <void-button variant="filled" @void-click="console.log('clicked')">Save</void-button>
+
+  <void-input :value="name" :disabled="false" @void-input="(e) => (name = e.detail.value)" />
+
+  <void-tags-input :value="tags" />
 </template>
 ```
 
-The composable observes the `data-theme` attribute on `<html>` via `MutationObserver` and cleans up automatically when the component unmounts.
+`e.detail` is typed from the element: `CustomEvent<{ value: string }>` for `void-input`, `{ checked: boolean }` for `void-checkbox`, and so on.
+
+## Two-way binding
+
+Bind the property and listen for the change event. This works for every control:
+
+```vue
+<script setup lang="ts">
+import { ref } from 'vue';
+
+const text = ref('a');
+const choice = ref('b');
+const agreed = ref(false);
+</script>
+
+<template>
+  <void-input :value="text" @void-input="(e) => (text = e.detail.value)" />
+
+  <void-select :value="choice" @void-change="(e) => (choice = e.detail.value)">
+    <option value="a">A</option>
+    <option value="b">B</option>
+    <option value="c">C</option>
+  </void-select>
+
+  <void-checkbox :checked="agreed" @void-change="(e) => (agreed = e.detail.checked)">I agree</void-checkbox>
+</template>
+```
+
+Do not use `v-model` on `<void-*>` elements. The generated typings reject it (`modelValue` is not a property of the element), and at runtime it only appears to work on `<void-input>`, through the browser's native `input` event; on `<void-select>` and `<void-checkbox>` it never updates the ref.
+
+## Theme
+
+Track the active theme (the `data-theme` attribute on `<html>`) with a small composable of your own:
+
+```ts
+// src/use-theme.ts
+import { onMounted, onUnmounted, readonly, ref } from 'vue';
+
+export type Theme = 'dark' | 'light';
+
+const read = (): Theme => (document.documentElement.getAttribute('data-theme') as Theme | null) ?? 'dark';
+
+export function useTheme() {
+  const theme = ref<Theme>('dark');
+  const observer = new MutationObserver(() => (theme.value = read()));
+  onMounted(() => {
+    theme.value = read();
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+  });
+  onUnmounted(() => observer.disconnect());
+  return readonly(theme);
+}
+```
+
+If you used the removed `@voidable/ui-vue` package, see [Migrating from the framework packages](/getting-started/migrating-from-framework-packages/).

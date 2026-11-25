@@ -64,6 +64,7 @@ export default defineConfig({
             { label: 'Component Authoring', slug: 'getting-started/component-authoring' },
             { label: 'Theming', slug: 'getting-started/theming' },
             { label: 'Design Tokens', slug: 'getting-started/tokens' },
+            { label: 'Migrating from the framework packages', slug: 'getting-started/migrating-from-framework-packages' },
           ],
         },
         {

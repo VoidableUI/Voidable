@@ -2,52 +2,102 @@
 title: Svelte
 ---
 
-Svelte handles custom elements natively in templates. The `@voidable/ui-svelte` package provides a `theme` readable store.
+Svelte 5 renders custom elements natively, so Svelte needs no adapter package: `@voidable/ui` and its generated typings are the whole setup. Everything below was run in a Svelte 5.59 app built with Vite and driven in a browser.
 
 ## Install
 
 ```bash
-npm install @voidable/ui @voidable/theme @voidable/ui-svelte
+npm install @voidable/ui @voidable/theme
 ```
+
+Register the elements and load the theme once, in your entry file:
+
+```ts
+// src/main.ts
+import '@voidable/ui';
+import '@voidable/theme';
+import { mount } from 'svelte';
+import App from './App.svelte';
+
+mount(App, { target: document.getElementById('app')! });
+```
+
+## Typings
+
+`@voidable/ui/types/svelte` registers every `<void-*>` tag with `SvelteHTMLElements`, with typed properties and typed `void-*` events. Load it from `tsconfig.json`:
+
+```jsonc
+// tsconfig.json
+{
+  "compilerOptions": { "types": ["svelte", "vite/client", "@voidable/ui/types/svelte"] }
+}
+```
+
+Type-check with `svelte-check`. A misspelled attribute name, a value outside an attribute's type (a size that does not exist, a string where a number is expected), an `onvoid-*` event the element does not fire and a handler whose `detail` has the wrong shape are all errors.
+
+Properties are typed under their JavaScript names, so a camelCase property such as a chart's `showValues` is written as is, not as `show-values`.
 
 ## Usage
 
-Use `<void-*>` elements directly in Svelte templates. Because Svelte 5's `onevent` syntax doesn't support hyphens in event names, bind a reference and wire up listeners in a `$effect`:
+Svelte sets a property when the element has one, so strings, booleans, numbers, arrays and objects (such as the `data` of the chart elements) keep their type. Events are `on` plus the event name, hyphens included:
 
 ```svelte
-<script>
-  import '@voidable/ui';
-
+<script lang="ts">
   let name = $state('');
-  let input;
-  let button;
-
-  $effect(() => {
-    const onchange = (e) => { name = e.detail.value; };
-    const onclick = () => console.log(name);
-    input.addEventListener('void-change', onchange);
-    button.addEventListener('void-click', onclick);
-    return () => {
-      input.removeEventListener('void-change', onchange);
-      button.removeEventListener('void-click', onclick);
-    };
-  });
+  let tags = $state(['design', 'ship']);
 </script>
 
-<void-input bind:this={input} placeholder="Your name" />
-<void-button bind:this={button} variant="filled">Submit</void-button>
+<void-button variant="filled" onvoid-click={() => console.log('clicked')}>Save</void-button>
+
+<void-input value={name} disabled={false} onvoid-input={(e) => (name = e.detail.value)}></void-input>
+
+<void-tags-input value={tags}></void-tags-input>
 ```
 
-## Theme store
+`e.detail` is typed from the element: `CustomEvent<{ value: string }>` for `void-input`, `{ checked: boolean }` for `void-checkbox`, and so on.
 
-Track the active theme with a readable Svelte store:
+## Two-way binding
+
+Svelte's `bind:` cannot be used on custom elements: `<void-input bind:value={name}>` fails to compile (`bind:value can only be used with <input>, <textarea>, <select>`). Bind the property and listen for the change event instead. This works for every control:
 
 ```svelte
-<script>
-  import { theme } from '@voidable/ui-svelte';
+<script lang="ts">
+  let text = $state('a');
+  let choice = $state('b');
+  let agreed = $state(false);
 </script>
 
-<span>Current theme: {$theme}</span>
+<void-input value={text} onvoid-input={(e) => (text = e.detail.value)}></void-input>
+
+<void-select value={choice} onvoid-change={(e) => (choice = e.detail.value)}>
+  <option value="a">A</option>
+  <option value="b">B</option>
+  <option value="c">C</option>
+</void-select>
+
+<void-checkbox checked={agreed} onvoid-change={(e) => (agreed = e.detail.checked)}>I agree</void-checkbox>
 ```
 
-The store observes the `data-theme` attribute on `<html>` via `MutationObserver` and cleans up its subscription automatically.
+## Theme
+
+Track the active theme (the `data-theme` attribute on `<html>`) with a store of your own:
+
+```ts
+// src/theme.ts
+import { readable } from 'svelte/store';
+
+export type Theme = 'dark' | 'light';
+
+const read = (): Theme => (document.documentElement.getAttribute('data-theme') as Theme | null) ?? 'dark';
+
+export const theme = readable<Theme>('dark', (set) => {
+  set(read());
+  const observer = new MutationObserver(() => set(read()));
+  observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+  return () => observer.disconnect();
+});
+```
+
+Then `{$theme}` in a template is `'dark'` or `'light'`.
+
+If you used the removed `@voidable/ui-svelte` package, see [Migrating from the framework packages](/getting-started/migrating-from-framework-packages/).

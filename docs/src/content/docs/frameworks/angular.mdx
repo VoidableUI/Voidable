@@ -2,67 +2,136 @@
 title: Angular
 ---
 
-The Angular adapter provides `VoidableModule` to register `CUSTOM_ELEMENTS_SCHEMA` and a `ThemeService` with Angular signals.
+Angular needs two things beyond `@voidable/ui` itself: `CUSTOM_ELEMENTS_SCHEMA` so the template compiler accepts `<void-*>` tags, and, if you use Angular forms, a `ControlValueAccessor`, which `@voidable/ui/angular` provides. No separate adapter package is involved. Everything below was run in a browser with Angular 22.3 (production AOT build) and Angular 19.2.
 
 ## Install
 
 ```bash
-npm install @voidable/ui @voidable/theme @voidable/ui-angular
+npm install @voidable/ui @voidable/theme
 ```
 
-## Standalone setup
-
-Angular 18+ defaults to standalone components. Add `CUSTOM_ELEMENTS_SCHEMA` directly to each component that uses `<void-*>` elements:
+Register the elements once, in your entry file, and load the theme as a global stylesheet (for example from `styles` in `angular.json`):
 
 ```ts
-import { CUSTOM_ELEMENTS_SCHEMA, Component } from '@angular/core';
+// src/main.ts
+import '@voidable/ui';
+import { bootstrapApplication } from '@angular/platform-browser';
+import { appConfig } from './app/app.config';
+import { App } from './app/app';
+
+bootstrapApplication(App, appConfig);
+```
+
+## Schema
+
+Add `CUSTOM_ELEMENTS_SCHEMA` to every standalone component whose template uses `<void-*>` elements (or to the NgModule that declares it):
+
+```ts
+import { Component, CUSTOM_ELEMENTS_SCHEMA, signal } from '@angular/core';
 
 @Component({
   selector: 'app-root',
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
-  standalone: true,
   template: `
-    <void-button variant="filled" (void-click)="onSave()">Save</void-button>
-    <void-input [value]="name" (void-change)="name = $event.detail.value"></void-input>
-    <void-alert color="info">Angular works with custom elements natively.</void-alert>
+    <void-button variant="filled" (void-click)="clicks.set(clicks() + 1)">Save</void-button>
+    <void-input [value]="name()" [disabled]="false" (void-input)="name.set($any($event).detail.value)"></void-input>
+    <void-tags-input [value]="tags"></void-tags-input>
   `,
 })
-export class AppComponent {
-  name = '';
-  onSave() {}
+export class App {
+  clicks = signal(0);
+  name = signal('');
+  tags = ['design', 'ship'];
 }
 ```
 
-## Module-based setup
+Property bindings such as `[value]` and `[disabled]` set DOM properties, so strings, booleans, numbers, arrays and objects (such as the `data` of the chart elements) keep their type. Bind a boolean property with brackets (`[showValues]="true"` on a chart); a plain `showValues` attribute is lowercased by the HTML parser and does not reach the property.
 
-For NgModule-based apps, import `VoidableModule` once in your app module:
+## Events and types
+
+Angular's template type checker does not look at custom element bindings. With `CUSTOM_ELEMENTS_SCHEMA`, a misspelled property binding, a value of the wrong type (`[disabled]` given a string) and an attribute outside the allowed values (a size that does not exist) all compile, and `$event` in a `(void-change)` handler is a plain `Event`, so `$event.detail` is an error and `$any($event)` is the escape hatch. There is no Angular entry in the generated typings: this is a limitation of Angular's templates, not something a typings file can fix.
+
+To keep type safety, do the work in the component class, where the generated event map applies:
 
 ```ts
-import { VoidableModule } from '@voidable/ui-angular';
+import type { VoidElementEvents } from '@voidable/ui/types/elements';
 
-@NgModule({
-  imports: [VoidableModule],
-})
-export class AppModule {}
+onChange(event: Event) {
+  const { detail } = event as VoidElementEvents['void-input']['void-change'];
+  this.name.set(detail.value); // detail: { value: string }
+}
 ```
 
-`VoidableModule` registers `CUSTOM_ELEMENTS_SCHEMA` so Angular does not reject unknown `<void-*>` tags. All components in the module can then use `<void-*>` elements in their templates.
+```html
+<void-input (void-change)="onChange($event)"></void-input>
+```
 
-## ThemeService
+## Forms
 
-`ThemeService` is provided in root via `providedIn: 'root'` — no module import needed. Inject it anywhere in your app:
+Angular's built-in value accessors only fit native `<input>` and `<select>`. Import `VoidValueAccessor` next to `FormsModule` or `ReactiveFormsModule` and `ngModel`, `formControl` and `formControlName` work on every Void form control (input, textarea, select, checkbox, switch, number input, slider, combobox, multiselect, tags input, date picker, and the rest): no `ngDefaultControl` attribute is needed.
 
 ```ts
-import { Component } from '@angular/core';
-import { ThemeService } from '@voidable/ui-angular';
+import { Component, CUSTOM_ELEMENTS_SCHEMA, signal } from '@angular/core';
+import { FormControl, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { VoidValueAccessor } from '@voidable/ui/angular';
 
 @Component({
-  selector: 'app-root',
-  template: `<span>Current theme: {{ themeService.theme() }}</span>`,
+  selector: 'app-form',
+  imports: [FormsModule, ReactiveFormsModule, VoidValueAccessor],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
+  template: `
+    <void-input [(ngModel)]="text"></void-input>
+
+    <void-select [(ngModel)]="choice">
+      <option value="a">A</option>
+      <option value="b">B</option>
+    </void-select>
+
+    <void-checkbox [(ngModel)]="agreed">I agree</void-checkbox>
+    <void-number-input [(ngModel)]="count" [min]="0" [max]="10"></void-number-input>
+
+    <form [formGroup]="form">
+      <void-input formControlName="name"></void-input>
+      <void-switch formControlName="notify"></void-switch>
+    </form>
+  `,
 })
-export class AppComponent {
-  constructor(public themeService: ThemeService) {}
+export class FormExample {
+  text = signal('a');
+  choice = signal('b');
+  agreed = signal(false);
+  count = signal(3);
+  form = new FormGroup({ name: new FormControl('n'), notify: new FormControl(false) });
 }
 ```
 
-`ThemeService` uses a `MutationObserver` to track the `data-theme` attribute on `<html>` and exposes a `signal<'dark' | 'light'>`.
+The accessor writes the control's value property, listens for its `void-input` and `void-change` events, marks the control touched on `focusout`, and forwards the disabled state. It ignores events that bubble up from nested controls, so a `void-checkbox-group` reports its own value, not that of one checkbox. It needs `@angular/core` and `@angular/forms` 19 or later (both optional peer dependencies of `@voidable/ui`). The tag list is generated from the component manifest, so a new form control is covered automatically.
+
+## Theme
+
+Track the active theme (the `data-theme` attribute on `<html>`) with a function of your own, called from an injection context such as a field initializer:
+
+```ts
+// src/app/inject-theme.ts
+import { DestroyRef, inject, signal } from '@angular/core';
+
+export type Theme = 'dark' | 'light';
+
+const read = (): Theme => (document.documentElement.getAttribute('data-theme') as Theme | null) ?? 'dark';
+
+export function injectTheme() {
+  const theme = signal<Theme>(read());
+  const observer = new MutationObserver(() => theme.set(read()));
+  observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+  inject(DestroyRef).onDestroy(() => observer.disconnect());
+  return theme.asReadonly();
+}
+```
+
+```ts
+export class App {
+  theme = injectTheme(); // Signal<'dark' | 'light'>
+}
+```
+
+If you used the removed `@voidable/ui-angular` package, see [Migrating from the framework packages](/getting-started/migrating-from-framework-packages/).

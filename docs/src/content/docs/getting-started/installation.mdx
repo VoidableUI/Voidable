@@ -55,20 +55,16 @@ Once imported, use `<void-*>` elements directly in HTML or any template:
 
 ## Framework adapters
 
-For framework-specific wrappers and theme utilities, install the adapter for your framework:
+Vue, Solid, Svelte and Angular need no adapter package: `@voidable/ui` and `@voidable/theme` are enough, plus a line or two of configuration and, in TypeScript projects, the generated typings in `@voidable/ui/types/*`. For React and the server-rendered stacks, install the adapter:
 
 ```bash
 npm install @voidable/ui-react    # React
-npm install @voidable/ui-vue      # Vue
-npm install @voidable/ui-solid    # Solid
-npm install @voidable/ui-svelte   # Svelte
-npm install @voidable/ui-angular  # Angular
 npm install @voidable/ui-hotwire  # Hotwire / Stimulus
 npm install @voidable/ui-alpine   # Alpine.js
 npm install @voidable/ui-liveview # Phoenix LiveView
 ```
 
-See the [Frameworks](/frameworks/react/) section for usage guides.
+See the [Frameworks](/frameworks/react/) section for each framework's setup. Coming from `@voidable/ui-vue`, `-solid`, `-svelte` or `-angular`? See [Migrating from the framework packages](/getting-started/migrating-from-framework-packages/).
 
 ## Without a bundler
 
