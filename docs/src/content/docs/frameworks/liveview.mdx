@@ -74,7 +74,7 @@ end
 
 ## DOM preservation
 
-`VoidDOM` is a separate export from `@voidable/ui-liveview` (not part of `VoidHooks`). Wire it into your `LiveSocket` constructor via the `dom` option to prevent LiveView from clobbering client-managed state (open dialogs, checked states, ARIA attributes) during morphdom updates:
+`VoidDOM` is a separate export from `@voidable/ui-liveview` (not part of `VoidHooks`). Wire both of its callbacks into your `LiveSocket` constructor via the `dom` option so morphdom patches are safe for every `<void-*>` component:
 
 ```js
 import { VoidHooks, VoidDOM } from '@voidable/ui-liveview';
@@ -82,6 +82,9 @@ import { VoidHooks, VoidDOM } from '@voidable/ui-liveview';
 let liveSocket = new LiveSocket('/live', Socket, {
   hooks: { ...VoidHooks },
   dom: {
+    onNodeAdded(node) {
+      VoidDOM.onNodeAdded(node);
+    },
     onBeforeElUpdated(from, to) {
       VoidDOM.onBeforeElUpdated(from, to);
     },
@@ -89,4 +92,15 @@ let liveSocket = new LiveSocket('/live', Socket, {
 });
 ```
 
-If you need more granular control, you can still add `phx-update="ignore"` to individual `<void-*>` elements, but `VoidDOM` handles this globally and is the recommended approach.
+`onNodeAdded` records the server's attributes of each new element as the baseline for later patches; `onBeforeElUpdated` applies the server-wins rule below to `to` and calls the element's pre-morph hook. What survives a patch:
+
+- **The component's own DOM.** Before the morph compares an element, the adapter calls its `voidBeforeMorph()` hook: the structure the component rendered (native inputs, wrappers, icons, list items) is set aside and the element is left looking like its server markup, so the morph only diffs what the server sent. Right after the morph the same nodes go back, so nothing is rebuilt: a field you are typing in keeps its focus, caret and text (in browsers with `Element.moveBefore`, currently Chromium; elsewhere focus and caret are restored after the move), an unfocused field keeps what was typed, and scroll positions, slider positions and chart state are kept.
+- **Attributes the component manages on itself** (`role`, `tabindex`, `aria-checked` and the like, and reflected properties still at their default, such as `size="md"`) are carried onto the incoming element whenever the server markup does not set them, so the morph leaves them alone.
+- **Server-controlled state follows the server.** Anything the server markup sets (`label`, `value`, `disabled`, ...) is applied. Client state such as `open` or `checked` is kept only while the server keeps rendering the same value it rendered last time; as soon as the server renders a different value (including removing it), the server wins.
+- **Without the adapter** (a plain idiomorph or morphdom call, `innerHTML` on a parent, a framework replacing children) components still end up correct: one that loses its rendered DOM renders it again, attributes it manages are put back, and a cloned or re-parsed copy of a rendered element (a page-cache snapshot) renders exactly one set of its DOM. Focus and selection inside a rebuilt component are lost in that case.
+
+`VoidDOM` covers every `<void-*>` element on the page, so you do not need `phx-update="ignore"` for components to survive patches. Use it only for a subtree you want LiveView to leave completely alone (it needs an id):
+
+```heex
+<div id="map" phx-update="ignore">…</div>
+```

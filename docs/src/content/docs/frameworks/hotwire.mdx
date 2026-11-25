@@ -395,7 +395,20 @@ The generated layouts include a theme toggle script that syncs `void-switch` sta
 
 ## Turbo morph protection
 
-`VoidTurbo.start()` keeps client-managed attributes (`open`, `checked`, `aria-expanded`, etc.) on `<void-*>` elements across page morphs while the server keeps rendering the same value, and lets the server win when it renders a different one. It also calls each element's `voidUnproject()` before Turbo morphs it, so the morph compares the element's own children with the server markup rather than the chrome the component rendered; the element re-projects itself right after, keeping its identity, state and focus.
+`VoidTurbo.start()` makes Turbo page morphs (`<meta name="turbo-refresh-method" content="morph">`, `turbo_stream` refreshes, `Turbo.morphChildren`) safe for every `<void-*>` component. On `turbo:before-morph-element` it records the server's attributes and calls the element's pre-morph hook. What survives a morph:
+
+- **The component's own DOM.** Before the morph compares an element, the adapter calls its `voidBeforeMorph()` hook: the structure the component rendered (native inputs, wrappers, icons, list items) is set aside and the element is left looking like its server markup, so the morph only diffs what the server sent. Right after the morph the same nodes go back, so nothing is rebuilt: a field you are typing in keeps its focus, caret and text (in browsers with `Element.moveBefore`, currently Chromium; elsewhere focus and caret are restored after the move), an unfocused field keeps what was typed, and scroll positions, slider positions and chart state are kept.
+- **Attributes the component manages on itself** (`role`, `tabindex`, `aria-checked` and the like, and reflected properties still at their default, such as `size="md"`) are carried onto the incoming element whenever the server markup does not set them, so the morph leaves them alone.
+- **Server-controlled state follows the server.** Anything the server markup sets (`label`, `value`, `disabled`, ...) is applied. Client state such as `open` or `checked` is kept only while the server keeps rendering the same value it rendered last time; as soon as the server renders a different value (including removing it), the server wins.
+- **Without the adapter** (a plain idiomorph or morphdom call, `innerHTML` on a parent, a framework replacing children) components still end up correct: one that loses its rendered DOM renders it again, attributes it manages are put back, and a cloned or re-parsed copy of a rendered element (a page-cache snapshot) renders exactly one set of its DOM. Focus and selection inside a rebuilt component are lost in that case.
+
+Turbo's page cache restores pages from a snapshot of the rendered page; components clean up the copied DOM when they reconnect, so a restored page shows each component once.
+
+To leave a subtree completely alone (Turbo neither morphs nor replaces it), give it an id and `data-turbo-permanent`:
+
+```erb
+<div id="player" data-turbo-permanent>…</div>
+```
 
 ## Usage in ERB templates
 

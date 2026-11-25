@@ -47,7 +47,7 @@ registerLivewireHooks();
 The plugin registers two directives:
 
 - `x-void-on` — Wires Voidable custom events to Alpine handlers
-- `x-void-preserve` — Sets `wire:ignore.self` on the element, preventing Livewire from morphing it
+- `x-void-preserve` — Sets `wire:ignore` on the element, so Livewire leaves it and its children alone
 
 ## Usage
 
@@ -71,13 +71,24 @@ Use `x-void-on:{event}` to handle custom events within `x-data` scopes:
 
 ## Livewire morph protection
 
-Add `x-void-preserve` to set `wire:ignore.self` on an element, preventing Livewire from morphing it during re-renders. Use this when you want to opt a specific element out of morphing entirely:
+With `registerLivewireHooks()`, Livewire re-renders are safe for every `<void-*>` component: on Livewire's `morph.updating` hook the element's pre-morph hook runs, and the component's `value` / `checked` are restored after the morph unless the server rendered a different value. What survives a morph:
+
+- **The component's own DOM.** Before the morph compares an element, the adapter calls its `voidBeforeMorph()` hook: the structure the component rendered (native inputs, wrappers, icons, list items) is set aside and the element is left looking like its server markup, so the morph only diffs what the server sent. Right after the morph the same nodes go back, so nothing is rebuilt: a field you are typing in keeps its focus, caret and text (in browsers with `Element.moveBefore`, currently Chromium; elsewhere focus and caret are restored after the move), an unfocused field keeps what was typed, and scroll positions, slider positions and chart state are kept.
+- **Attributes the component manages on itself** (`role`, `tabindex`, `aria-checked` and the like, and reflected properties still at their default, such as `size="md"`) are carried onto the incoming element whenever the server markup does not set them, so the morph leaves them alone.
+- **Server-controlled state follows the server.** Anything the server markup sets (`label`, `value`, `disabled`, ...) is applied. Client state such as `open` or `checked` is kept only while the server keeps rendering the same value it rendered last time; as soon as the server renders a different value (including removing it), the server wins.
+- **Without the adapter** (a plain idiomorph or morphdom call, `innerHTML` on a parent, a framework replacing children) components still end up correct: one that loses its rendered DOM renders it again, attributes it manages are put back, and a cloned or re-parsed copy of a rendered element (a page-cache snapshot) renders exactly one set of its DOM. Focus and selection inside a rebuilt component are lost in that case.
+
+To leave a subtree completely alone, add `wire:ignore` (or the `x-void-preserve` directive, which adds it for you):
 
 ```html
+<div wire:ignore>…</div>
+
 <void-dialog x-void-preserve>
-  <p>This dialog's open state survives Livewire updates.</p>
+  <p>Livewire never touches this dialog or its content.</p>
 </void-dialog>
 ```
+
+`wire:ignore.self` only protects the element's own attributes; Livewire still morphs its children.
 
 ## Laravel Blade directives
 
