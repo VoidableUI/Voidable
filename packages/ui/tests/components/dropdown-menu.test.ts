@@ -299,11 +299,10 @@ describe('VoidDropdownMenu', () => {
       expect(el.open).toBe(true);
     });
 
-    // BUG: connectedCallback always builds a new panel and moves every non-trigger child into it,
-    // including the previous panel, so each reconnect nests another panel (and moving the element
-    // in the DOM, e.g. by a framework, silently does this). dropdown-menu.ts:14-27. A separate
-    // branch is fixing this; expected: exactly one panel, items still direct children of it.
-    it.fails('does not nest a second panel when reconnected', async () => {
+    // Regression: connectedCallback used to build a new panel on every connect and move every
+    // non-trigger child into it, including the previous panel, so each reconnect (or a framework
+    // moving the element) nested another panel. Fixed by the ProjectionController migration (#4).
+    it('does not nest a second panel when reconnected', async () => {
       const el = await mount();
       el.remove();
       document.body.appendChild(el);
