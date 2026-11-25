@@ -404,11 +404,13 @@ test.describe('toast', () => {
   });
 
   test('hovering pauses the timer and leaving resumes it', async ({ page }) => {
-    await show(page, { message: 'Hover pause', duration: 400 });
+    // Long enough that the hover always lands first: Playwright waits for the
+    // entrance animation to finish before it hovers.
+    await show(page, { message: 'Hover pause', duration: 1500 });
     const toast = page.locator('void-toast');
     await toast.hover();
-    // Hold well past the duration, measured by the page's own clock.
-    await page.evaluate(() => new Promise((r) => setTimeout(r, 800)));
+    // Hold well past the whole duration, measured by the page's own clock.
+    await page.evaluate(() => new Promise((r) => setTimeout(r, 2000)));
     await expect(toast).toHaveCount(1);
     await page.mouse.move(10, 10);
     await expect(toast).toHaveCount(0);
