@@ -95,3 +95,27 @@ export const NoHeader: Story = {
     </void-card>
   `,
 };
+
+export const InFlexColumn: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story: 'Cards never shrink or scroll inside a height-constrained flex column. Add `scrollable` to opt in to an internal scrollbar.',
+      },
+    },
+  },
+  render: () => html`
+    <div style="display: flex; flex-direction: column; gap: 1rem; height: 12rem; overflow: auto;">
+      <void-card heading="First"><p>Keeps its natural height.</p><p>The parent scrolls instead.</p></void-card>
+      <void-card heading="Second"><p>Also keeps its natural height.</p><p>No inner scrollbar.</p></void-card>
+    </div>
+  `,
+};
+
+export const Scrollable: Story = {
+  render: () => html`
+    <div style="display: flex; flex-direction: column; height: 10rem;">
+      <void-card heading="Scrollable" scrollable><p>Opt-in.</p><p>Content.</p><p>That</p><p>scrolls</p><p>inside</p><p>the card.</p></void-card>
+    </div>
+  `,
+};

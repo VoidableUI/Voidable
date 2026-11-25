@@ -3,9 +3,17 @@ void-card {
   flex-direction: column;
   border: 1px solid var(--void-color-border);
   border-radius: var(--void-radius-lg);
-  overflow: auto;
+  /* clip: rounds the corners without becoming a scroll container, so the
+     automatic minimum size stays content-based and flex parents cannot
+     shrink the card. Opt in to scrolling with [scrollable]. */
+  overflow: clip;
   background: var(--void-color-bg-secondary);
   font-family: var(--void-font-sans);
+}
+
+void-card[scrollable] {
+  overflow: auto;
+  min-height: 0;
 }
 
 void-card[variant="elevated"] {
