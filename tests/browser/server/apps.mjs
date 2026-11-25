@@ -35,7 +35,6 @@ export const apps = {
     assets: {
       'ui.js': { esm: `export * from '@voidable/ui';` },
       'ui-hotwire.js': { esm: `export * from '@voidable/ui-hotwire';` },
-      'ui-dev.js': { esm: `import '@voidable/ui/dev';` },
       'theme.css': { css: '@voidable/theme' },
     },
     prepare: [

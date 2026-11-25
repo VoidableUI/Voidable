@@ -528,8 +528,8 @@ test.describe('a close the page cancels', () => {
         await act(page);
         await expect.poll(async () => (await closesOf(page)).length, `void-close fires for ${route}`).toBeGreaterThanOrEqual(1);
         await settle(page);
-        // Clicking an option takes focus off a combobox's input, which asks to close it again ("blur"); the veto covers that too.
-        const events = (await closesOf(page)).filter((e) => !(c.id === 'cb' && reason === 'select' && e.reason === 'blur'));
+        // Clicking an option or the page takes focus off a combobox's input, which asks to close it again ("blur"); the veto covers that too.
+        const events = (await closesOf(page)).filter((e) => !(c.id === 'cb' && reason !== 'blur' && e.reason === 'blur'));
         expect(events, route).toEqual([{ type: 'close', id: c.id, reason, cancelable: true }]);
         expect(await isOpen(page, c.id), `still open after ${route}`).toBe(true);
         await expectPerceivable(page.locator(`#${c.id}`).locator('input, button, [role=menuitem], [role=option], [role=grid] button, .pc').first());
@@ -858,7 +858,8 @@ test.describe('through a morph with an overlay open', () => {
       });
 
       test('focus on an item of an open menu stays there through a morph', async ({ page }) => {
-        expectedFailure('untracked:webkit-morph-drops-menu-focus', 'the focused item of an open dropdown-menu loses focus (document.activeElement becomes <body>) when a morph runs, though the menu stays open', { browsers: ['webkit'] });
+        // Fixed for Turbo and Alpine by the morph review changes; morphdom still loses it in WebKit.
+        if (engine === 'morphdom') expectedFailure('untracked:webkit-morph-drops-menu-focus', 'the focused item of an open dropdown-menu loses focus (document.activeElement becomes <body>) when a morphdom morph runs, though the menu stays open', { browsers: ['webkit'] });
         await page.locator('#m-t').click();
         await expect.poll(() => focusedId(page)).toBe('m-1');
         for (let i = 0; i < 3; i++) {

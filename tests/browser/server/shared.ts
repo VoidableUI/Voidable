@@ -23,6 +23,11 @@ export const test = base.extend<Fixtures>({
     async ({ page, allowErrors }, use) => {
       const errors: string[] = [];
       page.on('pageerror', (e) => errors.push(e.message));
+      // CI must never depend on a published or CDN-hosted build of this library: no request for this library's packages (@voidable/*) leaves the local app. Third-party assets such as icon fonts are not ours to forbid.
+      page.on('request', (r) => {
+        const u = new URL(r.url());
+        if (/^https?:$/.test(u.protocol) && u.hostname !== '127.0.0.1' && u.hostname !== 'localhost' && /voidable/i.test(r.url())) errors.push(`request for Voidable from a remote host: ${r.url()}`);
+      });
       page.on('console', (m) => m.type() === 'error' && errors.push(m.text()));
       await use(errors);
       const unexpected = errors.filter((e) => !allowErrors.some((a) => e.includes(a)));
