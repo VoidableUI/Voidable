@@ -2,11 +2,10 @@ import "@hotwired/turbo-rails";
 import { Application } from "@hotwired/stimulus";
 import "@voidable/ui";
 import "@voidable/ui-hotwire";
-import { VoidEventController } from "@voidable/ui-hotwire";
 import { VoidTurbo } from "@voidable/ui-hotwire";
 
 const app = Application.start();
-app.register("void-event", VoidEventController);
+// Voidable events need no controller: use data-action="void-click->x#y".
 VoidTurbo.start();
 
 import "./application.css";

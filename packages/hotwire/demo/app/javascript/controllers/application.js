@@ -6,8 +6,9 @@ const application = Application.start()
 application.debug = false
 window.Stimulus   = application
 
-import { VoidEventController, VoidTurbo } from "@voidable/ui-hotwire"
-application.register("void-event", VoidEventController)
+// Voidable events work with plain data-action="void-click->x#y"; no
+// controller registration is needed. VoidTurbo protects client state on morphs.
+import { VoidTurbo } from "@voidable/ui-hotwire"
 VoidTurbo.start()
 
 export { application }

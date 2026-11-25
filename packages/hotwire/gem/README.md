@@ -18,16 +18,19 @@ Run:
 
 The gem automatically pins `@voidable/ui` and `@voidable/ui-hotwire` to your importmap.
 
-Register the Stimulus controller and start Turbo integration in your `application.js`:
+Start the Turbo morph integration in your `application.js`. No Stimulus
+controller is needed: Stimulus handles Voidable's custom events natively via
+`data-action` (`VoidEventController` is deprecated and is a no-op).
 
 ```js
-import { VoidEventController } from "@voidable/ui-hotwire"
 import { VoidTurbo } from "@voidable/ui-hotwire"
 import "@voidable/ui"
 
-application.register("void-event", VoidEventController)
 VoidTurbo.start()
 ```
+
+The CDN versions the gem pins live in one place:
+`Voidable::Hotwire::Versions` (`lib/voidable/hotwire/versions.rb`).
 
 ### With jsbundling-rails
 
@@ -45,7 +48,8 @@ Or use a custom theme — any CSS that sets the `--void-*` custom properties wil
 
 ## View helpers
 
-Use `void_attrs` to generate Stimulus data attributes:
+Use `void_attrs` to generate the Stimulus `data-action` attribute (or write
+`data-action="void-click->form#submit"` by hand):
 
 ```erb
 <%= tag.void_button "Save", variant: "filled",

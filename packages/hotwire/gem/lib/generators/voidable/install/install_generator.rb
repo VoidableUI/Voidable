@@ -1,3 +1,5 @@
+require "voidable/hotwire/versions"
+
 module Voidable
   module Generators
     class InstallGenerator < Rails::Generators::Base
@@ -21,8 +23,8 @@ module Voidable
         append_to_file importmap, <<~RUBY
 
           # Voidable UI
-          pin "@voidable/ui", to: "https://cdn.jsdelivr.net/npm/@voidable/ui@0.5.4/+esm"
-          pin "@voidable/ui-hotwire", to: "https://cdn.jsdelivr.net/npm/@voidable/ui-hotwire@0.3.1/dist/index.js"
+          pin "@voidable/ui", to: "#{Voidable::Hotwire::Versions::UI_URL}"
+          pin "@voidable/ui-hotwire", to: "#{Voidable::Hotwire::Versions::UI_HOTWIRE_URL}"
         RUBY
         say "Pinned @voidable/ui and @voidable/ui-hotwire in importmap", :green
       end
@@ -145,12 +147,12 @@ module Voidable
           imports += "\nimport \"./voidable-layout.js\";"
           append_to_file js_entrypoint, "\n#{imports}\n"
         end
-        if vite? && !contents.include?("VoidEventController")
+        if vite? && !contents.include?("VoidTurbo")
+          # Voidable events need no Stimulus controller: use
+          # data-action="void-click->controller#method" directly.
           append_to_file js_entrypoint, <<~JS
 
-            import { VoidEventController, VoidTurbo } from "@voidable/ui-hotwire";
-            const app = Application.start();
-            app.register("void-event", VoidEventController);
+            import { VoidTurbo } from "@voidable/ui-hotwire";
             VoidTurbo.start();
           JS
         end
@@ -161,16 +163,15 @@ module Voidable
         return if vite?
         controllers_js = "app/javascript/controllers/application.js"
         return unless File.exist?(controllers_js)
-        return if File.read(controllers_js).include?("VoidEventController")
+        return if File.read(controllers_js).include?("VoidTurbo")
         inject_into_file controllers_js, after: /window\.Stimulus\s*=\s*application\n/ do
           <<~JS
 
-            import { VoidEventController, VoidTurbo } from "@voidable/ui-hotwire"
-            application.register("void-event", VoidEventController)
+            import { VoidTurbo } from "@voidable/ui-hotwire"
             VoidTurbo.start()
           JS
         end
-        say "Registered VoidEventController and started VoidTurbo in controllers/application.js", :green
+        say "Started VoidTurbo in controllers/application.js", :green
       end
 
       def create_vite_helper
