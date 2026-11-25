@@ -43,3 +43,8 @@ void-spinner [data-void-sr] {
   white-space: nowrap;
   border: 0;
 }
+
+/* Reduced motion: keep the spinner perceivable, but rotate it slowly */
+@media (prefers-reduced-motion: reduce) {
+  void-spinner::before { animation-duration: 3s; }
+}

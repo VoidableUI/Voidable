@@ -282,7 +282,13 @@
 :root[data-anim-speed="faster"]   { --void-anim-scale: 0.25; }
 :root[data-anim-speed="instant"]  { --void-anim-scale: 0.05; }
 
-/* Reduced-motion fallback — only when no explicit setting */
+/* Reduced motion — the OS preference wins over an explicit
+   data-anim-speed. An explicit attribute used to switch the OS
+   preference off silently; that is not honoured any more, because
+   a user who asked their OS for less motion should not get it back
+   from an app default. Apps that want a motion toggle should drive it
+   from their own UI and treat the OS preference as the initial value. */
 @media (prefers-reduced-motion: reduce) {
-  :root:not([data-anim-speed]) { --void-anim-scale: 0; }
+  :root,
+  :root[data-anim-speed] { --void-anim-scale: 0; }
 }

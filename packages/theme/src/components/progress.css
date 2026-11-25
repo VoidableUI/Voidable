@@ -42,3 +42,13 @@ void-progress[indeterminate] .void-progress-fill {
   0% { transform: translateX(-100%); }
   100% { transform: translateX(350%); }
 }
+
+/* Reduced motion: indeterminate state becomes a static, dimmed full bar
+   instead of a sliding one, so it never reads as a determinate 40%. */
+@media (prefers-reduced-motion: reduce) {
+  void-progress[indeterminate] .void-progress-fill {
+    animation: none;
+    width: 100% !important;
+    opacity: 0.5;
+  }
+}
