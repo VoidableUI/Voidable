@@ -2,7 +2,13 @@ source "https://rubygems.org"
 
 # Bundle edge Rails instead: gem "rails", github: "rails/rails", branch: "main"
 gem "rails", "~> 8.1.3"
-gem "voidable-hotwire", "~> 0.7.1"
+# VOIDABLE_LOCAL=1 runs the demo against this repository's gem and built
+# packages instead of the published ones (the browser tests do).
+if ENV["VOIDABLE_LOCAL"]
+  gem "voidable-hotwire", path: "../gem"
+else
+  gem "voidable-hotwire", "~> 0.7.1"
+end
 gem "devise"
 gem "pagy"
 # The modern asset pipeline for Rails [https://github.com/rails/propshaft]

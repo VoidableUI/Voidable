@@ -3,5 +3,8 @@
 #MISE depends=["install"]
 set -euo pipefail
 
+# VOID_BROWSERS picks the engines, as it does for test:browser
+# (default chromium,firefox,webkit). Extra arguments go to `playwright install`.
+IFS=, read -r -a browsers <<< "${VOID_BROWSERS:-chromium,firefox,webkit}"
 cd tests/browser
-exec ./node_modules/.bin/playwright install "$@" chromium firefox webkit
+exec ./node_modules/.bin/playwright install "$@" "${browsers[@]}"
