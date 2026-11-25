@@ -1,0 +1,115 @@
+#!/usr/bin/env bash
+#MISE description="Fail when a tag in the Custom Elements Manifest has no Storybook story, React wrapper or LiveView hex component"
+#MISE depends=["build"]
+set -euo pipefail
+
+# Reads packages/ui/dist/custom-elements.json (built by `mise run build`) and
+# checks every registered tag against three hand-written surfaces. Comments
+# are stripped first, and quoted tag names only count in a registration
+# position, so event names (`'void-input'`) and doc examples do not satisfy
+# the check:
+#
+#   story   a rendered `</void-x>` closing tag, a Storybook meta
+#           `component: 'void-x'`, or `createElement('void-x')` in
+#           packages/storybook/stories/*.stories.*
+#   react   a wrapper registration `('void-x', 'DisplayName')` (the wrapWc
+#           call) or `createElement('void-x', …)` in packages/react/src
+#   hex     a `<void-x` tag rendered inside a ~H""" HEEx template in
+#           packages/liveview/hex/lib/**/*.ex
+#
+# Known gaps live in .mise/manifest-drift-allowlist.txt. Any gap not listed
+# fails. Listed entries that are no longer gaps print a warning asking for
+# the line to be deleted (a parallel change may have closed the gap).
+
+node --input-type=module - <<'EOF'
+import { readFileSync, readdirSync, existsSync, statSync } from 'node:fs';
+import { join } from 'node:path';
+
+const MANIFEST = 'packages/ui/dist/custom-elements.json';
+const ALLOWLIST = '.mise/manifest-drift-allowlist.txt';
+
+if (!existsSync(MANIFEST)) {
+  console.error(`ERROR: ${MANIFEST} not found; run \`mise run build\` first`);
+  process.exit(1);
+}
+
+const manifest = JSON.parse(readFileSync(MANIFEST, 'utf8'));
+const tags = manifest.modules
+  .flatMap((m) => m.declarations ?? [])
+  .filter((d) => d.tagName)
+  .map((d) => d.tagName)
+  .sort();
+
+function files(dir, test) {
+  if (!existsSync(dir)) return [];
+  return readdirSync(dir).flatMap((name) => {
+    const path = join(dir, name);
+    if (statSync(path).isDirectory()) return files(path, test);
+    return test(name) ? [path] : [];
+  });
+}
+const read = (list) => list.map((f) => readFileSync(f, 'utf8')).join('\n');
+
+// Block comments and whole-line // comments (not `//` inside URLs on code lines).
+const stripJsComments = (s) => s.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
+// Only what HEEx templates render: the bodies of ~H""" ... """ sigils.
+const heexTemplates = (s) => [...s.matchAll(/~H"""([\s\S]*?)"""/g)].map((m) => m[1].replace(/<%!--[\s\S]*?--%>/g, '')).join('\n');
+
+const esc = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+const q = `['"\`]`;
+const matchers = {
+  story: (tag) => new RegExp(`</${esc(tag)}>|component:\\s*${q}${esc(tag)}${q}|createElement\\(\\s*${q}${esc(tag)}${q}`),
+  react: (tag) => new RegExp(`\\(\\s*${q}${esc(tag)}${q}\\s*,\\s*${q}[A-Z]\\w*${q}\\s*\\)|createElement\\(\\s*${q}${esc(tag)}${q}\\s*,`),
+  hex: (tag) => new RegExp(`<${esc(tag)}(?=[\\s>/])`),
+};
+
+const surfaces = {
+  story: stripJsComments(read(files('packages/storybook/stories', (n) => /\.stories\.[jt]sx?$/.test(n)))),
+  react: stripJsComments(read(files('packages/react/src', (n) => /\.[jt]sx?$/.test(n)))),
+  hex: heexTemplates(read(files('packages/liveview/hex/lib', (n) => /\.ex$/.test(n)))),
+};
+
+for (const [name, text] of Object.entries(surfaces)) {
+  if (!text.trim()) {
+    console.error(`ERROR: no source found for surface "${name}"`);
+    process.exit(1);
+  }
+}
+
+const gaps = new Set();
+for (const tag of tags) {
+  for (const [name, text] of Object.entries(surfaces)) {
+    if (!matchers[name](tag).test(text)) gaps.add(`${name} ${tag}`);
+  }
+}
+
+const allowed = new Map();
+readFileSync(ALLOWLIST, 'utf8').split('\n').forEach((raw, i) => {
+  const line = raw.replace(/#.*/, '').trim();
+  if (!line) return;
+  const [surface, tag, ...rest] = line.split(/\s+/);
+  if (!surfaces[surface] || !tag || rest.length) {
+    console.error(`ERROR: ${ALLOWLIST}:${i + 1}: expected "<story|react|hex> <tag>", got "${raw.trim()}"`);
+    process.exit(1);
+  }
+  allowed.set(`${surface} ${tag}`, i + 1);
+});
+
+const unexpected = [...gaps].filter((g) => !allowed.has(g));
+const stale = [...allowed.keys()].filter((g) => !gaps.has(g));
+
+if (stale.length) {
+  console.warn(`WARNING: ${stale.length} allowlist entr(ies) in ${ALLOWLIST} are no longer gaps; delete them:`);
+  for (const g of stale) console.warn(`  line ${allowed.get(g)}: ${g}`);
+}
+if (unexpected.length) {
+  console.error(`ERROR: ${unexpected.length} tag(s) missing from a surface (add the story/wrapper/component):`);
+  for (const g of unexpected) console.error(`  ${g}`);
+  process.exit(1);
+}
+
+console.log(
+  `Manifest drift lint passed: ${tags.length} tags checked against stories, React wrappers and hex components ` +
+    `(${allowed.size - stale.length} known gap(s) allowlisted in ${ALLOWLIST})`,
+);
+EOF

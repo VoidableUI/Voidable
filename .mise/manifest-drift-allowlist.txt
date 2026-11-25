@@ -1,0 +1,23 @@
+# Known gaps for `mise run lint:manifest` (see .mise/tasks/lint/manifest).
+#
+# One gap per line: `<surface> <tag>`, where surface is one of
+#   story   Storybook story in packages/storybook/stories
+#   react   React wrapper in packages/react/src
+#   hex     LiveView hex component in packages/liveview/hex/lib
+#
+# This list may only shrink. The lint fails on any gap that is not listed
+# here. A listed entry that is no longer a gap prints a warning (so a branch
+# that closes a gap still merges cleanly); delete the line when you see it,
+# ideally in the change that adds the wrapper, component or story.
+# Do not add new entries to silence the check.
+
+# The four chart components shipped without React wrappers or hex components
+# (issue #13).
+react void-bar-chart
+react void-donut-chart
+react void-gauge
+react void-line-chart
+hex void-bar-chart
+hex void-donut-chart
+hex void-gauge
+hex void-line-chart
