@@ -4,9 +4,22 @@ import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
 import { InternalsFormControl } from '../form-control.js';
 import { ProjectionController } from '../projection.js';
+import { edgeEnabled, stepEnabled, uid } from '../keyboard.js';
 import { VoidOption } from './multiselect.js';
 
-/** Filterable dropdown for long option lists like country selectors, user assignment fields, and tag pickers. */
+/**
+ * Filterable dropdown for long option lists like country selectors, user assignment fields, and tag pickers.
+ *
+ * Follows the WAI-ARIA "combobox with listbox popup" pattern (editable, list autocomplete, manual
+ * selection): the native input carries `role="combobox"` and keeps DOM focus; the highlighted option is
+ * exposed with `aria-activedescendant`.
+ *
+ * Keyboard (focus in the input): ArrowDown opens the list (or highlights the next option), ArrowUp opens
+ * it (or highlights the previous option), Alt+ArrowDown opens without highlighting, Enter chooses the
+ * highlighted option (without one, Enter is left alone so a surrounding form submits), Escape closes the
+ * list (a second Escape reaches the surrounding dialog), Home and End move the text cursor, Tab closes the
+ * list. Typing filters the options. Disabled options are skipped.
+ */
 export class VoidCombobox extends InternalsFormControl(VoidElement) {
   @property({ type: String }) value = '';
   @property({ type: String }) placeholder = 'Search...';
@@ -14,9 +27,13 @@ export class VoidCombobox extends InternalsFormControl(VoidElement) {
   @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' | 'xl' | 'xxl' = 'md';
   @property({ type: String, reflect: true }) error = '';
   @property({ type: String, reflect: true }) name = '';
+  /** Whether the option list is showing. Reflected, so it can be read (and set) from markup. */
+  @property({ type: Boolean, reflect: true }) open = false;
 
-  private _open = false;
   private _query = '';
+  /** The option with visual focus (`aria-activedescendant`), or null. */
+  private _active: VoidOption | null = null;
+  private readonly _listId = uid('void-combobox-list');
   // Options stay direct children after the rendered input; adding or removing one re-renders the list.
   protected readonly _projection = new ProjectionController(this, {
     regions: [{ name: 'options', target: 'after' }],
@@ -27,10 +44,14 @@ export class VoidCombobox extends InternalsFormControl(VoidElement) {
     return Array.from(this.querySelectorAll<VoidOption>('void-option'));
   }
 
+  /** Options the current query leaves in the list, in document order. */
+  private get _visible(): VoidOption[] {
+    const q = this._query.toLowerCase();
+    return this._options.filter(opt => (opt.textContent?.trim().toLowerCase() ?? '').includes(q));
+  }
+
   connectedCallback(): void {
     super.connectedCallback();
-    this.setHostAttribute('role', 'combobox');
-    this.setHostAttribute('aria-autocomplete', 'list');
     document.addEventListener('click', this._onDocumentClick);
     document.addEventListener('keydown', this._onDocumentKeydown);
   }
@@ -41,41 +62,69 @@ export class VoidCombobox extends InternalsFormControl(VoidElement) {
     document.removeEventListener('keydown', this._onDocumentKeydown);
   }
 
-  updated(_changed: Map<string, unknown>): void {
-    super.updated(_changed);
-    this.setHostAttribute('aria-expanded', String(this._open));
+  /**
+   * The open list is transient UI state, not something the server renders: a morph whose
+   * markup does not carry `open` (it never does) must not close a list the user is using.
+   */
+  override voidBeforeMorph(incoming?: Element | null): boolean {
+    if (incoming && this.open && !incoming.hasAttribute('open')) incoming.setAttribute('open', '');
+    return super.voidBeforeMorph(incoming);
+  }
+
+  protected override willUpdate(changed: Map<string, unknown>): void {
+    super.willUpdate(changed);
+    if (changed.has('open') && !this.open) {
+      this._query = '';
+      this._active = null;
+    }
+  }
+
+  protected override updated(changed: Map<string, unknown>): void {
+    super.updated(changed);
+    // Keep the highlighted option in view while arrowing through a long list.
+    this.querySelector('.void-combobox-option[data-active]')?.scrollIntoView?.({ block: 'nearest' });
   }
 
   render() {
-    const visible = this._options.filter(
-      opt => opt.textContent?.trim().toLowerCase().includes(this._query.toLowerCase())
-    );
+    const visible = this._visible;
     const selectedOpt = this._options.find(o => o.value === this.value);
+    if (this._active && !visible.includes(this._active)) this._active = null;
+    const activeIndex = this._active ? visible.indexOf(this._active) : -1;
+    const open = this.open && !this.disabled;
 
     return html`
       <input
         class="void-combobox-input"
-        .value=${live(this._open ? this._query : (selectedOpt?.textContent?.trim() || this.value || ''))}
+        role="combobox"
+        .value=${live(open ? this._query : (selectedOpt?.textContent?.trim() || this.value || ''))}
         placeholder=${this.placeholder}
+        aria-label=${this.placeholder}
         ?disabled=${this.disabled}
         autocomplete="off"
         aria-autocomplete="list"
-        aria-expanded=${String(this._open)}
+        aria-haspopup="listbox"
+        aria-expanded=${String(open)}
+        aria-controls=${open ? this._listId : nothing}
+        aria-activedescendant=${open && activeIndex >= 0 ? `${this._listId}-${activeIndex}` : nothing}
         aria-invalid=${this.error ? 'true' : 'false'}
         @focus=${this._onInputFocus}
         @input=${this._onInput}
         @keydown=${this._onInputKeydown}
         @blur=${this._onInputBlur}
       />
-      ${this._open ? html`
-        <div class="void-combobox-dropdown" role="listbox" aria-label=${this.placeholder}>
+      ${open ? html`
+        <div class="void-combobox-dropdown" role="listbox" id=${this._listId} aria-label=${this.placeholder}>
           ${visible.length > 0
-            ? visible.map(opt => html`
+            ? visible.map((opt, i) => html`
                 <div
                   class="void-combobox-option"
                   role="option"
-                  aria-selected=${opt.value === this.value ? 'true' : 'false'}
-                  @mousedown=${(e: Event) => { e.preventDefault(); this._selectOption(opt); }}
+                  id="${this._listId}-${i}"
+                  aria-selected=${i === activeIndex ? 'true' : 'false'}
+                  aria-disabled=${opt.disabled ? 'true' : nothing}
+                  ?data-active=${i === activeIndex}
+                  ?data-selected=${opt.value === this.value}
+                  @mousedown=${(e: Event) => { e.preventDefault(); if (!opt.disabled) this._selectOption(opt); }}
                 >${opt.textContent?.trim() || opt.value}</div>
               `)
             : html`<div class="void-combobox-empty">No options found</div>`
@@ -86,56 +135,90 @@ export class VoidCombobox extends InternalsFormControl(VoidElement) {
     `;
   }
 
+  private _close(): void {
+    this.open = false;
+    this._query = '';
+    this._active = null;
+  }
+
   private _onInputFocus = (): void => {
     if (this.disabled) return;
-    this._open = true;
+    this.open = true;
     this._query = '';
-    this.requestUpdate();
+    this._active = null;
   };
 
   private _onInput = (e: Event): void => {
     this._query = (e.target as HTMLInputElement).value;
-    this._open = true;
+    this.open = true;
+    // Manual selection: filtering never highlights an option by itself.
+    this._active = null;
     this.requestUpdate();
   };
 
+  /** Moves the highlight: `step` from the current option, or to the first/last enabled option. */
+  private _moveActive(to: 'next' | 'prev'): void {
+    const visible = this._visible;
+    const disabled = visible.map(o => o.disabled);
+    const from = this._active ? visible.indexOf(this._active) : -1;
+    let i: number;
+    if (to === 'next') i = stepEnabled(disabled, from, 1);
+    else i = from < 0 ? edgeEnabled(disabled, -1) : stepEnabled(disabled, from, -1);
+    this._active = i >= 0 ? visible[i]! : null;
+  }
+
   private _onInputKeydown = (e: KeyboardEvent): void => {
-    if (e.key === 'Escape') {
-      this._open = false;
-      this._query = '';
+    if (this.disabled || e.isComposing) return;
+    const key = e.key;
+    if (key === 'ArrowDown' || key === 'ArrowUp') {
+      e.preventDefault();
+      if (!this.open) {
+        this._query = '';
+        this.open = true;
+        if (!e.altKey) {
+          // Opening highlights the chosen option, else the first (Down) or last (Up) one.
+          const visible = this._visible;
+          const chosen = visible.find(o => o.value === this.value && !o.disabled);
+          if (chosen) this._active = chosen;
+          else this._moveActive(key === 'ArrowDown' ? 'next' : 'prev');
+        }
+      } else if (!e.altKey) {
+        this._moveActive(key === 'ArrowDown' ? 'next' : 'prev');
+      }
       this.requestUpdate();
+    } else if (key === 'Enter') {
+      if (this.open && this._active && !this._active.disabled) {
+        e.preventDefault();
+        this._selectOption(this._active);
+      }
+    } else if (key === 'Escape') {
+      if (this.open) {
+        e.preventDefault();
+        e.stopPropagation();
+        this._close();
+      }
     }
   };
 
   private _onInputBlur = (): void => {
     setTimeout(() => {
-      this._open = false;
-      this._query = '';
-      this.requestUpdate();
+      // Focus may have returned to the input meanwhile (a click on the list keeps it there).
+      if (this.contains(document.activeElement) && document.activeElement?.tagName === 'INPUT') return;
+      this._close();
     }, 150);
   };
 
   private _onDocumentClick = (e: Event): void => {
-    if (!this.contains(e.target as Node)) {
-      this._open = false;
-      this._query = '';
-      this.requestUpdate();
-    }
+    if (!this.contains(e.target as Node)) this._close();
   };
 
   private _onDocumentKeydown = (e: KeyboardEvent): void => {
-    if (e.key === 'Escape' && this._open) {
-      this._open = false;
-      this._query = '';
-      this.requestUpdate();
-    }
+    if (e.key === 'Escape' && this.open) this._close();
   };
 
   private _selectOption(opt: VoidOption): void {
     this.value = opt.value;
-    this._open = false;
-    this._query = '';
-    this.requestUpdate();
+    this._close();
     this.dispatchEvent(new CustomEvent('void-change', { bubbles: true, composed: true, detail: { value: this.value } }));
   }
 }

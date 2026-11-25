@@ -94,16 +94,20 @@ describe('VoidMultiselect', () => {
       await el.updateComplete;
     });
 
-    it('sets role="combobox" on host', () => {
-      expect(el.getAttribute('role')).toBe('combobox');
+    const trigger = () => el.querySelector('.void-multiselect-trigger')!;
+
+    it('puts role="combobox" on the focusable trigger, not on the host', () => {
+      expect(el.hasAttribute('role')).toBe(false);
+      expect(trigger().getAttribute('role')).toBe('combobox');
+      expect(trigger().getAttribute('tabindex')).toBe('0');
     });
 
-    it('sets aria-haspopup="listbox" on host', () => {
-      expect(el.getAttribute('aria-haspopup')).toBe('listbox');
+    it('sets aria-haspopup="listbox" on the trigger', () => {
+      expect(trigger().getAttribute('aria-haspopup')).toBe('listbox');
     });
 
-    it('sets aria-expanded="false" initially', () => {
-      expect(el.getAttribute('aria-expanded')).toBe('false');
+    it('sets aria-expanded="false" on the trigger initially', () => {
+      expect(trigger().getAttribute('aria-expanded')).toBe('false');
     });
   });
 
@@ -124,7 +128,8 @@ describe('VoidMultiselect', () => {
       trigger.click();
       await el.updateComplete;
       expect(el.querySelector('.void-multiselect-dropdown')).not.toBeNull();
-      expect(el.getAttribute('aria-expanded')).toBe('true');
+      expect(el.querySelector('.void-multiselect-trigger')!.getAttribute('aria-expanded')).toBe('true');
+      expect(el.hasAttribute('open')).toBe(true);
     });
 
     it('closes dropdown on second trigger click', async () => {

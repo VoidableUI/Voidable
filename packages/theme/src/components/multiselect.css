@@ -39,7 +39,7 @@ void-multiselect {
   box-shadow: 0 0 0 1px var(--void-color-border-focus);
 }
 
-void-multiselect[aria-expanded="true"] .void-multiselect-trigger {
+void-multiselect[open] .void-multiselect-trigger {
   border-color: var(--void-color-border-focus);
   box-shadow: 0 0 0 1px var(--void-color-border-focus);
 }
@@ -113,8 +113,14 @@ void-multiselect[aria-expanded="true"] .void-multiselect-trigger {
   transition: background var(--void-duration-fast) var(--void-ease-in-out);
 }
 
-.void-multiselect-option:hover {
+.void-multiselect-option:hover,
+.void-multiselect-option[data-active] {
   background: var(--void-color-bg-hover);
+}
+
+.void-multiselect-option[aria-disabled="true"] {
+  opacity: 0.5;
+  cursor: default;
 }
 
 .void-multiselect-checkbox {

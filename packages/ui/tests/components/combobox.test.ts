@@ -84,16 +84,21 @@ describe('VoidCombobox', () => {
       el.remove();
     });
 
-    it('sets role="combobox" on host', () => {
-      expect(el.getAttribute('role')).toBe('combobox');
+    const input = () => el.querySelector('input')!;
+
+    it('puts role="combobox" on the native input, not on the host', () => {
+      expect(el.hasAttribute('role')).toBe(false);
+      expect(input().getAttribute('role')).toBe('combobox');
     });
 
-    it('sets aria-autocomplete="list" on host', () => {
-      expect(el.getAttribute('aria-autocomplete')).toBe('list');
+    it('sets aria-autocomplete="list" and aria-haspopup="listbox" on the input', () => {
+      expect(input().getAttribute('aria-autocomplete')).toBe('list');
+      expect(input().getAttribute('aria-haspopup')).toBe('listbox');
     });
 
-    it('sets aria-expanded="false" initially', () => {
-      expect(el.getAttribute('aria-expanded')).toBe('false');
+    it('sets aria-expanded="false" on the input initially, and none on the host', () => {
+      expect(input().getAttribute('aria-expanded')).toBe('false');
+      expect(el.hasAttribute('aria-expanded')).toBe(false);
     });
   });
 
@@ -142,7 +147,8 @@ describe('VoidCombobox', () => {
       const input = el.querySelector('.void-combobox-input') as HTMLInputElement;
       input.dispatchEvent(new FocusEvent('focus', { bubbles: true }));
       await el.updateComplete;
-      expect(el.getAttribute('aria-expanded')).toBe('true');
+      expect(el.querySelector('input')!.getAttribute('aria-expanded')).toBe('true');
+      expect(el.hasAttribute('open')).toBe(true);
     });
   });
 
