@@ -69,8 +69,15 @@ export class VoidSelect extends NativeFormControl(VoidElement) {
     if (!this.value && !this.placeholder && select.value) {
       this.value = select.value;
     }
+    if (pristine) {
+      this.formCaptureDefault();
+    } else if (this._defaultValue !== undefined) {
+      // Keep the reset target on the options: a morph of the unprojected host
+      // strips `selected` attributes the server markup does not carry.
+      this.formWriteNativeDefault(this._defaultValue);
+    }
+    // Last, so toggling default-selected attributes cannot change the selection.
     this._applyValue();
-    if (pristine) this.formCaptureDefault();
   }
 
   /** Inserts, updates or removes the placeholder option; drops stale copies (from a morph, clone or recovery). */

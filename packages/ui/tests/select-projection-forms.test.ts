@@ -91,6 +91,24 @@ describe('void-select placeholder on the projection container', () => {
     expect(form.querySelectorAll('option[data-void-placeholder]')).toHaveLength(1);
   });
 
+  it('keeps the reset target when a morph strips default-selected attributes while unprojected', async () => {
+    const form = await mount(`<void-select name="s" value="b">${options}</void-select>`);
+    const el = form.querySelector('void-select') as VoidSelect;
+    const native = form.querySelector('select')!;
+    native.value = 'a';
+    native.dispatchEvent(new Event('change'));
+    expect(el.voidUnproject()).toBe(true);
+    // What a morph against server markup without `selected` does to the host's options.
+    for (const o of Array.from(el.querySelectorAll('option'))) o.removeAttribute('selected');
+    await el.voidReproject();
+    await settle(form);
+    expect(el.value).toBe('a');
+    expect(form.querySelector('select')!.value).toBe('a');
+    form.reset();
+    await settle(form);
+    expect(el.value).toBe('b');
+  });
+
   it('a stale placeholder copy from a serialised host is dropped, not duplicated', async () => {
     const form = await mount(`<void-select name="s" placeholder="Pick">${options}</void-select>`);
     const html = form.innerHTML;
