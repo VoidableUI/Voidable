@@ -24,7 +24,7 @@ A component library monorepo built on Lit 3 web components with framework adapte
 | `@voidable/storybook` | `packages/storybook/` | Storybook (private, published to GH Pages) |
 | — | `docs/` | Documentation site (Astro Starlight, published to GH Pages) |
 
-Server-side companions live inside the adapter packages and are released separately:
+Server-side companions live inside the adapter packages and are released together with the npm packages, at the same version:
 
 | Package | Path | Registry |
 |---------|------|----------|
@@ -156,7 +156,7 @@ set -euo pipefail
 | `mise run lint` | Lint all packages |
 | `mise run clean` | Remove build artifacts and node_modules |
 | `mise run liveview:demo` | Start the LiveView demo server |
-| `mise run ci` | Full CI pipeline: build, test, typecheck, lint and every `lint:*` task below |
+| `mise run ci` | Full CI pipeline: build, test, typecheck, lint, every `lint:*` task below and `release:test` |
 | `mise run lint` | ESLint with lit-a11y (WCAG checks on Lit templates) |
 | `mise run lint:tokens` | Ensure no raw values (colors, sizes, etc.) outside primitives.css |
 | `mise run lint:undefined-tokens` | Fail if a `--void-*` token is referenced but neither defined in theme CSS nor set from TypeScript |
@@ -164,6 +164,10 @@ set -euo pipefail
 | `mise run lint:styles` | Ensure UI components contain no visual styles |
 | `mise run lint:exports` | Verify every component has a subpath export, self-registers and is re-exported from the index |
 | `mise run lint:manifest` | Fail when a tag in the Custom Elements Manifest has no story, React wrapper or LiveView component (known gaps: `.mise/manifest-drift-allowlist.txt`) |
+| `mise run lint:versions` | Fail when a manifest holds a real version or a file hand-types a Voidable package version |
+| `mise run release:plan` | Print whether HEAD releases, the unified version and why |
+| `mise run release:dry-run` | Build, pack and verify every package at the planned version; publishes nothing |
+| `mise run release:test` | Unit tests for the release scripts (bump rules, plan, version lint) |
 | `mise run docs` | Start docs dev server |
 | `mise run docs:build` | Build docs for deployment |
 
@@ -245,11 +249,13 @@ Component CSS in `@voidable/theme` lives in `src/components/` with one file per 
 
 ## Release & Versioning
 
-- **Conventional commits** (Angular convention) for automatic semver.
-- Per-package tagging with prefixes: `ui-v`, `theme-v`, `ui-react-v`, `ui-solid-v`, `ui-vue-v`, `ui-svelte-v`, `ui-angular-v`, `ui-hotwire-v`, `ui-alpine-v`, `ui-liveview-v`, plus `hex-liveview-v`, `gem-hotwire-v` and `composer-alpine-v` for the server-side packages.
-- Each package has its own release workflow triggered by path-scoped changes on `master`. Every release workflow runs `.github/workflows/ci.yml` (`mise run ci`) and only tags and publishes if it passes; the same workflow runs on pull requests.
-- Version comes from git tags at publish time — no manual version management in `package.json`.
-- Storybook and docs deploy to GitHub Pages via a separate workflow that runs after the UI or theme release workflow succeeds (or on manual dispatch). It passes the latest `ui-v*` tag and the gzipped `@voidable/ui` size to the docs build.
+- **One version for everything.** Every package (npm, the `voidable-hotwire` gem, the `live_voidable` Hex package, the `voidable/laravel` Composer package) is released together at one version, tagged `vX.Y.Z`, even packages without changes. The first unified release is 0.8.0; the old per-package tags (`ui-v*`, `theme-v*`, `gem-hotwire-v*`, ...) are history only.
+- **Automatic on merge.** `.github/workflows/release.yml` runs on every push to `master`. It computes the next version from the conventional commits since the last `vX.Y.Z` tag that touch `packages/**` (not Storybook) or `release.yml`: `feat` minor, `fix`/`perf`/`revert` patch, breaking (`type!:` or `BREAKING CHANGE:`) major, which is a **minor** bump while the major is 0. No releasing commit, no release. Logic: `scripts/release/version.mjs`, tested by `mise run release:test`.
+- **Order:** plan, CI (`ci.yml` via `workflow_call`, the only CI run for a push), tag, npm theme and core, npm adapters, then gem, Hex and Composer, then the GitHub release (notes from `scripts/release/notes.mjs`), then docs and Storybook to GitHub Pages. Docs-only pushes skip the packages and deploy Pages.
+- **Versions are stamped, never committed.** Manifests hold `0.0.0` (`package.json` files, `packages/hotwire/gem/lib/voidable/hotwire/version.rb`, `packages/liveview/hex/mix.exs`); `scripts/release/stamp.mjs` writes the release version into the CI checkout. Internal npm dependencies are `workspace:*`, which `pnpm pack` turns into the exact version. The gem's CDN pins (`Voidable::Hotwire::CDN`) derive from its `VERSION`. Composer has no version field; the tag on the `VoidableUI/laravel` mirror is the version.
+- **Never hand-type a Voidable version** (CDN URL, Gemfile/mix requirement, demo pin). `mise run lint:versions` fails on it; derive it (the docs use `stats.versionNumber` from `docs/src/lib/stats.ts`) or leave it out.
+- **Idempotent and resumable.** Each publish step skips a version already on its registry; a commit that already carries its `vX.Y.Z` tag resumes at that version. A manual run of the Release workflow defaults to a dry run that builds and packs everything and publishes nothing; `mise run release:dry-run` does the same locally.
+- Every script the workflow calls lives in `scripts/release/` and has a `mise run release:*` task; keep logic there, not in inline YAML.
 
 ## Commit Messages
 
@@ -261,6 +267,8 @@ Follow conventional commits (Angular convention):
 - `docs:` — documentation changes
 
 Scope to the affected package when possible (e.g., `feat(ui): add void-dialog component`).
+
+The type decides the release (see Release & Versioning): `feat` minor, `fix`/`perf`/`revert` patch, anything else none. Mark a breaking change with `type!:` or a `BREAKING CHANGE:` footer; while Voidable is 0.x it bumps the minor version, never 1.0.0.
 
 ## Rules
 

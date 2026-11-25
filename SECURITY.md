@@ -10,4 +10,4 @@ Include the affected package and version, a description of the issue, and steps 
 
 ## Supported versions
 
-Fixes are released against the latest published version of each `@voidable/*` package.
+Fixes are released against the latest published version. Every Voidable package (npm, RubyGems, Hex and Composer) shares one version number, so a fix ships as a new release of all of them.

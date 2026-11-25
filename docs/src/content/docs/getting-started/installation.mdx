@@ -2,6 +2,11 @@
 title: Installation
 ---
 
+import { Code } from '@astrojs/starlight/components';
+import { stats } from '../../../lib/stats';
+
+export const pin = stats.versionNumber ? `@${stats.versionNumber}` : '';
+
 ## Install core packages
 
 ```bash
@@ -62,3 +67,16 @@ npm install @voidable/ui-liveview # Phoenix LiveView
 ```
 
 See the [Frameworks](/frameworks/react/) section for usage guides.
+
+## Without a bundler
+
+The theme is CSS, so load it with a stylesheet link, and load the components from a CDN that resolves their `lit` dependency:
+
+<Code lang="html" code={`<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@voidable/theme${pin}/src/index.css" />
+<script type="module" src="https://esm.sh/@voidable/ui${pin}"></script>`} />
+
+## Versions
+
+Every Voidable package is released together under one version number{stats.version ? <> (currently <code>{stats.version}</code>)</> : null}: the npm packages, the `voidable-hotwire` gem, the `live_voidable` Hex package and the `voidable/laravel` Composer package. A release bumps all of them, even those without changes, so install the same version of each. Each adapter requires exactly the matching `@voidable/ui`, and the gem's CDN pins follow its own version.
+
+Voidable is pre-1.0. A minor release (0.8 to 0.9) may contain breaking changes; a patch release (0.8.0 to 0.8.1) does not. Each release's notes on [GitHub](https://github.com/VoidableUI/Voidable/releases) list what changed.

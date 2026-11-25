@@ -53,6 +53,8 @@ Without a bundler, use a stylesheet link and a CDN module import; see the [`@voi
 
 The documentation site lives in [`docs`](docs) (Astro Starlight).
 
+All of these share one version number and are released together: every merge to `master` that changes a package publishes the next version of every package, even those without changes. Install matching versions; each adapter requires exactly the `@voidable/ui` it was released with. Releases and their notes are on [GitHub](https://github.com/VoidableUI/Voidable/releases); [CONTRIBUTING.md](CONTRIBUTING.md#releases) explains how the version is chosen.
+
 ## Development
 
 Tooling is managed by [mise](https://mise.jdx.dev); run everything through it rather than calling npm or pnpm directly.

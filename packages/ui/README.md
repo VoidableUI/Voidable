@@ -44,7 +44,7 @@ A bare `import '@voidable/theme'` cannot work in a browser, because the theme is
 </html>
 ```
 
-Pin versions (for example `@voidable/theme@0.8.0`, `@voidable/ui@0.7.0`) in production.
+In production, pin both URLs to the release you use by inserting `@<version>` after the package name. Every Voidable package shares one version number, so the theme and the components take the same one (see the [release notes](https://github.com/VoidableUI/Voidable/releases)).
 
 ## Component attributes
 
