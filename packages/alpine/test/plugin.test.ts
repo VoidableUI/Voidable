@@ -123,7 +123,7 @@ describe('registerLivewireHooks', () => {
     expect(() => registerLivewireHooks()).not.toThrow();
   });
 
-  it('registers morph hooks when Livewire is available', () => {
+  it('registers the morph.updating hook when Livewire is available', () => {
     const hooks: Record<string, Function> = {};
     (window as any).Livewire = {
       hook(name: string, callback: Function) {
@@ -133,107 +133,6 @@ describe('registerLivewireHooks', () => {
 
     registerLivewireHooks();
 
-    expect(hooks['morph.updating']).toBeDefined();
-    expect(hooks['morph.updated']).toBeDefined();
-  });
-
-  function setup() {
-    const hooks: Record<string, Function> = {};
-    (window as any).Livewire = {
-      hook(name: string, callback: Function) {
-        hooks[name] = callback;
-      },
-    };
-    registerLivewireHooks();
-    return hooks;
-  }
-
-  function serverEl(attrs: Record<string, string>) {
-    const toEl = document.createElement('void-input');
-    for (const [k, v] of Object.entries(attrs)) toEl.setAttribute(k, v);
-    return toEl;
-  }
-
-  function morph(hooks: Record<string, Function>, el: any, toEl: Element, clobber: () => void) {
-    hooks['morph.updating']({ el, toEl });
-    clobber();
-    hooks['morph.updated']({ el });
-  }
-
-  it('preserves client state while the server value is unchanged', () => {
-    const hooks = setup();
-    const el = document.createElement('void-input') as any;
-
-    // First render establishes the baseline.
-    morph(hooks, el, serverEl({ value: 'a' }), () => {});
-
-    el.value = 'typed';
-    el.checked = true;
-    morph(hooks, el, serverEl({ value: 'a' }), () => {
-      el.value = 'a';
-      el.checked = false;
-    });
-
-    expect(el.value).toBe('typed');
-    expect(el.checked).toBe(true);
-  });
-
-  it('lets the server win when the server value changed', () => {
-    const hooks = setup();
-    const el = document.createElement('void-input') as any;
-
-    morph(hooks, el, serverEl({ value: 'a' }), () => {});
-    el.value = 'typed';
-
-    morph(hooks, el, serverEl({ value: 'b' }), () => {
-      el.value = 'b';
-    });
-    expect(el.value).toBe('b');
-  });
-
-  it('lets the server uncheck an element it previously rendered checked', () => {
-    const hooks = setup();
-    const el = document.createElement('void-input') as any;
-
-    morph(hooks, el, serverEl({ checked: '' }), () => {});
-    el.checked = true;
-
-    morph(hooks, el, serverEl({}), () => {
-      el.checked = false;
-    });
-    expect(el.checked).toBe(false);
-  });
-
-  it('keeps no state in module scope between registrations', () => {
-    const hooksA = setup();
-    const el = document.createElement('void-input') as any;
-    morph(hooksA, el, serverEl({ value: 'a' }), () => {});
-
-    // A fresh registration has no record for el, so it preserves (safe default).
-    const hooksB = setup();
-    el.value = 'typed';
-    morph(hooksB, el, serverEl({ value: 'b' }), () => {
-      el.value = 'b';
-    });
-    expect(el.value).toBe('typed');
-  });
-
-  it('ignores non-void elements', () => {
-    const hooks: Record<string, Function> = {};
-    (window as any).Livewire = {
-      hook(name: string, callback: Function) {
-        hooks[name] = callback;
-      },
-    };
-
-    registerLivewireHooks();
-
-    const el = document.createElement('div') as any;
-    el.value = 'test';
-
-    hooks['morph.updating']({ el, toEl: document.createElement('div') });
-    el.value = 'changed';
-    hooks['morph.updated']({ el });
-    expect(el.value).toBe('changed');
+    expect(Object.keys(hooks)).toEqual(['morph.updating']);
   });
 });

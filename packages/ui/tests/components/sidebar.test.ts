@@ -116,22 +116,36 @@ describe('VoidSidebar', () => {
   });
 
   describe('void-toggle event', () => {
-    it('is dispatched with the new collapsed state when collapsed changes', async () => {
+    it('is dispatched by toggle() with the new collapsed state', async () => {
       const el = await mount();
       const details: unknown[] = [];
       el.addEventListener('void-toggle', (e) => details.push((e as CustomEvent).detail));
-      el.collapsed = true;
+      el.toggle();
       await el.updateComplete;
-      el.collapsed = false;
+      el.toggle(false);
+      el.toggle(false);
       await el.updateComplete;
       expect(details).toEqual([{ collapsed: true }, { collapsed: false }]);
+      expect(el.collapsed).toBe(false);
+    });
+
+    it('is not dispatched when collapsed is set in code or by the server', async () => {
+      const el = await mount();
+      let count = 0;
+      el.addEventListener('void-toggle', () => count++);
+      el.collapsed = true;
+      await el.updateComplete;
+      el.removeAttribute('collapsed');
+      await el.updateComplete;
+      expect(count).toBe(0);
+      expect(el.collapsed).toBe(false);
     });
 
     it('bubbles and is composed', async () => {
       const el = await mount();
       let ev: CustomEvent | null = null;
       document.body.addEventListener('void-toggle', (e) => { ev = e as CustomEvent; }, { once: true });
-      el.collapsed = true;
+      el.toggle();
       await el.updateComplete;
       expect(ev!.bubbles).toBe(true);
       expect(ev!.composed).toBe(true);

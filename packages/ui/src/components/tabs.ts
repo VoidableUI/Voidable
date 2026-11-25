@@ -41,6 +41,9 @@ export class VoidTabPanel extends VoidElement {
   /** @internal Number used to derive this panel's generated tab id; assigned on first use. */
   _tabKey = 0;
 
+  /** @internal The id the owning tabs generated for this panel, if it has not been given one. */
+  _generatedId: string | null = null;
+
 }
 
 if (!customElements.get('void-tab-panel')) {
@@ -74,21 +77,57 @@ export class VoidTabs extends VoidElement {
     },
   });
 
+  /** This tab set's own panels: direct children (a nested tab set's panels are its own). */
   private get _panels(): VoidTabPanel[] {
-    return Array.from(this.querySelectorAll('void-tab-panel')) as VoidTabPanel[];
+    return Array.from(this.querySelectorAll(':scope > void-tab-panel')) as VoidTabPanel[];
   }
+
+  /** The value last seen on a panel, to tell a removed selection from a value whose panel has not arrived yet. */
+  private _matchedValue: string | null = null;
 
   connectedCallback(): void {
     super.connectedCallback();
     this._syncPanels();
   }
 
+  /** A morph may have replaced or added panels that do not show the selection yet. */
+  protected override morphedCallback(): void {
+    this._syncPanels();
+    this.requestUpdate();
+  }
+
   private _syncPanels(): void {
+    this._reconcileRemovedSelection();
     for (const panel of this._panels) {
       // A panel not upgraded yet would keep this as a stale instance property.
       if (!(panel instanceof VoidTabPanel)) continue;
       panel.active = panel.tab === this.value;
       this._wire(panel);
+    }
+  }
+
+  /**
+   * When the panel the value points at has been removed (by the server, a
+   * framework), select the panel the `value` attribute names, else the first
+   * enabled panel, so a tab stays selected and a panel visible. A value that
+   * never had a panel (panels still arriving) is left alone. Programmatic, so
+   * no void-change is dispatched.
+   */
+  private _reconcileRemovedSelection(): void {
+    const panels = this._panels;
+    const enabled = (p: VoidTabPanel) => !(p instanceof VoidTabPanel) || !p.disabled;
+    const tabOf = (p: VoidTabPanel) => p.getAttribute('tab') ?? '';
+    if (panels.some(p => tabOf(p) === this.value)) {
+      this._matchedValue = this.value;
+      return;
+    }
+    if (this._matchedValue === null || this._matchedValue !== this.value || !panels.length) return;
+    const attr = this.getAttribute('value');
+    const next = panels.find(p => tabOf(p) === attr && enabled(p)) ?? panels.find(enabled);
+    this._matchedValue = null;
+    if (next) {
+      this.value = tabOf(next);
+      this._matchedValue = this.value;
     }
   }
 
@@ -103,6 +142,7 @@ export class VoidTabs extends VoidElement {
     if (!panel.id) {
       if (!panel._tabKey) panel._tabKey = ++nextTabId;
       panel.id = `void-tab-panel-${panel._tabKey}`;
+      panel._generatedId = panel.id;
     }
     return panel.id;
   }
@@ -150,14 +190,26 @@ export class VoidTabs extends VoidElement {
    * Panels carry an id the component gave them (for the tabs' aria-controls).
    * Morphers pair elements by id and never morph an element with an id into one
    * without, so a panel whose server markup has no id would be replaced on every
-   * morph. Give each incoming panel the id its live counterpart (same `tab`) has.
+   * morph. Give each incoming panel without an id the id this component
+   * generated for its live counterpart (same `tab`). Only generated ids: an id
+   * the server (or consumer) gave a panel is theirs, and wherever the server
+   * sends one it wins.
    */
   override voidBeforeMorph(incoming?: Element | null): boolean {
     if (incoming) {
-      const ids = new Map(this._panels.map(p => [p.getAttribute('tab'), p.id] as const));
-      for (const next of Array.from(incoming.querySelectorAll(':scope > void-tab-panel:not([id])'))) {
-        const id = ids.get(next.getAttribute('tab'));
-        if (id) next.setAttribute('id', id);
+      const sent = new Set(Array.from(incoming.querySelectorAll(':scope > void-tab-panel[id]'), p => p.id));
+      const ids = new Map<string | null, string>();
+      for (const p of this._panels) {
+        if (p instanceof VoidTabPanel && p._generatedId && p.id === p._generatedId && !sent.has(p.id)) ids.set(p.getAttribute('tab'), p.id);
+      }
+      if (ids.size) {
+        for (const next of Array.from(incoming.querySelectorAll(':scope > void-tab-panel:not([id])'))) {
+          const id = ids.get(next.getAttribute('tab'));
+          if (id) {
+            next.setAttribute('id', id);
+            ids.delete(next.getAttribute('tab'));
+          }
+        }
       }
     }
     return super.voidBeforeMorph(incoming);
@@ -176,7 +228,7 @@ export class VoidTabs extends VoidElement {
 
   private _onTabKeydown(e: KeyboardEvent, index: number): void {
     if (e.altKey || e.ctrlKey || e.metaKey) return;
-    const tabs = Array.from(this.querySelectorAll('.void-tabs-tab')) as HTMLElement[];
+    const tabs = Array.from(this.querySelectorAll(':scope > .void-tabs-list > .void-tabs-tab')) as HTMLElement[];
     const disabled = this._panels.map(p => p.disabled);
     let next = -1;
     if (e.key === 'ArrowRight') next = stepEnabled(disabled, index, 1);

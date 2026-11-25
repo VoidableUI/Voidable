@@ -3,6 +3,7 @@ import { live } from 'lit/directives/live.js';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
 import { InternalsFormControl } from '../form-control.js';
+import { isFocusParked } from '../projection.js';
 
 /**
  * Inline editable text for renaming items, editing headings, and click-to-edit table cells.
@@ -21,6 +22,11 @@ export class VoidEditable extends InternalsFormControl(VoidElement) {
   @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' = 'md';
 
   private _previousValue = '';
+  /** Text being edited and not confirmed yet; null when the field shows `value`. */
+  private _draft: string | null = null;
+
+  /** The draft survives re-renders and morphs until confirmed or cancelled, unless the server changes `value`. */
+  static override clientState = { _draft: 'value' };
 
   connectedCallback(): void {
     super.connectedCallback();
@@ -43,7 +49,8 @@ export class VoidEditable extends InternalsFormControl(VoidElement) {
       >${this.value || html`<span class="void-editable-placeholder">${this.placeholder}</span>`}</span>
       <input
         class="void-editable-input"
-        .value=${live(this.value)}
+        .value=${live(this._draft ?? this.value)}
+        @input=${this._handleInput}
         @keydown=${this._handleInputKeydown}
         @blur=${this._handleBlur}
       />
@@ -63,8 +70,13 @@ export class VoidEditable extends InternalsFormControl(VoidElement) {
     }
   };
 
+  private _handleInput = (e: Event): void => {
+    if (this.editing) this._draft = (e.target as HTMLInputElement).value;
+  };
+
   private _enterEditMode(): void {
     this._previousValue = this.value;
+    this._draft = null;
     this.editing = true;
     this.updateComplete.then(() => {
       const input = this.querySelector<HTMLInputElement>('.void-editable-input');
@@ -88,7 +100,9 @@ export class VoidEditable extends InternalsFormControl(VoidElement) {
   };
 
   private _handleBlur = (): void => {
-    if (!this.editing) return;
+    // A morph moving the field out of the document (browsers without
+    // Element.moveBefore) is not the user leaving it: focus comes back.
+    if (!this.editing || isFocusParked(this)) return;
     if (this.submitMode === 'blur' || this.submitMode === 'both') {
       this._confirm();
     } else {
@@ -101,12 +115,14 @@ export class VoidEditable extends InternalsFormControl(VoidElement) {
     if (input) {
       this.value = input.value;
     }
+    this._draft = null;
     this.editing = false;
     this.dispatchEvent(new CustomEvent('void-change', { bubbles: true, composed: true, detail: { value: this.value } }));
   }
 
   private _cancel(): void {
     this.value = this._previousValue;
+    this._draft = null;
     this.editing = false;
     this.dispatchEvent(new CustomEvent('void-cancel', { bubbles: true, composed: true }));
   }

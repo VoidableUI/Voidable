@@ -3,7 +3,7 @@ import { live } from 'lit/directives/live.js';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
 import { InternalsFormControl } from '../form-control.js';
-import { ProjectionController } from '../projection.js';
+import { ProjectionController, isFocusParked } from '../projection.js';
 import { edgeEnabled, stepEnabled, uid } from '../keyboard.js';
 import { VoidOption } from './multiselect.js';
 
@@ -60,15 +60,6 @@ export class VoidCombobox extends InternalsFormControl(VoidElement) {
     super.disconnectedCallback();
     document.removeEventListener('click', this._onDocumentClick);
     document.removeEventListener('keydown', this._onDocumentKeydown);
-  }
-
-  /**
-   * The open list is transient UI state, not something the server renders: a morph whose
-   * markup does not carry `open` (it never does) must not close a list the user is using.
-   */
-  override voidBeforeMorph(incoming?: Element | null): boolean {
-    if (incoming && this.open && !incoming.hasAttribute('open')) incoming.setAttribute('open', '');
-    return super.voidBeforeMorph(incoming);
   }
 
   protected override willUpdate(changed: Map<string, unknown>): void {
@@ -142,7 +133,9 @@ export class VoidCombobox extends InternalsFormControl(VoidElement) {
   }
 
   private _onInputFocus = (): void => {
-    if (this.disabled) return;
+    // Focus coming back after a morph moved the input (browsers without
+    // Element.moveBefore) keeps what the user typed.
+    if (this.disabled || isFocusParked(this)) return;
     this.open = true;
     this._query = '';
     this._active = null;

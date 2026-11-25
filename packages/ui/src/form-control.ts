@@ -129,6 +129,8 @@ export declare class VoidNativeFormControl extends VoidFormControl {
   protected formSyncNative(): void;
   /** Hook: make the native control's default (reset target) equal `state`. */
   protected formWriteNativeDefault(state: unknown): void;
+  /** Writes the captured reset target again (native controls that arrived after it was written). */
+  protected formRewriteNativeDefault(): void;
   /** Hook: after a reset, mirror the native control's state into the host (no events). */
   protected formReadNative(): void;
   /** Hook: the native control that owns form association. */
@@ -486,6 +488,14 @@ export function NativeFormControl<T extends Constructor<VoidElement>>(Base: T) {
 
     protected formWriteNativeDefault(state: unknown): void {
       void state;
+    }
+
+    /**
+     * Writes the captured reset target again, for native controls that arrived
+     * after it was written (children re-created by `innerHTML`, a framework).
+     */
+    protected formRewriteNativeDefault(): void {
+      if (!this.#nativeDefaultPending && this.#nativeDefault !== undefined) this.formWriteNativeDefault(this.#nativeDefault);
     }
 
     protected formReadNative(): void {}

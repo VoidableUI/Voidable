@@ -13,6 +13,9 @@ export class VoidToggle extends VoidElement {
     super.connectedCallback();
     this.setHostAttribute('role', 'button');
     this.setHostAttribute('tabindex', this.disabled ? '-1' : '0');
+    // A toggle that connects after its group (a blocking script in the head, a
+    // framework rendering children later) takes the group's state now.
+    (this.closest('void-toggle-group') as (Element & { _syncToggle?: (t: VoidToggle) => void }) | null)?._syncToggle?.(this);
     this.setHostAttribute('aria-pressed', String(this.pressed));
     this.addEventListener('click', this._handleClick);
     this.addEventListener('keydown', this._handleKeydown);
