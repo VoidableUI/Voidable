@@ -4,7 +4,8 @@
 
 /* @tokens void-page
    --void-page-actions-surface       Fill of the actions that close a page or its form (void-actions directly in void-page, or in the form that wraps its sections). Unset, they sit on the page.
-   --void-page-actions-padding       Padding around those actions.
+   --void-page-actions-padding-block   Padding above and below those actions.
+   --void-page-actions-padding-inline  Padding at their two ends.
    --void-page-actions-radius        Corner radius of their box.
    --void-page-actions-shadow        Shadow of their box.
    --void-page-actions-border        Edge colour of their box.
@@ -80,7 +81,7 @@ void-page > form {
    them one too: a bar of its own, so they do not float under the last box
    and outside every one. Unset, the tokens draw nothing. */
 :is(void-page, void-page > form) > void-actions {
-  padding: var(--void-page-actions-padding, 0);
+  padding: var(--void-page-actions-padding-block, 0) var(--void-page-actions-padding-inline, 0);
   border: var(--void-page-actions-border-width, 0) solid var(--void-page-actions-border, transparent);
   border-radius: var(--void-page-actions-radius, 0);
   background: var(--void-page-actions-surface, transparent);

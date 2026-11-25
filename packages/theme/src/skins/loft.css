@@ -88,7 +88,8 @@
   /* The actions that close a form are a tile too: a bar under the last
      section, not two buttons adrift below it. */
   --void-page-actions-surface: var(--void-color-surface);
-  --void-page-actions-padding: var(--void-space-3) calc(var(--void-container-padding) * 1.2);
+  --void-page-actions-padding-block: var(--void-space-3);
+  --void-page-actions-padding-inline: calc(var(--void-container-padding) * 1.2);
   --void-page-actions-radius: var(--void-radius-xl);
   --void-page-actions-shadow: var(--_void-loft-shadow);
   --void-page-actions-border-width: var(--void-container-border-width);
