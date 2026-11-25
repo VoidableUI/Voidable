@@ -115,7 +115,7 @@ test('a page-refresh morph keeps every component node and updates server text', 
   expect(await kept(page, IDS)).toEqual(IDS);
   await expect(page.locator('#lab-select option')).toHaveText(['Option a v2', 'Option b v2', 'Option c v2']);
   await expect(page.locator('#lab-menu-trigger')).toHaveText('Actions v2');
-  await expect(page.locator('#lab-card')).toHaveAttribute('heading', 'Panel 2');
+  await expect(page.locator('#lab-card void-card-title')).toHaveText('Panel 2');
 });
 
 test('controls keep their rendered DOM, role and label through a refresh morph', async ({ page }) => {
@@ -166,7 +166,8 @@ test('a dialog the user opened stays open through a refresh morph', async ({ pag
   // The dialog is modal, so the change arrives as a server refresh, not a click.
   await refresh(page);
   await expect(panel(page)).toBeVisible();
-  await expect(panel(page)).toContainText('Dialog body v1');
+  // The body is a slotted part: its text is the host's, not the shadow <dialog>'s.
+  await expect(page.locator('#lab-dialog')).toContainText('Dialog body v1');
 });
 
 test('an open dialog keeps its dialog role and name through a refresh morph', async ({ page }) => {
@@ -189,7 +190,7 @@ test('server changes win: selected value, new options, and a dialog the server o
   await expect(select).toHaveValue('d');
   await server(page, '#lab-open');
   await expect(panel(page)).toBeVisible();
-  await expect(panel(page)).toContainText('Dialog body v2');
+  await expect(page.locator('#lab-dialog')).toContainText('Dialog body v2');
   await page.evaluate(() =>
     fetch('/morph_lab', {
       method: 'PATCH',
