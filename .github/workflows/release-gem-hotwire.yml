@@ -32,10 +32,14 @@ jobs:
         working-directory: packages/hotwire/gem
         run: ruby -Ilib -Itest test/helpers_test.rb
 
+  ci:
+    name: CI
+    uses: ./.github/workflows/ci.yml
+
   tag:
     name: Create Tag
     runs-on: ubuntu-latest
-    needs: test
+    needs: [test, ci]
     permissions:
       contents: write
     outputs:

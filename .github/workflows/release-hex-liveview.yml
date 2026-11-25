@@ -36,10 +36,14 @@ jobs:
         working-directory: packages/liveview/hex
         run: mix test
 
+  ci:
+    name: CI
+    uses: ./.github/workflows/ci.yml
+
   tag:
     name: Create Tag
     runs-on: ubuntu-latest
-    needs: test
+    needs: [test, ci]
     permissions:
       contents: write
     outputs:

@@ -1,25 +1,31 @@
 # SPDX-License-Identifier: MIT
+#
+# Also called by every release workflow (workflow_call), whose tag job needs
+# it: a release cannot be cut from a commit that fails `mise run ci`.
 name: CI
 
 on:
   pull_request:
   push:
     branches: [master]
+  workflow_call:
 
 permissions:
   contents: read
 
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
+  # Only superseded pull request runs are cancelled; a run gating a release
+  # (push to master, or called from a release workflow) always finishes.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   ci:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
 
-      - uses: jdx/mise-action@v3
+      - uses: jdx/mise-action@5228313ee0372e111a38da051671ca30fc5a96db # v3.6.3
         with:
           install_args: "node npm:pnpm"
         env:
