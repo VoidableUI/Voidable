@@ -167,13 +167,19 @@ interface KeptFocus {
   scroll: [number, number];
   /** The element's ancestors when it was recorded (it may be out of the document while held). */
   within: Set<Element>;
+  /**
+   * Focused again. The record stays for a few frames anyway: a later host in
+   * the same morph may move the element again (into a popover that is not
+   * shown yet) and has to be able to put focus back once more.
+   */
+  restored?: boolean;
 }
 type FocusDocument = Document & { [FOCUS_KEY]?: KeptFocus };
 
 function keepFocus(host: Element): void {
   const doc = host.ownerDocument as FocusDocument;
   const active = doc.activeElement as HTMLElement | null;
-  if (doc[FOCUS_KEY] || !active || active === doc.body || !host.contains(active)) return;
+  if ((doc[FOCUS_KEY] && !doc[FOCUS_KEY].restored) || !active || active === doc.body || !host.contains(active)) return;
   const field = active as Partial<HTMLInputElement>;
   let range: KeptFocus['range'] = null;
   try {
@@ -186,10 +192,14 @@ function keepFocus(host: Element): void {
   const value = typeof field.value === 'string' ? field.value : null;
   const within = new Set<Element>();
   for (let p = active.parentElement; p; p = p.parentElement) within.add(p);
-  doc[FOCUS_KEY] = { el: active, value, range, scroll: [active.scrollTop, active.scrollLeft], within };
+  const kept: KeptFocus = { el: active, value, range, scroll: [active.scrollTop, active.scrollLeft], within };
+  doc[FOCUS_KEY] = kept;
+  // Kept for a few frames, not only to the end of the task: a host may
+  // re-project in a later task (an update scheduled behind other work), and an
+  // open popover takes focus back only once its overlay shows it again.
   setTimeout(() => {
-    delete doc[FOCUS_KEY];
-  }, 0);
+    if (doc[FOCUS_KEY] === kept) delete doc[FOCUS_KEY];
+  }, 100);
 }
 
 /**
@@ -201,16 +211,36 @@ function keepFocus(host: Element): void {
  */
 export function isFocusParked(host: Element): boolean {
   const kept = (host.ownerDocument as FocusDocument)[FOCUS_KEY];
-  return !!kept && (kept.within.has(host) || host.contains(kept.el));
+  return !!kept && !kept.restored && (kept.within.has(host) || host.contains(kept.el));
+}
+
+/**
+ * @internal Puts back focus a morph is still holding (see keepFocus), for a
+ * surface that could not take it when its host re-projected: an open
+ * popover that leaving the document closed takes focus only once its
+ * overlay shows it again (WebKit, and anywhere without Element.moveBefore).
+ */
+export function restoreParkedFocus(doc: Document): void {
+  restoreKeptFocus(doc);
 }
 
 function restoreKeptFocus(doc: Document): void {
   const kept = (doc as FocusDocument)[FOCUS_KEY];
   if (!kept || !kept.el.isConnected) return;
   const { el } = kept;
-  if (doc.activeElement !== el) el.focus({ preventScroll: true });
+  // The user (or the page) has moved focus somewhere else meanwhile: leave it there.
+  const current = doc.activeElement;
+  if (current && current !== doc.body && current !== el && !kept.within.has(current as Element)) {
+    delete (doc as FocusDocument)[FOCUS_KEY];
+    return;
+  }
+  if (doc.activeElement === el && kept.restored) return;
+  if (doc.activeElement !== el) {
+    kept.restored = false;
+    el.focus({ preventScroll: true });
+  }
   if (doc.activeElement !== el) return;
-  delete (doc as FocusDocument)[FOCUS_KEY];
+  kept.restored = true;
   const field = el as Partial<HTMLInputElement>;
   // A blur handler that ran while the field was out of the document may have rewritten it.
   if (kept.value !== null && field.value !== kept.value) field.value = kept.value;
