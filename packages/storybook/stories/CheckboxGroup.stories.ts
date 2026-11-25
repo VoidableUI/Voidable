@@ -3,6 +3,7 @@ import type { Meta, StoryObj } from '@storybook/web-components-vite';
 
 import '@voidable/ui';
 import '@voidable/theme';
+import { argTypesFor } from '../.storybook/manifest';
 
 const meta: Meta = {
   title: 'Form/CheckboxGroup',
@@ -14,10 +15,7 @@ const meta: Meta = {
       },
     },
   },
-  argTypes: {
-    label: { control: 'text' },
-    orientation: { control: 'select', options: ['vertical', 'horizontal'] },
-  },
+  argTypes: argTypesFor('void-checkbox-group'),
   render: (args) => html`
     <void-checkbox-group
       label=${args.label || 'Options'}

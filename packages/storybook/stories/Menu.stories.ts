@@ -3,9 +3,11 @@ import type { Meta, StoryObj } from '@storybook/web-components-vite';
 
 import '@voidable/ui';
 import '@voidable/theme';
+import { argTypesFor } from '../.storybook/manifest';
 
 const meta: Meta = {
   title: 'Components/Menu',
+  argTypes: argTypesFor('void-menu'),
   tags: ['autodocs'],
   parameters: {
     docs: {

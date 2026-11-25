@@ -3,6 +3,7 @@ import type { Meta, StoryObj } from '@storybook/web-components-vite';
 
 import '@voidable/ui';
 import '@voidable/theme';
+import { argTypesFor } from '../.storybook/manifest';
 
 const meta: Meta = {
   title: 'Form/Radio',
@@ -14,12 +15,7 @@ const meta: Meta = {
       },
     },
   },
-  argTypes: {
-    checked: { control: 'boolean' },
-    disabled: { control: 'boolean' },
-    color: { control: 'select', options: ['default', 'error', 'warning', 'caution', 'success', 'info', 'notice', 'highlight'] },
-    size: { control: 'select', options: ['sm', 'md', 'lg'] },
-  },
+  argTypes: argTypesFor('void-radio'),
   render: (args) => html`
     <void-radio
       color=${args.color || 'default'}

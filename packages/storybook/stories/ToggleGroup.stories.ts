@@ -2,6 +2,7 @@ import { html } from 'lit';
 import type { Meta, StoryObj } from '@storybook/web-components-vite';
 import '@voidable/ui';
 import '@voidable/theme';
+import { argTypesFor } from '../.storybook/manifest';
 
 const meta: Meta = {
   title: 'Components/ToggleGroup',
@@ -13,14 +14,7 @@ const meta: Meta = {
       },
     },
   },
-  argTypes: {
-    value: { control: 'text' },
-    multiple: { control: 'boolean' },
-    disabled: { control: 'boolean' },
-    size: { control: 'select', options: ['sm', 'md', 'lg'] },
-    color: { control: 'select', options: ['default', 'error', 'warning', 'caution', 'success', 'info', 'notice', 'highlight'] },
-    orientation: { control: 'select', options: ['horizontal', 'vertical'] },
-  },
+  argTypes: argTypesFor('void-toggle-group'),
   render: (args) => html`
     <void-toggle-group
       value=${args.value || 'bold'}

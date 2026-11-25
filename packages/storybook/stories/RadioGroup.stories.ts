@@ -3,6 +3,7 @@ import type { Meta, StoryObj } from '@storybook/web-components-vite';
 
 import '@voidable/ui';
 import '@voidable/theme';
+import { argTypesFor } from '../.storybook/manifest';
 
 const meta: Meta = {
   title: 'Form/RadioGroup',
@@ -14,12 +15,7 @@ const meta: Meta = {
       },
     },
   },
-  argTypes: {
-    label: { control: 'text' },
-    value: { control: 'text' },
-    name: { control: 'text' },
-    orientation: { control: 'select', options: ['vertical', 'horizontal'] },
-  },
+  argTypes: argTypesFor('void-radio-group'),
   render: (args) => html`
     <void-radio-group
       label=${args.label || 'Choose an option'}

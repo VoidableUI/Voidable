@@ -2,6 +2,7 @@ import { html } from 'lit';
 import type { Meta, StoryObj } from '@storybook/web-components-vite';
 import '@voidable/ui';
 import '@voidable/theme';
+import { argTypesFor } from '../.storybook/manifest';
 
 const meta: Meta = {
   title: 'Form/Combobox',
@@ -26,13 +27,7 @@ Pattern: combobox with listbox popup. The native input is the combobox; \`aria-a
       },
     },
   },
-  argTypes: {
-    disabled: { control: 'boolean' },
-    size: { control: 'select', options: ['sm', 'md', 'lg'] },
-    error: { control: 'text' },
-    placeholder: { control: 'text' },
-    value: { control: 'text' },
-  },
+  argTypes: argTypesFor('void-combobox'),
 };
 
 export default meta;

@@ -3,6 +3,7 @@ import type { Meta, StoryObj } from '@storybook/web-components-vite';
 
 import '@voidable/ui';
 import '@voidable/theme';
+import { argTypesFor } from '../.storybook/manifest';
 
 const meta: Meta = {
   title: 'Components/List',
@@ -14,9 +15,7 @@ const meta: Meta = {
       },
     },
   },
-  argTypes: {
-    dividers: { control: 'boolean' },
-  },
+  argTypes: argTypesFor('void-list'),
   render: (args) => html`
     <void-list ?dividers=${args.dividers}>
       <void-list-item>Item one</void-list-item>

@@ -2,6 +2,7 @@ import { html } from 'lit';
 import type { Meta, StoryObj } from '@storybook/web-components-vite';
 import '@voidable/ui';
 import '@voidable/theme';
+import { argTypesFor } from '../.storybook/manifest';
 
 const meta: Meta = {
   title: 'Form/ActionInput',
@@ -13,18 +14,7 @@ const meta: Meta = {
       },
     },
   },
-  argTypes: {
-    value: { control: 'text' },
-    placeholder: { control: 'text' },
-    disabled: { control: 'boolean' },
-    readonly: { control: 'boolean' },
-    size: { control: 'select', options: ['sm', 'md', 'lg'] },
-    color: { control: 'select', options: ['default', 'error', 'warning', 'caution', 'success', 'info', 'notice', 'highlight'] },
-    type: { control: 'select', options: ['text', 'password'] },
-    icon: { control: 'select', options: ['search', 'copy', 'send', 'eye', 'eye-off', 'check', 'x', 'arrow-right', 'clipboard'] },
-    actionLabel: { control: 'text' },
-    position: { control: 'select', options: ['left', 'right'] },
-  },
+  argTypes: argTypesFor('void-action-input'),
   render: (args) => html`
     <void-action-input
       .value=${args.value ?? ''}

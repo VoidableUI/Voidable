@@ -2,6 +2,7 @@ import { html } from 'lit';
 import type { Meta, StoryObj } from '@storybook/web-components-vite';
 import '@voidable/ui';
 import '@voidable/theme';
+import { argTypesFor } from '../.storybook/manifest';
 
 const meta: Meta = {
   title: 'Components/Stat',
@@ -14,20 +15,7 @@ const meta: Meta = {
       },
     },
   },
-  argTypes: {
-    color: {
-      control: { type: 'select' },
-      options: ['default', 'error', 'warning', 'caution', 'success', 'info', 'notice', 'highlight'],
-    },
-    size: {
-      control: { type: 'select' },
-      options: ['sm', 'md', 'lg'],
-    },
-    trend: {
-      control: { type: 'select' },
-      options: [null, 'up', 'down', 'flat', 'error', 'warning', 'caution', 'success', 'info', 'notice', 'highlight'],
-    },
-  },
+  argTypes: argTypesFor('void-stat'),
 };
 
 export default meta;

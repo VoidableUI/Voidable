@@ -2,6 +2,7 @@ import { html } from 'lit';
 import type { Meta, StoryObj } from '@storybook/web-components-vite';
 import '@voidable/ui';
 import '@voidable/theme';
+import { argTypesFor } from '../.storybook/manifest';
 
 /* ============================================================
    void-calendar
@@ -17,15 +18,7 @@ const calendarMeta: Meta = {
       },
     },
   },
-  argTypes: {
-    value: { control: 'text' },
-    min: { control: 'text' },
-    max: { control: 'text' },
-    disabled: { control: 'boolean' },
-    size: { control: 'select', options: ['sm', 'md', 'lg'] },
-    locale: { control: 'text' },
-    firstDay: { control: 'number' },
-  },
+  argTypes: argTypesFor('void-calendar'),
 };
 
 export default calendarMeta;
@@ -84,6 +77,8 @@ export const Disabled: Story = {
    ============================================================ */
 
 export const DatePickerDefault: Story = {
+  // The date picker's own attributes (color, placeholder, format, open) on top of the calendar's.
+  argTypes: argTypesFor('void-date-picker'),
   name: 'Date Picker',
   render: (args) => html`
     <void-date-picker
@@ -100,6 +95,8 @@ export const DatePickerDefault: Story = {
 };
 
 export const DatePickerWithValue: Story = {
+  // The date picker's own attributes (color, placeholder, format, open) on top of the calendar's.
+  argTypes: argTypesFor('void-date-picker'),
   name: 'Date Picker — With Value',
   render: () => html`
     <void-date-picker value="2024-06-15"></void-date-picker>
@@ -107,6 +104,8 @@ export const DatePickerWithValue: Story = {
 };
 
 export const DatePickerColors: Story = {
+  // The date picker's own attributes (color, placeholder, format, open) on top of the calendar's.
+  argTypes: argTypesFor('void-date-picker'),
   name: 'Date Picker — Colors',
   render: () => html`
     <div style="display: flex; flex-direction: column; gap: 12px; max-width: 300px;">
@@ -121,6 +120,8 @@ export const DatePickerColors: Story = {
 };
 
 export const DatePickerSizes: Story = {
+  // The date picker's own attributes (color, placeholder, format, open) on top of the calendar's.
+  argTypes: argTypesFor('void-date-picker'),
   name: 'Date Picker — Sizes',
   render: () => html`
     <div style="display: flex; flex-direction: column; gap: 12px; max-width: 300px;">
@@ -132,6 +133,8 @@ export const DatePickerSizes: Story = {
 };
 
 export const DatePickerCustomFormat: Story = {
+  // The date picker's own attributes (color, placeholder, format, open) on top of the calendar's.
+  argTypes: argTypesFor('void-date-picker'),
   name: 'Date Picker — DD/MM/YYYY',
   render: () => html`
     <void-date-picker value="2024-06-15" format="DD/MM/YYYY" placeholder="DD/MM/YYYY"></void-date-picker>
@@ -139,6 +142,8 @@ export const DatePickerCustomFormat: Story = {
 };
 
 export const DatePickerDisabled: Story = {
+  // The date picker's own attributes (color, placeholder, format, open) on top of the calendar's.
+  argTypes: argTypesFor('void-date-picker'),
   name: 'Date Picker — Disabled',
   render: () => html`
     <void-date-picker disabled value="2024-06-15"></void-date-picker>
@@ -146,6 +151,8 @@ export const DatePickerDisabled: Story = {
 };
 
 export const DatePickerWithConstraints: Story = {
+  // The date picker's own attributes (color, placeholder, format, open) on top of the calendar's.
+  argTypes: argTypesFor('void-date-picker'),
   name: 'Date Picker — Min/Max',
   render: () => html`
     <void-date-picker value="2024-06-15" min="2024-06-01" max="2024-06-30" placeholder="June only"></void-date-picker>

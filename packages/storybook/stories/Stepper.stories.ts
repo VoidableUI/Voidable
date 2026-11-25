@@ -2,6 +2,7 @@ import { html } from 'lit';
 import type { Meta, StoryObj } from '@storybook/web-components-vite';
 import '@voidable/ui';
 import '@voidable/theme';
+import { argTypesFor } from '../.storybook/manifest';
 
 const meta: Meta = {
   title: 'Navigation/Stepper',
@@ -13,10 +14,7 @@ const meta: Meta = {
       },
     },
   },
-  argTypes: {
-    value: { control: { type: 'range', min: 0, max: 5, step: 1 } },
-    steps: { control: 'text' },
-  },
+  argTypes: argTypesFor('void-stepper'),
 };
 export default meta;
 type Story = StoryObj;
