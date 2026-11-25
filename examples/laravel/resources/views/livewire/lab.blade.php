@@ -85,7 +85,7 @@
             <void-dropdown-menu-item>Rename</void-dropdown-menu-item>
             <void-dropdown-menu-item>Archive</void-dropdown-menu-item>
         </void-dropdown-menu>
-        <void-tabs id="tabs" {!! $tab !== '' ? 'value="'.e($tab).'"' : '' !!}>
+        <void-tabs id="tabs" @if ($tab !== '') value="{{ $tab }}" @endif>
             <void-tab-panel tab="one" label="One">Panel one, version {{ $v }}</void-tab-panel>
             <void-tab-panel tab="two" label="Two">Panel two, ticks {{ $ticks }}</void-tab-panel>
         </void-tabs>

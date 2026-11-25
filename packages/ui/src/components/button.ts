@@ -22,10 +22,10 @@ export class VoidButton extends VoidElement {
    */
   @property({ type: String, reflect: true }) variant: 'outline' | 'filled' | 'ghost' = 'outline';
   /**
-   * Status colour: `default`, `error`, `warning`, `caution`, `success`, `info` or `notice`. Use `error`
+   * Status colour: `default`, `error`, `warning`, `caution`, `success`, `info`, `notice` or `highlight`. Use `error`
    * for a destructive action such as Delete.
    */
-  @property({ type: String, reflect: true }) color: 'default' | 'error' | 'warning' | 'caution' | 'success' | 'info' | 'notice' = 'default';
+  @property({ type: String, reflect: true }) color: 'default' | 'error' | 'warning' | 'caution' | 'success' | 'info' | 'notice' | 'highlight' = 'default';
   /**
    * Stop the button reacting: clicks and Enter or Space do nothing and it leaves the tab order. A button
    * inside a `<fieldset disabled>` is disabled too.
@@ -36,8 +36,8 @@ export class VoidButton extends VoidElement {
    * validation), `reset` resets it. Set `submit` on the primary action of a form.
    */
   @property({ type: String, reflect: true }) type: 'button' | 'submit' | 'reset' = 'button';
-  /** Size step: `sm`, `md` (default), `lg`, `xl` or `xxl`. Controls of the same step share one height. */
-  @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' | 'xl' | 'xxl' = 'md';
+  /** Size step: `sm`, `md` (default) or `lg`. Controls of the same step share one height. */
+  @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' = 'md';
 
   /** Watches every ancestor's `disabled` attribute (a `<fieldset disabled>`). */
   private _unwatch: (() => void) | null = null;

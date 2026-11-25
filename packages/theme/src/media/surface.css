@@ -45,7 +45,6 @@ void-media > void-nav-bar,
 void-nav-bar[data-void-surface="media"] {
   isolation: isolate;
   background: transparent;
-  border-bottom-color: transparent;
 }
 
 void-nav-bar[data-void-surface="media"] {

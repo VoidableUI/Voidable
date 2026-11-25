@@ -2,8 +2,17 @@
 #
 # Runs on pull requests, and once per push to master as the `ci` job of
 # release.yml (workflow_call), whose tag and publish jobs need it: nothing is
-# released from a commit that fails `mise run ci`. There is deliberately no
-# push trigger here, so a push to master runs CI exactly once.
+# released from a commit that fails any job below (`ci`, `browser`, `server`,
+# `phoenix`, `laravel`). The jobs run in parallel, so a release waits for the
+# slowest one, not the sum. There is deliberately no push trigger here, so a
+# push to master runs CI exactly once.
+#
+# Toolchains: Node and pnpm come from mise (they are prebuilt downloads). Ruby,
+# Erlang/Elixir and PHP come from the prebuilt setup actions, because mise would
+# compile Erlang and PHP from source on a cold runner (the better part of an
+# hour). Every version is read from mise.toml, the single place they are pinned.
+# `MISE_TASK_RUN_AUTO_INSTALL: "false"` keeps `mise run` from installing the
+# tools it was told to skip; the tasks then use whatever is on PATH.
 name: CI
 
 on:
@@ -22,6 +31,7 @@ concurrency:
 jobs:
   ci:
     runs-on: ubuntu-latest
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
 
@@ -42,7 +52,7 @@ jobs:
   # the built packages. Kept out of `mise run ci`, which needs no browsers.
   browser:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
 
@@ -80,19 +90,36 @@ jobs:
 
   # Server-backed suites (tests/browser/server): real apps started by
   # Playwright on the built packages, one job per framework so each installs
-  # only its own toolchain (mise-action caches the installed tools). `server`
-  # is the Rails demo and needs Ruby; `phoenix` and `laravel` follow.
+  # only its own toolchain. The runtimes come from the prebuilt setup actions
+  # (setup-ruby, setup-beam, setup-php), never from mise, which would compile
+  # Erlang and PHP from source on a cold runner. Their versions are read from
+  # mise.toml, the one place the repository pins them. The task that starts an
+  # app (tests/browser/server/start.mjs) uses mise's copy of a tool when there
+  # is one and otherwise the one on PATH, and retries the dependency downloads.
+  #
+  # `server` is the Rails demo.
   server:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 20
+    env:
+      # Gems install into the workspace so one cache entry holds them all.
+      BUNDLE_PATH: ${{ github.workspace }}/.bundle
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
 
       - uses: jdx/mise-action@5228313ee0372e111a38da051671ca30fc5a96db # v3.6.3
         with:
-          install_args: "node npm:pnpm ruby"
+          install_args: "node npm:pnpm"
         env:
           MISE_NOT_FOUND_AUTO_INSTALL: "false"
+
+      - name: Read the Ruby version from mise.toml
+        id: versions
+        run: echo "ruby=$(mise config get tools.ruby)" >> "$GITHUB_OUTPUT"
+
+      - uses: ruby/setup-ruby@b3aaceaef7e0ee231b499e7b5f49c03fc1d32199 # v1.338.0
+        with:
+          ruby-version: ${{ steps.versions.outputs.ruby }}
 
       - name: Cache Playwright browsers
         uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
@@ -103,8 +130,8 @@ jobs:
       - name: Cache the Rails demo's gems
         uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
         with:
-          path: ~/.local/share/mise/installs/ruby/*/lib/ruby/gems
-          key: rails-demo-gems-${{ runner.os }}-${{ hashFiles('mise.toml', 'packages/hotwire/demo/Gemfile', 'packages/hotwire/gem/*.gemspec') }}
+          path: .bundle
+          key: rails-demo-gems-${{ runner.os }}-${{ steps.versions.outputs.ruby }}-${{ hashFiles('packages/hotwire/demo/Gemfile', 'packages/hotwire/gem/*.gemspec') }}
 
       - name: Install Chromium and its system libraries
         run: mise run test:browser:install -- --with-deps
@@ -132,15 +159,48 @@ jobs:
   # live_voidable Hex package and the built adapter. Needs Erlang and Elixir.
   phoenix:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
 
       - uses: jdx/mise-action@5228313ee0372e111a38da051671ca30fc5a96db # v3.6.3
         with:
-          install_args: "node npm:pnpm erlang elixir"
+          install_args: "node npm:pnpm"
         env:
           MISE_NOT_FOUND_AUTO_INSTALL: "false"
+
+      # mise.toml pins "1.19.5-otp-28"; setup-beam takes the Elixir version
+      # and the OTP version separately.
+      - name: Read the Erlang and Elixir versions from mise.toml
+        id: versions
+        run: |
+          {
+            echo "otp=$(mise config get tools.erlang)"
+            echo "elixir=$(mise config get tools.elixir | sed 's/-otp-.*$//')"
+          } >> "$GITHUB_OUTPUT"
+
+      # builds.hex.pm and the GitHub API are external services: a second
+      # attempt after a pause keeps a transient failure from failing the run.
+      - name: Install Erlang and Elixir
+        id: beam
+        continue-on-error: true
+        uses: erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124 # v1.24.1
+        with:
+          otp-version: ${{ steps.versions.outputs.otp }}
+          elixir-version: ${{ steps.versions.outputs.elixir }}
+          version-type: strict
+
+      - name: Wait before retrying the Erlang and Elixir install
+        if: steps.beam.outcome == 'failure'
+        run: sleep 20
+
+      - name: Install Erlang and Elixir (second attempt)
+        if: steps.beam.outcome == 'failure'
+        uses: erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124 # v1.24.1
+        with:
+          otp-version: ${{ steps.versions.outputs.otp }}
+          elixir-version: ${{ steps.versions.outputs.elixir }}
+          version-type: strict
 
       - name: Cache Playwright browsers
         uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
@@ -148,15 +208,14 @@ jobs:
           path: ~/.cache/ms-playwright
           key: playwright-chromium-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
 
+      # Not ~/.mix or ~/.hex: setup-beam puts Hex and Rebar there already.
       - name: Cache the Phoenix demo's dependencies and build
         uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
         with:
           path: |
             packages/liveview/demo/deps
             packages/liveview/demo/_build
-            ~/.mix
-            ~/.hex
-          key: phoenix-demo-${{ runner.os }}-${{ hashFiles('mise.toml', 'packages/liveview/demo/mix.lock', 'packages/liveview/hex/mix.exs') }}
+          key: phoenix-demo-${{ runner.os }}-${{ steps.versions.outputs.otp }}-${{ steps.versions.outputs.elixir }}-${{ hashFiles('packages/liveview/demo/mix.lock', 'packages/liveview/hex/mix.exs') }}
 
       - name: Install Chromium and its system libraries
         run: mise run test:browser:install -- --with-deps
@@ -184,15 +243,48 @@ jobs:
   # Alpine and the built adapter. Needs PHP and Composer.
   laravel:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
 
       - uses: jdx/mise-action@5228313ee0372e111a38da051671ca30fc5a96db # v3.6.3
         with:
-          install_args: "node npm:pnpm php"
+          install_args: "node npm:pnpm"
         env:
           MISE_NOT_FOUND_AUTO_INSTALL: "false"
+
+      # setup-php installs the newest patch of a minor version, so the patch
+      # in mise.toml (8.5.5) becomes "8.5".
+      - name: Read the PHP version from mise.toml
+        id: versions
+        run: echo "php=$(mise config get tools.php | cut -d. -f1,2)" >> "$GITHUB_OUTPUT"
+
+      - name: Install PHP and Composer
+        id: php
+        continue-on-error: true
+        uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # 2.40.0
+        with:
+          php-version: ${{ steps.versions.outputs.php }}
+          tools: composer:v2
+          extensions: ctype, curl, dom, fileinfo, mbstring, openssl, pdo_sqlite, sqlite3, tokenizer, xml
+          coverage: none
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+
+      - name: Wait before retrying the PHP install
+        if: steps.php.outcome == 'failure'
+        run: sleep 20
+
+      - name: Install PHP and Composer (second attempt)
+        if: steps.php.outcome == 'failure'
+        uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # 2.40.0
+        with:
+          php-version: ${{ steps.versions.outputs.php }}
+          tools: composer:v2
+          extensions: ctype, curl, dom, fileinfo, mbstring, openssl, pdo_sqlite, sqlite3, tokenizer, xml
+          coverage: none
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
 
       - name: Cache Playwright browsers
         uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
@@ -206,7 +298,7 @@ jobs:
           path: |
             examples/laravel/vendor
             ~/.cache/composer
-          key: laravel-example-${{ runner.os }}-${{ hashFiles('mise.toml', 'examples/laravel/composer.lock') }}
+          key: laravel-example-${{ runner.os }}-${{ steps.versions.outputs.php }}-${{ hashFiles('examples/laravel/composer.json', 'packages/alpine/laravel/composer.json') }}
 
       - name: Install Chromium and its system libraries
         run: mise run test:browser:install -- --with-deps

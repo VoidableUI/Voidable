@@ -17,8 +17,8 @@ const meta: Meta = {
   argTypes: {
     checked: { control: 'boolean' },
     disabled: { control: 'boolean' },
-    color: { control: 'select', options: ['default', 'error', 'warning', 'caution', 'success', 'info', 'notice'] },
-    size: { control: 'select', options: ['sm', 'md', 'lg', 'xl', 'xxl'] },
+    color: { control: 'select', options: ['default', 'error', 'warning', 'caution', 'success', 'info', 'notice', 'highlight'] },
+    size: { control: 'select', options: ['sm', 'md', 'lg'] },
   },
   render: (args) => html`
     <void-switch
@@ -58,8 +58,6 @@ export const Sizes: Story = {
       <void-switch size="sm"></void-switch>
       <void-switch size="md"></void-switch>
       <void-switch size="lg"></void-switch>
-      <void-switch size="xl"></void-switch>
-      <void-switch size="xxl"></void-switch>
     </div>
   `,
 };

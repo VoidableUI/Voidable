@@ -28,7 +28,7 @@ Pattern: combobox with listbox popup. The native input is the combobox; \`aria-a
   },
   argTypes: {
     disabled: { control: 'boolean' },
-    size: { control: 'select', options: ['sm', 'md', 'lg', 'xl', 'xxl'] },
+    size: { control: 'select', options: ['sm', 'md', 'lg'] },
     error: { control: 'text' },
     placeholder: { control: 'text' },
     value: { control: 'text' },
@@ -84,16 +84,6 @@ export const Sizes: Story = {
         <void-option value="c">Option C</void-option>
       </void-combobox>
       <void-combobox size="lg" placeholder="Large">
-        <void-option value="a">Option A</void-option>
-        <void-option value="b">Option B</void-option>
-        <void-option value="c">Option C</void-option>
-      </void-combobox>
-      <void-combobox size="xl" placeholder="XL">
-        <void-option value="a">Option A</void-option>
-        <void-option value="b">Option B</void-option>
-        <void-option value="c">Option C</void-option>
-      </void-combobox>
-      <void-combobox size="xxl" placeholder="XXL">
         <void-option value="a">Option A</void-option>
         <void-option value="b">Option B</void-option>
         <void-option value="c">Option C</void-option>

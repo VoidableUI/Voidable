@@ -8,7 +8,14 @@
 // each entry into a web server and a project.
 //
 // Commands run with the repository's mise toolchains on PATH (the mise task
-// test:server activates them).
+// test:server activates them). Where mise has not installed a tool, as in CI
+// where the prebuilt setup actions provide it, the tool on PATH is used.
+// A prepare step that downloads from a registry has `{ retry: true }` as a
+// third element (see start.mjs).
+//
+// Ports (Rails 4520, Phoenix 4530, Laravel 4540) come from VOID_RAILS_PORT, VOID_PHOENIX_PORT and
+// VOID_LARAVEL_PORT, so two checkouts, or a server already running, can coexist; the browser
+// suite takes VOID_TEST_PORT. A port in use fails the run; it never reuses another server.
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -32,7 +39,7 @@ export const apps = {
       'theme.css': { css: '@voidable/theme' },
     },
     prepare: [
-      ['bundle', ['install', '--quiet']],
+      ['bundle', ['install', '--quiet'], { retry: true }],
       ['bin/rails', ['db:prepare']],
     ],
     start: (port) => ['bin/rails', ['server', '-b', '127.0.0.1', '-p', String(port)]],
@@ -52,10 +59,10 @@ export const apps = {
       'css/voidable/index.css': { css: '@voidable/theme' },
     },
     prepare: [
-      ['mix', ['local.hex', '--force', '--if-missing']],
-      ['mix', ['local.rebar', '--force', '--if-missing']],
-      ['mix', ['deps.get']],
-      ['mix', ['assets.setup']],
+      ['mix', ['local.hex', '--force', '--if-missing'], { retry: true }],
+      ['mix', ['local.rebar', '--force', '--if-missing'], { retry: true }],
+      ['mix', ['deps.get'], { retry: true }],
+      ['mix', ['assets.setup'], { retry: true }],
       ['mix', ['assets.build']],
     ],
     start: () => ['mix', ['phx.server']],
@@ -69,7 +76,7 @@ export const apps = {
     readyPath: '/lab',
     env: { PHP_CLI_SERVER_WORKERS: '4' },
     prepare: [
-      ['composer', ['install', '--no-interaction', '--prefer-dist', '--no-progress']],
+      ['composer', ['install', '--no-interaction', '--prefer-dist', '--no-progress'], { retry: true }],
       {
         write: [
           '.env',

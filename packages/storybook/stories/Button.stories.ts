@@ -16,8 +16,8 @@ const meta: Meta = {
   },
   argTypes: {
     variant: { control: 'select', options: ['outline', 'filled', 'ghost'] },
-    color: { control: 'select', options: ['default', 'error', 'warning', 'caution', 'success', 'info', 'notice'] },
-    size: { control: 'select', options: ['sm', 'md', 'lg', 'xl', 'xxl'] },
+    color: { control: 'select', options: ['default', 'error', 'warning', 'caution', 'success', 'info', 'notice', 'highlight'] },
+    size: { control: 'select', options: ['sm', 'md', 'lg'] },
     disabled: { control: 'boolean' },
   },
   render: (args) => html`
@@ -108,8 +108,6 @@ export const Sizes: Story = {
       <void-button size="sm">Small</void-button>
       <void-button size="md">Medium</void-button>
       <void-button size="lg">Large</void-button>
-      <void-button size="xl">XL</void-button>
-      <void-button size="xxl">XXL</void-button>
     </div>
   `,
 };

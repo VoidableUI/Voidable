@@ -18,7 +18,7 @@ const meta: Meta = {
     multiple: { control: 'boolean' },
     disabled: { control: 'boolean' },
     size: { control: 'select', options: ['sm', 'md', 'lg'] },
-    color: { control: 'select', options: ['default', 'error', 'warning', 'success', 'info', 'notice'] },
+    color: { control: 'select', options: ['default', 'error', 'warning', 'caution', 'success', 'info', 'notice', 'highlight'] },
     orientation: { control: 'select', options: ['horizontal', 'vertical'] },
   },
   render: (args) => html`

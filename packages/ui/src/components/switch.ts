@@ -15,12 +15,12 @@ export class VoidSwitch extends InternalsFormControl(VoidElement) {
   /** Submitted under `name` while checked (like a native checkbox). */
   @property({ type: String, reflect: true }) value = 'on';
   /**
-   * Status colour of the switch when on: `default`, `error`, `warning`, `caution`, `success`, `info` or
-   * `notice`.
+   * Status colour of the switch when on: `default`, `error`, `warning`, `caution`, `success`, `info`,
+   * `notice` or `highlight`.
    */
-  @property({ type: String, reflect: true }) color: 'default' | 'error' | 'warning' | 'caution' | 'success' | 'info' | 'notice' = 'default';
-  /** Size step: `sm`, `md` (default), `lg`, `xl` or `xxl`. */
-  @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' | 'xl' | 'xxl' = 'md';
+  @property({ type: String, reflect: true }) color: 'default' | 'error' | 'warning' | 'caution' | 'success' | 'info' | 'notice' | 'highlight' = 'default';
+  /** Size step: `sm`, `md` (default) or `lg`. */
+  @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' = 'md';
 
   connectedCallback(): void {
     super.connectedCallback();

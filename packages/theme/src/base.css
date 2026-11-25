@@ -1,0 +1,28 @@
+/* ============================================================
+   @voidable/theme — Base
+   The only styling the theme applies to the page itself rather than to
+   `void-*` elements and what is inside them: the colour scheme, the page
+   background and the default text of the document. Every other element
+   selector in the theme is scoped to the inside of a theme element
+   (reset.css), so the theme does not restyle an application's own markup.
+
+   Optional. `@voidable/theme` includes it; `@voidable/theme/core` leaves it
+   out, for an application that sets its own body and html. Without it, set
+   `color-scheme`, `background` and `color` on your own page.
+   ============================================================ */
+
+html {
+  color-scheme: var(--void-color-scheme);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  font-family: var(--void-type-body-family);
+  font-size: var(--void-type-body-size);
+  line-height: var(--void-type-body-leading);
+  font-weight: var(--void-type-body-weight);
+  color: var(--void-type-body-color);
+  background: var(--void-color-bg);
+}

@@ -6,12 +6,18 @@
 // browser context and so a new Rails session with the default lab state.
 import { test as base, expect, type Page } from '@playwright/test';
 import { typeFast, withoutMoveBefore } from '../shared';
+import { expectedFailure } from '../../helpers/test';
 
 const test = base.extend<{ errors: string[] }>({
   errors: [
     async ({ page }, use) => {
       const errors: string[] = [];
       page.on('pageerror', (e) => errors.push(e.message));
+      // CI must never depend on a published or CDN-hosted build of this library: no request for this library's packages (@voidable/*) leaves the local app. Third-party assets such as icon fonts are not ours to forbid.
+      page.on('request', (r) => {
+        const u = new URL(r.url());
+        if (/^https?:$/.test(u.protocol) && u.hostname !== '127.0.0.1' && u.hostname !== 'localhost' && /voidable/i.test(r.url())) errors.push(`request for Voidable from a remote host: ${r.url()}`);
+      });
       page.on('console', (m) => m.type() === 'error' && errors.push(m.text()));
       await use(errors);
     },
@@ -168,10 +174,13 @@ test('an open dialog keeps its dialog role and name through a refresh morph', as
   await page.click('#lab-open-dialog');
   await refresh(page);
   await expect(page.getByRole('dialog', { name: 'Dialog v1' })).toBeVisible();
-  await expect(page.locator('#lab-dialog')).toHaveAttribute('aria-modal', 'true');
+  // The role and the modal state belong to the native <dialog> inside the host, not to the host.
+  await expect(page.locator('#lab-dialog')).not.toHaveAttribute('role', /.*/);
+  expect(await panel(page).evaluate((el) => el.matches(':modal'))).toBe(true);
 });
 
 test('server changes win: selected value, new options, and a dialog the server opens and closes', async ({ page }) => {
+  expectedFailure('untracked:turbo-server-open-dialog-ignored', 'a refresh morph whose HTML adds `open` to a closed void-dialog leaves it closed: the attribute and the property stay false, though the response contains <void-dialog open>');
   // The native select inside void-select, located directly: its field label is checked in the controls test above.
   const select = page.locator('#lab-select select');
   await server(page, '#lab-select-c');

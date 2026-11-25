@@ -49,8 +49,8 @@ export class VoidNumberInput extends InternalsFormControl(VoidElement) {
   @property({ type: Boolean, reflect: true }) readonly: boolean = false;
   /** Size step: `sm`, `md` (default) or `lg`. */
   @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' = 'md';
-  /** Status colour: `default`, `error`, `warning`, `caution`, `success`, `info` or `notice`. */
-  @property({ type: String, reflect: true }) color: 'default' | 'error' | 'warning' | 'caution' | 'success' | 'info' | 'notice' = 'default';
+  /** Status colour: `default`, `error`, `warning`, `caution`, `success`, `info`, `notice` or `highlight`. */
+  @property({ type: String, reflect: true }) color: 'default' | 'error' | 'warning' | 'caution' | 'success' | 'info' | 'notice' | 'highlight' = 'default';
   /** Hint text shown while the field is empty. */
   @property({ type: String }) placeholder: string = '';
   /**

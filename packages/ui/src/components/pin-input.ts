@@ -32,10 +32,10 @@ export class VoidPinInput extends InternalsFormControl(VoidElement) {
   /** Size step: `sm`, `md` (default) or `lg`. */
   @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' = 'md';
   /**
-   * Status colour of the cells: `default`, `error`, `warning`, `caution`, `success`, `info` or `notice`.
+   * Status colour of the cells: `default`, `error`, `warning`, `caution`, `success`, `info`, `notice` or `highlight`.
    * Use `error` after a wrong code.
    */
-  @property({ type: String, reflect: true }) color: 'default' | 'error' | 'warning' | 'caution' | 'success' | 'info' | 'notice' = 'default';
+  @property({ type: String, reflect: true }) color: 'default' | 'error' | 'warning' | 'caution' | 'success' | 'info' | 'notice' | 'highlight' = 'default';
   /** Character shown in every empty cell, such as `-`. */
   @property({ type: String }) placeholder: string = '';
 

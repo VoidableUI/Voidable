@@ -28,7 +28,7 @@ Pattern: select-only combobox with a multiselectable listbox. The trigger is the
   },
   argTypes: {
     disabled: { control: 'boolean' },
-    size: { control: 'select', options: ['sm', 'md', 'lg', 'xl', 'xxl'] },
+    size: { control: 'select', options: ['sm', 'md', 'lg'] },
     error: { control: 'text' },
     placeholder: { control: 'text' },
   },
@@ -80,14 +80,6 @@ export const Sizes: Story = {
         <void-option value="b">Option B</void-option>
       </void-multiselect>
       <void-multiselect size="lg" placeholder="Large">
-        <void-option value="a">Option A</void-option>
-        <void-option value="b">Option B</void-option>
-      </void-multiselect>
-      <void-multiselect size="xl" placeholder="XL">
-        <void-option value="a">Option A</void-option>
-        <void-option value="b">Option B</void-option>
-      </void-multiselect>
-      <void-multiselect size="xxl" placeholder="XXL">
         <void-option value="a">Option A</void-option>
         <void-option value="b">Option B</void-option>
       </void-multiselect>

@@ -20,7 +20,7 @@ const meta: Meta = {
     },
     size: {
       control: { type: 'select' },
-      options: ['sm', 'md', 'lg', 'xl'],
+      options: ['sm', 'md', 'lg'],
     },
     closable: {
       control: { type: 'boolean' },
@@ -67,7 +67,6 @@ export const Sizes: Story = {
         <button @click="${() => openDialog('dialog-sm')}" style="padding: 0.5rem 1rem; cursor: pointer;">Small</button>
         <button @click="${() => openDialog('dialog-md')}" style="padding: 0.5rem 1rem; cursor: pointer;">Medium</button>
         <button @click="${() => openDialog('dialog-lg')}" style="padding: 0.5rem 1rem; cursor: pointer;">Large</button>
-        <button @click="${() => openDialog('dialog-xl')}" style="padding: 0.5rem 1rem; cursor: pointer;">Extra Large</button>
       </div>
       <void-dialog id="dialog-sm" heading="Small Dialog" size="sm" @void-close="${onClose}">
         <p>This is a small dialog (24rem max-width).</p>
@@ -77,9 +76,6 @@ export const Sizes: Story = {
       </void-dialog>
       <void-dialog id="dialog-lg" heading="Large Dialog" size="lg" @void-close="${onClose}">
         <p>This is a large dialog (48rem max-width).</p>
-      </void-dialog>
-      <void-dialog id="dialog-xl" heading="Extra Large Dialog" size="xl" @void-close="${onClose}">
-        <p>This is an extra large dialog (64rem max-width).</p>
       </void-dialog>
     `;
   },

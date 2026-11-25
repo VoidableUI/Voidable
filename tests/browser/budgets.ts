@@ -20,8 +20,10 @@ export const calibrationMs = 80;
 // Re-baselined 2026-11-25 against the current master (a Linux desktop, Playwright Chromium 159).
 // The machine was shared with other jobs (load average 20 to 27), so each run's timings were
 // divided by that run's own calibration and rescaled to calibrationMs; medians of four runs,
-// rounded up. The first baseline, on the suite's old base, was 58, 75, 130, 170 and 28.5 ms and
-// 46.7 and 6.9 kB.
+// rounded up. The dialog figure moved from 28 to 330 ms when the dialog became a native <dialog>:
+// 1.6 ms per open and close instead of 0.14 (a top-layer showModal, a transition, focus handling). The
+// previous baseline, on the suite's old base, was 58, 75, 130, 170 and 28.5 ms and
+// 46.7 and 6.9 kB; the root entry grew from 52.4 to 59.5 kB gzipped with the overlay controller and anchor fallback.
 export const reference = {
   /** First render of 1,000 mixed components until all have rendered. */
   mixed1000Ms: 65,
@@ -32,9 +34,9 @@ export const reference = {
   /** First render of a void-select with 5,000 options. */
   select5000Ms: 40,
   /** 200 open/close cycles of a dialog. */
-  dialog200Ms: 28,
+  dialog200Ms: 330,
   /** Gzipped size of `import '@voidable/ui'` (everything, Lit included), minified. */
-  rootEntryGzipKB: 52.4,
+  rootEntryGzipKB: 59.5,
   /** Gzipped size of `import '@voidable/ui/components/button'` (one component, Lit included), minified. */
   singleComponentGzipKB: 11.6,
 };

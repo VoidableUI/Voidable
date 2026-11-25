@@ -5,7 +5,7 @@
 // scheme, and how that is written as Design Tokens Community Group JSON
 // (Format Module 2025.10) and as a flat map of CSS values.
 //
-// Takes CSS text, returns objects; scripts/build.mjs does the file work and
+// Takes CSS text, returns objects; scripts/export-tokens.mjs does the file work and
 // the theme builder on the docs site calls the same functions in the page.
 
 import { declarations, evaluate, fontFamilies, hex, clipped, ruleBody, stripComments, toPx } from './css-eval.js';
@@ -96,6 +96,7 @@ export function environment(source, { scheme = 'dark', knobs = {}, skin = {} } =
     ...source.primitives,
     ...source.knobs,
     ...source.inputs,
+    '--void-color-scheme': scheme === 'dark' ? 'dark' : 'light',
     '--void-scheme-dark': dark,
     '--void-page-scheme-dark': dark,
     ...knobs,

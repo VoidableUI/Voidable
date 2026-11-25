@@ -18,8 +18,8 @@ export class VoidToggleGroup extends InternalsFormControl(VoidElement) {
   @property({ type: Boolean, reflect: true }) disabled = false;
   /** Size step: `sm`, `md` (default) or `lg`. */
   @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' = 'md';
-  /** Status colour of the pressed toggles: `default`, `error`, `warning`, `success`, `info` or `notice`. */
-  @property({ type: String, reflect: true }) color: 'default' | 'error' | 'warning' | 'success' | 'info' | 'notice' = 'default';
+  /** Status colour of the pressed toggles: `default`, `error`, `warning`, `caution`, `success`, `info`, `notice` or `highlight`. */
+  @property({ type: String, reflect: true }) color: 'default' | 'error' | 'warning' | 'caution' | 'success' | 'info' | 'notice' | 'highlight' = 'default';
   /** Lay the toggles out in a `horizontal` row (default) or a `vertical` column. */
   @property({ type: String, reflect: true }) orientation: 'horizontal' | 'vertical' = 'horizontal';
 

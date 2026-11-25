@@ -17,14 +17,14 @@ const meta: Meta = {
   argTypes: {
     color: {
       control: { type: 'select' },
-      options: ['default', 'error', 'warning', 'caution', 'success', 'info', 'notice'],
+      options: ['default', 'error', 'warning', 'caution', 'success', 'info', 'notice', 'highlight'],
     },
     removable: {
       control: { type: 'boolean' },
     },
     size: {
       control: { type: 'select' },
-      options: ['sm', 'md', 'lg', 'xl', 'xxl'],
+      options: ['sm', 'md', 'lg'],
     },
   },
 };
@@ -62,8 +62,6 @@ export const Sizes: Story = {
       <void-tag size="sm">Small</void-tag>
       <void-tag size="md">Medium</void-tag>
       <void-tag size="lg">Large</void-tag>
-      <void-tag size="xl">XL</void-tag>
-      <void-tag size="xxl">XXL</void-tag>
     </div>
   `,
 };

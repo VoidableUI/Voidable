@@ -31,10 +31,10 @@ test.describe('layout page', () => {
   });
 
   test('clicking anywhere on a link button follows the link, including its padding', async ({ page }) => {
-    const link = page.locator('[data-link="xl"]');
+    const link = page.locator('[data-link="lg"]');
     const box = (await link.boundingBox())!;
     await page.mouse.click(box.x + 3, box.y + 3);
-    await expect(page).toHaveURL(/#xl$/);
+    await expect(page).toHaveURL(/#lg$/);
   });
 
   test('cards in a fixed-height flex column keep their content height instead of shrinking', async ({ page }) => {
@@ -75,23 +75,23 @@ test.describe('layout page', () => {
   test('overlays opened inside a card are not clipped by it', async ({ page }) => {
     await page.locator('#card').scrollIntoViewIfNeeded();
     await page.locator('#dd-t').click();
-    expect(await fullyVisible(page, '#dd .void-dropdown-menu-panel')).toBe(true);
+    await expect.poll(() => fullyVisible(page, '#dd .void-dropdown-menu-panel')).toBe(true);
     await page.keyboard.press('Escape');
 
     await page.locator('#po-t').click();
-    expect(await fullyVisible(page, '#po .void-popover-body')).toBe(true);
+    await expect.poll(() => fullyVisible(page, '#po .void-popover-body')).toBe(true);
     await page.keyboard.press('Escape');
 
     await page.locator('#cb input').click();
-    expect(await isPerceivable(page.locator('#cb').getByRole('option', { name: 'Solid' }))).toBe(true);
+    await expect.poll(() => isPerceivable(page.locator('#cb').getByRole('option', { name: 'Solid' }))).toBe(true);
     await page.keyboard.press('Escape');
 
     await page.locator('#ms .void-multiselect-trigger').click();
-    expect(await isPerceivable(page.locator('#ms').getByRole('option', { name: 'SQL' }))).toBe(true);
+    await expect.poll(() => isPerceivable(page.locator('#ms').getByRole('option', { name: 'SQL' }))).toBe(true);
     await page.locator('h1, main').first().click({ position: { x: 900, y: 5 } });
 
     await page.locator('#dp input').click();
-    expect(await isPerceivable(page.locator('#dp').getByRole('button', { name: /November 30, 2026|December 5, 2026/ }).last())).toBe(true);
+    await expect.poll(() => isPerceivable(page.locator('#dp').getByRole('button', { name: /November 30, 2026|December 5, 2026/ }).last())).toBe(true);
   });
 });
 

@@ -54,6 +54,7 @@ void-table caption {
 
 /* Header cells are labels: the small quiet name of a column. */
 void-table th {
+  vertical-align: middle;
   text-align: left;
   font-family: var(--void-type-label-family);
   font-size: var(--void-type-label-size);
@@ -68,6 +69,9 @@ void-table th {
 }
 
 void-table td {
+  /* Stated, not left to the browser default, so a reset that sets
+     vertical-align: baseline on cells does not shift every row. */
+  vertical-align: middle;
   padding: var(--void-table-padding-block) var(--void-table-padding-inline);
   color: var(--void-color-text);
   border-bottom: 1px solid var(--void-color-border);
@@ -103,21 +107,6 @@ void-table [data-align="center"] {
    mark the header and the cells (the page patterns write it by hand). */
 void-table :is(th, td)[data-numeric] {
   text-align: end;
-}
-
-/* Row actions written as <void-actions>: ghost buttons at the end of a row,
-   their labels (not their padding) on the table's edge. */
-void-table td > void-actions {
-  flex-wrap: nowrap;
-  gap: var(--void-space-1);
-}
-
-void-table td:last-child > void-actions {
-  justify-content: flex-end;
-}
-
-void-table:not([inset]) td:last-child > void-actions:has(> void-button[variant="ghost"]:last-child) {
-  margin-inline-end: calc(var(--void-control-padding-sm) * -1.25);
 }
 
 /* A column of row actions: ghost buttons, end-aligned, their labels

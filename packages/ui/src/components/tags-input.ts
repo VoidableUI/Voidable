@@ -25,8 +25,8 @@ export class VoidTagsInput extends InternalsFormControl(VoidElement) {
   @property({ type: String }) placeholder = 'Add tag...';
   /** Size step: `sm`, `md` (default) or `lg`. */
   @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' = 'md';
-  /** Status colour of the tags: `default`, `error`, `warning`, `caution`, `success`, `info` or `notice`. */
-  @property({ type: String, reflect: true }) color: 'default' | 'error' | 'warning' | 'caution' | 'success' | 'info' | 'notice' = 'default';
+  /** Status colour of the tags: `default`, `error`, `warning`, `caution`, `success`, `info`, `notice` or `highlight`. */
+  @property({ type: String, reflect: true }) color: 'default' | 'error' | 'warning' | 'caution' | 'success' | 'info' | 'notice' | 'highlight' = 'default';
   /** How the tags are drawn: `outline` (default) or `filled`. */
   @property({ type: String, reflect: true }) variant: 'filled' | 'outline' = 'outline';
   /** Accept the same tag more than once. Without it a tag that is already present is ignored. */

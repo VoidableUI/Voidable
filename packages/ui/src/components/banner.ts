@@ -6,10 +6,10 @@ import { ProjectionController } from '../projection.js';
 /** Full-width site-level announcement for maintenance windows, cookie consent, and promotional messaging. */
 export class VoidBanner extends VoidElement {
   /**
-   * Status colour of the announcement: `default`, `error`, `warning`, `caution`, `success`, `info` or
-   * `notice`.
+   * Status colour of the announcement: `default`, `error`, `warning`, `caution`, `success`, `info`,
+   * `notice` or `highlight`.
    */
-  @property({ type: String, reflect: true }) color: 'default' | 'error' | 'warning' | 'caution' | 'success' | 'info' | 'notice' = 'default';
+  @property({ type: String, reflect: true }) color: 'default' | 'error' | 'warning' | 'caution' | 'success' | 'info' | 'notice' | 'highlight' = 'default';
   /** Show a close button. Clicking it fires `void-close` and removes the banner from the page. */
   @property({ type: Boolean, reflect: true }) dismissable = false;
   /** `subtle` (default) tints the background; `filled` fills it with the status colour. */

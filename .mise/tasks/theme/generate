@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+#MISE description="Regenerate the theme source that is derived (src/reset.css, the scoped reset); the build does it too"
+set -euo pipefail
+
+pnpm --filter @voidable/theme generate

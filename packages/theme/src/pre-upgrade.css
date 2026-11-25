@@ -165,10 +165,6 @@ void-tags-input:not(:defined) {
   min-height: calc(var(--void-space-3) * 2 + var(--void-text-base) * var(--void-leading-normal) + 2px); /* token-ok: total height with the 1px border on each side (border-box) */
 }
 
-:is(void-input, void-multiselect, void-combobox, void-select, void-number-input, void-date-picker, void-action-input, void-tags-input)[size="xl"]:not(:defined) {
-  min-height: calc(var(--void-space-4) * 2 + var(--void-text-lg) * var(--void-leading-normal) + 2px); /* token-ok: total height with the 1px border on each side (border-box) */
-}
-
 /* Three rows unless `rows` says otherwise (typed attr() where supported). */
 void-textarea:not(:defined) {
   display: block;
@@ -227,8 +223,6 @@ void-progress:not(:defined)::before {
 
 void-progress[size="sm"]:not(:defined)::before { height: 0.25rem; /* token-ok: as progress.css */ }
 void-progress[size="lg"]:not(:defined)::before { height: 0.75rem; /* token-ok: as progress.css */ }
-void-progress[size="xl"]:not(:defined)::before { height: 1rem; /* token-ok: as progress.css */ }
-void-progress[size="xxl"]:not(:defined)::before { height: 1.25rem; /* token-ok: as progress.css */ }
 
 /* Skeleton defaults to the text variant once upgraded. */
 void-skeleton:not(:defined):not([variant]) {

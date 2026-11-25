@@ -4,7 +4,7 @@
 // min(), max(), clamp(), oklch(), color-mix(in srgb, …), hex colours,
 // box-shadow lists, font-family lists and cubic-bezier(). It resolves a
 // custom property to the value a browser computes, without a browser, so
-// the token export (scripts/build.mjs) can run wherever Node runs.
+// the token export (scripts/export-tokens.mjs) can run wherever Node runs.
 //
 // It is not a general CSS engine. It implements what tokens.css uses and
 // throws on anything else, so a new construct in the theme fails the build

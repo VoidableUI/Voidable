@@ -6,11 +6,11 @@ import { defaultTrueBoolean } from '../converters.js';
 /** Temporary notification for action confirmations, error alerts, and copy-to-clipboard feedback. */
 export class VoidToast extends VoidElement {
   /**
-   * Status colour: `default`, `error`, `warning`, `caution`, `success` or `info`. `error` and `warning`
+   * Status colour: `default`, `error`, `warning`, `caution`, `success`, `info`, `notice` or `highlight`. `error` and `warning`
    * are announced assertively, the rest politely.
    */
   @property({ type: String, reflect: true })
-  color: 'default' | 'error' | 'warning' | 'caution' | 'success' | 'info' = 'default';
+  color: 'default' | 'error' | 'warning' | 'caution' | 'success' | 'info' | 'notice' | 'highlight' = 'default';
 
   /**
    * Milliseconds before the toast closes itself. Defaults to 5000; 0 keeps it until dismissed. The timer

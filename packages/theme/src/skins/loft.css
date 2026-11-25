@@ -142,7 +142,7 @@
 /* 7. void-card and void-panel cast a shadow only as the elevated
       variant, which also changes their fill; the default container
       has no shadow or border-colour token. */
-[data-void-skin="loft"] :is(void-card, void-panel):not([variant="outlined"], [variant="bordered"]) {
+[data-void-skin="loft"] :is(void-card, void-panel):not([variant="bordered"]) {
   border-color: transparent;
   box-shadow: var(--void-loft-shadow);
 }

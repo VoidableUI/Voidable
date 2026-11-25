@@ -12,19 +12,23 @@
     "*.css"
   ],
   "license": "MIT",
-  "scripts": {
-    "build": "node scripts/build.mjs",
-    "test": "node --test test/"
-  },
+  "style": "./dist/void.css",
   "exports": {
-    ".": "./src/index.css",
-    "./primitives": "./src/primitives.css",
-    "./knobs": "./src/knobs.css",
-    "./tokens": "./src/tokens.css",
-    "./reset": "./src/reset.css",
-    "./type": "./src/type.css",
-    "./themes/*": "./src/themes/*",
-    "./skins/*": "./src/skins/*",
+    ".": { "style": "./dist/void.css", "default": "./dist/void.css" },
+    "./core": "./dist/core.css",
+    "./tokens": "./dist/tokens.css",
+    "./base": "./dist/base.css",
+    "./layers": "./dist/layers.css",
+    "./primitives": "./dist/primitives.css",
+    "./knobs": "./dist/knobs.css",
+    "./reset": "./dist/reset.css",
+    "./type": "./dist/type.css",
+    "./components/*": "./dist/components/*",
+    "./patterns/*": "./dist/patterns/*",
+    "./themes/*": "./dist/themes/*",
+    "./dist/*": "./dist/*",
+    "./src/*": "./src/*",
+    "./skins/*": "./dist/skins/*",
     "./dtcg/*": "./dist/dtcg/*",
     "./json/*": "./dist/json/*",
     "./knobs.json": "./dist/knobs.json",
@@ -41,5 +45,15 @@
   },
   "publishConfig": {
     "access": "public"
+  },
+  "scripts": {
+    "build": "node scripts/build.mjs && node scripts/export-tokens.mjs",
+    "test": "node --test test/",
+    "generate": "node scripts/build.mjs --generated-only"
+  },
+  "devDependencies": {
+    "lightningcss": "^1.32.0",
+    "postcss": "^8.5.12",
+    "postcss-selector-parser": "^6.1.2"
   }
 }

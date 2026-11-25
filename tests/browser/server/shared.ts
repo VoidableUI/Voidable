@@ -23,6 +23,11 @@ export const test = base.extend<Fixtures>({
     async ({ page, allowErrors }, use) => {
       const errors: string[] = [];
       page.on('pageerror', (e) => errors.push(e.message));
+      // CI must never depend on a published or CDN-hosted build of this library: no request for this library's packages (@voidable/*) leaves the local app. Third-party assets such as icon fonts are not ours to forbid.
+      page.on('request', (r) => {
+        const u = new URL(r.url());
+        if (/^https?:$/.test(u.protocol) && u.hostname !== '127.0.0.1' && u.hostname !== 'localhost' && /voidable/i.test(r.url())) errors.push(`request for Voidable from a remote host: ${r.url()}`);
+      });
       page.on('console', (m) => m.type() === 'error' && errors.push(m.text()));
       await use(errors);
       const unexpected = errors.filter((e) => !allowErrors.some((a) => e.includes(a)));
@@ -80,6 +85,25 @@ export const signature = (page: Page, selector: string) =>
   );
 
 /**
+ * Adds a tag with real typing. A server round trip can reset text typed into a field while its
+ * patch lands (the liveview-typing-focus-lost defect), so the tag is typed again until its chip
+ * renders; Enter is never pressed when the chip is already there, so it is added once.
+ */
+export async function addTag(page: Page, tag: string): Promise<void> {
+  const chip = page.locator('#i-tags .void-tags-input-tag-text', { hasText: new RegExp(`^${tag}$`) });
+  await expect(async () => {
+    if (await chip.count()) return;
+    await page.locator('#i-tags input').click();
+    await page.keyboard.press('Control+a');
+    await page.keyboard.press('Delete');
+    await page.keyboard.type(tag);
+    await expect(page.locator('#i-tags input')).toHaveValue(tag, { timeout: 1000 });
+    await page.keyboard.press('Enter');
+    await expect(chip).toHaveCount(1, { timeout: 2000 });
+  }).toPass({ timeout: 20_000 });
+}
+
+/**
  * The whole sequence a user would walk through on the lab form that every app carries
  * (ids i-name, i-email, i-bio, i-country, i-remember, i-plan, i-vol, i-news, i-seats, i-date,
  * i-tags, i-fw and i-skills): fills every control with real pointer and keyboard input.
@@ -111,11 +135,9 @@ export async function fillLabForm(page: Page, opts: { skip?: string[] } = {}): P
     picked = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
   });
   await step('tags', async () => {
-    await page.locator('#i-tags input').click();
-    await page.keyboard.type('alpha');
-    await page.keyboard.press('Enter');
-    await page.keyboard.type('beta');
-    await page.keyboard.press('Enter');
+    await expect(page.locator('#i-date [role=grid]')).toBeHidden();
+    await addTag(page, 'alpha');
+    await addTag(page, 'beta');
   });
   await step('framework', async () => {
     await page.locator('#i-fw input').click();

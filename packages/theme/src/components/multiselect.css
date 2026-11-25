@@ -177,5 +177,3 @@ void-multiselect[disabled] .void-multiselect-trigger {
 /* Size variants: each step sets the field tokens and nothing else */
 void-multiselect[size="sm"] { --void-field-height: var(--void-control-height-sm); --void-field-padding: var(--void-control-padding-sm); --void-field-text: var(--void-control-text-sm); }
 void-multiselect[size="lg"] { --void-field-height: var(--void-control-height-lg); --void-field-padding: var(--void-control-padding-lg); --void-field-text: var(--void-control-text-lg); }
-void-multiselect[size="xl"] { --void-field-height: var(--void-control-height-xl); --void-field-padding: var(--void-control-padding-xl); --void-field-text: var(--void-control-text-xl); }
-void-multiselect[size="xxl"] { --void-field-height: var(--void-control-height-xxl); --void-field-padding: var(--void-control-padding-xxl); --void-field-text: var(--void-control-text-xxl); }

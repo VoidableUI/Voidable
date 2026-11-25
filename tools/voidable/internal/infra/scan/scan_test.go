@@ -102,6 +102,85 @@ func TestScan(t *testing.T) {
 	}
 }
 
+// Template constructs written inside a tag's attribute list: conditionals,
+// spreads and expressions that contain `>`, quotes and parentheses must not
+// leak out as attribute names or end the tag early.
+func TestScanInlineConstructs(t *testing.T) {
+	tests := []struct {
+		name string
+		lang domain.Lang
+		src  string
+		want string
+	}{
+		// Blade
+		{"blade @if with a space before the parenthesis", domain.LangBlade, `<void-tabs id="tabs" @if ($tab !== '') value="{{ $tab }}" @endif>`,
+			`void-tabs{id:attr=tabs @if ($tab !== ''):directive value:attr={{ $tab }}! @endif:directive}@1:1`},
+		{"blade @if without a space", domain.LangBlade, `<void-tabs @if($tab !== '') value="x" @endif>`,
+			`void-tabs{@if($tab !== ''):directive value:attr=x @endif:directive}@1:1`},
+		{"blade @if with a tab before the parenthesis", domain.LangBlade, "<void-tabs @if\t($a) value=\"x\" @endif>",
+			"void-tabs{@if\t($a):directive value:attr=x @endif:directive}@1:1"},
+		{"blade parentheses inside a string argument", domain.LangBlade, `<void-input @if (str_contains($x, ')')) disabled @endif name="n">`,
+			`void-input{@if (str_contains($x, ')')):directive disabled:attr @endif:directive name:attr=n}@1:1`},
+		{"blade nested parentheses and a double-quoted string", domain.LangBlade, `<void-input @if (($a && ($b || $c)) || $d === "(") required @endif>`,
+			`void-input{@if (($a && ($b || $c)) || $d === "("):directive required:attr @endif:directive}@1:1`},
+		{"blade @elseif and @else", domain.LangBlade, `<void-badge @if ($a) color="error" @elseif ($b > 1) color="success" @else color="warning" @endif>`,
+			`void-badge{@if ($a):directive color:attr=error @elseif ($b > 1):directive color:attr=success @else:directive color:attr=warning @endif:directive}@1:1`},
+		{"blade @class with an array and a closure", domain.LangBlade, `<void-card @class(['a' => $x, 'b' => fn ($y) => ($y > 1)]) variant="outlined">`,
+			`void-card{@class(['a' => $x, 'b' => fn ($y) => ($y > 1)]):directive variant:attr=outlined}@1:1`},
+		{"blade @disabled with a space", domain.LangBlade, `<void-button @disabled ($busy) @required($r)>`,
+			`void-button{@disabled ($busy):directive @required($r):directive}@1:1`},
+		{"blade directive spanning lines", domain.LangBlade, "<void-select\n  @if (\n    $a &&\n    $b\n  )\n    disabled\n  @endif\n>",
+			"void-select{@if (\n    $a &&\n    $b\n  ):directive disabled:attr @endif:directive}@1:1"},
+		{"blade event shorthand followed by a parenthesis is not a directive", domain.LangBlade, `<void-button @click="go()" (x)>`,
+			`void-button{click:event=go() x:event}@1:1`},
+		{"blade echo and raw echo between attributes", domain.LangBlade, `<void-input {{ $attributes->merge(['a' => 1]) }} {!! $extra !!} name="n">`,
+			`void-input{{{ $attributes->merge(['a' => 1]) }}:spread {!! $extra !!}:spread name:attr=n}@1:1`},
+		// ERB
+		{"erb if inside a tag", domain.LangERB, `<void-input <% if x > 1 %> disabled <% end %> name="a">`,
+			`void-input{<% if x > 1 %>:spread disabled:attr <% end %>:spread name:attr=a}@1:1`},
+		{"erb with quotes and a closing angle bracket in the code", domain.LangERB, `<void-input <%= "disabled" if a > b && c == '%' %> type="email">`,
+			`void-input{<%= "disabled" if a > b && c == '%' %>:spread type:attr=email}@1:1`},
+		{"erb tag.attributes helper", domain.LangERB, `<void-button <%= tag.attributes(data: { id: 1 }) %>>`,
+			`void-button{<%= tag.attributes(data: { id: 1 }) %>:spread}@1:1`},
+		// HEEx
+		{"heex rest, :if and :for", domain.LangHEEx, `<void-badge {@rest} :if={@n > 1} :for={x <- @xs} color={if @n > 2, do: "error", else: "}"}>`,
+			`void-badge{{@rest}:spread :if:directive=@n > 1! :for:directive=x <- @xs! color:attr=if @n > 2, do: "error", else: "}"!}@1:1`},
+		{"heex attribute with a closing brace in a string", domain.LangHEEx, `<void-input value={"}"} name="n">`,
+			`void-input{value:attr=} name:attr=n}@1:1`},
+		// Svelte
+		{"svelte spread and shorthand", domain.LangSvelte, `<void-input {...rest} {value} disabled={a > b} class:big={n > 1}>`,
+			`void-input{{...rest}:spread {value}:spread disabled:attr=a > b! class:big:directive=n > 1!}@1:1`},
+		{"svelte restProps", domain.LangSvelte, `<void-button {...$$restProps} on:void-click={(e) => n > 1 && go(e)}>`,
+			`void-button{{...$$restProps}:spread void-click:event=(e) => n > 1 && go(e)!}@1:1`},
+		// JSX
+		{"jsx conditional spread", domain.LangJSX, `<void-input {...(cond ? { disabled: true } : {})} {...props} required={a > 1 && b < 2} />`,
+			`void-input/{{...(cond ? { disabled: true } : {})}:spread {...props}:spread required:attr=a > 1 && b < 2!}@1:1`},
+		{"jsx template literal with an angle bracket", domain.LangJSX, "<void-input title={`a > ${b}`} name=\"x>y\" />",
+			"void-input/{title:attr=`a > ${b}`! name:attr=x>y}@1:1"},
+		{"jsx arrow function and ternary", domain.LangJSX, `<void-button onvoid-click={() => (n > 1 ? a() : b())} variant={dark ? "filled" : "outlined"}>`,
+			`void-button{void-click:event=() => (n > 1 ? a() : b())! variant:attr=dark ? "filled" : "outlined"!}@1:1`},
+		// Vue
+		{"vue bindings with > and quotes", domain.LangVue, `<void-badge :color="n > 1 ? 'error' : 'success'" :title='"a > b"' @void-click="n = n > 1 ? 0 : 1" v-if="a > 1 && b">`,
+			`void-badge{color:bound=n > 1 ? 'error' : 'success'! title:bound="a > b"! void-click:event=n = n > 1 ? 0 : 1 v-if:directive=a > 1 && b}@1:1`},
+		{"vue v-bind object and slot shorthand", domain.LangVue, `<void-input v-bind="$attrs" v-model="form.a" #prefix>`,
+			`void-input{v-bind:directive=$attrs v-model:directive=form.a #prefix:directive}@1:1`},
+		// Alpine
+		{"alpine expressions", domain.LangHTML, `<void-dialog x-show="count > 5" @click="open = ! open" x-on:keydown.escape="alert('a > b')" x-data="{ a: '>' }" :class="{ 'a': b > 1 }">`,
+			`void-dialog{x-show:directive=count > 5 click:event=open = ! open keydown:event=alert('a > b') x-data:directive={ a: '>' } class:bound={ 'a': b > 1 }!}@1:1`},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tags, err := Scanner{}.Scan(context.Background(), []byte(tt.src), tt.lang)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if got := summary(tags); got != tt.want {
+				t.Errorf("\n got: %s\nwant: %s", got, tt.want)
+			}
+		})
+	}
+}
+
 func TestMarkdownFenceLang(t *testing.T) {
 	src := "```tsx\n<void-input />\n```\n```html\n<void-input />\n```\n<void-input />"
 	tags, _ := Scanner{}.Scan(context.Background(), []byte(src), domain.LangMarkdown)

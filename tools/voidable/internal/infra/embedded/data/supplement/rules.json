@@ -184,7 +184,7 @@
       "attributes": [
         {
           "name": "color",
-          "type": "'default' | 'success' | 'info' | 'warning' | 'caution' | 'error' | 'notice'",
+          "type": "'default' | 'success' | 'info' | 'warning' | 'caution' | 'error' | 'notice' | 'highlight'",
           "default": "default",
           "description": "default is grey (idle, off, unknown)"
         },
