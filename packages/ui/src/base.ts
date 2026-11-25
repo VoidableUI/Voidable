@@ -1,5 +1,5 @@
 import { LitElement, ReactiveElement, type PropertyDeclaration, type PropertyValues } from 'lit';
-import { PROJECTION_KEY, ProjectionController } from './projection.js';
+import { PROJECTION_KEY, ProjectionController, isFocusParked, stripSerializedChrome } from './projection.js';
 
 /** Per-class cache of reflected property defaults (attribute name -> property and default value). */
 const REFLECTED_DEFAULTS = Symbol('voidReflectedDefaults');
@@ -57,6 +57,8 @@ interface MorphMeta {
   drafts: Array<[PropertyKey, string | null]>;
   /** The class overrides VoidElement's `morphedCallback`. */
   hook: boolean;
+  /** Attributes the user edits through a focused inner control (see VoidElement.editState). */
+  edits: readonly string[];
 }
 
 const MORPH_META = Symbol('voidMorphMeta');
@@ -74,7 +76,7 @@ function morphMeta(el: VoidElement): MorphMeta {
   const drafts = Object.entries(ctor.clientState ?? {}) as Array<[PropertyKey, string | null]>;
   const proto = el as unknown as { morphedCallback: unknown };
   const hook = proto.morphedCallback !== (VoidElement.prototype as unknown as { morphedCallback: unknown }).morphedCallback;
-  const meta: MorphMeta = { attrs, drafts, hook };
+  const meta: MorphMeta = { attrs, drafts, hook, edits: ctor.editState ?? [] };
   ctor[MORPH_META] = meta;
   return meta;
 }
@@ -113,6 +115,9 @@ type DevHook = { report?: (warning: { kind: string; tag: string; subject: string
  *   {@link VoidElement.clientState}; groups re-apply state they keep in their
  *   children in {@link morphedCallback}.
  */
+/** Incoming elements whose state rule a host has applied, so a repeated call with the same one is a no-op. */
+const reconciled = new WeakMap<Element, Element>();
+
 export class VoidElement extends LitElement {
   /** @internal The element's projection controller (see ProjectionController). */
   declare [PROJECTION_KEY]?: ProjectionController;
@@ -149,6 +154,88 @@ export class VoidElement extends LitElement {
    * ```
    */
   static clientState?: Record<string, string | null>;
+
+  /**
+   * Attributes whose value the user is editing while focus is inside the
+   * element (the text of an input): a morph that arrives then never applies
+   * the server's value of these, as a browser never rewrites what a user typed
+   * into a native field from its `value` attribute. The server's value still
+   * becomes the baseline, and the next morph after focus has left applies a
+   * server change as usual. This is what keeps every keystroke when each one
+   * round-trips to the server and comes back a few keys behind (Livewire's
+   * `$wire.set` on `void-input`, LiveView's `phx-change` echo).
+   *
+   * ```ts
+   * static override editState = ['value'];
+   * ```
+   */
+  static editState?: readonly string[];
+
+  /**
+   * Where `aria-label` and `aria-labelledby` written on the host go, for a
+   * component whose host is not the control (a `void-select` renders a native
+   * `<select>`): a selector for the element(s) inside that are named. The
+   * host's attributes are moved onto them (a name on an element with no role
+   * is ignored and invalid), so `<void-select aria-label="Country">` names the
+   * select as `<void-field label="Country">` does. An `aria-labelledby` that
+   * `void-field` (or the author) wrote on the inner control itself is left
+   * alone. Set the attribute again to change the name, set it to an empty
+   * string to remove it; a morph to server markup without it removes it too.
+   *
+   * ```ts
+   * static override labelTarget = 'select';
+   * ```
+   */
+  static labelTarget?: string;
+
+  static override get observedAttributes(): string[] {
+    const names = super.observedAttributes;
+    return (this as typeof VoidElement).labelTarget ? [...names, 'aria-label', 'aria-labelledby'] : names;
+  }
+
+  /** The host's moved `aria-label` / `aria-labelledby`, and what was last written onto the inner control. */
+  #hostLabel: { 'aria-label': string | null; 'aria-labelledby': string | null; written: Map<Element, Record<string, string | null>> } | null = null;
+
+  #takeHostLabel(name: 'aria-label' | 'aria-labelledby', value: string): void {
+    if (!this.#hostLabel) {
+      this.#hostLabel = { 'aria-label': null, 'aria-labelledby': null, written: new Map() };
+      this.addController({ hostUpdated: () => this.#applyHostLabel() });
+    }
+    this.#hostLabel[name] = value || null;
+    this.removeAttribute(name);
+    this.#applyHostLabel();
+  }
+
+  #applyHostLabel(): void {
+    const state = this.#hostLabel;
+    const selector = (this.constructor as typeof VoidElement).labelTarget;
+    if (!state || !selector) return;
+    const targets = Array.from(this.querySelectorAll(selector));
+    for (const [el, written] of state.written) {
+      if (targets.includes(el)) continue;
+      state.written.delete(el);
+      for (const [name, value] of Object.entries(written)) if (value !== null && el.getAttribute(name) === value) el.removeAttribute(name);
+    }
+    for (const el of targets) {
+      let written = state.written.get(el);
+      if (!written) state.written.set(el, (written = { 'aria-label': null, 'aria-labelledby': null }));
+      for (const name of ['aria-label', 'aria-labelledby'] as const) {
+        const want = state[name];
+        const current = el.getAttribute(name);
+        // Someone else (void-field) labelled the control itself: theirs stays.
+        if (name === 'aria-labelledby' && current !== null && current !== written[name]) continue;
+        if (want === null) {
+          if (written[name] !== null && current === written[name] && current !== null) {
+            el.removeAttribute(name);
+          }
+          written[name] = null;
+        } else {
+          if (current !== want) el.setAttribute(name, want);
+          written[name] = want;
+        }
+      }
+    }
+  }
 
   createRenderRoot(): this {
     return this;
@@ -339,6 +426,10 @@ export class VoidElement extends LitElement {
   }
 
   override attributeChangedCallback(name: string, old: string | null, value: string | null): void {
+    if ((name === 'aria-label' || name === 'aria-labelledby') && (this.constructor as typeof VoidElement).labelTarget) {
+      if (value !== null) this.#takeHostLabel(name, value);
+      return;
+    }
     super.attributeChangedCallback(name, old, value);
     // A reflected attribute removed from outside (a morph to server markup that
     // omits it, `removeAttribute`): the property returns to its default, as it
@@ -461,8 +552,11 @@ export class VoidElement extends LitElement {
    *   style custom properties) are copied onto it where the server markup does
    *   not set them. {@link VoidElement.clientState} the server overrode is
    *   discarded, and {@link morphedCallback} runs once the morph has finished.
-   *   The adapters call this hook only for the server's version of an element;
-   *   call it at most once per morph.
+   *   The adapters call this hook only for the server's version of an element.
+   *   `incoming` may also be a detached copy of a rendered element (LiveView
+   *   morphs the live element to a clone it patched while the element was
+   *   locked): its copied chrome is dropped, its consumer content lifted back
+   *   onto it, and it is treated as carrying no server change.
    * - The rendered chrome is taken out of the element and parked, and consumer
    *   children are moved out of the rendered wrappers back onto the element in
    *   their original order, so the element looks like its server markup and the
@@ -476,9 +570,14 @@ export class VoidElement extends LitElement {
    * synchronously after this call (Turbo, idiomorph, morphdom and Livewire all
    * do); otherwise call {@link voidAfterMorph} once it has finished.
    *
-   * Returns true if chrome was parked, false if there was none (the component
-   * renders nothing of its own, has not rendered yet, or is already parked). Safe
-   * to call on any element, any number of times.
+   * Re-entrant: a second call before the element has re-projected (two morphs
+   * in one task, as LiveView runs a patch and the patch that undoes a lock)
+   * applies the state rule to the new `incoming` and leaves the element parked.
+   *
+   * Returns true if the element is parked (now or by an earlier call that has
+   * not re-projected yet), false if it has nothing to park (the component
+   * renders nothing of its own or has not rendered yet). Safe to call on any
+   * element, any number of times.
    */
   voidBeforeMorph(incoming?: Element | null): boolean {
     if (incoming && incoming !== this) {
@@ -487,10 +586,36 @@ export class VoidElement extends LitElement {
       // back in): put it back into its server shape too, so the morph compares
       // server markup on both sides.
       if (incoming instanceof VoidElement) incoming[PROJECTION_KEY]?.unproject();
-      this.#reconcileIncoming(incoming);
+      // Or a detached copy of a rendered element (LiveView patches a clone of
+      // a locked element, then morphs the live element to that clone): lift
+      // its consumer content out of the copied chrome and drop the chrome.
+      const copy = stripSerializedChrome(incoming);
+      // The server stopped naming the host: the moved name goes as well.
+      const label = this.#hostLabel;
+      if (label) {
+        for (const name of ['aria-label', 'aria-labelledby'] as const) {
+          if (label[name] !== null && !incoming.hasAttribute(name)) label[name] = null;
+        }
+        this.#applyHostLabel();
+      }
+      // The same incoming element twice (two adapters or listeners on one
+      // morph, as `VoidTurbo.start()` called twice): the second call must not
+      // compare it with the baseline the first one recorded from it, which
+      // would read every server change as "unchanged" and undo it.
+      if (reconciled.get(incoming) !== this) {
+        reconciled.set(incoming, this);
+        this.#reconcileIncoming(incoming, copy);
+      }
       this.#carryOwnedAttributes(incoming);
     }
-    return this[PROJECTION_KEY]?.unproject() ?? false;
+    // This element is itself such a copy, being morphed while detached.
+    if (!this.isConnected) stripSerializedChrome(this);
+    const projection = this[PROJECTION_KEY];
+    if (!projection) return false;
+    // Re-entrant: a second morph before re-projection (LiveView applies a
+    // patch and the patch that undoes a lock in one task) finds the element
+    // still in its server shape, which is what it needs.
+    return projection.parked || projection.unproject();
   }
 
   /**
@@ -529,17 +654,34 @@ export class VoidElement extends LitElement {
    * attributes the two elements carry, so an element whose server markup did
    * not change costs a few attribute reads.
    */
-  #reconcileIncoming(incoming: Element): void {
+  #reconcileIncoming(incoming: Element, copy = false): void {
     const meta = morphMeta(this);
     const before = this.#server ?? null;
     // A rendered incoming element carries what it reflected itself; what it
-    // recorded on connecting is the server's markup.
-    const now = incoming instanceof VoidElement && incoming.#server !== undefined ? incoming.#server : this.#readServer(incoming);
+    // recorded on connecting (or from the server markup it was morphed to) is
+    // the server's markup. A copy of a rendered element that never saw server
+    // markup carries client state only: it changes nothing the server owns.
+    const now =
+      incoming instanceof VoidElement && incoming.#server !== undefined
+        ? incoming.#server
+        : copy
+          ? before
+          : this.#readServer(incoming);
     let changed: Set<string> | null = null;
     if (before) for (const [name, value] of before) if (now?.get(name) !== value) (changed ??= new Set()).add(name);
     if (now) for (const [name, value] of now) if (before?.get(name) !== value) (changed ??= new Set()).add(name);
     // The new baseline is what the server sent, before the client's values are copied in.
     if (changed) this.#server = now;
+    if (changed && meta.edits.length && this.#editing()) {
+      // The user is typing here: the server's value of what they edit waits.
+      for (const name of meta.edits) {
+        if (!changed.delete(name)) continue;
+        const live = this.getAttribute(name);
+        if (live === null) incoming.removeAttribute(name);
+        else if (incoming.getAttribute(name) !== live) incoming.setAttribute(name, live);
+      }
+      if (!changed.size) changed = null;
+    }
     // Reflected attributes of the live element that the incoming markup must carry too...
     const list = this.attributes;
     for (let i = 0; i < list.length; i++) {
@@ -585,6 +727,12 @@ export class VoidElement extends LitElement {
         });
       });
     }
+  }
+
+  /** Focus is inside this element, or parked from inside it by a morph. */
+  #editing(): boolean {
+    const active = this.ownerDocument.activeElement;
+    return (!!active && active !== this && this.contains(active)) || isFocusParked(this);
   }
 
   /**

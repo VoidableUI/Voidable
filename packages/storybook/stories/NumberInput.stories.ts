@@ -30,7 +30,7 @@ const meta: Meta = {
   },
   render: (args) => html`
     <void-number-input
-      .value=${args.value ?? 0}
+      .value=${args.value ?? null}
       min=${ifDefined(args.min)}
       max=${ifDefined(args.max)}
       step=${args.step ?? 1}
@@ -121,5 +121,21 @@ export const StepAny: Story = {
   },
   render: () => html`
     <void-number-input step="any" value="2.375" style="max-width: 18rem;"></void-number-input>
+  `,
+};
+
+export const EmptyAndRequired: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story: 'Without a `value` the field is empty (`value` is `null`), submits an empty string and, with `required`, blocks the form as a native number field does. The stepper starts from `min` (or 0) going up and from `max` going down.',
+      },
+    },
+  },
+  render: () => html`
+    <form @submit=${(e: Event) => e.preventDefault()} style="display: flex; gap: 0.5rem; align-items: center;">
+      <void-number-input name="seats" required min="1" max="10" label="Seats" style="width: 200px;"></void-number-input>
+      <void-button type="submit">Book</void-button>
+    </form>
   `,
 };

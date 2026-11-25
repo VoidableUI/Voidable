@@ -155,7 +155,8 @@ describe('voidBeforeMorph()', () => {
     const el = mount('<void-card><p>c</p></void-card>');
     await settle(el);
     expect(el.voidBeforeMorph()).toBe(true);
-    expect(el.voidBeforeMorph()).toBe(false);
+    // Re-entrant: a second call before re-projection finds it still parked.
+    expect(el.voidBeforeMorph()).toBe(true);
     await settle(el);
     expect(el.querySelectorAll('.void-card-body').length).toBe(1);
   });

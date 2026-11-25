@@ -2,6 +2,7 @@ import { html, nothing } from 'lit';
 import { live } from 'lit/directives/live.js';
 import { property, query } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
+import { isFocusParked } from '../projection.js';
 import { InternalsFormControl, type FormSubmission } from '../form-control.js';
 
 /**
@@ -10,11 +11,24 @@ import { InternalsFormControl, type FormSubmission } from '../form-control.js';
  * name, which `<void-field>` supplies), and the stepper buttons are its own buttons.
  */
 export class VoidNumberInput extends InternalsFormControl(VoidElement) {
+  /** The host's `aria-label` / `aria-labelledby` name the inner control. */
+  static override labelTarget = 'input[role=spinbutton]';
+
+  /** While focus is inside, a morph does not apply the server's value over what the user is typing. */
+  static override editState = ['value'];
   /**
-   * The number. As an attribute it is the initial value; it is kept within `min` and `max` once the user
-   * commits an edit.
+   * The number, or `null` while the field is empty (the default, and after the user clears it). As an
+   * attribute it is the initial value; an absent or empty attribute is an empty field. It is kept within
+   * `min` and `max` once the user commits an edit. An empty field submits an empty string, and with
+   * `required` it is invalid (`valueMissing`), as a native number field.
    */
-  @property({ type: Number, reflect: true }) value: number = 0;
+  @property({
+    reflect: true,
+    converter: {
+      fromAttribute: (v: string | null): number | null => (v === null || v.trim() === '' ? null : Number(v)),
+      toAttribute: (v: number | null) => (v === null || v === undefined ? null : String(v)),
+    },
+  }) value: number | null = null;
   /** Lowest allowed value. Unbounded by default. */
   @property({ type: Number }) min: number = Number.NEGATIVE_INFINITY;
   /** Highest allowed value. Unbounded by default. */
@@ -79,7 +93,7 @@ export class VoidNumberInput extends InternalsFormControl(VoidElement) {
 
   protected formRestore(state: unknown): void {
     this._pendingText = null;
-    this.value = Number(state);
+    this.value = state === null || state === undefined || state === '' ? null : Number(state);
   }
 
   /**
@@ -92,8 +106,9 @@ export class VoidNumberInput extends InternalsFormControl(VoidElement) {
     if (text !== null) {
       const parsed = parseFloat(text);
       if (!isNaN(parsed)) return String(this._clamp(parsed));
+      if (!text.trim()) return '';
     }
-    return String(this.value);
+    return this.value === null ? '' : String(this.value);
   }
 
   private _clamp(v: number): number {
@@ -109,14 +124,14 @@ export class VoidNumberInput extends InternalsFormControl(VoidElement) {
     return this.precision >= 0 ? Number(v.toFixed(this.precision)) : v;
   }
 
-  private _commit(newVal: number): void {
-    const clamped = this._clamp(this._round(newVal));
+  private _commit(newVal: number | null): void {
+    const clamped = newVal === null ? null : this._clamp(this._round(newVal));
     if (clamped === this.value) return;
     this._pendingText = null;
     const previous = this.value;
     this.value = clamped;
     if (this._input) {
-      this._input.value = this._format(clamped);
+      this._input.value = clamped === null ? '' : this._format(clamped);
     }
     this.dispatchEvent(new CustomEvent('void-change', {
       bubbles: true,
@@ -130,18 +145,26 @@ export class VoidNumberInput extends InternalsFormControl(VoidElement) {
     return typeof this.step === 'number' && Number.isFinite(this.step) && this.step > 0 ? this.step : 1;
   }
 
+  /**
+   * Stepping from an empty field starts where a native number field does: up
+   * to `min` (or one step above zero without a minimum), down to `max` (or one
+   * step below zero).
+   */
   private _increment(): void {
     if (this.formDisabled || this.readonly) return;
-    this._commit(this.value + this._stepSize());
+    const step = this._stepSize();
+    this._commit((this.value ?? (Number.isFinite(this.min) ? this.min - step : 0)) + step);
   }
 
   private _decrement(): void {
     if (this.formDisabled || this.readonly) return;
-    this._commit(this.value - this._stepSize());
+    const step = this._stepSize();
+    this._commit((this.value ?? (Number.isFinite(this.max) ? this.max + step : 0)) - step);
   }
 
   private _canStep(dir: 1 | -1): boolean {
     if (this.formDisabled || this.readonly) return false;
+    if (this.value === null) return true;
     return dir > 0 ? this.value < this.max : this.value > this.min;
   }
 
@@ -212,11 +235,16 @@ export class VoidNumberInput extends InternalsFormControl(VoidElement) {
   }
 
   private _onBlur(): void {
-    if (!this._input || this.readonly) return;
+    // A morph moving the focused field out and back (no Element.moveBefore)
+    // blurs it and fires change: the user is still typing, commit nothing.
+    if (!this._input || this.readonly || isFocusParked(this)) return;
     this._pendingText = null;
     const parsed = parseFloat(this._input.value);
-    if (isNaN(parsed)) {
-      this._input.value = this._format(this.value);
+    if (!this._input.value.trim()) {
+      // Cleared: the field is empty again.
+      this._commit(null);
+    } else if (isNaN(parsed)) {
+      this._input.value = this.value === null ? '' : this._format(this.value);
     } else {
       this._commit(parsed);
     }
@@ -238,7 +266,7 @@ export class VoidNumberInput extends InternalsFormControl(VoidElement) {
       <button
         class="void-number-input-btn void-number-input-btn-dec"
         type="button"
-        ?disabled=${this.disabled || this.readonly || this.value <= this.min}
+        ?disabled=${this.disabled || this.readonly || (this.value !== null && this.value <= this.min)}
         aria-label="Decrement"
         @pointerdown=${(e: PointerEvent) => { e.preventDefault(); this._startRepeat(-1); }}
         @pointerup=${() => this._stopRepeat()}
@@ -256,7 +284,7 @@ export class VoidNumberInput extends InternalsFormControl(VoidElement) {
       <button
         class="void-number-input-btn void-number-input-btn-inc"
         type="button"
-        ?disabled=${this.disabled || this.readonly || this.value >= this.max}
+        ?disabled=${this.disabled || this.readonly || (this.value !== null && this.value >= this.max)}
         aria-label="Increment"
         @pointerdown=${(e: PointerEvent) => { e.preventDefault(); this._startRepeat(1); }}
         @pointerup=${() => this._stopRepeat()}
@@ -278,12 +306,13 @@ export class VoidNumberInput extends InternalsFormControl(VoidElement) {
         class="void-number-input-field"
         type="text"
         inputmode=${this.precision === 0 ? 'numeric' : 'decimal'}
-        .value=${live(this._pendingText ?? this._format(this.value))}
+        .value=${live(this._pendingText ?? (this.value === null ? '' : this._format(this.value)))}
         placeholder=${this.placeholder}
         ?disabled=${this.disabled}
         ?readonly=${this.readonly}
         role="spinbutton"
-        aria-valuenow=${this.value}
+        aria-valuenow=${this.value ?? nothing}
+        aria-required=${this.required ? 'true' : nothing}
         aria-valuemin=${isFinite(this.min) ? this.min : nothing}
         aria-valuemax=${isFinite(this.max) ? this.max : nothing}
         aria-label=${this.label || 'Number input'}

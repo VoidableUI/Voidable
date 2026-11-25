@@ -1,4 +1,5 @@
 import type { ReactiveController, ReactiveControllerHost } from 'lit';
+import { restoreParkedFocus } from './projection.js';
 
 /**
  * The shared overlay model behind every Void UI component that opens something
@@ -678,13 +679,45 @@ export class OverlayController implements ReactiveController {
     }
     if (supportsPopover(surface)) {
       try {
-        if (!matchesSafe(surface, ':popover-open')) surface.showPopover();
+        if (!matchesSafe(surface, ':popover-open')) {
+          surface.showPopover();
+          this._watchFade(surface);
+          // Shown again after a morph took it out of the document: the item
+          // that had focus inside can take it back now.
+          restoreParkedFocus(surface.ownerDocument);
+        }
       } catch {
         // Disconnected or not a popover any more; the next update tries again.
       }
     } else {
       surface.hidden = false;
     }
+  }
+
+  /**
+   * Firefox: when anchor positioning picks a position-try fallback (a flipped
+   * surface) while the entry fade runs, the surface keeps the fade's starting
+   * opacity once it ends, invisible though placed correctly. Once the entry
+   * transition is over, a surface that is open but still fully transparent
+   * has its position resolved again, which restyles it to its real opacity.
+   * Elsewhere the check finds opacity 1 and does nothing.
+   */
+  private _watchFade(surface: HTMLElement): void {
+    const done = (e: Event): void => {
+      if (e.target !== surface) return;
+      surface.removeEventListener('transitionend', done);
+      surface.removeEventListener('transitioncancel', done);
+      if (!this._active || !matchesSafe(surface, ':popover-open')) return;
+      const view = surface.ownerDocument.defaultView;
+      if (!view || view.getComputedStyle(surface).opacity !== '0') return;
+      const mode = surface.getAttribute('data-void-position');
+      if (mode !== 'anchor') return;
+      surface.removeAttribute('data-void-position');
+      void surface.getBoundingClientRect();
+      surface.setAttribute('data-void-position', mode);
+    };
+    surface.addEventListener('transitionend', done);
+    surface.addEventListener('transitioncancel', done);
   }
 
   private _hide(surface: HTMLElement): void {

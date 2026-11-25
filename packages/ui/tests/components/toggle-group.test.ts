@@ -298,3 +298,45 @@ describe('VoidToggleGroup', () => {
     });
   });
 });
+
+describe('VoidToggleGroup initial value from pressed toggles in the markup', () => {
+  async function parse(html: string): Promise<VoidToggleGroup> {
+    const wrap = document.createElement('div');
+    wrap.innerHTML = html;
+    document.body.appendChild(wrap);
+    const g = wrap.querySelector(TAG) as VoidToggleGroup;
+    await g.updateComplete;
+    return g;
+  }
+
+  it('takes its value from the pressed toggle when it has no value', async () => {
+    const g = await parse('<void-toggle-group aria-label="Align"><void-toggle value="l">L</void-toggle><void-toggle value="c" pressed>C</void-toggle></void-toggle-group>');
+    expect(g.value).toBe('c');
+    expect(g.getAttribute('value')).toBe('c');
+  });
+
+  it('with multiple, every pressed toggle', async () => {
+    const g = await parse('<void-toggle-group multiple aria-label="Fmt"><void-toggle value="b" pressed>B</void-toggle><void-toggle value="i">I</void-toggle><void-toggle value="u" pressed>U</void-toggle></void-toggle-group>');
+    expect(g.value).toBe('b,u');
+  });
+
+  it('without multiple, only the first pressed toggle stays pressed', async () => {
+    const g = await parse('<void-toggle-group aria-label="Align"><void-toggle value="l" pressed>L</void-toggle><void-toggle value="c" pressed>C</void-toggle></void-toggle-group>');
+    expect(g.value).toBe('l');
+    expect(Array.from(g.querySelectorAll('void-toggle')).map((t) => (t as VoidToggle).pressed)).toEqual([true, false]);
+  });
+
+  it('a value on the group wins over pressed toggles', async () => {
+    const g = await parse('<void-toggle-group value="l" aria-label="Align"><void-toggle value="l">L</void-toggle><void-toggle value="c" pressed>C</void-toggle></void-toggle-group>');
+    expect(g.value).toBe('l');
+    expect(Array.from(g.querySelectorAll('void-toggle')).map((t) => (t as VoidToggle).pressed)).toEqual([true, false]);
+  });
+
+  it('the adopted value is the reset target', async () => {
+    const g = await parse('<div><void-toggle-group name="a" aria-label="Align"><void-toggle value="l">L</void-toggle><void-toggle value="c" pressed>C</void-toggle></void-toggle-group></div>');
+    g.value = 'l';
+    await g.updateComplete;
+    g.formResetCallback();
+    expect(g.value).toBe('c');
+  });
+});

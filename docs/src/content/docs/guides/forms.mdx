@@ -62,13 +62,17 @@ A control with no `name` submits nothing, as a native one does.
 
 ## Disabled controls
 
-`disabled` on a control, or on a `<fieldset disabled>` around it, stops the control reacting and removes it from the submission. A control inside a disabled fieldset is disabled without any attribute of its own.
+`disabled` on a control, or on a `<fieldset disabled>` around it, stops the control reacting, takes it out of the tab order and removes it from the submission. A control inside a disabled fieldset is disabled without any attribute of its own; `void-button`, `void-toggle` and `void-hamburger` follow the fieldset too, as native buttons do. A disabled control carries `aria-disabled="true"`; an enabled one has no `aria-disabled` at all.
 
 ## Validation
 
-`required` works on every form control and uses the browser's own constraint validation: `form.checkValidity()` is false while a required control is empty, `:invalid` matches it, and `requestSubmit()` stops and reports the first invalid control. On a native control the browser's message appears; a form-associated control reports a `valueMissing` state with its own control as the anchor. `void-checkbox-group` with `required` means at least one box is checked.
+`required` works on every form control and uses the browser's own constraint validation: `form.checkValidity()` is false while a required control is empty, `:invalid` matches it, and `requestSubmit()` stops and reports the first invalid control. On a native control the browser's message appears; a form-associated control reports a `valueMissing` state with its own control as the anchor, and while it is invalid the host can take focus (`tabindex="-1"`, not in the tab order) and passes it on to that control, so `form.reportValidity()` focuses it and shows the message in Firefox as well as Chromium. `void-checkbox-group` with `required` means at least one box is checked, and an empty `void-number-input` with `required` is missing a value as a native number field is.
 
-`<void-button type="submit">` submits through `form.requestSubmit()`, so validation runs and `submit` events fire.
+`<void-button type="submit">` submits through `form.requestSubmit()`, so validation runs and `submit` events fire. `void-button` is not form-associated (its form is the one it sits in, so it is not in `form.elements`), which keeps server-rendering frameworks patching its label while it has focus.
+
+## Labelling
+
+Put a control in `<void-field label="…">`, or give it a visible `<label>` it can point to. Without a visible label, write `aria-label` or `aria-labelledby` on the component as you would on a native control: on components that render their own control (`void-select`, `void-input`, `void-combobox`, `void-date-picker`, ...) it moves onto that control, which is the element a screen reader and `getByLabel` find. Set it again to rename, or to an empty string to remove the name.
 
 To show your own message, set `error` on the surrounding field. While it is set, the control inside is marked `aria-invalid` and described by the message, and removing the attribute clears both.
 

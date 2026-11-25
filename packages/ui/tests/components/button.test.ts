@@ -106,8 +106,33 @@ describe('VoidButton', () => {
       expect(el.getAttribute('tabindex')).toBe('0');
     });
 
-    it('sets aria-disabled="false" on connect', () => {
-      expect(el.getAttribute('aria-disabled')).toBe('false');
+    it('has no aria-disabled while enabled', () => {
+      expect(el.hasAttribute('aria-disabled')).toBe(false);
+    });
+
+    it('removes aria-disabled again when re-enabled, rather than leaving "false"', async () => {
+      el.disabled = true;
+      await el.updateComplete;
+      el.disabled = false;
+      await el.updateComplete;
+      expect(el.hasAttribute('aria-disabled')).toBe(false);
+    });
+
+    it('follows a <fieldset disabled> ancestor without being form-associated', async () => {
+      const fs = document.createElement('fieldset');
+      document.body.append(fs);
+      fs.append(el);
+      await el.updateComplete;
+      expect((el.constructor as { formAssociated?: boolean }).formAssociated).toBeFalsy();
+      fs.disabled = true;
+      await new Promise((r) => setTimeout(r, 0));
+      expect(el.getAttribute('tabindex')).toBe('-1');
+      expect(el.getAttribute('aria-disabled')).toBe('true');
+      fs.disabled = false;
+      await new Promise((r) => setTimeout(r, 0));
+      expect(el.getAttribute('tabindex')).toBe('0');
+      expect(el.hasAttribute('aria-disabled')).toBe(false);
+      fs.remove();
     });
 
     it('updates aria-disabled when disabled changes', async () => {

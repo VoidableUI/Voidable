@@ -9,8 +9,11 @@ pin_all_from "app/javascript/controllers", under: "controllers"
 # Voidable UI: the voidable-hotwire engine pins @voidable/ui and
 # @voidable/ui-hotwire at the gem's own version (Voidable::Hotwire::CDN).
 # VOIDABLE_LOCAL=1 serves this repository's built packages from
-# public/voidable-local/ (written by tests/browser/server/rails.mjs) instead.
+# public/voidable-local/ (written by tests/browser/server/start.mjs) instead,
+# every one of them: nothing then comes from the CDN, including the
+# development warnings, which a checkout may have that no release has yet.
 if ENV["VOIDABLE_LOCAL"]
   pin "@voidable/ui", to: "/voidable-local/ui.js"
   pin "@voidable/ui-hotwire", to: "/voidable-local/ui-hotwire.js"
+  pin "@voidable/ui/dev", to: "/voidable-local/ui-dev.js", preload: false if Rails.env.development?
 end

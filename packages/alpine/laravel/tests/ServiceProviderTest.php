@@ -94,16 +94,34 @@ class ServiceProviderTest extends TestCase
 
     public function test_dev_warnings_script_is_emitted_when_on(): void
     {
-        config(['voidable.dev_warnings' => true]);
+        config(['voidable.dev_warnings' => true, 'voidable.dev_script' => '/js/voidable-dev.js']);
         $html = view('voidable::components.scripts')->render();
 
-        $this->assertStringContainsString('<script type="module" src="https://cdn.jsdelivr.net/npm/@voidable/ui@latest/dist/dev.js">', $html);
+        $this->assertStringContainsString('<script type="module" src="/js/voidable-dev.js">', $html);
         $this->assertStringNotContainsString('VOIDABLE_DEV', $html);
+    }
+
+    public function test_dev_script_defaults_to_the_release_never_latest(): void
+    {
+        $cdn = fn (string $v) => 'https://cdn.jsdelivr.net/npm/@voidable/ui' . '@' . $v . '/dist/dev.js';
+        $this->assertSame($cdn('1.4.2'), \Voidable\Laravel\VoidableServiceProvider::devScriptUrl('v1.4.2'));
+        $this->assertSame($cdn('0.9.0-rc.1'), \Voidable\Laravel\VoidableServiceProvider::devScriptUrl('0.9.0-rc.1'));
+        $this->assertNull(\Voidable\Laravel\VoidableServiceProvider::devScriptUrl('dev-master'));
+        $this->assertNull(\Voidable\Laravel\VoidableServiceProvider::devScriptUrl('0.0.0'));
+        $this->assertStringNotContainsString('@latest', (string) config('voidable.dev_script'));
+    }
+
+    public function test_no_dev_script_is_emitted_without_a_known_release(): void
+    {
+        config(['voidable.dev_warnings' => true, 'voidable.dev_script' => null]);
+        $html = view('voidable::components.scripts')->render();
+
+        $this->assertStringNotContainsString('dev.js', $html);
     }
 
     public function test_dev_warnings_throw_mode_sets_the_config_first(): void
     {
-        config(['voidable.dev_warnings' => 'throw']);
+        config(['voidable.dev_warnings' => 'throw', 'voidable.dev_script' => '/js/dev.js']);
         $html = view('voidable::components.scripts')->render();
 
         $this->assertStringContainsString('window.VOIDABLE_DEV = { throw: true };', $html);

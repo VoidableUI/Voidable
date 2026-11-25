@@ -25,7 +25,7 @@ module Voidable
         if autoloader?
           pins = Voidable::Hotwire::CDN::AUTOLOADER_PINS.map { |name, url| %(pin "#{name}", to: "#{url}") }
           pins << %(pin "@voidable/ui-hotwire", to: "#{Voidable::Hotwire::CDN::UI_HOTWIRE_URL}")
-          pins << dev_pin
+          pins << dev_pin if dev_pin
           append_to_file importmap, "\n# Voidable UI (autoloader: components load when their tag first appears)\n#{pins.join("\n")}\n"
           say "Pinned @voidable/ui/autoloader, lit and @voidable/ui-hotwire in importmap", :green
         else
@@ -213,8 +213,12 @@ module Voidable
 
       # The development warnings: pinned in development only; the layout's
       # `voidable_dev_tags` imports it (Vite apps import it from application.js).
+      # None from an unreleased gem checkout, which has no published file to pin.
       def dev_pin
-        %(pin "@voidable/ui/dev", to: "#{Voidable::Hotwire::CDN::UI_DEV_URL}" if Rails.env.development?  # console warnings for misused <void-*> markup)
+        url = Voidable::Hotwire::CDN::UI_DEV_URL
+        return unless url
+
+        %(pin "@voidable/ui/dev", to: "#{url}" if Rails.env.development?  # console warnings for misused <void-*> markup)
       end
 
       def app_name

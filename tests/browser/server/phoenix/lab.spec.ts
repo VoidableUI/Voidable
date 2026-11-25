@@ -4,7 +4,7 @@
 // /lab/two) with the built @voidable/ui and @voidable/ui-liveview packages and
 // the live_voidable Hex package from this repository. Every test gets a new
 // browser context and so a new LiveView.
-import { test, expect, expectedFailure, settle, ready, fillLabForm, addTag, formEntries, mark, kept, type Page } from '../shared';
+import { test, expect, expectedFailure, settle, ready, fillLabForm, addTag, formEntries, mark, kept, typeFast, withoutMoveBefore, type Page } from '../shared';
 
 /** Opens the lab and waits for the LiveView to connect (the dead render has upgraded by then too). */
 async function lab(page: Page, path = '/lab') {
@@ -110,14 +110,6 @@ test.describe('server updates while the user is mid-interaction', () => {
     await page.locator('#i-email input').fill('a@b.co');
     await expect(page.locator('#i-email input')).toHaveValue('a@b.co');
     await page.click('#timer-off');
-  });
-
-  test('typing fast into a field whose form echoes every change keeps focus and every key', async ({ page }) => {
-    expectedFailure('untracked:liveview-typing-focus-lost', 'at 30 ms between keys the email input is replaced mid-typing and focus moves to the body');
-    const input = page.locator('#i-email input');
-    await input.click();
-    await page.keyboard.type('line one two three four five six', { delay: 30 });
-    await expect(input).toHaveValue('line one two three four five six');
   });
 
   test('a select the user changed keeps its choice while option text changes under it', async ({ page }) => {
@@ -338,14 +330,39 @@ test.describe('the event bridge', () => {
     await expect.poll(() => last(page, 'bridge-btn')).toMatchObject({ event: 'void-click', id: 'bridge-btn', name: 'bridge' });
   });
 
-  test('phx-click on a button works next to the bridge', async ({ page }) => {
-    expectedFailure('untracked:liveview-phx-click-on-button', 'the void-click the hook pushes locks the button, so LiveView drops its phx-click');
+  test('phx-click on a button works next to the bridge, and the button shows what the server rendered', async ({ page }) => {
     await page.goto('/lab/two');
     await page.waitForSelector('.phx-connected');
     await ready(page);
     await page.click('#two-count');
     await expect(page.locator('#two-count')).toContainText('Count 1');
+    await page.click('#two-count');
+    await expect(page.locator('#two-count')).toContainText('Count 2');
   });
+
+  // Without `events` the hex components attach no hook: phx-click and phx-submit are LiveView's alone.
+  const CLICKS: [string, string | null, string][] = [
+    ['a button', null, '#click-button'],
+    ['a tag', null, '#click-tag'],
+    ['a card', null, '#click-card p'],
+    ['a dropdown-menu item', '#click-dd-trigger', '#click-dd-item'],
+    ['a menu item', null, '#click-menu-item'],
+    ['a tab (the binding is on its void-tab-panel)', null, '#click-tabs [role=tab] >> nth=1'],
+    ['phx-submit through a void-button type="submit"', null, '#click-submit'],
+  ];
+  for (const [what, open, selector] of CLICKS) {
+    test(`phx-click on ${what} runs once per click`, async ({ page }) => {
+      await page.goto('/lab/two');
+      await page.waitForSelector('.phx-connected');
+      await ready(page);
+      if (open) await page.click(open);
+      await page.click(selector);
+      await expect(page.locator('#two-count')).toContainText('Count 1');
+      if (open) await page.click(open);
+      await page.click(selector);
+      await expect(page.locator('#two-count')).toContainText('Count 2');
+    });
+  }
 
   test('a select change carries the value in detail', async ({ page }) => {
     await page.locator('#bridge-select select').selectOption('b');
@@ -378,3 +395,31 @@ test.describe('the event bridge', () => {
     expect((await events(page)).filter((e) => e.id === 'bridge-btn')).toHaveLength(1);
   });
 });
+
+// Every key is a phx-change round trip whose echo arrives a few keys behind,
+// and LiveView patches a clone of the locked form and morphs the page to it
+// when the reply comes, often two morphs in one task.
+const TEXT = 'the quick brown fox jumps over the lazy dog, again and again!'.slice(0, 60);
+const DIGITS = '1234567890'.repeat(6);
+const FIELDS: [string, string, string][] = [
+  ['input', '#i-name input', TEXT],
+  ['email input', '#i-email input', 'ada.lovelace.and.charles.babbage@analytical-engine.example.uk'.slice(0, 60)],
+  ['textarea', '#i-bio textarea', TEXT],
+  ['number-input', '#i-seats input', DIGITS],
+  ['combobox', '#i-fw input', TEXT],
+];
+for (const moveBefore of [true, false]) {
+  test.describe(`typing fast into a form that echoes every change${moveBefore ? '' : ', without Element.moveBefore'}`, () => {
+    test.beforeEach(async ({ page }) => {
+      if (!moveBefore) await withoutMoveBefore(page);
+      await lab(page);
+    });
+    for (const [name, selector, text] of FIELDS) {
+      test(`${name}: 60 keys at 30 ms keep every character and focus never leaves`, async ({ page }) => {
+        const { initial, value, away } = await typeFast(page, selector, text);
+        expect(value).toBe(initial + text);
+        expect(away, 'keystrokes after which focus was elsewhere').toBe(0);
+      });
+    }
+  });
+}

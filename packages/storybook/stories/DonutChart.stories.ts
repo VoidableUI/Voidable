@@ -234,3 +234,21 @@ export const Dramatic: Story = {
     ></void-donut-chart>
   `,
 };
+
+export const SingleSegment: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story: 'One segment at 100% is a closed ring: no seam at the top, and no gap even with `gaps` on.',
+      },
+    },
+  },
+  render: () => html`
+    <void-donut-chart
+      style="width: 220px; height: 220px;"
+      aria-label="All traffic is organic"
+      gaps="4"
+      .data=${{ segments: [{ name: 'Organic', value: 4820 }] }}
+    ></void-donut-chart>
+  `,
+};

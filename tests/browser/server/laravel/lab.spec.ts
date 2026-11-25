@@ -3,7 +3,7 @@
 // Laravel Livewire 4 and Alpine against the real example app (examples/laravel, /lab and
 // /lab/two) with the built @voidable/ui and @voidable/ui-alpine packages. Every test gets a
 // new browser context and so a new Livewire component.
-import { test, expect, settle, ready, fillLabForm, formEntries, mark, kept, type Page } from '../shared';
+import { test, expect, settle, ready, fillLabForm, formEntries, mark, kept, typeFast, withoutMoveBefore, type Page } from '../shared';
 
 /** Opens a page and waits for Livewire and Alpine to start and the components to upgrade. */
 async function open(page: Page, path = '/lab') {
@@ -335,3 +335,34 @@ test.describe('the event bridge', () => {
     expect((await events(page)).filter((e) => e.id === 'bridge-btn')).toHaveLength(1);
   });
 });
+
+// The text fields send every key to the server ($wire.set on void-input, the
+// live binding the README recommends) and Livewire morphs each reply in, a few
+// keys behind what has been typed; polling every 100 ms adds morphs between.
+const TEXT = 'the quick brown fox jumps over the lazy dog, again and again!'.slice(0, 60);
+const FIELDS: [string, string, string][] = [
+  ['input', '#i-name input', TEXT],
+  ['email input', '#i-email input', 'ada.lovelace.and.charles.babbage@analytical-engine.example.uk'.slice(0, 60)],
+  ['textarea', '#i-bio textarea', TEXT],
+  ['number-input', '#i-seats input', '1234567890'.repeat(6)],
+  ['combobox', '#i-fw input', TEXT],
+];
+for (const moveBefore of [true, false]) {
+  test.describe(`typing fast while every key round-trips and polls arrive${moveBefore ? '' : ', without Element.moveBefore'}`, () => {
+    test.beforeEach(async ({ page, allowErrors }) => {
+      // Livewire cancels the poll in flight when the next typed change is sent and logs that as an unhandled rejection.
+      allowErrors.push('signal is aborted');
+      if (!moveBefore) await withoutMoveBefore(page);
+      await open(page);
+      await page.click('#poll-on');
+    });
+    for (const [name, selector, text] of FIELDS) {
+      test(`${name}: 60 keys at 30 ms keep every character and focus never leaves`, async ({ page }) => {
+        const { initial, value, away } = await typeFast(page, selector, text);
+        await page.click('#poll-off');
+        expect(value).toBe(initial + text);
+        expect(away, 'keystrokes after which focus was elsewhere').toBe(0);
+      });
+    }
+  });
+}

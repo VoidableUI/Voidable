@@ -106,8 +106,13 @@ var funcs = template.FuncMap{
 	},
 	// heexDefault keeps attributes unset (nil) unless Phoenix requires a
 	// default from :values, in which case the manifest default is used.
+	// A boolean the component reads as "true"/"false" (spellcheck, closable)
+	// stays unset unless the caller sets it, so the element keeps its own
+	// default rather than one the template picked.
 	"heexDefault": func(a domain.Attribute) string {
 		switch {
+		case a.FalseString:
+			return "nil"
 		case a.Kind == domain.KindBoolean:
 			if a.Default == "true" {
 				return "true"
@@ -128,6 +133,9 @@ var funcs = template.FuncMap{
 	},
 	"elixirDoc": func(s string) string { return strings.ReplaceAll(s, `"`, `\"`) },
 	"phpDefault": func(a domain.Attribute) string {
+		if a.FalseString {
+			return "null"
+		}
 		if a.Kind == domain.KindBoolean {
 			if a.Default == "true" {
 				return "true"

@@ -26,7 +26,7 @@ describe('VoidDOM and host attributes', () => {
     const to = server('<void-button id="b" variant="filled" tabindex="-1">Go</void-button>');
     VoidDOM.onBeforeElUpdated(btn, to);
     expect(to.getAttribute('role')).toBe('button');
-    expect(to.getAttribute('aria-disabled')).toBe('false');
+    expect(to.hasAttribute('aria-disabled')).toBe(false);
     expect(to.getAttribute('size')).toBe('md');
     // Values the server markup sets follow the server.
     expect(to.getAttribute('tabindex')).toBe('-1');

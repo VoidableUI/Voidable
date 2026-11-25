@@ -104,7 +104,7 @@ defmodule DemoWeb.LabLive do
 
   def handle_event("server_tab", %{"tab" => tab}, socket), do: {:noreply, assign(socket, :tab, tab)}
 
-  # Voidable events pushed by the `VoidEvent` hook. The dialog's close also tells the server.
+  # Voidable events pushed by the `VoidEvent` hook, on the elements that pass `events`. The dialog's close also tells the server.
   def handle_event("void-close", %{"id" => "dlg"} = params, socket) do
     {:noreply, socket |> log_event("void-close", params) |> assign(:dialog_open, false)}
   end
@@ -224,7 +224,7 @@ defmodule DemoWeb.LabLive do
         <button id="close-dlg-later" type="button" phx-click="close_dialog_later">Close dialog in 400 ms</button>
         <span id="dialog-state">Server thinks the dialog is {if @dialog_open, do: "open", else: "closed"}</span>
       </section>
-      <V.dialog id="dlg" open={@dialog_open} heading="Server dialog">
+      <V.dialog id="dlg" open={@dialog_open} heading="Server dialog" events={["void-close"]}>
         <p id="dlg-body">Dialog body, ticks {@ticks}</p>
         <button id="dlg-bump" type="button" phx-click="bump">Bump from inside</button>
       </V.dialog>
@@ -243,14 +243,14 @@ defmodule DemoWeb.LabLive do
       </section>
 
       <section style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap">
-        <V.button id="bridge-btn" variant="filled" name="bridge">Bridge button</V.button>
-        <V.select id="bridge-select" name="bridge_select" placeholder="Bridge select">
+        <V.button id="bridge-btn" variant="filled" name="bridge" events>Bridge button</V.button>
+        <V.select id="bridge-select" name="bridge_select" placeholder="Bridge select" events>
           <option value="a">A</option>
           <option value="b">B</option>
         </V.select>
-        <V.checkbox id="bridge-check" name="bridge_check" value="1">Bridge check</V.checkbox>
-        <V.switch id="bridge-switch" name="bridge_switch">Bridge switch</V.switch>
-        <V.input id="bridge-input" name="bridge_input" placeholder="Bridge input" />
+        <V.checkbox id="bridge-check" name="bridge_check" value="1" events>Bridge check</V.checkbox>
+        <V.switch id="bridge-switch" name="bridge_switch" events>Bridge switch</V.switch>
+        <V.input id="bridge-input" name="bridge_input" placeholder="Bridge input" events />
       </section>
       <pre id="events">{Jason.encode!(Enum.reverse(@events))}</pre>
     </main>

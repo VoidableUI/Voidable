@@ -208,3 +208,24 @@ export const WithZeroValues: Story = {
     ></void-bar-chart>
   `,
 };
+
+export const NegativeValues: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story: 'Negative values are bars below a zero baseline: the value axis reaches the lowest value, a baseline is drawn at zero and `show-values` prints a negative value under its bar.',
+      },
+    },
+  },
+  render: () => html`
+    <void-bar-chart
+      show-values
+      style="max-width: 600px;"
+      aria-label="Net change per quarter: Q1 +40, Q2 -25, Q3 +10, Q4 -5"
+      .data=${{
+        labels: ['Q1', 'Q2', 'Q3', 'Q4'],
+        series: [{ name: 'Net', values: [40, -25, 10, -5] }],
+      }}
+    ></void-bar-chart>
+  `,
+};
