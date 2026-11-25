@@ -351,9 +351,9 @@
   "void-alert": {
     "group": "feedback",
     "events": {
-      "void-dismiss": "Fires when the user presses the dismiss button of a `dismissible` alert, just before the alert removes itself from the page."
+      "void-close": "Fires when the user presses the control in the `void-alert-close` part, just before the alert removes itself from the page."
     },
-    "children": "Two parts: `void-alert-title` (optional, short) and `void-alert-description`, the message with any inline markup, such as a link."
+    "children": "Explicit parts, in this order: `void-alert-title` (optional, short), `void-alert-description` (the message, with any inline markup, such as a link) and `void-alert-close` (optional; wraps the one control that dismisses the alert, and without it the alert cannot be dismissed)."
   },
   "void-banner": {
     "group": "feedback",

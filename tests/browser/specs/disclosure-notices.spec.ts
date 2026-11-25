@@ -125,6 +125,77 @@ test.describe('disclosure and notices', () => {
     });
   });
 
+  test.describe('alert', () => {
+    test('has no shadow root, and its parts and author button are the whole DOM', async ({ page }) => {
+      expect(await page.evaluate(() => document.getElementById('al1')!.shadowRoot)).toBeNull();
+      expect(await mark(page, '#al1')).toEqual(['void-alert-title', 'void-alert-description', 'void-alert-close', 'button']);
+      await expect(page.locator('#al1')).toHaveAttribute('role', 'alert');
+      await expect(page.locator('#al1')).not.toHaveAttribute('dismissible');
+    });
+
+    test('is dismissed by mouse, Enter and Space, each firing exactly one void-close', async ({ page }) => {
+      await page.evaluate(() => {
+        (window as any).__closed = [];
+        document.addEventListener('void-close', (e) => (window as any).__closed.push((e.target as Element).id));
+        document.addEventListener('void-dismiss', () => (window as any).__closed.push('void-dismiss'));
+      });
+      await page.locator('#al1-close').click();
+      await expect(page.locator('#al1')).toHaveCount(0);
+      await page.locator('#al3-close').focus();
+      await page.keyboard.press('Space');
+      await expect(page.locator('#al3')).toHaveCount(0);
+      expect(await page.evaluate(() => (window as any).__closed)).toEqual(['al1', 'al3']);
+      await page.evaluate(() => {
+        document.getElementById('before')!.insertAdjacentHTML('afterend', '<void-alert id="al4"><void-alert-description>New</void-alert-description><void-alert-close><button type="button" id="al4-close" aria-label="Dismiss">x</button></void-alert-close></void-alert>');
+      });
+      await page.locator('#al4-close').focus();
+      await page.keyboard.press('Enter');
+      await expect(page.locator('#al4')).toHaveCount(0);
+      expect(await page.evaluate(() => (window as any).__closed)).toEqual(['al1', 'al3', 'al4']);
+    });
+
+    test('focus moves to the next focusable element when the dismissed alert held it', async ({ page }) => {
+      await page.locator('#al1-close').focus();
+      await page.keyboard.press('Enter');
+      await expect(page.locator('#al1')).toHaveCount(0);
+      // The next focusable element after the alert in the document: the second alert's close button.
+      await expect(page.locator('#al3-close')).toBeFocused();
+    });
+
+    test('a dismissal that did not involve focus leaves focus where it was', async ({ page }) => {
+      await page.locator('#before').focus();
+      await page.evaluate(() => document.getElementById('al1-close')!.click());
+      await expect(page.locator('#al1')).toHaveCount(0);
+      await expect(page.locator('#before')).toBeFocused();
+    });
+
+    test('the same holds for a banner: focus moves on when it closes', async ({ page }) => {
+      await page.locator('#bn1-close').focus();
+      await page.keyboard.press('Enter');
+      await expect(page.locator('#bn1')).toHaveCount(0);
+      await expect(page.locator('#al1-close')).toBeFocused();
+    });
+
+    test('without a close part there is no dismiss control', async ({ page }) => {
+      await expect(page.locator('#al2 button')).toHaveCount(0);
+      await page.locator('#al2').click();
+      await expect(page.locator('#al2')).toHaveCount(1);
+    });
+
+    test('the close control sits in the top corner, inside the alert, and is named', async ({ page }) => {
+      const box = await page.evaluate(() => {
+        const a = document.getElementById('al1')!.getBoundingClientRect();
+        const b = document.getElementById('al1-close')!.getBoundingClientRect();
+        return { top: b.top - a.top, right: a.right - b.right, w: b.width };
+      });
+      expect(box.w).toBeGreaterThan(15);
+      expect(box.top).toBeGreaterThan(0);
+      expect(box.top).toBeLessThan(24);
+      expect(box.right).toBeGreaterThan(0);
+      await expect(page.getByRole('button', { name: 'Dismiss' }).first()).toBeVisible();
+    });
+  });
+
   test.describe('error fallback', () => {
     test('writes its built-in default when no part is written, and fires void-retry from its button', async ({ page }) => {
       await expect(page.locator('#ef1 void-error-fallback-title')).toHaveText('Something went wrong');
@@ -292,7 +363,7 @@ test.describe('disclosure and notices', () => {
 });
 
 test.describe('layout before the script loads', () => {
-  for (const id of ['co1', 'co-open', 'pn', 'bn1', 'bn2', 'ef3', 't-server']) {
+  for (const id of ['co1', 'co-open', 'pn', 'bn1', 'bn2', 'al1', 'al2', 'ef3', 't-server']) {
     test(`#${id} does not shift when it upgrades`, async ({ page }) => {
       // Hold the component script back, measure the layout, then let it in.
       let release!: () => void;

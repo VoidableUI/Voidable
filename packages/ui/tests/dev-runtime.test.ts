@@ -91,6 +91,14 @@ describe('@voidable/ui/dev', () => {
     expect(missing).toEqual(expect.arrayContaining(['void-banner', 'void-collapsible', 'void-panel', 'void-toast']));
   });
 
+  it('reports the old dismissible alert with the close part to write', async () => {
+    document.body.innerHTML = '<void-alert dismissible><void-alert-description>text</void-alert-description></void-alert>';
+    await settled();
+    const warning = seen.find((w) => w.tag === 'void-alert' && w.subject === 'dismissible')!;
+    expect(warning.message).toContain('<void-alert-close>');
+    expect(warning.message).toContain('aria-label="Dismiss"');
+  });
+
   it('accepts a fallback with no parts (its built-in default) and the parts written in order', async () => {
     document.body.innerHTML =
       '<void-error-fallback heading="Oops" retryable></void-error-fallback>' +

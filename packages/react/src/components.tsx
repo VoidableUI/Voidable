@@ -374,9 +374,8 @@ export const Avatar = wrapWc<VoidAvatar, {
 
 export const Alert = wrapWc<VoidAlert, {
   color?: 'default' | 'error' | 'warning' | 'caution' | 'success' | 'info' | 'notice' | 'highlight';
-  dismissible?: boolean;
   variant?: 'subtle' | 'filled';
-} & VoidEvents<{ Dismiss: null }>>('void-alert', 'Alert');
+} & VoidEvents<{ Close: null }>>('void-alert', 'Alert');
 
 export const Tag = wrapWc<VoidTag, {
   color?: 'default' | 'error' | 'warning' | 'caution' | 'success' | 'info' | 'notice' | 'highlight';

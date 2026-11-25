@@ -193,8 +193,9 @@ export const Empty: Story = {
 export const WithNotice: Story = {
   render: () => html`
     <div class="scaffold-index" style="max-width: 72rem; margin: 0 auto; padding: 2rem;">
-      <void-alert color="success" dismissible style="margin-bottom: var(--void-space-4);">
+      <void-alert color="success" style="margin-bottom: var(--void-space-4);">
         <void-alert-description>Product was successfully created.</void-alert-description>
+        <void-alert-close><button type="button" aria-label="Dismiss">&times;</button></void-alert-close>
       </void-alert>
       ${pageHeader}
       ${sectionHeader}

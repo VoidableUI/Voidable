@@ -50,11 +50,11 @@ Where a part has state of its own the component writes it as a plain attribute o
 
 ## Dialogs and drawers
 
-`<void-dialog>` and `<void-drawer>` are the one place the library uses a shadow root. A modal needs the browser's native `<dialog>` and `showModal()` (the top layer, an inert page behind it, Escape and the backdrop), and that element has to contain the content. Rather than move your nodes into a rendered `<dialog>`, the component keeps a small shadow root, `<dialog part="surface">`, a close button and a `<slot>`, and your parts stay unmoved children of the host. The dialog is named and described by your `-title` and `-description` parts through ARIA element references. The theme styles the surface with `void-dialog::part(surface)` and its backdrop with `void-dialog::part(surface)::backdrop`. `<void-alert dismissible>` uses the same arrangement for its dismiss button.
+`<void-dialog>` and `<void-drawer>` are the one place the library uses a shadow root. A modal needs the browser's native `<dialog>` and `showModal()` (the top layer, an inert page behind it, Escape and the backdrop), and that element has to contain the content. Rather than move your nodes into a rendered `<dialog>`, the component keeps a small shadow root, `<dialog part="surface">`, a close button and a `<slot>`, and your parts stay unmoved children of the host. The dialog is named and described by your `-title` and `-description` parts through ARIA element references. The theme styles the surface with `void-dialog::part(surface)` and its backdrop with `void-dialog::part(surface)::backdrop`.
 
 ## Dismiss controls
 
-A banner and a toast can be dismissed, and the control that does it is a region the author writes, like any other: a `-close` part that wraps the one button, the same shape as a trigger part.
+An alert, a banner and a toast can be dismissed, and the control that does it is a region the author writes, like any other: a `-close` part that wraps the one button, the same shape as a trigger part.
 
 ```html
 <void-banner color="info">
@@ -63,7 +63,7 @@ A banner and a toast can be dismissed, and the control that does it is a region 
 </void-banner>
 ```
 
-Pressing the control fires `void-close` and removes the element. Without a `-close` part there is no control, so the element cannot be dismissed (a toast still closes itself after its `duration`). The component renders no button of its own, and no shadow root, so the page, the framework and a server morph all see the control as ordinary markup. `<void-alert dismissible>` still uses a shadow root for this (see above).
+Pressing the control fires `void-close` (it bubbles and cannot be cancelled) and removes the element. Without a `-close` part there is no control, so the element cannot be dismissed (a toast still closes itself after its `duration`). The component renders no button of its own, and no shadow root, so the page, the framework and a server morph all see the control as ordinary markup. If focus was inside the element when it closed, it moves to the next focusable element after it (or the last one before it), so keyboard users are not sent back to the top of the page.
 
 ## Frameworks and morphs
 
@@ -85,7 +85,7 @@ The machine-readable form of this table is the `voidParts` entry of each compone
 | `<void-tooltip>` | `-trigger` (one control), `-content` | Content describes the control. |
 | `<void-tabs>` | `-list` holding `<void-tabs-trigger value>`, then `<void-tabs-content value>` | Trigger and content are paired by `value`. |
 | `<void-card>` | `-header` (holding `-title`, `-description`), `-body` (required), `-footer` | |
-| `<void-alert>` | `-title`, `-description` (required) | Shadow dismiss button when `dismissible`. |
+| `<void-alert>` | `-title`, `-description` (required), `-close` (one control) | Without `-close` it cannot be dismissed. |
 | `<void-accordion>` | `<void-accordion-item>`, each with `<void-accordion-trigger>` and `<void-accordion-content>` | |
 | `<void-collapsible>` | `-trigger`, `-content` | The trigger is the button; closed content is hidden from `open`. |
 | `<void-panel>` | `-header` (holding `-title`, `-description`), `-body` (required) | The title names the region. |
@@ -102,7 +102,7 @@ What every component does today, and what it becomes. **Parts** components are c
 | Component | Today | Target | Status |
 |---|---|---|---|
 | accordion, accordion-item | Parts | `void-accordion-item` > `-trigger`, `-content` | Parts |
-| alert | Parts | `-title`, `-description` | Parts |
+| alert | Parts | `-title`, `-description`, `-close` | Parts |
 | card | Parts | `-header` (`-title`, `-description`), `-body`, `-footer` | Parts |
 | dialog, drawer | Parts | `-title`, `-description`, `-body`, `-actions` | Parts |
 | dropdown-menu, dropdown-menu-item | Parts | `-trigger`, `-content` (`-item`, `-separator`) | Parts |

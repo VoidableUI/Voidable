@@ -11,7 +11,7 @@ const meta: Meta = {
   parameters: {
     docs: {
       description: {
-        component: 'Inline contextual messages for form validation feedback, permission warnings, and system status notices. Supports dismissible mode for transient messages.',
+        component: 'Inline contextual messages for form validation feedback, permission warnings, and system status notices. Add a `void-alert-close` part for a dismissible one.',
       },
     },
   },
@@ -25,10 +25,9 @@ export const Default: Story = {
   args: {
     color: 'default',
     variant: 'subtle',
-    dismissible: false,
   },
   render: (args) => html`
-    <void-alert color=${args.color} variant=${args.variant} ?dismissible=${args.dismissible}>
+    <void-alert color=${args.color} variant=${args.variant}>
       <void-alert-description>This is an informational alert message.</void-alert-description>
     </void-alert>
   `,
@@ -63,14 +62,17 @@ export const Filled: Story = {
 export const Dismissible: Story = {
   render: () => html`
     <div style="display: flex; flex-direction: column; gap: 0.75rem;">
-      <void-alert color="info" dismissible>
+      <void-alert color="info">
         <void-alert-description>This alert can be dismissed. Click the × button to close it.</void-alert-description>
+        <void-alert-close><button type="button" aria-label="Dismiss">&times;</button></void-alert-close>
       </void-alert>
-      <void-alert color="success" dismissible>
+      <void-alert color="success">
         <void-alert-description>Your changes have been saved successfully.</void-alert-description>
+        <void-alert-close><button type="button" aria-label="Dismiss">&times;</button></void-alert-close>
       </void-alert>
-      <void-alert color="error" dismissible>
+      <void-alert color="error">
         <void-alert-description>Failed to submit the form. Please try again.</void-alert-description>
+        <void-alert-close><button type="button" aria-label="Dismiss">&times;</button></void-alert-close>
       </void-alert>
     </div>
   `,

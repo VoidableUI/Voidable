@@ -273,13 +273,18 @@ defmodule VoidableUI.Components do
   end
 
   # ---------------------------------------------------------------------------
-  # Alert (interactive — void-dismiss when dismissible)
+  # Alert (interactive — void-close from its close part)
   # ---------------------------------------------------------------------------
 
-  @doc "Renders a `<void-alert>` message: `<void-alert-title>` and `<void-alert-description>` children."
+  @doc """
+  Renders a `<void-alert>` message.
+
+  Write its parts as children: an optional `<void-alert-title>`, the `<void-alert-description>` and an optional
+  `<void-alert-close>` wrapping the one control that dismisses it (without it the alert cannot be dismissed).
+  With `events`, pressing that control pushes `void-close`.
+  """
   attr :id, :string, default: nil
   attr :color, :string, default: nil
-  attr :dismissible, :boolean, default: false
   attr :variant, :string, default: nil
   attr :events, :any, default: nil, doc: @events_doc
   attr :rest, :global
@@ -290,10 +295,9 @@ defmodule VoidableUI.Components do
     <void-alert
       id={@id || auto_id("void-alert", @rest)}
       color={@color}
-      dismissible={@dismissible}
       variant={@variant}
       phx-hook={void_hook(@events)}
-      data-void-events={void_events(@events, "void-dismiss")}
+      data-void-events={void_events(@events, "void-close")}
       {@rest}
     >
       {render_slot(@inner_block)}

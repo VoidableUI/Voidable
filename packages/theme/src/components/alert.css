@@ -46,16 +46,20 @@ void-alert-description {
   display: block;
 }
 
-/* The close button of a dismissible alert lives in the alert's shadow root;
-   the text keeps clear of it. */
-void-alert[dismissible] {
+/* The close control the author wrote: a part wrapping their own button, in the
+   top corner. The text keeps clear of it. */
+void-alert:has(> void-alert-close) {
   padding-inline-end: calc(var(--void-container-padding) + 1.25rem + var(--void-space-3));
 }
 
-void-alert::part(close) {
+void-alert-close {
   position: absolute;
   top: var(--void-space-3);
   inset-inline-end: var(--void-container-padding);
+  display: flex;
+}
+
+void-alert-close > button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -72,11 +76,11 @@ void-alert::part(close) {
   transition: opacity var(--void-duration-fast) var(--void-ease-in-out);
 }
 
-void-alert::part(close):hover {
+void-alert-close > button:hover {
   opacity: 1;
 }
 
-void-alert::part(close):focus-visible {
+void-alert-close > button:focus-visible {
   opacity: 1;
   outline: var(--void-focus-ring-width) solid currentColor;
   outline-offset: var(--void-focus-ring-offset);
