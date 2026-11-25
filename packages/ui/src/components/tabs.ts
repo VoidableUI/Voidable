@@ -199,15 +199,25 @@ export class VoidTabs extends VoidElement {
     if (incoming) {
       const sent = new Set(Array.from(incoming.querySelectorAll(':scope > void-tab-panel[id]'), p => p.id));
       const ids = new Map<string | null, string>();
+      // LiveView sends an unchanged panel as an empty placeholder (data-phx-skip)
+      // that only carries its data-phx-id: pair those by that instead of `tab`.
+      const byPhx = new Map<string, string>();
       for (const p of this._panels) {
-        if (p instanceof VoidTabPanel && p._generatedId && p.id === p._generatedId && !sent.has(p.id)) ids.set(p.getAttribute('tab'), p.id);
+        if (p instanceof VoidTabPanel && p._generatedId && p.id === p._generatedId && !sent.has(p.id)) {
+          ids.set(p.getAttribute('tab'), p.id);
+          const phx = p.getAttribute('data-phx-id');
+          if (phx) byPhx.set(phx, p.id);
+        }
       }
       if (ids.size) {
         for (const next of Array.from(incoming.querySelectorAll(':scope > void-tab-panel:not([id])'))) {
-          const id = ids.get(next.getAttribute('tab'));
+          const tab = next.getAttribute('tab');
+          const phx = next.getAttribute('data-phx-id');
+          const id = tab !== null ? ids.get(tab) : phx ? byPhx.get(phx) : undefined;
           if (id) {
             next.setAttribute('id', id);
-            ids.delete(next.getAttribute('tab'));
+            ids.delete(tab);
+            if (phx) byPhx.delete(phx);
           }
         }
       }

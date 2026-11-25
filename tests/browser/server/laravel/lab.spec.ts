@@ -3,7 +3,7 @@
 // Laravel Livewire 4 and Alpine against the real example app (examples/laravel, /lab and
 // /lab/two) with the built @voidable/ui and @voidable/ui-alpine packages. Every test gets a
 // new browser context and so a new Livewire component.
-import { test, expect, expectedFailure, settle, ready, fillLabForm, formEntries, mark, kept, type Page } from '../shared';
+import { test, expect, settle, ready, fillLabForm, formEntries, mark, kept, type Page } from '../shared';
 
 /** Opens a page and waits for Livewire and Alpine to start and the components to upgrade. */
 async function open(page: Page, path = '/lab') {
@@ -120,7 +120,6 @@ test.describe('server updates while the user is mid-interaction', () => {
   });
 
   test('an open dropdown menu stays open through polls', async ({ page }) => {
-    expectedFailure('untracked:livewire-dropdown-closes', 'the first update closes a dropdown menu the user opened');
     await page.click('#poll-on');
     await page.click('#dd-trigger');
     await expect(page.getByRole('menuitem', { name: 'Rename' })).toBeVisible();
@@ -131,7 +130,6 @@ test.describe('server updates while the user is mid-interaction', () => {
   });
 
   test('a selected tab stays selected and its panel text updates', async ({ page }) => {
-    expectedFailure('untracked:livewire-tabs-childpart', 'after a tab is selected the next update throws "ChildPart has no parentNode" in Lit, on every poll');
     await page.getByRole('tab', { name: 'Two' }).click();
     await page.click('#poll-on');
     const start = await ticks(page);
@@ -143,7 +141,6 @@ test.describe('server updates while the user is mid-interaction', () => {
   });
 
   test('a multiselect keeps working through the updates after the user chose two options', async ({ page }) => {
-    expectedFailure('untracked:livewire-multiselect-childpart', 'choosing a second option throws "ChildPart has no parentNode" in Lit when the update for the first arrives');
     await page.locator('#i-skills .void-multiselect-trigger').click();
     await page.locator('#i-skills').getByRole('option', { name: 'JS' }).click();
     await page.locator('#i-skills').getByRole('option', { name: 'HTML' }).click();
@@ -179,7 +176,6 @@ test.describe('server updates while the user is mid-interaction', () => {
   });
 
   test('the server selecting a tab wins over the user selection', async ({ page }) => {
-    expectedFailure('untracked:livewire-tabs-server-value', 'a value the server adds to void-tabs selects nothing (and the update throws the ChildPart error)');
     await page.getByRole('tab', { name: 'One' }).click();
     await page.click('#server-tab');
     await expect(page.locator('#tabs').getByRole('tab', { name: 'Two' })).toHaveAttribute('aria-selected', 'true');
@@ -227,7 +223,6 @@ test.describe('overlays opened by the server or the user', () => {
   });
 
   test('a dialog the user opened without the server stays open through an unrelated update', async ({ page }) => {
-    expectedFailure('untracked:livewire-open-state', 'the Livewire hooks do not keep open, so an update that repeats the server markup closes the dialog');
     await page.evaluate(async () => {
       const d = document.getElementById('dlg') as any;
       d.open = true;

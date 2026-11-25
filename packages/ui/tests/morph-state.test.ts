@@ -461,3 +461,14 @@ describe('overlay open state (what the Livewire hook hands to the morph)', () =>
     expect(again.hasAttribute('open')).toBe(false);
   });
 });
+
+describe('tabs under LiveView placeholders', () => {
+  it('gives an unchanged panel sent as a data-phx-skip placeholder its generated id, paired by data-phx-id', async () => {
+    const tabs = await mount<Host>('<void-tabs><void-tab-panel tab="a" label="A" data-phx-id="m1">A</void-tab-panel><void-tab-panel tab="b" label="B" data-phx-id="m2">B</void-tab-panel></void-tabs>');
+    const live = Array.from(tabs.querySelectorAll('void-tab-panel')).map(p => p.id);
+    expect(live.every(Boolean)).toBe(true);
+    const next = server('<void-tabs value="b"><void-tab-panel data-phx-skip data-phx-id="m1"></void-tab-panel><void-tab-panel tab="b" label="B" data-phx-id="m2">B!</void-tab-panel></void-tabs>');
+    tabs.voidBeforeMorph(next);
+    expect(Array.from(next.querySelectorAll('void-tab-panel')).map(p => p.id)).toEqual(live);
+  });
+});

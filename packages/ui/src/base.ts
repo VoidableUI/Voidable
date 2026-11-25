@@ -1,4 +1,4 @@
-import { LitElement, type PropertyDeclaration, type PropertyValues } from 'lit';
+import { LitElement, ReactiveElement, type PropertyDeclaration, type PropertyValues } from 'lit';
 import { PROJECTION_KEY, ProjectionController } from './projection.js';
 
 /** Per-class cache of reflected property defaults (attribute name -> property and default value). */
@@ -204,7 +204,16 @@ export class VoidElement extends LitElement {
   protected override update(changed: PropertyValues): void {
     this.#inUpdate = true;
     try {
-      super.update(changed);
+      // A component without a template (Lit's default render) renders nothing:
+      // skip Lit's render, which would still put its marker comment into the
+      // host, where a morph sees an extra child and removes it, and the next
+      // update then throws "ChildPart has no parentNode" (tab panels under
+      // Livewire).
+      if ((this as unknown as { render: unknown }).render === (LitElement.prototype as unknown as { render: unknown }).render) {
+        ReactiveElement.prototype['update'].call(this, changed);
+      } else {
+        super.update(changed);
+      }
     } finally {
       this.#inUpdate = false;
     }

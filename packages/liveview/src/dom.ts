@@ -33,6 +33,10 @@ export const VoidDOM = {
    */
   onBeforeElUpdated(fromEl: Element, toEl: Element): void {
     if (!fromEl.tagName?.startsWith("VOID-")) return;
+    // An unchanged comprehension or component root arrives as an empty
+    // placeholder (data-phx-skip) and LiveView keeps the live element as it is;
+    // it is not the server's markup, so the state rule must not read it.
+    if (toEl.hasAttribute?.("data-phx-skip")) return;
     (fromEl as Morphable).voidBeforeMorph?.(toEl);
   },
 };
