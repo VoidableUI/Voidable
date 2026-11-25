@@ -29,6 +29,15 @@
   font-size: var(--void-text-base);
 }
 
+.vd-box {
+  /* A container of a set width: shows what a component does when its own
+     container, not the viewport, is narrow. */
+  width: 100%;
+  padding-inline: var(--void-space-2);
+  border: 1px dashed var(--void-color-border);
+  border-radius: var(--void-radius-md);
+}
+
 .vd-row {
   display: flex;
   flex-wrap: wrap;
