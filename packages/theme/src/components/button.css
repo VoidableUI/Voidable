@@ -103,6 +103,13 @@ void-button:has(> a) {
   padding: 0;
 }
 
+/* :has() takes the specificity of its argument, so the rule above is only
+   (0,0,2) and loses to void-button[size="…"] (0,1,1). Match the attribute
+   so the reset wins for every size; the inner <a> carries the padding. */
+void-button[size]:has(> a) {
+  padding: 0;
+}
+
 void-button > a {
   display: inline-flex;
   align-items: center;
