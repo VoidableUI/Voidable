@@ -51,7 +51,7 @@ export async function buildGallery(opts) {
   let items;
   let baseManifest = null;
   if (base) {
-    ({ items, base: baseManifest } = compareDirs(base, head, out));
+    ({ items, base: baseManifest } = await compareDirs(base, head, out));
   } else {
     items = manifest.shots.map((s) => ({ page: s.page, look: s.look, scheme: s.scheme, width: s.width, head: s.file, status: 'same', height: s.height }));
   }
