@@ -29,7 +29,7 @@ export const CONTRACT = {
   'void-avatar': { role: 'img', name: 'alt attribute', state: [], gaps: ['without alt the host is role="img" with an empty aria-label: an unnamed image (axe image-alt / role-img-alt)'] },
   'void-badge': { role: 'status', name: 'text content', state: ['color (reflected)'], gaps: ['every badge is role="status", a live region: a table of status badges is a page of live regions, and a decorative badge cannot opt out'] },
   'void-banner': { role: 'banner', name: 'text content', state: ['dismissable (reflected)'], gaps: ['role="banner" is the page header landmark; a second banner, or one inside <main>, is invalid'] },
-  'void-bar-chart': { role: 'img', name: 'aria-label attribute', state: [], gaps: ['data is a property only and its shape ({ series: [{ name, values }], labels }) is not in the manifest or `voidable ref`; the drawn values are not exposed as text'] },
+  'void-bar-chart': { role: 'img', name: 'aria-label attribute', state: [], gaps: ['data is a property only (its shape is in the manifest and `voidable ref`); the drawn values are not exposed as text'] },
   'void-breadcrumbs': { role: 'navigation', name: 'fixed "Breadcrumb"', state: [] },
   'void-button': {
     role: 'button',
@@ -81,7 +81,7 @@ export const CONTRACT = {
     gaps: ['role="dialog" stays on the host while closed (hidden content only)', 'focus is not returned to the opener on close; tests that check focus return need the app to do it'],
   },
   'void-divider': { role: 'separator', name: 'label attribute', state: ['aria-orientation'] },
-  'void-donut-chart': { role: 'img', name: 'aria-label attribute', state: [], gaps: ['data is a property only; its shape ({ segments: [{ name, value }] }) is not in the manifest or `voidable ref`'] },
+  'void-donut-chart': { role: 'img', name: 'aria-label attribute', state: [], gaps: ['data is a property only (its shape is in the manifest and `voidable ref`); the drawn values are not exposed as text'] },
   'void-drawer': {
     role: 'dialog',
     name: 'heading attribute (aria-label)',
@@ -121,7 +121,7 @@ export const CONTRACT = {
     state: ['value (attribute; the live value is the inner input value)', 'error (reflected) -> aria-invalid on the inner input', 'disabled (reflected)'],
     probe: { html: '<void-field label="Email"><void-input name="email"></void-input></void-field>', fill: { label: 'Email', text: 'a@b.co' }, event: 'void-input' },
   },
-  'void-line-chart': { role: 'img', name: 'aria-label attribute', state: [], gaps: ['data is a property only; its shape ({ series: [{ name, values }], labels }) is not in the manifest or `voidable ref`'] },
+  'void-line-chart': { role: 'img', name: 'aria-label attribute', state: [], gaps: ['data is a property only (its shape is in the manifest and `voidable ref`); the drawn values are not exposed as text'] },
   'void-list': { role: 'list', name: 'none', state: [] },
   'void-list-item': { role: 'listitem', name: 'text content', state: ['selected (reflected)', 'disabled (reflected)'], gaps: ['interactive items stay role="listitem": "selected" has no ARIA equivalent'] },
   'void-menu': { role: 'inner', name: 'none', state: ['open (reflected)', 'role="menu" rendered inside'], gaps: ['the menu has no accessible name'] },

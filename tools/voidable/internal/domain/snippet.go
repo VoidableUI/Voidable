@@ -18,7 +18,7 @@ const (
 )
 
 // SnippetLangs are the languages Snippet can emit.
-var SnippetLangs = []Lang{LangHTML, LangJSX, LangHEEx, LangERB}
+var SnippetLangs = []Lang{LangHTML, LangJSX, LangHEEx, LangERB, LangBlade}
 
 // Snippet is an example usage in one language.
 type Snippet struct {
@@ -33,6 +33,12 @@ func (l *Library) Snippet(ctx context.Context, tag string, lang Lang) (*Snippet,
 	return l.snippet(ctx, tag, lang, true)
 }
 
+// Markup renders the example markup alone, without the event-wiring example
+// that Snippet appends. The docs site renders it live.
+func (l *Library) Markup(ctx context.Context, tag string, lang Lang) (*Snippet, error) {
+	return l.snippet(ctx, tag, lang, false)
+}
+
 // snippet renders the example; wiring adds the event listener example.
 func (l *Library) snippet(ctx context.Context, tag string, lang Lang, wiring bool) (*Snippet, error) {
 	e, err := l.Lookup(tag)
@@ -40,9 +46,9 @@ func (l *Library) snippet(ctx context.Context, tag string, lang Lang, wiring boo
 		return nil, err
 	}
 	switch lang {
-	case LangHTML, LangJSX, LangHEEx, LangERB:
+	case LangHTML, LangJSX, LangHEEx, LangERB, LangBlade:
 	default:
-		return nil, fmt.Errorf("%w %q for snippets (use html, jsx, heex or erb)", ErrUnknownLang, lang)
+		return nil, fmt.Errorf("%w %q for snippets (use html, jsx, heex, erb or blade)", ErrUnknownLang, lang)
 	}
 	var nodes []*Node
 	src := SnippetSynthesized
@@ -114,6 +120,9 @@ func (r snippetRenderer) node(b *strings.Builder, n *Node, depth int, isRoot boo
 	el, isVoid := r.lib.cat.Element(n.Tag)
 	if r.lang == LangHEEx && isVoid && !el.CSSOnly {
 		name = "." + FunctionName(n.Tag)
+	}
+	if r.lang == LangBlade && isVoid && !el.CSSOnly {
+		name = "x-voidable::" + strings.TrimPrefix(n.Tag, "void-")
 	}
 	b.WriteString(ind + "<" + name)
 	for _, a := range n.Attrs {
@@ -200,6 +209,8 @@ func (r snippetRenderer) eventTail() string {
 		return fmt.Sprintf("<script type=\"module\">\n  document.querySelector('%s')\n    .addEventListener('%s', (e) => console.log(%s));\n</script>\n", r.root.Tag, ev.Name, access)
 	case LangHEEx:
 		return fmt.Sprintf("<%%!-- The component sets phx-hook=\"VoidEvent\"; handle_event(\"%s\", %s, socket) receives the detail. --%%>\n", ev.Name, elixirDetail(ev))
+	case LangBlade:
+		return fmt.Sprintf("{{-- Alpine: add x-void-on:%s=\"handle($event.detail)\" to the tag, or void_attrs('%s', 'handler') from voidable/laravel. --}}\n", ev.Name, ev.Name)
 	case LangERB:
 		return fmt.Sprintf("<%%# Stimulus: my-controller#handle receives event.detail %s. Helper: void_attrs(\"%s\", \"my-controller#handle\") %%>\n", ev.Detail, ev.Name)
 	}
