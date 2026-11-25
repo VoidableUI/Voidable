@@ -20,7 +20,7 @@ class VoidableServiceProvider extends ServiceProvider
         });
 
         Blade::directive('voidableStyles', function () {
-            return "<?php echo '<link rel=\"stylesheet\" href=\"' . asset(config('voidable.theme_path', 'build/assets/theme.css')) . '\">' ; ?>";
+            return "<?php if (\$__voidableTheme = config('voidable.theme_path')) { echo '<link rel=\"stylesheet\" href=\"' . e(asset(\$__voidableTheme)) . '\">'; } ?>";
         });
     }
 
