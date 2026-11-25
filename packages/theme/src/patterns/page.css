@@ -2,10 +2,18 @@
    --void-page-head-rule     The line under the page head.
    --void-page-head-padding  Space between the head's text and that line. */
 
+/* @tokens void-page
+   --void-page-actions-surface       Fill of the actions that close a page or its form (void-actions directly in void-page, or in the form that wraps its sections). Unset, they sit on the page.
+   --void-page-actions-padding       Padding around those actions.
+   --void-page-actions-radius        Corner radius of their box.
+   --void-page-actions-shadow        Shadow of their box.
+   --void-page-actions-border        Edge colour of their box.
+   --void-page-actions-border-width  Edge thickness of their box; 0 by default. Set it (the colour may be transparent) whenever the box has a fill or a shadow: forced colours removes both, and the edge is what remains. */
+
 /* @tokens void-section
    --void-section-surface       Fill of a titled section (one with a heading, or one that holds a table). Unset, a section draws nothing.
    --void-section-border        Edge colour of a titled section.
-   --void-section-border-width  Edge thickness of a titled section; 0 by default.
+   --void-section-border-width  Edge thickness of a titled section; 0 by default. Set it (the colour may be transparent) whenever the section has a fill or a shadow: forced colours removes both, and the edge is what remains.
    --void-section-radius        Corner radius of a titled section.
    --void-section-shadow        Shadow of a titled section.
    --void-section-padding       Padding inside a titled section.
@@ -65,6 +73,18 @@ void-page > form {
   display: flex;
   flex-direction: column;
   gap: var(--void-gap-group);
+}
+
+/* The actions that close a page or its form (Cancel, Save) are a block of
+   the page like its sections. Where sections are boxes, a skin can make
+   them one too: a bar of its own, so they do not float under the last box
+   and outside every one. Unset, the tokens draw nothing. */
+:is(void-page, void-page > form) > void-actions {
+  padding: var(--void-page-actions-padding, 0);
+  border: var(--void-page-actions-border-width, 0) solid var(--void-page-actions-border, transparent);
+  border-radius: var(--void-page-actions-radius, 0);
+  background: var(--void-page-actions-surface, transparent);
+  box-shadow: var(--void-page-actions-shadow, none);
 }
 
 /* ── void-page-head: what this page is and what you can do here ──
@@ -187,6 +207,18 @@ void-section:has(> :is(void-section-head, h2, h3, h4, void-table)) {
   box-shadow: var(--void-section-shadow, none);
   /* What a table inside paints its sticky cells with. */
   --_void-under: var(--void-section-surface);
+}
+
+/* Forced colours removes fills and shadows: where a skin has made the page
+   actions or a section a box, its edge is the boundary that is left, drawn
+   in a system colour whatever colour the skin gave it (forced-colors.css
+   has the same for the container components). With no edge thickness set,
+   as by default, nothing is drawn. */
+@media (forced-colors: active) {
+  :is(void-page, void-page > form) > void-actions,
+  void-section:has(> :is(void-section-head, h2, h3, h4, void-table)) {
+    border-color: CanvasText;
+  }
 }
 
 void-section-head {

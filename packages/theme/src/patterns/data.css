@@ -16,6 +16,8 @@
    --void-figure-surface  Fill of one figure.
    --void-figure-radius   Corner radius of one figure.
    --void-figure-shadow   Shadow of one figure.
+   --void-figure-border        Colour of the edge drawn just inside one figure.
+   --void-figure-border-width  Thickness of that edge; 0 by default. Set it (the colour may be transparent) whenever a figure has a fill or a shadow: forced colours removes both, and the edge is what remains.
    --void-figure-padding  Padding of every figure on every side. Unset, the first figure of a row sits flush on the content edge; set, each figure is a padded tile. */
 
 /* @tokens void-description-list
@@ -35,7 +37,18 @@ void-figure {
   border-radius: var(--void-figure-radius, 0);
   background: var(--void-figure-surface, transparent);
   box-shadow: var(--void-figure-shadow, none);
+  /* An outline, drawn inside, and not a border: the borders of a figure
+     are the rules between figures, and an edge must not move them. */
+  outline: var(--void-figure-border-width, 0) solid var(--void-figure-border, transparent);
+  outline-offset: calc(var(--void-figure-border-width, 0px) * -1);
   font-family: var(--void-font-sans);
+}
+
+/* Forced colours removes a tile's fill and shadow; its edge remains. */
+@media (forced-colors: active) {
+  void-figure {
+    outline-color: CanvasText;
+  }
 }
 
 void-figure > [data-void-type="value"] {

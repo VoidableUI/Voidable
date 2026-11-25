@@ -14,7 +14,9 @@
 //     that is neither a token of the theme nor a component token;
 //   - an assignment that would undo a guarantee: a duration that ignores the
 //     animation scale (reduced motion), a focus ring thinner than 2px, a
-//     control height under 24px, half of the preferred-scheme pair;
+//     control height under 24px, half of the preferred-scheme pair, a box
+//     drawn with a fill or a shadow and no edge (forced colours removes the
+//     fill and the shadow, so the box would have no boundary at all);
 //   - a skin that build/knobs.js does not list (the builder, the export and
 //     the docs read that list).
 //
@@ -86,6 +88,16 @@ for (const file of files) {
       const h = px(prop);
       if (h !== null && h < 24) fail(`src/${file}: ${prop} is ${h}px; a control keeps at least 24px (WCAG 2.5.8)`);
     }
+  }
+  // A box needs an edge in forced colours. Where a component or pattern has an
+  // edge-thickness token that is 0 unless set (section, figure, page actions), a
+  // skin that gives it a fill or a shadow has to set that thickness too; the
+  // edge colour may be transparent, forced colours draws it.
+  for (const t of tokens) {
+    if (!t.name.endsWith('-border-width') || !/^0(px)?$/.test(String(t.default ?? '').trim())) continue;
+    const stem = t.name.slice(0, -'-border-width'.length);
+    const drawn = ['-surface', '-shadow'].filter((k) => set[stem + k] !== undefined && !/^(none|transparent|initial)$/.test(set[stem + k]));
+    if (drawn.length && !((px(t.name) ?? 0) >= 1)) fail(`src/${file}: ${stem}${drawn[0]} draws a box, so set ${t.name} to at least 1px (its colour may stay transparent): forced colours removes fills and shadows, and the edge is the only boundary left`);
   }
   if (!listedSkins.some((s) => s.id === name)) fail(`src/${file}: add the skin to \`skins\` in build/knobs.js (the builder, the token export and the docs read that list)`);
   if (!/^\s*\/\* [A-Z][\w ]* — \S/.test(src(file))) fail(`src/${file}: start the file with a comment of the form \`/* Name — one line.\`, as a theme does`);
