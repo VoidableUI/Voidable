@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Project</title>
+  <style>
+    main { max-width: 40rem; margin: 0 auto; padding: var(--void-space-4); display: grid; gap: var(--void-space-4); }
+    .actions { display: flex; gap: var(--void-space-2); justify-content: flex-end; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Projects</h1>
+    <void-card id="project-card" heading="Apollo">
+      <p>Launch site and mission control dashboards.</p>
+    </void-card>
+    <div><void-button id="delete-trigger" color="error">Delete project</void-button></div>
+    <p id="status" role="status"></p>
+  </main>
+
+  <void-dialog id="confirm" heading="Delete Apollo?" size="sm">
+    <p>This permanently deletes the project and its data. This can't be undone.</p>
+    <div class="actions">
+      <void-button id="cancel">Cancel</void-button>
+      <void-button id="confirm-delete" color="error" variant="filled">Delete</void-button>
+    </div>
+  </void-dialog>
+
+  <script type="module">
+    const trigger = document.getElementById('delete-trigger');
+    const dialog = document.getElementById('confirm');
+    trigger.addEventListener('void-click', () => { dialog.open = true; });
+    // The dialog does not restore focus itself: put it back on the trigger.
+    dialog.addEventListener('void-close', () => trigger.focus());
+    document.getElementById('cancel').addEventListener('void-click', () => {
+      dialog.open = false;
+      trigger.focus();
+    });
+    document.getElementById('confirm-delete').addEventListener('void-click', () => {
+      dialog.open = false;
+      document.getElementById('project-card').remove();
+      trigger.remove();
+      document.getElementById('status').textContent = 'Project deleted';
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,11 @@
+{
+    "name": "voidable/evals-blade-fixture",
+    "description": "Blade renderer for the agent evals (evals/fixtures/blade/render.php); installed by `mise run evals:setup`.",
+    "license": "MIT",
+    "require": {
+        "php": "^8.3",
+        "illuminate/view": "13.*",
+        "illuminate/events": "13.*",
+        "illuminate/filesystem": "13.*"
+    }
+}

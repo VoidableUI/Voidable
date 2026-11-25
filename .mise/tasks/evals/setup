@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+#MISE description="Prepare the agent evals: build the library and the voidable CLI, install the Blade fixture, warm the HEEx fixture, check Chromium and ActionView"
+#MISE depends=["build"]
+set -euo pipefail
+
+root="$(pwd)"
+
+# The voidable binary gives the agents ref/check/snippet/skill and scores markup.
+(cd tools/voidable && mise install go "aqua:golangci/golangci-lint" >/dev/null && VOIDABLE_SKIP_UI_BUILD=1 mise run build:go)
+
+# Blade: Illuminate View, pinned in evals/fixtures/blade/composer.json.
+(cd evals/fixtures/blade && composer install --no-interaction --no-progress --quiet)
+
+# HEEx: Phoenix LiveView at the versions in packages/liveview/hex/mix.lock.
+mkdir -p evals/.cache/mix
+probe="$(mktemp -d)"
+printf '<p>{@x}</p>\n' > "$probe/index.html.heex"
+printf '{"x":"ok"}\n' > "$probe/data.json"
+MIX_INSTALL_DIR="$root/evals/.cache/mix" elixir evals/fixtures/heex/render.exs "$probe" >/dev/null
+rm -r "$probe"
+
+# ERB: ActionView from the installed Rails gems.
+if ! ruby -e 'require "action_view"' 2>/dev/null; then
+  echo "evals:setup: ActionView is missing; installing the actionview gem" >&2
+  gem install actionview --no-document
+fi
+
+# Chromium: VOID_CHROMIUM_PATH, /usr/bin/chromium, or Playwright's download.
+if [[ -z "${VOID_CHROMIUM_PATH:-}" && ! -x /usr/bin/chromium ]]; then
+  echo "evals:setup: no system Chromium; downloading Playwright's" >&2
+  (cd evals && ./node_modules/.bin/playwright-core install chromium)
+fi
+echo "evals ready: mise run evals -- list"

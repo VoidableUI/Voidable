@@ -1,0 +1,14 @@
+<main style="max-width: 32rem; margin: 0 auto; padding: var(--void-space-4);">
+  <h1>Notifications</h1>
+  <.form for={%{}} action="/preferences" style="display: grid; gap: var(--void-space-6);">
+    <void-radio-group label="Frequency" name="frequency" value={@prefs.frequency}>
+      <void-radio value="instant" checked={@prefs.frequency == "instant"}>Instant</void-radio>
+      <void-radio value="daily" checked={@prefs.frequency == "daily"}>Daily digest</void-radio>
+      <void-radio value="weekly" checked={@prefs.frequency == "weekly"}>Weekly digest</void-radio>
+    </void-radio-group>
+    <void-checkbox-group label="Channels" name="channels[]">
+      <void-checkbox :for={{value, label} <- [{"email", "Email"}, {"sms", "SMS"}, {"push", "Push"}]} value={value} checked={value in @prefs.channels}>{label}</void-checkbox>
+    </void-checkbox-group>
+    <div><void-button type="submit" variant="filled">Save preferences</void-button></div>
+  </.form>
+</main>

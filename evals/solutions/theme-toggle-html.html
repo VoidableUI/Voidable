@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Northwind</title>
+  <script>
+    // Apply the saved theme before first paint. Set dark explicitly: without
+    // data-theme the theme follows the OS preference.
+    let saved = null;
+    try { saved = localStorage.getItem('theme'); } catch {}
+    document.documentElement.dataset.theme = saved === 'light' ? 'light' : 'dark';
+  </script>
+  <style>
+    body { margin: 0; background: var(--void-color-bg); color: var(--void-color-text); }
+    .header { display: flex; justify-content: space-between; align-items: center; gap: var(--void-space-4); padding: var(--void-space-3) var(--void-space-4); }
+    main { padding: var(--void-space-4); }
+  </style>
+</head>
+<body>
+  <void-nav-bar>
+    <div class="header">
+      <strong>Northwind</strong>
+      <void-switch id="dark-mode" checked>Dark mode</void-switch>
+    </div>
+  </void-nav-bar>
+  <main>
+    <h1>Welcome</h1>
+    <p>Northwind keeps your team's orders, stock and suppliers in one place.</p>
+  </main>
+  <script type="module">
+    const sw = document.getElementById('dark-mode');
+    const light = document.documentElement.dataset.theme === 'light';
+    sw.checked = !light;
+    sw.addEventListener('void-change', (e) => {
+      const dark = e.detail.checked;
+      document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+      try { localStorage.setItem('theme', dark ? 'dark' : 'light'); } catch {}
+    });
+  </script>
+</body>
+</html>

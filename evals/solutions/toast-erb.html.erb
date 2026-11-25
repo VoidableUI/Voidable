@@ -1,0 +1,27 @@
+<main style="max-width: 40rem; margin: 0 auto; padding: var(--void-space-4);">
+  <h1>Pending invitations</h1>
+  <void-table>
+    <table>
+      <thead><tr><th>Email</th><th>Sent</th><th>Actions</th></tr></thead>
+      <tbody>
+        <% @invitations.each do |invitation| %>
+          <tr>
+            <td><%= invitation.email %></td>
+            <td><%= invitation.sent_at %></td>
+            <td>
+              <void-button size="sm" data-email="<%= invitation.email %>" aria-label="Resend invite to <%= invitation.email %>">Resend</void-button>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </void-table>
+</main>
+<void-toast-container position="bottom-right"></void-toast-container>
+<script type="module">
+  import { VoidToastContainer } from '@voidable/ui';
+  document.addEventListener('void-click', (e) => {
+    const email = e.target.closest('[data-email]')?.dataset.email;
+    if (email) VoidToastContainer.show({ message: `Invite resent to ${email}`, color: 'success', duration: 4000 });
+  });
+</script>

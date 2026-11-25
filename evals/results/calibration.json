@@ -1,0 +1,416 @@
+{
+  "generatedAt": "2026-11-25T08:15:31.231Z",
+  "tasks": {
+    "avatar-upload-svelte": {
+      "passed": 8,
+      "total": 8,
+      "failed": {},
+      "findings": [],
+      "axe": [],
+      "notes": [],
+      "usedTags": [
+        "void-button",
+        "void-field",
+        "void-file-upload"
+      ]
+    },
+    "combobox-filter-react": {
+      "passed": 7,
+      "total": 7,
+      "failed": {},
+      "findings": [],
+      "axe": [],
+      "notes": [],
+      "usedTags": [
+        "void-button",
+        "void-combobox",
+        "void-field",
+        "void-option"
+      ]
+    },
+    "confirm-dialog-html": {
+      "passed": 9,
+      "total": 9,
+      "failed": {},
+      "findings": [],
+      "axe": [],
+      "notes": [],
+      "usedTags": [
+        "void-button",
+        "void-card",
+        "void-dialog"
+      ]
+    },
+    "confirm-remove-react": {
+      "passed": 8,
+      "total": 8,
+      "failed": {},
+      "findings": [],
+      "axe": [],
+      "notes": [],
+      "usedTags": [
+        "void-avatar",
+        "void-button",
+        "void-dialog",
+        "void-list",
+        "void-list-item"
+      ]
+    },
+    "country-combobox-heex": {
+      "passed": 7,
+      "total": 7,
+      "failed": {},
+      "findings": [],
+      "axe": [],
+      "notes": [],
+      "usedTags": [
+        "void-button",
+        "void-combobox",
+        "void-field",
+        "void-input",
+        "void-option"
+      ]
+    },
+    "dashboard-react": {
+      "passed": 8,
+      "total": 8,
+      "failed": {},
+      "findings": [],
+      "axe": [],
+      "notes": [],
+      "usedTags": [
+        "void-bar-chart",
+        "void-card",
+        "void-list",
+        "void-list-item",
+        "void-stat"
+      ]
+    },
+    "dashboard-svelte": {
+      "passed": 8,
+      "total": 8,
+      "failed": {},
+      "findings": [],
+      "axe": [],
+      "notes": [],
+      "usedTags": [
+        "void-card",
+        "void-donut-chart",
+        "void-line-chart",
+        "void-stat"
+      ]
+    },
+    "data-table-react": {
+      "passed": 10,
+      "total": 10,
+      "failed": {},
+      "findings": [],
+      "axe": [],
+      "notes": [],
+      "usedTags": [
+        "void-badge",
+        "void-button",
+        "void-dropdown-menu",
+        "void-dropdown-menu-item",
+        "void-field",
+        "void-input",
+        "void-pagination",
+        "void-scroll-area",
+        "void-table"
+      ]
+    },
+    "date-range-blade": {
+      "passed": 6,
+      "total": 7,
+      "failed": {
+        "a11y": "aria-allowed-attr (critical) #x8yrsmi6p3f-control, #p5lkflb6dyr-control"
+      },
+      "findings": [],
+      "axe": [
+        "aria-allowed-attr|void-date-picker"
+      ],
+      "notes": [],
+      "usedTags": [
+        "void-button",
+        "void-date-picker",
+        "void-field"
+      ]
+    },
+    "drawer-detail-react": {
+      "passed": 8,
+      "total": 8,
+      "failed": {},
+      "findings": [],
+      "axe": [],
+      "notes": [],
+      "usedTags": [
+        "void-button",
+        "void-drawer"
+      ]
+    },
+    "empty-state-svelte": {
+      "passed": 8,
+      "total": 8,
+      "failed": {},
+      "findings": [],
+      "axe": [],
+      "notes": [],
+      "usedTags": [
+        "void-button"
+      ]
+    },
+    "file-upload-erb": {
+      "passed": 8,
+      "total": 8,
+      "failed": {},
+      "findings": [],
+      "axe": [],
+      "notes": [],
+      "usedTags": [
+        "void-button",
+        "void-field",
+        "void-file-upload"
+      ]
+    },
+    "inbox-drawer-erb": {
+      "passed": 8,
+      "total": 8,
+      "failed": {},
+      "findings": [],
+      "axe": [],
+      "notes": [],
+      "usedTags": [
+        "void-avatar",
+        "void-drawer"
+      ]
+    },
+    "multi-step-svelte": {
+      "passed": 10,
+      "total": 10,
+      "failed": {},
+      "findings": [],
+      "axe": [],
+      "notes": [],
+      "usedTags": [
+        "void-button",
+        "void-field",
+        "void-input",
+        "void-select",
+        "void-stepper"
+      ]
+    },
+    "preferences-heex": {
+      "passed": 8,
+      "total": 8,
+      "failed": {},
+      "findings": [],
+      "axe": [],
+      "notes": [],
+      "usedTags": [
+        "void-button",
+        "void-checkbox",
+        "void-checkbox-group",
+        "void-radio",
+        "void-radio-group"
+      ]
+    },
+    "pricing-toggle-html": {
+      "passed": 8,
+      "total": 8,
+      "failed": {},
+      "findings": [],
+      "axe": [],
+      "notes": [],
+      "usedTags": [
+        "void-badge",
+        "void-button",
+        "void-card",
+        "void-segmented-control",
+        "void-segmented-control-item"
+      ]
+    },
+    "settings-erb": {
+      "passed": 8,
+      "total": 9,
+      "failed": {
+        "a11y": "aria-input-field-name (serious) void-textarea"
+      },
+      "findings": [],
+      "axe": [
+        "aria-input-field-name|void-textarea"
+      ],
+      "notes": [],
+      "usedTags": [
+        "void-button",
+        "void-field",
+        "void-input",
+        "void-panel",
+        "void-switch",
+        "void-textarea"
+      ]
+    },
+    "sidebar-collapse-react": {
+      "passed": 8,
+      "total": 8,
+      "failed": {},
+      "findings": [],
+      "axe": [],
+      "notes": [],
+      "usedTags": [
+        "void-button",
+        "void-sidebar"
+      ]
+    },
+    "sidebar-shell-erb": {
+      "passed": 9,
+      "total": 9,
+      "failed": {},
+      "findings": [],
+      "axe": [],
+      "notes": [],
+      "usedTags": [
+        "void-avatar",
+        "void-field",
+        "void-hamburger",
+        "void-input",
+        "void-nav-bar",
+        "void-sidebar"
+      ]
+    },
+    "sign-in-heex": {
+      "passed": 8,
+      "total": 8,
+      "failed": {},
+      "findings": [],
+      "axe": [],
+      "notes": [],
+      "usedTags": [
+        "void-alert",
+        "void-button",
+        "void-checkbox",
+        "void-field",
+        "void-input"
+      ]
+    },
+    "sign-in-html": {
+      "passed": 9,
+      "total": 9,
+      "failed": {},
+      "findings": [],
+      "axe": [],
+      "notes": [],
+      "usedTags": [
+        "void-button",
+        "void-checkbox",
+        "void-field",
+        "void-input"
+      ]
+    },
+    "tabs-heex": {
+      "passed": 8,
+      "total": 8,
+      "failed": {},
+      "findings": [],
+      "axe": [],
+      "notes": [],
+      "usedTags": [
+        "void-list",
+        "void-list-item",
+        "void-switch",
+        "void-tab-panel",
+        "void-tabs"
+      ]
+    },
+    "tabs-keyboard-svelte": {
+      "passed": 8,
+      "total": 8,
+      "failed": {},
+      "findings": [],
+      "axe": [],
+      "notes": [],
+      "usedTags": [
+        "void-field",
+        "void-input",
+        "void-switch",
+        "void-tab-panel",
+        "void-tabs"
+      ]
+    },
+    "theme-toggle-html": {
+      "passed": 8,
+      "total": 8,
+      "failed": {},
+      "findings": [],
+      "axe": [],
+      "notes": [],
+      "usedTags": [
+        "void-nav-bar",
+        "void-switch"
+      ]
+    },
+    "toast-erb": {
+      "passed": 8,
+      "total": 8,
+      "failed": {},
+      "findings": [],
+      "axe": [],
+      "notes": [],
+      "usedTags": [
+        "void-button",
+        "void-table",
+        "void-toast-container"
+      ]
+    },
+    "toast-html": {
+      "passed": 7,
+      "total": 7,
+      "failed": {},
+      "findings": [],
+      "axe": [],
+      "notes": [],
+      "usedTags": [
+        "void-button",
+        "void-field",
+        "void-input",
+        "void-toast-container"
+      ]
+    },
+    "users-table-blade": {
+      "passed": 9,
+      "total": 9,
+      "failed": {},
+      "findings": [],
+      "axe": [],
+      "notes": [],
+      "usedTags": [
+        "void-badge",
+        "void-button",
+        "void-dropdown-menu",
+        "void-dropdown-menu-item",
+        "void-field",
+        "void-input",
+        "void-pagination",
+        "void-scroll-area",
+        "void-select",
+        "void-table"
+      ]
+    },
+    "validation-errors-blade": {
+      "passed": 8,
+      "total": 8,
+      "failed": {},
+      "findings": [],
+      "axe": [],
+      "notes": [],
+      "usedTags": [
+        "void-button",
+        "void-field",
+        "void-input"
+      ]
+    }
+  },
+  "libraryAxe": [
+    "aria-allowed-attr|void-date-picker",
+    "aria-input-field-name|void-textarea"
+  ]
+}

@@ -1,0 +1,14 @@
+<main style="max-width: 24rem; margin: 0 auto; padding: var(--void-space-6) var(--void-space-4); display: grid; gap: var(--void-space-4);">
+  <h1>Log in</h1>
+  <void-alert :if={@error_message} color="error">{@error_message}</void-alert>
+  <.form for={%{}} as={:user} action="/users/log_in" style="display: grid; gap: var(--void-space-4);">
+    <void-field label="Email">
+      <void-input type="email" name="user[email]" required></void-input>
+    </void-field>
+    <void-field label="Password">
+      <void-input type="password" name="user[password]" required></void-input>
+    </void-field>
+    <void-checkbox name="user[remember_me]" value="true">Keep me logged in</void-checkbox>
+    <void-button type="submit" variant="filled">Log in</void-button>
+  </.form>
+</main>
