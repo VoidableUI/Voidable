@@ -1,6 +1,8 @@
 import { html, nothing } from 'lit';
+import { live } from 'lit/directives/live.js';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
+import { defaultTrueBoolean, forwardedSpellcheck } from '../converters.js';
 import { NativeFormControl } from '../form-control.js';
 
 /** Multi-line text entry for comment fields, description inputs, and freeform text that needs more than one line. */
@@ -16,6 +18,21 @@ export class VoidTextarea extends NativeFormControl(VoidElement) {
   @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' | 'xl' | 'xxl' = 'md';
   @property({ type: String, reflect: true }) error = '';
 
+  /** Autofill hint forwarded to the native control (`autocomplete`), e.g. `current-password`, `one-time-code`, `email`. */
+  @property({ type: String, reflect: true }) autocomplete = '';
+  /** Minimum number of characters, enforced by the native control (`minlength`) and reported through validity. */
+  @property({ type: Number }) minlength: number | undefined = undefined;
+  /** Maximum number of characters accepted by the native control (`maxlength`). */
+  @property({ type: Number }) maxlength: number | undefined = undefined;
+  /** Virtual keyboard hint forwarded to the native control (`inputmode`). */
+  @property({ type: String, attribute: 'inputmode' }) override inputMode: '' | 'none' | 'text' | 'decimal' | 'numeric' | 'tel' | 'search' | 'email' | 'url' = '';
+  /** Label of the mobile keyboard's enter key (`enterkeyhint`). */
+  @property({ type: String, attribute: 'enterkeyhint' }) override enterKeyHint: '' | 'enter' | 'done' | 'go' | 'next' | 'previous' | 'search' | 'send' = '';
+  /** Capitalisation behaviour of virtual keyboards (`autocapitalize`). */
+  @property({ type: String }) override autocapitalize: '' | 'off' | 'none' | 'on' | 'sentences' | 'words' | 'characters' = '';
+  /** Spell checking of the native control (`spellcheck`). Defaults to true; `spellcheck="false"` turns it off from markup. */
+  @property({ converter: defaultTrueBoolean }) override spellcheck = true;
+
   connectedCallback(): void {
     super.connectedCallback();
     this.setHostAttribute('role', 'textbox');
@@ -25,12 +42,19 @@ export class VoidTextarea extends NativeFormControl(VoidElement) {
   render() {
     return html`
       <textarea
-        .value=${this.value}
+        .value=${live(this.value)}
         placeholder=${this.placeholder}
         ?disabled=${this.disabled}
         ?readonly=${this.readonly}
         ?required=${this.required}
         name=${this.name}
+        autocomplete=${this.autocomplete || nothing}
+        minlength=${this.minlength ?? nothing}
+        maxlength=${this.maxlength ?? nothing}
+        inputmode=${this.inputMode || nothing}
+        enterkeyhint=${this.enterKeyHint || nothing}
+        autocapitalize=${this.autocapitalize || nothing}
+        spellcheck=${forwardedSpellcheck(this) ?? nothing}
         form=${this.formAttr ?? nothing}
         rows=${this.rows}
         style="--void-textarea-resize: ${this.resize}"

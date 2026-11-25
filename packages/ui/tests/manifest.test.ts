@@ -42,6 +42,9 @@ interface Manifest {
 type LitClass = typeof ReactiveElement & { elementProperties: Map<PropertyKey, PropertyDeclaration> };
 
 /** Lit's attribute name for a reactive property (null when attribute: false). */
+/** Standard HTML attributes whose camelCase DOM property has a one-word attribute. */
+const NATIVE_ATTRIBUTES = new Set(['inputmode', 'enterkeyhint']);
+
 function litAttribute(name: string, options: PropertyDeclaration): string | null {
   if (options.attribute === false) return null;
   if (typeof options.attribute === 'string') return options.attribute;
@@ -227,6 +230,8 @@ describe('custom-elements.json', () => {
       for (const [name, options] of reactive) {
         const attr = litAttribute(name, options);
         if (attr === null || !/[A-Z]/.test(name)) continue;
+        // Native HTML attributes keep their native spelling (`inputmode`, not `input-mode`).
+        if (NATIVE_ATTRIBUTES.has(attr) && options.attribute === attr) continue;
         // Lit's default (the lowercased name, `maxsize`) is never what a user writes.
         // An explicit attribute that is not a kebab form (formAttr -> form) is deliberate.
         expect(attr, `${tag}.${name} uses Lit's lowercased default attribute`).not.toBe(name.toLowerCase());

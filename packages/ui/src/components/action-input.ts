@@ -1,6 +1,8 @@
 import { html, nothing } from 'lit';
+import { live } from 'lit/directives/live.js';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
+import { defaultTrueBoolean, forwardedSpellcheck } from '../converters.js';
 import { NativeFormControl } from '../form-control.js';
 
 /** Input field with an attached icon button — used for copy-to-clipboard inputs, search boxes, and similar patterns. */
@@ -11,10 +13,26 @@ export class VoidActionInput extends NativeFormControl(VoidElement) {
   @property({ type: Boolean, reflect: true }) readonly = false;
   @property({ type: Boolean, reflect: true }) required = false;
   @property({ type: String, reflect: true }) name = '';
+  /** Autofill hint forwarded to the native control (`autocomplete`), e.g. `current-password`, `one-time-code`, `email`. */
   @property({ type: String, reflect: true }) autocomplete = '';
+  /** Minimum number of characters, enforced by the native control (`minlength`) and reported through validity. */
+  @property({ type: Number }) minlength: number | undefined = undefined;
+  /** Maximum number of characters accepted by the native control (`maxlength`). */
+  @property({ type: Number }) maxlength: number | undefined = undefined;
+  /** Regular expression the value must match (`pattern`), reported through validity. */
+  @property({ type: String }) pattern = '';
+  /** Virtual keyboard hint forwarded to the native control (`inputmode`). */
+  @property({ type: String, attribute: 'inputmode' }) override inputMode: '' | 'none' | 'text' | 'decimal' | 'numeric' | 'tel' | 'search' | 'email' | 'url' = '';
+  /** Label of the mobile keyboard's enter key (`enterkeyhint`). */
+  @property({ type: String, attribute: 'enterkeyhint' }) override enterKeyHint: '' | 'enter' | 'done' | 'go' | 'next' | 'previous' | 'search' | 'send' = '';
+  /** Capitalisation behaviour of virtual keyboards (`autocapitalize`). */
+  @property({ type: String }) override autocapitalize: '' | 'off' | 'none' | 'on' | 'sentences' | 'words' | 'characters' = '';
+  /** Spell checking of the native control (`spellcheck`). Defaults to true; `spellcheck="false"` turns it off from markup. */
+  @property({ converter: defaultTrueBoolean }) override spellcheck = true;
   @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' = 'md';
-  @property({ type: String, reflect: true }) color: 'default' | 'error' | 'warning' | 'success' | 'info' | 'notice' = 'default';
-  @property({ type: String, reflect: true }) type: 'text' | 'password' = 'text';
+  @property({ type: String, reflect: true }) color: 'default' | 'error' | 'warning' | 'caution' | 'success' | 'info' | 'notice' = 'default';
+  /** Native input type; any text-like type is forwarded to the native control. */
+  @property({ type: String, reflect: true }) type: 'text' | 'password' | 'search' | 'email' | 'tel' | 'url' = 'text';
   @property({ type: String, reflect: true }) icon: string = 'search';
   @property({ type: String, attribute: 'action-label' }) actionLabel = 'Action';
   @property({ type: String, reflect: true }) position: 'left' | 'right' = 'right';
@@ -95,15 +113,22 @@ export class VoidActionInput extends NativeFormControl(VoidElement) {
       <input
         class="void-action-input-field"
         type=${this.type}
-        .value=${this.value}
+        .value=${live(this.value)}
         placeholder=${this.placeholder}
         ?disabled=${this.disabled}
         ?readonly=${this.readonly}
         ?required=${this.required}
         name=${this.name}
         form=${this.formAttr ?? nothing}
-        autocomplete=${this.autocomplete}
-        aria-label=${this.actionLabel}
+        autocomplete=${this.autocomplete || nothing}
+        minlength=${this.minlength ?? nothing}
+        maxlength=${this.maxlength ?? nothing}
+        pattern=${this.pattern || nothing}
+        inputmode=${this.inputMode || nothing}
+        enterkeyhint=${this.enterKeyHint || nothing}
+        autocapitalize=${this.autocapitalize || nothing}
+        spellcheck=${forwardedSpellcheck(this) ?? nothing}
+        aria-label=${this.getAttribute('aria-label') || this.placeholder || nothing}
         @input=${this._onInput}
         @change=${this._onChange}
       />

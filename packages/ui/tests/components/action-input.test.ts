@@ -192,11 +192,7 @@ describe('VoidActionInput', () => {
       expect(button(el).getAttribute('aria-label')).toBe('Go');
     });
 
-    // BUG: the text input is given aria-label=${actionLabel}, the same name as the button, so
-    // assistive tech announces two controls called e.g. "Copy link" and the input never gets
-    // a name describing its content. action-input.ts:~89. Expected: the input is not labelled
-    // by the button's action label.
-    it.fails('does not give the input the same accessible name as the action button', async () => {
+    it('does not give the input the same accessible name as the action button', async () => {
       const el = await mount({ actionLabel: 'Copy link' });
       expect(input(el).getAttribute('aria-label')).not.toBe(button(el).getAttribute('aria-label'));
     });
