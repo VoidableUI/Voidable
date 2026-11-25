@@ -14,8 +14,12 @@ void-menu[open] {
   display: flex;
 }
 
-/* ── Search input ── */
-.void-menu-search {
+/* ── Search: the part wraps the author's text field ── */
+void-menu-search {
+  display: contents;
+}
+
+void-menu-search > input {
   width: 100%;
   padding: var(--void-space-2) var(--void-space-3);
   background: transparent;
@@ -28,20 +32,16 @@ void-menu[open] {
   outline: none;
 }
 
-.void-menu-search::placeholder {
+void-menu-search > input::placeholder {
   color: var(--void-color-text-muted);
 }
 
-/* ── List container ── */
-.void-menu-list {
+/* ── The list: the content part ── */
+void-menu-content {
+  display: block;
   padding: var(--void-space-1) 0;
   max-height: 20rem;
   overflow-y: auto;
-}
-
-/* Closed: the component keeps this element rendered and sets [hidden]. */
-.void-menu-list[hidden] {
-  display: none;
 }
 
 /* ── Menu item ── */
@@ -80,7 +80,7 @@ void-menu-item[hidden] {
 }
 
 /* ── Item sub-elements ── */
-.void-menu-item-icon {
+void-menu-item-icon {
   flex-shrink: 0;
   width: 1rem;
   display: inline-flex;
@@ -89,14 +89,14 @@ void-menu-item[hidden] {
   color: var(--void-color-text-secondary);
 }
 
-.void-menu-item-label {
-  flex: 1;
+/* The item's own text is its label: it takes the room the icon and shortcut leave. */
+void-menu-item > :not(void-menu-item-icon, void-menu-item-shortcut) {
   min-width: 0;
 }
 
-.void-menu-item-shortcut {
+void-menu-item-shortcut {
   flex-shrink: 0;
-  margin-left: auto;
+  margin-inline-start: auto;
   font-size: var(--void-text-xs);
   color: var(--void-color-text-muted);
 }
@@ -114,7 +114,8 @@ void-menu-group + void-menu-group {
   border-top: 1px solid var(--void-color-border);
 }
 
-.void-menu-group-label {
+void-menu-group-label {
+  display: block;
   padding: var(--void-space-2) var(--void-space-3) var(--void-space-1);
   font-family: var(--void-type-label-family);
   font-size: var(--void-type-label-size);
@@ -126,24 +127,29 @@ void-menu-group + void-menu-group {
   user-select: none;
 }
 
-.void-menu-group-items {
-  display: flex;
-  flex-direction: column;
-}
-
-/* ── Empty state ── */
-.void-menu-empty {
+/* ── Empty state: the author's <void-menu-empty>, or the default text, shown while a search matches nothing ── */
+void-menu-empty,
+void-menu[empty]:not(:has(> void-menu-empty)) > void-menu-content::after {
+  display: block;
   padding: var(--void-space-3) var(--void-space-3);
   color: var(--void-color-text-muted);
   font-size: var(--void-text-xs);
   text-align: center;
 }
 
+void-menu:not([empty]) > void-menu-empty {
+  display: none;
+}
+
+void-menu[empty]:not(:has(> void-menu-empty)) > void-menu-content::after {
+  content: "No results found";
+}
+
 /* ── Size variants ── */
 void-menu[size='sm'] {
   min-width: 180px;
 }
-void-menu[size='sm'] .void-menu-search {
+void-menu[size='sm'] void-menu-search > input {
   padding: var(--void-space-1h) var(--void-space-2);
   font-size: var(--void-text-xs);
 }
@@ -151,14 +157,14 @@ void-menu[size='sm'] void-menu-item {
   padding: var(--void-space-1h) var(--void-space-2);
   font-size: var(--void-text-xs);
 }
-void-menu[size='sm'] .void-menu-list {
+void-menu[size='sm'] void-menu-content {
   max-height: 14rem;
 }
 
 void-menu[size='lg'] {
   min-width: 320px;
 }
-void-menu[size='lg'] .void-menu-search {
+void-menu[size='lg'] void-menu-search > input {
   padding: var(--void-space-3) var(--void-space-4);
   font-size: var(--void-text-base);
 }
@@ -166,6 +172,6 @@ void-menu[size='lg'] void-menu-item {
   padding: var(--void-space-3) var(--void-space-4);
   font-size: var(--void-text-base);
 }
-void-menu[size='lg'] .void-menu-list {
+void-menu[size='lg'] void-menu-content {
   max-height: 28rem;
 }

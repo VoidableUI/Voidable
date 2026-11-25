@@ -103,30 +103,17 @@ describe('VoidNavBar', () => {
     });
   });
 
-  describe('rendering', () => {
-    it('renders .void-nav-bar-content div', async () => {
-      const el = createElement();
-      document.body.appendChild(el);
-      await el.updateComplete;
-      expect(el.querySelector('.void-nav-bar-content')).not.toBeNull();
-      el.remove();
-    });
-  });
-
-  describe('Light DOM', () => {
-    it('createRenderRoot returns the element itself', () => {
-      const el = createElement();
-      expect(el.createRenderRoot()).toBe(el);
-    });
-
-    it('preserves user children inside .void-nav-bar-content', async () => {
+  describe('structure', () => {
+    it('renders nothing of its own and leaves the author nodes where they are', async () => {
       const container = document.createElement('div');
-      container.innerHTML = '<void-nav-bar><a href="#">Link</a></void-nav-bar>';
+      container.innerHTML = '<void-nav-bar><void-brand>Acme</void-brand><void-nav-links><a href="#" aria-current="page">Home</a></void-nav-links><void-spacer></void-spacer><button>Sign in</button></void-nav-bar>';
       document.body.appendChild(container);
       const el = container.querySelector(TAG) as VoidNavBar;
+      const before = Array.from(el.children);
       await el.updateComplete;
-      const content = el.querySelector('.void-nav-bar-content');
-      expect(content?.querySelector('a')).not.toBeNull();
+      expect(Array.from(el.children)).toEqual(before);
+      expect(el.querySelector('.void-nav-bar-content')).toBeNull();
+      expect(el.getAttribute('role')).toBe('navigation');
       container.remove();
     });
   });

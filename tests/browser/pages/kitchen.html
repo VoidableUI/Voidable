@@ -64,11 +64,11 @@
     <void-tabs value="one"><void-tabs-list><void-tabs-trigger value="one">One</void-tabs-trigger><void-tabs-trigger value="two">Two</void-tabs-trigger></void-tabs-list><void-tabs-content value="one">Panel one <a href="#p1">link</a></void-tabs-content><void-tabs-content value="two">Panel two</void-tabs-content></void-tabs>
     <void-accordion><void-accordion-item><void-accordion-trigger>Section 1</void-accordion-trigger><void-accordion-content>Content 1</void-accordion-content></void-accordion-item><void-accordion-item><void-accordion-trigger>Section 2</void-accordion-trigger><void-accordion-content>Content 2</void-accordion-content></void-accordion-item></void-accordion>
     <void-collapsible><void-collapsible-trigger>Collapsible</void-collapsible-trigger><void-collapsible-content><p>Hidden content</p></void-collapsible-content></void-collapsible>
-    <void-breadcrumbs><a href="/">Home</a><a href="/p">Products</a><span>Details</span></void-breadcrumbs>
+    <void-breadcrumbs><void-breadcrumbs-item><a href="/">Home</a></void-breadcrumbs-item><void-breadcrumbs-item><a href="/p">Products</a></void-breadcrumbs-item><void-breadcrumbs-item aria-current="page">Details</void-breadcrumbs-item></void-breadcrumbs>
     <void-pagination total="20" value="6"></void-pagination>
     <void-stepper value="1" steps="Cart,Shipping,Payment"></void-stepper>
-    <void-menu open aria-label="Actions"><void-menu-group label="File"><void-menu-item value="edit">Edit</void-menu-item><void-menu-item value="dup" shortcut="⌘D">Duplicate</void-menu-item></void-menu-group><void-menu-item value="del">Delete</void-menu-item></void-menu>
-    <void-nav-menu><void-nav-menu-item>Products<div><a href="#">Analytics</a></div></void-nav-menu-item><void-nav-menu-item href="/pricing">Pricing</void-nav-menu-item></void-nav-menu>
+    <void-menu open aria-label="Actions"><void-menu-content><void-menu-group><void-menu-group-label>File</void-menu-group-label><void-menu-item value="edit">Edit</void-menu-item><void-menu-item value="dup">Duplicate<void-menu-item-shortcut>⌘D</void-menu-item-shortcut></void-menu-item></void-menu-group><void-menu-item value="del">Delete</void-menu-item></void-menu-content></void-menu>
+    <void-nav-menu><void-nav-menu-item><void-nav-menu-trigger><button type="button">Products</button></void-nav-menu-trigger><void-nav-menu-content><a href="#">Analytics</a></void-nav-menu-content></void-nav-menu-item><void-nav-menu-item><void-nav-menu-trigger><a href="/pricing">Pricing</a></void-nav-menu-trigger></void-nav-menu-item></void-nav-menu>
     <void-list dividers><void-list-item>Item one</void-list-item><void-list-item selected>Item two</void-list-item><void-list-item interactive>Item three</void-list-item></void-list>
   </section>
   <section id="s-surfaces">
@@ -99,7 +99,7 @@
       <void-hover-card><void-hover-card-trigger><a href="#h">Hover</a></void-hover-card-trigger><void-hover-card-content><div>Card</div></void-hover-card-content></void-hover-card>
     </div>
     <void-scroll-area max-height="80px"><p>Line 1</p><p>Line 2</p><p>Line 3</p><p>Line 4</p></void-scroll-area>
-    <void-carousel controls indicators><void-carousel-slide><div style="height: 80px">Slide 1</div></void-carousel-slide><void-carousel-slide><div style="height: 80px">Slide 2</div></void-carousel-slide></void-carousel>
+    <void-carousel><void-carousel-content><void-carousel-item><div style="height: 80px">Slide 1</div></void-carousel-item><void-carousel-item><div style="height: 80px">Slide 2</div></void-carousel-item></void-carousel-content><void-carousel-previous aria-label="Previous slide"></void-carousel-previous><void-carousel-next aria-label="Next slide"></void-carousel-next><void-carousel-indicators></void-carousel-indicators></void-carousel>
     <void-error-fallback heading="Something broke" message="Try again" retryable></void-error-fallback>
     <void-error-fallback><void-error-fallback-title>Parts fallback</void-error-fallback-title><void-error-fallback-description>Written with parts.</void-error-fallback-description><void-error-fallback-actions><button type="button">Retry</button></void-error-fallback-actions></void-error-fallback>
     <void-divider label="Divider"></void-divider>

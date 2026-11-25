@@ -14,6 +14,13 @@ function createItem(): VoidNavMenuItem {
   return document.createElement(ITEM_TAG) as VoidNavMenuItem;
 }
 
+/** An item written with its parts: a button trigger and a dropdown panel. */
+function dropdownItem(label = 'Products'): VoidNavMenuItem {
+  const el = createItem();
+  el.innerHTML = `<void-nav-menu-trigger><button type="button">${label}</button></void-nav-menu-trigger><void-nav-menu-content><a href="/a">A</a></void-nav-menu-content>`;
+  return el;
+}
+
 describe('VoidNavMenu', () => {
   describe('class', () => {
     it('extends VoidElement', () => {
@@ -97,10 +104,6 @@ describe('VoidNavMenuItem', () => {
       expect(el.disabled).toBe(false);
     });
 
-    it('href defaults to empty string', () => {
-      expect(el.href).toBe('');
-    });
-
     it('active defaults to false', () => {
       expect(el.active).toBe(false);
     });
@@ -110,11 +113,7 @@ describe('VoidNavMenuItem', () => {
     let el: VoidNavMenuItem;
 
     beforeEach(async () => {
-      el = createItem();
-      el.textContent = 'Products';
-      const dropdown = document.createElement('div');
-      dropdown.textContent = 'Dropdown content';
-      el.appendChild(dropdown);
+      el = dropdownItem();
       document.body.appendChild(el);
       await el.updateComplete;
     });
@@ -142,12 +141,8 @@ describe('VoidNavMenuItem', () => {
     let el: VoidNavMenuItem;
 
     beforeEach(async () => {
-      el = createItem();
+      el = dropdownItem();
       el.disabled = true;
-      el.textContent = 'Products';
-      const dropdown = document.createElement('div');
-      dropdown.textContent = 'Dropdown';
-      el.appendChild(dropdown);
       document.body.appendChild(el);
       await el.updateComplete;
     });
@@ -169,11 +164,7 @@ describe('VoidNavMenuItem', () => {
     let el: VoidNavMenuItem;
 
     beforeEach(async () => {
-      el = createItem();
-      el.textContent = 'Products';
-      const dropdown = document.createElement('div');
-      dropdown.textContent = 'Dropdown content';
-      el.appendChild(dropdown);
+      el = dropdownItem();
       document.body.appendChild(el);
       await el.updateComplete;
     });
@@ -243,28 +234,207 @@ describe('VoidNavMenuItem', () => {
     });
   });
 
-  describe('trigger rendering', () => {
-    it('renders a button trigger when no href', async () => {
-      const el = createItem();
-      el.textContent = 'Products';
-      document.body.appendChild(el);
-      await el.updateComplete;
-      const trigger = el.querySelector('.void-nav-menu-trigger');
-      expect(trigger).not.toBeNull();
-      expect(trigger?.tagName.toLowerCase()).toBe('button');
-      el.remove();
+  describe('explicit parts', () => {
+    afterEach(() => {
+      document.body.innerHTML = '';
     });
 
-    it('renders an anchor trigger when href is set', async () => {
-      const el = createItem();
-      el.href = '/products';
-      el.textContent = 'Products';
+    it('renders nothing of its own and moves no node', async () => {
+      const el = dropdownItem();
+      const before = Array.from(el.querySelectorAll('*'));
       document.body.appendChild(el);
       await el.updateComplete;
-      const trigger = el.querySelector('.void-nav-menu-trigger');
-      expect(trigger).not.toBeNull();
-      expect(trigger?.tagName.toLowerCase()).toBe('a');
-      el.remove();
+      expect(Array.from(el.querySelectorAll('*'))).toEqual(before);
+      expect(el.querySelector('.void-nav-menu-trigger, .void-nav-menu-content')).toBeNull();
+    });
+
+    it('gives the control the menubar ARIA and links it to the panel', async () => {
+      const el = dropdownItem();
+      document.body.appendChild(el);
+      await el.updateComplete;
+      const control = el.querySelector('button')!;
+      const content = el.querySelector('void-nav-menu-content')!;
+      expect(control.getAttribute('role')).toBe('menuitem');
+      expect(control.getAttribute('aria-haspopup')).toBe('true');
+      expect(control.getAttribute('aria-expanded')).toBe('false');
+      expect(content.id).not.toBe('');
+      expect(control.getAttribute('aria-controls')).toBe(content.id);
+      expect(content.getAttribute('role')).toBe('menu');
+      el.open = true;
+      await el.updateComplete;
+      expect(control.getAttribute('aria-expanded')).toBe('true');
+    });
+
+    it('a link entry with no panel takes no popup ARIA and navigates', async () => {
+      const el = createItem();
+      el.innerHTML = '<void-nav-menu-trigger><a href="/docs">Docs</a></void-nav-menu-trigger>';
+      el.active = true;
+      document.body.appendChild(el);
+      await el.updateComplete;
+      const link = el.querySelector('a')!;
+      expect(link.getAttribute('role')).toBe('menuitem');
+      expect(link.hasAttribute('aria-haspopup')).toBe(false);
+      expect(link.hasAttribute('aria-expanded')).toBe(false);
+      expect(link.getAttribute('aria-current')).toBe('page');
+      link.click();
+      expect(el.open).toBe(false);
+    });
+
+    it('never replaces an id or a role the author wrote', async () => {
+      const el = createItem();
+      el.innerHTML = '<void-nav-menu-trigger><button role="menuitem">P</button></void-nav-menu-trigger><void-nav-menu-content id="mine" role="group">x</void-nav-menu-content>';
+      document.body.appendChild(el);
+      await el.updateComplete;
+      const content = el.querySelector('void-nav-menu-content')!;
+      expect(content.id).toBe('mine');
+      expect(content.getAttribute('role')).toBe('group');
+      expect(el.querySelector('button')!.getAttribute('aria-controls')).toBe('mine');
+    });
+
+    it('wires a panel that arrives late and unwires one that is removed', async () => {
+      const el = createItem();
+      el.innerHTML = '<void-nav-menu-trigger><button>P</button></void-nav-menu-trigger>';
+      document.body.appendChild(el);
+      await el.updateComplete;
+      const control = el.querySelector('button')!;
+      expect(control.hasAttribute('aria-haspopup')).toBe(false);
+      const content = document.createElement('void-nav-menu-content');
+      content.textContent = 'x';
+      el.appendChild(content);
+      await new Promise(r => setTimeout(r, 0));
+      expect(control.getAttribute('aria-haspopup')).toBe('true');
+      content.remove();
+      await new Promise(r => setTimeout(r, 0));
+      expect(control.hasAttribute('aria-haspopup')).toBe(false);
+      expect(control.hasAttribute('aria-controls')).toBe(false);
+    });
+
+    it('marks a disabled entry on its control', async () => {
+      const el = dropdownItem();
+      el.disabled = true;
+      document.body.appendChild(el);
+      await el.updateComplete;
+      const control = el.querySelector('button')!;
+      expect(control.hasAttribute('disabled')).toBe(true);
+      expect(control.getAttribute('aria-disabled')).toBe('true');
+      el.disabled = false;
+      await el.updateComplete;
+      expect(control.hasAttribute('disabled')).toBe(false);
+    });
+  });
+
+  describe('activation (one open or close per Enter, Space and click)', () => {
+    afterEach(() => {
+      document.body.innerHTML = '';
+    });
+
+    async function mountItem(): Promise<{ el: VoidNavMenuItem; opens: () => number; closes: () => number; button: HTMLButtonElement }> {
+      const el = dropdownItem();
+      document.body.appendChild(el);
+      await el.updateComplete;
+      let o = 0;
+      let c = 0;
+      el.addEventListener('void-open', () => o++);
+      el.addEventListener('void-close', () => c++);
+      return { el, opens: () => o, closes: () => c, button: el.querySelector('button')! };
+    }
+
+    it('a click on the button opens the panel, a second click closes it', async () => {
+      const { el, opens, closes, button } = await mountItem();
+      button.click();
+      await el.updateComplete;
+      expect(el.open).toBe(true);
+      expect(opens()).toBe(1);
+      button.click();
+      await el.updateComplete;
+      expect(el.open).toBe(false);
+      expect(closes()).toBe(1);
+    });
+
+    it('does not prevent the native click: a key that clicks a button toggles exactly once', async () => {
+      const { el, opens, button } = await mountItem();
+      // A browser turns Enter (keydown) and Space (keyup) on a button into one click each.
+      const keydown = new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true });
+      button.dispatchEvent(keydown);
+      expect(keydown.defaultPrevented).toBe(false);
+      button.click();
+      await el.updateComplete;
+      expect(opens()).toBe(1);
+    });
+
+    it('a click after the hover opened the panel keeps it open (pins it)', async () => {
+      const { el, closes, button } = await mountItem();
+      el.dispatchEvent(new MouseEvent('mouseenter'));
+      await new Promise(r => setTimeout(r, 200));
+      expect(el.open).toBe(true);
+      button.click();
+      expect(el.open).toBe(true);
+      expect(closes()).toBe(0);
+      button.click();
+      expect(el.open).toBe(false);
+    });
+
+    it('opens on hover after the delay and closes after leaving', async () => {
+      const { el } = await mountItem();
+      el.dispatchEvent(new MouseEvent('mouseenter'));
+      await new Promise(r => setTimeout(r, 200));
+      expect(el.open).toBe(true);
+      el.dispatchEvent(new MouseEvent('mouseleave'));
+      await new Promise(r => setTimeout(r, 400));
+      expect(el.open).toBe(false);
+    });
+
+    it('closes when focus leaves the item', async () => {
+      const { el, button } = await mountItem();
+      el.open = true;
+      await el.updateComplete;
+      const outside = document.createElement('button');
+      document.body.appendChild(outside);
+      button.dispatchEvent(new FocusEvent('focusout', { bubbles: true, relatedTarget: outside }));
+      expect(el.open).toBe(false);
+    });
+  });
+
+  describe('menu keyboard', () => {
+    afterEach(() => {
+      document.body.innerHTML = '';
+    });
+
+    it('arrow keys move between the trigger controls, Escape closes and returns focus', async () => {
+      const menu = createMenu();
+      menu.innerHTML =
+        '<void-nav-menu-item><void-nav-menu-trigger><button id="a">A</button></void-nav-menu-trigger><void-nav-menu-content><a id="inner" href="#">x</a></void-nav-menu-content></void-nav-menu-item>' +
+        '<void-nav-menu-item><void-nav-menu-trigger><a id="b" href="/b">B</a></void-nav-menu-trigger></void-nav-menu-item>';
+      document.body.appendChild(menu);
+      await menu.updateComplete;
+      const a = menu.querySelector<HTMLElement>('#a')!;
+      const b = menu.querySelector<HTMLElement>('#b')!;
+      a.focus();
+      a.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
+      expect(document.activeElement).toBe(b);
+      b.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
+      expect(document.activeElement).toBe(a);
+      const item = menu.querySelector<VoidNavMenuItem>('void-nav-menu-item')!;
+      item.open = true;
+      await item.updateComplete;
+      const inner = menu.querySelector<HTMLElement>('#inner')!;
+      inner.focus();
+      inner.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+      expect(item.open).toBe(false);
+      expect(document.activeElement).toBe(a);
+    });
+
+    it('opening one item closes the others', async () => {
+      const menu = createMenu();
+      menu.append(dropdownItem('A'), dropdownItem('B'));
+      document.body.appendChild(menu);
+      await menu.updateComplete;
+      const [x, y] = Array.from(menu.querySelectorAll<VoidNavMenuItem>('void-nav-menu-item'));
+      x!.querySelector('button')!.click();
+      expect(x!.open).toBe(true);
+      y!.querySelector('button')!.click();
+      expect(y!.open).toBe(true);
+      expect(x!.open).toBe(false);
     });
   });
 

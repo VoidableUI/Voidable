@@ -53,7 +53,9 @@ defmodule DemoWeb.LabTwoLive do
           </void-dropdown-menu-content>
         </V.dropdown_menu>
         <V.menu id="click-menu" open>
-          <V.menu_item id="click-menu-item" phx-click="count">Menu item</V.menu_item>
+          <void-menu-content>
+            <V.menu_item id="click-menu-item" phx-click="count">Menu item</V.menu_item>
+          </void-menu-content>
         </V.menu>
         <V.tabs id="click-tabs">
           <void-tabs-list>

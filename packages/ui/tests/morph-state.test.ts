@@ -274,89 +274,68 @@ describe('select', () => {
   });
 });
 
-describe('wrap regions under direct DOM edits (breadcrumbs)', () => {
-  const items = (bc: Element) => Array.from(bc.querySelectorAll('li')).map(li => li.textContent);
+describe('keyed list edits (breadcrumbs, explicit parts)', () => {
+  // The items are the author's own nodes in the trail itself: nothing wraps them, so every direct DOM edit a
+  // framework makes leaves exactly the order it made.
+  const items = (bc: Element) => Array.from(bc.children).map(c => c.textContent);
+  const trail = (...t: string[]) => `<void-breadcrumbs>${t.map(x => `<void-breadcrumbs-item>${x}</void-breadcrumbs-item>`).join('')}</void-breadcrumbs>`;
+  const node = (t: string) => {
+    const n = document.createElement('void-breadcrumbs-item');
+    n.textContent = t;
+    return n;
+  };
 
-  it('a reorder by appendChild (React) follows the nodes, not their old list items', async () => {
-    const bc = await mount<Host>('<void-breadcrumbs><a>a</a><a>b</a><a>c</a></void-breadcrumbs>');
-    const [a, b] = Array.from(bc.querySelectorAll('a'));
+  it('a reorder by appendChild (React) keeps the nodes and the order', async () => {
+    const bc = await mount<Host>(trail('a', 'b', 'c'));
+    const [a, b] = Array.from(bc.children);
     bc.appendChild(a);
     bc.appendChild(b);
     await settle();
     expect(items(bc)).toEqual(['c', 'a', 'b']);
+    expect(bc.children[1]).toBe(a);
   });
 
-  it('a node inserted with before() next to an item gets a list item of its own (Svelte)', async () => {
-    const bc = await mount<Host>('<void-breadcrumbs><a>b</a><a>c</a></void-breadcrumbs>');
-    const c = bc.querySelectorAll('a')[1];
-    const x = document.createElement('a');
-    x.textContent = 'x';
-    c.before(x);
+  it('a node inserted with before() (Svelte) and an insert before the next sibling (Solid)', async () => {
+    const bc = await mount<Host>(trail('b', 'c'));
+    bc.children[1]!.before(node('x'));
     await settle();
     expect(items(bc)).toEqual(['b', 'x', 'c']);
-    bc.textContent = '';
+    bc.insertBefore(node('y'), bc.children[0]!.nextSibling);
     await settle();
-    expect(bc.querySelectorAll('li')).toHaveLength(0);
+    expect(items(bc)).toEqual(['b', 'y', 'x', 'c']);
   });
 
-  it('an insert before the next sibling of an item lands right after it (Solid)', async () => {
-    const bc = await mount<Host>('<void-breadcrumbs><a>b</a><a>c</a></void-breadcrumbs>');
-    const b = bc.querySelector('a')!;
-    const x = document.createElement('a');
-    x.textContent = 'x';
-    bc.insertBefore(x, b.nextSibling);
-    await settle();
-    expect(items(bc)).toEqual(['b', 'x', 'c']);
-  });
-
-  it('follows a Solid keyed swap (nextSibling read before two moves)', async () => {
-    const bc = await mount<Host>('<void-breadcrumbs><a>a</a><a>x</a><a>b</a><a>y</a></void-breadcrumbs>');
-    const [a, x, b, y] = Array.from(bc.querySelectorAll('a'));
+  it('follows a Solid keyed swap and Svelte anchor moves', async () => {
+    const bc = await mount<Host>(trail('a', 'x', 'b', 'y'));
+    const [a, x, b, y] = Array.from(bc.children) as HTMLElement[];
     // reconcileArrays: [a, x, b, y] -> [y, b, x, a]
-    let node = y.nextSibling;
-    bc.insertBefore(y, a.nextSibling);
-    bc.insertBefore(a, node);
-    node = b.nextSibling;
-    bc.insertBefore(b, x.nextSibling);
-    bc.insertBefore(x, node);
+    let ref = y!.nextSibling;
+    bc.insertBefore(y!, a!.nextSibling);
+    bc.insertBefore(a!, ref);
+    ref = b!.nextSibling;
+    bc.insertBefore(b!, x!.nextSibling);
+    bc.insertBefore(x!, ref);
     await settle();
     expect(items(bc)).toEqual(['y', 'b', 'x', 'a']);
-  });
 
-  it('keeps the order of a run of items inserted before one reference (Solid)', async () => {
-    const bc = await mount<Host>('<void-breadcrumbs><a>a</a><a>h</a><a>d</a></void-breadcrumbs>');
-    const h = bc.querySelectorAll('a')[1];
-    const node = h.nextSibling;
-    for (const t of ['c', 'b']) {
-      const n = document.createElement('a');
-      n.textContent = t;
-      bc.insertBefore(n, node);
-    }
-    await settle();
-    expect(items(bc)).toEqual(['a', 'h', 'c', 'b', 'd']);
-  });
-
-  it('follows Svelte moves with anchor.before()', async () => {
-    const bc = await mount<Host>('<void-breadcrumbs><a>a</a><a>x</a><a>b</a><a>y</a></void-breadcrumbs>');
     const anchor = document.createTextNode('');
     bc.appendChild(anchor);
+    // [y, b, x, a] -> [a, x, b, y]
+    y!.before(a!);
+    y!.before(x!);
+    anchor.before(y!);
     await settle();
-    const [a, , b, y] = Array.from(bc.querySelectorAll('a'));
-    // [a, x, b, y] -> [y, b, x, a]
-    a.before(y);
-    a.before(b);
-    anchor.before(a);
-    await settle();
-    expect(items(bc)).toEqual(['y', 'b', 'x', 'a']);
+    expect(items(bc)).toEqual(['a', 'x', 'b', 'y']);
   });
 
-  it('a replaced item keeps its position', async () => {
-    const bc = await mount<Host>('<void-breadcrumbs><a>a</a><a>b</a><a>c</a></void-breadcrumbs>');
-    const y = document.createElement('a');
-    y.textContent = 'y';
-    bc.querySelectorAll('a')[1].replaceWith(y);
+  it('a replaced item keeps its position, and clearing leaves nothing behind', async () => {
+    const bc = await mount<Host>(trail('a', 'b', 'c'));
+    bc.children[1]!.replaceWith(node('y'));
     await settle();
     expect(items(bc)).toEqual(['a', 'y', 'c']);
+    bc.textContent = '';
+    await settle();
+    expect(bc.childNodes).toHaveLength(0);
   });
 });
 

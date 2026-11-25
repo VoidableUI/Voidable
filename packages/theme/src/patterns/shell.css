@@ -35,7 +35,7 @@ void-shell > main {
 }
 
 /* The bar's content lines up with the page column below it. */
-void-shell > void-nav-bar .void-nav-bar-content {
+void-shell > void-nav-bar {
   padding-inline: var(--void-page-inset);
   flex-wrap: wrap;
 }

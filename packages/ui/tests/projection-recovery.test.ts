@@ -230,20 +230,14 @@ describe('textContent and replaceChildren on a rendered host', () => {
     expect(el.querySelector('.void-projection-fixture-trigger')).toBe(panel);
   });
 
-  it('textContent on menu-item, tag and checkbox keeps their rendered parts', async () => {
-    const item = mount('<void-menu-item icon="*" shortcut="K">Old</void-menu-item>');
+  it('textContent on tag and checkbox keeps their rendered parts', async () => {
     const tag = mount('<void-tag removable>Old</void-tag>');
     const box = mount('<void-checkbox>Old</void-checkbox>');
-    await settle(item);
     await settle(tag);
     await settle(box);
-    item.textContent = 'New';
     tag.textContent = 'New';
     box.textContent = 'New';
-    await settle(item);
-    expect(item.querySelector('.void-menu-item-label')!.textContent).toBe('New');
-    expect(item.querySelector('.void-menu-item-icon')).not.toBeNull();
-    expect(item.querySelector('.void-menu-item-shortcut')).not.toBeNull();
+    await settle(tag);
     expect(tag.querySelector('.void-tag-close')).not.toBeNull();
     expect(tag.textContent).toContain('New');
     expect(tag.textContent).not.toContain('Old');
@@ -276,15 +270,17 @@ describe('textContent and replaceChildren on a rendered host', () => {
   });
 
   it('textContent = "" then append (Solid-style clear) keeps working', async () => {
-    const el = mount('<void-menu open><void-menu-item>a</void-menu-item></void-menu>');
+    const el = mount('<void-menu open><void-menu-content><void-menu-item>a</void-menu-item></void-menu-content></void-menu>');
     await settle(el);
     el.textContent = '';
+    const content = document.createElement('void-menu-content');
     const item = document.createElement('void-menu-item');
     item.textContent = 'x';
-    el.appendChild(item);
+    content.appendChild(item);
+    el.appendChild(content);
     await settle(el);
-    expect(el.querySelectorAll('.void-menu-list').length).toBe(1);
-    expect(el.querySelectorAll('.void-menu-list void-menu-item').length).toBe(1);
+    expect(content.getAttribute('role')).toBe('menu');
+    expect(el.querySelectorAll('void-menu-content > void-menu-item').length).toBe(1);
   });
 });
 

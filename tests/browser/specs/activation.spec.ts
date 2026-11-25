@@ -137,6 +137,30 @@ for (const [name, trigger, host] of [['dropdown-menu', 'dd-t', 'dd'], ['popover'
   });
 }
 
+// The button in a nav-menu trigger part: Enter, Space and a click each toggle the panel once (one
+// click event, one change of state), and hovering the item opens it too.
+test.describe('the button in a nav-menu trigger part', () => {
+  for (const route of routes) {
+    test(`${route}: one click, opens, and the same route closes it`, async ({ page }) => {
+      expect(await isOpen(page, 'nav-item')).toBe(false);
+      await activate(page, 'nav-t', route);
+      expect(await log(page)).toEqual(['click:nav-t']);
+      await expect.poll(() => isOpen(page, 'nav-item')).toBe(true);
+      await clear(page);
+      await activate(page, 'nav-t', route);
+      expect(await log(page)).toEqual(['click:nav-t']);
+      await expect.poll(() => isOpen(page, 'nav-item')).toBe(false);
+    });
+  }
+
+  test('hovering the item opens it and leaving closes it', async ({ page }) => {
+    await page.locator('#nav-t').hover();
+    await expect.poll(() => isOpen(page, 'nav-item')).toBe(true);
+    await page.mouse.move(0, 400);
+    await expect.poll(() => isOpen(page, 'nav-item')).toBe(false);
+  });
+});
+
 // Hover cards and tooltips open on hover and focus, not on a click: the button inside
 // their trigger part still gets exactly one click and one void-click from each route,
 // and the overlay is open after the mouse is over it or the keyboard is on it.
