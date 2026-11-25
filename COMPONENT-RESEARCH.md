@@ -1,5 +1,7 @@
 # Component Research
 
+> **Historical snapshot, dated 2026-05-06.** This document records the competitive survey as it stood on that date and is not updated as components ship. The "43 shipped components" in the gap analysis and every SHIPPED / ROADMAP status below describe that day. Many components marked ROADMAP or GAP have since shipped, and `@voidable/ui` now registers 78 custom elements across 66 components. For current status see [ROADMAP.md](ROADMAP.md) and the [component overview](https://voidable.dev/components/overview/).
+
 Competitive analysis of component coverage across 20 UI libraries — 10 free/OSS and 10 premium/enterprise. Used to identify gaps in Voidable's current component set and inform roadmap prioritization.
 
 Survey date: 2026-05-06.

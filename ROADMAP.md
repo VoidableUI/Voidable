@@ -2,7 +2,7 @@
 
 ## Current State
 
-**54 components** (65 custom element tags) shipped across `@voidable/ui` + `@voidable/theme`, all with Storybook stories and vitest tests.
+**66 components** (78 custom element tags) shipped across `@voidable/ui` + `@voidable/theme`, all with Storybook stories. Counts are derived from `packages/ui/src` (one file per component in `src/components/`, one tag per `customElements.define`); the docs site computes them at build time.
 
 **8 framework adapter packages:**
 - `@voidable/ui-react` — React 18/19 — **implemented** (typed wrappers, event bridging, ref forwarding, useTheme hook)
@@ -16,7 +16,7 @@
 
 ---
 
-## Phase 1: Free/OSS Components (21 remaining)
+## Phase 1: Free/OSS Components (15 remaining)
 
 Frequency based on survey of 10 OSS libraries (shadcn, Radix, Chakra, Mantine, DaisyUI, Flowbite, Park UI, Headless UI, Ark UI, HeroUI). See [COMPONENT-RESEARCH.md](COMPONENT-RESEARCH.md) for full data.
 
@@ -35,14 +35,14 @@ Frequency based on survey of 10 OSS libraries (shadcn, Radix, Chakra, Mantine, D
 | Component | Freq | Description |
 |-----------|------|-------------|
 | ~~Toggle / Toggle Group~~ | 7/10 | ✅ Shipped — `<void-toggle>` + `<void-toggle-group>` |
-| **Collapsible** | 7/10 | Simple expand/collapse for a single section |
-| **Navigation Menu** | 7/10 | Horizontal nav with dropdowns/mega-menus |
-| **Hover Card** | 7/10 | Rich content preview on hover |
-| **Pin Input / OTP** | 7/10 | Single-char inputs for verification codes |
-| **Color Picker** | 7/10 | Color selection via spectrum, swatches, or hex |
+| ~~Collapsible~~ | 7/10 | ✅ Shipped — `<void-collapsible>` |
+| ~~Navigation Menu~~ | 7/10 | ✅ Shipped — `<void-nav-menu>` + `<void-nav-menu-item>` |
+| ~~Hover Card~~ | 7/10 | ✅ Shipped — `<void-hover-card>` |
+| ~~Pin Input / OTP~~ | 7/10 | ✅ Shipped — `<void-pin-input>` |
+| ~~Color Picker~~ | 7/10 | ✅ Shipped — `<void-color-picker>` |
 | ~~Segmented Control~~ | 7/10 | ✅ Shipped — `<void-segmented-control>` + `<void-segmented-control-item>` |
-| **Editable** | 7/10 | Inline editable text field |
-| **Tags Input / Pills** | 7/10 | Multi-tag input with add/remove |
+| ~~Editable~~ | 7/10 | ✅ Shipped — `<void-editable>` |
+| ~~Tags Input / Pills~~ | 7/10 | ✅ Shipped — `<void-tags-input>` |
 | **Rating** | 6/10 | Star/icon-based score input |
 | **Toolbar** | 6/10 | Grouped row of action buttons for editors/views |
 | **Fieldset** | 6/10 | Grouped form fields with legend |
@@ -69,7 +69,7 @@ Frequency based on survey of 10 OSS libraries (shadcn, Radix, Chakra, Mantine, D
 
 ---
 
-## Phase 2: Premium Components (17 remaining)
+## Phase 2: Premium Components (17 remaining, 1 partially shipped)
 
 Enterprise-grade components surveyed across 10 premium libraries (Syncfusion, Telerik/Kendo, AG Grid, DevExtreme, MUI X, Ant Design Pro, PrimeReact/Vue, Vaadin, Infragistics, Wijmo). See [COMPONENT-RESEARCH.md](COMPONENT-RESEARCH.md) for full data.
 
@@ -78,7 +78,7 @@ Enterprise-grade components surveyed across 10 premium libraries (Syncfusion, Te
 | Component | Freq | Description | Complexity |
 |-----------|------|-------------|------------|
 | **Data Grid** | 10/10 | Sortable/filterable/groupable virtual-scroll table with inline editing, column pinning, CSV/Excel export | Million-row perf, complex cell rendering, keyboard nav |
-| **Chart Suite** | 10/10 | Line, bar, area, pie, scatter, financial, sparklines, gauges, real-time streaming, drill-down | GPU rendering, breadth of chart types |
+| **Chart Suite** | 10/10 | Line, bar, area, pie, scatter, financial, sparklines, gauges, real-time streaming, drill-down | GPU rendering, breadth of chart types. **Partially shipped:** `<void-bar-chart>`, `<void-line-chart>`, `<void-donut-chart>`, `<void-gauge>`. Remaining: area, scatter, sparklines, financial, streaming, drill-down |
 | **Tree Grid** | 9/10 | Hierarchical data grid with expand/collapse + full grid features | Tree ops reconciled with tabular features at infinite depth |
 
 ### Tier B — 6–7/10 premium libraries
@@ -114,14 +114,14 @@ Enterprise-grade components surveyed across 10 premium libraries (Syncfusion, Te
 
 ## Phase 3: Framework Adapters
 
-8 framework adapter packages expose `@voidable/ui` Lit web components to each framework's idioms. 4 are fully implemented; 4 need additional work.
+8 framework adapter packages (`@voidable/ui-*`) expose `@voidable/ui` Lit web components to each framework's idioms. Guides for Lit, Qwik, Astro and vanilla JS also exist on the docs site; they are guides, not packages. Server-side companions: `live_voidable` (Hex), `voidable-hotwire` (RubyGems), `voidable/laravel` (Composer).
 
 ### Adapter Status
 
 | Framework | Status | What's shipped | What's remaining |
 |-----------|--------|----------------|------------------|
-| **React** | ✅ Done | Typed wrappers via `wrapWc` factory for all 54 components, `onVoidX` event bridging, ref forwarding, `useTheme` hook | — |
-| **LiveView** | ✅ Done | `VoidHooks` JS (mount/update/destroy lifecycle, listener diffing), HEEx function components for all 54 components with phx-hook wiring | — |
+| **React** | ✅ Done | Typed wrappers for the UI components (chart elements not yet wrapped), `onVoidX` event bridging, ref forwarding, `useTheme` hook | — |
+| **LiveView** | ✅ Done | `VoidHooks` JS (mount/update/destroy lifecycle, listener diffing), HEEx function components for the UI components (chart elements not yet covered) with phx-hook wiring | — |
 | **Hotwire** | ✅ Done | `VoidEventController` Stimulus controller, Ruby gem `Helpers` module (`void_attrs`) | — |
 | **Alpine** | ✅ Done | `VoidableAlpine` plugin, `x-void-on` directive, `x-void-preserve`, `$voidable` magic | — |
 | **Angular** | Partial | `VoidableModule` (exports `CUSTOM_ELEMENTS_SCHEMA`), signal-based `ThemeService` with `DestroyRef` cleanup | Directive wrappers, `[(ngModel)]` support, typed templates |

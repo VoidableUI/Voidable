@@ -17,8 +17,24 @@ A component library monorepo built on Lit 3 web components with framework adapte
 | `@voidable/ui-solid` | `packages/solid/` | SolidJS adapter |
 | `@voidable/ui-vue` | `packages/vue/` | Vue adapter |
 | `@voidable/ui-svelte` | `packages/svelte/` | Svelte adapter |
+| `@voidable/ui-angular` | `packages/angular/` | Angular adapter (`VoidableModule`, `ThemeService`) |
+| `@voidable/ui-hotwire` | `packages/hotwire/` | Stimulus controller and Turbo morph protection |
+| `@voidable/ui-alpine` | `packages/alpine/` | Alpine.js plugin and Livewire morph protection |
+| `@voidable/ui-liveview` | `packages/liveview/` | Phoenix LiveView hooks |
 | `@voidable/storybook` | `packages/storybook/` | Storybook (private, published to GH Pages) |
 | — | `docs/` | Documentation site (Astro Starlight, published to GH Pages) |
+
+Server-side companions live inside the adapter packages and are released separately:
+
+| Package | Path | Registry |
+|---------|------|----------|
+| `live_voidable` | `packages/liveview/hex/` | Hex |
+| `voidable-hotwire` | `packages/hotwire/gem/` | RubyGems |
+| `voidable/laravel` | `packages/alpine/laravel/` | Composer (via a split repo) |
+
+`packages/voidable-gem/` holds a second gemspec named `voidable` whose relationship to `voidable-hotwire` is not documented. The Qwik and Astro pages on the docs site are guides, not packages; `examples/` holds runnable sample apps.
+
+Counts of components, custom elements and adapter packages are not maintained by hand: the docs site derives them at build time (`docs/src/lib/stats.ts`). Do not hard-code them in new prose.
 
 ## Architecture
 
@@ -34,6 +50,8 @@ Without a theme package loaded, components are completely devoid of styling. `@v
 
 - **React** (`@voidable/ui-react`): Uses a `wrapWc` factory + `useWcEvents` hook pattern. React does not forward custom events to Custom Elements natively, so the adapter bridges this gap.
 - **SolidJS / Vue / Svelte**: These frameworks handle Custom Elements natively. Adapters export composable hooks only with minimal wrapping.
+- **Angular** (`@voidable/ui-angular`): `VoidableModule` enables `CUSTOM_ELEMENTS_SCHEMA`; `ThemeService` exposes the active theme as a signal.
+- **Hotwire / Alpine / LiveView**: Server-rendered stacks. Each adapter bridges Voidable custom events to the framework (Stimulus controller, `x-void-on` directive, LiveView hooks) and protects component state across DOM morphs.
 
 ### Module Federation Support
 
@@ -64,7 +82,7 @@ Three-tier token system with `--void-*` prefix.
 
 Raw color scales with no semantic meaning:
 - **Stone palette**: 50–950 (includes 450)
-- **Status palettes**: red, amber, green, blue, purple, pink
+- **Status palettes**: red, orange, amber, green, blue, purple, pink
 - **Spacing scale**: rem-based
 - **Typography**: sizes, weights, line heights, system font stacks
 - **Other**: border radii, shadows, motion durations, z-index
@@ -76,7 +94,7 @@ Semantic aliases that reference Tier 1 primitives:
 - **Text**: `text`, `text-secondary`, `text-muted`, `text-tertiary`, `text-disabled`, `text-on-accent`
 - **Borders**: `border`, `border-strong`, `border-focus`
 - **Accent**
-- **Status colors**: error, warning, success, info, notice, highlight (each with subtle variants)
+- **Status colors**: error, warning, caution, success, info, notice, highlight (each with subtle variants)
 - **Dark mode** is default (true black `#000000` surfaces)
 - **Light mode** via `[data-theme="light"]`
 
@@ -94,7 +112,7 @@ The name "Void" reflects two core ideas: components are **devoid** of styling wi
 - **Monochrome hierarchy** — color used sparingly, reserved for status indication.
 - **Stone warm neutrals** for text and borders.
 - **White glow shadows** (not dark drop shadows) for elevation on dark backgrounds.
-- **Status palette**: red (error), amber (warning), green (success), blue (info), purple (notice), pink (highlight).
+- **Status palette**: red (error), orange (warning), amber (caution), green (success), blue (info), purple (notice), pink (highlight). Components that take a `color` attribute accept `default`, `error`, `warning`, `success`, `info` and `notice`.
 
 ### Shape Variants
 
@@ -111,7 +129,7 @@ Consumers toggle shape globally (`<html data-shape="sharp">`) or locally on any 
 
 ### mise
 
-`mise` manages all tooling versions (Node LTS, pnpm 10) via `mise.toml`. **All tasks run through mise** — never call npm or pnpm directly.
+`mise` manages all tooling versions via `mise.toml` (Node 24, pnpm 10, plus Ruby, PHP, Elixir and Erlang for the server-side packages). **All tasks run through mise** — never call npm or pnpm directly.
 
 Tasks live as shell scripts in `.mise/tasks/` with `#MISE` directives (not inline in `mise.toml`).
 
@@ -129,7 +147,7 @@ set -euo pipefail
 | Command | Description |
 |---------|-------------|
 | `mise run install` | Install dependencies |
-| `mise run dev` | Start all packages in watch/dev mode |
+| `mise run dev` | Start the Storybook dev server |
 | `mise run build` | Build all packages |
 | `mise run test` | Run all tests |
 | `mise run storybook` | Start Storybook dev server |
@@ -137,6 +155,7 @@ set -euo pipefail
 | `mise run typecheck` | TypeScript type checking |
 | `mise run lint` | Lint all packages |
 | `mise run clean` | Remove build artifacts and node_modules |
+| `mise run liveview:demo` | Start the LiveView demo server |
 | `mise run ci` | Full CI pipeline: build, test, typecheck, lint, token lint |
 | `mise run lint` | ESLint with lit-a11y (WCAG checks on Lit templates) |
 | `mise run lint_tokens` | Ensure no raw color values outside primitives.css |
@@ -147,11 +166,14 @@ set -euo pipefail
 
 - **Lit 3** — web components
 - **TypeScript 6**
-- **Vite 8** — build (powered by Rolldown)
+- **Vite 8** — build
 - **pnpm 10** — package management
 - **Storybook 10** with `@storybook/web-components-vite`
-- **Vitest 4** — testing
-- **happy-dom 20** — test DOM environment
+- **Vitest** (4 in `@voidable/ui`, 3 in some adapters) — testing
+- **happy-dom** (20 in `@voidable/ui`) — test DOM environment
+- **Astro 6 + Starlight** — docs site (`docs/`)
+
+The docs Open Graph image is generated from `docs/scripts/og-image.svg` with `mise run docs_og` (the PNG is committed). With the current mise (2026.11) task files whose names contain a colon (`docs:build`, `storybook:build`, `docs:og`) are exposed with an underscore (`docs_build`, `storybook_build`, `docs_og`); run `mise tasks` to see the exact names. Tasks in directories (`lint:tokens`, `liveview:demo`) keep the colon.
 
 ## Component Conventions
 
@@ -216,10 +238,10 @@ Component CSS in `@voidable/theme` lives in `src/components/` with one file per 
 ## Release & Versioning
 
 - **Conventional commits** (Angular convention) for automatic semver.
-- Per-package tagging with prefixes: `ui-v`, `theme-v`, `ui-react-v`, `ui-solid-v`, `ui-vue-v`, `ui-svelte-v`.
+- Per-package tagging with prefixes: `ui-v`, `theme-v`, `ui-react-v`, `ui-solid-v`, `ui-vue-v`, `ui-svelte-v`, `ui-angular-v`, `ui-hotwire-v`, `ui-alpine-v`, `ui-liveview-v`, plus `hex-liveview-v`, `gem-hotwire-v` and `composer-alpine-v` for the server-side packages.
 - Each package has its own release workflow triggered by path-scoped changes on `master`.
 - Version comes from git tags at publish time — no manual version management in `package.json`.
-- Storybook and docs deploy to GitHub Pages via a separate workflow.
+- Storybook and docs deploy to GitHub Pages via a separate workflow that runs after the UI or theme release workflow succeeds (or on manual dispatch). It passes the latest `ui-v*` tag and the gzipped `@voidable/ui` size to the docs build.
 
 ## Commit Messages
 
@@ -231,10 +253,6 @@ Follow conventional commits (Angular convention):
 - `docs:` — documentation changes
 
 Scope to the affected package when possible (e.g., `feat(ui): add void-dialog component`).
-
-## Reference Files
-
-The `ref/` directory contains source CSS and component patterns from upstream projects for porting reference. These are **not shipped** — they exist for development reference only.
 
 ## Rules
 
