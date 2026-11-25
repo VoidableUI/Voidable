@@ -1,0 +1,429 @@
+// @vitest-environment happy-dom
+import { describe, it, expect, afterEach } from 'vitest';
+import { VoidElement } from '../../src/base.js';
+import { VoidDropdownMenu, VoidDropdownMenuItem } from '../../src/components/dropdown-menu.js';
+
+const TAG = 'void-dropdown-menu';
+const ITEM = 'void-dropdown-menu-item';
+
+interface ItemSpec { label: string; disabled?: boolean; destructive?: boolean }
+
+const DEFAULT_ITEMS: ItemSpec[] = [{ label: 'Edit' }, { label: 'Duplicate' }, { label: 'Delete', destructive: true }];
+
+async function mount(
+  props: Partial<VoidDropdownMenu> = {},
+  items: ItemSpec[] = DEFAULT_ITEMS,
+  withTrigger = true,
+): Promise<VoidDropdownMenu> {
+  const el = document.createElement(TAG) as VoidDropdownMenu;
+  if (withTrigger) {
+    const t = document.createElement('button');
+    t.id = 'trigger';
+    t.textContent = 'Actions';
+    el.appendChild(t);
+  }
+  for (const spec of items) {
+    const item = document.createElement(ITEM) as VoidDropdownMenuItem;
+    item.textContent = spec.label;
+    if (spec.disabled) item.disabled = true;
+    if (spec.destructive) item.destructive = true;
+    el.appendChild(item);
+  }
+  Object.assign(el, props);
+  document.body.appendChild(el);
+  await el.updateComplete;
+  await Promise.all(menuItems(el).map((i) => i.updateComplete));
+  return el;
+}
+
+const trigger = (el: Element) => el.querySelector('#trigger') as HTMLButtonElement;
+const panels = (el: Element) => el.querySelectorAll('.void-dropdown-menu-panel');
+const menuItems = (el: Element) => Array.from(el.querySelectorAll(ITEM)) as VoidDropdownMenuItem[];
+
+function press(key: string, target: EventTarget = document): KeyboardEvent {
+  const e = new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true });
+  target.dispatchEvent(e);
+  return e;
+}
+
+afterEach(() => {
+  document.body.innerHTML = '';
+});
+
+describe('VoidDropdownMenu', () => {
+  describe('class', () => {
+    it('extends VoidElement', () => {
+      expect(VoidDropdownMenu.prototype).toBeInstanceOf(VoidElement);
+    });
+
+    it('is registered as void-dropdown-menu', () => {
+      expect(customElements.get(TAG)).toBe(VoidDropdownMenu);
+    });
+  });
+
+  describe('defaults and reflection', () => {
+    it('open defaults to false and position to "bottom-start"', () => {
+      const el = document.createElement(TAG) as VoidDropdownMenu;
+      expect(el.open).toBe(false);
+      expect(el.position).toBe('bottom-start');
+    });
+
+    it('reflects open and position', async () => {
+      const el = await mount({ open: true, position: 'top-end' });
+      expect(el.hasAttribute('open')).toBe(true);
+      expect(el.getAttribute('position')).toBe('top-end');
+    });
+
+    it('reads the open attribute', async () => {
+      const el = await mount();
+      el.setAttribute('open', '');
+      await el.updateComplete;
+      expect(el.open).toBe(true);
+    });
+  });
+
+  describe('structure', () => {
+    it('keeps the first child as the trigger, outside the panel', async () => {
+      const el = await mount();
+      expect(el.children[0]).toBe(trigger(el));
+    });
+
+    it('wraps every other child in a role="menu" panel appended last', async () => {
+      const el = await mount();
+      const panel = el.querySelector('.void-dropdown-menu-panel')!;
+      expect(panel.getAttribute('role')).toBe('menu');
+      expect(el.lastElementChild).toBe(panel);
+      expect(panel.querySelectorAll(ITEM)).toHaveLength(3);
+      expect(trigger(el).parentElement).toBe(el);
+    });
+
+    it('moves text nodes along with elements', async () => {
+      const el = document.createElement(TAG) as VoidDropdownMenu;
+      el.innerHTML = '<button id="trigger">t</button>loose text<span>x</span>';
+      document.body.appendChild(el);
+      await el.updateComplete;
+      const panel = el.querySelector('.void-dropdown-menu-panel')!;
+      expect(panel.textContent).toContain('loose text');
+    });
+
+    it('creates exactly one panel', async () => {
+      const el = await mount();
+      expect(panels(el)).toHaveLength(1);
+    });
+
+    it('renders an empty panel when there are no items', async () => {
+      const el = await mount({}, []);
+      expect(panels(el)).toHaveLength(1);
+      expect(panels(el)[0]!.children).toHaveLength(0);
+    });
+
+    it('does not throw without a trigger child or items', async () => {
+      const el = await mount({}, [], false);
+      expect(el.querySelector('.void-dropdown-menu-panel')).not.toBeNull();
+    });
+  });
+
+  describe('opening and closing', () => {
+    it('opens when the trigger is clicked and closes on a second click', async () => {
+      const el = await mount();
+      trigger(el).click();
+      expect(el.open).toBe(true);
+      trigger(el).click();
+      expect(el.open).toBe(false);
+    });
+
+    it('reflects open back to the attribute', async () => {
+      const el = await mount();
+      trigger(el).click();
+      await el.updateComplete;
+      expect(el.hasAttribute('open')).toBe(true);
+    });
+
+    it('closes on an outside mousedown', async () => {
+      const el = await mount({ open: true });
+      document.body.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+      expect(el.open).toBe(false);
+    });
+
+    it('stays open on a mousedown inside the menu (panel or trigger)', async () => {
+      const el = await mount({ open: true });
+      menuItems(el)[0]!.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+      expect(el.open).toBe(true);
+      trigger(el).dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+      expect(el.open).toBe(true);
+    });
+
+    it('ignores outside mousedown while already closed', async () => {
+      const el = await mount();
+      document.body.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+      expect(el.open).toBe(false);
+    });
+
+    it('can be opened programmatically', async () => {
+      const el = await mount();
+      el.open = true;
+      await el.updateComplete;
+      expect(el.hasAttribute('open')).toBe(true);
+    });
+
+    it('Escape closes an open menu and returns focus to the trigger', async () => {
+      const el = await mount({ open: true });
+      const e = press('Escape');
+      expect(el.open).toBe(false);
+      expect(document.activeElement).toBe(trigger(el));
+      expect(e.defaultPrevented).toBe(false);
+    });
+
+    it('Escape on a closed menu does nothing (focus is left alone)', async () => {
+      const el = await mount();
+      const other = document.createElement('input');
+      document.body.appendChild(other);
+      other.focus();
+      press('Escape');
+      expect(el.open).toBe(false);
+      expect(document.activeElement).toBe(other);
+    });
+
+    // BUG: choosing an item does not close the menu — void-select is dispatched but nothing
+    // sets open=false, so every consumer must close it manually. dropdown-menu.ts:~79-97 /
+    // VoidDropdownMenuItem._handleClick. Expected: selecting a non-disabled item closes the menu.
+    it.fails('closes when an item is selected', async () => {
+      const el = await mount({ open: true });
+      menuItems(el)[0]!.click();
+      expect(el.open).toBe(false);
+    });
+
+    it.fails('closes when an item is activated with the keyboard', async () => {
+      const el = await mount({ open: true });
+      press('Enter', menuItems(el)[0]!);
+      expect(el.open).toBe(false);
+    });
+
+    it('stays open when a disabled item is clicked', async () => {
+      const el = await mount({ open: true }, [{ label: 'Nope', disabled: true }]);
+      menuItems(el)[0]!.click();
+      expect(el.open).toBe(true);
+    });
+  });
+
+  describe('trigger ARIA', () => {
+    // BUG: the trigger is never given aria-haspopup or aria-expanded, so assistive tech cannot tell
+    // it opens a menu or whether it is open. dropdown-menu.ts:11-30. Expected: aria-haspopup="menu"
+    // and aria-expanded tracking `open`.
+    it.fails('marks the trigger with aria-haspopup="menu"', async () => {
+      const el = await mount();
+      expect(trigger(el).getAttribute('aria-haspopup')).toBe('menu');
+    });
+
+    it.fails('keeps aria-expanded on the trigger in sync with open', async () => {
+      const el = await mount();
+      expect(trigger(el).getAttribute('aria-expanded')).toBe('false');
+      trigger(el).click();
+      await el.updateComplete;
+      expect(trigger(el).getAttribute('aria-expanded')).toBe('true');
+    });
+  });
+
+  describe('arrow key navigation (focus is approximate in happy-dom)', () => {
+    it('ArrowDown focuses the first item when none is focused, and prevents default', async () => {
+      const el = await mount({ open: true });
+      const e = press('ArrowDown');
+      expect(document.activeElement).toBe(menuItems(el)[0]);
+      expect(e.defaultPrevented).toBe(true);
+    });
+
+    it('ArrowDown moves to the next item and wraps to the first', async () => {
+      const el = await mount({ open: true });
+      const items = menuItems(el);
+      items[0]!.focus();
+      press('ArrowDown');
+      expect(document.activeElement).toBe(items[1]);
+      items[2]!.focus();
+      press('ArrowDown');
+      expect(document.activeElement).toBe(items[0]);
+    });
+
+    it('ArrowUp moves to the previous item and wraps to the last', async () => {
+      const el = await mount({ open: true });
+      const items = menuItems(el);
+      items[1]!.focus();
+      press('ArrowUp');
+      expect(document.activeElement).toBe(items[0]);
+      press('ArrowUp');
+      expect(document.activeElement).toBe(items[2]);
+    });
+
+    it('ArrowUp focuses the last item when none is focused', async () => {
+      const el = await mount({ open: true });
+      press('ArrowUp');
+      expect(document.activeElement).toBe(menuItems(el)[2]);
+    });
+
+    it('skips disabled items', async () => {
+      const el = await mount({ open: true }, [{ label: 'a' }, { label: 'b', disabled: true }, { label: 'c' }]);
+      const items = menuItems(el);
+      items[0]!.focus();
+      press('ArrowDown');
+      expect(document.activeElement).toBe(items[2]);
+    });
+
+    it('does nothing while the menu is closed', async () => {
+      const el = await mount();
+      const e = press('ArrowDown');
+      expect(document.activeElement).not.toBe(menuItems(el)[0]);
+      expect(e.defaultPrevented).toBe(false);
+    });
+
+    it('does nothing (and does not throw) when every item is disabled', async () => {
+      await mount({ open: true }, [{ label: 'a', disabled: true }]);
+      expect(() => press('ArrowDown')).not.toThrow();
+    });
+  });
+
+  describe('lifecycle', () => {
+    it('removes its document listeners on disconnect', async () => {
+      const el = await mount({ open: true });
+      el.remove();
+      press('Escape');
+      expect(el.open).toBe(true);
+      document.body.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+      expect(el.open).toBe(true);
+    });
+
+    it('still toggles once per trigger click after reconnecting', async () => {
+      const el = await mount();
+      el.remove();
+      document.body.appendChild(el);
+      await el.updateComplete;
+      trigger(el).click();
+      expect(el.open).toBe(true);
+    });
+
+    // BUG: connectedCallback always builds a new panel and moves every non-trigger child into it,
+    // including the previous panel, so each reconnect nests another panel (and moving the element
+    // in the DOM, e.g. by a framework, silently does this). dropdown-menu.ts:14-27. A separate
+    // branch is fixing this; expected: exactly one panel, items still direct children of it.
+    it.fails('does not nest a second panel when reconnected', async () => {
+      const el = await mount();
+      el.remove();
+      document.body.appendChild(el);
+      await el.updateComplete;
+      expect(panels(el)).toHaveLength(1);
+      expect(menuItems(el)[0]!.parentElement).toBe(panels(el)[0]);
+    });
+  });
+});
+
+describe('VoidDropdownMenuItem', () => {
+  async function item(props: Partial<VoidDropdownMenuItem> = {}): Promise<VoidDropdownMenuItem> {
+    const el = document.createElement(ITEM) as VoidDropdownMenuItem;
+    Object.assign(el, props);
+    document.body.appendChild(el);
+    await el.updateComplete;
+    return el;
+  }
+
+  it('extends VoidElement and is registered', () => {
+    expect(VoidDropdownMenuItem.prototype).toBeInstanceOf(VoidElement);
+    expect(customElements.get(ITEM)).toBe(VoidDropdownMenuItem);
+  });
+
+  it('defaults disabled and destructive to false', () => {
+    const el = document.createElement(ITEM) as VoidDropdownMenuItem;
+    expect(el.disabled).toBe(false);
+    expect(el.destructive).toBe(false);
+  });
+
+  it('reflects disabled and destructive', async () => {
+    const el = await item({ disabled: true, destructive: true });
+    expect(el.hasAttribute('disabled')).toBe(true);
+    expect(el.hasAttribute('destructive')).toBe(true);
+  });
+
+  it('has role="menuitem" and tabindex="0"', async () => {
+    const el = await item();
+    expect(el.getAttribute('role')).toBe('menuitem');
+    expect(el.getAttribute('tabindex')).toBe('0');
+  });
+
+  it('exposes disabled via aria-disabled and tabindex="-1", and recovers', async () => {
+    const el = await item({ disabled: true });
+    expect(el.getAttribute('aria-disabled')).toBe('true');
+    expect(el.getAttribute('tabindex')).toBe('-1');
+    el.disabled = false;
+    await el.updateComplete;
+    expect(el.getAttribute('aria-disabled')).toBe('false');
+    expect(el.getAttribute('tabindex')).toBe('0');
+  });
+
+  describe('void-select event', () => {
+    it('is dispatched on click with the item as detail', async () => {
+      const el = await item();
+      let detail: { item: Element } | null = null;
+      el.addEventListener('void-select', (e) => { detail = (e as CustomEvent).detail; });
+      el.click();
+      expect(detail!.item).toBe(el);
+    });
+
+    it('bubbles and is composed', async () => {
+      const el = await item();
+      let ev: CustomEvent | null = null;
+      document.body.addEventListener('void-select', (e) => { ev = e as CustomEvent; }, { once: true });
+      el.click();
+      expect(ev!.bubbles).toBe(true);
+      expect(ev!.composed).toBe(true);
+    });
+
+    it('is dispatched exactly once per click', async () => {
+      const el = await item();
+      let count = 0;
+      el.addEventListener('void-select', () => count++);
+      el.click();
+      expect(count).toBe(1);
+    });
+
+    it('is dispatched for Enter and Space (with default prevented)', async () => {
+      const el = await item();
+      let count = 0;
+      el.addEventListener('void-select', () => count++);
+      expect(press('Enter', el).defaultPrevented).toBe(true);
+      expect(press(' ', el).defaultPrevented).toBe(true);
+      expect(count).toBe(2);
+    });
+
+    it('is not dispatched for other keys', async () => {
+      const el = await item();
+      let count = 0;
+      el.addEventListener('void-select', () => count++);
+      press('a', el);
+      expect(count).toBe(0);
+    });
+
+    it('is not dispatched when disabled (click or keyboard)', async () => {
+      const el = await item({ disabled: true });
+      let count = 0;
+      el.addEventListener('void-select', () => count++);
+      el.click();
+      press('Enter', el);
+      press(' ', el);
+      expect(count).toBe(0);
+    });
+
+    it('a disabled click does not reach ancestors', async () => {
+      const el = await item({ disabled: true });
+      let reached = false;
+      document.body.addEventListener('click', () => { reached = true; }, { once: true });
+      el.click();
+      expect(reached).toBe(false);
+    });
+
+    it('stops dispatching after disconnect', async () => {
+      const el = await item();
+      el.remove();
+      let count = 0;
+      el.addEventListener('void-select', () => count++);
+      el.click();
+      expect(count).toBe(0);
+    });
+  });
+});
