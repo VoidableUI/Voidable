@@ -51,3 +51,9 @@ void-banner[color="notice"]  { --tone: var(--void-color-notice); }
 .void-banner-close:hover {
   opacity: 1;
 }
+
+.void-banner-close:focus-visible {
+  opacity: 1;
+  outline: var(--void-focus-ring-width) solid currentColor;
+  outline-offset: var(--void-focus-ring-offset);
+}

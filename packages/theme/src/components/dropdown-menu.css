@@ -74,6 +74,8 @@ void-dropdown-menu-item:hover {
 
 void-dropdown-menu-item:focus-visible {
   background: var(--void-color-bg-hover);
+  outline: var(--void-focus-ring-width) solid var(--void-focus-ring-color);
+  outline-offset: calc(var(--void-focus-ring-width) * -1);
 }
 
 void-dropdown-menu-item[destructive] {

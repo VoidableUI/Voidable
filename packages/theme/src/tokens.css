@@ -28,6 +28,12 @@
   --void-color-border-focus:  color-mix(in srgb, var(--void-white) 55%, transparent);
   --void-color-border-control: color-mix(in srgb, var(--void-white) 36%, transparent);
 
+  /* Focus ring — shared by every :focus-visible indicator.
+     Colour is re-declared in the light block so it resolves per theme. */
+  --void-focus-ring-color:  var(--void-color-border-focus);
+  --void-focus-ring-width:  2px;
+  --void-focus-ring-offset: 2px;
+
   /* Accent — monochrome */
   --void-color-accent:       var(--void-white);
   --void-color-accent-hover: var(--void-stone-200);
@@ -81,6 +87,8 @@
   --void-color-border-strong: var(--void-stone-400);
   --void-color-border-focus:  var(--void-stone-600);
   --void-color-border-control: var(--void-stone-450);
+
+  --void-focus-ring-color:  var(--void-color-border-focus);
 
   /* Accent */
   --void-color-accent:       var(--void-stone-900);
