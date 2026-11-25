@@ -34,6 +34,14 @@ export const input: Attrs<'void-input'> = {
 
 export const chart: Attrs<'void-bar-chart'> = { data, height: 240, showValues: true, stagger: 30 };
 
+export const toggle: Attrs<'void-toggle'> = { value: 'a', slot: 'start' };
+export const menu: Attrs<'void-menu'> = {
+  'onvoid-select': (event) => {
+    const value: string = event.detail.value;
+    void value;
+  },
+};
+
 // @ts-expect-error: 'huge' is not a valid size
 export const badSize: Attrs<'void-button'> = { size: 'huge' };
 // @ts-expect-error: height is a number

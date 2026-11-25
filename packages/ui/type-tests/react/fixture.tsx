@@ -27,6 +27,25 @@ export const ok = (
       }}
     />
     <void-bar-chart data={data} height={240} showValues variant="outline" stagger={30} />
+    {/* React 19 passes `class` through to custom elements. */}
+    <void-badge class="pill">New</void-badge>
+    {/* Attribute read by the parent group (cem/supplement.js). */}
+    <void-toggle-group>
+      <void-toggle value="a">A</void-toggle>
+    </void-toggle-group>
+    {/* Bubbling child event typed on the parent (cem/supplement.js). */}
+    <void-menu
+      onvoid-select={(event) => {
+        const value: string = event.detail.value;
+        void value;
+      }}
+    />
+    <void-dropdown-menu
+      onvoid-select={(event) => {
+        const item: HTMLElement = event.detail.item;
+        void item;
+      }}
+    />
   </div>
 );
 

@@ -27,6 +27,16 @@ export const ok = (
       }}
     />
     <void-bar-chart data={data} height={240} showValues variant="outline" stagger={30} />
+    <void-bar-chart prop:data={data} attr:height="240" bool:show-values={true} />
+    <void-toggle-group>
+      <void-toggle value="a">A</void-toggle>
+    </void-toggle-group>
+    <void-menu
+      on:void-select={(event) => {
+        const value: string = event.detail.value;
+        void value;
+      }}
+    />
   </div>
 );
 
@@ -36,6 +46,8 @@ export const badSize = <void-button size="huge" />;
 export const badHeight = <void-bar-chart height="tall" />;
 // @ts-expect-error: data must be BarChartData
 export const badData = <void-bar-chart data={[1, 2, 3]} />;
+// @ts-expect-error: prop:data is typed like data
+export const badPropData = <void-bar-chart prop:data={[1, 2, 3]} />;
 export const badDetail = (
   <void-input
     on:void-change={(event) => {

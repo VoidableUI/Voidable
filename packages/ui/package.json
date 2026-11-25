@@ -57,6 +57,26 @@
   "dependencies": {
     "lit": "^3.3.0"
   },
+  "peerDependencies": {
+    "@types/react": ">=19",
+    "solid-js": ">=1.8.0",
+    "svelte": ">=5",
+    "vue": ">=3.5"
+  },
+  "peerDependenciesMeta": {
+    "@types/react": {
+      "optional": true
+    },
+    "solid-js": {
+      "optional": true
+    },
+    "svelte": {
+      "optional": true
+    },
+    "vue": {
+      "optional": true
+    }
+  },
   "devDependencies": {
     "@custom-elements-manifest/analyzer": "^0.11.0",
     "@types/react": "^19.0.0",

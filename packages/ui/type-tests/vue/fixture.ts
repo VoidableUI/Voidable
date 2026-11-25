@@ -35,6 +35,15 @@ export const input: Props<'void-input'> = {
 
 export const chart: Props<'void-bar-chart'> = { data, height: 240, showValues: true, stagger: 30 };
 
+// Light-DOM children carry `slot`; the toggle `value` attribute is read by its group.
+export const toggle: Props<'void-toggle'> = { value: 'a', slot: 'start' };
+export const menu: Props<'void-menu'> = {
+  onVoidSelect: (event) => {
+    const value: string = event.detail.value;
+    void value;
+  },
+};
+
 // `@void-change` listeners are typed through $emit.
 declare const inputEl: Instance<'void-input'>;
 inputEl.$emit('void-change', new CustomEvent('void-change', { detail: { value: 'x' } }));
