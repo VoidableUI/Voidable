@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+#MISE description="Run Go unit tests and go vet"
+set -euo pipefail
+
+cd "$(dirname "$0")/../../.."
+go vet ./...
+go test ./...

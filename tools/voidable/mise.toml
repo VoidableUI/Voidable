@@ -1,0 +1,5 @@
+# Scoped to tools/voidable so the root toolchain (Node, pnpm, Ruby...) is
+# untouched. Tasks live in .mise/tasks/ (build:manifest, build:go, ...).
+[tools]
+go = "1.27.3"
+"aqua:golangci/golangci-lint" = "2.15.0"

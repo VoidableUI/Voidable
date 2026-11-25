@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+#MISE description="voidable: lint, test, build"
+#MISE depends=["build:manifest"]
+set -euo pipefail
+
+cd "$(dirname "$0")/../.."
+mise run lint:go
+mise run test:unit
+VOIDABLE_SKIP_UI_BUILD=1 mise run build:go
+echo "CI passed"

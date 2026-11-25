@@ -1,0 +1,123 @@
+package domain
+
+import (
+	"path/filepath"
+	"strings"
+)
+
+// Lang names a markup dialect the checker understands.
+type Lang string
+
+const (
+	LangHTML     Lang = "html"
+	LangERB      Lang = "erb"
+	LangHEEx     Lang = "heex"
+	LangBlade    Lang = "blade"
+	LangJSX      Lang = "jsx"
+	LangAstro    Lang = "astro"
+	LangVue      Lang = "vue"
+	LangSvelte   Lang = "svelte"
+	LangLit      Lang = "lit"
+	LangMarkdown Lang = "markdown"
+)
+
+// Langs lists every accepted language name.
+var Langs = []Lang{LangHTML, LangERB, LangHEEx, LangBlade, LangJSX, LangAstro, LangVue, LangSvelte, LangLit, LangMarkdown}
+
+// ParseLang accepts a language name or a common alias (tsx, ex, php...).
+func ParseLang(s string) (Lang, error) {
+	switch strings.ToLower(strings.TrimPrefix(s, ".")) {
+	case "html", "htm", "":
+		return LangHTML, nil
+	case "erb", "rails", "ruby":
+		return LangERB, nil
+	case "heex", "ex", "exs", "elixir", "phoenix", "eex", "leex":
+		return LangHEEx, nil
+	case "blade", "php", "laravel":
+		return LangBlade, nil
+	case "jsx", "tsx", "react", "solid", "preact":
+		return LangJSX, nil
+	case "astro":
+		return LangAstro, nil
+	case "vue":
+		return LangVue, nil
+	case "svelte":
+		return LangSvelte, nil
+	case "lit", "ts", "js", "mjs", "typescript", "javascript":
+		return LangLit, nil
+	case "md", "mdx", "markdown":
+		return LangMarkdown, nil
+	}
+	return "", ErrUnknownLang
+}
+
+// LangForPath guesses the dialect from a file name.
+func LangForPath(path string) Lang {
+	base := strings.ToLower(filepath.Base(path))
+	if strings.HasSuffix(base, ".blade.php") {
+		return LangBlade
+	}
+	if strings.HasSuffix(base, ".tt") { // Rails generator templates: x.html.erb.tt
+		base = strings.TrimSuffix(base, ".tt")
+	}
+	l, err := ParseLang(filepath.Ext(base))
+	if err != nil {
+		return LangHTML
+	}
+	return l
+}
+
+// CaseSensitive reports whether attribute names keep their case, i.e. are
+// matched against property names as well (JSX sets properties when the
+// name is a property of the element).
+func (l Lang) CaseSensitive() bool { return l == LangJSX }
+
+// SelfClosingIgnored reports whether `<void-x />` is parsed by the browser
+// HTML parser, which ignores the slash and leaves the element open.
+func (l Lang) SelfClosingIgnored() bool {
+	switch l {
+	case LangHTML, LangERB, LangBlade, LangLit:
+		return true
+	}
+	return false
+}
+
+// Syntax says how an attribute token binds to the element.
+type Syntax string
+
+const (
+	SyntaxAttr      Syntax = "attr"      // name="v", name, name={expr}
+	SyntaxProperty  Syntax = "property"  // .name (Lit), prop:name (Solid)
+	SyntaxBoolBind  Syntax = "bool"      // ?name (Lit), bool:name (Solid)
+	SyntaxBound     Syntax = "bound"     // :name, v-bind:name, x-bind:name, attr:name
+	SyntaxEvent     Syntax = "event"     // @name, on:name, onname, v-on:name, x-on:name
+	SyntaxDirective Syntax = "directive" // framework directive, not an element attribute
+	SyntaxSpread    Syntax = "spread"    // {...props}, {@rest}, <%= %>, {{ $attributes }}
+)
+
+// AttrToken is one attribute as written in source, with the framework
+// prefix removed.
+type AttrToken struct {
+	Raw      string `json:"raw"`
+	Name     string `json:"name"`
+	Syntax   Syntax `json:"syntax"`
+	Value    string `json:"value,omitempty"`
+	HasValue bool   `json:"hasValue,omitempty"`
+	// Dynamic is true when the value is a template expression the scanner
+	// cannot evaluate.
+	Dynamic bool `json:"dynamic,omitempty"`
+	Line    int  `json:"line"`
+	Col     int  `json:"col"`
+}
+
+// Tag is one `<void-*>` start tag found by a scanner.
+type Tag struct {
+	Name        string      `json:"name"`
+	Lang        Lang        `json:"lang"`
+	Line        int         `json:"line"`
+	Col         int         `json:"col"`
+	Attrs       []AttrToken `json:"attrs"`
+	SelfClosing bool        `json:"selfClosing,omitempty"`
+	// Parent is the nearest enclosing `void-*` element, if any.
+	Parent string `json:"parent,omitempty"`
+}

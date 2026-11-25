@@ -1,0 +1,12 @@
+{
+  "note": "STAND-IN. Hand-written for the voidable CLI spike, not derived from component source. Snippets exist for six components only. These facts belong in the Custom Elements Manifest (slots, allowed parents, examples, related elements).",
+  "parents": {
+    "void-option": ["void-multiselect", "void-combobox"],
+    "void-dropdown-menu-item": ["void-dropdown-menu"]
+  },
+  "hints": {
+    "void-input": {"label": "wrap the control in <void-field label=\"...\">"},
+    "void-textarea": {"label": "wrap the control in <void-field label=\"...\">"},
+    "void-select": {"label": "wrap the control in <void-field label=\"...\">; options are native <option> children"}
+  }
+}
