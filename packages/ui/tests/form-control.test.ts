@@ -131,8 +131,30 @@ async function mount(html: string): Promise<HTMLFormElement> {
   const form = document.createElement('form');
   form.innerHTML = html;
   document.body.appendChild(form);
+  // Browsers call formDisabledCallback(true) for a FACE inserted into a disabled fieldset.
+  for (const el of Array.from(form.querySelectorAll('*'))) {
+    if (isFace(el) && internalsOf.has(el as HTMLElement) && isInDisabledFieldset(el)) {
+      (el as unknown as { formDisabledCallback(d: boolean): void }).formDisabledCallback(true);
+    }
+  }
   await settle(form);
   return form;
+}
+
+/** Toggle a fieldset as a browser does: FACE descendants get formDisabledCallback. */
+function setFieldsetDisabled(fs: HTMLFieldSetElement, disabled: boolean): void {
+  fs.toggleAttribute('disabled', disabled);
+  for (const el of Array.from(fs.querySelectorAll('*'))) {
+    if (isFace(el) && internalsOf.has(el as HTMLElement)) {
+      const own = el.hasAttribute('disabled');
+      (el as unknown as { formDisabledCallback(d: boolean): void }).formDisabledCallback(own || isInDisabledFieldset(el));
+    }
+  }
+}
+
+/** Entries a synchronous submit would see right now (no awaiting). */
+function entriesNow(form: HTMLFormElement): Array<[string, string]> {
+  return entries(form);
 }
 
 afterEach(() => {
@@ -154,10 +176,29 @@ describe('isInDisabledFieldset', () => {
 // ── Strategy (a): inner native control ──
 
 describe('native-control strategy', () => {
-  it('hosts are not form-associated (no double submission)', () => {
+  it('hosts are form-associated only for callbacks and never submit (no double submission)', async () => {
+    installFakeInternals();
+    const setFormValue = vi.spyOn(FakeInternals.prototype, 'setFormValue');
+    const form = await mount(`
+      <void-input name="a" value="1"></void-input>
+      <void-textarea name="b" value="2"></void-textarea>
+      <void-slider name="c" value="3"></void-slider>
+      <void-action-input name="d" value="4"></void-action-input>
+      <void-checkbox name="e" checked></void-checkbox>
+      <void-select name="f"><option value="x">X</option></void-select>
+      <void-radio-group name="g" value="y"><void-radio value="y"></void-radio></void-radio-group>
+      <void-checkbox-group name="h"><void-checkbox value="z" checked></void-checkbox></void-checkbox-group>
+    `);
+    (form.querySelector('void-input') as VoidInput).value = 'changed';
+    (form.querySelector('void-checkbox') as HTMLElement).click();
+    await settle(form);
     for (const tag of ['void-input', 'void-textarea', 'void-select', 'void-slider', 'void-action-input', 'void-checkbox', 'void-radio', 'void-radio-group', 'void-checkbox-group']) {
-      expect(isFace(document.createElement(tag)), tag).toBe(false);
+      expect(isFace(form.querySelector(tag)!), tag).toBe(true);
     }
+    expect(setFormValue).not.toHaveBeenCalled();
+    // Only the inner native controls contribute, once each.
+    expect(entries(form)).toEqual([['a', 'changed'], ['b', '2'], ['c', '3'], ['d', '4'], ['f', 'x'], ['g', 'y'], ['h', 'z']]);
+    setFormValue.mockRestore();
   });
 
   it('each control renders exactly one named native descendant', async () => {
@@ -729,5 +770,233 @@ describe('void-button form behaviour', () => {
     (form.querySelector('void-button') as VoidButton).click();
     expect(submit).not.toHaveBeenCalled();
     expect(click).not.toHaveBeenCalled();
+  });
+});
+
+// ── Review findings (synchronous submit, fieldset, validity) ──
+
+describe('review: synchronous form value (finding 1)', () => {
+  beforeEach(() => installFakeInternals());
+
+  it('a void-change listener that submits sees the new value', async () => {
+    const form = await mount(`
+      <void-switch name="s"></void-switch>
+      <void-segmented-control name="seg" value="one"><void-segmented-control-item value="one"></void-segmented-control-item><void-segmented-control-item value="two"></void-segmented-control-item></void-segmented-control>
+      <void-checkbox name="c"></void-checkbox>
+      <void-toggle-group name="t" multiple><void-toggle value="x"></void-toggle></void-toggle-group>
+    `);
+    const seen: Array<Array<[string, string]>> = [];
+    form.addEventListener('void-change', () => seen.push(entriesNow(form)));
+    (form.querySelector('void-switch') as HTMLElement).click();
+    (form.querySelectorAll('void-segmented-control-item')[1] as HTMLElement).click();
+    (form.querySelector('void-checkbox') as HTMLElement).click();
+    (form.querySelector('void-toggle') as HTMLElement).click();
+    expect(seen).toEqual([
+      [['s', 'on'], ['seg', 'one']],
+      [['s', 'on'], ['seg', 'two']],
+      [['s', 'on'], ['seg', 'two'], ['c', 'on']],
+      [['s', 'on'], ['seg', 'two'], ['c', 'on'], ['t', 'x']],
+    ]);
+  });
+
+  it('programmatic sets are visible to a submit in the same tick', async () => {
+    const form = await mount(`
+      <void-switch name="s"></void-switch>
+      <void-checkbox name="c"></void-checkbox>
+      <void-input name="i" value="a"></void-input>
+      <void-multiselect name="m"><void-option value="a">A</void-option></void-multiselect>
+      <void-radio-group name="r" value="x"><void-radio value="x"></void-radio><void-radio value="y"></void-radio></void-radio-group>
+    `);
+    (form.querySelector('void-switch') as VoidSwitch).checked = true;
+    (form.querySelector('void-checkbox') as VoidCheckbox).checked = true;
+    (form.querySelector('void-input') as VoidInput).value = 'b';
+    (form.querySelector('void-multiselect') as VoidMultiselect).value = ['a'];
+    (form.querySelector('void-radio-group') as VoidRadioGroup).value = 'y';
+    expect(entriesNow(form)).toEqual([['s', 'on'], ['c', 'on'], ['i', 'b'], ['m', 'a'], ['r', 'y']]);
+  });
+});
+
+describe('review: fieldset disabled (finding 5)', () => {
+  beforeEach(() => installFakeInternals());
+
+  it('number-input steppers and keys do nothing inside a disabled fieldset', async () => {
+    const form = await mount('<fieldset disabled><void-number-input name="n" value="5"></void-number-input></fieldset>');
+    const num = form.querySelector('void-number-input') as VoidNumberInput;
+    const spy = vi.fn();
+    form.addEventListener('void-change', spy);
+    num.querySelector('.void-number-input-btn-inc')!.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
+    num.querySelector('.void-number-input-btn-inc')!.dispatchEvent(new PointerEvent('pointerup', { bubbles: true }));
+    num.querySelector('.void-number-input-field')!.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp', bubbles: true }));
+    await settle(form);
+    expect(num.value).toBe(5);
+    expect(spy).not.toHaveBeenCalled();
+  });
+
+  it('switch, checkbox and radio reflect fieldset state in aria-disabled and tabindex, and recover', async () => {
+    const form = await mount('<fieldset disabled><void-switch name="s"></void-switch><void-checkbox name="c"></void-checkbox><void-radio name="r" value="1"></void-radio></fieldset>');
+    const fs = form.querySelector('fieldset')!;
+    const hosts = Array.from(fs.children) as HTMLElement[];
+    expect(hosts.map((h) => `${h.getAttribute('aria-disabled')}/${h.getAttribute('tabindex')}`)).toEqual(['true/-1', 'true/-1', 'true/-1']);
+    setFieldsetDisabled(fs, false);
+    await settle(form);
+    expect(hosts.map((h) => `${h.getAttribute('aria-disabled')}/${h.getAttribute('tabindex')}`)).toEqual(['false/0', 'false/0', 'false/0']);
+  });
+});
+
+describe('review: validity after re-enabling (finding 6)', () => {
+  beforeEach(() => installFakeInternals());
+
+  it('a required unchecked switch becomes invalid when its fieldset is enabled', async () => {
+    const form = await mount('<fieldset disabled><void-switch name="s" required></void-switch></fieldset>');
+    const sw = form.querySelector('void-switch') as VoidSwitch;
+    expect(sw.checkValidity()).toBe(true);
+    setFieldsetDisabled(form.querySelector('fieldset')!, false);
+    await settle(form);
+    expect(sw.checkValidity()).toBe(false);
+  });
+
+  it('a required control becomes invalid when its own disabled is cleared', async () => {
+    const form = await mount('<void-switch name="s" required disabled></void-switch>');
+    const sw = form.querySelector('void-switch') as VoidSwitch;
+    expect(sw.checkValidity()).toBe(true);
+    sw.disabled = false;
+    await settle(form);
+    expect(sw.checkValidity()).toBe(false);
+  });
+});
+
+describe('review: uncommitted text (finding 2)', () => {
+  beforeEach(() => installFakeInternals());
+
+  it('number-input submits typed text before it is committed, and commits on change', async () => {
+    const form = await mount('<void-number-input name="n" value="5" max="100"></void-number-input>');
+    const num = form.querySelector('void-number-input') as VoidNumberInput;
+    const field = num.querySelector<HTMLInputElement>('.void-number-input-field')!;
+    field.value = '42';
+    field.dispatchEvent(new Event('input', { bubbles: true }));
+    expect(entriesNow(form)).toEqual([['n', '42']]);
+    expect(num.value).toBe(5);
+    field.value = '500';
+    field.dispatchEvent(new Event('input', { bubbles: true }));
+    expect(entriesNow(form)).toEqual([['n', '100']]);
+    const spy = vi.fn();
+    num.addEventListener('void-change', spy);
+    field.value = '42';
+    field.dispatchEvent(new Event('change', { bubbles: true }));
+    expect(num.value).toBe(42);
+    expect(spy).toHaveBeenCalledOnce();
+    expect(entriesNow(form)).toEqual([['n', '42']]);
+  });
+
+  it('number-input programmatic sets win over stale field text', async () => {
+    const form = await mount('<void-number-input name="n" value="5"></void-number-input>');
+    const num = form.querySelector('void-number-input') as VoidNumberInput;
+    num.value = 9;
+    expect(entriesNow(form)).toEqual([['n', '9']]);
+  });
+
+  it('tags-input includes acceptable pending text, once', async () => {
+    const form = await mount('<void-tags-input name="t"></void-tags-input>');
+    const tags = form.querySelector('void-tags-input') as VoidTagsInput;
+    tags.value = ['a'];
+    const field = tags.querySelector<HTMLInputElement>('.void-tags-input-field')!;
+    field.value = 'b';
+    field.dispatchEvent(new Event('input', { bubbles: true }));
+    expect(entriesNow(form)).toEqual([['t', 'a'], ['t', 'b']]);
+    field.value = 'a';
+    field.dispatchEvent(new Event('input', { bubbles: true }));
+    expect(entriesNow(form)).toEqual([['t', 'a']]);
+    field.value = 'c';
+    field.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+    expect(tags.value).toEqual(['a', 'c']);
+    expect(entriesNow(form)).toEqual([['t', 'a'], ['t', 'c']]);
+  });
+});
+
+describe('review: required and ARIA (finding 7)', () => {
+  beforeEach(() => installFakeInternals());
+
+  it('exposes aria-required, and aria-invalid only after interaction or a failed check', async () => {
+    const form = await mount('<void-switch name="s" required></void-switch>');
+    const sw = form.querySelector('void-switch') as VoidSwitch;
+    expect(sw.getAttribute('aria-required')).toBe('true');
+    expect(sw.hasAttribute('aria-invalid')).toBe(false);
+    sw.dispatchEvent(new Event('invalid'));
+    expect(sw.getAttribute('aria-invalid')).toBe('true');
+    sw.click();
+    expect(sw.hasAttribute('aria-invalid')).toBe(false);
+    sw.required = false;
+    await settle(form);
+    expect(sw.hasAttribute('aria-required')).toBe(false);
+  });
+
+  it('checkbox, radio, radio-group and checkbox-group honour required', async () => {
+    const form = await mount(`
+      <void-checkbox name="c" required></void-checkbox>
+      <void-radio name="r" value="1" required></void-radio><void-radio name="r" value="2"></void-radio>
+      <void-radio-group name="g" required><void-radio value="x"></void-radio></void-radio-group>
+      <void-checkbox-group name="h" required><void-checkbox value="z"></void-checkbox></void-checkbox-group>
+      <void-action-input name="a" required></void-action-input>
+    `);
+    const valid = (sel: string) => internalsOf.get(form.querySelector(sel) as HTMLElement)!.validity.valid;
+    expect(valid('void-checkbox[name="c"]')).toBe(false);
+    expect(valid('void-radio[value="1"]')).toBe(false);
+    expect(valid('void-checkbox-group')).toBe(false);
+    expect((form.querySelector('void-radio[value="x"]') as HTMLElement & { required: boolean }).required).toBe(true);
+    expect(form.querySelector<HTMLInputElement>('void-action-input input')!.required).toBe(true);
+    // The aria-hidden inner checkbox/radio is not what validation focuses.
+    expect(form.querySelector<HTMLInputElement>('void-checkbox[name="c"] input')!.required).toBe(false);
+
+    (form.querySelector('void-checkbox[name="c"]') as HTMLElement).click();
+    (form.querySelector('void-radio[value="2"]') as HTMLElement).click();
+    (form.querySelector('void-checkbox-group void-checkbox') as HTMLElement).click();
+    expect(valid('void-checkbox[name="c"]')).toBe(true);
+    expect(valid('void-radio[value="1"]')).toBe(true);
+    expect(valid('void-checkbox-group')).toBe(true);
+  });
+
+  it('a required group with no focusable child makes the host focusable instead of failing silently', async () => {
+    const form = await mount('<void-toggle-group name="t" required></void-toggle-group>');
+    const tg = form.querySelector('void-toggle-group') as VoidToggleGroup;
+    expect(tg.checkValidity()).toBe(false);
+    expect(tg.getAttribute('tabindex')).toBe('-1');
+  });
+});
+
+describe('review: valueless checkbox (finding 10a)', () => {
+  it('value defaults to "on", matching what it submits', async () => {
+    const form = await mount('<void-checkbox-group name="g"><void-checkbox checked></void-checkbox></void-checkbox-group><void-checkbox name="c" checked></void-checkbox>');
+    expect((form.querySelector('void-checkbox[name="c"]') as VoidCheckbox).value).toBe('on');
+    expect((form.querySelector('void-checkbox-group') as VoidCheckboxGroup).value).toEqual(['on']);
+    expect([...new FormData(form).entries()]).toEqual([['g', 'on'], ['c', 'on']]);
+  });
+});
+
+describe('review: Enter with only a void-button (finding 8)', () => {
+  const press = (form: HTMLFormElement) =>
+    form.querySelector('void-input input')!.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }));
+
+  it('submits a multi-field form whose only submit button is a void-button', async () => {
+    const form = await mount('<void-input name="a"></void-input><void-input name="b"></void-input><void-button type="submit"></void-button>');
+    const submit = vi.fn((e: Event) => e.preventDefault());
+    form.addEventListener('submit', submit);
+    press(form);
+    expect(submit).toHaveBeenCalledOnce();
+  });
+
+  it('leaves it to the browser when there is a native submit button or a single field', async () => {
+    for (const html of [
+      '<void-input name="a"></void-input><void-input name="b"></void-input><button>go</button><void-button type="submit"></void-button>',
+      '<void-input name="a"></void-input><void-button type="submit"></void-button>',
+      '<void-input name="a"></void-input><void-input name="b"></void-input>',
+      '<void-input name="a"></void-input><void-input name="b"></void-input><void-button type="submit" disabled></void-button>',
+    ]) {
+      const form = await mount(html);
+      const submit = vi.fn((e: Event) => e.preventDefault());
+      form.addEventListener('submit', submit);
+      press(form);
+      expect(submit, html).not.toHaveBeenCalled();
+      form.remove();
+    }
   });
 });
