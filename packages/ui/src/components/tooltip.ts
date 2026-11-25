@@ -2,7 +2,13 @@ import { html } from 'lit';
 import { property, state } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
 
-/** Hover hint for icon buttons and truncated text that need a label without cluttering the visible interface. */
+/**
+ * Hover hint for icon buttons and truncated text that need a label without cluttering the visible interface.
+ *
+ * The trigger (the first child that is not the bubble) is described by the bubble with `aria-describedby`,
+ * also when it arrives after the tooltip rendered. The tooltip shows on hover and on focus within, and
+ * Escape hides it.
+ */
 export class VoidTooltip extends VoidElement {
   @property({ type: String }) text = '';
   @property({ type: String, reflect: true }) position: 'top' | 'bottom' | 'left' | 'right' = 'top';
@@ -12,8 +18,16 @@ export class VoidTooltip extends VoidElement {
 
   private _timerId: ReturnType<typeof setTimeout> | undefined;
   private _tooltipId = 'void-tooltip-' + Math.random().toString(36).slice(2);
+  /** The trigger the bubble currently describes. */
+  private _described: Element | null = null;
+  /** The trigger can arrive after the tooltip (blocking script in the head, framework rendering, morphs). */
+  private _observer: MutationObserver | null = null;
+
   connectedCallback(): void {
     super.connectedCallback();
+    this._observer ??= new MutationObserver(() => this._describeTrigger());
+    this._observer.observe(this, { childList: true });
+    this._describeTrigger();
     this.addEventListener('mouseenter', this._onMouseEnter);
     this.addEventListener('mouseleave', this._onMouseLeave);
     this.addEventListener('focusin', this._onFocusIn);
@@ -24,6 +38,7 @@ export class VoidTooltip extends VoidElement {
   disconnectedCallback(): void {
     super.disconnectedCallback();
     clearTimeout(this._timerId);
+    this._observer?.disconnect();
     this.removeEventListener('mouseenter', this._onMouseEnter);
     this.removeEventListener('mouseleave', this._onMouseLeave);
     this.removeEventListener('focusin', this._onFocusIn);
@@ -39,10 +54,27 @@ export class VoidTooltip extends VoidElement {
       this.setHostAttribute('visible', null);
     }
 
-    const trigger = this.children[0] as HTMLElement | undefined;
-    if (trigger && !trigger.classList.contains('void-tooltip-bubble') && trigger.getAttribute('aria-describedby') !== this._tooltipId) {
-      trigger.setAttribute('aria-describedby', this._tooltipId);
+    this._describeTrigger();
+  }
+
+  /** The trigger is the first element that is not the bubble; it is described by the bubble. */
+  private _describeTrigger(): void {
+    const trigger = Array.from(this.children).find(c => !c.classList.contains('void-tooltip-bubble')) ?? null;
+    if (this._described && this._described !== trigger) this._release(this._described);
+    this._described = trigger;
+    if (trigger && !this._tokens(trigger).includes(this._tooltipId)) {
+      trigger.setAttribute('aria-describedby', [...this._tokens(trigger), this._tooltipId].join(' '));
     }
+  }
+
+  private _tokens(el: Element): string[] {
+    return (el.getAttribute('aria-describedby') ?? '').split(/\s+/).filter(Boolean);
+  }
+
+  private _release(el: Element): void {
+    const rest = this._tokens(el).filter(t => t !== this._tooltipId);
+    if (rest.length) el.setAttribute('aria-describedby', rest.join(' '));
+    else el.removeAttribute('aria-describedby');
   }
 
   private _onKeydown = (e: KeyboardEvent): void => {

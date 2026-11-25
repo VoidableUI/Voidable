@@ -3,7 +3,14 @@ import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
 import { ProjectionController } from '../projection.js';
 
-/** Form field wrapper that pairs an input with its label, helper text, and validation error. */
+/**
+ * Form field wrapper that pairs an input with its label, helper text, and validation error.
+ *
+ * The label names the control as it appears: the native input, select or textarea (also inside Void
+ * components), else the widget a component renders inside itself (the multiselect trigger), else the first
+ * child. Controls that arrive after the field (a script that runs before the page is parsed, a framework)
+ * are wired when they do.
+ */
 export class VoidField extends VoidElement {
   @property({ type: String, reflect: true }) label = '';
   @property({ type: String, reflect: true }) error = '';
@@ -54,7 +61,11 @@ export class VoidField extends VoidElement {
   private _findControl(): Element | null {
     const container = this.querySelector('.void-field-control');
     if (!container) return null;
-    return container.querySelector('input, select, textarea') ?? container.firstElementChild;
+    // Native controls first (the hidden inputs inside checkboxes and radios are not the control),
+    // then the widget a Void component renders inside itself (multiselect's trigger).
+    return container.querySelector('input:not([aria-hidden="true"]):not([type="hidden"]), select, textarea')
+      ?? container.querySelector('[role="combobox"]')
+      ?? container.firstElementChild;
   }
 
   private _unwireControl(): void {

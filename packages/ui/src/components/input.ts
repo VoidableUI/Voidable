@@ -15,11 +15,6 @@ export class VoidInput extends NativeFormControl(VoidElement) {
   @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' | 'xl' | 'xxl' = 'md';
   @property({ type: String, reflect: true }) error = '';
 
-  connectedCallback(): void {
-    super.connectedCallback();
-    this.setHostAttribute('role', 'textbox');
-  }
-
   render() {
     return html`
       <input

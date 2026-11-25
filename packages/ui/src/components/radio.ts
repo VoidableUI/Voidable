@@ -53,7 +53,7 @@ export class VoidRadio extends NativeFormControl(VoidElement) {
 
   render() {
     return html`
-      <input type="radio" .checked=${this.checked} ?disabled=${this.formDisabled} ?required=${this.required} name=${this.name} value=${this.value} form=${this.formAttr ?? nothing} tabindex="-1" aria-hidden="true" @focus=${this._onNativeFocus} />
+      <input type="radio" .checked=${this.checked} ?disabled=${this.formDisabled} ?required=${this.required} name=${this.name} value=${this.value} form=${this.formAttr ?? nothing} tabindex="-1" aria-hidden="true" inert @invalid=${this._onNativeInvalid} @focus=${this._onNativeFocus} />
       <span class="void-radio-circle">
         ${this.checked ? html`<span class="void-radio-dot"></span>` : ''}
       </span>
@@ -85,6 +85,18 @@ export class VoidRadio extends NativeFormControl(VoidElement) {
   /** The browser focuses the native input to report validity; hand focus to the host. */
   private _onNativeFocus = (): void => {
     this.focus();
+  };
+
+  /**
+   * The native input is `inert`, so assistive technology and axe see one widget (the host)
+   * rather than a focusable input nested in it. An inert input cannot be focused, which
+   * would silently block submission of a required control, so it is made focusable for the
+   * moment the browser reports validity.
+   */
+  private _onNativeInvalid = (e: Event): void => {
+    const input = e.target as HTMLInputElement;
+    input.inert = false;
+    setTimeout(() => { input.inert = true; });
   };
 
   protected formSyncNative(): void {

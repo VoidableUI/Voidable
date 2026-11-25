@@ -963,8 +963,13 @@ describe('review: required and ARIA (finding 7)', () => {
     expect(native('void-checkbox[value="z"] input').validationMessage).toBe('');
     // Hosts expose aria-required.
     expect(form.querySelector('void-checkbox[name="c"]')!.getAttribute('aria-required')).toBe('true');
-    // Focus handed from the aria-hidden native input to the host.
-    native('void-checkbox[name="c"] input').focus();
+    // The native input is inert (one widget for assistive technology); it is made focusable while the
+    // browser reports validity ("invalid" event), and focus is handed from it to the host.
+    const nativeCheckbox = native('void-checkbox[name="c"] input');
+    expect(nativeCheckbox.inert).toBe(true);
+    nativeCheckbox.dispatchEvent(new Event('invalid'));
+    expect(nativeCheckbox.inert).toBe(false);
+    nativeCheckbox.focus();
     expect(document.activeElement).toBe(form.querySelector('void-checkbox[name="c"]'));
   });
 
