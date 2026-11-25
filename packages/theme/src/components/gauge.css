@@ -121,7 +121,7 @@ void-gauge[variant="wireframe"] .void-gauge-segment {
 
 /* Tick marks — speedometer-style indicator lines outside the arc band */
 void-gauge .void-gauge-tick {
-  stroke: var(--void-chart-axis, var(--void-color-border-strong));
+  stroke: var(--void-chart-axis);
   stroke-linecap: butt;
 }
 
