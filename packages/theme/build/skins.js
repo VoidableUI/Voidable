@@ -63,7 +63,7 @@ export const isSurfaceScope = (selector) => /void-media|void-glass|data-void-sur
 export const PROPERTIES = ['surface', 'ink', 'border', 'border-width', 'radius', 'shadow', 'rule', 'rule-edge', 'rule-head', 'rule-between', 'gap', 'padding', 'padding-block', 'padding-inline', 'height', 'width', 'size', 'font-size', 'font-weight'];
 export const STATES = ['hover', 'active', 'selected', 'disabled', 'invalid', 'open', 'focus'];
 export const PARTS = ['header', 'footer', 'title', 'body', 'actions', 'trigger', 'content', 'item', 'label', 'icon', 'value'];
-export const ROLES = ['container', 'float', 'control', 'field', 'rule'];
+export const ROLES = ['container', 'float', 'control', 'field', 'item', 'rule'];
 
 const alt = (list) => [...list].sort((a, b) => b.length - a.length).join('|');
 const TAIL = new RegExp(`^(?:(${alt(PARTS)})-)?(${alt(PROPERTIES)})(?:-(${alt(STATES)}))?$`);
@@ -91,7 +91,7 @@ export const isColourName = (name) => new RegExp(`-(surface|ink|border)(-(${alt(
 const COLOUR_INPUT = /^--void-(alpha-|scheme-|page-level$|contrast-level$|chrome-level$|neutral-c$|accent-|status-|tone-tint$|fg$|color-|preferred-scheme)/;
 
 /** A token of the theme's own derivation that a surface keeps for itself. */
-export const isSurfaceOwned = (name) => COLOUR_INPUT.test(name) || (/^--void-(container|float|field)-/.test(name) && isColourName(name));
+export const isSurfaceOwned = (name) => COLOUR_INPUT.test(name) || (/^--void-(container|float|control|field|item)-/.test(name) && isColourName(name));
 
 // ── Reading a skin ───────────────────────────────────────────────────
 

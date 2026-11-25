@@ -511,14 +511,21 @@
   --void-float-shadow:       var(--void-shadow-md);
 
   /* control: anything pressed or typed into. Size steps are the
-     --void-control-height|padding|text tokens above. */
+     --void-control-height|padding|text tokens above; border is the
+     edge that is its only boundary (3:1). */
   --void-control-radius:       var(--void-radius-md);
+  --void-control-border:       var(--void-color-border-control);
   --void-control-border-width: 1px;
 
   /* field: a control text is entered or chosen in. Input, textarea,
      select, combobox, number, pin, tags and the like. */
   --void-field-surface: var(--void-color-surface);
-  --void-field-border:  var(--void-color-border-control);
+  --void-field-border:  var(--void-control-border);
+
+  /* item: one of a set you move between. The link to the current page,
+     the selected item of a list. */
+  --void-item-surface-selected: var(--void-color-bg-hover);
+  --void-item-ink-selected:     var(--void-color-text);
 
   /* rule: a line that separates. A whole border (width, style,
      colour), so `none` switches it off and `2px solid …` makes it

@@ -15,7 +15,7 @@ void-switch {
   width: 2.25rem;
   height: 1.25rem;
   background: var(--_void-tone-subtle);
-  border: 1px solid var(--void-color-border-control);
+  border: 1px solid var(--void-control-border);
   border-radius: var(--void-radius-full);
   transition: background var(--void-duration-fast) var(--void-ease-in-out),
               border-color var(--void-duration-fast) var(--void-ease-in-out);
@@ -48,7 +48,7 @@ void-switch:focus-visible .void-switch-track {
 }
 
 void-switch:not([checked]):hover .void-switch-track {
-  border-color: var(--void-color-border-control);
+  border-color: var(--void-control-border);
 }
 
 void-switch[color="error"]   { --_void-tone: var(--void-color-error); }

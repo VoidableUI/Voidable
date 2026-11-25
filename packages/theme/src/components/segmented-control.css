@@ -8,7 +8,7 @@ void-segmented-control {
   /* Border plus padding plus item equals the shared control height. */
   padding: 2px;
   background: var(--void-color-surface);
-  border: var(--void-control-border-width) solid var(--void-color-border-control);
+  border: var(--void-control-border-width) solid var(--void-control-border);
   border-radius: var(--void-control-radius);
   gap: 2px;
 }

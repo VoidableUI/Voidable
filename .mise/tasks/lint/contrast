@@ -218,13 +218,13 @@ function checkConfig(name, overrides, { quiet = false, skin = {} } = {}) {
     // navigation link), otherwise with every text colour that can land on it.
     const tokenColor = (token) => color(raw(token));
     const flat = (v) => (v.a < 1 ? over(v, page) : v);
-    const surfaceTokens = new Set(['--void-container-surface', '--void-float-surface', '--void-field-surface', ...Object.keys(skin).filter((k) => /^--void-[a-z0-9-]+-surface(-[a-z]+)?$/.test(k))]);
+    const surfaceTokens = new Set(['--void-container-surface', '--void-float-surface', '--void-field-surface', '--void-item-surface-selected', ...Object.keys(skin).filter((k) => /^--void-[a-z0-9-]+-surface(-[a-z]+)?$/.test(k))]);
     for (const token of surfaceTokens) {
       let bg;
       try { bg = flat(tokenColor(token)); } catch { fail(`[${name}, ${mode}] ${token} is not a colour lint:contrast can evaluate`); continue; }
       const short = token.slice(7);
       const ink = token.replace(/-surface(-[a-z]+)?$/, '-ink$1');
-      if (ink in skin) { check(`${ink.slice(7)} on ${short}`, tokenColor(ink), bg, 4.5); continue; }
+      if (ink in skin || ink in derived) { check(`${ink.slice(7)} on ${short}`, tokenColor(ink), bg, 4.5); continue; }
       for (const t of ['text', 'text-secondary', 'text-muted']) check(`${t} on ${short}`, c(t), bg, 4.5);
       for (const r of roles) check(`type role ${r} on ${short}`, color(raw(`--void-type-${r}-color`)), bg, 4.5);
       check(`accent as text on ${short}`, c('accent'), bg, 4.5);
@@ -237,6 +237,7 @@ function checkConfig(name, overrides, { quiet = false, skin = {} } = {}) {
       if (!(token.replace(/-ink(-[a-z]+)?$/, '-surface$1') in skin)) check(`${token.slice(7)} on bg`, tokenColor(token), page, 4.5);
     }
     // The edge of a field is its only boundary: 3:1 against its fill and the page.
+    check('control-border on bg', tokenColor('--void-control-border'), page, 3);
     check('field-border on field-surface', tokenColor('--void-field-border'), flat(tokenColor('--void-field-surface')), 3);
     check('field-border on bg', tokenColor('--void-field-border'), page, 3);
 

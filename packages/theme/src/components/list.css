@@ -1,5 +1,7 @@
 /* @tokens void-list
-   --void-list-rule  The line between the items of a list with dividers. */
+   --void-list-rule                   The line between the items of a list with dividers.
+   --void-list-item-surface-selected  Fill of the selected item.
+   --void-list-item-ink-selected      Text colour of the selected item. Set it with the surface: lint:contrast checks the pair. */
 
 void-list {
   display: flex;
@@ -43,9 +45,11 @@ void-list[dividers] void-list-item {
   color: var(--void-color-text);
 }
 
-void-list-item[selected] {
-  background: var(--void-color-bg-hover);
-  color: var(--void-color-text);
+/* Also for a divided list, whose items set their own text colour. */
+void-list-item[selected],
+void-list[dividers] void-list-item[selected] {
+  background: var(--void-list-item-surface-selected, var(--void-item-surface-selected));
+  color: var(--void-list-item-ink-selected, var(--void-item-ink-selected));
 }
 
 void-list-item[disabled] {

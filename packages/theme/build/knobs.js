@@ -65,9 +65,14 @@ export const fontStacks = {
   },
 };
 
-/** Skins: structural layers that go beyond the knobs (src/skins/). */
+/**
+ * Skins: structure the knobs cannot express, as one rule of token
+ * assignments each (src/skins/). lint:component-tokens keeps this list and
+ * the files in step.
+ */
 export const skins = [
   { id: 'loft', label: 'Loft', description: 'Soft and elevated: a tinted page, white cards with shadows, no hairlines.' },
+  { id: 'slab', label: 'Slab', description: 'Dense, square and ruled: ink lines, framed boxes with hard shadows, inverted selection.' },
 ];
 
 const round = (n, places = 4) => Math.round(n * 10 ** places) / 10 ** places;

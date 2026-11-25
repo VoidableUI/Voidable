@@ -1,0 +1,101 @@
+/* Slab — dense, square, ruled.
+   Ink lines instead of soft edges: heavy rules under every heading and
+   around every group, boxes framed in ink that cast a hard offset
+   shadow, square corners whatever the radius knob says, tighter
+   controls, and the current page marked by an inverted link.
+
+     @import '@voidable/theme';
+     @import '@voidable/theme/skins/slab.css';
+
+     <html data-void-skin="slab">
+
+   One rule of token assignments and nothing else, as every skin is. It
+   is the worked example of the theming guide's "Build a skin": read it
+   top to bottom as the order to work in (semantic tokens, then roles,
+   then the few components that are exceptions). */
+[data-void-skin="slab"] {
+  /* Designed light first. An explicit data-theme still wins. */
+  --void-preferred-scheme: light;
+  --void-preferred-scheme-dark: 0;
+
+  /* ── Working values of this skin ── */
+  --_void-slab-ink: var(--void-color-text);
+  --_void-slab-heavy: 2px solid var(--_void-slab-ink);
+
+  /* ── Semantic tokens ── */
+
+  /* Square. Circles (radio, switch, status dot) keep --void-radius-full. */
+  --void-radius-xs: 0px;
+  --void-radius-sm: 0px;
+  --void-radius-md: 0px;
+  --void-radius-lg: 0px;
+  --void-radius-xl: 0px;
+
+  /* Dense: one step tighter than the theme, and still scaled by its
+     density knob. */
+  --void-control-height-sm: calc(1.625rem * var(--void-density));
+  --void-control-height: calc(2rem * var(--void-density));
+  --void-control-height-lg: calc(2.5rem * var(--void-density));
+  --void-cell-padding-block: calc(0.5rem * var(--void-density));
+  --void-container-padding: calc(1rem * var(--void-density));
+
+  /* Headings carry weight; hierarchy is ink, not air. */
+  --void-type-heading-weight: var(--void-weight-bold);
+  --void-type-label-weight: var(--void-weight-bold);
+  --void-type-label-color: var(--void-color-text);
+
+  /* ── Roles ── */
+
+  /* Rules: a thin line between items, a heavy one under a heading and
+     around a group. */
+  --void-rule: 1px solid var(--void-color-border-control);
+  --void-rule-head: var(--_void-slab-heavy);
+  --void-rule-edge: var(--_void-slab-heavy);
+
+  /* A container is a frame of ink on the page with a hard shadow. */
+  --void-container-surface: var(--void-color-bg);
+  --void-container-border: var(--_void-slab-ink);
+  --void-container-border-width: 2px;
+  --void-container-shadow: 4px 4px 0 var(--_void-slab-ink);
+
+  /* So is anything that floats; it sits a little higher. */
+  --void-float-border: var(--_void-slab-ink);
+  --void-float-border-width: 2px;
+  --void-float-shadow: 6px 6px 0 var(--_void-slab-ink);
+
+  /* Controls are drawn with the same line. */
+  --void-control-border-width: 2px;
+  --void-control-border: var(--_void-slab-ink);
+  --void-field-surface: var(--void-color-bg);
+
+  /* The one you are on is inverted: ink as the surface, the page colour
+     as the ink. */
+  --void-item-surface-selected: var(--_void-slab-ink);
+  --void-item-ink-selected: var(--void-color-bg);
+
+  /* ── Components ── */
+
+  --void-button-border: var(--_void-slab-ink);
+  --void-button-shadow: 2px 2px 0 var(--_void-slab-ink);
+  --void-button-font-weight: var(--void-weight-semibold);
+
+  --void-badge-radius: 0px;
+  --void-tag-radius: 0px;
+
+  --void-dialog-shadow: 8px 8px 0 var(--_void-slab-ink);
+
+  /* An alert is framed like everything else; its fill carries the tone. */
+  --void-alert-border: var(--_void-slab-ink);
+
+  /* A tooltip is inverted too. */
+  --void-tooltip-surface: var(--_void-slab-ink);
+  --void-tooltip-ink: var(--void-color-bg);
+  --void-tooltip-border: var(--_void-slab-ink);
+
+  /* The bar ends in a heavy rule. */
+  --void-nav-bar-rule: var(--_void-slab-heavy);
+  --void-sidebar-rule: var(--_void-slab-heavy);
+
+  /* Figures are a ruled grid. */
+  --void-figures-rule: var(--_void-slab-heavy);
+}

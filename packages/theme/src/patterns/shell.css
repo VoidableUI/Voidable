@@ -172,8 +172,8 @@ void-nav-links > a:hover {
 }
 
 void-nav-links > a[aria-current="page"] {
-  background: var(--void-nav-links-item-surface-selected, var(--void-color-bg-hover));
-  color: var(--void-nav-links-item-ink-selected, var(--void-color-text));
+  background: var(--void-nav-links-item-surface-selected, var(--void-item-surface-selected));
+  color: var(--void-nav-links-item-ink-selected, var(--void-item-ink-selected));
 }
 
 void-nav-links > a:focus-visible {
