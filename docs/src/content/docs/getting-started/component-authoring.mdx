@@ -153,15 +153,15 @@ A test fails when a default-true boolean is added without it, and the manifest r
 
 Components contain zero styling. All CSS lives in `@voidable/theme`. A component author writes no CSS.
 
-The theme uses a tone system built on CSS custom properties. Note the distinction: the component *property* is `color` (e.g. `color="error"`), but the CSS *custom property* is `--tone`. Component CSS in the theme references `--tone` for the primary color, with derived values computed via `color-mix()`:
+The theme uses a tone system built on CSS custom properties. Note the distinction: the component *property* is `color` (e.g. `color="error"`), but the CSS *custom property* is `--_void-tone`. Component CSS in the theme references `--_void-tone` for the primary color, with derived values computed via `color-mix()`:
 
-- `--tone` — primary tone color
-- `--tone-subtle` — tone at 14% opacity (backgrounds)
-- `--tone-border` — tone at 36% opacity (borders)
-- `--tone-text` — text color on tone backgrounds
-- `--tone-hover` — hover state color
+- `--_void-tone` — primary tone color
+- `--_void-tone-subtle` — tone at 14% opacity (backgrounds)
+- `--_void-tone-border` — tone at 36% opacity (borders)
+- `--_void-tone-text` — text color on tone backgrounds
+- `--_void-tone-hover` — hover state color
 
-Color variants override `--tone` only. All other derived values update automatically through the cascade.
+Color variants override `--_void-tone` only. All other derived values update automatically through the cascade.
 
 ## Registration Pattern
 

@@ -11,6 +11,7 @@
 @import '../../../packages/theme/src/themes/iris.css';
 @import '../../../packages/theme/src/themes/paper.css';
 @import '../../../packages/theme/src/skins/loft.css';
+@import '../../../packages/theme/src/skins/slab.css';
 /* Shared overlay rules (top layer, anchoring, transitions); before the components that refine them. */
 @import '../../../packages/theme/src/components/overlay.css';
 @import '../../../packages/theme/src/components/badge.css';

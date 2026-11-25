@@ -91,6 +91,11 @@ test('the theme CSS sets knobs only and reads back as the same theme', () => {
   assert.deepEqual(readTheme(css), values);
   assert.match(themeCss(values), /^:root \{/);
   assert.match(themeCss(values, { skin: 'loft' }), /^@import '@voidable\/theme\/skins\/loft\.css';\n:root/);
+  // Given the skin written out, the file holds its tokens in the skins layer instead of importing it.
+  const whole = themeCss(values, { skin: 'slab', skinCss: '[data-void-skin="slab"] {\n  --void-rule-edge: none;\n}\n' });
+  assert.doesNotMatch(whole, /@import/);
+  assert.match(whole, /^:root \{[^}]+\}\n\n\/\* The Slab skin[^*]+\*\/\n@layer components\.void\.skins \{\n  \[data-void-skin="slab"\] \{\n    --void-rule-edge: none;\n  \}\n\}\n$/);
+  assert.deepEqual(readTheme(whole), values);
 });
 
 test('the description names the look and the exact knobs', () => {

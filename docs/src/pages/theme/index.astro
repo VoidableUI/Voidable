@@ -11,6 +11,7 @@
 // the chrome does not move while you turn a knob.
 import '@voidable/theme';
 import '../../../../packages/theme/dist/skins/loft.css';
+import '../../../../packages/theme/dist/skins/slab.css';
 import knobsCss from '../../../../packages/theme/src/knobs.css?raw';
 import iconBrandGithub from '@tabler/icons/outline/brand-github.svg?raw';
 import iconSun from '@tabler/icons/outline/sun.svg?raw';
@@ -207,7 +208,7 @@ const ogImage = new URL('/og.png', canonical).href;
                 <output data-out="--void-radius"></output>
               </div>
               <void-switch id="tb-pill" class="tb-switch">Pill-shaped controls</void-switch>
-              <void-field label="Structure" helper="Loft is a skin: it changes what containers are, not only their values.">
+              <void-field label="Structure" helper="A skin changes structure with role and component tokens: what a container is, where the lines are. It combines with any knobs.">
                 <void-segmented-control id="tb-skin" value="none" aria-label="Structure">
                   <void-segmented-control-item value="none">Hairline</void-segmented-control-item>
                   {skins.map((s) => <void-segmented-control-item value={s.id}>{s.label}</void-segmented-control-item>)}
@@ -497,11 +498,12 @@ const ogImage = new URL('/og.png', canonical).href;
         background: var(--void-color-accent);
         border-radius: min(var(--void-radius-md), 0.5rem);
       }
-      /* The skin's swatch is a lifted card on its soft page. */
+      /* The skin's swatch is one of its containers on its page. */
       .tb-swatch-skin > span {
-        background: var(--void-color-surface);
-        box-shadow: var(--void-shadow-md);
-        border-radius: var(--void-radius-sm);
+        background: var(--void-container-surface);
+        border: var(--void-container-border-width) solid var(--void-container-border);
+        box-shadow: var(--void-container-shadow);
+        border-radius: min(var(--void-container-radius), 0.375rem);
       }
 
       /* A knob: the field, with its value at the end of the label row. */

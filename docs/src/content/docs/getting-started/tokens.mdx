@@ -501,29 +501,29 @@ Tokens for [UI over imagery](/patterns/ui-over-imagery/). The first five are inp
 
 ## The tone system
 
-Many Voidable components use an internal `--tone` custom property pattern for color theming. Instead of writing separate rulesets for every color variant, each component defines:
+Many Voidable components use an internal `--_void-tone` custom property pattern for color theming. Instead of writing separate rulesets for every color variant, each component defines:
 
 ```css
 void-badge {
-  --tone: var(--void-color-accent);
-  background: var(--tone);
+  --_void-tone: var(--void-color-accent);
+  background: var(--_void-tone);
 }
 
-void-badge[color="error"]   { --tone: var(--void-color-error); }
-void-badge[color="warning"] { --tone: var(--void-color-warning); }
-void-badge[color="success"] { --tone: var(--void-color-success); }
+void-badge[color="error"]   { --_void-tone: var(--void-color-error); }
+void-badge[color="warning"] { --_void-tone: var(--void-color-warning); }
+void-badge[color="success"] { --_void-tone: var(--void-color-success); }
 ```
 
 Some components derive additional tones for subtle backgrounds and borders:
 
 ```css
 void-alert {
-  --tone: var(--void-color-accent);
-  --tone-subtle: color-mix(in srgb, var(--tone) var(--void-tone-tint), transparent);
-  --tone-border: color-mix(in srgb, var(--tone) 36%, transparent);
+  --_void-tone: var(--void-color-accent);
+  --_void-tone-subtle: color-mix(in srgb, var(--_void-tone) var(--void-tone-tint), transparent);
+  --_void-tone-border: color-mix(in srgb, var(--_void-tone) 36%, transparent);
 
-  background: var(--tone-subtle);
-  border: 1px solid var(--tone-border);
+  background: var(--_void-tone-subtle);
+  border: 1px solid var(--_void-tone-border);
 }
 ```
 

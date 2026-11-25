@@ -149,6 +149,11 @@ func TestSkillTeachesRetheming(t *testing.T) {
 		"`theme`", "`skin`", "`name`", "`screen`, `scheme`, `device`",
 		"data-void-theme", "data-void-skin=\"loft\"",
 		"@voidable/theme/skins/loft.css", "@voidable/theme/knobs.json",
+		// Component tokens and skins: how to restyle one component and build a skin.
+		"data-void-skin=\"slab\"", "@voidable/theme/skins/slab.css", "`loft` or `slab`",
+		"--void-<component>-<part?>-<property>-<state?>", "@voidable/theme/component-tokens.json",
+		"--void-container-surface", "--void-rule-edge", "--void-item-surface-selected",
+		"[data-void-skin=\"mine\"]", "@voidable/theme/skin", "**To restyle one component**", "**To build a skin**",
 	} {
 		if !strings.Contains(md, want) {
 			t.Errorf("SKILL.md lacks %q", want)

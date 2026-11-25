@@ -1,13 +1,22 @@
 ---
 title: Theming
-description: Retheme Voidable by setting about a dozen knobs. What each knob does, the theme builder, eight copy-paste themes, a skin that goes beyond the knobs, tokens for design tools, type roles and layout rhythm, with live examples.
+description: Retheme Voidable in three tiers. Knobs are the dozen inputs everything derives from, semantic tokens are what they derive, and component tokens are per-component override points. The theme builder, eight themes, two skins, tokens for design tools, with live examples.
 ---
 
 import ThemeDemo from '../../../components/ThemeDemo.astro';
+import Tokens from '../../../components/api/Tokens.astro';
 
 Voidable separates structure from style. Components ship with **zero visual CSS**: all appearance comes from `--void-*` CSS custom properties defined in `@voidable/theme`.
 
-The theme is built to be rethemed by changing a handful of inputs, by a person or by an AI agent. You do not edit hundreds of tokens. You set **knobs**, and every colour, size, radius and duration is derived from them in plain CSS, in both colour schemes, with no build step.
+The theme has three tiers, and you work at the highest one that does the job:
+
+| Tier | What it is | Who sets it |
+|---|---|---|
+| **Knobs** | The 14 inputs: accent, neutral, page tint, contrast, chrome, radius, density, rhythm, type, motion | A theme (`data-void-theme`), or you on `:root` |
+| **Semantic tokens** | Everything derived from the knobs in plain CSS, in both colour schemes: colours, sizes, radii, shadows, type roles, and the **roles** a kind of component is drawn with (container, float, control, field, item, rule) | The theme derives them; a skin (`data-void-skin`) reassigns them |
+| **Component tokens** | Per-component override points that default to a semantic token: `--void-card-shadow`, `--void-page-head-rule` | A skin, or you, for the exception |
+
+To change the brand, set knobs. To change what a container or a line is everywhere, set a role. To make one component differ, set its token. None of the three needs a selector that reaches into a component's markup.
 
 <div class="vd-row not-content">
   <void-button variant="filled"><a href="/theme/">Open the theme builder</a></void-button>
@@ -175,11 +184,73 @@ Two more, to copy (the rest are in `@voidable/theme/themes/`):
 
 `mise run lint:contrast` evaluates the derived colours for the default knobs, for every file in `themes/` and `skins/`, and for the extremes of each colour knob, in both schemes. It fails if any text pair drops below 4.5:1 or any control border below 3:1, and if a theme file sets anything other than a knob. The theme builder shows the same measurement live for the theme you are making.
 
-## Skins: beyond the knobs
+## Component tokens
 
-A theme changes values. A **skin** changes structure: what a container is, whether anything has a line around it, what casts a shadow. It is a separate stylesheet that overrides derived tokens and, where a component offers no token, restyles the element itself. It never edits a component's own CSS, and it composes with every knob and every theme.
+A component token is a custom property a component reads with a fallback to its default:
 
-The package ships one, **Loft**: a soft tinted page, containers that are lighter than the page and float on a shadow, and no hairlines around anything.
+```css
+/* in the theme */
+void-card {
+  box-shadow: var(--void-card-shadow, var(--void-container-shadow));
+}
+```
+
+The theme never declares `--void-card-shadow`. That is the whole mechanism: an unset custom property costs nothing, and one declaration of it wins wherever you put it, in any stylesheet, with no `!important` and no selector that out-specifies the theme.
+
+```css
+/* every card in the application */
+:root { --void-card-shadow: var(--void-shadow-sm); }
+
+/* the cards of one region */
+.billing { --void-card-radius: 0; }
+```
+
+```html
+<!-- one card -->
+<void-card style="--void-card-padding: var(--void-space-8)">…</void-card>
+```
+
+Three rules to know:
+
+- **A component token is absolute.** `--void-button-height: 3rem` makes every button it reaches 3rem, whatever its `size`. To move all three size steps together, set the semantic steps (`--void-control-height-sm`, `--void-control-height`, `--void-control-height-lg`) or the density knob.
+- **States, colours and variants compose.** A coloured button keeps the edge of its tone; `--void-button-border` is the edge of the default one. A variant that is defined by not having something (a `bordered` card has no fill, a ghost button no shadow) does not take that token.
+- **A role or semantic token set on a subtree stops at the next scope.** The theme computes its tokens again on every element with `data-theme`, `data-void-theme` or `data-shape`, and on media and glass. Put the override on those too (`:root, [data-theme], [data-void-theme] { … }`), or write a skin, which the build writes out for every scope. Component tokens are not declared there, so they simply inherit.
+
+### Names
+
+One grammar, so a name can be guessed:
+
+```
+--void-<component>-<part?>-<property>-<state?>
+--void-<role>-<property>-<state?>
+```
+
+| | Vocabulary |
+|---|---|
+| component | The tag without `void-`: `card`, `nav-bar`, `page-head` |
+| part | `header`, `footer`, `title`, `body`, `actions`, `trigger`, `content`, `item`, `label`, `icon`, `value` (the same words as the part elements) |
+| property | `surface` (fill), `ink` (text), `border` (edge colour), `border-width`, `radius`, `shadow`, `rule` (a whole line: `rule`, `rule-between`, `rule-edge`, `rule-head`), `gap`, `padding`, `padding-block`, `padding-inline`, `height`, `width`, `size`, `font-size`, `font-weight` |
+| state | `hover`, `active`, `selected`, `disabled`, `invalid`, `open`, `focus` |
+
+`--void-nav-links-item-surface-selected` is the fill of the selected item of `void-nav-links`. A token exists only where a real design wants that component to differ from its role: there is no token per declaration, and `lint:component-tokens` fails on a name outside the grammar, a token nobody reads and a token nobody documented.
+
+### Roles
+
+Most of what a design language changes is the same idea in many components. Those ideas are role tokens, declared with the semantic tokens; components read them through their own token. Set a role and every component of that kind follows.
+
+<Tokens roles />
+
+### Component token reference
+
+Generated from the theme's CSS source: the name and the description from each file's `@tokens` comment, the default from the fallback the component reads it with. The same table is on each component's and pattern's own page, and the data is `@voidable/theme/component-tokens.json`.
+
+<Tokens all />
+
+## Skins
+
+A theme sets knobs. A **skin** changes structure: what a container is, where the lines are, what casts a shadow. It is one rule of token assignments (semantic, role and component tokens) and nothing else: no selector in it names a component. It leaves the knobs alone, so it combines with every theme, in dark and light.
+
+Two ship. **Loft**: a soft tinted page, containers lighter than the page that float on a shadow, no hairlines around anything. **Slab**: dense, square and ruled, with heavy ink lines, framed boxes that cast a hard offset shadow, and an inverted link for the current page.
 
 ```css
 @import '@voidable/theme';
@@ -190,10 +261,10 @@ The package ships one, **Loft**: a soft tinted page, containers that are lighter
 <html data-void-skin="loft">
 ```
 
-Put the attribute on `<html>`, or on an element that also carries `data-void-theme`. Live, the default look and Loft, each with the default knobs and with Dune:
+Put the attribute on `<html>`, or on an element that also carries `data-void-theme`. Live, the default look and the two skins, with the default knobs and with Dune:
 
-<div class="vd-themes vd-themes-2 not-content">
-  {[['', 'void', 'Default'], ['loft', 'void', 'Loft'], ['', 'dune', 'Dune'], ['loft', 'dune', 'Dune + Loft']].map(([skin, theme, label]) => (
+<div class="vd-themes not-content">
+  {[['', 'void', 'Default'], ['loft', 'void', 'Loft'], ['slab', 'void', 'Slab'], ['', 'dune', 'Dune'], ['loft', 'dune', 'Dune + Loft'], ['slab', 'dune', 'Dune + Slab']].map(([skin, theme, label]) => (
     <div class="vd-themed vd-skinned" data-void-theme={theme} data-void-skin={skin || undefined} data-theme="light">
       <span data-void-type="label">{label}</span>
       <void-card>
@@ -211,30 +282,9 @@ Put the attribute on `<html>`, or on an element that also carries `data-void-the
   ))}
 </div>
 
-See it on whole screens in the builder: [Loft](/theme/?skin=loft&scheme=light), [Loft with Aurora](/theme/?theme=aurora&skin=loft&scheme=light).
+See them on whole screens in the builder: [Loft](/theme/?skin=loft&scheme=light), [Slab](/theme/?skin=slab&scheme=light), [Slab with Console](/theme/?theme=console&skin=slab). To write your own, read [Build a skin](/getting-started/skins/).
 
-### What a skin could not reach
-
-Loft was written to find out how far a theme author gets without touching component CSS. Its file has two parts: one rule of token overrides, then the rules that had to name an element because no token existed. The first part did less than half the work. The second part is the list of override points the components and patterns are missing:
-
-| # | Element | What Loft needed | Why a token could not do it |
-|---|---|---|---|
-| 1 | `void-nav-bar` | A lifted surface and a shadow in place of the bottom rule | It reads the page colour and the shared divider colour directly; it has no background, border or shadow token |
-| 2 | `void-page-head` | No rule under the title | The rule is the shared divider colour, so removing it by token removes every divider |
-| 3 | `void-section` | A surface: background, padding, radius, shadow | The pattern has no surface at all, as tokens or as an attribute |
-| 4 | `void-figures`, `void-figure` | Tiles with a gap in place of hairline-divided cells | The row draws its dividers and paddings itself, with selectors specific enough that an override has to match them |
-| 5 | `void-rows`, `void-description-list`, `void-table` | Rules between items only, not above the first and below the last | No token or attribute separates the outer rules from the inner ones |
-| 6 | `void-button` | A soft edge and a shadow on the outline button | The border colour is `--tone-border`, a private, unprefixed property declared on the button itself, so an ancestor cannot set it; there is no shadow token |
-| 7 | `void-card`, `void-panel` | A shadow on the default container | Only the `elevated` variant casts one, and it also changes the fill |
-| 8 | `void-alert` | The container radius and no border | It takes the control radius and a tone border with no token for either |
-
-Three more things the tokens could not express, which Loft works around or leaves alone:
-
-- **The derived tokens are declared on a closed list of elements** (`:root`, `[data-theme]`, `[data-void-theme]`, `[data-shape]`, the surfaces). A skin cannot add its own attribute to that list, which is why `data-void-skin` has to sit on one of those elements.
-- **The media and glass surfaces derive their own tokens**, so a skin's token overrides stop at a `void-glass` panel and have to be repeated for it.
-- **The colour scheme a theme prefers cannot be set by the theme.** Loft is designed light-first, but dark stays the default unless the page sets `data-theme`.
-
-Where a component token did exist it worked: `--void-color-control-fill` gave every outline button and badge a filled surface, `--void-table-surface` repainted the table's sticky cells, and the radius, shadow and surface tokens restyled dialogs, menus, inputs and cards with no selectors at all. Component tokens for the eight rows above ([#46](https://github.com/VoidableUI/Voidable/issues/46)) would reduce Loft to its first rule.
+What holds under any skin, because a lint or the cascade says so: text and control edges keep their contrast on every surface and ink the skin assigns (`lint:contrast` checks each skin on every theme and across the colour knobs); forced colours and the focus outline sit in a layer above the skins; reduced motion cannot be undone, the focus ring stays at least 2px and a control at least 24px (`lint:component-tokens`).
 
 ## Tokens for design tools
 
@@ -296,6 +346,8 @@ Live: the first box sets two knobs inline, the second names a theme, and the thi
 The attribute matters. Custom properties that are computed from other custom properties are resolved where they are declared, so the theme re-declares its derived tokens on `:root` and on every element with `data-theme`, `data-void-theme` or `data-shape`. A knob set on an element without one of those attributes changes nothing below it.
 
 ## Dark and light
+
+Three things can say which colour scheme is in force, strongest first: `data-theme="dark"`, `"light"` or `"system"` on the element or an ancestor (your application's, that is your user's, explicit choice); the scheme a theme or skin says it was designed for; and the operating system. Loft and Slab prefer light, so `<html data-void-skin="loft">` is light until `data-theme` says otherwise, and `data-theme="system"` hands the decision back to the operating system. A theme or skin states its preference with a pair of declarations, because CSS cannot turn a keyword into a number: `--void-preferred-scheme: light; --void-preferred-scheme-dark: 0;`. Native controls and scrollbars follow through `color-scheme`.
 
 Dark is the **default**. Set `data-theme` on `<html>`, or on any element, to choose a scheme explicitly; without it, the page follows the operating system.
 
@@ -426,15 +478,17 @@ To scale:
 
 ## Overriding a single token
 
-Any derived token can still be overridden directly. Put the override on the same elements the theme derives on, so it also holds inside nested scheme or theme regions:
+Reach for the lowest tier last. A knob moves everything that depends on it; a role moves every component of a kind; a component token moves one component; a semantic token is one value.
 
 ```css
+/* a component token: anywhere, one declaration */
+:root { --void-alert-radius: var(--void-radius-lg); }
+
+/* a semantic token: on every scope, so it holds inside nested regions */
 :root, [data-theme], [data-void-theme] {
   --void-color-success: #22c55e;
 }
 ```
-
-Prefer a knob where one exists: an override is one value, a knob moves everything that depends on it.
 
 ## Importing the theme
 
@@ -515,6 +569,7 @@ void-card {
 Three things follow, and they are worth knowing:
 
 - **Put your own reset in a layer.** An unlayered reset (`* { margin: 0; padding: 0 }`, Meyer, a classic normalize) also beats the theme and will flatten component spacing. Load it into a layer below the theme instead: `@import 'reset.css' layer(base);`. Tailwind v4 preflight is already in `base`.
+- **Prefer a token to a property.** `void-card { --void-card-padding: … }` and `:root { --void-card-padding: … }` both work, and the second needs no selector at all; see [Component tokens](#component-tokens).
 - **`!important` is inverted between layers.** An important rule in an earlier layer beats an important rule in a later one, and any layered important beats an unlayered one. The theme uses `!important` in only two places (reduced motion and forced colours), both in the topmost layers; do not fight them with your own `!important`.
 - **Order of your own layers.** To put your own code between Voidable and Tailwind utilities, write it in the `components` layer itself (`@layer components { .my-card { ... } }`), which beats the theme's sublayers, or leave it unlayered.
 

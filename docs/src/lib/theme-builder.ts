@@ -9,8 +9,14 @@
 // The knob data, the link format, the CSS writer, the description and the
 // random theme all come from @voidable/theme (build/knobs.js), so the page,
 // the package and the `voidable` skill agree by construction.
+import tokensCss from '../../../packages/theme/src/tokens.css?raw';
+import { readSkin, scopes, skinCss } from '../../../packages/theme/build/skins.js';
 import { color, contrast, over, hex } from '../../../packages/theme/build/css-eval.js';
 import { builderUrl, describe, fontKey, fontStacks, fromParams, hueName, knobs, parseKnob, rng, slug, surprise, themeCss } from '../../../packages/theme/build/knobs.js';
+
+const skinSources: Record<string, string> = Object.fromEntries(
+  Object.entries(import.meta.glob<string>('../../../packages/theme/src/skins/*.css', { eager: true, query: '?raw', import: 'default' })).map(([path, css]) => [path.slice(path.lastIndexOf('/') + 1, -4), css]),
+);
 
 type Values = Record<string, string>;
 type Scheme = 'dark' | 'light';
@@ -305,6 +311,9 @@ export function start(): void {
     themeCss(state.values, {
       name: state.name,
       skin: state.skin,
+      // With a skin the file carries its role and component tokens too, so
+      // one file dropped beside the theme is the whole look.
+      skinCss: state.skin && skinSources[state.skin] ? skinCss(readSkin(skinSources[state.skin], state.skin), scopes(tokensCss)) : undefined,
       comment: `${state.name ? `${state.name}: a` : 'A'} Voidable theme. Open it in the builder:\n   ${publicUrl()}`,
     });
   const currentUrl = (withView = false) =>

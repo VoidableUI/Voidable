@@ -33,6 +33,10 @@
     "./json/*": "./dist/json/*",
     "./knobs.json": "./dist/knobs.json",
     "./component-tokens.json": "./dist/component-tokens.json",
+    "./skin": {
+      "types": "./dist/skin.d.ts",
+      "default": "./dist/skin.js"
+    },
     "./names": {
       "types": "./dist/names.d.ts",
       "default": "./dist/names.js"

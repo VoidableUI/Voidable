@@ -6,6 +6,7 @@ import primitives from '../../../packages/theme/src/primitives.css?raw';
 import knobsCss from '../../../packages/theme/src/knobs.css?raw';
 import tokens from '../../../packages/theme/src/tokens.css?raw';
 import { environment, knobsToDtcg, readSkin, readSource, resolve, toDtcg } from '../../../packages/theme/build/tokens.js';
+import registry from '../../../packages/theme/dist/component-tokens.json';
 
 const skins = import.meta.glob<string>('../../../packages/theme/src/skins/*.css', { eager: true, query: '?raw', import: 'default' });
 
@@ -16,10 +17,13 @@ export function exportDtcg(what: 'knobs' | 'dark' | 'light', values: Record<stri
   }
   const source = readSource({ primitives, knobs: knobsCss, tokens });
   const skinCss = meta.skin ? Object.entries(skins).find(([path]) => path.endsWith(`/${meta.skin}.css`))?.[1] : undefined;
-  const resolved = resolve(environment(source, { scheme: what, knobs: values, skin: skinCss ? readSkin(skinCss) : {} }));
+  const env = environment(source, { scheme: what, knobs: values, skin: skinCss ? readSkin(skinCss) : {} });
+  const resolved = resolve(env);
+  // Component tokens, grouped by component, as aliases of their defaults (or the skin's assignment).
+  const componentTokens = Object.entries(registry.components as Record<string, { name: string; default: string; description: string }[]>).flatMap(([component, list]) => list.map((t) => ({ ...t, component })));
   const doc = toDtcg(resolved, {
     description: `${meta.name || 'A'} Voidable theme, ${what} colour scheme: every token, resolved.`,
     extension: { ...extension, scheme: what },
-  });
+  }, { componentTokens, env });
   return `${JSON.stringify(doc, null, 2)}\n`;
 }

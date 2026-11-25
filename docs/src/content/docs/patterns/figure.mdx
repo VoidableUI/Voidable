@@ -3,6 +3,7 @@ title: Figure
 description: void-figure shows one number that matters with its label, unit, caption, an optional change (void-delta) and an optional progress bar; void-figures lays several out in a hairline-divided row.
 ---
 
+import Tokens from '../../../components/api/Tokens.astro';
 import Example from '../../../components/Example.astro';
 
 `<void-figure>` is one number that matters: its label, the value with its unit, and a caption that says what the number means. `<void-figures>` sets several in a row divided by hairlines, with one line above and one below. No boxes.
@@ -146,6 +147,14 @@ export const three = `
 | | `invert` | Less is better: down is green, up is red |
 
 A single `void-figure` works on its own too, in a glass panel or beside a chart.
+
+## Tokens
+
+A skin, or your own CSS, restyles this pattern through its tokens. The theme never declares them, so one declaration wins on the element, an ancestor or `:root`. See [Theming](/getting-started/theming/#component-tokens).
+
+<Tokens component="figures" />
+
+<Tokens component="figure" />
 
 ## Why this form, and `void-stat`
 

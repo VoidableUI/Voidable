@@ -1,0 +1,191 @@
+---
+title: Build a skin
+description: A skin changes structure, not only values, and it is one rule of token assignments. How to write one, worked through Slab (dense, square, ruled), what the build does with it, what the lints guarantee, and what a skin cannot do.
+---
+
+import Tokens from '../../../components/api/Tokens.astro';
+
+A [theme](/getting-started/theming/#writing-a-theme) sets knobs: colour, radius, density, type. When the look you want is a different *structure* (boxes instead of hairlines, heavy rules, inverted selection, hard shadows) knobs cannot say it, and you write a **skin**.
+
+A skin is one CSS rule that assigns tokens. Nothing else is allowed in the file: no second rule, no selector that names a component. If a design needs a selector, the component is missing a token, and that is a bug to report, not something to work around.
+
+```css
+[data-void-skin="mine"] {
+  /* token assignments only */
+}
+```
+
+This page builds **Slab**, the second skin the package ships, in the order you should work in. Open it on the reference screens while you read: [Slab in the builder](/theme/?skin=slab&scheme=light).
+
+<div class="vd-themes vd-themes-2 not-content">
+  {[['', 'Default'], ['slab', 'Slab']].map(([skin, label]) => (
+    <div class="vd-themed vd-skinned" data-void-theme="void" data-void-skin={skin || undefined} data-theme="light">
+      <span data-void-type="label">{label}</span>
+      <void-card>
+        <div class="vd-stack">
+          <span><span data-void-type="value">41</span> <span data-void-type="unit">of 44</span></span>
+          <span data-void-type="caption">Stations online</span>
+        </div>
+      </void-card>
+      <void-input value="Kiruna 3" aria-label="Station name"></void-input>
+      <div class="vd-row">
+        <void-button variant="filled">Save</void-button>
+        <void-button>Schedule</void-button>
+        <void-badge variant="outline" color="success">Done</void-badge>
+      </div>
+    </div>
+  ))}
+</div>
+
+## 1. Say what the design is, in sentences
+
+Slab: *ink lines instead of soft edges. A heavy rule under every heading and around every group. Boxes framed in ink with a hard offset shadow. Square corners. Tighter controls. The thing you are on is inverted.*
+
+Each sentence should turn into one or two assignments. If a sentence needs ten, you are working a tier too low.
+
+## 2. Semantic tokens first
+
+Anything the whole design shares is a semantic token. Slab is square whatever the theme's radius knob says, and one step denser than the theme, so it reassigns the derived radii and the control sizes. It does not touch the knobs: a skin that set `--void-radius` would fight the theme sitting on the same element, and the lint refuses it.
+
+```css
+[data-void-skin="slab"] {
+  /* Square. Circles (radio, switch, status dot) keep --void-radius-full. */
+  --void-radius-xs: 0px;
+  --void-radius-sm: 0px;
+  --void-radius-md: 0px;
+  --void-radius-lg: 0px;
+  --void-radius-xl: 0px;
+
+  /* Dense, and still scaled by the theme's density knob. */
+  --void-control-height-sm: calc(1.625rem * var(--void-density));
+  --void-control-height: calc(2rem * var(--void-density));
+  --void-control-height-lg: calc(2.5rem * var(--void-density));
+  --void-cell-padding-block: calc(0.5rem * var(--void-density));
+  --void-container-padding: calc(1rem * var(--void-density));
+
+  --void-type-heading-weight: var(--void-weight-bold);
+  --void-type-label-weight: var(--void-weight-bold);
+  --void-type-label-color: var(--void-color-text);
+```
+
+A skin's own working values are named `--_void-<skin>-*`. Slab has two, so its ink and its heavy line are each said once:
+
+```css
+  --_void-slab-ink: var(--void-color-text);
+  --_void-slab-heavy: 2px solid var(--_void-slab-ink);
+```
+
+## 3. Then the roles
+
+A role is what a *kind* of component is drawn with. This is where a skin does most of its work, because one assignment restyles every component of the kind.
+
+```css
+  /* Rules: thin between items, heavy under a heading and around a group. */
+  --void-rule: 1px solid var(--void-color-border-control);
+  --void-rule-head: var(--_void-slab-heavy);
+  --void-rule-edge: var(--_void-slab-heavy);
+
+  /* A container is a frame of ink with a hard shadow. */
+  --void-container-surface: var(--void-color-bg);
+  --void-container-border: var(--_void-slab-ink);
+  --void-container-border-width: 2px;
+  --void-container-shadow: 4px 4px 0 var(--_void-slab-ink);
+
+  /* So is anything that floats. */
+  --void-float-border: var(--_void-slab-ink);
+  --void-float-border-width: 2px;
+  --void-float-shadow: 6px 6px 0 var(--_void-slab-ink);
+
+  /* Controls are drawn with the same line. */
+  --void-control-border-width: 2px;
+  --void-control-border: var(--_void-slab-ink);
+  --void-field-surface: var(--void-color-bg);
+
+  /* The one you are on is inverted. */
+  --void-item-surface-selected: var(--_void-slab-ink);
+  --void-item-ink-selected: var(--void-color-bg);
+```
+
+Those lines restyle the card, panel, stat and glass panel; every menu, popover, select list, toast and dialog; every input, select, checkbox, radio, switch and toggle; the rule under the page head, a divided section, a card header and a table header; the lines around and between rows, description lists, figures and table rows; and the current link of the navigation and the selected item of a list.
+
+A rule token is a whole border, so `none` switches a line off and a different width makes it heavy. There are three positions because designs treat them differently: Loft removes the `edge` rules and keeps the ones `between`; Slab makes `edge` and `head` heavy and keeps `between` thin.
+
+<Tokens roles />
+
+## 4. Component tokens for the exceptions
+
+What is left are the places where one component should differ from its role. Slab has a dozen or so:
+
+```css
+  --void-button-border: var(--_void-slab-ink);
+  --void-button-shadow: 2px 2px 0 var(--_void-slab-ink);
+  --void-button-font-weight: var(--void-weight-semibold);
+
+  --void-badge-radius: 0px;     /* badges and tags are pills whatever the radius; not here */
+  --void-tag-radius: 0px;
+
+  --void-dialog-shadow: 8px 8px 0 var(--_void-slab-ink);
+  --void-alert-border: var(--_void-slab-ink);
+
+  --void-tooltip-surface: var(--_void-slab-ink);
+  --void-tooltip-ink: var(--void-color-bg);
+  --void-tooltip-border: var(--_void-slab-ink);
+
+  --void-nav-bar-rule: var(--_void-slab-heavy);
+  --void-sidebar-rule: var(--_void-slab-heavy);
+  --void-figures-rule: var(--_void-slab-heavy);
+```
+
+Every component token, its default and what it styles is in the [reference](/getting-started/theming/#component-token-reference) and on the component's own page. If the one you need is not there, that is a gap: see [What a skin cannot do](#what-a-skin-cannot-do).
+
+## 5. State the scheme it was designed in
+
+Optional. A skin (or a theme) may say which colour scheme it prefers, as a pair, because CSS cannot turn the keyword into the number the colour formulas use:
+
+```css
+  --void-preferred-scheme: light;
+  --void-preferred-scheme-dark: 0;
+```
+
+It applies when nothing more explicit does. `data-theme="dark"`, `"light"` or `"system"` on the element or an ancestor always wins, so an application's own setting is never overruled.
+
+## What the build does with it
+
+A custom property that refers to another is computed on the element that declares it. The theme computes its tokens again on every *scope* (a `data-theme` region, a nested `data-void-theme`, `data-shape`, a media surface, a glass panel), so a skin's assignments have to be declared there too, or they would hold the root's values inside a nested region. CSS cannot name a selector list once and reuse it, so the theme's build does it: it reads the list of scopes from `tokens.css` and writes your one rule out for each.
+
+- For a skin inside `@voidable/theme`, add `src/skins/<name>.css` and list it in `build/knobs.js`; `mise run theme:build` writes `dist/skins/<name>.css`.
+- For a skin of your own, pick it in the [theme builder](/theme/) or write it from scratch and expand it with the same function the build uses:
+
+```js
+import { readFileSync, writeFileSync } from 'node:fs';
+import { expandSkin } from '@voidable/theme/skin';
+
+// Throws if mine.css is anything but one rule of token assignments.
+writeFileSync('mine.skin.css', expandSkin(readFileSync('mine.css', 'utf8'), 'mine'));
+```
+
+  Or, for a skin that only has to work on `<html>` with no nested regions, ship the one rule as it is: it is valid CSS.
+
+**On media and glass a skin keeps its structure and gives up its colours.** Those surfaces compute their own colours and `lint:contrast` proves them against a white and a black photograph, so the build leaves the skin's colour assignments out there (and resets its component colour tokens). Radii, shadows, widths, rules and sizes carry over.
+
+## What is guaranteed
+
+| Guarantee | How |
+|---|---|
+| Contrast | `lint:contrast` evaluates every skin on the default knobs, on every theme and across the colour knobs, in both schemes. Every `…-surface` a skin assigns is checked with the `…-ink` of the same name when that is assigned too, otherwise with every text and status colour; control and field edges keep 3:1 |
+| Focus | The focus ring is a semantic token; a skin may recolour it (the lint checks 3:1) but not make it thinner than 2px. Forced-colours outlines are in the layer above the skins |
+| Forced colours | The `a11y` layer is above the `skins` layer. Keep a border where a box needs a boundary: a transparent border becomes visible in forced colours, a shadow does not |
+| Reduced motion | A skin cannot set the animation scale, and a duration it assigns must multiply by it |
+| Control size | A height or size a skin assigns evaluates to at least 24px |
+| No reaching in | `lint:component-tokens` refuses a skin that is anything but one rule of custom properties |
+
+## What a skin cannot do
+
+Loft and Slab were written to find the edge. This is the list of what they could not express through tokens today:
+
+- **Change what surface a component is.** An inverted navigation bar (the opposite scheme inside the bar) needs the theme's tokens computed again on that element. That is what `data-void-surface` and `data-theme` do in markup; a token cannot make an element a scope. Slab inverts single items (a surface and ink pair) instead.
+- **One side of a box.** A token is a whole border or a whole padding. An alert with only a thick left bar, or a section with only a rule above it, is not expressible.
+- **State changes beyond colour.** A pressed button that moves into its shadow, or a different focus indicator, has no token.
+- **Size steps per component.** A component token is absolute, so a skin that sets `--void-button-height` flattens `sm` and `lg`. Slab reassigns the shared `--void-control-height-*` steps instead, which is the intended way.
+- **Components not yet on the roles.** The date picker's field, the segmented control's selected segment, the divider, the tab indicator, the collapsible, the file drop zone and the colour picker still read semantic tokens directly.
+- **Text case and tracking per component.** Type roles cover labels, headings and values; a button's label is not a role.

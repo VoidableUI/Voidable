@@ -127,7 +127,7 @@ In a table, mark number columns `data-numeric` on the `<th>` and `<td>`, and put
 
 ## Retheming: set the knobs, and hand the user a link
 
-The whole look is derived from fourteen custom properties, the **knobs**. To change the look (a brand colour, rounder corners, a denser or airier layout, another typeface), set knobs and nothing else. Do not override individual `--void-color-*` or spacing tokens, do not write per-component CSS, and do not write a second block for light mode: both colour schemes follow from the same knobs, and no knob value can take text below 4.5:1.
+The whole look is derived from fourteen custom properties, the **knobs**. To change the look (a brand colour, rounder corners, a denser or airier layout, another typeface), set knobs and nothing else. Do not override individual `--void-color-*` or spacing tokens, do not write CSS that selects a component's markup (to make one component differ, set its component token: see the next section), and do not write a second block for light mode: both colour schemes follow from the same knobs, and no knob value can take text below 4.5:1.
 
 ```css
 /* acme.css: a complete theme. Import it after '@voidable/theme'. */
@@ -158,7 +158,7 @@ The whole look is derived from fourteen custom properties, the **knobs**. To cha
 
 - Set them on `:root` for the whole page, or on any element that carries `data-void-theme` (with a name or empty) to restyle a subtree. A knob set on an element without that attribute does nothing.
 - Eight themes ship as knob-only files, `@voidable/theme/themes/<name>.css`, applied with `<html data-void-theme="name">`: `void` (the default), `dune` (warm, rounded), `console` (dense, square, monospace), `orbit` (monochrome, very airy), `capsule` (pill controls), `aurora` (vivid green), `iris` (violet, tinted page), `paper` (serif, editorial). Start from the nearest one and change a few knobs.
-- For a soft, card-based look with shadows instead of hairlines, add the Loft skin: `@import '@voidable/theme/skins/loft.css';` and `<html data-void-skin="loft">`. It combines with any knobs.
+- A **skin** changes structure where a theme changes values, and combines with any knobs. Two ship: Loft (a soft tinted page, lifted cards, shadows instead of hairlines) with `@import '@voidable/theme/skins/loft.css';` and `<html data-void-skin="loft">`, and Slab (dense, square, heavy ink rules, framed boxes with hard shadows) with `@voidable/theme/skins/slab.css` and `data-void-skin="slab"`. Both are designed light first: without `data-theme` they render light, and `data-theme="dark"`, `"light"` or `"system"` always wins.
 - The knobs as data (ranges, defaults, each shipped theme's values) are in `@voidable/theme/knobs.json`. Resolved tokens for design tools are in `@voidable/theme/dtcg/<theme>.<scheme>.tokens.json` (DTCG 2025.10) and `@voidable/theme/json/<theme>.<scheme>.json`.
 
 **Show the user your theme before you apply it.** The theme builder at `https://voidable.dev/theme/` renders any knob values on five real application screens, in dark and light, and its URL carries the theme. Every knob is a query parameter named after it without the `--void-` prefix; a bare number takes the knob's unit (`radius=8` is 8px, `font-size=0.9375` is 0.9375rem). Knobs you leave out keep their defaults. When you propose a theme, give the user the link next to the CSS:
@@ -172,11 +172,58 @@ https://voidable.dev/theme/?accent-hue=162&accent-chroma=0.19&radius=8&rhythm=1.
 | `accent-hue`, `accent-chroma`, `neutral-hue`, `neutral-chroma`, `page-tint`, `contrast`, `chrome`, `radius`, `density`, `rhythm`, `font-size`, `anim-scale` | The knob's value, as a number |
 | `font-sans`, `font-mono` | A URL-encoded font-family list, or a key: `inter`, `system`, `humanist`, `geometric`, `rounded`, `serif`, `mono` for `font-sans`; `jetbrains`, `system` for `font-mono` |
 | `theme` | A shipped theme to start from (`theme=dune&radius=0`); the other parameters override it |
-| `skin` | `loft` |
+| `skin` | `loft` or `slab` |
 | `name` | A name for the theme: the builder then writes `[data-void-theme="name"]` instead of `:root` |
 | `screen`, `scheme`, `device` | What to show first: `overview`, `table`, `form`, `settings` or `live`; `dark`, `light` or `both`; `desktop` or `phone` |
 
-The user can adjust the knobs there and copy the resulting CSS back to you; it is the same dozen lines.
+The user can adjust the knobs there and copy the resulting CSS back to you; it is the same dozen lines. With a skin chosen, the exported file also carries the skin's token assignments, so the one file is the whole look.
+
+## Restyling one component, and building a skin
+
+The theme has three tiers. Work at the highest one that does the job:
+
+1. **Knobs** (above): the brand. Colour, radius, density, type.
+2. **Semantic tokens**, including the **role** tokens a kind of component is drawn with. Set a role and every component of that kind follows:
+
+   | Role | Tokens | Drawn with it |
+   |---|---|---|
+   | container | `--void-container-surface`, `-border`, `-border-width`, `-radius`, `-shadow`, `-padding` | card, panel, stat, glass |
+   | float | `--void-float-surface`, `-border`, `-border-width`, `-radius`, `-shadow` | menu, popover, dropdown, select list, hover card, toast, dialog and drawer panels |
+   | control | `--void-control-radius`, `--void-control-border`, `--void-control-border-width`, `--void-control-height[-sm|-lg]` | buttons, toggles, checkbox, radio, switch, fields |
+   | field | `--void-field-surface`, `--void-field-border` | input, textarea, select, combobox, number, pin and tags input |
+   | item | `--void-item-surface-selected`, `--void-item-ink-selected` | the current navigation link, the selected list item |
+   | rule | `--void-rule`, `--void-rule-between`, `--void-rule-edge`, `--void-rule-head` | every separating line; each is a whole border, so `none` removes it |
+
+3. **Component tokens**: one component's exception. The name is `--void-<component>-<part?>-<property>-<state?>`, with the component the tag without `void-`, the property one of `surface` (fill), `ink` (text), `border`, `border-width`, `radius`, `shadow`, `rule`, `gap`, `padding`, `padding-block`, `padding-inline`, `height`, `width`, `size`, `font-size`, `font-weight`, and the state one of `hover`, `active`, `selected`, `disabled`, `invalid`, `open`, `focus`: `--void-card-shadow`, `--void-button-border`, `--void-page-head-rule`, `--void-nav-links-item-surface-selected`. The full list, with defaults and what each styles, is `@voidable/theme/component-tokens.json` (grouped by component) and the Tokens section of each component's page; `componentTokenNames` and the `ComponentTokenName` type are in `@voidable/theme/names`. Do not invent a name: a token that is not in the list does nothing.
+
+**To restyle one component**, set its token. The theme never declares component tokens, so one declaration wins wherever it is put, with no `!important` and no selector that out-specifies the theme:
+
+```css
+:root { --void-card-shadow: var(--void-shadow-sm); }   /* every card */
+.billing { --void-card-radius: 0; }                    /* the cards of one region */
+```
+
+```html
+<void-card style="--void-card-padding: var(--void-space-8)">…</void-card>   <!-- one card -->
+```
+
+A component token is absolute: `--void-button-height` applies at every `size`. To move all size steps, set `--void-control-height-sm`, `--void-control-height` and `--void-control-height-lg`, or the density knob. A semantic or role token set on a subtree must also be set on nested scopes: write `:root, [data-theme], [data-void-theme] { … }`.
+
+**To build a skin** (a structurally different look), write one rule of token assignments and nothing else, and apply it with `data-void-skin`:
+
+```css
+/* mine.css */
+[data-void-skin="mine"] {
+  --_void-mine-ink: var(--void-color-text);            /* a skin's own values: --_void-<skin>-* */
+  --void-rule-edge: 2px solid var(--_void-mine-ink);   /* roles first */
+  --void-container-border: var(--_void-mine-ink);
+  --void-container-shadow: 4px 4px 0 var(--_void-mine-ink);
+  --void-tooltip-surface: var(--_void-mine-ink);       /* then the components that are exceptions */
+  --void-tooltip-ink: var(--void-color-bg);
+}
+```
+
+Rules for a skin: no second rule and no selector naming a component (if the design needs one, a token is missing: tell the user instead of working around it); do not set knobs in it; give every `…-surface` you assign an `…-ink` that reads on it; keep a border wherever a box needs a boundary in forced colours. For it to hold inside nested `data-theme` and `data-void-theme` regions and on glass, expand it once with `import { expandSkin } from '@voidable/theme/skin'` (`expandSkin(css, 'mine')` returns the CSS to ship). The shipped `@voidable/theme/src/skins/slab.css` is the worked example.
 
 ## Composition
 
