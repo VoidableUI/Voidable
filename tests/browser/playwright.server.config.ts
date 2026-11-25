@@ -8,7 +8,9 @@
 // ready when its readyPath answers) and a project whose specs live in
 // server/<app>/ and whose baseURL points at it.
 import { defineConfig, devices } from '@playwright/test';
-import { apps } from './server/apps.mjs';
+import { apps as known } from './server/apps.mjs';
+
+const apps: Record<string, { port: number; readyPath: string }> = known;
 
 const names = (process.env.VOID_SERVER_APPS || Object.keys(apps).join(',')).split(',').map((s) => s.trim()).filter(Boolean);
 for (const n of names) if (!(n in apps)) throw new Error(`unknown server app "${n}"`);

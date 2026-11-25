@@ -4,6 +4,9 @@
   "type": "module",
   "license": "MIT",
   "description": "Real-browser test suite (Playwright) run against the built packages. See Browser tests in CONTRIBUTING.md.",
+  "scripts": {
+    "typecheck": "tsc -p ."
+  },
   "dependencies": {
     "@alpinejs/morph": "^3.17.5",
     "@hotwired/turbo": "^8.0.23",

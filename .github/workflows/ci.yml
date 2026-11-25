@@ -37,3 +37,90 @@ jobs:
           # `mise run` would otherwise install every tool in mise.toml (erlang,
           # elixir, ruby, php) that the step above deliberately skipped.
           MISE_TASK_RUN_AUTO_INSTALL: "false"
+
+  # Real-browser suite (tests/browser): Chromium, Firefox and WebKit against
+  # the built packages. Kept out of `mise run ci`, which needs no browsers.
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+
+      - uses: jdx/mise-action@5228313ee0372e111a38da051671ca30fc5a96db # v3.6.3
+        with:
+          install_args: "node npm:pnpm"
+        env:
+          MISE_NOT_FOUND_AUTO_INSTALL: "false"
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+
+      - name: Install browsers and their system libraries
+        run: mise run test:browser:install -- --with-deps
+        env:
+          MISE_TASK_RUN_AUTO_INSTALL: "false"
+
+      - name: Run the browser suite
+        run: mise run test:browser
+        env:
+          MISE_TASK_RUN_AUTO_INSTALL: "false"
+
+      - name: Upload traces and screenshots
+        if: failure()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: browser-test-results
+          path: |
+            tests/browser/test-results/
+            tests/browser/playwright-report/
+          retention-days: 14
+
+  # Server-backed suite (tests/browser/server): real apps started by
+  # Playwright on the built packages. The Rails demo needs Ruby.
+  server:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+
+      - uses: jdx/mise-action@5228313ee0372e111a38da051671ca30fc5a96db # v3.6.3
+        with:
+          install_args: "node npm:pnpm ruby"
+        env:
+          MISE_NOT_FOUND_AUTO_INSTALL: "false"
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-chromium-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+
+      - name: Cache the Rails demo's gems
+        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
+        with:
+          path: ~/.local/share/mise/installs/ruby/*/lib/ruby/gems
+          key: rails-demo-gems-${{ runner.os }}-${{ hashFiles('mise.toml', 'packages/hotwire/demo/Gemfile', 'packages/hotwire/gem/*.gemspec') }}
+
+      - name: Install Chromium and its system libraries
+        run: mise run test:browser:install -- --with-deps
+        env:
+          VOID_BROWSERS: chromium
+          MISE_TASK_RUN_AUTO_INSTALL: "false"
+
+      - name: Run the server-backed suite
+        run: mise run test:server
+        env:
+          MISE_TASK_RUN_AUTO_INSTALL: "false"
+
+      - name: Upload traces and screenshots
+        if: failure()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: server-test-results
+          path: |
+            tests/browser/test-results/server/
+            tests/browser/playwright-report/server/
+          retention-days: 14
