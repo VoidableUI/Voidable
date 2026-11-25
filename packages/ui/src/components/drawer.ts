@@ -13,6 +13,7 @@ import { ProjectionController } from '../projection.js';
  *
  * Name the drawer with `heading`; without one, set `aria-label` on the element and it is passed to the native dialog.
  *
+ * @attr {string} aria-label - Accessible name of the drawer when there is no `heading`; it is passed to the native `<dialog>`. Ignored while `heading` is set.
  * @fires {CustomEvent<{ reason: 'api' }>} void-open - The drawer opened.
  * @fires {CustomEvent<{ reason: 'escape' | 'outside' | 'close-button' | 'form' | 'parent' | 'api' }>} void-close - The
  * drawer is closing. Cancelable when the user caused it (`escape`, `outside`, `close-button`).
@@ -20,7 +21,9 @@ import { ProjectionController } from '../projection.js';
 export class VoidDrawer extends VoidElement {
   /** Whether the drawer is open. Set or remove the attribute (or property) to open and close it. */
   @property({ type: Boolean, reflect: true }) open = false;
+  /** Screen edge the drawer slides in from: `right` (default), `left`, `top` or `bottom`. */
   @property({ type: String, reflect: true }) side: 'left' | 'right' | 'top' | 'bottom' = 'right';
+  /** Width of a side drawer, or height of a top or bottom one: `sm`, `md` (default) or `lg`. */
   @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' = 'md';
   /** Visible title; also the drawer's accessible name. */
   @property({ type: String }) heading = '';

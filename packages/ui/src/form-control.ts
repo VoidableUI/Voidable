@@ -129,6 +129,8 @@ export declare class VoidNativeFormControl extends VoidFormControl {
   protected formSyncNative(): void;
   /** Hook: make the native control's default (reset target) equal `state`. */
   protected formWriteNativeDefault(state: unknown): void;
+  /** Writes the captured reset target again (native controls that arrived after it was written). */
+  protected formRewriteNativeDefault(): void;
   /** Hook: after a reset, mirror the native control's state into the host (no events). */
   protected formReadNative(): void;
   /** Hook: the native control that owns form association. */
@@ -163,6 +165,10 @@ const listenForReset = Symbol('listenForReset');
 
 function CoreFormControl<T extends Constructor<VoidElement>>(Base: T) {
   class Core extends Base {
+    /**
+     * Key the control's value is submitted under in the form's `FormData`. Without a name the control
+     * submits nothing.
+     */
     @property({ type: String, reflect: true }) name = '';
     @state() protected ancestorDisabled = false;
 
@@ -272,6 +278,12 @@ function CoreFormControl<T extends Constructor<VoidElement>>(Base: T) {
     protected formCaptureDefault(): void {
       this.#default = this.formSnapshot();
       this.#defaultCaptured = true;
+    }
+
+    /** The server rendered a new value: like a native control's value attribute, it becomes the reset default. */
+    protected override serverChangedCallback(names: ReadonlySet<string>): void {
+      super.serverChangedCallback(names);
+      if (names.has('value') || names.has('checked')) this.formCaptureDefault();
     }
 
     protected formValidity(): FormValidityResult | null {
@@ -410,6 +422,10 @@ function CoreFormControl<T extends Constructor<VoidElement>>(Base: T) {
  */
 export function NativeFormControl<T extends Constructor<VoidElement>>(Base: T) {
   class Native extends CoreFormControl(Base) {
+    /**
+     * `id` of a `<form>` elsewhere in the page that this control belongs to, as on a native control.
+     * Without it the control belongs to the form it sits inside.
+     */
     @property({ attribute: 'form' }) protected formAttr: string | null = null;
 
     #nativeDefault: unknown = undefined;
@@ -488,6 +504,14 @@ export function NativeFormControl<T extends Constructor<VoidElement>>(Base: T) {
       void state;
     }
 
+    /**
+     * Writes the captured reset target again, for native controls that arrived
+     * after it was written (children re-created by `innerHTML`, a framework).
+     */
+    protected formRewriteNativeDefault(): void {
+      if (!this.#nativeDefaultPending && this.#nativeDefault !== undefined) this.formWriteNativeDefault(this.#nativeDefault);
+    }
+
     protected formReadNative(): void {}
 
     protected formNativeControl(): HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement | null {
@@ -506,6 +530,10 @@ export function InternalsFormControl<T extends Constructor<VoidElement>>(Base: T
   class Internals extends CoreFormControl(Base) {
     static formAssociated = true;
 
+    /**
+     * The control must have a value before its form can be submitted. An empty control is invalid
+     * (`valueMissing`) and the browser reports it, as for a native field.
+     */
     @property({ type: Boolean, reflect: true }) required = false;
 
     get validity(): ValidityState | undefined {

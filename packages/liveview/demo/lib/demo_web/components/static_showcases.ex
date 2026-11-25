@@ -554,7 +554,7 @@ defmodule DemoWeb.StaticShowcases do
     </div>
     <div class="showcase-section">
       <h3>Outlined</h3>
-      <VoidableUI.Components.card heading="Integration Status" variant="outlined">
+      <VoidableUI.Components.card heading="Integration Status" variant="bordered">
         All connected services are operating normally.
       </VoidableUI.Components.card>
     </div>

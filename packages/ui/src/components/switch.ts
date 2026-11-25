@@ -5,11 +5,21 @@ import { InternalsFormControl, type FormSubmission } from '../form-control.js';
 
 /** On/off toggle for feature flags, notification preferences, and settings that take immediate effect. */
 export class VoidSwitch extends InternalsFormControl(VoidElement) {
+  /** Whether the switch is on. The attribute is the initial state and the form's reset target. */
   @property({ type: Boolean, reflect: true }) checked = false;
+  /**
+   * Stop the switch reacting and exclude it from the form submission. Also disabled by an enclosing
+   * `<fieldset disabled>`.
+   */
   @property({ type: Boolean, reflect: true }) disabled = false;
   /** Submitted under `name` while checked (like a native checkbox). */
   @property({ type: String, reflect: true }) value = 'on';
+  /**
+   * Status colour of the switch when on: `default`, `error`, `warning`, `caution`, `success`, `info`,
+   * `notice` or `highlight`.
+   */
   @property({ type: String, reflect: true }) color: 'default' | 'error' | 'warning' | 'caution' | 'success' | 'info' | 'notice' | 'highlight' = 'default';
+  /** Size step: `sm`, `md` (default) or `lg`. */
   @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' = 'md';
 
   connectedCallback(): void {

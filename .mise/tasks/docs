@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #MISE description="Start docs development server"
-#MISE depends=["theme:build"]
+#MISE depends=["build", "voidable:binary"]
 set -euo pipefail
 
 pnpm --filter docs dev

@@ -198,16 +198,40 @@ function arcAngles(circular: 'full' | 'semi' | 'triple'): {
   return { startAngle: (3 * PI) / 4, endAngle: (PI) / 4 + 2 * PI, totalSweep: (3 * PI) / 2 };
 }
 
+/**
+ * Radial gauge for a single value within a range (capacity, score, load) or for a few segments that share
+ * it, drawn in SVG as a full, semi or three-quarter arc with optional tick marks and colour zones. Set
+ * `value` between `min` and `max`, or give it `data.segments`; it has no children. The gauge is an image to
+ * assistive technology, so set `aria-label` and state the figure in the surrounding text.
+ */
 export class VoidGauge extends VoidElement {
 
+  /**
+   * Text shown with the value, such as `%` or `MB/s`. Centered under the number, or right after it with
+   * `unit-inline`.
+   */
   @property() unit = '';
+  /**
+   * The reading, between `min` and `max`, for a single-value gauge. For a gauge split into segments set
+   * `data.segments` instead.
+   */
   @property({ type: Number }) value = 0;
+  /** Value at the start of the arc. Defaults to 0. */
   @property({ type: Number }) min = 0;
+  /** Value at the end of the arc. Defaults to 100. */
   @property({ type: Number }) max = 100;
+  /** Width of the gauge in pixels. Defaults to 220; the height follows from `circular`. */
   @property({ type: Number, reflect: true }) size = 220;
+  /** Width of the arc stroke in pixels. Defaults to 14. */
   @property({ type: Number }) thickness = 14;
+  /** How much of a circle the arc covers: `triple` (270 degrees, default), `semi` (180) or `full` (360). */
   @property({ reflect: true }) circular: 'full' | 'semi' | 'triple' = 'triple';
+  /**
+   * How the arc is drawn: `filled` (default, solid), `outline` (tinted with a border) or `wireframe`
+   * (thin lines only).
+   */
   @property({ reflect: true }) variant: 'filled' | 'outline' | 'wireframe' = 'filled';
+  /** Print the reading in the centre. On by default; write `show-value="false"` to hide it. */
   @property({ type: Boolean, attribute: 'show-value', reflect: true, converter: defaultTrueBoolean }) showValue = true;
   /** When true, render the unit right next to the value (e.g. "75%").
       When false (default), render it on the line below. Short units like
@@ -236,6 +260,10 @@ export class VoidGauge extends VoidElement {
       endpoint marked. If max naturally falls on a step, this upgrades the
       classification to major. Set `tick-max="false"` to disable. */
   @property({ type: Boolean, attribute: 'tick-max', reflect: true, converter: defaultTrueBoolean }) tickMax = true;
+  /**
+   * Order of segments around the arc: `value` (default, largest first) or `manual` (the order of
+   * `data.segments`).
+   */
   @property({ attribute: 'segments-sort' }) segmentsSort: 'value' | 'manual' = 'value';
   /** Visible gap between segments. `false`/`0` = seamless. `true` = 1% of the
       filled arc consumed by gaps. Number = explicit percent. Higher % = clearer
@@ -253,6 +281,10 @@ export class VoidGauge extends VoidElement {
       },
     },
   }) gaps: boolean | number = false;
+  /**
+   * Accessible name of the gauge, such as `Disk usage`. The gauge is an image to assistive technology,
+   * so set it and put the figure in the text around it.
+   */
   @property({ attribute: 'aria-label' }) ariaLabel = '';
 
   /** Colour bands over the value range. Assign an array of `{ from, to, color }`;
@@ -261,6 +293,11 @@ export class VoidGauge extends VoidElement {
 
   private _data: GaugeData = {};
 
+  /**
+   * Segmented data: `{ segments: [{ name, value, color? }] }` splits the arc between named parts; the
+   * optional `value` is the headline reading. Property only: assign a new object to update the gauge and
+   * animate to it. For a single reading, set the `value` attribute instead.
+   */
   get data(): GaugeData { return this._data; }
   set data(next: GaugeData) {
     const prevData = this._data;

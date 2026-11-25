@@ -11,15 +11,43 @@ import { NativeFormControl } from '../form-control.js';
  * which `<void-field>` supplies.
  */
 export class VoidTextarea extends NativeFormControl(VoidElement) {
+  /**
+   * The text in the box. As an attribute it is the initial value (and the form's reset target); read or
+   * set the `value` property for the current text.
+   */
   @property({ type: String }) value = '';
+  /**
+   * Hint text shown while the box is empty. It is not a label: wrap the textarea in `void-field
+   * label="..."`.
+   */
   @property({ type: String, reflect: true }) placeholder = '';
+  /**
+   * Stop the box accepting input and exclude it from the form submission. Also disabled by an enclosing
+   * `<fieldset disabled>`.
+   */
   @property({ type: Boolean, reflect: true }) disabled = false;
+  /**
+   * Show the value but do not let the user edit it. Unlike `disabled`, a readonly box is focusable,
+   * selectable and still submitted.
+   */
   @property({ type: Boolean, reflect: true }) readonly = false;
+  /**
+   * The control must have a value before its form can be submitted. An empty control is invalid
+   * (`valueMissing`) and the browser reports it, as for a native field.
+   */
   @property({ type: Boolean, reflect: true }) required = false;
+  /** Key the value is submitted under in the form's `FormData`. Without a name the box submits nothing. */
   @property({ type: String, reflect: true }) name = '';
+  /** Visible height in lines of text. Defaults to 3. */
   @property({ type: Number, reflect: true }) rows = 3;
+  /** Which way the user may drag the corner handle: `vertical` (default), `both` or `none`. */
   @property({ type: String, reflect: true }) resize: 'none' | 'vertical' | 'both' = 'vertical';
+  /** Size step: `sm`, `md` (default) or `lg`; sets the text size and padding. */
   @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' = 'md';
+  /**
+   * Mark the box invalid: it gets the error styling and `aria-invalid`. The message itself is shown by
+   * the wrapping `void-field`, whose own `error` attribute sets this one.
+   */
   @property({ type: String, reflect: true }) error = '';
 
   /** Autofill hint forwarded to the native control (`autocomplete`), e.g. `current-password`, `one-time-code`, `email`. */

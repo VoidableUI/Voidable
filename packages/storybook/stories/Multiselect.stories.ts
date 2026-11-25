@@ -28,7 +28,7 @@ Pattern: select-only combobox with a multiselectable listbox. The trigger is the
   },
   argTypes: {
     disabled: { control: 'boolean' },
-    size: { control: 'select', options: ['sm', 'md', 'lg', 'xl', 'xxl'] },
+    size: { control: 'select', options: ['sm', 'md', 'lg'] },
     error: { control: 'text' },
     placeholder: { control: 'text' },
   },

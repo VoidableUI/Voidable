@@ -5,6 +5,10 @@ import { ProjectionController } from '../projection.js';
 
 /** Navigation trail for deep page hierarchies in dashboards, e-commerce category trees, and file browsers. */
 export class VoidBreadcrumbs extends VoidElement {
+  /**
+   * Character drawn between the crumbs. Defaults to `/`. Each child element becomes one crumb; the last
+   * is marked as the current page.
+   */
   @property({ type: String }) separator = '/';
 
   // Each child element becomes one list item: projected into the list, in an

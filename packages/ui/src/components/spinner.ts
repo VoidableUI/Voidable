@@ -4,7 +4,12 @@ import { VoidElement } from '../base.js';
 
 /** Indeterminate loading indicator for async operations, button loading states, and inline fetching. */
 export class VoidSpinner extends VoidElement {
+  /** Size step: `sm`, `md` (default) or `lg`. */
   @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' = 'md';
+  /**
+   * Text announced to screen readers while loading, and the spinner's accessible name. Defaults to
+   * `Loading`; say what is loading (`Loading orders`).
+   */
   @property({ type: String, reflect: true }) label: string = 'Loading';
 
   connectedCallback(): void {

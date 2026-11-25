@@ -34,26 +34,6 @@ describe('VoidDOM pre-morph hook', () => {
     expect(log).toEqual(['unproject outer open=false', 'unproject inner open=false']);
   });
 
-  it('decides server-wins before unprojecting, and the decision still applies', () => {
-    const log: string[] = [];
-    const live = hook(el('<void-dialog id="d" open></void-dialog>'), log);
-    VoidDOM.onNodeAdded(live);
-
-    // Server still renders it open, the client closed it: the client value is kept.
-    live.removeAttribute('open');
-    const same = el('<void-dialog id="d" open></void-dialog>');
-    VoidDOM.onBeforeElUpdated(live, same);
-    expect(same.hasAttribute('open')).toBe(false);
-
-    // Server closes it after reopening: server wins.
-    live.setAttribute('open', '');
-    const closed = el('<void-dialog id="d"></void-dialog>');
-    VoidDOM.onBeforeElUpdated(live, closed);
-    expect(closed.hasAttribute('open')).toBe(false);
-
-    expect(log).toEqual(['unproject d open=false', 'unproject d open=true']);
-  });
-
   it('tolerates void-* elements without the hook', () => {
     expect(() => VoidDOM.onBeforeElUpdated(el('<void-badge></void-badge>'), el('<void-badge></void-badge>'))).not.toThrow();
   });

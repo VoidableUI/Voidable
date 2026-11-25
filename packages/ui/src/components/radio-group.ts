@@ -5,19 +5,26 @@ import { NativeFormControl } from '../form-control.js';
 import { ProjectionController } from '../projection.js';
 import type { VoidRadio } from './radio.js';
 
-/** Mutually exclusive option group for plan pickers, survey questions, and preference settings. */
 /**
+ * Mutually exclusive option group for plan pickers, survey questions, and preference settings.
+ *
  * Form strategy: pass-through. `name` is forwarded to the child void-radio
  * elements, whose native radios submit; the group itself submits nothing.
  */
 export class VoidRadioGroup extends NativeFormControl(VoidElement) {
+  /** Name of the group, shown above the radios and used as its accessible name. */
   @property({ type: String }) label = '';
+  /**
+   * `value` of the selected radio. Set it to choose one; it is the initial selection and the form's
+   * reset target.
+   */
   @property({ type: String }) value = '';
   @property({ type: String, reflect: true }) name = '';
   /** Forwarded to the child radios: the browser then requires one of them to be checked. */
   @property({ type: Boolean, reflect: true }) required = false;
   /** Disables every radio in the group (like a fieldset). */
   @property({ type: Boolean, reflect: true }) disabled = false;
+  /** Lay the radios out in a `vertical` column (default) or a `horizontal` row. */
   @property({ type: String, reflect: true }) orientation: 'vertical' | 'horizontal' = 'vertical';
 
   // Consumer radios are projected into the options container; late radios get the
@@ -29,6 +36,8 @@ export class VoidRadioGroup extends NativeFormControl(VoidElement) {
       this._syncRequired();
       this._syncFormAttr();
       this._syncChecked();
+      // Radios that arrived late (a framework, children re-created by innerHTML) get the default checkedness.
+      this.formRewriteNativeDefault();
       // Lets a pending native default (formWriteNativeDefault) reach radios that arrived late.
       this.requestUpdate();
     },
@@ -73,6 +82,14 @@ export class VoidRadioGroup extends NativeFormControl(VoidElement) {
   }
 
   private _didSync = false;
+
+  /** A morph may have replaced or added radios that do not show the group's value, name or form yet. */
+  protected override morphedCallback(): void {
+    this._syncNames();
+    this._syncRequired();
+    this._syncFormAttr();
+    this._syncChecked();
+  }
 
   protected formSyncNative(): void {
     // Programmatic value sets reach the radios (and their native inputs) synchronously.

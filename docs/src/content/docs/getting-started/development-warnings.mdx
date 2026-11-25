@@ -27,6 +27,7 @@ Every message starts with `[voidable]`, names the element, says what is wrong, l
 | Tag nothing defines | <code>&lt;void-buton&gt; is not a Void UI element and nothing defines it, so it does nothing. Did you mean &lt;void-button&gt;?</code> |
 | Component not imported | <code>&lt;void-sidebar&gt; is a Void UI element but it is not defined, so it renders as an unstyled, inert tag. Import it with import "@voidable/ui/components/sidebar.js", import "@voidable/ui", or use "@voidable/ui/autoloader".</code> |
 | Listener for an event nothing dispatches | <code>Listener for "void-chnage" on &lt;void-input&gt;: no Void UI element dispatches an event with that name, so it never fires. Did you mean "void-change"?</code> |
+| A script keeps removing an attribute a component manages | <code>&lt;void-button&gt; role: something keeps removing this attribute, which the component manages; after 10 restorations within 1000 ms it is no longer put back. Find the script that removes it (a MutationObserver, a sanitiser) and leave the attribute alone.</code> |
 
 Each distinct problem is reported once per element type and attribute (or child tag, or event name), not once per instance, so a table of 500 rows with the same mistake produces one line.
 

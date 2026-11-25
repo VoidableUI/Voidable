@@ -49,12 +49,25 @@ type CalendarView = 'days' | 'months' | 'years';
 
 /** Date selection for booking flows, scheduling UIs, and form fields with locale-aware formatting and min/max constraints. */
 export class VoidCalendar extends InternalsFormControl(VoidElement) {
+  /**
+   * Selected date as an ISO `YYYY-MM-DD` string. Empty means no selection. It is what the form submits
+   * and the reset target; picking a day updates it and fires `void-change`.
+   */
   @property({ type: String, reflect: true }) value = '';
+  /** Earliest selectable date, as `YYYY-MM-DD`. Earlier days are disabled. */
   @property({ type: String }) min = '';
+  /** Latest selectable date, as `YYYY-MM-DD`. Later days are disabled. */
   @property({ type: String }) max = '';
+  /** Stop the calendar reacting and exclude the value from the form submission. */
   @property({ type: Boolean, reflect: true }) disabled = false;
+  /** Size step: `sm`, `md` (default) or `lg`. */
   @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' = 'md';
+  /**
+   * BCP 47 language tag for month and weekday names and the long date announced for each day, such as
+   * `de-DE`. Defaults to `en-US`.
+   */
   @property({ type: String }) locale = 'en-US';
+  /** Day the week starts on, as a number from 0 (Sunday, the default) to 6 (Saturday). Use 1 for Monday. */
   @property({ attribute: 'first-day', type: Number }) firstDay = 0;
 
   private _viewYear = 0;
@@ -541,16 +554,36 @@ declare global {
  * The calendar popup is closing. Cancelable when the user caused it.
  */
 export class VoidDatePicker extends InternalsFormControl(VoidElement) {
+  /**
+   * Selected date as an ISO `YYYY-MM-DD` string, whatever `format` shows. It is what the form submits
+   * and the reset target.
+   */
   @property({ type: String, reflect: true }) value = '';
+  /** Earliest selectable date, as `YYYY-MM-DD`. */
   @property({ type: String }) min = '';
+  /** Latest selectable date, as `YYYY-MM-DD`. */
   @property({ type: String }) max = '';
+  /** Stop the field and its calendar reacting and exclude the value from the form submission. */
   @property({ type: Boolean, reflect: true }) disabled = false;
+  /** Size step: `sm`, `md` (default) or `lg`. */
   @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' = 'md';
+  /**
+   * BCP 47 language tag for the calendar's month and weekday names, such as `de-DE`. Defaults to
+   * `en-US`. It does not change `format`.
+   */
   @property({ type: String }) locale = 'en-US';
+  /** Day the calendar week starts on, as a number from 0 (Sunday, the default) to 6 (Saturday). */
   @property({ attribute: 'first-day', type: Number }) firstDay = 0;
+  /** Whether the calendar dropdown is showing. Clicking the field or button toggles it; Escape closes it. */
   @property({ type: Boolean, reflect: true }) open = false;
+  /** Hint shown in the field while no date is chosen. Defaults to `Select date`. */
   @property({ type: String }) placeholder = 'Select date';
+  /**
+   * How the chosen date is written in the field, using `YYYY`, `MM` and `DD`. Defaults to `MM/DD/YYYY`.
+   * Display only; the value stays `YYYY-MM-DD`.
+   */
   @property({ type: String }) format = 'MM/DD/YYYY';
+  /** Status colour of the field: `default`, `error`, `warning`, `caution`, `success`, `info`, `notice` or `highlight`. */
   @property({ type: String, reflect: true }) color: 'default' | 'error' | 'warning' | 'caution' | 'success' | 'info' | 'notice' | 'highlight' = 'default';
 
   /** The calendar popup, controlled by the input (APG date picker combobox). */

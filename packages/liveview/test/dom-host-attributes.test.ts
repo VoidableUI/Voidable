@@ -23,7 +23,6 @@ describe('VoidDOM and host attributes', () => {
     document.body.innerHTML = '<void-button id="b" variant="filled">Go</void-button>';
     await settle();
     const btn = document.getElementById('b')!;
-    VoidDOM.onNodeAdded(btn);
     const to = server('<void-button id="b" variant="filled" tabindex="-1">Go</void-button>');
     VoidDOM.onBeforeElUpdated(btn, to);
     expect(to.getAttribute('role')).toBe('button');
@@ -38,7 +37,6 @@ describe('VoidDOM and host attributes', () => {
     document.body.innerHTML = '<void-switch id="s">N</void-switch>';
     await settle();
     const sw = document.getElementById('s')!;
-    VoidDOM.onNodeAdded(sw);
     VoidDOM.onBeforeElUpdated(sw, server('<void-switch id="s">N</void-switch>'));
     // The server renders aria-checked itself for the first time: a change, so it wins.
     const to = server('<void-switch id="s" aria-checked="mixed">N</void-switch>');

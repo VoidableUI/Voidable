@@ -1,0 +1,34 @@
+---
+// Related components and patterns. `note.related` is hand-written: a tag, or
+// "/path/|Label" for a guide or pattern. Parents and children from the
+// manifest are always included.
+import { loadComponentData } from '../../lib/component-data.mjs';
+
+interface Props { tag: string }
+const { tag } = Astro.props;
+const data = loadComponentData();
+const c = data.byTag.get(tag)!;
+const seen = new Set<string>();
+const items: { href: string; label: string; code: boolean }[] = [];
+const add = (href: string, label: string, code: boolean) => {
+  if (seen.has(href)) return;
+  seen.add(href);
+  items.push({ href, label, code });
+};
+for (const r of c.note.related ?? []) {
+  if (r.startsWith('/')) {
+    const [href, label] = r.split('|');
+    add(href, label ?? href, false);
+  } else if (data.byTag.has(r)) add(`/components/${r.replace(/^void-/, '')}/`, r, true);
+  else throw new Error(`${tag}: related "${r}" is neither a component nor a path`);
+}
+if (c.form) add('/guides/forms/', 'Forms guide', false);
+if (c.events.length) add('/guides/events/', 'Events guide', false);
+add('/guides/accessibility/', 'Accessibility guide', false);
+for (const t of [...c.parents, ...c.requires, ...c.children]) if (data.byTag.has(t)) add(`/components/${t.replace(/^void-/, '')}/`, t, true);
+---
+
+<ul>
+  {items.map((i) => <li><a href={i.href}>{i.code ? <code>{i.label}</code> : i.label}</a></li>)}
+  {c.story && <li><a href={`/storybook/?path=/docs/${c.story}--docs`}>Storybook stories for <code>{c.tag}</code></a></li>}
+</ul>

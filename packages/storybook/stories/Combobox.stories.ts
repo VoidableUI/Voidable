@@ -28,7 +28,7 @@ Pattern: combobox with listbox popup. The native input is the combobox; \`aria-a
   },
   argTypes: {
     disabled: { control: 'boolean' },
-    size: { control: 'select', options: ['sm', 'md', 'lg', 'xl', 'xxl'] },
+    size: { control: 'select', options: ['sm', 'md', 'lg'] },
     error: { control: 'text' },
     placeholder: { control: 'text' },
     value: { control: 'text' },

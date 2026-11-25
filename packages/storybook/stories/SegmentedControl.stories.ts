@@ -25,7 +25,7 @@ Pattern: radio group. One tab stop (the checked item, else the first enabled); s
   },
   argTypes: {
     value: { control: 'text' },
-    size: { control: 'select', options: ['sm', 'md', 'lg', 'xl', 'xxl'] },
+    size: { control: 'select', options: ['sm', 'md', 'lg'] },
     color: { control: 'select', options: ['default', 'error', 'warning', 'caution', 'success', 'info', 'notice', 'highlight'] },
   },
   render: (args) => html`

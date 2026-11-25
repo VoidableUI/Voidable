@@ -120,7 +120,7 @@ describe('attributes', () => {
   it('keys one warning per element type and attribute, not per value or instance', () => {
     const a = checkAttribute(table, make('<void-button color="primary"></void-button>'), 'color')!;
     const b = checkAttribute(table, make('<void-button color="other"></void-button>'), 'color')!;
-    const c = checkAttribute(table, make('<void-button size="xl"></void-button>'), 'size')!;
+    const c = checkAttribute(table, make('<void-button size="huge"></void-button>'), 'size')!;
     expect(keyOf(a)).toBe(keyOf(b));
     expect(keyOf(a)).not.toBe(keyOf(c));
   });

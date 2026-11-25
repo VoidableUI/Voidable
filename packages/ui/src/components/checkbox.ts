@@ -6,9 +6,25 @@ import { ProjectionController } from '../projection.js';
 
 /** Binary or indeterminate selection for form fields, data table row selection, and toggle-able settings. */
 export class VoidCheckbox extends NativeFormControl(VoidElement) {
+  /**
+   * Whether the box is checked. Updated when the user toggles it; the attribute is the initial state and
+   * the form's reset target.
+   */
   @property({ type: Boolean, reflect: true }) checked = false;
+  /**
+   * Stop the box reacting and exclude it from the form submission. Also disabled by a `<fieldset
+   * disabled>` or a disabled `void-checkbox-group` around it.
+   */
   @property({ type: Boolean, reflect: true }) disabled = false;
+  /**
+   * Show the mixed state (a dash) for a parent box whose children are partly checked. It is purely
+   * visual and cleared when the user toggles the box.
+   */
   @property({ type: Boolean, reflect: true }) indeterminate = false;
+  /**
+   * Key the value is submitted under while the box is checked. Within a `void-checkbox-group` the
+   * group's `name` is used.
+   */
   @property({ type: String, reflect: true }) name = '';
   /** Submitted under `name` while checked; defaults to "on" like a native checkbox. */
   @property({ type: String, reflect: true }) value = 'on';
@@ -17,7 +33,12 @@ export class VoidCheckbox extends NativeFormControl(VoidElement) {
    * validates; when it focuses that (aria-hidden) input, focus moves to the host.
    */
   @property({ type: Boolean, reflect: true }) required = false;
+  /**
+   * Status colour of the checked box: `default`, `error`, `warning`, `caution`, `success`, `info`,
+   * `notice` or `highlight`.
+   */
   @property({ type: String, reflect: true }) color: 'default' | 'error' | 'warning' | 'caution' | 'success' | 'info' | 'notice' | 'highlight' = 'default';
+  /** Size step: `sm`, `md` (default) or `lg`. */
   @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' = 'md';
 
   // Consumer label content stays on the host, after the rendered control.

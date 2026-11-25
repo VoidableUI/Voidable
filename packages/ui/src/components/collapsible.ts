@@ -5,8 +5,11 @@ import { ProjectionController } from '../projection.js';
 
 /** Simple expand/collapse panel for FAQ sections, spoiler text, and progressive disclosure of secondary content. */
 export class VoidCollapsible extends VoidElement {
+  /** Text of the button that opens and closes the panel. */
   @property({ type: String }) heading = '';
+  /** Whether the content is shown. Add the attribute to start open; it follows the user's toggling. */
   @property({ type: Boolean, reflect: true }) open = false;
+  /** Stop the panel from toggling. The heading button ignores clicks and Enter or Space. */
   @property({ type: Boolean, reflect: true }) disabled = false;
 
   private _id = Math.random().toString(36).slice(2);

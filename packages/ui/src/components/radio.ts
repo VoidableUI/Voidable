@@ -6,8 +6,17 @@ import { ProjectionController } from '../projection.js';
 
 /** Single mutually exclusive option for forms and surveys; typically used inside VoidRadioGroup. */
 export class VoidRadio extends NativeFormControl(VoidElement) {
+  /** Whether this radio is the selected one. Checking one radio unchecks the others with the same `name`. */
   @property({ type: Boolean, reflect: true }) checked = false;
+  /**
+   * Stop the radio reacting and exclude it from the form submission. Also disabled by a `<fieldset
+   * disabled>` or a disabled `void-radio-group` around it.
+   */
   @property({ type: Boolean, reflect: true }) disabled = false;
+  /**
+   * Group name: radios sharing a name in the same form are mutually exclusive, and it is the key the
+   * chosen value is submitted under. Within a `void-radio-group` the group's `name` is used.
+   */
   @property({ type: String, reflect: true }) name = '';
   /** Submitted under `name` while checked; defaults to "on" like a native radio. */
   @property({ type: String, reflect: true }) value = 'on';
@@ -16,7 +25,12 @@ export class VoidRadio extends NativeFormControl(VoidElement) {
    * which the browser validates as a group; focus moves to the host.
    */
   @property({ type: Boolean, reflect: true }) required = false;
+  /**
+   * Status colour of the selected radio: `default`, `error`, `warning`, `caution`, `success`, `info`,
+   * `notice` or `highlight`.
+   */
   @property({ type: String, reflect: true }) color: 'default' | 'error' | 'warning' | 'caution' | 'success' | 'info' | 'notice' | 'highlight' = 'default';
+  /** Size step: `sm`, `md` (default) or `lg`. */
   @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' = 'md';
 
   // Consumer label content stays on the host, after the rendered control.

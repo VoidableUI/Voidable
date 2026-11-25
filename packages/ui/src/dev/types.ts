@@ -32,7 +32,9 @@ export type WarningKind =
   | 'wrong-parent'
   | 'missing-child'
   | 'undefined-element'
-  | 'unknown-event';
+  | 'unknown-event'
+  /** A page script keeps removing an attribute a component manages on itself; the component stopped restoring it. */
+  | 'attribute-fight';
 
 /** One reported problem. */
 export interface DevWarning {

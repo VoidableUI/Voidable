@@ -4,9 +4,13 @@ import { VoidElement } from '../base.js';
 
 /** Rich text entry area for messaging UIs, comment boxes, and social post composers. */
 export class VoidComposeInput extends VoidElement {
+  /** The draft text. It is cleared after each send. */
   @property({ type: String }) value = '';
+  /** Hint shown while the box is empty. Defaults to `Type a message...`. */
   @property({ type: String, reflect: true }) placeholder = 'Type a message...';
+  /** Stop the box and the send button reacting. */
   @property({ type: Boolean, reflect: true }) disabled = false;
+  /** Maximum number of characters. 0 (the default) means no limit. */
   @property({ type: Number, reflect: true }) maxlength = 0;
 
   @query('.void-compose-input-textarea') private _textarea!: HTMLTextAreaElement;

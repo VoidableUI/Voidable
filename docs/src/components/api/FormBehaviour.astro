@@ -1,0 +1,43 @@
+---
+// How a control takes part in a <form>. The mechanism comes from the mixin the
+// manifest records (NativeFormControl or InternalsFormControl); what is
+// submitted is hand-written in component-notes.json and checked against the
+// control's formSubmission().
+import { loadComponentData } from '../../lib/component-data.mjs';
+import { inline } from '../../lib/inline.mjs';
+
+interface Props { tag: string }
+const { tag } = Astro.props;
+const c = loadComponentData().byTag.get(tag)!;
+const f = c.note.form ?? {};
+const hasName = c.attributes.some((a: any) => a.name === 'name');
+const hasRequired = c.attributes.some((a: any) => a.name === 'required');
+---
+
+<ul>
+  {f.submits && <li><strong>Submits:</strong> <Fragment set:html={inline(f.submits)} /></li>}
+  {
+    c.form === 'native' && (
+      <li>
+        <strong>How:</strong> the element renders one real native control and forwards <code>name</code>, <code>value</code>, <code>disabled</code>, <code>required</code> and <code>form</code> to it, so the browser submits and validates it. The host element itself is not form-associated, so the native control is the only entry in <code>form.elements</code> under that name.
+      </li>
+    )
+  }
+  {
+    c.form === 'internals' && (
+      <li>
+        <strong>How:</strong> the element is form-associated and submits through <code>ElementInternals</code>. The controls it renders inside carry no <code>name</code>, so nothing is submitted twice. A disabled control, or one inside a <code>&lt;fieldset disabled&gt;</code>, submits nothing.
+      </li>
+    )
+  }
+  {hasName && <li><strong>Name:</strong> the <code>name</code> attribute is the key in the submitted <code>FormData</code>. Without one the control submits nothing.</li>}
+  <li><strong>Reset:</strong> {f.reset ? <Fragment set:html={inline(f.reset)} /> : 'form.reset() puts the control back to the state it had when it first rendered (the value in your markup), and fires no void-change.'}</li>
+  {
+    f.validity ? (
+      <li><strong>Validity:</strong> <Fragment set:html={inline(f.validity)} /></li>
+    ) : hasRequired ? (
+      <li><strong>Validity:</strong> with <code>required</code>, an empty control is invalid (<code>valueMissing</code>): the form does not submit and the browser reports it, as for a native field.</li>
+    ) : null
+  }
+  <li><strong>Timing:</strong> the form value is updated before every <code>void-change</code> is dispatched, so a listener that calls <code>form.requestSubmit()</code> already sees the new value.</li>
+</ul>

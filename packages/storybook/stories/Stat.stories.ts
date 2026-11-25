@@ -21,7 +21,7 @@ const meta: Meta = {
     },
     size: {
       control: { type: 'select' },
-      options: ['sm', 'md', 'lg', 'xl', 'xxl'],
+      options: ['sm', 'md', 'lg'],
     },
     trend: {
       control: { type: 'select' },

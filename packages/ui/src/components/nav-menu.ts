@@ -5,7 +5,12 @@ import { ProjectionController } from '../projection.js';
 
 /** Horizontal navigation bar with dropdown sub-menus for site headers, application nav bars, and mega-menu layouts. */
 export class VoidNavMenu extends VoidElement {
+  /**
+   * `horizontal` (default) lays the items out in a row with Left and Right arrow keys; `vertical` stacks
+   * them.
+   */
   @property({ type: String, reflect: true }) orientation: 'horizontal' | 'vertical' = 'horizontal';
+  /** CSS width of the menu, such as `100%` or `40rem`. By default it is as wide as its items. */
   @property({ type: String, reflect: true }) width: string = '';
 
   connectedCallback(): void {
@@ -99,9 +104,22 @@ if (!customElements.get('void-nav-menu')) {
 
 /** Individual navigation item with optional dropdown content panel for sub-menus and mega-menu layouts. */
 export class VoidNavMenuItem extends VoidElement {
+  /**
+   * Whether the item's dropdown panel is showing. A click or Enter on the trigger toggles it, firing
+   * `void-open` or `void-close`.
+   */
   @property({ type: Boolean, reflect: true }) open = false;
+  /** Dim the item and stop it opening or navigating. */
   @property({ type: Boolean, reflect: true }) disabled = false;
+  /**
+   * Make the trigger a link to this URL. An item with an `href` navigates instead of opening a dropdown;
+   * leave it out for an item that has a panel.
+   */
   @property({ type: String }) href = '';
+  /**
+   * Mark the item as the current section: it is drawn with an underline. Set it on the item that matches
+   * the page.
+   */
   @property({ type: Boolean, reflect: true }) active = false;
 
   private _openTimerId: ReturnType<typeof setTimeout> | undefined;

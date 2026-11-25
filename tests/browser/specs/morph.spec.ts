@@ -6,7 +6,7 @@
 // as a fresh render of the same markup would be, keep the client's state
 // while the server repeats itself, let the server win when it changes, keep
 // element identity and focus, and leak nothing.
-import { test, expect, expectedFailure, load, settle, type Page } from '../helpers/test';
+import { test, expect, load, settle, type Page } from '../helpers/test';
 import { allComponents, initialState, projectionApp, signupForm, type AppState } from '../helpers/markup';
 
 const ENGINES = ['turbo', 'morphdom', 'alpine'] as const;
@@ -80,7 +80,6 @@ for (const engine of ENGINES) {
     });
 
     test('client state is kept while the server repeats itself', async ({ page }) => {
-      if (engine === 'alpine') expectedFailure('untracked:livewire-open-state', 'the Livewire hooks preserve only value and checked, so a morph that repeats the server markup closes a dialog the user opened');
       await render(page, projectionApp(initialState));
       await page.locator('#s select').selectOption('c');
       await page.locator('#ck-a').click();
@@ -99,7 +98,6 @@ for (const engine of ENGINES) {
     });
 
     test('the server wins when it changes what it renders', async ({ page }) => {
-      if (engine === 'alpine') expectedFailure('untracked:livewire-first-change-lost', 'the Livewire hooks record server state only during a morph, so the first server change after page load is taken for a repeat and dropped');
       await render(page, projectionApp(initialState));
       await page.locator('#s select').selectOption('c');
       await page.locator('#ck-b').click(); // the client unchecks b

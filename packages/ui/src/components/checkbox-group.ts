@@ -5,8 +5,9 @@ import { NativeFormControl } from '../form-control.js';
 import { ProjectionController } from '../projection.js';
 import type { VoidCheckbox } from './checkbox.js';
 
-/** Grouped multi-option selection for preference forms, filter panels, and permission editors. */
 /**
+ * Grouped multi-option selection for preference forms, filter panels, and permission editors.
+ *
  * Form strategy: pass-through. `name` is forwarded to the child void-checkbox
  * elements, whose native checkboxes submit one entry per checked box; the
  * group itself submits nothing and each checkbox resets itself. `required`
@@ -14,10 +15,16 @@ import type { VoidCheckbox } from './checkbox.js';
  * enabled checkbox's native input. `disabled` and `form` are forwarded.
  */
 export class VoidCheckboxGroup extends NativeFormControl(VoidElement) {
+  /** Name of the group, shown above the boxes and used as its accessible name. */
   @property({ type: String, reflect: true }) label = '';
+  /** Lay the checkboxes out in a `vertical` column (default) or a `horizontal` row. */
   @property({ type: String, reflect: true }) orientation: 'vertical' | 'horizontal' = 'vertical';
   /** Field name forwarded to every child checkbox. */
   @property({ type: String, reflect: true }) name = '';
+  /**
+   * The control must have a value before its form can be submitted. An empty control is invalid
+   * (`valueMissing`) and the browser reports it, as for a native field.
+   */
   @property({ type: Boolean, reflect: true }) required = false;
   /** Disables every checkbox in the group (like a fieldset). */
   @property({ type: Boolean, reflect: true }) disabled = false;
@@ -93,6 +100,13 @@ export class VoidCheckboxGroup extends NativeFormControl(VoidElement) {
     if (changed.has('required')) {
       this._syncRequiredValidity();
     }
+  }
+
+  /** A morph may have replaced or added checkboxes that do not carry the group's name, form or validity yet. */
+  protected override morphedCallback(): void {
+    this._syncNames();
+    this._syncFormAttr();
+    this._syncRequiredValidity();
   }
 
   private _boxes(): VoidCheckbox[] {
