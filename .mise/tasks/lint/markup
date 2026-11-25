@@ -10,12 +10,14 @@ fi
 
 # Findings listed in .voidable/markup-allowlist.txt are open product decisions
 # (see issue #58); anything else, or a decision's usages growing, fails.
-tools/voidable/build/voidable check \
-  --allowlist .voidable/markup-allowlist.txt \
+# Only tracked files are checked, so build output and framework caches
+# (compiled Blade views, node_modules, _build) cannot fail the lint.
+git ls-files -z -- \
   docs/src \
   packages/storybook/stories \
   examples \
   packages/hotwire \
   packages/liveview/hex \
-  packages/alpine/laravel
+  packages/alpine/laravel \
+  | xargs -0 tools/voidable/build/voidable check --allowlist .voidable/markup-allowlist.txt
 echo "markup ok"
