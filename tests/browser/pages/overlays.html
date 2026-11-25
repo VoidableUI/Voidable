@@ -3,51 +3,74 @@
   <button id="before">before</button>
 
   <void-button id="open-dlg" onclick="document.getElementById('dlg').open = true">Open dialog</void-button>
-  <void-dialog id="dlg" heading="Edit profile">
-    <p class="dlg-content">Dialog body</p>
-    <input id="dlg-input" aria-label="Name" />
-    <void-button id="dlg-ok">OK</void-button>
+  <void-dialog id="dlg">
+    <void-dialog-title>Edit profile</void-dialog-title>
+    <void-dialog-body>
+      <p class="dlg-content">Dialog body</p>
+      <input id="dlg-input" aria-label="Name" />
+    </void-dialog-body>
+    <void-dialog-actions>
+      <void-button id="dlg-ok">OK</void-button>
+    </void-dialog-actions>
   </void-dialog>
 
   <void-button id="open-dlg-nc" onclick="document.getElementById('dlg-nc').open = true">Open fixed dialog</void-button>
-  <void-dialog id="dlg-nc" heading="Not closable" closable="false">
-    <p class="nc-content">Cannot close</p>
-    <button id="dlg-nc-btn">inside</button>
+  <void-dialog id="dlg-nc" closable="false">
+    <void-dialog-title>Not closable</void-dialog-title>
+    <void-dialog-body>
+      <p class="nc-content">Cannot close</p>
+    </void-dialog-body>
+    <void-dialog-actions>
+      <button id="dlg-nc-btn">inside</button>
+    </void-dialog-actions>
   </void-dialog>
 
   <void-button id="open-drw" onclick="document.getElementById('drw').open = true">Open drawer</void-button>
-  <void-drawer id="drw" heading="Drawer">
-    <p class="drw-content">Drawer body</p>
-    <button id="drw-btn">drawer button</button>
-    <void-button id="open-nested" onclick="document.getElementById('nested-dlg').open = true">Open nested dialog</void-button>
-    <void-dialog id="nested-dlg" heading="Nested dialog">
-      <p class="nd-content">Nested body</p>
-      <void-dropdown-menu id="nested-dd">
-        <button slot="trigger" id="nested-dd-t">Nested menu</button>
-        <void-dropdown-menu-item>N one</void-dropdown-menu-item>
-        <void-dropdown-menu-item>N two</void-dropdown-menu-item>
-      </void-dropdown-menu>
-    </void-dialog>
+  <void-drawer id="drw">
+    <void-drawer-title>Drawer</void-drawer-title>
+    <void-drawer-body>
+      <p class="drw-content">Drawer body</p>
+      <button id="drw-btn">drawer button</button>
+      <void-button id="open-nested" onclick="document.getElementById('nested-dlg').open = true">Open nested dialog</void-button>
+      <void-dialog id="nested-dlg">
+        <void-dialog-title>Nested dialog</void-dialog-title>
+        <void-dialog-body>
+          <p class="nd-content">Nested body</p>
+          <void-dropdown-menu id="nested-dd">
+            <void-dropdown-menu-trigger><button id="nested-dd-t">Nested menu</button></void-dropdown-menu-trigger>
+            <void-dropdown-menu-content>
+              <void-dropdown-menu-item>N one</void-dropdown-menu-item>
+              <void-dropdown-menu-item>N two</void-dropdown-menu-item>
+            </void-dropdown-menu-content>
+          </void-dropdown-menu>
+        </void-dialog-body>
+      </void-dialog>
+    </void-drawer-body>
   </void-drawer>
 
   <void-button id="open-drw-nc" onclick="document.getElementById('drw-nc').open = true">Open fixed drawer</void-button>
-  <void-drawer id="drw-nc" heading="Fixed drawer" closable="false">
-    <p class="drw-nc-content">stays</p>
-    <button id="drw-nc-btn">x</button>
+  <void-drawer id="drw-nc" closable="false">
+    <void-drawer-title>Fixed drawer</void-drawer-title>
+    <void-drawer-body>
+      <p class="drw-nc-content">stays</p>
+    </void-drawer-body>
+    <void-drawer-actions>
+      <button id="drw-nc-btn">x</button>
+    </void-drawer-actions>
   </void-drawer>
 
   <div style="display: flex; gap: 6rem; margin: 4rem 0; flex-wrap: wrap; align-items: flex-start">
-    <void-popover id="pop-start" align="start"><button slot="trigger" id="pop-start-t">Pop start</button><div class="pc" style="width: 240px">start content <button id="pop-start-in">in pop</button></div></void-popover>
-    <void-popover id="pop-center" align="center"><button slot="trigger" id="pop-center-t">Pop center</button><div class="pc" style="width: 240px">center content</div></void-popover>
-    <void-popover id="pop-end" align="end"><button slot="trigger" id="pop-end-t">Pop end</button><div class="pc" style="width: 240px">end content</div></void-popover>
-    <void-popover id="pop-default"><button slot="trigger" id="pop-default-t">Pop default</button><div class="pc" style="width: 240px">default content</div></void-popover>
+    <void-popover id="pop-start" align="start"><void-popover-trigger><button id="pop-start-t">Pop start</button></void-popover-trigger><void-popover-content><div class="pc" style="width: 240px">start content <button id="pop-start-in">in pop</button></div></void-popover-content></void-popover>
+    <void-popover id="pop-center" align="center"><void-popover-trigger><button id="pop-center-t">Pop center</button></void-popover-trigger><void-popover-content><div class="pc" style="width: 240px">center content</div></void-popover-content></void-popover>
+    <void-popover id="pop-end" align="end"><void-popover-trigger><button id="pop-end-t">Pop end</button></void-popover-trigger><void-popover-content><div class="pc" style="width: 240px">end content</div></void-popover-content></void-popover>
+    <void-popover id="pop-default"><void-popover-trigger><button id="pop-default-t">Pop default</button></void-popover-trigger><void-popover-content><div class="pc" style="width: 240px">default content</div></void-popover-content></void-popover>
   </div>
 
   <div style="display: flex; gap: 4rem; margin: 2rem 0; align-items: flex-start">
-    <void-hover-card id="hc" open-delay="100" close-delay="100"><a href="#hc" slot="trigger" id="hc-t">Hover me</a><div class="hcc">Hover card content <a href="#x" id="hc-link">link in card</a></div></void-hover-card>
-    <void-dropdown-menu id="dd"><button slot="trigger" id="dd-t">Menu</button><void-dropdown-menu-item id="dd-1">One</void-dropdown-menu-item><void-dropdown-menu-item id="dd-2">Two</void-dropdown-menu-item><void-dropdown-menu-item id="dd-3" disabled>Three</void-dropdown-menu-item></void-dropdown-menu>
-    <void-dropdown-menu id="dd2"><button id="dd2-t">Menu without slot</button><void-dropdown-menu-item id="dd2-1">Alpha</void-dropdown-menu-item><void-dropdown-menu-item id="dd2-2">Beta</void-dropdown-menu-item></void-dropdown-menu>
-    <void-tooltip id="tt" text="Tooltip text" delay="50"><button id="tt-t">Tip target</button></void-tooltip>
+    <void-hover-card id="hc" open-delay="100" close-delay="100"><void-hover-card-trigger><a href="#hc" id="hc-t">Hover me</a></void-hover-card-trigger><void-hover-card-content><div class="hcc">Hover card content <a href="#x" id="hc-link">link in card</a></div></void-hover-card-content></void-hover-card>
+    <void-dropdown-menu id="dd"><void-dropdown-menu-trigger><button id="dd-t">Menu</button></void-dropdown-menu-trigger><void-dropdown-menu-content><void-dropdown-menu-item id="dd-1">One</void-dropdown-menu-item><void-dropdown-menu-item id="dd-2">Two</void-dropdown-menu-item><void-dropdown-menu-item id="dd-3" disabled>Three</void-dropdown-menu-item></void-dropdown-menu-content></void-dropdown-menu>
+    <void-dropdown-menu id="dd2"><void-dropdown-menu-trigger><button id="dd2-t">Menu without slot</button></void-dropdown-menu-trigger><void-dropdown-menu-content><void-dropdown-menu-item id="dd2-1">Alpha</void-dropdown-menu-item><void-dropdown-menu-item id="dd2-2">Beta</void-dropdown-menu-item></void-dropdown-menu-content></void-dropdown-menu>
+    <void-tooltip id="tt" delay="50"><void-tooltip-trigger><button id="tt-t">Tip target</button></void-tooltip-trigger><void-tooltip-content>Tooltip text</void-tooltip-content></void-tooltip>
   </div>
 
   <void-toast-container id="tc" position="bottom-right"></void-toast-container>

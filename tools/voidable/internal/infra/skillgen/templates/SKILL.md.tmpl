@@ -229,16 +229,27 @@ Rules for a skin: no second rule and no selector naming a component (if the desi
 
 Elements render into the light DOM: there is no shadow root, so your own CSS applies and children stay in the document.
 
-- **Children are plain children.** Put content between the tags. Families work through nesting: `<void-tabs>` holds `<void-tab-panel tab="a" label="A">` children (the `value` of the tabs selects the active `tab`), `<void-accordion>` holds `<void-accordion-item>`, `<void-dropdown-menu>` holds `<void-dropdown-menu-item>`, `<void-radio-group>` holds `<void-radio>`.
-- **`slot="trigger"`.** `<void-dropdown-menu>`, `<void-popover>` and `<void-hover-card>` take the element that opens them as a child marked `slot="trigger"` (without one, the first child element is used). Everything else is the content:
+- **Children are plain children.** Put content between the tags; nothing is moved or wrapped.
+- **Explicit parts.** Components with regions are written with one child element per region, named `<component>-<part>`: `-trigger`, `-content`, `-title`, `-description`, `-body`, `-actions`, `-header`, `-footer`, `-item`, `-list`. The parts are plain `void-*` tags with no JavaScript of their own; the component finds them and wires up roles, ids and ARIA. Each component reference lists its parts and the order they go in, and `voidable check` reports a missing part, a stray child and the old forms with the correct markup:
 
   ```html
   <void-popover position="bottom" align="start">
-    <void-button slot="trigger">Details</void-button>
-    <p>Anchored content.</p>
+    <void-popover-trigger><void-button>Details</void-button></void-popover-trigger>
+    <void-popover-content><p>Anchored content.</p></void-popover-content>
   </void-popover>
+
+  <void-tabs value="a">
+    <void-tabs-list>
+      <void-tabs-trigger value="a">Overview</void-tabs-trigger>
+      <void-tabs-trigger value="b">Activity</void-tabs-trigger>
+    </void-tabs-list>
+    <void-tabs-content value="a">...</void-tabs-content>
+    <void-tabs-content value="b">...</void-tabs-content>
+  </void-tabs>
   ```
 
+  A trigger part wraps exactly one element (the button or link). The dialog and drawer take `-title`, `-description`, `-body` and `-actions`; the card takes `-header` (with `-title` and `-description`), `-body` and `-footer`; the alert takes `-title` and `-description`; an accordion item takes `-trigger` and `-content`; the dropdown menu puts its `<void-dropdown-menu-item>` children in `-content`. Settings that are not regions stay attributes (`size`, `position`, `open`, `value`).
+- **Families.** `<void-accordion>` holds `<void-accordion-item>`, `<void-radio-group>` holds `<void-radio>`.
 - **Options.** `<void-select>` takes native `<option>` children. `<void-multiselect>` and `<void-combobox>` take `<void-option>` children. Never put `<void-option>` inside `<void-select>`.
 - **Self-closing.** In HTML-like templates (plain HTML, ERB, HEEx outside components, Blade, Astro) write `<void-input></void-input>`: the parser ignores the slash of `<void-input />` and swallows what follows into it. JSX, Vue, Svelte and Solid templates may self-close.
 
@@ -273,7 +284,8 @@ Components communicate with `CustomEvent`s named `void-*` that bubble and carry 
 - `variant="primary"`, `variant="solid"`, `color="primary"` or `color="danger"` on buttons and badges: use the listed values (`color` is `default`, `error`, `warning`, `success`, `info`, `notice`).
 - `label="..."` on an input, textarea or select: wrap the control in `<void-field label="...">`.
 - `<void-option>` in `<void-select>`: use native `<option>`.
-- A `void-tab` element or hand-made tab buttons: tabs are `<void-tab-panel tab="..." label="...">`.
+- A `void-tab` element, hand-made tab buttons or `slot="trigger"`: write the explicit parts (`void-tabs-trigger`, `void-popover-trigger`, ...).
+- `heading` on a dialog, drawer, card or accordion item, `text` on a tooltip: the title or hint is a part (`void-dialog-title`, `void-tooltip-content`).
 - `showvalue`, `collapsedwidth` and other lowercased spellings: the attributes are kebab-case.
 - `disabled="false"`, `checked="false"`, `open="false"`: attribute present means on.
 - `<void-input />` in HTML-like templates: write the closing tag.

@@ -11,11 +11,13 @@ function createElement(): VoidHoverCard {
 
 function createWithChildren(): VoidHoverCard {
   const el = createElement();
+  const part = document.createElement('void-hover-card-trigger');
   const trigger = document.createElement('button');
   trigger.textContent = 'Hover me';
-  const content = document.createElement('div');
+  part.appendChild(trigger);
+  const content = document.createElement('void-hover-card-content');
   content.textContent = 'Card content';
-  el.appendChild(trigger);
+  el.appendChild(part);
   el.appendChild(content);
   return el;
 }
@@ -94,22 +96,20 @@ describe('VoidHoverCard', () => {
       el.remove();
     });
 
-    it('creates .void-hover-card-trigger wrapper', () => {
-      expect(el.querySelector('.void-hover-card-trigger')).not.toBeNull();
+    it('moves nothing: the trigger and content parts stay as written', () => {
+      expect([...el.children].map((c) => c.localName)).toEqual(['void-hover-card-trigger', 'void-hover-card-content']);
+      expect(el.querySelector('void-hover-card-trigger > button')).not.toBeNull();
+      expect(el.querySelector('void-hover-card-content')!.textContent).toBe('Card content');
     });
 
-    it('creates .void-hover-card-body element', () => {
-      expect(el.querySelector('.void-hover-card-body')).not.toBeNull();
-    });
-
-    it('moves content nodes into .void-hover-card-body', () => {
-      const body = el.querySelector('.void-hover-card-body');
-      expect(body?.textContent).toContain('Card content');
-    });
-
-    it('keeps trigger inside .void-hover-card-trigger wrapper', () => {
-      const wrapper = el.querySelector('.void-hover-card-trigger');
-      expect(wrapper?.querySelector('button')).not.toBeNull();
+    it('gives the content an id and keeps a server id', async () => {
+      expect(el.querySelector('void-hover-card-content')!.id).not.toBe('');
+      const other = createElement();
+      other.innerHTML = '<void-hover-card-trigger><a href="#">x</a></void-hover-card-trigger><void-hover-card-content id="srv">y</void-hover-card-content>';
+      document.body.appendChild(other);
+      await other.updateComplete;
+      expect(other.querySelector('void-hover-card-content')!.id).toBe('srv');
+      other.remove();
     });
   });
 
@@ -152,8 +152,8 @@ describe('VoidHoverCard', () => {
       vi.useFakeTimers();
       const events: CustomEvent[] = [];
       el.addEventListener('void-open', (e) => events.push(e as CustomEvent));
-      const trigger = el.querySelector('.void-hover-card-trigger') as HTMLElement;
-      trigger.dispatchEvent(new MouseEvent('mouseenter', { bubbles: true }));
+      const trigger = el.querySelector('void-hover-card-trigger > button') as HTMLElement;
+      trigger.dispatchEvent(new MouseEvent('mouseover', { bubbles: true }));
       vi.runAllTimers();
       await el.updateComplete;
       expect(events).toHaveLength(1);
@@ -165,11 +165,11 @@ describe('VoidHoverCard', () => {
       vi.useFakeTimers();
       const events: CustomEvent[] = [];
       el.addEventListener('void-close', (e) => events.push(e as CustomEvent));
-      const trigger = el.querySelector('.void-hover-card-trigger') as HTMLElement;
-      trigger.dispatchEvent(new MouseEvent('mouseenter', { bubbles: true }));
+      const trigger = el.querySelector('void-hover-card-trigger > button') as HTMLElement;
+      trigger.dispatchEvent(new MouseEvent('mouseover', { bubbles: true }));
       vi.runAllTimers();
       await el.updateComplete;
-      trigger.dispatchEvent(new MouseEvent('mouseleave', { bubbles: true }));
+      trigger.dispatchEvent(new MouseEvent('mouseout', { bubbles: true, relatedTarget: document.body }));
       vi.runAllTimers();
       await el.updateComplete;
       expect(events).toHaveLength(1);
@@ -227,13 +227,14 @@ describe('VoidHoverCard', () => {
     });
 
     it('puts no popup ARIA on the trigger: the card is supplementary, not a dialog', () => {
-      const wrapper = el.querySelector('.void-hover-card-trigger')!;
-      expect(wrapper.hasAttribute('aria-haspopup')).toBe(false);
-      expect(el.querySelector('.void-hover-card-body')!.hasAttribute('role')).toBe(false);
+      const control = el.querySelector('void-hover-card-trigger > button')!;
+      expect(control.hasAttribute('aria-haspopup')).toBe(false);
+      expect(control.hasAttribute('aria-expanded')).toBe(false);
+      expect(el.querySelector('void-hover-card-content')!.hasAttribute('role')).toBe(false);
     });
 
     it('the closed card is hidden, so links inside it cannot take focus', async () => {
-      const body = el.querySelector<HTMLElement>('.void-hover-card-body')!;
+      const body = el.querySelector<HTMLElement>('void-hover-card-content')!;
       if (typeof body.showPopover === 'function') expect(body.getAttribute('popover')).toBe('manual');
       else expect(body.hidden).toBe(true);
       el.open = true;

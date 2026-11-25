@@ -14,15 +14,18 @@ void-tabs {
   font-family: var(--void-font-sans);
 }
 
-.void-tabs-list {
+void-tabs-list {
   display: flex;
   border-bottom: var(--void-tabs-rule, var(--void-rule-head));
   gap: var(--void-space-2);
   order: -1;
 }
 
-.void-tabs-tab {
-  appearance: none;
+/* A tab: the trigger part itself is the control (role="tab", a tab stop). */
+void-tabs-trigger {
+  display: inline-flex;
+  align-items: center;
+  box-sizing: border-box;
   background: none;
   border: none;
   border-bottom: 2px solid transparent;
@@ -38,28 +41,37 @@ void-tabs {
               border-bottom-color var(--void-duration-fast) var(--void-ease-in-out);
   margin-bottom: -1px;
   outline: none;
+  user-select: none;
 }
 
-.void-tabs-tab:hover {
+void-tabs-trigger:hover {
   color: var(--void-color-text);
 }
 
-.void-tabs-tab:focus-visible {
+void-tabs-trigger:focus-visible {
   outline: var(--void-focus-ring-width) solid var(--void-focus-ring-color);
   outline-offset: var(--void-focus-ring-offset);
 }
 
-.void-tabs-tab[aria-selected="true"] {
+void-tabs-trigger[disabled] {
+  opacity: 0.5;
+  cursor: default;
+  pointer-events: none;
+}
+
+/* [active] is written by <void-tabs>, and may be rendered by the server so the
+   selected tab shows before the script loads. */
+void-tabs-trigger[active] {
   color: var(--void-color-text);
   border-bottom-color: var(--void-color-accent);
 }
 
-void-tab-panel {
+void-tabs-content {
   display: none;
   padding-top: var(--void-gap-inside);
 }
 
-void-tab-panel[active] {
+void-tabs-content[active] {
   display: block;
 }
 

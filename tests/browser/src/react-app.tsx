@@ -11,15 +11,21 @@ import {
   Button,
   Checkbox,
   Dialog,
+  DialogBody,
+  DialogTitle,
   DropdownMenu,
+  DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuTrigger,
   Input,
   Radio,
   RadioGroup,
   Select,
   Switch,
-  TabPanel,
   Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
   Textarea,
 } from '@voidable/ui-react';
 
@@ -87,29 +93,43 @@ function App() {
       <Button id="r-submit" type="submit" disabled={disabled} onVoidClick={log('click')}>
         Save {label}
       </Button>
-      <Dialog id="r-dlg" open={open} heading={`Dialog ${dlgItems.length}`} onVoidClose={log('close', () => setOpen(false))}>
-        {dlgItems.map((i) => (
-          <p key={i} className="di">
-            {i}
-          </p>
-        ))}
-        <span id="r-dtext">{label}</span>
+      <Dialog id="r-dlg" open={open} onVoidClose={log('close', () => setOpen(false))}>
+        <DialogTitle>{`Dialog ${dlgItems.length}`}</DialogTitle>
+        <DialogBody>
+          {dlgItems.map((i) => (
+            <p key={i} className="di">
+              {i}
+            </p>
+          ))}
+          <span id="r-dtext">{label}</span>
+        </DialogBody>
       </Dialog>
       <DropdownMenu id="r-dd">
-        <button type="button" slot="trigger" id="r-ddt">
-          Menu {label}
-        </button>
-        {opts.map((o) => (
-          <DropdownMenuItem key={o} id={`r-ddi-${o}`} onVoidSelect={log(`select-${o}`)}>
-            Item {o}
-          </DropdownMenuItem>
-        ))}
+        <DropdownMenuTrigger>
+          <button type="button" id="r-ddt">
+            Menu {label}
+          </button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent>
+          {opts.map((o) => (
+            <DropdownMenuItem key={o} id={`r-ddi-${o}`} onVoidSelect={log(`select-${o}`)}>
+              Item {o}
+            </DropdownMenuItem>
+          ))}
+        </DropdownMenuContent>
       </DropdownMenu>
       <Tabs id="r-tabs" value={tab} onVoidChange={log('tab', (e) => setTab(e.detail.value))}>
+        <TabsList>
+          {tabs.map((t) => (
+            <TabsTrigger key={t} value={t}>
+              {`Tab ${t}`}
+            </TabsTrigger>
+          ))}
+        </TabsList>
         {tabs.map((t) => (
-          <TabPanel key={t} tab={t} label={`Tab ${t}`}>
+          <TabsContent key={t} value={t}>
             Panel {t} {label}
-          </TabPanel>
+          </TabsContent>
         ))}
       </Tabs>
     </form>

@@ -38,10 +38,12 @@ type Story = StoryObj;
 export const Default: Story = {
   render: () => html`
     <void-dropdown-menu>
-      <void-button slot="trigger">Options</void-button>
-      <void-dropdown-menu-item>Edit</void-dropdown-menu-item>
-      <void-dropdown-menu-item>Duplicate</void-dropdown-menu-item>
-      <void-dropdown-menu-item>Archive</void-dropdown-menu-item>
+      <void-dropdown-menu-trigger><void-button>Options</void-button></void-dropdown-menu-trigger>
+      <void-dropdown-menu-content>
+        <void-dropdown-menu-item>Edit</void-dropdown-menu-item>
+        <void-dropdown-menu-item>Duplicate</void-dropdown-menu-item>
+        <void-dropdown-menu-item>Archive</void-dropdown-menu-item>
+      </void-dropdown-menu-content>
     </void-dropdown-menu>
   `,
 };
@@ -49,10 +51,12 @@ export const Default: Story = {
 export const WithDestructiveItem: Story = {
   render: () => html`
     <void-dropdown-menu>
-      <void-button slot="trigger">Actions</void-button>
-      <void-dropdown-menu-item>Edit</void-dropdown-menu-item>
-      <void-dropdown-menu-item>Duplicate</void-dropdown-menu-item>
-      <void-dropdown-menu-item destructive>Delete</void-dropdown-menu-item>
+      <void-dropdown-menu-trigger><void-button>Actions</void-button></void-dropdown-menu-trigger>
+      <void-dropdown-menu-content>
+        <void-dropdown-menu-item>Edit</void-dropdown-menu-item>
+        <void-dropdown-menu-item>Duplicate</void-dropdown-menu-item>
+        <void-dropdown-menu-item destructive>Delete</void-dropdown-menu-item>
+      </void-dropdown-menu-content>
     </void-dropdown-menu>
   `,
 };
@@ -60,10 +64,12 @@ export const WithDestructiveItem: Story = {
 export const WithDisabledItems: Story = {
   render: () => html`
     <void-dropdown-menu>
-      <void-button slot="trigger">Actions</void-button>
-      <void-dropdown-menu-item>Edit</void-dropdown-menu-item>
-      <void-dropdown-menu-item disabled>Publish (unavailable)</void-dropdown-menu-item>
-      <void-dropdown-menu-item destructive>Delete</void-dropdown-menu-item>
+      <void-dropdown-menu-trigger><void-button>Actions</void-button></void-dropdown-menu-trigger>
+      <void-dropdown-menu-content>
+        <void-dropdown-menu-item>Edit</void-dropdown-menu-item>
+        <void-dropdown-menu-item disabled>Publish (unavailable)</void-dropdown-menu-item>
+        <void-dropdown-menu-item destructive>Delete</void-dropdown-menu-item>
+      </void-dropdown-menu-content>
     </void-dropdown-menu>
   `,
 };
@@ -72,24 +78,32 @@ export const Positions: Story = {
   render: () => html`
     <div style="display: flex; gap: 16px; padding: 80px; flex-wrap: wrap; align-items: center;">
       <void-dropdown-menu position="bottom" align="start">
-        <void-button slot="trigger">Bottom Start</void-button>
-        <void-dropdown-menu-item>Item One</void-dropdown-menu-item>
-        <void-dropdown-menu-item>Item Two</void-dropdown-menu-item>
+        <void-dropdown-menu-trigger><void-button>Bottom Start</void-button></void-dropdown-menu-trigger>
+        <void-dropdown-menu-content>
+          <void-dropdown-menu-item>Item One</void-dropdown-menu-item>
+          <void-dropdown-menu-item>Item Two</void-dropdown-menu-item>
+        </void-dropdown-menu-content>
       </void-dropdown-menu>
       <void-dropdown-menu position="bottom" align="end">
-        <void-button slot="trigger">Bottom End</void-button>
-        <void-dropdown-menu-item>Item One</void-dropdown-menu-item>
-        <void-dropdown-menu-item>Item Two</void-dropdown-menu-item>
+        <void-dropdown-menu-trigger><void-button>Bottom End</void-button></void-dropdown-menu-trigger>
+        <void-dropdown-menu-content>
+          <void-dropdown-menu-item>Item One</void-dropdown-menu-item>
+          <void-dropdown-menu-item>Item Two</void-dropdown-menu-item>
+        </void-dropdown-menu-content>
       </void-dropdown-menu>
       <void-dropdown-menu position="top" align="start">
-        <void-button slot="trigger">Top Start</void-button>
-        <void-dropdown-menu-item>Item One</void-dropdown-menu-item>
-        <void-dropdown-menu-item>Item Two</void-dropdown-menu-item>
+        <void-dropdown-menu-trigger><void-button>Top Start</void-button></void-dropdown-menu-trigger>
+        <void-dropdown-menu-content>
+          <void-dropdown-menu-item>Item One</void-dropdown-menu-item>
+          <void-dropdown-menu-item>Item Two</void-dropdown-menu-item>
+        </void-dropdown-menu-content>
       </void-dropdown-menu>
       <void-dropdown-menu position="top" align="end">
-        <void-button slot="trigger">Top End</void-button>
-        <void-dropdown-menu-item>Item One</void-dropdown-menu-item>
-        <void-dropdown-menu-item>Item Two</void-dropdown-menu-item>
+        <void-dropdown-menu-trigger><void-button>Top End</void-button></void-dropdown-menu-trigger>
+        <void-dropdown-menu-content>
+          <void-dropdown-menu-item>Item One</void-dropdown-menu-item>
+          <void-dropdown-menu-item>Item Two</void-dropdown-menu-item>
+        </void-dropdown-menu-content>
       </void-dropdown-menu>
     </div>
   `,
@@ -99,11 +113,13 @@ export const KeepOpenItems: Story = {
   render: () => html`
     <div style="padding: 40px;">
       <void-dropdown-menu>
-        <void-button slot="trigger">View</void-button>
-        <void-dropdown-menu-item keep-open>Show grid</void-dropdown-menu-item>
-        <void-dropdown-menu-item keep-open>Show rulers</void-dropdown-menu-item>
-        <hr />
-        <void-dropdown-menu-item>Reset view</void-dropdown-menu-item>
+        <void-dropdown-menu-trigger><void-button>View</void-button></void-dropdown-menu-trigger>
+        <void-dropdown-menu-content>
+          <void-dropdown-menu-item keep-open>Show grid</void-dropdown-menu-item>
+          <void-dropdown-menu-item keep-open>Show rulers</void-dropdown-menu-item>
+          <void-dropdown-menu-separator></void-dropdown-menu-separator>
+          <void-dropdown-menu-item>Reset view</void-dropdown-menu-item>
+        </void-dropdown-menu-content>
       </void-dropdown-menu>
     </div>
   `,

@@ -18,18 +18,33 @@
       <void-segmented-control-item value="yearly">Yearly</void-segmented-control-item>
     </void-segmented-control>
     <div class="plans">
-      <void-card heading="Starter">
-        <p class="price" data-monthly="$9/mo" data-yearly="$90/yr">$9/mo</p>
-        <void-button>Choose Starter</void-button>
+      <void-card>
+        <void-card-header>
+          <void-card-title>Starter</void-card-title>
+        </void-card-header>
+        <void-card-body>
+          <p class="price" data-monthly="$9/mo" data-yearly="$90/yr">$9/mo</p>
+          <void-button>Choose Starter</void-button>
+        </void-card-body>
       </void-card>
-      <void-card heading="Team" variant="elevated">
-        <void-badge color="info">Most popular</void-badge>
-        <p class="price" data-monthly="$29/mo" data-yearly="$290/yr">$29/mo</p>
-        <void-button variant="filled">Choose Team</void-button>
+      <void-card variant="elevated">
+        <void-card-header>
+          <void-card-title>Team</void-card-title>
+        </void-card-header>
+        <void-card-body>
+          <void-badge color="info">Most popular</void-badge>
+          <p class="price" data-monthly="$29/mo" data-yearly="$290/yr">$29/mo</p>
+          <void-button variant="filled">Choose Team</void-button>
+        </void-card-body>
       </void-card>
-      <void-card heading="Business">
-        <p class="price" data-monthly="$79/mo" data-yearly="$790/yr">$79/mo</p>
-        <void-button>Choose Business</void-button>
+      <void-card>
+        <void-card-header>
+          <void-card-title>Business</void-card-title>
+        </void-card-header>
+        <void-card-body>
+          <p class="price" data-monthly="$79/mo" data-yearly="$790/yr">$79/mo</p>
+          <void-button>Choose Business</void-button>
+        </void-card-body>
       </void-card>
     </div>
   </main>

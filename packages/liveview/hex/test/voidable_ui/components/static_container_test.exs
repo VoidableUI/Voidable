@@ -223,11 +223,10 @@ defmodule VoidableUI.Components.StaticContainerTest do
 
     html =
       rendered_to_string(~H"""
-      <VoidableUI.Components.card heading="Title" variant="elevated" padding="lg">Card body</VoidableUI.Components.card>
+      <VoidableUI.Components.card variant="elevated" padding="lg">Card body</VoidableUI.Components.card>
       """)
 
     assert html =~ "<void-card"
-    assert html =~ ~s(heading="Title")
     assert html =~ ~s(variant="elevated")
     assert html =~ ~s(padding="lg")
     assert html =~ "Card body"
@@ -615,47 +614,22 @@ defmodule VoidableUI.Components.StaticContainerTest do
   end
 
   # ---------------------------------------------------------------------------
-  # tab_panel
+  # tabs with explicit parts
   # ---------------------------------------------------------------------------
 
-  test "tab_panel renders void-tab-panel with required tab" do
+  test "tabs renders its parts as written" do
     assigns = %{}
 
     html =
       rendered_to_string(~H"""
-      <VoidableUI.Components.tab_panel tab="general">General settings</VoidableUI.Components.tab_panel>
+      <VoidableUI.Components.tabs value="general">
+        <void-tabs-list><void-tabs-trigger value="general">General</void-tabs-trigger></void-tabs-list>
+        <void-tabs-content value="general">General settings</void-tabs-content>
+      </VoidableUI.Components.tabs>
       """)
 
-    assert html =~ "<void-tab-panel"
-    assert html =~ ~s(tab="general")
-    refute html =~ "label="
-    refute html =~ "active"
-    assert html =~ "General settings"
-  end
-
-  test "tab_panel renders label and active when set" do
-    assigns = %{}
-
-    html =
-      rendered_to_string(~H"""
-      <VoidableUI.Components.tab_panel tab="settings" label="Settings Tab" active={true}>Settings content</VoidableUI.Components.tab_panel>
-      """)
-
-    assert html =~ ~s(tab="settings")
-    assert html =~ ~s(label="Settings Tab")
-    assert html =~ "active"
-    assert html =~ "Settings content"
-  end
-
-  test "tab_panel passes through global attributes" do
-    assigns = %{}
-
-    html =
-      rendered_to_string(~H"""
-      <VoidableUI.Components.tab_panel tab="info" id="tp1" class="panel">Info</VoidableUI.Components.tab_panel>
-      """)
-
-    assert html =~ ~s(id="tp1")
-    assert html =~ ~s(class="panel")
+    assert html =~ ~s(<void-tabs-trigger value="general">General</void-tabs-trigger>)
+    assert html =~ ~s(<void-tabs-content value="general">General settings</void-tabs-content>)
+    refute function_exported?(VoidableUI.Components, :tab_panel, 1)
   end
 end

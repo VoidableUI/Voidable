@@ -4,13 +4,18 @@ void-accordion {
 }
 
 void-accordion-item {
-  border-bottom: 1px solid var(--void-color-border);
+  display: block;
+  border-bottom: var(--void-rule-between);
 }
 
-.void-accordion-trigger {
+/* The trigger part is the button (role="button", a tab stop, written by the
+   item); the chevron is drawn here, so it shows before the script loads. */
+void-accordion-trigger {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: var(--void-space-2);
+  box-sizing: border-box;
   width: 100%;
   padding: var(--void-space-3) var(--void-space-4);
   border: none;
@@ -21,35 +26,41 @@ void-accordion-item {
   font-weight: var(--void-weight-medium);
   text-align: left;
   cursor: pointer;
+  user-select: none;
+  outline: none;
   transition: background var(--void-duration-fast) var(--void-ease-in-out);
 }
 
-.void-accordion-trigger:hover {
+void-accordion-trigger::after {
+  content: '';
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+  background: var(--void-color-text-secondary);
+  /* token-ok: the chevron's shape; its colour is the background token above */
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M6 4l4 4-4 4' stroke='black' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
+  transition: transform var(--void-duration-fast) var(--void-ease-in-out);
+}
+
+void-accordion-trigger:hover {
   background: var(--void-color-bg-hover);
 }
 
-.void-accordion-trigger:focus-visible {
+void-accordion-trigger:focus-visible {
   outline: var(--void-focus-ring-width) solid var(--void-focus-ring-color);
   outline-offset: calc(var(--void-focus-ring-width) * -1);
 }
 
-.void-accordion-chevron {
-  width: 1rem;
-  height: 1rem;
-  flex-shrink: 0;
-  color: var(--void-color-text-secondary);
-  transition: transform var(--void-duration-fast) var(--void-ease-in-out);
-}
-
-void-accordion-item[open] .void-accordion-chevron {
+void-accordion-item[open] > void-accordion-trigger::after {
   transform: rotate(90deg);
 }
 
-.void-accordion-content {
+/* Closed content is hidden from the item's own attribute: no script needed. */
+void-accordion-content {
   display: none;
 }
 
-void-accordion-item[open] .void-accordion-content {
+void-accordion-item[open] > void-accordion-content {
   display: block;
   padding: var(--void-space-3) var(--void-space-4) var(--void-space-4);
   color: var(--void-color-text);

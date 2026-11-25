@@ -132,14 +132,15 @@ export class VoidActionInput extends NativeFormControl(VoidElement) {
 
   render() {
     const btn = html`
-      <void-tooltip text=${this.actionLabel} position=${this.tooltipPosition}>
-        <button
+      <void-tooltip position=${this.tooltipPosition}>
+        <void-tooltip-trigger><button
           class="void-action-input-btn"
           type="button"
           ?disabled=${this.disabled}
           aria-label=${this.actionLabel}
           @click=${this._onAction}
-        >${this._renderIcon()}</button>
+        >${this._renderIcon()}</button></void-tooltip-trigger>
+        <void-tooltip-content>${this.actionLabel}</void-tooltip-content>
       </void-tooltip>
     `;
 

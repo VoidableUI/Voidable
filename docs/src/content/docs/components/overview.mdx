@@ -8,7 +8,7 @@ import { stats } from '../../../lib/stats';
 import Index from '../../../components/api/Index.astro';
 import FalseStrings from '../../../components/api/FalseStrings.astro';
 
-Voidable ships {stats.elements} custom elements across {stats.components} components (parent and child elements such as `<void-tabs>` and `<void-tab-panel>` count separately). All of them render in the light DOM and are styled entirely by `@voidable/theme` tokens.
+Voidable ships {stats.elements} custom elements across {stats.components} components (parent and child elements such as `<void-accordion>` and `<void-accordion-item>` count separately; CSS-only parts such as `<void-tabs-trigger>` are not counted). All of them render in the light DOM and are styled entirely by `@voidable/theme` tokens.
 
 Each component page is generated from the library's Custom Elements Manifest, so its attributes, events, parents and required children are what the code declares. The same data feeds `voidable ref <tag>`, the markup checker and `llms.txt`. Every page has a live example and the same markup in HTML, JSX, ERB, HEEx and Blade, produced by the `voidable gen snippet` tool.
 

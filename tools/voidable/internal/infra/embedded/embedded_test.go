@@ -23,18 +23,35 @@ func TestFalseStringMatchesSource(t *testing.T) {
 	prop := regexp.MustCompile(`@property\(\{([^}]*converter: defaultTrueBoolean[^}]*)\}\)\s+(?:override\s+)?(\w+)`)
 	attrName := regexp.MustCompile(`attribute: '([^']+)'`)
 	want := map[string][]string{}
+	// Shared bases (modal.ts for dialog and drawer) declare properties their
+	// subclasses inherit.
+	bases := map[string]string{"VoidModal": filepath.Join(dir, "..", "modal.ts")}
+	props := func(src string) []string {
+		var names []string
+		for _, m := range prop.FindAllStringSubmatch(src, -1) {
+			name := m[2]
+			if a := attrName.FindStringSubmatch(m[1]); a != nil {
+				name = a[1]
+			}
+			names = append(names, name)
+		}
+		return names
+	}
 	for _, f := range files {
 		b, err := os.ReadFile(f)
 		if err != nil {
 			t.Fatal(err)
 		}
-		for _, m := range prop.FindAllStringSubmatch(string(b), -1) {
-			name := m[2]
-			if a := attrName.FindStringSubmatch(m[1]); a != nil {
-				name = a[1]
+		tag := "void-" + strings.TrimSuffix(filepath.Base(f), ".ts")
+		want[tag] = append(want[tag], props(string(b))...)
+		for base, path := range bases {
+			if strings.Contains(string(b), "extends "+base) {
+				bb, err := os.ReadFile(path)
+				if err != nil {
+					t.Fatal(err)
+				}
+				want[tag] = append(want[tag], props(string(bb))...)
 			}
-			tag := "void-" + strings.TrimSuffix(filepath.Base(f), ".ts")
-			want[tag] = append(want[tag], name)
 		}
 	}
 	cat, err := Source{}.Catalog(context.Background())

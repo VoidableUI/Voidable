@@ -26,7 +26,7 @@ const sectionLabelStyle = `font-family: var(--void-font-mono); font-size: var(--
 
 const sidebar = html`
   <style>
-    void-popover[position="top"].sidebar-settings .void-popover-body {
+    void-popover[position="top"].sidebar-settings void-popover-content {
       right: 0;
       left: auto;
       bottom: calc(100% + var(--void-space-3));
@@ -66,18 +66,20 @@ const sidebar = html`
         <span style="font-family: var(--void-font-sans); font-size: var(--void-text-2xs); color: var(--void-color-text-muted);">Admin</span>
       </div>
       <void-popover position="top" class="sidebar-settings" style="margin-left: auto;">
-        <button style="background: none; border: 1px solid var(--void-color-border); border-radius: var(--void-radius-sm); padding: var(--void-space-1) var(--void-space-2); cursor: pointer; font-size: var(--void-text-sm); color: var(--void-color-text-secondary);">&#x2699;</button>
-        <div style="padding: var(--void-space-2); min-width: 160px;">
-          <label style="display: flex; align-items: center; gap: var(--void-space-2); padding: var(--void-space-1) 0; font-family: var(--void-font-sans); font-size: var(--void-text-sm); color: var(--void-color-text); cursor: pointer;">
-            <i class="ti ti-moon"></i>
-            <span>Dark Mode</span>
-            <void-switch id="theme-switch" size="sm" checked style="margin-left: auto;"></void-switch>
-          </label>
-          <hr style="border: none; border-top: 1px solid var(--void-color-border); margin: var(--void-space-1) 0;">
-          <button style="display: flex; align-items: center; gap: var(--void-space-2); width: 100%; background: none; border: none; padding: var(--void-space-1) 0; font-family: var(--void-font-sans); font-size: var(--void-text-sm); color: var(--void-color-error); cursor: pointer;">
-            Sign Out
-          </button>
-        </div>
+        <void-popover-trigger><button style="background: none; border: 1px solid var(--void-color-border); border-radius: var(--void-radius-sm); padding: var(--void-space-1) var(--void-space-2); cursor: pointer; font-size: var(--void-text-sm); color: var(--void-color-text-secondary);">&#x2699;</button></void-popover-trigger>
+        <void-popover-content>
+          <div style="padding: var(--void-space-2); min-width: 160px;">
+            <label style="display: flex; align-items: center; gap: var(--void-space-2); padding: var(--void-space-1) 0; font-family: var(--void-font-sans); font-size: var(--void-text-sm); color: var(--void-color-text); cursor: pointer;">
+              <i class="ti ti-moon"></i>
+              <span>Dark Mode</span>
+              <void-switch id="theme-switch" size="sm" checked style="margin-left: auto;"></void-switch>
+            </label>
+            <hr style="border: none; border-top: 1px solid var(--void-color-border); margin: var(--void-space-1) 0;">
+            <button style="display: flex; align-items: center; gap: var(--void-space-2); width: 100%; background: none; border: none; padding: var(--void-space-1) 0; font-family: var(--void-font-sans); font-size: var(--void-text-sm); color: var(--void-color-error); cursor: pointer;">
+              Sign Out
+            </button>
+          </div>
+        </void-popover-content>
       </void-popover>
     </div>
   </void-sidebar>

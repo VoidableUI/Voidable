@@ -5,26 +5,36 @@
   <!-- Four deep: drawer > dialog > popover > dropdown-menu, each opened from inside the one below. -->
   <section id="chain">
     <void-button id="open-1" onclick="document.getElementById('l1').open = true">Open the drawer</void-button>
-    <void-drawer id="l1" heading="Level 1">
-      <p class="c1">drawer body</p>
-      <button id="l1-btn">in drawer</button>
-      <void-button id="open-2" onclick="document.getElementById('l2').open = true">Open the dialog</void-button>
-      <void-dialog id="l2" heading="Level 2">
-        <p class="c2">dialog body</p>
-        <input id="l2-in" aria-label="In dialog" />
-        <void-popover id="l3">
-          <button slot="trigger" id="open-3">Open the popover</button>
-          <div class="c3">
-            <p>popover body</p>
-            <button id="l3-btn">in popover</button>
-            <void-dropdown-menu id="l4">
-              <button slot="trigger" id="open-4">Open the menu</button>
-              <void-dropdown-menu-item id="l4-a">Alpha</void-dropdown-menu-item>
-              <void-dropdown-menu-item id="l4-b">Beta</void-dropdown-menu-item>
-            </void-dropdown-menu>
-          </div>
-        </void-popover>
-      </void-dialog>
+    <void-drawer id="l1">
+      <void-drawer-title>Level 1</void-drawer-title>
+      <void-drawer-body>
+        <p class="c1">drawer body</p>
+        <button id="l1-btn">in drawer</button>
+        <void-button id="open-2" onclick="document.getElementById('l2').open = true">Open the dialog</void-button>
+        <void-dialog id="l2">
+          <void-dialog-title>Level 2</void-dialog-title>
+          <void-dialog-body>
+            <p class="c2">dialog body</p>
+            <input id="l2-in" aria-label="In dialog" />
+            <void-popover id="l3">
+              <void-popover-trigger><button id="open-3">Open the popover</button></void-popover-trigger>
+              <void-popover-content>
+                <div class="c3">
+                  <p>popover body</p>
+                  <button id="l3-btn">in popover</button>
+                  <void-dropdown-menu id="l4">
+                    <void-dropdown-menu-trigger><button id="open-4">Open the menu</button></void-dropdown-menu-trigger>
+                    <void-dropdown-menu-content>
+                      <void-dropdown-menu-item id="l4-a">Alpha</void-dropdown-menu-item>
+                      <void-dropdown-menu-item id="l4-b">Beta</void-dropdown-menu-item>
+                    </void-dropdown-menu-content>
+                  </void-dropdown-menu>
+                </div>
+              </void-popover-content>
+            </void-popover>
+          </void-dialog-body>
+        </void-dialog>
+      </void-drawer-body>
     </void-drawer>
   </section>
 
@@ -32,10 +42,10 @@
   <section id="containers" style="display: flex; gap: 2rem; flex-wrap: wrap; margin: 2rem 0; align-items: flex-start">
     <div id="box-hidden" style="overflow: hidden; width: 220px; height: 90px; border: 1px solid; padding: 8px">
       <div class="set" data-box="hidden">
-        <void-popover id="pop-hidden"><button slot="trigger" id="pop-hidden-t">Popover</button><div class="pc" style="width: 200px">popover in overflow hidden</div></void-popover>
-        <void-dropdown-menu id="dd-hidden"><button slot="trigger" id="dd-hidden-t">Menu</button><void-dropdown-menu-item id="dd-hidden-1">One</void-dropdown-menu-item><void-dropdown-menu-item>Two</void-dropdown-menu-item></void-dropdown-menu>
-        <void-tooltip id="tt-hidden" text="Tooltip text" delay="50"><button id="tt-hidden-t">Tip</button></void-tooltip>
-        <void-hover-card id="hc-hidden" open-delay="50" close-delay="50"><a href="#hc" slot="trigger" id="hc-hidden-t">Card</a><div class="hcc" style="width: 180px">hover card in overflow hidden</div></void-hover-card>
+        <void-popover id="pop-hidden"><void-popover-trigger><button id="pop-hidden-t">Popover</button></void-popover-trigger><void-popover-content><div class="pc" style="width: 200px">popover in overflow hidden</div></void-popover-content></void-popover>
+        <void-dropdown-menu id="dd-hidden"><void-dropdown-menu-trigger><button id="dd-hidden-t">Menu</button></void-dropdown-menu-trigger><void-dropdown-menu-content><void-dropdown-menu-item id="dd-hidden-1">One</void-dropdown-menu-item><void-dropdown-menu-item>Two</void-dropdown-menu-item></void-dropdown-menu-content></void-dropdown-menu>
+        <void-tooltip id="tt-hidden" delay="50"><void-tooltip-trigger><button id="tt-hidden-t">Tip</button></void-tooltip-trigger><void-tooltip-content>Tooltip text</void-tooltip-content></void-tooltip>
+        <void-hover-card id="hc-hidden" open-delay="50" close-delay="50"><void-hover-card-trigger><a href="#hc" id="hc-hidden-t">Card</a></void-hover-card-trigger><void-hover-card-content><div class="hcc" style="width: 180px">hover card in overflow hidden</div></void-hover-card-content></void-hover-card>
         <void-combobox id="cb-hidden" placeholder="Pick" style="width: 160px"><void-option value="react">React</void-option><void-option value="vue">Vue</void-option></void-combobox>
         <void-date-picker id="dp-hidden" value="2026-11-10" style="width: 180px"></void-date-picker>
       </div>
@@ -43,10 +53,10 @@
 
     <div id="box-transform" style="transform: translate(12px, 6px) scale(0.85) rotate(2deg); transform-origin: top left; width: 260px; border: 1px solid; padding: 8px">
       <div class="set" data-box="transform">
-        <void-popover id="pop-transform"><button slot="trigger" id="pop-transform-t">Popover</button><div class="pc" style="width: 200px">popover in a transformed box</div></void-popover>
-        <void-dropdown-menu id="dd-transform"><button slot="trigger" id="dd-transform-t">Menu</button><void-dropdown-menu-item id="dd-transform-1">One</void-dropdown-menu-item><void-dropdown-menu-item>Two</void-dropdown-menu-item></void-dropdown-menu>
-        <void-tooltip id="tt-transform" text="Tooltip text" delay="50"><button id="tt-transform-t">Tip</button></void-tooltip>
-        <void-hover-card id="hc-transform" open-delay="50" close-delay="50"><a href="#hc" slot="trigger" id="hc-transform-t">Card</a><div class="hcc" style="width: 180px">hover card in a transformed box</div></void-hover-card>
+        <void-popover id="pop-transform"><void-popover-trigger><button id="pop-transform-t">Popover</button></void-popover-trigger><void-popover-content><div class="pc" style="width: 200px">popover in a transformed box</div></void-popover-content></void-popover>
+        <void-dropdown-menu id="dd-transform"><void-dropdown-menu-trigger><button id="dd-transform-t">Menu</button></void-dropdown-menu-trigger><void-dropdown-menu-content><void-dropdown-menu-item id="dd-transform-1">One</void-dropdown-menu-item><void-dropdown-menu-item>Two</void-dropdown-menu-item></void-dropdown-menu-content></void-dropdown-menu>
+        <void-tooltip id="tt-transform" delay="50"><void-tooltip-trigger><button id="tt-transform-t">Tip</button></void-tooltip-trigger><void-tooltip-content>Tooltip text</void-tooltip-content></void-tooltip>
+        <void-hover-card id="hc-transform" open-delay="50" close-delay="50"><void-hover-card-trigger><a href="#hc" id="hc-transform-t">Card</a></void-hover-card-trigger><void-hover-card-content><div class="hcc" style="width: 180px">hover card in a transformed box</div></void-hover-card-content></void-hover-card>
         <void-combobox id="cb-transform" placeholder="Pick" style="width: 160px"><void-option value="react">React</void-option><void-option value="vue">Vue</void-option></void-combobox>
         <void-date-picker id="dp-transform" value="2026-11-10" style="width: 180px"></void-date-picker>
       </div>
@@ -55,10 +65,10 @@
     <div id="box-scroll" style="overflow: auto; width: 260px; height: 130px; border: 1px solid">
       <div style="height: 120px">scroll down</div>
       <div class="set" data-box="scroll" style="padding: 8px">
-        <void-popover id="pop-scroll"><button slot="trigger" id="pop-scroll-t">Popover</button><div class="pc" style="width: 200px">popover in a scrolled box</div></void-popover>
-        <void-dropdown-menu id="dd-scroll"><button slot="trigger" id="dd-scroll-t">Menu</button><void-dropdown-menu-item id="dd-scroll-1">One</void-dropdown-menu-item><void-dropdown-menu-item>Two</void-dropdown-menu-item></void-dropdown-menu>
-        <void-tooltip id="tt-scroll" text="Tooltip text" delay="50"><button id="tt-scroll-t">Tip</button></void-tooltip>
-        <void-hover-card id="hc-scroll" open-delay="50" close-delay="50"><a href="#hc" slot="trigger" id="hc-scroll-t">Card</a><div class="hcc" style="width: 180px">hover card in a scrolled box</div></void-hover-card>
+        <void-popover id="pop-scroll"><void-popover-trigger><button id="pop-scroll-t">Popover</button></void-popover-trigger><void-popover-content><div class="pc" style="width: 200px">popover in a scrolled box</div></void-popover-content></void-popover>
+        <void-dropdown-menu id="dd-scroll"><void-dropdown-menu-trigger><button id="dd-scroll-t">Menu</button></void-dropdown-menu-trigger><void-dropdown-menu-content><void-dropdown-menu-item id="dd-scroll-1">One</void-dropdown-menu-item><void-dropdown-menu-item>Two</void-dropdown-menu-item></void-dropdown-menu-content></void-dropdown-menu>
+        <void-tooltip id="tt-scroll" delay="50"><void-tooltip-trigger><button id="tt-scroll-t">Tip</button></void-tooltip-trigger><void-tooltip-content>Tooltip text</void-tooltip-content></void-tooltip>
+        <void-hover-card id="hc-scroll" open-delay="50" close-delay="50"><void-hover-card-trigger><a href="#hc" id="hc-scroll-t">Card</a></void-hover-card-trigger><void-hover-card-content><div class="hcc" style="width: 180px">hover card in a scrolled box</div></void-hover-card-content></void-hover-card>
         <void-combobox id="cb-scroll" placeholder="Pick" style="width: 160px"><void-option value="react">React</void-option><void-option value="vue">Vue</void-option></void-combobox>
         <void-date-picker id="dp-scroll" value="2026-11-10" style="width: 180px"></void-date-picker>
       </div>
@@ -70,22 +80,22 @@
   <section id="modals" style="display: flex; gap: 2rem; flex-wrap: wrap; margin: 2rem 0; align-items: flex-start">
     <div id="mbox-hidden" style="overflow: hidden; width: 160px; height: 60px; border: 1px solid">
       <void-button id="mopen-hidden" onclick="document.getElementById('mdlg-hidden').open = true">Dialog</void-button>
-      <void-dialog id="mdlg-hidden" heading="In overflow hidden"><p class="mc">dialog from an overflow hidden box</p></void-dialog>
+      <void-dialog id="mdlg-hidden"><void-dialog-title>In overflow hidden</void-dialog-title><void-dialog-body><p class="mc">dialog from an overflow hidden box</p></void-dialog-body></void-dialog>
       <void-button id="mopen-hidden-drw" onclick="document.getElementById('mdrw-hidden').open = true">Drawer</void-button>
-      <void-drawer id="mdrw-hidden" heading="In overflow hidden"><p class="mc">drawer from an overflow hidden box</p></void-drawer>
+      <void-drawer id="mdrw-hidden"><void-drawer-title>In overflow hidden</void-drawer-title><void-drawer-body><p class="mc">drawer from an overflow hidden box</p></void-drawer-body></void-drawer>
     </div>
     <div id="mbox-transform" style="transform: translate(30px, 20px) scale(0.5); transform-origin: top left; width: 260px; border: 1px solid">
       <void-button id="mopen-transform" onclick="document.getElementById('mdlg-transform').open = true">Dialog</void-button>
-      <void-dialog id="mdlg-transform" heading="In a transformed box"><p class="mc">dialog from a transformed box</p></void-dialog>
+      <void-dialog id="mdlg-transform"><void-dialog-title>In a transformed box</void-dialog-title><void-dialog-body><p class="mc">dialog from a transformed box</p></void-dialog-body></void-dialog>
       <void-button id="mopen-transform-drw" onclick="document.getElementById('mdrw-transform').open = true">Drawer</void-button>
-      <void-drawer id="mdrw-transform" heading="In a transformed box"><p class="mc">drawer from a transformed box</p></void-drawer>
+      <void-drawer id="mdrw-transform"><void-drawer-title>In a transformed box</void-drawer-title><void-drawer-body><p class="mc">drawer from a transformed box</p></void-drawer-body></void-drawer>
     </div>
     <div id="mbox-scroll" style="overflow: auto; width: 200px; height: 80px; border: 1px solid">
       <div style="height: 100px">scroll down</div>
       <void-button id="mopen-scroll" onclick="document.getElementById('mdlg-scroll').open = true">Dialog</void-button>
-      <void-dialog id="mdlg-scroll" heading="In a scrolled box"><p class="mc">dialog from a scrolled box</p></void-dialog>
+      <void-dialog id="mdlg-scroll"><void-dialog-title>In a scrolled box</void-dialog-title><void-dialog-body><p class="mc">dialog from a scrolled box</p></void-dialog-body></void-dialog>
       <void-button id="mopen-scroll-drw" onclick="document.getElementById('mdrw-scroll').open = true">Drawer</void-button>
-      <void-drawer id="mdrw-scroll" heading="In a scrolled box"><p class="mc">drawer from a scrolled box</p></void-drawer>
+      <void-drawer id="mdrw-scroll"><void-drawer-title>In a scrolled box</void-drawer-title><void-drawer-body><p class="mc">drawer from a scrolled box</p></void-drawer-body></void-drawer>
       <div style="height: 300px"></div>
     </div>
   </section>
@@ -93,21 +103,29 @@
   <!-- A dialog with a method="dialog" form, a dialog opened by a button the test removes, and a plain one. -->
   <section id="misc">
     <void-button id="open-form" onclick="document.getElementById('form-dlg').open = true">Open form dialog</void-button>
-    <void-dialog id="form-dlg" heading="Form dialog">
-      <form method="dialog"><input id="form-in" aria-label="Note" /><button id="form-ok" value="ok">Done</button></form>
+    <void-dialog id="form-dlg">
+      <void-dialog-title>Form dialog</void-dialog-title>
+      <form method="dialog">
+        <void-dialog-body>
+          <input id="form-in" aria-label="Note" />
+        </void-dialog-body>
+        <void-dialog-actions>
+          <button id="form-ok" value="ok">Done</button>
+        </void-dialog-actions>
+      </form>
     </void-dialog>
 
     <div id="gone-host">
       <button id="gone-opener" onclick="document.getElementById('gone-dlg').open = true">Opener that goes away</button>
     </div>
-    <void-dialog id="gone-dlg" heading="Opener removed"><p>body</p><input id="gone-in" aria-label="Name" /></void-dialog>
+    <void-dialog id="gone-dlg"><void-dialog-title>Opener removed</void-dialog-title><void-dialog-body><p>body</p><input id="gone-in" aria-label="Name" /></void-dialog-body></void-dialog>
     <void-button id="gone-drw-opener" onclick="document.getElementById('gone-drw').open = true">Drawer opener that goes away</void-button>
-    <void-drawer id="gone-drw" heading="Opener removed"><p>body</p><button id="gone-drw-btn">in drawer</button></void-drawer>
+    <void-drawer id="gone-drw"><void-drawer-title>Opener removed</void-drawer-title><void-drawer-body><p>body</p></void-drawer-body><void-drawer-actions><button id="gone-drw-btn">in drawer</button></void-drawer-actions></void-drawer>
 
-    <void-dropdown-menu id="menu"><button slot="trigger" id="menu-t">Menu</button><void-dropdown-menu-item id="menu-1">One</void-dropdown-menu-item><void-dropdown-menu-item id="menu-2">Two</void-dropdown-menu-item></void-dropdown-menu>
-    <void-popover id="pop"><button slot="trigger" id="pop-t">Popover</button><div class="pc" style="width: 200px">popover body <button id="pop-in">in</button></div></void-popover>
-    <void-tooltip id="tt" text="Tooltip text" delay="50"><button id="tt-t">Tip target</button></void-tooltip>
-    <void-hover-card id="hc" open-delay="50" close-delay="50"><a href="#hc" slot="trigger" id="hc-t">Hover me</a><div class="hcc">Hover card content</div></void-hover-card>
+    <void-dropdown-menu id="menu"><void-dropdown-menu-trigger><button id="menu-t">Menu</button></void-dropdown-menu-trigger><void-dropdown-menu-content><void-dropdown-menu-item id="menu-1">One</void-dropdown-menu-item><void-dropdown-menu-item id="menu-2">Two</void-dropdown-menu-item></void-dropdown-menu-content></void-dropdown-menu>
+    <void-popover id="pop"><void-popover-trigger><button id="pop-t">Popover</button></void-popover-trigger><void-popover-content><div class="pc" style="width: 200px">popover body <button id="pop-in">in</button></div></void-popover-content></void-popover>
+    <void-tooltip id="tt" delay="50"><void-tooltip-trigger><button id="tt-t">Tip target</button></void-tooltip-trigger><void-tooltip-content>Tooltip text</void-tooltip-content></void-tooltip>
+    <void-hover-card id="hc" open-delay="50" close-delay="50"><void-hover-card-trigger><a href="#hc" id="hc-t">Hover me</a></void-hover-card-trigger><void-hover-card-content><div class="hcc">Hover card content</div></void-hover-card-content></void-hover-card>
     <void-combobox id="cb" placeholder="Pick"><void-option value="react">React</void-option><void-option value="vue">Vue</void-option></void-combobox>
     <void-multiselect id="ms" placeholder="Pick many"><void-option value="css">CSS</void-option><void-option value="js">JS</void-option></void-multiselect>
     <void-date-picker id="dp" value="2026-11-10"></void-date-picker>

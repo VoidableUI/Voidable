@@ -21,6 +21,26 @@ export interface DevTag {
   r?: readonly string[];
   /** Advice for attributes people guess that do not exist. */
   x?: Readonly<Record<string, string>>;
+  /** Its explicit parts (#52). */
+  q?: DevParts;
+  /** 1 for a CSS-only part: styled by the theme, never registered. */
+  c?: 1;
+}
+
+/** The explicit parts of a component (or of a part that has parts of its own). */
+export interface DevParts {
+  /** `parts`: every child element must be a part; `any`: parts mixed with other content. */
+  k: 'parts' | 'any';
+  /** The parts must appear in the listed order. */
+  o?: 1;
+  /** Non-part elements allowed between the owner and its parts (`form`). */
+  t?: readonly string[];
+  /** The correct markup in one line. */
+  s: string;
+  /** Advice for loose children: the implicit form the parts replaced. */
+  l?: string;
+  /** The parts, in canonical order. */
+  n: ReadonlyArray<{ t: string; r?: 1; x?: number; c?: 1 }>;
 }
 
 export type DevTable = Readonly<Record<string, DevTag>>;
@@ -33,6 +53,14 @@ export type WarningKind =
   | 'missing-child'
   | 'undefined-element'
   | 'unknown-event'
+  /** A required part (#52) is missing. */
+  | 'missing-part'
+  /** A child of a component that takes only parts is not one of them (the implicit form it replaced, usually). */
+  | 'unknown-child'
+  /** A part appears more often than allowed, or out of order. */
+  | 'part-misuse'
+  /** A tag that explicit parts replaced. */
+  | 'legacy-markup'
   /** A page script keeps removing an attribute a component manages on itself; the component stopped restoring it. */
   | 'attribute-fight';
 

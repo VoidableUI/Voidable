@@ -74,20 +74,31 @@
         <button id="open-dlg" type="button" wire:click="openDialog">Open dialog</button>
         <span id="dialog-state">Server thinks the dialog is {{ $dialogOpen ? 'open' : 'closed' }}</span>
     </section>
-    <void-dialog id="dlg" heading="Server dialog" @if ($dialogOpen) open @endif x-void-on:void-close="$wire.closeDialog()">
+    <void-dialog id="dlg" @if ($dialogOpen) open @endif x-void-on:void-close="$wire.closeDialog()">
+      <void-dialog-title>Server dialog</void-dialog-title>
+      <void-dialog-body>
         <p id="dlg-body">Dialog body, ticks {{ $ticks }}</p>
+      </void-dialog-body>
+      <void-dialog-actions>
         <button id="dlg-bump" type="button" wire:click="bump">Bump from inside</button>
+      </void-dialog-actions>
     </void-dialog>
 
     <section style="display: flex; gap: 2rem; align-items: flex-start; flex-wrap: wrap">
         <void-dropdown-menu id="dd">
-            <button slot="trigger" id="dd-trigger" type="button">Actions {{ $ticks }}</button>
+          <void-dropdown-menu-trigger><button id="dd-trigger" type="button">Actions {{ $ticks }}</button></void-dropdown-menu-trigger>
+          <void-dropdown-menu-content>
             <void-dropdown-menu-item>Rename</void-dropdown-menu-item>
             <void-dropdown-menu-item>Archive</void-dropdown-menu-item>
+          </void-dropdown-menu-content>
         </void-dropdown-menu>
         <void-tabs id="tabs" @if ($tab !== '') value="{{ $tab }}" @endif>
-            <void-tab-panel tab="one" label="One">Panel one, version {{ $v }}</void-tab-panel>
-            <void-tab-panel tab="two" label="Two">Panel two, ticks {{ $ticks }}</void-tab-panel>
+          <void-tabs-list>
+            <void-tabs-trigger value="one">One</void-tabs-trigger>
+            <void-tabs-trigger value="two">Two</void-tabs-trigger>
+          </void-tabs-list>
+          <void-tabs-content value="one">Panel one, version {{ $v }}</void-tabs-content>
+          <void-tabs-content value="two">Panel two, ticks {{ $ticks }}</void-tabs-content>
         </void-tabs>
         <button id="server-tab" type="button" wire:click="serverTab('two')">Server selects tab two</button>
     </section>

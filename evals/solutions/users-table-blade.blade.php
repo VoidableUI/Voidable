@@ -28,10 +28,12 @@
                                 <void-badge color="{{ ['active' => 'success', 'invited' => 'info', 'suspended' => 'error'][$user->status] }}">{{ ucfirst($user->status) }}</void-badge>
                             </td>
                             <td>
-                                <void-dropdown-menu position="bottom-end">
-                                    <void-button slot="trigger" size="sm" aria-label="Actions for {{ $user->name }}">⋯</void-button>
+                                <void-dropdown-menu position="bottom" align="end">
+                                  <void-dropdown-menu-trigger><void-button size="sm" aria-label="Actions for {{ $user->name }}">⋯</void-button></void-dropdown-menu-trigger>
+                                  <void-dropdown-menu-content>
                                     <void-dropdown-menu-item wire:click="edit({{ $user->id }})">Edit</void-dropdown-menu-item>
                                     <void-dropdown-menu-item destructive wire:click="deactivate({{ $user->id }})">Deactivate</void-dropdown-menu-item>
+                                  </void-dropdown-menu-content>
                                 </void-dropdown-menu>
                             </td>
                         </tr>

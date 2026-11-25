@@ -1,12 +1,14 @@
 <%= form_with(model: sample) do |form| %>
   <% if sample.errors.any? %>
     <void-alert color="error" class="form-errors">
-      <strong><%= pluralize(sample.errors.count, "error") %> prohibited this sample from being saved:</strong>
-      <ul class="form-error-list">
-        <% sample.errors.each do |error| %>
-          <li><%= error.full_message %></li>
-        <% end %>
-      </ul>
+      <void-alert-title><%= pluralize(sample.errors.count, "error") %> prohibited this sample from being saved</void-alert-title>
+      <void-alert-description>
+        <ul class="form-error-list">
+                <% sample.errors.each do |error| %>
+                  <li><%= error.full_message %></li>
+                <% end %>
+              </ul>
+      </void-alert-description>
     </void-alert>
   <% end %>
 

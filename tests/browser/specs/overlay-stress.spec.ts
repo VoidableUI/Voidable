@@ -112,7 +112,7 @@ test.describe('four overlays deep: drawer > dialog > popover > dropdown-menu', (
     await expectPerceivable(page.locator('#l4-a'));
     await expectPerceivable(page.locator('#l3-btn'));
     expect(await page.evaluate(() => [...document.querySelectorAll(':popover-open')].length), 'the popover and the menu are in the top layer').toBe(2);
-    expect(await page.evaluate(() => document.querySelectorAll('dialog:modal').length), 'the drawer and the dialog are modal').toBe(2);
+    expect(await page.evaluate(() => [...document.querySelectorAll('void-dialog, void-drawer')].filter((h) => h.shadowRoot?.querySelector('dialog')?.matches(':modal')).length), 'the drawer and the dialog are modal').toBe(2);
     expect(await scrollLocked(page)).toBe(true);
     // Real input still reaches the top layer: Arrow keys walk the menu, a click on its item chooses it.
     await page.keyboard.press('ArrowDown');
@@ -156,7 +156,7 @@ test.describe('four overlays deep: drawer > dialog > popover > dropdown-menu', (
     for (const l of levels) await expect.poll(() => isOpen(page, l.id), `${l.id} closed with the drawer`).toBe(false);
     expect((await closesOf(page)).map((e) => `${e.id}:${e.reason}:${e.cancelable}`)).toEqual(['l4:parent:false', 'l3:parent:false', 'l2:parent:false', 'l1:api:false']);
     expect(await scrollLocked(page)).toBe(false);
-    expect(await page.evaluate(() => document.querySelectorAll(':popover-open, dialog:modal, [inert]').length)).toBe(0);
+    expect(await page.evaluate(() => document.querySelectorAll(':popover-open, [inert]').length + [...document.querySelectorAll('void-dialog, void-drawer')].filter((h) => h.shadowRoot?.querySelector('dialog')?.matches(':modal')).length)).toBe(0);
     await expect.poll(() => focusedId(page)).toBe('open-1');
   });
 
@@ -235,14 +235,14 @@ test.describe('overlays inside overflow: hidden, transformed and scrolled boxes'
 
       test('popover', async ({ page }) => {
         await page.locator(`${at('pop')}-t`).click();
-        await expectShownWhole(page, page.locator(`${at('pop')} > .void-popover-body`), page.locator(`${at('pop')}-t`), 'the popover');
+        await expectShownWhole(page, page.locator(`${at('pop')} > void-popover-content`), page.locator(`${at('pop')}-t`), 'the popover');
         await page.keyboard.press('Escape');
         await expect.poll(() => isOpen(page, `pop-${box}`)).toBe(false);
       });
 
       test('dropdown-menu', async ({ page }) => {
         await page.locator(`${at('dd')}-t`).click();
-        await expectShownWhole(page, page.locator(`${at('dd')} .void-dropdown-menu-panel`), page.locator(`${at('dd')}-t`), 'the menu');
+        await expectShownWhole(page, page.locator(`${at('dd')} void-dropdown-menu-content`), page.locator(`${at('dd')}-t`), 'the menu');
         await page.locator(`${at('dd')}-1`).click();
         await expect.poll(() => isOpen(page, `dd-${box}`)).toBe(false);
       });
@@ -254,7 +254,7 @@ test.describe('overlays inside overflow: hidden, transformed and scrolled boxes'
 
       test('hover-card', async ({ page }) => {
         await page.locator(`${at('hc')}-t`).hover();
-        await expectShownWhole(page, page.locator(`${at('hc')} .void-hover-card-body`), page.locator(`${at('hc')}-t`), 'the hover card');
+        await expectShownWhole(page, page.locator(`${at('hc')} void-hover-card-content`), page.locator(`${at('hc')}-t`), 'the hover card');
       });
 
       test('combobox', async ({ page }) => {
@@ -279,7 +279,7 @@ test.describe('overlays inside overflow: hidden, transformed and scrolled boxes'
         const host = kind === 'dialog' ? `#mdlg-${box}` : `#mdrw-${box}`;
         await page.locator(opener).scrollIntoViewIfNeeded();
         await page.locator(opener).click();
-        const panel = page.locator(`${host} > dialog`);
+        const panel = page.locator(`${host} [part="surface"]`);
         await expect(panel).toBeVisible();
         await expectPerceivable(page.locator(`${host} .mc`));
         const vp = page.viewportSize()!;
@@ -298,7 +298,7 @@ test.describe('overlays inside overflow: hidden, transformed and scrolled boxes'
         } else {
           expect(r!.height, 'a drawer spans the viewport height').toBeGreaterThanOrEqual(vp.height - 1);
         }
-        expect(await page.evaluate((h) => document.querySelector(h + ' > dialog')!.matches(':modal'), host)).toBe(true);
+        expect(await page.evaluate((h) => document.querySelector(h)!.shadowRoot!.querySelector('dialog')!.matches(':modal'), host)).toBe(true);
         await page.keyboard.press('Escape');
         await expect.poll(() => isOpen(page, host.slice(1))).toBe(false);
       });
@@ -313,10 +313,10 @@ test.describe('at every corner of the viewport', () => {
   ];
   const corners = ['tl', 'tr', 'bl', 'br'] as const;
   const kinds = {
-    pop: { trigger: '#pop-t', panel: '#pop > .void-popover-body', how: 'click' },
-    menu: { trigger: '#menu-t', panel: '#menu .void-dropdown-menu-panel', how: 'click' },
+    pop: { trigger: '#pop-t', panel: '#pop > void-popover-content', how: 'click' },
+    menu: { trigger: '#menu-t', panel: '#menu void-dropdown-menu-content', how: 'click' },
     tip: { trigger: '#tip-t', panel: '#tip [role=tooltip]', how: 'hover' },
-    card: { trigger: '#card-t', panel: '#card .void-hover-card-body', how: 'hover' },
+    card: { trigger: '#card-t', panel: '#card void-hover-card-content', how: 'hover' },
     combo: { trigger: '#combo input', panel: '#combo [role=listbox]', how: 'click' },
     multi: { trigger: '#multi .void-multiselect-trigger', panel: '#multi [role=listbox]', how: 'click' },
     date: { trigger: '#date input', panel: '#date [popover]', how: 'click' },
@@ -456,7 +456,7 @@ test.describe('a close the page cancels', () => {
       routes: [
         ['Escape', (p) => p.keyboard.press('Escape'), 'escape'],
         ['a press on the backdrop', (p) => p.mouse.click(5, 5), 'outside'],
-        ['the close button', (p) => p.locator('#form-dlg .void-dialog-close').click(), 'close-button'],
+        ['the close button', (p) => p.locator('#form-dlg [part="close"]').click(), 'close-button'],
       ],
     },
     {
@@ -468,7 +468,7 @@ test.describe('a close the page cancels', () => {
       routes: [
         ['Escape', (p) => p.keyboard.press('Escape'), 'escape'],
         ['a press on the backdrop', (p) => p.mouse.click(5, 400), 'outside'],
-        ['the close button', (p) => p.locator('#gone-drw .void-drawer-close').click(), 'close-button'],
+        ['the close button', (p) => p.locator('#gone-drw [part="close"]').click(), 'close-button'],
       ],
     },
     {
@@ -568,13 +568,13 @@ test.describe('the reason on every way to close', () => {
   const routes: Route[] = [
     ['dialog: Escape', (p) => p.locator('#open-form').click(), (p) => p.keyboard.press('Escape'), 'form-dlg', 'escape', true],
     ['dialog: backdrop', (p) => p.locator('#open-form').click(), (p) => p.mouse.click(5, 5), 'form-dlg', 'outside', true],
-    ['dialog: close button', (p) => p.locator('#open-form').click(), (p) => p.locator('#form-dlg .void-dialog-close').click(), 'form-dlg', 'close-button', true],
+    ['dialog: close button', (p) => p.locator('#open-form').click(), (p) => p.locator('#form-dlg [part="close"]').click(), 'form-dlg', 'close-button', true],
     ['dialog: method="dialog" form', (p) => p.locator('#open-form').click(), (p) => p.locator('#form-ok').click(), 'form-dlg', 'form', false],
     ['dialog: open = false', (p) => p.locator('#open-form').click(), (p) => setOpen(p, 'form-dlg', false), 'form-dlg', 'api', false],
     ['dialog: the attribute removed', (p) => p.locator('#open-form').click(), (p) => p.evaluate(() => document.getElementById('form-dlg')!.removeAttribute('open')), 'form-dlg', 'api', false],
     ['drawer: Escape', (p) => p.locator('#gone-drw-opener').click(), (p) => p.keyboard.press('Escape'), 'gone-drw', 'escape', true],
     ['drawer: backdrop', (p) => p.locator('#gone-drw-opener').click(), (p) => p.mouse.click(5, 400), 'gone-drw', 'outside', true],
-    ['drawer: close button', (p) => p.locator('#gone-drw-opener').click(), (p) => p.locator('#gone-drw .void-drawer-close').click(), 'gone-drw', 'close-button', true],
+    ['drawer: close button', (p) => p.locator('#gone-drw-opener').click(), (p) => p.locator('#gone-drw [part="close"]').click(), 'gone-drw', 'close-button', true],
     ['drawer: open = false', (p) => p.locator('#gone-drw-opener').click(), (p) => setOpen(p, 'gone-drw', false), 'gone-drw', 'api', false],
     ['popover: Escape', (p) => p.locator('#pop-t').click(), (p) => p.keyboard.press('Escape'), 'pop', 'escape', true],
     ['popover: outside click', (p) => p.locator('#pop-t').click(), (p) => p.mouse.click(1200, 20), 'pop', 'outside', true],
@@ -650,7 +650,7 @@ test.describe('fifty cycles leave nothing behind', () => {
         await expect(p.locator('#form-dlg > dialog')).toBeVisible();
         const route = i % 4;
         if (route === 0) await p.keyboard.press('Escape');
-        if (route === 1) await p.locator('#form-dlg .void-dialog-close').click();
+        if (route === 1) await p.locator('#form-dlg [part="close"]').click();
         if (route === 2) await p.mouse.click(5, 5);
         if (route === 3) await p.locator('#form-ok').click();
         await expect.poll(() => isOpen(p, 'form-dlg')).toBe(false);
@@ -664,7 +664,7 @@ test.describe('fifty cycles leave nothing behind', () => {
         await expect(p.locator('#gone-drw > dialog')).toBeVisible();
         const route = i % 3;
         if (route === 0) await p.keyboard.press('Escape');
-        if (route === 1) await p.locator('#gone-drw .void-drawer-close').click();
+        if (route === 1) await p.locator('#gone-drw [part="close"]').click();
         if (route === 2) await p.mouse.click(5, 400);
         await expect.poll(() => isOpen(p, 'gone-drw')).toBe(false);
       },
@@ -674,7 +674,7 @@ test.describe('fifty cycles leave nothing behind', () => {
       id: 'pop',
       one: async (p, i) => {
         await p.locator('#pop-t').click();
-        await expect(p.locator('#pop > .void-popover-body')).toBeVisible();
+        await expect(p.locator('#pop > void-popover-content')).toBeVisible();
         const route = i % 3;
         if (route === 0) await p.keyboard.press('Escape');
         if (route === 1) await p.mouse.click(1200, 20);
@@ -810,9 +810,9 @@ test.describe('through a morph with an overlay open', () => {
   const page$ = (v: number, opts: { dialog?: boolean } = {}) => `<div id="app">
   <button id="before">before</button>
   <void-button id="open-d" onclick="document.getElementById('d').open = true">Open</void-button>
-  <void-dialog id="d" heading="Dialog v${v}"${opts.dialog ? ' open' : ''}><p class="dc">Dialog body v${v}</p><input id="d-in" aria-label="Name"><void-button id="d-ok">OK</void-button></void-dialog>
-  <void-popover id="p"><button slot="trigger" id="p-t">Popover</button><div class="pc" style="width: 200px">Popover body v${v} <button id="p-in">in</button></div></void-popover>
-  <void-dropdown-menu id="m"><button slot="trigger" id="m-t">Menu v${v}</button><void-dropdown-menu-item id="m-1">One v${v}</void-dropdown-menu-item><void-dropdown-menu-item>Two</void-dropdown-menu-item></void-dropdown-menu>
+  <void-dialog id="d"${opts.dialog ? ' open' : ''}><void-dialog-title>Dialog v${v}</void-dialog-title><void-dialog-body><p class="dc">Dialog body v${v}</p><input id="d-in" aria-label="Name"></void-dialog-body><void-dialog-actions><void-button id="d-ok">OK</void-button></void-dialog-actions></void-dialog>
+  <void-popover id="p"><void-popover-trigger><button id="p-t">Popover</button></void-popover-trigger><void-popover-content><div class="pc" style="width: 200px">Popover body v${v} <button id="p-in">in</button></div></void-popover-content></void-popover>
+  <void-dropdown-menu id="m"><void-dropdown-menu-trigger><button id="m-t">Menu v${v}</button></void-dropdown-menu-trigger><void-dropdown-menu-content><void-dropdown-menu-item id="m-1">One v${v}</void-dropdown-menu-item><void-dropdown-menu-item>Two</void-dropdown-menu-item></void-dropdown-menu-content></void-dropdown-menu>
   <p id="v">Server version ${v}</p>
 </div>`;
   const render = (page: Page, html: string) => page.evaluate((h) => (window as any).__morph.render(h), html);
@@ -843,7 +843,7 @@ test.describe('through a morph with an overlay open', () => {
           expect(await page.evaluate(() => (document.getElementById('d') as any).open), `dialog open after repeat ${i + 1}`).toBe(true);
           expect(await insideOf(page, 'd'), 'focus stays in the dialog').toBe(true);
           expect(await scrollLocked(page), 'still locked').toBe(true);
-          expect(await page.evaluate(() => document.querySelectorAll('dialog:modal').length)).toBe(1);
+          expect(await page.evaluate(() => [...document.querySelectorAll('void-dialog, void-drawer')].filter((h) => h.shadowRoot?.querySelector('dialog')?.matches(':modal')).length)).toBe(1);
         }
         await page.keyboard.press('Escape');
         await expect.poll(() => page.evaluate(() => (document.getElementById('d') as any).open)).toBe(false);
@@ -867,7 +867,7 @@ test.describe('through a morph with an overlay open', () => {
         await expect.poll(() => insideOf(page, 'd')).toBe(true);
         await morph(page, page$(2));
         await expect(page.locator('#d .dc')).toHaveText('Dialog body v2');
-        await expect(page.locator('#d .void-dialog-heading')).toHaveText('Dialog v2');
+        await expect(page.locator('#d void-dialog-title')).toHaveText('Dialog v2');
         expect(await page.evaluate(() => (document.getElementById('d') as any).open)).toBe(true);
         expect(await insideOf(page, 'd')).toBe(true);
         expect(await scrollLocked(page)).toBe(true);
@@ -891,7 +891,7 @@ test.describe('through a morph with an overlay open', () => {
         await expect.poll(() => page.evaluate(() => (document.getElementById('d') as any).open)).toBe(true);
         await expect.poll(() => insideOf(page, 'd')).toBe(true);
         expect(await scrollLocked(page)).toBe(true);
-        expect(await page.evaluate(() => document.querySelector('#d > dialog')!.matches(':modal'))).toBe(true);
+        expect(await page.evaluate(() => document.getElementById('d')!.shadowRoot!.querySelector('dialog')!.matches(':modal'))).toBe(true);
         // And one that stops rendering it open closes it again, with the lock.
         await morph(page, page$(3));
         await expect.poll(() => scrollLocked(page)).toBe(false);

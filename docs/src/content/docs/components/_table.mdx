@@ -134,10 +134,12 @@ Nothing in `<void-table>` clips by default, so a table that is wider than its co
             <td>Alice Morgan</td><td>Engineer</td><td>Platform</td><td>Berlin</td><td>Jan 2023</td><td>Senior</td><td>Ben Okafor</td><td>120,000</td>
             <td>
               <void-dropdown-menu position="bottom" align="end">
-                <void-button slot="trigger" variant="ghost" size="sm" aria-label="Actions for Alice Morgan">More</void-button>
-                <void-dropdown-menu-item>Edit</void-dropdown-menu-item>
-                <void-dropdown-menu-item>Duplicate</void-dropdown-menu-item>
-                <void-dropdown-menu-item destructive>Delete</void-dropdown-menu-item>
+                <void-dropdown-menu-trigger><void-button variant="ghost" size="sm" aria-label="Actions for Alice Morgan">More</void-button></void-dropdown-menu-trigger>
+                <void-dropdown-menu-content>
+                  <void-dropdown-menu-item>Edit</void-dropdown-menu-item>
+                  <void-dropdown-menu-item>Duplicate</void-dropdown-menu-item>
+                  <void-dropdown-menu-item destructive>Delete</void-dropdown-menu-item>
+                </void-dropdown-menu-content>
               </void-dropdown-menu>
             </td>
           </tr>
@@ -145,10 +147,12 @@ Nothing in `<void-table>` clips by default, so a table that is wider than its co
             <td>Ben Okafor</td><td>Designer</td><td>Product</td><td>Lagos</td><td>Mar 2023</td><td>Lead</td><td>Clara Shen</td><td>110,000</td>
             <td>
               <void-dropdown-menu position="bottom" align="end">
-                <void-button slot="trigger" variant="ghost" size="sm" aria-label="Actions for Ben Okafor">More</void-button>
-                <void-dropdown-menu-item>Edit</void-dropdown-menu-item>
-                <void-dropdown-menu-item>Duplicate</void-dropdown-menu-item>
-                <void-dropdown-menu-item destructive>Delete</void-dropdown-menu-item>
+                <void-dropdown-menu-trigger><void-button variant="ghost" size="sm" aria-label="Actions for Ben Okafor">More</void-button></void-dropdown-menu-trigger>
+                <void-dropdown-menu-content>
+                  <void-dropdown-menu-item>Edit</void-dropdown-menu-item>
+                  <void-dropdown-menu-item>Duplicate</void-dropdown-menu-item>
+                  <void-dropdown-menu-item destructive>Delete</void-dropdown-menu-item>
+                </void-dropdown-menu-content>
               </void-dropdown-menu>
             </td>
           </tr>
@@ -198,24 +202,34 @@ Nothing in `<void-table>` clips by default, so a table that is wider than its co
 A card pads its content, which doubles the padding of a table's first and last columns and stops its dividers short of the card's edge. `inset` bleeds the table out of the container's padding (`--void-card-padding`, else `--void-container-padding`) and pads its first and last columns back in by the same amount, so dividers, stripes and hover fills run to the edge and the text stays on the content edge.
 
 <div class="vd-example not-content">
-  <void-card heading="Team">
-    <void-table inset hoverable>
-      <table>
-        <thead>
-          <tr><th>Name</th><th>Role</th><th data-align="end">Seats</th></tr>
-        </thead>
-        <tbody>
-          <tr><td>Alice Morgan</td><td>Engineer</td><td>4</td></tr>
-          <tr><td>Ben Okafor</td><td>Designer</td><td>2</td></tr>
-        </tbody>
-      </table>
-    </void-table>
+  <void-card>
+    <void-card-header>
+      <void-card-title>Team</void-card-title>
+    </void-card-header>
+    <void-card-body>
+      <void-table inset hoverable>
+        <table>
+          <thead>
+            <tr><th>Name</th><th>Role</th><th data-align="end">Seats</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Alice Morgan</td><td>Engineer</td><td>4</td></tr>
+            <tr><td>Ben Okafor</td><td>Designer</td><td>2</td></tr>
+          </tbody>
+        </table>
+      </void-table>
+    </void-card-body>
   </void-card>
 </div>
 
 ```html
-<void-card heading="Team">
-  <void-table inset hoverable>…</void-table>
+<void-card>
+  <void-card-header>
+    <void-card-title>Team</void-card-title>
+  </void-card-header>
+  <void-card-body>
+    <void-table inset hoverable>…</void-table>
+  </void-card-body>
 </void-card>
 ```
 

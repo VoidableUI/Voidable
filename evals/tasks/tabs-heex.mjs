@@ -5,7 +5,7 @@ export default {
   id: 'tabs-heex',
   title: 'Tabs holding different content',
   format: 'heex',
-  components: ['void-tabs', 'void-tab-panel', 'void-list', 'void-list-item', 'void-switch'],
+  components: ['void-tabs', 'void-list', 'void-list-item', 'void-switch'],
   prompt: `Write the project page for @project. Under the project name, show three tabs: "Overview" (selected first) shows @project.description; "Activity" lists each entry of @activity as "<actor> <action>" (e.g. "Ada pushed 3 commits"); "Settings" has a "Public project" switch reflecting @project.public. Only the selected tab's content is visible.
 
 Assigns: @project is a map with :name, :description and :public; @activity is a list of maps with :actor and :action.`,

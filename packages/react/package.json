@@ -18,9 +18,9 @@
   },
   "files": ["dist"],
   "scripts": {
-    "build": "vite build",
-    "test": "vitest run",
-    "typecheck": "tsc --noEmit"
+    "build": "node scripts/parts.mjs && vite build",
+    "test": "node scripts/parts.mjs && vitest run",
+    "typecheck": "node scripts/parts.mjs && tsc --noEmit"
   },
   "peerDependencies": {
     "@voidable/ui": "workspace:*",

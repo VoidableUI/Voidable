@@ -1,20 +1,20 @@
-import { html } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
 import { OverlayController } from '../overlay.js';
-import { ProjectionController, triggerRegion } from '../projection.js';
+import { PartsController, triggerControl } from '../parts.js';
 
 /**
  * Anchored overlay for contextual detail and mini-forms that need more room than a tooltip.
  *
- * A non-modal dialog shown in the top layer (the Popover API), so no `overflow` or `transform` of an ancestor clips
- * it, placed next to its trigger with CSS anchor positioning (flipping at viewport edges; a JavaScript positioner
- * where anchor positioning is missing). Opening it from the trigger moves focus to its first focusable element;
- * Escape, a press outside it, or focus leaving it closes it and focus returns to the trigger. The trigger gets
- * `aria-haspopup="dialog"`, `aria-expanded` and `aria-controls`.
+ * Two parts: `<void-popover-trigger>` around the control that toggles it (one element: a `<void-button>`, a
+ * `<button>`), and `<void-popover-content>`, the panel. The parts are the final DOM; the popover only adds
+ * behaviour. The content is a non-modal dialog shown in the top layer (the Popover API), so no `overflow` or
+ * `transform` of an ancestor clips it, placed next to the trigger with CSS anchor positioning (flipping at
+ * viewport edges; a JavaScript positioner where anchor positioning is missing). Opening it from the trigger moves
+ * focus to its first focusable element; Escape, a press outside it, or focus leaving it closes it and focus
+ * returns to the trigger. The trigger's control gets `aria-haspopup="dialog"`, `aria-expanded` and
+ * `aria-controls`, and names the content.
  *
- * @slot trigger - The element that toggles the popover. Mark it with `slot="trigger"`; without one, the first child element is used.
- * @slot - Popover content.
  * @fires {CustomEvent<{ reason: 'trigger' | 'api' }>} void-open - The popover opened.
  * @fires {CustomEvent<{ reason: 'trigger' | 'escape' | 'outside' | 'blur' | 'parent' | 'api' }>} void-close - The
  * popover is closing. Cancelable when the user caused it (every reason but `parent` and `api`).
@@ -29,35 +29,43 @@ export class VoidPopover extends VoidElement {
   /** `click` toggles on trigger clicks; `manual` leaves opening to the `open` attribute or property. */
   @property({ type: String, reflect: true }) trigger: 'click' | 'manual' = 'click';
 
-  // The trigger (slot="trigger", else the first element child) stays the host's first child; everything else goes into the body.
-  protected readonly _projection: ProjectionController = new ProjectionController(this, {
-    regions: [
-      triggerRegion('trigger', 'before', () => this._projection, this),
-      { name: 'body', target: () => this.querySelector(':scope > .void-popover-body') },
-    ],
-    // Trigger ARIA follows the trigger, including one the parser adds after the first render.
-    onChange: () => this.requestUpdate(),
+  protected readonly _parts = new PartsController(this, {
+    tags: ['void-popover-trigger', 'void-popover-content'],
+    onChange: () => {
+      this._wire();
+      this.requestUpdate();
+    },
   });
 
   protected readonly _overlay = new OverlayController(this, {
     kind: 'dialog',
-    surface: () => this.querySelector<HTMLElement>(':scope > .void-popover-body'),
+    surface: () => this._parts.one('void-popover-content'),
     isOpen: () => this.open,
     setOpen: open => {
       this.open = open;
     },
-    trigger: () => this._triggerEl,
+    trigger: () => this._control(),
     haspopup: 'dialog',
     anchor: () => this,
     hostStyle: (p, v) => this.setHostStyle(p, v),
     placement: () => ({ side: this.position, align: this.align }),
+    attr: (el, name, value) => this._parts.set(el, name, value),
+    style: (el, p, v) => this._parts.style(el, p, v),
   });
 
-  /** Given to a trigger without an id, so the body can be named by it (re-applied after a morph strips it). */
-  private readonly _triggerId = `void-popover-trigger-${Math.random().toString(36).slice(2, 10)}`;
+  private _control(): HTMLElement | null {
+    return triggerControl(this._parts.one('void-popover-trigger'));
+  }
 
-  private get _triggerEl(): HTMLElement | null {
-    return (this._projection.nodes('trigger').find(n => n instanceof HTMLElement) as HTMLElement | undefined) ?? null;
+  /** The content is a non-modal dialog in the top layer, named by the trigger's control. */
+  private _wire(): void {
+    const content = this._parts.one('void-popover-content');
+    const control = this._control();
+    if (!content) return;
+    this._parts.set(content, 'popover', 'manual');
+    this._parts.set(content, 'role', 'dialog');
+    this._parts.id(content, 'void-popover-content');
+    this._parts.set(content, 'aria-labelledby', control ? this._parts.id(control, 'void-popover-trigger') : null);
   }
 
   connectedCallback(): void {
@@ -71,25 +79,8 @@ export class VoidPopover extends VoidElement {
     this.removeEventListener('click', this._handleTriggerClick);
   }
 
-  protected override updated(changed: Map<string, unknown>): void {
-    super.updated(changed);
-    // The body is a non-modal dialog named by its trigger.
-    const body = this.querySelector(':scope > .void-popover-body');
-    const trigger = this._triggerEl;
-    if (body && trigger) {
-      if (!trigger.id) trigger.id = this._triggerId;
-      if (body.getAttribute('aria-labelledby') !== trigger.id) body.setAttribute('aria-labelledby', trigger.id);
-    }
-  }
-
-  render() {
-    // The body carries its accessible name (aria-labelledby the trigger) from updated().
-    // eslint-disable-next-line lit-a11y/accessible-name
-    return html`<div class="void-popover-body" popover="manual" role="dialog"></div>`;
-  }
-
   private _handleTriggerClick = (e: Event): void => {
-    const trigger = this._triggerEl;
+    const trigger = this._parts.one('void-popover-trigger');
     if (this.trigger !== 'click' || !trigger || !trigger.contains(e.target as Node)) return;
     this._overlay.toggle('trigger');
   };

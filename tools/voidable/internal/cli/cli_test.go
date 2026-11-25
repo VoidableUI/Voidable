@@ -50,9 +50,20 @@ func TestCheckFixtures(t *testing.T) {
 			`App.tsx:5:42: [unknown-event] <void-button> does not dispatch void-change; it dispatches void-click`,
 		}, []string{"collapsedWidth", "collapsed-width", "className", "void-toggle", "self-closing", "placeholder"}},
 		{"index.astro", []string{
-			`index.astro:5:37: [unknown-attribute] unknown attribute value on <void-tab-panel>; valid: tab, label, active`,
+			`index.astro:5:21: [legacy-markup] <void-tab-panel> no longer exists; write the tabs as <void-tabs-list>`,
 			`index.astro:7:13: [invalid-value] color="primary" is not valid on <void-badge>`,
-		}, []string{"client:load", "size"}},
+		}, []string{"client:load", "size", "missing-part"}},
+		{"parts.html", []string{
+			`parts.html:1:1: [missing-part] <void-popover> has no <void-popover-trigger>`,
+			`parts.html:1:1: [missing-part] <void-popover> has no <void-popover-content>`,
+			`parts.html:2:3: [unknown-child] <void-button> is not a part of <void-popover>, which takes only <void-popover-trigger>, <void-popover-content>; wrap the button in <void-popover-trigger>`,
+			`parts.html:5:14: [unknown-attribute] unknown attribute heading on <void-dialog>; write the title as the first child: <void-dialog-title>`,
+			`parts.html:5:1: [part-misuse] the parts of <void-dialog> are out of order; write them as <void-dialog-title>, <void-dialog-actions>, in that order`,
+			`parts.html:9:1: [missing-part] <void-tabs> has no <void-tabs-content>`,
+			`parts.html:12:15: [unknown-attribute] unknown attribute text on <void-tooltip>`,
+			`parts.html:13:1: [missing-part] <void-card> has no <void-card-body>`,
+			`parts.html:13:12: [invalid-parent] <void-dialog-title> is not valid inside <void-card>`,
+		}, nil},
 	}
 	for _, tt := range tests {
 		t.Run(tt.file, func(t *testing.T) {
@@ -103,8 +114,8 @@ func TestRefAndGen(t *testing.T) {
 		{[]string{"ref"}, []string{"elements.", "void-button Action trigger"}},
 		{[]string{"ref", "void-button", "--format", "markdown"}, []string{"## `<void-button>`", "| `variant` | `outline\\|filled\\|ghost` |"}},
 		{[]string{"ref", "void-button", "--format", "json"}, []string{`"tag": "void-button"`, `"values": [`}},
-		{[]string{"ref", "--size"}, []string{"text     index", "102 elements"}},
-		{[]string{"gen", "snippet", "void-dialog", "--lang", "jsx"}, []string{`<void-dialog heading="Delete project" size="sm" onvoid-close=`, `<void-button color="error" variant="filled">Delete</void-button>`}},
+		{[]string{"ref", "--size"}, []string{"text     index", "130 elements"}},
+		{[]string{"gen", "snippet", "void-dialog", "--lang", "jsx"}, []string{`<void-dialog size="sm" onvoid-close=`, `<void-dialog-title>Delete project</void-dialog-title>`, `<void-button color="error" variant="filled">Delete</void-button>`}},
 		{[]string{"gen", "snippet", "void-dropdown-menu", "--lang", "erb"}, []string{`data-action="void-select->my-controller#handle"`}},
 		{[]string{"gen", "heex"}, []string{"defmodule VoidableUI.Components do", "def status_dot(assigns) do"}},
 		{[]string{"gen", "blade"}, []string{"==> resources/views/components/button.blade.php <=="}},

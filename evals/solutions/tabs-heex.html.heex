@@ -1,16 +1,21 @@
 <main style="max-width: 48rem; margin: 0 auto; padding: var(--void-space-4);">
   <h1>{@project.name}</h1>
   <void-tabs value="overview">
-    <void-tab-panel tab="overview" label="Overview">
+    <void-tabs-list>
+      <void-tabs-trigger value="overview">Overview</void-tabs-trigger>
+      <void-tabs-trigger value="activity">Activity</void-tabs-trigger>
+      <void-tabs-trigger value="settings">Settings</void-tabs-trigger>
+    </void-tabs-list>
+    <void-tabs-content value="overview">
       <p>{@project.description}</p>
-    </void-tab-panel>
-    <void-tab-panel tab="activity" label="Activity">
+    </void-tabs-content>
+    <void-tabs-content value="activity">
       <void-list dividers>
         <void-list-item :for={entry <- @activity}>{entry.actor} {entry.action}</void-list-item>
       </void-list>
-    </void-tab-panel>
-    <void-tab-panel tab="settings" label="Settings">
+    </void-tabs-content>
+    <void-tabs-content value="settings">
       <void-switch name="public" checked={@project.public}>Public project</void-switch>
-    </void-tab-panel>
+    </void-tabs-content>
   </void-tabs>
 </main>

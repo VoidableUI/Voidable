@@ -12,15 +12,15 @@
       `<void-input name="i${i}" value="v${i}" aria-label="Input ${i}"></void-input>`,
       `<void-badge color="info">B${i}</void-badge>`,
       `<void-checkbox name="c${i}">Check ${i}</void-checkbox>`,
-      `<void-card heading="Card ${i}"><p>Body ${i}</p></void-card>`,
+      `<void-card><void-card-header><void-card-title>Card ${i}</void-card-title></void-card-header><void-card-body><p>Body ${i}</p></void-card-body></void-card>`,
       `<void-select name="s${i}" aria-label="Select ${i}"><option value="a">A</option><option value="b">B</option></void-select>`,
       `<void-switch>S${i}</void-switch>`,
       `<void-tag>T${i}</void-tag>`,
-      `<void-alert color="info">Alert ${i}</void-alert>`,
-      `<void-dropdown-menu><button slot="trigger">M${i}</button><void-dropdown-menu-item>One</void-dropdown-menu-item><void-dropdown-menu-item>Two</void-dropdown-menu-item></void-dropdown-menu>`,
+      `<void-alert color="info"><void-alert-description>Alert ${i}</void-alert-description></void-alert>`,
+      `<void-dropdown-menu><void-dropdown-menu-trigger><button>M${i}</button></void-dropdown-menu-trigger><void-dropdown-menu-content><void-dropdown-menu-item>One</void-dropdown-menu-item><void-dropdown-menu-item>Two</void-dropdown-menu-item></void-dropdown-menu-content></void-dropdown-menu>`,
     ][i % 10];
   const ROWS = (n, v) =>
-    `<void-table><table><tbody>${Array.from({ length: n }, (_, i) => `<tr id="row-${i}"><td>Row ${i} ${i === 7 ? v : ''}</td><td><void-badge color="${i % 2 ? 'success' : 'info'}">${i % 2 ? 'Active' : 'Idle'}</void-badge></td><td><void-button size="sm">Edit</void-button><void-button size="sm" color="error">Delete</void-button></td><td><void-dropdown-menu><button slot="trigger" aria-label="Actions">⋯</button><void-dropdown-menu-item>Rename</void-dropdown-menu-item><void-dropdown-menu-item>Archive</void-dropdown-menu-item><void-dropdown-menu-item destructive>Delete</void-dropdown-menu-item></void-dropdown-menu></td></tr>`).join('')}</tbody></table></void-table>`;
+    `<void-table><table><tbody>${Array.from({ length: n }, (_, i) => `<tr id="row-${i}"><td>Row ${i} ${i === 7 ? v : ''}</td><td><void-badge color="${i % 2 ? 'success' : 'info'}">${i % 2 ? 'Active' : 'Idle'}</void-badge></td><td><void-button size="sm">Edit</void-button><void-button size="sm" color="error">Delete</void-button></td><td><void-dropdown-menu><void-dropdown-menu-trigger><button aria-label="Actions">⋯</button></void-dropdown-menu-trigger><void-dropdown-menu-content><void-dropdown-menu-item>Rename</void-dropdown-menu-item><void-dropdown-menu-item>Archive</void-dropdown-menu-item><void-dropdown-menu-item destructive>Delete</void-dropdown-menu-item></void-dropdown-menu-content></void-dropdown-menu></td></tr>`).join('')}</tbody></table></void-table>`;
 
   const timed = async (fn) => {
     const t0 = now();
@@ -59,7 +59,7 @@
         t.innerHTML = ROWS(500, 'b');
         Turbo.morphChildren(root, t);
       });
-      const intact = { rows: root.querySelectorAll('tr').length, menus: root.querySelectorAll('.void-dropdown-menu-panel').length, row7: root.querySelector('#row-7 td').textContent.trim() };
+      const intact = { rows: root.querySelectorAll('tr').length, menus: root.querySelectorAll('void-dropdown-menu-content').length, row7: root.querySelector('#row-7 td').textContent.trim() };
       await clear();
       return { first, morph, intact };
     },
@@ -73,7 +73,7 @@
       return { ms, value };
     },
     async dialog200() {
-      root.innerHTML = '<void-dialog id="dlg" heading="Perf"><p>Body</p><input aria-label="x"><void-button>OK</void-button></void-dialog>';
+      root.innerHTML = '<void-dialog id="dlg"><void-dialog-title>Perf</void-dialog-title><void-dialog-body><p>Body</p><input aria-label="x"></void-dialog-body><void-dialog-actions><void-button>OK</void-button></void-dialog-actions></void-dialog>';
       await window.__settle(root);
       const d = document.getElementById('dlg');
       const cycle = async (n) => {

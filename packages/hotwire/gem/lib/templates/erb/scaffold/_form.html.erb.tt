@@ -1,12 +1,14 @@
 <%%= form_with(model: <%= model_resource_name %>) do |form| %>
   <%% if <%= singular_table_name %>.errors.any? %>
     <void-alert color="error" class="form-errors">
-      <strong><%%= pluralize(<%= singular_table_name %>.errors.count, "error") %> prohibited this <%= singular_table_name %> from being saved:</strong>
-      <ul class="form-error-list">
-        <%% <%= singular_table_name %>.errors.each do |error| %>
-          <li><%%= error.full_message %></li>
-        <%% end %>
-      </ul>
+      <void-alert-title><%%= pluralize(<%= singular_table_name %>.errors.count, "error") %> prohibited this <%= singular_table_name %> from being saved</void-alert-title>
+      <void-alert-description>
+        <ul class="form-error-list">
+                <%% <%= singular_table_name %>.errors.each do |error| %>
+                  <li><%%= error.full_message %></li>
+                <%% end %>
+              </ul>
+      </void-alert-description>
     </void-alert>
   <%% end %>
 

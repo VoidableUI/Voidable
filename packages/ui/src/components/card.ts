@@ -1,30 +1,22 @@
-import { html, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
-import { ProjectionController } from '../projection.js';
 
-/** Content grouping container for dashboard widgets, product listings, and media previews. */
+/**
+ * Content grouping container for dashboard widgets, product listings, and media previews.
+ *
+ * Its regions are parts, in this order: an optional `<void-card-header>` (holding a `<void-card-title>` and an
+ * optional `<void-card-description>`), the `<void-card-body>`, and an optional `<void-card-footer>`. The parts are
+ * CSS-only and the card renders nothing of its own, so the markup looks the same before and after the script
+ * loads and survives any morph or re-render.
+ */
 export class VoidCard extends VoidElement {
-  /** Text of the card's header row. Leave it out for a card with no header. */
-  @property({ type: String }) heading = '';
   /** Surface style: `default`, `elevated` (lifted, with a shadow) or `bordered` (a visible border). */
   @property({ type: String, reflect: true }) variant: 'default' | 'elevated' | 'bordered' = 'default';
   /**
-   * Space around the card body: `none`, `sm`, `md` (default) or `lg`. Use `none` for edge-to-edge
+   * Space around the card's parts: `none`, `sm`, `md` (default) or `lg`. Use `none` for edge-to-edge
    * content such as a table or an image.
    */
   @property({ type: String, reflect: true }) padding: 'none' | 'sm' | 'md' | 'lg' = 'md';
-
-  // Consumer content is projected into the card body.
-  protected readonly _projection = new ProjectionController(this, {
-    regions: [{ name: 'body', target: () => this.querySelector(':scope > .void-card-body') }],
-  });
-
-  render() {
-    return html`${this.heading
-      ? html`<div class="void-card-header"><span class="void-card-heading">${this.heading}</span></div>`
-      : nothing}<div class="void-card-body"></div>`;
-  }
 }
 
 if (!customElements.get('void-card')) {

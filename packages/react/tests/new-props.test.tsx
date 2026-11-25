@@ -1,11 +1,11 @@
 import { describe, it, expect, afterEach } from 'vitest';
 import React, { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
-import { Card, Pagination, Popover, DropdownMenu, DropdownMenuItem, Select, SegmentedControl, Switch, Button } from '../src/index.js';
+import { Card, Pagination, Popover, DropdownMenu, DropdownMenuItem, Select, SegmentedControl, Switch, Button, PopoverTrigger, PopoverContent, CardHeader, CardTitle, CardBody, DropdownMenuTrigger, DropdownMenuContent } from '../src/index.js';
 import type { VoidPagination, VoidSegmentedControl, VoidSwitch, VoidDropdownMenu } from '@voidable/ui';
 
 // Props added in core by #37 (align, scrollable, link mode), #5 (form props)
-// and #4 (slot="trigger") reach the element through the wrappers.
+// and #4 (triggers, now explicit parts, #52) reach the element through the wrappers.
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
@@ -34,10 +34,17 @@ describe('new core props', () => {
     const c = await render(
       <>
         <Popover align="end">
-          <Button slot="trigger">T</Button>
-          Body
+          <PopoverTrigger>
+            <Button>T</Button>
+          </PopoverTrigger>
+          <PopoverContent>Body</PopoverContent>
         </Popover>
-        <Card scrollable heading="h">x</Card>
+        <Card scrollable>
+          <CardHeader>
+            <CardTitle>h</CardTitle>
+          </CardHeader>
+          <CardBody>x</CardBody>
+        </Card>
       </>,
     );
     expect(c.querySelector('void-popover')!.getAttribute('align')).toBe('end');
@@ -72,11 +79,15 @@ describe('new core props', () => {
     expect([sw.name, sw.value, sw.required]).toEqual(['sw', 'yes', true]);
   });
 
-  it('slot="trigger" picks the DropdownMenu trigger', async () => {
+  it('the DropdownMenuTrigger part opens the menu, wherever React puts it (#52)', async () => {
     const c = await render(
       <DropdownMenu>
-        <DropdownMenuItem>One</DropdownMenuItem>
-        <Button slot="trigger">Actions</Button>
+        <DropdownMenuContent>
+          <DropdownMenuItem>One</DropdownMenuItem>
+        </DropdownMenuContent>
+        <DropdownMenuTrigger>
+          <Button>Actions</Button>
+        </DropdownMenuTrigger>
       </DropdownMenu>,
     );
     const menu = c.querySelector('void-dropdown-menu') as VoidDropdownMenu;

@@ -67,65 +67,70 @@ const closeDelete = (e: Event) => {
 
 const showCard = html`
   <void-card>
-    <div style="padding: var(--void-space-5);">
-      <!-- Details -->
-      <p style="${sectionLabelStyles}">Details</p>
-      <dl style="${dlStyles}">
-        <dt style="${dtStyles}">Name</dt>
-        <dd style="${ddStyles}">Widget Pro</dd>
+    <void-card-body>
+      <div style="padding: var(--void-space-5);">
+        <!-- Details -->
+        <p style="${sectionLabelStyles}">Details</p>
+        <dl style="${dlStyles}">
+          <dt style="${dtStyles}">Name</dt>
+          <dd style="${ddStyles}">Widget Pro</dd>
 
-        <dt style="${dtStyles}">Description</dt>
-        <dd style="${ddStyles}">A premium widget for discerning users.</dd>
+          <dt style="${dtStyles}">Description</dt>
+          <dd style="${ddStyles}">A premium widget for discerning users.</dd>
 
-        <dt style="${dtStyles}">Category</dt>
-        <dd style="${ddStyles}">Electronics</dd>
-      </dl>
+          <dt style="${dtStyles}">Category</dt>
+          <dd style="${ddStyles}">Electronics</dd>
+        </dl>
 
-      <hr style="${sectionDividerStyles}">
+        <hr style="${sectionDividerStyles}">
 
-      <!-- Pricing & Inventory -->
-      <p style="${sectionLabelStyles}">Pricing &amp; Inventory</p>
-      <dl style="${dlStyles}">
-        <dt style="${dtStyles}">Price</dt>
-        <dd style="font-family: var(--void-font-mono); font-size: var(--void-text-sm); color: var(--void-color-text); margin: 0;">$29.99</dd>
+        <!-- Pricing & Inventory -->
+        <p style="${sectionLabelStyles}">Pricing &amp; Inventory</p>
+        <dl style="${dlStyles}">
+          <dt style="${dtStyles}">Price</dt>
+          <dd style="font-family: var(--void-font-mono); font-size: var(--void-text-sm); color: var(--void-color-text); margin: 0;">$29.99</dd>
 
-        <dt style="${dtStyles}">Quantity</dt>
-        <dd style="font-family: var(--void-font-mono); font-size: var(--void-text-sm); color: var(--void-color-text); margin: 0;">150</dd>
+          <dt style="${dtStyles}">Quantity</dt>
+          <dd style="font-family: var(--void-font-mono); font-size: var(--void-text-sm); color: var(--void-color-text); margin: 0;">150</dd>
 
-        <dt style="${dtStyles}">Weight</dt>
-        <dd style="font-family: var(--void-font-mono); font-size: var(--void-text-sm); color: var(--void-color-text); margin: 0;">0.5 kg</dd>
-      </dl>
+          <dt style="${dtStyles}">Weight</dt>
+          <dd style="font-family: var(--void-font-mono); font-size: var(--void-text-sm); color: var(--void-color-text); margin: 0;">0.5 kg</dd>
+        </dl>
 
-      <hr style="${sectionDividerStyles}">
+        <hr style="${sectionDividerStyles}">
 
-      <!-- Status & Dates -->
-      <p style="${sectionLabelStyles}">Status &amp; Dates</p>
-      <dl style="${dlStyles}">
-        <dt style="${dtStyles}">Active</dt>
-        <dd style="${ddStyles}"><void-badge color="success" variant="outline">Active</void-badge></dd>
+        <!-- Status & Dates -->
+        <p style="${sectionLabelStyles}">Status &amp; Dates</p>
+        <dl style="${dlStyles}">
+          <dt style="${dtStyles}">Active</dt>
+          <dd style="${ddStyles}"><void-badge color="success" variant="outline">Active</void-badge></dd>
 
-        <dt style="${dtStyles}">Release date</dt>
-        <dd style="${ddStyles}">2024-03-15</dd>
+          <dt style="${dtStyles}">Release date</dt>
+          <dd style="${ddStyles}">2024-03-15</dd>
 
-        <dt style="${dtStyles}">Published at</dt>
-        <dd style="${ddStyles}">2024-03-15 09:00</dd>
+          <dt style="${dtStyles}">Published at</dt>
+          <dd style="${ddStyles}">2024-03-15 09:00</dd>
 
-        <dt style="${dtStyles}">Available from</dt>
-        <dd style="${ddStyles}">08:00</dd>
-      </dl>
-    </div>
+          <dt style="${dtStyles}">Available from</dt>
+          <dd style="${ddStyles}">08:00</dd>
+        </dl>
+      </div>
+    </void-card-body>
   </void-card>
 `;
 
 const deleteDialog = html`
-  <void-dialog id="delete-dialog" heading="Delete product" size="sm">
-    <p style="font-family: var(--void-font-sans); font-size: var(--void-text-sm); color: var(--void-color-text); margin: 0 0 var(--void-space-4) 0;">
-      Are you sure you want to delete <strong>Widget Pro</strong>? This action cannot be undone.
-    </p>
-    <div style="display: flex; gap: var(--void-space-2); justify-content: flex-end;">
+  <void-dialog id="delete-dialog" size="sm">
+    <void-dialog-title>Delete product</void-dialog-title>
+    <void-dialog-body>
+      <p style="font-family: var(--void-font-sans); font-size: var(--void-text-sm); color: var(--void-color-text); margin: 0 0 var(--void-space-4) 0;">
+        Are you sure you want to delete <strong>Widget Pro</strong>? This action cannot be undone.
+      </p>
+    </void-dialog-body>
+    <void-dialog-actions>
       <void-button variant="ghost" size="sm" @click="${closeDelete}">Cancel</void-button>
       <void-button color="error" size="sm" @click="${closeDelete}">Delete</void-button>
-    </div>
+    </void-dialog-actions>
   </void-dialog>
 `;
 
@@ -142,10 +147,12 @@ export const Default: Story = {
         <div style="display: flex; justify-content: space-between; align-items: center;">
           <h1 style="margin: 0; font-family: var(--void-font-sans); color: var(--void-color-text);">Widget Pro</h1>
           <void-dropdown-menu align="end">
-            <void-button variant="outline" size="sm">Actions</void-button>
-            <void-dropdown-menu-item>Edit</void-dropdown-menu-item>
-            <hr>
-            <void-dropdown-menu-item destructive @click="${openDelete}">Delete</void-dropdown-menu-item>
+            <void-dropdown-menu-trigger><void-button variant="outline" size="sm">Actions</void-button></void-dropdown-menu-trigger>
+            <void-dropdown-menu-content>
+              <void-dropdown-menu-item>Edit</void-dropdown-menu-item>
+              <void-dropdown-menu-separator></void-dropdown-menu-separator>
+              <void-dropdown-menu-item destructive @click="${openDelete}">Delete</void-dropdown-menu-item>
+            </void-dropdown-menu-content>
           </void-dropdown-menu>
         </div>
       </div>
@@ -165,7 +172,7 @@ export const WithNotice: Story = {
   render: () => html`
     <div class="scaffold-show" style="max-width: 48rem; margin: 0 auto; padding: 2rem;">
       <void-alert color="success" dismissible style="margin-bottom: var(--void-space-4);">
-        Product was successfully updated.
+        <void-alert-description>Product was successfully updated.</void-alert-description>
       </void-alert>
 
       <div style="margin-bottom: var(--void-space-5);">
@@ -178,10 +185,12 @@ export const WithNotice: Story = {
         <div style="display: flex; justify-content: space-between; align-items: center;">
           <h1 style="margin: 0; font-family: var(--void-font-sans); color: var(--void-color-text);">Widget Pro</h1>
           <void-dropdown-menu align="end">
-            <void-button variant="outline" size="sm">Actions</void-button>
-            <void-dropdown-menu-item>Edit</void-dropdown-menu-item>
-            <hr>
-            <void-dropdown-menu-item destructive @click="${openDelete}">Delete</void-dropdown-menu-item>
+            <void-dropdown-menu-trigger><void-button variant="outline" size="sm">Actions</void-button></void-dropdown-menu-trigger>
+            <void-dropdown-menu-content>
+              <void-dropdown-menu-item>Edit</void-dropdown-menu-item>
+              <void-dropdown-menu-separator></void-dropdown-menu-separator>
+              <void-dropdown-menu-item destructive @click="${openDelete}">Delete</void-dropdown-menu-item>
+            </void-dropdown-menu-content>
           </void-dropdown-menu>
         </div>
       </div>
@@ -210,10 +219,12 @@ export const WithDeleteConfirmation: Story = {
         <div style="display: flex; justify-content: space-between; align-items: center;">
           <h1 style="margin: 0; font-family: var(--void-font-sans); color: var(--void-color-text);">Widget Pro</h1>
           <void-dropdown-menu align="end">
-            <void-button variant="outline" size="sm">Actions</void-button>
-            <void-dropdown-menu-item>Edit</void-dropdown-menu-item>
-            <hr>
-            <void-dropdown-menu-item destructive>Delete</void-dropdown-menu-item>
+            <void-dropdown-menu-trigger><void-button variant="outline" size="sm">Actions</void-button></void-dropdown-menu-trigger>
+            <void-dropdown-menu-content>
+              <void-dropdown-menu-item>Edit</void-dropdown-menu-item>
+              <void-dropdown-menu-separator></void-dropdown-menu-separator>
+              <void-dropdown-menu-item destructive>Delete</void-dropdown-menu-item>
+            </void-dropdown-menu-content>
           </void-dropdown-menu>
         </div>
       </div>
@@ -224,14 +235,17 @@ export const WithDeleteConfirmation: Story = {
         <void-button variant="ghost" size="sm">&#x2190; Back to products</void-button>
       </div>
 
-      <void-dialog id="delete-dialog" heading="Delete product" size="sm" .open="${true}">
-        <p style="font-family: var(--void-font-sans); font-size: var(--void-text-sm); color: var(--void-color-text); margin: 0 0 var(--void-space-4) 0;">
-          Are you sure you want to delete <strong>Widget Pro</strong>? This action cannot be undone.
-        </p>
-        <div style="display: flex; gap: var(--void-space-2); justify-content: flex-end;">
+      <void-dialog id="delete-dialog" size="sm" .open="${true}">
+        <void-dialog-title>Delete product</void-dialog-title>
+        <void-dialog-body>
+          <p style="font-family: var(--void-font-sans); font-size: var(--void-text-sm); color: var(--void-color-text); margin: 0 0 var(--void-space-4) 0;">
+            Are you sure you want to delete <strong>Widget Pro</strong>? This action cannot be undone.
+          </p>
+        </void-dialog-body>
+        <void-dialog-actions>
           <void-button variant="ghost" size="sm" @click="${closeDelete}">Cancel</void-button>
           <void-button color="error" size="sm" @click="${closeDelete}">Delete</void-button>
-        </div>
+        </void-dialog-actions>
       </void-dialog>
     </div>
   `,

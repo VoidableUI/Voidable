@@ -104,6 +104,47 @@ if (elements.length === 0) {
   throw new Error('custom-elements.json contains no custom elements; refusing to generate empty artefacts');
 }
 
+// CSS-only parts (#52): `void-*` tags styled by the theme that no class
+// registers, declared in the parent's `voidParts`. Editors and typed JSX need
+// them (tag, attributes, description) like any element; they have no class
+// (typed as HTMLElement), no properties and no events, and they do not count
+// as components.
+/** @type {(El & { cssOnly: true, owner: string })[]} */
+const partElements = [];
+for (const mod of manifest.modules) {
+  for (const decl of mod.declarations ?? []) {
+    if (!decl.voidParts) continue;
+    const visit = (owner, list) => {
+      for (const part of list) {
+        if (part.cssOnly) {
+          const attributes = (part.attributes ?? []).map((a) => ({
+            name: a.name,
+            type: a.type?.text,
+            description: a.description,
+            reflects: false,
+          }));
+          partElements.push({
+            tagName: part.tag,
+            className: undefined,
+            module: mod.path,
+            description: `${part.description} A CSS-only part of <${owner}>${part.required ? ' (required)' : ''}.`,
+            attributes,
+            extraAttributes: attributes,
+            properties: [],
+            events: [],
+            cssOnly: true,
+            owner,
+          });
+        }
+        if (part.parts) visit(part.tag, part.parts);
+      }
+    };
+    visit(decl.tagName, decl.voidParts.parts);
+  }
+}
+/** Registered elements and CSS-only parts, for editor data and typings. */
+const allElements = [...elements, ...partElements].sort((a, b) => a.tagName.localeCompare(b.tagName));
+
 const write = (rel, content) => {
   const file = resolve(dist, rel);
   mkdirSync(dirname(file), { recursive: true });
@@ -154,7 +195,7 @@ write(
   json({
     $schema: 'https://raw.githubusercontent.com/microsoft/vscode-html-languageservice/main/docs/customData.schema.json',
     version: 1.1,
-    tags: elements.map((el) => ({
+    tags: allElements.map((el) => ({
       name: el.tagName,
       description: elementDescription(el) && { kind: 'markdown', value: elementDescription(el) },
       attributes: el.attributes.map((a) => {
@@ -186,10 +227,10 @@ write(
     'description-markup': 'markdown',
     contributions: {
       html: {
-        elements: elements.map((el) => ({
+        elements: allElements.map((el) => ({
           name: el.tagName,
           ...(el.description ? { description: el.description } : {}),
-          source: { module: pkg.name, symbol: el.className },
+          ...(el.className ? { source: { module: pkg.name, symbol: el.className } } : {}),
           attributes: el.attributes.map((a) => ({
             name: a.name,
             ...(a.description ? { description: a.description } : {}),
@@ -241,6 +282,8 @@ write(
     tagCount: elements.length,
     eventNames: [...new Set(elements.flatMap((el) => el.events.map((e) => e.name)))].sort(),
     tags: elements.map((el) => el.tagName),
+    // CSS-only parts: tags the theme styles inside a component, not components.
+    parts: partElements.map((el) => ({ tag: el.tagName, owner: el.owner })),
     components,
     elements: elements.map((el) => ({
       tag: el.tagName,
@@ -310,9 +353,9 @@ const elementLines = [];
 const propLines = [];
 const attrLines = [];
 const eventLines = [];
-for (const el of elements) {
-  addImport(moduleSpecifier(el.module), el.className);
-  elementLines.push(`  ${q(el.tagName)}: ${el.className};`);
+for (const el of allElements) {
+  if (el.className) addImport(moduleSpecifier(el.module), el.className);
+  elementLines.push(`  ${q(el.tagName)}: ${el.className ?? 'HTMLElement'};`);
   const pick = el.properties.length
     ? `Partial<Pick<${el.className}, ${el.properties.map((p) => q(p.name)).join(' | ')}>>`
     : '{}';
@@ -339,7 +382,7 @@ write(
   `// ${HEADER}
 ${importLines.join('\n')}
 
-/** Every custom element registered by @voidable/ui, keyed by tag name. */
+/** Every custom element registered by @voidable/ui and every CSS-only part (HTMLElement), keyed by tag name. */
 export interface VoidElementTagNameMap {
 ${elementLines.join('\n')}
 }
@@ -366,7 +409,7 @@ export type VoidTagName = keyof VoidElementTagNameMap;
 `,
 );
 
-const perTag = (fn, indent = '      ') => elements.map((el) => `${indent}${q(el.tagName)}: ${fn(el)};`).join('\n');
+const perTag = (fn, indent = '      ') => allElements.map((el) => `${indent}${q(el.tagName)}: ${fn(el)};`).join('\n');
 const eventHandlers = (el, keyFn) =>
   el.events.length
     ? `{ ${el.events.map((e) => `${q(keyFn(e.name))}?: (event: VoidElementEvents[${q(el.tagName)}][${q(e.name)}]) => void`).join('; ')} }`

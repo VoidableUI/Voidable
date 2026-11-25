@@ -141,7 +141,12 @@ test('every keyboard stop on the kitchen page shows a focus indicator of 3:1', a
     if (!key) break;
     if (seen.has(key)) continue;
     seen.add(key);
-    const shotTarget = await page.evaluateHandle(() => document.activeElement!.parentElement!);
+    // The nearest ancestor with a box: a trigger part around the control is display: contents.
+    const shotTarget = await page.evaluateHandle(() => {
+      let el = document.activeElement!.parentElement!;
+      while (el.parentElement && !el.getClientRects().length) el = el.parentElement;
+      return el;
+    });
     const focusedShot = await shotTarget.screenshot();
     // 2. Blur, and let a popup that opened on focus close again.
     await page.evaluate(() => (window as any).__focusProbe.a.blur());
@@ -200,7 +205,7 @@ test('the compose-input focus indicator changes by 3:1', async ({ page }) => {
 });
 
 test.describe('nested data-theme', () => {
-  const REGION = `<void-card heading="Card"><p>Text in the region</p><void-input value="input"></void-input><void-button>Outline</void-button><void-button variant="filled">Filled</void-button><void-select aria-label="Pick"><option>Opt</option></void-select><void-checkbox checked>Check</void-checkbox><void-alert color="info">Info</void-alert><void-badge color="error">Err</void-badge></void-card>`;
+  const REGION = `<void-card><void-card-header><void-card-title>Card</void-card-title></void-card-header><void-card-body><p>Text in the region</p><void-input value="input"></void-input><void-button>Outline</void-button><void-button variant="filled">Filled</void-button><void-select aria-label="Pick"><option>Opt</option></void-select><void-checkbox checked>Check</void-checkbox><void-alert color="info"><void-alert-description>Info</void-alert-description></void-alert><void-badge color="error">Err</void-badge></void-card-body></void-card>`;
   for (const [outer, inner] of [['dark', 'light'], ['light', 'dark']]) {
     test(`a ${inner} region inside a ${outer} page uses the ${inner} tokens and keeps text readable`, async ({ page }) => {
       await load(page, `/blank?theme=${outer}`);

@@ -86,6 +86,8 @@ const REPAIR_LIMIT = 10;
 const REPAIR_WINDOW = 1000;
 /** Set by `@voidable/ui/dev` when it is loaded (an app imports it in development only). */
 const DEV_KEY = Symbol.for('voidable.dev');
+/** Same key as parts.ts's MORPH_PARTICIPANTS (a registered symbol, so base needs no import of parts.ts). */
+const MORPH_PARTICIPANTS: unique symbol = Symbol.for('@voidable/ui:morph-participants');
 type DevHook = { report?: (warning: { kind: string; tag: string; subject: string; message: string; element?: Element }) => void };
 
 /**
@@ -121,6 +123,8 @@ const reconciled = new WeakMap<Element, Element>();
 export class VoidElement extends LitElement {
   /** @internal The element's projection controller (see ProjectionController). */
   declare [PROJECTION_KEY]?: ProjectionController;
+  /** @internal Controllers that carry what they wrote on parts into the server's markup (see parts.ts). */
+  declare [MORPH_PARTICIPANTS]?: Array<{ voidBeforeMorph(incoming: Element): void; isCopy?(incoming: Element): boolean }>;
 
   /** Owned host attributes: last value this component wrote (null = it removed it). */
   #ownAttrs: Map<string, string | null> | null = null;
@@ -589,7 +593,8 @@ export class VoidElement extends LitElement {
       // Or a detached copy of a rendered element (LiveView patches a clone of
       // a locked element, then morphs the live element to that clone): lift
       // its consumer content out of the copied chrome and drop the chrome.
-      const copy = stripSerializedChrome(incoming);
+      // Explicit parts have no chrome: a copy shows itself by the ids its parts' controller generated.
+      const copy = stripSerializedChrome(incoming) || (this[MORPH_PARTICIPANTS] ?? []).some(p => p.isCopy?.(incoming));
       // The server stopped naming the host: the moved name goes as well.
       const label = this.#hostLabel;
       if (label) {
@@ -604,6 +609,8 @@ export class VoidElement extends LitElement {
       // would read every server change as "unchanged" and undo it.
       if (reconciled.get(incoming) !== this) {
         reconciled.set(incoming, this);
+        // Explicit parts (parts.ts): what the component wrote on its parts goes onto theirs.
+        for (const p of this[MORPH_PARTICIPANTS] ?? []) p.voidBeforeMorph(incoming);
         this.#reconcileIncoming(incoming, copy);
       }
       this.#carryOwnedAttributes(incoming);

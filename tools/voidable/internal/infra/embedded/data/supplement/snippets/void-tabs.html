@@ -1,5 +1,10 @@
 <void-tabs value="overview">
-  <void-tab-panel tab="overview" label="Overview">Summary of the project.</void-tab-panel>
-  <void-tab-panel tab="activity" label="Activity">Recent changes.</void-tab-panel>
-  <void-tab-panel tab="settings" label="Settings">Project settings.</void-tab-panel>
+  <void-tabs-list>
+    <void-tabs-trigger value="overview">Overview</void-tabs-trigger>
+    <void-tabs-trigger value="activity">Activity</void-tabs-trigger>
+    <void-tabs-trigger value="settings" disabled>Settings</void-tabs-trigger>
+  </void-tabs-list>
+  <void-tabs-content value="overview">Summary of the project.</void-tabs-content>
+  <void-tabs-content value="activity">Recent changes.</void-tabs-content>
+  <void-tabs-content value="settings">Not available on this plan.</void-tabs-content>
 </void-tabs>

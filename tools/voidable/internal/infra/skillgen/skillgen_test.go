@@ -96,10 +96,10 @@ func TestSkillContentFromManifest(t *testing.T) {
 	}
 	for _, c := range []struct{ file, want string }{
 		{"SKILL.md", "`closable` on `<void-dialog>`, `closable` on `<void-drawer>`"},
-		{"references/components/void-popover.md", "| `trigger` | The element that toggles the popover"},
+		{"references/components/void-popover.md", "| `<void-popover-trigger>` | required, one, wraps one control, CSS-only |"},
 		{"references/components/void-slider.md", "`show-value`"},
 		{"references/snippets/heex.md", "<.dropdown_menu align=\"end\">"},
-		{"references/snippets/jsx.md", "slot=\"trigger\""},
+		{"references/snippets/jsx.md", "<void-popover-trigger>"},
 		{"references/wrong-usages.md", "| `<void-gauge>` | `show-value` | `showvalue` |"},
 		{"references/wrong-usages.md", "| `<void-option>` | `<void-multiselect>`, `<void-combobox>` |"},
 		{"references/wrong-usages.md", "accept `\"false\"` in markup"},

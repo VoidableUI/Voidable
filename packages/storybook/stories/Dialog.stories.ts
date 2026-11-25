@@ -15,9 +15,6 @@ const meta: Meta = {
     },
   },
   argTypes: {
-    heading: {
-      control: { type: 'text' },
-    },
     size: {
       control: { type: 'select' },
       options: ['sm', 'md', 'lg'],
@@ -46,8 +43,11 @@ export const Default: Story = {
     };
     return html`
       <button @click="${toggle}" style="padding: 0.5rem 1rem; cursor: pointer;">Open Dialog</button>
-      <void-dialog heading="Confirm Action" @void-close="${onClose}">
-        <p>Are you sure you want to proceed? This action cannot be undone.</p>
+      <void-dialog @void-close="${onClose}">
+        <void-dialog-title>Confirm Action</void-dialog-title>
+        <void-dialog-body>
+          <p>Are you sure you want to proceed? This action cannot be undone.</p>
+        </void-dialog-body>
       </void-dialog>
     `;
   },
@@ -68,14 +68,23 @@ export const Sizes: Story = {
         <button @click="${() => openDialog('dialog-md')}" style="padding: 0.5rem 1rem; cursor: pointer;">Medium</button>
         <button @click="${() => openDialog('dialog-lg')}" style="padding: 0.5rem 1rem; cursor: pointer;">Large</button>
       </div>
-      <void-dialog id="dialog-sm" heading="Small Dialog" size="sm" @void-close="${onClose}">
-        <p>This is a small dialog (24rem max-width).</p>
+      <void-dialog id="dialog-sm" size="sm" @void-close="${onClose}">
+        <void-dialog-title>Small Dialog</void-dialog-title>
+        <void-dialog-body>
+          <p>This is a small dialog (24rem max-width).</p>
+        </void-dialog-body>
       </void-dialog>
-      <void-dialog id="dialog-md" heading="Medium Dialog" size="md" @void-close="${onClose}">
-        <p>This is a medium dialog (32rem max-width).</p>
+      <void-dialog id="dialog-md" size="md" @void-close="${onClose}">
+        <void-dialog-title>Medium Dialog</void-dialog-title>
+        <void-dialog-body>
+          <p>This is a medium dialog (32rem max-width).</p>
+        </void-dialog-body>
       </void-dialog>
-      <void-dialog id="dialog-lg" heading="Large Dialog" size="lg" @void-close="${onClose}">
-        <p>This is a large dialog (48rem max-width).</p>
+      <void-dialog id="dialog-lg" size="lg" @void-close="${onClose}">
+        <void-dialog-title>Large Dialog</void-dialog-title>
+        <void-dialog-body>
+          <p>This is a large dialog (48rem max-width).</p>
+        </void-dialog-body>
       </void-dialog>
     `;
   },
@@ -95,11 +104,14 @@ export const NotClosable: Story = {
     };
     return html`
       <button @click="${toggle}" style="padding: 0.5rem 1rem; cursor: pointer;">Open Non-Closable Dialog</button>
-      <void-dialog heading="Required Action" closable="false">
-        <p>You must complete this action before continuing. Press the button below to confirm.</p>
-        <div style="margin-top: 1rem;">
+      <void-dialog closable="false">
+        <void-dialog-title>Required Action</void-dialog-title>
+        <void-dialog-body>
+          <p>You must complete this action before continuing. Press the button below to confirm.</p>
+        </void-dialog-body>
+        <void-dialog-actions>
           <button @click="${dismiss}" style="padding: 0.5rem 1rem; cursor: pointer;">I Understand</button>
-        </div>
+        </void-dialog-actions>
       </void-dialog>
     `;
   },

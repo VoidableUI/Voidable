@@ -53,7 +53,48 @@ describe('@voidable/ui/dev', () => {
     expect(by['undefined-element:void-buton'].message).toContain('Did you mean <void-button>?');
     expect(by['undefined-element:void-tabs'].message).toContain('@voidable/ui/components/tabs.js');
     expect(by['wrong-parent'].message).toContain('<void-multiselect> or <void-combobox>');
-    expect(by['missing-child'].message).toContain('<void-tab-panel>');
+    expect(by['missing-part'].message).toContain('<void-tabs-list>');
+    expect(by['missing-part'].message).toContain('Correct markup:');
+  });
+
+  it('reports the implicit forms explicit parts replaced (#52), each with the correct markup', async () => {
+    document.body.innerHTML =
+      '<void-tabs value="a"><void-tab-panel tab="a" label="A">a</void-tab-panel></void-tabs>' +
+      '<void-popover><void-button slot="trigger">Open</void-button><p>body</p></void-popover>' +
+      '<void-dialog heading="Old"><p>body</p></void-dialog>';
+    await settled();
+    const kinds = seen.map((w) => `${w.kind}:${w.tag}`);
+    expect(kinds).toContain('legacy-markup:void-tab-panel');
+    expect(kinds).toContain('unknown-child:void-popover');
+    expect(kinds).toContain('unknown-attribute:void-dialog');
+    const legacy = seen.find((w) => w.kind === 'legacy-markup')!;
+    expect(legacy.message).toContain('<void-tabs-trigger value="a">');
+    const stray = seen.find((w) => w.kind === 'unknown-child' && w.tag === 'void-popover')!;
+    expect(stray.message).toContain('<void-popover-trigger>');
+    expect(seen.find((w) => w.subject === 'heading')!.message).toContain('<void-dialog-title>');
+  });
+
+  it('reports a part outside its parent, parts out of order and a trigger without one control', async () => {
+    document.body.innerHTML =
+      '<void-card><void-dialog-title>Stray</void-dialog-title><void-card-body>b</void-card-body></void-card>' +
+      '<void-alert><void-alert-description>d</void-alert-description><void-alert-title>t</void-alert-title></void-alert>' +
+      '<void-tooltip><void-tooltip-trigger>text only</void-tooltip-trigger><void-tooltip-content>hint</void-tooltip-content></void-tooltip>';
+    await settled();
+    const kinds = seen.map((w) => `${w.kind}:${w.tag}`);
+    expect(kinds.some((k) => k.endsWith(':void-dialog-title'))).toBe(true);
+    expect(kinds).toContain('part-misuse:void-alert');
+    expect(seen.some((w) => w.tag === 'void-tooltip-trigger' || (w.tag === 'void-tooltip' && /one element/.test(w.message)))).toBe(true);
+  });
+
+  it('is silent about correct explicit-parts markup', async () => {
+    document.body.innerHTML =
+      '<void-dialog><void-dialog-title>T</void-dialog-title><void-dialog-description>D</void-dialog-description><void-dialog-actions><void-button>OK</void-button></void-dialog-actions></void-dialog>' +
+      '<void-tabs value="a"><void-tabs-list><void-tabs-trigger value="a">A</void-tabs-trigger></void-tabs-list><void-tabs-content value="a">a</void-tabs-content></void-tabs>' +
+      '<void-dropdown-menu><void-dropdown-menu-trigger><void-button>M</void-button></void-dropdown-menu-trigger><void-dropdown-menu-content><void-dropdown-menu-item>a</void-dropdown-menu-item><void-dropdown-menu-separator></void-dropdown-menu-separator></void-dropdown-menu-content></void-dropdown-menu>' +
+      '<void-card><void-card-header><void-card-title>T</void-card-title></void-card-header><void-card-body>b</void-card-body></void-card>' +
+      '<void-accordion><void-accordion-item><void-accordion-trigger>Q</void-accordion-trigger><void-accordion-content>A</void-accordion-content></void-accordion-item></void-accordion>';
+    await settled();
+    expect(seen.filter((w) => w.kind !== 'undefined-element')).toEqual([]);
   });
 
   it('does not call a CSS-only pattern element unknown, and still reports a real typo', async () => {
@@ -127,7 +168,8 @@ describe('the generated table', () => {
 
   it('carries the parents, required children and hints from the manifest, not from a list in the dev entry', () => {
     expect(table['void-option'].p).toEqual(['void-multiselect', 'void-combobox']);
-    expect(table['void-tabs'].r).toEqual(['void-tab-panel']);
+    expect(table['void-tabs'].q?.n.map((p) => p.t)).toEqual(['void-tabs-list', 'void-tabs-content']);
+    expect(table['void-tabs-trigger'].c).toBe(1);
     expect(table['void-input'].x?.label).toContain('void-field');
     expect(table['void-file-upload'].h).toContain('dragging');
     expect(table['void-carousel-slide'].h).toContain('active');

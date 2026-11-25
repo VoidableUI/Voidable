@@ -52,6 +52,20 @@ func (l *Library) snippet(ctx context.Context, tag string, lang Lang, wiring boo
 	}
 	var nodes []*Node
 	src := SnippetSynthesized
+	// A part has no example of its own: its component's example shows it in place.
+	if _, own := l.sup.Snippets[e.Tag]; !own && e.PartOf != "" {
+		root := e
+		for root.PartOf != "" {
+			parent, ok := l.cat.Element(root.PartOf)
+			if !ok {
+				break
+			}
+			root = parent
+		}
+		if root != e {
+			return l.snippet(ctx, root.Tag, lang, wiring)
+		}
+	}
 	if html, ok := l.sup.Snippets[e.Tag]; ok && l.parser != nil {
 		if nodes, err = l.parser.ParseFragment(ctx, html); err != nil {
 			return nil, fmt.Errorf("parse snippet for %s: %w", e.Tag, err)

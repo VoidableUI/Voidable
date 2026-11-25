@@ -30,7 +30,6 @@ import type {
   VoidOption,
   VoidDialog,
   VoidTabs,
-  VoidTabPanel,
   VoidAccordion,
   VoidAccordionItem,
   VoidBreadcrumbs,
@@ -516,10 +515,18 @@ export const Option = wrapWc<VoidOption, {
 /**
  * A modal dialog (native `<dialog>` opened with `showModal()`). For a controlled dialog, keep `open` in
  * state and set it to false in `onVoidClose`; call `event.preventDefault()` there to keep it open.
+ * Its regions are parts:
+ *
+ * ```tsx
+ * <Dialog open={open} onVoidClose={() => setOpen(false)}>
+ *   <DialogTitle>Delete file?</DialogTitle>
+ *   <DialogBody>This cannot be undone.</DialogBody>
+ *   <DialogActions><Button>Cancel</Button><Button color="error">Delete</Button></DialogActions>
+ * </Dialog>
+ * ```
  */
 export const Dialog = wrapWc<VoidDialog, {
   open?: boolean;
-  heading?: string;
   size?: 'sm' | 'md' | 'lg';
   closable?: boolean;
 } & VoidEvents<OverlayEvents>>('void-dialog', 'Dialog');
@@ -531,20 +538,12 @@ export const Tabs = wrapWc<VoidTabs, {
   activation?: 'manual' | 'auto';
 } & VoidEvents<{ Change: { value: string } }>>('void-tabs', 'Tabs');
 
-export const TabPanel = wrapWc<VoidTabPanel, {
-  tab?: string;
-  label?: string;
-  active?: boolean;
-  /** The tab is shown but cannot be selected or focused. */
-  disabled?: boolean;
-}>('void-tab-panel', 'TabPanel');
-
 export const Accordion = wrapWc<VoidAccordion, {
   multiple?: boolean;
 }>('void-accordion', 'Accordion');
 
+/** One item: an `<AccordionTrigger>` (the heading text) followed by an `<AccordionContent>`. */
 export const AccordionItem = wrapWc<VoidAccordionItem, {
-  heading?: string;
   open?: boolean;
 } & VoidEvents<{ Toggle: { open: boolean } }>>('void-accordion-item', 'AccordionItem');
 
@@ -582,12 +581,11 @@ export const Drawer = wrapWc<VoidDrawer, {
   open?: boolean;
   side?: 'left' | 'right' | 'top' | 'bottom';
   size?: 'sm' | 'md' | 'lg';
-  heading?: string;
   closable?: boolean;
 } & VoidEvents<OverlayEvents>>('void-drawer', 'Drawer');
 
+/** Regions are parts: `<CardHeader>` (with `<CardTitle>`, `<CardDescription>`), `<CardBody>`, `<CardFooter>`. */
 export const Card = wrapWc<VoidCard, {
-  heading?: string;
   variant?: 'default' | 'elevated' | 'bordered';
   padding?: 'none' | 'sm' | 'md' | 'lg';
   /** Let the card shrink and scroll its content inside a height-constrained flex or grid parent. */
@@ -595,14 +593,12 @@ export const Card = wrapWc<VoidCard, {
 }>('void-card', 'Card');
 
 /**
- * Mark the element that toggles the popover with `slot="trigger"`; everything else is the popover content.
- * Without a slotted trigger the first child element is used, which breaks when
- * React re-keys or swaps that child, so always set the slot:
+ * Two parts: the trigger wraps the one element that toggles the popover; the content is the panel.
  *
  * ```tsx
  * <Popover>
- *   <Button slot="trigger">Details</Button>
- *   <p>Popover content</p>
+ *   <PopoverTrigger><Button>Details</Button></PopoverTrigger>
+ *   <PopoverContent><p>Popover content</p></PopoverContent>
  * </Popover>
  * ```
  */
@@ -614,8 +610,15 @@ export const Popover = wrapWc<VoidPopover, {
   align?: 'start' | 'center' | 'end';
 } & VoidEvents<OverlayEvents>>('void-popover', 'Popover');
 
+/**
+ * ```tsx
+ * <Tooltip>
+ *   <TooltipTrigger><Button>Copy</Button></TooltipTrigger>
+ *   <TooltipContent>Copy to clipboard</TooltipContent>
+ * </Tooltip>
+ * ```
+ */
 export const Tooltip = wrapWc<VoidTooltip, {
-  text?: string;
   position?: 'top' | 'bottom' | 'left' | 'right';
   /** Alignment along the trigger edge. */
   align?: 'start' | 'center' | 'end';
@@ -758,14 +761,12 @@ export const Sidebar = wrapWc<VoidSidebar, {
 } & VoidEvents<{ Toggle: { collapsed: boolean } }>>('void-sidebar', 'Sidebar');
 
 /**
- * Mark the element that opens the menu with `slot="trigger"`; everything else is the menu content.
- * Without a slotted trigger the first child element is used, which breaks when
- * React re-keys or swaps that child, so always set the slot:
- *
  * ```tsx
  * <DropdownMenu>
- *   <Button slot="trigger">Actions</Button>
- *   <DropdownMenuItem>Edit</DropdownMenuItem>
+ *   <DropdownMenuTrigger><Button>Actions</Button></DropdownMenuTrigger>
+ *   <DropdownMenuContent>
+ *     <DropdownMenuItem value="edit">Edit</DropdownMenuItem>
+ *   </DropdownMenuContent>
  * </DropdownMenu>
  * ```
  */
@@ -778,11 +779,13 @@ export const DropdownMenu = wrapWc<VoidDropdownMenu, {
 } & VoidEvents<OverlayEvents>>('void-dropdown-menu', 'DropdownMenu');
 
 export const DropdownMenuItem = wrapWc<VoidDropdownMenuItem, {
+  /** Passed as `detail.value` of `void-select`. */
+  value?: string;
   disabled?: boolean;
   destructive?: boolean;
   /** Keep the menu open when this item is chosen (checkbox-style items). */
   keepOpen?: boolean;
-} & VoidEvents<{ Select: { item: VoidDropdownMenuItem } }>>('void-dropdown-menu-item', 'DropdownMenuItem');
+} & VoidEvents<{ Select: { item: VoidDropdownMenuItem; value: string } }>>('void-dropdown-menu-item', 'DropdownMenuItem');
 
 export const Toggle = wrapWc<VoidToggle, {
   pressed?: boolean;
@@ -948,14 +951,10 @@ export const Editable = wrapWc<VoidEditable, {
 } & VoidEvents<{ Change: { value: string }; Cancel: null }>>('void-editable', 'Editable');
 
 /**
- * Mark the element that shows the card on hover or focus with `slot="trigger"`; everything else is the card content.
- * Without a slotted trigger the first child element is used, which breaks when
- * React re-keys or swaps that child, so always set the slot:
- *
  * ```tsx
  * <HoverCard>
- *   <a slot="trigger" href="/u/ada">Ada</a>
- *   <p>Profile preview</p>
+ *   <HoverCardTrigger><a href="/u/ada">Ada</a></HoverCardTrigger>
+ *   <HoverCardContent><p>Profile preview</p></HoverCardContent>
  * </HoverCard>
  * ```
  */

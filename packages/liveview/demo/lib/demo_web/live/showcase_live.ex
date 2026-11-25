@@ -161,7 +161,7 @@ defmodule DemoWeb.ShowcaseLive do
   defp render_showcase(assigns) do
     case assigns.component do
       # Static showcases (DemoWeb.StaticShowcases)
-      c when c in ~w(badge divider spinner skeleton status_dot avatar stepper progress tooltip error_fallback panel accordion breadcrumbs list card table scroll_area banner nav_bar toast_container field option tab_panel) ->
+      c when c in ~w(badge divider spinner skeleton status_dot avatar stepper progress tooltip error_fallback panel accordion breadcrumbs list card table scroll_area banner nav_bar toast_container field option) ->
         apply(DemoWeb.StaticShowcases, String.to_atom(c), [assigns])
 
       # Form showcases (DemoWeb.FormShowcases)
