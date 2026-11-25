@@ -1,0 +1,51 @@
+---
+title: Server-rendered apps
+description: There is no hydration step. How server markup becomes components, what the page looks like before they load, and how Turbo, Livewire and LiveView morphs leave them intact.
+---
+
+A Voidable page is server-rendered by default, because a Voidable component is an HTML tag with attributes. Your server (Rails, Phoenix, Laravel, Django, anything that writes HTML) emits `<void-button variant="filled">Save</void-button>`, the browser shows it, and the component upgrades that same element when its script loads. There is no component runtime on the server, no serialised state to ship and no hydration pass that has to match it.
+
+## Server markup is the source of truth
+
+Because components render into the [light DOM](/guides/composition/), what the server sends is real structure: children are in the document, text is selectable and searchable, and links work, before any script runs. State lives in attributes the server writes (`open`, `checked`, `value`, `active`, `selected`), so a server render can set the initial state of every component.
+
+Two things are not expressible as attributes and need a little script:
+
+- **Data for charts and gauges.** `<void-bar-chart>`, `<void-line-chart>`, `<void-donut-chart>` and `<void-gauge>` (for segments) take their `data` as a property. Render the numbers into your page, for example in a JSON `<script type="application/json">` tag, and assign them once the element exists; each [chart page](/components/bar-chart/) shows the code.
+- **Events.** A component tells your app what happened by dispatching `void-*` events. The adapters connect them to the mechanism your framework already uses: Stimulus `data-action`, a LiveView hook, Alpine `x-void-on:`. See [Events](/guides/events/).
+
+## Before the components load
+
+Until a component's module has run `customElements.define()`, the browser shows its tag as unknown inline content. The theme ships `:not(:defined)` rules that make that state look and measure like the finished one (closed dialogs stay hidden, a tab list keeps its height, option lists stay out of sight), and they switch off by themselves when the tag is defined. The loading options and what each costs are in [Loading components](/getting-started/loading/); for a server-rendered site the [autoloader](/getting-started/loading/#the-autoloader) is usually the right choice, because it fetches only the components a page uses, including ones that appear later, in a Turbo visit or a patch from the server.
+
+## Morphing
+
+Turbo's morphing page refresh, Livewire, and LiveView patch the DOM by comparing the live page with the new server HTML. A component whose rendered parts and managed attributes differ from the server's version would look like a change to undo. Voidable handles this with a hook on every element:
+
+```js
+el.voidBeforeMorph(incomingElement)
+```
+
+Called just before a morph compares the element with the server's version, it does two things. It carries the attributes the component manages itself (`role`, `tabindex`, `aria-*`, its custom properties, and reflected properties still at their default) onto the incoming element, so the morph does not strip them. And it takes the rendered parts out of the element and parks them, and returns your children to the element in their original order, so the morph compares your markup with the server's markup like with like. Nothing is destroyed: when the morph finishes the same nodes go back, so a text field keeps its typed text, focus and selection.
+
+The adapters call it for you:
+
+| Stack | Adapter | Hook point |
+| --- | --- | --- |
+| Rails, Turbo morphing | [`@voidable/ui-hotwire`](/frameworks/hotwire/) and the `voidable-hotwire` gem | `turbo:before-morph-element` |
+| Laravel, Livewire | [`@voidable/ui-alpine`](/frameworks/alpine/) | Livewire's `morph.updating` |
+| Phoenix LiveView | [`@voidable/ui-liveview`](/frameworks/liveview/) | `dom.onBeforeElUpdated` |
+
+If you drive a morph yourself (a custom morphdom or idiomorph call), call `el.voidBeforeMorph(incoming)` on every `void-*` element first, run the morph synchronously, and the component re-renders itself in the next microtask. If your morph is asynchronous, call `await el.voidAfterMorph()` when it finishes.
+
+Both methods are safe to call on any element, any number of times; on an element with nothing to park they do nothing.
+
+### What follows the server, and what does not
+
+After a morph, an attribute the server markup sets follows the server: a server that re-renders `open` closed closes the dialog. An attribute the server markup does not mention is left as the user set it when the component manages it or the property is at its default. State that the server never knew, such as the text in a field, stays.
+
+You do not need the framework's opt-outs (`data-turbo-permanent`, `wire:ignore`, `phx-update="ignore"`) to keep components alive across a morph; they remain the tool for content that is not Voidable's, and each adapter's page says how it treats them.
+
+## Forms and Turbo
+
+Controls are real form participants (see [Forms](/guides/forms/)), so Rails form helpers, `button_to`, and Turbo form submissions need no special handling. A `void-change` listener that calls `form.requestSubmit()` is the usual auto-submit pattern for a filter form, and it sees the new value because a control updates its form value before it dispatches.

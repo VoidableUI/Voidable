@@ -1,0 +1,24 @@
+---
+// Booleans that default to true and accept ="false", from the same list the
+// checker uses (rules.json), so this table is never typed by hand.
+import { loadComponentData } from '../../lib/component-data.mjs';
+
+const { components } = loadComponentData();
+const rows = components
+  .map((c: any) => ({ tag: c.tag, attrs: c.attributes.filter((a: any) => a.falseString).map((a: any) => a.name) }))
+  .filter((r: any) => r.attrs.length);
+---
+
+<div class="vd-api-table">
+  <table>
+    <thead><tr><th>Component</th><th>Attributes</th></tr></thead>
+    <tbody>
+      {rows.map((r: any) => (
+        <tr>
+          <td><a href={`/components/${r.tag.replace(/^void-/, '')}/`}><code>{`<${r.tag}>`}</code></a></td>
+          <td>{r.attrs.map((a: string, i: number) => (<Fragment>{i > 0 && ', '}<code>{a}</code></Fragment>))}</td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</div>

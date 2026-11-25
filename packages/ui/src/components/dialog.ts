@@ -15,6 +15,7 @@ import { ProjectionController } from '../projection.js';
  *
  * Name the dialog with `heading`; without one, set `aria-label` on the element and it is passed to the native dialog.
  *
+ * @attr {string} aria-label - Accessible name of the dialog when there is no `heading`; it is passed to the native `<dialog>`. Ignored while `heading` is set.
  * @fires {CustomEvent<{ reason: 'api' }>} void-open - The dialog opened. `detail.reason` is `api` (attribute or property).
  * @fires {CustomEvent<{ reason: 'escape' | 'outside' | 'close-button' | 'form' | 'parent' | 'api' }>} void-close - The
  * dialog is closing. Cancelable (`preventDefault()` keeps it open) when the user caused it: `escape`, `outside` (a
@@ -26,6 +27,7 @@ export class VoidDialog extends VoidElement {
   @property({ type: Boolean, reflect: true }) open = false;
   /** Visible title; also the dialog's accessible name. */
   @property({ type: String }) heading = '';
+  /** Width of the dialog panel: `sm`, `md` (default), `lg` or `xl`. */
   @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' | 'xl' = 'md';
   /** Set `closable="false"` in markup to hide the close button and ignore Escape and backdrop presses. */
   @property({ type: Boolean, converter: defaultTrueBoolean }) closable = true;

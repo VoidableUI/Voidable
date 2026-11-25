@@ -5,6 +5,7 @@ package cem
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"github.com/VoidableUI/Voidable/tools/voidable/internal/domain"
 )
@@ -115,7 +116,7 @@ func element(path string, d declaration) domain.Element {
 		kind, values, nullable := domain.ParseType(a.Type.Text)
 		e.Attributes = append(e.Attributes, domain.Attribute{
 			Name: a.Name, Field: a.FieldName, Type: a.Type.Text, Kind: kind, Values: values,
-			Nullable: nullable, Default: domain.CleanDefault(a.Default), Description: a.Description,
+			Nullable: nullable, Default: domain.CleanDefault(a.Default), Description: oneLine(a.Description),
 			FalseString: a.FalseString,
 		})
 	}
@@ -125,15 +126,20 @@ func element(path string, d declaration) domain.Element {
 		}
 		e.Properties = append(e.Properties, domain.Property{
 			Name: mb.Name, Attribute: mb.Attribute, Type: mb.Type.Text,
-			Default: domain.CleanDefault(mb.Default), Reflects: mb.Reflects, Description: mb.Description,
+			Default: domain.CleanDefault(mb.Default), Reflects: mb.Reflects, Description: oneLine(mb.Description),
 		})
 	}
 	for _, ev := range d.Events {
 		detail, fields := domain.ParseDetail(ev.Type.Text)
-		e.Events = append(e.Events, domain.Event{Name: ev.Name, Detail: detail, Fields: fields, Description: ev.Description})
+		e.Events = append(e.Events, domain.Event{Name: ev.Name, Detail: detail, Fields: fields, Description: oneLine(ev.Description)})
 	}
 	for _, sl := range d.Slots {
-		e.Slots = append(e.Slots, domain.Slot{Name: sl.Name, Description: sl.Description})
+		e.Slots = append(e.Slots, domain.Slot{Name: sl.Name, Description: oneLine(sl.Description)})
 	}
 	return e
 }
+
+// oneLine joins the lines a JSDoc comment is wrapped over, so the compact
+// reference shows one line per attribute. Paragraph breaks are kept as a
+// single space too: these descriptions are sentences, not documents.
+func oneLine(s string) string { return strings.Join(strings.Fields(s), " ") }

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #MISE description="Build docs for production"
-#MISE depends=["build"]
+#MISE depends=["build", "voidable:binary"]
 set -euo pipefail
 
 pnpm --filter docs build

@@ -3,9 +3,16 @@ import { VoidElement } from '../base.js';
 
 /** Collapsible side navigation for app shells, admin panels, and documentation sites. */
 export class VoidSidebar extends VoidElement {
+  /**
+   * Show the narrow, collapsed width. Toggling it fires `void-toggle` with `{ collapsed }`; the element
+   * has no built-in toggle button, so wire one (for example a `void-hamburger`) to this attribute.
+   */
   @property({ type: Boolean, reflect: true }) collapsed = false;
+  /** CSS width when expanded. Defaults to the theme's `--void-sidebar-width`. */
   @property({ type: String, reflect: true }) width = 'var(--void-sidebar-width)';
+  /** CSS width when collapsed. Defaults to the theme's `--void-sidebar-collapsed-width`. */
   @property({ type: String, attribute: 'collapsed-width', reflect: true }) collapsedWidth = 'var(--void-sidebar-collapsed-width)';
+  /** Which side of the page the sidebar sits on: `left` (default) or `right`. */
   @property({ type: String, reflect: true }) position: 'left' | 'right' = 'left';
 
   private _initialised = false;

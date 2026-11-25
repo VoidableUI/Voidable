@@ -1,0 +1,89 @@
+---
+// Attribute, property and method tables, straight from the manifest.
+import { loadComponentData } from '../../lib/component-data.mjs';
+import { inline } from '../../lib/inline.mjs';
+
+interface Props { tag: string }
+const { tag } = Astro.props;
+const c = loadComponentData().byTag.get(tag)!;
+---
+
+{
+  c.attributes.length > 0 && (
+    <div class="vd-api-table">
+      <table>
+        <thead>
+          <tr><th>Attribute</th><th>Type</th><th>Default</th><th>Description</th></tr>
+        </thead>
+        <tbody>
+          {c.attributes.map((a: any) => (
+            <tr>
+              <td><code>{a.name}</code></td>
+              <td>
+                {a.values
+                  ? a.values.map((v: string, i: number) => (<Fragment>{i > 0 && ' | '}<code>{v}</code></Fragment>))
+                  : <code>{a.type}</code>}
+              </td>
+              <td>{a.default !== undefined && a.default !== '' ? <code>{a.default}</code> : <span class="vd-api-none">none</span>}</td>
+              <td set:html={inline(a.description)} />
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  )
+}
+{c.attributes.length === 0 && <p>No attributes. The element takes its content as children.</p>}
+{
+  c.attributes.some((a: any) => a.isBool) && (
+    <p class="vd-api-note">
+      A boolean attribute is on whenever it is present.{' '}
+      {c.attributes.some((a: any) => a.falseString) && <Fragment>Those that default to true (<code>{c.attributes.filter((a: any) => a.falseString).map((a: any) => a.name).join(', ')}</code>) turn off with <code>="false"</code>.</Fragment>}
+    </p>
+  )
+}
+
+{
+  c.properties.length > 0 && (
+    <Fragment>
+      <h3 id="properties">Properties set in JavaScript</h3>
+      <p>These have no attribute: set them on the element in script.</p>
+      <div class="vd-api-table">
+        <table>
+          <thead><tr><th>Property</th><th>Type</th><th>Description</th></tr></thead>
+          <tbody>
+            {c.properties.map((p: any) => (
+              <tr>
+                <td><code>{p.name}</code>{p.readonly && <span class="vd-api-none"> (read-only)</span>}</td>
+                <td><code>{p.type}</code></td>
+                <td set:html={inline(p.description)} />
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </Fragment>
+  )
+}
+
+{
+  c.methods.length > 0 && (
+    <Fragment>
+      <h3 id="methods">Methods</h3>
+      <div class="vd-api-table">
+        <table>
+          <thead><tr><th>Method</th><th>Returns</th><th>Description</th></tr></thead>
+          <tbody>
+            {c.methods.map((m: any) => (
+              <tr>
+                <td><code>{m.static ? `${c.className}.` : ''}{m.signature}</code></td>
+                <td><code>{m.returns}</code></td>
+                <td set:html={inline(m.description)} />
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </Fragment>
+  )
+}

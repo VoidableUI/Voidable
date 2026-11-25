@@ -4,10 +4,15 @@ import { VoidElement } from '../base.js';
 
 /** Visual progress indicator for file uploads, multi-step processes, and loading states. */
 export class VoidProgress extends VoidElement {
+  /** Current progress, from 0 to `max`. Ignored while `indeterminate`. */
   @property({ type: Number, reflect: true }) value: number = 0;
+  /** Value that means complete. Defaults to 100. */
   @property({ type: Number, reflect: true }) max: number = 100;
+  /** Status colour of the bar: `default`, `error`, `warning`, `caution`, `success`, `info` or `notice`. */
   @property({ type: String, reflect: true }) color: 'default' | 'error' | 'warning' | 'caution' | 'success' | 'info' | 'notice' = 'default';
+  /** Thickness step of the bar: `sm`, `md` (default), `lg`, `xl` or `xxl`. */
   @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' | 'xl' | 'xxl' = 'md';
+  /** Show an animated bar for work of unknown length. It has no `aria-valuenow` while on. */
   @property({ type: Boolean, reflect: true }) indeterminate: boolean = false;
 
   connectedCallback(): void {

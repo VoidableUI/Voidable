@@ -5,10 +5,21 @@ import { InternalsFormControl, type FormSubmission } from '../form-control.js';
 
 /** Drag-and-drop file picker for document uploads, image attachment flows, and import wizards. */
 export class VoidFileUpload extends InternalsFormControl(VoidElement) {
+  /**
+   * Comma-separated file types the zone takes, as on a native file input: extensions (`.pdf`), MIME
+   * types (`image/png`) or wildcards (`image/*`). Other files are dropped without an error.
+   */
   @property({ type: String }) accept = '';
+  /** Allow more than one file. Without it a new choice replaces the old one. */
   @property({ type: Boolean, reflect: true }) multiple = false;
+  /** Stop the zone reacting and exclude the files from the form submission. */
   @property({ type: Boolean, reflect: true }) disabled = false;
+  /** Largest allowed file in bytes. 0 (the default) means no limit. Larger files are dropped silently. */
   @property({ type: Number, attribute: 'max-size' }) maxSize = 0;
+  /**
+   * Message shown under the zone, such as a server-side upload failure. It does not set `aria-invalid`;
+   * the component never produces an error text itself.
+   */
   @property({ type: String, reflect: true }) error = '';
 
   private _files: File[] = [];

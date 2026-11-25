@@ -25,7 +25,7 @@ import { ProjectionController, triggerRegion } from '../projection.js';
  * The menu is closing. Cancelable when the user caused it (every reason but `parent` and `api`).
  */
 export class VoidDropdownMenu extends VoidElement {
-  /** Whether the menu is open. */
+  /** Whether the menu is open. A click on the trigger toggles it; choosing an item, Escape, Tab or a press outside closes it. */
   @property({ type: Boolean, reflect: true }) open = false;
   /** Side of the trigger the menu opens on; it flips to the opposite side when there is no room. */
   @property({ type: String, reflect: true }) position: 'top' | 'bottom' | 'left' | 'right' = 'bottom';
@@ -198,7 +198,9 @@ if (!customElements.get('void-dropdown-menu')) {
  * @fires {CustomEvent<{ item: VoidDropdownMenuItem }>} void-select - The item was chosen.
  */
 export class VoidDropdownMenuItem extends VoidElement {
+  /** Dim the item, skip it in keyboard navigation and stop it firing `void-select`. */
   @property({ type: Boolean, reflect: true }) disabled = false;
+  /** Draw the item in the error colour, for an action that deletes or cannot be undone. */
   @property({ type: Boolean, reflect: true }) destructive = false;
   /** Keep the menu open when this item is chosen (checkbox-style or repeatable items). */
   @property({ type: Boolean, reflect: true, attribute: 'keep-open' }) keepOpen = false;

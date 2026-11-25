@@ -15,13 +15,15 @@ import { OverlayController } from '../overlay.js';
  * @fires {CustomEvent<{ reason: 'hover' | 'blur' | 'escape' | 'parent' | 'api' }>} void-close - The tooltip is hiding.
  */
 export class VoidTooltip extends VoidElement {
+  /** The hint text shown in the bubble. Keep it short and supplementary: it only appears on hover or focus. */
   @property({ type: String }) text = '';
   /** Side of the trigger the tooltip appears on; it flips to the opposite side when there is no room. */
   @property({ type: String, reflect: true }) position: 'top' | 'bottom' | 'left' | 'right' = 'top';
   /** Alignment with the trigger along that side. */
   @property({ type: String, reflect: true }) align: 'start' | 'center' | 'end' = 'center';
+  /** Milliseconds the pointer rests on the trigger before the bubble appears (keyboard focus shows it at once). Defaults to 200. */
   @property({ type: Number }) delay = 200;
-  /** Whether the tooltip is shown. */
+  /** Whether the tooltip is shown. It opens and closes itself from hover, focus and Escape; set it to drive it from script. */
   @property({ type: Boolean, reflect: true }) open = false;
 
   private _timerId: ReturnType<typeof setTimeout> | undefined;

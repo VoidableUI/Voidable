@@ -163,6 +163,10 @@ const listenForReset = Symbol('listenForReset');
 
 function CoreFormControl<T extends Constructor<VoidElement>>(Base: T) {
   class Core extends Base {
+    /**
+     * Key the control's value is submitted under in the form's `FormData`. Without a name the control
+     * submits nothing.
+     */
     @property({ type: String, reflect: true }) name = '';
     @state() protected ancestorDisabled = false;
 
@@ -410,6 +414,10 @@ function CoreFormControl<T extends Constructor<VoidElement>>(Base: T) {
  */
 export function NativeFormControl<T extends Constructor<VoidElement>>(Base: T) {
   class Native extends CoreFormControl(Base) {
+    /**
+     * `id` of a `<form>` elsewhere in the page that this control belongs to, as on a native control.
+     * Without it the control belongs to the form it sits inside.
+     */
     @property({ attribute: 'form' }) protected formAttr: string | null = null;
 
     #nativeDefault: unknown = undefined;
@@ -506,6 +514,10 @@ export function InternalsFormControl<T extends Constructor<VoidElement>>(Base: T
   class Internals extends CoreFormControl(Base) {
     static formAssociated = true;
 
+    /**
+     * The control must have a value before its form can be submitted. An empty control is invalid
+     * (`valueMissing`) and the browser reports it, as for a native field.
+     */
     @property({ type: Boolean, reflect: true }) required = false;
 
     get validity(): ValidityState | undefined {

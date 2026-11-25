@@ -1,6 +1,11 @@
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 import starlightLlmsTxt from 'starlight-llms-txt';
+import { componentSidebar, writeComponentPages } from './src/lib/component-pages.mjs';
+
+// One page per component, written from the Custom Elements Manifest before
+// Starlight scans the content directory.
+writeComponentPages();
 
 const SITE = 'https://voidable.dev';
 const OG_IMAGE = `${SITE}/og.png`;
@@ -30,7 +35,9 @@ export default defineConfig({
         starlightLlmsTxt({
           projectName: 'Voidable',
           description:
-            'Voidable is a framework-agnostic web component library built on Lit 3. Components render in the Light DOM and ship with zero visual CSS; styling comes from the @voidable/theme token package.',
+            'Voidable is a framework-agnostic web component library built on Lit 3. Components render in the light DOM and ship with no visual CSS until the @voidable/theme token package is loaded. Every component is a `void-*` custom element, so the same markup works in HTML, React, Rails, Phoenix, Laravel and any other stack.',
+          details:
+            'Each component page lists its attributes (type, values, default), events with their `detail`, where children go, form behaviour, keyboard keys, accessibility notes and common mistakes, with an example in HTML, JSX, ERB, HEEx and Blade. Those pages are generated from the library\'s Custom Elements Manifest, so they match the code that ships. The `voidable` command-line tool (`ref`, `check`, `gen snippet`, `mcp`) carries the same data offline; start with the "For AI agents" page.',
         }),
       ],
       head: [
@@ -75,8 +82,20 @@ export default defineConfig({
             { label: 'Theme builder', link: '/theme/' },
             { label: 'Design Tokens', slug: 'getting-started/tokens' },
             { label: 'Migrating from the framework packages', slug: 'getting-started/migrating-from-framework-packages' },
+            { label: 'For AI agents', slug: 'getting-started/for-agents' },
             { label: 'Measuring agent-friendliness', slug: 'getting-started/agent-evals' },
             { label: 'Testing in real browsers', slug: 'getting-started/browser-tests' },
+          ],
+        },
+        {
+          label: 'Guides',
+          items: [
+            { label: 'Forms', slug: 'guides/forms' },
+            { label: 'Composition and children', slug: 'guides/composition' },
+            { label: 'Events', slug: 'guides/events' },
+            { label: 'Server-rendered apps', slug: 'guides/server-rendered' },
+            { label: 'Accessibility', slug: 'guides/accessibility' },
+            { label: 'Testing', slug: 'guides/testing' },
           ],
         },
         {
@@ -101,14 +120,7 @@ export default defineConfig({
         },
         {
           label: 'Components',
-          items: [
-            { label: 'Overview', slug: 'components/overview' },
-            { label: 'Button', slug: 'components/button' },
-            { label: 'Table', slug: 'components/table' },
-            { label: 'Keyboard and ARIA', slug: 'components/keyboard' },
-            { label: 'Overlays', slug: 'components/overlays' },
-            { label: 'Storybook', link: '/storybook/', attrs: { target: '_blank' } },
-          ],
+          items: componentSidebar(),
         },
         {
           label: 'Showcase',

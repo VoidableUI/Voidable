@@ -134,7 +134,11 @@ func refText(p *printer, r *domain.Reference) {
 	if po := (&r.Element).PropertyOnly(); len(po) > 0 {
 		p.f("%s", "props only (set in JS, no attribute):\n")
 		for _, prop := range po {
-			p.f(" %s: %s\n", prop.Name, prop.Type)
+			line := fmt.Sprintf(" %s: %s", prop.Name, prop.Type)
+			if prop.Description != "" {
+				line += " # " + prop.Description
+			}
+			p.f("%s\n", line)
 		}
 	}
 	if len(r.Events) > 0 {

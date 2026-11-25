@@ -5,8 +5,14 @@ import { ProjectionController } from '../projection.js';
 
 /** Content grouping container for dashboard widgets, product listings, and media previews. */
 export class VoidCard extends VoidElement {
+  /** Text of the card's header row. Leave it out for a card with no header. */
   @property({ type: String }) heading = '';
+  /** Surface style: `default`, `elevated` (lifted, with a shadow) or `outlined` (a visible border). */
   @property({ type: String, reflect: true }) variant: 'default' | 'elevated' | 'outlined' = 'default';
+  /**
+   * Space around the card body: `none`, `sm`, `md` (default) or `lg`. Use `none` for edge-to-edge
+   * content such as a table or an image.
+   */
   @property({ type: String, reflect: true }) padding: 'none' | 'sm' | 'md' | 'lg' = 'md';
 
   // Consumer content is projected into the card body.

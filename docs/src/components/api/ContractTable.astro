@@ -1,0 +1,48 @@
+---
+// The selector and state contract as a table, from evals/contract/contract.mjs.
+// `gaps` lists the known limitations instead of the roles.
+import { loadComponentData, loadContract } from '../../lib/component-data.mjs';
+import { inline } from '../../lib/inline.mjs';
+
+interface Props { gaps?: boolean }
+const { gaps = false } = Astro.props;
+const contract = loadContract();
+const { components } = loadComponentData();
+const link = (tag: string) => `/components/${tag.replace(/^void-/, '')}/`;
+const roleText = (r: string | null) => (r === 'inner' ? 'inner element' : r ?? 'none');
+const rows = components.filter((c: any) => contract[c.tag]).map((c: any) => ({ tag: c.tag, k: contract[c.tag] }));
+---
+
+{
+  gaps ? (
+    <div class="vd-api-table">
+      <table>
+        <thead><tr><th>Component</th><th>Limitation</th></tr></thead>
+        <tbody>
+          {rows.filter((r: any) => r.k.gaps?.length).map((r: any) => (
+            <tr>
+              <td><a href={link(r.tag)}><code>{r.tag}</code></a></td>
+              <td><ul>{r.k.gaps.map((g: string) => <li set:html={inline(g)} />)}</ul></td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  ) : (
+    <div class="vd-api-table">
+      <table>
+        <thead><tr><th>Component</th><th>Role</th><th>Name from</th><th>State handles</th></tr></thead>
+        <tbody>
+          {rows.map((r: any) => (
+            <tr>
+              <td><a href={link(r.tag)}><code>{r.tag}</code></a></td>
+              <td>{roleText(r.k.role)}</td>
+              <td set:html={inline(r.k.name)} />
+              <td set:html={r.k.state?.length ? r.k.state.map((s: string) => inline(s)).join('<br>') : '<span class="vd-api-none">none</span>'} />
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  )
+}

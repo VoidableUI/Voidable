@@ -7,11 +7,29 @@ import { NativeFormControl } from '../form-control.js';
 
 /** Input field with an attached icon button — used for copy-to-clipboard inputs, search boxes, and similar patterns. */
 export class VoidActionInput extends NativeFormControl(VoidElement) {
+  /**
+   * The text in the field. As an attribute it is the initial value; read or set the `value` property for
+   * the current text.
+   */
   @property({ type: String }) value = '';
+  /**
+   * Hint text shown while the field is empty. It also names the field for assistive technology when
+   * there is no `aria-label`.
+   */
   @property({ type: String, reflect: true }) placeholder = '';
+  /** Stop the field and its button reacting and exclude the value from the form submission. */
   @property({ type: Boolean, reflect: true }) disabled = false;
+  /**
+   * Show the value but do not let the user edit it; the field is still focusable and submitted. The
+   * action button still works, which is what a copy-to-clipboard field wants.
+   */
   @property({ type: Boolean, reflect: true }) readonly = false;
+  /**
+   * The control must have a value before its form can be submitted. An empty control is invalid
+   * (`valueMissing`) and the browser reports it, as for a native field.
+   */
   @property({ type: Boolean, reflect: true }) required = false;
+  /** Key the value is submitted under in the form's `FormData`. Without a name the field submits nothing. */
   @property({ type: String, reflect: true }) name = '';
   /** Autofill hint forwarded to the native control (`autocomplete`), e.g. `current-password`, `one-time-code`, `email`. */
   @property({ type: String, reflect: true }) autocomplete = '';
@@ -29,13 +47,25 @@ export class VoidActionInput extends NativeFormControl(VoidElement) {
   @property({ type: String }) override autocapitalize: '' | 'off' | 'none' | 'on' | 'sentences' | 'words' | 'characters' = '';
   /** Spell checking of the native control (`spellcheck`). Defaults to true; `spellcheck="false"` turns it off from markup. */
   @property({ converter: defaultTrueBoolean }) override spellcheck = true;
+  /** Size step: `sm`, `md` (default) or `lg`. */
   @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' = 'md';
+  /**
+   * Status colour of the action button: `default`, `error`, `warning`, `caution`, `success`, `info` or
+   * `notice`.
+   */
   @property({ type: String, reflect: true }) color: 'default' | 'error' | 'warning' | 'caution' | 'success' | 'info' | 'notice' = 'default';
   /** Native input type; any text-like type is forwarded to the native control. */
   @property({ type: String, reflect: true }) type: 'text' | 'password' | 'search' | 'email' | 'tel' | 'url' = 'text';
+  /**
+   * Icon on the button: `search` (default), `copy`, `clipboard`, `send`, `eye`, `eye-off`, `check`, `x`
+   * or `arrow-right`. Any other value draws the search icon.
+   */
   @property({ type: String, reflect: true }) icon: string = 'search';
+  /** Accessible name of the button and its tooltip. Defaults to `Action`; say what it does (`Copy link`). */
   @property({ type: String, attribute: 'action-label' }) actionLabel = 'Action';
+  /** Which side of the field the button sits on: `right` (default) or `left`. */
   @property({ type: String, reflect: true }) position: 'left' | 'right' = 'right';
+  /** Where the button's tooltip appears: `top` (default), `bottom`, `left` or `right`. */
   @property({ type: String, reflect: true, attribute: 'tooltip-position' }) tooltipPosition: 'top' | 'bottom' | 'left' | 'right' = 'top';
 
   private _renderIcon() {

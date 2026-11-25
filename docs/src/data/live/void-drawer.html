@@ -1,0 +1,5 @@
+<void-button variant="filled" onclick="this.nextElementSibling.open = true">Open drawer</void-button>
+<void-drawer heading="Filters" side="right">
+  <p>Narrow the list by status and owner.</p>
+  <void-button variant="filled" onclick="this.closest('void-drawer').open = false">Apply filters</void-button>
+</void-drawer>

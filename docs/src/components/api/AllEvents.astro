@@ -1,0 +1,30 @@
+---
+// Every event every component dispatches, from the manifest.
+import { loadComponentData } from '../../lib/component-data.mjs';
+import { inline } from '../../lib/inline.mjs';
+
+const { components } = loadComponentData();
+const rows = components.flatMap((c: any) =>
+  c.events.map((e: any) => ({ c, e, text: c.note.events?.[e.name] ?? e.description ?? '' })),
+);
+---
+
+<div class="vd-api-table">
+  <table>
+    <thead><tr><th>Component</th><th>Event</th><th>Detail</th><th>Fires</th></tr></thead>
+    <tbody>
+      {rows.map(({ c, e, text }: any) => (
+        <tr>
+          <td><a href={`/components/${c.tag.replace(/^void-/, '')}/`}><code>{c.tag}</code></a></td>
+          <td><code>{e.name}</code></td>
+          <td>
+            {e.fields.length > 0
+              ? e.fields.map((f: any, i: number) => (<Fragment>{i > 0 && <br />}<code>{f.name}: {f.type}</code></Fragment>))
+              : <span class="vd-api-none">none</span>}
+          </td>
+          <td set:html={inline(text)} />
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</div>
