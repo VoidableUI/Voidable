@@ -116,7 +116,7 @@ const wideTable = html`
         <tr>
           ${wideColumns.map((c, j) => html`<td>${j === 0 ? `Person ${i + 1}` : `${c} ${i + 1}`}</td>`)}
           <td>
-            <void-dropdown-menu position="bottom-end">
+            <void-dropdown-menu position="bottom" align="end">
               <void-button slot="trigger" variant="ghost" size="sm" aria-label="Actions for person ${i + 1}">More</void-button>
               <void-dropdown-menu-item>Edit</void-dropdown-menu-item>
               <void-dropdown-menu-item>Duplicate</void-dropdown-menu-item>
