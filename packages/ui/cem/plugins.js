@@ -48,6 +48,7 @@
 //    are removed.
 
 import {
+  accessibleName,
   allowedParents,
   ancestorEvents,
   parentSetAttributes,
@@ -475,6 +476,24 @@ export function manifestSupplementPlugin() {
       for (const [tag, children] of Object.entries(requiredChildren)) {
         get(tag).voidRequires = children;
         checkTags('requiredChildren', children);
+      }
+      for (const [tag, rule] of Object.entries(accessibleName)) {
+        const decl = get(tag, 'accessibleName');
+        for (const name of rule.attributes) {
+          if (!/^(aria-|title$)/.test(name) && !decl.attributes?.some((a) => a.name === name)) {
+            throw new Error(`cem/supplement.js: accessibleName for <${tag}> lists "${name}", which is not an attribute of it`);
+          }
+        }
+        for (const anc of rule.ancestors ?? []) {
+          if (anc.tag !== 'label') get(anc.tag, 'accessibleName');
+          const ancDecl = anc.tag === 'label' ? undefined : byTag.get(anc.tag);
+          for (const name of anc.attributes ?? []) {
+            if (!ancDecl?.attributes?.some((a) => a.name === name)) {
+              throw new Error(`cem/supplement.js: accessibleName for <${tag}> lists "${name}" on <${anc.tag}>, which is not its attribute`);
+            }
+          }
+        }
+        decl.voidName = rule;
       }
       for (const [tag, hints] of Object.entries(attributeHints)) {
         const decl = get(tag);

@@ -2,6 +2,7 @@ import { html } from 'lit';
 import type { Meta, StoryObj } from '@storybook/web-components-vite';
 import '@voidable/ui';
 import '@voidable/theme';
+import { argTypesFor } from '../.storybook/manifest';
 
 const meta: Meta = {
   title: 'Form/FileUpload',
@@ -13,15 +14,9 @@ const meta: Meta = {
       },
     },
   },
-  argTypes: {
-    accept: { control: 'text' },
-    multiple: { control: 'boolean' },
-    disabled: { control: 'boolean' },
-    maxSize: { control: 'number' },
-    error: { control: 'text' },
-  },
+  argTypes: argTypesFor('void-file-upload'),
   render: (args) => html`
-    <void-file-upload
+    <void-file-upload aria-label="Upload files"
       accept=${args.accept || ''}
       ?multiple=${args.multiple}
       ?disabled=${args.disabled}
@@ -56,7 +51,7 @@ export const WithMaxSize: Story = {
   args: { maxSize: 1048576, multiple: true },
   render: () => html`
     <div style="max-width: 480px;">
-      <void-file-upload multiple .maxSize=${1048576}></void-file-upload>
+      <void-file-upload aria-label="Upload files" multiple .maxSize=${1048576}></void-file-upload>
       <p style="font-size: 12px; color: #888; margin-top: 8px;">Max file size: 1 MB</p>
     </div>
   `,

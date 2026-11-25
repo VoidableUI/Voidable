@@ -93,7 +93,7 @@ Voidable components work seamlessly with Livewire. The morph-protection hooks (e
         Submit
     </void-button>
 
-    <void-dialog
+    <void-dialog aria-label="Dialog"
         x-data="{ open: @entangle('showDialog') }"
         x-bind:open="open"
     >
@@ -140,12 +140,12 @@ Without Livewire, use Alpine.js directly for client-side interactivity:
 
 ```blade
 <form x-data="{ name: '', email: '' }" x-on:submit.prevent="$wire.save()">
-    <void-input
+    <void-input aria-label="Name"
         placeholder="Name"
         x-model="name"
     ></void-input>
 
-    <void-input
+    <void-input aria-label="Email"
         placeholder="Email"
         type="email"
         x-model="email"

@@ -3,6 +3,7 @@ import type { Meta, StoryObj } from '@storybook/web-components-vite';
 
 import '@voidable/ui';
 import '@voidable/theme';
+import { argTypesFor } from '../.storybook/manifest';
 
 const meta: Meta = {
   title: 'Components/NavMenu',
@@ -14,12 +15,7 @@ const meta: Meta = {
       },
     },
   },
-  argTypes: {
-    orientation: {
-      control: { type: 'select' },
-      options: ['horizontal', 'vertical'],
-    },
-  },
+  argTypes: argTypesFor('void-nav-menu'),
 };
 
 export default meta;

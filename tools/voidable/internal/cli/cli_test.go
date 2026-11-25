@@ -34,11 +34,14 @@ func TestCheckFixtures(t *testing.T) {
 			`page.html.erb:2:16: [invalid-value] color="primary" is not valid on <void-button>; allowed: default|error|warning|caution|success|info|notice`,
 			`page.html.erb:3:15: [unknown-attribute] unknown attribute label on <void-input>; wrap the control in <void-field label="...">`,
 			`page.html.erb:4:35: [unknown-attribute] unknown attribute cheked on <void-switch> (did you mean checked?)`,
+			`page.html.erb:3:3: [missing-name] <void-input> has no accessible name`,
 			`page.html.erb:5:16: [boolean-false] disabled="false"`,
 		}, []string{"name", "checked"}},
 		{"live.html.heex", []string{
 			`live.html.heex:1:38: [unknown-attribute] unknown attribute collapsedwidth on <void-sidebar> (did you mean collapsed-width?)`,
 			`live.html.heex:2:16: [unknown-attribute] unknown attribute showvalue on <void-slider> (did you mean show-value?)`,
+			`live.html.heex:2:3: [missing-name] <void-slider> has no accessible name`,
+			`live.html.heex:3:3: [missing-name] <void-select> has no accessible name`,
 			`live.html.heex:4:5: [invalid-parent] <void-option> is not valid inside <void-select>`,
 		}, []string{"self-closing", "phx-hook", ":if", "name"}},
 		{"form.blade.php", []string{
@@ -48,6 +51,7 @@ func TestCheckFixtures(t *testing.T) {
 		{"App.tsx", []string{
 			`App.tsx:5:22: [invalid-value] variant="primary" is not valid on <void-button>; allowed: outline|filled|ghost`,
 			`App.tsx:5:42: [unknown-event] <void-button> does not dispatch void-change; it dispatches void-click`,
+			`App.tsx:7:7: [missing-name] <void-input> has no accessible name`,
 		}, []string{"collapsedWidth", "collapsed-width", "className", "void-toggle", "self-closing", "placeholder"}},
 		{"index.astro", []string{
 			`index.astro:5:21: [legacy-markup] <void-tab-panel> no longer exists; write the tabs as <void-tabs-list>`,

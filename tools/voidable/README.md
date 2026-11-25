@@ -25,7 +25,7 @@ gh attestation verify voidable_linux_amd64.tar.gz --repo VoidableUI/Voidable
 | --- | --- |
 | `voidable version` | Version, commit, build date, the embedded manifest's `@voidable/ui` version. No network access. |
 | `voidable ref [tag]` | One line per element, or one element's attributes, events, parents and an example. |
-| `voidable check <file or dir>` | Finds unknown elements and attributes, invalid values and misplaced children; exit 1 on problems. |
+| `voidable check <file or dir>` | Finds unknown elements and attributes, invalid values, misplaced children and controls with no accessible name; exit 1 on problems. |
 | `voidable gen snippet <tag> --lang html\|jsx\|erb\|heex\|blade` | A working example of one element. |
 | `voidable mcp` | MCP server on stdio: `voidable_ref`, `voidable_check`, `voidable_snippet` and the skill. |
 | `voidable install --dir <path>` | Copies the built `@voidable/ui` modules, lit and the theme CSS into a project and prints the import map (needs a release binary or `-tags assets`). |

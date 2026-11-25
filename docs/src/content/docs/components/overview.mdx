@@ -65,7 +65,7 @@ A bare attribute, `="true"` or no attribute all keep the default. Setting the pr
 `<void-input>`, `<void-textarea>` and `<void-action-input>` forward the standard native attributes to their native control: `autocomplete`, `minlength`, `maxlength`, `inputmode`, `enterkeyhint`, `autocapitalize`, `spellcheck`, `readonly`, and (on the single-line inputs) `pattern`. `<void-input>` accepts every text-like `type`: `text`, `email`, `password`, `number`, `tel`, `url`, `search`, `date`, `datetime-local`, `month`, `time` and `week`.
 
 ```html
-<void-input type="password" name="password" autocomplete="current-password" minlength="8"></void-input>
+<void-input aria-label="Password" type="password" name="password" autocomplete="current-password" minlength="8"></void-input>
 ```
 
 `minlength` and `pattern` take part in validity and form submission. They apply to what the user types, as with a native input.

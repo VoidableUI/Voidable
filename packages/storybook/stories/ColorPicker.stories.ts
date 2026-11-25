@@ -3,6 +3,7 @@ import type { Meta, StoryObj } from '@storybook/web-components-vite';
 
 import '@voidable/ui';
 import '@voidable/theme';
+import { argTypesFor } from '../.storybook/manifest';
 
 const meta: Meta = {
   title: 'Components/ColorPicker',
@@ -14,21 +15,20 @@ const meta: Meta = {
       },
     },
   },
-  argTypes: {
-    value: { control: 'color' },
-    disabled: { control: 'boolean' },
-    size: { control: 'select', options: ['sm', 'md', 'lg'] },
-    showInput: { control: 'boolean' },
+  argTypes: argTypesFor('void-color-picker'),
+  render: (args) => {
+    const picker = html`
+      <void-color-picker aria-label="Colour"
+        value=${args.value ?? '#000000'}
+        size=${args.size || 'md'}
+        ?disabled=${args.disabled}
+        .showInput=${args.showInput ?? true}
+        .swatches=${args.swatches ?? []}
+      ></void-color-picker>
+    `;
+    // Without its text input the picker has no control to carry an aria-label: the field names it.
+    return args.showInput === false ? html`<void-field label="Colour">${picker}</void-field>` : picker;
   },
-  render: (args) => html`
-    <void-color-picker
-      value=${args.value ?? '#000000'}
-      size=${args.size || 'md'}
-      ?disabled=${args.disabled}
-      .showInput=${args.showInput ?? true}
-      .swatches=${args.swatches ?? []}
-    ></void-color-picker>
-  `,
 };
 
 export default meta;
@@ -49,9 +49,9 @@ export const WithSwatches: Story = {
 export const Sizes: Story = {
   render: () => html`
     <div style="display: flex; gap: 32px; align-items: flex-start;">
-      <void-color-picker size="sm" value="#ef4444"></void-color-picker>
-      <void-color-picker size="md" value="#3b82f6"></void-color-picker>
-      <void-color-picker size="lg" value="#22c55e"></void-color-picker>
+      <void-color-picker aria-label="Colour" size="sm" value="#ef4444"></void-color-picker>
+      <void-color-picker aria-label="Colour" size="md" value="#3b82f6"></void-color-picker>
+      <void-color-picker aria-label="Colour" size="lg" value="#22c55e"></void-color-picker>
     </div>
   `,
 };
@@ -67,16 +67,16 @@ export const NoInput: Story = {
 export const Compact: Story = {
   render: () => html`
     <div style="display: flex; gap: var(--void-space-4); align-items: flex-start;">
-      <void-color-picker variant="compact" value="#3b82f6"></void-color-picker>
-      <void-color-picker variant="compact" value="#22c55e" size="sm"></void-color-picker>
-      <void-color-picker variant="compact" value="#ef4444" disabled></void-color-picker>
+      <void-color-picker aria-label="Colour" variant="compact" value="#3b82f6"></void-color-picker>
+      <void-color-picker aria-label="Colour" variant="compact" value="#22c55e" size="sm"></void-color-picker>
+      <void-color-picker aria-label="Colour" variant="compact" value="#ef4444" disabled></void-color-picker>
     </div>
   `,
 };
 
 export const CompactWithSwatches: Story = {
   render: () => html`
-    <void-color-picker
+    <void-color-picker aria-label="Colour"
       variant="compact"
       value="#8b5cf6"
       .swatches=${['#ef4444', '#f59e0b', '#22c55e', '#3b82f6', '#8b5cf6', '#ec4899']}

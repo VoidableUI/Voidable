@@ -2,6 +2,7 @@ import { html } from 'lit';
 import type { Meta, StoryObj } from '@storybook/web-components-vite';
 import '@voidable/ui';
 import '@voidable/theme';
+import { argTypesFor } from '../.storybook/manifest';
 
 const meta: Meta = {
   title: 'Navigation/NavBar',
@@ -14,18 +15,7 @@ const meta: Meta = {
       },
     },
   },
-  argTypes: {
-    sticky: {
-      control: { type: 'boolean' },
-    },
-    bordered: {
-      control: { type: 'boolean' },
-    },
-    variant: {
-      control: { type: 'select' },
-      options: ['default', 'elevated'],
-    },
-  },
+  argTypes: argTypesFor('void-nav-bar'),
 };
 
 export default meta;

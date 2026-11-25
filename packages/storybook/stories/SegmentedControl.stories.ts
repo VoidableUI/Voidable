@@ -2,6 +2,7 @@ import { html } from 'lit';
 import type { Meta, StoryObj } from '@storybook/web-components-vite';
 import '@voidable/ui';
 import '@voidable/theme';
+import { argTypesFor } from '../.storybook/manifest';
 
 const meta: Meta = {
   title: 'Components/SegmentedControl',
@@ -23,11 +24,7 @@ Pattern: radio group. One tab stop (the checked item, else the first enabled); s
       },
     },
   },
-  argTypes: {
-    value: { control: 'text' },
-    size: { control: 'select', options: ['sm', 'md', 'lg'] },
-    color: { control: 'select', options: ['default', 'error', 'warning', 'caution', 'success', 'info', 'notice', 'highlight'] },
-  },
+  argTypes: argTypesFor('void-segmented-control'),
   render: (args) => html`
     <void-segmented-control value=${args.value || 'day'} size=${args.size || 'md'} color=${args.color || 'default'}>
       <void-segmented-control-item value="day">Day</void-segmented-control-item>

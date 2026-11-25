@@ -25,6 +25,8 @@ export interface DevTag {
   q?: DevParts;
   /** 1 for a CSS-only part: styled by the theme, never registered. */
   c?: 1;
+  /** What gives the element its accessible name (it must have one). */
+  n?: DevName;
 }
 
 /** The explicit parts of a component (or of a part that has parts of its own). */
@@ -41,6 +43,18 @@ export interface DevParts {
   l?: string;
   /** The parts, in canonical order. */
   n: ReadonlyArray<{ t: string; r?: 1; x?: number; c?: 1 }>;
+}
+
+/** The sources of an accessible name for one tag (cem/supplement.js `accessibleName`). */
+export interface DevName {
+  /** Attributes of the element that name it. */
+  a: readonly string[];
+  /** The element's own content names it. */
+  c?: 1;
+  /** Ancestors that name it: `[tag, ...attributes]`; with no attributes the ancestor alone is enough. */
+  p?: readonly (readonly string[])[];
+  /** What to do about it. */
+  h: string;
 }
 
 export type DevTable = Readonly<Record<string, DevTag>>;
@@ -61,6 +75,8 @@ export type WarningKind =
   | 'part-misuse'
   /** A tag that explicit parts replaced. */
   | 'legacy-markup'
+  /** The element needs an accessible name and nothing gives it one. */
+  | 'missing-name'
   /** A page script keeps removing an attribute a component manages on itself; the component stopped restoring it. */
   | 'attribute-fight';
 

@@ -32,7 +32,7 @@ export class MyApp extends LitElement {
         Clicked ${this.count} times
       </void-button>
 
-      <void-input
+      <void-input aria-label="Search"
         placeholder="Search"
         @void-change=${(e: CustomEvent) => console.log(e.detail.value)}
       ></void-input>

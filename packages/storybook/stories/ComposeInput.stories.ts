@@ -3,6 +3,7 @@ import type { Meta, StoryObj } from '@storybook/web-components-vite';
 
 import '@voidable/ui';
 import '@voidable/theme';
+import { argTypesFor } from '../.storybook/manifest';
 
 const meta: Meta = {
   title: 'Components/ComposeInput',
@@ -14,13 +15,9 @@ const meta: Meta = {
       },
     },
   },
-  argTypes: {
-    placeholder: { control: 'text' },
-    disabled: { control: 'boolean' },
-    maxlength: { control: 'number' },
-  },
+  argTypes: argTypesFor('void-compose-input'),
   render: (args) => html`
-    <void-compose-input
+    <void-compose-input aria-label="Message"
       placeholder=${args.placeholder || 'Type a message...'}
       ?disabled=${args.disabled}
       maxlength=${args.maxlength || 0}
@@ -53,7 +50,7 @@ export const EventDemo: Story = {
     };
     return html`
       <div style="max-width: 480px;">
-        <void-compose-input
+        <void-compose-input aria-label="Type and press Enter to submit"
           placeholder="Type and press Enter to submit..."
           @void-submit=${onSubmit}
         ></void-compose-input>

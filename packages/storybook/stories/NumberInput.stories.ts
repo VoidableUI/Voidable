@@ -3,6 +3,7 @@ import { ifDefined } from 'lit/directives/if-defined.js';
 import type { Meta, StoryObj } from '@storybook/web-components-vite';
 import '@voidable/ui';
 import '@voidable/theme';
+import { argTypesFor } from '../.storybook/manifest';
 
 const meta: Meta = {
   title: 'Form/NumberInput',
@@ -14,20 +15,7 @@ const meta: Meta = {
       },
     },
   },
-  argTypes: {
-    value: { control: 'number' },
-    min: { control: 'number' },
-    max: { control: 'number' },
-    step: { control: 'number' },
-    precision: { control: 'number' },
-    disabled: { control: 'boolean' },
-    readonly: { control: 'boolean' },
-    placeholder: { control: 'text' },
-    label: { control: 'text' },
-    size: { control: 'select', options: ['sm', 'md', 'lg'] },
-    color: { control: 'select', options: ['default', 'error', 'warning', 'caution', 'success', 'info', 'notice', 'highlight'] },
-    controls: { control: 'select', options: ['sides', 'right', 'none'] },
-  },
+  argTypes: argTypesFor('void-number-input'),
   render: (args) => html`
     <void-number-input
       .value=${args.value ?? null}
@@ -102,11 +90,11 @@ export const Readonly: Story = {
 export const WithUnit: Story = {
   render: () => html`
     <div style="display: flex; flex-direction: column; gap: var(--void-space-4); max-width: 18rem;">
-      <void-number-input value="25" unit="°C" min="-50" max="50"></void-number-input>
-      <void-number-input value="9.99" prefix="$" precision="2" step="0.01"></void-number-input>
-      <void-number-input value="50" unit="%" min="0" max="100"></void-number-input>
-      <void-number-input value="180" unit="°" min="0" max="360" step="15"></void-number-input>
-      <void-number-input value="1200" prefix="€" unit="/mo" precision="0"></void-number-input>
+      <void-number-input aria-label="Quantity" value="25" unit="°C" min="-50" max="50"></void-number-input>
+      <void-number-input aria-label="Quantity" value="9.99" prefix="$" precision="2" step="0.01"></void-number-input>
+      <void-number-input aria-label="Quantity" value="50" unit="%" min="0" max="100"></void-number-input>
+      <void-number-input aria-label="Quantity" value="180" unit="°" min="0" max="360" step="15"></void-number-input>
+      <void-number-input aria-label="Quantity" value="1200" prefix="€" unit="/mo" precision="0"></void-number-input>
     </div>
   `,
 };
@@ -120,7 +108,7 @@ export const StepAny: Story = {
     },
   },
   render: () => html`
-    <void-number-input step="any" value="2.375" style="max-width: 18rem;"></void-number-input>
+    <void-number-input aria-label="Quantity" step="any" value="2.375" style="max-width: 18rem;"></void-number-input>
   `,
 };
 

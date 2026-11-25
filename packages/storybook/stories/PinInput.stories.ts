@@ -2,6 +2,7 @@ import { html } from 'lit';
 import type { Meta, StoryObj } from '@storybook/web-components-vite';
 import '@voidable/ui';
 import '@voidable/theme';
+import { argTypesFor } from '../.storybook/manifest';
 
 const meta: Meta = {
   title: 'Components/PinInput',
@@ -13,18 +14,9 @@ const meta: Meta = {
       },
     },
   },
-  argTypes: {
-    length: { control: 'number' },
-    value: { control: 'text' },
-    disabled: { control: 'boolean' },
-    mask: { control: 'boolean' },
-    type: { control: 'select', options: ['numeric', 'alphanumeric'] },
-    size: { control: 'select', options: ['sm', 'md', 'lg'] },
-    color: { control: 'select', options: ['default', 'error', 'warning', 'caution', 'success', 'info', 'notice', 'highlight'] },
-    placeholder: { control: 'text' },
-  },
+  argTypes: argTypesFor('void-pin-input'),
   render: (args) => html`
-    <void-pin-input
+    <void-pin-input aria-label="Verification code"
       .length=${args.length ?? 6}
       .value=${args.value ?? ''}
       size=${args.size || 'md'}
@@ -61,9 +53,9 @@ export const Alphanumeric: Story = {
 export const Sizes: Story = {
   render: () => html`
     <div style="display: flex; flex-direction: column; gap: 16px;">
-      <void-pin-input size="sm" .value=${'1234'}></void-pin-input>
-      <void-pin-input size="md" .value=${'1234'}></void-pin-input>
-      <void-pin-input size="lg" .value=${'1234'}></void-pin-input>
+      <void-pin-input aria-label="Verification code" size="sm" .value=${'1234'}></void-pin-input>
+      <void-pin-input aria-label="Verification code" size="md" .value=${'1234'}></void-pin-input>
+      <void-pin-input aria-label="Verification code" size="lg" .value=${'1234'}></void-pin-input>
     </div>
   `,
 };
@@ -71,12 +63,12 @@ export const Sizes: Story = {
 export const Colors: Story = {
   render: () => html`
     <div style="display: flex; flex-direction: column; gap: 16px;">
-      <void-pin-input color="default" .value=${'123456'}></void-pin-input>
-      <void-pin-input color="error" .value=${'123456'}></void-pin-input>
-      <void-pin-input color="warning" .value=${'123456'}></void-pin-input>
-      <void-pin-input color="success" .value=${'123456'}></void-pin-input>
-      <void-pin-input color="info" .value=${'123456'}></void-pin-input>
-      <void-pin-input color="notice" .value=${'123456'}></void-pin-input>
+      <void-pin-input aria-label="Verification code" color="default" .value=${'123456'}></void-pin-input>
+      <void-pin-input aria-label="Verification code" color="error" .value=${'123456'}></void-pin-input>
+      <void-pin-input aria-label="Verification code" color="warning" .value=${'123456'}></void-pin-input>
+      <void-pin-input aria-label="Verification code" color="success" .value=${'123456'}></void-pin-input>
+      <void-pin-input aria-label="Verification code" color="info" .value=${'123456'}></void-pin-input>
+      <void-pin-input aria-label="Verification code" color="notice" .value=${'123456'}></void-pin-input>
     </div>
   `,
 };
@@ -84,9 +76,9 @@ export const Colors: Story = {
 export const Groups: Story = {
   render: () => html`
     <div style="display: flex; flex-direction: column; gap: 16px;">
-      <void-pin-input groups="3,3" .value=${'123456'}></void-pin-input>
-      <void-pin-input groups="3,4" .value=${'1234567'}></void-pin-input>
-      <void-pin-input groups="2,2,2" .value=${'123456'}></void-pin-input>
+      <void-pin-input aria-label="Verification code" groups="3,3" .value=${'123456'}></void-pin-input>
+      <void-pin-input aria-label="Verification code" groups="3,4" .value=${'1234567'}></void-pin-input>
+      <void-pin-input aria-label="Verification code" groups="2,2,2" .value=${'123456'}></void-pin-input>
     </div>
   `,
 };

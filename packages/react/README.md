@@ -23,7 +23,7 @@ import { Button, Input, Dialog, TagsInput, useTheme } from '@voidable/ui-react';
 import '@voidable/theme';
 
 function App() {
-  const theme = useTheme(); // 'dark' | 'light' (dark is the default)
+  const theme = useTheme(); // 'dark' | 'light': the scheme the page is in
 
   return (
     <div>
@@ -82,7 +82,7 @@ The package starts with `"use client"`, so the components can be imported from A
 
 ### Theme
 
-`useTheme()` returns the current value of `<html data-theme>`. It is `'dark'` when the attribute is unset and during server rendering.
+`useTheme()` returns the colour scheme in force, `'dark'` or `'light'`: what the page shows, not just the attribute. With `<html data-theme>` unset or `"system"` it reports what the theme resolves, so a theme or skin that prefers a scheme (Loft prefers light) is counted, and otherwise the operating system's `prefers-color-scheme`. It updates when the attribute or the operating system preference changes. During server rendering, and on the first render of a hydrating tree, it is `'dark'` (the server cannot know the visitor's preference); React then re-renders with the real value, with no hydration warning. It is read-only: set `data-theme` on `<html>` to change the scheme.
 
 ## Documentation
 

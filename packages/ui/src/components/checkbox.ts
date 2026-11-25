@@ -1,11 +1,15 @@
 import { html, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
+import { KeyboardActivation } from '../keyboard-activation.js';
 import { NativeFormControl } from '../form-control.js';
 import { ProjectionController } from '../projection.js';
 
 /** Binary or indeterminate selection for form fields, data table row selection, and toggle-able settings. */
 export class VoidCheckbox extends NativeFormControl(VoidElement) {
+  /** Enter and Space fire a real `click`, as on a native button. */
+  protected readonly _activation = new KeyboardActivation(this, { enter: false, disabled: () => this.formDisabled });
+
   /**
    * Whether the box is checked. Updated when the user toggles it; the attribute is the initial state and
    * the form's reset target.
@@ -52,13 +56,11 @@ export class VoidCheckbox extends NativeFormControl(VoidElement) {
     this.setHostAttribute('tabindex', '0');
     this.setHostAttribute('aria-checked', String(this.checked));
     this.addEventListener('click', this._handleClick);
-    this.addEventListener('keydown', this._handleKeydown);
   }
 
   disconnectedCallback(): void {
     super.disconnectedCallback();
     this.removeEventListener('click', this._handleClick);
-    this.removeEventListener('keydown', this._handleKeydown);
   }
 
   protected override updated(changed: Map<string, unknown>): void {
@@ -141,13 +143,6 @@ export class VoidCheckbox extends NativeFormControl(VoidElement) {
     const input = this.querySelector('input[type="checkbox"]') as HTMLInputElement | null;
     if (input) input.checked = this.checked;
     this.dispatchEvent(new CustomEvent('void-change', { bubbles: true, composed: true, detail: { checked: this.checked } }));
-  };
-
-  private _handleKeydown = (e: KeyboardEvent): void => {
-    if (e.key === ' ' && !this.formDisabled) {
-      e.preventDefault();
-      this._handleClick(e);
-    }
   };
 }
 

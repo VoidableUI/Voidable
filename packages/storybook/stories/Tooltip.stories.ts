@@ -2,6 +2,7 @@ import { html } from 'lit';
 import type { Meta, StoryObj } from '@storybook/web-components-vite';
 import '@voidable/ui';
 import '@voidable/theme';
+import { argTypesFor } from '../.storybook/manifest';
 
 const meta: Meta = {
   title: 'Components/Tooltip',
@@ -14,26 +15,7 @@ const meta: Meta = {
       },
     },
   },
-  argTypes: {
-    text: {
-      control: { type: 'text' },
-      description: 'Story control: the text of the <void-tooltip-content> part.',
-    },
-    position: {
-      control: { type: 'select' },
-      options: ['top', 'bottom', 'left', 'right'],
-    },
-    align: {
-      control: { type: 'select' },
-      options: ['start', 'center', 'end'],
-    },
-    open: {
-      control: { type: 'boolean' },
-    },
-    delay: {
-      control: { type: 'number' },
-    },
-  },
+  argTypes: argTypesFor('void-tooltip', { text: { control: { type: 'text' }, description: 'Story control: the text of the <void-tooltip-content> part.' } }),
 };
 
 export default meta;

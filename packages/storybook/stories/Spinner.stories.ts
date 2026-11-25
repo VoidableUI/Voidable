@@ -3,6 +3,7 @@ import type { Meta, StoryObj } from '@storybook/web-components-vite';
 
 import '@voidable/ui';
 import '@voidable/theme';
+import { argTypesFor } from '../.storybook/manifest';
 
 const meta: Meta = {
   title: 'Components/Spinner',
@@ -14,10 +15,7 @@ const meta: Meta = {
       },
     },
   },
-  argTypes: {
-    size: { control: 'select', options: ['sm', 'md', 'lg'] },
-    label: { control: 'text' },
-  },
+  argTypes: argTypesFor('void-spinner'),
   render: (args) => html`
     <void-spinner
       size=${args.size || 'md'}

@@ -96,12 +96,63 @@ func fences(src []byte) []region {
 	return append(out, cur)
 }
 
+// frame is one open element the scanner is inside: a void-* element, a
+// native <label>, or a framework component (whose output is not known).
+type frame struct {
+	name  string
+	kind  frameKind
+	tag   int // index into the region's tags, for kindVoid
+	start int // offset just after the start tag
+	attrs []domain.AttrToken
+}
+
+type frameKind int
+
+const (
+	kindVoid frameKind = iota
+	kindLabel
+	kindComponent
+)
+
+// closeFrame pops the innermost frame of the kind and name that the end tag
+// closes, and everything above it (elements the source left unclosed). It
+// returns the frame, or false when none matches.
+func closeFrame(stack []frame, kind frameKind, name string) ([]frame, frame, bool) {
+	for k := len(stack) - 1; k >= 0; k-- {
+		if stack[k].kind == kind && stack[k].name == name {
+			return stack[:k], stack[k], true
+		}
+	}
+	return stack, frame{}, false
+}
+
+// componentNameIn reads the name of a framework component's tag at src[i]
+// (just after `<`): `Field`, `.field`, `Foo.Bar`, `x-field`, `:slot`,
+// `svelte:component`. Plain lowercase HTML names are not components.
+// Plain HTML and Lit templates have no components, so their tags are never one.
+func componentNameIn(src []byte, i int, lang domain.Lang) string {
+	if lang == domain.LangHTML || lang == domain.LangLit {
+		return ""
+	}
+	j := i
+	for j < len(src) && (isLower(src[j]) || isDigit(src[j]) || src[j] == '-' || src[j] == '_' || src[j] == '.' || src[j] == ':' || (src[j] >= 'A' && src[j] <= 'Z')) {
+		j++
+	}
+	name := string(src[i:j])
+	switch {
+	case name == "":
+		return ""
+	case name[0] >= 'A' && name[0] <= 'Z', name[0] == '.', name[0] == ':', strings.HasPrefix(name, "x-"), strings.Contains(name, ":"):
+		return name
+	}
+	return ""
+}
+
 func (s *state) scanRegion(r region) []domain.Tag {
 	src := s.src[:r.end]
 	var tags []domain.Tag
-	var stack []string
-	// For each open element: its index in tags and where its content starts.
-	var open [][2]int
+	var stack []frame
+	labelFor := map[string]bool{}
 	base := len(s.done)
 	for i := r.start; i < r.end; i++ {
 		if end := skipComment(src, i); end > i {
@@ -113,15 +164,44 @@ func (s *state) scanRegion(r region) []domain.Tag {
 		}
 		if bytes.HasPrefix(src[i+1:], []byte("/void-")) {
 			name := readName(src, i+2)
-			for k := len(stack) - 1; k >= 0; k-- {
-				if stack[k] == name {
-					idx, from := open[k][0], open[k][1]
-					tags[idx].Closed = true
-					tags[idx].Dynamic = dynamicContent(src[from:i])
-					stack, open = stack[:k], open[:k]
-					break
+			var f frame
+			var ok bool
+			if stack, f, ok = closeFrame(stack, kindVoid, name); ok {
+				tags[f.tag].Content = s.analyzeContent(src, f.start, i, r.lang)
+				tags[f.tag].Closed = true
+				tags[f.tag].Dynamic = dynamicContent(src[f.start:i])
+			}
+			continue
+		}
+		if bytes.HasPrefix(src[i+1:], []byte("/label")) && i+7 < len(src) && (src[i+7] == '>' || isSpace(src[i+7])) {
+			stack, _, _ = closeFrame(stack, kindLabel, "label")
+			continue
+		}
+		if i+1 < len(src) && src[i+1] == '/' {
+			if name := componentNameIn(src, i+2, r.lang); name != "" {
+				stack, _, _ = closeFrame(stack, kindComponent, name)
+			}
+			continue
+		}
+		if bytes.HasPrefix(src[i+1:], []byte("label")) && i+6 < len(src) && (isSpace(src[i+6]) || src[i+6] == '>') {
+			t, next := s.parseTag(src, i, "label", r.lang)
+			for _, a := range t.Attrs {
+				if (a.Name == "for" || a.Name == "htmlFor") && a.HasValue && !a.Dynamic {
+					labelFor[a.Value] = true
 				}
 			}
+			if !t.SelfClosing {
+				stack = append(stack, frame{name: "label", kind: kindLabel})
+			}
+			i = next - 1
+			continue
+		}
+		if name := componentNameIn(src, i+1, r.lang); name != "" {
+			t, next := s.parseTag(src, i, name, r.lang)
+			if !t.SelfClosing {
+				stack = append(stack, frame{name: name, kind: kindComponent})
+			}
+			i = next - 1
 			continue
 		}
 		if !bytes.HasPrefix(src[i+1:], []byte("void-")) {
@@ -138,21 +218,44 @@ func (s *state) scanRegion(r region) []domain.Tag {
 		// not markup: check the name but do not track nesting.
 		if i > 0 && src[i-1] == '`' && next < len(src) && src[next] == '`' && len(t.Attrs) == 0 ||
 			r.lang == domain.LangMarkdown && inInlineCode(src, i) {
+			t.Mention = true
 			tags = append(tags, t)
 			i = next - 1
 			continue
 		}
-		t.ParentIndex = -1
-		if len(stack) > 0 {
-			t.Parent = stack[len(stack)-1]
-			t.ParentIndex = base + open[len(open)-1][0]
+		for k := len(stack) - 1; k >= 0; k-- {
+			if stack[k].kind == kindVoid {
+				t.Parent = stack[k].name
+				t.ParentIndex = base + stack[k].tag
+				break
+			}
 		}
-		if !t.SelfClosing {
-			stack = append(stack, name)
-			open = append(open, [2]int{len(tags), next})
+		for _, f := range stack {
+			switch f.kind {
+			case kindVoid:
+				t.Ancestors = append(t.Ancestors, domain.Ancestor{Name: f.name, Attrs: f.attrs})
+			case kindLabel:
+				t.Ancestors = append(t.Ancestors, domain.Ancestor{Name: "label"})
+				t.Labelled = true
+			case kindComponent:
+				t.InComponent = true
+			}
+		}
+		if t.SelfClosing {
+			t.Content = domain.Content{Known: true}
+		} else {
+			stack = append(stack, frame{name: name, kind: kindVoid, tag: len(tags), start: next, attrs: t.Attrs})
 		}
 		tags = append(tags, t)
 		i = next - 1
+	}
+	// A <label for> names the control with that id wherever it sits in the source.
+	for i := range tags {
+		for _, a := range tags[i].Attrs {
+			if a.Name == "id" && a.HasValue && !a.Dynamic && labelFor[a.Value] {
+				tags[i].Labelled = true
+			}
+		}
 	}
 	return tags
 }
@@ -171,6 +274,76 @@ func dynamicContent(b []byte) bool {
 		if bytes.Contains(b, m) {
 			return true
 		}
+	}
+	return false
+}
+
+// analyzeContent summarises src[from:to], the children of a tag, without
+// parsing them: whether there is static text or something that carries a
+// name, and whether anything it cannot evaluate may render content.
+func (s *state) analyzeContent(src []byte, from, to int, lang domain.Lang) domain.Content {
+	c := domain.Content{Known: true}
+	b := src[:to]
+	for i := from; i < to; i++ {
+		if end := skipComment(b, i); end > i {
+			i = end - 1
+			continue
+		}
+		switch ch := b[i]; {
+		case ch == '<' && i+1 < to && (b[i+1] == '%' || b[i+1] == '?'):
+			c.Dynamic = true
+			i = skipERB(b, i) - 1
+		case ch == '<' && i+1 < to && (b[i+1] == '/' || b[i+1] == '!'):
+			for i < to && b[i] != '>' {
+				i++
+			}
+		case ch == '<' && i+1 < to && (isLower(b[i+1]) || (b[i+1] >= 'A' && b[i+1] <= 'Z') || b[i+1] == '.' || b[i+1] == ':'):
+			name := readTagName(b, i+1)
+			if componentNameIn(b, i+1, lang) != "" || name == "slot" {
+				c.Dynamic = true
+			}
+			t, next := s.parseTag(b, i, name, lang)
+			for _, a := range t.Attrs {
+				switch {
+				case a.Syntax == domain.SyntaxSpread:
+					c.Dynamic = true
+				case isNameAttr(a.Name) && (a.Dynamic || (a.HasValue && strings.TrimSpace(a.Value) != "")):
+					c.Text = true
+				}
+			}
+			i = next - 1
+		case ch == '{':
+			c.Dynamic = true
+			i = skipBalanced(b, i, '{', '}') - 1
+		case ch == '$' && i+1 < to && b[i+1] == '{', ch == '#' && i+1 < to && b[i+1] == '{':
+			c.Dynamic = true
+			i = skipBalanced(b, i+1, '{', '}') - 1
+		case ch == '@' && isBladeDirective(b, i):
+			c.Dynamic = true
+			i = skipBladeDirective(b, i) - 1
+		case !isSpace(ch):
+			c.Text = true
+		}
+	}
+	return c
+}
+
+// readTagName reads an element name (lowercase, digits and hyphens, as in svg
+// and custom elements) at src[i].
+func readTagName(src []byte, i int) string {
+	j := i
+	for j < len(src) && (isLower(src[j]) || isDigit(src[j]) || src[j] == '-' || src[j] == ':' || src[j] == '.' || (src[j] >= 'A' && src[j] <= 'Z')) {
+		j++
+	}
+	return string(src[i:j])
+}
+
+// isNameAttr reports whether a child element's attribute gives it an
+// accessible name.
+func isNameAttr(name string) bool {
+	switch strings.ToLower(strings.ReplaceAll(name, "-", "")) {
+	case "arialabel", "arialabelledby", "alt", "title":
+		return true
 	}
 	return false
 }

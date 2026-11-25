@@ -2,6 +2,7 @@ import { html } from 'lit';
 import type { Meta, StoryObj } from '@storybook/web-components-vite';
 import '@voidable/ui';
 import '@voidable/theme';
+import { argTypesFor } from '../.storybook/manifest';
 
 const meta: Meta = {
   title: 'Components/Card',
@@ -14,20 +15,7 @@ const meta: Meta = {
       },
     },
   },
-  argTypes: {
-    heading: {
-      control: { type: 'text' },
-      description: 'Story control: the text of the <void-card-title> part (empty for no header).',
-    },
-    variant: {
-      control: { type: 'select' },
-      options: ['default', 'elevated', 'bordered'],
-    },
-    padding: {
-      control: { type: 'select' },
-      options: ['none', 'sm', 'md', 'lg'],
-    },
-  },
+  argTypes: argTypesFor('void-card', { heading: { control: { type: 'text' }, description: 'Story control: the text of the <void-card-title> part (empty for no header).' } }),
 };
 
 export default meta;

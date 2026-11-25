@@ -146,7 +146,7 @@ How the derivation works, and the rules that keep it working:
 - Derived tokens are declared on `:where(:root, [data-theme], [data-void-theme], [data-shape], [data-void-surface], void-media, void-glass)`. A custom property computed from another is resolved where it is declared, so a knob set on a subtree only takes effect if that element carries `data-void-theme`.
 - A surface (on-media, glass) is a set of overrides of the *inputs* to those formulas (the scheme number, the alpha steps, `--void-color-bg`), declared on `void-media`, `void-glass` and `[data-void-surface]`. Components need no surface-specific CSS; never add one.
 - Never put a `var()` in `primitives.css` or `knobs.css`, and never put a raw value in a theme file.
-- **Dark mode** is the default (true black `#000000` page). **Light mode** via `[data-theme="light"]`.
+- **Colour scheme**: `data-theme="dark"` or `"light"` on an element or an ancestor is the explicit choice, and `"system"` follows the operating system. Without one, the scheme a theme or skin prefers (`--void-preferred-scheme`, Loft and Slab prefer light) applies, and without that the operating system (`prefers-color-scheme`; dark where the browser cannot say). Dark is a true black `#000000` page, light a true white one.
 
 ### Token export
 
@@ -167,6 +167,8 @@ The default look is light and airy. It gets there with three decisions, each a k
 - **Chrome: minimal** (`--void-chrome`). Hairline dividers rather than boxes; containers have a barely visible fill; tables and lists sit directly on the page; no fills behind headers. Borders have two jobs with two tokens: `--void-color-border` divides and may be faint, `--void-color-border-control` bounds a control and keeps 3:1.
 
 And these:
+
+The primary author of code that uses this library is an LLM agent, so design for that author. APIs are chosen to be guessable: the name an agent would reach for first is the name that exists. Failures are loud: a wrong attribute, a missing label or a misused part is reported by `voidable check` and the development warnings rather than silently ignored. Correctness is established by functional tests in real browsers, not by reading code; a change is done when it has been run and observed to work.
 
 - **Human and agent friendly** — the UI is designed for both human users and AI agents. Light DOM exposes component structure. Reflected attributes make state machine-readable without executing JS. Semantic ARIA roles and properties give agents a structured understanding of the interface. Stable tag+attribute selectors provide reliable handles for programmatic interaction.
 - **Pure backgrounds by default** — true black (`#000000`) in dark mode, true white (`#ffffff`) in light mode. A theme may soften the page with `--void-page-tint`.
@@ -199,7 +201,7 @@ Consumers toggle shape globally (`<html data-shape="sharp">`) or locally on any 
 
 ### Reference Screens
 
-`packages/storybook/stories/reference/` holds five realistic screens (application overview, data table with toolbar, form, settings, and a page that opens on a photograph with navigation and a glass panel over it) built only from components, patterns and type roles, shown in Storybook under Reference/Screens. No screen has CSS of its own. Judge any theme change by looking at them at 1440x900 and 390x844, in dark and light, under the Void, Dune and Console themes and the Loft skin.
+`packages/storybook/stories/reference/` holds five realistic screens (application overview, data table with toolbar, form, settings, and a page that opens on a photograph with navigation and a glass panel over it) built only from components, patterns and type roles, shown in Storybook under Reference/Screens. No screen has CSS of its own. Besides these five it holds `empty`, `form-dialog`, `sheet` (every component), `states` and `overlays`, all photographed by `mise run shots` (see Visual Review). Judge any theme change by looking at them at 1440x900 and 390x844, in dark and light, under the Void, Dune and Console themes and the Loft skin.
 
 Photographs for stories and docs live in `docs/public/media/` (Storybook serves the same directory at `media/`). Only freely licensed images, never hot-linked, each listed in `docs/public/media/CREDITS.txt`.
 
@@ -262,6 +264,9 @@ set -euo pipefail
 | `mise run test:browser` | Real-browser suite (Playwright; Chromium, Firefox, WebKit) against the built packages; not part of `ci` |
 | `mise run test:browser:install` | Download the browsers for it (`-- --with-deps` adds system libraries on Debian/Ubuntu) |
 | `mise run test:server` | Server-backed suite: starts the Rails, Phoenix LiveView and Laravel Livewire demos on the built packages and drives each (`VOID_SERVER_APPS=rails,phoenix,laravel` selects; each needs its toolchain from `mise.toml`) |
+| `mise run shots` | Photograph the reference pages (every theme and skin, dark and light, 1440 and 390 px) and build the review gallery in `tmp/shots/gallery`; filters `--page --theme --skin --scheme --width --smoke --stories` |
+| `mise run shots:compare -- <base> [<head>]` | Before/after gallery for two refs, each built in a temporary worktree (`tmp/shots/compare/gallery`) |
+| `mise run shots:check` | Check a gallery in Chromium: layout at 1440 and 390 px, keyboard, every view, axe |
 | `mise run test:coverage` | Unit tests with V8 coverage, per-package summary (no thresholds) |
 
 ### Browser Tests
@@ -276,6 +281,16 @@ set -euo pipefail
 - Overlay specs: `overlays.spec.ts` (per component) and `overlay-stress.spec.ts` (nesting, containers, corners, focus return, cancelled close, close reasons, fifty-cycle leaks, morphs), with pages `overlays`, `overlay-deep` and `overlay-corners`. `expectPerceivable` and `scrollLocked` in `helpers/test.ts` are the overlay assertions. A failure in one engine only is an `expectedFailure(key, detail, { browsers: [...] })` naming the engine.
 - CI gets Ruby, Erlang/Elixir and PHP from `ruby/setup-ruby`, `erlef/setup-beam` and `shivammathur/setup-php` (pinned to commit SHAs, versions read from `mise.toml`), not from mise, which would compile them. `tests/browser/server/start.mjs` falls back to `PATH` when mise has not installed a tool, and retries registry steps three times.
 - Performance budgets are in `tests/browser/budgets.ts`, the axe baseline in `tests/browser/axe-baseline.json`, and the server apps in `tests/browser/server/apps.mjs`.
+
+### Visual Review
+
+`tests/browser/shots/` photographs the reference pages in `packages/storybook/stories/reference/` (the markup lives only there) in every theme and skin the theme package exports, dark and light, at 1440x900 and 390x844. `mise run shots` captures and builds a gallery (`tmp/shots/gallery/index.html`; filters `--page --theme --skin --scheme --width`, `--smoke`); `mise run shots:compare -- <base-ref> [<head-ref>]` builds each ref in a temporary worktree and writes a before/after gallery (changed images worst first, with slider and highlighted difference) in `tmp/shots/compare/gallery/`. For agents:
+
+- **Changing the theme, a token, a component's styles or markup, or a reference page: run `mise run shots:compare -- master` (or your base) and look at the changed images yourself, at both widths, both schemes, the default theme and Loft, before you report the work done.** Say in the report what changed and whether each change is intended. Passing tests are not a visual review.
+- The reference markup is in one place: add a component to `reference/sheet.html`, a state to `reference/states.html`, an overlay to `reference/overlays.html` plus an entry in `tests/browser/shots/pages.mjs`. Change markup there when a component's markup changes. Charts take data from `data-json-data`.
+- Themes and skins are discovered from `packages/theme/dist/exports.json`; never list them in the tooling.
+- Nothing is committed: no screenshots, no baselines. CI's `visual` job (pull requests only, skipped in the release path) compares base and head on one runner and fails only when the look changed and the change touches none of `packages/theme/`, `packages/ui/src/`, `packages/storybook/stories/reference/`; a `Visual-Change: <why>` commit trailer accepts an intended change.
+- Captures are byte-identical on one machine and differ across machines: compare only captures made on the same machine.
 
 ### Tech Stack
 

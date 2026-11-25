@@ -127,6 +127,7 @@ export default defineConfig({
           label: 'Showcase',
           items: [
             { label: 'Dashboard', link: '/showcase/dashboard/' },
+            { label: 'Visual review gallery', link: '/gallery/' },
           ],
         },
       ],

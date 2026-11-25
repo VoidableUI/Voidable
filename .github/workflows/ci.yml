@@ -3,7 +3,8 @@
 # Runs on pull requests, and once per push to master as the `ci` job of
 # release.yml (workflow_call), whose tag and publish jobs need it: nothing is
 # released from a commit that fails any job below (`ci`, `browser`, `server`,
-# `phoenix`, `laravel`). The jobs run in parallel, so a release waits for the
+# `phoenix`, `laravel`; the `visual` job runs on pull requests only and is
+# skipped in the release path). The jobs run in parallel, so a release waits for the
 # slowest one, not the sum. There is deliberately no push trigger here, so a
 # push to master runs CI exactly once.
 #
@@ -86,6 +87,66 @@ jobs:
           path: |
             tests/browser/test-results/
             tests/browser/playwright-report/
+          retention-days: 14
+
+  # Visual review (tests/browser/shots), pull requests only. It photographs the
+  # base commit and this checkout on the same runner, with the same Chromium,
+  # compares them and uploads the before/after gallery. There are no stored
+  # baselines: pixels differ between machines, so a stored image would never
+  # match a runner, while two renderings made side by side differ only by what
+  # the change did. A difference fails the job only when the change touches
+  # nothing meant to move pixels (see tests/browser/shots/ci.mjs and "Visual
+  # review" in CONTRIBUTING.md).
+  #
+  # Release gating: this job is skipped on every run that is not a pull request.
+  # release.yml calls this workflow from a push to master, where github.event_name
+  # is `push`, so the job does not run there and a release neither waits for it
+  # nor can be failed by it. Only a pull request can fail it.
+  visual:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      # The whole history: the base commit is built in a worktree of its own.
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          fetch-depth: 0
+
+      - uses: jdx/mise-action@5228313ee0372e111a38da051671ca30fc5a96db # v3.6.3
+        with:
+          install_args: "node npm:pnpm"
+        env:
+          MISE_NOT_FOUND_AUTO_INSTALL: "false"
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-chromium-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+
+      - name: Install Chromium and its system libraries
+        run: mise run test:browser:install -- --with-deps
+        env:
+          VOID_BROWSERS: chromium
+          MISE_TASK_RUN_AUTO_INSTALL: "false"
+
+      - name: Photograph the base and the head, and compare
+        run: mise run shots:ci
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          MISE_TASK_RUN_AUTO_INSTALL: "false"
+          MISE_NOT_FOUND_AUTO_INSTALL: "false"
+
+      - name: Upload the before/after gallery
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: visual-review
+          path: |
+            tmp/shots/compare/gallery/
+            tmp/shots/compare/summary.md
+            tmp/shots/compare/summary.json
+          if-no-files-found: ignore
           retention-days: 14
 
   # Server-backed suites (tests/browser/server): real apps started by

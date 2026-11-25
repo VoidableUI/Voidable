@@ -1,0 +1,39 @@
+<main>
+  <void-page>
+    <void-page-head>
+      <span data-void-type="label">Network / Passes</span>
+      <h1>Passes</h1>
+      <void-actions>
+        <void-button variant="filled">Assign a pass</void-button>
+      </void-actions>
+    </void-page-head>
+
+    <void-section>
+      <void-toolbar>
+        <void-input placeholder="Search passes" aria-label="Search passes"></void-input>
+        <void-select aria-label="Band"><option>Any band</option><option>S band</option><option>X band</option></void-select>
+        <span>0 of 37 passes</span>
+      </void-toolbar>
+      <void-empty bordered>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6"></circle><path d="m20 20-4.5-4.5"></path></svg>
+        <h3>No passes match</h3>
+        <p>Nothing is assigned to this station in the next 24 hours. Try another band, or assign a pass.</p>
+        <void-actions>
+          <void-button>Clear filters</void-button>
+          <void-button variant="filled">Assign a pass</void-button>
+        </void-actions>
+      </void-empty>
+    </void-section>
+
+    <void-section>
+      <void-section-head>
+        <h2>Notes</h2>
+      </void-section-head>
+      <void-empty size="sm">
+        <h3>No notes</h3>
+        <p>Notes are shown to the operator on call.</p>
+        <void-actions><void-button size="sm">Add a note</void-button></void-actions>
+      </void-empty>
+    </void-section>
+  </void-page>
+</main>

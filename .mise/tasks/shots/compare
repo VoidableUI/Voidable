@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+#MISE description="Before/after gallery for two git refs: mise run shots:compare -- <base-ref> [<head-ref>] (head defaults to the working tree)"
+#MISE depends=["build"]
+set -euo pipefail
+
+# Each ref is built in a temporary git worktree and photographed with this checkout's tooling.
+# Output: tmp/shots/compare/gallery/index.html, summary.md, summary.json. Filters as for `mise run shots`.
+exec node tests/browser/shots/compare.mjs "$@"

@@ -1,7 +1,8 @@
 /* ============================================================
    @voidable/theme — Tier 2 Semantic Tokens
    Everything here is derived from the knobs in knobs.css.
-   Dark is the default colour scheme; the page is true black or
+   With no explicit choice the scheme is the theme's preference, or
+   else the operating system's; the page is true black or
    true white and every grey is the neutral colour at an opacity.
 
    Browser baseline: oklch(), color-mix() and calc() inside both

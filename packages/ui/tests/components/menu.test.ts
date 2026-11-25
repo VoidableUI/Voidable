@@ -438,6 +438,7 @@ describe('VoidMenuItem', () => {
       let detail: { value: string } | null = null;
       el.addEventListener('void-select', (e) => { detail = (e as CustomEvent).detail; });
       el.dispatchEvent(new KeyboardEvent('keydown', { key: ' ', bubbles: true }));
+      el.dispatchEvent(new KeyboardEvent('keyup', { key: ' ', bubbles: true }));
       expect(detail?.value).toBe('test-val');
     });
 

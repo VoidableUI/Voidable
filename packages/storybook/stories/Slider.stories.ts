@@ -3,6 +3,7 @@ import type { Meta, StoryObj } from '@storybook/web-components-vite';
 
 import '@voidable/ui';
 import '@voidable/theme';
+import { argTypesFor } from '../.storybook/manifest';
 
 const meta: Meta = {
   title: 'Form/Slider',
@@ -14,17 +15,9 @@ const meta: Meta = {
       },
     },
   },
-  argTypes: {
-    value: { control: 'number' },
-    min: { control: 'number' },
-    max: { control: 'number' },
-    step: { control: 'number' },
-    disabled: { control: 'boolean' },
-    showValue: { control: 'boolean' },
-    size: { control: 'select', options: ['sm', 'md', 'lg'] },
-  },
+  argTypes: argTypesFor('void-slider'),
   render: (args) => html`
-    <void-slider
+    <void-slider aria-label="Value"
       .value=${args.value ?? 50}
       min=${args.min ?? 0}
       max=${args.max ?? 100}
@@ -49,9 +42,9 @@ export const WithValue: Story = {
 export const Sizes: Story = {
   render: () => html`
     <div style="display: flex; flex-direction: column; gap: 24px; width: 300px;">
-      <void-slider size="sm" .value=${40} show-value></void-slider>
-      <void-slider size="md" .value=${50} show-value></void-slider>
-      <void-slider size="lg" .value=${60} show-value></void-slider>
+      <void-slider aria-label="Value" size="sm" .value=${40} show-value></void-slider>
+      <void-slider aria-label="Value" size="md" .value=${50} show-value></void-slider>
+      <void-slider aria-label="Value" size="lg" .value=${60} show-value></void-slider>
     </div>
   `,
 };

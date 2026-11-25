@@ -1,5 +1,6 @@
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
+import { KeyboardActivation } from '../keyboard-activation.js';
 import { isInDisabledFieldset, watchDisabledAncestors } from '../form-control.js';
 
 /** Action trigger for forms, dialogs, and toolbars; supports semantic color variants. */
@@ -42,6 +43,21 @@ export class VoidButton extends VoidElement {
   /** Watches every ancestor's `disabled` attribute (a `<fieldset disabled>`). */
   private _unwatch: (() => void) | null = null;
 
+  /** The `<a>` of a link button (`<void-button><a href>…</a></void-button>`), which Enter follows. */
+  private get _link(): HTMLAnchorElement | null {
+    return this.querySelector(':scope > a[href]');
+  }
+
+  /**
+   * Keyboard activation is a real `click`, as on a native button: Enter on keydown, Space on keyup. A link button
+   * follows link semantics: Enter follows the link, Space does nothing.
+   */
+  protected readonly _activation = new KeyboardActivation(this, {
+    disabled: () => this.formDisabled,
+    space: () => !this._link,
+    activate: () => (this._link ?? this).click(),
+  });
+
   /** The form the button sits in. */
   private get _form(): HTMLFormElement | null {
     return this.closest('form');
@@ -52,7 +68,6 @@ export class VoidButton extends VoidElement {
     this.setHostAttribute('role', 'button');
     this.setHostAttribute('tabindex', '0');
     this.addEventListener('click', this._handleClick);
-    this.addEventListener('keydown', this._handleKeydown);
     this._syncDisabledState(this.formDisabled);
     this._unwatch = watchDisabledAncestors(this, () => this._syncDisabledState(this.formDisabled));
   }
@@ -60,7 +75,6 @@ export class VoidButton extends VoidElement {
   disconnectedCallback(): void {
     super.disconnectedCallback();
     this.removeEventListener('click', this._handleClick);
-    this.removeEventListener('keydown', this._handleKeydown);
     this._unwatch?.();
     this._unwatch = null;
   }
@@ -93,13 +107,6 @@ export class VoidButton extends VoidElement {
       this._form?.reset();
     }
     this.dispatchEvent(new CustomEvent('void-click', { bubbles: true, composed: true }));
-  };
-
-  private _handleKeydown = (e: KeyboardEvent): void => {
-    if ((e.key === 'Enter' || e.key === ' ') && !this.formDisabled) {
-      e.preventDefault();
-      this._handleClick(e);
-    }
   };
 }
 

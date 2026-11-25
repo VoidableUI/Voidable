@@ -3,6 +3,7 @@ import type { Meta, StoryObj } from '@storybook/web-components-vite';
 
 import '@voidable/ui';
 import '@voidable/theme';
+import { argTypesFor } from '../.storybook/manifest';
 
 const meta: Meta = {
   title: 'Components/Collapsible',
@@ -14,11 +15,7 @@ const meta: Meta = {
       },
     },
   },
-  argTypes: {
-    open: { control: 'boolean' },
-    disabled: { control: 'boolean' },
-    heading: { control: 'text' },
-  },
+  argTypes: argTypesFor('void-collapsible'),
   render: (args) => html`
     <void-collapsible
       heading=${args.heading || 'Click to expand'}

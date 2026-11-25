@@ -3,6 +3,7 @@ import type { Meta, StoryObj } from '@storybook/web-components-vite';
 
 import '@voidable/ui';
 import '@voidable/theme';
+import { argTypesFor } from '../.storybook/manifest';
 
 const meta: Meta = {
   title: 'Components/Accordion',
@@ -14,9 +15,7 @@ const meta: Meta = {
       },
     },
   },
-  argTypes: {
-    multiple: { control: 'boolean' },
-  },
+  argTypes: argTypesFor('void-accordion'),
   render: (args) => html`
     <void-accordion ?multiple=${args.multiple}>
       <void-accordion-item><void-accordion-trigger>Section 1</void-accordion-trigger><void-accordion-content>Content for section 1</void-accordion-content></void-accordion-item>

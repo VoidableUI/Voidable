@@ -421,6 +421,14 @@ jobs:
         with:
           install_args: "node npm:pnpm"
 
+      # For the visual review gallery at /gallery/. Optional: when this fails the
+      # gallery step of release:pages warns and the site deploys without it.
+      - name: Install Chromium for the visual review gallery
+        continue-on-error: true
+        run: mise run test:browser:install -- --with-deps
+        env:
+          VOID_BROWSERS: chromium
+
       - name: Build docs and Storybook
         env:
           VOIDABLE_VERSION: ${{ needs.plan.outputs.release == 'true' && needs.plan.outputs.version || '' }}

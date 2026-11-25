@@ -2,6 +2,7 @@ import { html } from 'lit';
 import type { Meta, StoryObj } from '@storybook/web-components-vite';
 import '@voidable/ui';
 import '@voidable/theme';
+import { argTypesFor } from '../.storybook/manifest';
 
 const meta: Meta = {
   title: 'Components/Drawer',
@@ -14,26 +15,7 @@ const meta: Meta = {
       },
     },
   },
-  argTypes: {
-    open: {
-      control: { type: 'boolean' },
-    },
-    side: {
-      control: { type: 'select' },
-      options: ['left', 'right', 'top', 'bottom'],
-    },
-    size: {
-      control: { type: 'select' },
-      options: ['sm', 'md', 'lg'],
-    },
-    heading: {
-      control: { type: 'text' },
-      description: 'Story control: the text of the <void-drawer-title> part.',
-    },
-    closable: {
-      control: { type: 'boolean' },
-    },
-  },
+  argTypes: argTypesFor('void-drawer', { heading: { control: { type: 'text' }, description: 'Story control: the text of the <void-drawer-title> part.' } }),
 };
 
 export default meta;

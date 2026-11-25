@@ -39,6 +39,7 @@ type declaration struct {
 	VoidRequires []string          `json:"voidRequires"`
 	VoidHints    map[string]string `json:"voidHints"`
 	VoidParts    *partsJSON        `json:"voidParts"`
+	VoidName     *nameRule         `json:"voidName"`
 }
 
 // partsJSON is voidParts as the manifest build writes it (packages/ui/cem/plugins.js).
@@ -64,6 +65,16 @@ type partJSON struct {
 	Legacy      *domain.Legacy `json:"legacy"`
 	Attributes  []attribute    `json:"attributes"`
 	Parts       []partJSON     `json:"parts"`
+}
+
+type nameRule struct {
+	Attributes []string `json:"attributes"`
+	Content    bool     `json:"content"`
+	Ancestors  []struct {
+		Tag        string   `json:"tag"`
+		Attributes []string `json:"attributes"`
+	} `json:"ancestors"`
+	Hint string `json:"hint"`
 }
 
 type slot struct {
@@ -153,6 +164,12 @@ func Decode(manifestJSON, summaryJSON []byte) (*domain.Catalog, error) {
 func element(path string, d declaration) domain.Element {
 	e := domain.Element{Tag: d.TagName, Class: d.Name, Module: path, Description: d.Description}
 	e.AllowedParents, e.RequiredChildren, e.AttrHints = d.VoidParents, d.VoidRequires, d.VoidHints
+	if n := d.VoidName; n != nil {
+		e.Name = &domain.NameRule{Attributes: n.Attributes, Content: n.Content, Hint: n.Hint}
+		for _, a := range n.Ancestors {
+			e.Name.Ancestors = append(e.Name.Ancestors, domain.NameAncestor{Tag: a.Tag, Attributes: a.Attributes})
+		}
+	}
 	for _, a := range d.Attributes {
 		kind, values, nullable := domain.ParseType(a.Type.Text)
 		e.Attributes = append(e.Attributes, domain.Attribute{

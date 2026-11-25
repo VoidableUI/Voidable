@@ -15,6 +15,8 @@
 //   p  tags it must sit inside (anywhere above it)
 //   r  tags it cannot work without (somewhere below it)
 //   x  advice for attributes people guess that do not exist
+//   n  what names the element (supplement.js accessibleName): a attributes, c content names it,
+//      p ancestors as [tag, ...attributes], h the hint
 //   q  its explicit parts (#52), from the manifest's voidParts:
 //        k 'parts' (only parts as children) or 'any'; o ordered; t transparent
 //        wrapper tags; s the one-line correct markup; l advice for loose
@@ -94,6 +96,12 @@ for (const mod of manifest.modules) {
     if (decl.voidParents?.length) entry.p = decl.voidParents;
     if (decl.voidRequires?.length) entry.r = decl.voidRequires;
     if (decl.voidHints && Object.keys(decl.voidHints).length) entry.x = decl.voidHints;
+    if (decl.voidName) {
+      const n = decl.voidName;
+      entry.n = { a: n.attributes, h: n.hint };
+      if (n.content) entry.n.c = 1;
+      if (n.ancestors?.length) entry.n.p = n.ancestors.map((x) => [x.tag, ...(x.attributes ?? [])]);
+    }
     tags[decl.tagName] = entry;
     if (decl.voidParts) {
       entry.q = partsEntry(decl.voidParts, decl.voidParts.skeleton);

@@ -154,7 +154,7 @@ Primitive color palettes are always available on `:root` regardless of the activ
 
 Semantic tokens carry purpose -- "the background color" rather than "stone-900". They are computed from the knobs and adapt to the color scheme set by the `data-theme` attribute.
 
-Dark mode is the **default**. Set `data-theme="light"` on `<html>` to activate light mode.
+There is no fixed default scheme: without `data-theme` the page follows the operating system, or the scheme a theme or skin prefers. Set `data-theme="light"` or `"dark"` on `<html>` to choose one.
 
 Every grey is one **neutral foreground** color (near-white on black, near-black on white) at a different opacity over a pure page. Light mode is the same formulas with the other foreground, not a second hand-tuned set.
 

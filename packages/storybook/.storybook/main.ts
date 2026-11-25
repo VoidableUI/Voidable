@@ -1,6 +1,7 @@
 import { fileURLToPath } from 'url';
 import { resolve, dirname } from 'path';
 import type { StorybookConfig } from '@storybook/web-components-vite';
+import { voidManifestPlugin } from './manifest-vite';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -18,6 +19,7 @@ const config: StorybookConfig & { title: string } = {
   staticDirs: [{ from: '../../../docs/public/media', to: '/media' }],
   framework: '@storybook/web-components-vite',
   async viteFinal(config) {
+    config.plugins = [...(config.plugins ?? []), voidManifestPlugin()];
     config.resolve = config.resolve ?? {};
     config.resolve.alias = {
       ...config.resolve.alias,

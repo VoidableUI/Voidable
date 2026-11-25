@@ -3,6 +3,7 @@ import type { Meta, StoryObj } from '@storybook/web-components-vite';
 
 import '@voidable/ui';
 import '@voidable/theme';
+import { argTypesFor } from '../.storybook/manifest';
 
 const meta: Meta = {
   title: 'Components/Switch',
@@ -14,14 +15,9 @@ const meta: Meta = {
       },
     },
   },
-  argTypes: {
-    checked: { control: 'boolean' },
-    disabled: { control: 'boolean' },
-    color: { control: 'select', options: ['default', 'error', 'warning', 'caution', 'success', 'info', 'notice', 'highlight'] },
-    size: { control: 'select', options: ['sm', 'md', 'lg'] },
-  },
+  argTypes: argTypesFor('void-switch'),
   render: (args) => html`
-    <void-switch
+    <void-switch aria-label="Setting"
       color=${args.color || 'default'}
       size=${args.size || 'md'}
       ?checked=${args.checked}
@@ -42,12 +38,12 @@ export const Checked: Story = {
 export const Colors: Story = {
   render: () => html`
     <div style="display: flex; flex-wrap: wrap; gap: 16px; align-items: center;">
-      <void-switch checked color="default"></void-switch>
-      <void-switch checked color="error"></void-switch>
-      <void-switch checked color="warning"></void-switch>
-      <void-switch checked color="success"></void-switch>
-      <void-switch checked color="info"></void-switch>
-      <void-switch checked color="notice"></void-switch>
+      <void-switch aria-label="Setting" checked color="default"></void-switch>
+      <void-switch aria-label="Setting" checked color="error"></void-switch>
+      <void-switch aria-label="Setting" checked color="warning"></void-switch>
+      <void-switch aria-label="Setting" checked color="success"></void-switch>
+      <void-switch aria-label="Setting" checked color="info"></void-switch>
+      <void-switch aria-label="Setting" checked color="notice"></void-switch>
     </div>
   `,
 };
@@ -55,9 +51,9 @@ export const Colors: Story = {
 export const Sizes: Story = {
   render: () => html`
     <div style="display: flex; align-items: center; gap: 16px;">
-      <void-switch size="sm"></void-switch>
-      <void-switch size="md"></void-switch>
-      <void-switch size="lg"></void-switch>
+      <void-switch aria-label="Setting" size="sm"></void-switch>
+      <void-switch aria-label="Setting" size="md"></void-switch>
+      <void-switch aria-label="Setting" size="lg"></void-switch>
     </div>
   `,
 };
@@ -65,8 +61,8 @@ export const Sizes: Story = {
 export const Disabled: Story = {
   render: () => html`
     <div style="display: flex; align-items: center; gap: 16px;">
-      <void-switch disabled></void-switch>
-      <void-switch disabled checked></void-switch>
+      <void-switch aria-label="Setting" disabled></void-switch>
+      <void-switch aria-label="Setting" disabled checked></void-switch>
     </div>
   `,
 };

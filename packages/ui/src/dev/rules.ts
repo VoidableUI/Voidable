@@ -1,7 +1,7 @@
 // The checks behind `@voidable/ui/dev`. Pure functions of a DOM element (or a
 // name) and the table generated from the Custom Elements Manifest, so they are
 // testable with a hand-written table and never touch the page.
-import type { AttrRule, DevTable, DevTag, DevWarning } from './types.js';
+import type { AttrRule, DevName, DevTable, DevTag, DevWarning } from './types.js';
 
 const PREFIX = '[voidable]';
 
@@ -229,6 +229,77 @@ export function checkRequired(table: DevTable, el: Element): DevWarning[] {
     );
   }
   return out;
+}
+
+const filled = (v: string | null | undefined): boolean => !!v && v.trim() !== '';
+
+/** The text of the elements an `aria-labelledby` points to, or whether it names something not there (yet). */
+function labelledBy(el: Element): boolean {
+  const ids = (el.getAttribute('aria-labelledby') ?? '').split(/\s+/).filter(Boolean);
+  if (!ids.length) return false;
+  const root = el.getRootNode() as Document | ShadowRoot;
+  // A reference to an element that is not there yet is given the benefit of the doubt.
+  return ids.some((id) => {
+    const target = root.getElementById?.(id);
+    return !target || filled(target.textContent) || filled(target.getAttribute('aria-label'));
+  });
+}
+
+/** Whether the element's content reads as something: text, or a child that has a name (an image's alt, an aria-label). */
+function contentNames(el: Element): boolean {
+  if (filled(el.textContent)) return true;
+  for (const child of el.querySelectorAll('[aria-label], img[alt], [title]')) {
+    if (filled(child.getAttribute('aria-label')) || filled(child.getAttribute('alt')) || filled(child.getAttribute('title'))) return true;
+  }
+  return false;
+}
+
+/** A `<label for>` in the same tree that points at the element or at a control inside it. */
+function labelledByFor(el: Element): boolean {
+  const root = el.getRootNode() as Document | ShadowRoot;
+  if (!root.querySelectorAll) return false;
+  const ids = [el, ...el.querySelectorAll('input, select, textarea, button, [role="combobox"], [role="slider"]')]
+    .map((c) => c.id)
+    .filter(Boolean);
+  return ids.some((id) => Array.from(root.querySelectorAll('label[for]')).some((l) => l.getAttribute('for') === id));
+}
+
+function hasName(el: Element, rule: DevName): boolean {
+  if (rule.a.some((name) => filled(el.getAttribute(name)))) return true;
+  if (labelledBy(el)) return true;
+  // The control a component renders inside itself: a name written on it, or one a field wired onto it.
+  for (const inner of el.querySelectorAll('input, select, textarea, [role="combobox"], [role="slider"], [role="textbox"], [role="button"]:not(button)')) {
+    if (filled(inner.getAttribute('aria-label')) || labelledBy(inner)) return true;
+    if ((inner as HTMLInputElement).labels?.length) return true;
+  }
+  if (rule.c && contentNames(el)) return true;
+  for (const [tag, ...attrs] of rule.p ?? []) {
+    const ancestor = el.parentElement?.closest(tag);
+    if (ancestor && (!attrs.length || attrs.some((a) => filled(ancestor.getAttribute(a))))) return true;
+  }
+  return labelledByFor(el);
+}
+
+/** An element that must have an accessible name and has none. Judged after upgrade, from the live DOM. */
+export function checkName(table: DevTable, el: Element): DevWarning | undefined {
+  const rule = table[el.localName]?.n;
+  if (!rule || !el.isConnected) return undefined;
+  // Parked by a morph: not in its real place right now.
+  if (el.closest(PARKING)) return undefined;
+  if (hasName(el, rule)) return undefined;
+  const sources = [
+    rule.a.some((a) => !/^(aria-|title$)/.test(a)) ? `a ${list(rule.a.filter((a) => !/^(aria-|title$)/.test(a)))} attribute` : '',
+    'aria-label',
+    rule.c ? 'text inside it' : '',
+    rule.p?.length ? `an enclosing ${list(rule.p.map(([tag, ...a]) => `<${tag}${a.length ? ` ${a[0]}` : ''}>`))}` : '',
+  ].filter(Boolean);
+  return warning(
+    'missing-name',
+    el.localName,
+    '',
+    `${describe(el)} has no accessible name, so a screen reader announces it as nothing. Name it with ${sources.join(', ')}: ${rule.h}.`,
+    el,
+  );
 }
 
 /** A `void-*` tag with no definition, once the page has settled. */

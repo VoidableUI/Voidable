@@ -8,7 +8,8 @@
 // It watches the document and reports through `console.warn` what would
 // otherwise fail silently: an attribute the element does not declare, a value
 // outside the declared set, `disabled="false"`, a child in the wrong parent or a
-// required child that is missing, a `void-*` tag nothing defines, a listener
+// required child that is missing, an element that needs an accessible name and
+// has none (judged after upgrade, on the live DOM), a `void-*` tag nothing defines, a listener
 // for a `void-*` event nothing dispatches, a component's parts (#52) missing,
 // repeated, out of order or replaced by the implicit form they superseded (a
 // bare button where a trigger part belongs, a removed tag), a script that keeps removing an
@@ -35,6 +36,7 @@ import {
   checkControl,
   checkDefined,
   checkEvent,
+  checkName,
   checkParent,
   checkParts,
   checkRemoved,
@@ -192,6 +194,7 @@ async function flushDeferred(): Promise<void> {
     for (const w of checkRequired(table, el)) report(w);
     for (const w of checkParts(table, el)) report(w);
     report(checkControl(table, el));
+    report(checkName(table, el));
   }
 }
 
@@ -279,6 +282,7 @@ export function check(root: ParentNode & Node = document): DevWarning[] {
       ...checkRequired(table, el),
       ...checkParts(table, el),
       checkControl(table, el),
+      checkName(table, el),
     ]) {
       if (!w || ignored(w)) continue;
       found.push(w);

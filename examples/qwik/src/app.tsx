@@ -30,7 +30,7 @@ export default component$(() => {
 
       <div class="component-section">
         <h2>Input</h2>
-        <void-input
+        <void-input aria-label="Name"
           placeholder="Name"
           onVoid-change$={(e: CustomEvent) =>
             logEvent('void-change', `Input: ${e.detail?.value ?? ''}`)
@@ -54,7 +54,7 @@ export default component$(() => {
 
       <div class="component-section">
         <h2>Select</h2>
-        <void-select
+        <void-select aria-label="Choose option"
           placeholder="Choose option"
           onVoid-change$={(e: CustomEvent) =>
             logEvent('void-change', `Select: ${e.detail?.value ?? ''}`)

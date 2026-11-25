@@ -22,6 +22,8 @@ const meta: Meta = {
       },
     },
   },
+  // Kept by hand on purpose: void-media is a CSS pattern (packages/theme/src/media), not a
+  // registered element, so the Custom Elements Manifest does not describe its options.
   argTypes: {
     image: { control: { type: 'select' }, options: ['limb', 'sunrise', 'storm', 'aleutians', 'ice', 'city'] },
     place: { control: { type: 'select' }, options: ['bottom', 'top', 'start', 'end', 'center'] },

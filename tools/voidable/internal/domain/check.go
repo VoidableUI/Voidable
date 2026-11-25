@@ -28,6 +28,7 @@ const (
 	RulePartMisuse Rule = "part-misuse"
 	// RuleLegacyMarkup: a tag that explicit parts replaced.
 	RuleLegacyMarkup Rule = "legacy-markup"
+	RuleMissingName  Rule = "missing-name"
 )
 
 // Finding is one problem in a source file.
@@ -112,6 +113,10 @@ func (c *Checker) CheckTag(file string, t Tag) []Finding {
 			}
 		}
 		out = append(out, fs...)
+	}
+	for _, nf := range checkName(el, t) {
+		nf.File = file
+		out = append(out, nf)
 	}
 	return out
 }

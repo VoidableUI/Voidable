@@ -66,7 +66,7 @@ Use `x-void-on:{event}` to handle custom events within `x-data` scopes:
     Clicked <span x-text="count"></span> times
   </void-button>
 
-  <void-input
+  <void-input aria-label="Search"
     placeholder="Search"
     x-void-on:void-change="$dispatch('filter', $event.detail)"
   ></void-input>

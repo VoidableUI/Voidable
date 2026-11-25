@@ -1,11 +1,15 @@
 import { html, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
+import { KeyboardActivation } from '../keyboard-activation.js';
 import { NativeFormControl } from '../form-control.js';
 import { ProjectionController } from '../projection.js';
 
 /** Single mutually exclusive option for forms and surveys; typically used inside VoidRadioGroup. */
 export class VoidRadio extends NativeFormControl(VoidElement) {
+  /** Enter and Space fire a real `click`, as on a native button. */
+  protected readonly _activation = new KeyboardActivation(this, { enter: false, disabled: () => this.formDisabled });
+
   /** Whether this radio is the selected one. Checking one radio unchecks the others with the same `name`. */
   @property({ type: Boolean, reflect: true }) checked = false;
   /**
@@ -44,13 +48,11 @@ export class VoidRadio extends NativeFormControl(VoidElement) {
     this.setHostAttribute('tabindex', '0');
     this.setHostAttribute('aria-checked', String(this.checked));
     this.addEventListener('click', this._handleClick);
-    this.addEventListener('keydown', this._handleKeydown);
   }
 
   disconnectedCallback(): void {
     super.disconnectedCallback();
     this.removeEventListener('click', this._handleClick);
-    this.removeEventListener('keydown', this._handleKeydown);
   }
 
   protected override updated(changed: Map<string, unknown>): void {
@@ -136,13 +138,6 @@ export class VoidRadio extends NativeFormControl(VoidElement) {
     const input = this.querySelector('input[type="radio"]') as HTMLInputElement | null;
     if (input) input.checked = true;
     this.dispatchEvent(new CustomEvent('void-change', { bubbles: true, composed: true, detail: { value: this.value, checked: true } }));
-  };
-
-  private _handleKeydown = (e: KeyboardEvent): void => {
-    if (e.key === ' ' && !this.formDisabled) {
-      e.preventDefault();
-      this._handleClick(e);
-    }
   };
 }
 

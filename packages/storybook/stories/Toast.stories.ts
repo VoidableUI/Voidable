@@ -3,6 +3,7 @@ import type { Meta, StoryObj } from '@storybook/web-components-vite';
 import '@voidable/ui';
 import '@voidable/theme';
 import { VoidToastContainer } from '@voidable/ui';
+import { argTypesFor } from '../.storybook/manifest';
 
 const meta: Meta = {
   title: 'Components/Toast',
@@ -15,21 +16,7 @@ const meta: Meta = {
       },
     },
   },
-  argTypes: {
-    color: {
-      control: { type: 'select' },
-      options: ['default', 'error', 'warning', 'caution', 'success', 'info', 'notice', 'highlight'],
-    },
-    duration: {
-      control: { type: 'number' },
-    },
-    dismissable: {
-      control: { type: 'boolean' },
-    },
-    heading: {
-      control: { type: 'text' },
-    },
-  },
+  argTypes: argTypesFor('void-toast'),
 };
 
 export default meta;

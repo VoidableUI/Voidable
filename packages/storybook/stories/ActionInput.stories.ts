@@ -2,6 +2,7 @@ import { html } from 'lit';
 import type { Meta, StoryObj } from '@storybook/web-components-vite';
 import '@voidable/ui';
 import '@voidable/theme';
+import { argTypesFor } from '../.storybook/manifest';
 
 const meta: Meta = {
   title: 'Form/ActionInput',
@@ -13,18 +14,7 @@ const meta: Meta = {
       },
     },
   },
-  argTypes: {
-    value: { control: 'text' },
-    placeholder: { control: 'text' },
-    disabled: { control: 'boolean' },
-    readonly: { control: 'boolean' },
-    size: { control: 'select', options: ['sm', 'md', 'lg'] },
-    color: { control: 'select', options: ['default', 'error', 'warning', 'caution', 'success', 'info', 'notice', 'highlight'] },
-    type: { control: 'select', options: ['text', 'password'] },
-    icon: { control: 'select', options: ['search', 'copy', 'send', 'eye', 'eye-off', 'check', 'x', 'arrow-right', 'clipboard'] },
-    actionLabel: { control: 'text' },
-    position: { control: 'select', options: ['left', 'right'] },
-  },
+  argTypes: argTypesFor('void-action-input'),
   render: (args) => html`
     <void-action-input
       .value=${args.value ?? ''}
@@ -58,7 +48,7 @@ export const SendMessage: Story = {
 
 export const PasswordReveal: Story = {
   render: () => html`
-    <void-action-input
+    <void-action-input aria-label="Search"
       value="secret-password"
       type="password"
       icon="eye"
@@ -88,7 +78,7 @@ export const PasswordPushToReveal: Story = {
       el.icon = 'eye';
     };
     return html`
-      <void-action-input
+      <void-action-input aria-label="Search"
         value="secret-password"
         type="password"
         icon="eye"
@@ -110,12 +100,12 @@ export const Icons: Story = {
   render: () => html`
     <div style="display: flex; flex-direction: column; gap: 12px; width: 320px;">
       <void-action-input icon="search" placeholder="Search..." action-label="Search"></void-action-input>
-      <void-action-input icon="copy" value="Copy this text" action-label="Copy" readonly></void-action-input>
+      <void-action-input aria-label="Search" icon="copy" value="Copy this text" action-label="Copy" readonly></void-action-input>
       <void-action-input icon="send" placeholder="Type a message..." action-label="Send"></void-action-input>
-      <void-action-input icon="eye" value="secret-value" action-label="Show"></void-action-input>
+      <void-action-input aria-label="Search" icon="eye" value="secret-value" action-label="Show"></void-action-input>
       <void-action-input icon="clipboard" placeholder="Paste here..." action-label="Paste"></void-action-input>
       <void-action-input icon="arrow-right" placeholder="Go to..." action-label="Go"></void-action-input>
-      <void-action-input icon="x" value="Clear me" action-label="Clear"></void-action-input>
+      <void-action-input aria-label="Search" icon="x" value="Clear me" action-label="Clear"></void-action-input>
     </div>
   `,
 };

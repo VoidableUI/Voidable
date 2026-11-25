@@ -11,6 +11,12 @@ import table from './reference/table.html?raw';
 import form from './reference/form.html?raw';
 import settings from './reference/settings.html?raw';
 import live from './reference/live.html?raw';
+import empty from './reference/empty.html?raw';
+import formDialog from './reference/form-dialog.html?raw';
+import sheet from './reference/sheet.html?raw';
+import states from './reference/states.html?raw';
+import overlays from './reference/overlays.html?raw';
+import { hydrate } from './reference/hydrate.js';
 
 // Reference screens: five realistic application screens built only from
 // Voidable components, the patterns (`void-shell`, `void-page`,
@@ -83,6 +89,41 @@ export const LiveOverImagery: Story = {
   render: () => screen('live', live),
 };
 
+// A page with nothing to show: a bordered empty state under a toolbar, and a quiet small one.
+export const EmptyStates: Story = {
+  render: () => screen('empty', empty),
+};
+
+// The form with a confirmation dialog open over it (the screenshot capture opens it the same way).
+export const FormWithDialog: Story = {
+  render: () => screen('form', form + formDialog),
+  play: ({ canvasElement }) => {
+    (canvasElement.querySelector('#confirm-dialog') as (HTMLElement & { open: boolean }) | null)!.open = true;
+  },
+};
+
+// Every component in its main variants, the three sizes and the eight colours.
+// The screenshot capture photographs this page; a component that is missing
+// from it is missing from the visual review.
+export const ComponentSheet: Story = {
+  render: () => html`<void-shell>${unsafeHTML(sheet)}</void-shell>`,
+  play: ({ canvasElement }) => hydrate(canvasElement),
+};
+
+// The same controls at rest, hovered, focused, pressed, disabled and invalid.
+// Storybook shows them at rest; the screenshot capture forces the other
+// states with the DevTools protocol (data-force on a row).
+export const InteractionStates: Story = {
+  render: () => html`<void-shell>${unsafeHTML(states)}</void-shell>`,
+};
+
+// The trigger and the overlay of each kind on one page: dialog, drawer,
+// popover, dropdown menu, tooltip, select, combobox and date picker. The
+// screenshot capture opens one at a time.
+export const Overlays: Story = {
+  render: () => html`<void-shell>${unsafeHTML(overlays)}</void-shell>`,
+};
+
 // Every theme knob as a control. The knobs are set inline on a wrapper that
 // carries data-void-theme, so everything under it is derived again: this is
 // the same mechanism an application uses to retheme part of a page. Pick a
@@ -99,6 +140,8 @@ const screens: Record<string, [string, string]> = {
 
 const range = (min: number, max: number, step: number) => ({ control: { type: 'range' as const, min, max, step } });
 
+// Kept by hand on purpose: these controls set theme knobs (--void-* custom properties) and a
+// screen selector. None is a component attribute, so the manifest has nothing to generate.
 export const ThemePlayground: Story = {
   argTypes: {
     screen: { control: 'select', options: Object.keys(screens) },

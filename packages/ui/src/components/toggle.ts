@@ -1,9 +1,13 @@
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
+import { KeyboardActivation } from '../keyboard-activation.js';
 import { isInDisabledFieldset, watchDisabledAncestors } from '../form-control.js';
 
 /** Pressable toggle button for toolbar actions and editor formatting controls with binary active/inactive state. */
 export class VoidToggle extends VoidElement {
+  /** Enter and Space fire a real `click`, as on a native button. */
+  protected readonly _activation = new KeyboardActivation(this, { disabled: () => this.formDisabled });
+
   /**
    * Whether the toggle is on. It flips on click, Enter or Space and fires `void-change` with `{ pressed
    * }`. Exposed as `aria-pressed`.
@@ -47,13 +51,11 @@ export class VoidToggle extends VoidElement {
     (this.closest('void-toggle-group') as (Element & { _syncToggle?: (t: VoidToggle) => void }) | null)?._syncToggle?.(this);
     this.setHostAttribute('aria-pressed', String(this.pressed));
     this.addEventListener('click', this._handleClick);
-    this.addEventListener('keydown', this._handleKeydown);
   }
 
   disconnectedCallback(): void {
     super.disconnectedCallback();
     this.removeEventListener('click', this._handleClick);
-    this.removeEventListener('keydown', this._handleKeydown);
     this._unwatch?.();
     this._unwatch = null;
   }
@@ -67,13 +69,6 @@ export class VoidToggle extends VoidElement {
     if (this.formDisabled) return;
     this.pressed = !this.pressed;
     this.dispatchEvent(new CustomEvent('void-change', { bubbles: true, composed: true, detail: { pressed: this.pressed } }));
-  };
-
-  private _handleKeydown = (e: KeyboardEvent): void => {
-    if ((e.key === ' ' || e.key === 'Enter') && !this.formDisabled) {
-      e.preventDefault();
-      this._handleClick();
-    }
   };
 }
 

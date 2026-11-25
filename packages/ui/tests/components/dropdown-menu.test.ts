@@ -48,6 +48,8 @@ const menuItems = (el: Element) => Array.from(el.querySelectorAll(ITEM)) as Void
 function press(key: string, target: EventTarget = document): KeyboardEvent {
   const e = new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true });
   target.dispatchEvent(e);
+  // Space activates on keyup, as on a native button.
+  if (key === ' ') target.dispatchEvent(new KeyboardEvent('keyup', { key: key, bubbles: true, cancelable: true }));
   return e;
 }
 

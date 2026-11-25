@@ -2,6 +2,7 @@ import { html } from 'lit';
 import type { Meta, StoryObj } from '@storybook/web-components-vite';
 import '@voidable/ui';
 import '@voidable/theme';
+import { argTypesFor } from '../.storybook/manifest';
 
 const meta: Meta = {
   title: 'Components/Skeleton',
@@ -14,12 +15,7 @@ const meta: Meta = {
       },
     },
   },
-  argTypes: {
-    variant: {
-      control: { type: 'select' },
-      options: ['text', 'circular', 'rectangular'],
-    },
-  },
+  argTypes: argTypesFor('void-skeleton'),
 };
 
 export default meta;

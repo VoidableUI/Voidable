@@ -2,6 +2,7 @@ import { html } from 'lit';
 import type { Meta, StoryObj } from '@storybook/web-components-vite';
 import '@voidable/ui';
 import '@voidable/theme';
+import { argTypesFor } from '../.storybook/manifest';
 
 const meta: Meta = {
   title: 'Components/Table',
@@ -15,22 +16,7 @@ const meta: Meta = {
       },
     },
   },
-  argTypes: {
-    striped: { control: { type: 'boolean' } },
-    hoverable: { control: { type: 'boolean' } },
-    compact: { control: { type: 'boolean' } },
-    bordered: { control: { type: 'boolean' } },
-    inset: { control: { type: 'boolean' } },
-    stack: {
-      control: { type: 'text' },
-      description: 'Empty (present) for the theme breakpoint, a CSS length such as `48rem`, or `always`. Absent: always a table.',
-    },
-    scrollable: { control: { type: 'boolean' } },
-    stickyHeader: { control: { type: 'boolean' }, name: 'sticky-header' },
-    stickyColumn: { control: { type: 'boolean' }, name: 'sticky-column' },
-    maxHeight: { control: { type: 'text' }, name: 'max-height' },
-    label: { control: { type: 'text' } },
-  },
+  argTypes: argTypesFor('void-table'),
 };
 
 export default meta;

@@ -16,6 +16,8 @@ async function mount(props: Partial<VoidToggle> = {}): Promise<VoidToggle> {
 const key = (el: Element, k: string) => {
   const e = new KeyboardEvent('keydown', { key: k, bubbles: true, cancelable: true });
   el.dispatchEvent(e);
+  // Space activates on keyup, as on a native button.
+  if (k === ' ') el.dispatchEvent(new KeyboardEvent('keyup', { key: k, bubbles: true, cancelable: true }));
   return e;
 };
 
