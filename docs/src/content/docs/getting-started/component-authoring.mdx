@@ -127,15 +127,15 @@ connectedCallback() {
 Use `@property` with `reflect: true` for attributes that CSS selects on. Reflected properties become attributes on the host element, allowing theme selectors like `void-button[size="lg"]` to work.
 
 ```ts
-@property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' | 'xl' | 'xxl' = 'md';
+@property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' = 'md';
 @property({ type: String, reflect: true }) color: 'default' | 'error' | 'warning' | 'success' | 'info' | 'notice' = 'default';
 @property({ type: Boolean, reflect: true }) dismissible = false;
 ```
 
 Standard scales across all components:
 
-- **Size** — `'sm' | 'md' | 'lg'` at minimum. Some components extend to `'xl'` and `'xxl'`.
-- **Color** — `'default' | 'error' | 'warning' | 'caution' | 'success' | 'info' | 'notice'`. Some components add `'highlight'`. Only list `caution` and `highlight` for a component whose theme CSS styles them.
+- **Size** — exactly `'sm' | 'md' | 'lg'`, default `'md'`, on every component that has a size. Do not add steps: a component that needs another dimension takes it from a token or a different attribute.
+- **Color** — exactly `'default' | 'error' | 'warning' | 'success' | 'info' | 'notice'`, on every component that has a color. List only the values the theme CSS styles.
 
 Use these exact values. Do not invent alternative names for the same concept.
 

@@ -13,7 +13,7 @@ export class VoidSelect extends NativeFormControl(VoidElement) {
   @property({ type: Boolean, reflect: true }) disabled = false;
   @property({ type: Boolean, reflect: true }) required = false;
   @property({ type: String, reflect: true }) name = '';
-  @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' | 'xl' | 'xxl' = 'md';
+  @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' = 'md';
   @property({ type: String, reflect: true }) error = '';
   @property({ type: String, reflect: true }) placeholder = '';
 

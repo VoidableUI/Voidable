@@ -26,7 +26,7 @@ export class VoidDialog extends VoidElement {
   @property({ type: Boolean, reflect: true }) open = false;
   /** Visible title; also the dialog's accessible name. */
   @property({ type: String }) heading = '';
-  @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' | 'xl' = 'md';
+  @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' = 'md';
   /** Set `closable="false"` in markup to hide the close button and ignore Escape and backdrop presses. */
   @property({ type: Boolean, converter: defaultTrueBoolean }) closable = true;
 

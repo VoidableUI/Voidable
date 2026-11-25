@@ -4,11 +4,11 @@ import { VoidElement } from '../base.js';
 
 /** Badge overlay for notification counts on icons and online presence signals on avatars. */
 export class VoidIndicator extends VoidElement {
-  @property({ type: String, reflect: true }) color: 'default' | 'error' | 'warning' | 'caution' | 'success' | 'info' | 'notice' = 'default';
+  @property({ type: String, reflect: true }) color: 'default' | 'error' | 'warning' | 'success' | 'info' | 'notice' = 'default';
   @property({ type: String, reflect: true }) position: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left' = 'top-right';
   @property({ type: Number, reflect: true }) count: number | null = null;
   @property({ type: Boolean, reflect: true }) ping = false;
-  @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' | 'xl' | 'xxl' = 'md';
+  @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' = 'md';
 
   connectedCallback(): void {
     super.connectedCallback();

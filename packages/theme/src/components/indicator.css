@@ -33,7 +33,6 @@ void-indicator[position="bottom-left"] .void-indicator-dot { bottom: -4px; left:
 
 void-indicator[color="error"]   { --tone: var(--void-color-error); }
 void-indicator[color="warning"] { --tone: var(--void-color-warning); }
-void-indicator[color="caution"] { --tone: var(--void-color-caution); }
 void-indicator[color="success"] { --tone: var(--void-color-success); }
 void-indicator[color="info"]    { --tone: var(--void-color-info); }
 void-indicator[color="notice"]  { --tone: var(--void-color-notice); }
@@ -55,10 +54,6 @@ void-indicator[size="sm"] .void-indicator-dot { min-width: 6px; min-height: 6px;
 void-indicator[size="sm"] .void-indicator-dot:not(:empty) { min-width: 14px; min-height: 14px; }
 void-indicator[size="lg"] .void-indicator-dot { min-width: 10px; min-height: 10px; }
 void-indicator[size="lg"] .void-indicator-dot:not(:empty) { min-width: 20px; min-height: 20px; font-size: var(--void-text-xs); }
-void-indicator[size="xl"] .void-indicator-dot { min-width: 12px; min-height: 12px; }
-void-indicator[size="xl"] .void-indicator-dot:not(:empty) { min-width: 24px; min-height: 24px; font-size: var(--void-text-sm); }
-void-indicator[size="xxl"] .void-indicator-dot { min-width: 14px; min-height: 14px; }
-void-indicator[size="xxl"] .void-indicator-dot:not(:empty) { min-width: 28px; min-height: 28px; font-size: var(--void-text-base); }
 
 
 /* Reduced motion: no expanding ping ring; the dot itself stays visible */

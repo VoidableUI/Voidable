@@ -59,5 +59,3 @@ void-textarea[error]:not([error=""]) textarea:focus {
 
 void-textarea[size="sm"]  { --void-field-height: var(--void-control-height-sm);  --void-field-padding: var(--void-control-padding-sm);  --void-field-text: var(--void-control-text-sm); }
 void-textarea[size="lg"]  { --void-field-height: var(--void-control-height-lg);  --void-field-padding: var(--void-control-padding-lg);  --void-field-text: var(--void-control-text-lg); }
-void-textarea[size="xl"]  { --void-field-height: var(--void-control-height-xl);  --void-field-padding: var(--void-control-padding-xl);  --void-field-text: var(--void-control-text-xl); }
-void-textarea[size="xxl"] { --void-field-height: var(--void-control-height-xxl); --void-field-padding: var(--void-control-padding-xxl); --void-field-text: var(--void-control-text-xxl); }

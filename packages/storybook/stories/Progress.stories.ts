@@ -20,11 +20,11 @@ const meta: Meta = {
     },
     color: {
       control: { type: 'select' },
-      options: ['default', 'error', 'warning', 'caution', 'success', 'info', 'notice'],
+      options: ['default', 'error', 'warning', 'success', 'info', 'notice'],
     },
     size: {
       control: { type: 'select' },
-      options: ['sm', 'md', 'lg', 'xl', 'xxl'],
+      options: ['sm', 'md', 'lg'],
     },
     indeterminate: {
       control: { type: 'boolean' },
@@ -71,8 +71,6 @@ export const Sizes: Story = {
       <void-progress value="60" size="sm"></void-progress>
       <void-progress value="60" size="md"></void-progress>
       <void-progress value="60" size="lg"></void-progress>
-      <void-progress value="60" size="xl"></void-progress>
-      <void-progress value="60" size="xxl"></void-progress>
     </div>
   `,
 };

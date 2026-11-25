@@ -6,7 +6,7 @@ import { defaultTrueBoolean } from '../converters.js';
 /** Temporary notification for action confirmations, error alerts, and copy-to-clipboard feedback. */
 export class VoidToast extends VoidElement {
   @property({ type: String, reflect: true })
-  color: 'default' | 'error' | 'warning' | 'caution' | 'success' | 'info' = 'default';
+  color: 'default' | 'error' | 'warning' | 'success' | 'info' = 'default';
 
   @property({ type: Number })
   duration = 5000;

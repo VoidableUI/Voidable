@@ -25,7 +25,7 @@ export class VoidNumberInput extends InternalsFormControl(VoidElement) {
   @property({ type: Boolean, reflect: true }) disabled: boolean = false;
   @property({ type: Boolean, reflect: true }) readonly: boolean = false;
   @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' = 'md';
-  @property({ type: String, reflect: true }) color: 'default' | 'error' | 'warning' | 'caution' | 'success' | 'info' | 'notice' = 'default';
+  @property({ type: String, reflect: true }) color: 'default' | 'error' | 'warning' | 'success' | 'info' | 'notice' = 'default';
   @property({ type: String }) placeholder: string = '';
   @property({ type: String, reflect: true }) controls: 'sides' | 'right' | 'none' = 'sides';
   @property({ type: String }) label: string = '';

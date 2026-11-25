@@ -4,7 +4,7 @@ import { VoidElement } from '../base.js';
 
 /** Indeterminate loading indicator for async operations, button loading states, and inline fetching. */
 export class VoidSpinner extends VoidElement {
-  @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' | 'xl' | 'xxl' = 'md';
+  @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' = 'md';
   @property({ type: String, reflect: true }) label: string = 'Loading';
 
   connectedCallback(): void {

@@ -23,15 +23,12 @@ void-progress {
 
 void-progress[color="error"]   { --tone: var(--void-color-error); }
 void-progress[color="warning"] { --tone: var(--void-color-warning); }
-void-progress[color="caution"] { --tone: var(--void-color-caution); }
 void-progress[color="success"] { --tone: var(--void-color-success); }
 void-progress[color="info"]    { --tone: var(--void-color-info); }
 void-progress[color="notice"]  { --tone: var(--void-color-notice); }
 
 void-progress[size="sm"] .void-progress-track { height: 0.25rem; }
 void-progress[size="lg"] .void-progress-track { height: 0.75rem; }
-void-progress[size="xl"] .void-progress-track { height: 1rem; }
-void-progress[size="xxl"] .void-progress-track { height: 1.25rem; }
 
 void-progress[indeterminate] .void-progress-fill {
   width: 40% !important;

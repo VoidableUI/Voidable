@@ -17,8 +17,8 @@ const meta: Meta = {
   argTypes: {
     checked: { control: 'boolean' },
     disabled: { control: 'boolean' },
-    color: { control: 'select', options: ['default', 'error', 'warning', 'caution', 'success', 'info', 'notice'] },
-    size: { control: 'select', options: ['sm', 'md', 'lg', 'xl', 'xxl'] },
+    color: { control: 'select', options: ['default', 'error', 'warning', 'success', 'info', 'notice'] },
+    size: { control: 'select', options: ['sm', 'md', 'lg'] },
   },
   render: (args) => html`
     <void-radio
@@ -66,8 +66,6 @@ export const Sizes: Story = {
       <void-radio size="sm" name="sizes" value="sm">Small</void-radio>
       <void-radio size="md" name="sizes" value="md">Medium</void-radio>
       <void-radio size="lg" name="sizes" value="lg">Large</void-radio>
-      <void-radio size="xl" name="sizes" value="xl">XL</void-radio>
-      <void-radio size="xxl" name="sizes" value="xxl">XXL</void-radio>
     </div>
   `,
 };

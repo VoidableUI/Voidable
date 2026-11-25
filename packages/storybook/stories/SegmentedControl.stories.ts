@@ -26,7 +26,7 @@ Pattern: radio group. One tab stop (the checked item, else the first enabled); s
   argTypes: {
     value: { control: 'text' },
     size: { control: 'select', options: ['sm', 'md', 'lg', 'xl', 'xxl'] },
-    color: { control: 'select', options: ['default', 'error', 'warning', 'success', 'info', 'notice', 'highlight'] },
+    color: { control: 'select', options: ['default', 'error', 'warning', 'success', 'info', 'notice'] },
   },
   render: (args) => html`
     <void-segmented-control value=${args.value || 'day'} size=${args.size || 'md'} color=${args.color || 'default'}>
@@ -58,16 +58,6 @@ export const Sizes: Story = {
         <void-segmented-control-item value="month">Month</void-segmented-control-item>
       </void-segmented-control>
       <void-segmented-control value="week" size="lg">
-        <void-segmented-control-item value="day">Day</void-segmented-control-item>
-        <void-segmented-control-item value="week">Week</void-segmented-control-item>
-        <void-segmented-control-item value="month">Month</void-segmented-control-item>
-      </void-segmented-control>
-      <void-segmented-control value="week" size="xl">
-        <void-segmented-control-item value="day">Day</void-segmented-control-item>
-        <void-segmented-control-item value="week">Week</void-segmented-control-item>
-        <void-segmented-control-item value="month">Month</void-segmented-control-item>
-      </void-segmented-control>
-      <void-segmented-control value="week" size="xxl">
         <void-segmented-control-item value="day">Day</void-segmented-control-item>
         <void-segmented-control-item value="week">Week</void-segmented-control-item>
         <void-segmented-control-item value="month">Month</void-segmented-control-item>

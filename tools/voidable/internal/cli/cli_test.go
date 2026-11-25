@@ -31,7 +31,7 @@ func TestCheckFixtures(t *testing.T) {
 		not  []string
 	}{
 		{"page.html.erb", []string{
-			`page.html.erb:2:16: [invalid-value] color="primary" is not valid on <void-button>; allowed: default|error|warning|caution|success|info|notice`,
+			`page.html.erb:2:16: [invalid-value] color="primary" is not valid on <void-button>; allowed: default|error|warning|success|info|notice`,
 			`page.html.erb:3:15: [unknown-attribute] unknown attribute label on <void-input>; wrap the control in <void-field label="...">`,
 			`page.html.erb:4:35: [unknown-attribute] unknown attribute cheked on <void-switch> (did you mean checked?)`,
 			`page.html.erb:5:16: [boolean-false] disabled="false"`,

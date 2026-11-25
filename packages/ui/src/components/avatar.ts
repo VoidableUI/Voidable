@@ -7,7 +7,7 @@ export class VoidAvatar extends VoidElement {
   @property({ type: String, reflect: true }) src: string = '';
   @property({ type: String, reflect: true }) alt: string = '';
   @property({ type: String, reflect: true }) initials: string = '';
-  @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' | 'xl' | 'xxl' = 'md';
+  @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' = 'md';
 
   connectedCallback(): void {
     super.connectedCallback();

@@ -88,16 +88,6 @@ export const Sizes: Story = {
         <void-option value="b">Option B</void-option>
         <void-option value="c">Option C</void-option>
       </void-combobox>
-      <void-combobox size="xl" placeholder="XL">
-        <void-option value="a">Option A</void-option>
-        <void-option value="b">Option B</void-option>
-        <void-option value="c">Option C</void-option>
-      </void-combobox>
-      <void-combobox size="xxl" placeholder="XXL">
-        <void-option value="a">Option A</void-option>
-        <void-option value="b">Option B</void-option>
-        <void-option value="c">Option C</void-option>
-      </void-combobox>
     </div>
   `,
 };

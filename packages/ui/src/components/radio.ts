@@ -16,8 +16,8 @@ export class VoidRadio extends NativeFormControl(VoidElement) {
    * which the browser validates as a group; focus moves to the host.
    */
   @property({ type: Boolean, reflect: true }) required = false;
-  @property({ type: String, reflect: true }) color: 'default' | 'error' | 'warning' | 'caution' | 'success' | 'info' | 'notice' = 'default';
-  @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' | 'xl' | 'xxl' = 'md';
+  @property({ type: String, reflect: true }) color: 'default' | 'error' | 'warning' | 'success' | 'info' | 'notice' = 'default';
+  @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' = 'md';
 
   // Consumer label content stays on the host, after the rendered control.
   protected readonly _projection = new ProjectionController(this, {

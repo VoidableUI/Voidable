@@ -20,7 +20,7 @@ const meta: Meta = {
     },
     variant: {
       control: { type: 'select' },
-      options: ['default', 'elevated', 'outlined'],
+      options: ['default', 'elevated', 'bordered'],
     },
     padding: {
       control: { type: 'select' },
@@ -63,7 +63,7 @@ export const Elevated: Story = {
 
 export const Outlined: Story = {
   render: () => html`
-    <void-card variant="outlined" heading="Integration Status">
+    <void-card variant="bordered" heading="Integration Status">
       <p>All connected services are operating normally. Last sync completed at 08:45 AM today.</p>
     </void-card>
   `,

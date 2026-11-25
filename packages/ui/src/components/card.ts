@@ -6,7 +6,7 @@ import { ProjectionController } from '../projection.js';
 /** Content grouping container for dashboard widgets, product listings, and media previews. */
 export class VoidCard extends VoidElement {
   @property({ type: String }) heading = '';
-  @property({ type: String, reflect: true }) variant: 'default' | 'elevated' | 'outlined' = 'default';
+  @property({ type: String, reflect: true }) variant: 'default' | 'elevated' | 'bordered' = 'default';
   @property({ type: String, reflect: true }) padding: 'none' | 'sm' | 'md' | 'lg' = 'md';
 
   // Consumer content is projected into the card body.

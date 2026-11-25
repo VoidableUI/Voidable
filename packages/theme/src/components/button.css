@@ -106,7 +106,6 @@ void-button[variant="ghost"]:active {
 /* Color variants — one override cascades to all derived states */
 void-button[color="error"]   { --tone: var(--void-color-error); }
 void-button[color="warning"] { --tone: var(--void-color-warning); }
-void-button[color="caution"] { --tone: var(--void-color-caution); }
 void-button[color="success"] { --tone: var(--void-color-success); }
 void-button[color="info"]    { --tone: var(--void-color-info); }
 void-button[color="notice"]  { --tone: var(--void-color-notice); }
@@ -142,18 +141,6 @@ void-button[size="lg"] {
   --void-button-height: var(--void-control-height-lg);
   --void-button-padding: calc(var(--void-control-padding-lg) * 1.25);
   --void-button-text: var(--void-control-text-lg);
-}
-
-void-button[size="xl"] {
-  --void-button-height: var(--void-control-height-xl);
-  --void-button-padding: calc(var(--void-control-padding-xl) * 1.25);
-  --void-button-text: var(--void-control-text-xl);
-}
-
-void-button[size="xxl"] {
-  --void-button-height: var(--void-control-height-xxl);
-  --void-button-padding: calc(var(--void-control-padding-xxl) * 1.25);
-  --void-button-text: var(--void-control-text-xxl);
 }
 
 /* Icon-only: a labelled button whose only child is an icon is square. */

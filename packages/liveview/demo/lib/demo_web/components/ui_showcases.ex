@@ -55,8 +55,6 @@ defmodule DemoWeb.UIShowcases do
         <VoidableUI.Components.button size="sm">Small</VoidableUI.Components.button>
         <VoidableUI.Components.button>Medium</VoidableUI.Components.button>
         <VoidableUI.Components.button size="lg">Large</VoidableUI.Components.button>
-        <VoidableUI.Components.button size="xl">XL</VoidableUI.Components.button>
-        <VoidableUI.Components.button size="xxl">XXL</VoidableUI.Components.button>
       </div>
     </div>
     <div class="showcase-section">
@@ -168,8 +166,6 @@ defmodule DemoWeb.UIShowcases do
         <VoidableUI.Components.tag size="sm">Small</VoidableUI.Components.tag>
         <VoidableUI.Components.tag>Medium</VoidableUI.Components.tag>
         <VoidableUI.Components.tag size="lg">Large</VoidableUI.Components.tag>
-        <VoidableUI.Components.tag size="xl">XL</VoidableUI.Components.tag>
-        <VoidableUI.Components.tag size="xxl">XXL</VoidableUI.Components.tag>
       </div>
     </div>
     <div class="showcase-section">
@@ -201,7 +197,7 @@ defmodule DemoWeb.UIShowcases do
     </div>
     <div class="showcase-section">
       <h3>Sizes (code examples)</h3>
-      <p>Only one dialog is shown open to avoid overlapping. Available sizes: sm, md, lg, xl.</p>
+      <p>Only one dialog is shown open to avoid overlapping. Available sizes: sm, md, lg.</p>
       <div class="showcase-code">
         <pre><code>&lt;VoidableUI.Components.dialog heading="Small Dialog" size="sm" open&gt;
   &lt;p&gt;This is a small dialog (24rem max-width).&lt;/p&gt;
@@ -213,10 +209,6 @@ defmodule DemoWeb.UIShowcases do
 
 &lt;VoidableUI.Components.dialog heading="Large Dialog" size="lg" open&gt;
   &lt;p&gt;This is a large dialog (48rem max-width).&lt;/p&gt;
-&lt;/VoidableUI.Components.dialog&gt;
-
-&lt;VoidableUI.Components.dialog heading="Extra Large Dialog" size="xl" open&gt;
-  &lt;p&gt;This is an extra large dialog (64rem max-width).&lt;/p&gt;
 &lt;/VoidableUI.Components.dialog&gt;
 
 &lt;VoidableUI.Components.dialog heading="Required Action" closable={false} open&gt;

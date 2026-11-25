@@ -60,11 +60,9 @@ void-stat[trend="up"]        .void-stat-delta { color: var(--void-color-success)
 void-stat[trend="down"]      .void-stat-delta { color: var(--void-color-error); }
 void-stat[trend="error"]     .void-stat-delta { color: var(--void-color-error); }
 void-stat[trend="warning"]   .void-stat-delta { color: var(--void-color-warning); }
-void-stat[trend="caution"]   .void-stat-delta { color: var(--void-color-caution); }
 void-stat[trend="success"]   .void-stat-delta { color: var(--void-color-success); }
 void-stat[trend="info"]      .void-stat-delta { color: var(--void-color-info); }
 void-stat[trend="notice"]    .void-stat-delta { color: var(--void-color-notice); }
-void-stat[trend="highlight"] .void-stat-delta { color: var(--void-color-highlight); }
 
 /* Sizes */
 void-stat[size="sm"] {
@@ -77,23 +75,11 @@ void-stat[size="lg"] {
   --void-stat-value-size: var(--void-text-4xl);
 }
 
-void-stat[size="xl"] {
-  --void-stat-padding: var(--void-space-8);
-  --void-stat-value-size: var(--void-text-5xl);
-}
-
-void-stat[size="xxl"] {
-  --void-stat-padding: var(--void-space-10);
-  --void-stat-value-size: calc(var(--void-text-5xl) * 1.3333);
-}
-
 void-stat[color="error"]     { --tone: var(--void-color-error); }
 void-stat[color="warning"]   { --tone: var(--void-color-warning); }
-void-stat[color="caution"]   { --tone: var(--void-color-caution); }
 void-stat[color="success"]   { --tone: var(--void-color-success); }
 void-stat[color="info"]      { --tone: var(--void-color-info); }
 void-stat[color="notice"]    { --tone: var(--void-color-notice); }
-void-stat[color="highlight"] { --tone: var(--void-color-highlight); }
 
 /* The attribute is reflected, so the plain stat carries color="default". */
 void-stat[color]:not([color="default"]) {

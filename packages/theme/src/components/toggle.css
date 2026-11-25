@@ -58,15 +58,12 @@ void-toggle[variant="filled"][pressed]:hover {
 
 void-toggle[color="error"]   { --tone: var(--void-color-error); }
 void-toggle[color="warning"] { --tone: var(--void-color-warning); }
-void-toggle[color="caution"] { --tone: var(--void-color-caution); }
 void-toggle[color="success"] { --tone: var(--void-color-success); }
 void-toggle[color="info"]    { --tone: var(--void-color-info); }
 void-toggle[color="notice"]  { --tone: var(--void-color-notice); }
 
 void-toggle[size="sm"] { --void-toggle-size: var(--void-control-height-sm); --void-toggle-text: var(--void-control-text-sm); }
 void-toggle[size="lg"] { --void-toggle-size: var(--void-control-height-lg); --void-toggle-text: var(--void-control-text-lg); }
-void-toggle[size="xl"] { --void-toggle-size: var(--void-control-height-xl); --void-toggle-text: var(--void-control-text-xl); }
-void-toggle[size="xxl"] { --void-toggle-size: var(--void-control-height-xxl); --void-toggle-text: var(--void-control-text-xxl); }
 
 void-toggle[disabled] {
   opacity: 0.5;

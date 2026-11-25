@@ -9,9 +9,9 @@ export class VoidStat extends VoidElement {
   @property({ type: String, reflect: true }) delta = '';
   /** Secondary line of text shown under the value, e.g. "vs. last month". */
   @property({ type: String, reflect: true }) description = '';
-  @property({ type: String, reflect: true }) trend: 'up' | 'down' | 'flat' | 'error' | 'warning' | 'caution' | 'success' | 'info' | 'notice' | 'highlight' | null = null;
-  @property({ type: String, reflect: true }) color: 'default' | 'error' | 'warning' | 'caution' | 'success' | 'info' | 'notice' | 'highlight' = 'default';
-  @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' | 'xl' | 'xxl' = 'md';
+  @property({ type: String, reflect: true }) trend: 'up' | 'down' | 'flat' | 'error' | 'warning' | 'success' | 'info' | 'notice' | null = null;
+  @property({ type: String, reflect: true }) color: 'default' | 'error' | 'warning' | 'success' | 'info' | 'notice' = 'default';
+  @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' = 'md';
 
   connectedCallback(): void {
     super.connectedCallback();

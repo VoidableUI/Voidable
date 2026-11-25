@@ -51,5 +51,3 @@ void-segmented-control-item[disabled] {
 
 void-segmented-control[size="sm"] { --void-segment-height: var(--void-control-height-sm); --void-segment-padding: var(--void-control-padding-sm); --void-segment-text: var(--void-control-text-sm); }
 void-segmented-control[size="lg"] { --void-segment-height: var(--void-control-height-lg); --void-segment-padding: var(--void-control-padding-lg); --void-segment-text: var(--void-control-text-lg); }
-void-segmented-control[size="xl"] { --void-segment-height: var(--void-control-height-xl); --void-segment-padding: var(--void-control-padding-xl); --void-segment-text: var(--void-control-text-xl); }
-void-segmented-control[size="xxl"] { --void-segment-height: var(--void-control-height-xxl); --void-segment-padding: var(--void-control-padding-xxl); --void-segment-text: var(--void-control-text-xxl); }

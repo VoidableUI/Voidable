@@ -21,7 +21,7 @@ const meta: Meta = {
     },
     color: {
       control: { type: 'select' },
-      options: ['default', 'error', 'warning', 'caution', 'success', 'info', 'notice'],
+      options: ['default', 'error', 'warning', 'success', 'info', 'notice'],
     },
     disabled: {
       control: { type: 'boolean' },

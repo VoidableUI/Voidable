@@ -16,8 +16,8 @@ const meta: Meta = {
   argTypes: {
     pressed: { control: 'boolean' },
     disabled: { control: 'boolean' },
-    color: { control: 'select', options: ['default', 'error', 'warning', 'caution', 'success', 'info', 'notice'] },
-    size: { control: 'select', options: ['sm', 'md', 'lg', 'xl', 'xxl'] },
+    color: { control: 'select', options: ['default', 'error', 'warning', 'success', 'info', 'notice'] },
+    size: { control: 'select', options: ['sm', 'md', 'lg'] },
     variant: { control: 'select', options: ['outline', 'filled'] },
   },
   render: (args) => html`
@@ -70,8 +70,6 @@ export const Sizes: Story = {
       <void-toggle size="sm">B</void-toggle>
       <void-toggle size="md">B</void-toggle>
       <void-toggle size="lg">B</void-toggle>
-      <void-toggle size="xl">B</void-toggle>
-      <void-toggle size="xxl">B</void-toggle>
     </div>
   `,
 };

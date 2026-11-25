@@ -26,7 +26,6 @@ void-tag {
 
 void-tag[color="error"]   { --tone: var(--void-color-error); }
 void-tag[color="warning"] { --tone: var(--void-color-warning); }
-void-tag[color="caution"] { --tone: var(--void-color-caution); }
 void-tag[color="success"] { --tone: var(--void-color-success); }
 void-tag[color="info"]    { --tone: var(--void-color-info); }
 void-tag[color="notice"]  { --tone: var(--void-color-notice); }
@@ -39,8 +38,6 @@ void-tag[color]:not([color="default"]) {
 
 void-tag[size="sm"]  { --void-tag-size: 1.125rem; --void-tag-padding: var(--void-space-1h); --void-tag-text: var(--void-type-label-size); }
 void-tag[size="lg"]  { --void-tag-size: 1.75rem;  --void-tag-padding: var(--void-space-3);  --void-tag-text: var(--void-text-sm); }
-void-tag[size="xl"]  { --void-tag-size: 2.25rem;  --void-tag-padding: var(--void-space-4);  --void-tag-text: var(--void-text-base); }
-void-tag[size="xxl"] { --void-tag-size: 2.75rem;  --void-tag-padding: var(--void-space-5);  --void-tag-text: var(--void-text-lg); }
 
 .void-tag-close {
   display: inline-flex;

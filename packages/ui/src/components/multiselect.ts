@@ -52,7 +52,7 @@ if (!customElements.get('void-option')) {
 export class VoidMultiselect extends InternalsFormControl(VoidElement) {
   @property({ type: String }) placeholder = 'Select...';
   @property({ type: Boolean, reflect: true }) disabled = false;
-  @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' | 'xl' | 'xxl' = 'md';
+  @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' = 'md';
   @property({ type: String, reflect: true }) error = '';
   @property({ type: String, reflect: true }) name = '';
   /** Whether the option list is showing. Reflected, so it can be read (and set) from markup. */

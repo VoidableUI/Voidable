@@ -22,5 +22,3 @@ void-avatar img {
 
 void-avatar[size="sm"] { width: 1.75rem; height: 1.75rem; font-size: var(--void-text-xs); }
 void-avatar[size="lg"] { width: 3.5rem; height: 3.5rem; font-size: var(--void-text-lg); }
-void-avatar[size="xl"] { width: 5rem; height: 5rem; font-size: var(--void-text-xl); }
-void-avatar[size="xxl"] { width: 6.5rem; height: 6.5rem; font-size: var(--void-text-2xl); }

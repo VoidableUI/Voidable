@@ -15,7 +15,7 @@ const meta: Meta = {
     },
   },
   argTypes: {
-    size: { control: 'select', options: ['sm', 'md', 'lg', 'xl', 'xxl'] },
+    size: { control: 'select', options: ['sm', 'md', 'lg'] },
     label: { control: 'text' },
   },
   render: (args) => html`
@@ -37,8 +37,6 @@ export const Sizes: Story = {
       <void-spinner size="sm" label="Loading small"></void-spinner>
       <void-spinner size="md" label="Loading medium"></void-spinner>
       <void-spinner size="lg" label="Loading large"></void-spinner>
-      <void-spinner size="xl" label="Loading xl"></void-spinner>
-      <void-spinner size="xxl" label="Loading xxl"></void-spinner>
     </div>
   `,
 };

@@ -42,8 +42,6 @@ defmodule DemoWeb.FormShowcases do
         <VoidableUI.Components.input size="sm" placeholder="Small" />
         <VoidableUI.Components.input placeholder="Medium" />
         <VoidableUI.Components.input size="lg" placeholder="Large" />
-        <VoidableUI.Components.input size="xl" placeholder="XL" />
-        <VoidableUI.Components.input size="xxl" placeholder="XXL" />
       </div>
     </div>
     """
@@ -85,8 +83,6 @@ defmodule DemoWeb.FormShowcases do
         <VoidableUI.Components.textarea size="sm" placeholder="Small" />
         <VoidableUI.Components.textarea placeholder="Medium" />
         <VoidableUI.Components.textarea size="lg" placeholder="Large" />
-        <VoidableUI.Components.textarea size="xl" placeholder="XL" />
-        <VoidableUI.Components.textarea size="xxl" placeholder="XXL" />
       </div>
     </div>
     """
@@ -132,12 +128,6 @@ defmodule DemoWeb.FormShowcases do
         <VoidableUI.Components.select size="lg">
           <option>Large</option>
         </VoidableUI.Components.select>
-        <VoidableUI.Components.select size="xl">
-          <option>XL</option>
-        </VoidableUI.Components.select>
-        <VoidableUI.Components.select size="xxl">
-          <option>XXL</option>
-        </VoidableUI.Components.select>
       </div>
     </div>
     """
@@ -178,8 +168,6 @@ defmodule DemoWeb.FormShowcases do
         <VoidableUI.Components.checkbox size="sm">Small</VoidableUI.Components.checkbox>
         <VoidableUI.Components.checkbox>Medium</VoidableUI.Components.checkbox>
         <VoidableUI.Components.checkbox size="lg">Large</VoidableUI.Components.checkbox>
-        <VoidableUI.Components.checkbox size="xl">Extra Large</VoidableUI.Components.checkbox>
-        <VoidableUI.Components.checkbox size="xxl">2X Large</VoidableUI.Components.checkbox>
       </div>
     </div>
     <div class="showcase-section">
@@ -223,8 +211,6 @@ defmodule DemoWeb.FormShowcases do
         <VoidableUI.Components.radio name="sizes" value="sm" size="sm">Small</VoidableUI.Components.radio>
         <VoidableUI.Components.radio name="sizes" value="md">Medium</VoidableUI.Components.radio>
         <VoidableUI.Components.radio name="sizes" value="lg" size="lg">Large</VoidableUI.Components.radio>
-        <VoidableUI.Components.radio name="sizes" value="xl" size="xl">XL</VoidableUI.Components.radio>
-        <VoidableUI.Components.radio name="sizes" value="xxl" size="xxl">XXL</VoidableUI.Components.radio>
       </div>
     </div>
     <div class="showcase-section">
@@ -359,16 +345,6 @@ defmodule DemoWeb.FormShowcases do
           <VoidableUI.Components.option value="b">Option B</VoidableUI.Components.option>
           <VoidableUI.Components.option value="c">Option C</VoidableUI.Components.option>
         </VoidableUI.Components.combobox>
-        <VoidableUI.Components.combobox size="xl" placeholder="XL">
-          <VoidableUI.Components.option value="a">Option A</VoidableUI.Components.option>
-          <VoidableUI.Components.option value="b">Option B</VoidableUI.Components.option>
-          <VoidableUI.Components.option value="c">Option C</VoidableUI.Components.option>
-        </VoidableUI.Components.combobox>
-        <VoidableUI.Components.combobox size="xxl" placeholder="XXL">
-          <VoidableUI.Components.option value="a">Option A</VoidableUI.Components.option>
-          <VoidableUI.Components.option value="b">Option B</VoidableUI.Components.option>
-          <VoidableUI.Components.option value="c">Option C</VoidableUI.Components.option>
-        </VoidableUI.Components.combobox>
       </div>
     </div>
     """
@@ -427,14 +403,6 @@ defmodule DemoWeb.FormShowcases do
           <VoidableUI.Components.option value="b">Option B</VoidableUI.Components.option>
         </VoidableUI.Components.multiselect>
         <VoidableUI.Components.multiselect size="lg" placeholder="Large">
-          <VoidableUI.Components.option value="a">Option A</VoidableUI.Components.option>
-          <VoidableUI.Components.option value="b">Option B</VoidableUI.Components.option>
-        </VoidableUI.Components.multiselect>
-        <VoidableUI.Components.multiselect size="xl" placeholder="XL">
-          <VoidableUI.Components.option value="a">Option A</VoidableUI.Components.option>
-          <VoidableUI.Components.option value="b">Option B</VoidableUI.Components.option>
-        </VoidableUI.Components.multiselect>
-        <VoidableUI.Components.multiselect size="xxl" placeholder="XXL">
           <VoidableUI.Components.option value="a">Option A</VoidableUI.Components.option>
           <VoidableUI.Components.option value="b">Option B</VoidableUI.Components.option>
         </VoidableUI.Components.multiselect>
@@ -535,8 +503,6 @@ defmodule DemoWeb.FormShowcases do
         <VoidableUI.Components.switch size="sm" />
         <VoidableUI.Components.switch />
         <VoidableUI.Components.switch size="lg" />
-        <VoidableUI.Components.switch size="xl" />
-        <VoidableUI.Components.switch size="xxl" />
       </div>
     </div>
     <div class="showcase-section">

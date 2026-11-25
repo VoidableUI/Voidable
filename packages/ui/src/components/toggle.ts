@@ -5,8 +5,8 @@ import { VoidElement } from '../base.js';
 export class VoidToggle extends VoidElement {
   @property({ type: Boolean, reflect: true }) pressed = false;
   @property({ type: Boolean, reflect: true }) disabled = false;
-  @property({ type: String, reflect: true }) color: 'default' | 'error' | 'warning' | 'caution' | 'success' | 'info' | 'notice' = 'default';
-  @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' | 'xl' | 'xxl' = 'md';
+  @property({ type: String, reflect: true }) color: 'default' | 'error' | 'warning' | 'success' | 'info' | 'notice' = 'default';
+  @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' = 'md';
   @property({ type: String, reflect: true }) variant: 'outline' | 'filled' = 'outline';
 
   connectedCallback(): void {

@@ -42,7 +42,6 @@ void-dialog:not(:defined) {
 void-dialog[size="sm"] .void-dialog-panel { max-width: 24rem; }
 void-dialog[size="md"] .void-dialog-panel { max-width: 32rem; }
 void-dialog[size="lg"] .void-dialog-panel { max-width: 48rem; }
-void-dialog[size="xl"] .void-dialog-panel { max-width: 64rem; }
 
 .void-dialog-heading[hidden] {
   display: none;

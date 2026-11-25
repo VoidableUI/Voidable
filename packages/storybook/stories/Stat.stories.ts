@@ -17,7 +17,7 @@ const meta: Meta = {
   argTypes: {
     color: {
       control: { type: 'select' },
-      options: ['default', 'error', 'warning', 'caution', 'success', 'info', 'notice', 'highlight'],
+      options: ['default', 'error', 'warning', 'success', 'info', 'notice'],
     },
     size: {
       control: { type: 'select' },
@@ -25,7 +25,7 @@ const meta: Meta = {
     },
     trend: {
       control: { type: 'select' },
-      options: [null, 'up', 'down', 'flat', 'error', 'warning', 'caution', 'success', 'info', 'notice', 'highlight'],
+      options: [null, 'up', 'down', 'flat', 'error', 'warning', 'success', 'info', 'notice'],
     },
   },
 };
@@ -100,20 +100,6 @@ export const Sizes: Story = {
         delta="+3.1%"
         trend="up"
       ></void-stat>
-      <void-stat
-        size="xl"
-        label="XLarge"
-        value="1,024"
-        delta="+3.1%"
-        trend="up"
-      ></void-stat>
-      <void-stat
-        size="xxl"
-        label="XXLarge"
-        value="1,024"
-        delta="+3.1%"
-        trend="up"
-      ></void-stat>
     </div>
   `,
 };
@@ -163,7 +149,6 @@ export const TrendColors: Story = {
       <void-stat label="Warning" value="847ms" delta="+120ms" trend="warning"></void-stat>
       <void-stat label="Info" value="1.2M" delta="+42K" trend="info"></void-stat>
       <void-stat label="Notice" value="v2.1" delta="new" trend="notice"></void-stat>
-      <void-stat label="Highlight" value="$4.2K" delta="+$800" trend="highlight"></void-stat>
     </div>
   `,
 };
@@ -177,7 +162,6 @@ export const Colors: Story = {
       <void-stat label="Success" value="99.9%" delta="+0.5%" trend="up" color="success"></void-stat>
       <void-stat label="Info" value="1.2M" delta="+42K" trend="info" color="info"></void-stat>
       <void-stat label="Notice" value="v2.1" delta="new" trend="notice" color="notice"></void-stat>
-      <void-stat label="Highlight" value="$4.2K" delta="+$800" trend="highlight" color="highlight"></void-stat>
     </div>
   `,
 };
@@ -186,7 +170,7 @@ export const WithDescription: Story = {
   render: () => html`
     <div style="display: flex; flex-wrap: wrap; gap: 16px;">
       <void-stat label="Active sessions" value="1,284" delta="+8%" trend="up" description="Across all regions, last 24 hours"></void-stat>
-      <void-stat label="Error rate" value="0.4%" description="Below the 1% budget" color="caution"></void-stat>
+      <void-stat label="Error rate" value="0.4%" description="Below the 1% budget" color="warning"></void-stat>
     </div>
   `,
 };
