@@ -40,6 +40,13 @@ export interface ProjectionRegion {
    * put it, after the Lit-rendered content.
    */
   accepts?: (node: Node, context: ProjectionContext) => boolean;
+  /**
+   * Development-only hint: if, after projection, this region holds no element while
+   * another region does, warn once per host with the message this returns (return
+   * null to stay quiet). Silent in production builds (when Lit's development build
+   * is not in use).
+   */
+  required?: () => string | null;
 }
 
 export interface ProjectionOptions {
@@ -47,8 +54,8 @@ export interface ProjectionOptions {
   /**
    * Called when the set or order of consumer nodes in any region changes after the
    * first render (children added, removed or reordered by the consumer), and after
-   * the controller recovered from its markers being removed (see the class docs).
-   * Not called for the initial projection. Typical use: `() => this.requestUpdate()`.
+   * the controller re-projected following recovery or `unproject()` (see the class
+   * docs). Not called for the initial projection. Typical use: `() => this.requestUpdate()`.
    */
   onChange?: () => void;
 }
@@ -65,6 +72,7 @@ const CONTAINER_ATTR = 'data-void-projection';
 const CHROME_ATTR = 'data-void-chrome';
 
 type ProjectionHost = LitElement & { [PROJECTION_KEY]?: ProjectionController };
+type MovableParent = Node & { moveBefore?: (node: Node, child: Node | null) => void };
 
 const isElement = (n: Node): n is Element => n.nodeType === Node.ELEMENT_NODE;
 const isComment = (n: Node): n is Comment => n.nodeType === Node.COMMENT_NODE;
@@ -73,6 +81,66 @@ const isStaleLooking = (n: Node): boolean =>
   (isElement(n) && n.hasAttribute(CHROME_ATTR));
 const isAnchor = (n: Node): boolean =>
   isComment(n) || (n.nodeType === Node.TEXT_NODE && !(n.textContent ?? '').trim());
+
+/**
+ * Moves `node` into `parent` before `ref`, preserving focus and other element
+ * state where the platform allows: `Element.moveBefore` (Chromium 133+) moves a
+ * connected node without removing it from the document; elsewhere the node is
+ * re-inserted and the focused element (and its text selection) is restored.
+ * Bypasses VoidElement's own `insertBefore` override.
+ */
+function moveNode(parent: Node, node: Node, ref: Node | null): void {
+  if (node.parentNode === parent && node.nextSibling === ref && node !== ref) return;
+  const movable = parent as MovableParent;
+  if (typeof movable.moveBefore === 'function' && node.isConnected && parent.isConnected && !isSelectPart(parent, node)) {
+    try {
+      movable.moveBefore(node, ref);
+      return;
+    } catch {
+      // Different roots, or a node type moveBefore does not take: insert instead.
+    }
+  }
+  const restore = captureFocus(node);
+  Node.prototype.insertBefore.call(parent, node, ref);
+  restore?.();
+}
+
+/**
+ * Options carry no focus or element state worth preserving, and moving them with
+ * `moveBefore` into or out of a `<select>` crashed the Chromium 155 renderer in
+ * testing; use a plain insert for them.
+ */
+function isSelectPart(parent: Node, node: Node): boolean {
+  const name = (n: Node) => (isElement(n) ? n.localName : '');
+  return ['select', 'optgroup', 'datalist'].includes(name(parent)) || ['option', 'optgroup'].includes(name(node));
+}
+
+/** If the focused element is inside `node`, returns a function that refocuses it after a move. */
+function captureFocus(node: Node): (() => void) | null {
+  const doc = node.ownerDocument;
+  const active = doc?.activeElement as HTMLElement | null | undefined;
+  if (!doc || !active || active === doc.body || !node.contains(active)) return null;
+  const field = active as Partial<HTMLInputElement>;
+  let range: [number, number, 'forward' | 'backward' | 'none'] | null = null;
+  try {
+    if (typeof field.selectionStart === 'number' && typeof field.selectionEnd === 'number') {
+      range = [field.selectionStart, field.selectionEnd, field.selectionDirection ?? 'none'];
+    }
+  } catch {
+    range = null;
+  }
+  return () => {
+    if (!active.isConnected || doc.activeElement === active) return;
+    active.focus({ preventScroll: true });
+    if (range) {
+      try {
+        field.setSelectionRange?.(range[0], range[1], range[2]);
+      } catch {
+        // Input types without selection support.
+      }
+    }
+  };
+}
 
 /**
  * @internal Experimental: the API may change before it is made public.
@@ -107,11 +175,12 @@ const isAnchor = (n: Node): boolean =>
  *    element that has no child parts, so consumer nodes moved inside are safe.
  *    Hide closed overlays with `hidden` / an attribute instead of not rendering.
  * 3. Consumer nodes are moved exactly once, never cloned, so identity, listeners
- *    and framework references survive. Nodes the consumer adds later land outside
- *    the markers and are routed by a MutationObserver, keeping their position
- *    relative to the region's other nodes; removals and reorders inside containers
- *    are observed too. This also covers elements upgraded before the parser
- *    appended their children.
+ *    and framework references survive (moves use `moveBefore` where available, so
+ *    focus survives too). Nodes the consumer adds later land outside the markers and
+ *    are routed by a MutationObserver, keeping their position relative to the
+ *    region's other nodes; removals and reorders inside containers are observed
+ *    too. This also covers elements upgraded before the parser appended their
+ *    children.
  * 4. Disconnecting stops observing; nothing is torn down or rebuilt, so moving the
  *    element in the DOM or reconnecting it never duplicates wrappers.
  * 5. `VoidElement` redirects `insertBefore` / `removeChild` / `replaceChild` calls
@@ -119,14 +188,20 @@ const isAnchor = (n: Node): boolean =>
  *    makes the `textContent` setter and `replaceChildren` replace only consumer
  *    content, so frameworks that keep treating the host as the parent of their
  *    children (React, Solid, Vue) keep working.
- * 6. Recovery: if the markers are removed (a server-side morph such as idiomorph,
- *    `host.innerHTML = …`, `innerText`), the controller discards whatever is left of
- *    the old chrome, inserts fresh markers (Lit keys its root part on the
- *    `renderBefore` node, so this yields a clean part), and re-renders, projecting
- *    the host's current children as if they were initial content. A host created by
- *    `cloneNode(true)` or an `outerHTML` round-trip of a rendered host is cleaned up
- *    the same way on first connect: container contents are lifted back onto the
- *    host and the stale chrome is dropped.
+ * 6. Morphing: {@link unproject} (exposed as `VoidElement.voidUnproject()`, the
+ *    supported pre-morph hook for adapters) puts the host back into its
+ *    server-markup shape so a DOM morph never sees chrome. The chrome is parked and
+ *    put back afterwards, so nothing is rebuilt.
+ * 7. Recovery, for morphs that skip that hook: if a marker or a top-level chrome
+ *    element leaves the host (idiomorph, `host.innerHTML = …`, `innerText`), the
+ *    controller discards what is left of the old chrome, inserts fresh markers (Lit
+ *    keys its root part on the `renderBefore` node, so this yields a clean part), and
+ *    re-renders, projecting the host's current children as if they were initial
+ *    content. Chrome elements are tracked by identity, so one a morph recycled as
+ *    consumer content (stripping its class) is replaced by a plain copy without
+ *    Lit's event listeners. A host created by `cloneNode(true)` or an `outerHTML`
+ *    round-trip of a rendered host is cleaned up the same way on first connect:
+ *    container contents are lifted back onto the host and the stale chrome dropped.
  *
  * Consequences for consumers: after projection, `host.children` lists the rendered
  * chrome rather than the consumer's children, and `child.parentNode === host` no
@@ -142,6 +217,12 @@ export class ProjectionController implements ReactiveController {
   private _observer: MutationObserver | null = null;
   private _observedContainers = new Set<Element>();
   private _placed = new WeakMap<Node, ProjectionRegion>();
+  /** Top-level elements of the current render, in order. */
+  private _chromeTop: Element[] = [];
+  /** Every element Lit rendered for this host (outside container contents), by identity. */
+  private _chromeAll = new WeakSet<Element>();
+  /** Region containers, by identity. */
+  private _containers = new WeakSet<Element>();
   /** Top-level text/comment nodes Lit rendered, with their data at render time. */
   private _litText = new WeakMap<Node, string>();
   private _signature: Node[] = [];
@@ -149,6 +230,16 @@ export class ProjectionController implements ReactiveController {
   private _recovered = false;
   private _initialPass = false;
   private _sawElement = false;
+  /**
+   * Set by unproject(): the markers and chrome are parked here until re-projection,
+   * in a hidden holder outside the morph target when `moveBefore` can keep them
+   * connected (so focus inside the chrome survives), else in a fragment.
+   */
+  private _parked: DocumentFragment | Element | null = null;
+  /** Restores focus to a parked chrome element (e.g. a combobox input) after re-projection. */
+  private _parkedFocus: (() => void) | null = null;
+  private _warned = false;
+
   constructor(host: LitElement, options: ProjectionOptions) {
     this._host = host as ProjectionHost;
     this._regions = options.regions;
@@ -159,9 +250,11 @@ export class ProjectionController implements ReactiveController {
 
   hostConnected(): void {
     const host = this._host;
-    if (!this._start) {
+    if (this._parked) {
+      this._restore();
+    } else if (!this._start) {
       this._init(false);
-    } else if (!this._intact()) {
+    } else if (this._needsInit()) {
       this._init(true);
       host.requestUpdate();
     }
@@ -177,20 +270,23 @@ export class ProjectionController implements ReactiveController {
   }
 
   hostUpdate(): void {
-    if (!this._start || !this._end) return;
-    if (!this._intact()) {
-      // Markers vanished since the last render; re-initialise so this render
-      // builds a fresh root part instead of patching detached nodes.
+    if (this._parked) {
+      this._restore();
+      return;
+    }
+    if (this._needsInit()) {
+      // Markers or chrome vanished since the last render; re-initialise so this
+      // render builds a fresh root part instead of patching detached nodes.
       this._init(true);
       return;
     }
-    if (this._rendered) return;
+    if (this._rendered || !this._start || !this._end) return;
     // Anything inserted between the markers before the first render would end up
     // beside Lit's part; move it out so it is treated as consumer content.
     const stray: Node[] = [];
     for (let n = this._start.nextSibling; n && n !== this._end; n = n.nextSibling) stray.push(n);
     const ref = this._end.nextSibling;
-    for (const n of stray) Node.prototype.insertBefore.call(this._host, n, ref);
+    for (const n of stray) moveNode(this._host, n, ref);
   }
 
   hostUpdated(): void {
@@ -230,11 +326,11 @@ export class ProjectionController implements ReactiveController {
     }
     const region = this._route(node, 'insert');
     if (region && region === this._placed.get(ref) && ref.parentNode) {
-      ref.parentNode.insertBefore(node, ref);
+      moveNode(ref.parentNode, node, ref);
       this._placed.set(node, region);
       if (isElement(node)) this._sawElement = true;
     } else if (!region || !this._place(node, region, null)) {
-      Node.prototype.insertBefore.call(this._host, node, null);
+      moveNode(this._host, node, null);
     }
     return node;
   }
@@ -242,8 +338,9 @@ export class ProjectionController implements ReactiveController {
   /**
    * Replaces all consumer content (every region, plus anything not yet routed) with
    * `nodes`, leaving the rendered chrome alone. Backs `textContent = …` and
-   * `replaceChildren(…)` on the host. Returns false if the markers are not intact,
-   * in which case the caller should fall back to the native operation.
+   * `replaceChildren(…)` on the host. Returns false if the projection is not
+   * intact, in which case the caller should fall back to the native operation.
+   * Callers validate `nodes` first.
    */
   replaceContent(nodes: Node[]): boolean {
     if (!this._intact()) return false;
@@ -258,10 +355,121 @@ export class ProjectionController implements ReactiveController {
       else if (n === this._end) zone = 'after';
       else if (zone !== 'lit') doomed.push(n);
     }
-    for (const n of doomed) n.parentNode?.removeChild(n);
-    for (const n of nodes) Node.prototype.insertBefore.call(host, n, null);
+    for (const n of doomed) {
+      if (!nodes.includes(n)) n.parentNode?.removeChild(n);
+    }
+    for (const n of nodes) moveNode(host, n, null);
     if (this._rendered) this._reconcile(true);
     return true;
+  }
+
+  /**
+   * Returns the host to the shape of its original markup so a DOM morph (Turbo,
+   * idiomorph, morphdom/LiveView, Livewire) compares like with like: each region
+   * container's consumer nodes are moved back onto the host (before-region nodes,
+   * then container contents in document order, then after-region nodes), and the
+   * markers and all rendered chrome are taken out of the document. The chrome is
+   * parked, not destroyed: on re-projection the same nodes go back, Lit's part stays
+   * valid, and no element is rebuilt (the native select, tab list and inputs keep
+   * their identity). Component state (properties) is untouched.
+   *
+   * Re-projection happens on its own once the morph has run: the update requested
+   * here and the observer both fire in a microtask, after a synchronous morph. Call
+   * {@link reproject} to force it. If the morph left stale chrome behind, the
+   * controller falls back to recovery (fresh chrome). Returns false if there was
+   * nothing to unproject.
+   */
+  unproject(): boolean {
+    const host = this._host;
+    const start = this._start;
+    const end = this._end;
+    if (this._parked || !this._rendered || !start || !end || !this._intact()) return false;
+    const containers = this._regions
+      .filter(r => typeof r.target === 'function')
+      .map(r => [r, (r.target as () => Element | null | undefined)()] as const)
+      .filter((pair): pair is readonly [ProjectionRegion, Element] => !!pair[1])
+      .sort((a, b) => (a[1].compareDocumentPosition(b[1]) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1));
+    for (const [region, container] of containers) {
+      for (const n of Array.from(container.childNodes)) {
+        if (this._placed.get(n) === region) moveNode(host, n, start);
+      }
+    }
+    const range: Node[] = [];
+    for (let n: Node | null = start; n; n = n.nextSibling) {
+      range.push(n);
+      if (n === end) break;
+    }
+    const doc = host.ownerDocument;
+    const root = doc.documentElement as MovableParent | null;
+    let parked: DocumentFragment | Element;
+    if (root && host.isConnected && typeof root.moveBefore === 'function') {
+      // A direct child of <html>, outside <body> and any morph container. Moved
+      // nodes stay connected, so a focused chrome element (a combobox input) keeps
+      // focus and selection without blur/focus events.
+      parked = doc.createElement('void-projection-park');
+      (parked as HTMLElement).hidden = true;
+      root.appendChild(parked);
+      for (const n of range) moveNode(parked, n, null);
+      this._parkedFocus = null;
+    } else {
+      this._parkedFocus = range.map(n => captureFocus(n)).find(Boolean) ?? null;
+      parked = doc.createDocumentFragment();
+      for (const n of range) parked.appendChild(n);
+    }
+    this._parked = parked;
+    this._observedContainers.clear();
+    if (this._observer && host.isConnected) {
+      this._observer.disconnect();
+      this._observer.observe(host, { childList: true });
+      this._observer.takeRecords();
+    }
+    host.requestUpdate();
+    return true;
+  }
+
+  /** Re-projects now after {@link unproject}; resolves when the host has rendered. */
+  reproject(): Promise<boolean> {
+    if (this._parked) {
+      this._restore();
+      this._host.requestUpdate();
+    }
+    return this._host.updateComplete;
+  }
+
+  /** Puts parked chrome back after a morph and re-projects the host's current children. */
+  private _restore(): void {
+    const host = this._host;
+    const parked = this._parked;
+    if (!parked) return;
+    const focus = this._parkedFocus;
+    this._parked = null;
+    this._parkedFocus = null;
+    if (Array.from(host.childNodes).some(isStaleLooking)) {
+      // The morph brought rendered markup of its own; rebuild from scratch.
+      if (isElement(parked)) parked.remove();
+      this._init(true);
+      host.requestUpdate();
+      return;
+    }
+    // Everything on the host is consumer content again; re-insert the chrome ahead
+    // of it and let reconcile route each node back to its region (placement is
+    // remembered, new nodes are routed as usual).
+    if (isElement(parked)) {
+      const ref = host.firstChild;
+      for (const n of Array.from(parked.childNodes)) moveNode(host, n, ref);
+      parked.remove();
+    } else {
+      Node.prototype.insertBefore.call(host, parked, host.firstChild);
+    }
+    // Always report a change: derived state (the native select's value, active
+    // tab) must be re-applied after the morph even when the node set is the same.
+    this._signature = [];
+    this._reconcile(true);
+    focus?.();
+  }
+
+  private _needsInit(): boolean {
+    return !this._parked && !!this._start && !this._intact();
   }
 
   private _intact(): boolean {
@@ -269,8 +477,17 @@ export class ProjectionController implements ReactiveController {
     const start = this._start;
     const end = this._end;
     if (!start || !end || start.parentNode !== host || end.parentNode !== host) return false;
-    for (let n = start.nextSibling; n; n = n.nextSibling) if (n === end) return true;
-    return false;
+    let found = false;
+    for (let n = start.nextSibling; n; n = n.nextSibling) {
+      if (n === end) {
+        found = true;
+        break;
+      }
+    }
+    if (!found) return false;
+    // A chrome element removed (or stripped of its marker attribute, as a morph
+    // that recycled it would) while the markers stayed also needs recovery.
+    return this._chromeTop.every(el => el.parentNode === host && el.hasAttribute(CHROME_ATTR));
   }
 
   /**
@@ -295,11 +512,16 @@ export class ProjectionController implements ReactiveController {
     host.renderOptions.renderBefore = end;
     this._placed = new WeakMap();
     this._litText = new WeakMap();
+    this._chromeTop = [];
+    this._chromeAll = new WeakSet();
+    this._containers = new WeakSet();
     this._observedContainers.clear();
     this._signature = [];
     this._rendered = false;
     this._recovered = recovering;
     this._sawElement = false;
+    this._parked = null;
+    this._parkedFocus = null;
   }
 
   /**
@@ -307,7 +529,8 @@ export class ProjectionController implements ReactiveController {
    * anything between them), lifting the contents of stale containers back onto the
    * host in their place. Stale nodes come from a clone or serialisation of a
    * rendered host, or are what is left of this host's own chrome after its markers
-   * were removed.
+   * were removed. Chrome elements a morph recycled as consumer content are replaced
+   * with plain copies so Lit's listeners do not come along.
    */
   private _purgeStale(): void {
     const host = this._host;
@@ -327,48 +550,90 @@ export class ProjectionController implements ReactiveController {
       // A Lit text/comment node whose data a morph has not rewritten.
       return this._litText.get(n) === (n as CharacterData).data;
     });
-    if (!stale.length) return;
     for (const node of stale) {
       for (const container of this._staleContainers(node)) {
-        for (const child of Array.from(container.childNodes)) {
-          Node.prototype.insertBefore.call(host, child, node);
-        }
+        for (const child of Array.from(container.childNodes)) moveNode(host, child, node);
       }
     }
     for (const node of stale) {
       if (node.parentNode === host) Node.prototype.removeChild.call(host, node);
+    }
+    this._replaceRecycledChrome();
+  }
+
+  /**
+   * After a morph, an element this host rendered may survive as consumer content
+   * (the morph matched it to a server node by tag and rewrote its attributes and
+   * children in place). It still carries Lit's event listeners, so swap it for a
+   * shallow copy that keeps its current attributes and children.
+   */
+  private _replaceRecycledChrome(): void {
+    const host = this._host;
+    const recycled = Array.from(host.querySelectorAll('*')).filter(
+      el => this._chromeAll.has(el) || this._containers.has(el)
+    );
+    for (const el of recycled) {
+      const parent = el.parentNode;
+      if (!parent) continue;
+      const copy = el.cloneNode(false) as Element;
+      copy.removeAttribute(CHROME_ATTR);
+      copy.removeAttribute(CONTAINER_ATTR);
+      Node.prototype.insertBefore.call(parent, copy, el);
+      for (const child of Array.from(el.childNodes)) moveNode(copy, child, null);
+      Node.prototype.removeChild.call(parent, el);
     }
   }
 
   /** Region containers inside a stale chrome node that belong to this host, outermost first. */
   private _staleContainers(node: Node): Element[] {
     if (!isElement(node)) return [];
-    const found = [node, ...Array.from(node.querySelectorAll(`[${CONTAINER_ATTR}]`))].filter(
-      el => el.hasAttribute(CONTAINER_ATTR)
-    );
+    const isContainer = (el: Element) => el.hasAttribute(CONTAINER_ATTR) || this._containers.has(el);
+    const found = [node, ...Array.from(node.querySelectorAll('*'))].filter(isContainer);
     return found.filter(el => {
       // Skip containers that belong to another component nested in the chrome, and
       // containers nested inside one already being lifted.
       for (let p = el.parentElement; p && p !== node.parentNode; p = p.parentElement) {
-        if (p !== el && (p.hasAttribute(CONTAINER_ATTR) || p.localName.includes('-'))) return false;
+        if (p !== el && (isContainer(p) || p.localName.includes('-'))) return false;
       }
       return true;
     });
   }
 
-  /** Tags Lit's top-level nodes so stale chrome can be recognised later. */
+  /** Records Lit's nodes by identity (and tags top-level ones) so stale chrome can be recognised later. */
   private _markChrome(): void {
+    for (const region of this._regions) {
+      if (typeof region.target !== 'function') continue;
+      const container = region.target();
+      if (!container) continue;
+      if (!container.hasAttribute(CONTAINER_ATTR)) container.setAttribute(CONTAINER_ATTR, region.name);
+      this._containers.add(container);
+    }
+    const top: Element[] = [];
     for (let n = this._start?.nextSibling; n && n !== this._end; n = n.nextSibling) {
       if (isElement(n)) {
         if (!n.hasAttribute(CHROME_ATTR)) n.setAttribute(CHROME_ATTR, '');
+        top.push(n);
+        this._trackChrome(n);
       } else {
         this._litText.set(n, (n as CharacterData).data);
       }
     }
+    this._chromeTop = top;
+  }
+
+  private _trackChrome(el: Element): void {
+    this._chromeAll.add(el);
+    // Container contents are consumer nodes; custom elements own their own children.
+    if (this._containers.has(el) || (el !== this._host && el.localName.includes('-'))) return;
+    for (let c = el.firstElementChild; c; c = c.nextElementSibling) this._trackChrome(c);
   }
 
   private _onMutation(): void {
-    if (this._start && !this._intact()) {
+    if (this._parked) {
+      this._restore();
+      return;
+    }
+    if (this._needsInit()) {
       this._init(true);
       this._observer?.takeRecords();
       this._host.requestUpdate();
@@ -391,20 +656,21 @@ export class ProjectionController implements ReactiveController {
     const validRef = ref && ref !== node && this._placed.get(ref) === region ? ref : null;
     if (region.target === 'before') {
       const before = validRef && validRef.parentNode === host && !this._isAfterEnd(validRef) ? validRef : this._start;
-      Node.prototype.insertBefore.call(host, node, before);
+      moveNode(host, node, before);
     } else if (region.target === 'after') {
       if (node.parentNode === host && this._isAfterEnd(node)) {
         // Already after the chrome, where the consumer put it.
       } else if (validRef && validRef.parentNode === host && this._isAfterEnd(validRef)) {
-        Node.prototype.insertBefore.call(host, node, validRef);
+        moveNode(host, node, validRef);
       } else {
-        Node.prototype.insertBefore.call(host, node, null);
+        moveNode(host, node, null);
       }
     } else {
       const container = region.target();
       if (!container) return false;
       if (!container.hasAttribute(CONTAINER_ATTR)) container.setAttribute(CONTAINER_ATTR, region.name);
-      container.insertBefore(node, validRef && validRef.parentNode === container ? validRef : null);
+      this._containers.add(container);
+      moveNode(container, node, validRef && validRef.parentNode === container ? validRef : null);
       this._observeContainer(container);
     }
     this._placed.set(node, region);
@@ -483,7 +749,9 @@ export class ProjectionController implements ReactiveController {
           this._placed.set(node, beforeRegion);
           continue;
         }
-        const region = this._route(node, nodeZone);
+        // A node that was projected before (moved back onto the host by the consumer,
+        // or lifted out by unproject()) returns to its region; others are routed.
+        const region = this._placed.get(node) ?? this._route(node, nodeZone);
         if (!region) continue;
         const ref = nodeZone === 'before' ? firstOf.get(region) ?? null : this._nextInRegion(node, region);
         this._place(node, region, ref);
@@ -495,6 +763,7 @@ export class ProjectionController implements ReactiveController {
         const container = region.target();
         if (container) {
           if (!container.hasAttribute(CONTAINER_ATTR)) container.setAttribute(CONTAINER_ATTR, region.name);
+          this._containers.add(container);
           this._observeContainer(container);
         }
       }
@@ -503,12 +772,31 @@ export class ProjectionController implements ReactiveController {
     // Our own moves queue records; they carry no new information.
     this._observer?.takeRecords();
 
+    this._warnIfRequiredMissing();
+
     if (!this._onChange) return;
     const signature = this._regions.flatMap(r => this._regionNodes(r));
     const changed =
       signature.length !== this._signature.length || signature.some((n, i) => n !== this._signature[i]);
     this._signature = signature;
     if (changed && notify) this._onChange();
+  }
+
+  /** Development builds only (Lit's dev build defines `enabledWarnings`); once per host. */
+  private _warnIfRequiredMissing(): void {
+    if (this._warned) return;
+    const ctor = this._host.constructor as { enabledWarnings?: unknown };
+    if (ctor.enabledWarnings === undefined) return;
+    const hasElement = (r: ProjectionRegion) => this._regionNodes(r).some(isElement);
+    for (const region of this._regions) {
+      if (!region.required || hasElement(region)) continue;
+      if (!this._regions.some(r => r !== region && hasElement(r))) continue;
+      const message = region.required();
+      if (!message) continue;
+      this._warned = true;
+      console.warn(`<${this._host.localName}>: ${message}`, this._host);
+      return;
+    }
   }
 
   /** The next host-level sibling of `node` already placed in `region`, if any. */
@@ -522,14 +810,16 @@ export class ProjectionController implements ReactiveController {
 
 /**
  * @internal A region for a component's trigger element (dropdown-menu, popover,
- * hover-card). An element with `slot="<name>"` is always the trigger, and once one
- * is present no unslotted element becomes the trigger. Without one, the first
- * element the host receives (at connect, or from the parser after an early
- * upgrade) is the trigger, and later an element the consumer puts ahead of the
- * rendered content (where the trigger lives: `prepend`, or a framework inserting
- * next to the old trigger or its placeholder comment) becomes it. Elements added
- * anywhere else go to the component's other regions, so a trigger that a framework
- * re-inserts relative to the panel's items needs `slot="<name>"`.
+ * hover-card). Mark the trigger with `slot="<name>"`; that is the supported way and
+ * the only one that survives frameworks re-keying or swapping the trigger element.
+ * An element with the slot is always the trigger, and once one is present no
+ * unslotted element becomes the trigger. Without one, as a fallback, the first
+ * element the host receives (at connect, or from the parser after an early upgrade)
+ * is the trigger, and later an element the consumer puts ahead of the rendered
+ * content (`prepend`, or a framework inserting next to the old trigger or its
+ * placeholder comment) becomes it. Elements added anywhere else go to the
+ * component's other regions. Development builds warn when projection leaves the
+ * component without a trigger.
  */
 export function triggerRegion(
   name: string,
@@ -538,12 +828,23 @@ export function triggerRegion(
   host: Element
 ): ProjectionRegion {
   const slotted = (n: Node) => isElement(n) && n.getAttribute('slot') === name;
+  // Once the consumer has used the slot, a missing trigger is deliberate (hidden
+  // conditionally), not a routing problem.
+  let usedSlot = false;
   return {
     name,
     target,
+    required: () =>
+      usedSlot
+        ? null
+        : `no ${name} element was projected, so the component cannot be opened. ` +
+          `Mark the ${name} with slot="${name}" (required when a framework re-keys or swaps it).`,
     accepts: (node, { initial, zone }) => {
       if (!isElement(node)) return false;
-      if (slotted(node)) return true;
+      if (slotted(node)) {
+        usedSlot = true;
+        return true;
+      }
       if (node.hasAttribute('slot')) return false;
       const existing = controller().nodes(name);
       if (existing.some(slotted) || host.querySelector(`:scope > [slot="${name}"]`)) return false;

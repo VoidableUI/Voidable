@@ -66,8 +66,55 @@ export class VoidElement extends LitElement {
         else if (n.nodeType === Node.DOCUMENT_FRAGMENT_NODE) flat.push(...Array.from(n.childNodes));
         else flat.push(n);
       }
+      // Validate before touching existing content, as the DOM spec does.
+      for (const n of flat) {
+        if (n.nodeType === Node.DOCUMENT_NODE || n.nodeType === Node.DOCUMENT_TYPE_NODE || n.contains(this)) {
+          throw new DOMException(
+            `Failed to execute 'replaceChildren' on '${this.localName}': the new child cannot be inserted here.`,
+            'HierarchyRequestError'
+          );
+        }
+      }
       if (projection.replaceContent(flat)) return;
     }
     super.replaceChildren(...nodes);
+  }
+
+  /**
+   * Supported pre-morph hook for server-driven DOM morphing (Turbo / idiomorph,
+   * Livewire, LiveView / morphdom). Call it on a component right before a morph
+   * compares the element's children, e.g. from `turbo:before-morph-element`,
+   * Livewire's `morph.updating` or LiveView's `dom.onBeforeElUpdated`.
+   *
+   * It moves the consumer's children out of the rendered wrappers back onto the
+   * element, in their original order, and takes every rendered node out of the
+   * element, so the element looks like its server markup and the morph diffs like
+   * with like: consumer nodes keep their identity and no chrome is ever recycled.
+   * The rendered nodes are parked, not destroyed, and put back on re-projection, so
+   * the native select, tab list and inputs keep their identity and state.
+   * Properties are untouched. Where `Element.moveBefore` exists, all moves keep
+   * focus and text selection without blur/focus events (the parked chrome waits in
+   * a hidden `<void-projection-park>` element under `<html>`, outside any morph
+   * target); elsewhere focus is restored after the move.
+   *
+   * The element re-projects on its own in a microtask, so the morph must run
+   * synchronously after this call (Turbo, idiomorph, morphdom and Livewire all
+   * do); otherwise call {@link voidReproject} once the morph has finished.
+   *
+   * Returns true if the element was unprojected, false if it does not project
+   * children, has nothing rendered yet, or is already unprojected (safe to call on
+   * any element, any number of times).
+   */
+  voidUnproject(): boolean {
+    return this[PROJECTION_KEY]?.unproject() ?? false;
+  }
+
+  /**
+   * Re-projects after {@link voidUnproject} without waiting for the scheduled
+   * update. Resolves once the element has rendered. A no-op for elements that are
+   * not unprojected.
+   */
+  voidReproject(): Promise<boolean> {
+    return this[PROJECTION_KEY]?.reproject() ?? this.updateComplete;
   }
 }
