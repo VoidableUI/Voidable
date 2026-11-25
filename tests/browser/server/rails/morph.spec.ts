@@ -5,6 +5,7 @@
 // @voidable/ui and @voidable/ui-hotwire packages. Every test gets a new
 // browser context and so a new Rails session with the default lab state.
 import { test as base, expect, type Page } from '@playwright/test';
+import { typeFast, withoutMoveBefore } from '../shared';
 
 const test = base.extend<{ errors: string[] }>({
   errors: [
@@ -247,3 +248,36 @@ test('the dropdown menu opens and is operable after morphs', async ({ page }) =>
   await page.keyboard.press('Escape');
   await expect(page.getByRole('menuitem', { name: 'Rename' })).toBeHidden();
 });
+
+// Page-refresh morphs (as a broadcast refresh sends them), the next one as
+// soon as the last has morphed, while someone types 60 keys at 30 ms each.
+const TEXT = 'the quick brown fox jumps over the lazy dog, again and again!'.slice(0, 60);
+const FIELDS: [string, string, string][] = [
+  ['input', '#lab-notes input', TEXT],
+  ['email input', '#lab-email input', 'ada.lovelace.and.charles.babbage@analytical-engine.example.uk'.slice(0, 60)],
+  ['textarea', '#lab-bio textarea', TEXT],
+  ['number-input', '#lab-seats input', '1234567890'.repeat(6)],
+  ['combobox', '#lab-fw input', TEXT],
+];
+for (const moveBefore of [true, false]) {
+  test.describe(`typing fast while refresh morphs arrive${moveBefore ? '' : ', without Element.moveBefore'}`, () => {
+    if (!moveBefore) test.beforeEach(async ({ page }) => { await withoutMoveBefore(page); await open(page); });
+    for (const [name, selector, text] of FIELDS) {
+      test(`${name}: 60 keys at 30 ms keep every character and focus never leaves`, async ({ page }) => {
+        await page.evaluate(() => {
+          const w = window as any;
+          w.__morphs = 0;
+          w.__refreshing = true;
+          const next = () => w.__refreshing && w.Turbo.session.refresh(location.href);
+          document.addEventListener('turbo:morph', () => { w.__morphs++; next(); });
+          next();
+        });
+        const { initial, value, away } = await typeFast(page, selector, text);
+        const morphs = await page.evaluate(() => { (window as any).__refreshing = false; return (window as any).__morphs; });
+        expect(morphs, 'refresh morphs while typing').toBeGreaterThan(5);
+        expect(value).toBe(initial + text);
+        expect(away, 'keystrokes after which focus was elsewhere').toBe(0);
+      });
+    }
+  });
+}

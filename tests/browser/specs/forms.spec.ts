@@ -3,7 +3,7 @@
 // Form association in a real browser: every value-bearing control, inside
 // and outside a <fieldset>, filled by real pointer and keyboard input, and
 // the exact FormData the browser builds on submit.
-import { test, expect, expectedFailure, load, settle, type Page } from '../helpers/test';
+import { test, expect, load, settle, type Page } from '../helpers/test';
 
 type Entries = [string, string][];
 // Only the data: a custom element cannot be a form's submitter, so e.submitter is null for void-button.
@@ -175,7 +175,6 @@ test.describe('form with every value-bearing control', () => {
   });
 
   test('nothing in a disabled fieldset can be reached with Tab', async ({ page }) => {
-    expectedFailure('untracked:fieldset-disabled-focusable', 'toggle-group, editable and file-upload stay in the tab order inside a disabled fieldset');
     await page.evaluate(() => ((document.getElementById('fs') as HTMLFieldSetElement).disabled = true));
     await settle(page);
     await page.locator('#i-search input').focus();
@@ -300,18 +299,24 @@ test.describe('required controls block submission until filled', () => {
   });
 
   // Controls that always hold a value (slider, colour, segmented, editable, calendar) cannot be empty.
-  const REQUIRED = CONTROLS.filter((c) => !['void-slider', 'void-color-picker', 'void-segmented-control', 'void-editable', 'void-calendar'].includes(c.tag)).map((c) =>
-    // A select without a placeholder selects its first option, which is valid, as a native select does.
-    c.tag === 'void-select' ? { ...c, html: c.html.replace('<void-select name="f"', '<void-select name="f" placeholder="Pick"') } : c,
-  );
+  const REQUIRED = [
+    ...CONTROLS.filter((c) => !['void-slider', 'void-color-picker', 'void-segmented-control', 'void-editable', 'void-calendar'].includes(c.tag)).map((c) =>
+      // A select without a placeholder selects its first option, which is valid, as a native select does.
+      c.tag === 'void-select' ? { ...c, html: c.html.replace('<void-select name="f"', '<void-select name="f" placeholder="Pick"') }
+        // A number-input without a value is empty.
+        : c.tag === 'void-number-input' ? { ...c, html: '<void-number-input name="f"></void-number-input>' }
+          : c,
+    ),
+    {
+      tag: 'void-file-upload',
+      html: '<void-file-upload name="f"></void-file-upload>',
+      set: 'const dt = new DataTransfer(); dt.items.add(new File(["abc"], "a.txt", { type: "text/plain" })); const i = el.querySelector("input[type=file]"); i.files = dt.files; i.dispatchEvent(new Event("change", { bubbles: true }))',
+      expect: [],
+    },
+  ];
 
   for (const c of REQUIRED) {
     test(`${c.tag}`, async ({ page, pageErrors }) => {
-      if (c.tag === 'void-number-input') expectedFailure('untracked:number-input-required', 'an empty required number-input is valid and its submit button does nothing');
-      if (c.tag === 'void-file-upload') expectedFailure('untracked:required-not-focusable', 'an invalid file-upload does not receive focus on a blocked submit');
-      if (['void-pin-input', 'void-tags-input', 'void-toggle-group', 'void-combobox', 'void-multiselect', 'void-date-picker'].includes(c.tag)) {
-        expectedFailure('untracked:required-not-focusable', `Firefox reports "The invalid form control is not focusable" for ${c.tag}: the host has no validation anchor, so no message is shown`, { browsers: ['firefox'] });
-      }
       const r = await page.evaluate(
         async ({ html, set }) => {
           const form = document.createElement('form');

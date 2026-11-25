@@ -20,7 +20,7 @@ export const apps = {
     cwd: join(repo, 'packages/hotwire/demo'),
     /** mise tools whose bin directories go first on PATH (mise.toml pins their versions). */
     tools: ['ruby'],
-    port: 4520,
+    port: Number(process.env.VOID_RAILS_PORT || 4520),
     readyPath: '/up',
     env: { VOIDABLE_LOCAL: '1', RAILS_ENV: 'development', RAILS_LOG_LEVEL: 'warn' },
     /** Where the built ESM bundles go, served by the app as /voidable-local/*. */
@@ -28,6 +28,7 @@ export const apps = {
     assets: {
       'ui.js': { esm: `export * from '@voidable/ui';` },
       'ui-hotwire.js': { esm: `export * from '@voidable/ui-hotwire';` },
+      'ui-dev.js': { esm: `export * from '@voidable/ui/dev';` },
       'theme.css': { css: '@voidable/theme' },
     },
     prepare: [
@@ -41,7 +42,7 @@ export const apps = {
     /** The LiveView demo, with the live_voidable Hex package from this repository and the built adapter (config/config.exs). */
     cwd: join(repo, 'packages/liveview/demo'),
     tools: ['erlang', 'elixir'],
-    port: 4530,
+    port: Number(process.env.VOID_PHOENIX_PORT || 4530),
     readyPath: '/lab',
     env: { VOIDABLE_LOCAL: '1', MIX_ENV: 'dev', HEX_HTTP_CONCURRENCY: '4' },
     /** The root layout loads these two; app.js and app.css come from `mix assets.build`. */
@@ -64,7 +65,7 @@ export const apps = {
     /** The Laravel example (Livewire 4 and the voidable/laravel package from this repository), assets built by its own Vite config from the packages' builds. */
     cwd: join(repo, 'examples/laravel'),
     tools: ['php'],
-    port: 4540,
+    port: Number(process.env.VOID_LARAVEL_PORT || 4540),
     readyPath: '/lab',
     env: { PHP_CLI_SERVER_WORKERS: '4' },
     prepare: [
@@ -77,7 +78,7 @@ export const apps = {
             'APP_ENV=local',
             'APP_KEY=',
             'APP_DEBUG=true',
-            'APP_URL=http://127.0.0.1:4540',
+            `APP_URL=http://127.0.0.1:${process.env.VOID_LARAVEL_PORT || 4540}`,
             'LOG_LEVEL=warning',
             'DB_CONNECTION=sqlite',
             'SESSION_DRIVER=file',
