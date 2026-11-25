@@ -3,6 +3,9 @@ import { ok } from '../lib/expect.mjs';
 
 const MEMBERS = ['Ada Lovelace', 'Grace Hopper', 'Alan Turing', 'Katherine Johnson', 'Linus Torvalds'];
 
+// The role="dialog" element of void-dialog and void-drawer is the native <dialog> in the host's shadow root; the author's parts are slotted into it, not its DOM descendants, so the content is scoped by the open host (evals/CONTRACT.md).
+const PANEL = (t) => t.page.locator('void-dialog[open], void-drawer[open], dialog[open], [role="dialog"]');
+
 export default {
   id: 'confirm-remove-react',
   title: 'Confirm before a destructive action',
@@ -22,8 +25,8 @@ export default {
       title: 'Cancel closes the modal and keeps the member',
       run: async (t) => {
         await t.click('button', /^remove grace hopper$/i);
-        const d = await t.visible(t.role('dialog', { name: /remove grace hopper/i }), 'dialog "Remove Grace Hopper from the team?"');
-        await d.getByRole('button', { name: /^cancel$/i }).click();
+        await t.visible(t.role('dialog', { name: /remove grace hopper/i }), 'dialog "Remove Grace Hopper from the team?"');
+        await PANEL(t).getByRole('button', { name: /^cancel$/i }).first().click();
         await t.settle();
         await t.hidden(t.role('dialog', { name: /remove grace hopper/i }), 'dialog after Cancel');
         await t.visible(t.role('button', { name: /^remove grace hopper$/i }), 'Grace Hopper still listed');
@@ -34,8 +37,8 @@ export default {
       title: 'confirming removes the member and shows the notice',
       run: async (t) => {
         await t.click('button', /^remove grace hopper$/i);
-        const d = await t.visible(t.role('dialog', { name: /remove grace hopper/i }), 'dialog');
-        await d.getByRole('button', { name: /^remove$/i }).click();
+        await t.visible(t.role('dialog', { name: /remove grace hopper/i }), 'dialog');
+        await PANEL(t).getByRole('button', { name: /^remove$/i }).first().click();
         await t.settle();
         await t.hidden(t.role('dialog', { name: /remove grace hopper/i }), 'dialog after confirming');
         await t.visible(t.text(/grace hopper was removed/i), 'notice "Grace Hopper was removed"');

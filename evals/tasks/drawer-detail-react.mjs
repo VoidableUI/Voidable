@@ -7,6 +7,9 @@ const ORDERS = [
   { id: 1044, customer: 'Ada Lovelace', total: '$310.00', status: 'Pending', items: ['Monitor arm', 'Webcam', 'Headset'] },
 ];
 
+// The role="dialog" element of void-dialog and void-drawer is the native <dialog> in the host's shadow root; the author's parts are slotted into it, not its DOM descendants, so the content is scoped by the open host (evals/CONTRACT.md).
+const PANEL = (t) => t.page.locator('void-dialog[open], void-drawer[open], dialog[open], [role="dialog"]');
+
 export default {
   id: 'drawer-detail-react',
   title: 'Master-detail drawer',
@@ -21,8 +24,8 @@ const orders = ${JSON.stringify(ORDERS)};`,
       title: 'clicking Order #1042 opens a dialog with its details',
       run: async (t) => {
         await t.click('button', /order #1042/i);
-        const d = await t.visible(t.role('dialog', { name: /order #1042/i }), 'dialog "Order #1042"');
-        for (const s of ['Grace Hopper', '$129.00', 'Mechanical keyboard', 'USB-C cable']) await t.visible(d.getByText(s), `"${s}" in the panel`);
+        await t.visible(t.role('dialog', { name: /order #1042/i }), 'dialog "Order #1042"');
+        for (const s of ['Grace Hopper', '$129.00', 'Mechanical keyboard', 'USB-C cable']) await t.visible(PANEL(t).getByText(s), `"${s}" in the panel`);
       },
     },
     {
@@ -44,9 +47,9 @@ const orders = ${JSON.stringify(ORDERS)};`,
       run: async (t) => {
         await t.click('button', /order #1044/i);
         const d = await t.visible(t.role('dialog', { name: /order #1044/i }), 'dialog "Order #1044"');
-        await t.visible(d.getByText('Ada Lovelace'), 'customer of #1044');
-        ok(!(await d.getByText('Grace Hopper').isVisible().catch(() => false)), 'the panel still shows #1042');
-        await d.getByRole('button', { name: /close/i }).first().click();
+        await t.visible(PANEL(t).getByText('Ada Lovelace'), 'customer of #1044');
+        ok(!(await PANEL(t).getByText('Grace Hopper').first().isVisible().catch(() => false)), 'the panel still shows #1042');
+        await PANEL(t).getByRole('button', { name: /close/i }).first().click();
         await t.settle();
         await t.hidden(d, 'dialog after its close button');
       },
