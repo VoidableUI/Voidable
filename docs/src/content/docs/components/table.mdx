@@ -196,10 +196,6 @@ Nothing in `<void-table>` clips by default, so a table that is wider than its co
 
 `stack` and `scrollable` combine: below the breakpoint rows stack; above it a table that is too wide scrolls instead of overflowing the page.
 
-### Menus, popovers and tooltips are not clipped
-
-A table without `scrollable` clips nothing, so a menu opened from its last row is fully visible. A scroll region has to clip, and the overlay components place their panel with `position: absolute` inside their own host, so while one is open (a dropdown menu, popover, hover card, tooltip or date picker whose host is `open` or `visible`) the region grows downward to contain the panel and scrolls it into view sideways. Open the menu on the last row above: it is whole and clickable, and when it closes the region returns to its size. This is the only script in the element that exists because of clipping; it is unnecessary once overlays render in the browser's top layer.
-
 ### Sticky header and first column
 
 `sticky-header` keeps the header row in view, `sticky-column` keeps the first column in view while the table scrolls sideways (a hairline marks its edge once content slides under it). `max-height` makes the region scroll vertically too, which is what the header sticks to; without it the header sticks to the page, below `--void-table-sticky-top`.

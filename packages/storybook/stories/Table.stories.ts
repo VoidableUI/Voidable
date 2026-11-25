@@ -282,7 +282,7 @@ export const Scrollable: Story = {
     docs: {
       description: {
         story:
-          '`scrollable` makes the table a horizontal scroll region. It is focusable and named (by `label`, else the caption, else `aria-label`) only while it really overflows, so arrow keys scroll it, and its edges fade where there is more to see. Open the menu on the last row: while it is open the region makes room for it, so it is neither clipped nor scrolled away.',
+          '`scrollable` makes the table a horizontal scroll region. It is focusable and named (by `label`, else the caption, else `aria-label`) only while it really overflows, so arrow keys scroll it, and its edges fade where there is more to see. Open the menu on the last row: it is drawn above the page, so it is never clipped by the region.',
       },
     },
   },
@@ -290,7 +290,6 @@ export const Scrollable: Story = {
     <div style="width: 560px; max-width: 100%;">
       <void-table scrollable label="People">${wideTable}</void-table>
     </div>
-    <p data-void-type="caption" style="margin-block-start: var(--void-space-4);">This paragraph follows the table, in the space the open menu borrows.</p>
   `,
 };
 
