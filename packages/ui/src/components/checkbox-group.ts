@@ -95,7 +95,7 @@ export class VoidCheckboxGroup extends NativeFormControl(VoidElement) {
       this._syncFormAttr();
     }
     if (changed.has('disabled') || changed.has('ancestorDisabled')) {
-      this.setHostAttribute('aria-disabled', String(this.formDisabled));
+      this.setHostAttribute('aria-disabled', this.formDisabled ? 'true' : null);
     }
     if (changed.has('required')) {
       this._syncRequiredValidity();

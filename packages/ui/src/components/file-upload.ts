@@ -5,6 +5,9 @@ import { InternalsFormControl, type FormSubmission } from '../form-control.js';
 
 /** Drag-and-drop file picker for document uploads, image attachment flows, and import wizards. */
 export class VoidFileUpload extends InternalsFormControl(VoidElement) {
+  /** The host's `aria-label` / `aria-labelledby` name the inner control. */
+  static override labelTarget = '.void-file-upload-dropzone';
+
   /**
    * Comma-separated file types the zone takes, as on a native file input: extensions (`.pdf`), MIME
    * types (`image/png`) or wildcards (`image/*`). Other files are dropped without an error.
@@ -57,9 +60,9 @@ export class VoidFileUpload extends InternalsFormControl(VoidElement) {
       />
       <div
         class="void-file-upload-dropzone"
-        tabindex=${this.disabled ? '-1' : '0'}
+        tabindex=${this.formDisabled ? '-1' : '0'}
         role="button"
-        aria-disabled=${this.disabled ? 'true' : 'false'}
+        aria-disabled=${this.formDisabled ? 'true' : nothing}
         @click=${this._onDropzoneClick}
         @keydown=${this._onDropzoneKeydown}
         @dragover=${this._onDragOver}

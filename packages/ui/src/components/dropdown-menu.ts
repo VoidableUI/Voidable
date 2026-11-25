@@ -102,7 +102,10 @@ export class VoidDropdownMenu extends VoidElement {
     const panel = this.querySelector(':scope > .void-dropdown-menu-panel');
     if (trigger && panel) {
       if (!trigger.id) trigger.id = `${this._panelId}-trigger`;
-      panel.setAttribute('aria-labelledby', trigger.id);
+      if (panel.getAttribute('aria-labelledby') !== trigger.id) panel.setAttribute('aria-labelledby', trigger.id);
+    } else if (panel?.hasAttribute('aria-labelledby')) {
+      // The trigger is gone (its content replaced): name nothing rather than an id that no longer exists.
+      panel.removeAttribute('aria-labelledby');
     }
   }
 
@@ -222,7 +225,7 @@ export class VoidDropdownMenuItem extends VoidElement {
 
   updated(changed: Map<string, unknown>): void {
     if (changed.has('disabled')) {
-      this.setHostAttribute('aria-disabled', String(this.disabled));
+      this.setHostAttribute('aria-disabled', this.disabled ? 'true' : null);
     }
   }
 

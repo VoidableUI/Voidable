@@ -11,6 +11,11 @@ import { NativeFormControl } from '../form-control.js';
  * which `<void-field>` supplies.
  */
 export class VoidTextarea extends NativeFormControl(VoidElement) {
+  /** The host's `aria-label` / `aria-labelledby` name the inner control. */
+  static override labelTarget = 'textarea';
+
+  /** While focus is inside, a morph does not apply the server's value over what the user is typing. */
+  static override editState = ['value'];
   /**
    * The text in the box. As an attribute it is the initial value (and the form's reset target); read or
    * set the `value` property for the current text.

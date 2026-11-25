@@ -85,9 +85,15 @@ export class VoidTooltip extends VoidElement {
     const trigger = this._trigger();
     if (this._described && this._described !== trigger) this._release(this._described);
     this._described = trigger;
-    if (trigger && !this._tokens(trigger).includes(this._tooltipId)) {
-      trigger.setAttribute('aria-describedby', [...this._tokens(trigger), this._tooltipId].join(' '));
-    }
+    if (!trigger) return;
+    const tokens = this._tokens(trigger);
+    // A copy of a described trigger (innerHTML += on the region around it, a
+    // page-cache snapshot) still names the bubble of the tooltip it was copied
+    // from, which no longer exists: drop such tokens, or each copy adds one.
+    const doc = this.ownerDocument;
+    const next = tokens.filter(t => t === this._tooltipId || !t.startsWith('void-tooltip-') || !!doc.getElementById(t));
+    if (!next.includes(this._tooltipId)) next.push(this._tooltipId);
+    if (next.join(' ') !== tokens.join(' ')) trigger.setAttribute('aria-describedby', next.join(' '));
   }
 
   private _tokens(el: Element): string[] {

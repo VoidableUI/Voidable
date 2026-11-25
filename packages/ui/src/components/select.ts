@@ -9,6 +9,9 @@ const PLACEHOLDER_ATTR = 'data-void-placeholder';
 
 /** Native dropdown for small option sets in forms where a simple pick-one is sufficient. */
 export class VoidSelect extends NativeFormControl(VoidElement) {
+  /** The host's `aria-label` / `aria-labelledby` name the inner control. */
+  static override labelTarget = 'select';
+
   /**
    * `value` of the chosen option. As an attribute it picks the initially selected option; read or set
    * the `value` property for the current choice.

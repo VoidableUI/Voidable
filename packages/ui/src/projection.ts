@@ -286,6 +286,64 @@ function captureFocus(node: Node): (() => void) | null {
 }
 
 /**
+ * @internal True when `host` carries serialised chrome of its own among its
+ * direct children: the markers, or a top-level element marked as chrome. That
+ * happens only to a copy of a rendered host (`cloneNode(true)`, an `outerHTML`
+ * round trip) and never to server markup. Reads the direct children only.
+ */
+export function hasSerializedChrome(host: Element): boolean {
+  for (let n = host.firstChild; n; n = n.nextSibling) if (isStaleLooking(n)) return true;
+  return false;
+}
+
+/**
+ * @internal Puts a copy of a rendered host that no controller manages (a
+ * detached clone, which a morpher may hand over as the "incoming" element:
+ * LiveView patches a clone of a locked element and later morphs the live
+ * element to it) back into the shape of its server markup: the contents of its
+ * region containers and per-node wrappers are lifted onto the host in place,
+ * and the markers, everything between them and every element marked as chrome
+ * are removed. Containers of nested components are left to those components.
+ * Returns true when `host` is such a copy (now or on an earlier call), false
+ * for an element without serialised chrome, which is left alone.
+ */
+export function stripSerializedChrome(host: Element): boolean {
+  const marked = host as Element & { [COPY_KEY]?: true };
+  if (!hasSerializedChrome(host)) return !!marked[COPY_KEY];
+  marked[COPY_KEY] = true;
+  const kids = Array.from(host.childNodes);
+  const startIdx = kids.findIndex(n => isComment(n) && n.data === START_DATA);
+  const endIdx = kids.findIndex((n, i) => i > startIdx && isComment(n) && n.data === END_DATA);
+  const stale = kids.filter((n, i) =>
+    isStaleLooking(n) || (startIdx >= 0 && endIdx > startIdx && i > startIdx && i < endIdx)
+  );
+  for (const node of stale) {
+    if (!isElement(node)) continue;
+    const isContainer = (el: Element) => el.hasAttribute(CONTAINER_ATTR);
+    const found = [node, ...Array.from(node.querySelectorAll(`[${CONTAINER_ATTR}]`))].filter(isContainer);
+    for (const container of found) {
+      // Containers of a component nested in the chrome, or inside one already lifted, stay.
+      let own = true;
+      for (let p = container.parentElement; p && p !== host; p = p.parentElement) {
+        if (p !== container && (isContainer(p) || p.localName.includes('-'))) own = false;
+      }
+      if (!own) continue;
+      for (const child of Array.from(container.childNodes)) {
+        const wrapped = isElement(child) && child.hasAttribute(WRAP_ATTR);
+        for (const n of wrapped ? Array.from(child.childNodes) : [child]) {
+          if (!isWrapEnd(n)) Node.prototype.insertBefore.call(host, n, node);
+        }
+      }
+    }
+  }
+  for (const node of stale) if (node.parentNode === host) Node.prototype.removeChild.call(host, node);
+  return true;
+}
+
+/** Set on an element stripSerializedChrome() found to be a copy of a rendered host. */
+const COPY_KEY = Symbol.for('@voidable/ui:serialized-copy');
+
+/**
  * @internal Experimental: the API may change before it is made public.
  *
  * Light-DOM content projection for {@link VoidElement} components.

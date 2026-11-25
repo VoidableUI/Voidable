@@ -245,10 +245,33 @@ describe('VoidBarChart', () => {
       expect(texts(el, '.void-bar-chart-y-axis')[0]).toBe('0');
     });
 
-    it('never gives a bar a negative height, even for negative values', async () => {
+    it('draws a negative value as a bar below a zero baseline', async () => {
       const el = await mount<VoidBarChart>(TAG, { data: { series: [{ name: 'A', values: [-5, 3] }] } });
+      await new Promise((r) => setTimeout(r, 50));
       for (const r of bars(el)) expect(num(r, 'height')).toBeGreaterThanOrEqual(0);
       expect(el.innerHTML).not.toContain('NaN');
+      const base = el.querySelector('.void-bar-chart-baseline')!;
+      expect(base).not.toBeNull();
+      const zeroY = Number(base.getAttribute('y1'));
+      const [neg, pos] = bars(el);
+      // The negative bar starts at zero and goes down; the positive one ends at zero.
+      expect(num(neg!, 'y')).toBeCloseTo(zeroY, 5);
+      expect(num(neg!, 'height')).toBeGreaterThan(0);
+      expect(num(pos!, 'y') + num(pos!, 'height')).toBeCloseTo(zeroY, 5);
+      // The axis reaches below zero.
+      expect(texts(el, '.void-bar-chart-y-axis').some((t) => t.startsWith('-'))).toBe(true);
+    });
+
+    it('an all-negative chart hangs every bar from zero at the top', async () => {
+      const el = await mount<VoidBarChart>(TAG, { data: { series: [{ name: 'A', values: [-2, -8] }] } });
+      const zeroY = Number(el.querySelector('.void-bar-chart-baseline')!.getAttribute('y1'));
+      expect(zeroY).toBeCloseTo(16, 5);
+      for (const r of bars(el)) expect(num(r, 'y')).toBeCloseTo(zeroY, 5);
+    });
+
+    it('draws no baseline when nothing is negative', async () => {
+      const el = await mount<VoidBarChart>(TAG, { data: { series: [{ name: 'A', values: [1, 2] }] } });
+      expect(el.querySelector('.void-bar-chart-baseline')).toBeNull();
     });
 
     it('centres a single bar in the plot area', async () => {

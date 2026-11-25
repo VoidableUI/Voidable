@@ -2,7 +2,7 @@ import { html } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
 import { edgeEnabled, stepEnabled } from '../keyboard.js';
-import { ProjectionController } from '../projection.js';
+import { ProjectionController, stripSerializedChrome } from '../projection.js';
 
 // Counter for generated ids; unique across every tabs instance on the page.
 let nextTabId = 0;
@@ -64,8 +64,15 @@ if (!customElements.get('void-tab-panel')) {
  * selected, is the single tab stop; the visible panel is a tab stop too). Keyboard: ArrowRight and ArrowLeft
  * move focus to the next and previous tab (wrapping, skipping disabled tabs), Home and End to the first and
  * last, Enter or Space select the focused tab; with `activation="auto"` moving focus selects the tab.
+ *
+ * Clicking a tab is a click on its panel: the click on the tab button stops there and the same click
+ * is dispatched on the `void-tab-panel`, so a click binding written on a panel (`phx-click`,
+ * `wire:click`, `@click`) runs when its tab is clicked.
  */
 export class VoidTabs extends VoidElement {
+  /** The host's `aria-label` / `aria-labelledby` name the inner control. */
+  static override labelTarget = ':scope > .void-tabs-list';
+
   /**
    * The `tab` key of the selected panel. As an attribute it is the initial tab; selecting a tab updates
    * it and fires `void-change`.
@@ -189,7 +196,7 @@ export class VoidTabs extends VoidElement {
             ?active=${panel.tab === this.value}
             ?disabled=${panel.disabled}
             tabindex=${index === stop ? '0' : '-1'}
-            @click=${() => this._onTabClick(panel)}
+            @click=${(e: MouseEvent) => this._onTabButtonClick(e, panel)}
             @keydown=${(e: KeyboardEvent) => this._onTabKeydown(e, index)}
           >${panel.label || panel.tab}</button>
         `)}
@@ -208,6 +215,8 @@ export class VoidTabs extends VoidElement {
    */
   override voidBeforeMorph(incoming?: Element | null): boolean {
     if (incoming) {
+      // A copy of a rendered tabs element holds its panels inside copied chrome.
+      if (incoming !== this) stripSerializedChrome(incoming);
       const sent = new Set(Array.from(incoming.querySelectorAll(':scope > void-tab-panel[id]'), p => p.id));
       const ids = new Map<string | null, string>();
       // LiveView sends an unchanged panel as an empty placeholder (data-phx-skip)
@@ -234,6 +243,30 @@ export class VoidTabs extends VoidElement {
       }
     }
     return super.voidBeforeMorph(incoming);
+  }
+
+  /**
+   * A click on a tab selects it and is also a click on its panel, the element
+   * the author wrote: a click binding on a `void-tab-panel` (`phx-click`,
+   * `wire:click`, `@click`, a Stimulus action) runs when its tab is clicked.
+   * The panel's click is dispatched after the tab's, as a separate event.
+   */
+  private _onTabButtonClick(e: MouseEvent, panel: VoidTabPanel): void {
+    this._onTabClick(panel);
+    e.stopPropagation();
+    panel.dispatchEvent(new MouseEvent('click', {
+      bubbles: true,
+      cancelable: true,
+      composed: true,
+      detail: e.detail,
+      clientX: e.clientX,
+      clientY: e.clientY,
+      button: e.button,
+      altKey: e.altKey,
+      ctrlKey: e.ctrlKey,
+      metaKey: e.metaKey,
+      shiftKey: e.shiftKey,
+    }));
   }
 
   private _onTabClick(panel: VoidTabPanel): void {

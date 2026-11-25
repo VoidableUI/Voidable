@@ -29,6 +29,9 @@ import { VoidOption } from './multiselect.js';
  * @fires {CustomEvent<{ reason: 'escape' | 'outside' | 'blur' | 'select' | 'parent' | 'api' }>} void-close - The option list is closing.
  */
 export class VoidCombobox extends InternalsFormControl(VoidElement) {
+  /** The host's `aria-label` / `aria-labelledby` name the inner control. */
+  static override labelTarget = 'input[role=combobox]';
+
   /**
    * `value` of the chosen `void-option`. As an attribute it is the initial choice; read the `value`
    * property for the current one.

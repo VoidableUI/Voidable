@@ -60,7 +60,7 @@ export class VoidRadio extends NativeFormControl(VoidElement) {
     }
     if (changed.has('disabled') || changed.has('ancestorDisabled')) {
       const disabled = this.formDisabled;
-      this.setHostAttribute('aria-disabled', String(disabled));
+      this.setHostAttribute('aria-disabled', disabled ? 'true' : null);
       this.setHostAttribute('tabindex', disabled ? '-1' : '0');
     }
   }

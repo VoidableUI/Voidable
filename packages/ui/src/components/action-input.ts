@@ -7,6 +7,11 @@ import { NativeFormControl } from '../form-control.js';
 
 /** Input field with an attached icon button — used for copy-to-clipboard inputs, search boxes, and similar patterns. */
 export class VoidActionInput extends NativeFormControl(VoidElement) {
+  /** The host's `aria-label` / `aria-labelledby` name the inner control. */
+  static override labelTarget = '.void-action-input-field';
+
+  /** While focus is inside, a morph does not apply the server's value over what the user is typing. */
+  static override editState = ['value'];
   /**
    * The text in the field. As an attribute it is the initial value; read or set the `value` property for
    * the current text.
@@ -158,7 +163,7 @@ export class VoidActionInput extends NativeFormControl(VoidElement) {
         enterkeyhint=${this.enterKeyHint || nothing}
         autocapitalize=${this.autocapitalize || nothing}
         spellcheck=${forwardedSpellcheck(this) ?? nothing}
-        aria-label=${this.getAttribute('aria-label') || this.placeholder || nothing}
+        aria-label=${this.placeholder || nothing}
         @input=${this._onInput}
         @change=${this._onChange}
       />

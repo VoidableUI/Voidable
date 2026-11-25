@@ -84,12 +84,20 @@ export function arcPath(
   endAngle: number,
   innerR = 0,
 ): string {
-  // A sweep of a full turn makes the arc's endpoints coincide, which SVG
-  // omits entirely. Stop just short so a single 100% segment still draws.
-  if (Math.abs(endAngle - startAngle) >= 2 * Math.PI) {
-    endAngle = startAngle + Math.sign(endAngle - startAngle) * (2 * Math.PI - 0.001);
-  }
   const rd = (n: number) => String(Number(n.toFixed(2)));
+  // A full turn: an arc whose endpoints coincide draws nothing, and stopping
+  // just short leaves a hairline seam (and, in an outlined ring, a radial
+  // edge). Draw closed circles instead, two half arcs each; the inner one runs
+  // the other way, so the nonzero fill leaves the hole empty.
+  if (Math.abs(endAngle - startAngle) >= 2 * Math.PI - 1e-9) {
+    const circle = (r: number, sweep: 0 | 1) => {
+      const R = rd(r);
+      const top = (cy - r).toFixed(2);
+      const bottom = (cy + r).toFixed(2);
+      return `M ${cx.toFixed(2)} ${top} A ${R} ${R} 0 1 ${sweep} ${cx.toFixed(2)} ${bottom} A ${R} ${R} 0 1 ${sweep} ${cx.toFixed(2)} ${top} Z`;
+    };
+    return innerR > 0 ? `${circle(outerR, 1)} ${circle(innerR, 0)}` : circle(outerR, 1);
+  }
   const oR = rd(outerR);
   const x0 = cx + outerR * Math.cos(startAngle);
   const y0 = cy + outerR * Math.sin(startAngle);

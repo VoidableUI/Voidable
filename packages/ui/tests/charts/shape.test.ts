@@ -217,10 +217,21 @@ describe('arcPath', () => {
     expect(cmds[0]!.nums).toEqual(cmds[1]!.nums.slice(5));
   });
 
-  it('renders a full-circle sweep as a visible arc (start != end)', () => {
-    const cmds = commands(arcPath(cx, cy, R, -Math.PI / 2, -Math.PI / 2 + 2 * Math.PI, 30));
-    const start = cmds[0]!.nums;
-    const end = cmds[1]!.nums.slice(5);
-    expect(`${start[0]},${start[1]}`).not.toBe(`${end[0]},${end[1]}`);
+  it('renders a full-circle sweep as closed outer and inner circles, with no seam and no radial edge', () => {
+    const d = arcPath(cx, cy, R, -Math.PI / 2, -Math.PI / 2 + 2 * Math.PI, 30);
+    const cmds = commands(d);
+    expect(cmds.map((c) => c.cmd).join('')).toBe('MAAZMAAZ');
+    // Each circle ends where it started.
+    expect(cmds[2]!.nums.slice(5)).toEqual(cmds[0]!.nums);
+    expect(cmds[6]!.nums.slice(5)).toEqual(cmds[4]!.nums);
+    // The outer circle is the radius R, the inner 30, and the inner one runs the other way.
+    expect(Math.abs(cmds[1]!.nums[6]! - cmds[0]!.nums[1]!)).toBeCloseTo(2 * R, 1);
+    expect(Math.abs(cmds[5]!.nums[6]! - cmds[4]!.nums[1]!)).toBeCloseTo(60, 1);
+    expect(cmds[1]!.nums[4]).toBe(1);
+    expect(cmds[5]!.nums[4]).toBe(0);
+  });
+
+  it('a full pie is one closed circle', () => {
+    expect(commands(arcPath(cx, cy, R, 0, 2 * Math.PI)).map((c) => c.cmd).join('')).toBe('MAAZ');
   });
 });

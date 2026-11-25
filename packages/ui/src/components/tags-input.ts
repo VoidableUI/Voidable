@@ -7,6 +7,9 @@ export type TagValue = string | { text: string; color?: string };
 
 /** Multi-tag input field for email recipients, category labels, keyword tagging, and comma-separated value entry. */
 export class VoidTagsInput extends InternalsFormControl(VoidElement) {
+  /** The host's `aria-label` / `aria-labelledby` name the inner control. */
+  static override labelTarget = '.void-tags-input-field';
+
   /**
    * The tags, as an array of strings or `{ text, color }` objects. Set it as a property from script, or
    * as a JSON array in the attribute.

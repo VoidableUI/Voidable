@@ -14,6 +14,11 @@ import { isFocusParked } from '../projection.js';
  * the previous value. Use `both` (default) or `blur` to commit on blur.
  */
 export class VoidEditable extends InternalsFormControl(VoidElement) {
+  /** The host's `aria-label` / `aria-labelledby` name the inner control. */
+  static override labelTarget = '.void-editable-preview, .void-editable-input';
+
+  /** While focus is inside, a morph does not apply the server's value over what the user is typing. */
+  static override editState = ['value'];
   /**
    * The committed text. As an attribute it is the initial value and the form's reset target. Text still
    * being edited is not part of it until committed.
@@ -59,7 +64,8 @@ export class VoidEditable extends InternalsFormControl(VoidElement) {
     return html`
       <span
         class="void-editable-preview"
-        tabindex=${this.disabled ? nothing : '0'}
+        role="button"
+        tabindex=${this.formDisabled ? nothing : '0'}
         @keydown=${this._handlePreviewKeydown}
       >${this.value || html`<span class="void-editable-placeholder">${this.placeholder}</span>`}</span>
       <input

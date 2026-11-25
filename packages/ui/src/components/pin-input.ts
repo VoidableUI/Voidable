@@ -6,6 +6,8 @@ import { InternalsFormControl } from '../form-control.js';
 
 /** Single-character input cells for OTP verification codes, PIN entry, and multi-digit confirmation fields. */
 export class VoidPinInput extends InternalsFormControl(VoidElement) {
+  /** While focus is inside, a morph does not apply the server's value over what the user is typing. */
+  static override editState = ['value'];
   /** Number of cells, so the number of characters in the code. Defaults to 6. */
   @property({ type: Number }) length: number = 6;
   /**

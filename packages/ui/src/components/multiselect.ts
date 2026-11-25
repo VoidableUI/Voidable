@@ -58,6 +58,9 @@ if (!customElements.get('void-option')) {
  * @fires {CustomEvent<{ reason: 'trigger' | 'escape' | 'outside' | 'blur' | 'parent' | 'api' }>} void-close - The option list is closing.
  */
 export class VoidMultiselect extends InternalsFormControl(VoidElement) {
+  /** The host's `aria-label` / `aria-labelledby` name the inner control. */
+  static override labelTarget = '[role=combobox]';
+
   /**
    * Text shown in the trigger while nothing is selected. Defaults to `Select...`. It is also the
    * trigger's accessible name when no `void-field` label names it.

@@ -104,7 +104,7 @@ describe('VoidToggle', () => {
       el.disabled = false;
       await el.updateComplete;
       expect(el.getAttribute('tabindex')).toBe('0');
-      expect(el.getAttribute('aria-disabled')).toBe('false');
+      expect(el.hasAttribute('aria-disabled')).toBe(false);
     });
   });
 

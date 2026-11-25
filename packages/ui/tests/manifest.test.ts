@@ -39,7 +39,7 @@ interface ManifestClass {
 interface Manifest {
   modules: { path: string; declarations?: ManifestClass[] }[];
 }
-type LitClass = typeof ReactiveElement & { elementProperties: Map<PropertyKey, PropertyDeclaration> };
+type LitClass = typeof ReactiveElement & { elementProperties: Map<PropertyKey, PropertyDeclaration>; labelTarget?: string };
 
 /** Lit's attribute name for a reactive property (null when attribute: false). */
 /** Standard HTML attributes whose camelCase DOM property has a one-word attribute. */
@@ -197,7 +197,9 @@ describe('custom-elements.json', () => {
 
     it('has exactly the observed attributes', () => {
       const manifestAttrs = (decl?.attributes ?? []).map((a) => a.name).filter((n) => !supplemented.has(n));
-      expect(manifestAttrs.sort()).toEqual([...(cls.observedAttributes ?? [])].sort());
+      // aria-label / aria-labelledby are observed to move them onto the inner control (labelTarget); they are ARIA, not component API.
+      const observed = [...(cls.observedAttributes ?? [])].filter((n) => !(cls.labelTarget && (n === 'aria-label' || n === 'aria-labelledby')));
+      expect(manifestAttrs.sort()).toEqual(observed.sort());
     });
 
     it('records every reactive property with attribute, reflect flag, type and default', () => {

@@ -546,14 +546,20 @@ declare global {
  * Input-anchored date picker that combines a text field with a VoidCalendar dropdown for form date selection.
  *
  * The calendar opens in a non-modal popup dialog in the top layer, placed under the input with CSS anchor
- * positioning (flipping above near the bottom of the viewport). Opening it from the input moves focus to the
- * selected (or current) day; choosing a day, Escape, or a press outside closes it and focus returns to the input.
+ * positioning (flipping above near the bottom of the viewport). A click on the field opens it and leaves focus
+ * in the field (ArrowDown then moves into the calendar); the calendar button, Enter, Space or ArrowDown on the
+ * field open it with focus on the selected (or current) day. Choosing a day, Escape, or a press outside closes
+ * it and focus returns to the input.
  *
- * @fires {CustomEvent<{ reason: 'trigger' | 'api' }>} void-open - The calendar popup opened.
+ * @fires {CustomEvent<{ reason: 'trigger' | 'focus' | 'keyboard' | 'api' }>} void-open - The calendar popup
+ * opened: `trigger` from the calendar button, `focus` from a click on the field, `keyboard` from a key.
  * @fires {CustomEvent<{ reason: 'trigger' | 'select' | 'escape' | 'outside' | 'blur' | 'parent' | 'api' }>} void-close -
  * The calendar popup is closing. Cancelable when the user caused it.
  */
 export class VoidDatePicker extends InternalsFormControl(VoidElement) {
+  /** The host's `aria-label` / `aria-labelledby` name the inner control. */
+  static override labelTarget = '.void-date-picker-input';
+
   /**
    * Selected date as an ISO `YYYY-MM-DD` string, whatever `format` shows. It is what the form submits
    * and the reset target.
@@ -597,8 +603,10 @@ export class VoidDatePicker extends InternalsFormControl(VoidElement) {
     },
     trigger: () => this.querySelector<HTMLElement>(':scope > .void-date-picker-anchor > .void-date-picker-input'),
     anchor: () => this.querySelector(':scope > .void-date-picker-anchor'),
+    // The calendar button and the keyboard move focus into the calendar; a
+    // click on the field itself opens it and leaves focus in the field.
     initialFocus: reason => {
-      if (reason !== 'api') void this._focusDay();
+      if (reason === 'trigger' || reason === 'keyboard') void this._focusDay();
       return false;
     },
   });
@@ -627,7 +635,7 @@ export class VoidDatePicker extends InternalsFormControl(VoidElement) {
           aria-haspopup="dialog"
           aria-expanded=${String(this.open)}
           aria-controls=${this._dropdownId}
-          @click=${this._toggle}
+          @click=${this._onInputClick}
           @keydown=${this._onInputKeydown}
         />
         <button
@@ -668,6 +676,11 @@ export class VoidDatePicker extends InternalsFormControl(VoidElement) {
     this._overlay.toggle('trigger');
   };
 
+  private _onInputClick = (): void => {
+    if (this.disabled) return;
+    this._overlay.toggle('focus');
+  };
+
   private _onCalendarChange = (e: CustomEvent): void => {
     e.stopPropagation();
     this.value = e.detail.value;
@@ -682,7 +695,12 @@ export class VoidDatePicker extends InternalsFormControl(VoidElement) {
   private _onInputKeydown = (e: KeyboardEvent): void => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
-      this._toggle();
+      if (!this.disabled) this._overlay.toggle('keyboard');
+    } else if (e.key === 'ArrowDown' && !this.disabled) {
+      // Into the calendar, opening it if a click on the field left it open with focus here.
+      e.preventDefault();
+      if (this.open) void this._focusDay();
+      else this._overlay.requestOpen('keyboard');
     }
   };
 }

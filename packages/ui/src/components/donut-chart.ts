@@ -269,7 +269,9 @@ export class VoidDonutChart extends VoidElement {
                      : this.gaps === false ? 0
                      : this.gaps;
     const gapTotal = (gapPercent / 100) * fullSweep;
-    const gapPerSegment = segments.length > 0 ? gapTotal / segments.length : 0;
+    // A ring with one non-zero segment has nothing to separate: no gap, no seam.
+    const drawn = segments.filter((_, j) => (this._displayValues.get(j) ?? 0) > 0).length;
+    const gapPerSegment = drawn > 1 ? gapTotal / segments.length : 0;
     const padHalf = gapPerSegment / 2;
 
     const arcs: TemplateResult[] = [];
@@ -285,7 +287,9 @@ export class VoidDonutChart extends VoidElement {
       if (renderedEnd > segStart + 0.001) {
         const color = seg.color ?? `var(--void-chart-series-${(i % 6) + 1})`;
         const startPadded = segStart + padHalf;
-        const endPadded = Math.max(startPadded + 0.001, renderedEnd - padHalf);
+        const endPadded = drawn === 1 && renderedEnd >= segStart + fullSweep - 1e-9
+          ? startPadded + fullSweep
+          : Math.max(startPadded + 0.001, renderedEnd - padHalf);
         arcs.push(svg`
           <path
             class="void-donut-chart-segment"
