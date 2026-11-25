@@ -41,9 +41,14 @@ export class VoidTextarea extends NativeFormControl(VoidElement) {
     `;
   }
 
-  formRestore(state: unknown): void {
+  protected formRestore(state: unknown): void {
     this.value = String(state ?? '');
     setNativeValue(this.querySelector('textarea'), this.value);
+  }
+
+  protected formSyncNative(): void {
+    const control = this.querySelector<HTMLInputElement | HTMLTextAreaElement>('textarea');
+    if (control && control.value !== this.value) control.value = this.value;
   }
 
   private _onInput(e: Event): void {

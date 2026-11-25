@@ -45,7 +45,7 @@ export class VoidMultiselect extends InternalsFormControl(VoidElement) {
   }
 
   /** One entry per selected option. */
-  formSubmission(): FormSubmission {
+  protected formSubmission(): FormSubmission {
     return this.value;
   }
 

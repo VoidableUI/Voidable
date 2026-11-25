@@ -1,19 +1,23 @@
 import { html, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
+import { NativeFormControl, type FormValidityResult } from '../form-control.js';
 import type { VoidCheckbox } from './checkbox.js';
 
 /** Grouped multi-option selection for preference forms, filter panels, and permission editors. */
 /**
  * Form strategy: pass-through. `name` is forwarded to the child void-checkbox
  * elements, whose native checkboxes submit one entry per checked box; the
- * group itself submits nothing and each checkbox resets itself.
+ * group itself submits nothing and each checkbox resets itself. `required`
+ * means "at least one checked" and is enforced on the group via
+ * ElementInternals validity (native checkboxes cannot express it).
  */
-export class VoidCheckboxGroup extends VoidElement {
+export class VoidCheckboxGroup extends NativeFormControl(VoidElement) {
   @property({ type: String, reflect: true }) label = '';
   @property({ type: String, reflect: true }) orientation: 'vertical' | 'horizontal' = 'vertical';
   /** Field name forwarded to every child checkbox. */
   @property({ type: String, reflect: true }) name = '';
+  @property({ type: Boolean, reflect: true }) required = false;
 
   private _userContent: Node[] = [];
   private _didSetup = false;
@@ -28,6 +32,20 @@ export class VoidCheckboxGroup extends VoidElement {
     for (const el of Array.from(this.querySelectorAll('void-checkbox')) as VoidCheckbox[]) {
       el.checked = wanted.has(el.value);
     }
+    this.formSync();
+  }
+
+  /** The checkboxes reset themselves; the group has no state of its own. */
+  protected formSnapshot(): unknown {
+    return null;
+  }
+
+  protected formRestore(): void {}
+
+  protected formValidity(): FormValidityResult | null {
+    if (!this.required || this.value.length > 0) return null;
+    const first = this.querySelector<HTMLElement>('void-checkbox:not([disabled])') ?? undefined;
+    return { flags: { valueMissing: true }, message: 'Please check at least one box.', anchor: first };
   }
 
   connectedCallback(): void {

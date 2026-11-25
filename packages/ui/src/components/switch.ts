@@ -31,21 +31,22 @@ export class VoidSwitch extends InternalsFormControl(VoidElement) {
     if (changed.has('checked')) {
       this.setAttribute('aria-checked', String(this.checked));
     }
-    if (changed.has('disabled')) {
-      this.setAttribute('aria-disabled', String(this.disabled));
-      this.setAttribute('tabindex', this.disabled ? '-1' : '0');
+    if (changed.has('disabled') || changed.has('fieldsetDisabled')) {
+      const disabled = this.formDisabled;
+      this.setAttribute('aria-disabled', String(disabled));
+      this.setAttribute('tabindex', disabled ? '-1' : '0');
     }
   }
 
-  formSubmission(): FormSubmission {
+  protected formSubmission(): FormSubmission {
     return this.checked ? this.value : null;
   }
 
-  formSnapshot(): unknown {
+  protected formSnapshot(): unknown {
     return this.checked;
   }
 
-  formRestore(state: unknown): void {
+  protected formRestore(state: unknown): void {
     this.checked = Boolean(state);
   }
 

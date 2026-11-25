@@ -1,7 +1,7 @@
-import { html, nothing } from 'lit';
+import { html } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
-import { NativeFormControl, setNativeChecked } from '../form-control.js';
+import { NativeFormControl, setNativeChecked, type FormValidityResult } from '../form-control.js';
 
 /** Binary or indeterminate selection for form fields, data table row selection, and toggle-able settings. */
 export class VoidCheckbox extends NativeFormControl(VoidElement) {
@@ -9,7 +9,13 @@ export class VoidCheckbox extends NativeFormControl(VoidElement) {
   @property({ type: Boolean, reflect: true }) disabled = false;
   @property({ type: Boolean, reflect: true }) indeterminate = false;
   @property({ type: String, reflect: true }) name = '';
-  @property({ type: String, reflect: true }) value = '';
+  /** Submitted under `name` while checked; defaults to "on" like a native checkbox. */
+  @property({ type: String, reflect: true }) value = 'on';
+  /**
+   * Must be checked. Validated on the host (the inner native checkbox is
+   * aria-hidden, so it must not be what the browser focuses on a failed submit).
+   */
+  @property({ type: Boolean, reflect: true }) required = false;
   @property({ type: String, reflect: true }) color: 'default' | 'error' | 'warning' | 'success' | 'info' | 'notice' = 'default';
   @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' | 'xl' | 'xxl' = 'md';
 
@@ -43,9 +49,10 @@ export class VoidCheckbox extends NativeFormControl(VoidElement) {
         this.setAttribute('aria-checked', String(this.checked));
       }
     }
-    if (changed.has('disabled')) {
-      this.setAttribute('aria-disabled', String(this.disabled));
-      this.setAttribute('tabindex', this.disabled ? '-1' : '0');
+    if (changed.has('disabled') || changed.has('fieldsetDisabled')) {
+      const disabled = this.formDisabled;
+      this.setAttribute('aria-disabled', String(disabled));
+      this.setAttribute('tabindex', disabled ? '-1' : '0');
     }
     if (!this._didSetup) {
       this._didSetup = true;
@@ -57,7 +64,7 @@ export class VoidCheckbox extends NativeFormControl(VoidElement) {
 
   render() {
     return html`
-      <input type="checkbox" .checked=${this.checked} .indeterminate=${this.indeterminate} ?disabled=${this.disabled} name=${this.name || nothing} value=${this.value || nothing} tabindex="-1" aria-hidden="true" />
+      <input type="checkbox" .checked=${this.checked} .indeterminate=${this.indeterminate} ?disabled=${this.disabled} name=${this.name} value=${this.value} tabindex="-1" aria-hidden="true" />
       <span class="void-checkbox-box">
         ${this.checked ? html`<svg viewBox="0 0 12 12" fill="none"><path d="M2.5 6l2.5 2.5 4.5-5" stroke="currentColor" stroke-width="var(--void-icon-stroke-width)" stroke-linecap="round" stroke-linejoin="round"/></svg>` : ''}
         ${this.indeterminate && !this.checked ? html`<svg viewBox="0 0 12 12" fill="none"><path d="M3 6h6" stroke="currentColor" stroke-width="var(--void-icon-stroke-width)" stroke-linecap="round"/></svg>` : ''}
@@ -66,13 +73,25 @@ export class VoidCheckbox extends NativeFormControl(VoidElement) {
   }
 
   /** Form reset target is the checked state; the native checkbox submits. */
-  formSnapshot(): unknown {
+  protected formSnapshot(): unknown {
     return this.checked;
   }
 
-  formRestore(state: unknown): void {
+  protected formRestore(state: unknown): void {
     this.checked = Boolean(state);
     setNativeChecked(this.querySelector('input[type="checkbox"]'), this.checked);
+  }
+
+  protected formValidity(): FormValidityResult | null {
+    if (!this.required || this.checked) return null;
+    return { flags: { valueMissing: true }, message: 'Please check this box if you want to proceed.' };
+  }
+
+  protected formSyncNative(): void {
+    const input = this.querySelector<HTMLInputElement>('input[type="checkbox"]');
+    if (input && input.checked !== this.checked) input.checked = this.checked;
+    // A containing group derives its validity from its checkboxes.
+    this.closest('void-checkbox-group')?.requestUpdate();
   }
 
   private _handleClick = (e: Event): void => {

@@ -33,7 +33,7 @@ export class VoidToggleGroup extends InternalsFormControl(VoidElement) {
   }
 
   /** Multiple: one entry per pressed toggle. Single: the pressed value, or nothing. */
-  formSubmission(): FormSubmission {
+  protected formSubmission(): FormSubmission {
     if (this.multiple) return this._selectedValues();
     return this.value || null;
   }

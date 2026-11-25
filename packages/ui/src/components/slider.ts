@@ -38,9 +38,14 @@ export class VoidSlider extends NativeFormControl(VoidElement) {
     return ((this.value - this.min) / (this.max - this.min)) * 100;
   }
 
-  formRestore(state: unknown): void {
+  protected formRestore(state: unknown): void {
     this.value = Number(state);
     setNativeValue(this.querySelector('input[type="range"]'), String(this.value));
+  }
+
+  protected formSyncNative(): void {
+    const control = this.querySelector<HTMLInputElement | HTMLTextAreaElement>('input[type="range"]');
+    if (control && control.value !== String(this.value)) control.value = String(this.value);
   }
 
   private _onInput(e: Event): void {

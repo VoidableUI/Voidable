@@ -13,6 +13,8 @@ export class VoidRadioGroup extends NativeFormControl(VoidElement) {
   @property({ type: String }) label = '';
   @property({ type: String }) value = '';
   @property({ type: String, reflect: true }) name = '';
+  /** Forwarded to the child radios: the browser then requires one of them to be checked. */
+  @property({ type: Boolean, reflect: true }) required = false;
   @property({ type: String, reflect: true }) orientation: 'vertical' | 'horizontal' = 'vertical';
 
   private _userContent: Node[] = [];
@@ -41,6 +43,9 @@ export class VoidRadioGroup extends NativeFormControl(VoidElement) {
     if (changed.has('name')) {
       this._syncNames();
     }
+    if (changed.has('required')) {
+      for (const radio of this._radios()) radio.required = this.required;
+    }
     if (!this._didSetup) {
       this._didSetup = true;
       const group = this.querySelector('.void-radio-group-options');
@@ -57,7 +62,12 @@ export class VoidRadioGroup extends NativeFormControl(VoidElement) {
     }
   }
 
-  formRestore(state: unknown): void {
+  protected formSyncNative(): void {
+    // Programmatic value sets reach the radios (and their native inputs) synchronously.
+    if (this._didSetup) this._syncChecked();
+  }
+
+  protected formRestore(state: unknown): void {
     this.value = String(state ?? '');
     for (const radio of this._radios()) {
       radio.checked = radio.value === this.value;

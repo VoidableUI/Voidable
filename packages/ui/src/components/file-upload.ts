@@ -14,15 +14,15 @@ export class VoidFileUpload extends InternalsFormControl(VoidElement) {
   private _files: File[] = [];
 
   /** One entry per selected file. */
-  formSubmission(): FormSubmission {
+  protected formSubmission(): FormSubmission {
     return this._files;
   }
 
-  formSnapshot(): unknown {
+  protected formSnapshot(): unknown {
     return [...this._files];
   }
 
-  formRestore(state: unknown): void {
+  protected formRestore(state: unknown): void {
     this._files = Array.isArray(state) ? [...state] : [];
     this.requestUpdate();
   }

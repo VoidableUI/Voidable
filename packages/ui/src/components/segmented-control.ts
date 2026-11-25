@@ -52,7 +52,7 @@ export class VoidSegmentedControl extends InternalsFormControl(VoidElement) {
   }
 
   /** The selected value, or nothing when no segment is selected. */
-  formSubmission(): FormSubmission {
+  protected formSubmission(): FormSubmission {
     return this.value || null;
   }
 

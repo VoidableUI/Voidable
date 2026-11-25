@@ -9,6 +9,7 @@ export class VoidActionInput extends NativeFormControl(VoidElement) {
   @property({ type: String, reflect: true }) placeholder = '';
   @property({ type: Boolean, reflect: true }) disabled = false;
   @property({ type: Boolean, reflect: true }) readonly = false;
+  @property({ type: Boolean, reflect: true }) required = false;
   @property({ type: String, reflect: true }) name = '';
   @property({ type: String, reflect: true }) autocomplete = '';
   @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' = 'md';
@@ -44,9 +45,14 @@ export class VoidActionInput extends NativeFormControl(VoidElement) {
     }
   }
 
-  formRestore(state: unknown): void {
+  protected formRestore(state: unknown): void {
     this.value = String(state ?? '');
     setNativeValue(this.querySelector('.void-action-input-field'), this.value);
+  }
+
+  protected formSyncNative(): void {
+    const control = this.querySelector<HTMLInputElement | HTMLTextAreaElement>('.void-action-input-field');
+    if (control && control.value !== this.value) control.value = this.value;
   }
 
   private _onInput(e: Event): void {
@@ -88,6 +94,7 @@ export class VoidActionInput extends NativeFormControl(VoidElement) {
         placeholder=${this.placeholder}
         ?disabled=${this.disabled}
         ?readonly=${this.readonly}
+        ?required=${this.required}
         name=${this.name}
         autocomplete=${this.autocomplete}
         aria-label=${this.actionLabel}
