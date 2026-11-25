@@ -38,7 +38,7 @@ export const Default: Story = {
   render: () => html`
     <div style="padding: 6rem; display: flex; justify-content: center;">
       <void-hover-card>
-        <a href="#" style="font-weight: 600; text-decoration: underline; cursor: pointer;">@janedoe</a>
+        <a slot="trigger" href="#" style="font-weight: 600; text-decoration: underline; cursor: pointer;">@janedoe</a>
         <div style="display: flex; flex-direction: column; gap: 0.75rem; min-width: 18rem;">
           <div style="display: flex; align-items: center; gap: 0.75rem;">
             <div style="width: 3rem; height: 3rem; border-radius: 50%; background: var(--void-color-bg-subtle); display: flex; align-items: center; justify-content: center; font-weight: 600;">JD</div>
@@ -62,25 +62,25 @@ export const Positions: Story = {
   render: () => html`
     <div style="padding: 8rem; display: flex; gap: 3rem; flex-wrap: wrap; justify-content: center;">
       <void-hover-card position="top">
-        <button style="padding: 0.5rem 1rem; cursor: pointer;">Top</button>
+        <button slot="trigger" style="padding: 0.5rem 1rem; cursor: pointer;">Top</button>
         <div>
           <p style="margin: 0;">Card opens above the trigger.</p>
         </div>
       </void-hover-card>
       <void-hover-card position="bottom">
-        <button style="padding: 0.5rem 1rem; cursor: pointer;">Bottom</button>
+        <button slot="trigger" style="padding: 0.5rem 1rem; cursor: pointer;">Bottom</button>
         <div>
           <p style="margin: 0;">Card opens below the trigger.</p>
         </div>
       </void-hover-card>
       <void-hover-card position="left">
-        <button style="padding: 0.5rem 1rem; cursor: pointer;">Left</button>
+        <button slot="trigger" style="padding: 0.5rem 1rem; cursor: pointer;">Left</button>
         <div>
           <p style="margin: 0;">Card opens to the left.</p>
         </div>
       </void-hover-card>
       <void-hover-card position="right">
-        <button style="padding: 0.5rem 1rem; cursor: pointer;">Right</button>
+        <button slot="trigger" style="padding: 0.5rem 1rem; cursor: pointer;">Right</button>
         <div>
           <p style="margin: 0;">Card opens to the right.</p>
         </div>
@@ -93,7 +93,7 @@ export const WithActions: Story = {
   render: () => html`
     <div style="padding: 6rem; display: flex; justify-content: center;">
       <void-hover-card>
-        <a href="#" style="font-weight: 600; text-decoration: underline; cursor: pointer;">@alexsmith</a>
+        <a slot="trigger" href="#" style="font-weight: 600; text-decoration: underline; cursor: pointer;">@alexsmith</a>
         <div style="display: flex; flex-direction: column; gap: 0.75rem; min-width: 18rem;">
           <div style="display: flex; align-items: center; gap: 0.75rem;">
             <div style="width: 3rem; height: 3rem; border-radius: 50%; background: var(--void-color-bg-subtle); display: flex; align-items: center; justify-content: center; font-weight: 600;">AS</div>
