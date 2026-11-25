@@ -392,7 +392,6 @@ export const Progress = wrapWc<VoidProgress, {
 }>('void-progress', 'Progress');
 
 export const Panel = wrapWc<VoidPanel, {
-  label?: string;
   variant?: 'default' | 'bordered' | 'elevated';
 }>('void-panel', 'Panel');
 
@@ -564,8 +563,6 @@ export const ListItem = wrapWc<VoidListItem, {
 export const Toast = wrapWc<VoidToast, {
   color?: 'default' | 'error' | 'warning' | 'caution' | 'success' | 'info' | 'notice' | 'highlight';
   duration?: number;
-  dismissable?: boolean;
-  heading?: string;
 } & VoidEvents<{ Close: null }>>('void-toast', 'Toast');
 
 export const ToastContainer = wrapWc<VoidToastContainer, {
@@ -629,7 +626,6 @@ export const Tooltip = wrapWc<VoidTooltip, {
 
 export const Banner = wrapWc<VoidBanner, {
   color?: 'default' | 'error' | 'warning' | 'caution' | 'success' | 'info' | 'notice' | 'highlight';
-  dismissable?: boolean;
   variant?: 'subtle' | 'filled';
 } & VoidEvents<{ Close: null }>>('void-banner', 'Banner');
 
@@ -932,7 +928,6 @@ export const ToggleGroup = wrapWc<VoidToggleGroup, {
 } & VoidEvents<{ Change: { value: string | string[] } }>>('void-toggle-group', 'ToggleGroup');
 
 export const Collapsible = wrapWc<VoidCollapsible, {
-  heading?: string;
   open?: boolean;
   disabled?: boolean;
 } & VoidEvents<{ Toggle: { open: boolean } }>>('void-collapsible', 'Collapsible');

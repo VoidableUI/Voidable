@@ -17,8 +17,6 @@ describe('VoidToast', () => {
     beforeEach(() => { el = document.createElement('void-toast') as VoidToast; });
     it('defaults color to "default"', () => { expect(el.color).toBe('default'); });
     it('defaults duration to 5000', () => { expect(el.duration).toBe(5000); });
-    it('defaults dismissable to true', () => { expect(el.dismissable).toBe(true); });
-    it('defaults heading to ""', () => { expect(el.heading).toBe(''); });
   });
 
   describe('ARIA', () => {
@@ -44,94 +42,60 @@ describe('VoidToast', () => {
       await el.updateComplete;
       expect(el.getAttribute('color')).toBe('error');
     });
-
-    it('reflects dismissable=false as the string "false" so markup round-trips', async () => {
-      el.dismissable = false;
-      await el.updateComplete;
-      expect(el.getAttribute('dismissable')).toBe('false');
-    });
-
-    it('turns dismissable off from markup with dismissable="false"', async () => {
-      const off = document.createElement('void-toast') as VoidToast;
-      off.setAttribute('dismissable', 'false');
-      document.body.appendChild(off);
-      await off.updateComplete;
-      expect(off.dismissable).toBe(false);
-      expect(off.querySelector('.void-toast-close')).toBeNull();
-      off.remove();
-    });
   });
 
-  describe('close button', () => {
-    it('renders close button when dismissable=true', async () => {
+  describe('close part', () => {
+    function withClose(): VoidToast {
       const el = document.createElement('void-toast') as VoidToast;
-      el.dismissable = true;
+      el.innerHTML =
+        '<void-toast-description>Saved</void-toast-description><void-toast-close><button type="button" aria-label="Dismiss">x</button></void-toast-close>';
+      document.body.appendChild(el);
+      return el;
+    }
+
+    it('writes no close control of its own: without the part there is nothing to press', async () => {
+      const el = document.createElement('void-toast') as VoidToast;
+      el.innerHTML = '<void-toast-description>Saved</void-toast-description>';
       document.body.appendChild(el);
       await el.updateComplete;
-      const btn = el.querySelector('.void-toast-close');
-      expect(btn).not.toBeNull();
+      expect(el.querySelector('button')).toBeNull();
+      expect(el.children.length).toBe(1);
       el.remove();
     });
 
-    it('does not render close button when dismissable=false', async () => {
-      const el = document.createElement('void-toast') as VoidToast;
-      el.dismissable = false;
-      document.body.appendChild(el);
+    it('keeps the author\'s nodes where they are', async () => {
+      const el = withClose();
+      const before = Array.from(el.querySelectorAll('*'));
       await el.updateComplete;
-      const btn = el.querySelector('.void-toast-close');
-      expect(btn).toBeNull();
+      expect(Array.from(el.querySelectorAll('*'))).toEqual(before);
       el.remove();
     });
-  });
 
-  describe('void-close event', () => {
-    it('dispatches void-close event when close button is clicked', async () => {
-      const el = document.createElement('void-toast') as VoidToast;
-      el.dismissable = true;
-      document.body.appendChild(el);
+    it('dispatches void-close and removes itself when the control in the close part is pressed', async () => {
+      const el = withClose();
       await el.updateComplete;
       const events: Event[] = [];
       document.addEventListener('void-close', (e) => events.push(e));
-      const btn = el.querySelector('.void-toast-close') as HTMLButtonElement;
-      btn.click();
+      (el.querySelector('void-toast-close button') as HTMLButtonElement).click();
       expect(events).toHaveLength(1);
       expect(events[0].bubbles).toBe(true);
       expect((events[0] as CustomEvent).composed).toBe(true);
-    });
-  });
-
-  describe('self-removal', () => {
-    it('removes itself from the DOM when close button is clicked', async () => {
-      const el = document.createElement('void-toast') as VoidToast;
-      el.dismissable = true;
-      document.body.appendChild(el);
-      await el.updateComplete;
-      expect(document.body.contains(el)).toBe(true);
-      const btn = el.querySelector('.void-toast-close') as HTMLButtonElement;
-      btn.click();
       expect(document.body.contains(el)).toBe(false);
     });
-  });
 
-  describe('heading', () => {
-    it('renders heading when set', async () => {
-      const el = document.createElement('void-toast') as VoidToast;
-      el.heading = 'Test Heading';
-      document.body.appendChild(el);
+    it('does not close from a click elsewhere in the toast', async () => {
+      const el = withClose();
       await el.updateComplete;
-      const headingEl = el.querySelector('span.void-toast-heading');
-      expect(headingEl).not.toBeNull();
+      (el.querySelector('void-toast-description') as HTMLElement).click();
+      expect(document.body.contains(el)).toBe(true);
       el.remove();
     });
 
-    it('does not render heading element when heading is empty', async () => {
-      const el = document.createElement('void-toast') as VoidToast;
-      el.heading = '';
-      document.body.appendChild(el);
+    it('close() closes it too', async () => {
+      const el = withClose();
       await el.updateComplete;
-      const headingEl = el.querySelector('.void-toast-heading');
-      expect(headingEl).toBeNull();
-      el.remove();
+      el.close();
+      expect(document.body.contains(el)).toBe(false);
     });
   });
 
@@ -220,45 +184,45 @@ describe('VoidToastContainer', () => {
 
   describe('VoidToastContainer.show()', () => {
     it('creates a toast and appends it to container', () => {
-      const toast = VoidToastContainer.show({ message: 'Test message' });
+      const toast = VoidToastContainer.show({ description: 'Test message' });
       const container = document.querySelector('void-toast-container');
       expect(container).not.toBeNull();
       expect(container!.contains(toast)).toBe(true);
     });
 
     it('returns the VoidToast element', () => {
-      const toast = VoidToastContainer.show({ message: 'Test' });
+      const toast = VoidToastContainer.show({ description: 'Test' });
       expect(toast).toBeInstanceOf(VoidToast);
     });
 
     it('toast has correct message', () => {
-      const toast = VoidToastContainer.show({ message: 'Hello World' });
-      expect(toast.textContent).toContain('Hello World');
+      const toast = VoidToastContainer.show({ description: 'Hello World' });
+      expect(toast.querySelector(':scope > void-toast-description')!.textContent).toBe('Hello World');
     });
 
     it('creates container if none exists in document', () => {
       expect(document.querySelector('void-toast-container')).toBeNull();
-      VoidToastContainer.show({ message: 'Test' });
+      VoidToastContainer.show({ description: 'Test' });
       expect(document.querySelector('void-toast-container')).not.toBeNull();
     });
 
     it('uses existing container if one exists', () => {
       const existing = document.createElement('void-toast-container') as VoidToastContainer;
       document.body.appendChild(existing);
-      VoidToastContainer.show({ message: 'Test' });
+      VoidToastContainer.show({ description: 'Test' });
       const containers = document.querySelectorAll('void-toast-container');
       expect(containers.length).toBe(1);
       expect(containers[0]).toBe(existing);
     });
 
     it('sets color on toast', () => {
-      const toast = VoidToastContainer.show({ message: 'Test', color: 'error' });
+      const toast = VoidToastContainer.show({ description: 'Test', color: 'error' });
       expect(toast.color).toBe('error');
     });
 
-    it('sets heading on toast when provided', () => {
-      const toast = VoidToastContainer.show({ message: 'Test', heading: 'Error' });
-      expect(toast.heading).toBe('Error');
+    it('writes a title part when provided', () => {
+      const toast = VoidToastContainer.show({ description: 'Test', title: 'Error' });
+      expect(toast.querySelector(':scope > void-toast-title')!.textContent).toBe('Error');
     });
   });
 });
@@ -273,6 +237,7 @@ describe('VoidToast roles and timer pausing', () => {
     const el = document.createElement('void-toast') as VoidToast;
     el.color = color;
     el.duration = duration;
+    el.innerHTML = '<void-toast-description>x</void-toast-description><void-toast-close><button type="button" aria-label="Dismiss">x</button></void-toast-close>';
     document.body.appendChild(el);
     await el.updateComplete;
     return el;
@@ -316,7 +281,7 @@ describe('VoidToast roles and timer pausing', () => {
   it('pauses on focus within and resumes on focus leaving', async () => {
     vi.useFakeTimers();
     const el = await make();
-    const btn = el.querySelector('.void-toast-close') as HTMLButtonElement;
+    const btn = el.querySelector('button') as HTMLButtonElement;
     btn.dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
     vi.advanceTimersByTime(10000);
     expect(el.isConnected).toBe(true);
@@ -350,12 +315,44 @@ describe('toast() helper', () => {
 
   it('shows a toast through the page container, creating one when missing', async () => {
     const { toast } = await import('../../src/components/toast.js');
-    const t = toast({ message: 'Saved', color: 'caution', dismissable: false });
+    const t = toast({ description: 'Saved', color: 'caution', dismissable: false });
     expect(t).toBeInstanceOf(VoidToast);
     expect(t.parentElement?.tagName).toBe('VOID-TOAST-CONTAINER');
-    expect(t.textContent).toBe('Saved');
     expect(t.color).toBe('caution');
-    expect(t.dismissable).toBe(false);
+  });
+
+  it('builds the parts an author would write, in order', async () => {
+    const { toast } = await import('../../src/components/toast.js');
+    const onClick = vi.fn();
+    const t = toast({ title: 'Saved', description: 'Your changes were saved.', actions: [{ label: 'Undo', onClick }], duration: 0 });
+    expect(Array.from(t.children).map(c => c.localName)).toEqual([
+      'void-toast-title', 'void-toast-description', 'void-toast-actions', 'void-toast-close',
+    ]);
+    expect(t.querySelector('void-toast-title')!.textContent).toBe('Saved');
+    expect(t.querySelector('void-toast-description')!.textContent).toBe('Your changes were saved.');
+    const undo = t.querySelector('void-toast-actions > void-button') as HTMLElement;
+    expect(undo.textContent).toBe('Undo');
+    undo.click();
+    expect(onClick).toHaveBeenCalledOnce();
+    expect(onClick.mock.calls[0]![1]).toBe(t);
+    expect(t.isConnected).toBe(true);
+    const close = t.querySelector('void-toast-close > button') as HTMLButtonElement;
+    expect(close.getAttribute('aria-label')).toBe('Dismiss');
+    close.click();
+    expect(t.isConnected).toBe(false);
+  });
+
+  it('writes text as text, never as markup', async () => {
+    const { toast } = await import('../../src/components/toast.js');
+    const t = toast({ title: '<b>x</b>', description: '<img src=x onerror=alert(1)>', duration: 0 });
+    expect(t.querySelector('b, img')).toBeNull();
+    expect(t.querySelector('void-toast-description')!.textContent).toBe('<img src=x onerror=alert(1)>');
+  });
+
+  it('leaves out the close part with dismissable: false and the title and actions when not given', async () => {
+    const { toast } = await import('../../src/components/toast.js');
+    const t = toast({ description: 'Hi', dismissable: false, duration: 0 });
+    expect(Array.from(t.children).map(c => c.localName)).toEqual(['void-toast-description']);
   });
 
   it('accepts position="inline" on the container', async () => {

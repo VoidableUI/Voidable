@@ -7,8 +7,11 @@ const TAG = 'void-collapsible';
 
 function create(heading = 'Test', content = 'Content'): VoidCollapsible {
   const el = document.createElement(TAG) as VoidCollapsible;
-  el.heading = heading;
-  el.textContent = content;
+  const trigger = document.createElement('void-collapsible-trigger');
+  trigger.textContent = heading;
+  const body = document.createElement('void-collapsible-content');
+  body.textContent = content;
+  el.append(trigger, body);
   return el;
 }
 
@@ -37,13 +40,9 @@ describe('VoidCollapsible', () => {
     it('disabled defaults to false', () => {
       expect(el.disabled).toBe(false);
     });
-
-    it('heading defaults to empty string', () => {
-      expect(el.heading).toBe('');
-    });
   });
 
-  describe('rendering', () => {
+  describe('parts', () => {
     let el: VoidCollapsible;
 
     beforeEach(async () => {
@@ -52,27 +51,72 @@ describe('VoidCollapsible', () => {
       await el.updateComplete;
     });
 
-    it('renders trigger button', () => {
-      expect(el.querySelector('.void-collapsible-trigger')).not.toBeNull();
+    it('renders nothing of its own: the author\'s two parts are its only children', () => {
+      expect(Array.from(el.children).map(c => c.localName)).toEqual(['void-collapsible-trigger', 'void-collapsible-content']);
+      expect(el.querySelector('button, svg, .void-collapsible-trigger')).toBeNull();
     });
 
-    it('renders content div', () => {
-      expect(el.querySelector('.void-collapsible-content')).not.toBeNull();
+    it('never moves the author\'s nodes', async () => {
+      const before = Array.from(el.children);
+      el.open = true;
+      await el.updateComplete;
+      (before[0] as HTMLElement).click();
+      await el.updateComplete;
+      expect(Array.from(el.children)).toEqual(before);
     });
 
-    it('trigger contains heading text', () => {
-      const trigger = el.querySelector('.void-collapsible-trigger') as HTMLElement;
-      expect(trigger.textContent).toContain('My Section');
+    it('the trigger is a focusable button', () => {
+      const trigger = el.querySelector('void-collapsible-trigger')!;
+      expect(trigger.getAttribute('role')).toBe('button');
+      expect(trigger.getAttribute('tabindex')).toBe('0');
+      expect(trigger.textContent).toBe('My Section');
     });
 
-    it('user content is placed inside .void-collapsible-content', async () => {
-      const content = el.querySelector('.void-collapsible-content') as HTMLElement;
-      expect(content.textContent).toContain('My Content');
+    it('keeps an author id and generates one only where missing', async () => {
+      const own = create();
+      own.querySelector('void-collapsible-trigger')!.id = 'mine';
+      document.body.appendChild(own);
+      await own.updateComplete;
+      expect(own.querySelector('void-collapsible-trigger')!.id).toBe('mine');
+      expect(own.querySelector('void-collapsible-content')!.getAttribute('aria-labelledby')).toBe('mine');
+      expect(own.querySelector('void-collapsible-content')!.id).toMatch(/^void-collapsible-content-/);
     });
 
-    it('renders chevron SVG inside trigger', () => {
-      const chevron = el.querySelector('.void-collapsible-chevron');
-      expect(chevron).not.toBeNull();
+    it('wires a content part that arrives late', async () => {
+      const late = document.createElement(TAG) as VoidCollapsible;
+      const trigger = document.createElement('void-collapsible-trigger');
+      trigger.textContent = 'T';
+      late.append(trigger);
+      document.body.appendChild(late);
+      await late.updateComplete;
+      expect(trigger.hasAttribute('aria-controls')).toBe(false);
+      const content = document.createElement('void-collapsible-content');
+      late.append(content);
+      await new Promise(r => setTimeout(r, 0));
+      expect(trigger.getAttribute('aria-controls')).toBe(content.id);
+      expect(content.getAttribute('role')).toBe('region');
+    });
+
+    it('takes what it wrote off a part that is removed', async () => {
+      const trigger = el.querySelector('void-collapsible-trigger')!;
+      trigger.remove();
+      await new Promise(r => setTimeout(r, 0));
+      expect(trigger.hasAttribute('role')).toBe(false);
+      expect(trigger.hasAttribute('aria-expanded')).toBe(false);
+      expect(el.querySelector('void-collapsible-content')!.hasAttribute('aria-labelledby')).toBe(false);
+    });
+
+    it('a nested collapsible keeps its own parts', async () => {
+      const outer = create('Outer', '');
+      const inner = create('Inner', 'inner body');
+      outer.querySelector('void-collapsible-content')!.append(inner);
+      document.body.appendChild(outer);
+      await outer.updateComplete;
+      await inner.updateComplete;
+      (inner.querySelector('void-collapsible-trigger') as HTMLElement).click();
+      await inner.updateComplete;
+      expect(inner.open).toBe(true);
+      expect(outer.open).toBe(false);
     });
   });
 
@@ -86,31 +130,31 @@ describe('VoidCollapsible', () => {
     });
 
     it('trigger has aria-expanded="false" when closed', () => {
-      const trigger = el.querySelector('.void-collapsible-trigger') as HTMLElement;
+      const trigger = el.querySelector('void-collapsible-trigger') as HTMLElement;
       expect(trigger.getAttribute('aria-expanded')).toBe('false');
     });
 
     it('trigger has aria-expanded="true" when open', async () => {
       el.open = true;
       await el.updateComplete;
-      const trigger = el.querySelector('.void-collapsible-trigger') as HTMLElement;
+      const trigger = el.querySelector('void-collapsible-trigger') as HTMLElement;
       expect(trigger.getAttribute('aria-expanded')).toBe('true');
     });
 
     it('trigger aria-controls matches content id', () => {
-      const trigger = el.querySelector('.void-collapsible-trigger') as HTMLElement;
-      const content = el.querySelector('.void-collapsible-content') as HTMLElement;
+      const trigger = el.querySelector('void-collapsible-trigger') as HTMLElement;
+      const content = el.querySelector('void-collapsible-content') as HTMLElement;
       expect(trigger.getAttribute('aria-controls')).toBe(content.id);
     });
 
     it('content has role="region"', () => {
-      const content = el.querySelector('.void-collapsible-content') as HTMLElement;
+      const content = el.querySelector('void-collapsible-content') as HTMLElement;
       expect(content.getAttribute('role')).toBe('region');
     });
 
     it('content aria-labelledby matches trigger id', () => {
-      const trigger = el.querySelector('.void-collapsible-trigger') as HTMLElement;
-      const content = el.querySelector('.void-collapsible-content') as HTMLElement;
+      const trigger = el.querySelector('void-collapsible-trigger') as HTMLElement;
+      const content = el.querySelector('void-collapsible-content') as HTMLElement;
       expect(content.getAttribute('aria-labelledby')).toBe(trigger.id);
     });
   });
@@ -125,14 +169,14 @@ describe('VoidCollapsible', () => {
     });
 
     it('opens on trigger click', async () => {
-      const trigger = el.querySelector('.void-collapsible-trigger') as HTMLElement;
+      const trigger = el.querySelector('void-collapsible-trigger') as HTMLElement;
       trigger.click();
       await el.updateComplete;
       expect(el.open).toBe(true);
     });
 
     it('closes on second trigger click', async () => {
-      const trigger = el.querySelector('.void-collapsible-trigger') as HTMLElement;
+      const trigger = el.querySelector('void-collapsible-trigger') as HTMLElement;
       trigger.click();
       await el.updateComplete;
       trigger.click();
@@ -152,14 +196,20 @@ describe('VoidCollapsible', () => {
     });
 
     it('click does not toggle when disabled', async () => {
-      const trigger = el.querySelector('.void-collapsible-trigger') as HTMLElement;
+      const trigger = el.querySelector('void-collapsible-trigger') as HTMLElement;
       trigger.click();
       await el.updateComplete;
       expect(el.open).toBe(false);
     });
 
+    it('marks the trigger aria-disabled and out of the tab order', () => {
+      const trigger = el.querySelector('void-collapsible-trigger') as HTMLElement;
+      expect(trigger.getAttribute('aria-disabled')).toBe('true');
+      expect(trigger.getAttribute('tabindex')).toBe('-1');
+    });
+
     it('keyboard does not toggle when disabled', async () => {
-      const trigger = el.querySelector('.void-collapsible-trigger') as HTMLElement;
+      const trigger = el.querySelector('void-collapsible-trigger') as HTMLElement;
       trigger.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
       await el.updateComplete;
       expect(el.open).toBe(false);
@@ -168,7 +218,7 @@ describe('VoidCollapsible', () => {
     it('does not dispatch void-toggle when disabled', async () => {
       let fired = false;
       el.addEventListener('void-toggle', () => { fired = true; });
-      const trigger = el.querySelector('.void-collapsible-trigger') as HTMLElement;
+      const trigger = el.querySelector('void-collapsible-trigger') as HTMLElement;
       trigger.click();
       await el.updateComplete;
       expect(fired).toBe(false);
@@ -187,7 +237,7 @@ describe('VoidCollapsible', () => {
     it('dispatches void-toggle on click', async () => {
       let fired = false;
       el.addEventListener('void-toggle', () => { fired = true; });
-      const trigger = el.querySelector('.void-collapsible-trigger') as HTMLElement;
+      const trigger = el.querySelector('void-collapsible-trigger') as HTMLElement;
       trigger.click();
       await el.updateComplete;
       expect(fired).toBe(true);
@@ -196,7 +246,7 @@ describe('VoidCollapsible', () => {
     it('void-toggle detail contains open state', async () => {
       let detail: { open: boolean } | null = null;
       el.addEventListener('void-toggle', (e) => { detail = (e as CustomEvent).detail; });
-      const trigger = el.querySelector('.void-collapsible-trigger') as HTMLElement;
+      const trigger = el.querySelector('void-collapsible-trigger') as HTMLElement;
       trigger.click();
       await el.updateComplete;
       expect(detail).toEqual({ open: true });
@@ -205,7 +255,7 @@ describe('VoidCollapsible', () => {
     it('void-toggle bubbles', async () => {
       let firedOnParent = false;
       document.body.addEventListener('void-toggle', () => { firedOnParent = true; }, { once: true });
-      const trigger = el.querySelector('.void-collapsible-trigger') as HTMLElement;
+      const trigger = el.querySelector('void-collapsible-trigger') as HTMLElement;
       trigger.click();
       await el.updateComplete;
       expect(firedOnParent).toBe(true);
@@ -216,7 +266,7 @@ describe('VoidCollapsible', () => {
       await el.updateComplete;
       let detail: { open: boolean } | null = null;
       el.addEventListener('void-toggle', (e) => { detail = (e as CustomEvent).detail; });
-      const trigger = el.querySelector('.void-collapsible-trigger') as HTMLElement;
+      const trigger = el.querySelector('void-collapsible-trigger') as HTMLElement;
       trigger.click();
       await el.updateComplete;
       expect(detail).toEqual({ open: false });
@@ -233,21 +283,21 @@ describe('VoidCollapsible', () => {
     });
 
     it('Enter key toggles open', async () => {
-      const trigger = el.querySelector('.void-collapsible-trigger') as HTMLElement;
+      const trigger = el.querySelector('void-collapsible-trigger') as HTMLElement;
       trigger.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
       await el.updateComplete;
       expect(el.open).toBe(true);
     });
 
     it('Space key toggles open', async () => {
-      const trigger = el.querySelector('.void-collapsible-trigger') as HTMLElement;
+      const trigger = el.querySelector('void-collapsible-trigger') as HTMLElement;
       trigger.dispatchEvent(new KeyboardEvent('keydown', { key: ' ', bubbles: true }));
       await el.updateComplete;
       expect(el.open).toBe(true);
     });
 
     it('other keys do not toggle', async () => {
-      const trigger = el.querySelector('.void-collapsible-trigger') as HTMLElement;
+      const trigger = el.querySelector('void-collapsible-trigger') as HTMLElement;
       trigger.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true }));
       await el.updateComplete;
       expect(el.open).toBe(false);
@@ -289,7 +339,7 @@ describe('VoidCollapsible', () => {
       document.body.appendChild(el);
       await el.updateComplete;
       expect(el.open).toBe(true);
-      const trigger = el.querySelector('.void-collapsible-trigger') as HTMLElement;
+      const trigger = el.querySelector('void-collapsible-trigger') as HTMLElement;
       expect(trigger.getAttribute('aria-expanded')).toBe('true');
     });
   });

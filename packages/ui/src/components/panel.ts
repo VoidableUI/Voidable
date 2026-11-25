@@ -1,50 +1,46 @@
-import { html, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
-import { ProjectionController } from '../projection.js';
+import { PartsController } from '../parts.js';
 
-/** Bordered or elevated content region for grouping related settings, dashboard sections, and detail blocks. */
+/**
+ * Bordered or elevated content region for grouping related settings, dashboard sections, and detail blocks.
+ *
+ * Its regions are parts, in this order: an optional `<void-panel-header>` (holding a `<void-panel-title>` and an
+ * optional `<void-panel-description>`) and the `<void-panel-body>`. The parts are CSS-only and never moved. The panel
+ * is a `region` named by its title part; without a title it is unnamed unless the author gives it an `aria-label`.
+ */
 export class VoidPanel extends VoidElement {
-  /**
-   * Title drawn at the top of the panel. It is also the region's accessible name; without a label the
-   * region is unnamed.
-   */
-  @property({ type: String, reflect: true }) label = '';
   /**
    * `default` is a quiet filled region, `bordered` draws a visible border, `elevated` lifts it with a
    * shadow.
    */
   @property({ type: String, reflect: true }) variant: 'default' | 'bordered' | 'elevated' = 'default';
 
-  // Consumer content stays on the host, after the rendered label.
-  protected readonly _projection = new ProjectionController(this, {
-    regions: [{ name: 'content', target: 'after' }],
+  /** The `aria-labelledby` this panel wrote itself, so an author's own name is never replaced. */
+  private _labelledBy: string | null = null;
+
+  protected readonly _parts = new PartsController(this, {
+    tags: ['void-panel-header', 'void-panel-title', 'void-panel-description', 'void-panel-body'],
+    onChange: () => this._wire(),
   });
 
   connectedCallback(): void {
     super.connectedCallback();
     this.setHostAttribute('role', 'region');
-    if (this.label) {
-      this.setHostAttribute('aria-label', this.label);
-    }
   }
 
-  protected override updated(changed: Map<string, unknown>): void {
-    super.updated(changed);
-    if (changed.has('label')) {
-      if (this.label) {
-        this.setHostAttribute('aria-label', this.label);
-      } else if (changed.get('label')) {
-        // Only a label that was set is taken back: an author's own `aria-label` stands.
-        this.setHostAttribute('aria-label', null);
-      }
+  private _wire(): void {
+    const title = this._parts.one('void-panel-title');
+    const current = this.getAttribute('aria-labelledby');
+    const ours = this._labelledBy !== null && current === this._labelledBy;
+    // The title names the region, unless the author named the panel themselves.
+    if (title && !this.hasAttribute('aria-label') && (current === null || ours)) {
+      this._labelledBy = this._parts.id(title, 'void-panel-title');
+      this.setHostAttribute('aria-labelledby', this._labelledBy);
+    } else if (ours) {
+      this._labelledBy = null;
+      this.setHostAttribute('aria-labelledby', null);
     }
-  }
-
-  render() {
-    return this.label
-      ? html`<div class="void-panel-label">${this.label}</div>`
-      : nothing;
   }
 }
 

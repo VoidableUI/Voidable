@@ -80,3 +80,23 @@ export const NoIcon: Story = {
     ></void-error-fallback>
   `,
 };
+
+export const WithParts: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story: 'Write the parts yourself and they replace the built-in default (the `heading`, `message` and `retryable` attributes no longer apply).',
+      },
+    },
+  },
+  render: () => html`
+    <void-error-fallback>
+      <void-error-fallback-title>Could not load invoices</void-error-fallback-title>
+      <void-error-fallback-description>The server did not respond. Check your connection and try again.</void-error-fallback-description>
+      <void-error-fallback-actions>
+        <button type="button">Try again</button>
+        <a href="/support">Contact support</a>
+      </void-error-fallback-actions>
+    </void-error-fallback>
+  `,
+};

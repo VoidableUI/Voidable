@@ -1,27 +1,35 @@
+/* The built-in default writes these same parts (data-void-default); the icon is
+   drawn here, so a fallback written with parts and one written by the default
+   look alike. */
 void-error-fallback {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: var(--void-space-8);
-  font-family: var(--void-font-sans);
-}
-
-.void-error-fallback-content {
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   gap: var(--void-space-3);
+  padding: var(--void-space-8);
   text-align: center;
-  max-width: 24rem;
+  font-family: var(--void-font-sans);
 }
 
-.void-error-fallback-icon {
+void-error-fallback::before {
+  content: '\26A0';
+  content: '\26A0' / '';
   font-size: var(--void-text-3xl);
   color: var(--void-color-error);
   opacity: 0.7;
 }
 
-.void-error-fallback-heading {
+void-error-fallback[icon="false"]::before {
+  display: none;
+}
+
+void-error-fallback > * {
+  max-width: 24rem;
+}
+
+void-error-fallback-title {
+  display: block;
   font-family: var(--void-type-heading-family);
   font-size: var(--void-type-heading-size);
   line-height: var(--void-type-heading-leading);
@@ -30,12 +38,21 @@ void-error-fallback {
   color: var(--void-type-heading-color);
 }
 
-.void-error-fallback-message {
+void-error-fallback-description {
+  display: block;
   font-size: var(--void-type-body-size);
   color: var(--void-color-text-secondary);
 }
 
-.void-error-fallback-retry {
+void-error-fallback-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: var(--void-space-2);
+}
+
+void-error-fallback-actions > button {
   min-height: var(--void-control-height);
   padding: 0 calc(var(--void-control-padding) * 1.25);
   background: transparent;
@@ -50,11 +67,11 @@ void-error-fallback {
               border-color var(--void-duration-fast) var(--void-ease-in-out);
 }
 
-.void-error-fallback-retry:hover {
+void-error-fallback-actions > button:hover {
   background: var(--void-color-bg-hover);
 }
 
-.void-error-fallback-retry:focus-visible {
+void-error-fallback-actions > button:focus-visible {
   outline: var(--void-focus-ring-width) solid var(--void-focus-ring-color);
   outline-offset: var(--void-focus-ring-offset);
 }

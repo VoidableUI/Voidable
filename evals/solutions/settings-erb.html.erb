@@ -1,25 +1,31 @@
 <main style="max-width: 40rem; margin: 0 auto; padding: var(--void-space-4);">
   <h1>Settings</h1>
   <%= form_with url: "/settings", method: :patch, style: "display: grid; gap: var(--void-space-6);" do %>
-    <void-panel variant="bordered" label="Profile">
-      <h2>Profile</h2>
-      <void-field label="Display name">
-        <void-input name="user[display_name]" value="<%= @user.display_name %>"></void-input>
-      </void-field>
-      <void-field label="Bio">
-        <void-textarea name="user[bio]" value="<%= @user.bio %>"></void-textarea>
-      </void-field>
+    <void-panel variant="bordered">
+      <void-panel-header><void-panel-title>Profile</void-panel-title></void-panel-header>
+      <void-panel-body>
+        <void-field label="Display name">
+          <void-input name="user[display_name]" value="<%= @user.display_name %>"></void-input>
+        </void-field>
+        <void-field label="Bio">
+          <void-textarea name="user[bio]" value="<%= @user.bio %>"></void-textarea>
+        </void-field>
+      </void-panel-body>
     </void-panel>
 
-    <void-panel variant="bordered" label="Notifications">
-      <h2>Notifications</h2>
-      <void-switch name="user[email_notifications]" value="1"<%= " checked" if @user.email_notifications %>>Email notifications</void-switch>
-      <void-switch name="user[weekly_digest]" value="1"<%= " checked" if @user.weekly_digest %>>Weekly digest</void-switch>
+    <void-panel variant="bordered">
+      <void-panel-header><void-panel-title>Notifications</void-panel-title></void-panel-header>
+      <void-panel-body>
+        <void-switch name="user[email_notifications]" value="1"<%= " checked" if @user.email_notifications %>>Email notifications</void-switch>
+        <void-switch name="user[weekly_digest]" value="1"<%= " checked" if @user.weekly_digest %>>Weekly digest</void-switch>
+      </void-panel-body>
     </void-panel>
 
-    <void-panel variant="bordered" label="Danger zone">
-      <h2>Danger zone</h2>
-      <void-button color="error" type="button">Delete account</void-button>
+    <void-panel variant="bordered">
+      <void-panel-header><void-panel-title>Danger zone</void-panel-title></void-panel-header>
+      <void-panel-body>
+        <void-button color="error" type="button">Delete account</void-button>
+      </void-panel-body>
     </void-panel>
 
     <div><void-button type="submit" variant="filled">Save changes</void-button></div>

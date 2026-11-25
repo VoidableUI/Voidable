@@ -89,9 +89,9 @@ export const PAGES = [
     setup: async (page) => {
       await page.evaluate(() => {
         const { toast } = window.VoidUI;
-        toast({ heading: 'Pass scheduled', message: 'MRD-0412 is assigned to Kiruna 3.', color: 'success', duration: 0 });
-        toast({ heading: 'Link degraded', message: 'Tromsø 2 is on its backup link.', color: 'warning', duration: 0 });
-        toast({ heading: 'Upload failed', message: 'The file is larger than 20 MB.', color: 'error', duration: 0 });
+        toast({ title: 'Pass scheduled', description: 'MRD-0412 is assigned to Kiruna 3.', color: 'success', duration: 0 });
+        toast({ title: 'Link degraded', description: 'Tromsø 2 is on its backup link.', color: 'warning', duration: 0 });
+        toast({ title: 'Upload failed', description: 'The file is larger than 20 MB.', color: 'error', duration: 0 });
       });
     },
   },

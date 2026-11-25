@@ -620,11 +620,10 @@ defmodule VoidableUI.Components.InteractiveUITest do
 
       html =
         rendered_to_string(~H"""
-        <VoidableUI.Components.toast color="success" heading="Done" duration={5000}>Msg</VoidableUI.Components.toast>
+        <VoidableUI.Components.toast color="success" duration={5000}>Msg</VoidableUI.Components.toast>
         """)
 
       assert html =~ ~s(color="success")
-      assert html =~ ~s(heading="Done")
       assert html =~ ~s(duration="5000")
     end
 
@@ -637,30 +636,25 @@ defmodule VoidableUI.Components.InteractiveUITest do
         """)
 
       refute html =~ "color="
-      refute html =~ "heading="
       refute html =~ "duration="
     end
 
-    test "renders dismissable by default (true)" do
+    test "renders the parts the author writes, with no structure of its own" do
       assigns = %{}
 
       html =
         rendered_to_string(~H"""
-        <VoidableUI.Components.toast>Msg</VoidableUI.Components.toast>
+        <VoidableUI.Components.toast>
+          <void-toast-title>Done</void-toast-title>
+          <void-toast-description>Saved</void-toast-description>
+          <void-toast-close><button type="button" aria-label="Dismiss">x</button></void-toast-close>
+        </VoidableUI.Components.toast>
         """)
 
-      assert html =~ "dismissable"
-    end
-
-    test "renders dismissable=\"false\" when explicitly false" do
-      assigns = %{}
-
-      html =
-        rendered_to_string(~H"""
-        <VoidableUI.Components.toast dismissable={false}>Msg</VoidableUI.Components.toast>
-        """)
-
-      assert html =~ ~s(dismissable="false")
+      assert html =~ "<void-toast-title>Done</void-toast-title>"
+      assert html =~ "void-toast-close"
+      refute html =~ "dismissable"
+      refute html =~ "heading="
     end
 
     test "passes through global attributes" do

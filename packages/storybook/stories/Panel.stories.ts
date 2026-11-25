@@ -11,7 +11,7 @@ const meta: Meta = {
   parameters: {
     docs: {
       description: {
-        component: 'Structural content container for settings sections, detail views, and grouped information in dashboards. Supports labelled, bordered, and elevated variants for visual hierarchy.',
+        component: 'Structural content container for settings sections, detail views, and grouped information in dashboards. Takes an optional header with a title and description, and supports bordered and elevated variants for visual hierarchy.',
       },
     },
   },
@@ -23,47 +23,77 @@ type Story = StoryObj;
 
 export const Default: Story = {
   args: {
-    label: '',
     variant: 'default',
   },
   render: (args) => html`
-    <void-panel label=${args.label} variant=${args.variant}>
-      <p>This is a default panel. Use it to group related content or provide a visual container for sections of your UI.</p>
+    <void-panel variant=${args.variant}>
+      <void-panel-body>
+        <p>This is a default panel. Use it to group related content or provide a visual container for sections of your UI.</p>
+      </void-panel-body>
     </void-panel>
   `,
 };
 
-export const WithLabel: Story = {
+export const WithTitle: Story = {
   render: () => html`
-    <void-panel label="Settings">
-      <p>Adjust your preferences here. Changes are saved automatically when you leave the field.</p>
+    <void-panel>
+      <void-panel-header><void-panel-title>Settings</void-panel-title></void-panel-header>
+      <void-panel-body>
+        <p>Adjust your preferences here. Changes are saved automatically when you leave the field.</p>
+      </void-panel-body>
+    </void-panel>
+  `,
+};
+
+export const WithDescription: Story = {
+  render: () => html`
+    <void-panel variant="bordered">
+      <void-panel-header>
+        <void-panel-title>Notifications</void-panel-title>
+        <void-panel-description>Choose what you hear about.</void-panel-description>
+      </void-panel-header>
+      <void-panel-body>
+        <p>Email digests are sent on Mondays.</p>
+      </void-panel-body>
     </void-panel>
   `,
 };
 
 export const Bordered: Story = {
   render: () => html`
-    <void-panel variant="bordered" label="Billing">
-      <p>Your current plan is <strong>Pro</strong>. Next billing date is May 1, 2026.</p>
+    <void-panel variant="bordered">
+      <void-panel-header><void-panel-title>Billing</void-panel-title></void-panel-header>
+      <void-panel-body>
+        <p>Your current plan is <strong>Pro</strong>. Next billing date is May 1, 2026.</p>
+      </void-panel-body>
     </void-panel>
   `,
 };
 
 export const Elevated: Story = {
   render: () => html`
-    <void-panel variant="elevated" label="Recent Activity">
-      <p>You signed in from a new device on April 28, 2026 at 09:14 AM.</p>
+    <void-panel variant="elevated">
+      <void-panel-header><void-panel-title>Recent Activity</void-panel-title></void-panel-header>
+      <void-panel-body>
+        <p>You signed in from a new device on April 28, 2026 at 09:14 AM.</p>
+      </void-panel-body>
     </void-panel>
   `,
 };
 
 export const Nested: Story = {
   render: () => html`
-    <void-panel label="Account">
-      <p>Manage your account details and connected services below.</p>
-      <void-panel variant="bordered" label="Profile" style="margin-top: 1rem;">
-        <p>Update your display name, avatar, and contact email.</p>
-      </void-panel>
+    <void-panel>
+      <void-panel-header><void-panel-title>Account</void-panel-title></void-panel-header>
+      <void-panel-body>
+        <p>Manage your account details and connected services below.</p>
+        <void-panel variant="bordered" style="margin-top: 1rem;">
+          <void-panel-header><void-panel-title>Profile</void-panel-title></void-panel-header>
+          <void-panel-body>
+            <p>Update your display name, avatar, and contact email.</p>
+          </void-panel-body>
+        </void-panel>
+      </void-panel-body>
     </void-panel>
   `,
 };

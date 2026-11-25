@@ -27,10 +27,6 @@ describe('VoidPanel', () => {
       el = createElement();
     });
 
-    it('label defaults to empty string', () => {
-      expect(el.label).toBe('');
-    });
-
     it('variant defaults to "default"', () => {
       expect(el.variant).toBe('default');
     });
@@ -40,6 +36,7 @@ describe('VoidPanel', () => {
     let el: VoidPanel;
 
     beforeEach(() => {
+      document.body.innerHTML = '';
       el = createElement();
       document.body.appendChild(el);
     });
@@ -48,29 +45,47 @@ describe('VoidPanel', () => {
       expect(el.getAttribute('role')).toBe('region');
     });
 
-    it('does not set aria-label when label is empty', () => {
+    it('is unnamed without a title part or an aria-label', () => {
       expect(el.getAttribute('aria-label')).toBeNull();
+      expect(el.getAttribute('aria-labelledby')).toBeNull();
     });
 
-    it('sets aria-label from label property on connect', () => {
-      const el2 = createElement();
-      el2.label = 'Settings';
-      document.body.appendChild(el2);
-      expect(el2.getAttribute('aria-label')).toBe('Settings');
+    it('is named by its title part', async () => {
+      el.innerHTML = '<void-panel-header><void-panel-title>Settings</void-panel-title></void-panel-header><void-panel-body>x</void-panel-body>';
+      await new Promise(r => setTimeout(r, 0));
+      const title = el.querySelector('void-panel-title')!;
+      expect(title.id).toMatch(/^void-panel-title-/);
+      expect(el.getAttribute('aria-labelledby')).toBe(title.id);
     });
 
-    it('updates aria-label when label property changes', async () => {
-      el.label = 'Profile';
-      await el.updateComplete;
-      expect(el.getAttribute('aria-label')).toBe('Profile');
+    it('keeps an author id on the title', async () => {
+      el.innerHTML = '<void-panel-header><void-panel-title id="t">Settings</void-panel-title></void-panel-header>';
+      await new Promise(r => setTimeout(r, 0));
+      expect(el.getAttribute('aria-labelledby')).toBe('t');
+      expect(el.querySelector('void-panel-title')!.id).toBe('t');
     });
 
-    it('removes aria-label when label is cleared', async () => {
-      el.label = 'Profile';
-      await el.updateComplete;
-      el.label = '';
-      await el.updateComplete;
-      expect(el.getAttribute('aria-label')).toBeNull();
+    it('leaves an author aria-label alone', async () => {
+      el.setAttribute('aria-label', 'Mine');
+      el.innerHTML = '<void-panel-header><void-panel-title>Settings</void-panel-title></void-panel-header>';
+      await new Promise(r => setTimeout(r, 0));
+      expect(el.getAttribute('aria-label')).toBe('Mine');
+      expect(el.hasAttribute('aria-labelledby')).toBe(false);
+    });
+
+    it('leaves an author aria-labelledby alone', async () => {
+      el.setAttribute('aria-labelledby', 'other');
+      el.innerHTML = '<void-panel-header><void-panel-title>Settings</void-panel-title></void-panel-header>';
+      await new Promise(r => setTimeout(r, 0));
+      expect(el.getAttribute('aria-labelledby')).toBe('other');
+    });
+
+    it('lets go of the name when the title part is removed', async () => {
+      el.innerHTML = '<void-panel-header><void-panel-title>Settings</void-panel-title></void-panel-header>';
+      await new Promise(r => setTimeout(r, 0));
+      el.querySelector('void-panel-header')!.remove();
+      await new Promise(r => setTimeout(r, 0));
+      expect(el.hasAttribute('aria-labelledby')).toBe(false);
     });
   });
 
@@ -100,21 +115,14 @@ describe('VoidPanel', () => {
     });
   });
 
-  describe('label rendering', () => {
-    it('renders label div when label is set', async () => {
+  describe('parts', () => {
+    it('renders nothing of its own and never moves the author\'s nodes', async () => {
       const el = createElement();
-      el.label = 'Notifications';
+      el.innerHTML = '<void-panel-header><void-panel-title>T</void-panel-title></void-panel-header><void-panel-body><p>x</p></void-panel-body>';
+      const before = Array.from(el.querySelectorAll('*'));
       document.body.appendChild(el);
       await el.updateComplete;
-      const labelDiv = el.querySelector('.void-panel-label');
-      expect(labelDiv).not.toBeNull();
-      expect(labelDiv?.textContent).toBe('Notifications');
-    });
-
-    it('does not render label div when label is empty', async () => {
-      const el = createElement();
-      document.body.appendChild(el);
-      await el.updateComplete;
+      expect(Array.from(el.querySelectorAll('*'))).toEqual(before);
       expect(el.querySelector('.void-panel-label')).toBeNull();
     });
   });

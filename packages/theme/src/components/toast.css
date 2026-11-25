@@ -47,9 +47,7 @@ void-toast {
   display: flex;
   flex-direction: column;
   gap: var(--void-space-1);
-  /* Room at the end for the close button, so the message never runs
-     under it. */
-  padding: var(--void-space-3) var(--void-space-9) var(--void-space-3) var(--void-space-4);
+  padding: var(--void-space-3) var(--void-space-4);
   background: var(--void-float-surface);
   border: var(--void-float-border-width) solid var(--void-float-border);
   border-left: 2px solid var(--_void-tone);
@@ -63,6 +61,11 @@ void-toast {
   line-height: var(--void-leading-normal);
 }
 
+/* Room at the end for the close control, so the message never runs under it. */
+void-toast:has(> void-toast-close) {
+  padding-inline-end: var(--void-space-9);
+}
+
 void-toast[color='error']   { --_void-tone: var(--void-color-error); }
 void-toast[color='warning'] { --_void-tone: var(--void-color-warning); }
 void-toast[color='caution'] { --_void-tone: var(--void-color-caution); }
@@ -71,15 +74,33 @@ void-toast[color='success'] { --_void-tone: var(--void-color-success); }
 void-toast[color='info']    { --_void-tone: var(--void-color-info); }
 void-toast[color='notice']  { --_void-tone: var(--void-color-notice); }
 
-.void-toast-heading {
+/* Parts (CSS-only): title, description, actions and the close control the
+   author wrote (or the toast() helper built). */
+void-toast-title {
+  display: block;
   font-weight: var(--void-weight-medium);
-  order: -1;
 }
 
-.void-toast-close {
+void-toast-description {
+  display: block;
+}
+
+void-toast-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--void-space-2);
+  margin-top: var(--void-space-1);
+}
+
+void-toast-close {
   position: absolute;
   top: var(--void-space-2);
   right: var(--void-space-2);
+  display: flex;
+}
+
+void-toast-close > button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -96,11 +117,11 @@ void-toast[color='notice']  { --_void-tone: var(--void-color-notice); }
   transition: opacity var(--void-duration-fast) var(--void-ease-in-out);
 }
 
-.void-toast-close:hover {
+void-toast-close > button:hover {
   opacity: 1;
 }
 
-.void-toast-close:focus-visible {
+void-toast-close > button:focus-visible {
   opacity: 1;
   outline: var(--void-focus-ring-width) solid currentColor;
   outline-offset: var(--void-focus-ring-offset);

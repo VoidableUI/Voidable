@@ -8,7 +8,7 @@ import {
   Input,
   NavBar,
   NumberInput,
-  Toast,
+  ErrorFallback,
   TagsInput,
   Switch,
   BarChart,
@@ -60,15 +60,15 @@ describe('registration', () => {
 });
 
 describe('booleans that default to true', () => {
-  it('turns them off with false and back on with true', async () => {
-    const c = await render(<Toast dismissable={false}>x</Toast>);
-    const el = c.querySelector('void-toast') as HTMLElement & { dismissable: boolean; updateComplete: Promise<boolean> };
+  it('turns an icon off with false and back on with true', async () => {
+    const c = await render(<ErrorFallback icon={false} />);
+    const el = c.querySelector('void-error-fallback') as HTMLElement & { icon: boolean; updateComplete: Promise<boolean> };
     await el.updateComplete;
-    expect(el.dismissable).toBe(false);
-    expect(el.querySelector('.void-toast-close')).toBeNull();
-    await rerender(<Toast dismissable>x</Toast>);
+    expect(el.icon).toBe(false);
+    expect(el.getAttribute('icon')).toBe('false');
+    await rerender(<ErrorFallback icon />);
     await el.updateComplete;
-    expect(el.dismissable).toBe(true);
+    expect(el.icon).toBe(true);
   });
 
   it('works for nav-bar bordered', async () => {

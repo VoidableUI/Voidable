@@ -22,6 +22,6 @@
   import { VoidToastContainer } from '@voidable/ui';
   document.addEventListener('void-click', (e) => {
     const email = e.target.closest('[data-email]')?.dataset.email;
-    if (email) VoidToastContainer.show({ message: `Invite resent to ${email}`, color: 'success', duration: 4000 });
+    if (email) VoidToastContainer.show({ description: `Invite resent to ${email}`, color: 'success', duration: 4000 });
   });
 </script>

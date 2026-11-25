@@ -74,6 +74,31 @@ describe('@voidable/ui/dev', () => {
     expect(seen.find((w) => w.subject === 'heading')!.message).toContain('<void-dialog-title>');
   });
 
+  it('reports the disclosure and notice forms parts replaced, each with the correct markup', async () => {
+    document.body.innerHTML =
+      '<void-collapsible heading="Old"><p>body</p></void-collapsible>' +
+      '<void-panel label="Old"><p>body</p></void-panel>' +
+      '<void-banner dismissable>text</void-banner>' +
+      '<void-toast heading="Old" dismissable>text</void-toast>';
+    await settled();
+    const attr = (tag: string, name: string) => seen.find((w) => w.tag === tag && w.subject === name)!.message;
+    expect(attr('void-collapsible', 'heading')).toContain('<void-collapsible-trigger>');
+    expect(attr('void-panel', 'label')).toContain('<void-panel-title>');
+    expect(attr('void-banner', 'dismissable')).toContain('<void-banner-close>');
+    expect(attr('void-toast', 'heading')).toContain('<void-toast-title>');
+    expect(attr('void-toast', 'dismissable')).toContain('<void-toast-close>');
+    const missing = seen.filter((w) => w.kind === 'missing-part').map((w) => w.tag).sort();
+    expect(missing).toEqual(expect.arrayContaining(['void-banner', 'void-collapsible', 'void-panel', 'void-toast']));
+  });
+
+  it('accepts a fallback with no parts (its built-in default) and the parts written in order', async () => {
+    document.body.innerHTML =
+      '<void-error-fallback heading="Oops" retryable></void-error-fallback>' +
+      '<void-banner><void-banner-description>d</void-banner-description><void-banner-close><button type="button" aria-label="Dismiss">x</button></void-banner-close></void-banner>';
+    await settled();
+    expect(seen.filter((w) => w.kind !== 'undefined-element' && (w.tag === 'void-error-fallback' || w.tag === 'void-banner'))).toEqual([]);
+  });
+
   it('reports a part outside its parent, parts out of order and a trigger without one control', async () => {
     document.body.innerHTML =
       '<void-card><void-dialog-title>Stray</void-dialog-title><void-card-body>b</void-card-body></void-card>' +

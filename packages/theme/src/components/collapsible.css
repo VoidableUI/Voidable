@@ -2,10 +2,14 @@ void-collapsible {
   display: block;
 }
 
-.void-collapsible-trigger {
+/* The trigger part is the button (role="button", a tab stop, written by the
+   collapsible); the chevron is drawn here, so it shows before the script loads. */
+void-collapsible-trigger {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: var(--void-space-2);
+  box-sizing: border-box;
   width: 100%;
   padding: var(--void-space-3) var(--void-space-4);
   border: 1px solid var(--void-color-border);
@@ -17,45 +21,42 @@ void-collapsible {
   font-weight: var(--void-weight-medium);
   text-align: left;
   cursor: pointer;
+  user-select: none;
+  outline: none;
   transition: background var(--void-duration-fast) var(--void-ease-in-out);
 }
 
-.void-collapsible-trigger:hover {
+void-collapsible-trigger::after {
+  content: '';
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+  background: var(--void-color-text-secondary);
+  /* token-ok: the chevron's shape; its colour is the background token above */
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M4 6l4 4 4-4' stroke='black' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
+  transition: transform var(--void-duration-fast) var(--void-ease-in-out);
+}
+
+void-collapsible-trigger:hover {
   background: var(--void-color-bg-hover);
 }
 
-.void-collapsible-trigger:focus-visible {
+void-collapsible-trigger:focus-visible {
   outline: var(--void-focus-ring-width) solid var(--void-focus-ring-color);
   outline-offset: calc(-1 * var(--void-focus-ring-width));
 }
 
-.void-collapsible-chevron {
-  width: 1rem; /* token-ok: intrinsic chevron icon size */
-  height: 1rem; /* token-ok: intrinsic chevron icon size */
-  flex-shrink: 0;
-  color: var(--void-color-text-secondary);
-  transition: transform var(--void-duration-fast) var(--void-ease-in-out);
-}
-
-void-collapsible[open] .void-collapsible-chevron {
+void-collapsible[open] > void-collapsible-trigger::after {
   transform: rotate(180deg);
 }
 
-.void-collapsible-content {
-  display: grid;
-  grid-template-rows: 0fr;
-  transition: grid-template-rows var(--void-duration-normal) var(--void-ease-in-out);
+/* Closed content is hidden from the host's own attribute: no script needed. */
+void-collapsible-content {
+  display: none;
 }
 
-.void-collapsible-inner {
-  overflow: hidden;
-}
-
-void-collapsible[open] .void-collapsible-content {
-  grid-template-rows: 1fr;
-}
-
-void-collapsible[open] .void-collapsible-inner {
+void-collapsible[open] > void-collapsible-content {
+  display: block;
   padding: var(--void-space-3) var(--void-space-4) var(--void-space-4);
   color: var(--void-color-text);
   font-family: var(--void-font-sans);
@@ -67,7 +68,7 @@ void-collapsible[disabled] {
   opacity: 0.5;
 }
 
-void-collapsible[disabled] .void-collapsible-trigger {
+void-collapsible[disabled] > void-collapsible-trigger {
   pointer-events: none;
   cursor: default;
 }

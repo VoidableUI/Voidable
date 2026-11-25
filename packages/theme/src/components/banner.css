@@ -29,10 +29,37 @@ void-banner[color="success"] { --_void-tone: var(--void-color-success); }
 void-banner[color="info"]    { --_void-tone: var(--void-color-info); }
 void-banner[color="notice"]  { --_void-tone: var(--void-color-notice); }
 
-.void-banner-close {
-  order: 1;
-  margin-left: auto;
+/* Parts (CSS-only): title, description, actions and the close control the
+   author wrote. The text takes the room, the buttons sit at the far end. */
+void-banner-title {
   flex-shrink: 0;
+  font-weight: var(--void-weight-medium);
+}
+
+void-banner-description {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+void-banner-actions {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: var(--void-space-2);
+  margin-inline-start: auto;
+}
+
+void-banner-close {
+  display: flex;
+  flex-shrink: 0;
+  margin-inline-start: auto;
+}
+
+void-banner-actions + void-banner-close {
+  margin-inline-start: 0;
+}
+
+void-banner-close > button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -49,11 +76,11 @@ void-banner[color="notice"]  { --_void-tone: var(--void-color-notice); }
   transition: opacity var(--void-duration-fast) var(--void-ease-in-out);
 }
 
-.void-banner-close:hover {
+void-banner-close > button:hover {
   opacity: 1;
 }
 
-.void-banner-close:focus-visible {
+void-banner-close > button:focus-visible {
   opacity: 1;
   outline: var(--void-focus-ring-width) solid currentColor;
   outline-offset: var(--void-focus-ring-offset);

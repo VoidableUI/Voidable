@@ -65,7 +65,7 @@ defmodule VoidableUI.Components do
   ## Booleans that default to true
 
   Every boolean that defaults to true in the core component (`closable` on
-  `dialog` and `drawer`, `dismissable` on `toast`, `bordered` on `nav_bar`,
+  `dialog` and `drawer`, `bordered` on `nav_bar`,
   `controls` and `indicators` on `carousel`, `show_input` on `color_picker`,
   `icon` on `error_fallback`) renders as `"true"` or `"false"`. The core
   component reads the string `"false"` as false, so the server can turn the
@@ -359,15 +359,19 @@ defmodule VoidableUI.Components do
   # Panel (static)
   # ---------------------------------------------------------------------------
 
-  @doc "Renders a `<void-panel>` container."
-  attr :label, :string, default: nil
+  @doc """
+  Renders a `<void-panel>` container.
+
+  Write its parts as children: an optional `<void-panel-header>` (holding a `<void-panel-title>`, which names the
+  region, and an optional `<void-panel-description>`) and the `<void-panel-body>`.
+  """
   attr :variant, :string, default: nil
   attr :rest, :global
   slot :inner_block, required: true
 
   def panel(assigns) do
     ~H"""
-    <void-panel label={@label} variant={@variant} {@rest}>
+    <void-panel variant={@variant} {@rest}>
       {render_slot(@inner_block)}
     </void-panel>
     """
@@ -864,12 +868,16 @@ defmodule VoidableUI.Components do
   # Toast (interactive — void-close)
   # ---------------------------------------------------------------------------
 
-  @doc "Renders a `<void-toast>` notification."
+  @doc """
+  Renders a `<void-toast>` notification.
+
+  Write its parts as children: an optional `<void-toast-title>`, the `<void-toast-description>`, an optional
+  `<void-toast-actions>` and an optional `<void-toast-close>` wrapping the one control that dismisses it (without
+  it the toast has no close button).
+  """
   attr :id, :string, default: nil
   attr :color, :string, default: nil
   attr :duration, :integer, default: nil
-  attr :dismissable, :boolean, default: true
-  attr :heading, :string, default: nil
   attr :events, :any, default: nil, doc: @events_doc
   attr :rest, :global
   slot :inner_block, required: true
@@ -880,8 +888,6 @@ defmodule VoidableUI.Components do
       id={@id || auto_id("void-toast", @rest)}
       color={@color}
       duration={@duration}
-      dismissable={to_string(@dismissable)}
-      heading={@heading}
       phx-hook={void_hook(@events)}
       data-void-events={void_events(@events, "void-close")}
       {@rest}
@@ -1032,9 +1038,14 @@ defmodule VoidableUI.Components do
   # Banner (static)
   # ---------------------------------------------------------------------------
 
-  @doc "Renders a `<void-banner>` announcement."
+  @doc """
+  Renders a `<void-banner>` announcement.
+
+  Write its parts as children: an optional `<void-banner-title>`, the `<void-banner-description>`, an optional
+  `<void-banner-actions>` and an optional `<void-banner-close>` wrapping the one control that dismisses it (without
+  it the banner cannot be dismissed).
+  """
   attr :color, :string, default: nil
-  attr :dismissable, :boolean, default: false
   attr :variant, :string, default: nil
   attr :rest, :global
   slot :inner_block, required: true
@@ -1043,7 +1054,6 @@ defmodule VoidableUI.Components do
     ~H"""
     <void-banner
       color={@color}
-      dismissable={@dismissable}
       variant={@variant}
       {@rest}
     >
@@ -1155,13 +1165,20 @@ defmodule VoidableUI.Components do
   # ErrorFallback (static)
   # ---------------------------------------------------------------------------
 
-  @doc "Renders a `<void-error-fallback>` error display."
+  @doc """
+  Renders a `<void-error-fallback>` error display.
+
+  With no children the component writes its built-in default from `heading`, `message`, `retryable` and
+  `retry_label`. Write parts as children (`<void-error-fallback-title>`, `<void-error-fallback-description>`,
+  `<void-error-fallback-actions>`) and they replace the default, and those attributes no longer apply.
+  """
   attr :heading, :string, default: nil
   attr :message, :string, default: nil
   attr :retryable, :boolean, default: false
   attr :retry_label, :string, default: nil
   attr :icon, :boolean, default: true
   attr :rest, :global
+  slot :inner_block
 
   def error_fallback(assigns) do
     ~H"""
@@ -1172,7 +1189,7 @@ defmodule VoidableUI.Components do
       retry-label={@retry_label}
       icon={to_string(@icon)}
       {@rest}
-    />
+    >{render_slot(@inner_block)}</void-error-fallback>
     """
   end
 
@@ -1868,9 +1885,12 @@ defmodule VoidableUI.Components do
   # Collapsible (interactive — void-toggle)
   # ---------------------------------------------------------------------------
 
-  @doc "Renders a `<void-collapsible>` expandable section."
+  @doc """
+  Renders a `<void-collapsible>` expandable section.
+
+  Write its parts as children: `<void-collapsible-trigger>` (the heading text) and `<void-collapsible-content>`.
+  """
   attr :id, :string, default: nil
-  attr :heading, :string, default: nil
   attr :open, :boolean, default: false
   attr :disabled, :boolean, default: false
   attr :events, :any, default: nil, doc: @events_doc
@@ -1881,7 +1901,6 @@ defmodule VoidableUI.Components do
     ~H"""
     <void-collapsible
       id={@id || auto_id("void-collapsible", @rest)}
-      heading={@heading}
       open={@open}
       disabled={@disabled}
       phx-hook={void_hook(@events)}

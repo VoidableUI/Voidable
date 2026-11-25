@@ -1,39 +1,50 @@
-import { html, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
-import { ProjectionController } from '../projection.js';
+import { PartsController } from '../parts.js';
 
-/** Full-width site-level announcement for maintenance windows, cookie consent, and promotional messaging. */
+/**
+ * Full-width site-level announcement for maintenance windows, cookie consent, and promotional messaging.
+ *
+ * Its text is written as parts: an optional `<void-banner-title>`, the `<void-banner-description>`, an optional
+ * `<void-banner-actions>` (buttons or links) and an optional `<void-banner-close>`. The parts are never moved. The
+ * close part wraps the one control the author writes (a `<void-button aria-label="Dismiss">`); pressing it fires
+ * `void-close` and removes the banner. Without a close part the banner cannot be dismissed.
+ *
+ * @fires {CustomEvent} void-close - The close control was pressed; the banner removes itself afterwards.
+ */
 export class VoidBanner extends VoidElement {
   /**
    * Status colour of the announcement: `default`, `error`, `warning`, `caution`, `success`, `info`,
    * `notice` or `highlight`.
    */
   @property({ type: String, reflect: true }) color: 'default' | 'error' | 'warning' | 'caution' | 'success' | 'info' | 'notice' | 'highlight' = 'default';
-  /** Show a close button. Clicking it fires `void-close` and removes the banner from the page. */
-  @property({ type: Boolean, reflect: true }) dismissable = false;
   /** `subtle` (default) tints the background; `filled` fills it with the status colour. */
   @property({ type: String, reflect: true }) variant: 'subtle' | 'filled' = 'subtle';
 
-  // Consumer content stays on the host, after the rendered close button.
-  protected readonly _projection = new ProjectionController(this, {
-    regions: [{ name: 'content', target: 'after' }],
+  protected readonly _parts = new PartsController(this, {
+    tags: ['void-banner-title', 'void-banner-description', 'void-banner-actions', 'void-banner-close'],
+    onChange: () => undefined,
   });
 
   connectedCallback(): void {
     super.connectedCallback();
     this.setHostAttribute('role', 'banner');
+    this.addEventListener('click', this._onClick);
   }
 
-  private _close(): void {
+  disconnectedCallback(): void {
+    super.disconnectedCallback();
+    this.removeEventListener('click', this._onClick);
+  }
+
+  private _onClick = (e: Event): void => {
+    const close = this._parts.one('void-banner-close');
+    if (!close || !(e.target instanceof Node) || !close.contains(e.target)) return;
+    const control = close.firstElementChild as (HTMLElement & { disabled?: boolean }) | null;
+    if (control?.disabled || control?.hasAttribute('disabled')) return;
     this.dispatchEvent(new CustomEvent('void-close', { bubbles: true, composed: true }));
     this.remove();
-  }
-
-  render() {
-    if (!this.dismissable) return nothing;
-    return html`<button type="button" class="void-banner-close" aria-label="Close" @click="${this._close}">&times;</button>`;
-  }
+  };
 }
 
 if (!customElements.get('void-banner')) {
