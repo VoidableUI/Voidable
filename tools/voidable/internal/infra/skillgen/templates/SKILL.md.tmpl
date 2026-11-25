@@ -204,7 +204,7 @@ The theme has three tiers. Work at the highest one that does the job:
 ```
 
 ```html
-<void-card style="--void-card-padding: var(--void-space-8)">…</void-card>   <!-- one card -->
+<void-card style="--void-card-padding: var(--void-space-8)"><void-card-body>…</void-card-body></void-card>   <!-- one card -->
 ```
 
 A component token is absolute: `--void-button-height` applies at every `size`. To move all size steps, set `--void-control-height-sm`, `--void-control-height` and `--void-control-height-lg`, or the density knob. A semantic or role token set on a subtree must also be set on nested scopes: write `:root, [data-theme], [data-void-theme] { … }`.

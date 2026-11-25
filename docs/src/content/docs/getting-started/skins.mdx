@@ -22,10 +22,12 @@ This page builds **Slab**, the second skin the package ships, in the order you s
     <div class="vd-themed vd-skinned" data-void-theme="void" data-void-skin={skin || undefined} data-theme="light">
       <span data-void-type="label">{label}</span>
       <void-card>
-        <div class="vd-stack">
-          <span><span data-void-type="value">41</span> <span data-void-type="unit">of 44</span></span>
-          <span data-void-type="caption">Stations online</span>
-        </div>
+        <void-card-body>
+          <div class="vd-stack">
+            <span><span data-void-type="value">41</span> <span data-void-type="unit">of 44</span></span>
+            <span data-void-type="caption">Stations online</span>
+          </div>
+        </void-card-body>
       </void-card>
       <void-input value="Kiruna 3" aria-label="Station name"></void-input>
       <div class="vd-row">
