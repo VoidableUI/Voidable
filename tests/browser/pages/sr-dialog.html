@@ -1,0 +1,16 @@
+<main>
+  <h1>Projects</h1>
+  <button id="before">Background action</button>
+  <void-button id="opener" onclick="document.getElementById('dlg').open = true">Edit profile</void-button>
+  <p>Text behind the dialog.</p>
+  <void-dialog id="dlg">
+    <void-dialog-title>Profile settings</void-dialog-title>
+    <void-dialog-description>Change how your name appears.</void-dialog-description>
+    <void-dialog-body>
+      <void-field label="Display name"><void-input id="dlg-name" value="Ada"></void-input></void-field>
+    </void-dialog-body>
+    <void-dialog-actions>
+      <void-button id="dlg-save" variant="filled">Save profile</void-button>
+    </void-dialog-actions>
+  </void-dialog>
+</main>

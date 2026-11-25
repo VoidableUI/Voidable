@@ -96,6 +96,7 @@ export default defineConfig({
             { label: 'Events', slug: 'guides/events' },
             { label: 'Server-rendered apps', slug: 'guides/server-rendered' },
             { label: 'Accessibility', slug: 'guides/accessibility' },
+            { label: 'Accessibility statement', slug: 'guides/accessibility-statement' },
             { label: 'Testing', slug: 'guides/testing' },
           ],
         },

@@ -1,0 +1,15 @@
+<main>
+  <h1>Buttons</h1>
+  <void-button id="save" variant="filled">Save changes</void-button>
+  <void-button id="docs"><a href="#documentation">Read the documentation</a></void-button>
+  <void-button id="close" aria-label="Close panel">
+    <svg aria-hidden="true" focusable="false" width="16" height="16" viewBox="0 0 16 16"><path d="M3 3l10 10M13 3L3 13" stroke="currentColor" stroke-width="2" fill="none"></path></svg>
+  </void-button>
+  <p id="saved-count">Saved 0 times</p>
+</main>
+<script>
+  document.getElementById('save').addEventListener('click', () => {
+    window.saved = (window.saved || 0) + 1;
+    document.getElementById('saved-count').textContent = `Saved ${window.saved} times`;
+  });
+</script>

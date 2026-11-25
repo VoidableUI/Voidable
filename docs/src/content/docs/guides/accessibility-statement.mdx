@@ -1,0 +1,78 @@
+---
+title: Accessibility statement
+description: The accessibility Voidable aims for, what is tested and how, what is not tested, the known gaps, and how to report a problem. No conformance claim.
+---
+
+import ScreenReaderResults from '../../../components/api/ScreenReaderResults.astro';
+import ContractTable from '../../../components/api/ContractTable.astro';
+
+This page says what Voidable aims for in accessibility, what the project checks, what it does not, and where it is known to fall short. It is a statement of effort and evidence. **It is not a claim that Voidable, or a page built with it, conforms to WCAG or any other standard.** Conformance belongs to a finished page, and only an audit of that page can establish it. The [accessibility guide](/guides/accessibility/) covers what the components do for you and what you still have to supply.
+
+## What we aim for
+
+The aim is [WCAG 2.2](https://www.w3.org/TR/WCAG22/) level AA for the components themselves: keyboard operation, names, roles and states a screen reader can use, focus that is visible and managed, text and control contrast, and respect for the reader's colour scheme, motion and forced-colours settings. "Aim" is the right word. Several of the places where the library falls short today are listed under [Known gaps](#known-gaps), and a component can pass every automated check below and still fail a real user.
+
+## What is tested, and how
+
+Everything in this section runs in the repository, on every pull request unless noted.
+
+- **axe-core.** The browser suite runs axe-core on a page with every component, in the dark and light theme, and on each open overlay, with the rule tags `wcag2a`, `wcag2aa`, `wcag21a`, `wcag21aa`, `wcag22aa` and `best-practice`. It runs in **Chromium only**, not in Firefox or WebKit. Known violations are recorded with a reason in `tests/browser/axe-baseline.json`; a new violation, or a fixed one still listed, fails the suite.
+- **Keyboard operation.** Specs drive the composite widgets (tabs, accordion, segmented control, slider, select, menu, calendar, date picker, combobox and multiselect, and the overlays) with real key presses in Chromium, Firefox and WebKit, against the key tables of the WAI-ARIA Authoring Practices: one tab stop, arrow, Home and End movement, Enter and Space, Escape, and where focus goes when an overlay opens and closes. One spec walks the whole kitchen-sink page with Tab to check there is no keyboard trap.
+- **Accessibility tree.** Specs assert the role, accessible name, description and states the browser exposes, through Playwright's role queries and ARIA snapshots, in Chromium, Firefox and WebKit. The screen-reader scenarios below are first written as the same assertions against the accessibility tree, from one set of definitions, so a failure with a real screen reader can be told apart from a failure of the page.
+- **Contrast.** `lint:contrast` evaluates the derived theme colours for the default settings, every theme and skin, and the extremes of each colour setting, in dark and light, on the page, on media and on glass. Text must reach 4.5:1 and control borders and focus rings 3:1. A browser spec repeats the check from the computed styles of rendered components, including the visible boundary of controls (WCAG 1.4.11).
+- **Focus visibility.** Another browser spec presses Tab through every keyboard stop of the kitchen-sink page and checks that each one shows a focus indicator that differs from its unfocused state by 3:1.
+- **Forced colours and reduced motion.** A spec turns `prefers-reduced-motion: reduce` on in every engine and checks that nothing animates forever (a spinner excepted) and that transitions are effectively instant. A second spec turns `forced-colors: active` on and checks that component states stay distinguishable; it runs in **Chromium only**, because that is the only engine Playwright can emulate forced colours in.
+- **Development warnings and `voidable check`.** These report a missing accessible name, an invalid attribute or a part in the wrong place while you write the markup. They help a page author; they are not an audit.
+- **Scripted screen readers.** VoiceOver on macOS and NVDA on Windows are driven by scripts through [Guidepup](https://www.guidepup.dev), and what they actually speak is asserted. See the next section.
+
+### Scripted screen-reader runs
+
+A GitHub Actions workflow (`screen-readers.yml`) starts a real VoiceOver on a macOS runner and a real NVDA on a Windows runner, opens small pages in a real browser, moves through them with the screen reader's own navigation commands (next item, next heading, next form control, next landmark, activate) and checks what was spoken. The scenarios cover buttons, a link button and an icon-only button; a field with a required and an invalid input and its error; a checkbox, a radio group, a switch, a slider and a number input; a dialog; a dropdown menu; tabs; an accordion and a collapsible; a toast and an alert; a tooltip; a table; breadcrumbs and pagination; and a select, a combobox and a multiselect.
+
+The assertions are deliberately loose. They look for the name, a word for the role and a word for each state in what was said, never a whole sentence, because VoiceOver and NVDA, and their versions, word things differently. They run with the screen reader and the system in English only.
+
+These runs are not part of the release gate. They run on pull requests that touch the components or the theme, once a week, and on demand, and they may fail for reasons that are not the library's (a runner image change, a screen reader update). A failure is investigated, not ignored, but it does not stop a release.
+
+#### Last verified
+
+This table is generated from the file `docs/src/data/screen-reader-results.json`. A maintainer adds a run to it from the artifacts of the workflow; nothing in it is written by hand and nothing runs automatically on the site. Until a run has been recorded for a combination, it says so.
+
+<ScreenReaderResults />
+
+## What is not tested
+
+Be clear about what the checks above are not.
+
+- **No audit by screen-reader users.** No person who relies on a screen reader has tested Voidable, and no accessibility consultancy has audited it. A script that presses keys and reads a log finds regressions and gross errors. It does not tell whether a flow is understandable or pleasant to use.
+- **No JAWS, no TalkBack, no VoiceOver on iOS.** Only VoiceOver on macOS and NVDA on Windows are scripted, each with one browser. Narrator, Orca, Dragon, switch access, magnifiers and braille displays are not tested.
+- **No cognitive, language or usability evaluation.** Reading level, consistent behaviour, error recovery, time limits and similar concerns are not assessed.
+- **Not every combination.** One browser per screen reader, one version of each runner image, desktop only. Touch, zoom and reflow at 400%, and text spacing overrides are not tested by a dedicated check.
+- **Not your page.** The components give you the pieces. Headings, landmarks, names for icon-only controls, focus after your own actions and the meaning of your content are yours; the [accessibility guide](/guides/accessibility/#what-you-still-have-to-provide) lists them.
+
+## Known gaps
+
+These are real, current findings, not a complete audit.
+
+**From the project's own checks.** The `tests/browser/axe-baseline.json` file records the violations axe-core finds today, each with its reason:
+
+- `void-nav-menu` holds plain links inside a `menubar`, which axe reports as missing required children.
+- The compact `void-color-picker`'s hex input has no label, and the color picker host is a focusable widget around native controls.
+- `void-banner` is `role="banner"`, a page landmark, even when it is used as a notice inside `<main>`.
+- A `void-button` around a link (a link button) is a button around a link: two nested interactive controls. The screen-reader scenario `link-button-one-control` records it as an expected failure (`untracked:link-button-nested-interactive` in `tests/browser/helpers/known-issues.ts`).
+- The viewport of `void-scroll-area` cannot be scrolled by keyboard unless its content is focusable.
+- Several targets are smaller than 24 by 24 CSS pixels: sidebar and breadcrumb links, carousel indicators, the compact colour input.
+
+**From the selector and state contract.** The table below is generated from the same data as the contract that the project's evals are written against. Each row is a place where an element has no stable name or role, or its state cannot be read reliably.
+
+<ContractTable gaps />
+
+## Reporting a problem
+
+If a component does not work with your assistive technology, or you find something on this site that you cannot use, please [open an issue](https://github.com/VoidableUI/Voidable/issues/new) in the repository. It helps to include:
+
+- the component and what you did,
+- what you expected to hear or do and what happened,
+- your screen reader and its version, browser and operating system, and
+- a short piece of markup that shows it, if you can.
+
+Reports from people who use assistive technology every day are the most valuable thing this project is missing, and are welcome.

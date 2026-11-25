@@ -1,0 +1,74 @@
+---
+// The "last verified" table of the accessibility statement, generated from
+// docs/src/data/screen-reader-results.json. That file is written by
+// `mise run test:screen-readers:record` from the artifacts of a run of the
+// "Screen readers" workflow and committed by a maintainer. Until a run has been
+// recorded the table says "not yet run": nothing here is typed by hand.
+import results from '../../data/screen-reader-results.json';
+
+interface Run {
+  screenReader: string;
+  screenReaderVersion: string;
+  browser: string;
+  system: string;
+  runnerImage: string;
+  date: string;
+  commit: string;
+  runUrl: string;
+  counts: { passed: number; flaky: number; failed: number; skipped: number };
+  scenarios: { id: string; status: string }[];
+}
+
+// The combinations the workflow runs, whether or not a result has been recorded for them.
+const planned = [
+  { screenReader: 'VoiceOver', browser: 'webkit', platform: 'macOS' },
+  { screenReader: 'NVDA', browser: 'chromium', platform: 'Windows' },
+];
+const runs = (results as { runs: Run[] }).runs;
+const rows = planned.map((p) => ({
+  ...p,
+  run: runs.filter((r) => r.screenReader === p.screenReader && r.browser === p.browser).sort((a, b) => b.date.localeCompare(a.date))[0] as Run | undefined,
+}));
+const day = (iso: string) => iso.slice(0, 10);
+const browserName = (b: string) => ({ webkit: 'WebKit (Playwright)', chromium: 'Chromium (Playwright)', firefox: 'Firefox (Playwright)' })[b] ?? b;
+---
+
+<div class="vd-api-table">
+  <table>
+    <thead>
+      <tr><th>Screen reader</th><th>Browser</th><th>Last run</th><th>Result</th><th>Version</th></tr>
+    </thead>
+    <tbody>
+      {
+        rows.map(({ screenReader, browser, platform, run }) => (
+          <tr>
+            <td>{screenReader} on {platform}</td>
+            <td>{browserName(browser)}</td>
+            {
+              run ? (
+                <Fragment>
+                  <td>{day(run.date)}{run.runUrl && <Fragment> (<a href={run.runUrl}>run</a>)</Fragment>}</td>
+                  <td>
+                    {run.counts.passed + run.counts.flaky} of {run.scenarios.length - run.counts.skipped} scenarios passed
+                    {run.counts.failed > 0 && <Fragment>, <strong>{run.counts.failed} failed</strong></Fragment>}
+                    {run.counts.flaky > 0 && <Fragment> ({run.counts.flaky} only after a retry)</Fragment>}
+                    {run.counts.skipped > 0 && <Fragment>, {run.counts.skipped} skipped (known defect)</Fragment>}
+                    <details>
+                      <summary>Scenarios</summary>
+                      <ul>{run.scenarios.map((s) => <li><code>{s.id}</code>: {s.status}</li>)}</ul>
+                    </details>
+                  </td>
+                  <td>{screenReader} {run.screenReaderVersion}, {run.runnerImage}</td>
+                </Fragment>
+              ) : (
+                <Fragment>
+                  <td colspan="3"><strong>Not yet run.</strong> No result has been recorded for this combination.</td>
+                </Fragment>
+              )
+            }
+          </tr>
+        ))
+      }
+    </tbody>
+  </table>
+</div>

@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+#MISE description="One-time setup for the screen-reader suite: configure the OS for VoiceOver or NVDA automation, download the screen reader assets and the browser (macOS or Windows only)"
+#MISE depends=["install"]
+set -euo pipefail
+
+# The same steps .github/workflows/screen-readers.yml runs. The @guidepup/setup
+# version is pinned here and in that workflow (GUIDEPUP_SETUP); keep them equal.
+# On macOS this changes system settings and may need manual steps the first time:
+# https://www.guidepup.dev/docs/guides/manual-voiceover-setup
+GUIDEPUP_SETUP="0.29.3"
+
+case "$(uname -s)" in
+  Darwin) browser=webkit ;;
+  MINGW* | MSYS* | CYGWIN*) browser=chromium ;;
+  *)
+    echo "The screen-reader suite runs on macOS (VoiceOver) or Windows (NVDA), not on $(uname -s)." >&2
+    exit 1
+    ;;
+esac
+
+npx -y --ignore-scripts=false "@guidepup/setup@${GUIDEPUP_SETUP}" setup
+cd tests/browser
+npx -y --ignore-scripts=false "@guidepup/setup@${GUIDEPUP_SETUP}" install
+exec ./node_modules/.bin/playwright install "${VOID_SR_BROWSER:-$browser}"

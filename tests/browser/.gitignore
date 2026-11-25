@@ -2,3 +2,6 @@
 test-results/
 playwright-report/
 blob-report/
+test-results-screen-readers/
+playwright-report-screen-readers/
+screen-reader-results/
