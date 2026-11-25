@@ -1,11 +1,12 @@
 import { html, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
+import { InternalsFormControl, type FormSubmission } from '../form-control.js';
 
 export type TagValue = string | { text: string; color?: string };
 
 /** Multi-tag input field for email recipients, category labels, keyword tagging, and comma-separated value entry. */
-export class VoidTagsInput extends VoidElement {
+export class VoidTagsInput extends InternalsFormControl(VoidElement) {
   @property({ type: Array }) value: TagValue[] = [];
   @property({ type: Boolean, reflect: true }) disabled = false;
   @property({ type: Boolean, reflect: true }) readonly = false;
@@ -22,6 +23,20 @@ export class VoidTagsInput extends VoidElement {
 
   private _tagColor(tag: TagValue): string | undefined {
     return typeof tag === 'string' ? undefined : tag.color;
+  }
+
+  /**
+   * One entry per tag (its text), plus text still in the entry field that
+   * would be accepted as a tag: a submit must not silently drop what the user
+   * typed but has not confirmed with Enter or a comma.
+   */
+  protected formSubmission(): FormSubmission {
+    const tags = this.value.map((t) => this._tagText(t));
+    const pending = this.querySelector<HTMLInputElement>('.void-tags-input-field')?.value.trim() ?? '';
+    if (pending && tags.length < this.max && (this.allowDuplicates || !tags.includes(pending))) {
+      tags.push(pending);
+    }
+    return tags;
   }
 
   connectedCallback(): void {
@@ -65,6 +80,7 @@ export class VoidTagsInput extends VoidElement {
               placeholder=${this.value.length === 0 ? this.placeholder : ''}
               ?disabled=${this.disabled}
               @keydown=${this._onKeydown}
+              @input=${this._onFieldInput}
               @paste=${this._onPaste}
             />`
           : nothing}
@@ -104,12 +120,18 @@ export class VoidTagsInput extends VoidElement {
 
     if (e.key === 'Enter' || e.key === ',') {
       e.preventDefault();
-      const raw = e.key === ',' ? input.value : input.value;
-      this._addTag(raw);
+      const raw = input.value;
+      // Clear first so the form value never counts the text twice.
       input.value = '';
+      this._addTag(raw);
+      this.formSync();
     } else if (e.key === 'Backspace' && input.value === '' && this.value.length > 0) {
       this._removeTag(this.value.length - 1);
     }
+  }
+
+  private _onFieldInput(): void {
+    this.formSync();
   }
 
   private _onPaste(e: ClipboardEvent): void {

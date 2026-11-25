@@ -1,11 +1,14 @@
 import { html } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
+import { InternalsFormControl, type FormSubmission } from '../form-control.js';
 
 /** On/off toggle for feature flags, notification preferences, and settings that take immediate effect. */
-export class VoidSwitch extends VoidElement {
+export class VoidSwitch extends InternalsFormControl(VoidElement) {
   @property({ type: Boolean, reflect: true }) checked = false;
   @property({ type: Boolean, reflect: true }) disabled = false;
+  /** Submitted under `name` while checked (like a native checkbox). */
+  @property({ type: String, reflect: true }) value = 'on';
   @property({ type: String, reflect: true }) color: 'default' | 'error' | 'warning' | 'success' | 'info' | 'notice' = 'default';
   @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' | 'xl' | 'xxl' = 'md';
 
@@ -28,14 +31,27 @@ export class VoidSwitch extends VoidElement {
     if (changed.has('checked')) {
       this.setAttribute('aria-checked', String(this.checked));
     }
-    if (changed.has('disabled')) {
-      this.setAttribute('aria-disabled', String(this.disabled));
-      this.setAttribute('tabindex', this.disabled ? '-1' : '0');
+    if (changed.has('disabled') || changed.has('ancestorDisabled')) {
+      const disabled = this.formDisabled;
+      this.setAttribute('aria-disabled', String(disabled));
+      this.setAttribute('tabindex', disabled ? '-1' : '0');
     }
   }
 
+  protected formSubmission(): FormSubmission {
+    return this.checked ? this.value : null;
+  }
+
+  protected formSnapshot(): unknown {
+    return this.checked;
+  }
+
+  protected formRestore(state: unknown): void {
+    this.checked = Boolean(state);
+  }
+
   private _handleClick = (): void => {
-    if (this.disabled) return;
+    if (this.formDisabled) return;
     this.checked = !this.checked;
     this.dispatchEvent(new CustomEvent('void-change', {
       bubbles: true,
@@ -45,7 +61,7 @@ export class VoidSwitch extends VoidElement {
   };
 
   private _handleKeydown = (e: KeyboardEvent): void => {
-    if ((e.key === ' ' || e.key === 'Enter') && !this.disabled) {
+    if ((e.key === ' ' || e.key === 'Enter') && !this.formDisabled) {
       e.preventDefault();
       this._handleClick();
     }

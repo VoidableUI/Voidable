@@ -35,7 +35,7 @@ function addToggle(group: VoidToggleGroup, value: string, label = ''): VoidToggl
 describe('VoidToggleGroup', () => {
   describe('class', () => {
     it('extends VoidElement', () => {
-      expect(Object.getPrototypeOf(VoidToggleGroup)).toBe(VoidElement);
+      expect(VoidToggleGroup.prototype).toBeInstanceOf(VoidElement);
     });
 
     it('is registered as void-toggle-group', () => {

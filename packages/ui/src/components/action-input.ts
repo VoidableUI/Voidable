@@ -1,13 +1,15 @@
-import { html } from 'lit';
+import { html, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
+import { NativeFormControl } from '../form-control.js';
 
 /** Input field with an attached icon button — used for copy-to-clipboard inputs, search boxes, and similar patterns. */
-export class VoidActionInput extends VoidElement {
+export class VoidActionInput extends NativeFormControl(VoidElement) {
   @property({ type: String }) value = '';
   @property({ type: String, reflect: true }) placeholder = '';
   @property({ type: Boolean, reflect: true }) disabled = false;
   @property({ type: Boolean, reflect: true }) readonly = false;
+  @property({ type: Boolean, reflect: true }) required = false;
   @property({ type: String, reflect: true }) name = '';
   @property({ type: String, reflect: true }) autocomplete = '';
   @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' = 'md';
@@ -41,6 +43,21 @@ export class VoidActionInput extends VoidElement {
       default:
         return html`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="var(--void-icon-stroke-width)" stroke-linecap="round" stroke-linejoin="round" width="1em" height="1em"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 10a7 7 0 1 0 14 0a7 7 0 1 0 -14 0"/><path d="M21 21l-6 -6"/></svg>`;
     }
+  }
+
+  protected formWriteNativeDefault(state: unknown): void {
+    const control = this.querySelector<HTMLInputElement | HTMLTextAreaElement>('.void-action-input-field');
+    if (control) control.defaultValue = String(state ?? '');
+  }
+
+  protected formReadNative(): void {
+    const control = this.querySelector<HTMLInputElement | HTMLTextAreaElement>('.void-action-input-field');
+    if (control) this.value = control.value;
+  }
+
+  protected formSyncNative(): void {
+    const control = this.querySelector<HTMLInputElement | HTMLTextAreaElement>('.void-action-input-field');
+    if (control && control.value !== this.value) control.value = this.value;
   }
 
   private _onInput(e: Event): void {
@@ -82,7 +99,9 @@ export class VoidActionInput extends VoidElement {
         placeholder=${this.placeholder}
         ?disabled=${this.disabled}
         ?readonly=${this.readonly}
+        ?required=${this.required}
         name=${this.name}
+        form=${this.formAttr ?? nothing}
         autocomplete=${this.autocomplete}
         aria-label=${this.actionLabel}
         @input=${this._onInput}

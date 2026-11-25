@@ -31,7 +31,7 @@ function addCheckbox(group: VoidCheckboxGroup, value: string, checked = false): 
 describe('VoidCheckboxGroup', () => {
   describe('class', () => {
     it('extends VoidElement', () => {
-      expect(Object.getPrototypeOf(VoidCheckboxGroup)).toBe(VoidElement);
+      expect(VoidCheckboxGroup.prototype).toBeInstanceOf(VoidElement);
     });
 
     it('is registered as void-checkbox-group', () => {

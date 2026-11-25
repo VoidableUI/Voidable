@@ -1,9 +1,10 @@
 import { html, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
+import { InternalsFormControl, type FormSubmission } from '../form-control.js';
 
 /** Drag-and-drop file picker for document uploads, image attachment flows, and import wizards. */
-export class VoidFileUpload extends VoidElement {
+export class VoidFileUpload extends InternalsFormControl(VoidElement) {
   @property({ type: String }) accept = '';
   @property({ type: Boolean, reflect: true }) multiple = false;
   @property({ type: Boolean, reflect: true }) disabled = false;
@@ -11,6 +12,23 @@ export class VoidFileUpload extends VoidElement {
   @property({ type: String, reflect: true }) error = '';
 
   private _files: File[] = [];
+
+  /** One entry per selected file. */
+  protected formSubmission(): FormSubmission {
+    return this._files;
+  }
+
+  protected formSnapshot(): unknown {
+    return [...this._files];
+  }
+
+  protected formRestore(state: unknown): void {
+    this._files = Array.isArray(state) ? [...state] : [];
+    this.requestUpdate();
+  }
+
+  /** Files cannot be restored from serialised state. */
+  formStateRestoreCallback(): void {}
 
   private get _input(): HTMLInputElement {
     return this.querySelector('input[type="file"]') as HTMLInputElement;
@@ -62,12 +80,12 @@ export class VoidFileUpload extends VoidElement {
   }
 
   private _onDropzoneClick = (): void => {
-    if (this.disabled) return;
+    if (this.formDisabled) return;
     this._input?.click();
   };
 
   private _onDropzoneKeydown = (e: KeyboardEvent): void => {
-    if (this.disabled) return;
+    if (this.formDisabled) return;
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
       this._input?.click();
@@ -87,7 +105,7 @@ export class VoidFileUpload extends VoidElement {
   private _onDrop = (e: DragEvent): void => {
     e.preventDefault();
     this.removeAttribute('dragging');
-    if (this.disabled) return;
+    if (this.formDisabled) return;
     const files = Array.from(e.dataTransfer?.files ?? []);
     this._addFiles(files);
   };

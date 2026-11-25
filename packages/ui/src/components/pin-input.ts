@@ -1,9 +1,11 @@
 import { html, nothing } from 'lit';
+import { live } from 'lit/directives/live.js';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
+import { InternalsFormControl } from '../form-control.js';
 
 /** Single-character input cells for OTP verification codes, PIN entry, and multi-digit confirmation fields. */
-export class VoidPinInput extends VoidElement {
+export class VoidPinInput extends InternalsFormControl(VoidElement) {
   @property({ type: Number }) length: number = 6;
   @property({ type: String, reflect: true }) groups: string = '';
   @property({ type: String }) value: string = '';
@@ -163,7 +165,7 @@ export class VoidPinInput extends VoidElement {
           type=${this.mask ? 'password' : 'text'}
           inputmode=${this.type === 'numeric' ? 'numeric' : 'text'}
           maxlength="1"
-          .value=${cellValue}
+          .value=${live(cellValue)}
           placeholder=${this.placeholder || nothing}
           ?disabled=${this.disabled}
           autocomplete="one-time-code"

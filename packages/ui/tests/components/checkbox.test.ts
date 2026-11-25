@@ -12,7 +12,7 @@ function createElement(): VoidCheckbox {
 describe('VoidCheckbox', () => {
   describe('class', () => {
     it('extends VoidElement', () => {
-      expect(Object.getPrototypeOf(VoidCheckbox)).toBe(VoidElement);
+      expect(VoidCheckbox.prototype).toBeInstanceOf(VoidElement);
     });
 
     it('is registered as void-checkbox', () => {

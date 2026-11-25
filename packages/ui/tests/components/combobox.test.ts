@@ -25,7 +25,7 @@ function createWithOptions(opts: Array<{ value: string; label: string }>): VoidC
 describe('VoidCombobox', () => {
   describe('class', () => {
     it('extends VoidElement', () => {
-      expect(Object.getPrototypeOf(VoidCombobox)).toBe(VoidElement);
+      expect(VoidCombobox.prototype).toBeInstanceOf(VoidElement);
     });
 
     it('is registered as void-combobox', () => {

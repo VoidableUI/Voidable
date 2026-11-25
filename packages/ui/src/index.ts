@@ -1,4 +1,11 @@
 export { VoidElement } from './base.js';
+export type {
+  VoidFormControl,
+  VoidNativeFormControl,
+  VoidInternalsFormControl,
+  FormSubmission,
+  FormValidityResult,
+} from './form-control.js';
 export { VoidBadge } from './components/badge.js';
 export { VoidButton } from './components/button.js';
 export { VoidDivider } from './components/divider.js';

@@ -1,22 +1,36 @@
 import { html, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
+import { NativeFormControl } from '../form-control.js';
 import { ProjectionController } from '../projection.js';
 import type { VoidRadio } from './radio.js';
 
 /** Mutually exclusive option group for plan pickers, survey questions, and preference settings. */
-export class VoidRadioGroup extends VoidElement {
+/**
+ * Form strategy: pass-through. `name` is forwarded to the child void-radio
+ * elements, whose native radios submit; the group itself submits nothing.
+ */
+export class VoidRadioGroup extends NativeFormControl(VoidElement) {
   @property({ type: String }) label = '';
   @property({ type: String }) value = '';
-  @property({ type: String }) name = '';
+  @property({ type: String, reflect: true }) name = '';
+  /** Forwarded to the child radios: the browser then requires one of them to be checked. */
+  @property({ type: Boolean, reflect: true }) required = false;
+  /** Disables every radio in the group (like a fieldset). */
+  @property({ type: Boolean, reflect: true }) disabled = false;
   @property({ type: String, reflect: true }) orientation: 'vertical' | 'horizontal' = 'vertical';
 
-  // Consumer radios are projected into the options container; late radios get the group's name and value.
+  // Consumer radios are projected into the options container; late radios get the
+  // group's name, value, required and form.
   protected readonly _projection = new ProjectionController(this, {
     regions: [{ name: 'options', target: () => this.querySelector(':scope > .void-radio-group-options') }],
     onChange: () => {
       this._syncNames();
+      this._syncRequired();
+      this._syncFormAttr();
       this._syncChecked();
+      // Lets a pending native default (formWriteNativeDefault) reach radios that arrived late.
+      this.requestUpdate();
     },
   });
   connectedCallback(): void {
@@ -39,14 +53,52 @@ export class VoidRadioGroup extends VoidElement {
     if (changed.has('name')) {
       this._syncNames();
     }
+    if (changed.has('required')) {
+      this._syncRequired();
+    }
+    if (changed.has('formAttr')) {
+      this._syncFormAttr();
+    }
+    if (changed.has('disabled') || changed.has('ancestorDisabled')) {
+      this.setAttribute('aria-disabled', String(this.formDisabled));
+    }
     if (!this._didSync) {
       this._didSync = true;
       this._syncNames();
+      this._syncChecked();
+    } else if (changed.has('value')) {
+      // Controlled value: programmatic sets update the radios without firing void-change.
       this._syncChecked();
     }
   }
 
   private _didSync = false;
+
+  protected formSyncNative(): void {
+    // Programmatic value sets reach the radios (and their native inputs) synchronously.
+    if (this._didSync) this._syncChecked();
+  }
+
+  /** The group's initial value becomes the native radios' default checkedness. */
+  protected formWriteNativeDefault(state: unknown): void {
+    const value = String(state ?? '');
+    for (const radio of this._radios()) {
+      radio.updateComplete.then(() => {
+        const input = radio.querySelector<HTMLInputElement>('input[type="radio"]');
+        if (input) input.defaultChecked = radio.value === value;
+      });
+    }
+  }
+
+  protected formReadNative(): void {
+    let value = '';
+    for (const radio of this._radios()) {
+      const input = radio.querySelector<HTMLInputElement>('input[type="radio"]');
+      radio.checked = Boolean(input?.checked);
+      if (radio.checked) value = radio.value;
+    }
+    this.value = value;
+  }
 
   private _radios(): VoidRadio[] {
     return Array.from(this.querySelectorAll('void-radio')) as VoidRadio[];
@@ -56,6 +108,17 @@ export class VoidRadioGroup extends VoidElement {
     if (!this.name) return;
     for (const radio of this._radios()) {
       radio.name = this.name;
+    }
+  }
+
+  private _syncRequired(): void {
+    for (const radio of this._radios()) radio.required = this.required;
+  }
+
+  private _syncFormAttr(): void {
+    for (const radio of this._radios()) {
+      if (this.formAttr === null) radio.removeAttribute('form');
+      else radio.setAttribute('form', this.formAttr);
     }
   }
 

@@ -1,6 +1,7 @@
 import { html, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
+import { InternalsFormControl, type FormSubmission } from '../form-control.js';
 import { ProjectionController } from '../projection.js';
 
 /** Selectable option child element for VoidMultiselect and VoidCombobox. */
@@ -8,6 +9,13 @@ export class VoidOption extends VoidElement {
   @property({ type: String, reflect: true }) value = '';
   @property({ type: Boolean, reflect: true }) selected = false;
 
+  protected override updated(changed: Map<string, unknown>): void {
+    super.updated(changed);
+    // Let the owning multiselect re-render (and re-submit) on programmatic selection.
+    if (changed.has('selected') && changed.get('selected') !== undefined) {
+      this.closest('void-multiselect')?.requestUpdate();
+    }
+  }
 }
 
 if (!customElements.get('void-option')) {
@@ -15,7 +23,7 @@ if (!customElements.get('void-option')) {
 }
 
 /** Multi-value picker for tag selection, permission assignment, and filter fields that allow several simultaneous choices. */
-export class VoidMultiselect extends VoidElement {
+export class VoidMultiselect extends InternalsFormControl(VoidElement) {
   @property({ type: String }) placeholder = 'Select...';
   @property({ type: Boolean, reflect: true }) disabled = false;
   @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' | 'xl' | 'xxl' = 'md';
@@ -35,6 +43,18 @@ export class VoidMultiselect extends VoidElement {
 
   get value(): string[] {
     return this._options.filter(o => o.selected).map(o => o.value);
+  }
+
+  /** Select exactly the options whose value is listed. Does not fire void-change. */
+  set value(values: string[]) {
+    const wanted = new Set(values ?? []);
+    for (const opt of this._options) opt.selected = wanted.has(opt.value);
+    this.requestUpdate();
+  }
+
+  /** One entry per selected option. */
+  protected formSubmission(): FormSubmission {
+    return this.value;
   }
 
   connectedCallback(): void {
@@ -104,14 +124,14 @@ export class VoidMultiselect extends VoidElement {
   }
 
   private _onTriggerClick = (e: Event): void => {
-    if (this.disabled) return;
+    if (this.formDisabled) return;
     e.stopPropagation();
     this._open = !this._open;
     this.requestUpdate();
   };
 
   private _onTriggerKeydown = (e: KeyboardEvent): void => {
-    if (this.disabled) return;
+    if (this.formDisabled) return;
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
       this._open = !this._open;

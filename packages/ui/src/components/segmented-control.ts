@@ -1,5 +1,6 @@
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
+import { InternalsFormControl, type FormSubmission } from '../form-control.js';
 
 /** Individual option within a VoidSegmentedControl button group. */
 export class VoidSegmentedControlItem extends VoidElement {
@@ -24,8 +25,9 @@ if (!customElements.get('void-segmented-control-item')) {
 }
 
 /** Mutually exclusive button group for view mode toggles, time range selectors, and compact tab-like navigation. */
-export class VoidSegmentedControl extends VoidElement {
+export class VoidSegmentedControl extends InternalsFormControl(VoidElement) {
   @property({ type: String, reflect: true }) value = '';
+  @property({ type: Boolean, reflect: true }) disabled = false;
   @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' | 'xl' | 'xxl' = 'md';
   @property({ type: String, reflect: true }) color: 'default' | 'error' | 'warning' | 'success' | 'info' | 'notice' | 'highlight' = 'default';
 
@@ -49,6 +51,11 @@ export class VoidSegmentedControl extends VoidElement {
     }
   }
 
+  /** The selected value, or nothing when no segment is selected. */
+  protected formSubmission(): FormSubmission {
+    return this.value || null;
+  }
+
   private _syncItems(): void {
     const items = Array.from(this.querySelectorAll('void-segmented-control-item')) as VoidSegmentedControlItem[];
     for (const item of items) {
@@ -59,7 +66,7 @@ export class VoidSegmentedControl extends VoidElement {
   private _handleClick = (e: Event): void => {
     const target = e.target as Element;
     const item = target.closest('void-segmented-control-item') as VoidSegmentedControlItem | null;
-    if (!item || item.disabled) return;
+    if (!item || item.disabled || this.formDisabled) return;
     this.value = item.value;
     this.dispatchEvent(new CustomEvent('void-change', {
       bubbles: true,

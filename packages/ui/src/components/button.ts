@@ -1,8 +1,17 @@
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
+import { isInDisabledFieldset } from '../form-control.js';
 
 /** Action trigger for forms, dialogs, and toolbars; supports loading states and semantic color variants. */
 export class VoidButton extends VoidElement {
+  /**
+   * Form-associated so the button knows its form owner (including the `form`
+   * attribute, via ElementInternals) and is told about `<fieldset disabled>`
+   * ancestors. It never calls setFormValue: like a native button it
+   * contributes no value. `type="submit"` calls form.requestSubmit() (which
+   * runs validation and fires `submit`), `type="reset"` calls form.reset(),
+   * `type="button"` does nothing to the form.
+   */
   static formAssociated = true;
 
   @property({ type: String, reflect: true }) variant: 'outline' | 'filled' = 'outline';
@@ -44,13 +53,27 @@ export class VoidButton extends VoidElement {
 
   updated(changed: Map<string, unknown>): void {
     if (changed.has('disabled')) {
-      this.setAttribute('aria-disabled', String(this.disabled));
-      this.setAttribute('tabindex', this.disabled ? '-1' : '0');
+      this._syncDisabledState(this.formDisabled);
     }
   }
 
+  /** True when disabled directly or via an ancestor `<fieldset disabled>`. */
+  get formDisabled(): boolean {
+    return this.disabled || isInDisabledFieldset(this);
+  }
+
+  /** Called by the browser when an ancestor fieldset's disabled state changes. */
+  formDisabledCallback(disabled: boolean): void {
+    this._syncDisabledState(disabled || this.formDisabled);
+  }
+
+  private _syncDisabledState(disabled: boolean): void {
+    this.setAttribute('aria-disabled', String(disabled));
+    this.setAttribute('tabindex', disabled ? '-1' : '0');
+  }
+
   private _handleClick = (e: Event): void => {
-    if (this.disabled) {
+    if (this.formDisabled) {
       e.stopImmediatePropagation();
       return;
     }
@@ -63,7 +86,7 @@ export class VoidButton extends VoidElement {
   };
 
   private _handleKeydown = (e: KeyboardEvent): void => {
-    if ((e.key === 'Enter' || e.key === ' ') && !this.disabled) {
+    if ((e.key === 'Enter' || e.key === ' ') && !this.formDisabled) {
       e.preventDefault();
       this._handleClick(e);
     }
