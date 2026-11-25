@@ -206,7 +206,7 @@ set -euo pipefail
 | `mise run docs:build` | Build docs for deployment |
 | `mise run test:browser` | Real-browser suite (Playwright; Chromium, Firefox, WebKit) against the built packages; not part of `ci` |
 | `mise run test:browser:install` | Download the browsers for it (`-- --with-deps` adds system libraries on Debian/Ubuntu) |
-| `mise run test:server` | Server-backed suite: starts the Rails demo on the built packages and drives it |
+| `mise run test:server` | Server-backed suite: starts the Rails, Phoenix LiveView and Laravel Livewire demos on the built packages and drives each (`VOID_SERVER_APPS=rails,phoenix,laravel` selects; each needs its toolchain from `mise.toml`) |
 | `mise run test:coverage` | Unit tests with V8 coverage, per-package summary (no thresholds) |
 
 ### Browser Tests
@@ -217,7 +217,7 @@ set -euo pipefail
 - Never wait with sleeps or timeouts. Use `settle(page)` (every `updateComplete` plus two frames), `expect` retries, `expect.poll` or component events.
 - A failing test that shows a real defect is not fixed by changing the test. Mark it with `expectedFailure('#n', detail)` (key in `helpers/known-issues.ts`, `untracked:` when no issue exists yet), keep the assertion of the correct behaviour, and report it.
 - When a fix makes an expected failure pass, remove its marker in the same change. `VOID_RUN_EXPECTED=1` runs every expected failure as an ordinary test, to see how each still fails.
-- The `browser` and `server` jobs of `ci.yml` run on pull requests and, through `workflow_call`, gate every release: `release.yml` tags and publishes only if all of `ci.yml` passed.
+- The `browser`, `server` (Rails), `phoenix` and `laravel` jobs of `ci.yml` run on pull requests and, through `workflow_call`, gate every release: `release.yml` tags and publishes only if all of `ci.yml` passed.
 - Performance budgets are in `tests/browser/budgets.ts`, the axe baseline in `tests/browser/axe-baseline.json`, and the server apps in `tests/browser/server/apps.mjs`.
 
 ### Tech Stack

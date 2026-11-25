@@ -6,7 +6,7 @@
 // (SIGTERM) when the run ends.
 import * as esbuild from 'esbuild';
 import { spawn, spawnSync } from 'node:child_process';
-import { mkdirSync, rmSync } from 'node:fs';
+import { existsSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -20,7 +20,7 @@ if (!app) {
 }
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const require = createRequire(join(root, 'package.json'));
-const env = { ...process.env, ...app.env };
+const env = { ...process.env, PORT: String(app.port), ...app.env };
 
 // The toolchains pinned in mise.toml, ahead of whatever else is on PATH (a
 // system Ruby, say), so the app runs on the versions the repository declares.
@@ -34,11 +34,14 @@ for (const tool of app.tools ?? []) {
 }
 
 // 1. This repository's built packages, as the app will load them.
-const out = join(app.cwd, app.assetsDir);
-rmSync(out, { recursive: true, force: true });
-mkdirSync(out, { recursive: true });
-for (const [file, spec] of Object.entries(app.assets)) {
+const out = app.assetsDir ? join(app.cwd, app.assetsDir) : null;
+if (out) {
+  rmSync(out, { recursive: true, force: true });
+  mkdirSync(out, { recursive: true });
+}
+for (const [file, spec] of Object.entries(app.assets ?? {})) {
   const target = join(out, file);
+  mkdirSync(dirname(target), { recursive: true });
   if (spec.esm) {
     await esbuild.build({ stdin: { contents: spec.esm, resolveDir: root, loader: 'js' }, bundle: true, format: 'esm', outfile: target, logLevel: 'warning', legalComments: 'none' });
   } else if (spec.css) {
@@ -46,8 +49,14 @@ for (const [file, spec] of Object.entries(app.assets)) {
   }
 }
 
-// 2. Prepare (install dependencies, create the database).
-for (const [cmd, args] of app.prepare) {
+// 2. Prepare (install dependencies, create the database). A step is a command, or { write: [file, text] }.
+for (const step of app.prepare) {
+  if (!Array.isArray(step)) {
+    // Never overwrite a file a developer made (the Laravel example's .env).
+    if (!existsSync(join(app.cwd, step.write[0]))) writeFileSync(join(app.cwd, step.write[0]), step.write[1]);
+    continue;
+  }
+  const [cmd, args] = step;
   const r = spawnSync(cmd, args, { cwd: app.cwd, env, stdio: 'inherit' });
   if (r.status !== 0) {
     console.error(`[${name}] "${cmd} ${args.join(' ')}" failed with ${r.status ?? r.signal}`);

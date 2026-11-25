@@ -71,6 +71,7 @@ export default defineConfig({
             { label: 'Design Tokens', slug: 'getting-started/tokens' },
             { label: 'Migrating from the framework packages', slug: 'getting-started/migrating-from-framework-packages' },
             { label: 'Measuring agent-friendliness', slug: 'getting-started/agent-evals' },
+            { label: 'Testing in real browsers', slug: 'getting-started/browser-tests' },
           ],
         },
         {

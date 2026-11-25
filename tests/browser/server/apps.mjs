@@ -36,4 +36,61 @@ export const apps = {
     ],
     start: (port) => ['bin/rails', ['server', '-b', '127.0.0.1', '-p', String(port)]],
   },
+
+  phoenix: {
+    /** The LiveView demo, with the live_voidable Hex package from this repository and the built adapter (config/config.exs). */
+    cwd: join(repo, 'packages/liveview/demo'),
+    tools: ['erlang', 'elixir'],
+    port: 4530,
+    readyPath: '/lab',
+    env: { VOIDABLE_LOCAL: '1', MIX_ENV: 'dev', HEX_HTTP_CONCURRENCY: '4' },
+    /** The root layout loads these two; app.js and app.css come from `mix assets.build`. */
+    assetsDir: 'priv/static/assets',
+    assets: {
+      'js/voidable-ui.js': { esm: `export * from '@voidable/ui';` },
+      'css/voidable/index.css': { css: '@voidable/theme' },
+    },
+    prepare: [
+      ['mix', ['local.hex', '--force', '--if-missing']],
+      ['mix', ['local.rebar', '--force', '--if-missing']],
+      ['mix', ['deps.get']],
+      ['mix', ['assets.setup']],
+      ['mix', ['assets.build']],
+    ],
+    start: () => ['mix', ['phx.server']],
+  },
+
+  laravel: {
+    /** The Laravel example (Livewire 4 and the voidable/laravel package from this repository), assets built by its own Vite config from the packages' builds. */
+    cwd: join(repo, 'examples/laravel'),
+    tools: ['php'],
+    port: 4540,
+    readyPath: '/lab',
+    env: { PHP_CLI_SERVER_WORKERS: '4' },
+    prepare: [
+      ['composer', ['install', '--no-interaction', '--prefer-dist', '--no-progress']],
+      {
+        write: [
+          '.env',
+          [
+            'APP_NAME=Voidable',
+            'APP_ENV=local',
+            'APP_KEY=',
+            'APP_DEBUG=true',
+            'APP_URL=http://127.0.0.1:4540',
+            'LOG_LEVEL=warning',
+            'DB_CONNECTION=sqlite',
+            'SESSION_DRIVER=file',
+            'CACHE_STORE=file',
+            'QUEUE_CONNECTION=sync',
+            'BROADCAST_CONNECTION=log',
+            '',
+          ].join('\n'),
+        ],
+      },
+      ['php', ['artisan', 'key:generate', '--force']],
+      ['./node_modules/.bin/vite', ['build']],
+    ],
+    start: (port) => ['php', ['artisan', 'serve', '--host=127.0.0.1', `--port=${port}`]],
+  },
 };

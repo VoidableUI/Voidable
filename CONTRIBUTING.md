@@ -27,7 +27,8 @@ mise run test:browser:install                 # once: download the browsers (add
 mise run test:browser                         # build, then run every spec on every engine, then the perf budgets
 VOID_BROWSERS=chromium mise run test:browser  # one engine
 mise run test:browser -- specs/forms.spec.ts --project=firefox
-mise run test:server                          # server-backed: starts the Rails demo and drives it (needs Ruby from mise.toml)
+mise run test:server                          # server-backed: starts the Rails, Phoenix and Laravel demos and drives each (needs Ruby, Erlang/Elixir and PHP from mise.toml)
+VOID_SERVER_APPS=phoenix mise run test:server # one app (rails, phoenix, laravel)
 mise run test:coverage                        # unit-test coverage per package (reported, not enforced)
 ```
 

@@ -1,0 +1,48 @@
+<% content_for :title, "Turbo lab" %>
+<% content_for :subtitle, "Turbo Drive, Frames and Streams on Voidable components" %>
+<% content_for :no_search, "1" %>
+
+<p id="lab-page">Turbo lab, page one</p>
+<nav style="display: flex; gap: 1rem; margin-bottom: 1rem">
+  <%= link_to "Page two", turbo_lab_two_path, id: "to-two" %>
+  <%= link_to "Morph lab", morph_lab_path, id: "to-morph" %>
+  <%= link_to "Plain (no Turbo)", turbo_lab_two_path, id: "to-two-plain", data: { turbo: false } %>
+</nav>
+
+<div id="a-controls" style="display: grid; gap: 1rem; max-width: 40rem">
+  <void-field label="Note"><void-input id="a-note" name="note"></void-input></void-field>
+  <void-field label="Pick">
+    <void-select id="a-pick" name="pick" placeholder="Choose…">
+      <option value="a">Option a</option>
+      <option value="b">Option b</option>
+      <option value="c">Option c</option>
+    </void-select>
+  </void-field>
+  <void-switch id="a-news" name="news" value="yes">Newsletter</void-switch>
+  <void-tabs id="a-tabs" value="one">
+    <void-tab-panel tab="one" label="One">Panel one</void-tab-panel>
+    <void-tab-panel tab="two" label="Two">Panel two</void-tab-panel>
+  </void-tabs>
+  <void-dropdown-menu id="a-menu">
+    <button slot="trigger" id="a-menu-trigger" type="button">Actions</button>
+    <void-dropdown-menu-item>Rename</void-dropdown-menu-item>
+    <void-dropdown-menu-item>Archive</void-dropdown-menu-item>
+  </void-dropdown-menu>
+  <void-button id="a-open-dialog" onclick="document.getElementById('a-dialog').open = true">Open dialog</void-button>
+  <void-dialog id="a-dialog" heading="A dialog"><p>Dialog body</p></void-dialog>
+</div>
+
+<h3>Turbo Frame</h3>
+<%= turbo_frame_tag "lab-frame" do %>
+  <%= link_to "Load the frame", turbo_lab_frame_path, id: "load-frame" %>
+<% end %>
+
+<h3>Turbo Streams</h3>
+<div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem">
+  <% %w[append prepend before after replace update remove].each do |op| %>
+    <%= button_to op.capitalize, turbo_lab_stream_path, params: { op: op }, id: "stream-#{op}" %>
+  <% end %>
+</div>
+<ul id="items" style="display: grid; gap: 1rem; list-style: none; padding: 0">
+  <% (1..3).each do |n| %><%= render "turbo_lab/item", n: n %><% end %>
+</ul>

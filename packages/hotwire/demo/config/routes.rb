@@ -5,6 +5,11 @@ Rails.application.routes.draw do
   resource :morph_lab, only: %i[show update], controller: "morph_lab" do
     post :stream
   end
+  # Turbo Drive navigation, Turbo Frames and Turbo Streams on Voidable components.
+  get "turbo_lab", to: "turbo_lab#show", as: :turbo_lab
+  get "turbo_lab/two", to: "turbo_lab#two", as: :turbo_lab_two
+  match "turbo_lab/frame", to: "turbo_lab#frame", via: %i[get post], as: :turbo_lab_frame
+  post "turbo_lab/stream", to: "turbo_lab#stream", as: :turbo_lab_stream
   post "toggle_layout", to: "settings#toggle_layout"
   devise_for :users
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html

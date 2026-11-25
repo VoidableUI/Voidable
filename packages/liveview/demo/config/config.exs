@@ -21,12 +21,21 @@ config :demo, DemoWeb.Endpoint,
   pubsub_server: Demo.PubSub,
   live_view: [signing_salt: "VImjJ0GG"]
 
+# The Voidable LiveView adapter is bundled from this repository: its source by default, or its
+# build when VOIDABLE_LOCAL=1 (tests/browser/server runs the demo that way).
+voidable_liveview =
+  if System.get_env("VOIDABLE_LOCAL") do
+    Path.expand("../../dist/index.js", __DIR__)
+  else
+    Path.expand("../../src/index.ts", __DIR__)
+  end
+
 # Configure esbuild (the version is required)
 config :esbuild,
   version: "0.25.4",
   demo: [
     args:
-      ~w(js/app.js css/app.css --bundle --target=es2022 --outdir=../priv/static/assets --external:/fonts/* --external:/images/* --alias:@=.),
+      ~w(js/app.js css/app.css --bundle --target=es2022 --outdir=../priv/static/assets --external:/fonts/* --external:/images/* --alias:@=. --alias:@voidable/ui-liveview=#{voidable_liveview}),
     cd: Path.expand("../assets", __DIR__),
     env: %{"NODE_PATH" => [Path.expand("../deps", __DIR__), Mix.Project.build_path()]}
   ]

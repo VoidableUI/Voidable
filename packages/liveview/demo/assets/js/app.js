@@ -23,8 +23,9 @@ import "phoenix_html"
 import {Socket} from "phoenix"
 import {LiveSocket} from "phoenix_live_view"
 import {hooks as colocatedHooks} from "phoenix-colocated/demo"
-// Source of truth: packages/liveview/src (bundled by esbuild, no copy to keep in sync)
-import {VoidHooks, VoidDOM} from "../../../src/index.ts"
+// The adapter. config/config.exs points this name at packages/liveview/src (the source of truth,
+// bundled by esbuild, no copy to keep in sync) or, with VOIDABLE_LOCAL=1 (the browser tests), at its build.
+import {VoidHooks, VoidDOM} from "@voidable/ui-liveview"
 import topbar from "../vendor/topbar.cjs"
 
 const csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
