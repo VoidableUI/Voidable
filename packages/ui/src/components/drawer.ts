@@ -13,6 +13,7 @@ import { ProjectionController } from '../projection.js';
  *
  * Name the drawer with `heading`; without one, set `aria-label` on the element and it is passed to the native dialog.
  *
+ * @attr {string} aria-label - Accessible name of the drawer when there is no `heading`; it is passed to the native `<dialog>`. Ignored while `heading` is set.
  * @fires {CustomEvent<{ reason: 'api' }>} void-open - The drawer opened.
  * @fires {CustomEvent<{ reason: 'escape' | 'outside' | 'close-button' | 'form' | 'parent' | 'api' }>} void-close - The
  * drawer is closing. Cancelable when the user caused it (`escape`, `outside`, `close-button`).
