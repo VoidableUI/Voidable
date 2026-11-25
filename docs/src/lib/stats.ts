@@ -49,18 +49,22 @@ function computeStats() {
   }
   adapters.sort();
 
-  // Latest @voidable/ui release: CI passes VOIDABLE_VERSION; locally use git tags.
+  // Latest release. Every package shares one version, tagged vX.Y.Z. The
+  // release workflow passes VOIDABLE_VERSION; locally use the newest tag.
   let version: string | undefined = process.env.VOIDABLE_VERSION || undefined;
   if (!version) {
     try {
-      const tag = execSync("git tag --list 'ui-v[0-9]*' --sort=-v:refname", { cwd: root, encoding: 'utf8' })
+      const tag = execSync("git tag --list 'v[0-9]*.[0-9]*.[0-9]*' --sort=-v:refname", { cwd: root, encoding: 'utf8' })
         .split('\n')[0]
         .trim();
-      if (tag) version = tag.replace(/^ui-/, '');
+      if (tag) version = tag;
     } catch {
       /* no git available */
     }
   }
+  if (version && !version.startsWith('v')) version = `v${version}`;
+  // Bare number for install snippets ("0.8.0"); undefined before the first release.
+  const versionNumber = version && /^v\d+\.\d+\.\d+$/.test(version) ? version.slice(1) : undefined;
 
   // Gzipped size of the @voidable/ui build: CI passes VOIDABLE_BUNDLE_SIZE
   // (same calculation); locally compute it from packages/ui/dist if built.
@@ -76,7 +80,7 @@ function computeStats() {
     }
   }
 
-  return { components, elements: tags.size, adapters: adapters.length, adapterNames: adapters, version, bundleSize };
+  return { components, elements: tags.size, adapters: adapters.length, adapterNames: adapters, version, versionNumber, bundleSize };
 }
 
 function readdirSyncRecursive(dir: string): string[] {

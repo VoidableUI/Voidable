@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+#MISE description="Build, pack and verify npm packages: mise run release:npm core|adapters|all (needs VERSION; publishes only with DRY_RUN=false)"
+set -euo pipefail
+
+exec scripts/release/npm.sh "$@"

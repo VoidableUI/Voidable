@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+#MISE description="Test, build and verify the voidable-hotwire gem (needs VERSION; pushes only with DRY_RUN=false)"
+set -euo pipefail
+
+exec scripts/release/gem.sh "$@"

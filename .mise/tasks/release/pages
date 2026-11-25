@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+#MISE description="Build the GitHub Pages site (docs and Storybook) into _site"
+#MISE depends=["install"]
+set -euo pipefail
+
+exec scripts/release/pages.sh "$@"

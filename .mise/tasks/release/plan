@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+#MISE description="Decide whether HEAD releases and at which unified version (read-only)"
+set -euo pipefail
+
+exec scripts/release/plan.sh "$@"

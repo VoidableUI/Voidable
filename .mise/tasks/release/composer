@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+#MISE description="Test voidable/laravel and split it to its mirror (needs VERSION; pushes only with DRY_RUN=false)"
+set -euo pipefail
+
+exec scripts/release/composer.sh "$@"

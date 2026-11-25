@@ -1,6 +1,8 @@
+require_relative "lib/voidable/hotwire/version"
+
 Gem::Specification.new do |spec|
   spec.name          = "voidable-hotwire"
-  spec.version       = "0.0.1"
+  spec.version       = Voidable::Hotwire::VERSION
   spec.authors       = ["Kaz Walker"]
   spec.email         = ["the.kaz.walker@gmail.com"]
 

@@ -2,6 +2,11 @@
 title: LiveView
 ---
 
+import { Code } from '@astrojs/starlight/components';
+import { stats } from '../../../lib/stats';
+
+export const hexRequirement = stats.versionNumber ? `~> ${stats.versionNumber}` : '>= 0.0.0';
+
 The LiveView adapter uses a dual-package architecture (npm + Hex) to bridge Voidable custom events to Phoenix LiveView's server-side event handling.
 
 ## Install
@@ -12,15 +17,13 @@ Install the JavaScript package:
 npm install @voidable/ui @voidable/theme @voidable/ui-liveview
 ```
 
-Add the Hex package to `mix.exs`:
+Add the Hex package to `mix.exs`. It shares its version number with the npm packages, so use the same version for both:
 
-```elixir
-defp deps do
+<Code lang="elixir" code={`defp deps do
   [
-    {:live_voidable, "~> 0.2"}
+    {:live_voidable, "${hexRequirement}"}
   ]
-end
-```
+end`} />
 
 ## Register the LiveView hook
 
