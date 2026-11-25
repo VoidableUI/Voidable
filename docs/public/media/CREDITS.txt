@@ -1,6 +1,6 @@
 Photographs in this directory
 
-All six are NASA photographs taken from images.nasa.gov. NASA imagery is
+All are NASA photographs taken from images.nasa.gov. NASA imagery is
 generally not subject to copyright in the United States and may be used
 without permission for informational and educational purposes, provided
 no endorsement by NASA is implied (https://www.nasa.gov/nasa-brand-center/images-and-media/).
@@ -11,6 +11,10 @@ limb.jpg       NASA ID iss073e0257194. "Noctilucent clouds are pictured above
                the North Pacific Ocean", International Space Station,
                28 June 2025. Credit: NASA.
                https://images.nasa.gov/details/iss073e0257194
+
+limb-horizon.jpg  The same photograph as limb.jpg, recomposed for the home page:
+               black added above and the frame cropped to 16:9, so the limb
+               sits low like a horizon.
 
 sunrise.jpg    NASA ID iss040e080833. "Earth Observation" (sunrise over the
                Earth's limb), Expedition 40, International Space Station,

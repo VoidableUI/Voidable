@@ -1,0 +1,114 @@
+---
+title: Empty state
+description: void-empty says that nothing is here, why, and what to do next (an icon, a heading, a sentence and actions), for a first run, a search with no results, or an error.
+---
+
+import Example from '../../../components/Example.astro';
+
+`<void-empty>` fills the place where content would be when there is none. It says what is missing, why, and what to do about it: an optional icon, a heading, one sentence, and at most two actions.
+
+export const empty = `
+<void-empty bordered>
+  <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6"/><path d="m20 20-4.5-4.5"/></svg>
+  <h3>No passes match</h3>
+  <p>Nothing is assigned to this station in the next 24 hours. Try another band, or assign a pass.</p>
+  <void-actions>
+    <void-button>Clear filters</void-button>
+    <void-button variant="filled">Assign a pass</void-button>
+  </void-actions>
+</void-empty>`;
+
+export const emptyErb = `
+<% if @passes.empty? %>
+  <void-empty bordered>
+    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6"/><path d="m20 20-4.5-4.5"/></svg>
+    <h3>No passes match</h3>
+    <p>Nothing is assigned to this station in the next 24 hours. Try another band, or assign a pass.</p>
+    <void-actions>
+      <void-button><%= link_to "Clear filters", station_passes_path(@station) %></void-button>
+      <void-button variant="filled"><%= link_to "Assign a pass", new_station_pass_path(@station) %></void-button>
+    </void-actions>
+  </void-empty>
+<% else %>
+  <%= render "passes/table", passes: @passes %>
+<% end %>`;
+
+export const emptyJsx = `
+{passes.length === 0 ? (
+  <void-empty bordered>
+    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6" /><path d="m20 20-4.5-4.5" /></svg>
+    <h3>No passes match</h3>
+    <p>Nothing is assigned to this station in the next 24 hours. Try another band, or assign a pass.</p>
+    <void-actions>
+      <Button onVoidClick={clearFilters}>Clear filters</Button>
+      <Button variant="filled" onVoidClick={assign}>Assign a pass</Button>
+    </void-actions>
+  </void-empty>
+) : (
+  <PassTable passes={passes} />
+)}`;
+
+<Example html={empty} erb={emptyErb} jsx={emptyJsx} />
+
+## Three situations, three texts
+
+The same element serves three different moments. What changes is the words.
+
+| Situation | Heading | Sentence | Action |
+|---|---|---|---|
+| **First run**: nothing has been made yet | "No stations yet" | What a station is and what adding one does | The primary action: "Add a station" |
+| **No results**: a search or filter matched nothing | "No passes match" | Which filter is in the way | "Clear filters" |
+| **Could not load** | "Could not load passes" | What happened, in plain words, and that nothing was lost | "Try again" |
+
+Write the heading as a fact, not an apology, and never leave the reader with only "No data".
+
+## Size and border
+
+`bordered` draws a dashed hairline around it, for an empty area inside a page that is otherwise full (under a toolbar, in a section). Leave it off when the empty state is the whole page. `size="sm"` has less padding, for a panel or a drawer.
+
+export const small = `
+<void-empty size="sm">
+  <h3>No notes</h3>
+  <p>Notes are shown to the operator on call.</p>
+  <void-actions><void-button size="sm">Add a note</void-button></void-actions>
+</void-empty>`;
+
+export const smallErb = `
+<void-empty size="sm">
+  <h3>No notes</h3>
+  <p>Notes are shown to the operator on call.</p>
+  <void-actions>
+    <void-button size="sm"><%= link_to "Add a note", new_station_note_path(@station) %></void-button>
+  </void-actions>
+</void-empty>`;
+
+export const smallJsx = `
+<void-empty size="sm">
+  <h3>No notes</h3>
+  <p>Notes are shown to the operator on call.</p>
+  <void-actions>
+    <Button size="sm" onVoidClick={addNote}>Add a note</Button>
+  </void-actions>
+</void-empty>`;
+
+<Example html={small} erb={smallErb} jsx={smallJsx} />
+
+## Reference
+
+| Child | |
+|---|---|
+| `<svg>`, `<i>` or `<img>` | Optional icon, drawn 24px in the muted text colour. Decorative: give it `aria-hidden="true"`. |
+| `<h3>` (or `h2`, `h4`) | Required. Choose the level that fits the outline of the page. |
+| `<p>` | One sentence, centred, held to a comfortable line. |
+| `<void-actions>` | Optional. At most one `filled` button. |
+
+| Attribute | Values |
+|---|---|
+| `bordered` | Dashed hairline around the empty area |
+| `size` | `md` (default), `sm` |
+
+When the content is replaced by an empty state after the page has loaded (a filter was applied), wrap it in `role="status"` so the change is announced.
+
+## Why this form
+
+An empty state is CSS only: a centred column. It takes a real heading so it has a place in the page outline, and the icon is yours, so it comes from the icon set your application already uses.

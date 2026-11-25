@@ -1,0 +1,27 @@
+---
+// A pattern at work, then its markup. The HTML tab is the same string the
+// live example renders, so the two cannot drift. `live` replaces what is
+// rendered when the copy-paste markup needs a frame around it to be shown
+// (an application shell, a full-bleed image).
+import { Code, Tabs, TabItem } from '@astrojs/starlight/components';
+
+interface Props {
+  html: string;
+  erb?: string;
+  jsx?: string;
+  live?: string;
+  /** plain: on the docs page. frame: inside a bordered region, for whole screens. */
+  frame?: 'plain' | 'frame';
+}
+
+const { html, erb, jsx, live, frame = 'plain' } = Astro.props;
+const clean = (s: string) => s.replace(/^\n+|\s+$/g, '');
+---
+
+<div class:list={['vd-pattern', 'not-content', frame === 'frame' && 'vd-pattern-frame']} set:html={live ?? html} />
+
+<Tabs syncKey="markup">
+  <TabItem label="HTML"><Code code={clean(html)} lang="html" /></TabItem>
+  {erb && <TabItem label="ERB"><Code code={clean(erb)} lang="erb" /></TabItem>}
+  {jsx && <TabItem label="JSX"><Code code={clean(jsx)} lang="jsx" /></TabItem>}
+</Tabs>

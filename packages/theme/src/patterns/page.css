@@ -1,3 +1,11 @@
+/* The patterns style the native elements placed inside them (h1, h2,
+   p, dl). Their browser margins are removed here, so the patterns do
+   not depend on the theme's reset being loaded. */
+:where(void-page-head, void-section, void-section-head, void-empty, void-media-content, void-stack, void-row-text, void-figure, void-glass) > :where(h1, h2, h3, h4, p),
+:where(void-description-list) :where(dl, dt, dd) {
+  margin: 0;
+}
+
 /* ── void-page: the content column ──
    One centred column with a gutter that tightens on narrow screens.
    Blocks inside it sit a group apart; sections sit a section apart.

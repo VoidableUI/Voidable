@@ -483,6 +483,24 @@ A fixed stacking order so overlapping elements layer predictably:
 
 ---
 
+## Surfaces over imagery
+
+Tokens for [UI over imagery](/patterns/ui-over-imagery/). The first five are inputs you may set; the rest are derived.
+
+| Token | Default | |
+|---|---|---|
+| `--void-scrim-strength` | `0` | 0 to 1. `0` is the lightest scrim that keeps body text at 4.5:1 over a white image |
+| `--void-scrim-fade` | `10rem` | Distance over which the scrim fades out beyond the content |
+| `--void-glass-blur` | `24px` | Backdrop blur of a glass panel |
+| `--void-glass-solid` | `0` | `1` makes glass a solid panel. Set to 1 automatically with `prefers-reduced-transparency` and where `backdrop-filter` is unsupported |
+| `--void-media-focal` | `50% 50%` | Which point of the image survives the crop |
+| `--void-scrim-alpha` | derived | Opacity of the scrim: 0.64 at strength 0, 0.94 at strength 1 |
+| `--void-color-scrim` | derived | Black at `--void-scrim-alpha` |
+| `--void-glass-alpha` | derived | Opacity of glass: 0.76 in light, 0.86 in dark, 1 when solid |
+| `--void-color-page` | derived | The page colour itself. `--void-color-bg` is this on a page, the scrim on a media surface and the glass colour on glass |
+| `--void-color-control-fill` | `transparent` | Fill of an outline control at rest. Transparent on a page; a dark translucent fill on a media surface, so a control's text does not depend on the image |
+| `--void-page-inset` | derived | Inline padding that lines an element up with the `void-page` column |
+
 ## The tone system
 
 Many Voidable components use an internal `--tone` custom property pattern for color theming. Instead of writing separate rulesets for every color variant, each component defines:

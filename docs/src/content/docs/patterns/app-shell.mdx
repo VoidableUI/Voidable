@@ -1,0 +1,190 @@
+---
+title: App shell
+description: void-shell frames an application (a top bar, a sidebar, or a bar laid over an image) and void-page is its centred content column. CSS only, responsive to 390px.
+---
+
+import Example from '../../../components/Example.astro';
+
+`<void-shell>` is the frame of an application: navigation, then `<main>`. `<void-page>` inside `<main>` is the content column: centred, with a gutter that tightens on a narrow screen. Between them they replace the page padding, max-width and sticky-header CSS that every application writes first.
+
+export const top = `
+<void-shell>
+  <void-nav-bar>
+    <void-brand><a href="/">Meridian</a></void-brand>
+    <void-nav-links>
+      <a href="/" aria-current="page">Overview</a>
+      <a href="/stations">Stations</a>
+      <a href="/passes">Passes</a>
+      <a href="/settings">Settings</a>
+    </void-nav-links>
+    <void-spacer></void-spacer>
+    <void-state color="success">eu-north-2</void-state>
+  </void-nav-bar>
+  <main>
+    <void-page>
+      <void-page-head>
+        <span data-void-type="label">Network</span>
+        <h1>Ground network</h1>
+      </void-page-head>
+      <p>The page goes here.</p>
+    </void-page>
+  </main>
+</void-shell>`;
+
+export const topErb = `
+<%# app/views/layouts/application.html.erb %>
+<void-shell>
+  <void-nav-bar>
+    <void-brand><%= link_to "Meridian", root_path %></void-brand>
+    <void-nav-links>
+      <% nav_items.each do |item| %>
+        <%= link_to item.label, item.path,
+              aria: { current: ("page" if current_page?(item.path)) } %>
+      <% end %>
+    </void-nav-links>
+    <void-spacer></void-spacer>
+    <void-state color="success"><%= Current.region %></void-state>
+  </void-nav-bar>
+  <main>
+    <void-page>
+      <%= yield %>
+    </void-page>
+  </main>
+</void-shell>`;
+
+export const topJsx = `
+export function Layout({ items, current, region, children }) {
+  return (
+    <void-shell>
+      <NavBar>
+        <void-brand><a href="/">Meridian</a></void-brand>
+        <void-nav-links>
+          {items.map((item) => (
+            <a key={item.href} href={item.href} aria-current={item.href === current ? 'page' : undefined}>
+              {item.label}
+            </a>
+          ))}
+        </void-nav-links>
+        <void-spacer />
+        <void-state color="success">{region}</void-state>
+      </NavBar>
+      <main>
+        <void-page>{children}</void-page>
+      </main>
+    </void-shell>
+  );
+}`;
+
+<Example frame="frame" html={top} erb={topErb} jsx={topJsx} />
+
+The bar's content lines up with the page column under it, at every width.
+
+## Navigation links
+
+`<void-nav-links>` holds plain `<a>` elements. Mark the current one with `aria-current="page"`: that is what a screen reader announces, and it is what the theme styles, so the two cannot disagree.
+
+On a narrow screen the links move to a row of their own under the brand and scroll sideways. Nothing is truncated and nothing is hidden behind a menu button: with four to seven destinations, a row you can swipe is faster than a drawer, and it works with no JavaScript. For more destinations than that, use a sidebar.
+
+## Sidebar
+
+`nav="side"` puts a `<void-sidebar>` beside the page. Below 48rem it becomes a bar across the top and its links scroll sideways in the same way.
+
+export const side = `
+<void-shell nav="side">
+  <void-sidebar width="14rem">
+    <void-brand><a href="/">Meridian</a></void-brand>
+    <void-nav-links>
+      <span data-void-type="label">Network</span>
+      <a href="/" aria-current="page">Overview</a>
+      <a href="/stations">Stations</a>
+      <a href="/passes">Passes</a>
+      <span data-void-type="label">Account</span>
+      <a href="/settings">Settings</a>
+    </void-nav-links>
+  </void-sidebar>
+  <main>
+    <void-page>
+      <void-page-head>
+        <span data-void-type="label">Network</span>
+        <h1>Ground network</h1>
+      </void-page-head>
+      <p>The page goes here.</p>
+    </void-page>
+  </main>
+</void-shell>`;
+
+export const sideErb = `
+<void-shell nav="side">
+  <void-sidebar width="14rem">
+    <void-brand><%= link_to "Meridian", root_path %></void-brand>
+    <void-nav-links>
+      <% nav_groups.each do |group| %>
+        <span data-void-type="label"><%= group.label %></span>
+        <% group.items.each do |item| %>
+          <%= link_to item.label, item.path,
+                aria: { current: ("page" if current_page?(item.path)) } %>
+        <% end %>
+      <% end %>
+    </void-nav-links>
+  </void-sidebar>
+  <main>
+    <void-page><%= yield %></void-page>
+  </main>
+</void-shell>`;
+
+export const sideJsx = `
+<void-shell nav="side">
+  <Sidebar width="14rem">
+    <void-brand><a href="/">Meridian</a></void-brand>
+    <void-nav-links>
+      {groups.map((group) => (
+        <Fragment key={group.label}>
+          <span data-void-type="label">{group.label}</span>
+          {group.items.map((item) => (
+            <a key={item.href} href={item.href} aria-current={item.href === current ? 'page' : undefined}>
+              {item.label}
+            </a>
+          ))}
+        </Fragment>
+      ))}
+    </void-nav-links>
+  </Sidebar>
+  <main>
+    <void-page>{children}</void-page>
+  </main>
+</void-shell>`;
+
+<Example frame="frame" html={side} erb={sideErb} jsx={sideJsx} />
+
+## Overlay
+
+`nav="overlay"` lays the bar over the top of the page, for a page that opens on a photograph. Give the bar `data-void-surface="media"` so its text is off-white over the image. Where the browser supports scroll-driven animation the bar stays with you and becomes a blurred bar once the image has scrolled past; elsewhere it scrolls away with the page. See [UI over imagery](/patterns/ui-over-imagery/#navigation-over-the-image).
+
+## The page column
+
+| `void-page` attribute | Values | |
+|---|---|---|
+| `width` | `narrow` | 42.5rem of content: for a form or for reading |
+| | *(default)* | 66rem of content (`--void-measure-page` less the gutters) |
+| | `wide` | A third wider, for a dense table |
+| | `full` | No maximum; only the gutter |
+
+Direct children of a page sit a group apart (`--void-gap-group`), and one section follows another a section apart (`--void-gap-section`). A `<form>` directly inside the page behaves like the page, so wrapping the sections of a form changes nothing.
+
+Something outside a `void-page` that must line up with it (a full-bleed band, a footer) takes `padding-inline: var(--void-page-inset)`.
+
+## Reference
+
+| Element | Attribute | Values |
+|---|---|---|
+| `void-shell` | `nav` | `top` (default), `side`, `overlay` |
+| `void-nav-links` | `orientation` | `horizontal` (default), `vertical` (automatic in a sidebar) |
+| `void-brand` | | Put an `<a>` inside to link it home |
+| `void-spacer` | | Pushes what follows to the far end of a bar or toolbar |
+| any element | `data-void-hide` | `narrow` removes it below 48rem, `wide` above |
+
+`void-nav-bar` and `void-sidebar` are components (they have behaviour: a menu button, collapsing). Everything else here is CSS only.
+
+## Why this form
+
+The shell is a custom element with attributes and not a set of classes because an element name is checkable: `voidable check` knows `void-shell`, knows `nav` takes three values, and tells an agent that wrote `layout="sidebar"` what it meant. It has no JavaScript because it has no behaviour: a frame is a flex container.

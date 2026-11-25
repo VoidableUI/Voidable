@@ -1,0 +1,116 @@
+---
+title: State
+description: void-state shows a state as a coloured dot and a word, so colour is never the only signal. When to use it, a badge or an alert.
+---
+
+import Example from '../../../components/Example.astro';
+
+`<void-state>` shows a state as a coloured dot and a word. The word is the content of the element and is required, so the colour is never the only thing that carries the meaning: it still works in greyscale, for a colour-blind reader, and for a screen reader.
+
+export const states = `
+<void-stack gap="tight">
+  <void-state color="success">Online</void-state>
+  <void-state color="success" pulse>Tracking MRD-0412</void-state>
+  <void-state color="warning">Degraded</void-state>
+  <void-state color="info">Maintenance</void-state>
+  <void-state color="error">Offline</void-state>
+  <void-state>Idle</void-state>
+</void-stack>`;
+
+export const statesErb = `
+<%# app/helpers/stations_helper.rb maps a state to a colour:
+    STATE_COLORS = { online: "success", degraded: "warning",
+                     maintenance: "info", offline: "error" } %>
+<void-state color="<%= STATE_COLORS.fetch(station.state.to_sym, "default") %>"
+            <%= "pulse" if station.tracking? %>>
+  <%= station.state.humanize %>
+</void-state>`;
+
+export const statesJsx = `
+const STATE_COLORS = { online: 'success', degraded: 'warning', maintenance: 'info', offline: 'error' };
+
+export function StationState({ station }) {
+  return (
+    <void-state color={STATE_COLORS[station.state] ?? 'default'} pulse={station.tracking || undefined}>
+      {station.stateLabel}
+    </void-state>
+  );
+}`;
+
+<Example html={states} erb={statesErb} jsx={statesJsx} />
+
+## Colours
+
+| `color` | Means | Example words |
+|---|---|---|
+| `success` | Working as intended | Online, Active, Healthy, Paid |
+| `info` | A neutral condition worth knowing | Maintenance, Scheduled, Syncing |
+| `warning` | Working, but needs attention soon | Degraded, Expiring, Slow |
+| `caution` | Stronger than a warning, short of failure | At risk, Over budget |
+| `error` | Not working | Offline, Failed, Rejected |
+| `notice` | Something new | Preview, New |
+| *(none)* | Nothing to report | Idle, Off, Unknown, Draft |
+
+`pulse` draws an animated ring around the dot: something is happening now (tracking, recording, deploying). It stops under `prefers-reduced-motion`. Use it for at most a few things on a screen.
+
+## In context
+
+A state is quiet enough to repeat down a table column and plain enough for a navigation bar.
+
+export const table = `
+<void-table>
+  <table>
+    <thead><tr><th>Station</th><th>State</th><th data-numeric>Passes</th></tr></thead>
+    <tbody>
+      <tr><td>Svalbard 1</td><td><void-state color="success">Online</void-state></td><td data-numeric>212</td></tr>
+      <tr><td>Tromsø 2</td><td><void-state color="warning">Degraded</void-state></td><td data-numeric>96</td></tr>
+      <tr><td>Troll</td><td><void-state color="error">Offline</void-state></td><td data-numeric>0</td></tr>
+    </tbody>
+  </table>
+</void-table>`;
+
+export const tableErb = `
+<void-table>
+  <table>
+    <thead><tr><th>Station</th><th>State</th><th data-numeric>Passes</th></tr></thead>
+    <tbody>
+      <% @stations.each do |station| %>
+        <tr>
+          <td><%= link_to station.name, station %></td>
+          <td><void-state color="<%= state_color(station) %>"><%= station.state.humanize %></void-state></td>
+          <td data-numeric><%= station.passes_today %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</void-table>`;
+
+export const tableJsx = `
+<Table>
+  <table>
+    <thead><tr><th>Station</th><th>State</th><th data-numeric>Passes</th></tr></thead>
+    <tbody>
+      {stations.map((station) => (
+        <tr key={station.id}>
+          <td>{station.name}</td>
+          <td><StationState station={station} /></td>
+          <td data-numeric>{station.passesToday}</td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</Table>`;
+
+<Example html={table} erb={tableErb} jsx={tableJsx} />
+
+## State, badge or alert
+
+- **`void-state`**: the current condition of a thing, shown where the thing is. Repeats well. Sentence case.
+- **`void-badge`**: a category or a count attached to a thing ("Beta", "Admin", "3"). It has an outline or a fill, so it is louder; a column of badges is a column of boxes.
+- **`void-alert`** and **`void-banner`**: a message to the reader, with a sentence and perhaps an action.
+
+When the state changes while the page is open, put the `void-state` in a live region (`<span role="status">`) so the change is announced.
+
+## Why this form
+
+A state is CSS only. The dot is drawn by the theme (`::before`), so the markup is one element and one word, which is all the server needs to render. The existing `void-status-dot` component draws a dot with no text and stays for the few places a dot stands alone next to text that already says the state.

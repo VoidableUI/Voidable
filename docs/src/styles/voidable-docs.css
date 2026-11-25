@@ -58,3 +58,8 @@
 @import '../../../packages/theme/src/components/tags-input.css';
 @import '../../../packages/theme/src/components/action-input.css';
 @import '../../../packages/theme/src/components/menu.css';
+@import '../../../packages/theme/src/patterns/shell.css';
+@import '../../../packages/theme/src/patterns/page.css';
+@import '../../../packages/theme/src/patterns/data.css';
+@import '../../../packages/theme/src/media/media.css';
+@import '../../../packages/theme/src/media/surface.css';

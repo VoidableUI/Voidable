@@ -55,6 +55,12 @@ void-shell[nav="side"] > main {
   align-self: stretch;
 }
 
+/* The brand and anything else in the sidebar line up with the text of
+   the links, which sit inside their own padding. */
+void-shell[nav="side"] > void-sidebar > :not(void-nav-links) {
+  padding-inline: var(--void-control-padding);
+}
+
 /* ── Overlay navigation ──
    The bar and the page share one grid cell, so the bar lies over the
    top of the page. It carries the on-media surface (off-white text,
