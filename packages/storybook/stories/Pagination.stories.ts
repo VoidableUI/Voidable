@@ -74,3 +74,19 @@ export const WideSiblings: Story = {
     <void-pagination total="20" value="10" siblings="3"></void-pagination>
   `,
 };
+
+export const LinkMode: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story: 'With `href-template` (or `param`) pages render as real links. Middle-click, copy link and no-JS work, and `void-change` stays cancelable. Turbo Drive follows the links with no adapter code.',
+      },
+    },
+  },
+  render: () => html`
+    <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+      <void-pagination total="20" value="6" href-template="?page={page}"></void-pagination>
+      <void-pagination total="20" value="6" param="page"></void-pagination>
+    </div>
+  `,
+};
