@@ -41,6 +41,12 @@ void-button {
   user-select: none;
 }
 
+/* Inline icons keep their size and sit on the text baseline */
+void-button svg {
+  flex-shrink: 0;
+  vertical-align: -0.15em;
+}
+
 /* Hover */
 void-button:hover {
   background: var(--tone-hover);
