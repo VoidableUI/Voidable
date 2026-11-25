@@ -5,7 +5,7 @@ description: How the composite widgets are operated from the keyboard and what t
 
 import KeyTable from '../../../components/api/KeyTable.astro';
 
-The widgets that have more than one part (combobox, multiselect, tabs, menus, segmented control) follow the matching [WAI-ARIA Authoring Practices](https://www.w3.org/WAI/ARIA/apg/patterns/) pattern. The widget role sits on the element that holds focus, never on the `<void-*>` host around it, so assistive technology sees one widget with one name.
+The widgets that have more than one part (combobox, multiselect, tabs, menus, segmented control, dialogs, popovers, date picker) follow the matching [WAI-ARIA Authoring Practices](https://www.w3.org/WAI/ARIA/apg/patterns/) pattern. The widget role sits on the element that holds focus, never on the `<void-*>` host around it, so assistive technology sees one widget with one name.
 
 Disabled options, tabs and items are skipped by every key below. Children can arrive after the component has rendered (a framework, a server-driven morph, a script that runs before the page is parsed); the roles, the tab stops and the labels are wired again when they do.
 

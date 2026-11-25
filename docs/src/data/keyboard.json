@@ -308,7 +308,7 @@
     "rows": [
       {
         "keys": "Tab, Shift + Tab",
-        "action": "Move between the focusable elements inside the dialog and wrap around; nothing outside it can be reached"
+        "action": "Move between the focusable elements inside the dialog, then on to the browser's own interface and back in; the page behind it cannot be reached"
       },
       {
         "keys": "Escape",
@@ -325,7 +325,7 @@
     "rows": [
       {
         "keys": "Tab, Shift + Tab",
-        "action": "Move between the focusable elements inside the drawer and wrap around; nothing outside it can be reached"
+        "action": "Move between the focusable elements inside the drawer, then on to the browser's own interface and back in; the page behind it cannot be reached"
       },
       {
         "keys": "Escape",

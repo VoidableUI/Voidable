@@ -5,6 +5,8 @@
 @import '../../../packages/theme/src/themes/void.css';
 @import '../../../packages/theme/src/themes/dune.css';
 @import '../../../packages/theme/src/themes/console.css';
+/* Shared overlay rules (top layer, anchoring, transitions); before the components that refine them. */
+@import '../../../packages/theme/src/components/overlay.css';
 @import '../../../packages/theme/src/components/badge.css';
 @import '../../../packages/theme/src/components/button.css';
 @import '../../../packages/theme/src/components/divider.css';
