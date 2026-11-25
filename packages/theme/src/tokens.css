@@ -12,39 +12,54 @@
 /* ── Colour scheme ──
    One number says which scheme is in force; every colour below is a
    single formula of it, so light is not a second hand-tuned block.
-   Dark stays the default when the OS expresses no preference; an
-   explicit data-theme always wins, on the root or on any subtree. */
-/* `color-scheme` (native scrollbars, form controls, autofill) is not set on
-   :root, which would restyle an application's own controls. The scoped
-   reset applies it to every theme element and base.css to html, both from
-   --void-color-scheme; a data-theme region sets it on itself. */
-:root,
-[data-theme="dark"] {
-  --void-color-scheme: dark;
-  --void-scheme-dark: 1;
-  /* The scheme of the page itself. A media surface forces
-     --void-scheme-dark to 1 for what sits on the image; a glass panel
-     inside it reads this to return to the page's scheme. */
-  --void-page-scheme-dark: 1;
+
+   Three things can say which scheme it is, strongest first:
+
+     1. data-theme="dark" | "light" | "system" on the element or an
+        ancestor: the application's (its user's) explicit choice.
+        "system" says "follow the operating system" out loud, which also
+        overrides a theme's preference.
+     2. the scheme a theme or a skin says it was designed for:
+          --void-preferred-scheme: light;      keyword, for color-scheme
+          --void-preferred-scheme-dark: 0;     the same, as the number
+        set together in its file (CSS cannot turn one into the other).
+     3. the operating system (prefers-color-scheme); dark where the
+        browser cannot say.
+
+   Each is a custom property that is simply not set when its source says
+   nothing, so the derived block picks the first one that is set with
+   var() fallbacks. `color-scheme` (native scrollbars, form controls,
+   autofill) is not set on :root, which would restyle an application's
+   own controls. The scoped reset applies it to every theme element and
+   base.css to html, both from --void-color-scheme; a data-theme region
+   sets it on itself. */
+:root {
+  --void-scheme-system: 1;
+  --void-color-scheme-system: dark;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    --void-scheme-system: 0;
+    --void-color-scheme-system: light;
+  }
 }
 
 [data-theme="dark"] {
   color-scheme: dark;
+  --void-scheme-explicit: 1;
+  --void-color-scheme-explicit: dark;
 }
 
 [data-theme="light"] {
   color-scheme: light;
-  --void-color-scheme: light;
-  --void-scheme-dark: 0;
-  --void-page-scheme-dark: 0;
+  --void-scheme-explicit: 0;
+  --void-color-scheme-explicit: light;
 }
 
-@media (prefers-color-scheme: light) {
-  :root:not([data-theme]) {
-    --void-color-scheme: light;
-    --void-scheme-dark: 0;
-    --void-page-scheme-dark: 0;
-  }
+[data-theme="system"] {
+  --void-scheme-explicit: var(--void-scheme-system);
+  --void-color-scheme-explicit: var(--void-color-scheme-system);
 }
 
 /* ── User preference: more contrast ──
@@ -120,6 +135,15 @@
    :where() keeps the specificity at zero, so any override of a token
    still wins. */
 :where(:root, [data-theme], [data-void-theme], [data-shape], [data-void-surface], void-media, void-glass) {
+  /* ── Colour scheme in force ──
+     The first of: explicit (data-theme), preferred (a theme or skin),
+     system. --void-page-scheme-dark is the scheme of the page itself: a
+     media surface forces --void-scheme-dark to 1 for what sits on the
+     image, and a glass panel inside it reads the page's to return. */
+  --void-page-scheme-dark: var(--void-scheme-explicit, var(--void-preferred-scheme-dark, var(--void-scheme-system)));
+  --void-scheme-dark:      var(--void-page-scheme-dark);
+  --void-color-scheme:     var(--void-color-scheme-explicit, var(--void-preferred-scheme, var(--void-color-scheme-system)));
+
   /* ── Working values (internal; set the knobs instead) ── */
   --void-contrast-level: clamp(0, var(--void-contrast) + var(--void-contrast-boost), 1);
   --void-chrome-level:   clamp(0, var(--void-chrome), 1);
@@ -457,6 +481,61 @@
   --void-duration-fast:   calc(120ms * var(--void-anim-scale));
   --void-duration-normal: calc(200ms * var(--void-anim-scale));
   --void-duration-slow:   calc(300ms * var(--void-anim-scale));
+
+  /* ── Structural roles ──
+     What a kind of component is drawn with. Each is a semantic token by
+     default, so nothing changes until a skin sets one; components read
+     them through their own token first:
+
+       box-shadow: var(--void-card-shadow, var(--void-container-shadow));
+
+     A skin sets a role to restyle every component of that kind, and a
+     component token for the exception. Component tokens are never
+     declared here: an unset custom property costs nothing, and one
+     declaration of it anywhere (an element, a subtree, :root) wins. */
+
+  /* container: a box that groups content on the page. Card, panel,
+     stat; alert and the section and figure patterns can join it. */
+  --void-container-surface:      var(--void-color-surface);
+  --void-container-border:       var(--void-color-border);
+  --void-container-border-width: 1px;
+  --void-container-radius:       var(--void-radius-lg);
+  --void-container-shadow:       none;
+
+  /* float: a box that lies over the page. Menu, popover, dropdown,
+     select list, hover card, toast; dialog and drawer for their panel. */
+  --void-float-surface:      var(--void-color-bg-elevated);
+  --void-float-border:       var(--void-color-border);
+  --void-float-border-width: 1px;
+  --void-float-radius:       var(--void-radius-lg);
+  --void-float-shadow:       var(--void-shadow-md);
+
+  /* control: anything pressed or typed into. Size steps are the
+     --void-control-height|padding|text tokens above; border is the
+     edge that is its only boundary (3:1). */
+  --void-control-radius:       var(--void-radius-md);
+  --void-control-border:       var(--void-color-border-control);
+  --void-control-border-width: 1px;
+
+  /* field: a control text is entered or chosen in. Input, textarea,
+     select, combobox, number, pin, tags and the like. */
+  --void-field-surface: var(--void-color-surface);
+  --void-field-border:  var(--void-control-border);
+
+  /* item: one of a set you move between. The link to the current page,
+     the selected item of a list. */
+  --void-item-surface-selected: var(--void-color-bg-hover);
+  --void-item-ink-selected:     var(--void-color-text);
+
+  /* rule: a line that separates. A whole border (width, style,
+     colour), so `none` switches it off and `2px solid …` makes it
+     heavy. between: items of one group (rows, cells, figures). edge:
+     the line that opens and closes a group. head: under a heading (the
+     page head, a divided section, a card header, a table header). */
+  --void-rule:         1px solid var(--void-color-border);
+  --void-rule-between: var(--void-rule);
+  --void-rule-edge:    var(--void-rule);
+  --void-rule-head:    var(--void-rule);
 
   /* ── Charts ── */
   --void-chart-series-1: var(--void-color-accent);

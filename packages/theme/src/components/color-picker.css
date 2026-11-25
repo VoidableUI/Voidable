@@ -237,9 +237,9 @@ void-color-picker {
   top: calc(100% + var(--void-space-2));
   left: 0;
   z-index: var(--void-z-dropdown);
-  background: var(--void-color-bg-elevated);
-  border: 1px solid var(--void-color-border);
-  border-radius: var(--void-radius-lg);
+  background: var(--void-float-surface);
+  border: var(--void-float-border-width) solid var(--void-float-border);
+  border-radius: var(--void-float-radius);
   padding: var(--void-space-3);
   box-shadow: var(--void-shadow-lg);
 }

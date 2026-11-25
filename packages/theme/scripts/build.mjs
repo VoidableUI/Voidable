@@ -12,7 +12,8 @@
 //   components/<name>   one component, with what it needs to render on its own
 //   patterns/<name>     one group of CSS-only elements
 //   themes/<name>       one demonstration theme, in its layer
-//   skins/<name>        one skin (data-void-skin), in the layer above the patterns
+//   skins/<name>        one skin (data-void-skin), in the layer above the patterns: the
+//                       source's one rule, written out for every scope (build/skins.js)
 // plus exports.json. No source map: the bundle is flattened from many files and the
 // packaging lint rejects maps (they would point at sources the package does not publish
 // under those names); the unminified file is the readable form.
@@ -20,6 +21,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { bundleAsync } from 'lightningcss';
 import * as L from './lib.mjs';
+import { readSkin, scopes, skinCss } from '../build/skins.js';
 
 const { SRC, DIST } = L;
 const generatedOnly = process.argv.includes('--generated-only');
@@ -183,9 +185,19 @@ for (const f of L.listCss('themes')) {
 }
 
 // skins
+const scope = scopes(L.read(abs('tokens.css')));
 for (const f of L.listCss('skins')) {
   const n = path.basename(f, '.css');
-  await emit(`skins/${n}`, `${statement}\n${imp(f, 'components.void.skins')}`);
+  // A skin's source is one rule of token assignments; what ships declares it on every scope.
+  let skin;
+  try {
+    skin = readSkin(L.read(abs(f)), n);
+  } catch (e) {
+    console.error(`src/${f}: ${e.message}`);
+    process.exit(1);
+  }
+  const header = /^\s*\/\*[\s\S]*?\*\//.exec(L.read(abs(f)))?.[0] ?? '';
+  await emit(`skins/${n}`, `${statement}\n${impVirtual(`skin-${n}`, `${header}\n${skinCss(skin, scope)}`, 'components.void.skins')}`);
   exportsJson.skins.push(n);
 }
 

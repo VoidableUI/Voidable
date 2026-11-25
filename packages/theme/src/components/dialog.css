@@ -1,5 +1,9 @@
 /* The host only carries attributes; the native <dialog> is the panel. Before
    the element upgrades, its content must not show inline. */
+/* @tokens void-dialog
+   --void-dialog-radius  Corner radius of the panel.
+   --void-dialog-shadow  Shadow of the panel. */
+
 void-dialog {
   display: contents;
 }
@@ -13,11 +17,11 @@ void-dialog:not(:defined) {
   box-sizing: border-box;
   margin: auto;
   padding: 0;
-  background: var(--void-color-bg-elevated);
+  background: var(--void-float-surface);
   color: var(--void-color-text);
-  border: 1px solid var(--void-color-border);
-  border-radius: var(--void-radius-xl);
-  box-shadow: var(--void-shadow-lg);
+  border: var(--void-float-border-width) solid var(--void-float-border);
+  border-radius: var(--void-dialog-radius, var(--void-radius-xl));
+  box-shadow: var(--void-dialog-shadow, var(--void-shadow-lg));
   max-height: 85vh;
   max-height: 85dvh;
   overflow-y: auto;
@@ -52,7 +56,7 @@ void-dialog[size="lg"] .void-dialog-panel { max-width: 48rem; }
   align-items: center;
   justify-content: space-between;
   padding: var(--void-space-4) var(--void-container-padding);
-  border-bottom: 1px solid var(--void-color-border);
+  border-bottom: var(--void-rule-head);
 }
 
 .void-dialog-heading {

@@ -6,6 +6,10 @@
    native elements you put inside (main, h1, h2, dl, a).
    ============================================================ */
 
+/* @tokens void-nav-links
+   --void-nav-links-item-surface-selected  Fill of the link to the current page.
+   --void-nav-links-item-ink-selected      Text colour of the link to the current page. Set it with the surface: lint:contrast checks the pair. */
+
 /* ── void-shell: the frame of an application ──
      <void-shell>                    top bar, then the page
        <void-nav-bar>…</void-nav-bar>
@@ -82,16 +86,16 @@ void-shell[nav="overlay"] > void-nav-bar {
 /* A media surface that opens the page keeps its content clear of
    the bar lying over it. */
 void-shell[nav="overlay"] {
-  --void-shell-bar-height: calc(var(--void-control-height) + var(--void-space-5));
+  --_void-shell-bar-height: calc(var(--void-control-height) + var(--void-space-5));
 }
 
 void-shell[nav="overlay"] > main > void-media:first-child > void-media-content {
-  padding-top: calc(var(--void-shell-bar-height) + var(--void-gap-group));
+  padding-top: calc(var(--_void-shell-bar-height) + var(--void-gap-group));
 }
 
 @media (max-width: 48rem) {
   void-shell[nav="overlay"] {
-    --void-shell-bar-height: calc(var(--void-control-height) + var(--void-control-height-sm) + var(--void-space-6));
+    --_void-shell-bar-height: calc(var(--void-control-height) + var(--void-control-height-sm) + var(--void-space-6));
   }
 
   /* Stacked, the content is under the image, not under the bar. */
@@ -153,7 +157,7 @@ void-nav-links > a {
   flex: none;
   min-height: var(--void-control-height-sm);
   padding: 0 var(--void-control-padding);
-  border-radius: var(--void-radius-md);
+  border-radius: var(--void-control-radius);
   color: var(--void-color-text-secondary);
   font-size: var(--void-type-body-size);
   line-height: var(--void-leading-tight);
@@ -168,8 +172,8 @@ void-nav-links > a:hover {
 }
 
 void-nav-links > a[aria-current="page"] {
-  background: var(--void-color-bg-hover);
-  color: var(--void-color-text);
+  background: var(--void-nav-links-item-surface-selected, var(--void-item-surface-selected));
+  color: var(--void-nav-links-item-ink-selected, var(--void-item-ink-selected));
 }
 
 void-nav-links > a:focus-visible {
@@ -232,7 +236,7 @@ void-spacer {
     gap: var(--void-gap-tight) var(--void-gap-inside);
     padding: var(--void-gap-tight) var(--void-gutter);
     border-inline: 0;
-    border-bottom: 1px solid var(--void-color-border);
+    border-bottom: var(--void-sidebar-rule, var(--void-rule));
     overflow: visible;
   }
 

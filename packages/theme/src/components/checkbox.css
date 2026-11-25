@@ -1,5 +1,5 @@
 void-checkbox {
-  --tone: var(--void-color-accent);
+  --_void-tone: var(--void-color-accent);
 
   display: inline-flex;
   align-items: center;
@@ -26,7 +26,7 @@ void-checkbox input[type="checkbox"] {
   flex-shrink: 0;
   width: 1.125rem;
   height: 1.125rem;
-  border: 1.5px solid var(--void-color-border-control);
+  border: 1.5px solid var(--void-control-border);
   border-radius: var(--void-radius-xs);
   background: transparent;
   color: var(--void-color-text-on-accent);
@@ -40,7 +40,7 @@ void-checkbox input[type="checkbox"] {
 }
 
 void-checkbox:hover .void-checkbox-box {
-  border-color: var(--tone);
+  border-color: var(--_void-tone);
 }
 
 void-checkbox:focus-visible .void-checkbox-box {
@@ -49,22 +49,22 @@ void-checkbox:focus-visible .void-checkbox-box {
 }
 
 void-checkbox[checked] .void-checkbox-box {
-  background: var(--tone);
-  border-color: var(--tone);
+  background: var(--_void-tone);
+  border-color: var(--_void-tone);
 }
 
 void-checkbox[indeterminate] .void-checkbox-box {
-  background: var(--tone);
-  border-color: var(--tone);
+  background: var(--_void-tone);
+  border-color: var(--_void-tone);
 }
 
-void-checkbox[color="error"]   { --tone: var(--void-color-error); }
-void-checkbox[color="warning"] { --tone: var(--void-color-warning); }
-void-checkbox[color="caution"] { --tone: var(--void-color-caution); }
-void-checkbox[color="highlight"] { --tone: var(--void-color-highlight); }
-void-checkbox[color="success"] { --tone: var(--void-color-success); }
-void-checkbox[color="info"]    { --tone: var(--void-color-info); }
-void-checkbox[color="notice"]  { --tone: var(--void-color-notice); }
+void-checkbox[color="error"]   { --_void-tone: var(--void-color-error); }
+void-checkbox[color="warning"] { --_void-tone: var(--void-color-warning); }
+void-checkbox[color="caution"] { --_void-tone: var(--void-color-caution); }
+void-checkbox[color="highlight"] { --_void-tone: var(--void-color-highlight); }
+void-checkbox[color="success"] { --_void-tone: var(--void-color-success); }
+void-checkbox[color="info"]    { --_void-tone: var(--void-color-info); }
+void-checkbox[color="notice"]  { --_void-tone: var(--void-color-notice); }
 
 void-checkbox[size="sm"] { font-size: var(--void-text-xs); }
 void-checkbox[size="sm"] .void-checkbox-box { width: 0.875rem; height: 0.875rem; }

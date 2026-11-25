@@ -45,6 +45,7 @@ void-media > void-nav-bar,
 void-nav-bar[data-void-surface="media"] {
   isolation: isolate;
   background: transparent;
+  box-shadow: none;
 }
 
 void-nav-bar[data-void-surface="media"] {
@@ -112,7 +113,7 @@ void-glass,
 void-glass {
   display: block;
   padding: var(--void-container-padding);
-  border-radius: var(--void-radius-lg);
+  border-radius: var(--void-container-radius);
   font-family: var(--void-font-sans);
 }
 

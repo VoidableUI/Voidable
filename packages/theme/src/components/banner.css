@@ -1,33 +1,33 @@
 void-banner {
-  --tone: var(--void-color-accent);
-  --tone-subtle: color-mix(in srgb, var(--tone) var(--void-tone-tint), transparent);
-  --tone-border: color-mix(in srgb, var(--tone) 36%, transparent);
+  --_void-tone: var(--void-color-accent);
+  --_void-tone-subtle: color-mix(in srgb, var(--_void-tone) var(--void-tone-tint), transparent);
+  --_void-tone-border: color-mix(in srgb, var(--_void-tone) 36%, transparent);
 
   display: flex;
   align-items: center;
   gap: var(--void-space-3);
   padding: var(--void-space-3) var(--void-container-padding);
-  border: 1px solid var(--tone-border);
+  border: 1px solid var(--_void-tone-border);
   border-radius: var(--void-radius-md);
-  background: var(--tone-subtle);
+  background: var(--_void-tone-subtle);
   color: var(--void-color-text);
   font-family: var(--void-font-sans);
   font-size: var(--void-type-body-size);
 }
 
 void-banner[variant="filled"] {
-  background: var(--tone);
-  border-color: var(--tone);
+  background: var(--_void-tone);
+  border-color: var(--_void-tone);
   color: var(--void-color-text-on-accent);
 }
 
-void-banner[color="error"]   { --tone: var(--void-color-error); }
-void-banner[color="warning"] { --tone: var(--void-color-warning); }
-void-banner[color="caution"] { --tone: var(--void-color-caution); }
-void-banner[color="highlight"] { --tone: var(--void-color-highlight); }
-void-banner[color="success"] { --tone: var(--void-color-success); }
-void-banner[color="info"]    { --tone: var(--void-color-info); }
-void-banner[color="notice"]  { --tone: var(--void-color-notice); }
+void-banner[color="error"]   { --_void-tone: var(--void-color-error); }
+void-banner[color="warning"] { --_void-tone: var(--void-color-warning); }
+void-banner[color="caution"] { --_void-tone: var(--void-color-caution); }
+void-banner[color="highlight"] { --_void-tone: var(--void-color-highlight); }
+void-banner[color="success"] { --_void-tone: var(--void-color-success); }
+void-banner[color="info"]    { --_void-tone: var(--void-color-info); }
+void-banner[color="notice"]  { --_void-tone: var(--void-color-notice); }
 
 .void-banner-close {
   order: 1;
@@ -62,6 +62,6 @@ void-banner[color="notice"]  { --tone: var(--void-color-notice); }
 /* The attribute is reflected, so the plain banner carries color="default":
    it is a quiet container, not an accent-tinted one. */
 void-banner:not([variant="filled"]):is([color="default"], :not([color])) {
-  --tone-subtle: var(--void-color-bg-secondary);
-  --tone-border: var(--void-color-border);
+  --_void-tone-subtle: var(--void-color-bg-secondary);
+  --_void-tone-border: var(--void-color-border);
 }

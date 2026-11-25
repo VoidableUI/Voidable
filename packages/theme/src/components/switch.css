@@ -1,6 +1,6 @@
 void-switch {
-  --tone: var(--void-color-accent);
-  --tone-subtle: color-mix(in srgb, var(--tone) 20%, transparent);
+  --_void-tone: var(--void-color-accent);
+  --_void-tone-subtle: color-mix(in srgb, var(--_void-tone) 20%, transparent);
 
   display: inline-flex;
   align-items: center;
@@ -14,8 +14,8 @@ void-switch {
   align-items: center;
   width: 2.25rem;
   height: 1.25rem;
-  background: var(--tone-subtle);
-  border: 1px solid var(--void-color-border-control);
+  background: var(--_void-tone-subtle);
+  border: 1px solid var(--void-control-border);
   border-radius: var(--void-radius-full);
   transition: background var(--void-duration-fast) var(--void-ease-in-out),
               border-color var(--void-duration-fast) var(--void-ease-in-out);
@@ -33,8 +33,8 @@ void-switch {
 }
 
 void-switch[checked] .void-switch-track {
-  background: var(--tone);
-  border-color: var(--tone);
+  background: var(--_void-tone);
+  border-color: var(--_void-tone);
 }
 
 void-switch[checked] .void-switch-thumb {
@@ -48,16 +48,16 @@ void-switch:focus-visible .void-switch-track {
 }
 
 void-switch:not([checked]):hover .void-switch-track {
-  border-color: var(--void-color-border-control);
+  border-color: var(--void-control-border);
 }
 
-void-switch[color="error"]   { --tone: var(--void-color-error); }
-void-switch[color="warning"] { --tone: var(--void-color-warning); }
-void-switch[color="caution"] { --tone: var(--void-color-caution); }
-void-switch[color="highlight"] { --tone: var(--void-color-highlight); }
-void-switch[color="success"] { --tone: var(--void-color-success); }
-void-switch[color="info"]    { --tone: var(--void-color-info); }
-void-switch[color="notice"]  { --tone: var(--void-color-notice); }
+void-switch[color="error"]   { --_void-tone: var(--void-color-error); }
+void-switch[color="warning"] { --_void-tone: var(--void-color-warning); }
+void-switch[color="caution"] { --_void-tone: var(--void-color-caution); }
+void-switch[color="highlight"] { --_void-tone: var(--void-color-highlight); }
+void-switch[color="success"] { --_void-tone: var(--void-color-success); }
+void-switch[color="info"]    { --_void-tone: var(--void-color-info); }
+void-switch[color="notice"]  { --_void-tone: var(--void-color-notice); }
 
 void-switch[size="sm"] .void-switch-track { width: 1.75rem; height: 1rem; }
 void-switch[size="sm"] .void-switch-thumb { width: 0.625rem; height: 0.625rem; }

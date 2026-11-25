@@ -3,6 +3,7 @@ title: Page head
 description: void-page-head places a label or breadcrumbs, the h1, a description and the page actions, and moves the actions under the title on a narrow screen.
 ---
 
+import Tokens from '../../../components/api/Tokens.astro';
 import Example from '../../../components/Example.astro';
 
 `<void-page-head>` is the first thing in a page: where you are, what this is, and what you can do here. The text sits on the left, the actions on the right on the last line of the text, and a hairline closes it.
@@ -92,6 +93,12 @@ export const flushJsx = `
 |---|---|---|
 | `void-page-head` | `flush` | No hairline, no space under the head |
 | `void-actions` | `justify` | `start` (default), `end`, `center` |
+
+## Tokens
+
+A skin, or your own CSS, restyles this pattern through its tokens. The theme never declares them, so one declaration wins on the element, an ancestor or `:root`. See [Theming](/getting-started/theming/#component-tokens).
+
+<Tokens component="page-head" />
 
 ## Why this form
 

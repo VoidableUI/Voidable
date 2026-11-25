@@ -11,7 +11,10 @@
 //   json/<theme>.<scheme>.json          { "--void-color-bg": "#000000", … }
 //   knobs.json                          the knobs as data: ranges, defaults,
 //                                       every theme's values, the builder URL
+//   component-tokens.json               the component tokens, grouped by component: name,
+//                                       default, what it styles; and the role tokens
 //   names.js, names.d.ts                token, knob, theme and skin names
+//   skin.js, skin.d.ts                  the skin expander (build/skins.js), for a skin of your own
 //
 // The values are computed by build/css-eval.js, not by a browser, so the
 // build needs nothing but Node. test/chromium.test.mjs proves they equal
@@ -20,7 +23,10 @@ import { mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'nod
 import { basename, dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { BUILDER_URL, fontStacks, groups, knobs, skins } from '../build/knobs.js';
+import { byComponent, readComponentTokens } from '../build/component-tokens.js';
+import { PARTS, PROPERTIES, ROLES, STATES, scopes } from '../build/skins.js';
 import { environment, readSkin, readSource, readTheme, resolve, resolverDocument, toDtcg, toFlat } from '../build/tokens.js';
+import * as L from './lib.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const SRC = join(ROOT, 'src');
@@ -33,7 +39,15 @@ export function load() {
   const list = (dir) => readdirSync(join(SRC, dir)).filter((f) => f.endsWith('.css')).sort();
   const themes = Object.fromEntries(list('themes').map((f) => [basename(f, '.css'), readTheme(read(`themes/${f}`))]));
   const skinTokens = Object.fromEntries(list('skins').map((f) => [basename(f, '.css'), readSkin(read(`skins/${f}`))]));
-  return { source, themes, skinTokens };
+  const { tokens: componentTokens, problems } = readComponentTokens(L.tokenFiles(), { owners: L.tokenOwners(), runtime: [...L.runtimeProperties()], defined: [...L.declaredTokens()] });
+  return { source, themes, skinTokens, componentTokens, problems };
+}
+
+/** The role tokens: the derived tokens named --void-<role>-<property>, with their defaults. */
+export function roleTokens(source) {
+  return Object.entries(source.derived)
+    .filter(([name]) => new RegExp(`^--void-(${ROLES.join('|')})(-|$)`).test(name) && !/^--void-control-(height|padding|text)/.test(name))
+    .map(([name, value]) => ({ name, role: /^--void-([a-z]+)/.exec(name)[1], default: value }));
 }
 
 /** Every exported configuration: each theme, then each skin on the default knobs, in dark and light. */
@@ -48,8 +62,9 @@ export function configurations({ themes, skinTokens }) {
 
 export function build() {
   const loaded = load();
-  const { source, themes, skinTokens } = loaded;
-  for (const f of ['dtcg', 'json', 'knobs.json', 'names.js', 'names.d.ts']) rmSync(join(DIST, f), { recursive: true, force: true });
+  const { source, themes, skinTokens, componentTokens, problems } = loaded;
+  if (problems.length) throw new Error(`component tokens:\n  ${problems.join('\n  ')}`);
+  for (const f of ['dtcg', 'json', 'knobs.json', 'component-tokens.json', 'names.js', 'names.d.ts', 'skin.js', 'skin.d.ts']) rmSync(join(DIST, f), { recursive: true, force: true });
   mkdirSync(join(DIST, 'dtcg'), { recursive: true });
   mkdirSync(join(DIST, 'json'), { recursive: true });
   const json = (file, data) => writeFileSync(join(DIST, file), `${JSON.stringify(data, null, 2)}\n`);
@@ -57,13 +72,14 @@ export function build() {
   const files = [];
   let names = [];
   for (const cfg of configurations(loaded)) {
-    const resolved = resolve(environment(source, cfg));
-    names = [...resolved.keys()];
+    const env = environment(source, cfg);
+    const resolved = resolve(env);
+    if (cfg.kind === 'theme') names = [...resolved.keys()];
     const stem = `${cfg.id}.${cfg.scheme}`;
     json(`dtcg/${stem}.tokens.json`, toDtcg(resolved, {
       description: `Voidable ${cfg.kind} "${cfg.id}", ${cfg.scheme} colour scheme: every token, resolved.`,
       extension: { [cfg.kind]: cfg.id, scheme: cfg.scheme },
-    }));
+    }, { componentTokens, env }));
     json(`json/${stem}.json`, toFlat(resolved));
     files.push({ context: `${cfg.id}-${cfg.scheme}`, file: `${stem}.tokens.json` });
   }
@@ -78,10 +94,45 @@ export function build() {
     skins: skins.filter((s) => s.id in skinTokens),
   });
 
+  const roles = roleTokens(source);
+  json('component-tokens.json', {
+    $description: 'Component tokens of @voidable/theme: per-component override points, read from the CSS source. The theme never declares them; each defaults to a role or semantic token. Set one on :root, on a subtree or on an element.',
+    grammar: { pattern: '--void-<component>-<part?>-<property>-<state?>', roles: ROLES, parts: PARTS, properties: PROPERTIES, states: STATES },
+    roles,
+    components: Object.fromEntries(Object.entries(byComponent(componentTokens)).map(([c, list]) => [c, list.map(({ name, part, property, state, setting, default: d, description }) => ({ name, part, property, state, ...(setting ? { setting: true } : {}), default: d, description }))])),
+  });
+
   const themeNames = Object.keys(themes);
+  const componentNames = componentTokens.map((t) => t.name);
+  const roleNames = roles.map((r) => r.name);
   const skinNames = Object.keys(skinTokens);
   const knobNames = knobs.map((k) => k.name);
   const arr = (list) => `[\n${list.map((n) => `  '${n}',`).join('\n')}\n]`;
+  // The skin expander, published: build/ is not in the package, and a skin
+  // written outside it needs the same expansion over the same list of scopes.
+  writeFileSync(join(DIST, 'skin.js'), `// Generated by scripts/export-tokens.mjs from build/skins.js. Do not edit.
+${readFileSync(join(DIST, '..', 'build', 'skins.js'), 'utf8')}
+/** The scopes of this version of the theme, read from its tokens.css at build time. */
+export const themeScopes = ${JSON.stringify(scopes(readFileSync(join(DIST, '..', 'src', 'tokens.css'), 'utf8')))};
+
+/** A skin source (one rule of token assignments) written out for every scope of the theme. */
+export const expandSkin = (css, name) => skinCss(readSkin(css, name), themeScopes);
+`);
+  writeFileSync(join(DIST, 'skin.d.ts'), `// Generated by scripts/export-tokens.mjs. Do not edit.
+export interface Skin { name: string; declarations: [string, string][] }
+export interface Scopes { page: string[]; surface: string[] }
+/** Reads a skin source. Throws when it is anything but one rule of token assignments named for the skin. */
+export function readSkin(css: string, expectedName?: string): Skin;
+export function skinCss(skin: Skin, scope: Scopes): string;
+export function scopes(tokensCss: string): Scopes;
+export const themeScopes: Scopes;
+/** A skin source (one rule of token assignments) written out for every scope of the theme. */
+export function expandSkin(css: string, name?: string): string;
+export const PROPERTIES: string[];
+export const STATES: string[];
+export const PARTS: string[];
+export const ROLES: string[];
+`);
   writeFileSync(join(DIST, 'names.js'), `// Generated by scripts/export-tokens.mjs from the theme's CSS. Do not edit.
 
 /** Every custom property the theme defines. */
@@ -95,6 +146,15 @@ export const themeNames = ${arr(themeNames)};
 
 /** The shipped skins: values of the data-void-skin attribute. */
 export const skinNames = ${arr(skinNames)};
+
+/** The role tokens: what a kind of component is drawn with. A skin sets these first. */
+export const roleTokenNames = ${arr(roleNames)};
+
+/** The component tokens: per-component override points. Never declared by the theme; set one where you need it. */
+export const componentTokenNames = ${arr(componentNames)};
+
+/** The component tokens of each component. */
+export const componentTokens = ${JSON.stringify(Object.fromEntries(Object.entries(byComponent(componentTokens)).map(([c, list]) => [c, list.map((t) => t.name)])), null, 2)};
 
 /** \`var(--void-…)\` for a token name. */
 export const cssVar = (name) => \`var(\${name})\`;
@@ -115,13 +175,23 @@ export type ThemeName = ${union(themeNames)};
 /** The shipped skins: values of the data-void-skin attribute. */
 export type SkinName = ${union(skinNames)};
 
+/** The role tokens: what a kind of component is drawn with. */
+export type RoleTokenName = ${union(roleNames)};
+
+/** The component tokens: per-component override points. */
+export type ComponentTokenName =
+${componentNames.map((n) => `  | '${n}'`).join('\n')};
+
 export declare const tokenNames: readonly TokenName[];
 export declare const knobNames: readonly KnobName[];
 export declare const themeNames: readonly ThemeName[];
 export declare const skinNames: readonly SkinName[];
+export declare const roleTokenNames: readonly RoleTokenName[];
+export declare const componentTokenNames: readonly ComponentTokenName[];
+export declare const componentTokens: Readonly<Record<string, readonly ComponentTokenName[]>>;
 
 /** \`var(--void-…)\` for a token name. */
-export declare function cssVar<T extends TokenName>(name: T): \`var(\${T})\`;
+export declare function cssVar<T extends TokenName | ComponentTokenName>(name: T): \`var(\${T})\`;
 `);
   return { files: files.length, tokens: names.length };
 }

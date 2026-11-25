@@ -1,5 +1,5 @@
 void-indicator {
-  --tone: var(--void-color-accent);
+  --_void-tone: var(--void-color-accent);
   position: relative;
   display: inline-flex;
 }
@@ -11,7 +11,7 @@ void-indicator {
   min-width: 8px;
   min-height: 8px;
   border-radius: var(--void-radius-full);
-  background: var(--tone);
+  background: var(--_void-tone);
   font-family: var(--void-font-sans);
   font-size: var(--void-text-2xs);
   font-weight: var(--void-weight-semibold);
@@ -31,20 +31,20 @@ void-indicator[position="top-left"] .void-indicator-dot { top: -4px; left: -4px;
 void-indicator[position="bottom-right"] .void-indicator-dot { bottom: -4px; right: -4px; }
 void-indicator[position="bottom-left"] .void-indicator-dot { bottom: -4px; left: -4px; }
 
-void-indicator[color="error"]   { --tone: var(--void-color-error); }
-void-indicator[color="warning"] { --tone: var(--void-color-warning); }
-void-indicator[color="caution"] { --tone: var(--void-color-caution); }
-void-indicator[color="highlight"] { --tone: var(--void-color-highlight); }
-void-indicator[color="success"] { --tone: var(--void-color-success); }
-void-indicator[color="info"]    { --tone: var(--void-color-info); }
-void-indicator[color="notice"]  { --tone: var(--void-color-notice); }
+void-indicator[color="error"]   { --_void-tone: var(--void-color-error); }
+void-indicator[color="warning"] { --_void-tone: var(--void-color-warning); }
+void-indicator[color="caution"] { --_void-tone: var(--void-color-caution); }
+void-indicator[color="highlight"] { --_void-tone: var(--void-color-highlight); }
+void-indicator[color="success"] { --_void-tone: var(--void-color-success); }
+void-indicator[color="info"]    { --_void-tone: var(--void-color-info); }
+void-indicator[color="notice"]  { --_void-tone: var(--void-color-notice); }
 
 void-indicator[ping] .void-indicator-dot::before {
   content: '';
   position: absolute;
   inset: 0;
   border-radius: var(--void-radius-full);
-  background: var(--tone);
+  background: var(--_void-tone);
   animation: void-indicator-ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;
 }
 

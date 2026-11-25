@@ -3,6 +3,7 @@ title: Description list
 description: void-description-list lays out a native dl of labels and values as hairline rows or as a grid; void-rows is the same idea for one thing per line with a control.
 ---
 
+import Tokens from '../../../components/api/Tokens.astro';
 import Example from '../../../components/Example.astro';
 
 `<void-description-list>` shows labels and their values: the details of a record. It wraps a native `<dl>`, so the pairing of each name with its value is in the markup for a screen reader, and the pattern only lays it out.
@@ -159,6 +160,12 @@ export const settingsJsx = `
 - **Many records** with the same fields: a `void-table`.
 - **One thing per line** with a control or a time: `void-rows`.
 - **One number** that deserves attention: a [figure](/patterns/figure/).
+
+## Tokens
+
+A skin, or your own CSS, restyles this pattern through its tokens. The theme never declares them, so one declaration wins on the element, an ancestor or `:root`. See [Theming](/getting-started/theming/#component-tokens).
+
+<Tokens component="description-list" />
 
 ## Why this form
 

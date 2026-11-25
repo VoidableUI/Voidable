@@ -8,6 +8,7 @@ import '@voidable/theme/themes/aurora.css';
 import '@voidable/theme/themes/iris.css';
 import '@voidable/theme/themes/paper.css';
 import '@voidable/theme/skins/loft.css';
+import '@voidable/theme/skins/slab.css';
 import '@voidable/ui';
 // Development warnings: misused attributes, values and children reach the console, so a story that
 // misuses a component is caught by `mise run test:warnings` and by anyone looking at it.
@@ -33,13 +34,14 @@ const preview: Preview = {
         title: 'Theme',
       },
     },
-    // Skins change structure, not only values, and combine with any theme.
+    // Skins change structure (role and component tokens), not only values, and combine with any theme.
     voidSkin: {
       toolbar: {
         icon: 'component',
         items: [
           { value: 'none', title: 'Hairline (default)' },
           { value: 'loft', title: 'Loft skin' },
+          { value: 'slab', title: 'Slab skin' },
         ],
         title: 'Skin',
       },

@@ -13,6 +13,12 @@ import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync
 import { join } from 'node:path';
 import { ROOT, componentGroups, loadComponentData } from './component-data.mjs';
 
+// Component tokens, written by the theme build from its CSS source.
+const tokenRegistry = () => {
+  const file = join(ROOT, 'packages/theme/dist/component-tokens.json');
+  return existsSync(file) ? JSON.parse(readFileSync(file, 'utf8')).components : {};
+};
+
 const DIR = join(ROOT, 'docs/src/content/docs/components');
 
 const yaml = (s) => JSON.stringify(s);
@@ -24,7 +30,7 @@ const mdxSafe = (text) =>
     .map((part, i) => (i % 2 ? part : part.replace(/\{/g, '\\{').replace(/</g, '&lt;')))
     .join('');
 
-function stub(c) {
+function stub(c, tokens) {
   const extraPath = join(DIR, `_${c.slug}.mdx`);
   const extraRaw = existsSync(extraPath) ? readFileSync(extraPath, 'utf8') : '';
   const extra = extraRaw.replace(/^---[\s\S]*?---\n/, '').trim();
@@ -35,6 +41,9 @@ function stub(c) {
   const t = c.tag;
 
   heading('Attributes', `<Attributes tag="${t}" />`);
+  // The tokens of the component's stylesheet, on the page of the tag that names it.
+  const tokenOwner = t.replace(/^void-/, '');
+  if (tokens[tokenOwner]) heading('Tokens', `<Tokens component="${tokenOwner}" intro />`);
   if (c.events.length) heading('Events', `<Events tag="${t}" />`);
   heading('Children and placement', `<Placement tag="${t}" />`);
   if (c.form) heading('Form behaviour', `<FormBehaviour tag="${t}" />`);
@@ -53,6 +62,7 @@ editUrl: false
 ---
 import Live from '../../../components/api/Live.astro';
 import Attributes from '../../../components/api/Attributes.astro';
+import Tokens from '../../../components/api/Tokens.astro';
 import Events from '../../../components/api/Events.astro';
 import Placement from '../../../components/api/Placement.astro';
 import FormBehaviour from '../../../components/api/FormBehaviour.astro';
@@ -73,6 +83,7 @@ ${sections.join('\n\n')}
 
 export function writeComponentPages() {
   const { components } = loadComponentData();
+  const tokens = tokenRegistry();
   mkdirSync(DIR, { recursive: true });
   const keep = new Set(components.map((c) => `${c.slug}.mdx`));
   for (const f of readdirSync(DIR)) {
@@ -82,7 +93,7 @@ export function writeComponentPages() {
     rmSync(join(DIR, f));
   }
   for (const c of components) {
-    const body = stub(c);
+    const body = stub(c, tokens);
     const path = join(DIR, `${c.slug}.mdx`);
     if (!existsSync(path) || readFileSync(path, 'utf8') !== body) writeFileSync(path, body);
   }

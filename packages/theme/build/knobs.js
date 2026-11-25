@@ -65,9 +65,14 @@ export const fontStacks = {
   },
 };
 
-/** Skins: structural layers that go beyond the knobs (src/skins/). */
+/**
+ * Skins: structure the knobs cannot express, as one rule of token
+ * assignments each (src/skins/). lint:component-tokens keeps this list and
+ * the files in step.
+ */
 export const skins = [
   { id: 'loft', label: 'Loft', description: 'Soft and elevated: a tinted page, white cards with shadows, no hairlines.' },
+  { id: 'slab', label: 'Slab', description: 'Dense, square and ruled: ink lines, framed boxes with hard shadows, inverted selection.' },
 ];
 
 const round = (n, places = 4) => Math.round(n * 10 ** places) / 10 ** places;
@@ -169,14 +174,22 @@ export function fromParams(params, defaults, themes = {}) {
 /** A theme name as it appears in a selector and a file name. */
 export const slug = (s) => String(s).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40);
 
-/** The theme as a CSS file: one rule that sets knobs. Every knob is written, so the file stands alone. */
-export function themeCss(values, { name = '', skin, comment } = {}) {
+/**
+ * The theme as a CSS file: one rule that sets knobs. Every knob is written,
+ * so the file stands alone. With a skin it imports the skin's stylesheet;
+ * given `skinCss` (the skin written out by build/skins.js) it holds the
+ * skin's token assignments instead, so the one file is the whole look.
+ */
+export function themeCss(values, { name = '', skin, comment, skinCss } = {}) {
   const selector = name ? `[data-void-theme="${name}"]` : ':root';
   const lines = knobs.filter((k) => values[k.name] !== undefined).map((k) => `  ${k.name}: ${values[k.name]};`);
   const head = [];
   if (comment) head.push(`/* ${comment} */`);
-  if (skin) head.push(`@import '@voidable/theme/skins/${skin}.css';`);
-  return `${head.join('\n')}${head.length ? '\n' : ''}${selector} {\n${lines.join('\n')}\n}\n`;
+  if (skin && !skinCss) head.push(`@import '@voidable/theme/skins/${skin}.css';`);
+  const rule = `${head.join('\n')}${head.length ? '\n' : ''}${selector} {\n${lines.join('\n')}\n}\n`;
+  if (!skin || !skinCss) return rule;
+  const label = skins.find((s) => s.id === skin)?.label ?? skin;
+  return `${rule}\n/* The ${label} skin: role and component tokens, in the layer above the\n   components. It applies where data-void-skin="${skin}" is set. */\n@layer components.void.skins {\n${skinCss.trim().split('\n').map((l) => (l ? `  ${l}` : l)).join('\n')}\n}\n`;
 }
 
 // ── Describing a theme in words ──────────────────────────────────────
@@ -201,12 +214,12 @@ export function describe(values, defaults, { skin, url } = {}) {
   const nc = n('--void-neutral-chroma');
   const greys = nc < 0.002 ? 'pure greys' : `${pick(nc, [[0.008, 'barely'], [0.018, 'lightly'], [1, 'clearly']])} ${temperature(n('--void-neutral-hue'))} greys`;
   const tint = n('--void-page-tint');
-  const page = skin === 'loft' ? 'a soft tinted page with lifted white cards and shadows instead of hairlines' : tint < 0.15 ? 'a pure black or white page' : tint < 0.6 ? 'a slightly tinted page' : 'a soft tinted page';
+  const page = skin === 'loft' ? 'a soft tinted page with lifted white cards and shadows instead of hairlines' : skin === 'slab' ? `${tint < 0.15 ? 'a pure black or white page' : 'a tinted page'} ruled with heavy ink lines, square framed boxes with hard offset shadows and an inverted current link` : tint < 0.15 ? 'a pure black or white page' : tint < 0.6 ? 'a slightly tinted page' : 'a soft tinted page';
   const radius = n('--void-radius');
-  const corners = radius >= 100 ? 'pill-shaped controls' : radius === 0 ? 'square corners' : `${radius}px corners`;
+  const corners = skin === 'slab' ? 'square corners' : radius >= 100 ? 'pill-shaped controls' : radius === 0 ? 'square corners' : `${radius}px corners`;
   const density = pick(n('--void-density'), [[0.88, 'compact'], [1.06, 'modest'], [9, 'roomy']]);
   const rhythm = pick(n('--void-rhythm'), [[0.85, 'tight'], [1.1, 'generous'], [9, 'very generous']]);
-  const chrome = skin === 'loft' ? '' : `, ${pick(n('--void-chrome'), [[0.15, 'almost no chrome'], [0.55, 'hairline dividers'], [9, 'clear dividers and filled containers']])}`;
+  const chrome = skin ? '' : `, ${pick(n('--void-chrome'), [[0.15, 'almost no chrome'], [0.55, 'hairline dividers'], [9, 'clear dividers and filled containers']])}`;
   const sans = values['--void-font-sans'] ?? defaults['--void-font-sans'];
   const face = fontStacks['--void-font-sans'][fontKey('--void-font-sans', sans)]?.label ?? sans.split(',')[0].replace(/['"]/g, '');
   const size = Math.round(n('--void-font-size') * 16 * 10) / 10;

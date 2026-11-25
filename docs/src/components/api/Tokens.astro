@@ -1,0 +1,69 @@
+---
+// Component tokens, as tables. The rows come from
+// @voidable/theme/component-tokens.json, which the theme build writes from
+// the `@tokens` comments and the var() fallbacks in the CSS source, so a table
+// here cannot disagree with what a component reads.
+//
+//   <Tokens component="card" />            one component or pattern
+//   <Tokens component="list" heading />    with a sentence above it
+//   <Tokens all />                         every component, one table each
+//   <Tokens roles />                       the role tokens
+import registry from '../../../../packages/theme/dist/component-tokens.json';
+import { inline } from '../../lib/inline.mjs';
+
+interface Props { component?: string; all?: boolean; roles?: boolean; intro?: boolean }
+const { component, all = false, roles = false, intro = false } = Astro.props;
+type Token = { name: string; default: string; description: string; setting?: boolean };
+const components = registry.components as Record<string, Token[]>;
+const groups: [string, Token[]][] = all ? Object.entries(components) : component && components[component] ? [[component, components[component]]] : [];
+const ROLE_NOTES: Record<string, string> = {
+  container: 'A box that groups content on the page: card, panel, stat, glass; the alert, section and figure tokens can point at it.',
+  float: 'A box that lies over the page: menu, popover, dropdown, select list, hover card, toast, tooltip; dialog and drawer for their panel; the elevated variant of a card or panel.',
+  control: 'Anything pressed or typed into: radius, edge colour and edge thickness. Size steps are the <code>--void-control-height|padding|text</code> tokens.',
+  field: 'A control text is entered or chosen in: input, textarea, select, combobox, number, pin and tags input.',
+  item: 'The selected one of a set: the link to the current page, the selected list item.',
+  rule: 'A line that separates, as a whole border (width, style, colour): <code>none</code> switches it off. <code>between</code> items of one group, <code>edge</code> opens and closes a group, <code>head</code> sits under a heading.',
+};
+const roleGroups = roles ? (registry.grammar.roles as string[]).map((r) => [r, (registry.roles as { name: string; role: string; default: string }[]).filter((t) => t.role === r)] as const) : [];
+---
+
+{intro && groups.length > 0 && (
+  <p>
+    Component tokens are override points. The theme never declares them, so one declaration of yours wins wherever you put it: on the element, on an ancestor, or on <code>:root</code>. Unset, each takes the default shown. See <a href="/getting-started/theming/#component-tokens">Theming</a>.
+  </p>
+)}
+{groups.map(([name, tokens]) => (
+  <Fragment>
+    {all && <h4 id={`tokens-${name}`}><code>void-{name}</code></h4>}
+    <div class="vd-api-table">
+      <table>
+        <thead><tr><th>Token</th><th>Default</th><th>What it styles</th></tr></thead>
+        <tbody>
+          {tokens.map((t) => (
+            <tr>
+              <td><code>{t.name}</code></td>
+              <td>{/--_void-/.test(t.default) ? <span class="vd-api-none">set by the component (its tone or its surroundings)</span> : <code>{t.default}</code>}</td>
+              <td set:html={inline(t.description)} />
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </Fragment>
+))}
+{roleGroups.map(([role, tokens]) => (
+  <Fragment>
+    <h4 id={`role-${role}`}>{role}</h4>
+    <p set:html={ROLE_NOTES[role]} />
+    <div class="vd-api-table">
+      <table>
+        <thead><tr><th>Role token</th><th>Default</th></tr></thead>
+        <tbody>
+          {tokens.map((t) => (
+            <tr><td><code>{t.name}</code></td><td><code>{t.default}</code></td></tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </Fragment>
+))}

@@ -83,7 +83,7 @@ A theme is a file that sets knobs and nothing else. Eight ship, each about a doz
 
 ### Skins
 
-A skin changes structure, which knobs cannot. `loft` is soft and elevated: a tinted page, white cards with shadows, no hairlines. It combines with any theme and any knobs.
+A skin changes structure, which knobs cannot. It is one rule of token assignments and combines with any theme and any knobs. Two ship: `loft` is soft and elevated (a tinted page, white cards with shadows, no hairlines); `slab` is dense, square and ruled (heavy ink lines, framed boxes with hard offset shadows, an inverted current link). Both prefer the light scheme; `data-theme` still decides when it is set.
 
 ```css
 @import '@voidable/theme';
@@ -93,6 +93,19 @@ A skin changes structure, which knobs cannot. `loft` is soft and elevated: a tin
 ```html
 <html data-void-skin="loft">
 ```
+
+To write your own, see [Build a skin](https://voidable.dev/getting-started/skins/): one `[data-void-skin="mine"] { … }` rule, expanded for nested regions with `expandSkin()` from `@voidable/theme/skin`.
+
+### Component tokens
+
+Below the knobs and the derived semantic tokens sit **component tokens**: per-component override points named `--void-<component>-<part?>-<property>-<state?>`, each defaulting to a semantic or role token. The theme never declares them, so one declaration wins anywhere, with no `!important`:
+
+```css
+:root { --void-card-shadow: var(--void-shadow-sm); }   /* every card */
+.billing { --void-card-radius: 0; }                    /* the cards of one region */
+```
+
+Role tokens restyle a whole kind of component: `--void-container-*`, `--void-float-*`, `--void-control-*`, `--void-field-*`, `--void-item-*-selected` and the `--void-rule*` lines. The full list with defaults is in the [theming guide](https://voidable.dev/getting-started/theming/#component-token-reference) and in `@voidable/theme/component-tokens.json`.
 
 ### Tokens as data
 
@@ -104,7 +117,9 @@ Every token, resolved for each theme and skin in both colour schemes, for tools 
 | `@voidable/theme/dtcg/voidable.resolver.json` | A DTCG resolver document listing those files |
 | `@voidable/theme/json/<theme>.<scheme>.json` | `{ "--void-color-bg": "#000000", ... }`: custom property to resolved CSS value |
 | `@voidable/theme/knobs.json` | The knobs as data: range, step, unit, default, description, and each shipped theme's values |
-| `@voidable/theme/names` | `tokenNames`, `knobNames`, `themeNames`, `skinNames`, `cssVar()`, and the types `TokenName`, `KnobName`, `ThemeName`, `SkinName` |
+| `@voidable/theme/component-tokens.json` | Component tokens grouped by component (name, default, what it styles), the role tokens and the naming vocabulary |
+| `@voidable/theme/names` | `tokenNames`, `roleTokenNames`, `componentTokenNames`, `componentTokens`, `knobNames`, `themeNames`, `skinNames`, `cssVar()`, and the types `TokenName`, `RoleTokenName`, `ComponentTokenName`, `KnobName`, `ThemeName`, `SkinName` |
+| `@voidable/theme/skin` | `expandSkin(css, name)`: a skin source written out for every scope of the theme |
 
 `<theme>` is a theme or skin name, `<scheme>` is `dark` or `light`: `@voidable/theme/dtcg/dune.light.tokens.json`. The values are computed at build time and tested to equal what Chromium computes from the CSS.
 

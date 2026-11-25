@@ -14,7 +14,7 @@ const tok = read('tokens.css');
 // ── parsing ──────────────────────────────────────────────
 function decls(body) {
   const out = {};
-  for (const m of body.matchAll(/(--void-[\w-]+)\s*:\s*([^;]+);/g)) out[m[1]] = m[2].trim().replace(/\s+/g, ' ');
+  for (const m of body.matchAll(/(--_?void-[\w-]+)\s*:\s*([^;]+);/g)) out[m[1]] = m[2].trim().replace(/\s+/g, ' ');
   return out;
 }
 function block(src, headerRe) {
@@ -26,7 +26,7 @@ function block(src, headerRe) {
 }
 const primitives = decls(block(prim, /^:root\s*\{/m));
 const knobs = decls(block(knobsCss, /^:root\s*\{/m));
-const derived = decls(block(tok, /^:where\(:root, \[data-theme\], \[data-void-theme\], \[data-shape\], \[data-void-surface\], void-media, void-glass\)\s*\{/m));
+const derived = decls(block(tok, /^:where\(:root,[^{]*\{/m));
 // UI over imagery: the fixed inputs (tokens.css) and the two surfaces
 // (media/surface.css), which override derived tokens on their own element.
 const mediaInputs = decls(block(tok, /^:root\s*\{\s*--void-scrim-strength/m).replace(/^/, '--void-scrim-strength'));
@@ -53,11 +53,23 @@ if (!/@media\s*\(prefers-contrast:\s*more\)\s*\{[^}]*--void-contrast-boost:\s*1/
 
 // ── tiny CSS value evaluator: var(), calc/min/max/clamp, oklch(), color-mix(in srgb) ──
 function substitute(val, env, depth = 0) {
-  if (depth > 40) throw new Error('var loop: ' + val);
-  return val.replace(/var\((--[\w-]+)\)/g, (_, name) => {
-    if (!(name in env)) throw new Error('undefined ' + name);
-    return substitute(env[name], env, depth + 1);
-  });
+  if (depth > 60) throw new Error('var loop: ' + val);
+  let out = '', i = 0;
+  for (;;) {
+    const at = val.indexOf('var(', i);
+    if (at === -1) return out + val.slice(i);
+    out += val.slice(i, at);
+    let d = 1, j = at + 4;
+    while (d && j < val.length) { if (val[j] === '(') d++; else if (val[j] === ')') d--; j++; }
+    const inner = val.slice(at + 4, j - 1);
+    const comma = inner.indexOf(',');
+    const name = (comma === -1 ? inner : inner.slice(0, comma)).trim();
+    // var(--x, fallback): the fallback is used when --x is not set at all
+    if (name in env) out += substitute(env[name], env, depth + 1);
+    else if (comma !== -1) out += substitute(inner.slice(comma + 1).trim(), env, depth + 1);
+    else throw new Error('undefined ' + name);
+    i = j;
+  }
 }
 // split on a separator at parenthesis depth 0
 function splitTop(s, sep) {
@@ -162,7 +174,7 @@ const roles = ['label', 'value', 'unit', 'caption', 'heading', 'title', 'display
 function checkConfig(name, overrides, { quiet = false, skin = {} } = {}) {
   let local = 0;
   for (const [mode, dark] of [['dark', 1], ['light', 0]]) {
-    const env = { ...primitives, ...knobs, ...mediaInputs, '--void-scheme-dark': String(dark), '--void-page-scheme-dark': String(dark), '--void-contrast-boost': '0', '--void-shape': '1', ...overrides, ...derived, ...skin };
+    const env = { ...primitives, ...knobs, ...mediaInputs, '--void-scheme-system': '1', '--void-scheme-explicit': String(dark), '--void-contrast-boost': '0', '--void-shape': '1', ...overrides, ...derived, ...skin };
     const raw = (token) => substitute(`var(${token})`, env);
     const page = color(raw('--void-color-bg'));
     // surfaces are opaque; anything translucent is composited over the page
@@ -199,6 +211,36 @@ function checkConfig(name, overrides, { quiet = false, skin = {} } = {}) {
         check(`ghost ${st} button label on its pressed fill over ${s}`, c(st), tintOf(st, bg, 1.25), 4.5);
       }
     }
+    // Roles and component tokens. A role surface is a semantic surface until a
+    // skin assigns it; then it is a new place text sits, and it is held to the
+    // same minimums. Every `…-surface` token in force is checked: with the
+    // `…-ink` of the same name when that is assigned (a tooltip, the current
+    // navigation link), otherwise with every text colour that can land on it.
+    const tokenColor = (token) => color(raw(token));
+    const flat = (v) => (v.a < 1 ? over(v, page) : v);
+    const surfaceTokens = new Set(['--void-container-surface', '--void-float-surface', '--void-field-surface', '--void-item-surface-selected', ...Object.keys(skin).filter((k) => /^--void-[a-z0-9-]+-surface(-[a-z]+)?$/.test(k))]);
+    for (const token of surfaceTokens) {
+      let bg;
+      try { bg = flat(tokenColor(token)); } catch { fail(`[${name}, ${mode}] ${token} is not a colour lint:contrast can evaluate`); continue; }
+      const short = token.slice(7);
+      const ink = token.replace(/-surface(-[a-z]+)?$/, '-ink$1');
+      if (ink in skin || ink in derived) { check(`${ink.slice(7)} on ${short}`, tokenColor(ink), bg, 4.5); continue; }
+      for (const t of ['text', 'text-secondary', 'text-muted']) check(`${t} on ${short}`, c(t), bg, 4.5);
+      for (const r of roles) check(`type role ${r} on ${short}`, color(raw(`--void-type-${r}-color`)), bg, 4.5);
+      check(`accent as text on ${short}`, c('accent'), bg, 4.5);
+      for (const st of statuses) check(`${st} text on ${short}`, c(st), bg, 4.5);
+      check(`border-control on ${short}`, c('border-control'), bg, 3);
+      check(`focus-ring-color on ${short}`, color(raw('--void-focus-ring-color')), bg, 3);
+    }
+    // An ink with no surface of its own sits on the page.
+    for (const token of Object.keys(skin).filter((k) => /^--void-[a-z0-9-]+-ink(-[a-z]+)?$/.test(k))) {
+      if (!(token.replace(/-ink(-[a-z]+)?$/, '-surface$1') in skin)) check(`${token.slice(7)} on bg`, tokenColor(token), page, 4.5);
+    }
+    // The edge of a field is its only boundary: 3:1 against its fill and the page.
+    check('control-border on bg', tokenColor('--void-control-border'), page, 3);
+    check('field-border on field-surface', tokenColor('--void-field-border'), flat(tokenColor('--void-field-surface')), 3);
+    check('field-border on bg', tokenColor('--void-field-border'), page, 3);
+
     check('text on bg-active (pressed, selected segment)', c('text'), solid('bg-active'), 4.5);
     check('text-on-accent on accent fill', c('text-on-accent'), c('accent'), 4.5);
     check('text-on-accent on accent-hover fill', c('text-on-accent'), solid('accent-hover'), 4.5);
@@ -244,7 +286,7 @@ function checkSurfaces(name, overrides, { quiet = false } = {}) {
     return { c, tint, raw };
   };
   for (const [mode, dark] of [['dark', 1], ['light', 0]]) {
-    const baseEnv = { ...primitives, ...knobs, ...mediaInputs, '--void-scheme-dark': String(dark), '--void-page-scheme-dark': String(dark), '--void-contrast-boost': '0', '--void-shape': '1', ...overrides, ...derived };
+    const baseEnv = { ...primitives, ...knobs, ...mediaInputs, '--void-scheme-system': '1', '--void-scheme-explicit': String(dark), '--void-contrast-boost': '0', '--void-shape': '1', ...overrides, ...derived };
     for (const [bname, backdrop] of Object.entries(backdrops)) {
       // on-media: the same in both page schemes, checked in both anyway
       {
@@ -299,26 +341,26 @@ const themes = fs.existsSync(themesDir) ? fs.readdirSync(themesDir).filter((f) =
 for (const file of themes) {
   const src = fs.readFileSync(themesDir + file, 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
   const set = decls(src);
-  for (const k of Object.keys(set)) if (!(k in knobs)) fail(`themes/${file}: ${k} is not a knob; a theme may only set the knobs declared in knobs.css`);
+  for (const k of Object.keys(set)) if (!(k in knobs) && !/^--void-preferred-scheme(-dark)?$/.test(k)) fail(`themes/${file}: ${k} is not a knob; a theme may only set the knobs declared in knobs.css`);
   if (/[^-\w](?!--void-)[a-z-]+\s*:\s*[^;{}]+;/.test(src.replace(/--void-[\w-]+\s*:\s*[^;]+;/g, ''))) fail(`themes/${file}: a theme may only contain knob declarations`);
   checkConfig(`theme ${path.basename(file, '.css')}`, set);
   checkSurfaces(`theme ${path.basename(file, '.css')}`, set);
 }
 
-// 2b. every shipped skin. A skin overrides derived tokens (the first rule of
-//     its file, which may hold nothing else), so it can break what the knobs
-//     guarantee: it is checked on the default knobs, on every theme and
-//     across the colour knobs. Its tokens do not reach the media and glass
-//     surfaces, which derive their own.
+// 2b. every shipped skin. A skin is one rule of token assignments (derived,
+//     role and component tokens), so it can break what the knobs guarantee:
+//     it is checked on the default knobs, on every theme and across the
+//     colour knobs, including every `…-surface` and `…-ink` it assigns. Its
+//     colours do not reach the media and glass surfaces (build/skins.js
+//     leaves them out there), which derive their own.
 const skinsDir = dir + 'skins/';
 const skins = fs.existsSync(skinsDir) ? fs.readdirSync(skinsDir).filter((f) => f.endsWith('.css')) : [];
 let skinSweeps = 0;
 for (const file of skins) {
   const src = fs.readFileSync(skinsDir + file, 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
-  const first = /^[^{}@]*\{([^{}]*)\}/.exec(src.trim());
+  const first = /^\[data-void-skin="[a-z0-9-]+"\]\s*\{([^{}]*)\}$/.exec(src.trim());
   const name = path.basename(file, '.css');
-  if (!first) { fail(`skins/${file}: a skin starts with one rule of token overrides`); continue; }
-  if (first[1].replace(/--void-[\w-]+\s*:\s*[^;{}]+;/g, '').trim()) fail(`skins/${file}: the first rule may only set --void-* properties; element styles go in the rules after it`);
+  if (!first) { fail(`skins/${file}: a skin is one rule, [data-void-skin="${name}"] { … }, of token assignments (lint:component-tokens says what is wrong)`); continue; }
   const skin = decls(first[1]);
   for (const k of Object.keys(skin)) if (k in knobs) fail(`skins/${file}: ${k} is a knob; a skin overrides derived tokens and leaves the knobs to the theme`);
   checkConfig(`skin ${name}`, {}, { skin });
@@ -373,15 +415,15 @@ if (!/@supports not \(\(backdrop-filter[^{]*\{\s*:root\s*\{\s*--void-glass-solid
 // The button reflects color="default", so a bare void-button[color] selector
 // would also turn the default border into a tone mix (below 3:1 in light).
 const buttonCss = fs.readFileSync(dir + 'components/button.css', 'utf8');
-if (/void-button\[color\]\s*\{[^}]*--tone-border/.test(buttonCss)) {
-  fail('button.css: void-button[color] must exclude color="default" when overriding --tone-border');
+if (/void-button\[color\]\s*\{[^}]*--_void-tone-border/.test(buttonCss)) {
+  fail('button.css: void-button[color] must exclude color="default" when overriding --_void-tone-border');
 }
 // The ghost fills checked above are the ones button.css declares.
 for (const [what, re] of [
-  ['default hover fill of 8%', /--tone-hover:\s*color-mix\(in srgb, var\(--tone\) 8%, transparent\)/],
-  ['default pressed fill of 13%', /--tone-active:\s*color-mix\(in srgb, var\(--tone\) 13%, transparent\)/],
-  ['coloured ghost hover fill of --void-tone-tint', /void-button\[variant="ghost"\]\[color\]:not\(\[color="default"\]\)\s*\{[^}]*--tone-hover:\s*color-mix\(in srgb, var\(--tone\) var\(--void-tone-tint\), transparent\)/],
-  ['coloured ghost pressed fill of 1.25 × --void-tone-tint', /void-button\[variant="ghost"\]\[color\]:not\(\[color="default"\]\)\s*\{[^}]*--tone-active:\s*color-mix\(in srgb, var\(--tone\) calc\(var\(--void-tone-tint\) \* 1\.25\), transparent\)/],
+  ['default hover fill of 8%', /--_void-tone-hover:\s*color-mix\(in srgb, var\(--_void-tone\) 8%, transparent\)/],
+  ['default pressed fill of 13%', /--_void-tone-active:\s*color-mix\(in srgb, var\(--_void-tone\) 13%, transparent\)/],
+  ['coloured ghost hover fill of --void-tone-tint', /void-button\[variant="ghost"\]\[color\]:not\(\[color="default"\]\)\s*\{[^}]*--_void-tone-hover:\s*color-mix\(in srgb, var\(--_void-tone\) var\(--void-tone-tint\), transparent\)/],
+  ['coloured ghost pressed fill of 1.25 × --void-tone-tint', /void-button\[variant="ghost"\]\[color\]:not\(\[color="default"\]\)\s*\{[^}]*--_void-tone-active:\s*color-mix\(in srgb, var\(--_void-tone\) calc\(var\(--void-tone-tint\) \* 1\.25\), transparent\)/],
 ]) {
   if (!re.test(buttonCss)) fail(`button.css: expected the ${what}; update lint:contrast together with the button's fills`);
 }

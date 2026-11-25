@@ -4,7 +4,7 @@ void-hamburger {
   justify-content: center;
   cursor: pointer;
   padding: var(--void-space-2);
-  border-radius: var(--void-radius-md);
+  border-radius: var(--void-control-radius);
   background: transparent;
   border: none;
   user-select: none;

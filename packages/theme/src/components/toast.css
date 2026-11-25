@@ -41,7 +41,7 @@ void-toast-container[position='inline'] {
 void-toast-container:not(:has(void-toast)) { display: none; }
 
 void-toast {
-  --tone: var(--void-color-accent);
+  --_void-tone: var(--void-color-accent);
   position: relative;
   pointer-events: auto;
   display: flex;
@@ -50,10 +50,10 @@ void-toast {
   /* Room at the end for the close button, so the message never runs
      under it. */
   padding: var(--void-space-3) var(--void-space-9) var(--void-space-3) var(--void-space-4);
-  background: var(--void-color-bg-elevated);
-  border: 1px solid var(--void-color-border);
-  border-left: 2px solid var(--tone);
-  border-radius: var(--void-radius-lg);
+  background: var(--void-float-surface);
+  border: var(--void-float-border-width) solid var(--void-float-border);
+  border-left: 2px solid var(--_void-tone);
+  border-radius: var(--void-float-radius);
   box-shadow: var(--void-shadow-lg);
   min-width: 20rem;
   max-width: 28rem;
@@ -63,13 +63,13 @@ void-toast {
   line-height: var(--void-leading-normal);
 }
 
-void-toast[color='error']   { --tone: var(--void-color-error); }
-void-toast[color='warning'] { --tone: var(--void-color-warning); }
-void-toast[color='caution'] { --tone: var(--void-color-caution); }
-void-toast[color='highlight'] { --tone: var(--void-color-highlight); }
-void-toast[color='success'] { --tone: var(--void-color-success); }
-void-toast[color='info']    { --tone: var(--void-color-info); }
-void-toast[color='notice']  { --tone: var(--void-color-notice); }
+void-toast[color='error']   { --_void-tone: var(--void-color-error); }
+void-toast[color='warning'] { --_void-tone: var(--void-color-warning); }
+void-toast[color='caution'] { --_void-tone: var(--void-color-caution); }
+void-toast[color='highlight'] { --_void-tone: var(--void-color-highlight); }
+void-toast[color='success'] { --_void-tone: var(--void-color-success); }
+void-toast[color='info']    { --_void-tone: var(--void-color-info); }
+void-toast[color='notice']  { --_void-tone: var(--void-color-notice); }
 
 .void-toast-heading {
   font-weight: var(--void-weight-medium);

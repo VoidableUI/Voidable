@@ -3,6 +3,7 @@ title: Section
 description: void-section is a titled part of a page with no box around it; void-split and void-stack arrange sections and blocks using the layout rhythm.
 ---
 
+import Tokens from '../../../components/api/Tokens.astro';
 import Example from '../../../components/Example.astro';
 
 `<void-section>` is a titled part of a page: a head, then content. It has no border, no fill and no shadow. What separates one section from the next is space, and that space is the same everywhere because the page sets it.
@@ -173,6 +174,16 @@ export const splitJsx = `
 | | `sticky` | As a child of `void-split`: stays in view while the other column scrolls |
 
 The attribute is `valign` and not `align` because `align` is an old HTML attribute that browsers still honour on unknown elements: it would also set the text alignment of everything inside.
+
+## Tokens
+
+A skin, or your own CSS, restyles this pattern through its tokens. The theme never declares them, so one declaration wins on the element, an ancestor or `:root`. See [Theming](/getting-started/theming/#component-tokens).
+
+<Tokens component="section" />
+
+`void-rows`, the list of rows shown above:
+
+<Tokens component="rows" />
 
 ## Why this form
 

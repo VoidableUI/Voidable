@@ -3,6 +3,7 @@ title: App shell
 description: void-shell frames an application (a top bar, a sidebar, or a bar laid over an image) and void-page is its centred content column. CSS only, responsive to 390px.
 ---
 
+import Tokens from '../../../components/api/Tokens.astro';
 import Example from '../../../components/Example.astro';
 
 `<void-shell>` is the frame of an application: navigation, then `<main>`. `<void-page>` inside `<main>` is the content column: centred, with a gutter that tightens on a narrow screen. Between them they replace the page padding, max-width and sticky-header CSS that every application writes first.
@@ -184,6 +185,12 @@ Something outside a `void-page` that must line up with it (a full-bleed band, a 
 | any element | `data-void-hide` | `narrow` removes it below 48rem, `wide` above |
 
 `void-nav-bar` and `void-sidebar` are components (they have behaviour: a menu button, collapsing). Everything else here is CSS only.
+
+## Tokens
+
+A skin, or your own CSS, restyles this pattern through its tokens. The theme never declares them, so one declaration wins on the element, an ancestor or `:root`. See [Theming](/getting-started/theming/#component-tokens).
+
+<Tokens component="nav-links" />
 
 ## Why this form
 

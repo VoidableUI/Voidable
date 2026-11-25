@@ -1,10 +1,14 @@
+/* @tokens void-pagination
+   --void-pagination-size       Height and least width of a page button. Applies at every size step; for a proportional change set the --void-control-* steps instead.
+   --void-pagination-font-size  Size of the page numbers. Applies at every size step; for a proportional change set the --void-control-* steps instead. */
+
 void-pagination {
-  --void-pagination-size: var(--void-control-height);
-  --void-pagination-text: var(--void-control-text);
-  --tone: var(--void-color-accent);
-  --tone-subtle: color-mix(in srgb, var(--tone) 13%, transparent);
-  --tone-border: transparent;
-  --tone-hover: color-mix(in srgb, var(--tone) 8%, transparent);
+  --_void-pagination-size: var(--void-pagination-size, var(--void-control-height));
+  --_void-pagination-font-size: var(--void-pagination-font-size, var(--void-control-text));
+  --_void-tone: var(--void-color-accent);
+  --_void-tone-subtle: color-mix(in srgb, var(--_void-tone) 13%, transparent);
+  --_void-tone-border: transparent;
+  --_void-tone-hover: color-mix(in srgb, var(--_void-tone) 8%, transparent);
 }
 
 void-pagination nav {
@@ -17,16 +21,16 @@ void-pagination nav {
 .void-pagination-btn {
   appearance: none;
   background: none;
-  border: 1px solid transparent;
-  border-radius: var(--void-radius-md);
+  border: var(--void-control-border-width) solid transparent;
+  border-radius: var(--void-control-radius);
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: var(--void-pagination-size);
-  height: var(--void-pagination-size);
+  min-width: var(--_void-pagination-size);
+  height: var(--_void-pagination-size);
   padding: 0 var(--void-space-1);
   font-family: var(--void-font-sans);
-  font-size: var(--void-pagination-text);
+  font-size: var(--_void-pagination-font-size);
   font-variant-numeric: tabular-nums;
   color: var(--void-color-text);
   box-sizing: border-box;
@@ -38,7 +42,7 @@ void-pagination nav {
 }
 
 .void-pagination-btn:hover:not(:disabled):not([aria-disabled="true"]) {
-  background: var(--tone-hover);
+  background: var(--_void-tone-hover);
 }
 
 .void-pagination-btn:focus-visible {
@@ -47,9 +51,9 @@ void-pagination nav {
 }
 
 .void-pagination-btn[aria-current="page"] {
-  background: var(--tone-subtle);
+  background: var(--_void-tone-subtle);
   color: var(--void-color-text);
-  border-color: var(--tone-border);
+  border-color: var(--_void-tone-border);
   cursor: default;
 }
 
@@ -67,11 +71,11 @@ void-pagination nav {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: var(--void-pagination-size);
+  min-width: var(--_void-pagination-size);
   color: var(--void-color-text-muted);
-  font-size: var(--void-pagination-text);
+  font-size: var(--_void-pagination-font-size);
   user-select: none;
 }
 
-void-pagination[size="sm"] { --void-pagination-size: var(--void-control-height-sm); --void-pagination-text: var(--void-control-text-sm); }
-void-pagination[size="lg"] { --void-pagination-size: var(--void-control-height-lg); --void-pagination-text: var(--void-control-text-lg); }
+void-pagination[size="sm"] { --_void-pagination-size: var(--void-pagination-size, var(--void-control-height-sm)); --_void-pagination-font-size: var(--void-pagination-font-size, var(--void-control-text-sm)); }
+void-pagination[size="lg"] { --_void-pagination-size: var(--void-pagination-size, var(--void-control-height-lg)); --_void-pagination-font-size: var(--void-pagination-font-size, var(--void-control-text-lg)); }

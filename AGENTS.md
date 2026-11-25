@@ -104,7 +104,24 @@ The inputs a theme sets. To retheme, change these and nothing else:
 
 A **theme** is a file in `packages/theme/src/themes/` with one `[data-void-theme="name"]` rule that sets knobs only (`lint:contrast` rejects anything else). Eight ship: `void`, `dune`, `console`, `orbit`, `capsule`, `aurora`, `iris`, `paper`. Each file starts with a comment of the form `/* Name — one line.`, which the theme builder shows.
 
-A **skin** is a file in `packages/theme/src/skins/` selected with `data-void-skin="name"` (on `<html>`, or beside `data-void-theme`). It changes structure, which knobs cannot: its first rule may only override `--void-*` tokens (the token export and `lint:contrast` read it, and the lint checks it on every theme and across the colour knobs); the rules after it restyle elements, and each of those is a missing override point to be replaced by a component token (#46). `loft` ships. A skin never edits a file under `components/`.
+A **skin** is a file in `packages/theme/src/skins/` selected with `data-void-skin="name"` (on `<html>`, or beside `data-void-theme`). It changes structure, which knobs cannot, and its source is exactly one rule, `[data-void-skin="name"] { … }`, holding nothing but assignments of semantic, role and component tokens (its own working values are `--_void-<name>-*`). No selector in a skin names a component: `build/skins.js` refuses anything else, and so do `lint:component-tokens` and `lint:contrast`. The build writes the rule out for every scope (the list is read from `tokens.css`), and for the surface scopes (media, glass, `[data-void-surface]`) it leaves out the colours a surface owns and resets the skin's component colour tokens, so on a surface a skin keeps its structure and the surface keeps its colours. `loft` and `slab` ship; a new one is listed in `build/knobs.js`. If a design cannot be said in tokens, add the missing component token (below); never add a selector to a skin, and never edit a file under `components/` for a skin.
+
+### Three tiers, and when a component token exists
+
+1. **Knobs**: the inputs (`knobs.css`). A theme sets these and nothing else.
+2. **Semantic tokens**: derived from the knobs in `tokens.css`. They include the **role tokens**, what a kind of component is drawn with: `--void-container-*` (surface, border, border-width, radius, shadow, padding), `--void-float-*` (the same, for what lies over the page), `--void-control-*` (radius, border, border-width, and the height/padding/text steps), `--void-field-*` (surface, border), `--void-item-*-selected` (surface, ink) and `--void-rule`, `--void-rule-between`, `--void-rule-edge`, `--void-rule-head` (whole border shorthands, so `none` removes a line).
+3. **Component tokens**: per-component override points, `--void-<component>-<part?>-<property>-<state?>`. The vocabulary is fixed in `build/skins.js` (`PARTS`, `PROPERTIES`, `STATES`, `ROLES`); parts are the part-element words (`header`, `footer`, `title`, `body`, `actions`, `trigger`, `content`, `item`, `label`, `icon`, `value`).
+
+Rules for component tokens:
+
+- **Never declared by the theme.** A component reads one with its default as the fallback, `var(--void-card-shadow, var(--void-container-shadow))`, so one declaration by an application or a skin wins on the element, an ancestor or `:root` with no `!important`. Where a file reads a token several times or it must compose with size steps, alias it once to a private property on the host (`--_void-button-height: var(--void-button-height, var(--void-control-height))`) and let the size rules reassign the private one.
+- **A component reads a role, not a raw semantic colour, for anything a role covers.** A card's edge is `var(--void-card-border, var(--void-container-border))`, not `var(--void-color-border)`.
+- **A token exists only when all three hold:** a shipped or plausible design treats this component differently from the others of its role; the difference is not already an attribute or variant; and it is a decision (surface, ink, border, radius, shadow, rule, padding, gap, height, type) and not a mechanic (display, position, transition, z-index). No token per declaration. A layout parameter that is not in the grammar is allowed when its description starts with `Setting:`.
+- **Documented where it is read.** Each stylesheet that reads component tokens starts with a `/* @tokens void-<name>` comment listing `--name  what it styles`, one per line. The docs tables, `dist/component-tokens.json`, the `component` group of the DTCG files, `componentTokenNames` in `@voidable/theme/names` and the per-component pages are generated from that comment and the fallback in the CSS.
+- **Private properties are `--_void-*`** (the tone system is `--_void-tone*`). They are not API and may change.
+- `mise run lint:component-tokens` fails on a token documented but not read, read but not documented, outside the grammar, declared by the theme, and on a skin that is not one rule of token assignments, sets a knob, thins the focus ring, shrinks a control below 24px or sets a duration that ignores `--void-anim-scale`.
+
+**Colour scheme.** Three sources, strongest first: `data-theme="dark|light|system"` on the element or an ancestor; the scheme a theme or skin prefers (`--void-preferred-scheme: light; --void-preferred-scheme-dark: 0;`, always as a pair); the operating system. `--void-scheme-dark` (0 or 1) and `--void-color-scheme` are derived from that chain in `tokens.css`; do not set them directly.
 
 The knobs are also data: `packages/theme/build/knobs.js` holds each knob's range, step, unit and URL parameter, the font stacks, the link format of the theme builder (`builderUrl`, `fromParams`), the theme-file writer, the prose description and the random theme. The builder page, the token export and `@voidable/theme/knobs.json` read it, and a test fails if its knob list, the knob table in the `voidable` skill template or `knobs.css` disagree. Add or change a knob in `knobs.css`, `build/knobs.js` and `tools/voidable/internal/infra/skillgen/templates/SKILL.md.tmpl` together.
 
@@ -221,6 +238,7 @@ set -euo pipefail
 | `mise run lint:theme` | Check the cascade-layer structure, that nothing global leaks outside the base, that `!important` is justified, and that the built output is layered and complete |
 | `mise run lint:tokens` | Ensure no raw values (colors, sizes, control heights, tracking, text case, backdrop blurs, scrim colours, text shadows) in component CSS; values live in primitives.css, knobs.css and tokens.css |
 | `mise run lint:undefined-tokens` | Fail if a `--void-*` token is referenced (in the theme, the components, the docs, the stories or the examples) but neither defined in theme CSS nor set from TypeScript |
+| `mise run lint:component-tokens` | Fail on a component token that is documented but unread, read but undocumented, outside the naming grammar or declared by the theme, and on a skin file that is anything but one rule of token assignments |
 | `mise run lint:contrast` | Evaluate the derived colours and check WCAG contrast in dark and light for the default knobs, every theme file, every skin and the extremes of each colour knob, on the page, on the on-media surface and on glass (over white, grey and black images, across the scrim strength); reject theme files that set anything but knobs |
 | `mise run lint:styles` | Ensure UI components contain no visual styles and that the CSS-only pattern elements are styled by the theme and never registered |
 | `mise run lint:exports` | Verify every component has a subpath export, self-registers and is re-exported from the index |
@@ -306,11 +324,11 @@ Use **tag + attribute selectors** (not BEM classes) for all component styling in
 void-button { display: inline-flex; }
 
 /* Variants — attribute selectors */
-void-button[variant="filled"] { background: var(--tone); }
+void-button[variant="filled"] { background: var(--_void-tone); }
 void-button[disabled] { opacity: 0.5; pointer-events: none; }
 
 /* States — pseudo-classes */
-void-button:hover { background: var(--tone-hover); }
+void-button:hover { background: var(--_void-tone-hover); }
 void-button:focus-visible { outline: 2px solid var(--void-color-border-focus); }
 ```
 
@@ -322,30 +340,30 @@ Rationale:
 
 ### Tone System
 
-Components that support color variants use a **tone variable** pattern. The base rule defines derived values via `color-mix()`, and each color variant only overrides `--tone`:
+Components that support color variants use a **tone variable** pattern. The base rule defines derived values via `color-mix()`, and each color variant only overrides `--_void-tone`:
 
 ```css
 void-button {
-  --tone: var(--void-color-accent);
-  --tone-text: var(--void-color-text);
-  --tone-subtle: transparent;
-  --tone-border: var(--void-color-border-control);
-  --tone-hover: color-mix(in srgb, var(--tone) 8%, transparent);
-  --tone-active: color-mix(in srgb, var(--tone) 13%, transparent);
+  --_void-tone: var(--void-color-accent);
+  --_void-tone-text: var(--void-color-text);
+  --_void-tone-subtle: transparent;
+  --_void-tone-border: var(--void-color-border-control);
+  --_void-tone-hover: color-mix(in srgb, var(--_void-tone) 8%, transparent);
+  --_void-tone-active: color-mix(in srgb, var(--_void-tone) 13%, transparent);
 }
 
 /* A coloured button tints itself with the shared tint strength */
 void-button[color]:not([color="default"]) {
-  --tone-subtle: color-mix(in srgb, var(--tone) var(--void-tone-tint), transparent);
-  --tone-border: color-mix(in srgb, var(--tone) 50%, transparent);
+  --_void-tone-subtle: color-mix(in srgb, var(--_void-tone) var(--void-tone-tint), transparent);
+  --_void-tone-border: color-mix(in srgb, var(--_void-tone) 50%, transparent);
 }
 
 /* One override cascades to all derived states */
-void-button[color="error"]   { --tone: var(--void-color-error); }
-void-button[color="warning"] { --tone: var(--void-color-warning); }
-void-button[color="success"] { --tone: var(--void-color-success); }
-void-button[color="info"]    { --tone: var(--void-color-info); }
-void-button[color="notice"]  { --tone: var(--void-color-notice); }
+void-button[color="error"]   { --_void-tone: var(--void-color-error); }
+void-button[color="warning"] { --_void-tone: var(--void-color-warning); }
+void-button[color="success"] { --_void-tone: var(--void-color-success); }
+void-button[color="info"]    { --_void-tone: var(--void-color-info); }
+void-button[color="notice"]  { --_void-tone: var(--void-color-notice); }
 ```
 
 Component CSS in `@voidable/theme` lives in `src/components/` with one file per component, imported by `src/core.css`, each into a cascade layer. `src/layers.css` declares the order (`theme, base, components.void.reset, components.void.tokens, components.void.themes, components.void.type, components.void.components, components.void.patterns, components.void.skins, components.void.a11y, utilities`: the theme's layers are children of `components` so Tailwind utilities beat them whichever stylesheet loads first; a skin lives in `components.void.skins`); a source file is never wrapped in `@layer` itself, only its `@import` is. `src/reset.css` is generated (scoped to `void-*` tags and what they contain): never hand-edit it, and never put a selector that matches an element outside a `void-*` component in the theme; `src/base.css` (`html`, `body`) is the one optional exception. `mise run theme:build` generates `packages/theme/dist/` (the single `void.css` and `void.min.css`, per-component and per-pattern files, `exports.json`); `lint:theme` checks the layer structure and the built output. Apps override the theme with unlayered CSS and no `!important`.

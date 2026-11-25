@@ -1,10 +1,14 @@
+/* @tokens void-sidebar
+   --void-sidebar-surface  Fill of the sidebar.
+   --void-sidebar-rule     The line on its inner edge (under it when the shell turns it into a bar on a narrow screen). */
+
 void-sidebar {
   display: flex;
   flex-direction: column;
   width: var(--void-sidebar-width);
   height: 100%;
-  background: var(--void-color-bg);
-  border-right: 1px solid var(--void-color-border);
+  background: var(--void-sidebar-surface, var(--void-color-bg));
+  border-right: var(--void-sidebar-rule, var(--void-rule));
   overflow: hidden;
   font-family: var(--void-font-sans);
   color: var(--void-color-text);
@@ -14,7 +18,7 @@ void-sidebar {
 
 void-sidebar[position="right"] {
   border-right: none;
-  border-left: 1px solid var(--void-color-border);
+  border-left: var(--void-sidebar-rule, var(--void-rule));
 }
 
 void-sidebar[collapsed] {
