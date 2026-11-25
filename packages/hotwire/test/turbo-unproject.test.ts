@@ -1,7 +1,7 @@
 import { describe, it, expect, afterEach, vi } from 'vitest';
 import { VoidTurbo } from '../src/turbo.js';
 
-// The pre-morph hook: VoidTurbo calls voidUnproject() on each void-* element
+// The pre-morph hook: VoidTurbo calls voidBeforeMorph() on each void-* element
 // Turbo is about to morph, after recording the server state for it.
 
 let stop: (() => void) | undefined;
@@ -12,11 +12,11 @@ afterEach(() => {
   document.body.innerHTML = '';
 });
 
-type Spied = Element & { voidUnproject: ReturnType<typeof vi.fn> };
+type Spied = Element & { voidBeforeMorph: ReturnType<typeof vi.fn> };
 
 function spied(el: Element, log: string[]): Spied {
   const s = el as Spied;
-  s.voidUnproject = vi.fn(() => {
+  s.voidBeforeMorph = vi.fn(() => {
     log.push(`unproject ${el.id}`);
     return true;
   });
@@ -76,8 +76,8 @@ describe('VoidTurbo pre-morph hook', () => {
     beforeMorph(plain, server('<div id="plain"></div>'));
     beforeMorph(dialog, server('<void-dialog id="d"></void-dialog>'));
 
-    expect(plain.voidUnproject).not.toHaveBeenCalled();
-    expect(dialog.voidUnproject).not.toHaveBeenCalled();
+    expect(plain.voidBeforeMorph).not.toHaveBeenCalled();
+    expect(dialog.voidBeforeMorph).not.toHaveBeenCalled();
   });
 
   it('tolerates void-* elements without the hook (not upgraded, or not projecting)', () => {
@@ -92,7 +92,7 @@ describe('VoidTurbo pre-morph hook', () => {
     const dialog = spied(document.getElementById('d')!, log);
     // Unprojecting moves children only; prove the decision is made from host
     // attributes recorded before it, not affected by it.
-    dialog.voidUnproject.mockImplementation(() => {
+    dialog.voidBeforeMorph.mockImplementation(() => {
       log.push(`unproject with open=${dialog.hasAttribute('open')}`);
       return true;
     });

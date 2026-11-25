@@ -40,8 +40,8 @@ export class VoidPinInput extends InternalsFormControl(VoidElement) {
 
   connectedCallback(): void {
     super.connectedCallback();
-    this.setAttribute('role', 'group');
-    this.setAttribute('aria-label', 'PIN input');
+    this.setHostAttribute('role', 'group');
+    this.setHostAttribute('aria-label', 'PIN input');
   }
 
   private _getCells(): HTMLInputElement[] {

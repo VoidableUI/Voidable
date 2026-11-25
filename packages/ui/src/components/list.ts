@@ -7,7 +7,7 @@ export class VoidList extends VoidElement {
 
   connectedCallback(): void {
     super.connectedCallback();
-    this.setAttribute('role', 'list');
+    this.setHostAttribute('role', 'list');
   }
 
 }
@@ -24,7 +24,7 @@ export class VoidListItem extends VoidElement {
 
   connectedCallback(): void {
     super.connectedCallback();
-    this.setAttribute('role', 'listitem');
+    this.setHostAttribute('role', 'listitem');
   }
 
   protected override updated(_changed: Map<string, unknown>): void {

@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { registerLivewireHooks } from '../src/livewire.js';
 
-// The pre-morph hook: registerLivewireHooks calls voidUnproject() on each
+// The pre-morph hook: registerLivewireHooks calls voidBeforeMorph() on each
 // void-* element in morph.updating, after reading the client state, and
 // re-applies that state once the element has re-projected.
 
@@ -35,7 +35,7 @@ function fakeHost(log: string[], initial: string) {
       value = v;
     },
   });
-  el.voidUnproject = () => {
+  el.voidBeforeMorph = () => {
     log.push('unproject');
     chrome = false;
     el.updateComplete = new Promise<void>((r) => (resolve = r)).then(() => {
@@ -109,8 +109,8 @@ describe('registerLivewireHooks pre-morph hook', () => {
     const inner = fakeHost(log, '').el;
     outer.id = 'outer';
     inner.id = 'inner';
-    outer.voidUnproject = () => (log.push('outer'), true);
-    inner.voidUnproject = () => (log.push('inner'), true);
+    outer.voidBeforeMorph = () => (log.push('outer'), true);
+    inner.voidBeforeMorph = () => (log.push('inner'), true);
     hooks['morph.updating']({ el: outer, toEl: server('') });
     hooks['morph.updated']({ el: outer });
     hooks['morph.updating']({ el: inner, toEl: server('') });
@@ -120,11 +120,24 @@ describe('registerLivewireHooks pre-morph hook', () => {
   it('restores synchronously for elements that did not unproject', () => {
     const hooks = setup();
     const el = document.createElement('void-input') as HTMLElement & Record<string, any>;
-    el.voidUnproject = () => false;
+    el.voidBeforeMorph = () => false;
     el.value = 'typed';
     hooks['morph.updating']({ el, toEl: server('') });
     el.value = 'clobbered';
     hooks['morph.updated']({ el });
     expect(el.value).toBe('typed');
+  });
+
+  it('hands toEl to voidBeforeMorph so the component can carry its own attributes onto it', () => {
+    const hooks = setup();
+    const el = document.createElement('void-switch') as HTMLElement & Record<string, any>;
+    const seen: unknown[] = [];
+    el.voidBeforeMorph = (incoming?: Element) => {
+      seen.push(incoming);
+      return false;
+    };
+    const toEl = document.createElement('void-switch');
+    hooks['morph.updating']({ el, toEl });
+    expect(seen).toEqual([toEl]);
   });
 });

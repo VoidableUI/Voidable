@@ -15,9 +15,9 @@ export class VoidPanel extends VoidElement {
 
   connectedCallback(): void {
     super.connectedCallback();
-    this.setAttribute('role', 'region');
+    this.setHostAttribute('role', 'region');
     if (this.label) {
-      this.setAttribute('aria-label', this.label);
+      this.setHostAttribute('aria-label', this.label);
     }
   }
 
@@ -25,9 +25,9 @@ export class VoidPanel extends VoidElement {
     super.updated(changed);
     if (changed.has('label')) {
       if (this.label) {
-        this.setAttribute('aria-label', this.label);
+        this.setHostAttribute('aria-label', this.label);
       } else {
-        this.removeAttribute('aria-label');
+        this.setHostAttribute('aria-label', null);
       }
     }
   }

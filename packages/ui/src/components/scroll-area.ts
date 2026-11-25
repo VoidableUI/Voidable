@@ -15,7 +15,7 @@ export class VoidScrollArea extends VoidElement {
 
   protected override updated(_changed: Map<string, unknown>): void {
     super.updated(_changed);
-    this.style.setProperty('--void-scroll-area-max-height', this.maxHeight || '');
+    this.setHostStyle('--void-scroll-area-max-height', this.maxHeight || '');
   }
 
   render() {

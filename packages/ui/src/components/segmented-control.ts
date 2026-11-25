@@ -1,4 +1,4 @@
-import { property } from 'lit/decorators.js';
+import { property, state } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
 import { InternalsFormControl, type FormSubmission } from '../form-control.js';
 
@@ -6,17 +6,20 @@ import { InternalsFormControl, type FormSubmission } from '../form-control.js';
 export class VoidSegmentedControlItem extends VoidElement {
   @property({ type: String, reflect: true }) value = '';
   @property({ type: Boolean, reflect: true }) disabled = false;
+  /** @internal Set by the parent control; drives `aria-checked`. */
+  @state() _selected = false;
 
   connectedCallback(): void {
     super.connectedCallback();
-    this.setAttribute('role', 'radio');
-    this.setAttribute('tabindex', this.disabled ? '-1' : '0');
+    this.setHostAttribute('role', 'radio');
+    this.setHostAttribute('tabindex', this.disabled ? '-1' : '0');
   }
 
   updated(changed: Map<string, unknown>): void {
     if (changed.has('disabled')) {
-      this.setAttribute('tabindex', this.disabled ? '-1' : '0');
+      this.setHostAttribute('tabindex', this.disabled ? '-1' : '0');
     }
+    if (changed.has('_selected')) this.setHostAttribute('aria-checked', String(this._selected));
   }
 }
 
@@ -33,7 +36,7 @@ export class VoidSegmentedControl extends InternalsFormControl(VoidElement) {
 
   connectedCallback(): void {
     super.connectedCallback();
-    this.setAttribute('role', 'radiogroup');
+    this.setHostAttribute('role', 'radiogroup');
     this.addEventListener('click', this._handleClick);
     this.addEventListener('keydown', this._handleKeydown);
     this._syncItems();
@@ -45,8 +48,11 @@ export class VoidSegmentedControl extends InternalsFormControl(VoidElement) {
     this.removeEventListener('keydown', this._handleKeydown);
   }
 
+  private _itemsSynced = false;
+
   updated(changed: Map<string, unknown>): void {
-    if (changed.has('value')) {
+    if (changed.has('value') || !this._itemsSynced) {
+      this._itemsSynced = true;
       this._syncItems();
     }
   }
@@ -59,7 +65,9 @@ export class VoidSegmentedControl extends InternalsFormControl(VoidElement) {
   private _syncItems(): void {
     const items = Array.from(this.querySelectorAll('void-segmented-control-item')) as VoidSegmentedControlItem[];
     for (const item of items) {
-      item.setAttribute('aria-checked', String(item.value === this.value));
+      // The item owns aria-checked on its host (so it survives morphs); an item
+      // not upgraded yet is synced from updated() once the value is applied.
+      if (item instanceof VoidSegmentedControlItem) item._selected = item.value === this.value;
     }
   }
 

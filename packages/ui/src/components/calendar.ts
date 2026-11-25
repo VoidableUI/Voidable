@@ -64,8 +64,8 @@ export class VoidCalendar extends InternalsFormControl(VoidElement) {
 
   connectedCallback(): void {
     super.connectedCallback();
-    this.setAttribute('role', 'group');
-    this.setAttribute('aria-label', 'Calendar');
+    this.setHostAttribute('role', 'group');
+    this.setHostAttribute('aria-label', 'Calendar');
     if (!this._didInit) {
       this._didInit = true;
       this._initView();
@@ -543,8 +543,8 @@ export class VoidDatePicker extends InternalsFormControl(VoidElement) {
 
   connectedCallback(): void {
     super.connectedCallback();
-    this.setAttribute('role', 'combobox');
-    this.setAttribute('aria-haspopup', 'dialog');
+    this.setHostAttribute('role', 'combobox');
+    this.setHostAttribute('aria-haspopup', 'dialog');
     document.addEventListener('mousedown', this._onDocumentClick);
     document.addEventListener('keydown', this._onDocumentKeydown);
   }
@@ -557,7 +557,7 @@ export class VoidDatePicker extends InternalsFormControl(VoidElement) {
 
   updated(changed: Map<string, unknown>): void {
     super.updated(changed);
-    this.setAttribute('aria-expanded', String(this.open));
+    this.setHostAttribute('aria-expanded', String(this.open));
   }
 
   render() {

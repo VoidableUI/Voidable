@@ -1,6 +1,7 @@
 import { html, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
+import { ProjectionController } from '../projection.js';
 
 /** Form field wrapper that pairs an input with its label, helper text, and validation error. */
 export class VoidField extends VoidElement {
@@ -9,32 +10,44 @@ export class VoidField extends VoidElement {
   @property({ type: String, reflect: true }) helper = '';
   @property({ type: Boolean, reflect: true }) required = false;
 
-  private _userContent: Node[] = [];
-  private _didSetup = false;
   private _uid = Math.random().toString(36).slice(2);
   private _labelledControl: Element | null = null;
+  /** Re-wires when the control's own rendering changes (a Void control re-rendering its native input). */
+  private _controlObserver: MutationObserver | null = null;
+
+  // The consumer's control is projected into the control container.
+  protected readonly _projection = new ProjectionController(this, {
+    regions: [{ name: 'control', target: () => this.querySelector(':scope > .void-field-control') }],
+    onChange: () => this.requestUpdate(),
+  });
 
   connectedCallback(): void {
     super.connectedCallback();
-    if (!this._didSetup) {
-      this._userContent = Array.from(this.childNodes);
-    }
+    if (this.hasUpdated) this._observeControl();
+  }
+
+  disconnectedCallback(): void {
+    super.disconnectedCallback();
+    this._controlObserver?.disconnect();
+    this._controlObserver = null;
   }
 
   protected override updated(_changed: Map<string, unknown>): void {
     super.updated(_changed);
-    if (!this._didSetup) {
-      this._didSetup = true;
-      const control = this.querySelector('.void-field-control');
-      if (control) {
-        for (const node of this._userContent) {
-          control.appendChild(node);
-        }
-      }
-    }
     this._wireControl();
+    this._observeControl();
     // Void controls render their inner native input asynchronously; wire again once they have.
     queueMicrotask(() => { if (this.isConnected) this._wireControl(); });
+  }
+
+  private _observeControl(): void {
+    const container = this.querySelector(':scope > .void-field-control');
+    if (!container || !this.isConnected) return;
+    this._controlObserver ??= new MutationObserver(() => this._wireControl());
+    this._controlObserver.disconnect();
+    // Subtree child changes: a nested Void control that rebuilt its chrome after a
+    // morph renders a new native input, which needs the label again.
+    this._controlObserver.observe(container, { childList: true, subtree: true });
   }
 
   /** The element that should carry the accessible name: an inner native control (also inside Void components), else the first child. */

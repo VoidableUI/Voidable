@@ -19,8 +19,8 @@ export class VoidDrawer extends VoidElement {
 
   connectedCallback(): void {
     super.connectedCallback();
-    this.setAttribute('role', 'dialog');
-    this.setAttribute('aria-modal', 'true');
+    this.setHostAttribute('role', 'dialog');
+    this.setHostAttribute('aria-modal', 'true');
     this.addEventListener('keydown', this._handleKeydown);
   }
 
@@ -32,9 +32,9 @@ export class VoidDrawer extends VoidElement {
   protected override updated(changed: Map<string, unknown>): void {
     super.updated(changed);
     if (changed.has('heading') && this.heading) {
-      this.setAttribute('aria-label', this.heading);
+      this.setHostAttribute('aria-label', this.heading);
     } else if (changed.has('heading') && !this.heading) {
-      this.removeAttribute('aria-label');
+      this.setHostAttribute('aria-label', null);
     }
   }
 

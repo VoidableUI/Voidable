@@ -10,8 +10,8 @@ export class VoidSidebar extends VoidElement {
 
   connectedCallback(): void {
     super.connectedCallback();
-    this.setAttribute('role', 'navigation');
-    this.setAttribute('aria-label', 'Sidebar navigation');
+    this.setHostAttribute('role', 'navigation');
+    this.setHostAttribute('aria-label', 'Sidebar navigation');
     this._updateWidth();
   }
 
@@ -34,7 +34,7 @@ export class VoidSidebar extends VoidElement {
   }
 
   private _updateWidth(): void {
-    this.style.setProperty('--void-sidebar-width', this.collapsed ? this.collapsedWidth : this.width);
+    this.setHostStyle('--void-sidebar-width', this.collapsed ? this.collapsedWidth : this.width);
   }
 }
 

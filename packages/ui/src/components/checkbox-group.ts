@@ -62,8 +62,8 @@ export class VoidCheckboxGroup extends NativeFormControl(VoidElement) {
 
   connectedCallback(): void {
     super.connectedCallback();
-    this.setAttribute('role', 'group');
-    if (this.label) this.setAttribute('aria-label', this.label);
+    this.setHostAttribute('role', 'group');
+    if (this.label) this.setHostAttribute('aria-label', this.label);
     this.addEventListener('void-change', this._handleChildChange);
   }
 
@@ -76,9 +76,9 @@ export class VoidCheckboxGroup extends NativeFormControl(VoidElement) {
     super.updated(changed);
     if (changed.has('label')) {
       if (this.label) {
-        this.setAttribute('aria-label', this.label);
+        this.setHostAttribute('aria-label', this.label);
       } else {
-        this.removeAttribute('aria-label');
+        this.setHostAttribute('aria-label', null);
       }
     }
     if (changed.has('name')) {
@@ -88,7 +88,7 @@ export class VoidCheckboxGroup extends NativeFormControl(VoidElement) {
       this._syncFormAttr();
     }
     if (changed.has('disabled') || changed.has('ancestorDisabled')) {
-      this.setAttribute('aria-disabled', String(this.formDisabled));
+      this.setHostAttribute('aria-disabled', String(this.formDisabled));
     }
     if (changed.has('required')) {
       this._syncRequiredValidity();

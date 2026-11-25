@@ -7,7 +7,7 @@
  * renders a different value, the server wins and the client state is
  * overwritten.
  *
- * Before Livewire morphs a `void-*` element its `voidUnproject()` pre-morph hook
+ * Before Livewire morphs a `void-*` element its `voidBeforeMorph()` pre-morph hook
  * is called, so the morph compares the element's own children with the server
  * markup instead of the chrome the component rendered around them (Livewire
  * morphs parents first, so outer elements are unprojected first). The element
@@ -32,7 +32,7 @@ interface ClientState {
 }
 
 type VoidHost = HTMLElement & {
-  voidUnproject?: () => boolean;
+  voidBeforeMorph?: (incoming?: Element | null) => boolean;
   updateComplete?: Promise<unknown>;
 };
 
@@ -79,9 +79,10 @@ export function registerLivewireHooks(): void {
     pending.set(el, preserve);
     if (next) lastServer.set(el, next);
 
-    // Only after the client state is read: getters may read rendered chrome,
-    // which unprojecting takes out of the element until it re-projects.
-    if ((el as VoidHost).voidUnproject?.()) unprojected.add(el);
+    // Only after the client and server state are read: getters may read rendered
+    // chrome, which the hook parks until the element re-projects, and the hook
+    // adds the component's own attributes to toEl.
+    if ((el as VoidHost).voidBeforeMorph?.(toEl)) unprojected.add(el);
   });
 
   Livewire.hook('morph.updated', ({ el }: { el: HTMLElement }) => {

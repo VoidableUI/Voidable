@@ -8,11 +8,14 @@
  * attribute) the server wins, so `open={false}` on the server really closes a
  * dialog the client opened.
  *
- * `onBeforeElUpdated` also calls each `void-*` element's `voidUnproject()`
- * pre-morph hook, so morphdom compares the element's own children with the
- * server markup instead of the chrome the component rendered around them.
- * morphdom visits parents before children, so outer elements are unprojected
- * first; every element re-projects itself in the microtask after the patch.
+ * `onBeforeElUpdated` also calls each `void-*` element's `voidBeforeMorph(toEl)`
+ * pre-morph hook: attributes the component manages on its host (`role`,
+ * `tabindex`, `aria-*`, reflected defaults) are copied onto `toEl` where the
+ * server markup does not set them, and the chrome the component rendered is
+ * parked, so morphdom compares the element's own children with the server
+ * markup. morphdom visits parents before children, so outer elements are parked
+ * first; every element puts the same chrome back in the microtask after the
+ * patch.
  *
  * Usage:
  * ```js
@@ -33,6 +36,8 @@ const PRESERVE_ATTRS: readonly string[] = [
   "active",
   "checked",
   "selected",
+  // A reflected value the user changed (number-input, slider, tabs ...).
+  "value",
 ];
 
 /**
@@ -42,7 +47,7 @@ const PRESERVE_ATTRS: readonly string[] = [
 const SERVER_STATE = Symbol.for("@voidable/ui-liveview:server-attrs");
 
 type ServerAttrs = Record<string, string | null>;
-type WithState = Element & { [SERVER_STATE]?: ServerAttrs; voidUnproject?: () => boolean };
+type WithState = Element & { [SERVER_STATE]?: ServerAttrs; voidBeforeMorph?: (incoming?: Element | null) => boolean };
 
 function isVoid(el: Element): boolean {
   return !!el.tagName?.startsWith("VOID-");
@@ -98,7 +103,8 @@ export const VoidDOM = {
 
     el[SERVER_STATE] = next;
 
-    // After the client attributes are read (unprojecting moves children only).
-    el.voidUnproject?.();
+    // After the server attributes are recorded: the hook adds the component's own
+    // attributes to toEl, which must not count as server values.
+    el.voidBeforeMorph?.(toEl);
   },
 };

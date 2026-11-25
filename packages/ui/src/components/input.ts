@@ -17,7 +17,7 @@ export class VoidInput extends NativeFormControl(VoidElement) {
 
   connectedCallback(): void {
     super.connectedCallback();
-    this.setAttribute('role', 'textbox');
+    this.setHostAttribute('role', 'textbox');
   }
 
   render() {

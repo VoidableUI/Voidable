@@ -9,13 +9,13 @@ export class VoidDivider extends VoidElement {
 
   connectedCallback(): void {
     super.connectedCallback();
-    this.setAttribute('role', 'separator');
-    this.setAttribute('aria-orientation', this.orientation);
+    this.setHostAttribute('role', 'separator');
+    this.setHostAttribute('aria-orientation', this.orientation);
   }
 
   updated(changed: Map<string, unknown>): void {
     if (changed.has('orientation')) {
-      this.setAttribute('aria-orientation', this.orientation);
+      this.setHostAttribute('aria-orientation', this.orientation);
     }
   }
 

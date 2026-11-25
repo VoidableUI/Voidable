@@ -1,4 +1,6 @@
-import { LitElement, html, svg, nothing } from 'lit';
+import { html, svg, nothing } from 'lit';
+import { VoidElement } from '../base.js';
+import { defaultTrueBoolean } from '../converters.js';
 import { property, state } from 'lit/decorators.js';
 
 export interface GaugeZone {
@@ -196,8 +198,7 @@ function arcAngles(circular: 'full' | 'semi' | 'triple'): {
   return { startAngle: (3 * PI) / 4, endAngle: (PI) / 4 + 2 * PI, totalSweep: (3 * PI) / 2 };
 }
 
-export class VoidGauge extends LitElement {
-  createRenderRoot(): this { return this; }
+export class VoidGauge extends VoidElement {
 
   @property() unit = '';
   @property({ type: Number }) value = 0;
@@ -228,13 +229,13 @@ export class VoidGauge extends LitElement {
       position). Independent of `tick-major` — useful when min isn't a
       multiple of the major interval but you still want an endpoint
       marker. Set `tick-min="false"` to disable. */
-  @property({ type: Boolean, attribute: 'tick-min', reflect: true }) tickMin = true;
+  @property({ type: Boolean, attribute: 'tick-min', reflect: true, converter: defaultTrueBoolean }) tickMin = true;
   /** When true (default), force a major tick at `max` (the gauge end
       position). Useful when max doesn't naturally fall on a major-interval
       boundary (e.g. max=100 with tick-major=30) but you still want the
       endpoint marked. If max naturally falls on a step, this upgrades the
       classification to major. Set `tick-max="false"` to disable. */
-  @property({ type: Boolean, attribute: 'tick-max', reflect: true }) tickMax = true;
+  @property({ type: Boolean, attribute: 'tick-max', reflect: true, converter: defaultTrueBoolean }) tickMax = true;
   @property({ attribute: 'segments-sort' }) segmentsSort: 'value' | 'manual' = 'value';
   /** Visible gap between segments. `false`/`0` = seamless. `true` = 1% of the
       filled arc consumed by gaps. Number = explicit percent. Higher % = clearer
@@ -312,7 +313,7 @@ export class VoidGauge extends LitElement {
 
   connectedCallback() {
     super.connectedCallback();
-    this.setAttribute('role', 'img');
+    this.setHostAttribute('role', 'img');
     this._refreshTargets();
     requestAnimationFrame(() => {
       const fromSegs = new Map<number, number>();

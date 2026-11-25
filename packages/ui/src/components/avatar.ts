@@ -11,13 +11,13 @@ export class VoidAvatar extends VoidElement {
 
   connectedCallback(): void {
     super.connectedCallback();
-    this.setAttribute('role', 'img');
-    this.setAttribute('aria-label', this.alt || this.initials);
+    this.setHostAttribute('role', 'img');
+    this.setHostAttribute('aria-label', this.alt || this.initials);
   }
 
   updated(changed: Map<string, unknown>): void {
     if (changed.has('alt') || changed.has('initials')) {
-      this.setAttribute('aria-label', this.alt || this.initials);
+      this.setHostAttribute('aria-label', this.alt || this.initials);
     }
   }
 

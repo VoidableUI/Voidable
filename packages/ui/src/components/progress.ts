@@ -12,23 +12,23 @@ export class VoidProgress extends VoidElement {
 
   connectedCallback(): void {
     super.connectedCallback();
-    this.setAttribute('role', 'progressbar');
-    this.setAttribute('aria-valuemin', '0');
-    this.setAttribute('aria-valuemax', String(this.max));
+    this.setHostAttribute('role', 'progressbar');
+    this.setHostAttribute('aria-valuemin', '0');
+    this.setHostAttribute('aria-valuemax', String(this.max));
     if (!this.indeterminate) {
-      this.setAttribute('aria-valuenow', String(this.value));
+      this.setHostAttribute('aria-valuenow', String(this.value));
     }
   }
 
   updated(changed: Map<string, unknown>): void {
     if (changed.has('max')) {
-      this.setAttribute('aria-valuemax', String(this.max));
+      this.setHostAttribute('aria-valuemax', String(this.max));
     }
     if (changed.has('value') || changed.has('indeterminate')) {
       if (this.indeterminate) {
-        this.removeAttribute('aria-valuenow');
+        this.setHostAttribute('aria-valuenow', null);
       } else {
-        this.setAttribute('aria-valuenow', String(this.value));
+        this.setHostAttribute('aria-valuenow', String(this.value));
       }
     }
   }

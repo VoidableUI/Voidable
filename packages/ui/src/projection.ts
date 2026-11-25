@@ -47,10 +47,25 @@ export interface ProjectionRegion {
    * is not in use).
    */
   required?: () => string | null;
+  /**
+   * Gives each node of a container region a wrapper element of its own (for
+   * example an `<li>` per item of a list): called once per node, the wrapper is
+   * kept for that node while it stays in the region and removed once it leaves.
+   * Wrappers belong to the component (it may set attributes on them) and are
+   * parked and restored with the container. Only for function targets.
+   */
+  wrap?: (node: Node) => Element;
 }
 
 export interface ProjectionOptions {
-  regions: ProjectionRegion[];
+  /** Destinations for consumer children. Empty (the default) for components that only render chrome. */
+  regions?: ProjectionRegion[];
+  /**
+   * Where the rendered chrome sits among consumer nodes that no region takes:
+   * `'start'` (before them) or `'end'` (after them, where Lit puts a plain
+   * render). Defaults to `'start'` with regions and `'end'` without.
+   */
+  placement?: 'start' | 'end';
   /**
    * Called when the set or order of consumer nodes in any region changes after the
    * first render (children added, removed or reordered by the consumer), and after
@@ -70,9 +85,51 @@ const END_DATA = '/void-projection';
 const CONTAINER_ATTR = 'data-void-projection';
 /** Set on each top-level element Lit renders, so stale chrome can be recognised after a clone or morph. */
 const CHROME_ATTR = 'data-void-chrome';
+/** Set on each per-node wrapper of a `wrap` region. */
+const WRAP_ATTR = 'data-void-wrap';
 
 type ProjectionHost = LitElement & { [PROJECTION_KEY]?: ProjectionController };
 type MovableParent = Node & { moveBefore?: (node: Node, child: Node | null) => void };
+
+/**
+ * One hidden holder per document for chrome parked during a morph, kept on the
+ * document (not in module scope) and removed again once it is empty.
+ */
+const PARK_KEY = Symbol.for('@voidable/ui:projection-park');
+type ParkDocument = Document & { [PARK_KEY]?: HTMLElement };
+
+function sharedPark(doc: Document): HTMLElement {
+  const d = doc as ParkDocument;
+  let park = d[PARK_KEY];
+  if (!park || park.parentNode !== doc.documentElement) {
+    park = doc.createElement('void-projection-park');
+    park.hidden = true;
+    doc.documentElement.appendChild(park);
+    d[PARK_KEY] = park;
+  }
+  return park;
+}
+
+function releasePark(park: Element): void {
+  if (park.firstChild) return;
+  const doc = park.ownerDocument as ParkDocument;
+  if (doc[PARK_KEY] === park) delete doc[PARK_KEY];
+  park.remove();
+}
+
+/** What unproject() took out of the host. */
+interface Parked {
+  nodes: Node[];
+  /** The shared park element, or null when the nodes wait in a fragment. */
+  park: Element | null;
+  fragment: DocumentFragment | null;
+  /** The consumer node that followed the chrome, to put it back in the same place. */
+  anchor: Node | null;
+  /** Restores focus to a parked element where the nodes could not stay connected. */
+  focus: (() => void) | null;
+  /** Scroll offsets of scrolled chrome elements, put back after the nodes return. */
+  scroll: Array<[Element, number, number]>;
+}
 
 const isElement = (n: Node): n is Element => n.nodeType === Node.ELEMENT_NODE;
 const isComment = (n: Node): n is Comment => n.nodeType === Node.COMMENT_NODE;
@@ -147,10 +204,14 @@ function captureFocus(node: Node): (() => void) | null {
  *
  * Light-DOM content projection for {@link VoidElement} components.
  *
- * Components that render chrome with Lit and also host consumer children (text,
- * elements, framework-managed nodes) use one of these instead of snapshotting
- * `childNodes` in `connectedCallback`. Construct it in a field initializer so it
- * exists before the first connect:
+ * Every VoidElement that renders gets one with no regions from the base class:
+ * its chrome is confined between the markers (placed after the consumer content),
+ * tracked, parked around morphs, recovered and cleaned up in clones as described
+ * below, and consumer children simply stay on the host. Components that also host
+ * consumer children in rendered containers (text, elements, framework-managed
+ * nodes) declare their own, with regions, instead of snapshotting `childNodes` in
+ * `connectedCallback`; it replaces the default one. Construct it in a field
+ * initializer so it exists before the first connect:
  *
  * ```ts
  * protected readonly _projection = new ProjectionController(this, {
@@ -188,10 +249,11 @@ function captureFocus(node: Node): (() => void) | null {
  *    makes the `textContent` setter and `replaceChildren` replace only consumer
  *    content, so frameworks that keep treating the host as the parent of their
  *    children (React, Solid, Vue) keep working.
- * 6. Morphing: {@link unproject} (exposed as `VoidElement.voidUnproject()`, the
+ * 6. Morphing: {@link unproject} (behind `VoidElement.voidBeforeMorph()`, the
  *    supported pre-morph hook for adapters) puts the host back into its
- *    server-markup shape so a DOM morph never sees chrome. The chrome is parked and
- *    put back afterwards, so nothing is rebuilt.
+ *    server-markup shape so a DOM morph never sees chrome. The chrome is parked (in
+ *    one shared hidden holder per document while `moveBefore` exists) and put back
+ *    afterwards with its scroll offsets, so nothing is rebuilt.
  * 7. Recovery, for morphs that skip that hook: if a marker or a top-level chrome
  *    element leaves the host (idiomorph, `host.innerHTML = …`, `innerText`), the
  *    controller discards what is left of the old chrome, inserts fresh markers (Lit
@@ -211,6 +273,7 @@ function captureFocus(node: Node): (() => void) | null {
 export class ProjectionController implements ReactiveController {
   private readonly _host: ProjectionHost;
   private readonly _regions: ProjectionRegion[];
+  private readonly _placement: 'start' | 'end';
   private readonly _onChange?: () => void;
   private _start: Comment | null = null;
   private _end: Comment | null = null;
@@ -223,6 +286,9 @@ export class ProjectionController implements ReactiveController {
   private _chromeAll = new WeakSet<Element>();
   /** Region containers, by identity. */
   private _containers = new WeakSet<Element>();
+  /** Per-node wrappers of `wrap` regions: node -> wrapper, and the set of wrappers. */
+  private _wrapperOf = new WeakMap<Node, Element>();
+  private _wrappers = new WeakSet<Element>();
   /** Top-level text/comment nodes Lit rendered, with their data at render time. */
   private _litText = new WeakMap<Node, string>();
   private _signature: Node[] = [];
@@ -235,15 +301,19 @@ export class ProjectionController implements ReactiveController {
    * in a hidden holder outside the morph target when `moveBefore` can keep them
    * connected (so focus inside the chrome survives), else in a fragment.
    */
-  private _parked: DocumentFragment | Element | null = null;
-  /** Restores focus to a parked chrome element (e.g. a combobox input) after re-projection. */
-  private _parkedFocus: (() => void) | null = null;
+  private _parked: Parked | null = null;
   private _warned = false;
 
-  constructor(host: LitElement, options: ProjectionOptions) {
+  constructor(host: LitElement, options: ProjectionOptions = {}) {
     this._host = host as ProjectionHost;
-    this._regions = options.regions;
+    this._regions = options.regions ?? [];
+    this._placement = options.placement ?? (this._regions.length ? 'start' : 'end');
     this._onChange = options.onChange;
+    // VoidElement gives every rendering component a region-less controller; a
+    // component that declares its own (with regions) replaces it. Both are
+    // created in the constructor, before anything was connected or rendered.
+    const previous = this._host[PROJECTION_KEY];
+    if (previous && previous !== this) host.removeController(previous);
     this._host[PROJECTION_KEY] = this;
     host.addController(this);
   }
@@ -261,10 +331,24 @@ export class ProjectionController implements ReactiveController {
     this._observer ??= new MutationObserver(() => this._onMutation());
     this._observer.observe(host, { childList: true });
     this._observedContainers.clear();
+    host.addEventListener('scroll', this._onScroll, { capture: true, passive: true });
     if (this._rendered) this._reconcile(true);
   }
 
+  /**
+   * Elements inside the host that have been scrolled, so their scroll position
+   * can be put back after parking (a parked element has no layout box, which
+   * resets its scroll offsets). Recorded from scroll events rather than read
+   * from every element at park time, which would force layouts mid-morph.
+   */
+  private _scrolled: Set<Element> | null = null;
+  private readonly _onScroll = (e: Event): void => {
+    const target = e.target;
+    if (target instanceof Element && target !== this._host) (this._scrolled ??= new Set()).add(target);
+  };
+
   hostDisconnected(): void {
+    this._host.removeEventListener('scroll', this._onScroll, { capture: true });
     this._observer?.disconnect();
     this._observedContainers.clear();
   }
@@ -285,6 +369,16 @@ export class ProjectionController implements ReactiveController {
     // beside Lit's part; move it out so it is treated as consumer content.
     const stray: Node[] = [];
     for (let n = this._start.nextSibling; n && n !== this._end; n = n.nextSibling) stray.push(n);
+    if (this._placement === 'end') {
+      // Children the parser appended after an early upgrade come before the
+      // chrome, as they would with a plain Lit render.
+      for (const n of stray) moveNode(this._host, n, this._start);
+      if (this._end.nextSibling) {
+        Node.prototype.insertBefore.call(this._host, this._start, null);
+        Node.prototype.insertBefore.call(this._host, this._end, null);
+      }
+      return;
+    }
     const ref = this._end.nextSibling;
     for (const n of stray) moveNode(this._host, n, ref);
   }
@@ -315,7 +409,9 @@ export class ProjectionController implements ReactiveController {
     const region = this._placed.get(node);
     if (!region || typeof region.target !== 'function') return false;
     const parent = node.parentNode;
-    return !!parent && parent !== this._host && parent === region.target();
+    if (!parent || parent === this._host) return false;
+    const container = region.target();
+    return parent === container || (this._wrappers.has(parent as Element) && parent.parentNode === container);
   }
 
   /** `host.insertBefore(node, ref)` where `ref` has been projected into a container. */
@@ -325,7 +421,9 @@ export class ProjectionController implements ReactiveController {
       return node;
     }
     const region = this._route(node, 'insert');
-    if (region && region === this._placed.get(ref) && ref.parentNode) {
+    if (region?.wrap && region === this._placed.get(ref)) {
+      this._place(node, region, ref);
+    } else if (region && region === this._placed.get(ref) && ref.parentNode) {
       moveNode(ref.parentNode, node, ref);
       this._placed.set(node, region);
       if (isElement(node)) this._sawElement = true;
@@ -358,7 +456,8 @@ export class ProjectionController implements ReactiveController {
     for (const n of doomed) {
       if (!nodes.includes(n)) n.parentNode?.removeChild(n);
     }
-    for (const n of nodes) moveNode(host, n, null);
+    const ref = this._placement === 'end' ? this._start : null;
+    for (const n of nodes) moveNode(host, n, ref);
     if (this._rendered) this._reconcile(true);
     return true;
   }
@@ -389,32 +488,43 @@ export class ProjectionController implements ReactiveController {
       .map(r => [r, (r.target as () => Element | null | undefined)()] as const)
       .filter((pair): pair is readonly [ProjectionRegion, Element] => !!pair[1])
       .sort((a, b) => (a[1].compareDocumentPosition(b[1]) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1));
-    for (const [region, container] of containers) {
-      for (const n of Array.from(container.childNodes)) {
-        if (this._placed.get(n) === region) moveNode(host, n, start);
+    // Before anything moves: emptying a container clamps its scroll offsets.
+    const scroll: Array<[Element, number, number]> = [];
+    if (this._scrolled) {
+      for (const el of this._scrolled) {
+        if (!host.contains(el)) {
+          this._scrolled.delete(el);
+          continue;
+        }
+        if (el.scrollTop || el.scrollLeft) scroll.push([el, el.scrollTop, el.scrollLeft]);
+        else this._scrolled.delete(el);
       }
+    }
+    for (const [region] of containers) {
+      for (const n of this._regionNodes(region)) moveNode(host, n, start);
     }
     const range: Node[] = [];
     for (let n: Node | null = start; n; n = n.nextSibling) {
       range.push(n);
       if (n === end) break;
     }
+    const anchor = end.nextSibling;
     const doc = host.ownerDocument;
     const root = doc.documentElement as MovableParent | null;
-    let parked: DocumentFragment | Element;
+    const parked: Parked = { nodes: range, park: null, fragment: null, anchor, focus: null, scroll };
     if (root && host.isConnected && typeof root.moveBefore === 'function') {
-      // A direct child of <html>, outside <body> and any morph container. Moved
-      // nodes stay connected, so a focused chrome element (a combobox input) keeps
-      // focus and selection without blur/focus events.
-      parked = doc.createElement('void-projection-park');
-      (parked as HTMLElement).hidden = true;
-      root.appendChild(parked);
-      for (const n of range) moveNode(parked, n, null);
-      this._parkedFocus = null;
+      // A direct child of <html>, outside <body> and any morph container, shared
+      // by every host parked in this morph. Moved nodes stay connected, so a
+      // focused chrome element (an input) keeps focus and selection without
+      // blur/focus events.
+      const park = sharedPark(doc);
+      for (const n of range) moveNode(park, n, null);
+      parked.park = park;
     } else {
-      this._parkedFocus = range.map(n => captureFocus(n)).find(Boolean) ?? null;
-      parked = doc.createDocumentFragment();
-      for (const n of range) parked.appendChild(n);
+      parked.focus = range.map(n => captureFocus(n)).find(Boolean) ?? null;
+      const fragment = doc.createDocumentFragment();
+      for (const n of range) fragment.appendChild(n);
+      parked.fragment = fragment;
     }
     this._parked = parked;
     this._observedContainers.clear();
@@ -441,31 +551,42 @@ export class ProjectionController implements ReactiveController {
     const host = this._host;
     const parked = this._parked;
     if (!parked) return;
-    const focus = this._parkedFocus;
     this._parked = null;
-    this._parkedFocus = null;
     if (Array.from(host.childNodes).some(isStaleLooking)) {
       // The morph brought rendered markup of its own; rebuild from scratch.
-      if (isElement(parked)) parked.remove();
+      for (const n of parked.nodes) n.parentNode?.removeChild(n);
+      if (parked.park) releasePark(parked.park);
       this._init(true);
       host.requestUpdate();
       return;
     }
-    // Everything on the host is consumer content again; re-insert the chrome ahead
-    // of it and let reconcile route each node back to its region (placement is
-    // remembered, new nodes are routed as usual).
-    if (isElement(parked)) {
-      const ref = host.firstChild;
-      for (const n of Array.from(parked.childNodes)) moveNode(host, n, ref);
-      parked.remove();
+    // Everything on the host is consumer content again. With regions the chrome
+    // goes back ahead of it and reconcile routes each node back to its region
+    // (placement is remembered, new nodes are routed as usual); without, it goes
+    // back where it was, before the consumer node that followed it if that is
+    // still here.
+    const ref = this._regions.length
+      ? host.firstChild
+      : parked.anchor && parked.anchor.parentNode === host
+        ? parked.anchor
+        : this._placement === 'end'
+          ? null
+          : host.firstChild;
+    if (parked.fragment) {
+      Node.prototype.insertBefore.call(host, parked.fragment, ref);
     } else {
-      Node.prototype.insertBefore.call(host, parked, host.firstChild);
+      for (const n of parked.nodes) moveNode(host, n, ref);
     }
+    if (parked.park) releasePark(parked.park);
     // Always report a change: derived state (the native select's value, active
     // tab) must be re-applied after the morph even when the node set is the same.
     this._signature = [];
     this._reconcile(true);
-    focus?.();
+    parked.focus?.();
+    for (const [el, top, left] of parked.scroll) {
+      if (el.scrollTop !== top) el.scrollTop = top;
+      if (el.scrollLeft !== left) el.scrollLeft = left;
+    }
   }
 
   private _needsInit(): boolean {
@@ -504,7 +625,7 @@ export class ProjectionController implements ReactiveController {
     const doc = host.ownerDocument;
     const start = doc.createComment(START_DATA);
     const end = doc.createComment(END_DATA);
-    Node.prototype.insertBefore.call(host, end, host.firstChild);
+    Node.prototype.insertBefore.call(host, end, this._placement === 'end' ? null : host.firstChild);
     Node.prototype.insertBefore.call(host, start, end);
     this._start = start;
     this._end = end;
@@ -515,13 +636,14 @@ export class ProjectionController implements ReactiveController {
     this._chromeTop = [];
     this._chromeAll = new WeakSet();
     this._containers = new WeakSet();
+    this._wrapperOf = new WeakMap();
+    this._wrappers = new WeakSet();
     this._observedContainers.clear();
     this._signature = [];
     this._rendered = false;
     this._recovered = recovering;
     this._sawElement = false;
     this._parked = null;
-    this._parkedFocus = null;
   }
 
   /**
@@ -552,7 +674,11 @@ export class ProjectionController implements ReactiveController {
     });
     for (const node of stale) {
       for (const container of this._staleContainers(node)) {
-        for (const child of Array.from(container.childNodes)) moveNode(host, child, node);
+        for (const child of Array.from(container.childNodes)) {
+          // A per-node wrapper of a `wrap` region: lift what it wraps.
+          const wrapped = isElement(child) && (child.hasAttribute(WRAP_ATTR) || this._wrappers.has(child));
+          for (const n of wrapped ? Array.from(child.childNodes) : [child]) moveNode(host, n, node);
+        }
       }
     }
     for (const node of stale) {
@@ -570,7 +696,7 @@ export class ProjectionController implements ReactiveController {
   private _replaceRecycledChrome(): void {
     const host = this._host;
     const recycled = Array.from(host.querySelectorAll('*')).filter(
-      el => this._chromeAll.has(el) || this._containers.has(el)
+      el => this._chromeAll.has(el) || this._containers.has(el) || this._wrappers.has(el)
     );
     for (const el of recycled) {
       const parent = el.parentNode;
@@ -578,6 +704,7 @@ export class ProjectionController implements ReactiveController {
       const copy = el.cloneNode(false) as Element;
       copy.removeAttribute(CHROME_ATTR);
       copy.removeAttribute(CONTAINER_ATTR);
+      copy.removeAttribute(WRAP_ATTR);
       Node.prototype.insertBefore.call(parent, copy, el);
       for (const child of Array.from(el.childNodes)) moveNode(copy, child, null);
       Node.prototype.removeChild.call(parent, el);
@@ -670,12 +797,41 @@ export class ProjectionController implements ReactiveController {
       if (!container) return false;
       if (!container.hasAttribute(CONTAINER_ATTR)) container.setAttribute(CONTAINER_ATTR, region.name);
       this._containers.add(container);
-      moveNode(container, node, validRef && validRef.parentNode === container ? validRef : null);
+      if (region.wrap) {
+        let wrapper = this._wrapperOf.get(node);
+        if (!wrapper) {
+          wrapper = region.wrap(node);
+          wrapper.setAttribute(WRAP_ATTR, '');
+          this._wrapperOf.set(node, wrapper);
+          this._wrappers.add(wrapper);
+        }
+        const refWrapper = validRef ? this._wrapperOf.get(validRef) : undefined;
+        moveNode(container, wrapper, refWrapper && refWrapper.parentNode === container ? refWrapper : null);
+        moveNode(wrapper, node, null);
+        this._observeContainer(wrapper);
+      } else {
+        moveNode(container, node, validRef && validRef.parentNode === container ? validRef : null);
+      }
       this._observeContainer(container);
     }
     this._placed.set(node, region);
     if (isElement(node)) this._sawElement = true;
     return true;
+  }
+
+  /** Removes wrappers whose node left the region (removed by the consumer, or moved elsewhere). */
+  private _dropEmptyWrappers(region: ProjectionRegion): void {
+    const container = (region.target as () => Element | null | undefined)();
+    if (!container) return;
+    for (const n of Array.from(container.childNodes)) {
+      if (!this._wrappers.has(n as Element)) continue;
+      const held = Array.from(n.childNodes).filter(w => this._placed.get(w) === region);
+      if (!held.length) {
+        // Anything else a consumer put inside a wrapper stays in the region.
+        for (const w of Array.from(n.childNodes)) moveNode(container, w, n);
+        Node.prototype.removeChild.call(container, n);
+      }
+    }
   }
 
   private _isAfterEnd(node: Node): boolean {
@@ -704,7 +860,11 @@ export class ProjectionController implements ReactiveController {
       const container = region.target();
       if (container) {
         for (const n of Array.from(container.childNodes)) {
-          if (this._placed.get(n) === region) out.push(n);
+          if (region.wrap && this._wrappers.has(n as Element)) {
+            for (const w of Array.from(n.childNodes)) if (this._placed.get(w) === region) out.push(w);
+          } else if (this._placed.get(n) === region) {
+            out.push(n);
+          }
         }
       }
     }
@@ -723,9 +883,11 @@ export class ProjectionController implements ReactiveController {
     const pending: Array<[Node, 'before' | 'after']> = [];
     let zone: 'before' | 'lit' | 'after' = 'before';
     let stale = false;
+    const routing = this._regions.length > 0;
     for (let n = host.firstChild; n; n = n.nextSibling) {
       if (n === start) zone = 'lit';
       else if (n === end) zone = 'after';
+      else if (!routing) stale ||= zone !== 'lit' && isStaleLooking(n);
       else if (zone !== 'lit' && this._placed.get(n)?.target !== zone) {
         pending.push([n, zone]);
         stale ||= isStaleLooking(n);
@@ -738,14 +900,58 @@ export class ProjectionController implements ReactiveController {
       this._reconcile(notify);
       return;
     }
+    if (!routing && this._placement === 'end' && end.nextSibling) {
+      // Without regions the chrome comes after the consumer content, whenever
+      // that content arrived (the parser after an early upgrade, a framework
+      // appending), so the host reads the same as a clone or a server render.
+      const late: Node[] = [];
+      for (let n: ChildNode | null = end.nextSibling; n; n = n.nextSibling) late.push(n);
+      for (const n of late) moveNode(host, n, start);
+    }
     if (pending.length) {
       // Nodes ahead of the chrome logically precede everything already projected,
       // so they go before each region's current first node.
       const firstOf = new Map(this._regions.map(r => [r, this._regionNodes(r)[0] ?? null] as const));
       const beforeRegion = this._regions.find(r => r.target === 'before');
+      // The next host-level sibling already placed in each region, for every
+      // pending node: one backward pass instead of a forward scan per node
+      // (which made projecting thousands of options quadratic).
+      const nextPlaced = new Map<Node, Map<ProjectionRegion, Node>>();
+      const last = new Map<ProjectionRegion, Node>();
+      const pendingSet = new Set(pending.map(p => p[0]));
+      for (let n = host.lastChild; n; n = n.previousSibling) {
+        if (pendingSet.has(n)) nextPlaced.set(n, new Map(last));
+        const r = this._placed.get(n);
+        if (r) last.set(r, n);
+      }
+      // Consecutive fresh nodes bound for the end of the same container are
+      // inserted together, as one fragment.
+      let batch: { region: ProjectionRegion; nodes: Node[] } | null = null;
+      const active = host.ownerDocument.activeElement;
+      const flush = () => {
+        const b = batch;
+        batch = null;
+        if (!b) return;
+        const container = (b.region.target as () => Element | null | undefined)();
+        if (!container || b.nodes.length < 2) {
+          for (const n of b.nodes) this._place(n, b.region, null);
+          return;
+        }
+        const fragment = host.ownerDocument.createDocumentFragment();
+        for (const n of b.nodes) fragment.appendChild(n);
+        Node.prototype.insertBefore.call(container, fragment, null);
+        if (!container.hasAttribute(CONTAINER_ATTR)) container.setAttribute(CONTAINER_ATTR, b.region.name);
+        this._containers.add(container);
+        for (const n of b.nodes) {
+          this._placed.set(n, b.region);
+          if (isElement(n)) this._sawElement = true;
+        }
+        this._observeContainer(container);
+      };
       for (const [node, nodeZone] of pending) {
         if (nodeZone === 'before' && beforeRegion && !this._initialPass && isAnchor(node)) {
           // Framework anchors (comments, whitespace) placed next to a trigger stay there.
+          flush();
           this._placed.set(node, beforeRegion);
           continue;
         }
@@ -753,12 +959,24 @@ export class ProjectionController implements ReactiveController {
         // or lifted out by unproject()) returns to its region; others are routed.
         const region = this._placed.get(node) ?? this._route(node, nodeZone);
         if (!region) continue;
-        const ref = nodeZone === 'before' ? firstOf.get(region) ?? null : this._nextInRegion(node, region);
+        const ref = nodeZone === 'before' ? firstOf.get(region) ?? null : nextPlaced.get(node)?.get(region) ?? null;
+        const batchable =
+          typeof region.target === 'function' && !region.wrap && !region.accepts &&
+          (ref === null || ref.parentNode === host) && !(active && node.contains(active));
+        if (batchable) {
+          if (batch && batch.region !== region) flush();
+          (batch ??= { region, nodes: [] }).nodes.push(node);
+          if (isElement(node)) this._sawElement = true;
+          continue;
+        }
+        flush();
         this._place(node, region, ref);
       }
+      flush();
     }
 
     for (const region of this._regions) {
+      if (region.wrap && typeof region.target === 'function') this._dropEmptyWrappers(region);
       if (typeof region.target === 'function') {
         const container = region.target();
         if (container) {
@@ -799,13 +1017,6 @@ export class ProjectionController implements ReactiveController {
     }
   }
 
-  /** The next host-level sibling of `node` already placed in `region`, if any. */
-  private _nextInRegion(node: Node, region: ProjectionRegion): Node | null {
-    for (let n = node.nextSibling; n; n = n.nextSibling) {
-      if (this._placed.get(n) === region) return n;
-    }
-    return null;
-  }
 }
 
 /**

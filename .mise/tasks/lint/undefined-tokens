@@ -6,11 +6,12 @@ THEME_SRC="packages/theme/src"
 UI_SRC="packages/ui/src"
 
 # Definitions: `--void-x:` declarations in theme CSS, plus custom properties
-# set from TypeScript (inline `style="--void-x: ..."` or setProperty('--void-x', ...)).
+# set from TypeScript (inline `style="--void-x: ..."`, setProperty('--void-x', ...) or
+# a component's setHostStyle('--void-x', ...)).
 defined=$(
   {
     grep -rhPo --include='*.css' '(?<![\w-])--void-[a-z0-9-]+(?=\s*:)' "$THEME_SRC" || true
-    grep -rhPo --include='*.ts' "(?<![\w-])--void-[a-z0-9-]+(?=\s*:)|setProperty\(\s*['\"]\K--void-[a-z0-9-]+" "$UI_SRC" || true
+    grep -rhPo --include='*.ts' "(?<![\w-])--void-[a-z0-9-]+(?=\s*:)|(?:setProperty|setHostStyle)\(\s*['\"]\K--void-[a-z0-9-]+" "$UI_SRC" || true
   } | sort -u
 )
 

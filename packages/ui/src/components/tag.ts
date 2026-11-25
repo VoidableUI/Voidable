@@ -15,7 +15,7 @@ export class VoidTag extends VoidElement {
   });
   connectedCallback(): void {
     super.connectedCallback();
-    this.setAttribute('role', 'listitem');
+    this.setHostAttribute('role', 'listitem');
   }
 
   render() {

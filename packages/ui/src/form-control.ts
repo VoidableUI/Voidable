@@ -354,7 +354,7 @@ function CoreFormControl<T extends Constructor<VoidElement>>(Base: T) {
       if (anchor) return anchor;
       // No focusable descendant: let the host itself take focus so the browser
       // can show the message instead of silently refusing to submit.
-      if (!this.hasAttribute('tabindex')) this.setAttribute('tabindex', '-1');
+      if (!this.hasAttribute('tabindex')) this.setHostAttribute('tabindex', '-1');
       return undefined;
     }
 
@@ -363,11 +363,7 @@ function CoreFormControl<T extends Constructor<VoidElement>>(Base: T) {
      * state machine-readable in the DOM, and it works without ElementInternals.
      */
     #setAria(attr: string, value: string | null): void {
-      if (value === null) {
-        if (this.getAttribute(attr) !== null) this.removeAttribute(attr);
-      } else if (this.getAttribute(attr) !== value) {
-        this.setAttribute(attr, value);
-      }
+      this.setHostAttribute(attr, value);
     }
 
     #onInvalid = (): void => {
@@ -418,15 +414,36 @@ export function NativeFormControl<T extends Constructor<VoidElement>>(Base: T) {
 
     #nativeDefault: unknown = undefined;
     #nativeDefaultPending = false;
+    #nativeDefaultRetry = false;
+    /** The native control the reset target was last written to. */
+    #nativeDefaultControl: Element | null = null;
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     constructor(...args: any[]) {
       super(...args);
       this.addController({
         hostUpdated: () => {
-          if (this.#nativeDefaultPending && this.formNativeControl()) {
+          const control = this.formNativeControl();
+          if (this.#nativeDefaultPending && control) {
             this.#nativeDefaultPending = false;
             this.formWriteNativeDefault(this.#nativeDefault);
+          } else if (this.#nativeDefaultPending && !this.#nativeDefaultRetry) {
+            // The native control belongs to children that render after this
+            // host (radios in a group): try again once they have.
+            this.#nativeDefaultRetry = true;
+            setTimeout(() => {
+              this.#nativeDefaultRetry = false;
+              if (this.#nativeDefaultPending && this.formNativeControl()) {
+                this.#nativeDefaultPending = false;
+                this.formWriteNativeDefault(this.#nativeDefault);
+              }
+            }, 0);
+          }
+          // A native control rebuilt after its chrome was lost (a morph without
+          // the pre-morph hook) gets the reset target again.
+          if (!this.#nativeDefaultPending && control && control !== this.#nativeDefaultControl) {
+            if (this.#nativeDefaultControl) this.formWriteNativeDefault(this.#nativeDefault);
+            this.#nativeDefaultControl = control;
           }
           // The owning form can change with the `form` attribute.
           this[listenForReset]();

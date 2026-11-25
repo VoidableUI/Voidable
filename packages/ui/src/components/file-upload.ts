@@ -95,16 +95,16 @@ export class VoidFileUpload extends InternalsFormControl(VoidElement) {
   private _onDragOver = (e: DragEvent): void => {
     if (this.disabled) return;
     e.preventDefault();
-    this.setAttribute('dragging', '');
+    this.setHostAttribute('dragging', '');
   };
 
   private _onDragLeave = (): void => {
-    this.removeAttribute('dragging');
+    this.setHostAttribute('dragging', null);
   };
 
   private _onDrop = (e: DragEvent): void => {
     e.preventDefault();
-    this.removeAttribute('dragging');
+    this.setHostAttribute('dragging', null);
     if (this.formDisabled) return;
     const files = Array.from(e.dataTransfer?.files ?? []);
     this._addFiles(files);

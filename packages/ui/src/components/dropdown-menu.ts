@@ -87,8 +87,8 @@ export class VoidDropdownMenuItem extends VoidElement {
 
   connectedCallback(): void {
     super.connectedCallback();
-    this.setAttribute('role', 'menuitem');
-    this.setAttribute('tabindex', this.disabled ? '-1' : '0');
+    this.setHostAttribute('role', 'menuitem');
+    this.setHostAttribute('tabindex', this.disabled ? '-1' : '0');
     this.addEventListener('click', this._handleClick);
     this.addEventListener('keydown', this._handleKeydown);
   }
@@ -101,8 +101,8 @@ export class VoidDropdownMenuItem extends VoidElement {
 
   updated(changed: Map<string, unknown>): void {
     if (changed.has('disabled')) {
-      this.setAttribute('tabindex', this.disabled ? '-1' : '0');
-      this.setAttribute('aria-disabled', String(this.disabled));
+      this.setHostAttribute('tabindex', this.disabled ? '-1' : '0');
+      this.setHostAttribute('aria-disabled', String(this.disabled));
     }
   }
 

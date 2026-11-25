@@ -38,9 +38,9 @@ export class VoidButton extends VoidElement {
 
   connectedCallback(): void {
     super.connectedCallback();
-    this.setAttribute('role', 'button');
-    this.setAttribute('tabindex', '0');
-    this.setAttribute('aria-disabled', String(this.disabled));
+    this.setHostAttribute('role', 'button');
+    this.setHostAttribute('tabindex', '0');
+    this.setHostAttribute('aria-disabled', String(this.disabled));
     this.addEventListener('click', this._handleClick);
     this.addEventListener('keydown', this._handleKeydown);
   }
@@ -68,8 +68,8 @@ export class VoidButton extends VoidElement {
   }
 
   private _syncDisabledState(disabled: boolean): void {
-    this.setAttribute('aria-disabled', String(disabled));
-    this.setAttribute('tabindex', disabled ? '-1' : '0');
+    this.setHostAttribute('aria-disabled', String(disabled));
+    this.setHostAttribute('tabindex', disabled ? '-1' : '0');
   }
 
   private _handleClick = (e: Event): void => {

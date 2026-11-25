@@ -27,9 +27,9 @@ export class VoidCheckbox extends NativeFormControl(VoidElement) {
 
   connectedCallback(): void {
     super.connectedCallback();
-    this.setAttribute('role', 'checkbox');
-    this.setAttribute('tabindex', '0');
-    this.setAttribute('aria-checked', String(this.checked));
+    this.setHostAttribute('role', 'checkbox');
+    this.setHostAttribute('tabindex', '0');
+    this.setHostAttribute('aria-checked', String(this.checked));
     this.addEventListener('click', this._handleClick);
     this.addEventListener('keydown', this._handleKeydown);
   }
@@ -44,15 +44,15 @@ export class VoidCheckbox extends NativeFormControl(VoidElement) {
     super.updated(changed);
     if (changed.has('checked') || changed.has('indeterminate')) {
       if (this.indeterminate) {
-        this.setAttribute('aria-checked', 'mixed');
+        this.setHostAttribute('aria-checked', 'mixed');
       } else {
-        this.setAttribute('aria-checked', String(this.checked));
+        this.setHostAttribute('aria-checked', String(this.checked));
       }
     }
     if (changed.has('disabled') || changed.has('ancestorDisabled')) {
       const disabled = this.formDisabled;
-      this.setAttribute('aria-disabled', String(disabled));
-      this.setAttribute('tabindex', disabled ? '-1' : '0');
+      this.setHostAttribute('aria-disabled', String(disabled));
+      this.setHostAttribute('tabindex', disabled ? '-1' : '0');
     }
   }
 

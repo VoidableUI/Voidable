@@ -9,8 +9,8 @@ export class VoidStepper extends VoidElement {
 
   connectedCallback(): void {
     super.connectedCallback();
-    this.setAttribute('role', 'navigation');
-    this.setAttribute('aria-label', 'Progress');
+    this.setHostAttribute('role', 'navigation');
+    this.setHostAttribute('aria-label', 'Progress');
   }
 
   render() {

@@ -32,31 +32,31 @@ export class VoidNumberInput extends InternalsFormControl(VoidElement) {
 
   connectedCallback(): void {
     super.connectedCallback();
-    this.setAttribute('role', 'spinbutton');
+    this.setHostAttribute('role', 'spinbutton');
     if (this.label) {
-      this.setAttribute('aria-label', this.label);
+      this.setHostAttribute('aria-label', this.label);
     }
     if (isFinite(this.min)) {
-      this.setAttribute('aria-valuemin', String(this.min));
+      this.setHostAttribute('aria-valuemin', String(this.min));
     }
     if (isFinite(this.max)) {
-      this.setAttribute('aria-valuemax', String(this.max));
+      this.setHostAttribute('aria-valuemax', String(this.max));
     }
-    this.setAttribute('aria-valuenow', String(this.value));
+    this.setHostAttribute('aria-valuenow', String(this.value));
   }
 
   updated(changed: Map<string, unknown>): void {
     if (changed.has('value')) {
-      this.setAttribute('aria-valuenow', String(this.value));
+      this.setHostAttribute('aria-valuenow', String(this.value));
     }
     if (changed.has('min') && isFinite(this.min)) {
-      this.setAttribute('aria-valuemin', String(this.min));
+      this.setHostAttribute('aria-valuemin', String(this.min));
     }
     if (changed.has('max') && isFinite(this.max)) {
-      this.setAttribute('aria-valuemax', String(this.max));
+      this.setHostAttribute('aria-valuemax', String(this.max));
     }
     if (changed.has('label')) {
-      this.setAttribute('aria-label', this.label);
+      this.setHostAttribute('aria-label', this.label);
     }
   }
 

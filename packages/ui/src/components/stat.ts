@@ -13,7 +13,7 @@ export class VoidStat extends VoidElement {
 
   connectedCallback(): void {
     super.connectedCallback();
-    this.setAttribute('role', 'figure');
+    this.setHostAttribute('role', 'figure');
   }
 
   render() {
