@@ -1,8 +1,13 @@
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
+import starlightLlmsTxt from 'starlight-llms-txt';
+
+const SITE = 'https://voidable.dev';
+const OG_IMAGE = `${SITE}/og.png`;
+const OG_ALT = 'Voidable. Devoid of style.';
 
 export default defineConfig({
-  site: 'https://voidable.dev',
+  site: SITE,
   vite: {
     resolve: {
       alias: {
@@ -14,7 +19,21 @@ export default defineConfig({
   integrations: [
     starlight({
       title: 'Voidable',
+      description: 'Framework-agnostic Lit 3 web components. Light DOM, zero visual CSS until a theme is loaded, token-driven theming.',
+      plugins: [
+        starlightLlmsTxt({
+          projectName: 'Voidable',
+          description:
+            'Voidable is a framework-agnostic web component library built on Lit 3. Components render in the Light DOM and ship with zero visual CSS; styling comes from the @voidable/theme token package.',
+        }),
+      ],
       head: [
+        { tag: 'meta', attrs: { property: 'og:image', content: OG_IMAGE } },
+        { tag: 'meta', attrs: { property: 'og:image:width', content: '1200' } },
+        { tag: 'meta', attrs: { property: 'og:image:height', content: '630' } },
+        { tag: 'meta', attrs: { property: 'og:image:alt', content: OG_ALT } },
+        { tag: 'meta', attrs: { name: 'twitter:image', content: OG_IMAGE } },
+        { tag: 'meta', attrs: { name: 'twitter:image:alt', content: OG_ALT } },
         { tag: 'link', attrs: { rel: 'preconnect', href: 'https://fonts.googleapis.com' } },
         { tag: 'link', attrs: { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: true } },
         { tag: 'link', attrs: { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap' } },
@@ -28,6 +47,11 @@ export default defineConfig({
           icon: 'github',
           label: 'GitHub',
           href: 'https://github.com/VoidableUI/Voidable',
+        },
+        {
+          icon: 'npm',
+          label: 'npm',
+          href: 'https://www.npmjs.com/package/@voidable/ui',
         },
       ],
       sidebar: [
@@ -44,14 +68,7 @@ export default defineConfig({
         },
         {
           label: 'Frameworks',
-          items: [
-            { label: 'React', slug: 'frameworks/react' },
-            { label: 'Vue', slug: 'frameworks/vue' },
-            { label: 'Solid', slug: 'frameworks/solid' },
-            { label: 'Svelte', slug: 'frameworks/svelte' },
-            { label: 'Angular', slug: 'frameworks/angular' },
-            { label: 'Hotwire', slug: 'frameworks/hotwire' },
-          ],
+          autogenerate: { directory: 'frameworks' },
         },
         {
           label: 'Components',
