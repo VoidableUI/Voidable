@@ -9,12 +9,37 @@ const PLACEHOLDER_ATTR = 'data-void-placeholder';
 
 /** Native dropdown for small option sets in forms where a simple pick-one is sufficient. */
 export class VoidSelect extends NativeFormControl(VoidElement) {
+  /**
+   * `value` of the chosen option. As an attribute it picks the initially selected option; read or set
+   * the `value` property for the current choice.
+   */
   @property({ type: String }) value = '';
+  /**
+   * Stop the select opening and exclude it from the form submission. Also disabled by an enclosing
+   * `<fieldset disabled>`.
+   */
   @property({ type: Boolean, reflect: true }) disabled = false;
+  /**
+   * The control must have a value before its form can be submitted. An empty control is invalid
+   * (`valueMissing`) and the browser reports it, as for a native field.
+   */
   @property({ type: Boolean, reflect: true }) required = false;
+  /**
+   * Key the chosen value is submitted under in the form's `FormData`. Without a name the select submits
+   * nothing.
+   */
   @property({ type: String, reflect: true }) name = '';
+  /** Size step: `sm`, `md` (default), `lg`, `xl` or `xxl`. */
   @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' | 'xl' | 'xxl' = 'md';
+  /**
+   * Mark the select invalid: it gets the error styling and `aria-invalid`. The message itself is shown
+   * by the wrapping `void-field`, whose own `error` attribute sets this one.
+   */
   @property({ type: String, reflect: true }) error = '';
+  /**
+   * Prompt shown while nothing is chosen, such as `Choose a plan`. The element adds a hidden, disabled
+   * first option for it, so it can never be submitted; pair it with `required` to force a choice.
+   */
   @property({ type: String, reflect: true }) placeholder = '';
 
   // Consumer <option>/<optgroup> children are projected into the native <select>.

@@ -7,7 +7,15 @@ import { ProjectionController } from '../projection.js';
 
 /** Selectable option child element for VoidMultiselect and VoidCombobox. */
 export class VoidOption extends VoidElement {
+  /**
+   * Value this option contributes when chosen: what the parent `void-combobox` or `void-multiselect`
+   * reports and submits. The option's text content is what the user sees.
+   */
   @property({ type: String, reflect: true }) value = '';
+  /**
+   * Mark the option as chosen when the parent first renders. In a `void-multiselect`, any number of
+   * options may be selected; in a `void-combobox`, one.
+   */
   @property({ type: Boolean, reflect: true }) selected = false;
   /** A disabled option is listed but cannot be highlighted or chosen. */
   @property({ type: Boolean, reflect: true }) disabled = false;
@@ -42,9 +50,19 @@ if (!customElements.get('void-option')) {
  * the surrounding dialog), Tab closes it and moves on. Disabled options are skipped.
  */
 export class VoidMultiselect extends InternalsFormControl(VoidElement) {
+  /**
+   * Text shown in the trigger while nothing is selected. Defaults to `Select...`. It is also the
+   * trigger's accessible name when no `void-field` label names it.
+   */
   @property({ type: String }) placeholder = 'Select...';
+  /** Stop the trigger opening and exclude the values from the form submission. */
   @property({ type: Boolean, reflect: true }) disabled = false;
+  /** Size step: `sm`, `md` (default), `lg`, `xl` or `xxl`. */
   @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' | 'xl' | 'xxl' = 'md';
+  /**
+   * Mark the control invalid: it gets the error styling and `aria-invalid`. The message itself is shown
+   * by the wrapping `void-field`.
+   */
   @property({ type: String, reflect: true }) error = '';
   @property({ type: String, reflect: true }) name = '';
   /** Whether the option list is showing. Reflected, so it can be read (and set) from markup. */

@@ -5,8 +5,11 @@ import { ProjectionController } from '../projection.js';
 
 /** Removable label chip for selected filters, applied tags, and multi-value inputs. */
 export class VoidTag extends VoidElement {
+  /** Status colour: `default`, `error`, `warning`, `caution`, `success`, `info` or `notice`. */
   @property({ type: String, reflect: true }) color: 'default' | 'error' | 'warning' | 'caution' | 'success' | 'info' | 'notice' = 'default';
+  /** Show a remove button. Clicking it fires `void-remove` and removes the tag from the page. */
   @property({ type: Boolean, reflect: true }) removable = false;
+  /** Size step: `sm`, `md` (default), `lg`, `xl` or `xxl`. */
   @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' | 'xl' | 'xxl' = 'md';
 
   // Consumer content stays on the host, before the rendered remove button.

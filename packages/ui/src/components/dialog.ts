@@ -6,8 +6,15 @@ import { ProjectionController } from '../projection.js';
 
 /** Modal overlay for confirmations, detail views, and multi-step forms that require user attention before continuing. */
 export class VoidDialog extends VoidElement {
+  /**
+   * Whether the dialog is shown. Set the property or attribute to open it; closing it (close button,
+   * Escape, backdrop click) sets it back to false and fires `void-close`. While open the page behind
+   * does not scroll.
+   */
   @property({ type: Boolean, reflect: true }) open = false;
+  /** Title in the header row. Also the dialog's accessible name, so always set it. */
   @property({ type: String }) heading = '';
+  /** Width of the dialog panel: `sm`, `md` (default), `lg` or `xl`. */
   @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' | 'xl' = 'md';
   /** Set `closable="false"` in markup to hide the close button and ignore Escape and backdrop clicks. */
   @property({ type: Boolean, converter: defaultTrueBoolean }) closable = true;

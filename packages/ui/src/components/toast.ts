@@ -5,15 +5,25 @@ import { defaultTrueBoolean } from '../converters.js';
 
 /** Temporary notification for action confirmations, error alerts, and copy-to-clipboard feedback. */
 export class VoidToast extends VoidElement {
+  /**
+   * Status colour: `default`, `error`, `warning`, `caution`, `success` or `info`. `error` and `warning`
+   * are announced assertively, the rest politely.
+   */
   @property({ type: String, reflect: true })
   color: 'default' | 'error' | 'warning' | 'caution' | 'success' | 'info' = 'default';
 
+  /**
+   * Milliseconds before the toast closes itself. Defaults to 5000; 0 keeps it until dismissed. The timer
+   * pauses while the pointer or focus is on the toast.
+   */
   @property({ type: Number })
   duration = 5000;
 
+  /** Show a close button. On by default; write `dismissable="false"` to hide it. */
   @property({ type: Boolean, reflect: true, converter: defaultTrueBoolean })
   dismissable = true;
 
+  /** Bold title above the message. Optional. */
   @property({ type: String })
   heading = '';
 

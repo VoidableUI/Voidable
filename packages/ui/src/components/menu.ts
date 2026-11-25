@@ -16,9 +16,19 @@ import { ProjectionController } from '../projection.js';
  * `searchable`), Enter or Space activate the item (`void-select`), Escape closes the menu.
  */
 export class VoidMenu extends VoidElement {
+  /**
+   * Whether the menu list is shown. It starts hidden: add `open` to show it (the list has no trigger of
+   * its own). Escape sets it back to false.
+   */
   @property({ type: Boolean, reflect: true }) open = false;
+  /**
+   * Show a search field above the items that filters them as the user types; it takes focus when the
+   * menu opens.
+   */
   @property({ type: Boolean, reflect: true }) searchable = false;
+  /** Size step: `sm`, `md` (default) or `lg`. */
   @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' = 'md';
+  /** Hint in the search field. Defaults to `Search...`. Only used with `searchable`. */
   @property({ type: String }) placeholder = 'Search...';
 
   private _query = '';
@@ -213,10 +223,21 @@ if (!customElements.get('void-menu')) {
   customElements.define('void-menu', VoidMenu);
 }
 
+/** One action in a `void-menu`: activating it (click, Enter or Space) fires `void-select` with its `value`. */
 export class VoidMenuItem extends VoidElement {
+  /**
+   * Identifier the item reports in the `void-select` event's `detail.value`. Use it instead of matching
+   * on the item's text.
+   */
   @property({ type: String }) value = '';
+  /** Dim the item, skip it in keyboard navigation and stop it firing `void-select`. */
   @property({ type: Boolean, reflect: true }) disabled = false;
+  /**
+   * Text shown at the end of the row to advertise a keyboard shortcut, such as `Ctrl+K`. Display only:
+   * it does not bind the key.
+   */
   @property({ type: String }) shortcut = '';
+  /** Text drawn before the label, usually a single glyph or emoji. It is plain text, not an icon name. */
   @property({ type: String }) icon = '';
 
   protected readonly _projection = new ProjectionController(this, {
@@ -280,7 +301,9 @@ if (!customElements.get('void-menu-item')) {
   customElements.define('void-menu-item', VoidMenuItem);
 }
 
+/** Labelled group of `void-menu-item`s inside a `void-menu`, with a heading drawn from `label`. */
 export class VoidMenuGroup extends VoidElement {
+  /** Heading of the group, also its accessible name. */
   @property({ type: String, reflect: true }) label = '';
 
   protected readonly _projection = new ProjectionController(this, {

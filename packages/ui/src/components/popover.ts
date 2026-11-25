@@ -10,9 +10,19 @@ import { ProjectionController, triggerRegion } from '../projection.js';
  * @slot - Popover content.
  */
 export class VoidPopover extends VoidElement {
+  /**
+   * Whether the popover is showing. With `trigger="click"` a click on the trigger toggles it and Escape
+   * closes it; set it from script to drive it.
+   */
   @property({ type: Boolean, reflect: true }) open = false;
+  /** Which side of the trigger the popover appears on: `bottom` (default), `top`, `left` or `right`. */
   @property({ type: String, reflect: true }) position: 'top' | 'bottom' | 'left' | 'right' = 'bottom';
+  /** How the popover lines up along the trigger's edge: `start` (default), `center` or `end`. */
   @property({ type: String, reflect: true }) align: 'start' | 'center' | 'end' = 'start';
+  /**
+   * What opens it: `click` (default) toggles on a click of the trigger; `manual` never opens it by
+   * itself, so drive `open` from script.
+   */
   @property({ type: String, reflect: true }) trigger: 'click' | 'manual' = 'click';
 
   // The trigger (slot="trigger", else the first element child) stays the host's first child; everything else goes into the body.

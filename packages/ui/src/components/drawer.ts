@@ -6,9 +6,16 @@ import { ProjectionController } from '../projection.js';
 
 /** Slide-out overlay panel for filters, detail views, and navigation menus; opens from any screen edge. */
 export class VoidDrawer extends VoidElement {
+  /**
+   * Whether the drawer is shown. Set the property or attribute to open it; closing it (close button,
+   * Escape, backdrop click) sets it back to false and fires `void-close`.
+   */
   @property({ type: Boolean, reflect: true }) open = false;
+  /** Screen edge the drawer slides in from: `right` (default), `left`, `top` or `bottom`. */
   @property({ type: String, reflect: true }) side: 'left' | 'right' | 'top' | 'bottom' = 'right';
+  /** Width of a side drawer, or height of a top or bottom one: `sm`, `md` (default) or `lg`. */
   @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' = 'md';
+  /** Title in the header row. Also the drawer's accessible name. */
   @property({ type: String }) heading = '';
   /** Set `closable="false"` in markup to hide the close button and ignore Escape and overlay clicks. */
   @property({ type: Boolean, reflect: true, converter: defaultTrueBoolean }) closable = true;

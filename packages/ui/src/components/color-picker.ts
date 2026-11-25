@@ -7,12 +7,25 @@ import { defaultTrueBoolean } from '../converters.js';
 
 /** Color selection control with spectrum area, hue slider, hex input, and preset swatches for theme customization and design tools. */
 export class VoidColorPicker extends InternalsFormControl(VoidElement) {
+  /**
+   * Selected colour as a hex string such as `#3366ff`. Defaults to black. As an attribute it is the
+   * initial value and the form's reset target.
+   */
   @property({ type: String, reflect: true }) value: string = '#000000'; // token-ok: default color value
+  /** Stop the picker reacting and exclude the value from the form submission. */
   @property({ type: Boolean, reflect: true }) disabled: boolean = false;
+  /** Size step: `sm`, `md` (default) or `lg`. */
   @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' = 'md';
+  /**
+   * Preset colours as an array of hex strings shown under the spectrum. Set it as a property from script
+   * (`el.swatches = ['#ff0000', '#00ff00']`) or as a JSON array in the attribute.
+   */
   @property({ type: Array }) swatches: string[] = [];
+  /** Show the hex text field under the spectrum. On by default; write `show-input="false"` to hide it. */
   @property({ type: Boolean, attribute: 'show-input', reflect: true, converter: defaultTrueBoolean }) showInput: boolean = true;
+  /** `default` shows the full picker inline; `compact` shows only a swatch button that opens it. */
   @property({ type: String, reflect: true }) variant: 'default' | 'compact' = 'default';
+  /** Whether the compact variant's picker is open. Only meaningful with `variant="compact"`. */
   @property({ type: Boolean, reflect: true }) open: boolean = false;
 
   private _hue: number = 0;

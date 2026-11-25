@@ -10,8 +10,14 @@ import { VoidElement } from '../base.js';
  * Escape hides it.
  */
 export class VoidTooltip extends VoidElement {
+  /**
+   * The hint text shown in the bubble. Keep it short: it is not for anything the user must read, since
+   * it only appears on hover or focus.
+   */
   @property({ type: String }) text = '';
+  /** Which side of the trigger the bubble appears on: `top` (default), `bottom`, `left` or `right`. */
   @property({ type: String, reflect: true }) position: 'top' | 'bottom' | 'left' | 'right' = 'top';
+  /** Milliseconds the pointer rests on the trigger before the bubble appears. Defaults to 200. */
   @property({ type: Number }) delay = 200;
 
   @state() private _visible = false;

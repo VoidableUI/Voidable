@@ -4,7 +4,12 @@ import { VoidElement } from '../base.js';
 
 /** Multi-step progress tracker for onboarding flows, checkout funnels, and guided wizards. */
 export class VoidStepper extends VoidElement {
+  /** Zero-based index of the current step. Earlier steps show as completed, later ones as upcoming. */
   @property({ type: Number, reflect: true }) value: number = 0;
+  /**
+   * Step labels as one comma-separated string, in order: `Account, Plan, Payment`. The element draws
+   * them; it does not hold any step content.
+   */
   @property({ reflect: true }) steps: string = '';
 
   connectedCallback(): void {

@@ -9,13 +9,27 @@ import { NativeFormControl } from '../form-control.js';
  * the accessible name, which `<void-field>` supplies.
  */
 export class VoidSlider extends NativeFormControl(VoidElement) {
+  /**
+   * Current position, between `min` and `max`. Defaults to 50. As an attribute it is the initial value;
+   * read the `value` property for the current one.
+   */
   @property({ type: Number }) value: number = 50;
+  /** Lowest value. Defaults to 0. */
   @property({ type: Number }) min: number = 0;
+  /** Highest value. Defaults to 100. */
   @property({ type: Number }) max: number = 100;
+  /** Granularity: the value moves in multiples of `step` from `min`. Defaults to 1. */
   @property({ type: Number }) step: number = 1;
+  /** Stop the slider reacting and exclude it from the form submission. */
   @property({ type: Boolean, reflect: true }) disabled: boolean = false;
+  /**
+   * Key the value is submitted under in the form's `FormData`. Without a name the slider submits
+   * nothing.
+   */
   @property({ type: String, reflect: true }) name: string = '';
+  /** Show the current number beside the slider. */
   @property({ type: Boolean, attribute: 'show-value', reflect: true }) showValue: boolean = false;
+  /** Size step: `sm`, `md` (default) or `lg`. */
   @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' = 'md';
 
   private _fill(): number {

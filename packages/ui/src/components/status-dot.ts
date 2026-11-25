@@ -3,6 +3,10 @@ import { VoidElement } from '../base.js';
 
 /** Presence indicator for user lists and chat rosters showing online/away/offline state at a glance. */
 export class VoidStatusDot extends VoidElement {
+  /**
+   * Presence state: `online`, `away` or `offline` (default). Sets the colour and the accessible name
+   * (`Online`, `Away`, `Offline`).
+   */
   @property({ type: String, reflect: true }) status: 'online' | 'away' | 'offline' = 'offline';
 
   connectedCallback(): void {

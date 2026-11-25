@@ -62,9 +62,13 @@ interface Column {
  * @cssprop --void-table-max-height - Height at which a scrollable table starts scrolling vertically.
  */
 export class VoidTable extends VoidElement {
+  /** Shade every other body row. */
   @property({ type: Boolean, reflect: true }) striped = false;
+  /** Highlight the body row under the pointer. */
   @property({ type: Boolean, reflect: true }) hoverable = false;
+  /** Reduce the padding of the cells for a denser table. */
   @property({ type: Boolean, reflect: true }) compact = false;
+  /** Draw a border around every cell. */
   @property({ type: Boolean, reflect: true }) bordered = false;
   /** For a table placed in a card or panel: its dividers and stripes run to the container's edge and its text stays aligned with the container's content. */
   @property({ type: Boolean, reflect: true }) inset = false;

@@ -10,9 +10,16 @@ import { ProjectionController, triggerRegion } from '../projection.js';
  * @slot - Card content.
  */
 export class VoidHoverCard extends VoidElement {
+  /**
+   * Whether the card is showing. It opens after `open-delay` when the pointer or focus reaches the
+   * trigger and closes after `close-delay`, or on Escape; set it to drive it from script.
+   */
   @property({ type: Boolean, reflect: true }) open = false;
+  /** Which side of the trigger the card appears on: `bottom` (default), `top`, `left` or `right`. */
   @property({ type: String, reflect: true }) position: 'top' | 'bottom' | 'left' | 'right' = 'bottom';
+  /** Milliseconds the pointer rests on the trigger before the card opens. Defaults to 300. */
   @property({ type: Number, attribute: 'open-delay' }) openDelay = 300;
+  /** Milliseconds after the pointer leaves before the card closes. Defaults to 300. */
   @property({ type: Number, attribute: 'close-delay' }) closeDelay = 300;
 
   // The trigger (slot="trigger", else the first element child) goes into the trigger wrapper; everything else goes into the body.

@@ -18,7 +18,15 @@ import { ProjectionController, triggerRegion } from '../projection.js';
  * @slot - The menu items (`<void-dropdown-menu-item>`).
  */
 export class VoidDropdownMenu extends VoidElement {
+  /**
+   * Whether the menu is showing. A click on the trigger toggles it; Escape, Tab or a click outside close
+   * it. Choosing an item does not close it: listen for `void-select` and set `open` to false yourself.
+   */
   @property({ type: Boolean, reflect: true }) open = false;
+  /**
+   * Where the panel sits relative to the trigger: `bottom-start` (default), `bottom-end`, `top-start` or
+   * `top-end`. `end` aligns the panel's right edge with the trigger's.
+   */
   @property({ type: String, reflect: true }) position: 'bottom-start' | 'bottom-end' | 'top-start' | 'top-end' = 'bottom-start';
 
   // The trigger (slot="trigger", else the first element child) stays before the panel; everything else goes into the panel.
@@ -173,8 +181,11 @@ if (!customElements.get('void-dropdown-menu')) {
   customElements.define('void-dropdown-menu', VoidDropdownMenu);
 }
 
+/** One action in a `void-dropdown-menu`: activating it (click, Enter or Space) fires `void-select`. */
 export class VoidDropdownMenuItem extends VoidElement {
+  /** Dim the item, skip it in keyboard navigation and stop it firing `void-select`. */
   @property({ type: Boolean, reflect: true }) disabled = false;
+  /** Draw the item in the error colour, for an action that deletes or cannot be undone. */
   @property({ type: Boolean, reflect: true }) destructive = false;
 
   connectedCallback(): void {

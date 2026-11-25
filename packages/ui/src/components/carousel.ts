@@ -19,13 +19,33 @@ if (!customElements.get('void-carousel-slide')) {
 
 /** Scrollable content gallery for product photo viewers, onboarding flows, and featured content sliders. */
 export class VoidCarousel extends VoidElement {
+  /**
+   * Zero-based index of the slide being shown. Set it to jump to a slide; the arrows, indicators and
+   * arrow keys update it and fire `void-change`.
+   */
   @property({ type: Number, reflect: true }) active = 0;
+  /**
+   * Wrap around: Next on the last slide goes to the first, and Previous on the first goes to the last.
+   * Without it the arrows stop at the ends.
+   */
   @property({ type: Boolean, reflect: true }) loop = false;
+  /**
+   * Advance to the next slide every `interval` milliseconds. It pauses while the pointer is over the
+   * carousel.
+   */
   @property({ type: Boolean, reflect: true }) autoplay = false;
+  /** Milliseconds between slides when `autoplay` is on. Defaults to 5000. */
   @property({ type: Number }) interval = 5000;
+  /** Size step of the carousel: `sm`, `md` (default) or `lg`. */
   @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' = 'md';
+  /** Show the previous and next buttons. On by default; write `controls="false"` to hide them. */
   @property({ type: Boolean, reflect: true, converter: defaultTrueBoolean }) controls = true;
+  /** Show the row of slide dots. On by default; write `indicators="false"` to hide them. */
   @property({ type: Boolean, reflect: true, converter: defaultTrueBoolean }) indicators = true;
+  /**
+   * Direction slides advance: `horizontal` (default, Left and Right arrow keys) or `vertical` (Up and
+   * Down).
+   */
   @property({ type: String, reflect: true }) orientation: 'horizontal' | 'vertical' = 'horizontal';
 
   private _slides: VoidCarouselSlide[] = [];
