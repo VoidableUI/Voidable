@@ -596,6 +596,19 @@ defmodule VoidableUI.Components.StaticSimpleTest do
       refute html =~ "retry-label"
     end
 
+    test "renders the parts the author writes as children, replacing the default" do
+      assigns = %{}
+
+      html =
+        rendered_to_string(~H"""
+        <VoidableUI.Components.error_fallback>
+          <void-error-fallback-title>Mine</void-error-fallback-title>
+        </VoidableUI.Components.error_fallback>
+        """)
+
+      assert html =~ "<void-error-fallback-title>Mine</void-error-fallback-title>"
+    end
+
     test "passes through global attributes" do
       assigns = %{}
 

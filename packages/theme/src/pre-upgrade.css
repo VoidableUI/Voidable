@@ -26,7 +26,7 @@
  * one wins. Only tokens that already exist are used.
  *
  * Components with explicit parts (#52: dialog, drawer, popover, hover card,
- * dropdown menu, tooltip, tabs, card, alert, accordion) need little here: their
+ * dropdown menu, tooltip, tabs, card, alert, accordion, collapsible, panel, banner, toast, error fallback) need little here: their
  * regions are elements the author wrote, styled the same before and after
  * upgrade, so only what the script reveals (overlay content) is hidden.
  */
@@ -67,25 +67,22 @@ void-tabs:not(:defined):not(:has(void-tabs-trigger[active])) > void-tabs-list > 
   border-bottom-color: var(--void-color-accent);
 }
 
-/* ── Collapsible ───────────────────────────────────────────────────────────
-   The heading is an attribute, so it can be shown in the trigger's place; the
-   body stays hidden unless the server rendered it open. (Accordion items are
-   parts: their trigger and content need nothing here.) */
-void-collapsible:not(:defined)::before {
+/* ── Error fallback ────────────────────────────────────────────────────────
+   Written with no parts, it writes its default (heading, message, retry button)
+   itself. Show the heading where that title will be, so the box has its height. */
+void-error-fallback:not(:defined):empty::after {
   content: attr(heading);
   display: block;
-  padding: var(--void-space-3) var(--void-space-4);
-  font-family: var(--void-font-sans);
-  font-size: var(--void-text-base);
-  font-weight: var(--void-weight-medium);
-  line-height: var(--void-leading-normal);
-  color: var(--void-color-text);
-  border: 1px solid var(--void-color-border);
-  border-radius: var(--void-radius-md);
+  font-family: var(--void-type-heading-family);
+  font-size: var(--void-type-heading-size);
+  line-height: var(--void-type-heading-leading);
+  font-weight: var(--void-type-heading-weight);
+  letter-spacing: var(--void-type-heading-tracking);
+  color: var(--void-type-heading-color);
 }
 
-void-collapsible:not(:defined):not([open]) > * {
-  display: none;
+void-error-fallback:not(:defined):empty:not([heading])::after {
+  content: 'Something went wrong';
 }
 
 /* ── Carousel ──────────────────────────────────────────────────────────────

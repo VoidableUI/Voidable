@@ -23,8 +23,14 @@ void-panel[variant="elevated"] {
   box-shadow: var(--void-float-shadow);
 }
 
-.void-panel-label {
+/* Parts (CSS-only): a header (title, optional description) and the body. */
+void-panel-header {
+  display: block;
   margin-bottom: var(--void-space-3);
+}
+
+void-panel-title {
+  display: block;
   font-family: var(--void-type-label-family);
   font-size: var(--void-type-label-size);
   line-height: var(--void-type-label-leading);
@@ -32,4 +38,15 @@ void-panel[variant="elevated"] {
   letter-spacing: var(--void-type-label-tracking);
   text-transform: var(--void-type-label-case);
   color: var(--void-type-label-color);
+}
+
+void-panel-description {
+  display: block;
+  margin-top: var(--void-space-1);
+  font-size: var(--void-type-caption-size);
+  color: var(--void-color-text-secondary);
+}
+
+void-panel-body {
+  display: block;
 }

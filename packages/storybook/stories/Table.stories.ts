@@ -354,7 +354,9 @@ export const Inset: Story = {
         </void-card-body>
       </void-card>
       <void-panel>
-        <void-table inset hoverable>${sampleTable}</void-table>
+        <void-panel-body>
+          <void-table inset hoverable>${sampleTable}</void-table>
+        </void-panel-body>
       </void-panel>
     </div>
   `,

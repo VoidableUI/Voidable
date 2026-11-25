@@ -1,0 +1,55 @@
+<main style="padding: 2rem; max-width: 40rem">
+  <h1>Disclosure and notices</h1>
+  <button id="before">before</button>
+
+  <void-collapsible id="co1">
+    <void-collapsible-trigger>Shipping details</void-collapsible-trigger>
+    <void-collapsible-content><p id="co1-p">Ships in two days. <a id="co1-link" href="#ship">Track</a></p></void-collapsible-content>
+  </void-collapsible>
+  <void-collapsible id="co-open" open>
+    <void-collapsible-trigger>Already open</void-collapsible-trigger>
+    <void-collapsible-content><p>Visible content</p></void-collapsible-content>
+  </void-collapsible>
+  <void-collapsible id="co-dis" disabled>
+    <void-collapsible-trigger>Disabled one</void-collapsible-trigger>
+    <void-collapsible-content><p>Never shown</p></void-collapsible-content>
+  </void-collapsible>
+
+  <void-panel id="pn" variant="bordered">
+    <void-panel-header>
+      <void-panel-title>Preferences</void-panel-title>
+      <void-panel-description>Choose what you hear about.</void-panel-description>
+    </void-panel-header>
+    <void-panel-body><p id="pn-p">Digests are sent on Mondays.</p></void-panel-body>
+  </void-panel>
+  <void-panel id="pn-bare"><void-panel-body>Unnamed panel</void-panel-body></void-panel>
+
+  <void-banner id="bn1" color="info">
+    <void-banner-title>Maintenance</void-banner-title>
+    <void-banner-description>Saturday 02:00 to 04:00 UTC.</void-banner-description>
+    <void-banner-actions><void-button size="sm" id="bn1-act">Details</void-button></void-banner-actions>
+    <void-banner-close><button type="button" id="bn1-close" aria-label="Dismiss">&times;</button></void-banner-close>
+  </void-banner>
+  <void-banner id="bn2" color="warning"><void-banner-description>Cannot be dismissed.</void-banner-description></void-banner>
+
+  <void-error-fallback id="ef3">
+    <void-error-fallback-title>Mine</void-error-fallback-title>
+    <void-error-fallback-description>Written with parts.</void-error-fallback-description>
+    <void-error-fallback-actions><button type="button" id="ef3-btn">Retry</button></void-error-fallback-actions>
+  </void-error-fallback>
+
+  <void-error-fallback id="ef1" retryable></void-error-fallback>
+  <void-error-fallback id="ef2" heading="Could not load" message="Check your connection." retryable retry-label="Reconnect"></void-error-fallback>
+  <void-toast-container id="flash" position="bottom-right">
+    <void-toast id="t-server" color="success" duration="0">
+      <void-toast-title>Saved</void-toast-title>
+      <void-toast-description>Your changes were saved.</void-toast-description>
+      <void-toast-close><button type="button" aria-label="Dismiss">&times;</button></void-toast-close>
+    </void-toast>
+    <void-toast id="t-alert" color="error" duration="0">
+      <void-toast-description>Upload failed.</void-toast-description>
+      <void-toast-actions><void-button size="sm" id="t-alert-retry">Retry</void-button></void-toast-actions>
+    </void-toast>
+  </void-toast-container>
+  <button id="after">after</button>
+</main>

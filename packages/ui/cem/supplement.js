@@ -321,6 +321,104 @@ export const parts = {
       },
     ],
   },
+  'void-collapsible': {
+    children: 'parts',
+    ordered: true,
+    skeleton:
+      '<void-collapsible open><void-collapsible-trigger>Advanced options</void-collapsible-trigger><void-collapsible-content>...</void-collapsible-content></void-collapsible>',
+    legacy: {
+      attributes: {
+        heading: 'write the heading as <void-collapsible-trigger>...</void-collapsible-trigger> and the content in <void-collapsible-content> after it',
+      },
+      children: 'put the heading text in <void-collapsible-trigger> and the content in <void-collapsible-content>',
+    },
+    parts: [
+      { tag: 'void-collapsible-trigger', required: true, max: 1, description: 'Heading text of the panel; becomes the button that opens and closes it.' },
+      { tag: 'void-collapsible-content', required: true, max: 1, description: 'Content shown while the panel is open.' },
+    ],
+  },
+  'void-panel': {
+    children: 'parts',
+    ordered: true,
+    skeleton:
+      '<void-panel variant="bordered"><void-panel-header><void-panel-title>Billing</void-panel-title><void-panel-description>One line.</void-panel-description></void-panel-header><void-panel-body>...</void-panel-body></void-panel>',
+    legacy: {
+      attributes: { label: 'write <void-panel-header><void-panel-title>...</void-panel-title></void-panel-header> as the first child; the title names the panel' },
+      children: 'put the content in <void-panel-body>',
+    },
+    parts: [
+      {
+        tag: 'void-panel-header',
+        max: 1,
+        children: 'any',
+        description: 'Top of the panel: the title, an optional description, and anything at the far end.',
+        parts: [
+          { tag: 'void-panel-title', max: 1, description: 'Title of the panel; it names the region.' },
+          { tag: 'void-panel-description', max: 1, description: 'One line under the title.' },
+        ],
+      },
+      { tag: 'void-panel-body', required: true, max: 1, description: 'Content of the panel.' },
+    ],
+  },
+  'void-banner': {
+    children: 'parts',
+    ordered: true,
+    skeleton:
+      '<void-banner color="info"><void-banner-title>Maintenance</void-banner-title><void-banner-description>Saturday 02:00 to 04:00 UTC.</void-banner-description><void-banner-actions><void-button size="sm">Details</void-button></void-banner-actions><void-banner-close><button type="button" aria-label="Dismiss">&times;</button></void-banner-close></void-banner>',
+    legacy: {
+      attributes: { dismissable: 'add <void-banner-close><button type="button" aria-label="Dismiss">&times;</button></void-banner-close> as the last child; without it the banner is not dismissible' },
+      children: 'put the message in <void-banner-description> (and a short title in <void-banner-title> before it)',
+    },
+    parts: [
+      { tag: 'void-banner-title', max: 1, description: 'Short title of the announcement.' },
+      { tag: 'void-banner-description', required: true, max: 1, description: 'The announcement.' },
+      { tag: 'void-banner-actions', max: 1, description: 'Buttons or links for the announcement, at the trailing edge.' },
+      {
+        tag: 'void-banner-close',
+        max: 1,
+        control: true,
+        description: 'Wraps the one control that dismisses the banner (a <button aria-label="Dismiss">); pressing it fires void-close and removes the banner. Without it the banner cannot be dismissed.',
+      },
+    ],
+  },
+  'void-toast': {
+    children: 'parts',
+    ordered: true,
+    skeleton:
+      '<void-toast color="success"><void-toast-title>Saved</void-toast-title><void-toast-description>Your changes were saved.</void-toast-description><void-toast-actions><void-button size="sm">Undo</void-button></void-toast-actions><void-toast-close><button type="button" aria-label="Dismiss">&times;</button></void-toast-close></void-toast>',
+    legacy: {
+      attributes: {
+        heading: 'write the title as <void-toast-title>...</void-toast-title> before the description',
+        dismissable: 'add <void-toast-close><button type="button" aria-label="Dismiss">&times;</button></void-toast-close> as the last child; without it the toast has no close button',
+      },
+      children: 'put the message in <void-toast-description> (and a short title in <void-toast-title> before it)',
+    },
+    parts: [
+      { tag: 'void-toast-title', max: 1, description: 'Short title of the notification.' },
+      { tag: 'void-toast-description', required: true, max: 1, description: 'The message.' },
+      { tag: 'void-toast-actions', max: 1, description: 'Buttons for the notification, such as Undo.' },
+      {
+        tag: 'void-toast-close',
+        max: 1,
+        control: true,
+        description: 'Wraps the one control that dismisses the toast (a <button aria-label="Dismiss">); pressing it fires void-close and removes the toast. Without it only the timer closes the toast.',
+      },
+    ],
+  },
+  'void-error-fallback': {
+    children: 'parts',
+    ordered: true,
+    skeleton:
+      '<void-error-fallback><void-error-fallback-title>Could not load invoices</void-error-fallback-title><void-error-fallback-description>The server did not respond.</void-error-fallback-description><void-error-fallback-actions><button type="button">Try again</button></void-error-fallback-actions></void-error-fallback>',
+    legacy: {
+      children: 'write the headline as <void-error-fallback-title>, the detail as <void-error-fallback-description> and buttons in <void-error-fallback-actions>',
+    },
+    parts: [
+      { tag: 'void-error-fallback-title', max: 1, description: 'Headline. Without any part the component writes its own default headline (the heading attribute).' },
+      { tag: 'void-error-fallback-description', max: 1, description: 'What failed or what to try.' },
+      { tag: 'void-error-fallback-actions', max: 1, description: 'Buttons, such as a retry. Wire your own listener: void-retry comes only from the built-in default.' },
+    ],
+  },
 };
 
 /**

@@ -49,7 +49,7 @@ describe('VoidErrorFallback', () => {
     });
   });
 
-  describe('rendering', () => {
+  describe('built-in default (no parts written)', () => {
     let el: VoidErrorFallback;
 
     beforeEach(async () => {
@@ -62,61 +62,94 @@ describe('VoidErrorFallback', () => {
       el.remove();
     });
 
-    it('renders the content wrapper', () => {
-      expect(el.querySelector('.void-error-fallback-content')).not.toBeNull();
+    it('writes a title part with the default heading', () => {
+      const title = el.querySelector(':scope > void-error-fallback-title');
+      expect(title).not.toBeNull();
+      expect(title!.textContent).toBe('Something went wrong');
+      expect(title!.hasAttribute('data-void-default')).toBe(true);
     });
 
-    it('renders the heading', () => {
-      const heading = el.querySelector('.void-error-fallback-heading');
-      expect(heading).not.toBeNull();
-      expect(heading!.textContent).toBe('Something went wrong');
+    it('writes no description and no actions by default', () => {
+      expect(el.querySelector('void-error-fallback-description')).toBeNull();
+      expect(el.querySelector('void-error-fallback-actions')).toBeNull();
     });
 
-    it('renders the icon by default', () => {
-      expect(el.querySelector('.void-error-fallback-icon')).not.toBeNull();
-    });
-
-    it('does not render icon when icon is false', async () => {
-      el.icon = false;
+    it('follows heading and message', async () => {
+      el.heading = 'Could not load';
+      el.message = 'Check your connection.';
       await el.updateComplete;
-      expect(el.querySelector('.void-error-fallback-icon')).toBeNull();
-    });
-
-    it('does not render message when message is empty', () => {
-      expect(el.querySelector('.void-error-fallback-message')).toBeNull();
-    });
-
-    it('renders message when message is set', async () => {
-      el.message = 'An unexpected error occurred.';
+      expect(el.querySelector('void-error-fallback-title')!.textContent).toBe('Could not load');
+      expect(el.querySelector('void-error-fallback-description')!.textContent).toBe('Check your connection.');
+      el.message = '';
       await el.updateComplete;
-      const msg = el.querySelector('.void-error-fallback-message');
-      expect(msg).not.toBeNull();
-      expect(msg!.textContent).toBe('An unexpected error occurred.');
+      expect(el.querySelector('void-error-fallback-description')).toBeNull();
     });
 
-    it('does not render retry button when retryable is false', () => {
-      expect(el.querySelector('.void-error-fallback-retry')).toBeNull();
-    });
-
-    it('renders retry button when retryable is true', async () => {
+    it('writes the retry button when retryable, with the default and a custom label', async () => {
       el.retryable = true;
       await el.updateComplete;
-      expect(el.querySelector('.void-error-fallback-retry')).not.toBeNull();
-    });
-
-    it('renders retry button with default label', async () => {
-      el.retryable = true;
-      await el.updateComplete;
-      const btn = el.querySelector('.void-error-fallback-retry') as HTMLButtonElement;
+      const btn = el.querySelector('void-error-fallback-actions > button') as HTMLButtonElement;
       expect(btn.textContent).toBe('Try again');
-    });
-
-    it('renders retry button with custom retryLabel', async () => {
-      el.retryable = true;
       el.retryLabel = 'Reconnect';
       await el.updateComplete;
-      const btn = el.querySelector('.void-error-fallback-retry') as HTMLButtonElement;
+      expect(el.querySelector('void-error-fallback-actions > button')).toBe(btn);
       expect(btn.textContent).toBe('Reconnect');
+      el.retryable = false;
+      await el.updateComplete;
+      expect(el.querySelector('void-error-fallback-actions')).toBeNull();
+    });
+
+    it('keeps the parts in title, description, actions order', async () => {
+      el.retryable = true;
+      await el.updateComplete;
+      el.message = 'late';
+      await el.updateComplete;
+      expect(Array.from(el.children).map(c => c.localName)).toEqual([
+        'void-error-fallback-title', 'void-error-fallback-description', 'void-error-fallback-actions',
+      ]);
+    });
+  });
+
+  describe('author parts replace the default', () => {
+    it('writes nothing when the author wrote a title part', async () => {
+      const el = document.createElement('void-error-fallback') as VoidErrorFallback;
+      el.heading = 'ignored';
+      el.retryable = true;
+      el.innerHTML = '<void-error-fallback-title>Mine</void-error-fallback-title>';
+      const mine = el.firstElementChild;
+      document.body.appendChild(el);
+      await el.updateComplete;
+      expect(Array.from(el.children)).toEqual([mine]);
+      expect(el.querySelector('[data-void-default]')).toBeNull();
+      el.remove();
+    });
+
+    it('takes its own parts away when the author adds one later, and writes them again when it is removed', async () => {
+      const el = document.createElement('void-error-fallback') as VoidErrorFallback;
+      document.body.appendChild(el);
+      await el.updateComplete;
+      expect(el.querySelector('[data-void-default]')).not.toBeNull();
+      const mine = document.createElement('void-error-fallback-title');
+      mine.textContent = 'Mine';
+      el.append(mine);
+      await new Promise(r => setTimeout(r, 0));
+      expect(Array.from(el.children)).toEqual([mine]);
+      mine.remove();
+      await new Promise(r => setTimeout(r, 0));
+      expect(el.querySelector('void-error-fallback-title')!.textContent).toBe('Something went wrong');
+      el.remove();
+    });
+
+    it('does not fire void-retry from the author\'s own buttons', async () => {
+      const el = document.createElement('void-error-fallback') as VoidErrorFallback;
+      el.innerHTML = '<void-error-fallback-title>T</void-error-fallback-title><void-error-fallback-actions><button type="button">Retry</button></void-error-fallback-actions>';
+      document.body.appendChild(el);
+      await el.updateComplete;
+      const events: Event[] = [];
+      document.addEventListener('void-retry', e => events.push(e));
+      el.querySelector('button')!.click();
+      expect(events).toHaveLength(0);
+      el.remove();
     });
   });
 
@@ -134,11 +167,11 @@ describe('VoidErrorFallback', () => {
       el.remove();
     });
 
-    it('dispatches void-retry event when retry button is clicked', async () => {
+    it('dispatches void-retry event when the built-in retry button is clicked', async () => {
       const events: Event[] = [];
       document.addEventListener('void-retry', (e) => events.push(e));
 
-      const btn = el.querySelector('.void-error-fallback-retry') as HTMLButtonElement;
+      const btn = el.querySelector('void-error-fallback-actions > button') as HTMLButtonElement;
       btn.click();
 
       expect(events).toHaveLength(1);

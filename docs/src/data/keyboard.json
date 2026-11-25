@@ -295,7 +295,7 @@
     ]
   },
   "void-collapsible": {
-    "intro": "The heading is a button.",
+    "intro": "The trigger is a button (`role=\"button\"`, a tab stop).",
     "rows": [
       {
         "keys": "Enter / Space",

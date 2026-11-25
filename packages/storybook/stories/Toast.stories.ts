@@ -12,7 +12,7 @@ const meta: Meta = {
   parameters: {
     docs: {
       description: {
-        component: 'Ephemeral notification for confirming actions, surfacing errors, and delivering system messages without interrupting the user flow. Stacks in a corner via VoidToastContainer and auto-dismisses after a configurable duration.',
+        component: 'Ephemeral notification for confirming actions, surfacing errors, and delivering system messages without interrupting the user flow. Written as parts (title, description, actions, close), by hand or by the `toast()` helper. Stacks in a corner via VoidToastContainer and auto-dismisses after a configurable duration.',
       },
     },
   },
@@ -25,7 +25,7 @@ type Story = StoryObj;
 export const Default: Story = {
   render: () => {
     const show = () => {
-      VoidToastContainer.show({ message: 'Operation completed successfully.', color: 'default' });
+      VoidToastContainer.show({ description: 'Operation completed successfully.', color: 'default' });
     };
     return html`
       <void-toast-container position='bottom-right'></void-toast-container>
@@ -37,7 +37,7 @@ export const Default: Story = {
 export const Colors: Story = {
   render: () => {
     const show = (color: string, message: string) => {
-      VoidToastContainer.show({ message, color: color as any });
+      VoidToastContainer.show({ description: message, color: color as any });
     };
     return html`
       <void-toast-container position='bottom-right'></void-toast-container>
@@ -52,14 +52,14 @@ export const Colors: Story = {
   },
 };
 
-export const WithHeading: Story = {
+export const WithTitle: Story = {
   render: () => {
     const show = () => {
-      VoidToastContainer.show({ message: 'Your file has been saved.', heading: 'Saved', color: 'success' });
+      VoidToastContainer.show({ description: 'Your file has been saved.', title: 'Saved', color: 'success' });
     };
     return html`
       <void-toast-container position='bottom-right'></void-toast-container>
-      <button @click='${show}' style='padding: 0.5rem 1rem; cursor: pointer;'>Show Toast with Heading</button>
+      <button @click='${show}' style='padding: 0.5rem 1rem; cursor: pointer;'>Show Toast with Title</button>
     `;
   },
 };
@@ -67,7 +67,7 @@ export const WithHeading: Story = {
 export const NoDismiss: Story = {
   render: () => {
     const show = () => {
-      VoidToastContainer.show({ message: 'Processing in background...', duration: 3000, dismissable: false });
+      VoidToastContainer.show({ description: 'Processing in background...', duration: 3000, dismissable: false });
     };
     return html`
       <void-toast-container position='bottom-right'></void-toast-container>
@@ -76,10 +76,27 @@ export const NoDismiss: Story = {
   },
 };
 
+export const WithActions: Story = {
+  render: () => {
+    const show = () => {
+      VoidToastContainer.show({
+        title: 'Message archived',
+        description: 'It will be deleted in 30 days.',
+        actions: [{ label: 'Undo', onClick: (_e, toast) => toast.close() }],
+        duration: 8000,
+      });
+    };
+    return html`
+      <void-toast-container position='bottom-right'></void-toast-container>
+      <button @click='${show}' style='padding: 0.5rem 1rem; cursor: pointer;'>Show Toast with Action</button>
+    `;
+  },
+};
+
 export const Persistent: Story = {
   render: () => {
     const show = () => {
-      VoidToastContainer.show({ message: 'This toast will not auto-dismiss.', duration: 0 });
+      VoidToastContainer.show({ description: 'This toast will not auto-dismiss.', duration: 0 });
     };
     return html`
       <void-toast-container position='bottom-right'></void-toast-container>
@@ -99,7 +116,8 @@ export const Positions: Story = {
       }
       const toast = document.createElement('void-toast') as any;
       toast.color = 'info';
-      toast.textContent = `Position: ${position}`;
+      toast.innerHTML = '<void-toast-description></void-toast-description><void-toast-close><button type="button" aria-label="Dismiss">&times;</button></void-toast-close>';
+      toast.querySelector('void-toast-description').textContent = `Position: ${position}`;
       container.appendChild(toast);
     };
     return html`
@@ -126,7 +144,11 @@ export const InlinePlacement: Story = {
   render: () => html`
     <div style="max-width: 28rem;">
       <void-toast-container position="inline">
-        <void-toast color="caution" heading="Heads up">Your trial ends in 3 days.</void-toast>
+        <void-toast color="caution">
+          <void-toast-title>Heads up</void-toast-title>
+          <void-toast-description>Your trial ends in 3 days.</void-toast-description>
+          <void-toast-close><button type="button" aria-label="Dismiss">&times;</button></void-toast-close>
+        </void-toast>
       </void-toast-container>
       <p>Page content continues below the toast.</p>
     </div>

@@ -325,17 +325,20 @@ defmodule DemoWeb.UIShowcases do
       <h3>Colors</h3>
       <p>Toast notifications with different color tones.</p>
       <div style="display: flex; flex-direction: column; gap: 0.75rem;">
-        <VoidableUI.Components.toast events color="success" heading="Success!" dismissable={false}>
-          Your changes have been saved.
+        <VoidableUI.Components.toast events color="success">
+          <void-toast-title>Success!</void-toast-title>
+          <void-toast-description>Your changes have been saved.</void-toast-description>
         </VoidableUI.Components.toast>
-        <VoidableUI.Components.toast events color="error" heading="Error" dismissable={false}>
-          Something went wrong. Please try again.
+        <VoidableUI.Components.toast events color="error">
+          <void-toast-title>Error</void-toast-title>
+          <void-toast-description>Something went wrong. Please try again.</void-toast-description>
         </VoidableUI.Components.toast>
-        <VoidableUI.Components.toast events color="warning" heading="Warning" dismissable={false}>
-          Your session will expire soon.
+        <VoidableUI.Components.toast events color="warning">
+          <void-toast-title>Warning</void-toast-title>
+          <void-toast-description>Your session will expire soon.</void-toast-description>
         </VoidableUI.Components.toast>
-        <VoidableUI.Components.toast events color="info" dismissable={false}>
-          A simple informational notification.
+        <VoidableUI.Components.toast events color="info">
+          <void-toast-description>A simple informational notification.</void-toast-description>
         </VoidableUI.Components.toast>
       </div>
     </div>

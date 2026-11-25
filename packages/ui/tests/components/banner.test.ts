@@ -23,10 +23,6 @@ describe('VoidBanner', () => {
       expect(el.color).toBe('default');
     });
 
-    it('defaults dismissable to false', () => {
-      expect(el.dismissable).toBe(false);
-    });
-
     it('defaults variant to "subtle"', () => {
       expect(el.variant).toBe('subtle');
     });
@@ -41,12 +37,13 @@ describe('VoidBanner', () => {
     });
   });
 
-  describe('close', () => {
+  describe('close part', () => {
     let el: VoidBanner;
 
     beforeEach(async () => {
       el = document.createElement('void-banner') as VoidBanner;
-      el.dismissable = true;
+      el.innerHTML =
+        '<void-banner-description>Maintenance</void-banner-description><void-banner-close><button type="button" aria-label="Dismiss">x</button></void-banner-close>';
       document.body.appendChild(el);
       await el.updateComplete;
     });
@@ -55,25 +52,49 @@ describe('VoidBanner', () => {
       el.remove();
     });
 
-    it('dispatches void-close event when close button is clicked', async () => {
+    it('writes nothing of its own; the author\'s two parts are the only children', () => {
+      expect(Array.from(el.children).map(c => c.localName)).toEqual(['void-banner-description', 'void-banner-close']);
+      expect(el.querySelectorAll('button').length).toBe(1);
+    });
+
+    it('dispatches void-close when the control in the close part is pressed', async () => {
       const events: Event[] = [];
       document.addEventListener('void-close', (e) => events.push(e));
-
-      const btn = el.querySelector('.void-banner-close') as HTMLButtonElement;
-      btn.click();
-
+      (el.querySelector('void-banner-close button') as HTMLButtonElement).click();
       expect(events).toHaveLength(1);
       expect(events[0].bubbles).toBe(true);
       expect((events[0] as CustomEvent).composed).toBe(true);
     });
 
     it('removes itself from the DOM when closed', async () => {
-      expect(document.body.contains(el)).toBe(true);
-
-      const btn = el.querySelector('.void-banner-close') as HTMLButtonElement;
-      btn.click();
-
+      (el.querySelector('void-banner-close button') as HTMLButtonElement).click();
       expect(document.body.contains(el)).toBe(false);
+    });
+
+    it('is not dismissed by a click elsewhere', () => {
+      (el.querySelector('void-banner-description') as HTMLElement).click();
+      expect(document.body.contains(el)).toBe(true);
+    });
+
+    it('has no way to dismiss it without a close part', async () => {
+      const plain = document.createElement('void-banner') as VoidBanner;
+      plain.innerHTML = '<void-banner-description>Hi</void-banner-description>';
+      document.body.appendChild(plain);
+      await plain.updateComplete;
+      expect(plain.querySelector('button')).toBeNull();
+      plain.click();
+      expect(document.body.contains(plain)).toBe(true);
+      plain.remove();
+    });
+
+    it('a close part added later works', async () => {
+      const late = document.createElement('void-banner') as VoidBanner;
+      late.innerHTML = '<void-banner-description>Hi</void-banner-description>';
+      document.body.appendChild(late);
+      await late.updateComplete;
+      late.insertAdjacentHTML('beforeend', '<void-banner-close><button type="button" aria-label="Dismiss">x</button></void-banner-close>');
+      (late.querySelector('button') as HTMLButtonElement).click();
+      expect(late.isConnected).toBe(false);
     });
   });
 

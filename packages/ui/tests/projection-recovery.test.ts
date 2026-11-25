@@ -5,8 +5,8 @@
 import { describe, it, expect, afterEach } from 'vitest';
 import type { LitElement } from 'lit';
 // Dialog, card, tabs and the anchored overlays use explicit parts (#52) and no
-// projection; void-collapsible (chrome plus one projected region) stands in.
-import '../src/components/collapsible.js';
+// projection; a fixture (chrome plus one projected region) stands in.
+import './helpers/projection-fixture.js';
 import '../src/components/select.js';
 import '../src/components/menu.js';
 import '../src/components/tag.js';
@@ -54,37 +54,37 @@ afterEach(() => {
 
 describe('recovery after the markers are removed (morph)', () => {
   it('rebuilds its chrome and projects the morphed content', async () => {
-    const el = mount('<void-collapsible heading="Hi"><p id="dc">one</p></void-collapsible>');
+    const el = mount('<void-projection-fixture heading="Hi"><p id="dc">one</p></void-projection-fixture>');
     await settle(el);
     morphChildren(el, '<p id="dc">two</p><button id="db">ok</button>');
     await settle(el);
     expect(markers(el).length).toBe(2);
-    expect(el.querySelectorAll('.void-collapsible-trigger').length).toBe(1);
-    expect(ids(el.querySelector('.void-collapsible-inner'))).toEqual(['dc', 'db']);
+    expect(el.querySelectorAll('.void-projection-fixture-trigger').length).toBe(1);
+    expect(ids(el.querySelector('.void-projection-fixture-inner'))).toEqual(['dc', 'db']);
     expect(el.querySelector('#dc')!.textContent).toBe('two');
     el.open = true;
     await settle(el);
-    expect(el.querySelector('.void-collapsible-trigger')!.getAttribute('aria-expanded')).toBe('true');
+    expect(el.querySelector('.void-projection-fixture-trigger')!.getAttribute('aria-expanded')).toBe('true');
     el.heading = 'After';
     await settle(el);
-    expect(el.querySelector('.void-collapsible-trigger')!.textContent!.trim()).toBe('After');
+    expect(el.querySelector('.void-projection-fixture-trigger')!.textContent!.trim()).toBe('After');
   });
 
   it('survives repeated morphs', async () => {
-    const el = mount('<void-collapsible heading="H"><p>1</p></void-collapsible>');
+    const el = mount('<void-projection-fixture heading="H"><p>1</p></void-projection-fixture>');
     await settle(el);
     for (let i = 2; i < 6; i++) {
       morphChildren(el, `<p id="p${i}">${i}</p>`);
       await settle(el);
-      expect(ids(el.querySelector('.void-collapsible-inner'))).toEqual([`p${i}`]);
-      expect(el.querySelectorAll('.void-collapsible-trigger').length).toBe(1);
+      expect(ids(el.querySelector('.void-projection-fixture-inner'))).toEqual([`p${i}`]);
+      expect(el.querySelectorAll('.void-projection-fixture-trigger').length).toBe(1);
     }
     el.heading = '';
     await settle(el);
-    expect(el.querySelector('.void-collapsible-trigger')!.textContent!.trim()).toBe('');
+    expect(el.querySelector('.void-projection-fixture-trigger')!.textContent!.trim()).toBe('');
     el.heading = 'Back';
     await settle(el);
-    expect(el.querySelector('.void-collapsible-trigger')!.textContent!.trim()).toBe('Back');
+    expect(el.querySelector('.void-projection-fixture-trigger')!.textContent!.trim()).toBe('Back');
   });
 
   it('select gets a fresh native select with the right value', async () => {
@@ -99,39 +99,39 @@ describe('recovery after the markers are removed (morph)', () => {
   });
 
   it('recovers when only one marker is removed, without duplicating chrome or content', async () => {
-    const el = mount('<void-collapsible><p id="c">c</p></void-collapsible>');
+    const el = mount('<void-projection-fixture><p id="c">c</p></void-projection-fixture>');
     await settle(el);
     const start = markers(el)[0];
     Node.prototype.removeChild.call(el, start);
     await settle(el);
     expect(markers(el).length).toBe(2);
-    expect(el.querySelectorAll('.void-collapsible-trigger').length).toBe(1);
+    expect(el.querySelectorAll('.void-projection-fixture-trigger').length).toBe(1);
     expect(el.querySelectorAll('#c').length).toBe(1);
-    expect(el.querySelector('.void-collapsible-inner #c')).not.toBeNull();
+    expect(el.querySelector('.void-projection-fixture-inner #c')).not.toBeNull();
   });
 
   it('recovers when markers vanish while disconnected', async () => {
-    const el = mount('<void-collapsible><p id="c">c</p></void-collapsible>');
+    const el = mount('<void-projection-fixture><p id="c">c</p></void-projection-fixture>');
     await settle(el);
     el.remove();
     morphChildren(el, '<p id="d">d</p>');
     document.body.appendChild(el);
     await settle(el);
-    expect(ids(el.querySelector('.void-collapsible-inner'))).toEqual(['d']);
+    expect(ids(el.querySelector('.void-projection-fixture-inner'))).toEqual(['d']);
   });
 
   it('recovers when a property change lands in the same tick as the morph', async () => {
-    const el = mount('<void-collapsible heading="H"><p>1</p></void-collapsible>');
+    const el = mount('<void-projection-fixture heading="H"><p>1</p></void-projection-fixture>');
     await settle(el);
     el.heading = '';
     morphChildren(el, '<p id="m">m</p>');
     await settle(el);
-    expect(el.querySelector('.void-collapsible-trigger')!.textContent!.trim()).toBe('');
-    expect(ids(el.querySelector('.void-collapsible-inner'))).toEqual(['m']);
+    expect(el.querySelector('.void-projection-fixture-trigger')!.textContent!.trim()).toBe('');
+    expect(ids(el.querySelector('.void-projection-fixture-inner'))).toEqual(['m']);
   });
 
   it('settles after recovery instead of looping', async () => {
-    const el = mount('<void-collapsible><p>1</p></void-collapsible>');
+    const el = mount('<void-projection-fixture><p>1</p></void-projection-fixture>');
     await settle(el);
     let updates = 0;
     const original = (el as unknown as { updated: (c: Map<string, unknown>) => void }).updated;
@@ -149,28 +149,28 @@ describe('recovery after the markers are removed (morph)', () => {
   });
 
   it('host.innerHTML on a rendered host is treated as new content', async () => {
-    const el = mount('<void-collapsible heading="H"><p>old</p></void-collapsible>');
+    const el = mount('<void-projection-fixture heading="H"><p>old</p></void-projection-fixture>');
     await settle(el);
     el.innerHTML = '<p id="n">new</p>';
     await settle(el);
-    expect(ids(el.querySelector('.void-collapsible-inner'))).toEqual(['n']);
+    expect(ids(el.querySelector('.void-projection-fixture-inner'))).toEqual(['n']);
     el.heading = 'H2';
     await settle(el);
-    expect(el.querySelector('.void-collapsible-trigger')!.textContent!.trim()).toBe('H2');
+    expect(el.querySelector('.void-projection-fixture-trigger')!.textContent!.trim()).toBe('H2');
   });
 });
 
 describe('cloneNode / outerHTML of a rendered host', () => {
   it('a deep clone renders one set of chrome around the original content', async () => {
-    const el = mount('<void-collapsible heading="Hi"><p id="c">content</p></void-collapsible>');
+    const el = mount('<void-projection-fixture heading="Hi"><p id="c">content</p></void-projection-fixture>');
     await settle(el);
     const clone = el.cloneNode(true) as Host;
     clone.id = 'clone';
     document.body.appendChild(clone);
     await settle(clone);
-    expect(clone.querySelectorAll('.void-collapsible-trigger').length).toBe(1);
+    expect(clone.querySelectorAll('.void-projection-fixture-trigger').length).toBe(1);
     expect(markers(clone).length).toBe(2);
-    const body = clone.querySelector('.void-collapsible-inner')!;
+    const body = clone.querySelector('.void-projection-fixture-inner')!;
     expect(body.children.length).toBe(1);
     expect(body.firstElementChild!.id).toBe('c');
   });
@@ -187,47 +187,47 @@ describe('cloneNode / outerHTML of a rendered host', () => {
   });
 
   it('nested projecting hosts inside a cloned host are each cleaned up once', async () => {
-    const el = mount('<void-collapsible><void-collapsible heading="C"><p id="inner">x</p></void-collapsible></void-collapsible>');
+    const el = mount('<void-projection-fixture><void-projection-fixture heading="C"><p id="inner">x</p></void-projection-fixture></void-projection-fixture>');
     await settle(el);
     const clone = el.cloneNode(true) as Host;
     document.body.appendChild(clone);
     await settle(clone);
-    await settle(clone.querySelector('void-collapsible void-collapsible') as LitElement);
-    expect(clone.querySelectorAll('.void-collapsible-trigger').length).toBe(2);
-    expect(clone.querySelectorAll('void-collapsible void-collapsible').length).toBe(1);
+    await settle(clone.querySelector('void-projection-fixture void-projection-fixture') as LitElement);
+    expect(clone.querySelectorAll('.void-projection-fixture-trigger').length).toBe(2);
+    expect(clone.querySelectorAll('void-projection-fixture void-projection-fixture').length).toBe(1);
     expect(clone.querySelectorAll('#inner').length).toBe(1);
-    expect(clone.querySelector('.void-collapsible-inner > void-collapsible > .void-collapsible-content > .void-collapsible-inner > #inner')).not.toBeNull();
+    expect(clone.querySelector('.void-projection-fixture-inner > void-projection-fixture > .void-projection-fixture-content > .void-projection-fixture-inner > #inner')).not.toBeNull();
   });
 
   it('an outerHTML round-trip (cache snapshot / restore) renders once', async () => {
-    const el = mount('<void-collapsible heading="H"><p id="c">body</p></void-collapsible>');
+    const el = mount('<void-projection-fixture heading="H"><p id="c">body</p></void-projection-fixture>');
     await settle(el);
     const box = document.createElement('div');
     document.body.appendChild(box);
     box.innerHTML = el.outerHTML;
     const restored = box.firstElementChild as Host;
     await settle(restored);
-    expect(restored.querySelectorAll('.void-collapsible-trigger').length).toBe(1);
-    expect(restored.querySelectorAll('.void-collapsible-inner').length).toBe(1);
-    expect(ids(restored.querySelector('.void-collapsible-inner'))).toEqual(['c']);
+    expect(restored.querySelectorAll('.void-projection-fixture-trigger').length).toBe(1);
+    expect(restored.querySelectorAll('.void-projection-fixture-inner').length).toBe(1);
+    expect(ids(restored.querySelector('.void-projection-fixture-inner'))).toEqual(['c']);
   });
 });
 
 describe('textContent and replaceChildren on a rendered host', () => {
   it('textContent replaces only the projected content, keeping the chrome', async () => {
-    const el = mount('<void-collapsible open heading="D">hello</void-collapsible>');
+    const el = mount('<void-projection-fixture open heading="D">hello</void-projection-fixture>');
     await settle(el);
-    const panel = el.querySelector('.void-collapsible-trigger');
+    const panel = el.querySelector('.void-projection-fixture-trigger');
     for (const text of ['world', 'again', 'third']) {
       el.textContent = text;
       await settle(el);
-      expect(el.querySelector('.void-collapsible-trigger')).toBe(panel);
-      expect(el.querySelector('.void-collapsible-inner')!.textContent).toBe(text);
+      expect(el.querySelector('.void-projection-fixture-trigger')).toBe(panel);
+      expect(el.querySelector('.void-projection-fixture-inner')!.textContent).toBe(text);
     }
     el.textContent = '';
     await settle(el);
-    expect(el.querySelector('.void-collapsible-inner')!.childNodes.length).toBe(0);
-    expect(el.querySelector('.void-collapsible-trigger')).toBe(panel);
+    expect(el.querySelector('.void-projection-fixture-inner')!.childNodes.length).toBe(0);
+    expect(el.querySelector('.void-projection-fixture-trigger')).toBe(panel);
   });
 
   it('textContent on menu-item, tag and checkbox keeps their rendered parts', async () => {
@@ -252,22 +252,22 @@ describe('textContent and replaceChildren on a rendered host', () => {
   });
 
   it('reading textContent is unchanged', async () => {
-    const el = mount('<void-collapsible heading="H"><p>body</p></void-collapsible>');
+    const el = mount('<void-projection-fixture heading="H"><p>body</p></void-projection-fixture>');
     await settle(el);
     expect(el.textContent).toContain('H');
     expect(el.textContent).toContain('body');
   });
 
   it('replaceChildren replaces consumer content with nodes and strings', async () => {
-    const el = mount('<void-collapsible open><p>old</p></void-collapsible>');
+    const el = mount('<void-projection-fixture open><p>old</p></void-projection-fixture>');
     await settle(el);
-    const panel = el.querySelector('.void-collapsible-trigger');
+    const panel = el.querySelector('.void-projection-fixture-trigger');
     const p = document.createElement('p');
     p.id = 'n';
     el.replaceChildren(p, 'tail');
     await settle(el);
-    expect(el.querySelector('.void-collapsible-trigger')).toBe(panel);
-    const body = el.querySelector('.void-collapsible-inner')!;
+    expect(el.querySelector('.void-projection-fixture-trigger')).toBe(panel);
+    const body = el.querySelector('.void-projection-fixture-inner')!;
     expect(body.firstChild).toBe(p);
     expect(body.textContent).toBe('tail');
     el.replaceChildren();
@@ -290,22 +290,22 @@ describe('textContent and replaceChildren on a rendered host', () => {
 
 describe('insertion order for observed nodes', () => {
   it('prepend lands first in a card body', async () => {
-    const el = mount('<void-collapsible><p id="a">a</p><p id="b">b</p></void-collapsible>');
+    const el = mount('<void-projection-fixture><p id="a">a</p><p id="b">b</p></void-projection-fixture>');
     await settle(el);
     const x = document.createElement('p');
     x.id = 'x';
     el.prepend(x);
     await settle(el);
-    expect(ids(el.querySelector('.void-collapsible-inner'))).toEqual(['x', 'a', 'b']);
+    expect(ids(el.querySelector('.void-projection-fixture-inner'))).toEqual(['x', 'a', 'b']);
     const y = document.createElement('p');
     y.id = 'y';
     el.insertBefore(y, el.firstChild);
     await settle(el);
-    expect(ids(el.querySelector('.void-collapsible-inner'))).toEqual(['y', 'x', 'a', 'b']);
+    expect(ids(el.querySelector('.void-projection-fixture-inner'))).toEqual(['y', 'x', 'a', 'b']);
   });
 
   it('several prepended nodes keep their relative order', async () => {
-    const el = mount('<void-collapsible><p id="a">a</p></void-collapsible>');
+    const el = mount('<void-projection-fixture><p id="a">a</p></void-projection-fixture>');
     await settle(el);
     const x = document.createElement('p');
     x.id = 'x';
@@ -313,7 +313,7 @@ describe('insertion order for observed nodes', () => {
     y.id = 'y';
     el.prepend(x, y);
     await settle(el);
-    expect(ids(el.querySelector('.void-collapsible-inner'))).toEqual(['x', 'y', 'a']);
+    expect(ids(el.querySelector('.void-projection-fixture-inner'))).toEqual(['x', 'y', 'a']);
   });
 
   it('prepend lands first in a select', async () => {

@@ -144,10 +144,10 @@ Use these exact values. Do not invent alternative names for the same concept.
 Lit's Boolean converter reads any present attribute as true, so markup can never turn off a property that defaults to true. Give such a property the `defaultTrueBoolean` converter from `src/converters.ts`, which reads the string `"false"` as false:
 
 ```ts
-@property({ type: Boolean, reflect: true, converter: defaultTrueBoolean }) dismissable = true;
+@property({ type: Boolean, reflect: true, converter: defaultTrueBoolean }) icon = true;
 ```
 
-A test fails when a default-true boolean is added without it, and the manifest records the attribute as `falseString` so the `voidable` checker and generators accept `dismissable="false"`.
+A test fails when a default-true boolean is added without it, and the manifest records the attribute as `falseString` so the `voidable` checker and generators accept `icon="false"`.
 
 ## CSS
 

@@ -103,7 +103,7 @@ func TestSkillContentFromManifest(t *testing.T) {
 		{"references/wrong-usages.md", "| `<void-gauge>` | `show-value` | `showvalue` |"},
 		{"references/wrong-usages.md", "| `<void-option>` | `<void-multiselect>`, `<void-combobox>` |"},
 		{"references/wrong-usages.md", "accept `\"false\"` in markup"},
-		{"references/wrong-usages.md", "`dismissable` on `<void-toast>`"},
+		{"references/wrong-usages.md", "`icon` on `<void-error-fallback>`"},
 		{"references/elements.md", "| `<void-button>` |"},
 	} {
 		if got := read(c.file); !strings.Contains(got, c.want) {

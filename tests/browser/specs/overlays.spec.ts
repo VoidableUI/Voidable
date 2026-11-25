@@ -408,21 +408,21 @@ test.describe('toast', () => {
 
   test('shows a polite status, auto-dismisses, and an error is an alert', async ({ page }) => {
     // Long enough to check the toast before it goes, short enough to watch it go.
-    await show(page, { message: 'Saved', heading: 'OK', duration: 1500 });
-    await show(page, { message: 'Failed', color: 'error', duration: 0 });
+    await show(page, { description: 'Saved', title: 'OK', duration: 1500 });
+    await show(page, { description: 'Failed', color: 'error', duration: 0 });
     await expect(page.locator('void-toast', { hasText: 'Saved' })).toHaveAttribute('role', 'status');
     await expect(page.locator('void-toast', { hasText: 'Failed' })).toHaveAttribute('role', 'alert');
     expect(await isPerceivable(page.locator('void-toast', { hasText: 'Saved' }))).toBe(true);
     await expect(page.locator('void-toast', { hasText: 'Saved' })).toHaveCount(0);
     await expect(page.locator('void-toast', { hasText: 'Failed' })).toHaveCount(1);
-    await page.locator('void-toast', { hasText: 'Failed' }).getByRole('button', { name: 'Close' }).click();
+    await page.locator('void-toast', { hasText: 'Failed' }).getByRole('button', { name: 'Dismiss' }).click();
     await expect(page.locator('void-toast')).toHaveCount(0);
   });
 
   test('hovering pauses the timer and leaving resumes it', async ({ page }) => {
     // Long enough that the hover always lands first: Playwright waits for the
     // entrance animation to finish before it hovers.
-    await show(page, { message: 'Hover pause', duration: 1500 });
+    await show(page, { description: 'Hover pause', duration: 1500 });
     const toast = page.locator('void-toast');
     await toast.hover();
     // Hold well past the whole duration, measured by the page's own clock.

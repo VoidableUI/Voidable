@@ -32,7 +32,7 @@ export { VoidAccordion, VoidAccordionItem } from './components/accordion.js';
 export { VoidBreadcrumbs } from './components/breadcrumbs.js';
 export { VoidList, VoidListItem } from './components/list.js';
 export { VoidToast, VoidToastContainer, toast } from './components/toast.js';
-export type { ToastOptions } from './components/toast.js';
+export type { ToastOptions, ToastAction } from './components/toast.js';
 export { VoidStepper } from './components/stepper.js';
 export { VoidDrawer } from './components/drawer.js';
 export { VoidCard } from './components/card.js';

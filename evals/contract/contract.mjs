@@ -28,7 +28,7 @@ export const CONTRACT = {
   'void-alert': { role: 'alert', name: 'text content (its void-alert-title and void-alert-description parts)', state: ['color (reflected)'], gaps: ['always role="alert", so a static, non-urgent notice is announced as urgent; no status variant'] },
   'void-avatar': { role: 'img', name: 'alt attribute', state: [], gaps: ['without alt the host is role="img" with an empty aria-label: an unnamed image (axe image-alt / role-img-alt)'] },
   'void-badge': { role: 'status', name: 'text content', state: ['color (reflected)'], gaps: ['every badge is role="status", a live region: a table of status badges is a page of live regions, and a decorative badge cannot opt out'] },
-  'void-banner': { role: 'banner', name: 'text content', state: ['dismissable (reflected)'], gaps: ['role="banner" is the page header landmark; a second banner, or one inside <main>, is invalid'] },
+  'void-banner': { role: 'banner', name: 'text content (its void-banner-title and void-banner-description parts)', state: ['color (reflected)', 'a void-banner-close part makes it dismissible'], gaps: ['role="banner" is the page header landmark; a second banner, or one inside <main>, is invalid'] },
   'void-bar-chart': { role: 'img', name: 'aria-label attribute', state: [], gaps: ['data is a property only (its shape is in the manifest and `voidable ref`); the drawn values are not exposed as text'] },
   'void-breadcrumbs': { role: 'navigation', name: 'fixed "Breadcrumb"', state: [] },
   'void-button': {
@@ -51,9 +51,9 @@ export const CONTRACT = {
   'void-checkbox-group': { role: 'group', name: 'label attribute (aria-label)', state: ['disabled (reflected)'], gaps: ['the selected values are a property only (value: string[]); read them from the child checkboxes'] },
   'void-collapsible': {
     role: 'inner',
-    name: 'heading attribute, on the rendered button',
-    state: ['open (reflected)', 'aria-expanded on the rendered button'],
-    probe: { html: '<void-collapsible heading="Details">More</void-collapsible>', click: { role: 'button', name: 'Details' }, expect: { host: { open: '' }, button: { name: 'Details', 'aria-expanded': 'true' } } },
+    name: 'its void-collapsible-trigger part, which is the button',
+    state: ['open (reflected)', 'aria-expanded on the trigger part'],
+    probe: { html: '<void-collapsible><void-collapsible-trigger>Details</void-collapsible-trigger><void-collapsible-content>More</void-collapsible-content></void-collapsible>', click: { role: 'button', name: 'Details' }, expect: { host: { open: '' }, button: { name: 'Details', 'aria-expanded': 'true' } } },
   },
   'void-color-picker': { role: null, name: 'aria-label / aria-labelledby on the host, moved onto the inner hex input', state: ['value (reflected)', 'open (reflected)'], gaps: ['no role on the host'] },
   'void-combobox': {
@@ -97,7 +97,7 @@ export const CONTRACT = {
   },
   'void-dropdown-menu-item': { role: 'menuitem', name: 'text content', state: ['value (reflected)', 'disabled (reflected)', 'aria-disabled', 'destructive (reflected)'] },
   'void-editable': { role: null, name: 'aria-label / aria-labelledby on the host, moved onto the role="button" preview and the inner input', state: ['value (reflected)', 'editing (reflected)'], gaps: ['no role on the host'] },
-  'void-error-fallback': { role: 'alert', name: 'heading attribute', state: [] },
+  'void-error-fallback': { role: 'alert', name: 'text content (its void-error-fallback-title part, or the heading attribute while no part is written)', state: [], gaps: ['void-retry comes only from the built-in retry button; write your own listener for buttons in void-error-fallback-actions'] },
   'void-field': { role: null, name: 'its label names the control inside (aria-labelledby, and for= on native controls)', state: ['error (reflected) -> aria-invalid and aria-describedby on the control'], gaps: [] },
   'void-file-upload': {
     role: 'inner',
@@ -140,7 +140,7 @@ export const CONTRACT = {
     probe: { html: '<void-pagination total="5" value="1"></void-pagination>', click: { role: 'button', name: '2' }, expect: { button: { name: '2', 'aria-current': 'page' } }, event: 'void-change' },
     gaps: ['value is not reflected after a click: read aria-current instead'],
   },
-  'void-panel': { role: 'region', name: 'label attribute (aria-label)', state: [], gaps: ['without label it is an unnamed role="region"'] },
+  'void-panel': { role: 'region', name: 'its void-panel-title part (aria-labelledby), or aria-label', state: [], gaps: ['without a title part or an aria-label it is an unnamed role="region"'] },
   'void-pin-input': { role: 'group', name: 'fixed "PIN input"', state: ['value (property only: the attribute is the initial value and is not updated)'], gaps: ['the current value is not reflected to an attribute: [value=...] selectors and attribute assertions see the initial value only'] },
   'void-popover': { role: null, name: 'the control in its void-popover-trigger part (aria-labelledby on the role="dialog" void-popover-content part)', state: ['open (reflected)', 'aria-haspopup="dialog", aria-expanded and aria-controls on the trigger control'] },
   'void-progress': { role: 'progressbar', name: 'none', state: ['aria-valuenow', 'aria-valuemin', 'aria-valuemax', 'value (reflected)'], gaps: ['no accessible name'] },
@@ -189,7 +189,7 @@ export const CONTRACT = {
   'void-tag': { role: null, name: 'text content', state: ['removable (reflected)', 'role="listitem" inside a void-list or a role="list" parent'] },
   'void-tags-input': { role: 'inner', name: 'void-field label or aria-label / aria-labelledby on the host (moved onto it), on the inner entry input', state: [], gaps: ['the tags are a property (value: TagValue[]), not reflected'] },
   'void-textarea': { role: 'inner', name: 'void-field label or aria-label / aria-labelledby on the host (moved onto it), on the inner textarea', state: ['value (attribute)', 'error (reflected)'] },
-  'void-toast': { role: 'status', name: 'text content (role="alert" for error and warning)', state: ['color (reflected)'], gaps: ['no attribute says whether it is still showing; it is removed from the DOM after duration'] },
+  'void-toast': { role: 'status', name: 'text content (its void-toast-title and void-toast-description parts; role="alert" for error and warning)', state: ['color (reflected)', 'a void-toast-close part makes it dismissible'], gaps: ['no attribute says whether it is still showing; it is removed from the DOM after duration'] },
   'void-toast-container': { role: 'region', name: 'fixed "Notifications" (aria-live="polite")', state: [] },
   'void-toggle': {
     role: 'button',

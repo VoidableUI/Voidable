@@ -1,64 +1,85 @@
-import { html } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
-import { ProjectionController } from '../projection.js';
+import { PartsController } from '../parts.js';
 
-/** Simple expand/collapse panel for FAQ sections, spoiler text, and progressive disclosure of secondary content. */
+/**
+ * Simple expand/collapse panel for FAQ sections, spoiler text, and progressive disclosure of secondary content.
+ *
+ * Written as two parts: a `<void-collapsible-trigger>` (the heading text that toggles it) followed by a
+ * `<void-collapsible-content>`. Both are written by the author and never moved. The trigger becomes the button
+ * (`role="button"`, a tab stop, Enter and Space, `aria-expanded`, `aria-controls`); the content is the region it
+ * names. Closed content is hidden by the theme from the host's `open` attribute, before the script loads as well.
+ *
+ * @fires {CustomEvent<{ open: boolean }>} void-toggle - The user opened or closed the panel.
+ */
 export class VoidCollapsible extends VoidElement {
-  /** Text of the button that opens and closes the panel. */
-  @property({ type: String }) heading = '';
   /** Whether the content is shown. Add the attribute to start open; it follows the user's toggling. */
   @property({ type: Boolean, reflect: true }) open = false;
-  /** Stop the panel from toggling. The heading button ignores clicks and Enter or Space. */
+  /** Stop the panel from toggling. The trigger ignores clicks and Enter or Space. */
   @property({ type: Boolean, reflect: true }) disabled = false;
 
-  private _id = Math.random().toString(36).slice(2);
-  // Consumer content is projected into the collapsible content region.
-  protected readonly _projection = new ProjectionController(this, {
-    regions: [{ name: 'content', target: () => this.querySelector(':scope > .void-collapsible-content > .void-collapsible-inner') }],
+  protected readonly _parts = new PartsController(this, {
+    tags: ['void-collapsible-trigger', 'void-collapsible-content'],
+    onChange: () => this._wire(),
   });
 
-  private _handleClick = (e: Event): void => {
+  connectedCallback(): void {
+    super.connectedCallback();
+    this.addEventListener('click', this._onClick);
+    this.addEventListener('keydown', this._onKeydown);
+  }
+
+  disconnectedCallback(): void {
+    super.disconnectedCallback();
+    this.removeEventListener('click', this._onClick);
+    this.removeEventListener('keydown', this._onKeydown);
+  }
+
+  protected override updated(changed: Map<string, unknown>): void {
+    super.updated(changed);
+    if (changed.has('open') || changed.has('disabled')) this._wire();
+  }
+
+  private _wire(): void {
+    const trigger = this._parts.one('void-collapsible-trigger');
+    const content = this._parts.one('void-collapsible-content');
+    if (trigger) {
+      this._parts.set(trigger, 'role', 'button');
+      this._parts.set(trigger, 'tabindex', this.disabled ? '-1' : '0');
+      this._parts.set(trigger, 'aria-expanded', String(this.open));
+      this._parts.set(trigger, 'aria-disabled', this.disabled ? 'true' : null);
+      this._parts.set(trigger, 'aria-controls', content ? this._parts.id(content, 'void-collapsible-content') : null);
+    }
+    if (content) {
+      this._parts.set(content, 'role', 'region');
+      this._parts.set(content, 'aria-labelledby', trigger ? this._parts.id(trigger, 'void-collapsible-trigger') : null);
+    }
+  }
+
+  private _fromTrigger(e: Event): boolean {
+    const trigger = this._parts.one('void-collapsible-trigger');
+    return !!trigger && e.target instanceof Node && trigger.contains(e.target);
+  }
+
+  private _onClick = (e: Event): void => {
+    if (!this._fromTrigger(e)) return;
     e.preventDefault();
+    this._toggle();
+  };
+
+  private _onKeydown = (e: KeyboardEvent): void => {
+    if (e.key !== 'Enter' && e.key !== ' ') return;
+    if (!this._fromTrigger(e) || e.defaultPrevented) return;
+    // A real control inside the trigger (a link) keeps its own keys.
+    if ((e.target as Element).closest('a, button, input, select, textarea')) return;
+    e.preventDefault();
+    this._toggle();
+  };
+
+  private _toggle(): void {
     if (this.disabled) return;
     this.open = !this.open;
-    this.dispatchEvent(new CustomEvent('void-toggle', {
-      bubbles: true,
-      composed: true,
-      detail: { open: this.open },
-    }));
-  };
-
-  private _handleKeydown = (e: KeyboardEvent): void => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      this._handleClick(e);
-    }
-  };
-
-  render() {
-    return html`
-      <button
-        type="button"
-        id="trigger-${this._id}"
-        class="void-collapsible-trigger"
-        aria-expanded=${String(this.open)}
-        aria-controls="content-${this._id}"
-        @click=${this._handleClick}
-        @keydown=${this._handleKeydown}
-      >
-        ${this.heading}
-        <svg class="void-collapsible-chevron" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-          <path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="var(--void-icon-stroke-width)" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </button>
-      <div
-        id="content-${this._id}"
-        class="void-collapsible-content"
-        role="region"
-        aria-labelledby="trigger-${this._id}"
-      ><div class="void-collapsible-inner"></div></div>
-    `;
+    this.dispatchEvent(new CustomEvent('void-toggle', { bubbles: true, composed: true, detail: { open: this.open } }));
   }
 }
 

@@ -17,12 +17,11 @@ const meta: Meta = {
   },
   argTypes: argTypesFor('void-collapsible'),
   render: (args) => html`
-    <void-collapsible
-      heading=${args.heading || 'Click to expand'}
-      ?open=${args.open}
-      ?disabled=${args.disabled}
-    >
-      <p style="margin: 0;">This is the collapsible content. It can contain any HTML, including paragraphs, lists, code, and other components.</p>
+    <void-collapsible ?open=${args.open} ?disabled=${args.disabled}>
+      <void-collapsible-trigger>Click to expand</void-collapsible-trigger>
+      <void-collapsible-content>
+        <p style="margin: 0;">This is the collapsible content. It can contain any HTML, including paragraphs, lists, code, and other components.</p>
+      </void-collapsible-content>
     </void-collapsible>
   `,
 };
@@ -35,11 +34,13 @@ export const Default: Story = {};
 export const Open: Story = {
   args: {
     open: true,
-    heading: 'Already expanded',
   },
   render: (args) => html`
-    <void-collapsible heading=${args.heading} ?open=${args.open}>
-      <p style="margin: 0;">This collapsible starts in the open state. Click the trigger to collapse it.</p>
+    <void-collapsible ?open=${args.open}>
+      <void-collapsible-trigger>Already expanded</void-collapsible-trigger>
+      <void-collapsible-content>
+        <p style="margin: 0;">This collapsible starts in the open state. Click the trigger to collapse it.</p>
+      </void-collapsible-content>
     </void-collapsible>
   `,
 };
@@ -47,11 +48,13 @@ export const Open: Story = {
 export const Disabled: Story = {
   args: {
     disabled: true,
-    heading: 'Cannot be toggled',
   },
   render: (args) => html`
-    <void-collapsible heading=${args.heading} ?disabled=${args.disabled}>
-      <p style="margin: 0;">This content is hidden and the trigger is disabled.</p>
+    <void-collapsible ?disabled=${args.disabled}>
+      <void-collapsible-trigger>Cannot be toggled</void-collapsible-trigger>
+      <void-collapsible-content>
+        <p style="margin: 0;">This content is hidden and the trigger is disabled.</p>
+      </void-collapsible-content>
     </void-collapsible>
   `,
 };

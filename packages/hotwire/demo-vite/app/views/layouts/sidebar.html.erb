@@ -78,10 +78,16 @@
 
     <void-toast-container position="bottom-right">
       <% if notice.present? %>
-        <void-toast color="success" duration="20000" dismissable><%= notice %></void-toast>
+        <void-toast color="success" duration="20000">
+          <void-toast-description><%= notice %></void-toast-description>
+          <void-toast-close><button type="button" aria-label="Dismiss">&times;</button></void-toast-close>
+        </void-toast>
       <% end %>
       <% if alert.present? %>
-        <void-toast color="caution" duration="20000" dismissable><%= alert %></void-toast>
+        <void-toast color="caution" duration="20000">
+          <void-toast-description><%= alert %></void-toast-description>
+          <void-toast-close><button type="button" aria-label="Dismiss">&times;</button></void-toast-close>
+        </void-toast>
       <% end %>
     </void-toast-container>
 

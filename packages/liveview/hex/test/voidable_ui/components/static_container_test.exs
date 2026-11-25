@@ -13,11 +13,10 @@ defmodule VoidableUI.Components.StaticContainerTest do
 
     html =
       rendered_to_string(~H"""
-      <VoidableUI.Components.panel label="Title" variant="outlined">Panel content</VoidableUI.Components.panel>
+      <VoidableUI.Components.panel variant="outlined"><void-panel-body>Panel content</void-panel-body></VoidableUI.Components.panel>
       """)
 
     assert html =~ "<void-panel"
-    assert html =~ ~s(label="Title")
     assert html =~ ~s(variant="outlined")
     assert html =~ "Panel content"
   end
@@ -31,7 +30,6 @@ defmodule VoidableUI.Components.StaticContainerTest do
       """)
 
     assert html =~ "<void-panel"
-    refute html =~ "label="
     refute html =~ "variant="
     assert html =~ "Bare panel"
   end
@@ -410,15 +408,19 @@ defmodule VoidableUI.Components.StaticContainerTest do
     assert html =~ "Important message"
   end
 
-  test "banner renders dismissable when true" do
+  test "banner renders the close part the author writes" do
     assigns = %{}
 
     html =
       rendered_to_string(~H"""
-      <VoidableUI.Components.banner dismissable={true}>Notice</VoidableUI.Components.banner>
+      <VoidableUI.Components.banner>
+        <void-banner-description>Notice</void-banner-description>
+        <void-banner-close><button type="button" aria-label="Dismiss">x</button></void-banner-close>
+      </VoidableUI.Components.banner>
       """)
 
-    assert html =~ "dismissable"
+    assert html =~ "void-banner-close"
+    refute html =~ "dismissable"
   end
 
   test "banner omits nil attributes and false booleans" do

@@ -1,9 +1,18 @@
-import { html, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
-import { defaultTrueBoolean } from '../converters.js';
+import { PartsController } from '../parts.js';
 
-/** Temporary notification for action confirmations, error alerts, and copy-to-clipboard feedback. */
+/**
+ * Temporary notification for action confirmations, error alerts, and copy-to-clipboard feedback.
+ *
+ * Its text is written as parts: an optional `<void-toast-title>`, the `<void-toast-description>`, an optional
+ * `<void-toast-actions>` (buttons) and an optional `<void-toast-close>` wrapping the one control that dismisses
+ * it (a `<void-button aria-label="Dismiss">`). The parts are never moved, so a toast a server rendered into the
+ * container and one built by `toast()` are the same markup. Without a close part the toast cannot be dismissed by
+ * the user (it still closes itself after `duration`).
+ *
+ * @fires {CustomEvent} void-close - The toast closed, by its close control or by its timer; it removes itself afterwards.
+ */
 export class VoidToast extends VoidElement {
   /**
    * Status colour: `default`, `error`, `warning`, `caution`, `success`, `info`, `notice` or `highlight`. `error` and `warning`
@@ -19,13 +28,10 @@ export class VoidToast extends VoidElement {
   @property({ type: Number })
   duration = 5000;
 
-  /** Show a close button. On by default; write `dismissable="false"` to hide it. */
-  @property({ type: Boolean, reflect: true, converter: defaultTrueBoolean })
-  dismissable = true;
-
-  /** Bold title above the message. Optional. */
-  @property({ type: String })
-  heading = '';
+  protected readonly _parts = new PartsController(this, {
+    tags: ['void-toast-title', 'void-toast-description', 'void-toast-actions', 'void-toast-close'],
+    onChange: () => undefined,
+  });
 
   private _timer: ReturnType<typeof setTimeout> | undefined;
   private _remaining = 0;
@@ -40,6 +46,7 @@ export class VoidToast extends VoidElement {
     this.addEventListener('mouseleave', this._onLeave);
     this.addEventListener('focusin', this._onFocusIn);
     this.addEventListener('focusout', this._onFocusOut);
+    this.addEventListener('click', this._onClick);
     this._hovered = false;
     this._focused = false;
     if (this.duration > 0) {
@@ -56,6 +63,7 @@ export class VoidToast extends VoidElement {
     this.removeEventListener('mouseleave', this._onLeave);
     this.removeEventListener('focusin', this._onFocusIn);
     this.removeEventListener('focusout', this._onFocusOut);
+    this.removeEventListener('click', this._onClick);
   }
 
   protected override updated(changed: Map<string, unknown>): void {
@@ -94,16 +102,22 @@ export class VoidToast extends VoidElement {
     this._resume();
   };
 
+  private _onClick = (e: Event): void => {
+    const close = this._parts.one('void-toast-close');
+    if (!close || !(e.target instanceof Node) || !close.contains(e.target)) return;
+    const control = close.firstElementChild as HTMLElement | null;
+    if (control?.hasAttribute('disabled')) return;
+    this._close();
+  };
+
+  /** Closes the toast: fires `void-close` and removes it. */
+  close(): void {
+    this._close();
+  }
+
   private _close() {
     this.dispatchEvent(new CustomEvent('void-close', { bubbles: true, composed: true }));
     this.remove();
-  }
-
-  render() {
-    return html`
-      ${this.heading ? html`<span class='void-toast-heading'>${this.heading}</span>` : nothing}
-      ${this.dismissable ? html`<button type="button" class='void-toast-close' aria-label='Close' @click='${this._close}'>&times;</button>` : nothing}
-    `;
   }
 }
 
@@ -159,7 +173,8 @@ export class VoidToastContainer extends VoidElement {
     }
     let modal = false;
     try {
-      modal = added && !!this.ownerDocument.querySelector('dialog:modal');
+      // A modal dialog or drawer keeps its native <dialog> in a shadow root, so look at the hosts.
+      modal = added && !!this.ownerDocument.querySelector('void-dialog[open], void-drawer[open], dialog:modal');
     } catch {
       modal = false;
     }
@@ -178,37 +193,80 @@ export class VoidToastContainer extends VoidElement {
     }
   }
 
-  static show(options: {
-    message: string;
-    heading?: string;
-    color?: VoidToast['color'];
-    duration?: number;
-    dismissable?: boolean;
-  }): VoidToast {
+  /**
+   * Shows a toast built from `options` and returns it. The toast it builds is the markup an author would write:
+   * `<void-toast><void-toast-title>`, `<void-toast-description>`, `<void-toast-actions>` and `<void-toast-close>`
+   * parts, all plain elements (text goes in as text, never as HTML).
+   */
+  static show(options: ToastOptions): VoidToast {
     let container = document.querySelector('void-toast-container') as VoidToastContainer | null;
     if (!container) {
       container = document.createElement('void-toast-container') as VoidToastContainer;
       document.body.appendChild(container);
     }
-    const toast = document.createElement('void-toast') as VoidToast;
-    if (options.color !== undefined) toast.color = options.color;
-    if (options.heading !== undefined) toast.heading = options.heading;
-    if (options.duration !== undefined) toast.duration = options.duration;
-    if (options.dismissable !== undefined) toast.dismissable = options.dismissable;
-    toast.textContent = options.message;
+    const toast = buildToast(options);
     container.appendChild(toast);
     return toast;
   }
 }
 
-/** Options for {@link toast}. */
+/** One button of the actions part of a toast built by {@link toast}. */
+export interface ToastAction {
+  /** Text of the button. */
+  label: string;
+  /** Called when the button is pressed, with the event and the toast. The toast stays open; call `toast.close()` to close it. */
+  onClick?: (event: MouseEvent, toast: VoidToast) => void;
+}
+
+/** Options for {@link toast}: each one becomes a part of the toast, or an attribute of it. */
 export interface ToastOptions {
-  message: string;
-  heading?: string;
+  /** Text of the `<void-toast-description>` part: the message. */
+  description: string;
+  /** Text of the optional `<void-toast-title>` part, shown above the message. */
+  title?: string;
+  /** Buttons for the optional `<void-toast-actions>` part. */
+  actions?: ToastAction[];
+  /** The `color` attribute. */
   color?: VoidToast['color'];
-  /** Milliseconds before the toast closes itself; 0 keeps it until dismissed. */
+  /** The `duration` attribute: milliseconds before the toast closes itself; 0 keeps it until dismissed. */
   duration?: number;
+  /** Write the `<void-toast-close>` part with its button. On by default; `false` leaves it out. */
   dismissable?: boolean;
+}
+
+/** Builds a detached `<void-toast>` with the parts an author would write. */
+function buildToast(options: ToastOptions): VoidToast {
+  const toast = document.createElement('void-toast') as VoidToast;
+  if (options.color !== undefined) toast.color = options.color;
+  if (options.duration !== undefined) toast.duration = options.duration;
+  const part = (tag: string, text?: string): HTMLElement => {
+    const el = document.createElement(`void-toast-${tag}`);
+    if (text !== undefined) el.textContent = text;
+    return el;
+  };
+  if (options.title) toast.append(part('title', options.title));
+  toast.append(part('description', options.description));
+  if (options.actions?.length) {
+    const actions = part('actions');
+    for (const action of options.actions) {
+      const button = document.createElement('void-button');
+      button.setAttribute('size', 'sm');
+      button.textContent = action.label;
+      button.addEventListener('click', event => action.onClick?.(event as MouseEvent, toast));
+      actions.append(button);
+    }
+    toast.append(actions);
+  }
+  if (options.dismissable !== false) {
+    const close = part('close');
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.setAttribute('aria-label', 'Dismiss');
+    button.innerHTML = '&times;';
+    close.append(button);
+    toast.append(close);
+  }
+  return toast;
 }
 
 /**

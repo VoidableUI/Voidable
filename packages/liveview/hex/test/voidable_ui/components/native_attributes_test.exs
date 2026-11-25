@@ -93,9 +93,6 @@ defmodule VoidableUI.Components.NativeAttributesTest do
     test "render \"true\" by default and \"false\" when turned off" do
       assigns = %{}
 
-      assert rendered_to_string(~H"<C.toast>x</C.toast>") =~ ~s(dismissable="true")
-      assert rendered_to_string(~H"<C.toast dismissable={false}>x</C.toast>") =~ ~s(dismissable="false")
-
       assert rendered_to_string(~H"<C.nav_bar>x</C.nav_bar>") =~ ~s(bordered="true")
       assert rendered_to_string(~H"<C.nav_bar bordered={false}>x</C.nav_bar>") =~ ~s(bordered="false")
 

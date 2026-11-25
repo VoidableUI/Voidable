@@ -19,7 +19,7 @@ import '../src/components/alert.js';
 import '../src/components/scroll-area.js';
 import '../src/components/nav-bar.js';
 import '../src/components/accordion.js';
-import '../src/components/collapsible.js';
+import './helpers/projection-fixture.js';
 import '../src/components/radio.js';
 import '../src/components/checkbox.js';
 import '../src/components/radio-group.js';
@@ -293,7 +293,7 @@ describe('container components project late children and survive reconnect', () 
   const cases: Array<[string, string]> = [
     ['void-scroll-area', '.void-scroll-area-viewport'],
     ['void-nav-bar', '.void-nav-bar-content'],
-    ['void-collapsible', '.void-collapsible-inner'],
+    ['void-projection-fixture', '.void-projection-fixture-inner'],
     ['void-checkbox-group', '.void-checkbox-group-items'],
   ];
   for (const [tag, selector] of cases) {
@@ -316,10 +316,8 @@ describe('container components project late children and survive reconnect', () 
 
 describe('host-region components keep content when their chrome toggles', () => {
   const cases: Array<[string, string]> = [
-    ['void-banner', 'dismissable'],
     ['void-alert', 'dismissible'],
     ['void-tag', 'removable'],
-    ['void-panel', 'label'],
   ];
   for (const [tag, prop] of cases) {
     it(`${tag} (${prop})`, async () => {
@@ -327,11 +325,11 @@ describe('host-region components keep content when their chrome toggles', () => 
       await settle(el);
       const c = el.querySelector('#c')!;
       const host = el as unknown as Record<string, unknown>;
-      host[prop] = prop === 'label' ? 'Label' : true;
+      host[prop] = true;
       await settle(el);
-      host[prop] = prop === 'label' ? '' : false;
+      host[prop] = false;
       await settle(el);
-      host[prop] = prop === 'label' ? 'Again' : true;
+      host[prop] = true;
       await settle(el);
       expect(el.querySelector('#c')).toBe(c);
       expect(c.parentNode).toBe(el);

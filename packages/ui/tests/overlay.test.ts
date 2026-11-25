@@ -202,7 +202,7 @@ describe('toast container', () => {
       return Element.prototype.closest.call(this, sel) === this;
     });
     try {
-      const toast = VoidToastContainer.show({ message: 'Saved', duration: 0 });
+      const toast = VoidToastContainer.show({ description: 'Saved', duration: 0 });
       const container = toast.closest('void-toast-container') as VoidToastContainer;
       await flush(container);
       expect(container.getAttribute('popover')).toBe('manual');

@@ -63,7 +63,7 @@
     <h2>Navigation</h2>
     <void-tabs value="one"><void-tabs-list><void-tabs-trigger value="one">One</void-tabs-trigger><void-tabs-trigger value="two">Two</void-tabs-trigger></void-tabs-list><void-tabs-content value="one">Panel one <a href="#p1">link</a></void-tabs-content><void-tabs-content value="two">Panel two</void-tabs-content></void-tabs>
     <void-accordion><void-accordion-item><void-accordion-trigger>Section 1</void-accordion-trigger><void-accordion-content>Content 1</void-accordion-content></void-accordion-item><void-accordion-item><void-accordion-trigger>Section 2</void-accordion-trigger><void-accordion-content>Content 2</void-accordion-content></void-accordion-item></void-accordion>
-    <void-collapsible heading="Collapsible"><p>Hidden content</p></void-collapsible>
+    <void-collapsible><void-collapsible-trigger>Collapsible</void-collapsible-trigger><void-collapsible-content><p>Hidden content</p></void-collapsible-content></void-collapsible>
     <void-breadcrumbs><a href="/">Home</a><a href="/p">Products</a><span>Details</span></void-breadcrumbs>
     <void-pagination total="20" value="6"></void-pagination>
     <void-stepper value="1" steps="Cart,Shipping,Payment"></void-stepper>
@@ -76,10 +76,10 @@
     <div class="row">
       <void-card style="width: 260px"><void-card-header><void-card-title>Card</void-card-title></void-card-header><void-card-body><p>Default card body text.</p></void-card-body></void-card>
       <void-card variant="elevated" style="width: 260px"><void-card-header><void-card-title>Elevated</void-card-title></void-card-header><void-card-body><p>Elevated card.</p></void-card-body></void-card>
-      <void-panel label="Panel" variant="bordered" style="width: 260px"><p>Panel body</p></void-panel>
+      <void-panel variant="bordered" style="width: 260px"><void-panel-header><void-panel-title>Panel</void-panel-title></void-panel-header><void-panel-body><p>Panel body</p></void-panel-body></void-panel>
     </div>
     <void-alert color="info"><void-alert-description>Info alert message.</void-alert-description></void-alert><void-alert color="error" dismissible><void-alert-description>Error alert message.</void-alert-description></void-alert><void-alert color="success" variant="filled"><void-alert-description>Success filled alert.</void-alert-description></void-alert>
-    <void-banner color="warning" dismissable>Page-level banner.</void-banner>
+    <void-banner color="warning"><void-banner-description>Page-level banner.</void-banner-description><void-banner-close><button type="button" aria-label="Dismiss">&times;</button></void-banner-close></void-banner>
     <div class="row">
       <void-progress value="40" aria-label="Progress"></void-progress><void-skeleton variant="text" style="width: 200px"></void-skeleton>
       <void-stat label="Revenue" value="$12k" delta="+4%" trend="up" style="width: 200px"></void-stat>
@@ -101,11 +101,12 @@
     <void-scroll-area max-height="80px"><p>Line 1</p><p>Line 2</p><p>Line 3</p><p>Line 4</p></void-scroll-area>
     <void-carousel controls indicators><void-carousel-slide><div style="height: 80px">Slide 1</div></void-carousel-slide><void-carousel-slide><div style="height: 80px">Slide 2</div></void-carousel-slide></void-carousel>
     <void-error-fallback heading="Something broke" message="Try again" retryable></void-error-fallback>
+    <void-error-fallback><void-error-fallback-title>Parts fallback</void-error-fallback-title><void-error-fallback-description>Written with parts.</void-error-fallback-description><void-error-fallback-actions><button type="button">Retry</button></void-error-fallback-actions></void-error-fallback>
     <void-divider label="Divider"></void-divider>
     <void-dialog><void-dialog-title>Closed dialog</void-dialog-title><void-dialog-body><p>Dialog body</p></void-dialog-body></void-dialog>
     <void-drawer><void-drawer-title>Closed drawer</void-drawer-title><void-drawer-body><p>Drawer body</p></void-drawer-body></void-drawer>
   </section>
-  <void-toast-container><void-toast duration="0" heading="Saved">Your changes were saved.</void-toast></void-toast-container>
+  <void-toast-container><void-toast duration="0"><void-toast-title>Saved</void-toast-title><void-toast-description>Your changes were saved.</void-toast-description><void-toast-close><button type="button" aria-label="Dismiss">&times;</button></void-toast-close></void-toast></void-toast-container>
 </main>
 <script>
   customElements.whenDefined('void-bar-chart').then(() => {

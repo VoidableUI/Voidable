@@ -355,15 +355,16 @@
   "void-banner": {
     "group": "feedback",
     "events": {
-      "void-close": "Fires when the user presses the close button of a `dismissable` banner, just before the banner removes itself from the page."
+      "void-close": "Fires when the user presses the control in the `void-banner-close` part, just before the banner removes itself from the page."
     },
-    "children": "The message text and any inline markup, such as a link."
+    "children": "Explicit parts, in this order: `void-banner-title` (optional, short), `void-banner-description` (the message, with any inline markup such as a link), `void-banner-actions` (optional buttons) and `void-banner-close` (optional; wraps the one control that dismisses the banner, and without it the banner cannot be dismissed)."
   },
   "void-error-fallback": {
     "group": "feedback",
     "events": {
-      "void-retry": "Fires when the user presses the retry button of a `retryable` fallback."
-    }
+      "void-retry": "Fires when the user presses the built-in retry button of a `retryable` fallback. It is the default's: write your own buttons in `void-error-fallback-actions` and listen to them directly."
+    },
+    "children": "Explicit parts: `void-error-fallback-title`, `void-error-fallback-description` (optional) and `void-error-fallback-actions` (optional buttons). Write none and the component writes its built-in default from `heading`, `message`, `retryable` and `retry-label`; write any part and the default goes away, and those attributes no longer apply."
   },
   "void-progress": {
     "group": "feedback"
@@ -377,13 +378,13 @@
   "void-toast": {
     "group": "feedback",
     "events": {
-      "void-close": "Fires when the toast closes, by timeout or the close button, just before it removes itself from the page."
+      "void-close": "Fires when the toast closes, by timeout or the control in its `void-toast-close` part, just before it removes itself from the page."
     },
-    "children": "The message text."
+    "children": "Explicit parts, in this order: `void-toast-title` (optional, short), `void-toast-description` (the message), `void-toast-actions` (optional buttons) and `void-toast-close` (optional; wraps the one control that dismisses the toast). `toast({ title, description, actions })` writes the same parts."
   },
   "void-toast-container": {
     "group": "feedback",
-    "children": "Takes `void-toast` children."
+    "children": "Takes `void-toast` children, written in the markup (a server's flash message) or added by `toast()`."
   },
   "void-accordion": {
     "group": "layout",
@@ -405,14 +406,14 @@
     "events": {
       "void-toggle": "Fires after the section opens or closes. `detail.open` is the new state."
     },
-    "children": "The body that opens and closes. The `heading` attribute is the title shown on the button."
+    "children": "Two parts: `void-collapsible-trigger`, the heading text that opens and closes it, and `void-collapsible-content`, the body."
   },
   "void-divider": {
     "group": "layout"
   },
   "void-panel": {
     "group": "layout",
-    "children": "The panel body: any content. The `label` attribute is the heading and the region's accessible name."
+    "children": "Explicit parts, in this order: `void-panel-header` (optional; with `void-panel-title`, which is also the region's accessible name, and `void-panel-description`) and `void-panel-body`."
   },
   "void-scroll-area": {
     "group": "layout",

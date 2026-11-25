@@ -355,8 +355,6 @@ Checklist per component: parts in the supplement and the manifest; implicit form
 
 Remaining components, in the order to convert them (grouping and open questions in the composition guide's inventory):
 
-1. **Disclosure**: collapsible, panel (the same trigger/content and header/body shapes as accordion and card).
-2. **Notices**: banner, toast, error-fallback (title, description, actions; error-fallback keeps its built-in default text, an owner decision).
 3. **Navigation**: nav-menu and nav-menu-item, nav-bar, breadcrumbs.
 4. **Menus**: menu, menu-item, menu-group (icon and shortcut as parts or attributes is open).
 5. **Carousel**: carousel and carousel-slide (renaming the slide to `-item` is open).

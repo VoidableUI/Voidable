@@ -52,6 +52,19 @@ Where a part has state of its own the component writes it as a plain attribute o
 
 `<void-dialog>` and `<void-drawer>` are the one place the library uses a shadow root. A modal needs the browser's native `<dialog>` and `showModal()` (the top layer, an inert page behind it, Escape and the backdrop), and that element has to contain the content. Rather than move your nodes into a rendered `<dialog>`, the component keeps a small shadow root, `<dialog part="surface">`, a close button and a `<slot>`, and your parts stay unmoved children of the host. The dialog is named and described by your `-title` and `-description` parts through ARIA element references. The theme styles the surface with `void-dialog::part(surface)` and its backdrop with `void-dialog::part(surface)::backdrop`. `<void-alert dismissible>` uses the same arrangement for its dismiss button.
 
+## Dismiss controls
+
+A banner and a toast can be dismissed, and the control that does it is a region the author writes, like any other: a `-close` part that wraps the one button, the same shape as a trigger part.
+
+```html
+<void-banner color="info">
+  <void-banner-description>Maintenance on Saturday.</void-banner-description>
+  <void-banner-close><button type="button" aria-label="Dismiss">&times;</button></void-banner-close>
+</void-banner>
+```
+
+Pressing the control fires `void-close` and removes the element. Without a `-close` part there is no control, so the element cannot be dismissed (a toast still closes itself after its `duration`). The component renders no button of its own, and no shadow root, so the page, the framework and a server morph all see the control as ordinary markup. `<void-alert dismissible>` still uses a shadow root for this (see above).
+
 ## Frameworks and morphs
 
 Parts are ordinary children, so every framework renders them directly. React has wrappers for them next to the components (`DialogTitle`, `TabsTrigger`, `PopoverContent` and the rest, generated from the manifest). Vue, Svelte, Solid, Angular, ERB, HEEx and Blade write the tags as they are. A part can arrive late, be reordered, re-keyed or removed, including while the overlay is open or the user is typing in it: the component looks its parts up when something changes and rewires them.
@@ -74,6 +87,11 @@ The machine-readable form of this table is the `voidParts` entry of each compone
 | `<void-card>` | `-header` (holding `-title`, `-description`), `-body` (required), `-footer` | |
 | `<void-alert>` | `-title`, `-description` (required) | Shadow dismiss button when `dismissible`. |
 | `<void-accordion>` | `<void-accordion-item>`, each with `<void-accordion-trigger>` and `<void-accordion-content>` | |
+| `<void-collapsible>` | `-trigger`, `-content` | The trigger is the button; closed content is hidden from `open`. |
+| `<void-panel>` | `-header` (holding `-title`, `-description`), `-body` (required) | The title names the region. |
+| `<void-banner>` | `-title`, `-description` (required), `-actions`, `-close` (one control) | Without `-close` it cannot be dismissed. |
+| `<void-toast>` | `-title`, `-description` (required), `-actions`, `-close` (one control) | `toast()` writes the same parts. |
+| `<void-error-fallback>` | `-title`, `-description`, `-actions` | Write none and the component writes its default from `heading`, `message` and `retryable`; any part replaces it. |
 
 Every part above except the dropdown menu item and the accordion item is CSS-only.
 
@@ -90,11 +108,11 @@ What every component does today, and what it becomes. **Parts** components are c
 | dropdown-menu, dropdown-menu-item | Parts | `-trigger`, `-content` (`-item`, `-separator`) | Parts |
 | hover-card, popover, tooltip | Parts | `-trigger`, `-content` | Parts |
 | tabs | Parts | `-list` (`-trigger`), `-content` | Parts |
-| collapsible | Projects content below a rendered trigger (`heading`) | `void-collapsible-trigger`, `void-collapsible-content` | To convert |
-| panel | Projects content below a rendered header (`heading`) | `void-panel-header` (`-title`, `-description`), `void-panel-body` | To convert |
-| banner | Projects content beside a rendered dismiss button | `void-banner-title`, `void-banner-description`, `void-banner-actions` | To convert |
-| toast | Renders `heading` and the message | `void-toast-title`, `void-toast-description`, `void-toast-action` | To convert |
-| error-fallback | Renders `heading`, `message`, a retry button | `void-error-fallback-title`, `-description`, `-actions` | To convert (open: keep the attributes for the built-in default) |
+| collapsible | Parts | `-trigger`, `-content` | Parts |
+| panel | Parts | `-header` (`-title`, `-description`), `-body` | Parts |
+| banner | Parts | `-title`, `-description`, `-actions`, `-close` | Parts |
+| toast | Parts | `-title`, `-description`, `-actions`, `-close` | Parts |
+| error-fallback | Parts, or the built-in default | `-title`, `-description`, `-actions` | Parts (the built-in default from `heading`, `message` and `retryable` is kept while no part is written) |
 | nav-menu, nav-menu-item | Item text becomes the trigger, child elements the dropdown | `void-nav-menu-item` > `void-nav-menu-trigger`, `void-nav-menu-content` | To convert |
 | menu, menu-item, menu-group | Projects items into a rendered list; group `label` | `void-menu-group-label`; item label, icon and shortcut as parts | To convert (open: icon and shortcut as parts or attributes) |
 | nav-bar | Projects content into a rendered bar | `void-nav-bar-brand`, `void-nav-bar-content`, `void-nav-bar-actions` | To convert |

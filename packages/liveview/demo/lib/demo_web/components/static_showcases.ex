@@ -382,34 +382,51 @@ defmodule DemoWeb.StaticShowcases do
       <h3>Default</h3>
       <p>A container panel for grouping related content.</p>
       <VoidableUI.Components.panel>
+        <void-panel-body>
         This is a default panel. Use it to group related content or provide a visual container for sections of your UI.
+        </void-panel-body>
       </VoidableUI.Components.panel>
     </div>
     <div class="showcase-section">
       <h3>With Label</h3>
-      <VoidableUI.Components.panel label="Settings">
+      <VoidableUI.Components.panel>
+        <void-panel-header><void-panel-title>Settings</void-panel-title></void-panel-header>
+        <void-panel-body>
         Adjust your preferences here. Changes are saved automatically when you leave the field.
+        </void-panel-body>
       </VoidableUI.Components.panel>
     </div>
     <div class="showcase-section">
       <h3>Bordered Variant</h3>
-      <VoidableUI.Components.panel label="Billing" variant="bordered">
+      <VoidableUI.Components.panel variant="bordered">
+        <void-panel-header><void-panel-title>Billing</void-panel-title></void-panel-header>
+        <void-panel-body>
         Your current plan is <strong>Pro</strong>. Next billing date is May 1, 2026.
+        </void-panel-body>
       </VoidableUI.Components.panel>
     </div>
     <div class="showcase-section">
       <h3>Elevated Variant</h3>
-      <VoidableUI.Components.panel label="Recent Activity" variant="elevated">
+      <VoidableUI.Components.panel variant="elevated">
+        <void-panel-header><void-panel-title>Recent Activity</void-panel-title></void-panel-header>
+        <void-panel-body>
         You signed in from a new device on April 28, 2026 at 09:14 AM.
+        </void-panel-body>
       </VoidableUI.Components.panel>
     </div>
     <div class="showcase-section">
       <h3>Nested</h3>
-      <VoidableUI.Components.panel label="Account">
-        Manage your account details and connected services below.
-        <VoidableUI.Components.panel label="Profile" variant="bordered" style="margin-top: 1rem;">
-          Update your display name, avatar, and contact email.
-        </VoidableUI.Components.panel>
+      <VoidableUI.Components.panel>
+        <void-panel-header><void-panel-title>Account</void-panel-title></void-panel-header>
+        <void-panel-body>
+          Manage your account details and connected services below.
+          <VoidableUI.Components.panel variant="bordered" style="margin-top: 1rem;">
+            <void-panel-header><void-panel-title>Profile</void-panel-title></void-panel-header>
+            <void-panel-body>
+              Update your display name, avatar, and contact email.
+            </void-panel-body>
+          </VoidableUI.Components.panel>
+        </void-panel-body>
       </VoidableUI.Components.panel>
     </div>
     """
@@ -739,25 +756,54 @@ defmodule DemoWeb.StaticShowcases do
     <div class="showcase-section">
       <h3>Colors</h3>
       <p>Full-width notification banners for important messages.</p>
-      <VoidableUI.Components.banner>Default -- general-purpose page message.</VoidableUI.Components.banner>
-      <VoidableUI.Components.banner color="error">Error -- something went wrong and needs attention.</VoidableUI.Components.banner>
-      <VoidableUI.Components.banner color="warning">Warning -- proceed with caution.</VoidableUI.Components.banner>
-      <VoidableUI.Components.banner color="success">Success -- the operation completed successfully.</VoidableUI.Components.banner>
-      <VoidableUI.Components.banner color="info">Info -- here is some useful information.</VoidableUI.Components.banner>
-      <VoidableUI.Components.banner color="notice">Notice -- a routine notification for your awareness.</VoidableUI.Components.banner>
+      <VoidableUI.Components.banner>
+        <void-banner-description>Default -- general-purpose page message.</void-banner-description>
+      </VoidableUI.Components.banner>
+      <VoidableUI.Components.banner color="error">
+        <void-banner-description>Error -- something went wrong and needs attention.</void-banner-description>
+      </VoidableUI.Components.banner>
+      <VoidableUI.Components.banner color="warning">
+        <void-banner-description>Warning -- proceed with caution.</void-banner-description>
+      </VoidableUI.Components.banner>
+      <VoidableUI.Components.banner color="success">
+        <void-banner-description>Success -- the operation completed successfully.</void-banner-description>
+      </VoidableUI.Components.banner>
+      <VoidableUI.Components.banner color="info">
+        <void-banner-description>Info -- here is some useful information.</void-banner-description>
+      </VoidableUI.Components.banner>
+      <VoidableUI.Components.banner color="notice">
+        <void-banner-description>Notice -- a routine notification for your awareness.</void-banner-description>
+      </VoidableUI.Components.banner>
     </div>
     <div class="showcase-section">
       <h3>Filled</h3>
-      <VoidableUI.Components.banner variant="filled">Default filled banner.</VoidableUI.Components.banner>
-      <VoidableUI.Components.banner color="error" variant="filled">Error filled banner.</VoidableUI.Components.banner>
-      <VoidableUI.Components.banner color="success" variant="filled">Success filled banner.</VoidableUI.Components.banner>
-      <VoidableUI.Components.banner color="info" variant="filled">Info filled banner.</VoidableUI.Components.banner>
+      <VoidableUI.Components.banner variant="filled">
+        <void-banner-description>Default filled banner.</void-banner-description>
+      </VoidableUI.Components.banner>
+      <VoidableUI.Components.banner color="error" variant="filled">
+        <void-banner-description>Error filled banner.</void-banner-description>
+      </VoidableUI.Components.banner>
+      <VoidableUI.Components.banner color="success" variant="filled">
+        <void-banner-description>Success filled banner.</void-banner-description>
+      </VoidableUI.Components.banner>
+      <VoidableUI.Components.banner color="info" variant="filled">
+        <void-banner-description>Info filled banner.</void-banner-description>
+      </VoidableUI.Components.banner>
     </div>
     <div class="showcase-section">
       <h3>Dismissable</h3>
-      <VoidableUI.Components.banner color="info" dismissable>This banner can be dismissed. Click the close button.</VoidableUI.Components.banner>
-      <VoidableUI.Components.banner color="success" dismissable>Your changes have been saved successfully.</VoidableUI.Components.banner>
-      <VoidableUI.Components.banner color="error" dismissable>Failed to submit the form. Please try again.</VoidableUI.Components.banner>
+      <VoidableUI.Components.banner color="info">
+        <void-banner-description>This banner can be dismissed. Click the close button.</void-banner-description>
+        <void-banner-close><button type="button" aria-label="Dismiss">&times;</button></void-banner-close>
+      </VoidableUI.Components.banner>
+      <VoidableUI.Components.banner color="success">
+        <void-banner-description>Your changes have been saved successfully.</void-banner-description>
+        <void-banner-close><button type="button" aria-label="Dismiss">&times;</button></void-banner-close>
+      </VoidableUI.Components.banner>
+      <VoidableUI.Components.banner color="error">
+        <void-banner-description>Failed to submit the form. Please try again.</void-banner-description>
+        <void-banner-close><button type="button" aria-label="Dismiss">&times;</button></void-banner-close>
+      </VoidableUI.Components.banner>
     </div>
     """
   end
@@ -807,8 +853,9 @@ defmodule DemoWeb.StaticShowcases do
       <p>A positioning container for toast notifications. Toasts appear in the specified corner.</p>
       <div style="position: relative; height: 150px; border: 1px dashed var(--void-color-border, #ccc);">
         <VoidableUI.Components.toast_container position="top-right">
-          <VoidableUI.Components.toast heading="Notification" color="info" dismissable={false}>
-            This is a sample toast.
+          <VoidableUI.Components.toast color="info">
+            <void-toast-title>Notification</void-toast-title>
+            <void-toast-description>This is a sample toast.</void-toast-description>
           </VoidableUI.Components.toast>
         </VoidableUI.Components.toast_container>
       </div>
@@ -817,8 +864,9 @@ defmodule DemoWeb.StaticShowcases do
       <h3>Bottom Left</h3>
       <div style="position: relative; height: 150px; border: 1px dashed var(--void-color-border, #ccc);">
         <VoidableUI.Components.toast_container position="bottom-left">
-          <VoidableUI.Components.toast heading="Saved" color="success" dismissable={false}>
-            Your changes have been saved.
+          <VoidableUI.Components.toast color="success">
+            <void-toast-title>Saved</void-toast-title>
+            <void-toast-description>Your changes have been saved.</void-toast-description>
           </VoidableUI.Components.toast>
         </VoidableUI.Components.toast_container>
       </div>
