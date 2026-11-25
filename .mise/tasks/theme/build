@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+#MISE description="Build the theme stylesheets (dist/) from src/: layered single files, per-component and per-pattern files, themes"
+set -euo pipefail
+
+pnpm --filter @voidable/theme build

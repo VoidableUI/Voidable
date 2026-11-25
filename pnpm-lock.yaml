@@ -289,7 +289,17 @@ importers:
         specifier: '>=8.0.16 <9.0.0'
         version: 8.0.16(@types/node@25.6.0)(esbuild@0.28.1)(jiti@2.7.0)
 
-  packages/theme: {}
+  packages/theme:
+    devDependencies:
+      lightningcss:
+        specifier: ^1.32.0
+        version: 1.32.0
+      postcss:
+        specifier: ^8.5.12
+        version: 8.5.15
+      postcss-selector-parser:
+        specifier: ^6.1.2
+        version: 6.1.2
 
   packages/ui:
     devDependencies:
@@ -4975,8 +4985,8 @@ snapshots:
       hast-util-to-html: 9.0.5
       hast-util-to-text: 4.0.2
       hastscript: 9.0.1
-      postcss: 8.5.12
-      postcss-nested: 6.2.0(postcss@8.5.12)
+      postcss: 8.5.15
+      postcss-nested: 6.2.0(postcss@8.5.15)
       unist-util-visit: 5.1.0
       unist-util-visit-parents: 6.0.2
 
@@ -6078,7 +6088,7 @@ snapshots:
       '@vue/shared': 3.5.33
       estree-walker: 2.0.2
       magic-string: 0.30.21
-      postcss: 8.5.12
+      postcss: 8.5.15
       source-map-js: 1.2.1
 
   '@vue/compiler-ssr@3.5.33':
@@ -8170,9 +8180,9 @@ snapshots:
 
   playwright-core@1.65.1: {}
 
-  postcss-nested@6.2.0(postcss@8.5.12):
+  postcss-nested@6.2.0(postcss@8.5.15):
     dependencies:
-      postcss: 8.5.12
+      postcss: 8.5.15
       postcss-selector-parser: 6.1.2
 
   postcss-selector-parser@6.1.2:
@@ -9065,7 +9075,7 @@ snapshots:
       esbuild: 0.28.1
       fdir: 6.5.0(picomatch@4.0.4)
       picomatch: 4.0.4
-      postcss: 8.5.12
+      postcss: 8.5.15
       rollup: 4.60.2
       tinyglobby: 0.2.16
     optionalDependencies:

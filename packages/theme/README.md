@@ -10,27 +10,28 @@ npm install @voidable/theme
 
 ## Usage
 
-Import the full theme (includes primitives, tokens, reset, and all component styles):
+Import the full theme (tokens, scoped reset, and all component styles):
 
 ```css
 @import '@voidable/theme';
 ```
 
-Or import individual layers:
+Or import parts of it, or one component at a time (always with the tokens):
 
 ```css
-@import '@voidable/theme/primitives';
-@import '@voidable/theme/knobs';
 @import '@voidable/theme/tokens';
-@import '@voidable/theme/reset';
-@import '@voidable/theme/type';
+@import '@voidable/theme/base';        /* html and body; in the full theme already */
+@import '@voidable/theme/components/button.css';
+@import '@voidable/theme/patterns/page.css';
 ```
 
-Without a bundler, link the stylesheet directly (the entry point pulls in the other files with relative `@import`s):
+Without a bundler, link the built file directly:
 
 ```html
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@voidable/theme/src/index.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@voidable/theme/dist/void.min.css" />
 ```
+
+Everything is in named cascade layers (`void.reset`, `void.tokens`, `void.components` and so on), so an unlayered rule in your app overrides the theme without `!important`. See Theming on the docs site.
 
 In a JavaScript entry point processed by a bundler (for example Vite), `import '@voidable/theme';` also works.
 

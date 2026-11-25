@@ -122,6 +122,23 @@ void-actions {
 void-actions[justify="end"]    { justify-content: flex-end; }
 void-actions[justify="center"] { justify-content: center; }
 
+/* In a table row: ghost buttons at the end of the row, their labels (not
+   their padding) on the table's edge. These sit with the pattern, not in
+   table.css: a pattern layer rule beats a component layer rule whatever
+   its specificity, so the table context has to be in the pattern's layer. */
+void-table td > void-actions {
+  flex-wrap: nowrap;
+  gap: var(--void-space-1);
+}
+
+void-table td:last-child > void-actions {
+  justify-content: flex-end;
+}
+
+void-table:not([inset]) td:last-child > void-actions:has(> void-button[variant="ghost"]:last-child) {
+  margin-inline-end: calc(var(--void-control-padding-sm) * -1.25);
+}
+
 /* ── void-section: a titled part of a page ──
      <void-section>
        <void-section-head>

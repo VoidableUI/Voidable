@@ -12,16 +12,24 @@
     "*.css"
   ],
   "license": "MIT",
+  "style": "./dist/void.css",
   "exports": {
-    ".": "./src/index.css",
-    "./primitives": "./src/primitives.css",
-    "./knobs": "./src/knobs.css",
-    "./tokens": "./src/tokens.css",
-    "./reset": "./src/reset.css",
-    "./type": "./src/type.css",
-    "./themes/*": "./src/themes/*"
+    ".": { "style": "./dist/void.css", "default": "./dist/void.css" },
+    "./core": "./dist/core.css",
+    "./tokens": "./dist/tokens.css",
+    "./base": "./dist/base.css",
+    "./layers": "./dist/layers.css",
+    "./primitives": "./dist/primitives.css",
+    "./knobs": "./dist/knobs.css",
+    "./reset": "./dist/reset.css",
+    "./type": "./dist/type.css",
+    "./components/*": "./dist/components/*",
+    "./patterns/*": "./dist/patterns/*",
+    "./themes/*": "./dist/themes/*",
+    "./dist/*": "./dist/*",
+    "./src/*": "./src/*"
   },
-  "files": ["src"],
+  "files": ["src", "dist"],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/VoidableUI/Voidable.git",
@@ -29,5 +37,14 @@
   },
   "publishConfig": {
     "access": "public"
+  },
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "generate": "node scripts/build.mjs --generated-only"
+  },
+  "devDependencies": {
+    "lightningcss": "^1.32.0",
+    "postcss": "^8.5.12",
+    "postcss-selector-parser": "^6.1.2"
   }
 }
