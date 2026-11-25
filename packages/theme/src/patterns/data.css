@@ -381,6 +381,20 @@ void-toolbar > :is(void-select, void-combobox, void-multiselect) {
   width: auto;
 }
 
+/* On a phone the fields take the row: a search field that stops 40px short
+   of the edge and a select that stops halfway are two ragged ends. The
+   search field has a row to itself, a picker grows to fill its own. */
+@media (max-width: 30rem) {
+  void-toolbar > :is(void-input, void-action-input) {
+    flex-basis: 100%;
+    max-width: none;
+  }
+
+  void-toolbar > :is(void-select, void-combobox, void-multiselect) {
+    flex-grow: 1;
+  }
+}
+
 /* Text in a toolbar (a count, a selection summary) is quiet. */
 void-toolbar > :is(span, p) {
   color: var(--void-color-text-secondary);
