@@ -81,7 +81,7 @@ export const DatePickerDefault: Story = {
   argTypes: argTypesFor('void-date-picker'),
   name: 'Date Picker',
   render: (args) => html`
-    <void-date-picker
+    <void-date-picker aria-label="Date"
       value=${args.value || ''}
       min=${args.min || ''}
       max=${args.max || ''}
@@ -99,7 +99,7 @@ export const DatePickerWithValue: Story = {
   argTypes: argTypesFor('void-date-picker'),
   name: 'Date Picker — With Value',
   render: () => html`
-    <void-date-picker value="2024-06-15"></void-date-picker>
+    <void-date-picker aria-label="Date" value="2024-06-15"></void-date-picker>
   `,
 };
 
@@ -109,12 +109,12 @@ export const DatePickerColors: Story = {
   name: 'Date Picker — Colors',
   render: () => html`
     <div style="display: flex; flex-direction: column; gap: 12px; max-width: 300px;">
-      <void-date-picker color="default" placeholder="Default" value="2024-06-15"></void-date-picker>
-      <void-date-picker color="error" placeholder="Error" value="2024-06-15"></void-date-picker>
-      <void-date-picker color="warning" placeholder="Warning" value="2024-06-15"></void-date-picker>
-      <void-date-picker color="success" placeholder="Success" value="2024-06-15"></void-date-picker>
-      <void-date-picker color="info" placeholder="Info" value="2024-06-15"></void-date-picker>
-      <void-date-picker color="notice" placeholder="Notice" value="2024-06-15"></void-date-picker>
+      <void-date-picker aria-label="Default" color="default" placeholder="Default" value="2024-06-15"></void-date-picker>
+      <void-date-picker aria-label="Error" color="error" placeholder="Error" value="2024-06-15"></void-date-picker>
+      <void-date-picker aria-label="Warning" color="warning" placeholder="Warning" value="2024-06-15"></void-date-picker>
+      <void-date-picker aria-label="Success" color="success" placeholder="Success" value="2024-06-15"></void-date-picker>
+      <void-date-picker aria-label="Info" color="info" placeholder="Info" value="2024-06-15"></void-date-picker>
+      <void-date-picker aria-label="Notice" color="notice" placeholder="Notice" value="2024-06-15"></void-date-picker>
     </div>
   `,
 };
@@ -125,9 +125,9 @@ export const DatePickerSizes: Story = {
   name: 'Date Picker — Sizes',
   render: () => html`
     <div style="display: flex; flex-direction: column; gap: 12px; max-width: 300px;">
-      <void-date-picker size="sm" placeholder="Small"></void-date-picker>
-      <void-date-picker size="md" placeholder="Medium"></void-date-picker>
-      <void-date-picker size="lg" placeholder="Large"></void-date-picker>
+      <void-date-picker aria-label="Small" size="sm" placeholder="Small"></void-date-picker>
+      <void-date-picker aria-label="Medium" size="md" placeholder="Medium"></void-date-picker>
+      <void-date-picker aria-label="Large" size="lg" placeholder="Large"></void-date-picker>
     </div>
   `,
 };
@@ -137,7 +137,7 @@ export const DatePickerCustomFormat: Story = {
   argTypes: argTypesFor('void-date-picker'),
   name: 'Date Picker — DD/MM/YYYY',
   render: () => html`
-    <void-date-picker value="2024-06-15" format="DD/MM/YYYY" placeholder="DD/MM/YYYY"></void-date-picker>
+    <void-date-picker aria-label="DD/MM/YYYY" value="2024-06-15" format="DD/MM/YYYY" placeholder="DD/MM/YYYY"></void-date-picker>
   `,
 };
 
@@ -146,7 +146,7 @@ export const DatePickerDisabled: Story = {
   argTypes: argTypesFor('void-date-picker'),
   name: 'Date Picker — Disabled',
   render: () => html`
-    <void-date-picker disabled value="2024-06-15"></void-date-picker>
+    <void-date-picker aria-label="Date" disabled value="2024-06-15"></void-date-picker>
   `,
 };
 
@@ -155,6 +155,6 @@ export const DatePickerWithConstraints: Story = {
   argTypes: argTypesFor('void-date-picker'),
   name: 'Date Picker — Min/Max',
   render: () => html`
-    <void-date-picker value="2024-06-15" min="2024-06-01" max="2024-06-30" placeholder="June only"></void-date-picker>
+    <void-date-picker aria-label="June only" value="2024-06-15" min="2024-06-01" max="2024-06-30" placeholder="June only"></void-date-picker>
   `,
 };

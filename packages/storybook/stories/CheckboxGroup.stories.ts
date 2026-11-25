@@ -59,7 +59,7 @@ export const PreSelected: Story = {
 
 export const NoLabel: Story = {
   render: () => html`
-    <void-checkbox-group>
+    <void-checkbox-group aria-label="Options">
       <void-checkbox value="one">One</void-checkbox>
       <void-checkbox value="two">Two</void-checkbox>
       <void-checkbox value="three">Three</void-checkbox>

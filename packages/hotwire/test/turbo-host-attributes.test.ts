@@ -64,20 +64,20 @@ describe('VoidTurbo and host attributes', () => {
   });
 
   it('keeps a reflected value the user changed while the server value is unchanged', async () => {
-    document.body.innerHTML = '<void-number-input id="n" value="3"></void-number-input>';
+    document.body.innerHTML = '<void-number-input aria-label="Quantity" id="n" value="3"></void-number-input>';
     await settle();
     stop = VoidTurbo.start();
     const el = document.getElementById('n') as HTMLElement & { value: number };
     el.value = 7;
     await settle();
     // Identical server markup: the element is skipped and keeps 7.
-    expect(beforeMorph(el, server('<void-number-input id="n" value="3"></void-number-input>'))).toBe(true);
+    expect(beforeMorph(el, server('<void-number-input aria-label="Quantity" id="n" value="3"></void-number-input>'))).toBe(true);
     expect(el.value).toBe(7);
     // Other markup with the same value: the morph runs and keeps the client's 7.
-    const same = server('<void-number-input id="n" value="3" step="1"></void-number-input>');
+    const same = server('<void-number-input aria-label="Quantity" id="n" value="3" step="1"></void-number-input>');
     expect(beforeMorph(el, same)).toBe(false);
     expect(same.getAttribute('value')).toBe('7');
-    const changed = server('<void-number-input id="n" value="5"></void-number-input>');
+    const changed = server('<void-number-input aria-label="Quantity" id="n" value="5"></void-number-input>');
     beforeMorph(el, changed);
     expect(changed.getAttribute('value')).toBe('5');
   });

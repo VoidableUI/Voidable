@@ -22,7 +22,7 @@ type Story = StoryObj;
 
 export const Default: Story = {
   render: (args) => html`
-    <void-select size=${args.size || 'md'} ?disabled=${args.disabled} error=${args.error || ''}>
+    <void-select aria-label="Choose an option" size=${args.size || 'md'} ?disabled=${args.disabled} error=${args.error || ''}>
       <option value="">Select an option...</option>
       <option value="1">Option 1</option>
       <option value="2">Option 2</option>
@@ -33,7 +33,7 @@ export const Default: Story = {
 
 export const WithError: Story = {
   render: () => html`
-    <void-select error="Please select an option">
+    <void-select aria-label="Choose an option" error="Please select an option">
       <option value="">Select an option...</option>
       <option value="1">Option 1</option>
       <option value="2">Option 2</option>
@@ -44,16 +44,16 @@ export const WithError: Story = {
 export const Sizes: Story = {
   render: () => html`
     <div style="display: flex; flex-direction: column; gap: 12px; max-width: 400px;">
-      <void-select size="sm"><option>Small</option></void-select>
-      <void-select size="md"><option>Medium</option></void-select>
-      <void-select size="lg"><option>Large</option></void-select>
+      <void-select aria-label="Choose an option" size="sm"><option>Small</option></void-select>
+      <void-select aria-label="Choose an option" size="md"><option>Medium</option></void-select>
+      <void-select aria-label="Choose an option" size="lg"><option>Large</option></void-select>
     </div>
   `,
 };
 
 export const Disabled: Story = {
   render: () => html`
-    <void-select disabled>
+    <void-select aria-label="Choose an option" disabled>
       <option>Disabled select</option>
     </void-select>
   `,

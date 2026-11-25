@@ -174,6 +174,7 @@ describe('VoidSwitch', () => {
 
     it('Space key toggles checked', () => {
       el.dispatchEvent(new KeyboardEvent('keydown', { key: ' ', bubbles: true }));
+      el.dispatchEvent(new KeyboardEvent('keyup', { key: ' ', bubbles: true }));
       expect(el.checked).toBe(true);
     });
 
@@ -186,6 +187,7 @@ describe('VoidSwitch', () => {
       let fired = false;
       el.addEventListener('void-change', () => { fired = true; });
       el.dispatchEvent(new KeyboardEvent('keydown', { key: ' ', bubbles: true }));
+      el.dispatchEvent(new KeyboardEvent('keyup', { key: ' ', bubbles: true }));
       expect(fired).toBe(true);
     });
 
@@ -200,6 +202,7 @@ describe('VoidSwitch', () => {
       el.disabled = true;
       await el.updateComplete;
       el.dispatchEvent(new KeyboardEvent('keydown', { key: ' ', bubbles: true }));
+      el.dispatchEvent(new KeyboardEvent('keyup', { key: ' ', bubbles: true }));
       expect(el.checked).toBe(false);
     });
 

@@ -40,7 +40,7 @@ export const App = component$(() => {
 
   return (
     <>
-      <void-input
+      <void-input aria-label="Your name"
         placeholder="Your name"
         onVoid-change$={(e: CustomEvent) => {
           name.value = e.detail.value;

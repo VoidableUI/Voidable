@@ -8,7 +8,8 @@
 // It watches the document and reports through `console.warn` what would
 // otherwise fail silently: an attribute the element does not declare, a value
 // outside the declared set, `disabled="false"`, a child in the wrong parent or a
-// required child that is missing, a `void-*` tag nothing defines, a listener
+// required child that is missing, an element that needs an accessible name and
+// has none (judged after upgrade, on the live DOM), a `void-*` tag nothing defines, a listener
 // for a `void-*` event nothing dispatches, a script that keeps removing an
 // attribute a component manages (reported by the component, which stops
 // restoring it). Each message names the element, what
@@ -32,6 +33,7 @@ import {
   checkAttributes,
   checkDefined,
   checkEvent,
+  checkName,
   checkParent,
   checkRequired,
   keyOf,
@@ -184,6 +186,7 @@ async function flushDeferred(): Promise<void> {
     report(checkDefined(table, el, autoloading, styled));
     report(checkParent(table, el));
     for (const w of checkRequired(table, el)) report(w);
+    report(checkName(table, el));
   }
 }
 
@@ -263,7 +266,7 @@ export function check(root: ParentNode & Node = document): DevWarning[] {
   const found: DevWarning[] = [];
   for (const el of voidElements(root)) {
     const loader = (globalThis as Record<symbol, unknown>)[AUTOLOADER] !== undefined;
-    for (const w of [...checkAttributes(table, el), checkDefined(table, el, loader), checkParent(table, el), ...checkRequired(table, el)]) {
+    for (const w of [...checkAttributes(table, el), checkDefined(table, el, loader), checkParent(table, el), ...checkRequired(table, el), checkName(table, el)]) {
       if (!w || ignored(w)) continue;
       found.push(w);
       report(w);

@@ -119,3 +119,72 @@ export const attributeHints = {
 export const parentSetAttributes = {
   'void-carousel-slide': ['active'],
 };
+
+// Shorthands for the entries below.
+const ARIA = ['aria-label', 'aria-labelledby', 'title'];
+const FIELD = [{ tag: 'void-field', attributes: ['label'] }, { tag: 'label' }];
+const control = (extra = []) => ({
+  attributes: [...ARIA, ...extra],
+  ancestors: FIELD,
+  hint: 'wrap it in <void-field label="..."> or give it aria-label',
+});
+const choice = () => ({
+  attributes: ARIA,
+  content: true,
+  ancestors: FIELD,
+  hint: 'put its label text inside it, or give it aria-label',
+});
+const group = (extra = []) => ({
+  attributes: [...ARIA, ...extra],
+  ancestors: FIELD,
+  hint: 'give the group a label or aria-label',
+});
+/**
+ * Components that must have an accessible name, and what supplies one. Read by
+ * the `voidable check` tool (rule `missing-name`) and by the `@voidable/ui/dev`
+ * runtime warnings, which both report an element none of these gives a name.
+ * Written to the declaration as `voidName`.
+ *
+ * Per tag:
+ *   attributes  attributes of the element itself that name it (a non-empty
+ *               value, or a dynamic one, counts). `aria-label`,
+ *               `aria-labelledby` and `title` are always welcome; list the
+ *               component's own (`label`, `heading`, `alt`) too.
+ *   content     true when the element's own text (or an icon with a name)
+ *               names it, as a button's label does.
+ *   ancestors   enclosing elements that name it: `{ tag, attributes }` is
+ *               satisfied by an ancestor with that tag carrying one of the
+ *               attributes (none listed: the ancestor alone is enough). `label`
+ *               is the native element.
+ *   hint        what to do, in one sentence, appended to the message.
+ * @type {Record<string, { attributes: string[], content?: boolean, ancestors?: { tag: string, attributes?: string[] }[], hint: string }>}
+ */
+export const accessibleName = {
+  'void-button': { attributes: ARIA, content: true, hint: 'an icon-only button needs an aria-label' },
+  'void-toggle': { attributes: ARIA, content: true, hint: 'an icon-only toggle needs an aria-label' },
+  'void-switch': choice(),
+  'void-checkbox': choice(),
+  'void-radio': choice(),
+  'void-input': control(),
+  'void-textarea': control(),
+  'void-select': control(),
+  'void-slider': control(),
+  'void-number-input': control(['label']),
+  'void-combobox': control(),
+  // Its placeholder is the name of the control it renders (multiselect.ts).
+  'void-multiselect': control(['placeholder']),
+  'void-pin-input': control(),
+  'void-tags-input': control(),
+  'void-date-picker': control(),
+  'void-color-picker': control(),
+  'void-file-upload': control(),
+  // Its placeholder is the name of the input it renders (action-input.ts).
+  'void-action-input': control(['placeholder']),
+  'void-compose-input': control(),
+  'void-progress': control(),
+  'void-radio-group': group(['label']),
+  'void-checkbox-group': group(['label']),
+  'void-dialog': { attributes: [...ARIA, 'heading'], hint: 'give it a heading or an aria-label' },
+  'void-drawer': { attributes: [...ARIA, 'heading'], hint: 'give it a heading or an aria-label' },
+  'void-avatar': { attributes: [...ARIA, 'alt', 'initials'], hint: 'set alt to the person\'s name (or initials)' },
+};

@@ -35,7 +35,7 @@ type Story = StoryObj;
 
 export const Default: Story = {
   render: (args) => html`
-    <void-combobox
+    <void-combobox aria-label="Search options"
       size=${args.size || 'md'}
       ?disabled=${args.disabled}
       error=${args.error || ''}
@@ -54,7 +54,7 @@ export const Default: Story = {
 
 export const WithValue: Story = {
   render: () => html`
-    <void-combobox value="vue" placeholder="Select a framework...">
+    <void-combobox aria-label="Select a framework" value="vue" placeholder="Select a framework...">
       <void-option value="react">React</void-option>
       <void-option value="vue">Vue</void-option>
       <void-option value="svelte">Svelte</void-option>
@@ -68,17 +68,17 @@ export const WithValue: Story = {
 export const Sizes: Story = {
   render: () => html`
     <div style="display: flex; flex-direction: column; gap: 12px; max-width: 400px;">
-      <void-combobox size="sm" placeholder="Small">
+      <void-combobox aria-label="Small" size="sm" placeholder="Small">
         <void-option value="a">Option A</void-option>
         <void-option value="b">Option B</void-option>
         <void-option value="c">Option C</void-option>
       </void-combobox>
-      <void-combobox size="md" placeholder="Medium">
+      <void-combobox aria-label="Medium" size="md" placeholder="Medium">
         <void-option value="a">Option A</void-option>
         <void-option value="b">Option B</void-option>
         <void-option value="c">Option C</void-option>
       </void-combobox>
-      <void-combobox size="lg" placeholder="Large">
+      <void-combobox aria-label="Large" size="lg" placeholder="Large">
         <void-option value="a">Option A</void-option>
         <void-option value="b">Option B</void-option>
         <void-option value="c">Option C</void-option>
@@ -89,7 +89,7 @@ export const Sizes: Story = {
 
 export const WithError: Story = {
   render: () => html`
-    <void-combobox error="Please select an option" placeholder="Select a framework...">
+    <void-combobox aria-label="Select a framework" error="Please select an option" placeholder="Select a framework...">
       <void-option value="react">React</void-option>
       <void-option value="vue">Vue</void-option>
       <void-option value="svelte">Svelte</void-option>
@@ -102,7 +102,7 @@ export const WithError: Story = {
 
 export const Disabled: Story = {
   render: () => html`
-    <void-combobox disabled placeholder="Select a framework...">
+    <void-combobox aria-label="Select a framework" disabled placeholder="Select a framework...">
       <void-option value="react">React</void-option>
       <void-option value="vue">Vue</void-option>
       <void-option value="svelte">Svelte</void-option>
@@ -115,7 +115,7 @@ export const Disabled: Story = {
 
 export const DisabledOption: Story = {
   render: () => html`
-    <void-combobox placeholder="Select a framework...">
+    <void-combobox aria-label="Select a framework" placeholder="Select a framework...">
       <void-option value="react">React</void-option>
       <void-option value="vue">Vue</void-option>
       <void-option value="svelte" disabled>Svelte (unavailable)</void-option>

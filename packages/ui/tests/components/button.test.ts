@@ -208,6 +208,7 @@ describe('VoidButton', () => {
       let fired = false;
       el.addEventListener('void-click', () => { fired = true; });
       el.dispatchEvent(new KeyboardEvent('keydown', { key: ' ', bubbles: true }));
+      el.dispatchEvent(new KeyboardEvent('keyup', { key: ' ', bubbles: true }));
       expect(fired).toBe(true);
     });
 
@@ -228,7 +229,69 @@ describe('VoidButton', () => {
       let fired = false;
       el.addEventListener('void-click', () => { fired = true; });
       el.dispatchEvent(new KeyboardEvent('keydown', { key: ' ', bubbles: true }));
+      el.dispatchEvent(new KeyboardEvent('keyup', { key: ' ', bubbles: true }));
       expect(fired).toBe(false);
+    });
+
+    it('Enter and Space produce one real click and one void-click each', () => {
+      const seen: string[] = [];
+      el.addEventListener('click', () => seen.push('click'));
+      el.addEventListener('void-click', () => seen.push('void-click'));
+      el.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }));
+      expect(seen.sort()).toEqual(['click', 'void-click']);
+      seen.length = 0;
+      el.dispatchEvent(new KeyboardEvent('keydown', { key: ' ', bubbles: true, cancelable: true }));
+      expect(seen).toEqual([]);
+      el.dispatchEvent(new KeyboardEvent('keyup', { key: ' ', bubbles: true, cancelable: true }));
+      expect(seen.sort()).toEqual(['click', 'void-click']);
+    });
+
+    it('a held Enter does not click again on repeat', () => {
+      let clicks = 0;
+      el.addEventListener('click', () => clicks++);
+      el.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+      el.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, repeat: true }));
+      expect(clicks).toBe(1);
+    });
+
+    it('a Space keyup without its keydown on the button does nothing', () => {
+      let clicks = 0;
+      el.addEventListener('click', () => clicks++);
+      el.dispatchEvent(new KeyboardEvent('keyup', { key: ' ', bubbles: true }));
+      expect(clicks).toBe(0);
+    });
+
+    it('aria-disabled stops the keyboard', () => {
+      el.setAttribute('aria-disabled', 'true');
+      let clicks = 0;
+      el.addEventListener('click', () => clicks++);
+      el.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+      el.dispatchEvent(new KeyboardEvent('keydown', { key: ' ', bubbles: true }));
+      el.dispatchEvent(new KeyboardEvent('keyup', { key: ' ', bubbles: true }));
+      expect(clicks).toBe(0);
+    });
+
+    it('a key that lands inside the button (a native control) is left to it', () => {
+      const inner = document.createElement('input');
+      el.appendChild(inner);
+      let clicks = 0;
+      el.addEventListener('click', () => clicks++);
+      inner.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+      expect(clicks).toBe(0);
+    });
+
+    it('a link button follows its link with Enter and ignores Space', () => {
+      const a = document.createElement('a');
+      a.href = '#x';
+      a.addEventListener('click', (e) => e.preventDefault());
+      el.appendChild(a);
+      const seen: string[] = [];
+      a.addEventListener('click', () => seen.push('a'));
+      el.dispatchEvent(new KeyboardEvent('keydown', { key: ' ', bubbles: true }));
+      el.dispatchEvent(new KeyboardEvent('keyup', { key: ' ', bubbles: true }));
+      expect(seen).toEqual([]);
+      el.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+      expect(seen).toEqual(['a']);
     });
 
     it('other keys do not dispatch void-click', () => {

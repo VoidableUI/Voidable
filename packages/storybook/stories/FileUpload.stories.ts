@@ -16,7 +16,7 @@ const meta: Meta = {
   },
   argTypes: argTypesFor('void-file-upload'),
   render: (args) => html`
-    <void-file-upload
+    <void-file-upload aria-label="Upload files"
       accept=${args.accept || ''}
       ?multiple=${args.multiple}
       ?disabled=${args.disabled}
@@ -51,7 +51,7 @@ export const WithMaxSize: Story = {
   args: { maxSize: 1048576, multiple: true },
   render: () => html`
     <div style="max-width: 480px;">
-      <void-file-upload multiple .maxSize=${1048576}></void-file-upload>
+      <void-file-upload aria-label="Upload files" multiple .maxSize=${1048576}></void-file-upload>
       <p style="font-size: 12px; color: #888; margin-top: 8px;">Max file size: 1 MB</p>
     </div>
   `,

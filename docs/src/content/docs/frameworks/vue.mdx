@@ -72,9 +72,9 @@ const tags = ref(['design', 'ship']);
 <template>
   <void-button variant="filled" @void-click="console.log('clicked')">Save</void-button>
 
-  <void-input :value="name" :disabled="false" @void-input="(e) => (name = e.detail.value)" />
+  <void-input aria-label="Text input" :value="name" :disabled="false" @void-input="(e) => (name = e.detail.value)" />
 
-  <void-tags-input :value="tags" />
+  <void-tags-input aria-label="Tags" :value="tags" />
 </template>
 ```
 
@@ -94,9 +94,9 @@ const agreed = ref(false);
 </script>
 
 <template>
-  <void-input :value="text" @void-input="(e) => (text = e.detail.value)" />
+  <void-input aria-label="Text input" :value="text" @void-input="(e) => (text = e.detail.value)" />
 
-  <void-select :value="choice" @void-change="(e) => (choice = e.detail.value)">
+  <void-select aria-label="Choose an option" :value="choice" @void-change="(e) => (choice = e.detail.value)">
     <option value="a">A</option>
     <option value="b">B</option>
     <option value="c">C</option>
@@ -110,7 +110,7 @@ Do not use `v-model` on `<void-*>` elements. The generated typings reject it (`m
 
 ## Theme
 
-Track the active theme (the `data-theme` attribute on `<html>`) with a small composable of your own:
+Track the colour scheme in force (resolved from `data-theme`, a theme or skin's preference and the operating system) with a small composable of your own:
 
 ```ts
 // src/use-theme.ts
@@ -118,7 +118,9 @@ import { onMounted, onUnmounted, readonly, ref } from 'vue';
 
 export type Theme = 'dark' | 'light';
 
-const read = (): Theme => (document.documentElement.getAttribute('data-theme') as Theme | null) ?? 'dark';
+// The theme resolves the scheme in CSS (data-theme, then a theme or skin's preference, then the OS) and exposes it here.
+const read = (): Theme =>
+  getComputedStyle(document.documentElement).getPropertyValue('--void-color-scheme').trim() === 'light' ? 'light' : 'dark';
 
 export function useTheme() {
   const theme = ref<Theme>('dark');

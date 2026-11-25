@@ -66,7 +66,7 @@ Use `x-void-on:{event}` to handle custom events within `x-data` scopes:
     Clicked <span x-text="count"></span> times
   </void-button>
 
-  <void-input
+  <void-input aria-label="Search"
     placeholder="Search"
     x-void-on:void-change="$dispatch('filter', $event.detail)"
   ></void-input>
@@ -90,7 +90,7 @@ To leave a subtree completely alone, add `wire:ignore` (or the `x-void-preserve`
 ```html
 <div wire:ignore>…</div>
 
-<void-dialog x-void-preserve>
+<void-dialog aria-label="Dialog" x-void-preserve>
   <p>Livewire never touches this dialog or its content.</p>
 </void-dialog>
 ```

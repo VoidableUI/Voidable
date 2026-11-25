@@ -21,6 +21,20 @@ export interface DevTag {
   r?: readonly string[];
   /** Advice for attributes people guess that do not exist. */
   x?: Readonly<Record<string, string>>;
+  /** What gives the element its accessible name (it must have one). */
+  n?: DevName;
+}
+
+/** The sources of an accessible name for one tag (cem/supplement.js `accessibleName`). */
+export interface DevName {
+  /** Attributes of the element that name it. */
+  a: readonly string[];
+  /** The element's own content names it. */
+  c?: 1;
+  /** Ancestors that name it: `[tag, ...attributes]`; with no attributes the ancestor alone is enough. */
+  p?: readonly (readonly string[])[];
+  /** What to do about it. */
+  h: string;
 }
 
 export type DevTable = Readonly<Record<string, DevTag>>;
@@ -33,6 +47,8 @@ export type WarningKind =
   | 'missing-child'
   | 'undefined-element'
   | 'unknown-event'
+  /** The element needs an accessible name and nothing gives it one. */
+  | 'missing-name'
   /** A page script keeps removing an attribute a component manages on itself; the component stopped restoring it. */
   | 'attribute-fight';
 

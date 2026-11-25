@@ -17,7 +17,7 @@ const meta: Meta = {
   },
   argTypes: argTypesFor('void-textarea'),
   render: (args) => html`
-    <void-textarea
+    <void-textarea aria-label="Message"
       placeholder=${args.placeholder || 'Enter text…'}
       ?disabled=${args.disabled}
       ?readonly=${args.readonly}
@@ -41,9 +41,9 @@ export const WithError: Story = {
 export const Sizes: Story = {
   render: () => html`
     <div style="display: flex; flex-direction: column; gap: 12px;">
-      <void-textarea size="sm" placeholder="Small"></void-textarea>
-      <void-textarea size="md" placeholder="Medium"></void-textarea>
-      <void-textarea size="lg" placeholder="Large"></void-textarea>
+      <void-textarea aria-label="Small" size="sm" placeholder="Small"></void-textarea>
+      <void-textarea aria-label="Medium" size="md" placeholder="Medium"></void-textarea>
+      <void-textarea aria-label="Large" size="lg" placeholder="Large"></void-textarea>
     </div>
   `,
 };

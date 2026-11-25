@@ -1,10 +1,14 @@
 import { html } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
+import { KeyboardActivation } from '../keyboard-activation.js';
 import { isInDisabledFieldset, watchDisabledAncestors } from '../form-control.js';
 
 /** Animated open/close toggle for mobile navigation menus and collapsible sidebars. */
 export class VoidHamburger extends VoidElement {
+  /** Enter and Space fire a real `click`, as on a native button. */
+  protected readonly _activation = new KeyboardActivation(this, { disabled: () => isInDisabledFieldset(this) });
+
   /**
    * Whether the menu it controls is open: draws the lines as a close cross and sets `aria-expanded`. It
    * flips on every click and Enter or Space, and fires `void-toggle`; set it yourself when the menu
@@ -31,13 +35,11 @@ export class VoidHamburger extends VoidElement {
     this.setHostAttribute('aria-expanded', String(this.active));
     this.setHostAttribute('aria-label', this.active ? 'Close menu' : 'Menu');
     this.addEventListener('click', this._handleClick);
-    this.addEventListener('keydown', this._handleKeydown);
   }
 
   disconnectedCallback(): void {
     super.disconnectedCallback();
     this.removeEventListener('click', this._handleClick);
-    this.removeEventListener('keydown', this._handleKeydown);
     this._unwatch?.();
     this._unwatch = null;
   }
@@ -57,13 +59,6 @@ export class VoidHamburger extends VoidElement {
       composed: true,
       detail: { active: this.active },
     }));
-  };
-
-  private _handleKeydown = (e: KeyboardEvent): void => {
-    if (e.key === ' ' || e.key === 'Enter') {
-      e.preventDefault();
-      this._handleClick();
-    }
   };
 
   render() {

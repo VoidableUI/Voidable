@@ -1024,7 +1024,7 @@ import iconLogout from '@tabler/icons/outline/logout.svg?raw';
               <div class="filter-popover">
                 <div class="filter-section">
                   <span class="filter-label">Status Code</span>
-                  <void-checkbox-group>
+                  <void-checkbox-group aria-label="Options">
                     <void-checkbox value="2xx" checked>2xx Success</void-checkbox>
                     <void-checkbox value="3xx" checked>3xx Redirect</void-checkbox>
                     <void-checkbox value="4xx" checked>4xx Client Error</void-checkbox>
@@ -1033,7 +1033,7 @@ import iconLogout from '@tabler/icons/outline/logout.svg?raw';
                 </div>
                 <div class="filter-section">
                   <span class="filter-label">Method</span>
-                  <void-checkbox-group>
+                  <void-checkbox-group aria-label="Options">
                     <void-checkbox value="GET" checked>GET</void-checkbox>
                     <void-checkbox value="POST" checked>POST</void-checkbox>
                     <void-checkbox value="PATCH">PATCH</void-checkbox>
@@ -1042,7 +1042,7 @@ import iconLogout from '@tabler/icons/outline/logout.svg?raw';
                 </div>
                 <div class="filter-section">
                   <span class="filter-label">Latency</span>
-                  <void-select size="sm">
+                  <void-select aria-label="Choose an option" size="sm">
                     <option value="all">All</option>
                     <option value="fast">&lt; 50ms</option>
                     <option value="moderate">50–200ms</option>

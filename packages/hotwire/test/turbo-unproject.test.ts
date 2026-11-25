@@ -41,7 +41,7 @@ function server(html: string): Element {
 
 describe('VoidTurbo pre-morph hook', () => {
   it('unprojects each void-* element as Turbo reaches it, outer first', () => {
-    document.body.innerHTML = '<void-card id="outer"><void-dialog id="inner"></void-dialog></void-card>';
+    document.body.innerHTML = '<void-card id="outer"><void-dialog aria-label="Dialog" id="inner"></void-dialog></void-card>';
     const log: string[] = [];
     const outer = spied(document.getElementById('outer')!, log);
     const inner = spied(document.getElementById('inner')!, log);
@@ -49,13 +49,13 @@ describe('VoidTurbo pre-morph hook', () => {
 
     // Turbo (idiomorph) visits the parent before its children.
     beforeMorph(outer, server('<void-card id="outer"></void-card>'));
-    beforeMorph(inner, server('<void-dialog id="inner"></void-dialog>'));
+    beforeMorph(inner, server('<void-dialog aria-label="Dialog" id="inner"></void-dialog>'));
 
     expect(log).toEqual(['unproject outer', 'unproject inner']);
   });
 
   it('does not unproject non-void elements, or a morph another listener cancelled', () => {
-    document.body.innerHTML = '<div id="plain"></div><void-dialog id="d"></void-dialog>';
+    document.body.innerHTML = '<div id="plain"></div><void-dialog aria-label="Dialog" id="d"></void-dialog>';
     const log: string[] = [];
     const plain = spied(document.getElementById('plain')!, log);
     const dialog = spied(document.getElementById('d')!, log);
@@ -64,7 +64,7 @@ describe('VoidTurbo pre-morph hook', () => {
     stop = VoidTurbo.start();
 
     beforeMorph(plain, server('<div id="plain"></div>'));
-    beforeMorph(dialog, server('<void-dialog id="d"></void-dialog>'));
+    beforeMorph(dialog, server('<void-dialog aria-label="Dialog" id="d"></void-dialog>'));
 
     expect(plain.voidBeforeMorph).not.toHaveBeenCalled();
     expect(dialog.voidBeforeMorph).not.toHaveBeenCalled();

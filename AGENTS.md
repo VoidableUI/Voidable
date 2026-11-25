@@ -144,7 +144,7 @@ How the derivation works, and the rules that keep it working:
 - Derived tokens are declared on `:where(:root, [data-theme], [data-void-theme], [data-shape], [data-void-surface], void-media, void-glass)`. A custom property computed from another is resolved where it is declared, so a knob set on a subtree only takes effect if that element carries `data-void-theme`.
 - A surface (on-media, glass) is a set of overrides of the *inputs* to those formulas (the scheme number, the alpha steps, `--void-color-bg`), declared on `void-media`, `void-glass` and `[data-void-surface]`. Components need no surface-specific CSS; never add one.
 - Never put a `var()` in `primitives.css` or `knobs.css`, and never put a raw value in a theme file.
-- **Dark mode** is the default (true black `#000000` page). **Light mode** via `[data-theme="light"]`.
+- **Colour scheme**: `data-theme="dark"` or `"light"` on an element or an ancestor is the explicit choice, and `"system"` follows the operating system. Without one, the scheme a theme or skin prefers (`--void-preferred-scheme`, Loft and Slab prefer light) applies, and without that the operating system (`prefers-color-scheme`; dark where the browser cannot say). Dark is a true black `#000000` page, light a true white one.
 
 ### Token export
 
@@ -165,6 +165,8 @@ The default look is light and airy. It gets there with three decisions, each a k
 - **Chrome: minimal** (`--void-chrome`). Hairline dividers rather than boxes; containers have a barely visible fill; tables and lists sit directly on the page; no fills behind headers. Borders have two jobs with two tokens: `--void-color-border` divides and may be faint, `--void-color-border-control` bounds a control and keeps 3:1.
 
 And these:
+
+The primary author of code that uses this library is an LLM agent, so design for that author. APIs are chosen to be guessable: the name an agent would reach for first is the name that exists. Failures are loud: a wrong attribute, a missing label or a misused part is reported by `voidable check` and the development warnings rather than silently ignored. Correctness is established by functional tests in real browsers, not by reading code; a change is done when it has been run and observed to work.
 
 - **Human and agent friendly** — the UI is designed for both human users and AI agents. Light DOM exposes component structure. Reflected attributes make state machine-readable without executing JS. Semantic ARIA roles and properties give agents a structured understanding of the interface. Stable tag+attribute selectors provide reliable handles for programmatic interaction.
 - **Pure backgrounds by default** — true black (`#000000`) in dark mode, true white (`#ffffff`) in light mode. A theme may soften the page with `--void-page-tint`.

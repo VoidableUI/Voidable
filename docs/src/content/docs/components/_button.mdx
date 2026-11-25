@@ -11,6 +11,10 @@ Buttons have three variants of one size: at every size step they share a height 
 | `outline` (default) | A control border, no fill at rest | Secondary actions |
 | `ghost` | Nothing at rest; a faint fill on hover, a stronger one when pressed | Row actions in a table, toolbars of icon buttons, the quiet action beside a primary one |
 
+## Keyboard and click
+
+A `void-button` activates like a native `<button>`. A mouse click, Enter (on key down) and Space (on key up) each fire one real `click` event, and one `void-click`, so anything that listens for `click` works from the keyboard too: `onClick`, `phx-click`, `wire:click`, Alpine `@click`, an overlay trigger and a form's `type="submit"` or `type="reset"`. A disabled button, or one with `aria-disabled="true"`, does nothing. A link button (an `<a>` inside) follows its link with Enter, and Space does nothing, as on a link.
+
 ## Ghost
 
 A ghost button has no border and no fill until it is hovered, so several of them in a row read as text, not as a row of boxes. Its label is the normal text colour, its focus ring is the same as every other button's, and in forced-colours mode it shows a border on hover and focus.
@@ -83,7 +87,7 @@ With a `color`, a ghost button carries the colour in its label and its hover fil
     <void-button size="sm">Small</void-button>
     <void-button>Medium</void-button>
     <void-button size="lg">Large</void-button>
-    <void-input placeholder="An input, same height" style="width: 14rem"></void-input>
+    <void-input aria-label="An input, same height" placeholder="An input, same height" style="width: 14rem"></void-input>
     <void-button variant="ghost">Ghost</void-button>
   </div>
 </div>

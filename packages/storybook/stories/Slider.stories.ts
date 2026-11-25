@@ -17,7 +17,7 @@ const meta: Meta = {
   },
   argTypes: argTypesFor('void-slider'),
   render: (args) => html`
-    <void-slider
+    <void-slider aria-label="Value"
       .value=${args.value ?? 50}
       min=${args.min ?? 0}
       max=${args.max ?? 100}
@@ -42,9 +42,9 @@ export const WithValue: Story = {
 export const Sizes: Story = {
   render: () => html`
     <div style="display: flex; flex-direction: column; gap: 24px; width: 300px;">
-      <void-slider size="sm" .value=${40} show-value></void-slider>
-      <void-slider size="md" .value=${50} show-value></void-slider>
-      <void-slider size="lg" .value=${60} show-value></void-slider>
+      <void-slider aria-label="Value" size="sm" .value=${40} show-value></void-slider>
+      <void-slider aria-label="Value" size="md" .value=${50} show-value></void-slider>
+      <void-slider aria-label="Value" size="lg" .value=${60} show-value></void-slider>
     </div>
   `,
 };

@@ -21,6 +21,7 @@ import {
   TabPanel,
   Tabs,
   Textarea,
+  useTheme,
 } from '@voidable/ui-react';
 
 declare global {
@@ -30,6 +31,7 @@ declare global {
     submits: [string, string][][];
     mount: (strict?: boolean) => void;
     unmount: () => void;
+    mountTheme: () => void;
   }
 }
 
@@ -122,3 +124,12 @@ window.mount = (strict = false) => {
   flushSync(() => root!.render(strict ? <StrictMode><App /></StrictMode> : <App />));
 };
 window.unmount = () => flushSync(() => root?.unmount());
+
+/** Renders what useTheme() reports, for the theme spec. */
+function ThemeProbe() {
+  return <output id="r-theme">{useTheme()}</output>;
+}
+window.mountTheme = () => {
+  root = createRoot(document.getElementById('app')!);
+  flushSync(() => root!.render(<ThemeProbe />));
+};

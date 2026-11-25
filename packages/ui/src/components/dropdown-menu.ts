@@ -1,6 +1,7 @@
 import { html } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
+import { KeyboardActivation } from '../keyboard-activation.js';
 import { isPrintable, stepEnabled, Typeahead, uid } from '../keyboard.js';
 import { OverlayController } from '../overlay.js';
 import { ProjectionController, triggerRegion } from '../projection.js';
@@ -201,6 +202,9 @@ if (!customElements.get('void-dropdown-menu')) {
  * @fires {CustomEvent<{ item: VoidDropdownMenuItem }>} void-select - The item was chosen.
  */
 export class VoidDropdownMenuItem extends VoidElement {
+  /** Enter and Space fire a real `click`, as on a native button. */
+  protected readonly _activation = new KeyboardActivation(this, { disabled: () => this.disabled });
+
   /** Dim the item, skip it in keyboard navigation and stop it firing `void-select`. */
   @property({ type: Boolean, reflect: true }) disabled = false;
   /** Draw the item in the error colour, for an action that deletes or cannot be undone. */
@@ -214,13 +218,11 @@ export class VoidDropdownMenuItem extends VoidElement {
     // Items are reached with the arrow keys, not Tab (roving focus inside the menu).
     this.setHostAttribute('tabindex', '-1');
     this.addEventListener('click', this._handleClick);
-    this.addEventListener('keydown', this._handleKeydown);
   }
 
   disconnectedCallback(): void {
     super.disconnectedCallback();
     this.removeEventListener('click', this._handleClick);
-    this.removeEventListener('keydown', this._handleKeydown);
   }
 
   updated(changed: Map<string, unknown>): void {
@@ -239,13 +241,6 @@ export class VoidDropdownMenuItem extends VoidElement {
       composed: true,
       detail: { item: this },
     }));
-  };
-
-  private _handleKeydown = (e: KeyboardEvent): void => {
-    if ((e.key === 'Enter' || e.key === ' ') && !this.disabled) {
-      e.preventDefault();
-      this._handleClick(e);
-    }
   };
 }
 

@@ -118,4 +118,39 @@ type Tag struct {
 	SelfClosing bool        `json:"selfClosing,omitempty"`
 	// Parent is the nearest enclosing `void-*` element, if any.
 	Parent string `json:"parent,omitempty"`
+
+	// Mention marks a tag written in backticks in prose or a doc string: it is
+	// named for the unknown-element check but is not markup.
+	Mention bool `json:"mention,omitempty"`
+	// Content summarises what sits between the start and end tag.
+	Content Content `json:"content"`
+	// Ancestors are the enclosing elements the name check needs, outermost
+	// first: every `void-*` element with its attributes, and `label`.
+	Ancestors []Ancestor `json:"ancestors,omitempty"`
+	// Labelled is true when a native `<label>` names the element: it sits
+	// inside one, or a `<label for>` in the same source names its id.
+	Labelled bool `json:"labelled,omitempty"`
+	// InComponent is true when the tag sits inside an enclosing framework
+	// component (`<Field>`, `<.field>`, `<x-field>`): what it renders is not
+	// known, so it may name the element.
+	InComponent bool `json:"inComponent,omitempty"`
+}
+
+// Content describes the children of a tag without parsing them.
+type Content struct {
+	// Known is false when the end tag was not found (an unclosed element), and
+	// for a tag the HTML parser leaves open.
+	Known bool `json:"known"`
+	// Text is true when there is static text, or an element that carries a
+	// name (an image with `alt`, an `aria-label`, an svg `<title>`).
+	Text bool `json:"text,omitempty"`
+	// Dynamic is true when something the scanner cannot evaluate may render
+	// content: an expression, a slot, a yielded block, a framework component.
+	Dynamic bool `json:"dynamic,omitempty"`
+}
+
+// Ancestor is an enclosing element and its attributes.
+type Ancestor struct {
+	Name  string      `json:"name"`
+	Attrs []AttrToken `json:"attrs,omitempty"`
 }

@@ -17,7 +17,7 @@ const meta: Meta = {
   },
   argTypes: argTypesFor('void-compose-input'),
   render: (args) => html`
-    <void-compose-input
+    <void-compose-input aria-label="Message"
       placeholder=${args.placeholder || 'Type a message...'}
       ?disabled=${args.disabled}
       maxlength=${args.maxlength || 0}
@@ -50,7 +50,7 @@ export const EventDemo: Story = {
     };
     return html`
       <div style="max-width: 480px;">
-        <void-compose-input
+        <void-compose-input aria-label="Type and press Enter to submit"
           placeholder="Type and press Enter to submit..."
           @void-submit=${onSubmit}
         ></void-compose-input>

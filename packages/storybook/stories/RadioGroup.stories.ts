@@ -54,7 +54,7 @@ export const Horizontal: Story = {
 
 export const NoLabel: Story = {
   render: () => html`
-    <void-radio-group value="yes" name="confirm">
+    <void-radio-group aria-label="Confirm" value="yes" name="confirm">
       <void-radio value="yes">Yes</void-radio>
       <void-radio value="no">No</void-radio>
     </void-radio-group>

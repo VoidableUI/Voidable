@@ -141,6 +141,7 @@ describe('VoidHamburger', () => {
 
     it('Space key toggles active', () => {
       el.dispatchEvent(new KeyboardEvent('keydown', { key: ' ', bubbles: true }));
+      el.dispatchEvent(new KeyboardEvent('keyup', { key: ' ', bubbles: true }));
       expect(el.active).toBe(true);
     });
 
@@ -153,6 +154,7 @@ describe('VoidHamburger', () => {
       let fired = false;
       el.addEventListener('void-toggle', () => { fired = true; });
       el.dispatchEvent(new KeyboardEvent('keydown', { key: ' ', bubbles: true }));
+      el.dispatchEvent(new KeyboardEvent('keyup', { key: ' ', bubbles: true }));
       expect(fired).toBe(true);
     });
 

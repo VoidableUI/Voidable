@@ -12,7 +12,7 @@
     {{-- 2. void-input bound to Livewire via wire:model --}}
     <section class="mb-8">
         <h2 class="text-lg font-semibold mb-2">Input with wire:model</h2>
-        <void-input
+        <void-input aria-label="Type your name"
             x-void-on:void-change="$wire.set('name', $event.detail.value)"
             wire:model="name"
             placeholder="Type your name..."
@@ -33,7 +33,7 @@
     {{-- 4. void-select with event handling --}}
     <section class="mb-8">
         <h2 class="text-lg font-semibold mb-2">Select with event handling</h2>
-        <void-select
+        <void-select aria-label="Choose a framework"
             x-void-preserve
             x-void-on:void-change="$wire.set('selectedOption', $event.detail.value)"
             placeholder="Choose a framework..."
