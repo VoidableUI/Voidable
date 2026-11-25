@@ -36,6 +36,18 @@ Each app is described in `tests/browser/server/apps.mjs` and started by `tests/b
 
 A test for a defect that is not fixed asserts the correct behaviour and starts with `expectedFailure('#61', 'what goes wrong')`. The key names a GitHub issue in `tests/browser/helpers/known-issues.ts` (or `untracked:` when no issue exists yet). The test still runs and is reported, but does not turn the suite red; when the defect is fixed, Playwright reports "expected to fail but passed" and the marker is removed with the fix. `VOID_RUN_EXPECTED=1` runs every marked test as an ordinary test.
 
+## Visual review
+
+The browser suite checks behaviour; `tests/browser/shots` checks how it looks. It photographs the reference pages (a dashboard, a queue table, a form with an open dialog, settings, empty states, a page over a photograph, a sheet of every component and the interaction states hover, focus, pressed, disabled and invalid, and every open overlay) at 1440x900 and 390x844, in dark and light, in every shipped theme and skin, and builds a gallery to review them side by side. The current gallery of the main branch is at [/gallery/](/gallery/).
+
+```bash
+mise run shots                       # capture everything, build tmp/shots/gallery/index.html
+mise run shots -- --page sheet --theme void,paper --scheme dark --width 390
+mise run shots:compare -- master     # before/after of the working tree against master
+```
+
+`shots:compare` builds each ref in a temporary worktree and shows the images that changed, worst first, as side by side, an overlay slider and a highlighted difference. The captures are byte-identical on one machine (fonts bundled, animations finished, fixed clock, software rendering) and differ between machines, so no screenshot is stored: on a pull request, CI photographs the base and the head on the same runner and uploads the before/after gallery. A difference is expected when the change touches the theme, a component or the reference pages and fails the job otherwise, unless a commit says `Visual-Change: <why>`. The job is skipped in the release path.
+
 ## In CI
 
 The `browser`, `server` (Rails), `phoenix` and `laravel` jobs of `.github/workflows/ci.yml` run on every pull request. The release workflow calls the same file, so nothing is tagged or published unless every one of them passed. CI installs Ruby, Erlang/Elixir and PHP with `ruby/setup-ruby`, `erlef/setup-beam` and `shivammathur/setup-php`, which download prebuilt toolchains, at the versions pinned in `mise.toml`.

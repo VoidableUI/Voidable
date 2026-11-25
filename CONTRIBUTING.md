@@ -42,6 +42,30 @@ Locally, an engine that is not installed or cannot load its system libraries is 
 
 **Server toolchains.** `mise run test:server` uses Ruby, Erlang/Elixir and PHP from `mise` when installed, and otherwise from `PATH` (as CI provides them through `ruby/setup-ruby`, `erlef/setup-beam` and `shivammathur/setup-php`, with versions read from `mise.toml`). Steps that touch a package registry (bundler, hex, composer) are retried up to three times, so a registry blip does not fail the run. The apps listen on 4520 (Rails), 4530 (Phoenix) and 4540 (Laravel), and the browser suite's server on 4417; set `VOID_RAILS_PORT`, `VOID_PHOENIX_PORT`, `VOID_LARAVEL_PORT` and `VOID_TEST_PORT` to run two checkouts side by side. A busy port fails the run and an existing server is never reused.
 
+## Visual review
+
+A component that works can still look wrong on a page. `tests/browser/shots` photographs the reference pages (`packages/storybook/stories/reference/`: dashboard, queue table, form, form with an open dialog, settings, empty states, a page over a photograph, a component sheet with every component in its variants, the three sizes and the eight colours, the interaction states hover, focus, pressed, disabled and invalid, and each open overlay) at 1440x900 and 390x844, in dark and light, in every theme and skin the theme package ships (read from `packages/theme/dist/exports.json`, so a new theme or skin is captured without touching the tooling). The markup lives only in those HTML files; Storybook (Reference/Screens), the docs theme builder and the capture all render them.
+
+```bash
+mise run test:browser:install                 # once; VOID_BROWSERS=chromium fetches only Chromium
+mise run shots                                # the whole matrix, then the gallery: tmp/shots/gallery/index.html
+mise run shots -- --page sheet,form --theme void,paper --scheme dark --width 390   # filters (comma lists): --page --theme --skin --look --scheme --width
+mise run shots -- --smoke                     # a few pages in the default theme and Loft
+mise run shots:compare -- master              # before/after: master against the working tree
+mise run shots:compare -- v0.3.0 master       # or two refs; add the same filters
+mise run shots:check                          # check a gallery in Chromium: layout, keyboard, every view, axe
+```
+
+`shots:compare` builds each ref in a temporary git worktree (`mise run build` there), photographs it with this checkout's tooling (the ref needs none of this code) and writes `tmp/shots/compare/gallery/index.html`: the images that changed, worst first, each as side by side, an overlay slider and a highlighted difference, with a count of how many changed, plus `summary.md`. Nothing but the gallery is a baseline: no screenshot is committed.
+
+**Determinism.** A capture is repeatable on one machine: byte-identical, which two consecutive runs of the whole matrix (648 images) confirm, at any `--jobs`. It uses Chromium with software rendering (no GPU), hinting and LCD text off, sRGB, scale 1; animations and transitions finished, reduced motion, caret and scrollbars hidden; the Inter, JetBrains Mono and (for Paper's serif stack) Source Serif 4 faces bundled from `@fontsource-variable` and awaited with `document.fonts.ready`, so no network is used; a fixed clock (2026-01-15T12:00:00Z), `en-US` and UTC; the data is in the HTML. It is not identical across machines (font rasterisation and the Chromium build differ), which is why nothing is stored.
+
+**Pull requests.** CI's `visual` job photographs the pull request's base commit and the merged head on the same runner and compares them; an image that differs differs because of the change, whatever the machine draws like. The before/after gallery is uploaded as the `visual-review` artifact (unzip, open `index.html`) and a summary is written to the run page. The verdict: if the change touches `packages/theme/`, `packages/ui/src/`, `packages/storybook/stories/reference/` a difference is expected, the job reports it and passes, and the reviewer looks at the gallery. If it touches none of those, a difference is an accident and the job fails; a commit message trailer `Visual-Change: <why>` says it is intended and turns that failure into a pass. A change that can alter the look runs the full matrix, anything else only the smoke subset. The job runs on pull requests only: it is skipped in the release path, so it cannot hold up or fail a release.
+
+**Reviewing a design change.** Run `mise run shots:compare -- <base>` and look at the changed images at both widths, both schemes, the default theme and Loft, before opening the pull request. A pull request that changes the theme says what changed and links or attaches the gallery.
+
+**Stories.** `--stories` also photographs every Storybook story at the default theme (dark and light, both widths) for regression only; they stay out of the gallery's main view. It needs `mise run storybook_build`.
+
 ## Tenets
 
 These are enforced in review and partly by `lint:styles`, `lint:tokens`, `lint:undefined-tokens` and `lint:exports`:
