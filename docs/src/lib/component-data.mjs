@@ -162,7 +162,10 @@ export function loadComponentData() {
 
   for (const { d, path } of decls) {
     const tag = d.tagName;
-    const note = notes[tag] ?? {};
+    const note = { ...(notes[tag] ?? {}) };
+    // Live-example overrides are HTML files, so voidable check validates them.
+    const livePath = join(ROOT, 'docs/src/data/live', `${tag}.html`);
+    if (existsSync(livePath)) note.live = readFileSync(livePath, 'utf8').trim();
     const fieldByAttr = new Map((d.members ?? []).filter((m) => m.attribute).map((m) => [m.attribute, m]));
     const attributes = (d.attributes ?? []).map((a) => {
       const field = fieldByAttr.get(a.name) ?? (d.members ?? []).find((m) => m.name === a.fieldName);

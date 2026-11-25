@@ -183,7 +183,6 @@
   },
   "void-dialog": {
     "group": "overlays",
-    "live": "<void-button variant=\"filled\" onclick=\"this.nextElementSibling.open = true\">Open dialog</void-button>\n<void-dialog heading=\"Delete project\" size=\"sm\">\n  <p>This cannot be undone.</p>\n  <void-button color=\"error\" variant=\"filled\" onclick=\"this.closest('void-dialog').open = false\">Delete</void-button>\n</void-dialog>",
     "events": {
       "void-close": "Fires when the dialog closes itself (the close button, Escape or a backdrop click)."
     },
@@ -191,7 +190,6 @@
   },
   "void-drawer": {
     "group": "overlays",
-    "live": "<void-button variant=\"filled\" onclick=\"this.nextElementSibling.open = true\">Open drawer</void-button>\n<void-drawer heading=\"Filters\" side=\"right\">\n  <p>Narrow the list by status and owner.</p>\n  <void-button variant=\"filled\" onclick=\"this.closest('void-drawer').open = false\">Apply filters</void-button>\n</void-drawer>",
     "events": {
       "void-close": "Fires when the drawer closes itself (the close button, Escape or a backdrop click)."
     },
@@ -371,7 +369,6 @@
   },
   "void-toast": {
     "group": "feedback",
-    "live": "<void-toast-container position=\"inline\">\n  <void-toast color=\"success\" heading=\"Saved\" duration=\"0\">Your changes were saved.</void-toast>\n</void-toast-container>",
     "events": {
       "void-close": "Fires when the toast closes, by timeout or the close button, just before it removes itself from the page."
     },
@@ -379,7 +376,6 @@
   },
   "void-toast-container": {
     "group": "feedback",
-    "live": "<void-toast-container position=\"inline\">\n  <void-toast color=\"info\" duration=\"0\">The export will be ready in a minute.</void-toast>\n</void-toast-container>",
     "children": "Takes `void-toast` children."
   },
   "void-accordion": {
