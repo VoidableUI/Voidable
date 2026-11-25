@@ -11,12 +11,8 @@
 # ideally in the change that adds the wrapper, component or story.
 # Do not add new entries to silence the check.
 
-# The four chart components shipped without React wrappers or hex components
+# The four chart components shipped without hex components
 # (issue #13).
-react void-bar-chart
-react void-donut-chart
-react void-gauge
-react void-line-chart
 hex void-bar-chart
 hex void-donut-chart
 hex void-gauge
