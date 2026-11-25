@@ -17,7 +17,7 @@
   /* Text */
   --void-color-text:           var(--void-stone-100);
   --void-color-text-secondary: var(--void-stone-400);
-  --void-color-text-muted:     var(--void-stone-500);
+  --void-color-text-muted:     var(--void-stone-450);
   --void-color-text-tertiary:  var(--void-stone-450);
   --void-color-text-disabled:  var(--void-stone-600);
   --void-color-text-on-accent: var(--void-black);
@@ -84,14 +84,16 @@
   --void-color-accent:       var(--void-stone-900);
   --void-color-accent-hover: var(--void-stone-950);
 
-  /* Status — primary (-600 variants for light mode) */
-  --void-color-error:     var(--void-red-600);
-  --void-color-warning:   var(--void-orange-600);
-  --void-color-caution:   var(--void-amber-600);
-  --void-color-success:   var(--void-green-600);
+  /* Status — primary. -700 where -600 is below 4.5:1 as text on white /
+     bg-secondary (and as a fill under white text-on-accent); -600 where
+     it already passes (info, notice). */
+  --void-color-error:     var(--void-red-700);
+  --void-color-warning:   var(--void-orange-700);
+  --void-color-caution:   var(--void-amber-700);
+  --void-color-success:   var(--void-green-700);
   --void-color-info:      var(--void-blue-600);
   --void-color-notice:    var(--void-purple-600);
-  --void-color-highlight: var(--void-pink-600);
+  --void-color-highlight: var(--void-pink-700);
 
   /* Status — subtle (8% color-mix for light backgrounds) */
   --void-color-error-subtle:     color-mix(in srgb, var(--void-color-error)     8%, transparent);
