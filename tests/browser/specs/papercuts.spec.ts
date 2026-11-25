@@ -24,7 +24,7 @@ test.describe('hover-card after Escape', () => {
   test('keyboard focus that arrives after a hover was dismissed with Escape opens it', async ({ page }) => {
     await mount(page, `
       <button id="before">before</button>
-      <void-hover-card id="hc" open-delay="0" close-delay="0"><a id="t" href="#">Trigger</a><p>Card</p></void-hover-card>`);
+      <void-hover-card id="hc" open-delay="0" close-delay="0"><void-hover-card-trigger><a id="t" href="#">Trigger</a></void-hover-card-trigger><void-hover-card-content><p>Card</p></void-hover-card-content></void-hover-card>`);
     await page.hover('#t');
     await expect.poll(() => page.evaluate(() => (document.getElementById('hc') as any).open)).toBe(true);
     await page.keyboard.press('Escape');
@@ -37,7 +37,7 @@ test.describe('hover-card after Escape', () => {
   });
 
   test('Escape with focus on the trigger keeps it closed while focus stays there', async ({ page }) => {
-    await mount(page, `<void-hover-card id="hc" open-delay="0" close-delay="0"><a id="t" href="#">Trigger</a><p>Card</p></void-hover-card>`);
+    await mount(page, `<void-hover-card id="hc" open-delay="0" close-delay="0"><void-hover-card-trigger><a id="t" href="#">Trigger</a></void-hover-card-trigger><void-hover-card-content><p>Card</p></void-hover-card-content></void-hover-card>`);
     await page.focus('#t');
     await expect.poll(() => page.evaluate(() => (document.getElementById('hc') as any).open)).toBe(true);
     await page.keyboard.press('Escape');
@@ -49,9 +49,12 @@ test.describe('hover-card after Escape', () => {
 
 test.describe('names that follow replaced content', () => {
   test('dropdown-menu names its menu after the current trigger, or nothing', async ({ page }) => {
-    await mount(page, `<void-dropdown-menu id="dd"><button id="t1">Actions</button><void-dropdown-menu-item>A</void-dropdown-menu-item></void-dropdown-menu>`);
+    await mount(page, `<void-dropdown-menu id="dd"><void-dropdown-menu-trigger><button id="t1">Actions</button></void-dropdown-menu-trigger><void-dropdown-menu-content><void-dropdown-menu-item>A</void-dropdown-menu-item></void-dropdown-menu-content></void-dropdown-menu>`);
     const named = () => page.evaluate(() => {
-      const id = document.querySelector('#dd [role=menu]')!.getAttribute('aria-labelledby');
+      // With explicit parts, text in place of the parts leaves no menu at all: nothing is named.
+      const menu = document.querySelector('#dd [role=menu]');
+      if (!menu) return null;
+      const id = menu.getAttribute('aria-labelledby');
       return id === null ? null : (document.getElementById(id)?.textContent ?? 'MISSING');
     });
     expect(await named()).toBe('Actions');
@@ -61,7 +64,7 @@ test.describe('names that follow replaced content', () => {
     });
     expect(await named()).toBe(null);
     await page.evaluate(async () => {
-      document.getElementById('dd')!.innerHTML = '<button>New</button><void-dropdown-menu-item>B</void-dropdown-menu-item>';
+      document.getElementById('dd')!.innerHTML = '<void-dropdown-menu-trigger><button>New</button></void-dropdown-menu-trigger><void-dropdown-menu-content><void-dropdown-menu-item>B</void-dropdown-menu-item></void-dropdown-menu-content>';
       await (window as any).__settle(document);
     });
     expect(await named()).toBe('New');
