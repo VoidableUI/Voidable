@@ -5,7 +5,10 @@ import type { StorybookConfig } from '@storybook/web-components-vite';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-const config: StorybookConfig = {
+const config: StorybookConfig & { title: string } = {
+  // Browser tab title for the manager (renders as "Voidable - Storybook").
+  // Without this Storybook falls back to the package name ("storybook").
+  title: 'Voidable',
   stories: [
     '../stories/**/*.mdx',
     '../stories/**/*.stories.@(js|ts)',

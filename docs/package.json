@@ -4,7 +4,11 @@
   "type": "module",
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build"
+    "build": "astro build",
+    "og": "node scripts/generate-og.mjs"
+  },
+  "devDependencies": {
+    "sharp": "^0.34.5"
   },
   "dependencies": {
     "@astrojs/starlight": "^0.38.0",
@@ -12,6 +16,7 @@
     "@voidable/theme": "workspace:*",
     "@voidable/ui": "workspace:*",
     "astro": "^6.1.0",
-    "shiki": "^4.0.2"
+    "shiki": "^4.0.2",
+    "starlight-llms-txt": "^0.10.0"
   }
 }

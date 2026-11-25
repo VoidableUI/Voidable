@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+#MISE description="Regenerate docs/public/og.png from docs/scripts/og-image.svg"
+set -euo pipefail
+
+pnpm --filter docs og

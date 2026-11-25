@@ -1,6 +1,6 @@
 # @voidable/ui
 
-Core web components for Voidable UI — a framework-agnostic component library built with Lit.
+Core web components for Voidable UI, a framework-agnostic component library built with Lit 3. Components render in the Light DOM and ship with no visual CSS: without a theme loaded they are unstyled. Load [`@voidable/theme`](https://www.npmjs.com/package/@voidable/theme) for the default look.
 
 ## Install
 
@@ -8,16 +8,47 @@ Core web components for Voidable UI — a framework-agnostic component library b
 npm install @voidable/ui @voidable/theme
 ```
 
-## Usage
+## Usage with a bundler
+
+Import the theme (CSS) and the components (registers every `<void-*>` element) in your app entry point. This needs a bundler that handles CSS imports, such as Vite.
+
+```js
+import '@voidable/theme';
+import '@voidable/ui';
+```
 
 ```html
-<script type="module">
-  import '@voidable/ui';
-  import '@voidable/theme';
-</script>
-
 <void-button variant="filled" color="success">Save</void-button>
+
+<void-field label="Name">
+  <void-input placeholder="Ada Lovelace"></void-input>
+</void-field>
 ```
+
+Prefer smaller bundles? Import single components: `import '@voidable/ui/button'`.
+
+## Usage without a bundler
+
+A bare `import '@voidable/theme'` cannot work in a browser, because the theme is CSS and the package entry point is not a URL. Use a stylesheet link for the theme and a CDN that resolves the `lit` dependency for the components:
+
+```html
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@voidable/theme/src/index.css" />
+    <script type="module" src="https://esm.sh/@voidable/ui"></script>
+  </head>
+  <body>
+    <void-button variant="filled" color="success">Save</void-button>
+  </body>
+</html>
+```
+
+Pin versions (for example `@voidable/theme@0.7.0`, `@voidable/ui@0.6.1`) in production.
+
+## Component attributes
+
+Components that take a `color` accept `default`, `error`, `warning`, `success`, `info` or `notice`. Buttons take `variant="outline"` (default) or `variant="filled"`. See the docs for each component's attributes.
 
 ## Components
 
@@ -26,12 +57,15 @@ npm install @voidable/ui @voidable/theme
 `void-alert`, `void-badge`, `void-tag`, `void-avatar`, `void-spinner`, `void-skeleton`,
 `void-progress`, `void-panel`, `void-card`, `void-popover`, `void-tooltip`, `void-banner`,
 `void-breadcrumbs`, `void-list`, `void-stepper`, `void-pagination`, `void-combobox`,
-`void-slider`, `void-file-upload`, `void-nav-bar`, and more.
+`void-slider`, `void-file-upload`, `void-nav-bar`, `void-bar-chart`, `void-gauge`, and more.
+The full list is in the [component overview](https://voidable.dev/components/overview/).
 
 ## Documentation
 
-- [Storybook](https://voidableui.github.io/Voidable/)
+- [Docs](https://voidable.dev)
+- [Storybook](https://voidable.dev/storybook/)
 - [GitHub](https://github.com/VoidableUI/Voidable)
+- [npm](https://www.npmjs.com/package/@voidable/ui)
 
 ## License
 

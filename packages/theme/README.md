@@ -24,18 +24,28 @@ Or import individual layers:
 @import '@voidable/theme/reset';
 ```
 
-## Dark mode
-
-Set the `data-theme` attribute on `<html>`:
+Without a bundler, link the stylesheet directly (the entry point pulls in the other files with relative `@import`s):
 
 ```html
-<html data-theme="dark">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@voidable/theme/src/index.css" />
+```
+
+In a JavaScript entry point processed by a bundler (for example Vite), `import '@voidable/theme';` also works.
+
+## Dark mode
+
+Dark is the default (true black surfaces). Set the `data-theme` attribute on `<html>` to choose a theme explicitly:
+
+```html
+<html data-theme="light">
 ```
 
 ## Documentation
 
-- [Storybook](https://voidableui.github.io/Voidable/)
+- [Docs](https://voidable.dev)
+- [Storybook](https://voidable.dev/storybook/)
 - [GitHub](https://github.com/VoidableUI/Voidable)
+- [npm](https://www.npmjs.com/package/@voidable/theme)
 
 ## License
 

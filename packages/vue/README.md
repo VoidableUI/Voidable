@@ -39,14 +39,16 @@ const theme = useTheme(); // readonly ref: 'dark' | 'light'
 </script>
 
 <template>
-  <void-button variant="filled" color="primary">Click me</void-button>
+  <void-button variant="filled" color="success">Click me</void-button>
 </template>
 ```
 
 ## Documentation
 
-- [Storybook](https://voidableui.github.io/Voidable/)
+- [Docs](https://voidable.dev/frameworks/vue/)
+- [Storybook](https://voidable.dev/storybook/)
 - [GitHub](https://github.com/VoidableUI/Voidable)
+- [npm](https://www.npmjs.com/package/@voidable/ui-vue)
 
 ## License
 

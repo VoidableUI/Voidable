@@ -3,14 +3,16 @@ title: Voidable
 description: A framework-agnostic web component library built with Lit 3.
 ---
 
+import { stats } from '../../../lib/stats';
+
 Voidable is a **framework-agnostic web component library** built on [Lit 3](https://lit.dev). Every component renders in the **Light DOM** — no Shadow DOM barriers — so your CSS has full access to component internals.
 
 ## Key features
 
-- **56 components** covering layout, forms, data display, feedback, and navigation
+- **{stats.elements} custom elements** ({stats.components} components) covering layout, forms, data display, feedback, and navigation
 - **CSS token system** with dark/light themes via `data-theme` attribute
 - **Zero visual CSS in components** — all styling flows through `@voidable/theme`
-- **First-class framework adapters** for React, Vue, Solid, Svelte, Angular, Hotwire, Alpine, and LiveView
+- **{stats.adapters} framework adapter packages** for React, Vue, Solid, Svelte, Angular, Hotwire, Alpine, and LiveView, plus guides for Lit, Qwik, Astro, and vanilla JS
 
 ## Quick start
 
@@ -43,8 +45,10 @@ npm install @voidable/ui @voidable/theme
 | `@voidable/ui-liveview` | Phoenix LiveView hooks and DOM preservation |
 | `live_voidable` (Hex) | Phoenix function components for HEEx templates |
 | `voidable-hotwire` (Gem) | Rails helper and asset pipeline integration |
+| `voidable/laravel` (Composer) | Laravel service provider for the Alpine/Livewire adapter |
 
 ## Resources
 
 - [Storybook](/storybook/) — Interactive component demos
 - [GitHub](https://github.com/VoidableUI/Voidable) — Source code and issues
+- npm — [`@voidable/ui`](https://www.npmjs.com/package/@voidable/ui) and [`@voidable/theme`](https://www.npmjs.com/package/@voidable/theme)

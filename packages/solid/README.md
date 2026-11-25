@@ -19,7 +19,7 @@ function App() {
   const theme = useTheme(); // signal: 'dark' | 'light'
 
   return (
-    <void-button variant="filled" color="primary">
+    <void-button variant="filled" color="success">
       Click me
     </void-button>
   );
@@ -30,8 +30,10 @@ SolidJS handles `<void-*>` custom elements natively in JSX.
 
 ## Documentation
 
-- [Storybook](https://voidableui.github.io/Voidable/)
+- [Docs](https://voidable.dev/frameworks/solid/)
+- [Storybook](https://voidable.dev/storybook/)
 - [GitHub](https://github.com/VoidableUI/Voidable)
+- [npm](https://www.npmjs.com/package/@voidable/ui-solid)
 
 ## License
 
