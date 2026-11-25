@@ -1,7 +1,7 @@
-import { html } from 'lit';
+import { html, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
-import { NativeFormControl, setNativeValue } from '../form-control.js';
+import { NativeFormControl } from '../form-control.js';
 
 /** Continuous value selection for volume controls, price range filters, and numeric range settings. */
 export class VoidSlider extends NativeFormControl(VoidElement) {
@@ -38,9 +38,14 @@ export class VoidSlider extends NativeFormControl(VoidElement) {
     return ((this.value - this.min) / (this.max - this.min)) * 100;
   }
 
-  protected formRestore(state: unknown): void {
-    this.value = Number(state);
-    setNativeValue(this.querySelector('input[type="range"]'), String(this.value));
+  protected formWriteNativeDefault(state: unknown): void {
+    const control = this.querySelector<HTMLInputElement | HTMLTextAreaElement>('input[type="range"]');
+    if (control) control.defaultValue = String(state ?? '');
+  }
+
+  protected formReadNative(): void {
+    const control = this.querySelector<HTMLInputElement | HTMLTextAreaElement>('input[type="range"]');
+    if (control) this.value = Number(control.value);
   }
 
   protected formSyncNative(): void {
@@ -79,6 +84,7 @@ export class VoidSlider extends NativeFormControl(VoidElement) {
         step=${this.step}
         ?disabled=${this.disabled}
         name=${this.name}
+        form=${this.formAttr ?? nothing}
         style="--void-slider-fill: ${fill}%"
         @input=${this._onInput}
         @change=${this._onChange}

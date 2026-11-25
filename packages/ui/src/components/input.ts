@@ -1,7 +1,7 @@
-import { html } from 'lit';
+import { html, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
-import { NativeFormControl, setNativeValue } from '../form-control.js';
+import { NativeFormControl } from '../form-control.js';
 
 /** Single-line text entry for login forms, search fields, and structured data capture. */
 export class VoidInput extends NativeFormControl(VoidElement) {
@@ -30,6 +30,7 @@ export class VoidInput extends NativeFormControl(VoidElement) {
         ?readonly=${this.readonly}
         ?required=${this.required}
         name=${this.name}
+        form=${this.formAttr ?? nothing}
         aria-invalid=${this.error ? 'true' : 'false'}
         @input=${this._onInput}
         @change=${this._onChange}
@@ -39,9 +40,14 @@ export class VoidInput extends NativeFormControl(VoidElement) {
     `;
   }
 
-  protected formRestore(state: unknown): void {
-    this.value = String(state ?? '');
-    setNativeValue(this.querySelector('input'), this.value);
+  protected formWriteNativeDefault(state: unknown): void {
+    const control = this.querySelector<HTMLInputElement | HTMLTextAreaElement>('input');
+    if (control) control.defaultValue = String(state ?? '');
+  }
+
+  protected formReadNative(): void {
+    const control = this.querySelector<HTMLInputElement | HTMLTextAreaElement>('input');
+    if (control) this.value = control.value;
   }
 
   protected formSyncNative(): void {

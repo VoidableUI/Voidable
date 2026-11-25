@@ -39,8 +39,8 @@ describe('VoidRadio', () => {
       expect(el.name).toBe('');
     });
 
-    it('value defaults to empty string', () => {
-      expect(el.value).toBe('');
+    it('value defaults to "on" like a native radio', () => {
+      expect(el.value).toBe('on');
     });
 
     it('color defaults to "default"', () => {

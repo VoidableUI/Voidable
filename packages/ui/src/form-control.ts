@@ -15,15 +15,20 @@ import type { VoidElement } from './base.js';
  * (a) NativeFormControl — the component renders ONE native control whose
  *     value IS the component value (input, textarea, select, slider,
  *     action-input, checkbox, radio). The component forwards
- *     name/value/disabled/required to that control and the native control
- *     submits and validates. The host IS form-associated but NEVER calls
- *     setFormValue (so it contributes no entry and, having no validity flags
- *     of its own, never counts as invalid). Form association is used only so
- *     the browser tells the host about real resets (formResetCallback is not
- *     called for a reset whose event was cancelled) and about
- *     <fieldset disabled> (formDisabledCallback). Pass-through containers
- *     (radio-group, checkbox-group) forward `name` to child controls of this
- *     kind and submit nothing themselves.
+ *     name/value/disabled/required/form to that control and the native
+ *     control submits and validates. The host is NOT form-associated, so the
+ *     native control is the only thing listed in form.elements under that
+ *     name (form.elements.email.value keeps working). On reset the host does
+ *     not restore anything itself: it listens for `reset` (capture phase) and,
+ *     in a task after the reset has run, re-reads its state from the native
+ *     control. The browser has by then reset the control (real reset) or left
+ *     it alone (cancelled reset), whichever listener cancelled. For that to be
+ *     right the native control's own defaults (defaultValue, defaultChecked,
+ *     option defaultSelected) are set to the host's initial state.
+ *     <fieldset disabled> and disabled groups are observed on the ancestors.
+ *     Pass-through containers (radio-group, checkbox-group) forward `name`,
+ *     `disabled`, `required` and `form` to child controls of this kind and
+ *     submit nothing themselves.
  *
  * (b) InternalsFormControl — the component has no native control carrying its
  *     value, or its value is composite/formatted (switch, number-input,
@@ -45,9 +50,9 @@ import type { VoidElement } from './base.js';
  * Turbo auto-submit pattern) or code that sets a value and submits in the same
  * tick sees the new value.
  *
- * Where `attachInternals` is unavailable (old browsers, happy-dom), controls
- * keep working as UI and reset on the form's `reset` event, but (b) controls
- * submit nothing.
+ * Where `attachInternals` is unavailable (old browsers, happy-dom), (b)
+ * controls keep working as UI and restore their default on the form's `reset`
+ * event, but submit nothing.
  *
  * Reset target: the control's state at its first update (after attributes and
  * properties set before connection have been applied), matching how a native
@@ -81,20 +86,6 @@ export function isInDisabledFieldset(el: Element): boolean {
   return false;
 }
 
-/** Set a native input/textarea's current and default value (the default is what native reset restores). */
-export function setNativeValue(control: HTMLInputElement | HTMLTextAreaElement | null, value: string): void {
-  if (!control) return;
-  control.defaultValue = value;
-  control.value = value;
-}
-
-/** Set a native checkbox/radio's current and default checkedness. */
-export function setNativeChecked(control: HTMLInputElement | null, checked: boolean): void {
-  if (!control) return;
-  control.defaultChecked = checked;
-  control.checked = checked;
-}
-
 function clone<T>(v: T): T {
   return (Array.isArray(v) ? [...v] : v) as T;
 }
@@ -108,14 +99,16 @@ export declare class VoidFormControl {
   name: string;
   /** The associated form, if any. */
   readonly form: HTMLFormElement | null;
-  /** True when disabled directly or via an ancestor `<fieldset disabled>`. */
-  readonly formDisabled: boolean;
-  /** Browser callback: the form was reset. */
+  /** True when disabled directly or via a disabled ancestor (`<fieldset disabled>`, disabled group). */
+  get formDisabled(): boolean;
+  /** Reset callback (called by the browser for form-associated hosts). */
   formResetCallback(): void;
   /** Browser callback: the disabled state (own or via fieldset) changed. */
   formDisabledCallback(disabled: boolean): void;
-  /** Reactive mirror of "inside a disabled fieldset", updated by formDisabledCallback. */
-  protected fieldsetDisabled: boolean;
+  /** Reactive mirror of formAncestorDisabled(), kept current by observing ancestors. */
+  protected ancestorDisabled: boolean;
+  /** Hook: whether an ancestor disables this control. Defaults to a disabled fieldset. */
+  protected formAncestorDisabled(): boolean;
   /** Hook: state to remember as the reset target. Defaults to `value`. */
   protected formSnapshot(): unknown;
   /** Hook: apply a snapshot (reset / restore). Must not fire void-change. */
@@ -130,8 +123,16 @@ export declare class VoidFormControl {
 
 /** Surface added by NativeFormControl. */
 export declare class VoidNativeFormControl extends VoidFormControl {
+  /** The `form` attribute, forwarded to the native control. */
+  protected formAttr: string | null;
   /** Hook: push host state into the native control synchronously (no events). */
   protected formSyncNative(): void;
+  /** Hook: make the native control's default (reset target) equal `state`. */
+  protected formWriteNativeDefault(state: unknown): void;
+  /** Hook: after a reset, mirror the native control's state into the host (no events). */
+  protected formReadNative(): void;
+  /** Hook: the native control that owns form association. */
+  protected formNativeControl(): HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement | null;
 }
 
 /** Surface added by InternalsFormControl. */
@@ -157,13 +158,13 @@ type RequestUpdateArgs = Parameters<ReactiveElement['requestUpdate']>;
 const onFormChange = Symbol('onFormChange');
 const formInternals = Symbol('formInternals');
 const formSubmissionOrUndefined = Symbol('formSubmissionOrUndefined');
+const onFormReset = Symbol('onFormReset');
+const listenForReset = Symbol('listenForReset');
 
 function CoreFormControl<T extends Constructor<VoidElement>>(Base: T) {
   class Core extends Base {
-    static formAssociated = true;
-
     @property({ type: String, reflect: true }) name = '';
-    @state() protected fieldsetDisabled = false;
+    @state() protected ancestorDisabled = false;
 
     #internals: ElementInternals | null = null;
     #default: unknown = undefined;
@@ -172,12 +173,14 @@ function CoreFormControl<T extends Constructor<VoidElement>>(Base: T) {
     #syncKey: string | undefined = undefined;
     /** Like :user-invalid — only expose aria-invalid after interaction or a failed submit. */
     #interacted = false;
+    #ancestorObserver: MutationObserver | null = null;
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     constructor(...args: any[]) {
       super(...args);
+      const associated = (this.constructor as { formAssociated?: boolean }).formAssociated;
       try {
-        if (typeof this.attachInternals === 'function') this.#internals = this.attachInternals();
+        if (associated && typeof this.attachInternals === 'function') this.#internals = this.attachInternals();
       } catch {
         this.#internals = null;
       }
@@ -193,13 +196,37 @@ function CoreFormControl<T extends Constructor<VoidElement>>(Base: T) {
     connectedCallback(): void {
       super.connectedCallback();
       // With ElementInternals the browser calls formResetCallback (only for
-      // resets that were not cancelled). Without it, fall back to the event.
-      if (!this.#internals) this.#listenForReset();
+      // resets that were not cancelled). Without it, use the reset event.
+      if (!this.#internals) this[listenForReset]();
+      this.#observeAncestors();
     }
 
     disconnectedCallback(): void {
       super.disconnectedCallback();
       this.#stopListeningForReset();
+      this.#ancestorObserver?.disconnect();
+      this.#ancestorObserver = null;
+    }
+
+    /** Watch every ancestor's `disabled` attribute (fieldsets, disabled groups). */
+    #observeAncestors(): void {
+      this.#ancestorObserver?.disconnect();
+      this.ancestorDisabled = this.formAncestorDisabled();
+      if (typeof MutationObserver === 'undefined') return;
+      this.#ancestorObserver = new MutationObserver(() => {
+        const next = this.formAncestorDisabled();
+        if (next !== this.ancestorDisabled) {
+          this.ancestorDisabled = next;
+          this.formSync();
+        }
+      });
+      for (let p = this.parentElement; p; p = p.parentElement) {
+        this.#ancestorObserver.observe(p, { attributes: true, attributeFilter: ['disabled'] });
+      }
+    }
+
+    protected formAncestorDisabled(): boolean {
+      return isInDisabledFieldset(this);
     }
 
     /** Sync synchronously on every property set once rendered. */
@@ -231,7 +258,7 @@ function CoreFormControl<T extends Constructor<VoidElement>>(Base: T) {
     }
 
     get formDisabled(): boolean {
-      return Boolean((this as { disabled?: boolean }).disabled) || isInDisabledFieldset(this);
+      return Boolean((this as { disabled?: boolean }).disabled) || this.formAncestorDisabled();
     }
 
     protected formSnapshot(): unknown {
@@ -266,10 +293,8 @@ function CoreFormControl<T extends Constructor<VoidElement>>(Base: T) {
       this.formSync();
     }
 
-    formDisabledCallback(disabled: boolean): void {
-      this.fieldsetDisabled = isInDisabledFieldset(this);
-      // `disabled` covers both the host attribute and an ancestor fieldset.
-      this.setAttribute('aria-disabled', String(disabled || this.formDisabled));
+    formDisabledCallback(): void {
+      this.ancestorDisabled = this.formAncestorDisabled();
       this.formSync();
     }
 
@@ -291,6 +316,10 @@ function CoreFormControl<T extends Constructor<VoidElement>>(Base: T) {
       const entries = Array.isArray(submission)
         ? submission.map((v: string | File) => (typeof v === 'string' ? v : [v.name, v.size, v.lastModified]))
         : submission;
+      // Machine-readable disabled state (own, fieldset or group).
+      if (disabled) this.#setAria('aria-disabled', 'true');
+      else if (this.hasAttribute('aria-disabled')) this.#setAria('aria-disabled', 'false');
+
       const key = JSON.stringify([
         this.name, entries, state, disabled, required, this.#interacted,
         validity ? [validity.flags, validity.message] : null,
@@ -349,16 +378,17 @@ function CoreFormControl<T extends Constructor<VoidElement>>(Base: T) {
       this.formSync();
     };
 
-    #listenForReset(): void {
-      const form = this.closest('form');
+    /** (Re)attach the capture-phase reset listener to the current owning form. */
+    [listenForReset](): void {
+      const form = this.isConnected ? this.form : null;
       if (form === this.#resetForm) return;
-      this.#resetForm?.removeEventListener('reset', this.#onFormReset);
+      this.#resetForm?.removeEventListener('reset', this.#onFormReset, true);
       this.#resetForm = form;
-      form?.addEventListener('reset', this.#onFormReset);
+      form?.addEventListener('reset', this.#onFormReset, true);
     }
 
     #stopListeningForReset(): void {
-      this.#resetForm?.removeEventListener('reset', this.#onFormReset);
+      this.#resetForm?.removeEventListener('reset', this.#onFormReset, true);
       this.#resetForm = null;
     }
 
@@ -366,29 +396,86 @@ function CoreFormControl<T extends Constructor<VoidElement>>(Base: T) {
       // Only the form's own reset (not a bubbling event of the same name).
       // Compared by type: some DOMs (happy-dom) hand out proxies for the form.
       if (!(e.target instanceof HTMLFormElement)) return;
-      this.formResetCallback();
+      this[onFormReset]();
     };
+
+    /** Without ElementInternals: restore from the remembered default. */
+    [onFormReset](): void {
+      this.formResetCallback();
+    }
   }
   return Core;
 }
 
 /**
  * Strategy (a): the component renders a native control that submits for it.
- * The host is form-associated only for reset/fieldset callbacks and never
- * calls setFormValue.
- *
- * Components implementing `formRestore` must also update the native control's
- * *default* (see setNativeValue / setNativeChecked) so that a reset handled
- * by the `reset`-event fallback agrees with the browser's own native reset.
+ * The host is not form-associated; see the header comment for how reset,
+ * defaults and disabled ancestors are handled.
  */
 export function NativeFormControl<T extends Constructor<VoidElement>>(Base: T) {
   class Native extends CoreFormControl(Base) {
+    @property({ attribute: 'form' }) protected formAttr: string | null = null;
+
+    #nativeDefault: unknown = undefined;
+    #nativeDefaultPending = false;
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    constructor(...args: any[]) {
+      super(...args);
+      this.addController({
+        hostUpdated: () => {
+          if (this.#nativeDefaultPending && this.formNativeControl()) {
+            this.#nativeDefaultPending = false;
+            this.formWriteNativeDefault(this.#nativeDefault);
+          }
+          // The owning form can change with the `form` attribute.
+          this[listenForReset]();
+        },
+      });
+    }
+
+    override get form(): HTMLFormElement | null {
+      return this.formNativeControl()?.form ?? null;
+    }
+
+    protected override formCaptureDefault(): void {
+      super.formCaptureDefault();
+      this.#nativeDefault = this.formSnapshot();
+      this.#nativeDefaultPending = true;
+      if (this.hasUpdated && this.formNativeControl()) {
+        this.#nativeDefaultPending = false;
+        this.formWriteNativeDefault(this.#nativeDefault);
+      }
+    }
+
+    /**
+     * Mirror, don't restore: run after the reset has finished (a new task, so
+     * also after a reset triggered by a native reset button) and copy whatever
+     * the native control now holds. A cancelled reset changed nothing.
+     */
+    override [onFormReset](): void {
+      setTimeout(() => {
+        this.formReadNative();
+        this.formSync();
+      }, 0);
+    }
+
     override [onFormChange](): void {
       this.formSyncNative();
       super[onFormChange]();
     }
 
     protected formSyncNative(): void {}
+
+    protected formWriteNativeDefault(state: unknown): void {
+      void state;
+    }
+
+    protected formReadNative(): void {}
+
+    protected formNativeControl(): HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement | null {
+      return this.querySelector('input, select, textarea');
+    }
   }
   return Native as unknown as Constructor<VoidNativeFormControl> & T;
 }
@@ -400,6 +487,8 @@ export function NativeFormControl<T extends Constructor<VoidElement>>(Base: T) {
  */
 export function InternalsFormControl<T extends Constructor<VoidElement>>(Base: T) {
   class Internals extends CoreFormControl(Base) {
+    static formAssociated = true;
+
     @property({ type: Boolean, reflect: true }) required = false;
 
     get validity(): ValidityState | undefined {
@@ -454,6 +543,3 @@ export function InternalsFormControl<T extends Constructor<VoidElement>>(Base: T
   }
   return Internals as unknown as Constructor<VoidInternalsFormControl> & T;
 }
-
-/** Selector for the first focusable descendant; exported for components that pick their own anchor. */
-export const FORM_FOCUSABLE_SELECTOR = FOCUSABLE;

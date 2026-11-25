@@ -1,7 +1,7 @@
 import { html, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
-import { NativeFormControl, type FormValidityResult } from '../form-control.js';
+import { NativeFormControl } from '../form-control.js';
 import type { VoidCheckbox } from './checkbox.js';
 
 /** Grouped multi-option selection for preference forms, filter panels, and permission editors. */
@@ -9,8 +9,8 @@ import type { VoidCheckbox } from './checkbox.js';
  * Form strategy: pass-through. `name` is forwarded to the child void-checkbox
  * elements, whose native checkboxes submit one entry per checked box; the
  * group itself submits nothing and each checkbox resets itself. `required`
- * means "at least one checked" and is enforced on the group via
- * ElementInternals validity (native checkboxes cannot express it).
+ * means "at least one checked", enforced with setCustomValidity on the first
+ * enabled checkbox's native input. `disabled` and `form` are forwarded.
  */
 export class VoidCheckboxGroup extends NativeFormControl(VoidElement) {
   @property({ type: String, reflect: true }) label = '';
@@ -18,6 +18,8 @@ export class VoidCheckboxGroup extends NativeFormControl(VoidElement) {
   /** Field name forwarded to every child checkbox. */
   @property({ type: String, reflect: true }) name = '';
   @property({ type: Boolean, reflect: true }) required = false;
+  /** Disables every checkbox in the group (like a fieldset). */
+  @property({ type: Boolean, reflect: true }) disabled = false;
 
   private _userContent: Node[] = [];
   private _didSetup = false;
@@ -40,12 +42,14 @@ export class VoidCheckboxGroup extends NativeFormControl(VoidElement) {
     return null;
   }
 
-  protected formRestore(): void {}
-
-  protected formValidity(): FormValidityResult | null {
-    if (!this.required || this.value.length > 0) return null;
-    const first = this.querySelector<HTMLElement>('void-checkbox:not([disabled])') ?? undefined;
-    return { flags: { valueMissing: true }, message: 'Please check at least one box.', anchor: first };
+  /** "At least one" validity, carried by the first enabled native checkbox. */
+  protected formSyncNative(): void {
+    const boxes = Array.from(this.querySelectorAll('void-checkbox')) as VoidCheckbox[];
+    const anchor = this.required && this.value.length === 0 ? boxes.find((b) => !b.formDisabled) : undefined;
+    for (const box of boxes) {
+      const input = box.querySelector<HTMLInputElement>('input[type="checkbox"]');
+      input?.setCustomValidity(box === anchor ? 'Please check at least one box.' : '');
+    }
   }
 
   connectedCallback(): void {
@@ -74,6 +78,19 @@ export class VoidCheckboxGroup extends NativeFormControl(VoidElement) {
     }
     if (changed.has('name')) {
       this._syncNames();
+    }
+    if (changed.has('formAttr')) {
+      for (const el of Array.from(this.querySelectorAll('void-checkbox'))) {
+        if (this.formAttr === null) el.removeAttribute('form');
+        else el.setAttribute('form', this.formAttr);
+      }
+    }
+    if (changed.has('disabled') || changed.has('ancestorDisabled')) {
+      this.setAttribute('aria-disabled', String(this.formDisabled));
+    }
+    if (changed.has('required')) {
+      Promise.all((Array.from(this.querySelectorAll('void-checkbox')) as VoidCheckbox[]).map((b) => b.updateComplete))
+        .then(() => this.formSyncNative());
     }
     if (!this._didSetup) {
       this._didSetup = true;

@@ -1,7 +1,7 @@
-import { html } from 'lit';
+import { html, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
-import { NativeFormControl, setNativeValue } from '../form-control.js';
+import { NativeFormControl } from '../form-control.js';
 
 /** Multi-line text entry for comment fields, description inputs, and freeform text that needs more than one line. */
 export class VoidTextarea extends NativeFormControl(VoidElement) {
@@ -31,6 +31,7 @@ export class VoidTextarea extends NativeFormControl(VoidElement) {
         ?readonly=${this.readonly}
         ?required=${this.required}
         name=${this.name}
+        form=${this.formAttr ?? nothing}
         rows=${this.rows}
         style="--void-textarea-resize: ${this.resize}"
         aria-invalid=${this.error ? 'true' : 'false'}
@@ -41,9 +42,14 @@ export class VoidTextarea extends NativeFormControl(VoidElement) {
     `;
   }
 
-  protected formRestore(state: unknown): void {
-    this.value = String(state ?? '');
-    setNativeValue(this.querySelector('textarea'), this.value);
+  protected formWriteNativeDefault(state: unknown): void {
+    const control = this.querySelector<HTMLInputElement | HTMLTextAreaElement>('textarea');
+    if (control) control.defaultValue = String(state ?? '');
+  }
+
+  protected formReadNative(): void {
+    const control = this.querySelector<HTMLInputElement | HTMLTextAreaElement>('textarea');
+    if (control) this.value = control.value;
   }
 
   protected formSyncNative(): void {

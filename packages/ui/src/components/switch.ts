@@ -31,7 +31,7 @@ export class VoidSwitch extends InternalsFormControl(VoidElement) {
     if (changed.has('checked')) {
       this.setAttribute('aria-checked', String(this.checked));
     }
-    if (changed.has('disabled') || changed.has('fieldsetDisabled')) {
+    if (changed.has('disabled') || changed.has('ancestorDisabled')) {
       const disabled = this.formDisabled;
       this.setAttribute('aria-disabled', String(disabled));
       this.setAttribute('tabindex', disabled ? '-1' : '0');

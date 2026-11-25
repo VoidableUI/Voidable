@@ -121,6 +121,8 @@ function browserReset(form: HTMLFormElement): void {
 }
 
 async function settle(root: ParentNode): Promise<void> {
+  // Native-backed hosts mirror their native control in a task after reset.
+  await new Promise((r) => setTimeout(r, 0));
   for (let i = 0; i < 3; i++) {
     const els = Array.from(root.querySelectorAll('*')).filter((e) => 'updateComplete' in e) as unknown as Array<{ updateComplete: Promise<unknown> }>;
     await Promise.all(els.map((e) => e.updateComplete));
@@ -176,7 +178,7 @@ describe('isInDisabledFieldset', () => {
 // ── Strategy (a): inner native control ──
 
 describe('native-control strategy', () => {
-  it('hosts are form-associated only for callbacks and never submit (no double submission)', async () => {
+  it('hosts are not form-associated; the native control is the only participant (no double submission)', async () => {
     installFakeInternals();
     const setFormValue = vi.spyOn(FakeInternals.prototype, 'setFormValue');
     const form = await mount(`
@@ -185,7 +187,7 @@ describe('native-control strategy', () => {
       <void-slider name="c" value="3"></void-slider>
       <void-action-input name="d" value="4"></void-action-input>
       <void-checkbox name="e" checked></void-checkbox>
-      <void-select name="f"><option value="x">X</option></void-select>
+      <void-select name="f" value="x"><option value="x">X</option></void-select>
       <void-radio-group name="g" value="y"><void-radio value="y"></void-radio></void-radio-group>
       <void-checkbox-group name="h"><void-checkbox value="z" checked></void-checkbox></void-checkbox-group>
     `);
@@ -193,9 +195,15 @@ describe('native-control strategy', () => {
     (form.querySelector('void-checkbox') as HTMLElement).click();
     await settle(form);
     for (const tag of ['void-input', 'void-textarea', 'void-select', 'void-slider', 'void-action-input', 'void-checkbox', 'void-radio', 'void-radio-group', 'void-checkbox-group']) {
-      expect(isFace(form.querySelector(tag)!), tag).toBe(true);
+      const host = form.querySelector(tag)! as HTMLElement;
+      expect(isFace(host), tag).toBe(false);
+      expect(internalsOf.has(host), tag).toBe(false);
     }
     expect(setFormValue).not.toHaveBeenCalled();
+    // form.elements resolves each name to the native control, whose value is the real value.
+    const named = form.elements.namedItem('a') as HTMLInputElement;
+    expect(named.tagName).toBe('INPUT');
+    expect(named.value).toBe('changed');
     // Only the inner native controls contribute, once each.
     expect(entries(form)).toEqual([['a', 'changed'], ['b', '2'], ['c', '3'], ['d', '4'], ['f', 'x'], ['g', 'y'], ['h', 'z']]);
     setFormValue.mockRestore();
@@ -614,13 +622,17 @@ describe('internals strategy with ElementInternals (fake)', () => {
     expect(spy).not.toHaveBeenCalled();
   });
 
-  it('formDisabledCallback updates aria-disabled', async () => {
-    const form = await mount('<void-switch name="a"></void-switch>');
-    const sw = form.querySelector('void-switch') as VoidSwitch;
-    sw.formDisabledCallback(true);
-    expect(sw.getAttribute('aria-disabled')).toBe('true');
-    sw.formDisabledCallback(false);
-    expect(sw.getAttribute('aria-disabled')).toBe('false');
+  it('fieldset toggles update aria-disabled', async () => {
+    const form = await mount('<fieldset><void-switch name="a"></void-switch><void-tags-input name="t"></void-tags-input></fieldset>');
+    const fs = form.querySelector('fieldset')!;
+    setFieldsetDisabled(fs, true);
+    await settle(form);
+    expect(form.querySelector('void-switch')!.getAttribute('aria-disabled')).toBe('true');
+    expect(form.querySelector('void-tags-input')!.getAttribute('aria-disabled')).toBe('true');
+    setFieldsetDisabled(fs, false);
+    await settle(form);
+    expect(form.querySelector('void-switch')!.getAttribute('aria-disabled')).toBe('false');
+    expect(form.querySelector('void-tags-input')!.getAttribute('aria-disabled')).toBe('false');
   });
 
   it('formResetCallback restores initial values without void-change', async () => {
@@ -930,29 +942,30 @@ describe('review: required and ARIA (finding 7)', () => {
     expect(sw.hasAttribute('aria-required')).toBe(false);
   });
 
-  it('checkbox, radio, radio-group and checkbox-group honour required', async () => {
+  it('checkbox, radio, radio-group, checkbox-group and action-input validate on the native control', async () => {
     const form = await mount(`
       <void-checkbox name="c" required></void-checkbox>
       <void-radio name="r" value="1" required></void-radio><void-radio name="r" value="2"></void-radio>
       <void-radio-group name="g" required><void-radio value="x"></void-radio></void-radio-group>
-      <void-checkbox-group name="h" required><void-checkbox value="z"></void-checkbox></void-checkbox-group>
+      <void-checkbox-group name="h" required><void-checkbox value="z"></void-checkbox><void-checkbox value="w"></void-checkbox></void-checkbox-group>
       <void-action-input name="a" required></void-action-input>
     `);
-    const valid = (sel: string) => internalsOf.get(form.querySelector(sel) as HTMLElement)!.validity.valid;
-    expect(valid('void-checkbox[name="c"]')).toBe(false);
-    expect(valid('void-radio[value="1"]')).toBe(false);
-    expect(valid('void-checkbox-group')).toBe(false);
-    expect((form.querySelector('void-radio[value="x"]') as HTMLElement & { required: boolean }).required).toBe(true);
-    expect(form.querySelector<HTMLInputElement>('void-action-input input')!.required).toBe(true);
-    // The aria-hidden inner checkbox/radio is not what validation focuses.
-    expect(form.querySelector<HTMLInputElement>('void-checkbox[name="c"] input')!.required).toBe(false);
-
-    (form.querySelector('void-checkbox[name="c"]') as HTMLElement).click();
-    (form.querySelector('void-radio[value="2"]') as HTMLElement).click();
-    (form.querySelector('void-checkbox-group void-checkbox') as HTMLElement).click();
-    expect(valid('void-checkbox[name="c"]')).toBe(true);
-    expect(valid('void-radio[value="1"]')).toBe(true);
-    expect(valid('void-checkbox-group')).toBe(true);
+    const native = (sel: string) => form.querySelector<HTMLInputElement>(sel)!;
+    expect(native('void-checkbox[name="c"] input').required).toBe(true);
+    expect(native('void-radio[value="1"] input').required).toBe(true);
+    expect(native('void-radio[value="x"] input').required).toBe(true);
+    expect(native('void-action-input input').required).toBe(true);
+    // checkbox-group: "at least one" via a custom validity message on the first checkbox.
+    expect(native('void-checkbox[value="z"] input').validationMessage).toBe('Please check at least one box.');
+    expect(native('void-checkbox[value="w"] input').validationMessage).toBe('');
+    (form.querySelector('void-checkbox[value="w"]') as HTMLElement).click();
+    await settle(form);
+    expect(native('void-checkbox[value="z"] input').validationMessage).toBe('');
+    // Hosts expose aria-required.
+    expect(form.querySelector('void-checkbox[name="c"]')!.getAttribute('aria-required')).toBe('true');
+    // Focus handed from the aria-hidden native input to the host.
+    native('void-checkbox[name="c"] input').focus();
+    expect(document.activeElement).toBe(form.querySelector('void-checkbox[name="c"]'));
   });
 
   it('a required group with no focusable child makes the host focusable instead of failing silently', async () => {
@@ -998,5 +1011,34 @@ describe('review: Enter with only a void-button (finding 8)', () => {
       expect(submit, html).not.toHaveBeenCalled();
       form.remove();
     }
+  });
+});
+
+describe('native-backed: disabled groups and form attribute', () => {
+  it('a disabled radio-group / checkbox-group disables its children like a fieldset', async () => {
+    const form = await mount(`
+      <void-radio-group name="g" value="x" disabled><void-radio value="x"></void-radio></void-radio-group>
+      <void-checkbox-group name="h" disabled><void-checkbox value="z" checked></void-checkbox></void-checkbox-group>
+    `);
+    expect([...new FormData(form).entries()]).toEqual([]);
+    expect(form.querySelector('void-radio')!.getAttribute('aria-disabled')).toBe('true');
+    const spy = vi.fn();
+    form.addEventListener('void-change', spy);
+    (form.querySelector('void-checkbox') as HTMLElement).click();
+    expect(spy).not.toHaveBeenCalled();
+    (form.querySelector('void-checkbox-group') as VoidCheckboxGroup).toggleAttribute('disabled', false);
+    await settle(form);
+    expect([...new FormData(form).entries()]).toEqual([['h', 'z']]);
+    expect(form.querySelector('void-checkbox')!.getAttribute('aria-disabled')).toBe('false');
+  });
+
+  it('forwards the form attribute to the native control (and through groups)', async () => {
+    document.body.innerHTML = '<form id="other"></form>';
+    const form = await mount(`
+      <void-input name="a" form="other"></void-input>
+      <void-checkbox-group name="h" form="other"><void-checkbox value="z" checked></void-checkbox></void-checkbox-group>
+    `);
+    expect(form.querySelector('void-input input')!.getAttribute('form')).toBe('other');
+    expect(form.querySelector('void-checkbox input')!.getAttribute('form')).toBe('other');
   });
 });

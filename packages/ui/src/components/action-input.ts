@@ -1,7 +1,7 @@
-import { html } from 'lit';
+import { html, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
-import { NativeFormControl, setNativeValue } from '../form-control.js';
+import { NativeFormControl } from '../form-control.js';
 
 /** Input field with an attached icon button — used for copy-to-clipboard inputs, search boxes, and similar patterns. */
 export class VoidActionInput extends NativeFormControl(VoidElement) {
@@ -45,9 +45,14 @@ export class VoidActionInput extends NativeFormControl(VoidElement) {
     }
   }
 
-  protected formRestore(state: unknown): void {
-    this.value = String(state ?? '');
-    setNativeValue(this.querySelector('.void-action-input-field'), this.value);
+  protected formWriteNativeDefault(state: unknown): void {
+    const control = this.querySelector<HTMLInputElement | HTMLTextAreaElement>('.void-action-input-field');
+    if (control) control.defaultValue = String(state ?? '');
+  }
+
+  protected formReadNative(): void {
+    const control = this.querySelector<HTMLInputElement | HTMLTextAreaElement>('.void-action-input-field');
+    if (control) this.value = control.value;
   }
 
   protected formSyncNative(): void {
@@ -96,6 +101,7 @@ export class VoidActionInput extends NativeFormControl(VoidElement) {
         ?readonly=${this.readonly}
         ?required=${this.required}
         name=${this.name}
+        form=${this.formAttr ?? nothing}
         autocomplete=${this.autocomplete}
         aria-label=${this.actionLabel}
         @input=${this._onInput}

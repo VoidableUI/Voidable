@@ -1,7 +1,7 @@
 import { html, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
-import { NativeFormControl, setNativeChecked } from '../form-control.js';
+import { NativeFormControl } from '../form-control.js';
 import type { VoidRadio } from './radio.js';
 
 /** Mutually exclusive option group for plan pickers, survey questions, and preference settings. */
@@ -15,6 +15,8 @@ export class VoidRadioGroup extends NativeFormControl(VoidElement) {
   @property({ type: String, reflect: true }) name = '';
   /** Forwarded to the child radios: the browser then requires one of them to be checked. */
   @property({ type: Boolean, reflect: true }) required = false;
+  /** Disables every radio in the group (like a fieldset). */
+  @property({ type: Boolean, reflect: true }) disabled = false;
   @property({ type: String, reflect: true }) orientation: 'vertical' | 'horizontal' = 'vertical';
 
   private _userContent: Node[] = [];
@@ -46,6 +48,15 @@ export class VoidRadioGroup extends NativeFormControl(VoidElement) {
     if (changed.has('required')) {
       for (const radio of this._radios()) radio.required = this.required;
     }
+    if (changed.has('formAttr')) {
+      for (const radio of this._radios()) {
+        if (this.formAttr === null) radio.removeAttribute('form');
+        else radio.setAttribute('form', this.formAttr);
+      }
+    }
+    if (changed.has('disabled') || changed.has('ancestorDisabled')) {
+      this.setAttribute('aria-disabled', String(this.formDisabled));
+    }
     if (!this._didSetup) {
       this._didSetup = true;
       const group = this.querySelector('.void-radio-group-options');
@@ -67,12 +78,25 @@ export class VoidRadioGroup extends NativeFormControl(VoidElement) {
     if (this._didSetup) this._syncChecked();
   }
 
-  protected formRestore(state: unknown): void {
-    this.value = String(state ?? '');
+  /** The group's initial value becomes the native radios' default checkedness. */
+  protected formWriteNativeDefault(state: unknown): void {
+    const value = String(state ?? '');
     for (const radio of this._radios()) {
-      radio.checked = radio.value === this.value;
-      setNativeChecked(radio.querySelector('input[type="radio"]'), radio.checked);
+      radio.updateComplete.then(() => {
+        const input = radio.querySelector<HTMLInputElement>('input[type="radio"]');
+        if (input) input.defaultChecked = radio.value === value;
+      });
     }
+  }
+
+  protected formReadNative(): void {
+    let value = '';
+    for (const radio of this._radios()) {
+      const input = radio.querySelector<HTMLInputElement>('input[type="radio"]');
+      radio.checked = Boolean(input?.checked);
+      if (radio.checked) value = radio.value;
+    }
+    this.value = value;
   }
 
   private _radios(): VoidRadio[] {

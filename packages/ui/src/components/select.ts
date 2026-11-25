@@ -59,16 +59,21 @@ export class VoidSelect extends NativeFormControl(VoidElement) {
     }
   }
 
-  formRestore(state: unknown): void {
-    this.value = String(state ?? '');
+  /** The initial value becomes the default-selected option (what native reset selects). */
+  protected formWriteNativeDefault(state: unknown): void {
     const select = this.querySelector('select');
     if (!select) return;
-    // Make the restored option the native default so the browser's own reset agrees.
+    const value = String(state ?? '');
     const options = Array.from(select.options);
-    if (options.some((o) => o.value === this.value)) {
-      for (const option of options) option.defaultSelected = option.value === this.value;
+    if (options.some((o) => o.value === value)) {
+      // The `selected` content attribute is defaultSelected.
+      for (const option of options) option.toggleAttribute('selected', option.value === value);
     }
-    select.value = this.value;
+  }
+
+  protected formReadNative(): void {
+    const select = this.querySelector('select');
+    if (select) this.value = select.value;
   }
 
   render() {
@@ -77,6 +82,7 @@ export class VoidSelect extends NativeFormControl(VoidElement) {
         ?disabled=${this.disabled}
         ?required=${this.required}
         name=${this.name}
+        form=${this.formAttr ?? nothing}
         aria-invalid=${this.error ? 'true' : 'false'}
         @change=${this._onChange}
       >${this.placeholder

@@ -1,17 +1,18 @@
-import { html } from 'lit';
+import { html, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
-import { NativeFormControl, setNativeChecked, type FormValidityResult } from '../form-control.js';
+import { NativeFormControl } from '../form-control.js';
 
 /** Single mutually exclusive option for forms and surveys; typically used inside VoidRadioGroup. */
 export class VoidRadio extends NativeFormControl(VoidElement) {
   @property({ type: Boolean, reflect: true }) checked = false;
   @property({ type: Boolean, reflect: true }) disabled = false;
   @property({ type: String, reflect: true }) name = '';
-  @property({ type: String, reflect: true }) value = '';
+  /** Submitted under `name` while checked; defaults to "on" like a native radio. */
+  @property({ type: String, reflect: true }) value = 'on';
   /**
-   * One radio with this name must be checked (as for native radios). Validated
-   * on the host: the inner native radio is aria-hidden.
+   * One radio with this name must be checked. Forwarded to the native radio,
+   * which the browser validates as a group; focus moves to the host.
    */
   @property({ type: Boolean, reflect: true }) required = false;
   @property({ type: String, reflect: true }) color: 'default' | 'error' | 'warning' | 'success' | 'info' | 'notice' = 'default';
@@ -43,7 +44,7 @@ export class VoidRadio extends NativeFormControl(VoidElement) {
     if (changed.has('checked')) {
       this.setAttribute('aria-checked', String(this.checked));
     }
-    if (changed.has('disabled') || changed.has('fieldsetDisabled')) {
+    if (changed.has('disabled') || changed.has('ancestorDisabled')) {
       const disabled = this.formDisabled;
       this.setAttribute('aria-disabled', String(disabled));
       this.setAttribute('tabindex', disabled ? '-1' : '0');
@@ -58,7 +59,7 @@ export class VoidRadio extends NativeFormControl(VoidElement) {
 
   render() {
     return html`
-      <input type="radio" .checked=${this.checked} ?disabled=${this.disabled} name=${this.name} value=${this.value} tabindex="-1" aria-hidden="true" />
+      <input type="radio" .checked=${this.checked} ?disabled=${this.formDisabled} ?required=${this.required} name=${this.name} value=${this.value} form=${this.formAttr ?? nothing} tabindex="-1" aria-hidden="true" @focus=${this._onNativeFocus} />
       <span class="void-radio-circle">
         ${this.checked ? html`<span class="void-radio-dot"></span>` : ''}
       </span>
@@ -70,36 +71,41 @@ export class VoidRadio extends NativeFormControl(VoidElement) {
     return this.checked;
   }
 
-  formResetCallback(): void {
-    // Inside a void-radio-group the group owns the checked state.
-    if (this.closest('void-radio-group')) return;
-    super.formResetCallback();
+  /** A disabled void-radio-group disables its radios like a fieldset. */
+  protected formAncestorDisabled(): boolean {
+    return super.formAncestorDisabled() || Boolean(this.closest('void-radio-group')?.hasAttribute('disabled'));
   }
 
-  protected formRestore(state: unknown): void {
-    this.checked = Boolean(state);
-    setNativeChecked(this.querySelector('input[type="radio"]'), this.checked);
+  protected formWriteNativeDefault(state: unknown): void {
+    // Inside a void-radio-group the group owns the default.
+    if (this.closest('void-radio-group')) return;
+    const input = this.querySelector<HTMLInputElement>('input[type="radio"]');
+    if (input) input.defaultChecked = Boolean(state);
   }
+
+  protected formReadNative(): void {
+    const input = this.querySelector<HTMLInputElement>('input[type="radio"]');
+    if (input) this.checked = input.checked;
+  }
+
+  /** The browser focuses the native input to report validity; hand focus to the host. */
+  private _onNativeFocus = (): void => {
+    this.focus();
+  };
 
   protected formSyncNative(): void {
     const input = this.querySelector<HTMLInputElement>('input[type="radio"]');
     if (input && input.checked !== this.checked) input.checked = this.checked;
-    // Validity depends on the whole same-name set.
-    for (const peer of this._peers()) if (peer !== this) peer.formSync();
-  }
-
-  protected formValidity(): FormValidityResult | null {
-    if (!this.required || this._peers().some((r) => r.checked)) return null;
-    return { flags: { valueMissing: true }, message: 'Please select one of these options.' };
+    // Like native radios: checking one unchecks the other same-name radios of its form.
+    if (this.checked && this.name && !this.closest('void-radio-group')) {
+      const scope: ParentNode = this.form ?? (this.getRootNode() as ParentNode);
+      for (const peer of Array.from(scope.querySelectorAll('void-radio')) as VoidRadio[]) {
+        if (peer !== this && peer.name === this.name && peer.checked && !peer.closest('void-radio-group')) peer.checked = false;
+      }
+    }
   }
 
   /** void-radio elements sharing this radio's name in the same form (or document). */
-  private _peers(): VoidRadio[] {
-    if (!this.name) return [this];
-    const scope: ParentNode = this.closest('form') ?? this.getRootNode() as ParentNode;
-    return (Array.from(scope.querySelectorAll('void-radio')) as VoidRadio[]).filter((r) => r.name === this.name);
-  }
-
   private _handleClick = (e: Event): void => {
     const disabled = this.formDisabled;
     if (disabled || this.checked) {
