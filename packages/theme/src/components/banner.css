@@ -7,7 +7,7 @@ void-banner {
   align-items: center;
   gap: var(--void-space-3);
   padding: var(--void-space-3) var(--void-container-padding);
-  border: 1px solid var(--_void-tone-border);
+  border: var(--void-container-border-width) solid var(--_void-tone-border);
   border-radius: var(--void-radius-md);
   background: var(--_void-tone-subtle);
   color: var(--void-color-text);

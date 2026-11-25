@@ -41,9 +41,11 @@ void-card[variant="elevated"] {
   box-shadow: var(--void-float-shadow);
 }
 
+/* No fill and no shadow: only a line, the frame rule (a skin's container
+   edge may be invisible, and a bordered card is nothing but its edge). */
 void-card[variant="bordered"] {
   background: transparent;
-  border: var(--_void-card-border-width) solid var(--void-color-border);
+  border: var(--void-rule-frame);
   box-shadow: none;
 }
 

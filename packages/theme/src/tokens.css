@@ -535,11 +535,14 @@
      colour), so `none` switches it off and `2px solid …` makes it
      heavy. between: items of one group (rows, cells, figures). edge:
      the line that opens and closes a group. head: under a heading (the
-     page head, a divided section, a card header, a table header). */
+     page head, a divided section, a card header, a table header).
+     frame: the line all the way round a box that has no fill of its own
+     (a bordered card or panel, a bordered table, a collapsible). */
   --void-rule:         1px solid var(--void-color-border);
   --void-rule-between: var(--void-rule);
   --void-rule-edge:    var(--void-rule);
   --void-rule-head:    var(--void-rule);
+  --void-rule-frame:   var(--void-rule);
 
   /* ── Charts ── */
   --void-chart-series-1: var(--void-color-accent);

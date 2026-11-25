@@ -118,20 +118,21 @@ void-number-input:has(.void-number-input-unit) input.void-number-input-field {
   cursor: not-allowed;
 }
 
-/* Separator lines between btn and input */
+/* Separator lines between btn and input: the rule between items of one
+   group, so a skin that draws its rules in ink draws these too. */
 .void-number-input-btn-dec {
-  border-right: 1px solid var(--void-color-border);
+  border-right: var(--void-rule-between);
 }
 
 .void-number-input-btn-inc {
-  border-left: 1px solid var(--void-color-border);
+  border-left: var(--void-rule-between);
 }
 
 /* controls="right" — both buttons stacked vertically on the right */
 void-number-input[controls="right"] .void-number-input-btn-group {
   display: flex;
   flex-direction: column;
-  border-left: 1px solid var(--void-color-border);
+  border-left: var(--void-rule-between);
 }
 
 void-number-input[controls="right"] .void-number-input-btn {
@@ -141,7 +142,7 @@ void-number-input[controls="right"] .void-number-input-btn {
 }
 
 void-number-input[controls="right"] .void-number-input-btn-inc {
-  border-bottom: 1px solid var(--void-color-border);
+  border-bottom: var(--void-rule-between);
 }
 
 /* controls="none" — just the input, no separators */

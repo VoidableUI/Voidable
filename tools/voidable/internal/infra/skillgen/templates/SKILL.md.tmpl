@@ -192,7 +192,7 @@ The theme has three tiers. Work at the highest one that does the job:
    | control | `--void-control-radius`, `--void-control-border`, `--void-control-border-width`, `--void-control-height[-sm|-lg]` | buttons, toggles, checkbox, radio, switch, fields |
    | field | `--void-field-surface`, `--void-field-border` | input, textarea, select, combobox, number, pin and tags input |
    | item | `--void-item-surface-selected`, `--void-item-ink-selected` | the current navigation link, the selected list item |
-   | rule | `--void-rule`, `--void-rule-between`, `--void-rule-edge`, `--void-rule-head` | every separating line; each is a whole border, so `none` removes it |
+   | rule | `--void-rule`, `--void-rule-between`, `--void-rule-edge`, `--void-rule-head`, `--void-rule-frame` | every separating line; each is a whole border, so `none` removes it |
 
 3. **Component tokens**: one component's exception. The name is `--void-<component>-<part?>-<property>-<state?>`, with the component the tag without `void-`, the property one of `surface` (fill), `ink` (text), `border`, `border-width`, `radius`, `shadow`, `rule`, `gap`, `padding`, `padding-block`, `padding-inline`, `height`, `width`, `size`, `font-size`, `font-weight`, and the state one of `hover`, `active`, `selected`, `disabled`, `invalid`, `open`, `focus`: `--void-card-shadow`, `--void-button-border`, `--void-page-head-rule`, `--void-nav-links-item-surface-selected`. The full list, with defaults and what each styles, is `@voidable/theme/component-tokens.json` (grouped by component) and the Tokens section of each component's page; `componentTokenNames` and the `ComponentTokenName` type are in `@voidable/theme/names`. Do not invent a name: a token that is not in the list does nothing.
 

@@ -229,7 +229,7 @@ One grammar, so a name can be guessed:
 |---|---|
 | component | The tag without `void-`: `card`, `nav-bar`, `page-head` |
 | part | `header`, `footer`, `title`, `body`, `actions`, `trigger`, `content`, `item`, `label`, `icon`, `value` (the same words as the part elements) |
-| property | `surface` (fill), `ink` (text), `border` (edge colour), `border-width`, `radius`, `shadow`, `rule` (a whole line: `rule`, `rule-between`, `rule-edge`, `rule-head`), `gap`, `padding`, `padding-block`, `padding-inline`, `height`, `width`, `size`, `font-size`, `font-weight` |
+| property | `surface` (fill), `ink` (text), `border` (edge colour), `border-width`, `radius`, `shadow`, `rule` (a whole line: `rule`, `rule-between`, `rule-edge`, `rule-head`, `rule-frame`), `gap`, `padding`, `padding-block`, `padding-inline`, `height`, `width`, `size`, `font-size`, `font-weight` |
 | state | `hover`, `active`, `selected`, `disabled`, `invalid`, `open`, `focus` |
 
 `--void-nav-links-item-surface-selected` is the fill of the selected item of `void-nav-links`. A token exists only where a real design wants that component to differ from its role: there is no token per declaration, and `lint:component-tokens` fails on a name outside the grammar, a token nobody reads and a token nobody documented.
