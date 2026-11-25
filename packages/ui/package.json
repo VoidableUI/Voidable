@@ -16,6 +16,7 @@
       "types": "./dist/components/*.d.ts",
       "default": "./dist/components/*.js"
     },
+    "./custom-elements.json": "./dist/custom-elements.json",
     "./*": {
       "types": "./dist/components/*.d.ts",
       "default": "./dist/components/*.js"
@@ -28,8 +29,9 @@
     "./src/components/*.ts"
   ],
   "files": ["dist"],
+  "customElements": "dist/custom-elements.json",
   "scripts": {
-    "build": "vite build",
+    "build": "vite build && cem analyze",
     "test": "vitest run",
     "typecheck": "tsc --noEmit"
   },
@@ -37,6 +39,7 @@
     "lit": "^3.3.0"
   },
   "devDependencies": {
+    "@custom-elements-manifest/analyzer": "^0.11.0",
     "typescript": "^6.0.0",
     "vite": "^8.0.0",
     "vite-plugin-dts": "^4.5.0",
