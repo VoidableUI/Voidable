@@ -4,7 +4,7 @@
     "events": {
       "void-click": "Fires after an enabled button is activated, once any form submit or reset it does has run. Not fired while the button is disabled. A native `click` listener works too."
     },
-    "children": "The label: text, or text with an icon. For an icon-only button put an `aria-label` on the button. A link can go inside to make a link that looks like a button."
+    "children": "The label: text, or text with an icon. For an icon-only button put an `aria-label` on the button. A link (`<a href>`) or a native `<button>` can go inside to make a link that looks like a button: the inner element is then the one control (the host has no role and no tab stop, and draws the focus ring when the link has focus). `disabled` marks the link `aria-disabled=\"true\"`, takes it out of the tab order and stops it navigating."
   },
   "void-action-input": {
     "group": "forms",
@@ -252,7 +252,7 @@
   },
   "void-breadcrumbs": {
     "group": "navigation",
-    "children": "One `void-breadcrumbs-item` per crumb, in order, each holding a link (or text for the current page). Put `aria-current=\"page\"` on the item of the current page. The separators are drawn by the theme."
+    "children": "One `void-breadcrumbs-list` holding one `void-breadcrumbs-item` per crumb, in order, each holding a link (or text for the current page). The component gives the list and the items `role=\"list\"` and `role=\"listitem\"`. Put `aria-current=\"page\"` on the item of the current page. The separators are drawn by the theme and are not read out."
   },
   "void-hamburger": {
     "group": "navigation",
