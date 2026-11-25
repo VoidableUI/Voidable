@@ -2,4 +2,9 @@
 #MISE description="Install all dependencies"
 set -euo pipefail
 
+# sharp (a docs devDependency) switches to building from source when it finds a
+# system libvips, which fails without node-addon-api. Use its prebuilt binaries
+# everywhere, as CI does.
+export SHARP_IGNORE_GLOBAL_LIBVIPS=1
+
 pnpm install
