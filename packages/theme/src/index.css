@@ -76,5 +76,8 @@
 @import './components/donut-chart.css';
 @import './components/gauge.css';
 
+/* Pre-upgrade state: :not(:defined) rules, after every component file */
+@import './pre-upgrade.css';
+
 /* Accessibility: forced-colors (keep last so it wins) */
 @import './forced-colors.css';

@@ -1,0 +1,243 @@
+/*
+ * Pre-upgrade state (`:not(:defined)`).
+ *
+ * Until a component's script has loaded and defined its tag, the browser treats
+ * `<void-*>` as an unknown element: it renders the server-sent children as plain
+ * inline content and none of what the component would render itself (tab list,
+ * input box, field label). When the script arrives the element upgrades and the
+ * page reflows. These rules make the page look and measure the same before and
+ * after:
+ *
+ *   - hide what must not show yet: closed overlays, panels of tabs that are not
+ *     active, closed accordion and collapsible bodies, option lists, carousel
+ *     slides after the first;
+ *   - reserve the space of what the component will render, using the same
+ *     tokens its own rules use;
+ *   - never hide content that means something before upgrade: the text of
+ *     buttons, badges, tags, cards, alerts, banners and panels stays visible.
+ *
+ * `:not(:defined)` stops matching the moment `customElements.define()` runs for
+ * the tag, so these rules switch themselves off with no JavaScript, no class and
+ * no timer. They apply equally to the full bundle, per-component imports and the
+ * autoloader (`@voidable/ui/autoloader`).
+ *
+ * Imported by index.css after the component files, so where a rule here has the
+ * same specificity as a component rule (for example `void-dialog[open]`) this
+ * one wins. Only tokens that already exist are used.
+ */
+
+/* ── Closed overlays ───────────────────────────────────────────────────────
+   A server may render `open`; the backdrop, panel and focus handling only exist
+   after upgrade, so the bare children would flash. Show nothing until then. */
+void-dialog:not(:defined),
+void-drawer:not(:defined),
+void-menu:not(:defined) {
+  display: none;
+}
+
+/* Anchored content and the option lists of pickers: the component positions
+   and reveals them, so before upgrade they are not content. */
+void-popover:not(:defined) > :not(:first-child),
+void-hover-card:not(:defined) > :not(:first-child),
+void-dropdown-menu:not(:defined) > :not(:first-child),
+void-select:not(:defined) > option,
+void-select:not(:defined) > optgroup,
+void-multiselect:not(:defined) > *,
+void-combobox:not(:defined) > * {
+  display: none;
+}
+
+/* ── Tabs ──────────────────────────────────────────────────────────────────
+   The tab list is rendered by the component. Reserve its height, and show one
+   panel: the one the server marked [active], or the first when none is marked
+   (render `active` on the selected panel when the initial tab is not the
+   first). Every other panel is already display:none (tabs.css). */
+void-tabs:not(:defined)::before {
+  content: '\00a0';
+  order: -1;
+  padding: var(--void-space-2) var(--void-space-3);
+  padding-bottom: calc(var(--void-space-2) + 1px); /* token-ok: the tab's 2px underline overlaps the list's 1px rule */
+  border-bottom: 1px solid var(--void-color-border);
+  font-size: var(--void-text-sm);
+  line-height: var(--void-leading-normal);
+}
+
+void-tabs[size="sm"]:not(:defined)::before {
+  padding: var(--void-space-1) var(--void-space-2);
+  padding-bottom: calc(var(--void-space-1) + 1px); /* token-ok: the tab's 2px underline overlaps the list's 1px rule */
+  font-size: var(--void-text-xs);
+}
+
+void-tabs[size="lg"]:not(:defined)::before {
+  padding: var(--void-space-3) var(--void-space-4);
+  padding-bottom: calc(var(--void-space-3) + 1px); /* token-ok: the tab's 2px underline overlaps the list's 1px rule */
+  font-size: var(--void-text-base);
+}
+
+void-tabs:not(:defined):not(:has(> void-tab-panel[active])) > void-tab-panel:first-of-type {
+  display: block;
+}
+
+/* ── Accordion and collapsible ─────────────────────────────────────────────
+   The heading is an attribute, so it can be shown in the trigger's place; the
+   body stays hidden unless the server rendered the item open. */
+void-accordion-item:not(:defined)::before,
+void-collapsible:not(:defined)::before {
+  content: attr(heading);
+  display: block;
+  padding: var(--void-space-3) var(--void-space-4);
+  font-family: var(--void-font-sans);
+  font-size: var(--void-text-base);
+  font-weight: var(--void-weight-medium);
+  line-height: var(--void-leading-normal);
+  color: var(--void-color-text);
+}
+
+void-collapsible:not(:defined)::before {
+  border: 1px solid var(--void-color-border);
+  border-radius: var(--void-radius-md);
+}
+
+void-accordion-item:not(:defined):not([open]) > *,
+void-collapsible:not(:defined):not([open]) > * {
+  display: none;
+}
+
+/* ── Carousel ──────────────────────────────────────────────────────────────
+   Slides sit side by side after upgrade; unstyled they would stack. */
+void-carousel:not(:defined) > void-carousel-slide:not(:first-of-type) {
+  display: none;
+}
+
+/* The indicator row below the viewport. */
+void-carousel:not(:defined):not([indicators="false"])::after {
+  content: '';
+  display: block;
+  height: 2rem; /* token-ok: indicator row, as carousel.css */
+}
+
+/* ── Field ─────────────────────────────────────────────────────────────────
+   Label, helper and error are attributes: show them where the component will
+   render them. */
+void-field:not(:defined)[label]::before {
+  content: attr(label);
+  font-size: var(--void-text-sm);
+  font-weight: var(--void-weight-medium);
+  color: var(--void-color-text);
+}
+
+void-field:not(:defined)[helper]:not([error]:not([error=""]))::after {
+  content: attr(helper);
+  font-size: var(--void-text-xs);
+  color: var(--void-color-text-muted);
+}
+
+void-field:not(:defined)[error]:not([error=""])::after {
+  content: attr(error);
+  font-size: var(--void-text-xs);
+  color: var(--void-color-error);
+}
+
+/* ── Controls that render their own box ────────────────────────────────────
+   One line of text-sm at leading-normal, vertical padding space-2 and a 1px
+   border: the height of the native control the component renders. */
+void-input:not(:defined),
+void-multiselect:not(:defined),
+void-combobox:not(:defined),
+void-select:not(:defined),
+void-number-input:not(:defined),
+void-date-picker:not(:defined),
+void-action-input:not(:defined),
+void-tags-input:not(:defined) {
+  display: block;
+  box-sizing: border-box;
+  background: var(--void-color-bg-secondary);
+  border: 1px solid var(--void-color-border-control);
+  border-radius: var(--void-radius-md);
+  min-height: calc(var(--void-space-2) * 2 + var(--void-text-sm) * var(--void-leading-normal) + 2px); /* token-ok: total height with the 1px border on each side (border-box) */
+}
+
+:is(void-input, void-multiselect, void-combobox, void-select, void-number-input, void-date-picker, void-action-input, void-tags-input)[size="sm"]:not(:defined) {
+  min-height: calc(var(--void-space-1) * 2 + var(--void-text-xs) * var(--void-leading-normal) + 2px); /* token-ok: total height with the 1px border on each side (border-box) */
+}
+
+:is(void-input, void-multiselect, void-combobox, void-select, void-number-input, void-date-picker, void-action-input, void-tags-input)[size="lg"]:not(:defined) {
+  min-height: calc(var(--void-space-3) * 2 + var(--void-text-base) * var(--void-leading-normal) + 2px); /* token-ok: total height with the 1px border on each side (border-box) */
+}
+
+:is(void-input, void-multiselect, void-combobox, void-select, void-number-input, void-date-picker, void-action-input, void-tags-input)[size="xl"]:not(:defined) {
+  min-height: calc(var(--void-space-4) * 2 + var(--void-text-lg) * var(--void-leading-normal) + 2px); /* token-ok: total height with the 1px border on each side (border-box) */
+}
+
+/* Three rows unless `rows` says otherwise (typed attr() where supported). */
+void-textarea:not(:defined) {
+  display: block;
+  box-sizing: border-box;
+  background: var(--void-color-bg-secondary);
+  border: 1px solid var(--void-color-border-control);
+  border-radius: var(--void-radius-md);
+  min-height: calc(3 * var(--void-text-sm) * var(--void-leading-normal) + var(--void-space-2) * 2 + 2px); /* token-ok: total height with the 1px border on each side (border-box) */
+  min-height: calc(attr(rows type(<number>), 3) * var(--void-text-sm) * var(--void-leading-normal) + var(--void-space-2) * 2 + 2px); /* token-ok: total height with the 1px border on each side (border-box) */
+}
+
+void-file-upload:not(:defined) {
+  display: block;
+  box-sizing: border-box;
+  border: 2px dashed var(--void-color-border);
+  border-radius: var(--void-radius-lg);
+  min-height: calc(var(--void-space-6) * 2 + var(--void-text-sm) * var(--void-leading-normal) + 4px); /* token-ok: total height with the 2px dashed border on each side (border-box) */
+}
+
+/* One row of boxes, 2.5rem tall at the default size. */
+void-pin-input:not(:defined) {
+  display: block;
+  min-height: 2.5rem; /* token-ok: one pin box, as pin-input.css */
+}
+
+/* ── Card ──────────────────────────────────────────────────────────────────
+   The card wraps its children in a padded body. Its text is content and stays
+   visible; only the padding is reserved, and the header when there is a heading. */
+void-card:not(:defined) {
+  padding: var(--void-space-4);
+}
+
+void-card[padding="none"]:not(:defined) { padding: 0; }
+void-card[padding="sm"]:not(:defined) { padding: var(--void-space-2); }
+void-card[padding="lg"]:not(:defined) { padding: var(--void-space-6); }
+
+void-card:not(:defined):not([padding])[heading]::before {
+  content: attr(heading);
+  display: block;
+  margin: calc(var(--void-space-4) * -1) calc(var(--void-space-4) * -1) var(--void-space-4);
+  padding: var(--void-space-4) var(--void-space-4) var(--void-space-3);
+  border-bottom: 1px solid var(--void-color-border);
+  font-size: var(--void-text-base);
+  font-weight: var(--void-weight-semibold);
+  color: var(--void-color-text);
+}
+
+/* ── Meters and placeholders ───────────────────────────────────────────── */
+void-progress:not(:defined)::before {
+  content: '';
+  display: block;
+  height: 0.5rem; /* token-ok: track height, as progress.css */
+  background: var(--void-color-bg-hover);
+  border-radius: var(--void-radius-full);
+}
+
+void-progress[size="sm"]:not(:defined)::before { height: 0.25rem; /* token-ok: as progress.css */ }
+void-progress[size="lg"]:not(:defined)::before { height: 0.75rem; /* token-ok: as progress.css */ }
+void-progress[size="xl"]:not(:defined)::before { height: 1rem; /* token-ok: as progress.css */ }
+void-progress[size="xxl"]:not(:defined)::before { height: 1.25rem; /* token-ok: as progress.css */ }
+
+/* Skeleton defaults to the text variant once upgraded. */
+void-skeleton:not(:defined):not([variant]) {
+  height: 1em;
+  width: 100%;
+  border-radius: var(--void-radius-xs);
+}
+
+void-calendar:not(:defined) {
+  box-sizing: border-box;
+  min-height: 16.5rem; /* token-ok: one month grid of the default size */
+}
