@@ -164,6 +164,8 @@ set -euo pipefail
 | `mise run lint:styles` | Ensure UI components contain no visual styles |
 | `mise run lint:exports` | Verify every component has a subpath export, self-registers and is re-exported from the index |
 | `mise run lint:manifest` | Fail when a tag in the Custom Elements Manifest has no story, React wrapper or LiveView component (known gaps: `.mise/manifest-drift-allowlist.txt`) |
+| `mise run voidable:ci` | Lint, test and build the Go CLI in `tools/voidable` (installs the pinned Go on demand; `VOIDABLE_SKIP_GO=1` skips it and `lint:markup`) |
+| `mise run lint:markup` | `voidable check` over docs, stories, examples and adapter templates; open product decisions are in `.voidable/markup-allowlist.txt` |
 | `mise run docs` | Start docs dev server |
 | `mise run docs:build` | Build docs for deployment |
 
