@@ -59,7 +59,7 @@ export class VoidSegmentedControl extends InternalsFormControl(VoidElement) {
   @property({ type: String, reflect: true }) value = '';
   @property({ type: Boolean, reflect: true }) disabled = false;
   @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' = 'md';
-  @property({ type: String, reflect: true }) color: 'default' | 'error' | 'warning' | 'success' | 'info' | 'notice' = 'default';
+  @property({ type: String, reflect: true }) color: 'default' | 'error' | 'warning' | 'caution' | 'success' | 'info' | 'notice' | 'highlight' = 'default';
 
   private _observer: MutationObserver | null = null;
 

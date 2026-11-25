@@ -322,13 +322,13 @@ function wrapWc<E extends HTMLElement, P = object>(
 // ---------------------------------------------------------------------------
 
 export const Badge = wrapWc<VoidBadge, {
-  color?: 'default' | 'error' | 'warning' | 'success' | 'info' | 'notice';
+  color?: 'default' | 'error' | 'warning' | 'caution' | 'success' | 'info' | 'notice' | 'highlight';
   size?: 'sm' | 'md' | 'lg';
 }>('void-badge', 'Badge');
 
 export const Button = wrapWc<VoidButton, {
   variant?: 'outline' | 'filled' | 'ghost';
-  color?: 'default' | 'error' | 'warning' | 'success' | 'info' | 'notice';
+  color?: 'default' | 'error' | 'warning' | 'caution' | 'success' | 'info' | 'notice' | 'highlight';
   disabled?: boolean;
   type?: 'button' | 'submit' | 'reset';
   size?: 'sm' | 'md' | 'lg';
@@ -355,7 +355,7 @@ export const StatusDot = wrapWc<VoidStatusDot, {
 export const Switch = wrapWc<VoidSwitch, {
   checked?: boolean;
   disabled?: boolean;
-  color?: 'default' | 'error' | 'warning' | 'success' | 'info' | 'notice';
+  color?: 'default' | 'error' | 'warning' | 'caution' | 'success' | 'info' | 'notice' | 'highlight';
   size?: 'sm' | 'md' | 'lg';
   /** Form field name; the value is submitted under it. */
   name?: string;
@@ -373,13 +373,13 @@ export const Avatar = wrapWc<VoidAvatar, {
 }>('void-avatar', 'Avatar');
 
 export const Alert = wrapWc<VoidAlert, {
-  color?: 'default' | 'error' | 'warning' | 'success' | 'info' | 'notice';
+  color?: 'default' | 'error' | 'warning' | 'caution' | 'success' | 'info' | 'notice' | 'highlight';
   dismissible?: boolean;
   variant?: 'subtle' | 'filled';
 } & VoidEvents<{ Dismiss: null }>>('void-alert', 'Alert');
 
 export const Tag = wrapWc<VoidTag, {
-  color?: 'default' | 'error' | 'warning' | 'success' | 'info' | 'notice';
+  color?: 'default' | 'error' | 'warning' | 'caution' | 'success' | 'info' | 'notice' | 'highlight';
   removable?: boolean;
   size?: 'sm' | 'md' | 'lg';
 } & VoidEvents<{ Remove: null }>>('void-tag', 'Tag');
@@ -387,7 +387,7 @@ export const Tag = wrapWc<VoidTag, {
 export const Progress = wrapWc<VoidProgress, {
   value?: number;
   max?: number;
-  color?: 'default' | 'error' | 'warning' | 'success' | 'info' | 'notice';
+  color?: 'default' | 'error' | 'warning' | 'caution' | 'success' | 'info' | 'notice' | 'highlight';
   size?: 'sm' | 'md' | 'lg';
   indeterminate?: boolean;
 }>('void-progress', 'Progress');
@@ -457,7 +457,7 @@ export const Checkbox = wrapWc<VoidCheckbox, {
   indeterminate?: boolean;
   name?: string;
   value?: string;
-  color?: 'default' | 'error' | 'warning' | 'success' | 'info' | 'notice';
+  color?: 'default' | 'error' | 'warning' | 'caution' | 'success' | 'info' | 'notice' | 'highlight';
   size?: 'sm' | 'md' | 'lg';
   /** Form validation: the control must have a value. */
   required?: boolean;
@@ -468,7 +468,7 @@ export const Radio = wrapWc<VoidRadio, {
   disabled?: boolean;
   name?: string;
   value?: string;
-  color?: 'default' | 'error' | 'warning' | 'success' | 'info' | 'notice';
+  color?: 'default' | 'error' | 'warning' | 'caution' | 'success' | 'info' | 'notice' | 'highlight';
   size?: 'sm' | 'md' | 'lg';
   /** Form validation: the control must have a value. */
   required?: boolean;
@@ -563,7 +563,7 @@ export const ListItem = wrapWc<VoidListItem, {
 } & VoidEvents<{ Click: Record<string, never> }>>('void-list-item', 'ListItem');
 
 export const Toast = wrapWc<VoidToast, {
-  color?: 'default' | 'error' | 'warning' | 'success' | 'info';
+  color?: 'default' | 'error' | 'warning' | 'caution' | 'success' | 'info' | 'notice' | 'highlight';
   duration?: number;
   dismissable?: boolean;
   heading?: string;
@@ -625,7 +625,7 @@ export const Tooltip = wrapWc<VoidTooltip, {
 } & VoidEvents<OverlayEvents>>('void-tooltip', 'Tooltip');
 
 export const Banner = wrapWc<VoidBanner, {
-  color?: 'default' | 'error' | 'warning' | 'success' | 'info' | 'notice';
+  color?: 'default' | 'error' | 'warning' | 'caution' | 'success' | 'info' | 'notice' | 'highlight';
   dismissable?: boolean;
   variant?: 'subtle' | 'filled';
 } & VoidEvents<{ Close: null }>>('void-banner', 'Banner');
@@ -787,7 +787,7 @@ export const DropdownMenuItem = wrapWc<VoidDropdownMenuItem, {
 export const Toggle = wrapWc<VoidToggle, {
   pressed?: boolean;
   disabled?: boolean;
-  color?: 'default' | 'error' | 'warning' | 'success' | 'info' | 'notice';
+  color?: 'default' | 'error' | 'warning' | 'caution' | 'success' | 'info' | 'notice' | 'highlight';
   size?: 'sm' | 'md' | 'lg';
   variant?: 'outline' | 'filled' | 'ghost' | 'solid';
   /** Value this toggle contributes to a parent ToggleGroup. */
@@ -815,13 +815,13 @@ export const Stat = wrapWc<VoidStat, {
   delta?: string;
   /** Secondary line of text under the value. */
   description?: string;
-  trend?: 'up' | 'down' | 'flat' | 'error' | 'warning' | 'success' | 'info' | 'notice' | null;
-  color?: 'default' | 'error' | 'warning' | 'success' | 'info' | 'notice';
+  trend?: 'up' | 'down' | 'flat' | 'error' | 'warning' | 'caution' | 'success' | 'info' | 'notice' | 'highlight' | null;
+  color?: 'default' | 'error' | 'warning' | 'caution' | 'success' | 'info' | 'notice' | 'highlight';
   size?: 'sm' | 'md' | 'lg';
 }>('void-stat', 'Stat');
 
 export const Indicator = wrapWc<VoidIndicator, {
-  color?: 'default' | 'error' | 'warning' | 'success' | 'info' | 'notice';
+  color?: 'default' | 'error' | 'warning' | 'caution' | 'success' | 'info' | 'notice' | 'highlight';
   size?: 'sm' | 'md' | 'lg';
   count?: number;
   ping?: boolean;
@@ -886,7 +886,7 @@ export const DatePicker = wrapWc<VoidDatePicker, {
   open?: boolean;
   placeholder?: string;
   format?: string;
-  color?: 'default' | 'error' | 'warning' | 'success' | 'info' | 'notice';
+  color?: 'default' | 'error' | 'warning' | 'caution' | 'success' | 'info' | 'notice' | 'highlight';
   /** Form field name; the value is submitted under it. */
   name?: string;
   /** Form validation: the control must have a value. */
@@ -903,7 +903,7 @@ export const NumberInput = wrapWc<VoidNumberInput, {
   disabled?: boolean;
   readonly?: boolean;
   size?: 'sm' | 'md' | 'lg';
-  color?: 'default' | 'error' | 'warning' | 'success' | 'info' | 'notice';
+  color?: 'default' | 'error' | 'warning' | 'caution' | 'success' | 'info' | 'notice' | 'highlight';
   placeholder?: string;
   controls?: 'sides' | 'right' | 'none';
   label?: string;
@@ -920,7 +920,7 @@ export const ToggleGroup = wrapWc<VoidToggleGroup, {
   multiple?: boolean;
   disabled?: boolean;
   size?: 'sm' | 'md' | 'lg';
-  color?: 'default' | 'error' | 'warning' | 'success' | 'info' | 'notice';
+  color?: 'default' | 'error' | 'warning' | 'caution' | 'success' | 'info' | 'notice' | 'highlight';
   orientation?: 'horizontal' | 'vertical';
   /** Form field name; the value is submitted under it. */
   name?: string;
@@ -976,7 +976,7 @@ export const PinInput = wrapWc<VoidPinInput, {
   mask?: boolean;
   type?: 'numeric' | 'alphanumeric';
   size?: 'sm' | 'md' | 'lg';
-  color?: 'default' | 'error' | 'warning' | 'success' | 'info' | 'notice';
+  color?: 'default' | 'error' | 'warning' | 'caution' | 'success' | 'info' | 'notice' | 'highlight';
   placeholder?: string;
   /** Form field name; the value is submitted under it. */
   name?: string;
@@ -991,7 +991,7 @@ export const TagsInput = wrapWc<VoidTagsInput, {
   max?: number;
   placeholder?: string;
   size?: 'sm' | 'md' | 'lg';
-  color?: 'default' | 'error' | 'warning' | 'success' | 'info' | 'notice';
+  color?: 'default' | 'error' | 'warning' | 'caution' | 'success' | 'info' | 'notice' | 'highlight';
   variant?: 'filled' | 'outline';
   allowDuplicates?: boolean;
   /** Form field name; the value is submitted under it. */
@@ -1033,7 +1033,7 @@ export const ActionInput = wrapWc<VoidActionInput, {
   readonly?: boolean;
   type?: 'text' | 'password' | 'search' | 'email' | 'tel' | 'url';
   size?: 'sm' | 'md' | 'lg';
-  color?: 'default' | 'error' | 'warning' | 'success' | 'info' | 'notice';
+  color?: 'default' | 'error' | 'warning' | 'caution' | 'success' | 'info' | 'notice' | 'highlight';
   /** Autofill hint for the native control, e.g. `current-password`. */
   autocomplete?: string;
   minlength?: number;

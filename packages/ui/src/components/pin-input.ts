@@ -13,7 +13,7 @@ export class VoidPinInput extends InternalsFormControl(VoidElement) {
   @property({ type: Boolean, reflect: true }) mask: boolean = false;
   @property({ type: String, reflect: true }) type: 'numeric' | 'alphanumeric' = 'numeric';
   @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' = 'md';
-  @property({ type: String, reflect: true }) color: 'default' | 'error' | 'warning' | 'success' | 'info' | 'notice' = 'default';
+  @property({ type: String, reflect: true }) color: 'default' | 'error' | 'warning' | 'caution' | 'success' | 'info' | 'notice' | 'highlight' = 'default';
   @property({ type: String }) placeholder: string = '';
 
   private get _effectiveLength(): number {

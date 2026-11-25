@@ -26,7 +26,7 @@ Pattern: radio group. One tab stop (the checked item, else the first enabled); s
   argTypes: {
     value: { control: 'text' },
     size: { control: 'select', options: ['sm', 'md', 'lg', 'xl', 'xxl'] },
-    color: { control: 'select', options: ['default', 'error', 'warning', 'success', 'info', 'notice'] },
+    color: { control: 'select', options: ['default', 'error', 'warning', 'caution', 'success', 'info', 'notice', 'highlight'] },
   },
   render: (args) => html`
     <void-segmented-control value=${args.value || 'day'} size=${args.size || 'md'} color=${args.color || 'default'}>

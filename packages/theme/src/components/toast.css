@@ -65,8 +65,11 @@ void-toast {
 
 void-toast[color='error']   { --tone: var(--void-color-error); }
 void-toast[color='warning'] { --tone: var(--void-color-warning); }
+void-toast[color='caution'] { --tone: var(--void-color-caution); }
+void-toast[color='highlight'] { --tone: var(--void-color-highlight); }
 void-toast[color='success'] { --tone: var(--void-color-success); }
 void-toast[color='info']    { --tone: var(--void-color-info); }
+void-toast[color='notice']  { --tone: var(--void-color-notice); }
 
 .void-toast-heading {
   font-weight: var(--void-weight-medium);

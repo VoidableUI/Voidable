@@ -128,14 +128,14 @@ Use `@property` with `reflect: true` for attributes that CSS selects on. Reflect
 
 ```ts
 @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' = 'md';
-@property({ type: String, reflect: true }) color: 'default' | 'error' | 'warning' | 'success' | 'info' | 'notice' = 'default';
+@property({ type: String, reflect: true }) color: 'default' | 'error' | 'warning' | 'caution' | 'success' | 'info' | 'notice' | 'highlight' = 'default';
 @property({ type: Boolean, reflect: true }) dismissible = false;
 ```
 
 Standard scales across all components:
 
 - **Size** — exactly `'sm' | 'md' | 'lg'`, default `'md'`, on every component that has a size. Do not add steps: a component that needs another dimension takes it from a token or a different attribute.
-- **Color** — exactly `'default' | 'error' | 'warning' | 'success' | 'info' | 'notice'`, on every component that has a color. List only the values the theme CSS styles.
+- **Color** — exactly `'default' | 'error' | 'warning' | 'caution' | 'success' | 'info' | 'notice' | 'highlight'`, on every component that has a color. The theme styles every value on every such component, so a new component with a color adds a rule for each.
 
 Use these exact values. Do not invent alternative names for the same concept.
 

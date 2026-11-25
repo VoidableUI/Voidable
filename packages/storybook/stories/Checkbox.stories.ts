@@ -18,7 +18,7 @@ const meta: Meta = {
     checked: { control: 'boolean' },
     disabled: { control: 'boolean' },
     indeterminate: { control: 'boolean' },
-    color: { control: 'select', options: ['default', 'error', 'warning', 'success', 'info', 'notice'] },
+    color: { control: 'select', options: ['default', 'error', 'warning', 'caution', 'success', 'info', 'notice', 'highlight'] },
     size: { control: 'select', options: ['sm', 'md', 'lg'] },
   },
   render: (args) => html`

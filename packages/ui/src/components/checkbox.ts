@@ -17,7 +17,7 @@ export class VoidCheckbox extends NativeFormControl(VoidElement) {
    * validates; when it focuses that (aria-hidden) input, focus moves to the host.
    */
   @property({ type: Boolean, reflect: true }) required = false;
-  @property({ type: String, reflect: true }) color: 'default' | 'error' | 'warning' | 'success' | 'info' | 'notice' = 'default';
+  @property({ type: String, reflect: true }) color: 'default' | 'error' | 'warning' | 'caution' | 'success' | 'info' | 'notice' | 'highlight' = 'default';
   @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' = 'md';
 
   // Consumer label content stays on the host, after the rendered control.

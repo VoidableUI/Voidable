@@ -18,7 +18,7 @@ const meta: Meta = {
   argTypes: {
     color: {
       control: { type: 'select' },
-      options: ['default', 'error', 'warning', 'success', 'info'],
+      options: ['default', 'error', 'warning', 'caution', 'success', 'info', 'notice', 'highlight'],
     },
     duration: {
       control: { type: 'number' },
@@ -139,7 +139,7 @@ export const InlinePlacement: Story = {
   render: () => html`
     <div style="max-width: 28rem;">
       <void-toast-container position="inline">
-        <void-toast color="warning" heading="Heads up">Your trial ends in 3 days.</void-toast>
+        <void-toast color="caution" heading="Heads up">Your trial ends in 3 days.</void-toast>
       </void-toast-container>
       <p>Page content continues below the toast.</p>
     </div>

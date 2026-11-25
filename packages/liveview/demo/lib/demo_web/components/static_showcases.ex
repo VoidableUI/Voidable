@@ -30,6 +30,7 @@ defmodule DemoWeb.StaticShowcases do
         <VoidableUI.Components.badge color="success">Success</VoidableUI.Components.badge>
         <VoidableUI.Components.badge color="info">Info</VoidableUI.Components.badge>
         <VoidableUI.Components.badge color="notice">Notice</VoidableUI.Components.badge>
+        <VoidableUI.Components.badge color="highlight">Highlight</VoidableUI.Components.badge>
       </div>
     </div>
     <div class="showcase-section">

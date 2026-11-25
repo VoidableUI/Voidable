@@ -17,7 +17,7 @@ const meta: Meta = {
   argTypes: {
     color: {
       control: { type: 'select' },
-      options: ['default', 'error', 'warning', 'success', 'info', 'notice'],
+      options: ['default', 'error', 'warning', 'caution', 'success', 'info', 'notice', 'highlight'],
     },
     size: {
       control: { type: 'select' },
@@ -48,6 +48,7 @@ export const Colors: Story = {
       <void-badge color="success">Success</void-badge>
       <void-badge color="info">Info</void-badge>
       <void-badge color="notice">Notice</void-badge>
+      <void-badge color="highlight">Highlight</void-badge>
     </div>
   `,
 };

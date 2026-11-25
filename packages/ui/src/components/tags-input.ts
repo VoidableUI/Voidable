@@ -13,7 +13,7 @@ export class VoidTagsInput extends InternalsFormControl(VoidElement) {
   @property({ type: Number }) max = Infinity;
   @property({ type: String }) placeholder = 'Add tag...';
   @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' = 'md';
-  @property({ type: String, reflect: true }) color: 'default' | 'error' | 'warning' | 'success' | 'info' | 'notice' = 'default';
+  @property({ type: String, reflect: true }) color: 'default' | 'error' | 'warning' | 'caution' | 'success' | 'info' | 'notice' | 'highlight' = 'default';
   @property({ type: String, reflect: true }) variant: 'filled' | 'outline' = 'outline';
   @property({ type: Boolean, attribute: 'allow-duplicates' }) allowDuplicates = false;
 

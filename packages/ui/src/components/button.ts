@@ -20,7 +20,7 @@ export class VoidButton extends VoidElement {
    * for row actions, toolbars and the quiet button beside a primary one.
    */
   @property({ type: String, reflect: true }) variant: 'outline' | 'filled' | 'ghost' = 'outline';
-  @property({ type: String, reflect: true }) color: 'default' | 'error' | 'warning' | 'success' | 'info' | 'notice' = 'default';
+  @property({ type: String, reflect: true }) color: 'default' | 'error' | 'warning' | 'caution' | 'success' | 'info' | 'notice' | 'highlight' = 'default';
   @property({ type: Boolean, reflect: true }) disabled = false;
   @property({ type: String, reflect: true }) type: 'button' | 'submit' | 'reset' = 'button';
   @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' = 'md';

@@ -44,6 +44,19 @@ void-segmented-control-item[aria-checked="true"] {
   color: var(--void-color-text);
 }
 
+/* Colour: the selected segment takes the tone. */
+void-segmented-control[color="error"]     { --tone: var(--void-color-error); }
+void-segmented-control[color="warning"]   { --tone: var(--void-color-warning); }
+void-segmented-control[color="caution"]   { --tone: var(--void-color-caution); }
+void-segmented-control[color="success"]   { --tone: var(--void-color-success); }
+void-segmented-control[color="info"]      { --tone: var(--void-color-info); }
+void-segmented-control[color="notice"]    { --tone: var(--void-color-notice); }
+void-segmented-control[color="highlight"] { --tone: var(--void-color-highlight); }
+
+void-segmented-control:where([color="error"], [color="warning"], [color="caution"], [color="success"], [color="info"], [color="notice"], [color="highlight"]) void-segmented-control-item[aria-checked="true"] {
+  background: color-mix(in srgb, var(--tone) 14%, transparent);
+}
+
 void-segmented-control-item[disabled] {
   opacity: 0.5;
   pointer-events: none;

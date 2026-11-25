@@ -5,7 +5,7 @@ import { ProjectionController } from '../projection.js';
 
 /** Full-width site-level announcement for maintenance windows, cookie consent, and promotional messaging. */
 export class VoidBanner extends VoidElement {
-  @property({ type: String, reflect: true }) color: 'default' | 'error' | 'warning' | 'success' | 'info' | 'notice' = 'default';
+  @property({ type: String, reflect: true }) color: 'default' | 'error' | 'warning' | 'caution' | 'success' | 'info' | 'notice' | 'highlight' = 'default';
   @property({ type: Boolean, reflect: true }) dismissable = false;
   @property({ type: String, reflect: true }) variant: 'subtle' | 'filled' = 'subtle';
 

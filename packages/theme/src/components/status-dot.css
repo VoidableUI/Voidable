@@ -15,6 +15,10 @@ void-status-dot[status="away"] {
   background: var(--void-color-caution);
 }
 
+void-status-dot[status="caution"] {
+  background: var(--void-color-caution);
+}
+
 void-status-dot[status="offline"] {
   background: var(--void-color-text-disabled);
 }

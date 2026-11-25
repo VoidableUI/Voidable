@@ -17,7 +17,7 @@ const meta: Meta = {
   argTypes: {
     checked: { control: 'boolean' },
     disabled: { control: 'boolean' },
-    color: { control: 'select', options: ['default', 'error', 'warning', 'success', 'info', 'notice'] },
+    color: { control: 'select', options: ['default', 'error', 'warning', 'caution', 'success', 'info', 'notice', 'highlight'] },
     size: { control: 'select', options: ['sm', 'md', 'lg'] },
   },
   render: (args) => html`

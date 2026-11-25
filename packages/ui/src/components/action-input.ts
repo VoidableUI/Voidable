@@ -30,7 +30,7 @@ export class VoidActionInput extends NativeFormControl(VoidElement) {
   /** Spell checking of the native control (`spellcheck`). Defaults to true; `spellcheck="false"` turns it off from markup. */
   @property({ converter: defaultTrueBoolean }) override spellcheck = true;
   @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' = 'md';
-  @property({ type: String, reflect: true }) color: 'default' | 'error' | 'warning' | 'success' | 'info' | 'notice' = 'default';
+  @property({ type: String, reflect: true }) color: 'default' | 'error' | 'warning' | 'caution' | 'success' | 'info' | 'notice' | 'highlight' = 'default';
   /** Native input type; any text-like type is forwarded to the native control. */
   @property({ type: String, reflect: true }) type: 'text' | 'password' | 'search' | 'email' | 'tel' | 'url' = 'text';
   @property({ type: String, reflect: true }) icon: string = 'search';

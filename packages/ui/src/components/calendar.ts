@@ -551,7 +551,7 @@ export class VoidDatePicker extends InternalsFormControl(VoidElement) {
   @property({ type: Boolean, reflect: true }) open = false;
   @property({ type: String }) placeholder = 'Select date';
   @property({ type: String }) format = 'MM/DD/YYYY';
-  @property({ type: String, reflect: true }) color: 'default' | 'error' | 'warning' | 'success' | 'info' | 'notice' = 'default';
+  @property({ type: String, reflect: true }) color: 'default' | 'error' | 'warning' | 'caution' | 'success' | 'info' | 'notice' | 'highlight' = 'default';
 
   /** The calendar popup, controlled by the input (APG date picker combobox). */
   private readonly _dropdownId = uid('void-date-picker-dialog');
