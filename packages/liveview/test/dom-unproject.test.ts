@@ -1,11 +1,11 @@
 import { describe, it, expect } from 'vitest';
 import { VoidDOM } from '../src/dom.js';
 
-// The pre-morph hook: VoidDOM.onBeforeElUpdated calls voidUnproject() on each
+// The pre-morph hook: VoidDOM.onBeforeElUpdated calls voidBeforeMorph() on each
 // void-* element morphdom is about to patch, after the client attributes have
 // been carried over to the server element.
 
-type Hooked = Element & { voidUnproject?: () => boolean };
+type Hooked = Element & { voidBeforeMorph?: () => boolean };
 
 function el(html: string): Element {
   const tpl = document.createElement('template');
@@ -15,7 +15,7 @@ function el(html: string): Element {
 
 function hook(target: Element, log: string[]): Hooked {
   const h = target as Hooked;
-  h.voidUnproject = () => {
+  h.voidBeforeMorph = () => {
     log.push(`unproject ${target.id} open=${target.hasAttribute('open')}`);
     return true;
   };

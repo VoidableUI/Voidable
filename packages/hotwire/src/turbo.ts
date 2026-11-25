@@ -7,12 +7,14 @@
  * When the server renders a different value (including removing the
  * attribute), the server wins.
  *
- * It also calls each `void-*` element's `voidUnproject()` pre-morph hook, so
- * the morph compares the element's own children with the server markup instead
- * of the chrome the component rendered around them. Turbo morphs parents before
- * children, so outer elements are unprojected first; every element re-projects
- * itself (same chrome, same state, focus kept) in the microtask after the
- * morph.
+ * It also calls each `void-*` element's `voidBeforeMorph(newElement)` pre-morph
+ * hook: attributes the component manages on its host (`role`, `tabindex`,
+ * `aria-*`, reflected defaults) are carried onto the incoming element where the
+ * server markup does not set them, and the chrome the component rendered is
+ * parked, so the morph compares the element's own children with the server
+ * markup. Turbo morphs parents before children, so outer elements are parked
+ * first; every element puts the same chrome back (same nodes, state, typed text
+ * and focus) in the microtask after the morph.
  *
  * Usage:
  * ```js
@@ -30,10 +32,12 @@ const PRESERVE_ATTRS = [
   'active',
   'checked',
   'selected',
+  // A reflected value the user changed (number-input, slider, tabs ...).
+  'value',
 ];
 
 type ServerAttrs = Record<string, string | null>;
-type Unprojectable = Element & { voidUnproject?: () => boolean };
+type Morphable = Element & { voidBeforeMorph?: (incoming?: Element | null) => boolean };
 
 function isVoid(el: Element | null | undefined): el is Element {
   return !!el?.tagName?.startsWith('VOID-');
@@ -80,10 +84,10 @@ export const VoidTurbo = {
       preserve.set(el, keep);
       lastServer.set(el, incoming);
 
-      // After the server state is recorded (unprojecting only moves children;
-      // host attributes and properties are untouched), and only if the element
-      // is really about to be morphed.
-      if (!event.defaultPrevented) (el as Unprojectable).voidUnproject?.();
+      // After the server state is recorded (the hook adds the component's own
+      // attributes to `next`, which must not count as server values), and only if
+      // the element is really about to be morphed.
+      if (!event.defaultPrevented) (el as Morphable).voidBeforeMorph?.(next);
     }) as EventListener;
 
     const onBeforeMorphAttribute = ((event: CustomEvent<{ attributeName: string }>) => {
