@@ -11,126 +11,23 @@ on:
       - '.github/workflows/release-ui-liveview.yml'
 
 permissions:
-  contents: write
-  id-token: write
+  contents: read
+
+concurrency:
+  group: release-ui-liveview
+  cancel-in-progress: false
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - uses: jdx/mise-action@v3
-        with:
-          install_args: "node npm:pnpm"
-        env:
-          MISE_NOT_FOUND_AUTO_INSTALL: "false"
-
-      - name: Install and build
-        run: |
-          pnpm install
-          pnpm --filter @voidable/ui-liveview build
-
-      - name: Typecheck
-        run: pnpm --filter @voidable/ui-liveview typecheck
-
-  tag:
-    name: Create Tag
-    runs-on: ubuntu-latest
-    needs: build
-    outputs:
-      new_tag: ${{ steps.tag_version.outputs.new_tag }}
-      changelog: ${{ steps.tag_version.outputs.changelog }}
-      should_release: ${{ steps.check_tag.outputs.should_release }}
-
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Bump version and create tag
-        id: tag_version
-        uses: Work-Fort/github-tag-action@v6.3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          default_bump: false
-          release_branches: master
-          tag_prefix: ui-liveview-v
-          paths: packages/liveview/**,.github/workflows/release-ui-liveview.yml
-
-      - name: Check if new tag was created
-        id: check_tag
-        run: |
-          if [ -n "$TAG" ]; then
-            echo "should_release=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "should_release=false" >> "$GITHUB_OUTPUT"
-          fi
-        env:
-          TAG: ${{ steps.tag_version.outputs.new_tag }}
-
   release:
-    name: Publish to npm
-    runs-on: ubuntu-latest
-    needs: tag
-    if: needs.tag.outputs.should_release == 'true'
-
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: ${{ needs.tag.outputs.new_tag }}
-
-      - uses: jdx/mise-action@v3
-        with:
-          install_args: "node npm:pnpm"
-        env:
-          MISE_NOT_FOUND_AUTO_INSTALL: "false"
-
-      - name: Build and publish
-        env:
-          TAG: ${{ needs.tag.outputs.new_tag }}
-        run: |
-          VERSION=$(echo "$TAG" | sed 's|^ui-liveview-v||')
-          pnpm install
-          cd packages/liveview
-          npm pkg set version="$VERSION"
-          UI_VERSION=$(npm view @voidable/ui version)
-          sed -i "s|\"workspace:\*\"|\"^$UI_VERSION\"|g" package.json
-          pnpm run build
-          npm publish --provenance --access public
-          npm pack
-          mv voidable-ui-liveview-*.tgz ../..
-
-      - name: Create release notes
-        env:
-          TAG: ${{ needs.tag.outputs.new_tag }}
-          CHANGELOG: ${{ needs.tag.outputs.changelog }}
-        run: |
-          VERSION=$(echo "$TAG" | sed 's|^ui-liveview-v||')
-          cat > release-notes.md << EOF
-          # @voidable/ui-liveview v${VERSION}
-
-          ## What's Changed
-
-          ${CHANGELOG}
-
-          ## Installation
-
-          \`\`\`bash
-          npm install @voidable/ui-liveview@${VERSION}
-          \`\`\`
-          EOF
-
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: ${{ needs.tag.outputs.new_tag }}
-          name: "@voidable/ui-liveview ${{ needs.tag.outputs.new_tag }}"
-          body_path: release-notes.md
-          draft: false
-          prerelease: false
-          files: voidable-ui-liveview-*.tgz
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    permissions:
+      contents: write
+      id-token: write
+    uses: ./.github/workflows/_release-npm-adapter.yml
+    with:
+      package: "@voidable/ui-liveview"
+      directory: packages/liveview
+      tag_prefix: ui-liveview-v
+      tag_paths: packages/liveview/**,.github/workflows/release-ui-liveview.yml
+      check_script: typecheck
+      build_core_in_ci: false
+      build_core_in_release: false
