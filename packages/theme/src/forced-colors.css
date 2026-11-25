@@ -7,11 +7,7 @@
    ============================================================ */
 
 @media (forced-colors: active) {
-  /* Focus: a real outline wins over every `outline: none` in the theme. */
-  :focus-visible {
-    outline: var(--void-focus-ring-width, 2px) solid Highlight !important;
-    outline-offset: var(--void-focus-ring-offset, 2px);
-  }
+  /* The focus outline is in reset.css, scoped to the theme's own elements. */
 
   /* Control boundaries in explicit system colours (translucent
      border colours would otherwise rely on UA remapping alone). */

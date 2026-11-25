@@ -31,10 +31,10 @@ test.describe('layout page', () => {
   });
 
   test('clicking anywhere on a link button follows the link, including its padding', async ({ page }) => {
-    const link = page.locator('[data-link="xl"]');
+    const link = page.locator('[data-link="lg"]');
     const box = (await link.boundingBox())!;
     await page.mouse.click(box.x + 3, box.y + 3);
-    await expect(page).toHaveURL(/#xl$/);
+    await expect(page).toHaveURL(/#lg$/);
   });
 
   test('cards in a fixed-height flex column keep their content height instead of shrinking', async ({ page }) => {

@@ -126,7 +126,7 @@ void-delta[trend="up"][invert] {
      <void-state color="success">Tracking</void-state>
    The word is the content and is always there, so colour is never the
    only signal. color: default (grey), success, info, warning,
-   caution, error, notice. `pulse` marks something happening now. */
+   caution, error, notice, highlight. `pulse` marks something happening now. */
 void-state {
   --tone: var(--void-color-text-disabled);
 
@@ -149,6 +149,7 @@ void-state[color="success"] { --tone: var(--void-color-success); }
 void-state[color="info"]    { --tone: var(--void-color-info); }
 void-state[color="warning"] { --tone: var(--void-color-warning); }
 void-state[color="caution"] { --tone: var(--void-color-caution); }
+void-state[color="highlight"] { --tone: var(--void-color-highlight); }
 void-state[color="error"]   { --tone: var(--void-color-error); }
 void-state[color="notice"]  { --tone: var(--void-color-notice); }
 

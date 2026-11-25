@@ -583,8 +583,8 @@ export class VoidDatePicker extends InternalsFormControl(VoidElement) {
    * Display only; the value stays `YYYY-MM-DD`.
    */
   @property({ type: String }) format = 'MM/DD/YYYY';
-  /** Status colour of the field: `default`, `error`, `warning`, `caution`, `success`, `info` or `notice`. */
-  @property({ type: String, reflect: true }) color: 'default' | 'error' | 'warning' | 'caution' | 'success' | 'info' | 'notice' = 'default';
+  /** Status colour of the field: `default`, `error`, `warning`, `caution`, `success`, `info`, `notice` or `highlight`. */
+  @property({ type: String, reflect: true }) color: 'default' | 'error' | 'warning' | 'caution' | 'success' | 'info' | 'notice' | 'highlight' = 'default';
 
   /** The calendar popup, controlled by the input (APG date picker combobox). */
   private readonly _dropdownId = uid('void-date-picker-dialog');

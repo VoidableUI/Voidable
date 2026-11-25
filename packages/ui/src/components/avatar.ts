@@ -13,8 +13,8 @@ export class VoidAvatar extends VoidElement {
   @property({ type: String, reflect: true }) alt: string = '';
   /** One to three letters shown when there is no image. Used as the accessible name when `alt` is empty. */
   @property({ type: String, reflect: true }) initials: string = '';
-  /** Size step: `sm`, `md` (default), `lg`, `xl` or `xxl`. */
-  @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' | 'xl' | 'xxl' = 'md';
+  /** Size step: `sm`, `md` (default) or `lg`. */
+  @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' = 'md';
 
   connectedCallback(): void {
     super.connectedCallback();

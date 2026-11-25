@@ -65,8 +65,8 @@ export class VoidMultiselect extends InternalsFormControl(VoidElement) {
   @property({ type: String }) placeholder = 'Select...';
   /** Stop the trigger opening and exclude the values from the form submission. */
   @property({ type: Boolean, reflect: true }) disabled = false;
-  /** Size step: `sm`, `md` (default), `lg`, `xl` or `xxl`. */
-  @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' | 'xl' | 'xxl' = 'md';
+  /** Size step: `sm`, `md` (default) or `lg`. */
+  @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' = 'md';
   /**
    * Mark the control invalid: it gets the error styling and `aria-invalid`. The message itself is shown
    * by the wrapping `void-field`.

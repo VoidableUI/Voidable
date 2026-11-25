@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 #MISE description="Start Storybook development server"
+#MISE depends=["theme:build"]
 set -euo pipefail
 
 pnpm --filter @voidable/storybook dev

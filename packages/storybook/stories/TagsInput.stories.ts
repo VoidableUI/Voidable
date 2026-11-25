@@ -21,7 +21,7 @@ const meta: Meta = {
     },
     color: {
       control: { type: 'select' },
-      options: ['default', 'error', 'warning', 'caution', 'success', 'info', 'notice'],
+      options: ['default', 'error', 'warning', 'caution', 'success', 'info', 'notice', 'highlight'],
     },
     disabled: {
       control: { type: 'boolean' },
@@ -113,7 +113,7 @@ export const Sizes: Story = {
 export const Colors: Story = {
   render: () => html`
     <div style="display: flex; flex-direction: column; gap: 12px; max-width: 500px;">
-      ${(['default', 'error', 'warning', 'success', 'info', 'notice'] as const).map((color) => {
+      ${(['default', 'error', 'warning', 'caution', 'success', 'info', 'notice', 'highlight'] as const).map((color) => {
         const el = document.createElement('void-tags-input');
         el.value = [color];
         el.color = color;

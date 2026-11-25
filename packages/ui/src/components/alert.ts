@@ -6,10 +6,10 @@ import { ProjectionController } from '../projection.js';
 /** Inline contextual message for form validation feedback, permission warnings, and system status notices. */
 export class VoidAlert extends VoidElement {
   /**
-   * Status colour of the message: `default`, `error`, `warning`, `caution`, `success`, `info` or
-   * `notice`. Pick the one that matches the meaning (error for a failure, success for a confirmation).
+   * Status colour of the message: `default`, `error`, `warning`, `caution`, `success`, `info`,
+   * `notice` or `highlight`. Pick the one that matches the meaning (error for a failure, success for a confirmation).
    */
-  @property({ type: String, reflect: true }) color: 'default' | 'error' | 'warning' | 'caution' | 'success' | 'info' | 'notice' = 'default';
+  @property({ type: String, reflect: true }) color: 'default' | 'error' | 'warning' | 'caution' | 'success' | 'info' | 'notice' | 'highlight' = 'default';
   /** Show a close button. Clicking it fires `void-dismiss` and removes the alert from the page. */
   @property({ type: Boolean, reflect: true }) dismissible = false;
   /**

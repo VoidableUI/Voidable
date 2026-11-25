@@ -21,7 +21,7 @@ const meta: Meta = {
     },
     size: {
       control: { type: 'select' },
-      options: ['sm', 'md', 'lg', 'xl', 'xxl'],
+      options: ['sm', 'md', 'lg'],
     },
   },
 };
@@ -59,8 +59,6 @@ export const Sizes: Story = {
       <void-badge size="sm">9</void-badge>
       <void-badge size="md">42</void-badge>
       <void-badge size="lg">New</void-badge>
-      <void-badge size="xl">XL</void-badge>
-      <void-badge size="xxl">XXL</void-badge>
     </div>
   `,
 };

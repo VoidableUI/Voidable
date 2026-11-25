@@ -51,7 +51,7 @@ A bare `import '@voidable/theme'` cannot work in a browser, because the theme is
 <!doctype html>
 <html lang="en" data-theme="dark">
   <head>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@voidable/theme/src/index.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@voidable/theme/dist/void.min.css" />
     <script type="module" src="https://esm.sh/@voidable/ui"></script>
   </head>
   <body>

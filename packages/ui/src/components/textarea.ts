@@ -42,8 +42,8 @@ export class VoidTextarea extends NativeFormControl(VoidElement) {
   @property({ type: Number, reflect: true }) rows = 3;
   /** Which way the user may drag the corner handle: `vertical` (default), `both` or `none`. */
   @property({ type: String, reflect: true }) resize: 'none' | 'vertical' | 'both' = 'vertical';
-  /** Size step: `sm`, `md` (default), `lg`, `xl` or `xxl`; sets the text size and padding. */
-  @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' | 'xl' | 'xxl' = 'md';
+  /** Size step: `sm`, `md` (default) or `lg`; sets the text size and padding. */
+  @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' = 'md';
   /**
    * Mark the box invalid: it gets the error styling and `aria-invalid`. The message itself is shown by
    * the wrapping `void-field`, whose own `error` attribute sets this one.

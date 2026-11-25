@@ -50,10 +50,10 @@ export class VoidActionInput extends NativeFormControl(VoidElement) {
   /** Size step: `sm`, `md` (default) or `lg`. */
   @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' = 'md';
   /**
-   * Status colour of the action button: `default`, `error`, `warning`, `caution`, `success`, `info` or
-   * `notice`.
+   * Status colour of the action button: `default`, `error`, `warning`, `caution`, `success`, `info`,
+   * `notice` or `highlight`.
    */
-  @property({ type: String, reflect: true }) color: 'default' | 'error' | 'warning' | 'caution' | 'success' | 'info' | 'notice' = 'default';
+  @property({ type: String, reflect: true }) color: 'default' | 'error' | 'warning' | 'caution' | 'success' | 'info' | 'notice' | 'highlight' = 'default';
   /** Native input type; any text-like type is forwarded to the native control. */
   @property({ type: String, reflect: true }) type: 'text' | 'password' | 'search' | 'email' | 'tel' | 'url' = 'text';
   /**

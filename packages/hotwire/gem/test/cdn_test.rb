@@ -14,7 +14,7 @@ class CDNTest < Minitest::Test
     assert_equal expected, C::NPM_VERSION
     assert_equal "https://cdn.jsdelivr.net/npm/@voidable/ui@#{expected}/+esm", C::UI_URL
     assert_equal "https://cdn.jsdelivr.net/npm/@voidable/ui-hotwire@#{expected}/dist/index.js", C::UI_HOTWIRE_URL
-    assert_equal "https://cdn.jsdelivr.net/npm/@voidable/theme@#{expected}/src/index.css", C::THEME_CSS_URL
+    assert_equal "https://cdn.jsdelivr.net/npm/@voidable/theme@#{expected}/dist/void.min.css", C::THEME_CSS_URL
   end
 
   def test_dev_entry_is_a_raw_standalone_file

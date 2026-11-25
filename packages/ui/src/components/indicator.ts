@@ -4,8 +4,8 @@ import { VoidElement } from '../base.js';
 
 /** Badge overlay for notification counts on icons and online presence signals on avatars. */
 export class VoidIndicator extends VoidElement {
-  /** Status colour of the dot: `default`, `error`, `warning`, `caution`, `success`, `info` or `notice`. */
-  @property({ type: String, reflect: true }) color: 'default' | 'error' | 'warning' | 'caution' | 'success' | 'info' | 'notice' = 'default';
+  /** Status colour of the dot: `default`, `error`, `warning`, `caution`, `success`, `info`, `notice` or `highlight`. */
+  @property({ type: String, reflect: true }) color: 'default' | 'error' | 'warning' | 'caution' | 'success' | 'info' | 'notice' | 'highlight' = 'default';
   /**
    * Which corner of the wrapped content the dot sits on: `top-right` (default), `top-left`,
    * `bottom-right` or `bottom-left`.
@@ -21,8 +21,8 @@ export class VoidIndicator extends VoidElement {
    * reduced motion.
    */
   @property({ type: Boolean, reflect: true }) ping = false;
-  /** Size step: `sm`, `md` (default), `lg`, `xl` or `xxl`. */
-  @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' | 'xl' | 'xxl' = 'md';
+  /** Size step: `sm`, `md` (default) or `lg`. */
+  @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' = 'md';
 
   connectedCallback(): void {
     super.connectedCallback();

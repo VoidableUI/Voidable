@@ -20,7 +20,7 @@ const meta: Meta = {
     initials: { control: { type: 'text' } },
     size: {
       control: { type: 'select' },
-      options: ['sm', 'md', 'lg', 'xl', 'xxl'],
+      options: ['sm', 'md', 'lg'],
     },
   },
 };
@@ -55,8 +55,6 @@ export const Sizes: Story = {
       <void-avatar initials="KW" size="sm"></void-avatar>
       <void-avatar initials="KW" size="md"></void-avatar>
       <void-avatar initials="KW" size="lg"></void-avatar>
-      <void-avatar initials="KW" size="xl"></void-avatar>
-      <void-avatar initials="KW" size="xxl"></void-avatar>
     </div>
   `,
 };

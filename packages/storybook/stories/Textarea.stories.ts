@@ -20,7 +20,7 @@ const meta: Meta = {
     readonly: { control: 'boolean' },
     rows: { control: 'number' },
     resize: { control: 'select', options: ['none', 'vertical', 'both'] },
-    size: { control: 'select', options: ['sm', 'md', 'lg', 'xl', 'xxl'] },
+    size: { control: 'select', options: ['sm', 'md', 'lg'] },
     error: { control: 'text' },
   },
   render: (args) => html`
@@ -51,8 +51,6 @@ export const Sizes: Story = {
       <void-textarea size="sm" placeholder="Small"></void-textarea>
       <void-textarea size="md" placeholder="Medium"></void-textarea>
       <void-textarea size="lg" placeholder="Large"></void-textarea>
-      <void-textarea size="xl" placeholder="XL"></void-textarea>
-      <void-textarea size="xxl" placeholder="XXL"></void-textarea>
     </div>
   `,
 };

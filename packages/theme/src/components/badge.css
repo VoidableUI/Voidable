@@ -46,5 +46,3 @@ void-badge[variant="outline"] {
 /* Sizes */
 void-badge[size="sm"]  { --void-badge-size: 1.125rem; --void-badge-padding: var(--void-space-1h); --void-badge-text: var(--void-type-label-size); }
 void-badge[size="lg"]  { --void-badge-size: 1.75rem;  --void-badge-padding: var(--void-space-3);  --void-badge-text: var(--void-text-sm); }
-void-badge[size="xl"]  { --void-badge-size: 2.25rem;  --void-badge-padding: var(--void-space-4);  --void-badge-text: var(--void-text-base); }
-void-badge[size="xxl"] { --void-badge-size: 3rem;     --void-badge-padding: var(--void-space-5);  --void-badge-text: var(--void-text-lg); }

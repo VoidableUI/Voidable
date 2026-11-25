@@ -18,7 +18,7 @@ const meta: Meta = {
     placeholder: { control: 'text' },
     disabled: { control: 'boolean' },
     readonly: { control: 'boolean' },
-    size: { control: 'select', options: ['sm', 'md', 'lg', 'xl', 'xxl'] },
+    size: { control: 'select', options: ['sm', 'md', 'lg'] },
     error: { control: 'text' },
   },
   render: (args) => html`
@@ -48,8 +48,6 @@ export const Sizes: Story = {
       <void-input size="sm" placeholder="Small"></void-input>
       <void-input size="md" placeholder="Medium"></void-input>
       <void-input size="lg" placeholder="Large"></void-input>
-      <void-input size="xl" placeholder="XL"></void-input>
-      <void-input size="xxl" placeholder="XXL"></void-input>
     </div>
   `,
 };

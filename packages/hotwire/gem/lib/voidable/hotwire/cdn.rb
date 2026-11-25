@@ -16,7 +16,7 @@ module Voidable
 
       UI_URL = "#{BASE}/@voidable/ui@#{NPM_VERSION}/+esm".freeze
       UI_HOTWIRE_URL = "#{BASE}/@voidable/ui-hotwire@#{NPM_VERSION}/dist/index.js".freeze
-      THEME_CSS_URL = "#{BASE}/@voidable/theme@#{NPM_VERSION}/src/index.css".freeze
+      THEME_CSS_URL = "#{BASE}/@voidable/theme@#{NPM_VERSION}/dist/void.min.css".freeze
 
       # The autoloader (@voidable/ui/autoloader) imports each component from a
       # file next to it, so it is pinned as the raw dist file, not as a +esm

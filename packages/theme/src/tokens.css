@@ -14,10 +14,13 @@
    single formula of it, so light is not a second hand-tuned block.
    Dark stays the default when the OS expresses no preference; an
    explicit data-theme always wins, on the root or on any subtree. */
+/* `color-scheme` (native scrollbars, form controls, autofill) is not set on
+   :root, which would restyle an application's own controls. The scoped
+   reset applies it to every theme element and base.css to html, both from
+   --void-color-scheme; a data-theme region sets it on itself. */
 :root,
 [data-theme="dark"] {
-  /* Native UI (scrollbars, form controls, autofill) follows the theme */
-  color-scheme: dark;
+  --void-color-scheme: dark;
   --void-scheme-dark: 1;
   /* The scheme of the page itself. A media surface forces
      --void-scheme-dark to 1 for what sits on the image; a glass panel
@@ -25,15 +28,20 @@
   --void-page-scheme-dark: 1;
 }
 
+[data-theme="dark"] {
+  color-scheme: dark;
+}
+
 [data-theme="light"] {
   color-scheme: light;
+  --void-color-scheme: light;
   --void-scheme-dark: 0;
   --void-page-scheme-dark: 0;
 }
 
 @media (prefers-color-scheme: light) {
   :root:not([data-theme]) {
-    color-scheme: light;
+    --void-color-scheme: light;
     --void-scheme-dark: 0;
     --void-page-scheme-dark: 0;
   }
@@ -300,21 +308,15 @@
   --void-control-height-sm:  calc(1.75rem * var(--void-density));
   --void-control-height:     calc(2.25rem * var(--void-density));
   --void-control-height-lg:  calc(2.75rem * var(--void-density));
-  --void-control-height-xl:  calc(3.25rem * var(--void-density));
-  --void-control-height-xxl: calc(4rem * var(--void-density));
 
   /* Inline padding of a text field; buttons use a little more. */
   --void-control-padding-sm:  calc(0.5rem * var(--void-density));
   --void-control-padding:     calc(0.75rem * var(--void-density));
   --void-control-padding-lg:  calc(1rem * var(--void-density));
-  --void-control-padding-xl:  calc(1.25rem * var(--void-density));
-  --void-control-padding-xxl: calc(1.5rem * var(--void-density));
 
   --void-control-text-sm:  var(--void-text-sm);
   --void-control-text:     var(--void-text-base);
   --void-control-text-lg:  var(--void-text-md);
-  --void-control-text-xl:  var(--void-text-lg);
-  --void-control-text-xxl: var(--void-text-xl);
 
   /* Padding of a table cell or list row, block then inline. */
   --void-cell-padding-block:  calc(0.75rem * var(--void-density));
