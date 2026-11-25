@@ -1,0 +1,177 @@
+# SPDX-License-Identifier: MIT
+#
+# Scripted screen-reader tests (#34): VoiceOver on a macOS runner and NVDA on a
+# Windows runner, driven by Guidepup through Playwright, asserting on what is
+# actually spoken (tests/browser/screen-readers; see its README.md).
+#
+# This workflow does NOT gate anything. It is separate from ci.yml on purpose:
+#   - it has no `workflow_call` trigger, and neither ci.yml nor release.yml
+#     references it, so a release never waits for it and cannot be failed by it;
+#   - none of its jobs is meant to be a required status check (that is a decision
+#     for the repository settings, and the standing decision is that only the
+#     `ci`, `browser`, `server`, `phoenix` and `laravel` jobs gate a release);
+#   - it runs on pull requests that touch what it tests, once a week, and on demand.
+# A screen reader on a hosted runner depends on the runner image and on the screen
+# reader's own release, so a red run here is a prompt to look, not a verdict.
+#
+# Runner images (what Guidepup supports and tests itself on today): macos-15 (Apple
+# silicon) with VoiceOver and Playwright WebKit, windows-2025 with NVDA and
+# Playwright Chromium. Pinned by name, not `-latest`, so an image migration is a
+# change in this file. Tooling: Node and pnpm from mise (versions from mise.toml,
+# as ci.yml does); the dependency install and the build are narrowed to what the
+# browser suite needs, and run with pnpm directly because mise's file tasks are
+# bash scripts and the full `mise run build` installs the whole workspace.
+#
+# After a run: download the `*-results` artifacts and merge them into the
+# accessibility statement with `mise run test:screen-readers:record -- <folder>`.
+name: Screen readers
+
+on:
+  pull_request:
+    paths:
+      - "packages/ui/**"
+      - "packages/theme/**"
+      - "tests/browser/screen-readers/**"
+      - "tests/browser/pages/sr-*.html"
+      - "tests/browser/playwright.screen-readers.config.ts"
+      - "tests/browser/package.json"
+      - ".github/workflows/screen-readers.yml"
+  schedule:
+    # Mondays 04:23 UTC.
+    - cron: "23 4 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: screen-readers-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  # The @guidepup/setup CLI, pinned (it changes system settings on the runner).
+  # Keep equal to GUIDEPUP_SETUP in .mise/tasks/test/screen-readers/setup.
+  GUIDEPUP_SETUP: "0.29.3"
+  # sharp (a dev dependency of the browser suite) builds from source when it finds a
+  # system libvips; use its prebuilt binaries, as `mise run install` does.
+  SHARP_IGNORE_GLOBAL_LIBVIPS: "1"
+  MISE_NOT_FOUND_AUTO_INSTALL: "false"
+
+jobs:
+  voiceover:
+    name: VoiceOver (macOS 15, WebKit)
+    runs-on: macos-15
+    timeout-minutes: 90
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+
+      # Node (and pnpm) first, from mise.toml: Guidepup's setup and install run on it.
+      - uses: jdx/mise-action@5228313ee0372e111a38da051671ca30fc5a96db # v3.6.3
+        with:
+          install_args: "node npm:pnpm"
+
+      # Guidepup's own workflows configure the machine first, before anything else
+      # touches it. --ci avoids the prompts; --macos-record saves a screen recording
+      # of the setup to ./recordings, which is the way to debug a macOS setup failure.
+      - name: Configure macOS for VoiceOver automation
+        run: npx -y --ignore-scripts=false "@guidepup/setup@${GUIDEPUP_SETUP}" setup --ci --macos-record
+
+      - name: Log the language settings (the tests need English)
+        run: |
+          defaults read -g AppleLanguages || true
+          defaults read -g AppleLocale || true
+          sw_vers
+
+      - name: Install the browser suite's dependencies
+        run: pnpm install --frozen-lockfile --filter "@voidable/browser-tests..."
+
+      - name: Build the packages the browser suite loads
+        run: pnpm --filter "@voidable/browser-tests^..." build
+
+      - name: Install WebKit
+        run: pnpm --dir tests/browser exec playwright install webkit
+
+      - name: Install the VoiceOver assets for this Guidepup version
+        working-directory: tests/browser
+        run: npx -y --ignore-scripts=false "@guidepup/setup@${GUIDEPUP_SETUP}" install
+
+      - name: Run the VoiceOver scenarios
+        run: pnpm --dir tests/browser exec playwright test --config playwright.screen-readers.config.ts
+
+      - name: Upload the results, spoken-phrase logs, traces and recordings
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: voiceover-macos-15-results
+          path: |
+            tests/browser/screen-reader-results/
+            tests/browser/test-results-screen-readers/
+            tests/browser/playwright-report-screen-readers/
+            recordings/
+          if-no-files-found: warn
+          retention-days: 30
+
+  nvda:
+    name: NVDA (Windows Server 2025, Chromium)
+    runs-on: windows-2025
+    timeout-minutes: 90
+    defaults:
+      run:
+        shell: bash
+    env:
+      # pnpm runs package scripts with cmd.exe on Windows, and packages/ui builds with
+      # `rm -rf dist && cem analyze && ...`. Run them with Git Bash instead.
+      npm_config_script_shell: 'C:\Program Files\Git\bin\bash.exe'
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+
+      # Node (and pnpm) first, from mise.toml: Guidepup's setup and install run on it.
+      - uses: jdx/mise-action@5228313ee0372e111a38da051671ca30fc5a96db # v3.6.3
+        with:
+          install_args: "node npm:pnpm"
+
+      - name: Use English for the user, the culture and the keyboard
+        shell: pwsh
+        run: |
+          try {
+            Set-WinUserLanguageList -LanguageList en-US -Force
+            Set-Culture en-US
+          } catch {
+            Write-Warning "could not set the language: $_"
+          }
+          Get-Culture | Format-List Name, DisplayName
+          Get-WinUserLanguageList | Format-List LanguageTag
+
+      - name: Configure Windows for NVDA automation
+        run: npx -y --ignore-scripts=false "@guidepup/setup@${GUIDEPUP_SETUP}" setup --ci
+
+      - name: Install the browser suite's dependencies
+        run: pnpm install --frozen-lockfile --filter "@voidable/browser-tests..."
+
+      - name: Build the packages the browser suite loads
+        run: pnpm --filter "@voidable/browser-tests^..." build
+
+      - name: Install Chromium
+        run: pnpm --dir tests/browser exec playwright install chromium
+
+      - name: Install the NVDA assets for this Guidepup version
+        working-directory: tests/browser
+        run: npx -y --ignore-scripts=false "@guidepup/setup@${GUIDEPUP_SETUP}" install
+
+      - name: Run the NVDA scenarios
+        run: pnpm --dir tests/browser exec playwright test --config playwright.screen-readers.config.ts
+
+      - name: Upload the results, spoken-phrase logs, traces and recordings
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: nvda-windows-2025-results
+          path: |
+            tests/browser/screen-reader-results/
+            tests/browser/test-results-screen-readers/
+            tests/browser/playwright-report-screen-readers/
+          if-no-files-found: warn
+          retention-days: 30
