@@ -17,25 +17,26 @@ export const TOLERANCE = 1.5;
 /** Plain-DOM calibration workload on the reference machine, in ms. */
 export const calibrationMs = 80;
 
-// Set 2026-11-25 on the reference machine (a Linux desktop), Playwright Chromium 159,
-// median of three runs of this suite. (The ad hoc final review measured the
-// same workloads differently, with the system Chromium: 176, 117, 209, 210
-// and 17.5 ms, 48.5 and 7.3 kB.)
+// Re-baselined 2026-11-25 against the current master (a Linux desktop, Playwright Chromium 159).
+// The machine was shared with other jobs (load average 20 to 27), so each run's timings were
+// divided by that run's own calibration and rescaled to calibrationMs; medians of four runs,
+// rounded up. The first baseline, on the suite's old base, was 58, 75, 130, 170 and 28.5 ms and
+// 46.7 and 6.9 kB.
 export const reference = {
   /** First render of 1,000 mixed components until all have rendered. */
-  mixed1000Ms: 58,
+  mixed1000Ms: 65,
   /** First render of a 500-row table with a dropdown-menu, a badge and two buttons per row. */
-  table500FirstMs: 75,
+  table500FirstMs: 72,
   /** One Turbo morph of that table (one cell changed), through VoidTurbo. */
-  table500MorphMs: 130,
+  table500MorphMs: 115,
   /** First render of a void-select with 5,000 options. */
-  select5000Ms: 170,
+  select5000Ms: 40,
   /** 200 open/close cycles of a dialog. */
-  dialog200Ms: 28.5,
+  dialog200Ms: 28,
   /** Gzipped size of `import '@voidable/ui'` (everything, Lit included), minified. */
-  rootEntryGzipKB: 46.7,
-  /** Gzipped size of `import '@voidable/ui/button'` (one component, Lit included), minified. */
-  singleComponentGzipKB: 6.9,
+  rootEntryGzipKB: 52.4,
+  /** Gzipped size of `import '@voidable/ui/components/button'` (one component, Lit included), minified. */
+  singleComponentGzipKB: 11.6,
 };
 
 /** Leak limits for the 200 dialog cycles (absolute, not scaled). */

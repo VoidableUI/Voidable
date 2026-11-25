@@ -11,8 +11,8 @@
 
   /**
    * Resolves once every Lit element under `root` has finished updating
-   * (repeated, because one update can schedule another) and two frames
-   * have been painted.
+   * (repeated, because one update can schedule another), any chart or gauge
+   * has finished drawing in, and two frames have been painted.
    */
   window.__settle = async (root = document) => {
     for (let round = 0; round < 6; round++) {
@@ -21,6 +21,9 @@
       await Promise.all([...root.querySelectorAll('*')].filter((el) => el.updateComplete).map((el) => el.updateComplete));
       await Promise.resolve();
     }
+    // Charts and gauges draw in over ~700 ms and show intermediate values; wait for them to arrive.
+    const drawing = () => [...root.querySelectorAll('*')].some((el) => el._phase === 'pre' || el._phase === 'animating');
+    for (let i = 0; i < 120 && drawing(); i++) await frame();
     await frame();
   };
   window.__frame = frame;

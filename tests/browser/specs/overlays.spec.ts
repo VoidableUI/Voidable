@@ -44,12 +44,12 @@ test.describe('closed overlays', () => {
   });
 
   test('hover-card body is hidden while closed', async ({ page }) => {
-    expectedFailure('untracked:hover-card-closed-exposed', 'the closed card is only opacity: 0, so its content stays in the accessibility tree and its links in the tab order');
+    expectedFailure('#6', 'the closed card is only opacity: 0, so its content stays in the accessibility tree and its links in the tab order');
     await expectGone(page, '#hc .hcc', /Hover card content/);
   });
 
   test('the tab order skips every closed overlay', async ({ page }) => {
-    expectedFailure('untracked:hover-card-closed-exposed', 'Tab lands on the link inside the closed hover card');
+    expectedFailure('#6', 'Tab lands on the link inside the closed hover card');
     await page.locator('#before').focus();
     const seen: string[] = [];
     for (let i = 0; i < 30; i++) {
@@ -264,7 +264,7 @@ test.describe('popover', () => {
 
 test.describe('hover-card', () => {
   test('opens on hover and closes when the pointer leaves, repeatedly', async ({ page }) => {
-    expectedFailure('untracked:hover-card-closed-exposed', 'after closing, the card content is still in the accessibility tree');
+    expectedFailure('#6', 'after closing, the card content is still in the accessibility tree');
     for (let i = 0; i < 4; i++) {
       await page.locator('#hc-t').hover();
       await expect(page.locator('#hc .hcc')).toBeVisible();
@@ -285,7 +285,7 @@ test.describe('hover-card', () => {
   });
 
   test('opens on keyboard focus and closes on Escape', async ({ page }) => {
-    expectedFailure('untracked:hover-card-closed-exposed', 'after Escape, the card content is still in the accessibility tree');
+    expectedFailure('#6', 'after Escape, the card content is still in the accessibility tree');
     await page.locator('#hc-t').focus();
     await expect(page.locator('#hc .hcc')).toBeVisible();
     await expect(page.locator('#hc .void-hover-card-trigger')).toHaveAttribute('aria-expanded', 'true');
@@ -333,7 +333,7 @@ test.describe('dropdown-menu', () => {
     });
 
     test(`${label}: choosing an item fires void-select and closes the menu`, async ({ page }) => {
-      expectedFailure('#39', 'dropdown-menu stays open after an item is chosen');
+      expectedFailure('#6', 'dropdown-menu stays open after an item is chosen');
       await page.locator(`#${id}-t`).click();
       await page.keyboard.press('ArrowDown');
       await page.keyboard.press('Enter');
@@ -342,7 +342,6 @@ test.describe('dropdown-menu', () => {
     });
 
     test(`${label}: the trigger announces the menu (aria-haspopup, aria-expanded)`, async ({ page }) => {
-      expectedFailure('#39', 'dropdown-menu trigger has no aria-haspopup or aria-expanded');
       const trigger = page.locator(`#${id}-t`);
       await expect(trigger).toHaveAttribute('aria-haspopup', 'menu', { timeout: 1000 });
       await expect(trigger).toHaveAttribute('aria-expanded', 'false', { timeout: 1000 });

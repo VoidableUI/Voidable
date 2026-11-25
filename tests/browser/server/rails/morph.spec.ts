@@ -71,12 +71,10 @@ test.afterEach(async ({ errors }) => {
   expect(errors, 'page and console errors').toEqual([]);
 });
 
-// The demo layout's header search (void-action-input) throws from Lit on
-// every page-refresh morph: the morph removes the part markers it rendered.
-// The other tests leave it off the page so this one error does not mask theirs.
+// The demo layout's header search (void-action-input) must survive a page-refresh morph (it used to
+// throw from Lit, which lost the part markers it rendered). The other tests leave it off the page so a
+// regression here does not mask theirs.
 test('a refresh morph leaves the layout header search working', async ({ page, errors }) => {
-  test.fail(true, '#61: morphs strip DOM the component rendered itself (void-action-input loses its Lit part markers)');
-  test.info().annotations.push({ type: 'issue', description: '#61' });
   await open(page, true);
   await page.click('#lab-bump');
   await expect(page.locator('#lab-version')).toHaveText('Server version 2');
@@ -97,20 +95,6 @@ test('the demo runs the local gem and built packages', async ({ page }) => {
   await expect(page.getByRole('combobox', { name: 'Pick' })).toHaveValue('b');
 });
 
-/**
- * Marks the running test as an expected failure for #61: a Turbo page-refresh
- * morph (with VoidTurbo running) strips what components rendered on their own
- * hosts and inside them. Measured on this page: void-switch and void-input
- * lose their whole rendered DOM and role; void-select loses aria-labelledby
- * (its field label), size, error and placeholder; void-tabs loses size;
- * void-dialog loses role, aria-modal and aria-label.
- * Turbo Stream morphs of the same markup are not affected.
- */
-function known61(detail: string) {
-  test.fail(true, `#61: ${detail}`);
-  test.info().annotations.push({ type: 'issue', description: '#61' });
-}
-
 /** Refreshes the page from the server (as a broadcast refresh would) and waits for the morph. */
 async function refresh(page: Page) {
   const done = page.waitForResponse((r) => r.url().endsWith('/morph_lab') && r.request().method() === 'GET');
@@ -129,16 +113,17 @@ test('a page-refresh morph keeps every component node and updates server text', 
 });
 
 test('controls keep their rendered DOM, role and label through a refresh morph', async ({ page }) => {
-  known61('void-switch and void-input lose their rendered DOM; void-select loses its label link');
   await server(page, '#lab-bump', 2);
   await expect(page.getByRole('switch', { name: 'Newsletter' })).toBeVisible();
   await expect(page.getByRole('textbox', { name: 'Notes' })).toBeVisible();
   await expect(page.getByRole('combobox', { name: 'Pick' })).toHaveValue('b');
+  // The lab's tabs have no value, so no panel shows until a tab is chosen.
+  await expect(page.locator('#lab-tabs [role="tabpanel"]:visible')).toHaveCount(0);
+  await page.getByRole('tab', { name: 'One' }).click();
   await expect(page.locator('#lab-tabs [role="tabpanel"]:visible')).toContainText('Panel one v2');
 });
 
 test('ten refresh morphs in a row leave the generated structure as on a fresh load', async ({ page }) => {
-  known61('each refresh morph removes component-rendered nodes (154 elements become 145)');
   const fresh = await generated(page);
   for (let v = 2; v <= 11; v++) await server(page, '#lab-bump', v);
   expect(await generated(page)).toEqual(fresh);
@@ -162,7 +147,6 @@ test('client state survives a refresh morph: checked box and selected tab', asyn
 });
 
 test('client state survives a refresh morph: a toggled switch', async ({ page }) => {
-  known61('void-switch loses its rendered DOM and role');
   await page.getByRole('switch', { name: 'Newsletter' }).click();
   await server(page, '#lab-bump', 2);
   await expect(page.getByRole('switch', { name: 'Newsletter' })).toBeChecked();
@@ -180,7 +164,6 @@ test('a dialog the user opened stays open through a refresh morph', async ({ pag
 });
 
 test('an open dialog keeps its dialog role and name through a refresh morph', async ({ page }) => {
-  known61('the morph strips role, aria-modal and aria-label from the void-dialog host');
   await page.click('#lab-open-dialog');
   await refresh(page);
   await expect(page.getByRole('dialog', { name: 'Dialog v1' })).toBeVisible();
@@ -188,7 +171,7 @@ test('an open dialog keeps its dialog role and name through a refresh morph', as
 });
 
 test('server changes win: selected value, new options, and a dialog the server opens and closes', async ({ page }) => {
-  // The native select inside void-select, located directly: its field label is the #61 test above.
+  // The native select inside void-select, located directly: its field label is checked in the controls test above.
   const select = page.locator('#lab-select select');
   await server(page, '#lab-select-c');
   await expect(select).toHaveValue('c');
@@ -212,7 +195,6 @@ test('server changes win: selected value, new options, and a dialog the server o
 });
 
 test('a form of Voidable controls submits through Turbo and the morph shows the saved value', async ({ page }) => {
-  known61('void-input loses its rendered input on the refresh morph that follows the submission');
   await page.getByRole('textbox', { name: 'Notes' }).fill('hello from the browser');
   await mark(page, ['lab-notes']);
   const done = page.waitForResponse((r) => r.url().endsWith('/morph_lab') && r.request().method() === 'GET');
@@ -237,9 +219,11 @@ test('a form of Voidable controls submits its values to Rails through Turbo', as
 });
 
 test('a Turbo Stream with method morph updates the panel in place, repeatedly', async ({ page }) => {
-  const fresh = await generated(page);
   await mark(page, IDS.slice(0, 7));
   await page.getByRole('checkbox', { name: 'Olives' }).check();
+  await settle(page);
+  // A checked box renders its check mark (two nodes), so the baseline is taken once it is checked.
+  const fresh = await generated(page);
   for (let v = 2; v <= 4; v++) {
     const done = page.waitForResponse((r) => r.url().endsWith('/morph_lab/stream'));
     await page.click('#lab-stream');

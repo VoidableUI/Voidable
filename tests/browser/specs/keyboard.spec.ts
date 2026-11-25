@@ -58,25 +58,32 @@ test.describe('tabs', () => {
     expect(await page.evaluate(() => !!document.activeElement!.closest('#tabs [role=tablist]'))).toBe(false);
   });
 
+  // The active panel is itself a tab stop (APG: tabpanel tabindex=0), so Tab from the tab lands on the
+  // panel, and the next Tab reaches its content.
   test('Tab from the selected tab enters its panel', async ({ page }) => {
     await page.locator('#tabs').getByRole('tab', { name: 'One' }).focus();
+    await page.keyboard.press('Tab');
+    expect(await page.evaluate(() => document.activeElement?.getAttribute('role'))).toBe('tabpanel');
     await page.keyboard.press('Tab');
     expect(await page.evaluate(() => document.activeElement?.id)).toBe('p1-link');
   });
 
   test('Home and End move to the first and last tab', async ({ page }) => {
-    expectedFailure('#7', 'tabs have no Home/End');
     await page.locator('#tabs').getByRole('tab', { name: 'One' }).focus();
     expect(await walk(page, ['End', 'Home'])).toEqual(['Three', 'One']);
   });
 
   test('a tablist with no value set is still reachable by Tab', async ({ page }) => {
-    expectedFailure('#7', 'with value unset every tab gets tabindex=-1');
     await page.locator('#tabs').getByRole('tab', { name: 'One' }).focus();
-    await page.keyboard.press('Tab'); // into panel one's link
+    await page.keyboard.press('Tab'); // panel one
+    await page.keyboard.press('Tab'); // panel one's link
     await page.keyboard.press('Tab');
     expect(await activeLabel(page)).toBe('Alpha');
-    await expect(page.locator('#tabs-unset').getByRole('tab', { name: 'Alpha' })).toHaveAttribute('aria-selected', 'true');
+    // With no value the first enabled tab is the tab stop but nothing is selected until the user chooses.
+    const alpha = page.locator('#tabs-unset').getByRole('tab', { name: 'Alpha' });
+    await expect(alpha).toHaveAttribute('aria-selected', 'false');
+    await page.keyboard.press('Enter');
+    await expect(alpha).toHaveAttribute('aria-selected', 'true');
   });
 });
 
@@ -124,14 +131,12 @@ test.describe('segmented-control', () => {
   });
 
   test('a radiogroup is a single tab stop', async ({ page }) => {
-    expectedFailure('#39', 'every segmented-control item has tabindex="0"; there is no roving tabindex');
     await page.locator('#seg').getByRole('radio', { name: 'List' }).focus();
     await page.keyboard.press('Tab');
     expect(await page.evaluate(() => document.getElementById('seg')!.contains(document.activeElement))).toBe(false);
   });
 
   test('ArrowLeft with nothing selected selects the last item', async ({ page }) => {
-    expectedFailure('#39', 'ArrowLeft with nothing selected picks the second-to-last item');
     await page.locator('#seg-none').getByRole('radio', { name: 'A' }).focus();
     await page.evaluate(() => (document.activeElement as HTMLElement).blur());
     await page.locator('#seg-none').getByRole('radio').first().focus();
@@ -183,7 +188,6 @@ test.describe('menu', () => {
   });
 
   test('menuitems are direct children of the menu in the accessibility tree', async ({ page }) => {
-    expectedFailure('#7', 'menu nests role=listbox between role=menu and its menuitems');
     await expect(page.locator('#menu')).toMatchAriaSnapshot(`
       - menu "Actions":
         - menuitem "Edit"
@@ -202,7 +206,6 @@ test.describe('menu', () => {
   });
 
   test('an open menu does not take arrow keys from a textarea elsewhere on the page', async ({ page }) => {
-    expectedFailure('#7', 'menu calls preventDefault on ArrowUp/ArrowDown for the whole document while open');
     await page.locator('#notes').focus();
     await page.evaluate(() => (document.getElementById('notes') as HTMLTextAreaElement).setSelectionRange(0, 0));
     await page.keyboard.press('ArrowDown');
@@ -282,7 +285,6 @@ test.describe('date-picker', () => {
 
 test.describe('combobox and multiselect keyboard selection', () => {
   test('combobox: ArrowDown and Enter pick an option', async ({ page }) => {
-    expectedFailure('#7', 'combobox options respond only to the mouse');
     await page.locator('#combo input').focus();
     await page.keyboard.press('ArrowDown');
     await page.keyboard.press('ArrowDown');
@@ -291,14 +293,22 @@ test.describe('combobox and multiselect keyboard selection', () => {
     expect(await value(page, 'combo')).toBe('vue');
   });
 
+  // Opening highlights the first option (focus stays on the trigger, aria-activedescendant points at the
+  // highlight), arrows move it, Space and Enter toggle it, and the list stays open.
   test('multiselect: arrows and Space toggle options', async ({ page }) => {
-    expectedFailure('#7', 'multiselect has no arrow-key navigation');
-    await page.locator('#multi .void-multiselect-trigger').focus();
+    const trigger = page.locator('#multi .void-multiselect-trigger');
+    await trigger.focus();
     await page.keyboard.press('Enter');
+    await expect(trigger).toHaveAttribute('aria-expanded', 'true');
     await page.keyboard.press('ArrowDown');
     await page.keyboard.press('Space');
     await settle(page);
-    expect(await value(page, 'multi')).toEqual(['css']);
+    expect(await value(page, 'multi')).toEqual(['js']);
+    await page.keyboard.press('ArrowUp');
+    await page.keyboard.press('Enter');
+    await settle(page);
+    expect([...(await value(page, 'multi'))].sort()).toEqual(['css', 'js']);
+    await expect(trigger).toHaveAttribute('aria-expanded', 'true');
   });
 });
 

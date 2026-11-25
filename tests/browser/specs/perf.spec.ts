@@ -96,5 +96,5 @@ test('gzipped bundle size: the root entry and a single component', async () => {
     return gzipSync(out.outputFiles[0].contents, { level: 9 }).length / 1024;
   };
   within('gzipped root entry', await size(`import '@voidable/ui';`), reference.rootEntryGzipKB, 'kB', false);
-  within('gzipped single component (button)', await size(`import '@voidable/ui/button';`), reference.singleComponentGzipKB, 'kB', false);
+  within('gzipped single component (button)', await size(`import '@voidable/ui/components/button';`), reference.singleComponentGzipKB, 'kB', false);
 });

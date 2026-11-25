@@ -103,7 +103,7 @@ for (const mode of MODES) {
     });
 
     test('every control has a visible boundary (3:1)', async ({ page }) => {
-      expectedFailure('untracked:date-picker-boundary', 'the date-picker input is drawn with --void-color-border (about 1.4:1) instead of the control border every other input uses (3.1:1 and up)');
+      expectedFailure('untracked:date-picker-boundary', 'the date-picker input is drawn with --void-color-border (about 1.2 to 1.3:1) instead of the control border every other input uses (about 4:1)');
       await load(page, `/kitchen?${mode.query}`);
       const found = await boundaries(page);
       const low = Object.entries(found).filter(([, v]) => typeof v === 'string' || v < 3);
@@ -178,7 +178,6 @@ test('every keyboard stop on the kitchen page shows a focus indicator of 3:1', a
 });
 
 test('the compose-input focus indicator changes by 3:1', async ({ page }) => {
-  expectedFailure('untracked:compose-input-focus', 'focus only brightens the border from 36% to 55% white, about 1.5:1 between states');
   await load(page, '/kitchen');
   await page.addStyleTag({ content: '*, *::before, *::after { transition: none !important; }' });
   const ta = page.locator('void-compose-input textarea');

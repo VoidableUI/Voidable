@@ -1,25 +1,22 @@
 {
   "_notes": {
     "_": "Reviewed known violations. Each rule says why it is accepted for now and where it is tracked. Counts are violating nodes per rule per component; see specs/axe.spec.ts.",
-    "aria-allowed-attr": "#7: aria-expanded on a plain <input> (date-picker, combobox) and on the hover-card trigger wrapper, which have no role that allows it; the role belongs on the focusable element.",
-    "aria-dialog-name": "#7: the hover-card body is role=dialog with no name (noted in hover-card.ts).",
-    "aria-input-field-name": "#7 duplicate roles: void-input, void-textarea, void-slider, void-number-input and void-tags-input put an unnamed widget role on the host while the inner native control is the real, labelled one.",
-    "aria-required-children": "#7: void-menu nests role=listbox between menu and menuitems; void-tags-input is role=listbox around a text input; void-nav-menu (menubar) holds plain links.",
-    "aria-required-parent": "#7: void-menu-item sits in the listbox described above; void-tag is role=listitem even outside a list (untracked).",
-    "color-contrast": "Light theme: void-stat's success delta on its tint is 4.28:1 (needs 4.5:1); the tint gap is noted in lint:contrast (untracked).",
+    "aria-allowed-attr": "Untracked: aria-expanded on the plain <input> inside date-picker and on the hover-card trigger wrapper, which have no role that allows it; the role belongs on the focusable element.",
+    "aria-dialog-name": "Untracked: the hover-card body is role=dialog with no name (noted in hover-card.ts).",
+    "aria-input-field-name": "Untracked duplicate roles: void-textarea, void-slider, void-number-input and void-tags-input put an unnamed widget role on the host while the inner native control is the real, labelled one.",
+    "aria-required-children": "Untracked: void-tags-input is role=listbox around a text input; void-nav-menu (menubar) holds plain links.",
+    "aria-required-parent": "Untracked: void-tag is role=listitem even outside a list.",
     "label": "Untracked: the compact void-color-picker's hex input has no label.",
     "landmark-banner-is-top-level": "Untracked: void-banner is role=banner, a page landmark, even when used as an in-page notice inside <main>.",
-    "nested-interactive": "#7 duplicate roles: checkbox, radio, slider and color-picker hosts are focusable widgets around native controls; a void-button wrapping an <a> (link button) is a button around a link.",
+    "nested-interactive": "Untracked duplicate roles: slider and color-picker hosts are focusable widgets around native controls; a void-button wrapping an <a> (link button) is a button around a link.",
     "scrollable-region-focusable": "Untracked: void-scroll-area's viewport cannot be scrolled by keyboard unless its content is focusable.",
     "target-size": "Untracked: sidebar and breadcrumb links, carousel indicators and the compact colour input are under 24x24 px; the link button's anchor is partly covered by its host's padding."
   },
   "form dark": {
     "aria-allowed-attr": {
-      "void-date-picker": 1,
-      "void-combobox": 1
+      "void-date-picker": 1
     },
     "aria-input-field-name": {
-      "void-input": 2,
       "void-textarea": 1,
       "void-slider": 1,
       "void-number-input": 1,
@@ -29,8 +26,6 @@
       "void-tags-input": 1
     },
     "nested-interactive": {
-      "void-checkbox": 4,
-      "void-radio": 3,
       "void-slider": 1
     },
     "target-size": {
@@ -39,11 +34,9 @@
   },
   "form light": {
     "aria-allowed-attr": {
-      "void-date-picker": 1,
-      "void-combobox": 1
+      "void-date-picker": 1
     },
     "aria-input-field-name": {
-      "void-input": 2,
       "void-textarea": 1,
       "void-slider": 1,
       "void-number-input": 1,
@@ -53,8 +46,6 @@
       "void-tags-input": 1
     },
     "nested-interactive": {
-      "void-checkbox": 4,
-      "void-radio": 3,
       "void-slider": 1
     },
     "target-size": {
@@ -64,14 +55,12 @@
   "kitchen dark": {
     "aria-allowed-attr": {
       "void-date-picker": 1,
-      "void-combobox": 1,
       "void-hover-card": 1
     },
     "aria-dialog-name": {
       "void-hover-card": 1
     },
     "aria-input-field-name": {
-      "void-input": 3,
       "void-textarea": 1,
       "void-number-input": 1,
       "void-slider": 1,
@@ -79,12 +68,10 @@
     },
     "aria-required-children": {
       "void-tags-input": 1,
-      "void-menu": 2,
       "void-nav-menu-item": 1
     },
     "aria-required-parent": {
-      "void-tag": 3,
-      "void-menu-item": 3
+      "void-tag": 3
     },
     "label": {
       "void-color-picker": 1
@@ -94,8 +81,6 @@
     },
     "nested-interactive": {
       "void-button": 1,
-      "void-checkbox": 4,
-      "void-radio": 2,
       "void-slider": 1,
       "void-color-picker": 1
     },
@@ -113,14 +98,12 @@
   "kitchen light": {
     "aria-allowed-attr": {
       "void-date-picker": 1,
-      "void-combobox": 1,
       "void-hover-card": 1
     },
     "aria-dialog-name": {
       "void-hover-card": 1
     },
     "aria-input-field-name": {
-      "void-input": 3,
       "void-textarea": 1,
       "void-number-input": 1,
       "void-slider": 1,
@@ -128,15 +111,10 @@
     },
     "aria-required-children": {
       "void-tags-input": 1,
-      "void-menu": 2,
       "void-nav-menu-item": 1
     },
     "aria-required-parent": {
-      "void-tag": 3,
-      "void-menu-item": 3
-    },
-    "color-contrast": {
-      "void-stat": 1
+      "void-tag": 3
     },
     "label": {
       "void-color-picker": 1
@@ -146,8 +124,6 @@
     },
     "nested-interactive": {
       "void-button": 1,
-      "void-checkbox": 4,
-      "void-radio": 2,
       "void-slider": 1,
       "void-color-picker": 1
     },

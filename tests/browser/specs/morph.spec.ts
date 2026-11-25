@@ -131,7 +131,6 @@ for (const engine of ENGINES) {
     });
 
     test('attributes a component sets on itself (role, aria-*, reflected defaults) survive a morph', async ({ page }) => {
-      expectedFailure('#61', 'the morph strips host attributes the server markup lacks: checkbox-group loses role=group and orientation (its checkboxes reflow inline), checkboxes lose color, size and aria-disabled');
       await render(page, projectionApp(initialState));
       const hostAttrs = () =>
         page.evaluate(() =>
@@ -145,7 +144,6 @@ for (const engine of ENGINES) {
     });
 
     test('every component survives a morph that changes one unrelated text', async ({ page }) => {
-      expectedFailure('#61', 'components without the projection controller are emptied or duplicated by a morph');
       const html = allComponents();
       await render(page, `<p class="flash">one</p>${html}`);
       await morph(page, `<p class="flash">two</p>${html}`);
@@ -154,7 +152,6 @@ for (const engine of ENGINES) {
     });
 
     test('a field, input, switch and button form still works after a morph', async ({ page }) => {
-      expectedFailure('#61', 'the input and label disappear and the switch and button lose role and tabindex');
       await render(page, signupForm('v1'));
       const before = await page.evaluate(() => [...new FormData(document.getElementById('f') as HTMLFormElement)].map((e) => e.join('=')));
       await morph(page, signupForm('v2 (only this text changed)'));
@@ -196,7 +193,6 @@ test.describe('snapshot restore', () => {
     });
 
     test(`${how}: every component restores without duplicating its content`, async ({ page }) => {
-      expectedFailure('#61', 'about 30 components render their content a second time after a snapshot restore');
       await render(page, allComponents());
       const before = await signature(page, 'root');
       await restore(page, how);
@@ -204,7 +200,6 @@ test.describe('snapshot restore', () => {
     });
 
     test(`${how}: a restored form submits each name once`, async ({ page }) => {
-      expectedFailure('#61', 'void-field renders its label and control twice after a restore, so names are submitted twice');
       await render(page, signupForm('cached'));
       const before = await page.evaluate(() => [...new FormData(document.getElementById('f') as HTMLFormElement)].map((e) => e.join('=')));
       await restore(page, how);

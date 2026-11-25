@@ -51,6 +51,8 @@ export const test = base.extend<Fixtures>({
  *   expectedFailure('firefox:select-typeahead', '...', { browsers: ['firefox'] });
  */
 export function expectedFailure(issue: KnownIssue, detail: string, opts: { browsers?: string[] } = {}): void {
+  // VOID_RUN_EXPECTED=1 runs these tests as ordinary tests, to see how each still fails.
+  if (process.env.VOID_RUN_EXPECTED) return;
   const info = base.info();
   const applies = !opts.browsers || opts.browsers.includes(info.project.use.browserName ?? info.project.name);
   if (!applies) return;

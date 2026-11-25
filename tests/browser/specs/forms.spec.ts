@@ -175,7 +175,7 @@ test.describe('form with every value-bearing control', () => {
   });
 
   test('nothing in a disabled fieldset can be reached with Tab', async ({ page }) => {
-    expectedFailure('untracked:fieldset-disabled-focusable', 'toggle-group, segmented-control, multiselect, editable and file-upload stay in the tab order inside a disabled fieldset');
+    expectedFailure('untracked:fieldset-disabled-focusable', 'toggle-group, editable and file-upload stay in the tab order inside a disabled fieldset');
     await page.evaluate(() => ((document.getElementById('fs') as HTMLFieldSetElement).disabled = true));
     await settle(page);
     await page.locator('#i-search input').focus();
