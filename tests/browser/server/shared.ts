@@ -111,11 +111,19 @@ export async function fillLabForm(page: Page, opts: { skip?: string[] } = {}): P
     picked = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
   });
   await step('tags', async () => {
+    // The date step's server round trip can still be patching the form; wait for each tag to render
+    // before typing the next, so a patch cannot swallow keys.
+    const chips = page.locator('#i-tags .void-tags-input-tag');
+    await expect(page.locator('#i-date [role=grid]')).toBeHidden();
     await page.locator('#i-tags input').click();
     await page.keyboard.type('alpha');
+    await expect(page.locator('#i-tags input')).toHaveValue('alpha');
     await page.keyboard.press('Enter');
+    await expect(chips).toHaveCount(1);
     await page.keyboard.type('beta');
+    await expect(page.locator('#i-tags input')).toHaveValue('beta');
     await page.keyboard.press('Enter');
+    await expect(chips).toHaveCount(2);
   });
   await step('framework', async () => {
     await page.locator('#i-fw input').click();

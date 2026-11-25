@@ -120,7 +120,6 @@ test.describe('server updates while the user is mid-interaction', () => {
   });
 
   test('an open dropdown menu stays open through polls', async ({ page }) => {
-    expectedFailure('untracked:livewire-dropdown-closes', 'the first update closes a dropdown menu the user opened');
     await page.click('#poll-on');
     await page.click('#dd-trigger');
     await expect(page.getByRole('menuitem', { name: 'Rename' })).toBeVisible();
@@ -227,7 +226,6 @@ test.describe('overlays opened by the server or the user', () => {
   });
 
   test('a dialog the user opened without the server stays open through an unrelated update', async ({ page }) => {
-    expectedFailure('untracked:livewire-open-state', 'the Livewire hooks do not keep open, so an update that repeats the server markup closes the dialog');
     await page.evaluate(async () => {
       const d = document.getElementById('dlg') as any;
       d.open = true;

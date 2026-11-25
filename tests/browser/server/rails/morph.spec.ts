@@ -167,7 +167,9 @@ test('an open dialog keeps its dialog role and name through a refresh morph', as
   await page.click('#lab-open-dialog');
   await refresh(page);
   await expect(page.getByRole('dialog', { name: 'Dialog v1' })).toBeVisible();
-  await expect(page.locator('#lab-dialog')).toHaveAttribute('aria-modal', 'true');
+  // The role and the modal state belong to the native <dialog> inside the host, not to the host.
+  await expect(page.locator('#lab-dialog')).not.toHaveAttribute('role', /.*/);
+  expect(await panel(page).evaluate((el) => el.matches(':modal'))).toBe(true);
 });
 
 test('server changes win: selected value, new options, and a dialog the server opens and closes', async ({ page }) => {
