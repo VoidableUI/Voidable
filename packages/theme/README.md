@@ -41,7 +41,7 @@ Until a component's script has loaded, its tag is an unknown element and the pag
 
 ## Dark and light
 
-Dark is the default (a true black page). Set the `data-theme` attribute on `<html>`, or on any element, to choose a scheme explicitly:
+There is no fixed default scheme. With no `data-theme`, the page follows the operating system (`prefers-color-scheme`; dark where the browser cannot say), unless a theme or skin states a preferred scheme (Loft and Slab prefer light), which then wins over the operating system. Set the `data-theme` attribute on `<html>`, or on any element, to choose a scheme explicitly: `dark` or `light` always win, and `system` follows the operating system even over a theme or skin's preference. Dark is a true black page, light a true white one.
 
 ```html
 <html data-theme="light">

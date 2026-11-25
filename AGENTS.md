@@ -144,7 +144,7 @@ How the derivation works, and the rules that keep it working:
 - Derived tokens are declared on `:where(:root, [data-theme], [data-void-theme], [data-shape], [data-void-surface], void-media, void-glass)`. A custom property computed from another is resolved where it is declared, so a knob set on a subtree only takes effect if that element carries `data-void-theme`.
 - A surface (on-media, glass) is a set of overrides of the *inputs* to those formulas (the scheme number, the alpha steps, `--void-color-bg`), declared on `void-media`, `void-glass` and `[data-void-surface]`. Components need no surface-specific CSS; never add one.
 - Never put a `var()` in `primitives.css` or `knobs.css`, and never put a raw value in a theme file.
-- **Dark mode** is the default (true black `#000000` page). **Light mode** via `[data-theme="light"]`.
+- **Colour scheme**: `data-theme="dark"` or `"light"` on an element or an ancestor is the explicit choice, and `"system"` follows the operating system. Without one, the scheme a theme or skin prefers (`--void-preferred-scheme`, Loft and Slab prefer light) applies, and without that the operating system (`prefers-color-scheme`; dark where the browser cannot say). Dark is a true black `#000000` page, light a true white one.
 
 ### Token export
 

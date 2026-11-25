@@ -109,7 +109,7 @@ The accessor writes the control's value property, listens for its `void-input` a
 
 ## Theme
 
-Track the active theme (the `data-theme` attribute on `<html>`) with a function of your own, called from an injection context such as a field initializer:
+Track the colour scheme in force (resolved from `data-theme`, a theme or skin's preference and the operating system) with a function of your own, called from an injection context such as a field initializer:
 
 ```ts
 // src/app/inject-theme.ts
@@ -117,7 +117,9 @@ import { DestroyRef, inject, signal } from '@angular/core';
 
 export type Theme = 'dark' | 'light';
 
-const read = (): Theme => (document.documentElement.getAttribute('data-theme') as Theme | null) ?? 'dark';
+// The theme resolves the scheme in CSS (data-theme, then a theme or skin's preference, then the OS) and exposes it here.
+const read = (): Theme =>
+  getComputedStyle(document.documentElement).getPropertyValue('--void-color-scheme').trim() === 'light' ? 'light' : 'dark';
 
 export function injectTheme() {
   const theme = signal<Theme>(read());

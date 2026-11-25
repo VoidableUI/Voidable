@@ -49,6 +49,11 @@ await Promise.all([
     entryPoints: [require.resolve('@voidable/theme')],
     outfile: join(out, 'theme.css'),
   }),
+  esbuild.build({
+    ...common,
+    entryPoints: [require.resolve('@voidable/theme/skins/loft.css')],
+    outfile: join(out, 'loft.css'),
+  }),
   // Turbo 8 starts Turbo Drive on import and sets window.Turbo.
   iife('turbo', `import '@hotwired/turbo';`),
   iife('hotwire', `import { VoidTurbo } from '@voidable/ui-hotwire'; window.VoidTurbo = VoidTurbo;`),

@@ -349,7 +349,7 @@ The attribute matters. Custom properties that are computed from other custom pro
 
 Three things can say which colour scheme is in force, strongest first: `data-theme="dark"`, `"light"` or `"system"` on the element or an ancestor (your application's, that is your user's, explicit choice); the scheme a theme or skin says it was designed for; and the operating system. Loft and Slab prefer light, so `<html data-void-skin="loft">` is light until `data-theme` says otherwise, and `data-theme="system"` hands the decision back to the operating system. A theme or skin states its preference with a pair of declarations, because CSS cannot turn a keyword into a number: `--void-preferred-scheme: light; --void-preferred-scheme-dark: 0;`. Native controls and scrollbars follow through `color-scheme`.
 
-Dark is the **default**. Set `data-theme` on `<html>`, or on any element, to choose a scheme explicitly; without it, the page follows the operating system.
+There is no fixed default. Without `data-theme` the page uses the scheme the theme or skin prefers and, when none does, follows the operating system (dark where the browser cannot say). Set `data-theme` on `<html>`, or on any element, to choose a scheme explicitly. In React, `useTheme()` reports the scheme in force, including a theme or skin's preference.
 
 ```html
 <html data-theme="light">
@@ -357,7 +357,7 @@ Dark is the **default**. Set `data-theme` on `<html>`, or on any element, to cho
 
 ```js
 function toggleTheme() {
-  const current = document.documentElement.getAttribute('data-theme') ?? 'dark';
+  const current = getComputedStyle(document.documentElement).getPropertyValue('--void-color-scheme').trim();
   document.documentElement.setAttribute('data-theme', current === 'dark' ? 'light' : 'dark');
 }
 ```

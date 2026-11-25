@@ -80,7 +80,7 @@ Svelte's `bind:` cannot be used on custom elements: `<void-input bind:value={nam
 
 ## Theme
 
-Track the active theme (the `data-theme` attribute on `<html>`) with a store of your own:
+Track the colour scheme in force (resolved from `data-theme`, a theme or skin's preference and the operating system) with a store of your own:
 
 ```ts
 // src/theme.ts
@@ -88,7 +88,9 @@ import { readable } from 'svelte/store';
 
 export type Theme = 'dark' | 'light';
 
-const read = (): Theme => (document.documentElement.getAttribute('data-theme') as Theme | null) ?? 'dark';
+// The theme resolves the scheme in CSS (data-theme, then a theme or skin's preference, then the OS) and exposes it here.
+const read = (): Theme =>
+  getComputedStyle(document.documentElement).getPropertyValue('--void-color-scheme').trim() === 'light' ? 'light' : 'dark';
 
 export const theme = readable<Theme>('dark', (set) => {
   set(read());
