@@ -57,6 +57,8 @@ Importing `@voidable/ui-react` also imports `@voidable/ui`, which defines the `<
 
 Custom events are exposed as typed `onVoid*` props: `void-change` becomes `onVoidChange`, `void-click` becomes `onVoidClick`, and so on. `event.detail` is typed per component, for example `Switch` `onVoidChange` receives `CustomEvent<{ checked: boolean }>`.
 
+Overlays (`Dialog`, `Drawer`, `Popover`, `DropdownMenu`, `Tooltip`, `HoverCard`, `Combobox`, `Multiselect`, `DatePicker`) take a controlled `open` and fire `onVoidOpen` / `onVoidClose` with `{ reason }` (`OverlayOpenReason`, `OverlayCloseReason`). Set your state to false in `onVoidClose`, or call `event.preventDefault()` there to keep a user-closed overlay open.
+
 ### Triggers
 
 `DropdownMenu`, `Popover` and `HoverCard` need to know which child is the trigger. Give it `slot="trigger"`; every other child is the menu, popover or card content. Without the slot the first child element is used, which goes wrong as soon as React re-keys or swaps that child.
