@@ -56,6 +56,21 @@ Importing `@voidable/ui-react` also imports `@voidable/ui`, which defines the `<
 
 Custom events are exposed as typed `onVoid*` props: `void-change` becomes `onVoidChange`, `void-click` becomes `onVoidClick`, and so on. `event.detail` is typed per component, for example `Switch` `onVoidChange` receives `CustomEvent<{ checked: boolean }>`.
 
+### Triggers
+
+`DropdownMenu`, `Popover` and `HoverCard` need to know which child is the trigger. Give it `slot="trigger"`; every other child is the menu, popover or card content. Without the slot the first child element is used, which goes wrong as soon as React re-keys or swaps that child.
+
+```tsx
+<DropdownMenu>
+  <Button slot="trigger">Actions</Button>
+  <DropdownMenuItem onVoidSelect={edit}>Edit</DropdownMenuItem>
+</DropdownMenu>
+```
+
+### Forms
+
+Form controls take `name`, `value`, `required` and `disabled` and take part in a surrounding `<form>` (submission, `form.reset()`, `<fieldset disabled>`), whether they render a native control or are form-associated custom elements.
+
 ### Next.js
 
 The package starts with `"use client"`, so the components can be imported from App Router server components. They render on the server as plain custom elements and upgrade on the client.

@@ -346,6 +346,12 @@ export const Switch = wrapWc<VoidSwitch, {
   disabled?: boolean;
   color?: 'default' | 'error' | 'warning' | 'success' | 'info' | 'notice';
   size?: 'sm' | 'md' | 'lg' | 'xl' | 'xxl';
+  /** Form field name; the value is submitted under it. */
+  name?: string;
+  /** Form validation: the control must have a value. */
+  required?: boolean;
+  /** Submitted value when checked (default "on"). */
+  value?: string;
 } & VoidEvents<{ Change: { checked: boolean } }>>('void-switch', 'Switch');
 
 export const Avatar = wrapWc<VoidAvatar, {
@@ -423,6 +429,8 @@ export const Checkbox = wrapWc<VoidCheckbox, {
   value?: string;
   color?: 'default' | 'error' | 'warning' | 'success' | 'info' | 'notice';
   size?: 'sm' | 'md' | 'lg' | 'xl' | 'xxl';
+  /** Form validation: the control must have a value. */
+  required?: boolean;
 } & VoidEvents<{ Change: { checked: boolean } }>>('void-checkbox', 'Checkbox');
 
 export const Radio = wrapWc<VoidRadio, {
@@ -432,6 +440,8 @@ export const Radio = wrapWc<VoidRadio, {
   value?: string;
   color?: 'default' | 'error' | 'warning' | 'success' | 'info' | 'notice';
   size?: 'sm' | 'md' | 'lg' | 'xl' | 'xxl';
+  /** Form validation: the control must have a value. */
+  required?: boolean;
 } & VoidEvents<{ Change: { value: string; checked: boolean } }>>('void-radio', 'Radio');
 
 export const RadioGroup = wrapWc<VoidRadioGroup, {
@@ -439,6 +449,10 @@ export const RadioGroup = wrapWc<VoidRadioGroup, {
   value?: string;
   name?: string;
   orientation?: 'vertical' | 'horizontal';
+  /** One of the radios must be checked. */
+  required?: boolean;
+  /** Disables every radio in the group. */
+  disabled?: boolean;
 } & VoidEvents<{ Change: { value: string } }>>('void-radio-group', 'RadioGroup');
 
 export const Field = wrapWc<VoidField, {
@@ -454,6 +468,10 @@ export const Multiselect = wrapWc<VoidMultiselect, {
   size?: 'sm' | 'md' | 'lg' | 'xl' | 'xxl';
   error?: string;
   name?: string;
+  /** Form validation: the control must have a value. */
+  required?: boolean;
+  /** The selected option values. */
+  value?: string[];
 } & VoidEvents<{ Change: { values: string[] } }>>('void-multiselect', 'Multiselect');
 
 export const Option = wrapWc<VoidOption, {
@@ -530,12 +548,28 @@ export const Card = wrapWc<VoidCard, {
   heading?: string;
   variant?: 'default' | 'elevated' | 'outlined';
   padding?: 'none' | 'sm' | 'md' | 'lg';
+  /** Let the card shrink and scroll its content inside a height-constrained flex or grid parent. */
+  scrollable?: boolean;
 }>('void-card', 'Card');
 
+/**
+ * Mark the element that toggles the popover with `slot="trigger"`; everything else is the popover content.
+ * Without a slotted trigger the first child element is used, which breaks when
+ * React re-keys or swaps that child, so always set the slot:
+ *
+ * ```tsx
+ * <Popover>
+ *   <Button slot="trigger">Details</Button>
+ *   <p>Popover content</p>
+ * </Popover>
+ * ```
+ */
 export const Popover = wrapWc<VoidPopover, {
   open?: boolean;
   position?: 'top' | 'bottom' | 'left' | 'right';
   trigger?: 'click' | 'manual';
+  /** Alignment along the trigger edge. */
+  align?: 'start' | 'center' | 'end';
 } & VoidEvents<{ Close: null }>>('void-popover', 'Popover');
 
 export const Tooltip = wrapWc<VoidTooltip, {
@@ -567,6 +601,13 @@ export const Pagination = wrapWc<VoidPagination, {
   value?: number;
   siblings?: number;
   size?: 'sm' | 'md' | 'lg';
+  /**
+   * Link mode: render pages as links built from this template, with `{page}`
+   * replaced by the page number (for example `/posts?page={page}`).
+   */
+  hrefTemplate?: string;
+  /** Link mode: query parameter set on the current URL when there is no `hrefTemplate`. */
+  param?: string;
 } & VoidEvents<{ Change: { value: number } }>>('void-pagination', 'Pagination');
 
 export const ErrorFallback = wrapWc<VoidErrorFallback, {
@@ -580,6 +621,14 @@ export const ErrorFallback = wrapWc<VoidErrorFallback, {
 export const CheckboxGroup = wrapWc<VoidCheckboxGroup, {
   label?: string;
   orientation?: 'vertical' | 'horizontal';
+  /** Form field name; the value is submitted under it. */
+  name?: string;
+  /** At least one checkbox must be checked. */
+  required?: boolean;
+  /** Disables every checkbox in the group. */
+  disabled?: boolean;
+  /** The values of the checked checkboxes. */
+  value?: string[];
 } & VoidEvents<{ Change: { values: string[] } }>>('void-checkbox-group', 'CheckboxGroup');
 
 export const Combobox = wrapWc<VoidCombobox, {
@@ -589,6 +638,8 @@ export const Combobox = wrapWc<VoidCombobox, {
   size?: 'sm' | 'md' | 'lg' | 'xl' | 'xxl';
   error?: string;
   name?: string;
+  /** Form validation: the control must have a value. */
+  required?: boolean;
 } & VoidEvents<{ Change: { value: string } }>>('void-combobox', 'Combobox');
 
 export const Slider = wrapWc<VoidSlider, {
@@ -608,6 +659,10 @@ export const FileUpload = wrapWc<VoidFileUpload, {
   disabled?: boolean;
   maxSize?: number;
   error?: string;
+  /** Form field name; the value is submitted under it. */
+  name?: string;
+  /** Form validation: the control must have a value. */
+  required?: boolean;
 } & VoidEvents<{ Change: { files: File[] } }>>('void-file-upload', 'FileUpload');
 
 export const NavBar = wrapWc<VoidNavBar, {
@@ -635,6 +690,18 @@ export const Sidebar = wrapWc<VoidSidebar, {
   collapsedWidth?: string;
 } & VoidEvents<{ Toggle: { collapsed: boolean } }>>('void-sidebar', 'Sidebar');
 
+/**
+ * Mark the element that opens the menu with `slot="trigger"`; everything else is the menu content.
+ * Without a slotted trigger the first child element is used, which breaks when
+ * React re-keys or swaps that child, so always set the slot:
+ *
+ * ```tsx
+ * <DropdownMenu>
+ *   <Button slot="trigger">Actions</Button>
+ *   <DropdownMenuItem>Edit</DropdownMenuItem>
+ * </DropdownMenu>
+ * ```
+ */
 export const DropdownMenu = wrapWc<VoidDropdownMenu, {
   open?: boolean;
   position?: 'bottom-start' | 'bottom-end' | 'top-start' | 'top-end';
@@ -651,11 +718,18 @@ export const Toggle = wrapWc<VoidToggle, {
   color?: 'default' | 'error' | 'warning' | 'success' | 'info' | 'notice';
   size?: 'sm' | 'md' | 'lg' | 'xl' | 'xxl';
   variant?: 'outline' | 'filled' | 'ghost' | 'solid';
+  /** Value this toggle contributes to a parent ToggleGroup. */
+  value?: string;
 } & VoidEvents<{ Change: { pressed: boolean } }>>('void-toggle', 'Toggle');
 
 export const SegmentedControl = wrapWc<VoidSegmentedControl, {
   value?: string;
   size?: 'sm' | 'md' | 'lg' | 'xl' | 'xxl';
+  /** Form field name; the value is submitted under it. */
+  name?: string;
+  /** Form validation: the control must have a value. */
+  required?: boolean;
+  disabled?: boolean;
 } & VoidEvents<{ Change: { value: string } }>>('void-segmented-control', 'SegmentedControl');
 
 export const SegmentedControlItem = wrapWc<VoidSegmentedControlItem, {
@@ -721,6 +795,10 @@ export const Calendar = wrapWc<VoidCalendar, {
   size?: 'sm' | 'md' | 'lg';
   locale?: string;
   firstDay?: number;
+  /** Form field name; the value is submitted under it. */
+  name?: string;
+  /** Form validation: the control must have a value. */
+  required?: boolean;
 } & VoidEvents<{ Change: { value: string; date: Date } }>>('void-calendar', 'Calendar');
 
 export const DatePicker = wrapWc<VoidDatePicker, {
@@ -735,6 +813,10 @@ export const DatePicker = wrapWc<VoidDatePicker, {
   placeholder?: string;
   format?: string;
   color?: 'default' | 'error' | 'warning' | 'success' | 'info' | 'notice';
+  /** Form field name; the value is submitted under it. */
+  name?: string;
+  /** Form validation: the control must have a value. */
+  required?: boolean;
 } & VoidEvents<{ Change: { value: string; date: Date } }>>('void-date-picker', 'DatePicker');
 
 export const NumberInput = wrapWc<VoidNumberInput, {
@@ -752,6 +834,10 @@ export const NumberInput = wrapWc<VoidNumberInput, {
   label?: string;
   prefix?: string;
   unit?: string;
+  /** Form field name; the value is submitted under it. */
+  name?: string;
+  /** Form validation: the control must have a value. */
+  required?: boolean;
 } & VoidEvents<{ Change: { value: number; previous: number } }>>('void-number-input', 'NumberInput');
 
 export const ToggleGroup = wrapWc<VoidToggleGroup, {
@@ -761,6 +847,10 @@ export const ToggleGroup = wrapWc<VoidToggleGroup, {
   size?: 'sm' | 'md' | 'lg';
   color?: 'default' | 'error' | 'warning' | 'success' | 'info' | 'notice';
   orientation?: 'horizontal' | 'vertical';
+  /** Form field name; the value is submitted under it. */
+  name?: string;
+  /** Form validation: the control must have a value. */
+  required?: boolean;
 } & VoidEvents<{ Change: { value: string | string[] } }>>('void-toggle-group', 'ToggleGroup');
 
 export const Collapsible = wrapWc<VoidCollapsible, {
@@ -776,8 +866,24 @@ export const Editable = wrapWc<VoidEditable, {
   placeholder?: string;
   submitMode?: 'blur' | 'enter' | 'both';
   size?: 'sm' | 'md' | 'lg';
+  /** Form field name; the value is submitted under it. */
+  name?: string;
+  /** Form validation: the control must have a value. */
+  required?: boolean;
 } & VoidEvents<{ Change: { value: string }; Cancel: null }>>('void-editable', 'Editable');
 
+/**
+ * Mark the element that shows the card on hover or focus with `slot="trigger"`; everything else is the card content.
+ * Without a slotted trigger the first child element is used, which breaks when
+ * React re-keys or swaps that child, so always set the slot:
+ *
+ * ```tsx
+ * <HoverCard>
+ *   <a slot="trigger" href="/u/ada">Ada</a>
+ *   <p>Profile preview</p>
+ * </HoverCard>
+ * ```
+ */
 export const HoverCard = wrapWc<VoidHoverCard, {
   open?: boolean;
   position?: 'top' | 'bottom' | 'left' | 'right';
@@ -795,6 +901,10 @@ export const PinInput = wrapWc<VoidPinInput, {
   size?: 'sm' | 'md' | 'lg';
   color?: 'default' | 'error' | 'warning' | 'success' | 'info' | 'notice';
   placeholder?: string;
+  /** Form field name; the value is submitted under it. */
+  name?: string;
+  /** Form validation: the control must have a value. */
+  required?: boolean;
 } & VoidEvents<{ Change: { value: string }; Complete: { value: string } }>>('void-pin-input', 'PinInput');
 
 export const TagsInput = wrapWc<VoidTagsInput, {
@@ -807,6 +917,10 @@ export const TagsInput = wrapWc<VoidTagsInput, {
   color?: 'default' | 'error' | 'warning' | 'success' | 'info' | 'notice';
   variant?: 'filled' | 'outline';
   allowDuplicates?: boolean;
+  /** Form field name; the value is submitted under it. */
+  name?: string;
+  /** Form validation: the control must have a value. */
+  required?: boolean;
 } & VoidEvents<{ Change: { value: TagValue[] } }>>('void-tags-input', 'TagsInput');
 
 export const NavMenu = wrapWc<VoidNavMenu, {
@@ -829,6 +943,10 @@ export const ColorPicker = wrapWc<VoidColorPicker, {
   showInput?: boolean;
   variant?: 'default' | 'compact';
   open?: boolean;
+  /** Form field name; the value is submitted under it. */
+  name?: string;
+  /** Form validation: the control must have a value. */
+  required?: boolean;
 } & VoidEvents<{ Change: { value: string } }>>('void-color-picker', 'ColorPicker');
 
 export const ActionInput = wrapWc<VoidActionInput, {
@@ -842,6 +960,10 @@ export const ActionInput = wrapWc<VoidActionInput, {
   icon?: string;
   actionLabel?: string;
   position?: 'left' | 'right';
+  /** Form field name; the value is submitted under it. */
+  name?: string;
+  /** Form validation: the control must have a value. */
+  required?: boolean;
 } & VoidEvents<{ Input: { value: string }; Change: { value: string }; Action: { value: string } }>>('void-action-input', 'ActionInput');
 
 export const BarChart = wrapWc<VoidBarChart, {
