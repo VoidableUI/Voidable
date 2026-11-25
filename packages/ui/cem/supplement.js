@@ -102,6 +102,7 @@ export const attributeHints = {
   'void-input': { label: 'wrap the control in <void-field label="...">' },
   'void-textarea': { label: 'wrap the control in <void-field label="...">' },
   'void-select': { label: 'wrap the control in <void-field label="...">; options are native <option> children' },
+  'void-tooltip': { visible: 'the shown state is the open attribute' },
 };
 
 /**

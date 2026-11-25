@@ -89,12 +89,28 @@ type snippetRenderer struct {
 	root *Element
 }
 
-// firstEvent returns the root's first event and an example detail access.
+// firstEvent returns the root's most useful event and an example detail access:
+// the first event that is not an overlay's void-open / void-close (a dropdown's
+// void-select, say), else void-close, else the first event.
 func (r snippetRenderer) firstEvent() (*Event, string) {
 	if len(r.root.Events) == 0 {
 		return nil, ""
 	}
 	ev := &r.root.Events[0]
+	rank := func(name string) int {
+		switch name {
+		case "void-open":
+			return 2
+		case "void-close":
+			return 1
+		}
+		return 0
+	}
+	for i := range r.root.Events {
+		if rank(r.root.Events[i].Name) < rank(ev.Name) {
+			ev = &r.root.Events[i]
+		}
+	}
 	access := "e.detail"
 	if len(ev.Fields) > 0 {
 		access += "." + ev.Fields[0].Name

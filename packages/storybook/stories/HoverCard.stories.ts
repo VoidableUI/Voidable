@@ -10,7 +10,7 @@ const meta: Meta = {
   parameters: {
     docs: {
       description: {
-        component: 'Rich content preview card that appears on hover for user profiles, link previews, and contextual information panels. Supports four placement positions with arrow indicators.',
+        component: 'Rich content preview card that appears on hover for user profiles, link previews, and contextual information panels. Opens on any side of the trigger (`position`, `align`) and flips at the viewport edges.',
       },
     },
   },
@@ -21,6 +21,10 @@ const meta: Meta = {
     position: {
       control: { type: 'select' },
       options: ['top', 'bottom', 'left', 'right'],
+    },
+    align: {
+      control: { type: 'select' },
+      options: ['start', 'center', 'end'],
     },
     'open-delay': {
       control: { type: 'number' },

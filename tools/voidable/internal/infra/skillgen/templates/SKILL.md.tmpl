@@ -63,7 +63,7 @@ Elements render into the light DOM: there is no shadow root, so your own CSS app
 
 ## Events
 
-Components communicate with `CustomEvent`s named `void-*` that bubble and carry a `detail`. Native `click` and `input` events still fire from the underlying elements, but `void-click`, `void-change`, `void-input`, `void-close`, `void-select` and the like are the contract. Each element dispatches only the events listed in its reference (`void-change` with `detail.value` on inputs, `void-click` on buttons, `void-close` on dialogs and popovers); listening for another name never fires, so look it up.
+Components communicate with `CustomEvent`s named `void-*` that bubble and carry a `detail`. Native `click` and `input` events still fire from the underlying elements, but `void-click`, `void-change`, `void-input`, `void-close`, `void-select` and the like are the contract. The exceptions are `void-open` and `void-close` on overlays (dialog, drawer, popover, dropdown menu, tooltip, hover card and the option lists of the pickers): like the native `toggle` event they fire on the element itself and do not bubble, `void-close` carries `detail.reason` and can be cancelled with `preventDefault()` when the user caused it. Each element dispatches only the events listed in its reference (`void-change` with `detail.value` on inputs, `void-click` on buttons, `void-close` on dialogs and popovers); listening for another name never fires, so look it up.
 
 | Framework | Listener |
 |---|---|
