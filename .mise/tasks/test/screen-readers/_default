@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+#MISE description="Run the scripted screen-reader suite (VoiceOver on macOS, NVDA on Windows) against the built packages; not for Linux"
+#MISE depends=["build"]
+set -euo pipefail
+
+# Needs a Mac or a Windows machine that has been set up once with
+# `mise run test:screen-readers:setup`. Extra arguments go to Playwright, for example:
+#   mise run test:screen-readers -- --grep dialog
+#   VOID_SR_BROWSER=chromium mise run test:screen-readers      (macOS with Chrome for Testing)
+# The browser comes from `playwright install webkit` (macOS) or `chromium` (Windows).
+# See "Screen readers" in CONTRIBUTING.md and tests/browser/screen-readers/README.md.
+cd tests/browser
+rm -rf screen-reader-results
+exec ./node_modules/.bin/playwright test --config playwright.screen-readers.config.ts "$@"

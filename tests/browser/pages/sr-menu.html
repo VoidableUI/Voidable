@@ -1,0 +1,17 @@
+<main>
+  <h1>Documents</h1>
+  <void-dropdown-menu id="actions">
+    <void-dropdown-menu-trigger><button id="actions-trigger">Actions</button></void-dropdown-menu-trigger>
+    <void-dropdown-menu-content>
+      <void-dropdown-menu-item value="rename">Rename</void-dropdown-menu-item>
+      <void-dropdown-menu-item value="duplicate">Duplicate</void-dropdown-menu-item>
+      <void-dropdown-menu-item value="delete">Delete</void-dropdown-menu-item>
+    </void-dropdown-menu-content>
+  </void-dropdown-menu>
+  <p id="chosen">Nothing chosen</p>
+</main>
+<script>
+  document.getElementById('actions').addEventListener('void-select', (e) => {
+    document.getElementById('chosen').textContent = `Chosen ${e.detail.value}`;
+  });
+</script>
