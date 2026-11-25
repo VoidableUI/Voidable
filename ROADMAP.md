@@ -11,7 +11,7 @@
 - `@voidable/ui-svelte` — Svelte 5+ — native CE (theme store; Svelte handles CEs natively)
 - `@voidable/ui-angular` — Angular 18/19/20 — partial (VoidableModule + ThemeService, no directive wrappers)
 - `@voidable/ui-liveview` — Phoenix LiveView 1.0+ — **implemented** (VoidHooks JS + HEEx function components)
-- `@voidable/ui-hotwire` — Stimulus/Turbo — **implemented** (VoidEventController + Ruby gem helpers)
+- `@voidable/ui-hotwire` — Stimulus/Turbo — **implemented** (VoidTurbo morph integration + Ruby gem helpers)
 - `@voidable/ui-alpine` — Alpine.js — **implemented** (x-void-on directive, x-void-preserve, $voidable magic)
 
 ---
@@ -122,7 +122,7 @@ Enterprise-grade components surveyed across 10 premium libraries (Syncfusion, Te
 |-----------|--------|----------------|------------------|
 | **React** | ✅ Done | Typed wrappers for the UI components (chart elements not yet wrapped), `onVoidX` event bridging, ref forwarding, `useTheme` hook | — |
 | **LiveView** | ✅ Done | `VoidHooks` JS (mount/update/destroy lifecycle, listener diffing), HEEx function components for the UI components (chart elements not yet covered) with phx-hook wiring | — |
-| **Hotwire** | ✅ Done | `VoidEventController` Stimulus controller, Ruby gem `Helpers` module (`void_attrs`) | — |
+| **Hotwire** | ✅ Done | `VoidTurbo` morph integration, Ruby gem `Helpers` module (`void_attrs`) | — |
 | **Alpine** | ✅ Done | `VoidableAlpine` plugin, `x-void-on` directive, `x-void-preserve`, `$voidable` magic | — |
 | **Angular** | Partial | `VoidableModule` (exports `CUSTOM_ELEMENTS_SCHEMA`), signal-based `ThemeService` with `DestroyRef` cleanup | Directive wrappers, `[(ngModel)]` support, typed templates |
 | **Vue** | ✅ Native CE | `useTheme` composable (Vue handles CEs natively) | Optional: Vue plugin, `v-model` support, typed props |

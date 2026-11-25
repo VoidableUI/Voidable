@@ -36,13 +36,6 @@ your controllers with `data-action`:
 </void-select>
 ```
 
-### `VoidEventController` (deprecated)
-
-`VoidEventController` is kept as a no-op for backwards compatibility and can be
-removed from your setup (`application.register('void-event', ...)`). The old
-version re-dispatched events with an empty prefix, which fired the same event on
-the same element again and recursed until the stack overflowed.
-
 ## Documentation
 
 - [Storybook](https://voidableui.github.io/Voidable/)

@@ -154,9 +154,6 @@ importers:
 
   packages/hotwire:
     devDependencies:
-      '@hotwired/stimulus':
-        specifier: ^3.2.0
-        version: 3.2.2
       '@hotwired/turbo':
         specifier: ^8.0.0
         version: 8.0.23
@@ -690,9 +687,6 @@ packages:
 
   '@github/catalyst@1.8.1':
     resolution: {integrity: sha512-dnN4WWpbeuQvA17LvsGdlXEueJdBk9y+I+WO5pdNpoHNOXPsFcz3hJrq1iRmdsNgQOf4S8e83axtwIxvG62eWA==}
-
-  '@hotwired/stimulus@3.2.2':
-    resolution: {integrity: sha512-eGeIqNOQpXoPAIP7tC1+1Yc1yl1xnwYqg+3mzqxyrbE5pg5YFBZcA6YoTiByJB6DKAEsiWtl6tjTJS4IYtbB7A==}
 
   '@hotwired/turbo@8.0.23':
     resolution: {integrity: sha512-GZ7cijxEZ6Ig71u7rD6LHaRv/wcE/hNsc+nEfiWOkLNqUgLOwo5MNGWOy5ZV9ZUDSiQx1no7YxjTNnT4O6//cQ==}
@@ -4688,8 +4682,6 @@ snapshots:
       '@expressive-code/core': 0.41.7
 
   '@github/catalyst@1.8.1': {}
-
-  '@hotwired/stimulus@3.2.2': {}
 
   '@hotwired/turbo@8.0.23': {}
 

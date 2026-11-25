@@ -14,7 +14,7 @@ bundle add voidable-hotwire
 
 The engine auto-registers importmap pins for `@voidable/ui` and `@voidable/ui-hotwire`, and includes the `void_attrs` view helper into ActionView.
 
-Run `rails generate voidable:install` (see [Install generator](#install-generator) below) — it wires the Stimulus controller and Turbo morph protection automatically. No manual edit needed.
+Run `rails generate voidable:install` (see [Install generator](#install-generator) below) — it starts Turbo morph protection automatically. No manual edit needed.
 
 ### npm (Vite, esbuild, custom bundlers)
 
@@ -22,15 +22,12 @@ Run `rails generate voidable:install` (see [Install generator](#install-generato
 npm install @voidable/ui @voidable/theme @voidable/ui-hotwire
 ```
 
-Register `VoidEventController` with your Stimulus application and start Turbo morph protection:
+Start Turbo morph protection. No Stimulus controller is needed: Stimulus handles Voidable's custom events natively, so wire them with `data-action` (see [Usage in ERB templates](#usage-in-erb-templates)).
 
 ```js
-import { Application } from '@hotwired/stimulus';
-import { VoidEventController } from '@voidable/ui-hotwire';
+import '@voidable/ui';
 import { VoidTurbo } from '@voidable/ui-hotwire';
 
-const app = Application.start();
-app.register('void-event', VoidEventController);
 VoidTurbo.start();
 ```
 
@@ -124,16 +121,13 @@ Replace the importmap-style `app/javascript/application.js` with ES imports:
 import "@hotwired/turbo-rails";
 import { Application } from "@hotwired/stimulus";
 import "@voidable/ui";
-import "@voidable/ui-hotwire";
-import { VoidEventController } from "@voidable/ui-hotwire";
 import { VoidTurbo } from "@voidable/ui-hotwire";
 
 const app = Application.start();
-app.register("void-event", VoidEventController);
 VoidTurbo.start();
 ```
 
-This is the baseline the install generator builds on. When you run `voidable:install --asset_pipeline vite` (Step 10), it appends CSS imports and ensures `VoidEventController` and `VoidTurbo` are registered — it does not undo this step.
+This is the baseline the install generator builds on. When you run `voidable:install --asset_pipeline vite` (Step 10), it appends CSS imports and ensures `VoidTurbo` is started — it does not undo this step.
 
 Delete the importmap controller loader since Vite handles module resolution:
 
@@ -401,13 +395,13 @@ The generated layouts include a theme toggle script that syncs `void-switch` sta
 
 ## Turbo morph protection
 
-`VoidTurbo.start()` prevents Turbo from clobbering client-managed attributes (`open`, `checked`, `aria-expanded`, etc.) on `<void-*>` elements during page morphs.
+`VoidTurbo.start()` keeps client-managed attributes (`open`, `checked`, `aria-expanded`, etc.) on `<void-*>` elements across page morphs while the server keeps rendering the same value, and lets the server win when it renders a different one. It also calls each element's `voidUnproject()` before Turbo morphs it, so the morph compares the element's own children with the server markup rather than the chrome the component rendered; the element re-projects itself right after, keeping its identity, state and focus.
 
 ## Usage in ERB templates
 
 With the `void_attrs` helper (gem only):
 
-`void_attrs` returns a Ruby hash (`{ data: { controller: "void-event", ... } }`) that you splat into a Rails tag helper:
+`void_attrs` returns a Ruby hash (`{ data: { action: "void-click->form#submit" } }`) that you splat into a Rails tag helper:
 
 ```erb
 <%= tag.void_button "Save", variant: "filled",
@@ -417,27 +411,18 @@ With the `void_attrs` helper (gem only):
       **void_attrs("void-change", "search#filter") %>
 ```
 
-With manual data attributes:
+With manual data attributes, use Stimulus `data-action` directly; Stimulus listens for Voidable's custom events like any other DOM event:
 
 ```erb
-<void-button
-  variant="filled"
-  data-controller="void-event"
-  data-void-event-events-value="void-click"
-  data-action="void-click->form#submit"
->
+<void-button variant="filled" data-action="void-click->form#submit">
   Save
 </void-button>
 
 <void-input
   placeholder="Email"
-  data-controller="void-event"
-  data-void-event-events-value="void-change"
   data-action="void-change->search#filter"
 ></void-input>
 ```
-
-The `VoidEventController` listens for the specified custom events on the element and re-dispatches them as Stimulus-compatible events so they can be routed via `data-action`.
 
 ## Scaffolds
 

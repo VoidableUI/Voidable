@@ -20,7 +20,7 @@ The gem automatically pins `@voidable/ui` and `@voidable/ui-hotwire` to your imp
 
 Start the Turbo morph integration in your `application.js`. No Stimulus
 controller is needed: Stimulus handles Voidable's custom events natively via
-`data-action` (`VoidEventController` is deprecated and is a no-op).
+`data-action`.
 
 ```js
 import { VoidTurbo } from "@voidable/ui-hotwire"
