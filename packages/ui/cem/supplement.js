@@ -237,6 +237,11 @@ export const parts = {
             attributes: [
               { name: 'value', type: 'string', description: 'Key of the tab: the `value` of the <void-tabs-content> it shows, and of <void-tabs> while it is selected.' },
               { name: 'disabled', type: 'boolean', description: 'Shown, but cannot be selected and is skipped by the arrow keys.' },
+              {
+                name: 'active',
+                type: 'boolean',
+                description: 'Set by <void-tabs> on the selected tab. Render it on the selected tab in server markup so the page looks right before the script loads.',
+              },
             ],
           },
         ],
