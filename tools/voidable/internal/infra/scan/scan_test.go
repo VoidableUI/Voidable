@@ -220,3 +220,24 @@ func TestFragments(t *testing.T) {
 		t.Errorf("attrs = %+v", in.Attrs)
 	}
 }
+
+// A tag records the void-* elements written inside it, so the name check can
+// see that a dialog has its title part; the parent links and the closed flag
+// the parts check reads are unchanged by it.
+func TestContentRecordsPartTags(t *testing.T) {
+	src := `<void-dialog><void-dialog-title>T</void-dialog-title><void-dialog-body><void-button>x</void-button></void-dialog-body></void-dialog>`
+	tags, err := Scanner{}.Scan(context.Background(), []byte(src), domain.LangHTML)
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := []string{"void-dialog-title", "void-dialog-body", "void-button"}
+	if got := tags[0].Content.Tags; strings.Join(got, ",") != strings.Join(want, ",") {
+		t.Errorf("dialog content tags = %v, want %v", got, want)
+	}
+	if !tags[0].Closed || tags[1].ParentIndex != 0 || tags[3].ParentIndex != 2 {
+		t.Errorf("closed=%v parents=%d,%d", tags[0].Closed, tags[1].ParentIndex, tags[3].ParentIndex)
+	}
+	if len(tags[3].Content.Tags) != 0 {
+		t.Errorf("a leaf records tags: %v", tags[3].Content.Tags)
+	}
+}

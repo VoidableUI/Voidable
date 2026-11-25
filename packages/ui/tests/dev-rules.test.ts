@@ -38,7 +38,11 @@ const table: DevTable = {
   'void-tab-panel': { m: 'tabs', a: {}, e: [], p: ['void-tabs'] },
   'void-field': { m: 'field', a: { label: 0 }, e: [] },
   'void-avatar': { m: 'avatar', a: { alt: 0, initials: 0 }, e: [], n: { a: ['aria-label', 'alt', 'initials'], h: 'set alt' } },
-  'void-dialog': { m: 'dialog', a: { heading: 0 }, e: [], n: { a: ['aria-label', 'aria-labelledby', 'heading'], h: 'give it a heading' } },
+  // Named by its title part (#52), or aria-label.
+  'void-dialog': { m: 'dialog', a: {}, e: [], n: { a: ['aria-label', 'aria-labelledby', 'title'], t: ['void-dialog-title'], h: 'write its title as <void-dialog-title>' } },
+  'void-drawer': { m: 'drawer', a: {}, e: [], n: { a: ['aria-label', 'aria-labelledby', 'title'], t: ['void-drawer-title'], h: 'write its title as <void-drawer-title>' } },
+  'void-dialog-title': { m: 'dialog', a: {}, e: [], c: 1 },
+  'void-drawer-title': { m: 'drawer', a: {}, e: [], c: 1 },
   'void-checkbox': {
     m: 'checkbox', a: {}, e: [],
     n: { a: ['aria-label', 'aria-labelledby', 'title'], c: 1, p: [['void-field', 'label'], ['label']], h: 'put text inside it' },
@@ -257,7 +261,11 @@ describe('accessible names', () => {
     ['a name on the control inside it', '<void-input><input aria-label="Email"></void-input>'],
     ['avatar alt', '<void-avatar alt="Ada Lovelace"></void-avatar>'],
     ['avatar initials', '<void-avatar initials="AL"></void-avatar>'],
-    ['dialog heading', '<void-dialog heading="Edit profile"></void-dialog>'],
+    ['a dialog title part', '<void-dialog><void-dialog-title>Edit profile</void-dialog-title><void-dialog-body>x</void-dialog-body></void-dialog>'],
+    ['a drawer title part', '<void-drawer><void-drawer-title>Filters</void-drawer-title></void-drawer>'],
+    ['a title part with an aria-label', '<void-dialog><void-dialog-title aria-label="Edit"></void-dialog-title></void-dialog>'],
+    ['a named button inside a trigger part', `<void-popover-trigger><void-button aria-label="More">${ICON}</void-button></void-popover-trigger>`],
+    ['a button with text inside a dropdown trigger part', '<void-dropdown-menu-trigger><void-button>Actions</void-button></void-dropdown-menu-trigger>'],
     ['dialog aria-label', '<void-dialog aria-label="Edit profile"></void-dialog>'],
     ['checkbox text', '<void-checkbox>Accept the terms</void-checkbox>'],
   ])('%s names it', (_what, html) => {
@@ -270,7 +278,12 @@ describe('accessible names', () => {
     ['an input on its own', '<void-input></void-input>'],
     ['an input in a field with no label', '<void-field><void-input></void-input></void-field>'],
     ['an input with only a placeholder', '<void-input placeholder="Email"></void-input>'],
-    ['a dialog with no heading', '<void-dialog></void-dialog>'],
+    ['a dialog with no title part', '<void-dialog><void-dialog-body>x</void-dialog-body></void-dialog>'],
+    ['a dialog with an empty title part', '<void-dialog><void-dialog-title></void-dialog-title></void-dialog>'],
+    ['a dialog with the heading attribute of the old form', '<void-dialog heading="Edit"></void-dialog>'],
+    ['a drawer with another component\'s title', '<void-drawer><void-dialog-title>Edit</void-dialog-title></void-drawer>'],
+    ['an icon-only button inside a popover trigger part', `<void-popover-trigger><void-button>${ICON}</void-button></void-popover-trigger>`],
+    ['an icon-only button inside a tooltip trigger part', `<void-tooltip-trigger><void-button>${ICON}</void-button></void-tooltip-trigger>`],
     ['an avatar with nothing', '<void-avatar></void-avatar>'],
     ['an empty checkbox', '<void-checkbox></void-checkbox>'],
   ])('%s is reported', (_what, html) => {
@@ -286,8 +299,9 @@ describe('accessible names', () => {
     expect(w.message).toContain('an icon-only button needs an aria-label');
   });
 
-  it('says which attribute a component uses', () => {
-    expect(named('<void-dialog></void-dialog>')!.message).toContain('heading');
+  it('says which part names a dialog or a drawer', () => {
+    expect(named('<void-dialog></void-dialog>')!.message).toContain('a <void-dialog-title> part');
+    expect(named('<void-drawer></void-drawer>')!.message).toContain('a <void-drawer-title> part');
   });
 
   it('ignores a tag that needs no name', () => {

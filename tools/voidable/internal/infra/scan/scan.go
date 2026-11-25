@@ -10,6 +10,7 @@ import (
 	"bytes"
 	"context"
 	"regexp"
+	"slices"
 	"sort"
 	"strings"
 
@@ -301,6 +302,9 @@ func (s *state) analyzeContent(src []byte, from, to int, lang domain.Lang) domai
 			name := readTagName(b, i+1)
 			if componentNameIn(b, i+1, lang) != "" || name == "slot" {
 				c.Dynamic = true
+			}
+			if strings.HasPrefix(name, "void-") && !slices.Contains(c.Tags, name) {
+				c.Tags = append(c.Tags, name)
 			}
 			t, next := s.parseTag(b, i, name, lang)
 			for _, a := range t.Attrs {

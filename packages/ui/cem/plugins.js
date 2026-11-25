@@ -484,6 +484,11 @@ export function manifestSupplementPlugin() {
             throw new Error(`cem/supplement.js: accessibleName for <${tag}> lists "${name}", which is not an attribute of it`);
           }
         }
+        for (const part of rule.parts ?? []) {
+          // A part of this component (supplement.js `parts`), written before the entry is checked.
+          const owned = parts[tag]?.parts?.some((p) => p.tag === part);
+          if (!owned) throw new Error(`cem/supplement.js: accessibleName for <${tag}> lists part <${part}>, which is not one of its parts`);
+        }
         for (const anc of rule.ancestors ?? []) {
           if (anc.tag !== 'label') get(anc.tag, 'accessibleName');
           const ancDecl = anc.tag === 'label' ? undefined : byTag.get(anc.tag);

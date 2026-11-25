@@ -157,6 +157,9 @@ type Content struct {
 	// Dynamic is true when something the scanner cannot evaluate may render
 	// content: an expression, a slot, a yielded block, a framework component.
 	Dynamic bool `json:"dynamic,omitempty"`
+	// Tags are the void-* elements written inside (their start tags), so a
+	// name rule can look for the part that names its owner.
+	Tags []string `json:"tags,omitempty"`
 }
 
 // Ancestor is an enclosing element and its attributes.

@@ -70,6 +70,7 @@ type partJSON struct {
 type nameRule struct {
 	Attributes []string `json:"attributes"`
 	Content    bool     `json:"content"`
+	Parts      []string `json:"parts"`
 	Ancestors  []struct {
 		Tag        string   `json:"tag"`
 		Attributes []string `json:"attributes"`
@@ -165,7 +166,7 @@ func element(path string, d declaration) domain.Element {
 	e := domain.Element{Tag: d.TagName, Class: d.Name, Module: path, Description: d.Description}
 	e.AllowedParents, e.RequiredChildren, e.AttrHints = d.VoidParents, d.VoidRequires, d.VoidHints
 	if n := d.VoidName; n != nil {
-		e.Name = &domain.NameRule{Attributes: n.Attributes, Content: n.Content, Hint: n.Hint}
+		e.Name = &domain.NameRule{Attributes: n.Attributes, Content: n.Content, Parts: n.Parts, Hint: n.Hint}
 		for _, a := range n.Ancestors {
 			e.Name.Ancestors = append(e.Name.Ancestors, domain.NameAncestor{Tag: a.Tag, Attributes: a.Attributes})
 		}

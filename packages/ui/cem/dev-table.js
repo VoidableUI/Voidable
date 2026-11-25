@@ -16,7 +16,7 @@
 //   r  tags it cannot work without (somewhere below it)
 //   x  advice for attributes people guess that do not exist
 //   n  what names the element (supplement.js accessibleName): a attributes, c content names it,
-//      p ancestors as [tag, ...attributes], h the hint
+//      t part tags whose presence names it, p ancestors as [tag, ...attributes], h the hint
 //   q  its explicit parts (#52), from the manifest's voidParts:
 //        k 'parts' (only parts as children) or 'any'; o ordered; t transparent
 //        wrapper tags; s the one-line correct markup; l advice for loose
@@ -100,6 +100,7 @@ for (const mod of manifest.modules) {
       const n = decl.voidName;
       entry.n = { a: n.attributes, h: n.hint };
       if (n.content) entry.n.c = 1;
+      if (n.parts?.length) entry.n.t = n.parts;
       if (n.ancestors?.length) entry.n.p = n.ancestors.map((x) => [x.tag, ...(x.attributes ?? [])]);
     }
     tags[decl.tagName] = entry;

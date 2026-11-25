@@ -366,12 +366,14 @@ const group = (extra = []) => ({
  *               component's own (`label`, `heading`, `alt`) too.
  *   content     true when the element's own text (or an icon with a name)
  *               names it, as a button's label does.
+ *   parts       descendant part elements whose presence names it (a dialog's
+ *               title); the live-DOM dev warning also wants the part to hold text.
  *   ancestors   enclosing elements that name it: `{ tag, attributes }` is
  *               satisfied by an ancestor with that tag carrying one of the
  *               attributes (none listed: the ancestor alone is enough). `label`
  *               is the native element.
  *   hint        what to do, in one sentence, appended to the message.
- * @type {Record<string, { attributes: string[], content?: boolean, ancestors?: { tag: string, attributes?: string[] }[], hint: string }>}
+ * @type {Record<string, { attributes: string[], content?: boolean, parts?: string[], ancestors?: { tag: string, attributes?: string[] }[], hint: string }>}
  */
 export const accessibleName = {
   'void-button': { attributes: ARIA, content: true, hint: 'an icon-only button needs an aria-label' },
@@ -398,7 +400,8 @@ export const accessibleName = {
   'void-progress': control(),
   'void-radio-group': group(['label']),
   'void-checkbox-group': group(['label']),
-  'void-dialog': { attributes: [...ARIA, 'heading'], hint: 'give it a heading or an aria-label' },
-  'void-drawer': { attributes: [...ARIA, 'heading'], hint: 'give it a heading or an aria-label' },
+  // Named by its title part (#52), which is its own child; the native <dialog> in its shadow root is labelled by it.
+  'void-dialog': { attributes: ARIA, parts: ['void-dialog-title'], hint: 'write its title as <void-dialog-title>' },
+  'void-drawer': { attributes: ARIA, parts: ['void-drawer-title'], hint: 'write its title as <void-drawer-title>' },
   'void-avatar': { attributes: [...ARIA, 'alt', 'initials'], hint: 'set alt to the person\'s name (or initials)' },
 };

@@ -51,6 +51,8 @@ export interface DevName {
   a: readonly string[];
   /** The element's own content names it. */
   c?: 1;
+  /** Part elements (own descendants) that name it when they hold text. */
+  t?: readonly string[];
   /** Ancestors that name it: `[tag, ...attributes]`; with no attributes the ancestor alone is enough. */
   p?: readonly (readonly string[])[];
   /** What to do about it. */

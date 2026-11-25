@@ -234,6 +234,9 @@ type NameRule struct {
 	// Content is true when the element's own text (or a named icon inside it)
 	// names it.
 	Content bool `json:"content,omitempty"`
+	// Parts are descendant part elements whose presence names the element (a
+	// dialog's title part).
+	Parts []string `json:"parts,omitempty"`
 	// Ancestors name the element when an enclosing element has the tag and
 	// carries one of the attributes (none listed: the tag alone is enough).
 	// The tag `label` is the native element.

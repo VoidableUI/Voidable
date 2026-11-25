@@ -27,7 +27,8 @@ func TestMissingNameInEveryDialect(t *testing.T) {
 <label for="n">Name</label><void-input id="n"></void-input>
 <void-button x-bind="attrs"><svg></svg></void-button>
 <void-button :aria-label="label"><svg></svg></void-button>
-<void-dialog heading="Edit"></void-dialog>
+<void-dialog><void-dialog-title>Edit</void-dialog-title></void-dialog>
+<void-drawer><void-drawer-title>Filters</void-drawer-title></void-drawer>
 <void-avatar alt="Ada"></void-avatar>`,
 			`<void-button><svg></svg></void-button>`},
 		{"a.html.erb",
@@ -113,5 +114,35 @@ func TestMissingNameJSON(t *testing.T) {
 	out, _ := run(t, "check", "--format", "json", f)
 	if !strings.Contains(out, `"rule": "missing-name"`) || !strings.Contains(out, `"suggestion": "aria-label=\"...\""`) {
 		t.Errorf("json: %s", out)
+	}
+}
+
+// TestMissingNameOfTheConvertedOverlays: a dialog or drawer is named by its
+// title part (or aria-label), and the old heading attribute names nothing.
+func TestMissingNameOfTheConvertedOverlays(t *testing.T) {
+	dir := t.TempDir()
+	for _, tt := range []struct {
+		name, src string
+		want      int
+	}{
+		{"titled", `<void-dialog><void-dialog-title>Edit</void-dialog-title><void-dialog-body>x</void-dialog-body></void-dialog>`, 0},
+		{"drawer titled", `<void-drawer side="right"><void-drawer-title>Filters</void-drawer-title><void-drawer-body>x</void-drawer-body></void-drawer>`, 0},
+		{"aria-label", `<void-dialog aria-label="Edit"><void-dialog-body>x</void-dialog-body></void-dialog>`, 0},
+		{"body only", `<void-dialog><void-dialog-body>x</void-dialog-body></void-dialog>`, 1},
+		{"drawer body only", `<void-drawer><void-drawer-body>x</void-drawer-body></void-drawer>`, 1},
+		{"popover trigger with a named icon button", `<void-popover><void-popover-trigger><void-button aria-label="More"><svg></svg></void-button></void-popover-trigger><void-popover-content>x</void-popover-content></void-popover>`, 0},
+		{"popover trigger with an icon-only button", `<void-popover><void-popover-trigger><void-button><svg></svg></void-button></void-popover-trigger><void-popover-content>x</void-popover-content></void-popover>`, 1},
+		{"tooltip around an icon-only button", `<void-tooltip><void-tooltip-trigger><void-button><svg></svg></void-button></void-tooltip-trigger><void-tooltip-content>Copy</void-tooltip-content></void-tooltip>`, 1},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			f := filepath.Join(dir, strings.ReplaceAll(tt.name, " ", "-")+".html")
+			if err := os.WriteFile(f, []byte(tt.src), 0o644); err != nil {
+				t.Fatal(err)
+			}
+			out, _ := run(t, "check", f)
+			if n := strings.Count(out, "[missing-name]"); n != tt.want {
+				t.Errorf("missing-name findings = %d, want %d:\n%s", n, tt.want, out)
+			}
+		})
 	}
 }

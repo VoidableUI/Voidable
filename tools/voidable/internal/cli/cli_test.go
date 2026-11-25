@@ -56,6 +56,7 @@ func TestCheckFixtures(t *testing.T) {
 		{"index.astro", []string{
 			`index.astro:5:21: [legacy-markup] <void-tab-panel> no longer exists; write the tabs as <void-tabs-list>`,
 			`index.astro:7:13: [invalid-value] color="primary" is not valid on <void-badge>`,
+			`index.astro:8:1: [missing-name] <void-input> has no accessible name`,
 		}, []string{"client:load", "size", "missing-part"}},
 		{"parts.html", []string{
 			`parts.html:1:1: [missing-part] <void-popover> has no <void-popover-trigger>`,

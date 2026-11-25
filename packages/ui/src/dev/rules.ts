@@ -273,6 +273,9 @@ function hasName(el: Element, rule: DevName): boolean {
     if ((inner as HTMLInputElement).labels?.length) return true;
   }
   if (rule.c && contentNames(el)) return true;
+  for (const tag of rule.t ?? []) {
+    for (const part of el.querySelectorAll(tag)) if (filled(part.textContent) || filled(part.getAttribute('aria-label')) || labelledBy(part)) return true;
+  }
   for (const [tag, ...attrs] of rule.p ?? []) {
     const ancestor = el.parentElement?.closest(tag);
     if (ancestor && (!attrs.length || attrs.some((a) => filled(ancestor.getAttribute(a))))) return true;
@@ -291,6 +294,7 @@ export function checkName(table: DevTable, el: Element): DevWarning | undefined 
     rule.a.some((a) => !/^(aria-|title$)/.test(a)) ? `a ${list(rule.a.filter((a) => !/^(aria-|title$)/.test(a)))} attribute` : '',
     'aria-label',
     rule.c ? 'text inside it' : '',
+    rule.t?.length ? `a ${list(rule.t.map((tag) => `<${tag}>`))} part` : '',
     rule.p?.length ? `an enclosing ${list(rule.p.map(([tag, ...a]) => `<${tag}${a.length ? ` ${a[0]}` : ''}>`))}` : '',
   ].filter(Boolean);
   return warning(
