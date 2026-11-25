@@ -166,6 +166,8 @@ The default look is light and airy. It gets there with three decisions, each a k
 
 And these:
 
+The primary author of code that uses this library is an LLM agent, so design for that author. APIs are chosen to be guessable: the name an agent would reach for first is the name that exists. Failures are loud: a wrong attribute, a missing label or a misused part is reported by `voidable check` and the development warnings rather than silently ignored. Correctness is established by functional tests in real browsers, not by reading code; a change is done when it has been run and observed to work.
+
 - **Human and agent friendly** — the UI is designed for both human users and AI agents. Light DOM exposes component structure. Reflected attributes make state machine-readable without executing JS. Semantic ARIA roles and properties give agents a structured understanding of the interface. Stable tag+attribute selectors provide reliable handles for programmatic interaction.
 - **Pure backgrounds by default** — true black (`#000000`) in dark mode, true white (`#ffffff`) in light mode. A theme may soften the page with `--void-page-tint`.
 - **Monochrome hierarchy** — hierarchy comes from the opacity of one foreground colour, not from weight or hue. Colour is reserved for status. The default accent has no colour.
