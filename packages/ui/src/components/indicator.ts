@@ -4,7 +4,7 @@ import { VoidElement } from '../base.js';
 
 /** Badge overlay for notification counts on icons and online presence signals on avatars. */
 export class VoidIndicator extends VoidElement {
-  @property({ type: String, reflect: true }) color: 'default' | 'error' | 'warning' | 'success' | 'info' | 'notice' = 'default';
+  @property({ type: String, reflect: true }) color: 'default' | 'error' | 'warning' | 'caution' | 'success' | 'info' | 'notice' = 'default';
   @property({ type: String, reflect: true }) position: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left' = 'top-right';
   @property({ type: Number, reflect: true }) count: number | null = null;
   @property({ type: Boolean, reflect: true }) ping = false;
@@ -16,7 +16,7 @@ export class VoidIndicator extends VoidElement {
   }
 
   updated(): void {
-    this.setHostAttribute('aria-label', this.count != null ? `${this.count} notifications` : 'notification');
+    this.setHostAttribute('aria-label', this.count != null ? `${this.count} ${this.count === 1 ? 'notification' : 'notifications'}` : 'notification');
   }
 
   // The dot is rendered after the consumer content it decorates.
