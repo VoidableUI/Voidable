@@ -201,9 +201,20 @@ export const scenarios: Scenario[] = [
   },
   {
     id: 'alert',
-    title: 'An alert is read with its title and message',
+    title: 'An alert is read with its title and message, and its close control dismisses it',
     page: '/sr-alert',
-    steps: [{ reach: { role: 'alert', text: 'Payment failed', container: true, spoken: [/payment failed/] } }],
+    steps: [
+      { reach: { role: 'alert', text: 'Payment failed', container: true, spoken: [/payment failed/] } },
+      { reach: { role: 'button', name: 'Dismiss' }, by: 'control' },
+      { act: true },
+      {
+        check: async (page) => {
+          await expect(page.locator('#problem')).toHaveCount(0);
+          await expect(page.getByRole('alert')).toHaveCount(0);
+        },
+        note: 'the alert is gone from the page and from the accessibility tree',
+      },
+    ],
   },
   {
     id: 'tooltip',
