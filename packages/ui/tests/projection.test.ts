@@ -2,7 +2,8 @@
 import { describe, it, expect, afterEach } from 'vitest';
 import { html, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
-import { VoidElement, ProjectionController } from '../src/base.js';
+import { VoidElement } from '../src/base.js';
+import { ProjectionController } from '../src/projection.js';
 
 /** Test host: a heading region before Lit's chrome, a body container, and a footer region after. */
 class ProjectionTestHost extends VoidElement {

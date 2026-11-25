@@ -143,12 +143,12 @@ describe('void-dialog: persistent declarative dialog (issue #4 production report
     expect(el.querySelectorAll('.void-dialog-body').length).toBe(1);
   });
 
-  it('copes with a morph re-adding its original children to the host without duplicating them', async () => {
+  it('re-routes original children appended back onto the host without duplicating them', async () => {
     const el = mount<Dialog>('<void-dialog open><p id="a">A</p><p id="b">B</p></void-dialog>');
     await settle(el);
     const a = el.querySelector('#a')!;
     const b = el.querySelector('#b')!;
-    // A morph that believes the host's children are [a, b] re-inserts them there.
+    // Same nodes moved back onto the host (chrome left intact); real morph coverage is below.
     el.appendChild(a);
     el.appendChild(b);
     await settle(el);
@@ -157,12 +157,12 @@ describe('void-dialog: persistent declarative dialog (issue #4 production report
     expect(el.querySelectorAll('p').length).toBe(2);
   });
 
-  it('copes with a morph reordering the original children', async () => {
+  it('re-routes original children reordered through the host', async () => {
     const el = mount<Dialog>('<void-dialog open><p id="a">A</p><p id="b">B</p></void-dialog>');
     await settle(el);
     const a = el.querySelector('#a')!;
     const b = el.querySelector('#b')!;
-    // Reorder through the host, as a morph working against the server markup would.
+    // Reorder through the host with the chrome left intact.
     el.insertBefore(b, a);
     await settle(el);
     expect(Array.from(el.querySelector('.void-dialog-body')!.children)).toEqual([b, a]);
@@ -379,7 +379,7 @@ describe('container components project late children and survive reconnect', () 
       const late = document.createElement('span');
       el.appendChild(late);
       await settle(el);
-      expect(late.parentElement?.matches(selector)).toBe(true);
+      expect(late.parentElement?.matches(selector), el.innerHTML).toBe(true);
       el.remove();
       document.body.appendChild(el);
       await settle(el);
