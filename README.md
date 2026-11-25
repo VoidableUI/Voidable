@@ -30,7 +30,7 @@ import '@voidable/ui';
 </void-field>
 ```
 
-Without a bundler, use a stylesheet link and a CDN module import; see the [`@voidable/ui` README](packages/ui/README.md#usage-without-a-bundler). Framework guides are in the [docs](https://voidable.dev/frameworks/react/).
+To load components on demand instead of registering all of them, import `@voidable/ui/autoloader` (see [Loading components](https://voidable.dev/getting-started/loading/)). Without a bundler, use a stylesheet link and a CDN module import; see the [`@voidable/ui` README](packages/ui/README.md#usage-without-a-bundler). Framework guides are in the [docs](https://voidable.dev/frameworks/react/).
 
 ## Packages
 

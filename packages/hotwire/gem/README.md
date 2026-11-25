@@ -36,6 +36,22 @@ npm packages (`Voidable::Hotwire::CDN`, derived from `Voidable::Hotwire::VERSION
 Installed from a git checkout or a path, where the version is the unreleased
 placeholder 0.0.0, it pins the latest published packages instead.
 
+To load components on demand instead, run `rails generate voidable:install --components=autoloader`,
+or pin the autoloader yourself. It imports each component from a file beside it, so it is
+pinned as the raw `dist` file with Lit's entry points pinned next to it
+(`Voidable::Hotwire::CDN::AUTOLOADER_PINS` holds the four pins):
+
+```ruby
+Voidable::Hotwire::CDN::AUTOLOADER_PINS.each { |name, url| pin name, to: url }
+```
+
+```js
+import "@voidable/ui/autoloader"
+```
+
+Prefer the full `@voidable/ui` import when most pages use most components; see
+[Loading components](https://voidable.dev/getting-started/loading/).
+
 ### With jsbundling-rails
 
 Install the npm packages:

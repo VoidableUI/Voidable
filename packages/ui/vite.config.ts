@@ -17,11 +17,15 @@ const componentEntries = readdirSync('src/components')
 const entry: Record<string, string> = {
   index: resolve(__dirname, 'src/index.ts'),
   base: resolve(__dirname, 'src/base.ts'),
+  autoloader: resolve(__dirname, 'src/autoloader.ts'),
   ...componentEntries,
 };
 
 export default defineConfig({
   build: {
+    // The build script empties dist/ itself: cem analyze writes the manifest
+    // there first and the autoloader table is generated from it.
+    emptyOutDir: false,
     lib: {
       entry,
       formats: ['es'],

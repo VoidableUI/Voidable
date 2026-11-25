@@ -14,6 +14,8 @@ bundle add voidable-hotwire
 
 The engine auto-registers importmap pins for `@voidable/ui` and `@voidable/ui-hotwire`, and includes the `void_attrs` view helper into ActionView.
 
+`import "@voidable/ui"` registers every component up front. Server-rendered pages often use only a few; `rails generate voidable:install --components=autoloader` pins `@voidable/ui/autoloader` (and the Lit entry points it needs) instead, so each component is fetched the first time its tag appears, including tags that arrive in Turbo Drive visits, Streams and frames. See [Loading components](/getting-started/loading/) for when to prefer which. The pins are on `Voidable::Hotwire::CDN::AUTOLOADER_PINS` if you pin by hand.
+
 Run `rails generate voidable:install` (see [Install generator](#install-generator) below) — it starts Turbo morph protection automatically. No manual edit needed.
 
 ### npm (Vite, esbuild, custom bundlers)
@@ -25,7 +27,7 @@ npm install @voidable/ui @voidable/theme @voidable/ui-hotwire
 Start Turbo morph protection. No Stimulus controller is needed: Stimulus handles Voidable's custom events natively, so wire them with `data-action` (see [Usage in ERB templates](#usage-in-erb-templates)).
 
 ```js
-import '@voidable/ui';
+import '@voidable/ui'; // or '@voidable/ui/autoloader' to load components on demand
 import { VoidTurbo } from '@voidable/ui-hotwire';
 
 VoidTurbo.start();
@@ -265,6 +267,7 @@ rails generate voidable:install
 |---|---|---|---|
 | `--layout` | `topbar`, `sidebar`, `switching` | `topbar` | Application layout style |
 | `--asset_pipeline` | `importmap`, `vite` | `importmap` | Asset pipeline integration |
+| `--components` | `all`, `autoloader` | `all` | `all` registers every component up front; `autoloader` loads each when its tag first appears |
 
 ```bash
 # Defaults: topbar layout, importmap pipeline
@@ -278,6 +281,9 @@ rails generate voidable:install --layout switching
 
 # For apps using Vite (see "Setting up Vite with Rails" above)
 rails generate voidable:install --layout switching --asset_pipeline vite
+
+# Load components on demand instead of registering all of them
+rails generate voidable:install --components autoloader
 ```
 
 The `--asset_pipeline vite` flag changes the destination paths for generated assets from `app/assets/stylesheets/` and `app/assets/javascripts/` to `app/javascript/`, adds CSS `@import` statements to `application.js`, and creates a `ViteHelper` for production manifest lookup. It does **not** modify `config/importmap.rb`.

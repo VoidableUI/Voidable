@@ -16,6 +16,10 @@ For Laravel projects, also install the Composer package:
 composer require voidable/laravel
 ```
 
+## Load the components
+
+`import '@voidable/ui'` registers every component up front. For Livewire and Blade pages that use a few components, `import '@voidable/ui/autoloader'` loads each one the first time its tag appears, including tags Livewire adds when it morphs the page. See [Loading components](/getting-started/loading/).
+
 ## Register the Alpine plugin
 
 For standalone Alpine projects, import and start Alpine yourself:

@@ -23,7 +23,8 @@ func NewCmd(assets domain.AssetSource) *cobra.Command {
 		Use:   "install --dir <path>",
 		Short: "Write the embedded @voidable/ui bundle, lit and theme CSS into a project",
 		Long: "Vendors the library from the binary alone (no Node toolchain): ES modules for " +
-			"@voidable/ui and lit, the theme CSS, and importmap.json mapping the bare imports. " +
+			"@voidable/ui (including the lazy autoloader, ui/autoloader.js) and lit, the theme CSS, and " +
+			"importmap.json mapping the bare imports. " +
 			"Only available in binaries built with -tags assets.",
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			if dir == "" {
@@ -46,7 +47,7 @@ func NewCmd(assets domain.AssetSource) *cobra.Command {
 			base := strings.TrimSuffix(baseURL, "/") + "/"
 			inline := strings.ReplaceAll(string(im), `"./`, `"`+base)
 			_, err = fmt.Fprintf(cmd.OutOrStdout(),
-				"wrote %d files under %s\nadd to your layout <head> (serve %s at %s):\n<link rel=\"stylesheet\" href=\"%stheme/index.css\">\n<script type=\"importmap\">\n%s</script>\n<script type=\"module\">import '@voidable/ui';</script>\n",
+				"wrote %d files under %s\nadd to your layout <head> (serve %s at %s):\n<link rel=\"stylesheet\" href=\"%stheme/index.css\">\n<script type=\"importmap\">\n%s</script>\n<script type=\"module\">import '@voidable/ui/autoloader.js';</script>\n\nThe autoloader loads each component the first time its tag appears on the page (including\ncontent added later by Turbo, LiveView or Livewire). To register every component up front\ninstead, import the whole bundle: <script type=\"module\">import '@voidable/ui';</script>\nImport maps ignore package exports, so subpaths need their .js extension.\n",
 				n, dir, dir, base, base, inline)
 			return err
 		},

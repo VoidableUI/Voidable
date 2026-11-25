@@ -8,6 +8,8 @@ module Voidable
 
       class_option :layout, type: :string, default: "topbar", enum: ["topbar", "sidebar", "switching"],
         desc: "Application layout style (topbar, sidebar, or switching)"
+      class_option :components, type: :string, default: "all", enum: ["all", "autoloader"],
+        desc: "How components load: all (one bundle, every component registered up front) or autoloader (each component loads when its tag first appears)"
       class_option :asset_pipeline, type: :string, default: "importmap", enum: ["importmap", "vite"],
         desc: "Asset pipeline (importmap or vite)"
 
@@ -20,13 +22,20 @@ module Voidable
         importmap = "config/importmap.rb"
         return unless File.exist?(importmap)
         return if File.read(importmap).include?("@voidable/ui")
-        append_to_file importmap, <<~RUBY
+        if autoloader?
+          pins = Voidable::Hotwire::CDN::AUTOLOADER_PINS.map { |name, url| %(pin "#{name}", to: "#{url}") }
+          pins << %(pin "@voidable/ui-hotwire", to: "#{Voidable::Hotwire::CDN::UI_HOTWIRE_URL}")
+          append_to_file importmap, "\n# Voidable UI (autoloader: components load when their tag first appears)\n#{pins.join("\n")}\n"
+          say "Pinned @voidable/ui/autoloader, lit and @voidable/ui-hotwire in importmap", :green
+        else
+          append_to_file importmap, <<~RUBY
 
-          # Voidable UI
-          pin "@voidable/ui", to: "#{Voidable::Hotwire::CDN::UI_URL}"
-          pin "@voidable/ui-hotwire", to: "#{Voidable::Hotwire::CDN::UI_HOTWIRE_URL}"
-        RUBY
-        say "Pinned @voidable/ui and @voidable/ui-hotwire in importmap", :green
+            # Voidable UI
+            pin "@voidable/ui", to: "#{Voidable::Hotwire::CDN::UI_URL}"
+            pin "@voidable/ui-hotwire", to: "#{Voidable::Hotwire::CDN::UI_HOTWIRE_URL}"
+          RUBY
+          say "Pinned @voidable/ui and @voidable/ui-hotwire in importmap", :green
+        end
       end
 
       def create_layout
@@ -111,7 +120,16 @@ module Voidable
         return unless File.exist?(js_entrypoint)
         contents = File.read(js_entrypoint)
         unless contents.include?("@voidable/ui")
-          header = if vite?
+          header = if autoloader?
+            <<~JS
+              // Components load when their tag first appears on the page.
+              // Switch to `import "@voidable/ui";` to register every component
+              // up front (see https://voidable.dev/getting-started/installation/).
+              import "@voidable/ui/autoloader";
+              import "@voidable/ui-hotwire";
+
+            JS
+          elsif vite?
             <<~JS
               // For smaller bundles, replace the bulk import below with
               // per-component imports for only the elements you use, e.g.:
@@ -188,6 +206,10 @@ module Voidable
 
       def vite?
         options[:asset_pipeline] == "vite"
+      end
+
+      def autoloader?
+        options[:components] == "autoloader"
       end
 
       public

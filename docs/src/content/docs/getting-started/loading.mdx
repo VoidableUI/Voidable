@@ -1,0 +1,134 @@
+---
+title: Loading components
+description: Register every component up front, import single components, or let the autoloader fetch only what a page uses; and what the page looks like before a component loads.
+---
+
+import { Code } from '@astrojs/starlight/components';
+import { stats } from '../../../lib/stats';
+
+export const pin = stats.versionNumber ? `@${stats.versionNumber}` : '';
+
+A custom element does nothing until its module has loaded and called `customElements.define()`. Voidable gives you three ways to decide when that happens.
+
+| Setup | Loads | Best for |
+| --- | --- | --- |
+| `import '@voidable/ui'` | Every component, up front | Single-page apps, dashboards and any page that uses most of the library. One entry, nothing to think about. |
+| `import '@voidable/ui/components/button'` | Exactly the components you import | A bundler app that uses a handful of components and wants them in the main bundle. |
+| `import '@voidable/ui/autoloader'` | Each component the first time its tag appears | Server-rendered pages (Rails, Phoenix, Laravel, Django) and any page where the set of components varies by route or arrives later. |
+
+## The autoloader
+
+The autoloader registers nothing when it loads. It scans the document for `<void-*>` tags, then keeps watching, and imports the module for each tag the first time it sees it. Content added later is found the same way, whoever adds it: Turbo Drive, Turbo Streams and frames, Phoenix LiveView patches, Livewire, htmx, or your own `innerHTML`.
+
+```js
+import '@voidable/ui/autoloader';
+```
+
+A page that uses three components downloads three components, their shared base code and Lit.
+
+The tag-to-module table is generated from the [Custom Elements Manifest](/getting-started/component-authoring/) when `@voidable/ui` is built, so a new component is in the autoloader the release it ships; there is no list to maintain.
+
+### With a bundler
+
+Import it once from your entry point. Vite, Rollup, webpack and esbuild see one literal `import('./components/<name>.js')` per component and emit one chunk each.
+
+```js
+import '@voidable/theme';
+import '@voidable/ui/autoloader';
+```
+
+### With an import map and no bundler
+
+Import maps ignore a package's `exports`, so a subpath needs its real file name: `@voidable/ui/autoloader.js`, not `@voidable/ui/autoloader`. Map `@voidable/ui/` to the directory holding the package's `dist` files; the autoloader finds the components next to itself.
+
+```html
+<script type="importmap">
+  {
+    "imports": {
+      "@voidable/ui/": "/vendor/voidable/ui/",
+      "lit": "/vendor/voidable/lit/lit/index.js",
+      "lit/": "/vendor/voidable/lit/lit/",
+      "lit-html": "/vendor/voidable/lit/lit-html/lit-html.js",
+      "lit-html/": "/vendor/voidable/lit/lit-html/",
+      "lit-element": "/vendor/voidable/lit/lit-element/index.js",
+      "lit-element/": "/vendor/voidable/lit/lit-element/",
+      "@lit/reactive-element": "/vendor/voidable/lit/@lit/reactive-element/reactive-element.js",
+      "@lit/reactive-element/": "/vendor/voidable/lit/@lit/reactive-element/"
+    }
+  }
+</script>
+<script type="module">import '@voidable/ui/autoloader.js';</script>
+```
+
+`voidable install --dir public/vendor/voidable` writes these files and prints this map and the matching `<script>`; you do not have to write it by hand.
+
+### From a CDN
+
+Point the import map at the package's files on the CDN, and pin Lit's three entry points beside them. This is what the `voidable-hotwire` gem's `--components=autoloader` option writes.
+
+<Code lang="html" code={`<script type="importmap">
+  {
+    "imports": {
+      "@voidable/ui/autoloader": "https://cdn.jsdelivr.net/npm/@voidable/ui${pin}/dist/autoloader.js",
+      "lit": "https://cdn.jsdelivr.net/npm/lit@3/+esm",
+      "lit/decorators.js": "https://cdn.jsdelivr.net/npm/lit@3/decorators.js/+esm",
+      "lit/directives/live.js": "https://cdn.jsdelivr.net/npm/lit@3/directives/live.js/+esm"
+    }
+  }
+</script>
+<script type="module">import '@voidable/ui/autoloader';</script>`} />
+
+Use the raw `dist/autoloader.js` file, not its `+esm` form. jsDelivr's `+esm` bundles each file it serves on its own, so every component would carry a private copy of the shared base code; the raw files share one.
+
+To load components from a different place than the autoloader itself (a CDN directory, another origin), set a base once. Components are then imported from `<base><name>.js`.
+
+```js
+import { configure } from '@voidable/ui/autoloader';
+
+configure({ base: 'https://static.example.com/voidable/components/' });
+```
+
+### Waiting for components
+
+`ready()` resolves when every `<void-*>` element in the document is defined, including the ones other components render. Use it before code that needs a component's API, or in tests.
+
+```js
+import { ready } from '@voidable/ui/autoloader';
+
+await ready();
+document.querySelector('void-dialog').open = true;
+```
+
+`ready()` never rejects. A module that fails to load (a network error) is logged, listed in `autoloader.failed`, and tried again the next time one of its tags is added to the page.
+
+Components inside a shadow root or a detached subtree are not part of the document. Pass the root to `observe(root)` and the autoloader watches it too.
+
+### What to expect
+
+- **A component is defined a moment later.** The page has to fetch the autoloader, then the component module, then Lit's own modules. A bundler preloads the chain; an import map without a bundler fetches it as a short waterfall. Interactions before then do nothing, which is true of any deferred script, and the [pre-upgrade styles](#before-a-component-loads) keep the page stable until then.
+- **Order is not guaranteed between components.** Modules arrive in any order, so a parent can upgrade before the children it manages. The components are written to pick up children as they upgrade (tabs, selects inside fields and forms are exercised against the autoloader in the repository's browser checks); your own code should not assume `<void-radio>` is defined when `<void-radio-group>` is, and a component that misbehaves when its children arrive late is a bug worth reporting.
+- **It is for the browser.** Like the full bundle it needs `customElements` and `HTMLElement`; do not import it while rendering on a server.
+- **It does not replace a bundle for an app that uses most components.** If your pages use most of the library, the full import loads the same bytes in one request chain and has no startup latency per component. Prefer it, or per-component imports, there.
+- **Loading both is safe.** Every component guards its `customElements.define()`, so importing the full bundle and the autoloader on the same page registers each element once.
+
+## Before a component loads
+
+Until its module loads, `<void-tabs>` is an unknown element: the browser shows its children as plain text and reserves none of the space the component will fill. With a script at the end of the page, or loaded late, that shows as content that jumps when the component arrives.
+
+The theme styles the not-yet-defined state with `:not(:defined)` rules, in one file ([`pre-upgrade.css`](https://github.com/VoidableUI/Voidable/blob/master/packages/theme/src/pre-upgrade.css)) that `@voidable/theme` imports. Each rule switches itself off the instant `customElements.define()` runs for the tag, so there is nothing to configure and no class to remove. They apply to the full bundle, per-component imports and the autoloader alike. They do two things:
+
+- **Hide what should not show yet:** closed dialogs, drawers and menus (even when the server rendered `open`), anchored content of popovers and dropdown menus, the options of selects and comboboxes, closed accordion and collapsible bodies, carousel slides after the first, and the panels of tabs that are not selected.
+- **Reserve space** for what the component renders itself, from the same tokens it uses: the tab list, input, select, textarea and file-upload boxes, a field's label and helper text (read from its attributes), a card's padding and heading, accordion and collapsible headings (read from `heading`), and progress tracks.
+
+Text that means something before upgrade is never hidden: buttons, badges, tags, alerts, banners, cards and panels keep showing their content.
+
+Two things are worth doing on the server:
+
+- **Mark the selected tab panel `active`.** Without it the first panel is shown, which is right when the first tab is the initial one and wrong otherwise.
+- **Load the theme in `<head>` as a stylesheet.** CSS blocks first paint, so the page never renders without these rules.
+
+Not every component is covered. Components whose size depends on content or data (tables, charts, calendars with other sizes, menus) are not reserved exactly, and an accordion item rendered `open` still shifts slightly when its body gains the component's padding.
+
+### What is not done: server-rendered final DOM
+
+The rules above cannot make the page *usable* before upgrade: a `<void-select>` is a styled box until its module loads, not a working control. Having the server emit each component's final structure and the component adopt it, instead of rebuilding it, would remove that gap, but it means a stable, versioned contract for every component's rendered markup, a server-side renderer in each adapter, and hydration in each component. It is tracked as a separate decision (see [#4](https://github.com/VoidableUI/Voidable/issues/4) and [#19](https://github.com/VoidableUI/Voidable/issues/19)); this page documents what works today.

@@ -16,3 +16,7 @@ A component library built on Lit 3 web components with a strict theme-separation
 Components in `@voidable/ui` ship with **zero visual CSS**. All styling flows through `--void-*` CSS custom properties defined by `@voidable/theme`.
 
 Without a theme loaded, components are completely unstyled.
+
+## Loading
+
+These stories register every component up front (`import '@voidable/ui'`). In an application you can also import single components, or `@voidable/ui/autoloader` to load each component the first time its tag appears; see "Loading components" in the docs.

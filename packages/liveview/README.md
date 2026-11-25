@@ -9,7 +9,10 @@ Two packages work together:
   LiveView patches).
 
 Load `@voidable/ui` and a theme such as `@voidable/theme` in your asset
-pipeline as usual; the components have no styling without a theme.
+pipeline as usual; the components have no styling without a theme. To load each
+component only when its tag first appears (in the page or in a LiveView patch),
+import `@voidable/ui/autoloader` instead of `@voidable/ui`; see
+[Loading components](https://voidable.dev/getting-started/loading/).
 
 ## Setup
 

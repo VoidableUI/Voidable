@@ -31,6 +31,18 @@ Import the component definitions as a module and use the elements in your HTML:
 </html>
 ```
 
+### Load only what the page uses
+
+`import '@voidable/ui'` registers every component. To fetch each component the first time its tag appears (including tags you add later), import the autoloader instead:
+
+```html
+<script type="module">
+  import '@voidable/ui/autoloader';
+</script>
+```
+
+Without a bundler this needs an import map, because a browser cannot resolve a bare package name; see [Loading components](/getting-started/loading/) for the import map and CDN forms and for when to prefer the full import.
+
 ## Event handling
 
 Voidable components emit standard `CustomEvent`s. Listen with `addEventListener`:
