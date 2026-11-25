@@ -63,43 +63,27 @@ describe('VoidSlider', () => {
   describe('ARIA', () => {
     let el: VoidSlider;
 
-    beforeEach(() => {
+    beforeEach(async () => {
       el = createElement();
       document.body.appendChild(el);
+      await el.updateComplete;
     });
 
-    it('sets role="slider" on connect', () => {
-      expect(el.getAttribute('role')).toBe('slider');
+    it('has no role or value attributes on the host: the native range input is the slider', () => {
+      for (const name of ['role', 'aria-valuemin', 'aria-valuemax', 'aria-valuenow']) {
+        expect(el.hasAttribute(name), name).toBe(false);
+      }
     });
 
-    it('sets aria-valuemin on connect', () => {
-      expect(el.getAttribute('aria-valuemin')).toBe('0');
-    });
-
-    it('sets aria-valuemax on connect', () => {
-      expect(el.getAttribute('aria-valuemax')).toBe('100');
-    });
-
-    it('sets aria-valuenow on connect', () => {
-      expect(el.getAttribute('aria-valuenow')).toBe('50');
-    });
-
-    it('updates aria-valuenow when value changes', async () => {
+    it('keeps value and bounds on the native range input', async () => {
+      el.min = 10;
+      el.max = 200;
       el.value = 75;
       await el.updateComplete;
-      expect(el.getAttribute('aria-valuenow')).toBe('75');
-    });
-
-    it('updates aria-valuemin when min changes', async () => {
-      el.min = 10;
-      await el.updateComplete;
-      expect(el.getAttribute('aria-valuemin')).toBe('10');
-    });
-
-    it('updates aria-valuemax when max changes', async () => {
-      el.max = 200;
-      await el.updateComplete;
-      expect(el.getAttribute('aria-valuemax')).toBe('200');
+      const input = el.querySelector('input[type="range"]') as HTMLInputElement;
+      expect(input.min).toBe('10');
+      expect(input.max).toBe('200');
+      expect(input.value).toBe('75');
     });
   });
 

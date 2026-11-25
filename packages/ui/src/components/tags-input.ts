@@ -1,4 +1,4 @@
-import { html, nothing } from 'lit';
+import { html, nothing, type PropertyValues } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
 import { InternalsFormControl, type FormSubmission } from '../form-control.js';
@@ -39,9 +39,14 @@ export class VoidTagsInput extends InternalsFormControl(VoidElement) {
     return tags;
   }
 
-  connectedCallback(): void {
-    super.connectedCallback();
-    this.setHostAttribute('role', 'listbox');
+  /**
+   * The host has no role while the entry field is there: that native input is the control and carries the
+   * accessible name. Without it (read-only, or at `max`) there is nothing to label, so the host is a
+   * labelled group of the tags.
+   */
+  protected override updated(changed: PropertyValues): void {
+    super.updated(changed);
+    this.setHostAttribute('role', this.querySelector('.void-tags-input-field') ? null : 'group');
   }
 
   render() {
@@ -54,12 +59,7 @@ export class VoidTagsInput extends InternalsFormControl(VoidElement) {
             const text = this._tagText(tag);
             const color = this._tagColor(tag);
             return html`
-              <span
-                class="void-tags-input-tag"
-                role="option"
-                aria-selected="true"
-                data-color=${color || nothing}
-              >
+              <span class="void-tags-input-tag" data-color=${color || nothing}>
                 <span class="void-tags-input-tag-text">${text}</span>
                 ${!this.disabled && !this.readonly
                   ? html`<button

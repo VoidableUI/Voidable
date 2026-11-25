@@ -43,8 +43,36 @@ describe('VoidNumberInput', () => {
     expect(el.controls).toBe('sides');
   });
 
-  it('sets role=spinbutton', () => {
-    expect(el.getAttribute('role')).toBe('spinbutton');
+  it('puts the spinbutton on the native input, not on the host', async () => {
+    await el.updateComplete;
+    expect(el.hasAttribute('role')).toBe(false);
+    expect(el.hasAttribute('aria-valuenow')).toBe(false);
+    const input = el.querySelector('input')!;
+    expect(input.getAttribute('role')).toBe('spinbutton');
+    expect(input.getAttribute('aria-valuenow')).toBe(String(el.value));
+  });
+
+  it('reports finite bounds on the input and follows changes', async () => {
+    el.min = 0;
+    el.max = 10;
+    el.value = 4;
+    await el.updateComplete;
+    const input = el.querySelector('input')!;
+    expect(input.getAttribute('aria-valuemin')).toBe('0');
+    expect(input.getAttribute('aria-valuemax')).toBe('10');
+    expect(input.getAttribute('aria-valuenow')).toBe('4');
+    el.min = Number.NEGATIVE_INFINITY;
+    el.max = Number.POSITIVE_INFINITY;
+    await el.updateComplete;
+    expect(input.hasAttribute('aria-valuemin')).toBe(false);
+    expect(input.hasAttribute('aria-valuemax')).toBe(false);
+  });
+
+  it('is named by the label on the input, not on the host', async () => {
+    el.label = 'Quantity';
+    await el.updateComplete;
+    expect(el.querySelector('input')!.getAttribute('aria-label')).toBe('Quantity');
+    expect(el.hasAttribute('aria-label')).toBe(false);
   });
 
   it('renders a native input', async () => {

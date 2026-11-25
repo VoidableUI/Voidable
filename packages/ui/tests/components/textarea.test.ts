@@ -2,6 +2,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { VoidElement } from '../../src/base.js';
 import { VoidTextarea } from '../../src/components/textarea.js';
+import '../../src/components/field.js';
 
 const TAG = 'void-textarea';
 
@@ -92,12 +93,24 @@ describe('VoidTextarea', () => {
       await el.updateComplete;
     });
 
-    it('sets role="textbox" on connect', () => {
-      expect(el.getAttribute('role')).toBe('textbox');
+    it('has no role of its own: the native textarea is the textbox', () => {
+      expect(el.hasAttribute('role')).toBe(false);
+      expect(el.hasAttribute('aria-multiline')).toBe(false);
+      expect(el.querySelector('textarea')).not.toBeNull();
     });
 
-    it('sets aria-multiline="true" on connect', () => {
-      expect(el.getAttribute('aria-multiline')).toBe('true');
+    it('is named by void-field through the native textarea', async () => {
+      const field = document.createElement('void-field') as HTMLElement & { label: string; updateComplete: Promise<boolean> };
+      field.label = 'Notes';
+      field.appendChild(el);
+      document.body.appendChild(field);
+      await field.updateComplete;
+      await el.updateComplete;
+      await new Promise((r) => setTimeout(r, 0));
+      const textarea = el.querySelector('textarea')!;
+      const label = field.querySelector('.void-field-label')!;
+      expect(textarea.getAttribute('aria-labelledby')).toBe(label.id);
+      expect(el.hasAttribute('aria-labelledby')).toBe(false);
     });
   });
 

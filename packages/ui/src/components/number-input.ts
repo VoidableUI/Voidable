@@ -4,7 +4,11 @@ import { property, query } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
 import { InternalsFormControl, type FormSubmission } from '../form-control.js';
 
-/** Precise numeric entry for quantity selectors, price fields, and settings with increment/decrement controls. */
+/**
+ * Precise numeric entry for quantity selectors, price fields, and settings with increment/decrement controls.
+ * The host has no role: the native text input is the spinbutton (it carries the value, bounds and the accessible
+ * name, which `<void-field>` supplies), and the stepper buttons are its own buttons.
+ */
 export class VoidNumberInput extends InternalsFormControl(VoidElement) {
   @property({ type: Number, reflect: true }) value: number = 0;
   @property({ type: Number }) min: number = Number.NEGATIVE_INFINITY;
@@ -36,36 +40,6 @@ export class VoidNumberInput extends InternalsFormControl(VoidElement) {
   private _pendingText: string | null = null;
 
   @query('.void-number-input-field') private _input!: HTMLInputElement;
-
-  connectedCallback(): void {
-    super.connectedCallback();
-    this.setHostAttribute('role', 'spinbutton');
-    if (this.label) {
-      this.setHostAttribute('aria-label', this.label);
-    }
-    if (isFinite(this.min)) {
-      this.setHostAttribute('aria-valuemin', String(this.min));
-    }
-    if (isFinite(this.max)) {
-      this.setHostAttribute('aria-valuemax', String(this.max));
-    }
-    this.setHostAttribute('aria-valuenow', String(this.value));
-  }
-
-  updated(changed: Map<string, unknown>): void {
-    if (changed.has('value')) {
-      this.setHostAttribute('aria-valuenow', String(this.value));
-    }
-    if (changed.has('min') && isFinite(this.min)) {
-      this.setHostAttribute('aria-valuemin', String(this.min));
-    }
-    if (changed.has('max') && isFinite(this.max)) {
-      this.setHostAttribute('aria-valuemax', String(this.max));
-    }
-    if (changed.has('label')) {
-      this.setHostAttribute('aria-label', this.label);
-    }
-  }
 
   disconnectedCallback(): void {
     super.disconnectedCallback();
@@ -277,6 +251,10 @@ export class VoidNumberInput extends InternalsFormControl(VoidElement) {
         placeholder=${this.placeholder}
         ?disabled=${this.disabled}
         ?readonly=${this.readonly}
+        role="spinbutton"
+        aria-valuenow=${this.value}
+        aria-valuemin=${isFinite(this.min) ? this.min : nothing}
+        aria-valuemax=${isFinite(this.max) ? this.max : nothing}
         aria-label=${this.label || 'Number input'}
         @keydown=${this._onKeydown}
         @blur=${this._onBlur}

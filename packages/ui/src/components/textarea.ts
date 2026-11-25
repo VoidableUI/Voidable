@@ -5,7 +5,11 @@ import { VoidElement } from '../base.js';
 import { defaultTrueBoolean, forwardedSpellcheck } from '../converters.js';
 import { NativeFormControl } from '../form-control.js';
 
-/** Multi-line text entry for comment fields, description inputs, and freeform text that needs more than one line. */
+/**
+ * Multi-line text entry for comment fields, description inputs, and freeform text that needs more than one line.
+ * The host has no role: the native textarea is the (multi-line) textbox and carries the accessible name,
+ * which `<void-field>` supplies.
+ */
 export class VoidTextarea extends NativeFormControl(VoidElement) {
   @property({ type: String }) value = '';
   @property({ type: String, reflect: true }) placeholder = '';
@@ -32,12 +36,6 @@ export class VoidTextarea extends NativeFormControl(VoidElement) {
   @property({ type: String }) override autocapitalize: '' | 'off' | 'none' | 'on' | 'sentences' | 'words' | 'characters' = '';
   /** Spell checking of the native control (`spellcheck`). Defaults to true; `spellcheck="false"` turns it off from markup. */
   @property({ converter: defaultTrueBoolean }) override spellcheck = true;
-
-  connectedCallback(): void {
-    super.connectedCallback();
-    this.setHostAttribute('role', 'textbox');
-    this.setHostAttribute('aria-multiline', 'true');
-  }
 
   render() {
     return html`
