@@ -72,7 +72,7 @@
    [data-theme="light"] attribute and once inside the
    prefers-color-scheme block that follows. Plain CSS cannot share one
    declaration list between a selector and a media query, so edit both
-   blocks together (scripts/check-contrast.py verifies they match). */
+   blocks together (mise run lint:contrast verifies they match). */
 [data-theme="light"] {
   /* Native UI (scrollbars, form controls, autofill) follows the theme */
   color-scheme: light;
