@@ -1,278 +1,166 @@
 // @vitest-environment happy-dom
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, afterEach } from 'vitest';
 import { VoidElement } from '../../src/base.js';
 import { VoidDrawer } from '../../src/components/drawer.js';
+import '../../src/components/dialog.js';
+import type { VoidDialog } from '../../src/components/dialog.js';
+import { cleanup, flush, locks, pointerdown, press, stack } from '../helpers/overlay.js';
 
 const TAG = 'void-drawer';
 
-function createElement(): VoidDrawer {
-  return document.createElement(TAG) as VoidDrawer;
+async function mount(props: Partial<VoidDrawer> = {}, content = '<button id="inside">x</button>'): Promise<VoidDrawer> {
+  const el = document.createElement(TAG) as VoidDrawer;
+  el.id = 'drawer';
+  el.innerHTML = content;
+  Object.assign(el, props);
+  document.body.appendChild(el);
+  await flush(el);
+  return el;
 }
+
+const panel = (el: Element) => el.querySelector(':scope > dialog.void-drawer-panel') as HTMLDialogElement;
+
+afterEach(cleanup);
 
 describe('VoidDrawer', () => {
   describe('class', () => {
-    it('extends VoidElement', () => {
+    it('extends VoidElement and is registered', () => {
       expect(Object.getPrototypeOf(VoidDrawer)).toBe(VoidElement);
-    });
-
-    it('is registered as void-drawer', () => {
       expect(customElements.get(TAG)).toBe(VoidDrawer);
     });
-  });
 
-  describe('default property values', () => {
-    let el: VoidDrawer;
-
-    beforeEach(() => {
-      el = createElement();
-    });
-
-    it('open defaults to false', () => {
-      expect(el.open).toBe(false);
-    });
-
-    it('side defaults to "right"', () => {
-      expect(el.side).toBe('right');
-    });
-
-    it('size defaults to "md"', () => {
-      expect(el.size).toBe('md');
-    });
-
-    it('heading defaults to empty string', () => {
-      expect(el.heading).toBe('');
-    });
-
-    it('closable defaults to true', () => {
-      expect(el.closable).toBe(true);
+    it('createRenderRoot returns the element itself', () => {
+      const el = document.createElement(TAG) as VoidDrawer;
+      expect(el.createRenderRoot()).toBe(el);
     });
   });
 
-  describe('ARIA', () => {
-    let el: VoidDrawer;
-
-    beforeEach(() => {
-      el = createElement();
-      document.body.appendChild(el);
+  describe('defaults and reflection', () => {
+    it('open false, side right, size md, heading empty, closable true', () => {
+      const el = document.createElement(TAG) as VoidDrawer;
+      expect([el.open, el.side, el.size, el.heading, el.closable]).toEqual([false, 'right', 'md', '', true]);
     });
 
-    afterEach(() => {
-      el.remove();
-    });
-
-    it('sets role="dialog" on connect', () => {
-      expect(el.getAttribute('role')).toBe('dialog');
-    });
-
-    it('sets aria-modal="true" on connect', () => {
-      expect(el.getAttribute('aria-modal')).toBe('true');
-    });
-
-    it('sets aria-label from heading when heading is set', async () => {
-      el.heading = 'Settings';
-      await el.updateComplete;
-      expect(el.getAttribute('aria-label')).toBe('Settings');
-    });
-
-    it('removes aria-label when heading is cleared', async () => {
-      el.heading = 'Settings';
-      await el.updateComplete;
-      el.heading = '';
-      await el.updateComplete;
-      expect(el.getAttribute('aria-label')).toBeNull();
-    });
-  });
-
-  describe('attribute reflection', () => {
-    let el: VoidDrawer;
-
-    beforeEach(() => {
-      el = createElement();
-      document.body.appendChild(el);
-    });
-
-    afterEach(() => {
-      el.remove();
-    });
-
-    it('reflects open to attribute', async () => {
+    it('reflects open, side and size, and reads them from markup', async () => {
+      document.body.innerHTML = '<void-drawer id="d" side="left" size="lg"></void-drawer>';
+      const el = document.getElementById('d') as VoidDrawer;
+      await flush(el);
+      expect([el.side, el.size]).toEqual(['left', 'lg']);
       el.open = true;
-      await el.updateComplete;
+      await flush(el);
       expect(el.hasAttribute('open')).toBe(true);
     });
-
-    it('reflects side to attribute', async () => {
-      el.side = 'left';
-      await el.updateComplete;
-      expect(el.getAttribute('side')).toBe('left');
-    });
-
-    it('reflects size to attribute', async () => {
-      el.size = 'lg';
-      await el.updateComplete;
-      expect(el.getAttribute('size')).toBe('lg');
-    });
-
-    it('reads side from attribute', () => {
-      el.setAttribute('side', 'bottom');
-      expect(el.side).toBe('bottom');
-    });
-
-    it('reads size from attribute', () => {
-      el.setAttribute('size', 'sm');
-      expect(el.size).toBe('sm');
-    });
   });
 
-  describe('rendering', () => {
-    let el: VoidDrawer;
+  describe('structure and naming', () => {
+    it('renders a native <dialog> panel holding the content; the host has no dialog role', async () => {
+      const el = await mount({ heading: 'Filters' });
+      expect(panel(el)).toBeInstanceOf(HTMLDialogElement);
+      expect(panel(el).querySelector('.void-drawer-body #inside')).not.toBeNull();
+      expect(el.hasAttribute('role')).toBe(false);
+      expect(el.hasAttribute('aria-modal')).toBe(false);
+      const title = el.querySelector(`#${panel(el).getAttribute('aria-labelledby')}`);
+      expect(title?.textContent).toBe('Filters');
+    });
 
-    beforeEach(async () => {
-      el = createElement();
+    it('hides the empty heading and names the panel from aria-label without one', async () => {
+      const el = document.createElement(TAG) as VoidDrawer;
+      el.setAttribute('aria-label', 'Navigation');
       document.body.appendChild(el);
-      await el.updateComplete;
+      await flush(el);
+      expect(el.querySelector<HTMLElement>('.void-drawer-heading')!.hidden).toBe(true);
+      expect(panel(el).getAttribute('aria-label')).toBe('Navigation');
     });
 
-    afterEach(() => {
-      el.remove();
-    });
-
-    it('hides backdrop and panel when closed', () => {
-      // They stay in the DOM so projected content survives close/reopen.
-      expect(el.querySelector<HTMLElement>('.void-drawer-backdrop')!.hidden).toBe(true);
-      expect(el.querySelector<HTMLElement>('.void-drawer-panel')!.hidden).toBe(true);
-    });
-
-    it('renders backdrop and panel when open', async () => {
-      el.open = true;
-      await el.updateComplete;
-      expect(el.querySelector<HTMLElement>('.void-drawer-backdrop')!.hidden).toBe(false);
-      expect(el.querySelector<HTMLElement>('.void-drawer-panel')!.hidden).toBe(false);
-    });
-
-    it('renders heading when heading is set', async () => {
-      el.heading = 'My Drawer';
-      el.open = true;
-      await el.updateComplete;
-      const heading = el.querySelector('.void-drawer-heading');
-      expect(heading).not.toBeNull();
-      expect(heading?.textContent).toBe('My Drawer');
-    });
-
-    it('does not render heading element when heading is empty', async () => {
-      el.open = true;
-      await el.updateComplete;
-      expect(el.querySelector('.void-drawer-heading')).toBeNull();
-    });
-
-    it('renders close button when closable', async () => {
-      el.open = true;
-      await el.updateComplete;
+    it('renders the close button only when closable', async () => {
+      const el = await mount();
       expect(el.querySelector('.void-drawer-close')).not.toBeNull();
-    });
-
-    it('does not render close button when not closable', async () => {
       el.closable = false;
-      el.open = true;
-      await el.updateComplete;
+      await flush(el);
       expect(el.querySelector('.void-drawer-close')).toBeNull();
     });
-
-    it('renders body element when open', async () => {
-      el.open = true;
-      await el.updateComplete;
-      expect(el.querySelector('.void-drawer-body')).not.toBeNull();
-    });
   });
 
-  describe('close behavior', () => {
-    let el: VoidDrawer;
+  describe('opening, closing and focus', () => {
+    it('opens as a modal, takes focus, and locks scrolling', async () => {
+      const opener = document.createElement('button');
+      document.body.appendChild(opener);
+      opener.focus();
+      const el = await mount({ open: true });
+      expect(panel(el).open).toBe(true);
+      expect(document.activeElement?.id).toBe('inside');
+      expect(stack()).toEqual(['drawer']);
+      expect(locks()).toBe(1);
+      press('Escape');
+      await flush(el);
+      expect(el.open).toBe(false);
+      expect(panel(el).open).toBe(false);
+      expect(document.activeElement).toBe(opener);
+      expect(locks()).toBe(0);
+    });
 
-    beforeEach(async () => {
-      el = createElement();
+    it('Escape works right after opening, without focus inside first', async () => {
+      const el = await mount();
       el.open = true;
-      document.body.appendChild(el);
-      await el.updateComplete;
-    });
-
-    afterEach(() => {
-      el.remove();
-    });
-
-    it('closes when close button is clicked', async () => {
-      const btn = el.querySelector('.void-drawer-close') as HTMLButtonElement;
-      btn.click();
+      await flush(el);
+      press('Escape', document.body);
+      await flush(el);
       expect(el.open).toBe(false);
     });
 
-    it('dispatches void-close event when close button is clicked', async () => {
-      let fired = false;
-      el.addEventListener('void-close', () => { fired = true; });
-      const btn = el.querySelector('.void-drawer-close') as HTMLButtonElement;
-      btn.click();
-      expect(fired).toBe(true);
-    });
-
-    it('void-close event bubbles', async () => {
-      let firedOnParent = false;
-      document.body.addEventListener('void-close', () => { firedOnParent = true; }, { once: true });
-      const btn = el.querySelector('.void-drawer-close') as HTMLButtonElement;
-      btn.click();
-      expect(firedOnParent).toBe(true);
-    });
-
-    it('closes on backdrop click', async () => {
-      const backdrop = el.querySelector('.void-drawer-backdrop') as HTMLElement;
-      backdrop.click();
+    it('close button, backdrop press and Escape each close it with their reason', async () => {
+      const el = await mount();
+      const reasons: string[] = [];
+      el.addEventListener('void-close', e => reasons.push((e as CustomEvent).detail.reason));
+      el.open = true;
+      await flush(el);
+      el.querySelector<HTMLButtonElement>('.void-drawer-close')!.click();
+      await flush(el);
+      el.open = true;
+      await flush(el);
+      pointerdown(document.body);
+      await flush(el);
+      el.open = true;
+      await flush(el);
+      press('Escape');
+      await flush(el);
+      expect(reasons).toEqual(['close-button', 'outside', 'escape']);
       expect(el.open).toBe(false);
     });
 
-    it('dispatches void-close on backdrop click', async () => {
-      let fired = false;
-      el.addEventListener('void-close', () => { fired = true; });
-      const backdrop = el.querySelector('.void-drawer-backdrop') as HTMLElement;
-      backdrop.click();
-      expect(fired).toBe(true);
-    });
-
-    it('closes on Escape key', async () => {
-      el.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
-      expect(el.open).toBe(false);
-    });
-
-    it('dispatches void-close on Escape key', async () => {
-      let fired = false;
-      el.addEventListener('void-close', () => { fired = true; });
-      el.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
-      expect(fired).toBe(true);
-    });
-
-    it('does not close on Escape when not closable', async () => {
-      el.closable = false;
-      await el.updateComplete;
-      el.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    it('closable="false" ignores Escape and backdrop presses', async () => {
+      const el = await mount({ closable: false, open: true });
+      press('Escape');
+      pointerdown(document.body);
+      await flush(el);
       expect(el.open).toBe(true);
     });
 
-    it('does not close on backdrop click when not closable', async () => {
-      el.closable = false;
-      el.open = true;
-      await el.updateComplete;
-      const backdrop = el.querySelector('.void-drawer-backdrop') as HTMLElement;
-      backdrop?.click();
-      expect(el.open).toBe(true);
-    });
-
-    it('other keys do not close the drawer', async () => {
-      el.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true }));
+    it('a press inside the panel does not close it', async () => {
+      const el = await mount({ open: true });
+      pointerdown(el.querySelector('#inside')!);
+      await flush(el);
       expect(el.open).toBe(true);
     });
   });
 
-  describe('Light DOM', () => {
-    it('createRenderRoot returns the element itself', () => {
-      const el = createElement();
-      expect(el.createRenderRoot()).toBe(el);
+  describe('nesting', () => {
+    it('a dialog inside the drawer stacks above it: Escape closes the dialog, then the drawer', async () => {
+      const el = await mount({ open: true }, '<button id="b">x</button><void-dialog id="inner"><input id="i"></void-dialog>');
+      const inner = el.querySelector('#inner') as VoidDialog;
+      inner.open = true;
+      await flush(inner, el);
+      expect(stack()).toEqual(['drawer', 'inner']);
+      expect(locks()).toBe(2);
+      press('Escape');
+      await flush(inner, el);
+      expect(inner.open).toBe(false);
+      expect(el.open).toBe(true);
+      expect(locks()).toBe(1);
+      press('Escape');
+      await flush(inner, el);
+      expect(el.open).toBe(false);
+      expect(locks()).toBe(0);
     });
   });
 });

@@ -3,6 +3,8 @@ import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
 import { live } from 'lit/directives/live.js';
 import { InternalsFormControl } from '../form-control.js';
+import { OverlayController } from '../overlay.js';
+import { uid } from '../keyboard.js';
 
 /* ── Helpers ── */
 
@@ -527,7 +529,17 @@ declare global {
 
 /* ── VoidDatePicker ── */
 
-/** Input-anchored date picker that combines a text field with a VoidCalendar dropdown for form date selection. */
+/**
+ * Input-anchored date picker that combines a text field with a VoidCalendar dropdown for form date selection.
+ *
+ * The calendar opens in a non-modal popup dialog in the top layer, placed under the input with CSS anchor
+ * positioning (flipping above near the bottom of the viewport). Opening it from the input moves focus to the
+ * selected (or current) day; choosing a day, Escape, or a press outside closes it and focus returns to the input.
+ *
+ * @fires {CustomEvent<{ reason: 'trigger' | 'api' }>} void-open - The calendar popup opened.
+ * @fires {CustomEvent<{ reason: 'trigger' | 'select' | 'escape' | 'outside' | 'blur' | 'parent' | 'api' }>} void-close -
+ * The calendar popup is closing. Cancelable when the user caused it.
+ */
 export class VoidDatePicker extends InternalsFormControl(VoidElement) {
   @property({ type: String, reflect: true }) value = '';
   @property({ type: String }) min = '';
@@ -541,23 +553,30 @@ export class VoidDatePicker extends InternalsFormControl(VoidElement) {
   @property({ type: String }) format = 'MM/DD/YYYY';
   @property({ type: String, reflect: true }) color: 'default' | 'error' | 'warning' | 'caution' | 'success' | 'info' | 'notice' = 'default';
 
-  connectedCallback(): void {
-    super.connectedCallback();
-    this.setHostAttribute('role', 'combobox');
-    this.setHostAttribute('aria-haspopup', 'dialog');
-    document.addEventListener('mousedown', this._onDocumentClick);
-    document.addEventListener('keydown', this._onDocumentKeydown);
-  }
+  /** The calendar popup, controlled by the input (APG date picker combobox). */
+  private readonly _dropdownId = uid('void-date-picker-dialog');
+  protected readonly _overlay = new OverlayController(this, {
+    kind: 'dialog',
+    surface: () => this.querySelector<HTMLElement>(':scope > .void-date-picker-dropdown'),
+    isOpen: () => this.open,
+    setOpen: open => {
+      this.open = open;
+    },
+    trigger: () => this.querySelector<HTMLElement>(':scope > .void-date-picker-anchor > .void-date-picker-input'),
+    anchor: () => this.querySelector(':scope > .void-date-picker-anchor'),
+    initialFocus: reason => {
+      if (reason !== 'api') void this._focusDay();
+      return false;
+    },
+  });
 
-  disconnectedCallback(): void {
-    super.disconnectedCallback();
-    document.removeEventListener('mousedown', this._onDocumentClick);
-    document.removeEventListener('keydown', this._onDocumentKeydown);
-  }
-
-  updated(changed: Map<string, unknown>): void {
-    super.updated(changed);
-    this.setHostAttribute('aria-expanded', String(this.open));
+  /** Focus the calendar's roving day once it has rendered. */
+  private async _focusDay(): Promise<void> {
+    const calendar = this.querySelector<VoidCalendar>(':scope > .void-date-picker-dropdown > void-calendar');
+    if (!calendar) return;
+    await calendar.updateComplete;
+    if (!this.open) return;
+    calendar.querySelector<HTMLElement>('[tabindex="0"]')?.focus({ preventScroll: true });
   }
 
   render() {
@@ -570,8 +589,11 @@ export class VoidDatePicker extends InternalsFormControl(VoidElement) {
           placeholder=${this.placeholder}
           ?disabled=${this.disabled}
           readonly
-          aria-expanded=${String(this.open)}
+          role="combobox"
+          aria-label=${this.placeholder}
           aria-haspopup="dialog"
+          aria-expanded=${String(this.open)}
+          aria-controls=${this._dropdownId}
           @click=${this._toggle}
           @keydown=${this._onInputKeydown}
         />
@@ -592,7 +614,7 @@ export class VoidDatePicker extends InternalsFormControl(VoidElement) {
         </button>
       </div>
       ${this.open ? html`
-        <div class="void-date-picker-dropdown" role="dialog" aria-label="Choose date">
+        <div class="void-date-picker-dropdown" id=${this._dropdownId} role="dialog" aria-label="Choose date" popover="manual">
           <void-calendar
             value=${this.value}
             min=${this.min}
@@ -610,15 +632,13 @@ export class VoidDatePicker extends InternalsFormControl(VoidElement) {
 
   private _toggle = (): void => {
     if (this.disabled) return;
-    this.open = !this.open;
-    this.requestUpdate();
+    this._overlay.toggle('trigger');
   };
 
   private _onCalendarChange = (e: CustomEvent): void => {
     e.stopPropagation();
     this.value = e.detail.value;
-    this.open = false;
-    this.requestUpdate();
+    this._overlay.requestClose('select');
     this.dispatchEvent(new CustomEvent('void-change', {
       bubbles: true,
       composed: true,
@@ -626,28 +646,10 @@ export class VoidDatePicker extends InternalsFormControl(VoidElement) {
     }));
   };
 
-  private _onDocumentClick = (e: MouseEvent): void => {
-    if (this.open && !this.contains(e.target as Node)) {
-      this.open = false;
-      this.requestUpdate();
-    }
-  };
-
-  private _onDocumentKeydown = (e: KeyboardEvent): void => {
-    if (e.key === 'Escape' && this.open) {
-      this.open = false;
-      this.requestUpdate();
-    }
-  };
-
   private _onInputKeydown = (e: KeyboardEvent): void => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
       this._toggle();
-    }
-    if (e.key === 'Escape' && this.open) {
-      this.open = false;
-      this.requestUpdate();
     }
   };
 }

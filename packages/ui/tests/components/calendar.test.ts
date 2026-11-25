@@ -478,16 +478,24 @@ describe('VoidDatePicker', () => {
       el.remove();
     });
 
-    it('sets role="combobox" on host', () => {
-      expect(el.getAttribute('role')).toBe('combobox');
+    const input = () => el.querySelector('.void-date-picker-input')!;
+
+    it('the input is the combobox, named by the placeholder; the host has no role', () => {
+      expect(input().getAttribute('role')).toBe('combobox');
+      expect(input().getAttribute('aria-label')).toBe('Select date');
+      expect(el.hasAttribute('role')).toBe(false);
     });
 
-    it('sets aria-haspopup="dialog" on host', () => {
-      expect(el.getAttribute('aria-haspopup')).toBe('dialog');
+    it('sets aria-haspopup="dialog" on the input', () => {
+      expect(input().getAttribute('aria-haspopup')).toBe('dialog');
     });
 
-    it('sets aria-expanded="false" initially', () => {
-      expect(el.getAttribute('aria-expanded')).toBe('false');
+    it('sets aria-expanded="false" initially, and points aria-controls at the calendar when open', async () => {
+      expect(input().getAttribute('aria-expanded')).toBe('false');
+      el.open = true;
+      await el.updateComplete;
+      expect(input().getAttribute('aria-expanded')).toBe('true');
+      expect(input().getAttribute('aria-controls')).toBe(el.querySelector('.void-date-picker-dropdown')!.id);
     });
   });
 
@@ -535,7 +543,8 @@ describe('VoidDatePicker', () => {
       const input = el.querySelector('.void-date-picker-input') as HTMLInputElement;
       input.click();
       await el.updateComplete;
-      document.body.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+      document.body.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, button: 0 }));
+      await el.updateComplete;
       await el.updateComplete;
       expect(el.querySelector('.void-date-picker-dropdown')).toBeNull();
     });
@@ -544,7 +553,7 @@ describe('VoidDatePicker', () => {
       const input = el.querySelector('.void-date-picker-input') as HTMLInputElement;
       input.click();
       await el.updateComplete;
-      expect(el.getAttribute('aria-expanded')).toBe('true');
+      expect(input.getAttribute('aria-expanded')).toBe('true');
     });
 
     it('renders void-calendar inside dropdown', async () => {

@@ -152,9 +152,15 @@ The composite widgets follow the matching [WAI-ARIA Authoring Practices](https:/
 | Up Arrow (trigger) | Open and focus the last item |
 | Down Arrow / Up Arrow / Home / End | Move between items (wraps) |
 | Characters | Jump to the next item starting with them |
-| Enter / Space (item) | Activate the item |
+| Enter / Space (item) | Activate the item, close and return focus to the trigger (unless the item has `keep-open`) |
 | Escape | Close and return focus to the trigger |
 | Tab | Close and move on |
+
+## Overlays
+
+Dialog and drawer are native `<dialog>` elements opened with `showModal()`, so the page behind them is inert, focus moves in, and focus returns to the opener when they close. Popover, hover card, dropdown menu, tooltip, the picker lists and the toast container are `popover="manual"` elements in the top layer, placed next to their trigger with CSS anchor positioning (with a built-in fallback) and flipped at the viewport edges, never clipped by an `overflow` or `transform` ancestor. Open overlays form one stack: Escape and outside presses close only the topmost one, and the page scroll lock is counted.
+
+Every overlay takes `open`, `position` and `align` where it is anchored, and fires `void-open` and `void-close` with a `reason` (`escape`, `outside`, `select`, `api`, ...). These two events do not bubble, and `void-close` can be cancelled when the user caused it. Browser baseline: the Popover API (Chrome 114, Firefox 125, Safari 17). Details on the [docs site](https://voidable.dev/components/overlays/).
 
 ## Documentation
 

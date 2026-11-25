@@ -1,17 +1,17 @@
 void-popover {
-  position: relative;
   display: inline-flex;
 }
 
-void-popover > :not(:first-child):not(.void-popover-body) {
+/* Before the element upgrades, only the trigger shows. */
+void-popover:not(:defined) > :not(:first-child) {
   display: none;
 }
 
+/* A popover="manual" surface in the top layer; placement, gap, flipping and
+   transitions are shared (overlay.css). */
 .void-popover-body {
-  display: none;
-  position: absolute;
-  z-index: var(--void-z-dropdown);
   min-width: 12rem;
+  max-width: min(24rem, calc(100vw - 2 * var(--void-overlay-gap)));
   background: var(--void-color-bg-elevated);
   border: 1px solid var(--void-color-border);
   border-radius: var(--void-radius-lg);
@@ -20,61 +20,9 @@ void-popover > :not(:first-child):not(.void-popover-body) {
   font-family: var(--void-font-sans);
   font-size: var(--void-type-body-size);
   color: var(--void-color-text);
-  transition: opacity var(--void-duration-fast) var(--void-ease-in-out);
 }
 
-void-popover[open] .void-popover-body {
-  display: block;
-}
-
-/* Main axis (offset from trigger) */
-void-popover[position="bottom"] .void-popover-body {
-  inset-block-start: calc(100% + var(--void-space-2));
-}
-
-void-popover[position="top"] .void-popover-body {
-  inset-block-end: calc(100% + var(--void-space-2));
-}
-
-void-popover[position="left"] .void-popover-body {
-  inset-inline-end: calc(100% + var(--void-space-2));
-}
-
-void-popover[position="right"] .void-popover-body {
-  inset-inline-start: calc(100% + var(--void-space-2));
-}
-
-/* Cross axis alignment: start (default), center, end */
-void-popover[position="bottom"] .void-popover-body,
-void-popover[position="top"] .void-popover-body {
-  inset-inline-start: 0;
-}
-
-void-popover[position="left"] .void-popover-body,
-void-popover[position="right"] .void-popover-body {
-  inset-block-start: 0;
-}
-
-void-popover[position="bottom"][align="end"] .void-popover-body,
-void-popover[position="top"][align="end"] .void-popover-body {
-  inset-inline-start: auto;
-  inset-inline-end: 0;
-}
-
-void-popover[position="left"][align="end"] .void-popover-body,
-void-popover[position="right"][align="end"] .void-popover-body {
-  inset-block-start: auto;
-  inset-block-end: 0;
-}
-
-void-popover[position="bottom"][align="center"] .void-popover-body,
-void-popover[position="top"][align="center"] .void-popover-body {
-  inset-inline-start: 50%;
-  translate: -50% 0;
-}
-
-void-popover[position="left"][align="center"] .void-popover-body,
-void-popover[position="right"][align="center"] .void-popover-body {
-  inset-block-start: 50%;
-  translate: 0 -50%;
+.void-popover-body:focus-visible {
+  outline: var(--void-focus-ring-width) solid var(--void-focus-ring-color);
+  outline-offset: var(--void-focus-ring-offset);
 }

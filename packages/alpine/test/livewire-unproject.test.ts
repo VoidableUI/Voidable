@@ -140,4 +140,48 @@ describe('registerLivewireHooks pre-morph hook', () => {
     hooks['morph.updating']({ el, toEl });
     expect(seen).toEqual([toEl]);
   });
+
+  describe('overlay open state', () => {
+    const dialog = (open: boolean) => {
+      const d = document.createElement('void-dialog');
+      if (open) d.setAttribute('open', '');
+      return d;
+    };
+
+    it('keeps a dialog the user opened open through a re-render that does not mention it', () => {
+      const live = dialog(false);
+      document.body.appendChild(live);
+      const hooks = setup();
+      live.setAttribute('open', '');
+      const toEl = dialog(false);
+      hooks['morph.updating']({ el: live, toEl });
+      expect(toEl.hasAttribute('open')).toBe(true);
+      live.remove();
+    });
+
+    it('closes it when the server stops rendering open (server wins)', () => {
+      const live = dialog(true);
+      document.body.appendChild(live);
+      const hooks = setup();
+      const toEl = dialog(false);
+      hooks['morph.updating']({ el: live, toEl });
+      expect(toEl.hasAttribute('open')).toBe(false);
+      live.remove();
+    });
+
+    it('opens it when the server starts rendering open, and keeps a user close while the server repeats itself', () => {
+      const live = dialog(false);
+      document.body.appendChild(live);
+      const hooks = setup();
+      const first = dialog(true);
+      hooks['morph.updating']({ el: live, toEl: first });
+      expect(first.hasAttribute('open')).toBe(true);
+      live.setAttribute('open', '');
+      live.removeAttribute('open'); // the user closed it
+      const again = dialog(true);
+      hooks['morph.updating']({ el: live, toEl: again });
+      expect(again.hasAttribute('open')).toBe(false);
+      live.remove();
+    });
+  });
 });

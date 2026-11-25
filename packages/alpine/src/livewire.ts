@@ -2,10 +2,12 @@
  * Livewire morph hooks that preserve Voidable component state during
  * Livewire re-renders.
  *
- * Client state (`value`, `checked`) is preserved only while the server keeps
- * rendering the same value it rendered last time. As soon as the server
- * renders a different value, the server wins and the client state is
- * overwritten.
+ * Client state (`value`, `checked`, and the `open` attribute of overlays such
+ * as `<void-dialog>`, `<void-drawer>` and `<void-popover>`) is preserved only
+ * while the server keeps rendering the same value it rendered last time. As
+ * soon as the server renders a different value, the server wins and the client
+ * state is overwritten: a dialog the user opened stays open through a re-render
+ * that does not mention it, and closes when the server stops rendering `open`.
  *
  * Before Livewire morphs a `void-*` element its `voidBeforeMorph()` pre-morph hook
  * is called, so the morph compares the element's own children with the server
@@ -54,6 +56,18 @@ export function registerLivewireHooks(): void {
   const pending = new WeakMap<Element, ClientState>();
   /** Elements unprojected for the current morph; restored once re-projected. */
   const unprojected = new WeakSet<Element>();
+  /** Last server-rendered `open` attribute per element, seeded from the page and from added elements. */
+  const serverOpen_ = new WeakMap<Element, boolean>();
+  const seedOpen = (root: Element | Document) => {
+    const els = root instanceof Element ? [root, ...Array.from(root.querySelectorAll('*'))] : Array.from(root.querySelectorAll('*'));
+    for (const el of els) {
+      if (el.tagName?.startsWith('VOID-') && !serverOpen_.has(el)) serverOpen_.set(el, el.hasAttribute('open'));
+    }
+  };
+  seedOpen(document);
+  Livewire.hook('morph.added', ({ el }: { el: Element }) => {
+    if (el?.nodeType === 1) seedOpen(el);
+  });
 
   const restore = (el: HTMLElement, state: ClientState) => {
     if (state.value !== undefined) (el as any).value = state.value;
@@ -78,6 +92,18 @@ export function registerLivewireHooks(): void {
 
     pending.set(el, preserve);
     if (next) lastServer.set(el, next);
+
+    // An overlay's open state is kept by leaving the attribute alone in the
+    // incoming markup (changing it after the morph would close and reopen it,
+    // losing focus), only while the server renders what it rendered last time.
+    if (toEl && typeof toEl.hasAttribute === 'function') {
+      const serverOpen = toEl.hasAttribute('open');
+      const lastOpen = serverOpen_.get(el);
+      serverOpen_.set(el, serverOpen);
+      if ((lastOpen === undefined || lastOpen === serverOpen) && el.hasAttribute('open') !== serverOpen) {
+        toEl.toggleAttribute('open', el.hasAttribute('open'));
+      }
+    }
 
     // Only after the client and server state are read: getters may read rendered
     // chrome, which the hook parks until the element re-projects, and the hook

@@ -68,13 +68,13 @@ describe('voidBeforeMorph()', () => {
   it('re-projects on its own, reusing the same chrome and consumer nodes', async () => {
     const el = mount('<void-dialog open heading="H"><p id="c">c</p></void-dialog>');
     await settle(el);
-    const backdrop = el.querySelector('.void-dialog-backdrop');
+    const panel = el.querySelector('dialog.void-dialog-panel');
     const close = el.querySelector('.void-dialog-close');
     const c = el.querySelector('#c');
     el.voidBeforeMorph();
-    expect(el.querySelector('.void-dialog-backdrop')).toBeNull();
+    expect(el.querySelector('dialog.void-dialog-panel')).toBeNull();
     await settle(el);
-    expect(el.querySelector('.void-dialog-backdrop')).toBe(backdrop);
+    expect(el.querySelector('dialog.void-dialog-panel')).toBe(panel);
     expect(el.querySelector('.void-dialog-close')).toBe(close);
     expect(el.querySelector('.void-dialog-body > #c')).toBe(c);
     expect(el.open).toBe(true);
@@ -192,15 +192,23 @@ describe('identity-tracked chrome (morphs without the hook)', () => {
     return recycled;
   }
 
-  it('dialog: a recycled backdrop is not handed back as content with its click listener', async () => {
+  it('dialog: a morph that drops the rendered panel rebuilds it, still open, around the server content', async () => {
     const el = mount('<void-dialog open heading="H"><div id="dcontent">one</div></void-dialog>');
     await settle(el);
-    const backdrop = el.querySelector('.void-dialog-backdrop')!;
-    const recycled = morphRecyclingFirstDiv(el, 'dcontent', 'two');
-    expect(recycled).toBe(backdrop);
+    const panel = el.querySelector('dialog.void-dialog-panel')!;
+    // The rendered panel is a <dialog>, so a morph cannot recycle it as a content <div>;
+    // without the hook it is removed together with the markers.
+    for (const n of Array.from(el.childNodes)) Node.prototype.removeChild.call(el, n);
+    const server = document.createElement('div');
+    server.id = 'dcontent';
+    server.textContent = 'two';
+    Node.prototype.appendChild.call(el, server);
     await settle(el);
+    await settle(el);
+    const fresh = el.querySelector<HTMLDialogElement>('dialog.void-dialog-panel')!;
+    expect(fresh).not.toBe(panel);
+    expect(fresh.open).toBe(true);
     const content = el.querySelector('#dcontent')!;
-    expect(content).not.toBe(backdrop);
     expect(content.textContent).toBe('two');
     expect(content.parentElement!.classList.contains('void-dialog-body')).toBe(true);
     (content as HTMLElement).click();
