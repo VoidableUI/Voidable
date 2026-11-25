@@ -4,8 +4,9 @@
 //
 // `reference` is what the workload measured on the machine the budgets were
 // set on (median of several runs), together with `calibrationMs`, a plain-DOM
-// workload measured on that same machine. On a slower machine (a CI runner)
-// every timing budget is scaled by how much slower its calibration run is, so
+// workload measured on that same machine. The calibration runs again before
+// every workload; on a slower or busier machine (a CI runner) each timing
+// budget is scaled by how much slower that calibration is, so
 // the budget tracks the code, not the hardware. It is never scaled down.
 //
 // A test fails when the measurement exceeds reference * TOLERANCE (scaled).

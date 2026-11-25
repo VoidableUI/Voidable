@@ -33,14 +33,13 @@ function within(name: string, measured: number, ref: number, unit: string, scale
 
 const run = <T,>(page: Page, name: string) => page.evaluate((n) => (window as any).perf[n](), name) as Promise<T>;
 
+// Before every workload: warm up the parser, JIT and style system, then
+// measure the plain-DOM calibration again, so a machine that is busy right now
+// (another job, a GC-heavy neighbour) gets proportionally more time.
 test.beforeEach(async ({ page }) => {
   await load(page, '/perf');
-  // Warm up the parser, JIT and style system once per page.
   await run(page, 'calibrate');
   await run(page, 'mixed1000');
-});
-
-test('machine calibration', async ({ page }) => {
   const ms = await median(5, () => run<number>(page, 'calibrate'));
   scale = Math.max(1, ms / calibrationMs);
   const line = `calibration: ${ms.toFixed(1)} ms (reference machine ${calibrationMs} ms): timing budgets scaled x${scale.toFixed(2)}`;
@@ -65,7 +64,7 @@ test('500-row table: first render and one Turbo morph', async ({ page }) => {
 });
 
 test('a select with 5,000 options', async ({ page }) => {
-  const ms = await median(3, async () => {
+  const ms = await median(5, async () => {
     const r = await run<{ ms: number; value: string }>(page, 'select5000');
     expect(r.value).toBe('4321');
     return r.ms;
