@@ -1,6 +1,7 @@
 import { html } from 'lit';
 import { property } from 'lit/decorators.js';
-import { VoidElement, ProjectionController } from '../base.js';
+import { VoidElement } from '../base.js';
+import { ProjectionController } from '../projection.js';
 
 /** Collapsible section container for FAQs, settings panels, and long-form content organized into expandable items. */
 export class VoidAccordion extends VoidElement {

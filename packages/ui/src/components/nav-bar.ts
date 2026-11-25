@@ -1,6 +1,7 @@
 import { html } from 'lit';
 import { property } from 'lit/decorators.js';
-import { VoidElement, ProjectionController } from '../base.js';
+import { VoidElement } from '../base.js';
+import { ProjectionController } from '../projection.js';
 
 /** Top application navigation bar for branding, primary links, and user account controls. */
 export class VoidNavBar extends VoidElement {

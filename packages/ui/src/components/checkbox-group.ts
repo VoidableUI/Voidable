@@ -1,6 +1,7 @@
 import { html, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
-import { VoidElement, ProjectionController } from '../base.js';
+import { VoidElement } from '../base.js';
+import { ProjectionController } from '../projection.js';
 import type { VoidCheckbox } from './checkbox.js';
 
 /** Grouped multi-option selection for preference forms, filter panels, and permission editors. */

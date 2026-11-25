@@ -1,6 +1,7 @@
 import { html, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
-import { VoidElement, ProjectionController } from '../base.js';
+import { VoidElement } from '../base.js';
+import { ProjectionController } from '../projection.js';
 
 /** Modal overlay for confirmations, detail views, and multi-step forms that require user attention before continuing. */
 export class VoidDialog extends VoidElement {

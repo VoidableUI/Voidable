@@ -1,6 +1,7 @@
 import { html } from 'lit';
 import { property } from 'lit/decorators.js';
-import { VoidElement, ProjectionController } from '../base.js';
+import { VoidElement } from '../base.js';
+import { ProjectionController } from '../projection.js';
 
 /** Native dropdown for small option sets in forms where a simple pick-one is sufficient. */
 export class VoidSelect extends VoidElement {
@@ -15,20 +16,24 @@ export class VoidSelect extends VoidElement {
   // Consumer <option>/<optgroup> children are projected into the native <select>.
   protected readonly _projection = new ProjectionController(this, {
     regions: [{ name: 'options', target: () => this.querySelector(':scope > select') }],
-    onChange: () => this._syncValue(),
+    onChange: () => this._syncOptions(),
   });
-  private _didSyncValue = false;
+  private _didSyncOptions = false;
 
   protected override updated(_changed: Map<string, unknown>): void {
     super.updated(_changed);
-    if (!this._didSyncValue) {
-      this._didSyncValue = true;
-      this._syncValue();
+    if (!this._didSyncOptions) {
+      this._didSyncOptions = true;
+      this._syncOptions();
     }
   }
 
-  /** Re-applies `value` to the native select, e.g. once the matching option exists. */
-  private _syncValue(): void {
+  /**
+   * Single sync point between the projected options and the native select. Runs
+   * after the first render, whenever options are added, removed or reordered, and
+   * after the projection recovers from a morph or clone (a fresh native select).
+   */
+  private _syncOptions(): void {
     const select = this.querySelector<HTMLSelectElement>(':scope > select');
     if (select && this.value) {
       select.value = this.value;

@@ -1,6 +1,7 @@
 import { html } from 'lit';
 import { property } from 'lit/decorators.js';
-import { VoidElement, ProjectionController } from '../base.js';
+import { VoidElement } from '../base.js';
+import { ProjectionController } from '../projection.js';
 
 /** Single mutually exclusive option for forms and surveys; typically used inside VoidRadioGroup. */
 export class VoidRadio extends VoidElement {

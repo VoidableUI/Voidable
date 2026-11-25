@@ -1,6 +1,7 @@
 import { html, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
-import { VoidElement, ProjectionController } from '../base.js';
+import { VoidElement } from '../base.js';
+import { ProjectionController } from '../projection.js';
 
 /** Full-width site-level announcement for maintenance windows, cookie consent, and promotional messaging. */
 export class VoidBanner extends VoidElement {

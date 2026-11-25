@@ -1,6 +1,7 @@
 import { html } from 'lit';
 import { property } from 'lit/decorators.js';
-import { VoidElement, ProjectionController } from '../base.js';
+import { VoidElement } from '../base.js';
+import { ProjectionController, triggerRegion } from '../projection.js';
 
 /** Rich content preview card that appears on hover for user profiles, link previews, and contextual information panels. */
 export class VoidHoverCard extends VoidElement {
@@ -9,14 +10,10 @@ export class VoidHoverCard extends VoidElement {
   @property({ type: Number, attribute: 'open-delay' }) openDelay = 300;
   @property({ type: Number, attribute: 'close-delay' }) closeDelay = 300;
 
-  // The first element child goes into the trigger wrapper; everything else goes into the body.
+  // The trigger (slot="trigger", else the first element child) goes into the trigger wrapper; everything else goes into the body.
   protected readonly _projection: ProjectionController = new ProjectionController(this, {
     regions: [
-      {
-        name: 'trigger',
-        target: () => this.querySelector(':scope > .void-hover-card-trigger'),
-        accepts: node => node instanceof Element && !this._projection.nodes('trigger').some(n => n instanceof Element),
-      },
+      triggerRegion('trigger', () => this.querySelector(':scope > .void-hover-card-trigger'), () => this._projection, this),
       { name: 'body', target: () => this.querySelector(':scope > .void-hover-card-body') },
     ],
   });

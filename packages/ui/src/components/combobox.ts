@@ -1,6 +1,7 @@
 import { html, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
-import { VoidElement, ProjectionController } from '../base.js';
+import { VoidElement } from '../base.js';
+import { ProjectionController } from '../projection.js';
 import { VoidOption } from './multiselect.js';
 
 /** Filterable dropdown for long option lists like country selectors, user assignment fields, and tag pickers. */

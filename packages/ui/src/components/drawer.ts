@@ -1,6 +1,7 @@
 import { html, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
-import { VoidElement, ProjectionController } from '../base.js';
+import { VoidElement } from '../base.js';
+import { ProjectionController } from '../projection.js';
 
 /** Slide-out overlay panel for filters, detail views, and navigation menus; opens from any screen edge. */
 export class VoidDrawer extends VoidElement {

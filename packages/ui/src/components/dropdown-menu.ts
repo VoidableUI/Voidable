@@ -1,20 +1,17 @@
 import { html } from 'lit';
 import { property } from 'lit/decorators.js';
-import { VoidElement, ProjectionController } from '../base.js';
+import { VoidElement } from '../base.js';
+import { ProjectionController, triggerRegion } from '../projection.js';
 
 /** Trigger-anchored action menu for table row actions, toolbar overflow menus, and context menus. */
 export class VoidDropdownMenu extends VoidElement {
   @property({ type: Boolean, reflect: true }) open = false;
   @property({ type: String, reflect: true }) position: 'bottom-start' | 'bottom-end' | 'top-start' | 'top-end' = 'bottom-start';
 
-  // The first element child is the trigger and stays before the panel; everything else goes into the panel.
+  // The trigger (slot="trigger", else the first element child) stays before the panel; everything else goes into the panel.
   protected readonly _projection: ProjectionController = new ProjectionController(this, {
     regions: [
-      {
-        name: 'trigger',
-        target: 'before',
-        accepts: node => node instanceof Element && !this._projection.nodes('trigger').some(n => n instanceof Element),
-      },
+      triggerRegion('trigger', 'before', () => this._projection, this),
       { name: 'panel', target: () => this.querySelector(':scope > .void-dropdown-menu-panel') },
     ],
   });

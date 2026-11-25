@@ -1,6 +1,7 @@
 import { html } from 'lit';
 import { property } from 'lit/decorators.js';
-import { VoidElement, ProjectionController } from '../base.js';
+import { VoidElement } from '../base.js';
+import { ProjectionController } from '../projection.js';
 
 /** Scrollable container with styled scrollbars for long content areas, code blocks, and chat histories. */
 export class VoidScrollArea extends VoidElement {

@@ -1,6 +1,7 @@
 import { html } from 'lit';
 import { property } from 'lit/decorators.js';
-import { VoidElement, ProjectionController } from '../base.js';
+import { VoidElement } from '../base.js';
+import { ProjectionController } from '../projection.js';
 
 /** Simple expand/collapse panel for FAQ sections, spoiler text, and progressive disclosure of secondary content. */
 export class VoidCollapsible extends VoidElement {

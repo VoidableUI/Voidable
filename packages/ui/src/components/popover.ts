@@ -1,6 +1,7 @@
 import { html } from 'lit';
 import { property } from 'lit/decorators.js';
-import { VoidElement, ProjectionController } from '../base.js';
+import { VoidElement } from '../base.js';
+import { ProjectionController, triggerRegion } from '../projection.js';
 
 /** Anchored overlay for contextual detail and mini-forms that need more room than a tooltip. */
 export class VoidPopover extends VoidElement {
@@ -8,14 +9,10 @@ export class VoidPopover extends VoidElement {
   @property({ type: String, reflect: true }) position: 'top' | 'bottom' | 'left' | 'right' = 'bottom';
   @property({ type: String, reflect: true }) trigger: 'click' | 'manual' = 'click';
 
-  // The first element child is the trigger and stays the host's first child; everything else goes into the body.
+  // The trigger (slot="trigger", else the first element child) stays the host's first child; everything else goes into the body.
   protected readonly _projection: ProjectionController = new ProjectionController(this, {
     regions: [
-      {
-        name: 'trigger',
-        target: 'before',
-        accepts: node => node instanceof Element && !this._projection.nodes('trigger').some(n => n instanceof Element),
-      },
+      triggerRegion('trigger', 'before', () => this._projection, this),
       { name: 'body', target: () => this.querySelector(':scope > .void-popover-body') },
     ],
   });
