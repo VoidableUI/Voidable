@@ -175,7 +175,7 @@ export const scenarios: Scenario[] = [
   {
     id: 'collapsible',
     title: 'A collapsible trigger announces collapsed, then expanded, then collapsed',
-    page: '/sr-disclosure',
+    page: '/sr-collapsible',
     steps: [
       { reach: { role: 'button', name: 'Shipping details', expanded: false }, by: 'control' },
       { act: true },
@@ -202,7 +202,7 @@ export const scenarios: Scenario[] = [
   {
     id: 'alert',
     title: 'An alert is read with its title and message',
-    page: '/sr-notices',
+    page: '/sr-alert',
     steps: [{ reach: { role: 'alert', text: 'Payment failed', container: true, spoken: [/payment failed/] } }],
   },
   {
@@ -229,12 +229,32 @@ export const scenarios: Scenario[] = [
   },
   {
     id: 'breadcrumbs',
-    title: 'Breadcrumbs are a navigation landmark and the last item is the current page',
+    title: 'Breadcrumbs are a named navigation landmark of links and the last item is the current page',
     page: '/sr-navigation',
     steps: [
       { reach: { role: 'navigation', name: 'Breadcrumb' }, by: 'landmark' },
       { reach: { role: 'link', name: 'Products' }, by: 'link' },
-      { reach: { role: 'listitem', text: 'Keyboards', current: true, container: true } },
+      { reach: { role: 'generic', selector: 'void-breadcrumbs-item', text: 'Keyboards', current: true, container: true } },
+    ],
+  },
+  {
+    id: 'breadcrumbs-list',
+    title: 'Breadcrumbs are a list of links, so a screen reader says how many and which one',
+    page: '/sr-navigation',
+    knownIssue: {
+      key: 'untracked:breadcrumbs-no-list-semantics',
+      detail:
+        '<void-breadcrumbs> renders nothing of its own and <void-breadcrumbs-item> has no role, so the navigation contains links and bare text with no list and no listitems: a screen reader does not announce "list, 3 items" or the position of a crumb, which the previous markup (ul/li) did and the WAI-ARIA breadcrumb pattern uses.',
+    },
+    steps: [
+      {
+        check: async (page) => {
+          const nav = page.getByRole('navigation', { name: 'Breadcrumb' });
+          await expect(nav.getByRole('list'), 'a list inside the breadcrumb navigation').toHaveCount(1);
+          await expect(nav.getByRole('listitem'), 'one list item per crumb').toHaveCount(3);
+        },
+        note: 'the breadcrumb navigation holds a list of three items',
+      },
     ],
   },
   {

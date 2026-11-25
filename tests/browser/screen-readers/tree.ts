@@ -14,6 +14,7 @@ const FOCUS_ONLY = new Set(['slider', 'spinbutton', 'textbox', 'searchbox', 'com
 
 /** The element a Fact describes, by role and name (and text or group), as a user agent exposes it. */
 export function locate(page: Page, fact: Fact): Locator {
+  if (fact.selector) return page.locator(fact.selector).filter({ hasText: fact.text });
   const scope = fact.group ? page.getByRole(fact.group.role as never, { name: fact.group.name, exact: true }) : page;
   const opts: Parameters<Page['getByRole']>[1] = {};
   if (fact.name !== undefined) {
@@ -101,7 +102,7 @@ export async function expectFact(page: Page, fact: Fact): Promise<Locator> {
 /** What activating an element does with a pointer-free user: click it, or just take focus for text-like controls. */
 async function activate(page: Page, fact: Fact): Promise<void> {
   // By identity only: the states in the Fact are as they were when it was reached.
-  const loc = locate(page, { role: fact.role, name: fact.name, text: fact.text, group: fact.group });
+  const loc = locate(page, { role: fact.role, selector: fact.selector, name: fact.name, text: fact.text, group: fact.group });
   if (FOCUS_ONLY.has(fact.role)) await loc.focus();
   else await loc.click();
 }

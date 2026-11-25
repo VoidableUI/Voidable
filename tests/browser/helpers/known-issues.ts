@@ -8,6 +8,7 @@
 // entry here, once nothing uses it) are deleted in the same change.
 export const KNOWN_ISSUES = {
   'untracked:link-button-nested-interactive': 'void-button around a link is a button containing a link',
+  'untracked:breadcrumbs-no-list-semantics': 'void-breadcrumbs exposes links in a navigation with no list or list items',
 } as const;
 
 export type KnownIssue = keyof typeof KNOWN_ISSUES;

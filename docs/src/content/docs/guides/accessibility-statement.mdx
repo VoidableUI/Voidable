@@ -56,9 +56,10 @@ These are real, current findings, not a complete audit.
 **From the project's own checks.** The `tests/browser/axe-baseline.json` file records the violations axe-core finds today, each with its reason:
 
 - `void-nav-menu` holds plain links inside a `menubar`, which axe reports as missing required children.
-- The compact `void-color-picker`'s hex input has no label, and the color picker host is a focusable widget around native controls.
+- The `void-color-picker` host is a focusable widget around native controls.
 - `void-banner` is `role="banner"`, a page landmark, even when it is used as a notice inside `<main>`.
 - A `void-button` around a link (a link button) is a button around a link: two nested interactive controls. The screen-reader scenario `link-button-one-control` records it as an expected failure (`untracked:link-button-nested-interactive` in `tests/browser/helpers/known-issues.ts`).
+- `void-breadcrumbs` and `void-breadcrumbs-item` expose no list: the navigation holds links and plain text, so a screen reader does not say how many crumbs there are or which one it is on. The current page is marked with `aria-current` by the author. The screen-reader scenario `breadcrumbs-list` records it as an expected failure (`untracked:breadcrumbs-no-list-semantics`).
 - The viewport of `void-scroll-area` cannot be scrolled by keyboard unless its content is focusable.
 - Several targets are smaller than 24 by 24 CSS pixels: sidebar and breadcrumb links, carousel indicators, the compact colour input.
 
