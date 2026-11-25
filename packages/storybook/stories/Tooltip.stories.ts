@@ -17,6 +17,7 @@ const meta: Meta = {
   argTypes: {
     text: {
       control: { type: 'text' },
+      description: 'Story control: the text of the <void-tooltip-content> part.',
     },
     position: {
       control: { type: 'select' },

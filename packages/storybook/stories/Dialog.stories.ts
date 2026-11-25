@@ -15,9 +15,6 @@ const meta: Meta = {
     },
   },
   argTypes: {
-    heading: {
-      control: { type: 'text' },
-    },
     size: {
       control: { type: 'select' },
       options: ['sm', 'md', 'lg'],

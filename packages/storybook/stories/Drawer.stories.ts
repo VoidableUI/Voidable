@@ -28,6 +28,7 @@ const meta: Meta = {
     },
     heading: {
       control: { type: 'text' },
+      description: 'Story control: the text of the <void-drawer-title> part.',
     },
     closable: {
       control: { type: 'boolean' },

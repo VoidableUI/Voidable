@@ -10,13 +10,14 @@ const meta: Meta = {
   parameters: {
     docs: {
       description: {
-        component: 'Content grouping containers for dashboard widgets, product listings, and media previews. Supports heading, variants, and configurable padding.',
+        component: 'Content grouping containers for dashboard widgets, product listings, and media previews. Written with header, body and footer parts; supports variants and configurable padding.',
       },
     },
   },
   argTypes: {
     heading: {
       control: { type: 'text' },
+      description: 'Story control: the text of the <void-card-title> part (empty for no header).',
     },
     variant: {
       control: { type: 'select' },
@@ -34,15 +35,13 @@ type Story = StoryObj;
 
 export const Default: Story = {
   args: {
-    heading: '',
+    heading: 'Card title',
     variant: 'default',
     padding: 'md',
   },
   render: (args) => html`
     <void-card variant=${args.variant} padding=${args.padding}>
-      <void-card-header>
-        <void-card-title>${args.heading}</void-card-title>
-      </void-card-header>
+      ${args.heading ? html`<void-card-header><void-card-title>${args.heading}</void-card-title></void-card-header>` : ''}
       <void-card-body>
         <p>This is a default card. Use it to present self-contained pieces of content such as summaries, previews, or calls to action.</p>
       </void-card-body>

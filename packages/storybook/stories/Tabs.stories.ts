@@ -100,19 +100,6 @@ export const WithRichContent: Story = {
   `,
 };
 
-export const FallbackLabel: Story = {
-  render: () => html`
-    <void-tabs value="tab-one">
-      <void-tabs-list>
-        <void-tabs-trigger value="tab-one">tab-one</void-tabs-trigger>
-        <void-tabs-trigger value="tab-two">tab-two</void-tabs-trigger>
-      </void-tabs-list>
-      <void-tabs-content value="tab-one">Tab one content (label falls back to tab id)</void-tabs-content>
-      <void-tabs-content value="tab-two">Tab two content</void-tabs-content>
-    </void-tabs>
-  `,
-};
-
 export const AutomaticActivation: Story = {
   render: () => html`
     <void-tabs value="one" activation="auto">
