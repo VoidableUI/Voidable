@@ -65,3 +65,80 @@ describe('VoidField', () => {
     expect(control).not.toBeNull();
   });
 });
+
+describe('VoidField accessibility wiring', () => {
+  async function make(inner: string, props: Partial<Pick<VoidField, 'label' | 'error' | 'helper'>> = {}) {
+    const f = document.createElement('void-field') as VoidField;
+    f.innerHTML = inner;
+    Object.assign(f, { label: 'Email', ...props });
+    document.body.appendChild(f);
+    await f.updateComplete;
+    await Promise.resolve();
+    return f;
+  }
+
+  it('associates the label with a native input, generating an id', async () => {
+    const f = await make('<input type="text">');
+    const input = f.querySelector('input')!;
+    const label = f.querySelector('label')!;
+    expect(input.id).not.toBe('');
+    expect(label.getAttribute('for')).toBe(input.id);
+    expect(input.getAttribute('aria-labelledby')).toBe(label.id);
+    f.remove();
+  });
+
+  it('keeps an existing control id', async () => {
+    const f = await make('<input id="mine">');
+    expect(f.querySelector('input')!.id).toBe('mine');
+    expect(f.querySelector('label')!.getAttribute('for')).toBe('mine');
+    f.remove();
+  });
+
+  it('labels the inner native control of a wrapper component, overriding its aria-label', async () => {
+    const f = await make('<div class="wrapper"><input aria-label="Number input"></div>');
+    const input = f.querySelector('input')!;
+    expect(input.getAttribute('aria-labelledby')).toBe(f.querySelector('label')!.id);
+    f.remove();
+  });
+
+  it('generates distinct ids per field', async () => {
+    const a = await make('<input>');
+    const b = await make('<input>');
+    expect(a.querySelector('input')!.id).not.toBe(b.querySelector('input')!.id);
+    a.remove();
+    b.remove();
+  });
+
+  it('links error text with aria-describedby and sets aria-invalid', async () => {
+    const f = await make('<input>', { error: 'Required' });
+    const input = f.querySelector('input')!;
+    const err = f.querySelector('.void-field-error')!;
+    expect(input.getAttribute('aria-describedby')).toBe(err.id);
+    expect(input.getAttribute('aria-invalid')).toBe('true');
+    f.remove();
+  });
+
+  it('links helper text and clears aria-invalid when the error goes away', async () => {
+    const f = await make('<input>', { error: 'Required', helper: 'Hint' });
+    f.error = '';
+    await f.updateComplete;
+    const input = f.querySelector('input')!;
+    expect(input.getAttribute('aria-describedby')).toBe(f.querySelector('.void-field-helper')!.id);
+    expect(input.hasAttribute('aria-invalid')).toBe(false);
+    f.remove();
+  });
+
+  it('preserves consumer aria-describedby tokens', async () => {
+    const f = await make('<input aria-describedby="extra">', { helper: 'Hint' });
+    const tokens = f.querySelector('input')!.getAttribute('aria-describedby')!.split(' ');
+    expect(tokens).toContain('extra');
+    expect(tokens).toContain(f.querySelector('.void-field-helper')!.id);
+    f.remove();
+  });
+
+  it('removes aria-describedby when there is no message', async () => {
+    const f = await make('<input>');
+    expect(f.querySelector('input')!.hasAttribute('aria-describedby')).toBe(false);
+    f.remove();
+  });
+});

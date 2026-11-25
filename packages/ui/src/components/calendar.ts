@@ -114,6 +114,7 @@ export class VoidCalendar extends VoidElement {
   private _renderDays() {
     const dayNames = this._getDayNames();
     const cells = this._buildDayCells();
+    const weeks = Array.from({ length: cells.length / 7 }, (_, i) => cells.slice(i * 7, i * 7 + 7));
     const monthLabel = this._getMonthName(this._viewMonth);
 
     return html`
@@ -144,41 +145,57 @@ export class VoidCalendar extends VoidElement {
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="var(--void-icon-stroke-width)" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"></polyline></svg>
         </button>
       </div>
-      <div class="void-calendar-grid" role="grid" @keydown=${this._onDayKeydown}>
-        <div class="void-calendar-weekdays">
-          ${dayNames.map(n => html`<div class="void-calendar-weekday">${n}</div>`)}
+      <div class="void-calendar-grid" role="grid" aria-label="${monthLabel} ${this._viewYear}" @keydown=${this._onDayKeydown}>
+        <div class="void-calendar-weekdays" role="row">
+          ${dayNames.map(n => html`<div class="void-calendar-weekday" role="columnheader" aria-label=${n.long}>${n.short}</div>`)}
         </div>
-        <div class="void-calendar-days">
-          ${cells.map(cell => {
-            const isSelected = cell.iso === this.value;
-            const isToday = cell.iso === today();
-            const isOutside = cell.outside;
-            const isDisabled = this.disabled || cell.disabled;
-            return html`
-              <button
-                type="button"
-                class="void-calendar-day${isSelected ? ' selected' : ''}${isToday ? ' today' : ''}${isOutside ? ' outside' : ''}"
-                ?disabled=${isDisabled}
-                aria-selected=${isSelected ? 'true' : 'false'}
-                aria-label=${cell.iso}
-                tabindex=${cell.iso === this._focusDate ? '0' : '-1'}
-                data-date=${cell.iso}
-                @click=${() => this._selectDate(cell.iso)}
-              >${cell.day}</button>
-            `;
-          })}
+        <div class="void-calendar-days" role="rowgroup">
+          ${weeks.map(week => html`
+            <div class="void-calendar-week" role="row">
+              ${week.map(cell => {
+                const isSelected = cell.iso === this.value;
+                const isToday = cell.iso === today();
+                const isDisabled = this.disabled || cell.disabled;
+                return html`
+                  <div class="void-calendar-cell" role="gridcell" aria-selected=${isSelected ? 'true' : 'false'}>
+                    <button
+                      type="button"
+                      class="void-calendar-day${isSelected ? ' selected' : ''}${isToday ? ' today' : ''}${cell.outside ? ' outside' : ''}"
+                      ?disabled=${isDisabled}
+                      aria-label=${this._formatFullDate(cell.iso)}
+                      aria-current=${isToday ? 'date' : nothing}
+                      tabindex=${cell.iso === this._focusDate ? '0' : '-1'}
+                      data-date=${cell.iso}
+                      @click=${() => this._selectDate(cell.iso)}
+                    >${cell.day}</button>
+                  </div>
+                `;
+              })}
+            </div>
+          `)}
         </div>
       </div>
     `;
   }
 
-  private _getDayNames(): string[] {
+  private _formatFullDate(iso: string): string {
+    const p = toDateParts(iso);
+    if (!p) return iso;
+    try {
+      return new Intl.DateTimeFormat(this.locale, { dateStyle: 'full' }).format(new Date(p[0], p[1], p[2]));
+    } catch {
+      return iso;
+    }
+  }
+
+  private _getDayNames(): Array<{ short: string; long: string }> {
     const fmt = new Intl.DateTimeFormat(this.locale, { weekday: 'short' });
-    const names: string[] = [];
+    const longFmt = new Intl.DateTimeFormat(this.locale, { weekday: 'long' });
+    const names: Array<{ short: string; long: string }> = [];
     // Jan 2024 starts on Monday — use a known Sunday: Jan 7 2024
     for (let i = 0; i < 7; i++) {
       const d = new Date(2024, 0, 7 + ((this.firstDay + i) % 7));
-      names.push(fmt.format(d));
+      names.push({ short: fmt.format(d), long: longFmt.format(d) });
     }
     return names;
   }
@@ -333,6 +350,7 @@ export class VoidCalendar extends VoidElement {
     } else {
       this._viewMonth--;
     }
+    this._syncFocusToView();
     this.requestUpdate();
   };
 
@@ -343,6 +361,7 @@ export class VoidCalendar extends VoidElement {
     } else {
       this._viewMonth++;
     }
+    this._syncFocusToView();
     this.requestUpdate();
   };
 
@@ -380,7 +399,19 @@ export class VoidCalendar extends VoidElement {
   private _pickMonth(m: number): void {
     this._viewMonth = m;
     this._view = 'days';
+    this._syncFocusToView();
     this.requestUpdate();
+  }
+
+  /** Move the roving-tabindex day into the visible month, keeping the day-of-month where possible. */
+  private _syncFocusToView(): void {
+    const p = toDateParts(this._focusDate) ?? [this._viewYear, this._viewMonth, 1];
+    const day = Math.min(p[2], daysInMonth(this._viewYear, this._viewMonth));
+    this._focusDate = clampDate(
+      toISO(this._viewYear, this._viewMonth, day),
+      this.min || undefined,
+      this.max || undefined,
+    );
   }
 
   private _pickYear(y: number): void {
@@ -422,6 +453,7 @@ export class VoidCalendar extends VoidElement {
     const [y, m] = parts;
     let d = parts[2];
     let handled = true;
+    let newBase: Date | null = null;
 
     switch (e.key) {
       case 'ArrowLeft':
@@ -436,6 +468,20 @@ export class VoidCalendar extends VoidElement {
       case 'ArrowDown':
         d += 7;
         break;
+      case 'Home':
+        d -= (new Date(y, m, d).getDay() - this.firstDay + 7) % 7;
+        break;
+      case 'End':
+        d += 6 - ((new Date(y, m, d).getDay() - this.firstDay + 7) % 7);
+        break;
+      case 'PageUp':
+      case 'PageDown': {
+        const delta = e.key === 'PageUp' ? -1 : 1;
+        const target = e.shiftKey ? new Date(y + delta, m, 1) : new Date(y, m + delta, 1);
+        d = Math.min(d, daysInMonth(target.getFullYear(), target.getMonth()));
+        newBase = target;
+        break;
+      }
       case 'Enter':
       case ' ':
         this._selectDate(currentDate);
@@ -448,7 +494,7 @@ export class VoidCalendar extends VoidElement {
     if (!handled) return;
     e.preventDefault();
 
-    const newDate = new Date(y, m, d);
+    const newDate = newBase ? new Date(newBase.getFullYear(), newBase.getMonth(), d) : new Date(y, m, d);
     const newISO = toISO(newDate.getFullYear(), newDate.getMonth(), newDate.getDate());
     const clamped = clampDate(newISO, this.min || undefined, this.max || undefined);
     this._focusDate = clamped;

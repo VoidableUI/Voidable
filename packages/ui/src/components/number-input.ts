@@ -94,27 +94,52 @@ export class VoidNumberInput extends VoidElement {
     this._commit(this.value - this.step);
   }
 
-  private _startRepeat(fn: () => void): void {
-    fn();
+  private _canStep(dir: 1 | -1): boolean {
+    if (this.disabled || this.readonly) return false;
+    return dir > 0 ? this.value < this.max : this.value > this.min;
+  }
+
+  private _startRepeat(dir: 1 | -1): void {
+    this._stopRepeat();
+    if (!this._canStep(dir)) return;
+    const step = () => {
+      // Stop as soon as the button would be disabled (min/max reached, disabled, readonly).
+      if (!this._canStep(dir)) {
+        this._stopRepeat();
+        return false;
+      }
+      if (dir > 0) this._increment(); else this._decrement();
+      if (!this._canStep(dir)) this._stopRepeat();
+      return true;
+    };
+    step();
+    if (!this._canStep(dir)) return;
     this._pressTimer = setTimeout(() => {
+      this._pressTimer = null;
       this._repeatInterval = 300;
       this._repeatCount = 0;
-      this._repeatTimer = setInterval(() => {
-        fn();
-        this._repeatCount++;
-        if (this._repeatCount % 5 === 0 && this._repeatInterval > 50) {
-          const newInterval = Math.max(50, Math.floor(this._repeatInterval / 2));
-          if (newInterval !== this._repeatInterval) {
-            this._repeatInterval = newInterval;
-            clearInterval(this._repeatTimer!);
-            this._repeatTimer = setInterval(() => {
-              fn();
-              this._repeatCount++;
-            }, this._repeatInterval);
+      const schedule = () => {
+        this._repeatTimer = setInterval(() => {
+          if (!step()) return;
+          this._repeatCount++;
+          if (this._repeatCount % 5 === 0 && this._repeatInterval > 50 && this._repeatTimer !== null) {
+            const newInterval = Math.max(50, Math.floor(this._repeatInterval / 2));
+            if (newInterval !== this._repeatInterval) {
+              this._repeatInterval = newInterval;
+              clearInterval(this._repeatTimer);
+              schedule();
+            }
           }
-        }
-      }, this._repeatInterval);
+        }, this._repeatInterval);
+      };
+      schedule();
     }, 400);
+  }
+
+  /** Keyboard / assistive-tech activation: a native button click with detail 0 (pointer clicks are handled by pointerdown). */
+  private _onStepperClick(e: MouseEvent, dir: 1 | -1): void {
+    if (e.detail !== 0) return;
+    if (dir > 0) this._increment(); else this._decrement();
   }
 
   private _stopRepeat(): void {
@@ -161,9 +186,11 @@ export class VoidNumberInput extends VoidElement {
         type="button"
         ?disabled=${this.disabled || this.readonly || this.value <= this.min}
         aria-label="Decrement"
-        @pointerdown=${(e: PointerEvent) => { e.preventDefault(); this._startRepeat(() => this._decrement()); }}
+        @pointerdown=${(e: PointerEvent) => { e.preventDefault(); this._startRepeat(-1); }}
         @pointerup=${() => this._stopRepeat()}
+        @pointercancel=${() => this._stopRepeat()}
         @pointerleave=${() => this._stopRepeat()}
+        @click=${(e: MouseEvent) => this._onStepperClick(e, -1)}
       >
         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="var(--void-icon-stroke-width)" stroke-linecap="round" stroke-linejoin="round" width="1em" height="1em">
           <line x1="3" y1="8" x2="13" y2="8"/>
@@ -177,9 +204,11 @@ export class VoidNumberInput extends VoidElement {
         type="button"
         ?disabled=${this.disabled || this.readonly || this.value >= this.max}
         aria-label="Increment"
-        @pointerdown=${(e: PointerEvent) => { e.preventDefault(); this._startRepeat(() => this._increment()); }}
+        @pointerdown=${(e: PointerEvent) => { e.preventDefault(); this._startRepeat(1); }}
         @pointerup=${() => this._stopRepeat()}
+        @pointercancel=${() => this._stopRepeat()}
         @pointerleave=${() => this._stopRepeat()}
+        @click=${(e: MouseEvent) => this._onStepperClick(e, 1)}
       >
         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="var(--void-icon-stroke-width)" stroke-linecap="round" stroke-linejoin="round" width="1em" height="1em">
           <line x1="8" y1="3" x2="8" y2="13"/>

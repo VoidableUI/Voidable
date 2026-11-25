@@ -17,19 +17,71 @@ export class VoidToast extends VoidElement {
   heading = '';
 
   private _timer: ReturnType<typeof setTimeout> | undefined;
+  private _remaining = 0;
+  private _timerStart = 0;
+  private _hovered = false;
+  private _focused = false;
 
   connectedCallback() {
     super.connectedCallback();
-    this.setAttribute('role', 'status');
+    this._syncRole();
+    this.addEventListener('mouseenter', this._onEnter);
+    this.addEventListener('mouseleave', this._onLeave);
+    this.addEventListener('focusin', this._onFocusIn);
+    this.addEventListener('focusout', this._onFocusOut);
+    this._hovered = false;
+    this._focused = false;
     if (this.duration > 0) {
-      this._timer = setTimeout(() => this._close(), this.duration);
+      this._remaining = this.duration;
+      this._startTimer();
     }
   }
 
   disconnectedCallback() {
     super.disconnectedCallback();
     clearTimeout(this._timer);
+    this._timer = undefined;
+    this.removeEventListener('mouseenter', this._onEnter);
+    this.removeEventListener('mouseleave', this._onLeave);
+    this.removeEventListener('focusin', this._onFocusIn);
+    this.removeEventListener('focusout', this._onFocusOut);
   }
+
+  protected override updated(changed: Map<string, unknown>): void {
+    super.updated(changed);
+    if (changed.has('color')) this._syncRole();
+  }
+
+  /** Errors and warnings interrupt (alert); everything else is polite (status). */
+  private _syncRole(): void {
+    this.setAttribute('role', this.color === 'error' || this.color === 'warning' ? 'alert' : 'status');
+  }
+
+  private _startTimer(): void {
+    this._timerStart = Date.now();
+    this._timer = setTimeout(() => this._close(), this._remaining);
+  }
+
+  private _pause(): void {
+    if (this._timer === undefined) return;
+    clearTimeout(this._timer);
+    this._timer = undefined;
+    this._remaining = Math.max(0, this._remaining - (Date.now() - this._timerStart));
+  }
+
+  private _resume(): void {
+    if (this._hovered || this._focused || this._timer !== undefined || this.duration <= 0) return;
+    this._startTimer();
+  }
+
+  private _onEnter = (): void => { this._hovered = true; this._pause(); };
+  private _onLeave = (): void => { this._hovered = false; this._resume(); };
+  private _onFocusIn = (): void => { this._focused = true; this._pause(); };
+  private _onFocusOut = (e: FocusEvent): void => {
+    if (e.relatedTarget instanceof Node && this.contains(e.relatedTarget)) return;
+    this._focused = false;
+    this._resume();
+  };
 
   private _close() {
     this.dispatchEvent(new CustomEvent('void-close', { bubbles: true, composed: true }));

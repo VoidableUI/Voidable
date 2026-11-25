@@ -208,18 +208,45 @@ describe('VoidAccordionItem', () => {
       await el.updateComplete;
     });
 
-    it('Enter key toggles open', async () => {
+    /**
+     * Models a native <button>: Enter fires click on keydown unless the keydown was
+     * default-prevented; Space fires click on keyup (Firefox does so even when keydown
+     * was default-prevented). happy-dom does not synthesise these clicks itself.
+     */
+    function press(trigger: HTMLElement, key: 'Enter' | ' '): void {
+      const down = new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true });
+      trigger.dispatchEvent(down);
+      if (key === 'Enter' && !down.defaultPrevented) trigger.click();
+      trigger.dispatchEvent(new KeyboardEvent('keyup', { key, bubbles: true, cancelable: true }));
+      if (key === ' ') trigger.click();
+    }
+
+    it('Enter key toggles open exactly once', async () => {
       const trigger = el.querySelector('.void-accordion-trigger') as HTMLElement;
-      trigger.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+      const events: boolean[] = [];
+      el.addEventListener('void-toggle', (e) => events.push((e as CustomEvent).detail.open));
+      press(trigger, 'Enter');
       await el.updateComplete;
       expect(el.open).toBe(true);
+      expect(events).toEqual([true]);
     });
 
-    it('Space key toggles open', async () => {
+    it('Space key toggles open exactly once', async () => {
       const trigger = el.querySelector('.void-accordion-trigger') as HTMLElement;
-      trigger.dispatchEvent(new KeyboardEvent('keydown', { key: ' ', bubbles: true }));
+      const events: boolean[] = [];
+      el.addEventListener('void-toggle', (e) => events.push((e as CustomEvent).detail.open));
+      press(trigger, ' ');
       await el.updateComplete;
       expect(el.open).toBe(true);
+      expect(events).toEqual([true]);
+    });
+
+    it('a second Enter / Space activation closes it again', async () => {
+      const trigger = el.querySelector('.void-accordion-trigger') as HTMLElement;
+      press(trigger, 'Enter');
+      press(trigger, ' ');
+      await el.updateComplete;
+      expect(el.open).toBe(false);
     });
 
     it('other keys do not toggle', async () => {

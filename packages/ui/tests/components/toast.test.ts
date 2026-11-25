@@ -252,3 +252,85 @@ describe('VoidToastContainer', () => {
     });
   });
 });
+
+describe('VoidToast roles and timer pausing', () => {
+  afterEach(() => {
+    vi.useRealTimers();
+    document.querySelectorAll('void-toast').forEach(t => t.remove());
+  });
+
+  async function make(color: VoidToast['color'] = 'default', duration = 1000) {
+    const el = document.createElement('void-toast') as VoidToast;
+    el.color = color;
+    el.duration = duration;
+    document.body.appendChild(el);
+    await el.updateComplete;
+    return el;
+  }
+
+  it.each([
+    ['error', 'alert'],
+    ['warning', 'alert'],
+    ['default', 'status'],
+    ['success', 'status'],
+    ['info', 'status'],
+  ] as const)('color=%s uses role=%s', async (color, role) => {
+    const el = await make(color, 0);
+    expect(el.getAttribute('role')).toBe(role);
+  });
+
+  it('updates role when color changes', async () => {
+    const el = await make('default', 0);
+    el.color = 'error';
+    await el.updateComplete;
+    expect(el.getAttribute('role')).toBe('alert');
+    el.color = 'success';
+    await el.updateComplete;
+    expect(el.getAttribute('role')).toBe('status');
+  });
+
+  it('pauses the dismiss timer on hover and resumes with the remaining time on leave', async () => {
+    vi.useFakeTimers();
+    const el = await make();
+    vi.advanceTimersByTime(600);
+    el.dispatchEvent(new MouseEvent('mouseenter'));
+    vi.advanceTimersByTime(10000);
+    expect(el.isConnected).toBe(true);
+    el.dispatchEvent(new MouseEvent('mouseleave'));
+    vi.advanceTimersByTime(399);
+    expect(el.isConnected).toBe(true);
+    vi.advanceTimersByTime(1);
+    expect(el.isConnected).toBe(false);
+  });
+
+  it('pauses on focus within and resumes on focus leaving', async () => {
+    vi.useFakeTimers();
+    const el = await make();
+    const btn = el.querySelector('.void-toast-close') as HTMLButtonElement;
+    btn.dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
+    vi.advanceTimersByTime(10000);
+    expect(el.isConnected).toBe(true);
+    btn.dispatchEvent(new FocusEvent('focusout', { bubbles: true }));
+    vi.advanceTimersByTime(1000);
+    expect(el.isConnected).toBe(false);
+  });
+
+  it('stays paused while still hovered after focus leaves', async () => {
+    vi.useFakeTimers();
+    const el = await make();
+    el.dispatchEvent(new MouseEvent('mouseenter'));
+    el.dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
+    el.dispatchEvent(new FocusEvent('focusout', { bubbles: true }));
+    vi.advanceTimersByTime(10000);
+    expect(el.isConnected).toBe(true);
+  });
+
+  it('does not start a timer on hover leave when duration is 0', async () => {
+    vi.useFakeTimers();
+    const el = await make('default', 0);
+    el.dispatchEvent(new MouseEvent('mouseenter'));
+    el.dispatchEvent(new MouseEvent('mouseleave'));
+    vi.advanceTimersByTime(100000);
+    expect(el.isConnected).toBe(true);
+  });
+});
