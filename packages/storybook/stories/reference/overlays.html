@@ -1,0 +1,86 @@
+<main>
+  <void-page>
+    <void-page-head>
+      <span data-void-type="label">Reference / Overlays</span>
+      <h1>Overlays</h1>
+      <p>One page holding the trigger and the overlay for each kind. The capture opens one at a time and photographs the page with it open.</p>
+    </void-page-head>
+
+    <void-section>
+      <void-toolbar>
+        <void-button id="ov-dialog-trigger" onclick="document.getElementById('ov-dialog').open = true">Open dialog</void-button>
+        <void-button id="ov-drawer-trigger" onclick="document.getElementById('ov-drawer').open = true">Open drawer</void-button>
+
+        <void-popover id="ov-popover">
+          <void-button slot="trigger" id="ov-popover-trigger">Popover</void-button>
+          <void-stack style="width: 16rem">
+            <strong>Pass window</strong>
+            <span>Tracking starts at 14:02 UTC and ends at 14:12 UTC.</span>
+            <void-button size="sm">Open pass</void-button>
+          </void-stack>
+        </void-popover>
+
+        <void-dropdown-menu id="ov-menu">
+          <void-button slot="trigger" id="ov-menu-trigger">Actions</void-button>
+          <void-dropdown-menu-item>Edit</void-dropdown-menu-item>
+          <void-dropdown-menu-item>Duplicate</void-dropdown-menu-item>
+          <void-dropdown-menu-item disabled>Archive</void-dropdown-menu-item>
+          <void-dropdown-menu-item destructive>Delete</void-dropdown-menu-item>
+        </void-dropdown-menu>
+
+        <void-tooltip id="ov-tooltip" text="Recalculates the pass table" position="bottom">
+          <void-button id="ov-tooltip-target">Recalculate</void-button>
+        </void-tooltip>
+      </void-toolbar>
+    </void-section>
+
+    <void-section>
+      <void-split>
+        <void-field label="Region">
+          <void-select id="ov-select" name="region">
+            <option value="arctic">Arctic</option>
+            <option value="southern">Southern</option>
+            <option value="equatorial">Equatorial</option>
+            <option value="pacific">Pacific</option>
+          </void-select>
+        </void-field>
+        <void-field label="Station">
+          <void-combobox id="ov-combobox" placeholder="Search stations">
+            <void-option value="kiruna">Kiruna</void-option>
+            <void-option value="svalbard">Svalbard</void-option>
+            <void-option value="troll">Troll</void-option>
+            <void-option value="tromso">Tromsø</void-option>
+          </void-combobox>
+        </void-field>
+      </void-split>
+      <void-split>
+        <void-field label="Start date">
+          <void-date-picker id="ov-date" value="2026-06-15"></void-date-picker>
+        </void-field>
+        <void-field label="Notes">
+          <void-textarea rows="3" placeholder="Optional"></void-textarea>
+        </void-field>
+      </void-split>
+    </void-section>
+  </void-page>
+
+  <void-dialog id="ov-dialog" heading="Schedule pass">
+    <p>Assign MRD-0412 to Kiruna 3 for the next available window?</p>
+    <void-field label="Note"><void-input value="Priority downlink"></void-input></void-field>
+    <void-actions justify="end">
+      <void-button variant="ghost">Cancel</void-button>
+      <void-button variant="filled">Schedule</void-button>
+    </void-actions>
+  </void-dialog>
+
+  <void-drawer id="ov-drawer" heading="Pass details">
+    <void-description-list>
+      <dl>
+        <div><dt>Satellite</dt><dd>MRD-0412</dd></div>
+        <div><dt>Station</dt><dd>Kiruna 3</dd></div>
+        <div><dt>Band</dt><dd>X</dd></div>
+        <div><dt>Duration</dt><dd>9 min 40 s</dd></div>
+      </dl>
+    </void-description-list>
+  </void-drawer>
+</main>
