@@ -35,6 +35,9 @@ export class VoidHoverCard extends VoidElement {
     document.removeEventListener('keydown', this._handleKeydown);
   }
 
+  // The body carried role="dialog" without a name before it moved into this template; naming it is
+  // ARIA work tracked separately (#7), so the rule is suspended here rather than changing semantics.
+  /* eslint-disable lit-a11y/accessible-name */
   render() {
     return html`
       <div
@@ -49,6 +52,7 @@ export class VoidHoverCard extends VoidElement {
       <div class="void-hover-card-body" role="dialog" @mouseenter=${this._onBodyEnter} @mouseleave=${this._onBodyLeave}></div>
     `;
   }
+  /* eslint-enable lit-a11y/accessible-name */
 
   private _onTriggerEnter = (): void => {
     clearTimeout(this._closeTimerId);
