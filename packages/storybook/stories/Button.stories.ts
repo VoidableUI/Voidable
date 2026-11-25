@@ -3,6 +3,7 @@ import type { Meta, StoryObj } from '@storybook/web-components-vite';
 
 import '@voidable/ui';
 import '@voidable/theme';
+import { argTypesFor } from '../.storybook/manifest';
 
 const meta: Meta = {
   title: 'Components/Button',
@@ -14,12 +15,7 @@ const meta: Meta = {
       },
     },
   },
-  argTypes: {
-    variant: { control: 'select', options: ['outline', 'filled', 'ghost'] },
-    color: { control: 'select', options: ['default', 'error', 'warning', 'caution', 'success', 'info', 'notice', 'highlight'] },
-    size: { control: 'select', options: ['sm', 'md', 'lg'] },
-    disabled: { control: 'boolean' },
-  },
+  argTypes: argTypesFor('void-button'),
   render: (args) => html`
     <void-button
       variant=${args.variant || 'outline'}

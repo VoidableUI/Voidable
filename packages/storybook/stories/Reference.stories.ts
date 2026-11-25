@@ -99,6 +99,8 @@ const screens: Record<string, [string, string]> = {
 
 const range = (min: number, max: number, step: number) => ({ control: { type: 'range' as const, min, max, step } });
 
+// Kept by hand on purpose: these controls set theme knobs (--void-* custom properties) and a
+// screen selector. None is a component attribute, so the manifest has nothing to generate.
 export const ThemePlayground: Story = {
   argTypes: {
     screen: { control: 'select', options: Object.keys(screens) },

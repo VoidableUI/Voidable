@@ -2,6 +2,7 @@ import { html } from 'lit';
 import type { Meta, StoryObj } from '@storybook/web-components-vite';
 import '@voidable/ui';
 import '@voidable/theme';
+import { argTypesFor } from '../.storybook/manifest';
 
 const meta: Meta = {
   title: 'Components/Divider',
@@ -13,10 +14,7 @@ const meta: Meta = {
       },
     },
   },
-  argTypes: {
-    label: { control: 'text' },
-    orientation: { control: 'select', options: ['horizontal', 'vertical'] },
-  },
+  argTypes: argTypesFor('void-divider'),
   render: (args) => html`
     <void-divider
       orientation=${args.orientation || 'horizontal'}

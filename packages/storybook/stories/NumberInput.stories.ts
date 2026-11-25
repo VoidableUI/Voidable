@@ -3,6 +3,7 @@ import { ifDefined } from 'lit/directives/if-defined.js';
 import type { Meta, StoryObj } from '@storybook/web-components-vite';
 import '@voidable/ui';
 import '@voidable/theme';
+import { argTypesFor } from '../.storybook/manifest';
 
 const meta: Meta = {
   title: 'Form/NumberInput',
@@ -14,20 +15,7 @@ const meta: Meta = {
       },
     },
   },
-  argTypes: {
-    value: { control: 'number' },
-    min: { control: 'number' },
-    max: { control: 'number' },
-    step: { control: 'number' },
-    precision: { control: 'number' },
-    disabled: { control: 'boolean' },
-    readonly: { control: 'boolean' },
-    placeholder: { control: 'text' },
-    label: { control: 'text' },
-    size: { control: 'select', options: ['sm', 'md', 'lg'] },
-    color: { control: 'select', options: ['default', 'error', 'warning', 'caution', 'success', 'info', 'notice', 'highlight'] },
-    controls: { control: 'select', options: ['sides', 'right', 'none'] },
-  },
+  argTypes: argTypesFor('void-number-input'),
   render: (args) => html`
     <void-number-input
       .value=${args.value ?? null}

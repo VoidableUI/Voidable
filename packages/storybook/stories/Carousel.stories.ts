@@ -2,6 +2,7 @@ import { html } from 'lit';
 import type { Meta, StoryObj } from '@storybook/web-components-vite';
 import '@voidable/ui';
 import '@voidable/theme';
+import { argTypesFor } from '../.storybook/manifest';
 
 const meta: Meta = {
   title: 'Components/Carousel',
@@ -13,16 +14,7 @@ const meta: Meta = {
       },
     },
   },
-  argTypes: {
-    active: { control: 'number' },
-    loop: { control: 'boolean' },
-    autoplay: { control: 'boolean' },
-    interval: { control: 'number' },
-    size: { control: 'select', options: ['sm', 'md', 'lg'] },
-    controls: { control: 'boolean' },
-    indicators: { control: 'boolean' },
-    orientation: { control: 'select', options: ['horizontal', 'vertical'] },
-  },
+  argTypes: argTypesFor('void-carousel'),
 };
 
 export default meta;

@@ -3,6 +3,7 @@ import type { Meta, StoryObj } from '@storybook/web-components-vite';
 
 import '@voidable/ui';
 import '@voidable/theme';
+import { argTypesFor } from '../.storybook/manifest';
 
 const meta: Meta = {
   title: 'Components/ColorPicker',
@@ -14,12 +15,7 @@ const meta: Meta = {
       },
     },
   },
-  argTypes: {
-    value: { control: 'color' },
-    disabled: { control: 'boolean' },
-    size: { control: 'select', options: ['sm', 'md', 'lg'] },
-    showInput: { control: 'boolean' },
-  },
+  argTypes: argTypesFor('void-color-picker'),
   render: (args) => html`
     <void-color-picker
       value=${args.value ?? '#000000'}

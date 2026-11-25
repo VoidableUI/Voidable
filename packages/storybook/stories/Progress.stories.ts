@@ -2,6 +2,7 @@ import { html } from 'lit';
 import type { Meta, StoryObj } from '@storybook/web-components-vite';
 import '@voidable/ui';
 import '@voidable/theme';
+import { argTypesFor } from '../.storybook/manifest';
 
 const meta: Meta = {
   title: 'Components/Progress',
@@ -14,22 +15,7 @@ const meta: Meta = {
       },
     },
   },
-  argTypes: {
-    value: {
-      control: { type: 'range', min: 0, max: 100, step: 1 },
-    },
-    color: {
-      control: { type: 'select' },
-      options: ['default', 'error', 'warning', 'caution', 'success', 'info', 'notice', 'highlight'],
-    },
-    size: {
-      control: { type: 'select' },
-      options: ['sm', 'md', 'lg'],
-    },
-    indeterminate: {
-      control: { type: 'boolean' },
-    },
-  },
+  argTypes: argTypesFor('void-progress'),
 };
 
 export default meta;

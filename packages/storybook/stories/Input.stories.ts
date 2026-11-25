@@ -2,6 +2,7 @@ import { html } from 'lit';
 import type { Meta, StoryObj } from '@storybook/web-components-vite';
 import '@voidable/ui';
 import '@voidable/theme';
+import { argTypesFor } from '../.storybook/manifest';
 
 const meta: Meta = {
   title: 'Form/Input',
@@ -13,14 +14,7 @@ const meta: Meta = {
       },
     },
   },
-  argTypes: {
-    type: { control: 'select', options: ['text', 'email', 'password', 'number', 'tel', 'url', 'search', 'date', 'datetime-local', 'month', 'time', 'week'] },
-    placeholder: { control: 'text' },
-    disabled: { control: 'boolean' },
-    readonly: { control: 'boolean' },
-    size: { control: 'select', options: ['sm', 'md', 'lg'] },
-    error: { control: 'text' },
-  },
+  argTypes: argTypesFor('void-input'),
   render: (args) => html`
     <void-input
       type=${args.type || 'text'}

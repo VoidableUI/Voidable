@@ -3,6 +3,7 @@ import type { Meta, StoryObj } from '@storybook/web-components-vite';
 
 import '@voidable/ui';
 import '@voidable/theme';
+import { argTypesFor } from '../.storybook/manifest';
 
 const meta: Meta = {
   title: 'Components/ComposeInput',
@@ -14,11 +15,7 @@ const meta: Meta = {
       },
     },
   },
-  argTypes: {
-    placeholder: { control: 'text' },
-    disabled: { control: 'boolean' },
-    maxlength: { control: 'number' },
-  },
+  argTypes: argTypesFor('void-compose-input'),
   render: (args) => html`
     <void-compose-input
       placeholder=${args.placeholder || 'Type a message...'}

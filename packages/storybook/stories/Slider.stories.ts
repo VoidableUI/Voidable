@@ -3,6 +3,7 @@ import type { Meta, StoryObj } from '@storybook/web-components-vite';
 
 import '@voidable/ui';
 import '@voidable/theme';
+import { argTypesFor } from '../.storybook/manifest';
 
 const meta: Meta = {
   title: 'Form/Slider',
@@ -14,15 +15,7 @@ const meta: Meta = {
       },
     },
   },
-  argTypes: {
-    value: { control: 'number' },
-    min: { control: 'number' },
-    max: { control: 'number' },
-    step: { control: 'number' },
-    disabled: { control: 'boolean' },
-    showValue: { control: 'boolean' },
-    size: { control: 'select', options: ['sm', 'md', 'lg'] },
-  },
+  argTypes: argTypesFor('void-slider'),
   render: (args) => html`
     <void-slider
       .value=${args.value ?? 50}

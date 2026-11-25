@@ -2,6 +2,7 @@ import { html } from 'lit';
 import type { Meta, StoryObj } from '@storybook/web-components-vite';
 import '@voidable/ui';
 import '@voidable/theme';
+import { argTypesFor } from '../.storybook/manifest';
 
 const meta: Meta = {
   title: 'Navigation/Pagination',
@@ -13,12 +14,7 @@ const meta: Meta = {
       },
     },
   },
-  argTypes: {
-    total: { control: 'number' },
-    value: { control: 'number' },
-    siblings: { control: 'number' },
-    size: { control: 'select', options: ['sm', 'md', 'lg'] },
-  },
+  argTypes: argTypesFor('void-pagination'),
 };
 
 export default meta;

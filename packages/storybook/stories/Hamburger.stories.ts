@@ -3,6 +3,7 @@ import type { Meta, StoryObj } from '@storybook/web-components-vite';
 
 import '@voidable/ui';
 import '@voidable/theme';
+import { argTypesFor } from '../.storybook/manifest';
 
 const meta: Meta = {
   title: 'Navigation/Hamburger',
@@ -14,10 +15,7 @@ const meta: Meta = {
       },
     },
   },
-  argTypes: {
-    active: { control: 'boolean' },
-    size: { control: 'select', options: ['sm', 'md', 'lg'] },
-  },
+  argTypes: argTypesFor('void-hamburger'),
   render: (args) => html`
     <void-hamburger
       size=${args.size || 'md'}

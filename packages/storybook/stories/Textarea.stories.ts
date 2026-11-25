@@ -3,6 +3,7 @@ import type { Meta, StoryObj } from '@storybook/web-components-vite';
 
 import '@voidable/ui';
 import '@voidable/theme';
+import { argTypesFor } from '../.storybook/manifest';
 
 const meta: Meta = {
   title: 'Form/Textarea',
@@ -14,15 +15,7 @@ const meta: Meta = {
       },
     },
   },
-  argTypes: {
-    placeholder: { control: 'text' },
-    disabled: { control: 'boolean' },
-    readonly: { control: 'boolean' },
-    rows: { control: 'number' },
-    resize: { control: 'select', options: ['none', 'vertical', 'both'] },
-    size: { control: 'select', options: ['sm', 'md', 'lg'] },
-    error: { control: 'text' },
-  },
+  argTypes: argTypesFor('void-textarea'),
   render: (args) => html`
     <void-textarea
       placeholder=${args.placeholder || 'Enter text…'}

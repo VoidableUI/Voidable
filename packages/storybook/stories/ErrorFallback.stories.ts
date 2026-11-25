@@ -2,6 +2,7 @@ import { html } from 'lit';
 import type { Meta, StoryObj } from '@storybook/web-components-vite';
 import '@voidable/ui';
 import '@voidable/theme';
+import { argTypesFor } from '../.storybook/manifest';
 
 const meta: Meta = {
   title: 'Components/ErrorFallback',
@@ -14,23 +15,7 @@ const meta: Meta = {
       },
     },
   },
-  argTypes: {
-    heading: {
-      control: { type: 'text' },
-    },
-    message: {
-      control: { type: 'text' },
-    },
-    retryable: {
-      control: { type: 'boolean' },
-    },
-    retryLabel: {
-      control: { type: 'text' },
-    },
-    icon: {
-      control: { type: 'boolean' },
-    },
-  },
+  argTypes: argTypesFor('void-error-fallback'),
 };
 
 export default meta;
