@@ -16,12 +16,13 @@ How to find every Voidable element and read its state the way a user, an agent d
 | `void-badge` | status | text content | color (reflected) | every badge is role="status", a live region: a table of status badges is a page of live regions, and a decorative badge cannot opt out |
 | `void-banner` | banner | text content | dismissable (reflected) | role="banner" is the page header landmark; a second banner, or one inside <main>, is invalid |
 | `void-bar-chart` | img | aria-label attribute | — | data is a property only (its shape is in the manifest and `voidable ref`); the drawn values are not exposed as text |
-| `void-breadcrumbs` | navigation | fixed "Breadcrumb" | — | — |
+| `void-breadcrumbs` | navigation | fixed "Breadcrumb" | aria-current="page" on the void-breadcrumbs-item part the author marks | the landmark name is fixed English; there is no attribute to change it |
 | `void-button` | button | text content or aria-label | disabled (reflected)<br>aria-disabled="true" while disabled (own or a disabled fieldset), absent otherwise | not form-associated: it submits and resets its closest form like a native button but is not in form.elements |
 | `void-calendar` | group | fixed "Calendar"; the grid is named "<Month> <Year>" | value (reflected, YYYY-MM-DD)<br>aria-selected on the day cell | day buttons are named with a long date ("Tuesday, November 3, 2026") that depends on locale |
 | `void-card` | — | none | — | the void-card-title part is not a heading, so a card cannot be found by its title with getByRole("heading"); add a heading element inside it |
 | `void-carousel` | region | none (aria-roledescription="carousel") | active (reflected) | no accessible name |
-| `void-carousel-slide` | group | none (aria-roledescription="slide") | — | — |
+| `void-carousel-next` | button | aria-label the author writes on it | aria-disabled at the last slide unless loop | — |
+| `void-carousel-previous` | button | aria-label the author writes on it | aria-disabled at the first slide unless loop | — |
 | `void-checkbox` | checkbox | text content | checked (reflected)<br>aria-checked ("mixed" when indeterminate) | — |
 | `void-checkbox-group` | group | label attribute (aria-label) | disabled (reflected) | the selected values are a property only (value: string[]); read them from the child checkboxes |
 | `void-collapsible` | inner | heading attribute, on the rendered button | open (reflected)<br>aria-expanded on the rendered button | — |
@@ -47,13 +48,13 @@ How to find every Voidable element and read its state the way a user, an agent d
 | `void-line-chart` | img | aria-label attribute | — | data is a property only (its shape is in the manifest and `voidable ref`); the drawn values are not exposed as text |
 | `void-list` | list | none | — | — |
 | `void-list-item` | listitem | text content | selected (reflected)<br>disabled (reflected) | interactive items stay role="listitem": "selected" has no ARIA equivalent |
-| `void-menu` | inner | none | open (reflected)<br>role="menu" rendered inside | the menu has no accessible name |
-| `void-menu-group` | group | label attribute | — | — |
-| `void-menu-item` | menuitem | text content | disabled (reflected)<br>aria-disabled | — |
+| `void-menu` | — | aria-label on the host, copied to the void-menu-content part (default "Menu") | open (reflected)<br>role="menu" on the void-menu-content part<br>empty attribute on the host while a search matches nothing | — |
+| `void-menu-group` | group | its void-menu-group-label part (aria-labelledby) | — | — |
+| `void-menu-item` | menuitem | text content | value (reflected)<br>disabled (reflected)<br>aria-disabled | — |
 | `void-multiselect` | inner | void-field label or aria-label / aria-labelledby on the host (moved onto it), on the inner combobox | open (reflected)<br>aria-expanded on the inner combobox<br>role="option" + aria-selected on rendered options | the selected values are a property only (value: string[]), not reflected (#23) |
 | `void-nav-bar` | navigation | none | — | role="navigation" on a top bar that usually holds search and account controls; a <nav> inside it makes a nested, unnamed landmark |
 | `void-nav-menu` | menubar | none | — | — |
-| `void-nav-menu-item` | none | text content, on the rendered menuitem | open (reflected)<br>active (reflected)<br>aria-expanded on the trigger | — |
+| `void-nav-menu-item` | none | the control in its void-nav-menu-trigger part (a button or a link) | open (reflected)<br>active (reflected)<br>aria-expanded, aria-haspopup and aria-controls on a button trigger<br>aria-current="page" on a link trigger when active | — |
 | `void-number-input` | inner | void-field label or aria-label / aria-labelledby on the host (moved onto it), else the label attribute, on the inner role="spinbutton" input | value (reflected; absent when the field is empty)<br>aria-valuenow on the inner spinbutton (absent when empty) | — |
 | `void-option` | — | text content | selected (reflected) | not the element users interact with (see void-combobox) |
 | `void-pagination` | inner | the rendered nav is named "Pagination"; buttons by page number, "Previous page", "Next page" | value (attribute)<br>aria-current="page" on the current page button or link | value is not reflected after a click: read aria-current instead |
@@ -96,6 +97,7 @@ How to find every Voidable element and read its state the way a user, an agent d
 - `void-badge`: every badge is role="status", a live region: a table of status badges is a page of live regions, and a decorative badge cannot opt out
 - `void-banner`: role="banner" is the page header landmark; a second banner, or one inside <main>, is invalid
 - `void-bar-chart`: data is a property only (its shape is in the manifest and `voidable ref`); the drawn values are not exposed as text
+- `void-breadcrumbs`: the landmark name is fixed English; there is no attribute to change it
 - `void-button`: not form-associated: it submits and resets its closest form like a native button but is not in form.elements
 - `void-calendar`: day buttons are named with a long date ("Tuesday, November 3, 2026") that depends on locale
 - `void-card`: the void-card-title part is not a heading, so a card cannot be found by its title with getByRole("heading"); add a heading element inside it
@@ -120,7 +122,6 @@ How to find every Voidable element and read its state the way a user, an agent d
 - `void-indicator`: the name does not include the count
 - `void-line-chart`: data is a property only (its shape is in the manifest and `voidable ref`); the drawn values are not exposed as text
 - `void-list-item`: interactive items stay role="listitem": "selected" has no ARIA equivalent
-- `void-menu`: the menu has no accessible name
 - `void-multiselect`: the selected values are a property only (value: string[]), not reflected (#23)
 - `void-nav-bar`: role="navigation" on a top bar that usually holds search and account controls; a <nav> inside it makes a nested, unnamed landmark
 - `void-option`: not the element users interact with (see void-combobox)
