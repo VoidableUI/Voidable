@@ -54,7 +54,7 @@ How to find every Voidable element and read its state the way a user, an agent d
 | `void-nav-bar` | navigation | none | — | role="navigation" on a top bar that usually holds search and account controls; a <nav> inside it makes a nested, unnamed landmark |
 | `void-nav-menu` | menubar | none | — | — |
 | `void-nav-menu-item` | none | text content, on the rendered menuitem | open (reflected)<br>active (reflected)<br>aria-expanded on the trigger | — |
-| `void-number-input` | spinbutton | label attribute | value (reflected)<br>aria-valuenow | the host spinbutton gets aria-label="" when no label is set |
+| `void-number-input` | — | void-field label or aria-label, on the inner spinbutton | value (reflected)<br>aria-valuenow on the inner spinbutton | — |
 | `void-option` | — | text content | selected (reflected) | not the element users interact with (see void-combobox) |
 | `void-pagination` | inner | the rendered nav is named "Pagination"; buttons by page number, "Previous page", "Next page" | value (attribute)<br>aria-current="page" on the current page button or link | value is not reflected after a click: read aria-current instead |
 | `void-panel` | region | label attribute (aria-label) | — | without label it is an unnamed role="region" |
@@ -69,7 +69,7 @@ How to find every Voidable element and read its state the way a user, an agent d
 | `void-select` | inner | void-field label, on the native select | value (property only: the attribute is the initial value and is not updated)<br>native select value | the current value is not reflected to an attribute: [value=...] selectors and attribute assertions see the initial value only |
 | `void-sidebar` | navigation | fixed "Sidebar navigation" unless aria-label is set | collapsed (reflected) | no responsive behaviour and no aria-expanded/aria-controls link to a toggle: collapsing is a width change only |
 | `void-skeleton` | presentation | none (aria-hidden) | — | the loading region gets no aria-busy; nothing announces loading |
-| `void-slider` | slider | none unless aria-label | aria-valuenow<br>value (property only: the attribute is the initial value and is not updated) | the current value is not reflected to an attribute: [value=...] selectors and attribute assertions see the initial value only<br>the void-field label is wired to the inner range input, not the host slider |
+| `void-slider` | — | void-field label or aria-label, on the inner slider | aria-valuenow on the inner slider<br>value (property only: the attribute is the initial value and is not updated) | the current value is not reflected to an attribute: [value=...] selectors and attribute assertions see the initial value only |
 | `void-spinner` | status | label attribute (default "Loading") | — | — |
 | `void-stat` | figure | none | trend (reflected) | role="figure" without a name; the label is plain text, not linked to the value |
 | `void-status-dot` | status | status attribute ("Online", "Away", "Offline") | status (reflected) | — |
@@ -79,15 +79,15 @@ How to find every Voidable element and read its state the way a user, an agent d
 | `void-table` | — | none; the native <table> inside carries the table, row and cell roles | striped, hoverable, compact, bordered (reflected, presentational) | no caption or name support; a wide table overflows unless the author wraps it (void-scroll-area) |
 | `void-tabs` | inner | each void-tab-panel label becomes a role="tab" button | value (property only: the attribute is the initial value and is not updated)<br>aria-selected on the tabs<br>active on each void-tab-panel (reflected there) | the current value is not reflected to an attribute: [value=...] selectors and attribute assertions see the initial value only<br>the tablist has no accessible name |
 | `void-tag` | listitem | text content | removable (reflected) | role="listitem" outside any list unless the author adds one |
-| `void-tags-input` | listbox | none | — | the tags are a property (value: TagValue[]), not reflected; the host listbox has no options role structure |
-| `void-textarea` | textbox | void-field label, on the inner textarea | value (attribute)<br>error (reflected) | the host still has role="textbox" without a name while the named native textarea is inside it (axe aria-input-field-name); void-input no longer does this |
+| `void-tags-input` | — | void-field label or aria-label, on the inner text input | — | the tags are a property (value: TagValue[]), not reflected |
+| `void-textarea` | — | void-field label, on the inner textarea | value (attribute)<br>error (reflected) | — |
 | `void-toast` | status | text content (role="alert" for error and warning) | color (reflected) | no attribute says whether it is still showing; it is removed from the DOM after duration |
 | `void-toast-container` | region | fixed "Notifications" (aria-live="polite") | — | — |
 | `void-toggle` | button | text content | pressed (reflected)<br>aria-pressed | — |
 | `void-toggle-group` | group | none | value (reflected, comma list when multiple) | — |
 | `void-tooltip` | inner | the tooltip text (role="tooltip"), linked to the trigger by aria-describedby | — | — |
 
-## Gaps (60)
+## Gaps (57)
 
 - `void-accordion`: no group role or name; the items are only found by their heading buttons
 - `void-action-input`: the current value is not reflected to an attribute: [value=...] selectors and attribute assertions see the initial value only
@@ -127,7 +127,6 @@ How to find every Voidable element and read its state the way a user, an agent d
 - `void-menu`: the menu has no accessible name
 - `void-multiselect`: the selected values are a property only (value: string[]), not reflected (#23)
 - `void-nav-bar`: role="navigation" on a top bar that usually holds search and account controls; a <nav> inside it makes a nested, unnamed landmark
-- `void-number-input`: the host spinbutton gets aria-label="" when no label is set
 - `void-option`: not the element users interact with (see void-combobox)
 - `void-pagination`: value is not reflected after a click: read aria-current instead
 - `void-panel`: without label it is an unnamed role="region"
@@ -140,12 +139,10 @@ How to find every Voidable element and read its state the way a user, an agent d
 - `void-sidebar`: no responsive behaviour and no aria-expanded/aria-controls link to a toggle: collapsing is a width change only
 - `void-skeleton`: the loading region gets no aria-busy; nothing announces loading
 - `void-slider`: the current value is not reflected to an attribute: [value=...] selectors and attribute assertions see the initial value only
-- `void-slider`: the void-field label is wired to the inner range input, not the host slider
 - `void-stat`: role="figure" without a name; the label is plain text, not linked to the value
 - `void-table`: no caption or name support; a wide table overflows unless the author wraps it (void-scroll-area)
 - `void-tabs`: the current value is not reflected to an attribute: [value=...] selectors and attribute assertions see the initial value only
 - `void-tabs`: the tablist has no accessible name
 - `void-tag`: role="listitem" outside any list unless the author adds one
-- `void-tags-input`: the tags are a property (value: TagValue[]), not reflected; the host listbox has no options role structure
-- `void-textarea`: the host still has role="textbox" without a name while the named native textarea is inside it (axe aria-input-field-name); void-input no longer does this
+- `void-tags-input`: the tags are a property (value: TagValue[]), not reflected
 - `void-toast`: no attribute says whether it is still showing; it is removed from the DOM after duration

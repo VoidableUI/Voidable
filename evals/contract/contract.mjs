@@ -131,7 +131,7 @@ export const CONTRACT = {
   'void-nav-bar': { role: 'navigation', name: 'none', state: [], gaps: ['role="navigation" on a top bar that usually holds search and account controls; a <nav> inside it makes a nested, unnamed landmark'] },
   'void-nav-menu': { role: 'menubar', name: 'none', state: [] },
   'void-nav-menu-item': { role: 'none', name: 'text content, on the rendered menuitem', state: ['open (reflected)', 'active (reflected)', 'aria-expanded on the trigger'] },
-  'void-number-input': { role: 'spinbutton', name: 'label attribute', state: ['value (reflected)', 'aria-valuenow'], gaps: ['the host spinbutton gets aria-label="" when no label is set'] },
+  'void-number-input': { role: null, name: 'void-field label or aria-label, on the inner spinbutton', state: ['value (reflected)', 'aria-valuenow on the inner spinbutton'], gaps: [] },
   'void-option': { role: null, name: 'text content', state: ['selected (reflected)'], gaps: ['not the element users interact with (see void-combobox)'] },
   'void-pagination': {
     role: 'inner',
@@ -167,7 +167,7 @@ export const CONTRACT = {
     gaps: ['no responsive behaviour and no aria-expanded/aria-controls link to a toggle: collapsing is a width change only'],
   },
   'void-skeleton': { role: 'presentation', name: 'none (aria-hidden)', state: [], gaps: ['the loading region gets no aria-busy; nothing announces loading'] },
-  'void-slider': { role: 'slider', name: 'none unless aria-label', state: ['aria-valuenow', 'value (property only: the attribute is the initial value and is not updated)'], gaps: ['the current value is not reflected to an attribute: [value=...] selectors and attribute assertions see the initial value only', 'the void-field label is wired to the inner range input, not the host slider'] },
+  'void-slider': { role: null, name: 'void-field label or aria-label, on the inner slider', state: ['aria-valuenow on the inner slider', 'value (property only: the attribute is the initial value and is not updated)'], gaps: ['the current value is not reflected to an attribute: [value=...] selectors and attribute assertions see the initial value only'] },
   'void-spinner': { role: 'status', name: 'label attribute (default "Loading")', state: [] },
   'void-stat': { role: 'figure', name: 'none', state: ['trend (reflected)'], gaps: ['role="figure" without a name; the label is plain text, not linked to the value'] },
   'void-status-dot': { role: 'status', name: 'status attribute ("Online", "Away", "Offline")', state: ['status (reflected)'] },
@@ -188,8 +188,8 @@ export const CONTRACT = {
     gaps: ['the current value is not reflected to an attribute: [value=...] selectors and attribute assertions see the initial value only', 'the tablist has no accessible name'],
   },
   'void-tag': { role: 'listitem', name: 'text content', state: ['removable (reflected)'], gaps: ['role="listitem" outside any list unless the author adds one'] },
-  'void-tags-input': { role: 'listbox', name: 'none', state: [], gaps: ['the tags are a property (value: TagValue[]), not reflected; the host listbox has no options role structure'] },
-  'void-textarea': { role: 'textbox', name: 'void-field label, on the inner textarea', state: ['value (attribute)', 'error (reflected)'], gaps: ['the host still has role="textbox" without a name while the named native textarea is inside it (axe aria-input-field-name); void-input no longer does this'] },
+  'void-tags-input': { role: null, name: 'void-field label or aria-label, on the inner text input', state: [], gaps: ['the tags are a property (value: TagValue[]), not reflected'] },
+  'void-textarea': { role: null, name: 'void-field label, on the inner textarea', state: ['value (attribute)', 'error (reflected)'], gaps: [] },
   'void-toast': { role: 'status', name: 'text content (role="alert" for error and warning)', state: ['color (reflected)'], gaps: ['no attribute says whether it is still showing; it is removed from the DOM after duration'] },
   'void-toast-container': { role: 'region', name: 'fixed "Notifications" (aria-live="polite")', state: [] },
   'void-toggle': {

@@ -13,7 +13,7 @@
 // (Turbo responses, LiveView events, Livewire requests) are not exercised.
 import { build } from 'esbuild';
 import { spawnSync } from 'node:child_process';
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { dirname, join } from 'node:path';
 import { ASSETS, EVALS, FIXTURES, ROOT } from './paths.mjs';
@@ -27,12 +27,18 @@ export async function buildAssets({ force = false } = {}) {
   const theme = join(ASSETS, 'theme.css');
   const dist = join(ROOT, 'packages', 'ui', 'dist', 'index.js');
   if (!existsSync(dist)) throw new Error('packages/ui/dist is missing; run `mise run build` first');
-  if (force || !existsSync(ui)) {
+  // Rebuild when the built library or theme is newer than the cached bundle;
+  // a stale cache makes the contract and scoring tests judge an old build.
+  const newest = (dir) => readdirSync(dir, { recursive: true, withFileTypes: true })
+    .filter((e) => e.isFile()).reduce((t, e) => Math.max(t, statSync(join(e.parentPath, e.name)).mtimeMs), 0);
+  const stale = (out, dir) => !existsSync(out) || statSync(out).mtimeMs < newest(dir);
+  const themeDir = dirname(require.resolve('@voidable/theme'));
+  if (force || stale(ui, dirname(dist))) {
     const entry = join(ASSETS, 'ui-entry.js');
     writeFileSync(entry, "export * from '@voidable/ui';\n");
     await build({ entryPoints: [entry], bundle: true, format: 'esm', outfile: ui, absWorkingDir: EVALS, logLevel: 'silent', nodePaths: [join(EVALS, 'node_modules')] });
   }
-  if (force || !existsSync(theme)) {
+  if (force || stale(theme, themeDir)) {
     await build({ entryPoints: [require.resolve('@voidable/theme')], bundle: true, outfile: theme, logLevel: 'silent' });
   }
   return { ui, theme, axe: require.resolve('axe-core/axe.min.js') };
