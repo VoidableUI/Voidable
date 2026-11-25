@@ -5,7 +5,7 @@
   "license": "MIT",
   "description": "Agent-friendliness evaluation: give a model a UI task, render what it wrote in Chromium and score it. See evals/README.md.",
   "scripts": {
-    "test": "node --test test/"
+    "test": "node --test \"test/**/*.test.mjs\""
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.14.0",
