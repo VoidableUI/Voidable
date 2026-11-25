@@ -49,7 +49,7 @@ export const Default: Story = {
       heading=${args.heading}
       message=${args.message}
       ?retryable=${args.retryable}
-      retryLabel=${args.retryLabel}
+      retry-label=${args.retryLabel}
       ?icon=${args.icon}
     ></void-error-fallback>
   `,
@@ -80,7 +80,7 @@ export const RetryableCustomLabel: Story = {
       heading="Connection lost"
       message="Unable to reach the server. Check your network and try again."
       retryable
-      retryLabel="Reconnect"
+      retry-label="Reconnect"
     ></void-error-fallback>
   `,
 };

@@ -8,7 +8,7 @@ export class VoidFileUpload extends InternalsFormControl(VoidElement) {
   @property({ type: String }) accept = '';
   @property({ type: Boolean, reflect: true }) multiple = false;
   @property({ type: Boolean, reflect: true }) disabled = false;
-  @property({ type: Number }) maxSize = 0;
+  @property({ type: Number, attribute: 'max-size' }) maxSize = 0;
   @property({ type: String, reflect: true }) error = '';
 
   private _files: File[] = [];

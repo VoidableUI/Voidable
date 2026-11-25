@@ -11,7 +11,7 @@ export class VoidSlider extends NativeFormControl(VoidElement) {
   @property({ type: Number }) step: number = 1;
   @property({ type: Boolean, reflect: true }) disabled: boolean = false;
   @property({ type: String, reflect: true }) name: string = '';
-  @property({ type: Boolean, reflect: true }) showValue: boolean = false;
+  @property({ type: Boolean, attribute: 'show-value', reflect: true }) showValue: boolean = false;
   @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' = 'md';
 
   connectedCallback(): void {

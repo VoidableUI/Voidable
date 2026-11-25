@@ -5,7 +5,7 @@ import { VoidElement } from '../base.js';
 export class VoidSidebar extends VoidElement {
   @property({ type: Boolean, reflect: true }) collapsed = false;
   @property({ type: String, reflect: true }) width = 'var(--void-sidebar-width)';
-  @property({ type: String, reflect: true }) collapsedWidth = 'var(--void-sidebar-collapsed-width)';
+  @property({ type: String, attribute: 'collapsed-width', reflect: true }) collapsedWidth = 'var(--void-sidebar-collapsed-width)';
   @property({ type: String, reflect: true }) position: 'left' | 'right' = 'left';
 
   connectedCallback(): void {

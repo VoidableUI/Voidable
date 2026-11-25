@@ -34,7 +34,7 @@ export const Default: Story = {
     direction: 'vertical',
   },
   render: (args) => html`
-    <void-scroll-area maxHeight=${args.maxHeight} direction=${args.direction}>
+    <void-scroll-area max-height=${args.maxHeight} direction=${args.direction}>
       <p>Line 1 — The scroll area constrains content height and provides a styled scrollbar.</p>
       <p>Line 2 — Scroll down to see more content within this container.</p>
       <p>Line 3 — All content is preserved as Light DOM children.</p>
@@ -48,7 +48,7 @@ export const Default: Story = {
 
 export const Vertical: Story = {
   render: () => html`
-    <void-scroll-area maxHeight="150px" direction="vertical">
+    <void-scroll-area max-height="150px" direction="vertical">
       <p>Alpha</p>
       <p>Beta</p>
       <p>Gamma</p>
@@ -76,7 +76,7 @@ export const Horizontal: Story = {
 
 export const Both: Story = {
   render: () => html`
-    <void-scroll-area maxHeight="150px" direction="both" style="max-width: 300px;">
+    <void-scroll-area max-height="150px" direction="both" style="max-width: 300px;">
       <div style="width: 600px;">
         <p>Row 1 — This content is wider than the container and taller than maxHeight.</p>
         <p>Row 2 — Scroll both vertically and horizontally to explore all content.</p>

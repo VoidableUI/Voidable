@@ -7,7 +7,7 @@ export class VoidErrorFallback extends VoidElement {
   @property({ type: String }) heading = 'Something went wrong';
   @property({ type: String }) message = '';
   @property({ type: Boolean, reflect: true }) retryable = false;
-  @property({ type: String }) retryLabel = 'Try again';
+  @property({ type: String, attribute: 'retry-label' }) retryLabel = 'Try again';
   @property({ type: Boolean }) icon = true;
 
   connectedCallback(): void {

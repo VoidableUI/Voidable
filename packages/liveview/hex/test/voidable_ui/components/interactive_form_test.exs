@@ -940,7 +940,7 @@ defmodule VoidableUI.Components.InteractiveFormTest do
       assert html =~ ~s(data-void-events="void-input,void-change")
     end
 
-    test "show_value maps to showValue attribute" do
+    test "show_value maps to show-value attribute" do
       assigns = %{}
 
       html =
@@ -948,7 +948,7 @@ defmodule VoidableUI.Components.InteractiveFormTest do
         <VoidableUI.Components.slider show_value={true} />
         """)
 
-      assert html =~ "showValue"
+      assert html =~ "show-value"
     end
 
     test "boolean attrs render when true" do
@@ -960,7 +960,7 @@ defmodule VoidableUI.Components.InteractiveFormTest do
         """)
 
       assert html =~ "disabled"
-      assert html =~ "showValue"
+      assert html =~ "show-value"
     end
 
     test "boolean attrs omitted when false (default)" do
@@ -972,7 +972,7 @@ defmodule VoidableUI.Components.InteractiveFormTest do
         """)
 
       refute html =~ "disabled"
-      refute html =~ "showValue"
+      refute html =~ "show-value"
     end
 
     test "nil default attrs are not rendered" do
@@ -1044,7 +1044,7 @@ defmodule VoidableUI.Components.InteractiveFormTest do
       assert html =~ ~s(data-void-events="void-change")
     end
 
-    test "max_size maps to maxSize attribute" do
+    test "max_size maps to max-size attribute" do
       assigns = %{}
 
       html =
@@ -1052,7 +1052,7 @@ defmodule VoidableUI.Components.InteractiveFormTest do
         <VoidableUI.Components.file_upload max_size={5000} />
         """)
 
-      assert html =~ ~s(maxSize="5000")
+      assert html =~ ~s(max-size="5000")
     end
 
     test "boolean attrs render when true" do
@@ -1088,7 +1088,7 @@ defmodule VoidableUI.Components.InteractiveFormTest do
         """)
 
       refute html =~ "accept="
-      refute html =~ "maxSize="
+      refute html =~ "max-size="
       refute html =~ "error="
     end
 

@@ -981,7 +981,7 @@ defmodule VoidableUI.Components do
 
   def scroll_area(assigns) do
     ~H"""
-    <void-scroll-area maxHeight={@max_height} direction={@direction} {@rest}>
+    <void-scroll-area max-height={@max_height} direction={@direction} {@rest}>
       {render_slot(@inner_block)}
     </void-scroll-area>
     """
@@ -1058,7 +1058,7 @@ defmodule VoidableUI.Components do
       heading={@heading}
       message={@message}
       retryable={@retryable}
-      retryLabel={@retry_label}
+      retry-label={@retry_label}
       icon={@icon}
       {@rest}
     />
@@ -1151,7 +1151,7 @@ defmodule VoidableUI.Components do
       step={@step}
       disabled={@disabled}
       name={@name}
-      showValue={@show_value}
+      show-value={@show_value}
       size={@size}
       phx-hook="VoidEvent"
       data-void-events="void-input,void-change"
@@ -1180,7 +1180,7 @@ defmodule VoidableUI.Components do
       accept={@accept}
       multiple={@multiple}
       disabled={@disabled}
-      maxSize={@max_size}
+      max-size={@max_size}
       error={@error}
       phx-hook="VoidEvent"
       data-void-events="void-change"
@@ -1783,7 +1783,7 @@ defmodule VoidableUI.Components do
       editing={@editing}
       disabled={@disabled}
       placeholder={@placeholder}
-      submitMode={@submit_mode}
+      submit-mode={@submit_mode}
       size={@size}
       phx-hook="VoidEvent"
       data-void-events="void-change,void-cancel"
@@ -1809,8 +1809,8 @@ defmodule VoidableUI.Components do
     <void-hover-card
       open={@open}
       position={@position}
-      openDelay={@open_delay}
-      closeDelay={@close_delay}
+      open-delay={@open_delay}
+      close-delay={@close_delay}
       {@rest}
     >
       {render_slot(@inner_block)}
@@ -1882,7 +1882,7 @@ defmodule VoidableUI.Components do
       size={@size}
       color={@color}
       variant={@variant}
-      allowDuplicates={@allow_duplicates}
+      allow-duplicates={@allow_duplicates}
       phx-hook="VoidEvent"
       data-void-events="void-change"
       {@rest}
@@ -1959,7 +1959,7 @@ defmodule VoidableUI.Components do
       value={@value}
       disabled={@disabled}
       size={@size}
-      showInput={@show_input}
+      show-input={@show_input}
       variant={@variant}
       open={@open}
       phx-hook="VoidEvent"

@@ -548,7 +548,7 @@ defmodule VoidableUI.Components.StaticSimpleTest do
       assert html =~ ~s(message="Something went wrong")
     end
 
-    test "renders retryable boolean and retry_label mapped to retryLabel" do
+    test "renders retryable boolean and retry_label mapped to retry-label" do
       assigns = %{}
 
       html =
@@ -557,7 +557,7 @@ defmodule VoidableUI.Components.StaticSimpleTest do
         """)
 
       assert html =~ "retryable"
-      assert html =~ ~s(retryLabel="Try again")
+      assert html =~ ~s(retry-label="Try again")
     end
 
     test "icon defaults to true and renders as boolean attribute" do
@@ -596,7 +596,7 @@ defmodule VoidableUI.Components.StaticSimpleTest do
       refute html =~ "heading="
       refute html =~ "message="
       refute html =~ "retryable"
-      refute html =~ "retryLabel"
+      refute html =~ "retry-label"
     end
 
     test "passes through global attributes" do

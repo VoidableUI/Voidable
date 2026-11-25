@@ -5,7 +5,7 @@ import { ProjectionController } from '../projection.js';
 
 /** Scrollable container with styled scrollbars for long content areas, code blocks, and chat histories. */
 export class VoidScrollArea extends VoidElement {
-  @property({ type: String }) maxHeight = '';
+  @property({ type: String, attribute: 'max-height' }) maxHeight = '';
   @property({ type: String, reflect: true }) direction: 'vertical' | 'horizontal' | 'both' = 'vertical';
 
   // Consumer content is projected into the scroll viewport.

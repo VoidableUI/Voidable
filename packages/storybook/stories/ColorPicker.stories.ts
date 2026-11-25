@@ -25,7 +25,7 @@ const meta: Meta = {
       value=${args.value ?? '#000000'}
       size=${args.size || 'md'}
       ?disabled=${args.disabled}
-      ?showInput=${args.showInput ?? true}
+      .showInput=${args.showInput ?? true}
       .swatches=${args.swatches ?? []}
     ></void-color-picker>
   `,

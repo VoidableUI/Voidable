@@ -223,6 +223,21 @@ describe('custom-elements.json', () => {
       }
     });
 
+    it('gives every multi-word property a kebab-case attribute (#40)', () => {
+      for (const [name, options] of reactive) {
+        const attr = litAttribute(name, options);
+        if (attr === null || !/[A-Z]/.test(name)) continue;
+        // Lit's default (the lowercased name, `maxsize`) is never what a user writes.
+        // An explicit attribute that is not a kebab form (formAttr -> form) is deliberate.
+        expect(attr, `${tag}.${name} uses Lit's lowercased default attribute`).not.toBe(name.toLowerCase());
+        const kebab = name.replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`);
+        if (attr === kebab) {
+          const entry = decl?.attributes?.find((a) => a.name === kebab);
+          expect(entry, `${tag} attribute ${kebab} in the manifest`).toBeDefined();
+        }
+      }
+    });
+
     it('records every dispatched void-* event', () => {
       const own = eventsBySource.get(cls.name) ?? new Set<string>();
       const bubbled = ancestorEvents.filter((a) => a.tag === tag).flatMap((a) => a.events);

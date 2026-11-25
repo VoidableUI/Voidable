@@ -293,7 +293,7 @@ describe('VoidSlider', () => {
       el.showValue = true;
       document.body.appendChild(el);
       await el.updateComplete;
-      expect(el.hasAttribute('showvalue')).toBe(true);
+      expect(el.hasAttribute('show-value')).toBe(true);
     });
 
     it('reflects size to attribute', async () => {

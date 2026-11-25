@@ -318,7 +318,7 @@ defmodule VoidableUI.Components.StaticContainerTest do
       """)
 
     assert html =~ "<void-scroll-area"
-    assert html =~ ~s(maxHeight="300px")
+    assert html =~ ~s(max-height="300px")
     assert html =~ ~s(direction="vertical")
     assert html =~ "Scrollable"
   end
@@ -332,7 +332,7 @@ defmodule VoidableUI.Components.StaticContainerTest do
       """)
 
     assert html =~ "<void-scroll-area"
-    refute html =~ "maxHeight="
+    refute html =~ "max-height="
     refute html =~ "direction="
     assert html =~ "Content"
   end

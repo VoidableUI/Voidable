@@ -15,7 +15,7 @@ export class VoidTagsInput extends InternalsFormControl(VoidElement) {
   @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' = 'md';
   @property({ type: String, reflect: true }) color: 'default' | 'error' | 'warning' | 'success' | 'info' | 'notice' = 'default';
   @property({ type: String, reflect: true }) variant: 'filled' | 'outline' = 'outline';
-  @property({ type: Boolean }) allowDuplicates = false;
+  @property({ type: Boolean, attribute: 'allow-duplicates' }) allowDuplicates = false;
 
   private _tagText(tag: TagValue): string {
     return typeof tag === 'string' ? tag : tag.text;

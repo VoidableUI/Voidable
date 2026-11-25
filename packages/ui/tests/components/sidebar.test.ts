@@ -44,7 +44,7 @@ describe('VoidSidebar', () => {
       const el = await mount({ collapsed: true, width: '300px', collapsedWidth: '48px', position: 'right' });
       expect(el.hasAttribute('collapsed')).toBe(true);
       expect(el.getAttribute('width')).toBe('300px');
-      expect(el.getAttribute('collapsedwidth')).toBe('48px');
+      expect(el.getAttribute('collapsed-width')).toBe('48px');
       expect(el.getAttribute('position')).toBe('right');
     });
 

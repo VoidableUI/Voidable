@@ -1,13 +1,13 @@
 // Analyzer plugins for @custom-elements-manifest/analyzer, used by
 // ../custom-elements-manifest.config.js.
 //
-// Component source is not annotated with @fires/@slot/@cssprop JSDoc and is
+// Component source is mostly not annotated with @fires/@slot/@cssprop JSDoc and is
 // out of scope for the manifest tooling, so these plugins recover what can be
 // derived statically from the code and clean up what should not ship:
 //
 // 1. litPropertyPlugin: Lit's default attribute name for a property without
 //    an explicit `attribute` option is the property name lowercased
-//    (`maxSize` -> `maxsize`), not the property name verbatim, which is what
+//    (`fooBar` -> `foobar`), not the property name verbatim, which is what
 //    the analyzer emits. Also falls back to the Lit `type` option for fields
 //    the analyzer could not type, and restores `@property` defaults it drops
 //    for member-access initializers (`Number.NEGATIVE_INFINITY`).
@@ -21,8 +21,9 @@
 //    (for example from `@fires` JSDoc) are merged, not replaced. `new Event()`
 //    and non-literal or non-`void-` event names fail the build.
 //
-// 3. manifestSupplementPlugin: merges ./supplement.js (child attributes read
-//    by parents, bubbling ancestor events, detail types inference cannot see).
+// 3. manifestSupplementPlugin: merges ./supplement.js (attributes with no property
+//    that a parent or the theme reads, bubbling ancestor events, detail types
+//    inference cannot see).
 //
 // 4. publishedManifestPlugin: makes the manifest describe what ships. Module
 //    paths point at dist/ entry modules; internal modules that are bundled

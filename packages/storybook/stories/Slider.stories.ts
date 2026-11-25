@@ -31,7 +31,7 @@ const meta: Meta = {
       step=${args.step ?? 1}
       size=${args.size || 'md'}
       ?disabled=${args.disabled}
-      ?showValue=${args.showValue}
+      ?show-value=${args.showValue}
       style="width: 300px;"
     ></void-slider>
   `,

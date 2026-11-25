@@ -45,7 +45,7 @@ export const Default: Story = {
     <void-sidebar
       ?collapsed=${args.collapsed}
       width=${args.width}
-      collapsedWidth=${args.collapsedWidth}
+      collapsed-width=${args.collapsedWidth}
       position=${args.position}
       style="height:300px"
     >
