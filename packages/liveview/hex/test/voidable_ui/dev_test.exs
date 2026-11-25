@@ -32,8 +32,8 @@ defmodule VoidableUI.DevTest do
     Application.put_env(:live_voidable, :dev_warnings, true)
 
     assert rendered_to_string(~H"""
-           <VoidableUI.Dev.warnings />
-           """) =~ "/dist/dev.js"
+           <VoidableUI.Dev.warnings src="/assets/dev.js" />
+           """) =~ "/assets/dev.js"
   end
 
   test "renders the module script when on" do
@@ -41,12 +41,22 @@ defmodule VoidableUI.DevTest do
 
     html =
       rendered_to_string(~H"""
-      <VoidableUI.Dev.warnings mode={true} />
+      <VoidableUI.Dev.warnings mode={true} src="/assets/voidable-dev.js" />
       """)
 
-    assert html =~ ~s(<script type="module" src="https://cdn.jsdelivr.net/npm/@voidable/ui@)
-    assert html =~ "/dist/dev.js"
+    assert html =~ ~s(<script type="module" src="/assets/voidable-dev.js")
     refute html =~ "VOIDABLE_DEV"
+  end
+
+  test "renders nothing without a source: an unreleased checkout has no published file" do
+    assigns = %{}
+
+    html =
+      rendered_to_string(~H"""
+      <VoidableUI.Dev.warnings mode={:throw} />
+      """)
+
+    if VoidableUI.Dev.url(), do: assert(html =~ VoidableUI.Dev.url()), else: assert(String.trim(html) == "")
   end
 
   test "throw mode sets the config before the module script" do
@@ -54,7 +64,7 @@ defmodule VoidableUI.DevTest do
 
     html =
       rendered_to_string(~H"""
-      <VoidableUI.Dev.warnings mode={:throw} />
+      <VoidableUI.Dev.warnings mode={:throw} src="/dev.js" />
       """)
 
     assert html =~ "window.VOIDABLE_DEV = { throw: true };"
@@ -68,13 +78,16 @@ defmodule VoidableUI.DevTest do
 
     html =
       rendered_to_string(~H"""
-      <VoidableUI.Dev.warnings mode={:throw} nonce="abc" />
+      <VoidableUI.Dev.warnings mode={:throw} nonce="abc" src="/dev.js" />
       """)
 
     assert length(String.split(html, ~s(nonce="abc"))) == 3
   end
 
-  test "the url follows the package version, or latest in an unreleased checkout" do
-    assert VoidableUI.Dev.url() =~ ~r{@voidable/ui@(latest|\d+\.\d+\.\d+)/dist/dev\.js\z}
+  test "the url follows the package version, never latest, and is nil in an unreleased checkout" do
+    case Mix.Project.config()[:version] do
+      "0.0.0" -> assert VoidableUI.Dev.url() == nil
+      v -> assert VoidableUI.Dev.url() == "https://cdn.jsdelivr.net/npm/@voidable/ui@#{v}/dist/dev.js"
+    end
   end
 end
