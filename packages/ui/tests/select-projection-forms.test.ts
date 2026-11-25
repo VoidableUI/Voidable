@@ -77,15 +77,15 @@ describe('void-select placeholder on the projection container', () => {
     expect(el.value).toBe('');
   });
 
-  it('voidUnproject() returns the host to its server shape without the placeholder, which comes back after', async () => {
+  it('voidBeforeMorph() returns the host to its server shape without the placeholder, which comes back after', async () => {
     const form = await mount(`<void-select name="s" placeholder="Pick">${options}</void-select>`);
     const el = form.querySelector('void-select') as VoidSelect;
-    expect(el.voidUnproject()).toBe(true);
+    expect(el.voidBeforeMorph()).toBe(true);
     expect(Array.from(el.children).map((c) => c.outerHTML)).toEqual([
       '<option value="a">A</option>',
       '<option value="b">B</option>',
     ]);
-    await el.voidReproject();
+    await el.voidAfterMorph();
     await settle(form);
     expect(values(form.querySelector('select')!)).toEqual(['', 'a', 'b']);
     expect(form.querySelectorAll('option[data-void-placeholder]')).toHaveLength(1);
@@ -97,10 +97,10 @@ describe('void-select placeholder on the projection container', () => {
     const native = form.querySelector('select')!;
     native.value = 'a';
     native.dispatchEvent(new Event('change'));
-    expect(el.voidUnproject()).toBe(true);
+    expect(el.voidBeforeMorph()).toBe(true);
     // What a morph against server markup without `selected` does to the host's options.
     for (const o of Array.from(el.querySelectorAll('option'))) o.removeAttribute('selected');
-    await el.voidReproject();
+    await el.voidAfterMorph();
     await settle(form);
     expect(el.value).toBe('a');
     expect(form.querySelector('select')!.value).toBe('a');

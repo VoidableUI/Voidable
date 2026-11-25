@@ -45,7 +45,7 @@ export class VoidComposeInput extends VoidElement {
     ta.style.height = 'auto';
     const scrollHeight = ta.scrollHeight;
     ta.style.height = '';
-    this.style.setProperty('--void-compose-input-height', `${scrollHeight}px`);
+    this.setHostStyle('--void-compose-input-height', `${scrollHeight}px`);
     this.dispatchEvent(new CustomEvent('void-input', { bubbles: true, composed: true, detail: { value: this.value } }));
   }
 
@@ -62,7 +62,7 @@ export class VoidComposeInput extends VoidElement {
     this.value = '';
     if (this._textarea) {
       this._textarea.style.height = '';
-      this.style.removeProperty('--void-compose-input-height');
+      this.setHostStyle('--void-compose-input-height', null);
     }
     this.dispatchEvent(new CustomEvent('void-submit', { bubbles: true, composed: true, detail: { value } }));
   }

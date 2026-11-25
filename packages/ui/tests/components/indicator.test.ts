@@ -102,11 +102,14 @@ describe('VoidIndicator', () => {
       expect(dots(el)[0]!.textContent).toBe('');
     });
 
-    it('is removed on disconnect and recreated once on reconnect (no duplicates)', async () => {
+    it('is kept across disconnect and reconnect, never duplicated', async () => {
       const el = await mount({ count: 2 });
+      const dot = dots(el)[0];
       el.remove();
-      expect(dots(el)).toHaveLength(0);
+      expect(dots(el)).toHaveLength(1);
       document.body.appendChild(el);
+      await el.updateComplete;
+      expect(dots(el)[0]).toBe(dot);
       await el.updateComplete;
       expect(dots(el)).toHaveLength(1);
       expect(dots(el)[0]!.textContent).toBe('2');

@@ -29,8 +29,8 @@ export class VoidCombobox extends InternalsFormControl(VoidElement) {
 
   connectedCallback(): void {
     super.connectedCallback();
-    this.setAttribute('role', 'combobox');
-    this.setAttribute('aria-autocomplete', 'list');
+    this.setHostAttribute('role', 'combobox');
+    this.setHostAttribute('aria-autocomplete', 'list');
     document.addEventListener('click', this._onDocumentClick);
     document.addEventListener('keydown', this._onDocumentKeydown);
   }
@@ -43,7 +43,7 @@ export class VoidCombobox extends InternalsFormControl(VoidElement) {
 
   updated(_changed: Map<string, unknown>): void {
     super.updated(_changed);
-    this.setAttribute('aria-expanded', String(this._open));
+    this.setHostAttribute('aria-expanded', String(this._open));
   }
 
   render() {

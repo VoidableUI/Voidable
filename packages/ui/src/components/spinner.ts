@@ -9,13 +9,13 @@ export class VoidSpinner extends VoidElement {
 
   connectedCallback(): void {
     super.connectedCallback();
-    this.setAttribute('role', 'status');
-    this.setAttribute('aria-label', this.label);
+    this.setHostAttribute('role', 'status');
+    this.setHostAttribute('aria-label', this.label);
   }
 
   updated(changed: Map<string, unknown>): void {
     if (changed.has('label')) {
-      this.setAttribute('aria-label', this.label);
+      this.setHostAttribute('aria-label', this.label);
     }
   }
 

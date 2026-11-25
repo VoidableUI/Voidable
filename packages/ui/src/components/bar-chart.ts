@@ -1,4 +1,5 @@
-import { LitElement, html, svg, nothing } from 'lit';
+import { html, svg, nothing } from 'lit';
+import { VoidElement } from '../base.js';
 import { property, state } from 'lit/decorators.js';
 import { LinearScale, BandScale } from './charts/scale.js';
 
@@ -43,8 +44,7 @@ function niceStepLocal(raw: number): number {
   return niceFrac * mag;
 }
 
-export class VoidBarChart extends LitElement {
-  createRenderRoot(): this { return this; }
+export class VoidBarChart extends VoidElement {
 
   @property({ type: Number, reflect: true }) height = 220;
   @property({ type: Boolean, attribute: 'show-values', reflect: true }) showValues = false;
@@ -96,7 +96,7 @@ export class VoidBarChart extends LitElement {
 
   connectedCallback() {
     super.connectedCallback();
-    this.setAttribute('role', 'img');
+    this.setHostAttribute('role', 'img');
     this._refreshTargets();
     requestAnimationFrame(() => { this._startAnimation(new Map()); });
   }

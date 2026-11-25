@@ -1,5 +1,5 @@
 // @vitest-environment happy-dom
-// Issue #4 second review: the voidUnproject() pre-morph hook, identity-tracked
+// Issue #4 second review: the voidBeforeMorph() pre-morph hook, identity-tracked
 // chrome (recycled-chrome morphs, removed chrome), replaceChildren validation and
 // the dev-only missing-trigger warning. Focus is checked in the Chromium probes.
 import { describe, it, expect, afterEach, vi } from 'vitest';
@@ -40,12 +40,12 @@ afterEach(() => {
   document.body.style.overflow = '';
 });
 
-describe('voidUnproject()', () => {
+describe('voidBeforeMorph()', () => {
   it('leaves the host looking like its original markup, in order', async () => {
     const original = '<p id="a">a</p>text<p id="b">b</p>';
     const el = mount(`<void-card heading="H">${original}</void-card>`);
     await settle(el);
-    expect(el.voidUnproject()).toBe(true);
+    expect(el.voidBeforeMorph()).toBe(true);
     expect(el.innerHTML).toBe(original);
     expect(el.querySelector('[data-void-chrome], [data-void-projection]')).toBeNull();
   });
@@ -53,15 +53,15 @@ describe('voidUnproject()', () => {
   it('puts before-region, container and after-region nodes back in source order', async () => {
     const el = mount('<void-dropdown-menu><button id="t" slot="trigger">T</button><void-dropdown-menu-item id="i">I</void-dropdown-menu-item></void-dropdown-menu>');
     await settle(el);
-    el.voidUnproject();
+    el.voidBeforeMorph();
     expect(Array.from(el.children).map(c => c.id)).toEqual(['t', 'i']);
     const hc = mount('<void-hover-card><a id="ht">t</a><div id="hb">b</div></void-hover-card>');
     await settle(hc);
-    hc.voidUnproject();
+    hc.voidBeforeMorph();
     expect(Array.from(hc.children).map(c => c.id)).toEqual(['ht', 'hb']);
     const tabs = mount('<void-tabs value="a"><void-tab-panel tab="a" label="A">a</void-tab-panel></void-tabs>');
     await settle(tabs);
-    tabs.voidUnproject();
+    tabs.voidBeforeMorph();
     expect(Array.from(tabs.children).map(c => c.localName)).toEqual(['void-tab-panel']);
   });
 
@@ -71,7 +71,7 @@ describe('voidUnproject()', () => {
     const backdrop = el.querySelector('.void-dialog-backdrop');
     const close = el.querySelector('.void-dialog-close');
     const c = el.querySelector('#c');
-    el.voidUnproject();
+    el.voidBeforeMorph();
     expect(el.querySelector('.void-dialog-backdrop')).toBeNull();
     await settle(el);
     expect(el.querySelector('.void-dialog-backdrop')).toBe(backdrop);
@@ -84,13 +84,13 @@ describe('voidUnproject()', () => {
     expect(el.querySelector('.void-dialog-close')).toBeNull();
   });
 
-  it('voidReproject() re-projects without waiting', async () => {
+  it('voidAfterMorph() re-projects without waiting', async () => {
     const el = mount('<void-card><p id="c">c</p></void-card>');
     await settle(el);
-    el.voidUnproject();
-    el.voidReproject();
+    el.voidBeforeMorph();
+    el.voidAfterMorph();
     expect(el.querySelector('.void-card-body > #c')).not.toBeNull();
-    await el.voidReproject();
+    await el.voidAfterMorph();
     expect(el.querySelectorAll('.void-card-body').length).toBe(1);
   });
 
@@ -98,7 +98,7 @@ describe('voidUnproject()', () => {
     const el = mount('<void-card><p id="a">a</p><p id="b">b</p></void-card>');
     await settle(el);
     const a = el.querySelector('#a')!;
-    el.voidUnproject();
+    el.voidBeforeMorph();
     // what a morph does against new server markup: edit a, drop b, add c
     a.textContent = 'a2';
     Node.prototype.removeChild.call(el, el.querySelector('#b')!);
@@ -122,7 +122,7 @@ describe('voidUnproject()', () => {
     native.dispatchEvent(new Event('change'));
     tabs.querySelectorAll<HTMLElement>('.void-tabs-tab')[1].click();
     await settle(tabs);
-    for (const el of [sel, tabs, dd]) el.voidUnproject();
+    for (const el of [sel, tabs, dd]) el.voidBeforeMorph();
     await settle(sel);
     await settle(tabs);
     await settle(dd);
@@ -139,7 +139,7 @@ describe('voidUnproject()', () => {
     const el = mount('<void-card heading="H"><p id="c">c</p></void-card>');
     await settle(el);
     const serialised = el.innerHTML;
-    el.voidUnproject();
+    el.voidBeforeMorph();
     el.innerHTML = serialised; // a morph against a snapshot of the rendered page
     await settle(el);
     expect(el.querySelectorAll('.void-card-body').length).toBe(1);
@@ -149,13 +149,13 @@ describe('voidUnproject()', () => {
 
   it('is a safe no-op where there is nothing to unproject', async () => {
     const button = mount('<void-button>b</void-button>');
-    expect(button.voidUnproject()).toBe(false);
+    expect(button.voidBeforeMorph()).toBe(false);
     const fresh = document.createElement('void-card') as Host;
-    expect(fresh.voidUnproject()).toBe(false);
+    expect(fresh.voidBeforeMorph()).toBe(false);
     const el = mount('<void-card><p>c</p></void-card>');
     await settle(el);
-    expect(el.voidUnproject()).toBe(true);
-    expect(el.voidUnproject()).toBe(false);
+    expect(el.voidBeforeMorph()).toBe(true);
+    expect(el.voidBeforeMorph()).toBe(false);
     await settle(el);
     expect(el.querySelectorAll('.void-card-body').length).toBe(1);
   });
@@ -166,8 +166,8 @@ describe('voidUnproject()', () => {
     const card = el.querySelector('void-card') as Host;
     await settle(card);
     const p = el.querySelector('#p');
-    el.voidUnproject();
-    card.voidUnproject();
+    el.voidBeforeMorph();
+    card.voidBeforeMorph();
     expect(Array.from(el.children)).toEqual([card]);
     expect(markup(card)).toBe('<p id="p">p</p>');
     await settle(el);

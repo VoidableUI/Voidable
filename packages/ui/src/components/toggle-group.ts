@@ -14,7 +14,7 @@ export class VoidToggleGroup extends InternalsFormControl(VoidElement) {
 
   connectedCallback(): void {
     super.connectedCallback();
-    this.setAttribute('role', 'group');
+    this.setHostAttribute('role', 'group');
     this.addEventListener('void-change', this._handleChildChange as EventListener);
     this.addEventListener('keydown', this._handleKeydown);
     this._syncToggles();

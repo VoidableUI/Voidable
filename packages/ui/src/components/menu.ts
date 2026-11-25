@@ -17,7 +17,7 @@ export class VoidMenu extends VoidElement {
 
   connectedCallback(): void {
     super.connectedCallback();
-    this.setAttribute('role', 'menu');
+    this.setHostAttribute('role', 'menu');
     document.addEventListener('keydown', this._handleKeydown);
   }
 
@@ -158,8 +158,8 @@ export class VoidMenuItem extends VoidElement {
 
   connectedCallback(): void {
     super.connectedCallback();
-    this.setAttribute('role', 'menuitem');
-    this.setAttribute('tabindex', this.disabled ? '-1' : '0');
+    this.setHostAttribute('role', 'menuitem');
+    this.setHostAttribute('tabindex', this.disabled ? '-1' : '0');
     this.addEventListener('click', this._handleClick);
     this.addEventListener('keydown', this._handleKeydown);
   }
@@ -173,8 +173,8 @@ export class VoidMenuItem extends VoidElement {
   updated(changed: Map<string, unknown>): void {
     super.updated(changed);
     if (changed.has('disabled')) {
-      this.setAttribute('tabindex', this.disabled ? '-1' : '0');
-      this.setAttribute('aria-disabled', String(this.disabled));
+      this.setHostAttribute('tabindex', this.disabled ? '-1' : '0');
+      this.setHostAttribute('aria-disabled', String(this.disabled));
     }
   }
 
@@ -216,16 +216,16 @@ export class VoidMenuGroup extends VoidElement {
 
   connectedCallback(): void {
     super.connectedCallback();
-    this.setAttribute('role', 'group');
+    this.setHostAttribute('role', 'group');
     if (this.label) {
-      this.setAttribute('aria-label', this.label);
+      this.setHostAttribute('aria-label', this.label);
     }
   }
 
   protected override updated(changed: Map<string, unknown>): void {
     super.updated(changed);
     if (changed.has('label') && this.label) {
-      this.setAttribute('aria-label', this.label);
+      this.setHostAttribute('aria-label', this.label);
     }
   }
 

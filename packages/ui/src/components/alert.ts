@@ -16,7 +16,7 @@ export class VoidAlert extends VoidElement {
 
   connectedCallback(): void {
     super.connectedCallback();
-    this.setAttribute('role', 'alert');
+    this.setHostAttribute('role', 'alert');
   }
 
   private _dismiss(): void {

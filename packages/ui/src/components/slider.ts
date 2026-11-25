@@ -16,21 +16,21 @@ export class VoidSlider extends NativeFormControl(VoidElement) {
 
   connectedCallback(): void {
     super.connectedCallback();
-    this.setAttribute('role', 'slider');
-    this.setAttribute('aria-valuemin', String(this.min));
-    this.setAttribute('aria-valuemax', String(this.max));
-    this.setAttribute('aria-valuenow', String(this.value));
+    this.setHostAttribute('role', 'slider');
+    this.setHostAttribute('aria-valuemin', String(this.min));
+    this.setHostAttribute('aria-valuemax', String(this.max));
+    this.setHostAttribute('aria-valuenow', String(this.value));
   }
 
   updated(changed: Map<string, unknown>): void {
     if (changed.has('min')) {
-      this.setAttribute('aria-valuemin', String(this.min));
+      this.setHostAttribute('aria-valuemin', String(this.min));
     }
     if (changed.has('max')) {
-      this.setAttribute('aria-valuemax', String(this.max));
+      this.setHostAttribute('aria-valuemax', String(this.max));
     }
     if (changed.has('value') || changed.has('min') || changed.has('max')) {
-      this.setAttribute('aria-valuenow', String(this.value));
+      this.setHostAttribute('aria-valuenow', String(this.value));
     }
   }
 

@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 import { describe, it, expect, afterEach } from 'vitest';
-import { LitElement } from 'lit';
+import { VoidElement } from '../../src/base.js';
 import { VoidGauge, type GaugeData, type GaugeZone } from '../../src/components/gauge.js';
 import { mount, settle, noAnimation } from '../helpers/chart.js';
 
@@ -63,8 +63,8 @@ afterEach(() => {
 
 describe('VoidGauge', () => {
   describe('class', () => {
-    it('is a LitElement that renders into itself (light DOM)', () => {
-      expect(Object.getPrototypeOf(VoidGauge)).toBe(LitElement);
+    it('extends VoidElement and renders into itself (light DOM)', () => {
+      expect(Object.getPrototypeOf(VoidGauge)).toBe(VoidElement);
       const el = document.createElement(TAG) as VoidGauge;
       expect(el.createRenderRoot()).toBe(el);
     });
@@ -131,23 +131,20 @@ describe('VoidGauge', () => {
       expect(el.ariaLabel).toBe('CPU');
     });
 
-    it('removing the tick-min attribute disables the min tick', () => {
+    it('removing the tick-min attribute restores the default (on), as markup without it means', () => {
       const el = document.createElement(TAG) as VoidGauge;
-      el.setAttribute('tick-min', '');
+      el.setAttribute('tick-min', 'false');
       el.removeAttribute('tick-min');
-      expect(el.tickMin).toBe(false);
+      expect(el.tickMin).toBe(true);
     });
 
-    // BUG: the property docs say `tick-min="false"` / `tick-max="false"` disable the end ticks,
-    // but both are plain Boolean properties, so any present attribute (including "false") means
-    // true. gauge.ts:231 / :237. Expected: "false" disables, as `gaps="false"` does.
-    it.fails('tick-min="false" disables the min tick (as documented)', () => {
+    it('tick-min="false" disables the min tick (as documented)', () => {
       const el = document.createElement(TAG) as VoidGauge;
       el.setAttribute('tick-min', 'false');
       expect(el.tickMin).toBe(false);
     });
 
-    it.fails('tick-max="false" disables the max tick (as documented)', () => {
+    it('tick-max="false" disables the max tick (as documented)', () => {
       const el = document.createElement(TAG) as VoidGauge;
       el.setAttribute('tick-max', 'false');
       expect(el.tickMax).toBe(false);

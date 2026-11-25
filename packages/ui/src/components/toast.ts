@@ -54,7 +54,7 @@ export class VoidToast extends VoidElement {
 
   /** Errors and warnings interrupt (alert); everything else is polite (status). */
   private _syncRole(): void {
-    this.setAttribute('role', this.color === 'error' || this.color === 'warning' ? 'alert' : 'status');
+    this.setHostAttribute('role', this.color === 'error' || this.color === 'warning' ? 'alert' : 'status');
   }
 
   private _startTimer(): void {
@@ -113,9 +113,9 @@ export class VoidToastContainer extends VoidElement {
 
   connectedCallback() {
     super.connectedCallback();
-    this.setAttribute('role', 'region');
-    this.setAttribute('aria-label', 'Notifications');
-    this.setAttribute('aria-live', 'polite');
+    this.setHostAttribute('role', 'region');
+    this.setHostAttribute('aria-label', 'Notifications');
+    this.setHostAttribute('aria-live', 'polite');
   }
 
   static show(options: {

@@ -9,10 +9,10 @@ export class VoidHamburger extends VoidElement {
 
   connectedCallback(): void {
     super.connectedCallback();
-    this.setAttribute('role', 'button');
-    this.setAttribute('tabindex', '0');
-    this.setAttribute('aria-expanded', String(this.active));
-    this.setAttribute('aria-label', this.active ? 'Close menu' : 'Menu');
+    this.setHostAttribute('role', 'button');
+    this.setHostAttribute('tabindex', '0');
+    this.setHostAttribute('aria-expanded', String(this.active));
+    this.setHostAttribute('aria-label', this.active ? 'Close menu' : 'Menu');
     this.addEventListener('click', this._handleClick);
     this.addEventListener('keydown', this._handleKeydown);
   }
@@ -25,8 +25,8 @@ export class VoidHamburger extends VoidElement {
 
   updated(changed: Map<string, unknown>): void {
     if (changed.has('active')) {
-      this.setAttribute('aria-expanded', String(this.active));
-      this.setAttribute('aria-label', this.active ? 'Close menu' : 'Menu');
+      this.setHostAttribute('aria-expanded', String(this.active));
+      this.setHostAttribute('aria-label', this.active ? 'Close menu' : 'Menu');
     }
   }
 

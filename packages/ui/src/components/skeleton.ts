@@ -7,8 +7,8 @@ export class VoidSkeleton extends VoidElement {
 
   connectedCallback(): void {
     super.connectedCallback();
-    this.setAttribute('role', 'presentation');
-    this.setAttribute('aria-hidden', 'true');
+    this.setHostAttribute('role', 'presentation');
+    this.setHostAttribute('aria-hidden', 'true');
   }
 }
 

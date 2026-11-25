@@ -41,7 +41,7 @@ export class VoidTagsInput extends InternalsFormControl(VoidElement) {
 
   connectedCallback(): void {
     super.connectedCallback();
-    this.setAttribute('role', 'listbox');
+    this.setHostAttribute('role', 'listbox');
   }
 
   render() {

@@ -1,3 +1,4 @@
+import { html } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
 
@@ -9,30 +10,18 @@ export class VoidIndicator extends VoidElement {
   @property({ type: Boolean, reflect: true }) ping = false;
   @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' | 'xl' | 'xxl' = 'md';
 
-  private _dot!: HTMLSpanElement;
-
   connectedCallback(): void {
     super.connectedCallback();
-    this.setAttribute('role', 'status');
-    this._dot = document.createElement('span');
-    this._dot.className = 'void-indicator-dot';
-    this._updateDot();
-    this.appendChild(this._dot);
-  }
-
-  disconnectedCallback(): void {
-    super.disconnectedCallback();
-    this._dot?.remove();
+    this.setHostAttribute('role', 'status');
   }
 
   updated(): void {
-    this._updateDot();
+    this.setHostAttribute('aria-label', this.count != null ? `${this.count} notifications` : 'notification');
   }
 
-  private _updateDot(): void {
-    if (!this._dot) return;
-    this._dot.textContent = this.count != null ? String(this.count) : '';
-    this.setAttribute('aria-label', this.count != null ? `${this.count} notifications` : 'notification');
+  // The dot is rendered after the consumer content it decorates.
+  render() {
+    return html`<span class="void-indicator-dot">${this.count != null ? String(this.count) : ''}</span>`;
   }
 }
 

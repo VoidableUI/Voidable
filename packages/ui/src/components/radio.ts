@@ -26,9 +26,9 @@ export class VoidRadio extends NativeFormControl(VoidElement) {
 
   connectedCallback(): void {
     super.connectedCallback();
-    this.setAttribute('role', 'radio');
-    this.setAttribute('tabindex', '0');
-    this.setAttribute('aria-checked', String(this.checked));
+    this.setHostAttribute('role', 'radio');
+    this.setHostAttribute('tabindex', '0');
+    this.setHostAttribute('aria-checked', String(this.checked));
     this.addEventListener('click', this._handleClick);
     this.addEventListener('keydown', this._handleKeydown);
   }
@@ -42,12 +42,12 @@ export class VoidRadio extends NativeFormControl(VoidElement) {
   protected override updated(changed: Map<string, unknown>): void {
     super.updated(changed);
     if (changed.has('checked')) {
-      this.setAttribute('aria-checked', String(this.checked));
+      this.setHostAttribute('aria-checked', String(this.checked));
     }
     if (changed.has('disabled') || changed.has('ancestorDisabled')) {
       const disabled = this.formDisabled;
-      this.setAttribute('aria-disabled', String(disabled));
-      this.setAttribute('tabindex', disabled ? '-1' : '0');
+      this.setHostAttribute('aria-disabled', String(disabled));
+      this.setHostAttribute('tabindex', disabled ? '-1' : '0');
     }
   }
 

@@ -16,7 +16,7 @@ export class VoidNavBar extends VoidElement {
 
   connectedCallback(): void {
     super.connectedCallback();
-    this.setAttribute('role', 'navigation');
+    this.setHostAttribute('role', 'navigation');
   }
 
   render() {

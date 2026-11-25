@@ -7,8 +7,8 @@ import { ProjectionController } from '../projection.js';
 export class VoidCarouselSlide extends VoidElement {
   connectedCallback(): void {
     super.connectedCallback();
-    this.setAttribute('role', 'group');
-    this.setAttribute('aria-roledescription', 'slide');
+    this.setHostAttribute('role', 'group');
+    this.setHostAttribute('aria-roledescription', 'slide');
   }
 }
 
@@ -40,8 +40,8 @@ export class VoidCarousel extends VoidElement {
   });
   connectedCallback(): void {
     super.connectedCallback();
-    this.setAttribute('role', 'region');
-    this.setAttribute('aria-roledescription', 'carousel');
+    this.setHostAttribute('role', 'region');
+    this.setHostAttribute('aria-roledescription', 'carousel');
     this.addEventListener('mouseenter', this._onMouseEnter);
     this.addEventListener('mouseleave', this._onMouseLeave);
     this.addEventListener('keydown', this._onKeydown);
@@ -73,7 +73,7 @@ export class VoidCarousel extends VoidElement {
       if (this.autoplay) this._startAutoplay();
     }
 
-    this.style.setProperty('--void-carousel-offset', String(this.active));
+    this.setHostStyle('--void-carousel-offset', String(this.active));
 
     if (needsRerender) this.requestUpdate();
   }

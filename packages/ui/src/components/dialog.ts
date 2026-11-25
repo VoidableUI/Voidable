@@ -24,10 +24,10 @@ export class VoidDialog extends VoidElement {
 
   connectedCallback(): void {
     super.connectedCallback();
-    this.setAttribute('role', 'dialog');
-    this.setAttribute('aria-modal', 'true');
+    this.setHostAttribute('role', 'dialog');
+    this.setHostAttribute('aria-modal', 'true');
     if (this.heading) {
-      this.setAttribute('aria-label', this.heading);
+      this.setHostAttribute('aria-label', this.heading);
     }
   }
 
@@ -36,9 +36,9 @@ export class VoidDialog extends VoidElement {
 
     if (changed.has('heading')) {
       if (this.heading) {
-        this.setAttribute('aria-label', this.heading);
+        this.setHostAttribute('aria-label', this.heading);
       } else {
-        this.removeAttribute('aria-label');
+        this.setHostAttribute('aria-label', null);
       }
     }
 

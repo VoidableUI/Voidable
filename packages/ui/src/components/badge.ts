@@ -9,7 +9,7 @@ export class VoidBadge extends VoidElement {
 
   connectedCallback(): void {
     super.connectedCallback();
-    this.setAttribute('role', 'status');
+    this.setHostAttribute('role', 'status');
   }
 }
 

@@ -12,11 +12,7 @@ export class VoidTooltip extends VoidElement {
 
   private _timerId: ReturnType<typeof setTimeout> | undefined;
   private _tooltipId = 'void-tooltip-' + Math.random().toString(36).slice(2);
-  private _userContent: Node[] = [];
-  private _didSetup = false;
-
   connectedCallback(): void {
-    this._userContent = Array.from(this.childNodes);
     super.connectedCallback();
     this.addEventListener('mouseenter', this._onMouseEnter);
     this.addEventListener('mouseleave', this._onMouseLeave);
@@ -35,25 +31,16 @@ export class VoidTooltip extends VoidElement {
     document.removeEventListener('keydown', this._onKeydown);
   }
 
+  // The trigger (consumer content) stays on the host; the bubble is rendered after it.
   protected override updated(): void {
-    if (!this._didSetup) {
-      this._didSetup = true;
-      const bubble = this.querySelector('.void-tooltip-bubble');
-      if (bubble) {
-        for (const node of this._userContent) {
-          this.insertBefore(node, bubble);
-        }
-      }
-    }
-
     if (this._visible) {
-      this.setAttribute('visible', '');
+      this.setHostAttribute('visible', '');
     } else {
-      this.removeAttribute('visible');
+      this.setHostAttribute('visible', null);
     }
 
     const trigger = this.children[0] as HTMLElement | undefined;
-    if (trigger) {
+    if (trigger && !trigger.classList.contains('void-tooltip-bubble') && trigger.getAttribute('aria-describedby') !== this._tooltipId) {
       trigger.setAttribute('aria-describedby', this._tooltipId);
     }
   }

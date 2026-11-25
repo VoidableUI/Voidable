@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 import { describe, it, expect, afterEach } from 'vitest';
-import { LitElement } from 'lit';
+import { VoidElement } from '../../src/base.js';
 import { VoidBarChart, type BarChartData } from '../../src/components/bar-chart.js';
 import { mount, settle } from '../helpers/chart.js';
 
@@ -29,8 +29,8 @@ afterEach(() => {
 
 describe('VoidBarChart', () => {
   describe('class', () => {
-    it('is a LitElement that renders into itself (light DOM)', () => {
-      expect(Object.getPrototypeOf(VoidBarChart)).toBe(LitElement);
+    it('extends VoidElement and renders into itself (light DOM)', () => {
+      expect(Object.getPrototypeOf(VoidBarChart)).toBe(VoidElement);
       const el = document.createElement(TAG) as VoidBarChart;
       expect(el.createRenderRoot()).toBe(el);
     });

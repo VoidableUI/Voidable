@@ -14,9 +14,9 @@ export class VoidSwitch extends InternalsFormControl(VoidElement) {
 
   connectedCallback(): void {
     super.connectedCallback();
-    this.setAttribute('role', 'switch');
-    this.setAttribute('tabindex', this.disabled ? '-1' : '0');
-    this.setAttribute('aria-checked', String(this.checked));
+    this.setHostAttribute('role', 'switch');
+    this.setHostAttribute('tabindex', this.disabled ? '-1' : '0');
+    this.setHostAttribute('aria-checked', String(this.checked));
     this.addEventListener('click', this._handleClick);
     this.addEventListener('keydown', this._handleKeydown);
   }
@@ -29,12 +29,12 @@ export class VoidSwitch extends InternalsFormControl(VoidElement) {
 
   updated(changed: Map<string, unknown>): void {
     if (changed.has('checked')) {
-      this.setAttribute('aria-checked', String(this.checked));
+      this.setHostAttribute('aria-checked', String(this.checked));
     }
     if (changed.has('disabled') || changed.has('ancestorDisabled')) {
       const disabled = this.formDisabled;
-      this.setAttribute('aria-disabled', String(disabled));
-      this.setAttribute('tabindex', disabled ? '-1' : '0');
+      this.setHostAttribute('aria-disabled', String(disabled));
+      this.setHostAttribute('tabindex', disabled ? '-1' : '0');
     }
   }
 

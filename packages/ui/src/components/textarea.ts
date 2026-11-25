@@ -18,8 +18,8 @@ export class VoidTextarea extends NativeFormControl(VoidElement) {
 
   connectedCallback(): void {
     super.connectedCallback();
-    this.setAttribute('role', 'textbox');
-    this.setAttribute('aria-multiline', 'true');
+    this.setHostAttribute('role', 'textbox');
+    this.setHostAttribute('aria-multiline', 'true');
   }
 
   render() {

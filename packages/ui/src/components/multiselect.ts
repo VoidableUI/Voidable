@@ -59,8 +59,8 @@ export class VoidMultiselect extends InternalsFormControl(VoidElement) {
 
   connectedCallback(): void {
     super.connectedCallback();
-    this.setAttribute('role', 'combobox');
-    this.setAttribute('aria-haspopup', 'listbox');
+    this.setHostAttribute('role', 'combobox');
+    this.setHostAttribute('aria-haspopup', 'listbox');
     document.addEventListener('click', this._onDocumentClick);
     document.addEventListener('keydown', this._onDocumentKeydown);
   }
@@ -73,7 +73,7 @@ export class VoidMultiselect extends InternalsFormControl(VoidElement) {
 
   protected override updated(_changed: Map<string, unknown>): void {
     super.updated(_changed);
-    this.setAttribute('aria-expanded', String(this._open));
+    this.setHostAttribute('aria-expanded', String(this._open));
   }
 
   render() {

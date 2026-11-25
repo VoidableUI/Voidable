@@ -11,9 +11,9 @@ export class VoidToggle extends VoidElement {
 
   connectedCallback(): void {
     super.connectedCallback();
-    this.setAttribute('role', 'button');
-    this.setAttribute('tabindex', this.disabled ? '-1' : '0');
-    this.setAttribute('aria-pressed', String(this.pressed));
+    this.setHostAttribute('role', 'button');
+    this.setHostAttribute('tabindex', this.disabled ? '-1' : '0');
+    this.setHostAttribute('aria-pressed', String(this.pressed));
     this.addEventListener('click', this._handleClick);
     this.addEventListener('keydown', this._handleKeydown);
   }
@@ -25,10 +25,10 @@ export class VoidToggle extends VoidElement {
   }
 
   updated(changed: Map<string, unknown>): void {
-    if (changed.has('pressed')) this.setAttribute('aria-pressed', String(this.pressed));
+    if (changed.has('pressed')) this.setHostAttribute('aria-pressed', String(this.pressed));
     if (changed.has('disabled')) {
-      this.setAttribute('aria-disabled', String(this.disabled));
-      this.setAttribute('tabindex', this.disabled ? '-1' : '0');
+      this.setHostAttribute('aria-disabled', String(this.disabled));
+      this.setHostAttribute('tabindex', this.disabled ? '-1' : '0');
     }
   }
 

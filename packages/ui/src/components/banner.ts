@@ -16,7 +16,7 @@ export class VoidBanner extends VoidElement {
 
   connectedCallback(): void {
     super.connectedCallback();
-    this.setAttribute('role', 'banner');
+    this.setHostAttribute('role', 'banner');
   }
 
   private _close(): void {

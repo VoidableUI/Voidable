@@ -7,13 +7,13 @@ export class VoidStatusDot extends VoidElement {
 
   connectedCallback(): void {
     super.connectedCallback();
-    this.setAttribute('role', 'status');
-    this.setAttribute('aria-label', this._ariaLabel());
+    this.setHostAttribute('role', 'status');
+    this.setHostAttribute('aria-label', this._ariaLabel());
   }
 
   updated(changed: Map<string, unknown>): void {
     if (changed.has('status')) {
-      this.setAttribute('aria-label', this._ariaLabel());
+      this.setHostAttribute('aria-label', this._ariaLabel());
     }
   }
 

@@ -1,4 +1,5 @@
-import { LitElement, html, svg, nothing, type TemplateResult } from 'lit';
+import { html, svg, nothing, type TemplateResult } from 'lit';
+import { VoidElement } from '../base.js';
 import { property, state } from 'lit/decorators.js';
 import { arcPath } from './charts/shape.js';
 
@@ -26,8 +27,7 @@ function formatValue(v: number): string {
   return Math.round(v).toString();
 }
 
-export class VoidDonutChart extends LitElement {
-  createRenderRoot(): this { return this; }
+export class VoidDonutChart extends VoidElement {
 
   @property({ type: Number, reflect: true }) size = 220;
   @property({ type: Number }) inner = 0.6;
@@ -106,7 +106,7 @@ export class VoidDonutChart extends LitElement {
 
   connectedCallback() {
     super.connectedCallback();
-    this.setAttribute('role', 'img');
+    this.setHostAttribute('role', 'img');
     this._refreshTargets();
     requestAnimationFrame(() => { this._startAnimation(new Map(), 0, 0, true); });
     this.addEventListener('mousemove', this._onMouseMove);

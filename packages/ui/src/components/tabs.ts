@@ -11,13 +11,13 @@ export class VoidTabPanel extends VoidElement {
 
   connectedCallback(): void {
     super.connectedCallback();
-    this.setAttribute('role', 'tabpanel');
+    this.setHostAttribute('role', 'tabpanel');
     if (this.tab) this.id = this.tab;
   }
 
   protected override updated(_changed: Map<string, unknown>): void {
     super.updated(_changed);
-    this.setAttribute('role', 'tabpanel');
+    this.setHostAttribute('role', 'tabpanel');
     if (_changed.has('tab') && this.tab) this.id = this.tab;
   }
 
@@ -52,6 +52,8 @@ export class VoidTabs extends VoidElement {
 
   private _syncPanels(): void {
     for (const panel of this._panels) {
+      // A panel not upgraded yet would keep this as a stale instance property.
+      if (!(panel instanceof VoidTabPanel)) continue;
       panel.active = panel.tab === this.value;
     }
   }
@@ -81,6 +83,23 @@ export class VoidTabs extends VoidElement {
         `)}
       </div>
     `;
+  }
+
+  /**
+   * Panels carry an id the component gave them (for the tabs' aria-controls).
+   * Morphers pair elements by id and never morph an element with an id into one
+   * without, so a panel whose server markup has no id would be replaced on every
+   * morph. Give each incoming panel the id its live counterpart (same `tab`) has.
+   */
+  override voidBeforeMorph(incoming?: Element | null): boolean {
+    if (incoming) {
+      const ids = new Map(this._panels.map(p => [p.getAttribute('tab'), p.id] as const));
+      for (const next of Array.from(incoming.querySelectorAll(':scope > void-tab-panel:not([id])'))) {
+        const id = ids.get(next.getAttribute('tab'));
+        if (id) next.setAttribute('id', id);
+      }
+    }
+    return super.voidBeforeMorph(incoming);
   }
 
   private _onTabClick(panel: VoidTabPanel): void {

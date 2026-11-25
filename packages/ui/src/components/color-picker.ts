@@ -37,11 +37,11 @@ export class VoidColorPicker extends InternalsFormControl(VoidElement) {
 
   private _applyCustomProperties(): void {
     const hueColor = this._hsvToHex(this._hue, 100, 100);
-    this.style.setProperty('--void-cp-hue', hueColor); // style-ok
-    this.style.setProperty('--void-cp-current', this.value); // style-ok
-    this.style.setProperty('--void-cp-area-x', `${this._saturation}%`); // style-ok
-    this.style.setProperty('--void-cp-area-y', `${100 - this._brightness}%`); // style-ok
-    this.style.setProperty('--void-cp-hue-x', `${(this._hue / 360) * 100}%`); // style-ok
+    this.setHostStyle('--void-cp-hue', hueColor); // style-ok
+    this.setHostStyle('--void-cp-current', this.value); // style-ok
+    this.setHostStyle('--void-cp-area-x', `${this._saturation}%`); // style-ok
+    this.setHostStyle('--void-cp-area-y', `${100 - this._brightness}%`); // style-ok
+    this.setHostStyle('--void-cp-hue-x', `${(this._hue / 360) * 100}%`); // style-ok
   }
 
   // ── HSV ↔ Hex conversion ──

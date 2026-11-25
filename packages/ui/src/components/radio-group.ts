@@ -35,8 +35,8 @@ export class VoidRadioGroup extends NativeFormControl(VoidElement) {
   });
   connectedCallback(): void {
     super.connectedCallback();
-    this.setAttribute('role', 'radiogroup');
-    if (this.label) this.setAttribute('aria-label', this.label);
+    this.setHostAttribute('role', 'radiogroup');
+    if (this.label) this.setHostAttribute('aria-label', this.label);
     this.addEventListener('void-change', this._handleChildChange as EventListener);
   }
 
@@ -48,7 +48,7 @@ export class VoidRadioGroup extends NativeFormControl(VoidElement) {
   protected override updated(changed: Map<string, unknown>): void {
     super.updated(changed);
     if (changed.has('label') && this.label) {
-      this.setAttribute('aria-label', this.label);
+      this.setHostAttribute('aria-label', this.label);
     }
     if (changed.has('name')) {
       this._syncNames();
@@ -60,7 +60,7 @@ export class VoidRadioGroup extends NativeFormControl(VoidElement) {
       this._syncFormAttr();
     }
     if (changed.has('disabled') || changed.has('ancestorDisabled')) {
-      this.setAttribute('aria-disabled', String(this.formDisabled));
+      this.setHostAttribute('aria-disabled', String(this.formDisabled));
     }
     if (!this._didSync) {
       this._didSync = true;

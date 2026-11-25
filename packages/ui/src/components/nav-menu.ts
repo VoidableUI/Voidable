@@ -1,5 +1,7 @@
+import { html, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
+import { ProjectionController } from '../projection.js';
 
 /** Horizontal navigation bar with dropdown sub-menus for site headers, application nav bars, and mega-menu layouts. */
 export class VoidNavMenu extends VoidElement {
@@ -8,7 +10,7 @@ export class VoidNavMenu extends VoidElement {
 
   connectedCallback(): void {
     super.connectedCallback();
-    this.setAttribute('role', 'menubar');
+    this.setHostAttribute('role', 'menubar');
     this.addEventListener('keydown', this._handleKeydown);
     this.addEventListener('void-open', this._handleItemOpen as EventListener);
   }
@@ -23,9 +25,9 @@ export class VoidNavMenu extends VoidElement {
     super.updated(changed);
     if (changed.has('width')) {
       if (this.width) {
-        this.style.setProperty('--void-nav-menu-width', this.width); // style-ok
+        this.setHostStyle('--void-nav-menu-width', this.width); // style-ok
       } else {
-        this.style.removeProperty('--void-nav-menu-width');
+        this.setHostStyle('--void-nav-menu-width', null);
       }
     }
   }
@@ -102,21 +104,35 @@ export class VoidNavMenuItem extends VoidElement {
   @property({ type: String }) href = '';
   @property({ type: Boolean, reflect: true }) active = false;
 
-  private _triggerEl: HTMLElement | null = null;
-  private _contentEl: HTMLDivElement | null = null;
-  private _contentNodes: Node[] = [];
-  private _didSetup = false;
   private _openTimerId: ReturnType<typeof setTimeout> | undefined;
   private _closeTimerId: ReturnType<typeof setTimeout> | undefined;
+  /** Decided at the first render and kept, so the trigger container is never re-created. */
+  private _asLink: boolean | null = null;
+
+  // Non-empty text goes into the trigger; child elements form the dropdown content.
+  protected readonly _projection = new ProjectionController(this, {
+    regions: [
+      {
+        name: 'label',
+        target: () => this.querySelector(':scope > .void-nav-menu-trigger'),
+        accepts: node => node.nodeType === Node.TEXT_NODE && !!node.textContent?.trim(),
+      },
+      {
+        name: 'content',
+        target: () => this.querySelector(':scope > .void-nav-menu-content'),
+        accepts: node => node.nodeType === Node.ELEMENT_NODE,
+      },
+    ],
+    onChange: () => this.requestUpdate(),
+  });
+
+  private get _hasContent(): boolean {
+    return this._projection.nodes('content').length > 0;
+  }
 
   connectedCallback(): void {
     super.connectedCallback();
-    this.setAttribute('role', 'none');
-
-    if (!this._didSetup) {
-      this._contentNodes = Array.from(this.childNodes);
-    }
-
+    this.setHostAttribute('role', 'none');
     this.addEventListener('mouseenter', this._onMouseEnter);
     this.addEventListener('mouseleave', this._onMouseLeave);
     document.addEventListener('mousedown', this._onOutsideClick);
@@ -133,79 +149,39 @@ export class VoidNavMenuItem extends VoidElement {
 
   protected override updated(changed: Map<string, unknown>): void {
     super.updated(changed);
-
-    if (!this._didSetup) {
-      this._didSetup = true;
-
-      // Build the trigger element
-      if (this.href) {
-        this._triggerEl = document.createElement('a');
-        (this._triggerEl as HTMLAnchorElement).href = this.href;
+    // Whether there is dropdown content is only known once children are projected.
+    const content = this.querySelector(':scope > .void-nav-menu-content');
+    const trigger = this.querySelector(':scope > .void-nav-menu-trigger');
+    const has = this._hasContent;
+    if (content && content.hasAttribute('hidden') === has) content.toggleAttribute('hidden', !has);
+    if (trigger) {
+      if (has) {
+        trigger.setAttribute('aria-haspopup', 'true');
+        trigger.setAttribute('aria-expanded', String(this.open));
       } else {
-        this._triggerEl = document.createElement('button');
-        (this._triggerEl as HTMLButtonElement).type = 'button';
+        trigger.removeAttribute('aria-haspopup');
+        trigger.removeAttribute('aria-expanded');
       }
-      this._triggerEl.className = 'void-nav-menu-trigger';
-      this._triggerEl.setAttribute('role', 'menuitem');
-      this._triggerEl.setAttribute('tabindex', this.disabled ? '-1' : '0');
-
-      // Separate text content from child elements for the dropdown
-      const textNodes: Node[] = [];
-      const dropdownNodes: Node[] = [];
-
-      for (const node of this._contentNodes) {
-        if (node.nodeType === Node.TEXT_NODE && node.textContent?.trim()) {
-          textNodes.push(node);
-        } else if (node.nodeType === Node.ELEMENT_NODE) {
-          dropdownNodes.push(node);
-        }
-      }
-
-      // Put text nodes inside the trigger
-      for (const node of textNodes) {
-        this._triggerEl.appendChild(node);
-      }
-
-      this.appendChild(this._triggerEl);
-
-      // If there are child elements, they form the dropdown content
-      if (dropdownNodes.length > 0) {
-        this._triggerEl.setAttribute('aria-haspopup', 'true');
-        this._triggerEl.setAttribute('aria-expanded', String(this.open));
-
-        this._contentEl = document.createElement('div');
-        this._contentEl.className = 'void-nav-menu-content';
-        this._contentEl.setAttribute('role', 'menu');
-
-        for (const node of dropdownNodes) {
-          this._contentEl.appendChild(node);
-        }
-
-        this._contentEl.addEventListener('mouseenter', this._onContentEnter);
-        this._contentEl.addEventListener('mouseleave', this._onContentLeave);
-        this.appendChild(this._contentEl);
-      }
-    }
-
-    if (changed.has('open') && this._triggerEl) {
-      this._triggerEl.setAttribute('aria-expanded', String(this.open));
-    }
-
-    if (changed.has('disabled') && this._triggerEl) {
-      this._triggerEl.setAttribute('tabindex', this.disabled ? '-1' : '0');
-      this._triggerEl.setAttribute('aria-disabled', String(this.disabled));
-      if (this._triggerEl instanceof HTMLButtonElement) {
-        this._triggerEl.disabled = this.disabled;
-      }
-    }
-
-    if (changed.has('href') && this._triggerEl instanceof HTMLAnchorElement) {
-      this._triggerEl.href = this.href;
     }
   }
 
+  render() {
+    this._asLink ??= !!this.href;
+    const tabindex = this.disabled ? '-1' : '0';
+    // The trigger is named by the consumer's text, projected into it, which the static lint rule cannot see.
+    const trigger = this._asLink
+      ? // eslint-disable-next-line lit-a11y/accessible-name
+        html`<a class="void-nav-menu-trigger" role="menuitem" href=${this.href || nothing} tabindex=${tabindex}
+          aria-disabled=${this.disabled ? 'true' : nothing}></a>`
+      : // eslint-disable-next-line lit-a11y/accessible-name
+        html`<button type="button" class="void-nav-menu-trigger" role="menuitem" tabindex=${tabindex}
+          ?disabled=${this.disabled} aria-disabled=${this.disabled ? 'true' : nothing}></button>`;
+    return html`${trigger}<div class="void-nav-menu-content" role="menu" hidden
+      @mouseenter=${this._onContentEnter} @mouseleave=${this._onContentLeave}></div>`;
+  }
+
   private _onMouseEnter = (): void => {
-    if (this.disabled || !this._contentEl) return;
+    if (this.disabled || !this._hasContent) return;
     clearTimeout(this._closeTimerId);
     this._openTimerId = setTimeout(() => {
       this._openDropdown();
@@ -213,7 +189,7 @@ export class VoidNavMenuItem extends VoidElement {
   };
 
   private _onMouseLeave = (): void => {
-    if (!this._contentEl) return;
+    if (!this._hasContent) return;
     clearTimeout(this._openTimerId);
     this._closeTimerId = setTimeout(() => {
       this._closeDropdown();
