@@ -418,27 +418,55 @@ var bladeKeywords = map[string]bool{
 	"required": true, "csrf": true, "method": true, "error": true, "enderror": true, "auth": true, "endauth": true,
 }
 
-// isBladeDirective distinguishes `@if(...)`/`@endif` from Lit/Vue/Alpine
-// `@event=` shorthand.
-func isBladeDirective(src []byte, i int) bool {
+// bladeNoArgs are the directives that never take parenthesised arguments, so a
+// `(` after one of them (and a space) belongs to the next attribute.
+var bladeNoArgs = map[string]bool{
+	"else": true, "endif": true, "endunless": true, "endisset": true, "endforeach": true,
+	"enderror": true, "endauth": true, "csrf": true,
+}
+
+// bladeWord returns the directive name at src[i] (which is '@') and the offset
+// after it.
+func bladeWord(src []byte, i int) (string, int) {
 	j := i + 1
 	for j < len(src) && (isLower(src[j]) || (src[j] >= 'A' && src[j] <= 'Z')) {
 		j++
 	}
-	word := string(src[i+1 : j])
-	if word == "" || (j < len(src) && (src[j] == '=' || src[j] == '-' || src[j] == '.' || src[j] == ':')) {
-		return false
-	}
-	return bladeKeywords[word] || (j < len(src) && src[j] == '(')
+	return string(src[i+1 : j]), j
 }
 
-func skipBladeDirective(src []byte, i int) int {
-	j := i + 1
-	for j < len(src) && (isLower(src[j]) || (src[j] >= 'A' && src[j] <= 'Z')) {
+// bladeArgs returns the offset of the `(` that opens a directive's arguments,
+// or -1. Blade allows spaces and tabs between the name and the parenthesis:
+// `@if ($a)` and `@if($a)` are the same directive.
+func bladeArgs(src []byte, word string, j int) int {
+	if bladeNoArgs[word] {
+		return -1
+	}
+	for j < len(src) && (src[j] == ' ' || src[j] == '\t') {
 		j++
 	}
 	if j < len(src) && src[j] == '(' {
-		return skipBalanced(src, j, '(', ')')
+		return j
+	}
+	return -1
+}
+
+// isBladeDirective distinguishes `@if(...)`/`@endif` from Lit/Vue/Alpine
+// `@event=` shorthand.
+func isBladeDirective(src []byte, i int) bool {
+	word, j := bladeWord(src, i)
+	if word == "" || (j < len(src) && (src[j] == '=' || src[j] == '-' || src[j] == '.' || src[j] == ':')) {
+		return false
+	}
+	return bladeKeywords[word] || bladeArgs(src, word, j) >= 0
+}
+
+// skipBladeDirective returns the offset after the directive at i, including
+// its balanced, string-aware argument list.
+func skipBladeDirective(src []byte, i int) int {
+	word, j := bladeWord(src, i)
+	if open := bladeArgs(src, word, j); open >= 0 {
+		return skipBalanced(src, open, '(', ')')
 	}
 	return j
 }
