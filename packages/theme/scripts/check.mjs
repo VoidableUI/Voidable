@@ -98,6 +98,7 @@ for (const f of srcFiles) {
 const IMPORTANT_OK = new Map([
   ['tokens.css|--void-anim-scale', 'the OS reduced-motion preference wins over every knob, however it was set'],
   ['reset.css|outline', 'forced colours: a real focus outline wins over every `outline: none`'],
+  ['reset.css|display', 'the hidden attribute hides: it wins over every display rule a component or pattern sets'],
   ['components/progress.css|width', 'beats the inline width the component writes (indeterminate and reduced motion)'],
   ['components/gauge.css|stroke-width', 'beats the stroke-width the component sets on its SVG paths'],
   ['components/table.css|mask-image', 'beats the scroll fade the component sets inline while focused'],
