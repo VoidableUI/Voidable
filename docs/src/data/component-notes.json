@@ -252,7 +252,7 @@
   },
   "void-breadcrumbs": {
     "group": "navigation",
-    "children": "One `void-breadcrumbs-item` per crumb, in order, each holding a link (or text for the current page). Put `aria-current=\"page\"` on the item of the current page. The separators are drawn by the theme."
+    "children": "One `void-breadcrumbs-list` holding one `void-breadcrumbs-item` per crumb, in order, each holding a link (or text for the current page). The component gives the list and the items `role=\"list\"` and `role=\"listitem\"`. Put `aria-current=\"page\"` on the item of the current page. The separators are drawn by the theme and are not read out."
   },
   "void-hamburger": {
     "group": "navigation",

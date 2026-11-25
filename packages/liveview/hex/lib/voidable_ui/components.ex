@@ -811,8 +811,9 @@ defmodule VoidableUI.Components do
   # ---------------------------------------------------------------------------
 
   @doc """
-  Renders a `<void-breadcrumbs>` navigation trail. Write one `<void-breadcrumbs-item>` per crumb (a link, or
-  text for the page you are on) and put `aria-current="page"` on the current one.
+  Renders a `<void-breadcrumbs>` navigation trail. Write one `<void-breadcrumbs-list>` and, in it, one
+  `<void-breadcrumbs-item>` per crumb (a link, or text for the page you are on), and put `aria-current="page"`
+  on the current one. The component gives the list and the items their list roles.
   """
   attr :separator, :string, default: nil
   attr :rest, :global

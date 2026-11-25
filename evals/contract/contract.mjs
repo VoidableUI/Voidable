@@ -30,7 +30,7 @@ export const CONTRACT = {
   'void-badge': { role: 'status', name: 'text content', state: ['color (reflected)'], gaps: ['every badge is role="status", a live region: a table of status badges is a page of live regions, and a decorative badge cannot opt out'] },
   'void-banner': { role: 'banner', name: 'text content (its void-banner-title and void-banner-description parts)', state: ['color (reflected)', 'a void-banner-close part makes it dismissible'], gaps: ['role="banner" is the page header landmark; a second banner, or one inside <main>, is invalid'] },
   'void-bar-chart': { role: 'img', name: 'aria-label attribute', state: [], gaps: ['data is a property only (its shape is in the manifest and `voidable ref`); the drawn values are not exposed as text'] },
-  'void-breadcrumbs': { role: 'navigation', name: 'fixed "Breadcrumb"', state: ['aria-current="page" on the void-breadcrumbs-item part the author marks'], gaps: ['the landmark name is fixed English; there is no attribute to change it'] },
+  'void-breadcrumbs': { role: 'navigation', name: 'fixed "Breadcrumb"', state: ['void-breadcrumbs-list is role="list" and each void-breadcrumbs-item in it role="listitem"', 'aria-current="page" on the void-breadcrumbs-item part the author marks'], gaps: ['the landmark name is fixed English; there is no attribute to change it'] },
   'void-button': {
     role: 'button',
     name: 'text content or aria-label',

@@ -152,12 +152,14 @@ describe('chrome of components without regions', () => {
   });
 
   it('breadcrumbs have explicit parts (#52): the items are the author nodes, nothing is lifted or wrapped', async () => {
-    const bc = await mount<Host>('<void-breadcrumbs><void-breadcrumbs-item><a href="/">a</a></void-breadcrumbs-item><void-breadcrumbs-item aria-current="page">b</void-breadcrumbs-item></void-breadcrumbs>');
-    const items = Array.from(bc.children);
+    const bc = await mount<Host>('<void-breadcrumbs><void-breadcrumbs-list><void-breadcrumbs-item><a href="/">a</a></void-breadcrumbs-item><void-breadcrumbs-item aria-current="page">b</void-breadcrumbs-item></void-breadcrumbs-list></void-breadcrumbs>');
+    const list = bc.firstElementChild!;
+    const items = Array.from(list.children);
     bc.voidBeforeMorph();
-    expect(serverShape(bc)).toBe('<void-breadcrumbs-item><a href="/">a</a></void-breadcrumbs-item><void-breadcrumbs-item aria-current="page">b</void-breadcrumbs-item>');
+    expect(serverShape(bc)).toBe('<void-breadcrumbs-list role="list"><void-breadcrumbs-item role="listitem"><a href="/">a</a></void-breadcrumbs-item><void-breadcrumbs-item aria-current="page" role="listitem">b</void-breadcrumbs-item></void-breadcrumbs-list>');
     await settle();
-    expect(Array.from(bc.children)).toEqual(items);
+    expect(bc.firstElementChild).toBe(list);
+    expect(Array.from(list.children)).toEqual(items);
     expect(bc.querySelector('li')).toBeNull();
   });
 });

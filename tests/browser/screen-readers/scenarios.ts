@@ -234,18 +234,13 @@ export const scenarios: Scenario[] = [
     steps: [
       { reach: { role: 'navigation', name: 'Breadcrumb' }, by: 'landmark' },
       { reach: { role: 'link', name: 'Products' }, by: 'link' },
-      { reach: { role: 'generic', selector: 'void-breadcrumbs-item', text: 'Keyboards', current: true, container: true } },
+      { reach: { role: 'listitem', text: 'Keyboards', current: true, container: true, position: { n: 3, of: 3, within: 'void-breadcrumbs-list' } } },
     ],
   },
   {
     id: 'breadcrumbs-list',
     title: 'Breadcrumbs are a list of links, so a screen reader says how many and which one',
     page: '/sr-navigation',
-    knownIssue: {
-      key: 'untracked:breadcrumbs-no-list-semantics',
-      detail:
-        '<void-breadcrumbs> renders nothing of its own and <void-breadcrumbs-item> has no role, so the navigation contains links and bare text with no list and no listitems: a screen reader does not announce "list, 3 items" or the position of a crumb, which the previous markup (ul/li) did and the WAI-ARIA breadcrumb pattern uses.',
-    },
     steps: [
       {
         check: async (page) => {

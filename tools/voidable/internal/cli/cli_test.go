@@ -88,7 +88,8 @@ func TestCheckFixtures(t *testing.T) {
 			`parts.html:19:68: [unknown-attribute] unknown attribute shortcut on <void-menu-item>; write <void-menu-item-shortcut>`,
 			`parts.html:20:16: [missing-part] <void-nav-menu-item> has no <void-nav-menu-trigger>`,
 			`parts.html:20:36: [unknown-attribute] unknown attribute href on <void-nav-menu-item>; write the link as <void-nav-menu-trigger>`,
-			`parts.html:21:1: [missing-part] <void-breadcrumbs> has no <void-breadcrumbs-item>`,
+			`parts.html:21:1: [missing-part] <void-breadcrumbs> has no <void-breadcrumbs-list>`,
+			`parts.html:21:19: [invalid-parent] <void-breadcrumbs-item> is not valid inside <void-breadcrumbs>; it belongs in <void-breadcrumbs-list>`,
 			`parts.html:22:48: [unknown-attribute] unknown attribute label on <void-menu-group>; write the heading as <void-menu-group-label>`,
 		}, nil},
 	}
@@ -141,7 +142,7 @@ func TestRefAndGen(t *testing.T) {
 		{[]string{"ref"}, []string{"elements.", "void-button Action trigger"}},
 		{[]string{"ref", "void-button", "--format", "markdown"}, []string{"## `<void-button>`", "| `variant` | `outline\\|filled\\|ghost` |"}},
 		{[]string{"ref", "void-button", "--format", "json"}, []string{`"tag": "void-button"`, `"values": [`}},
-		{[]string{"ref", "--size"}, []string{"text     index", "160 elements"}},
+		{[]string{"ref", "--size"}, []string{"text     index", "161 elements"}},
 		{[]string{"gen", "snippet", "void-dialog", "--lang", "jsx"}, []string{`<void-dialog size="sm" onvoid-close=`, `<void-dialog-title>Delete project</void-dialog-title>`, `<void-button color="error" variant="filled">Delete</void-button>`}},
 		{[]string{"gen", "snippet", "void-dropdown-menu", "--lang", "erb"}, []string{`data-action="void-select->my-controller#handle"`}},
 		{[]string{"gen", "heex"}, []string{"defmodule VoidableUI.Components do", "def status_dot(assigns) do"}},

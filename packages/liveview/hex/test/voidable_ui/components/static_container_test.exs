@@ -110,8 +110,10 @@ defmodule VoidableUI.Components.StaticContainerTest do
     html =
       rendered_to_string(~H"""
       <VoidableUI.Components.breadcrumbs>
-        <void-breadcrumbs-item><a href="/">Home</a></void-breadcrumbs-item>
-        <void-breadcrumbs-item aria-current="page">Page</void-breadcrumbs-item>
+        <void-breadcrumbs-list>
+          <void-breadcrumbs-item><a href="/">Home</a></void-breadcrumbs-item>
+          <void-breadcrumbs-item aria-current="page">Page</void-breadcrumbs-item>
+        </void-breadcrumbs-list>
       </VoidableUI.Components.breadcrumbs>
       <VoidableUI.Components.menu open>
         <void-menu-content>

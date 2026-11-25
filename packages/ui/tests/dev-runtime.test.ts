@@ -117,9 +117,18 @@ describe('@voidable/ui/dev', () => {
       '<void-tabs value="a"><void-tabs-list><void-tabs-trigger value="a">A</void-tabs-trigger></void-tabs-list><void-tabs-content value="a">a</void-tabs-content></void-tabs>' +
       '<void-dropdown-menu><void-dropdown-menu-trigger><void-button>M</void-button></void-dropdown-menu-trigger><void-dropdown-menu-content><void-dropdown-menu-item>a</void-dropdown-menu-item><void-dropdown-menu-separator></void-dropdown-menu-separator></void-dropdown-menu-content></void-dropdown-menu>' +
       '<void-card><void-card-header><void-card-title>T</void-card-title></void-card-header><void-card-body>b</void-card-body></void-card>' +
-      '<void-accordion><void-accordion-item><void-accordion-trigger>Q</void-accordion-trigger><void-accordion-content>A</void-accordion-content></void-accordion-item></void-accordion>';
+      '<void-accordion><void-accordion-item><void-accordion-trigger>Q</void-accordion-trigger><void-accordion-content>A</void-accordion-content></void-accordion-item></void-accordion>' +
+      '<void-breadcrumbs><void-breadcrumbs-list><void-breadcrumbs-item><a href="/">Home</a></void-breadcrumbs-item><void-breadcrumbs-item aria-current="page">Page</void-breadcrumbs-item></void-breadcrumbs-list></void-breadcrumbs>';
     await settled();
     expect(seen.filter((w) => w.kind !== 'undefined-element')).toEqual([]);
+  });
+
+  it('reports breadcrumb items written without the list part, with the correct markup', async () => {
+    document.body.innerHTML = '<void-breadcrumbs><void-breadcrumbs-item><a href="/">Home</a></void-breadcrumbs-item></void-breadcrumbs>';
+    await settled();
+    const missing = seen.find((w) => w.kind === 'missing-part' && w.tag === 'void-breadcrumbs')!;
+    expect(missing.message).toContain('<void-breadcrumbs-list>');
+    expect(missing.message).toContain('Correct markup:');
   });
 
   it('does not call a CSS-only pattern element unknown, and still reports a real typo', async () => {
