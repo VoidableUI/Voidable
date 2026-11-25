@@ -19,7 +19,7 @@ func genCatalog() *domain.Catalog {
 		{Tag: "void-status-dot", Description: `A "dot".`, Attributes: []domain.Attribute{at("status", "status", "'online' | 'away'", "online")}},
 		{Tag: "void-hover-card", Attributes: []domain.Attribute{at("open-delay", "openDelay", "number", "300"), at("open", "open", "boolean", "false")},
 			Events: []domain.Event{{Name: "void-open"}, {Name: "void-close"}}},
-		{Tag: "void-dialog", Attributes: []domain.Attribute{at("closable", "closable", "boolean", "true"), at("trend", "trend", "'up' | null", "null")}},
+		{Tag: "void-dialog", Attributes: []domain.Attribute{func() domain.Attribute { a := at("closable", "closable", "boolean", "true"); a.FalseString = true; return a }(), at("trend", "trend", "'up' | null", "null")}},
 	})
 }
 
@@ -41,11 +41,12 @@ func TestGenerate(t *testing.T) {
 			`id={@id || "void-hover-card-#{unique_id()}"}`,
 			`data-void-events="void-open,void-close"`,
 			"attr :closable, :boolean, default: true",
+			"closable={to_string(@closable)}", // converter reads "false": never drop the attribute
 			"attr :trend, :string, default: nil\n", // nullable enum: no values
 		}},
 		{"blade", 3, "resources/views/components/dialog.blade.php", []string{
 			"'closable' => true, // boolean",
-			"@if($closable) closable @endif",
+			`closable="{{ $closable ? 'true' : 'false' }}"`,
 			`@if(!is_null($trend)) trend="{{ $trend }}" @endif`,
 			"{{ $attributes }}",
 		}},

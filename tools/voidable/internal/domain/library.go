@@ -25,6 +25,19 @@ func NewLibrary(ctx context.Context, ms ManifestSource, ss SupplementSource, p F
 			return nil, err
 		}
 	}
+	for tag, names := range sup.FalseString {
+		el, ok := cat.Element(tag)
+		if !ok {
+			return nil, fmt.Errorf("%w: supplement falseString names unknown element %s", ErrManifest, tag)
+		}
+		for _, n := range names {
+			a, ok := el.Attribute(n)
+			if !ok {
+				return nil, fmt.Errorf("%w: supplement falseString names unknown attribute %s.%s", ErrManifest, tag, n)
+			}
+			a.FalseString = true
+		}
+	}
 	return &Library{cat: cat, sup: sup, parser: p}, nil
 }
 
@@ -68,7 +81,9 @@ func (l *Library) Reference(ctx context.Context, tag string) (*Reference, error)
 		return nil, err
 	}
 	r := &Reference{Element: *e, Parents: l.sup.Parents[e.Tag], Example: sn}
-	r.Missing = append(r.Missing, "slots")
+	if len(e.Slots) == 0 {
+		r.Missing = append(r.Missing, "slots")
+	}
 	missingDesc := 0
 	for _, a := range e.Attributes {
 		if a.Description == "" {

@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+#MISE description="tools/voidable: golangci-lint, go vet, go test, build (installs the pinned Go on demand; VOIDABLE_SKIP_GO=1 skips)"
+#MISE depends=["build"]
+set -euo pipefail
+
+if [[ "${VOIDABLE_SKIP_GO:-}" == "1" ]]; then
+  echo "voidable:ci skipped (VOIDABLE_SKIP_GO=1): the Go tool in tools/voidable was NOT checked" >&2
+  exit 0
+fi
+
+cd tools/voidable
+# Install only what tools/voidable/mise.toml adds (Go and golangci-lint), not
+# the root toolchain (erlang, ruby, php), and do it explicitly because CI runs
+# with MISE_TASK_RUN_AUTO_INSTALL=false.
+mise install go "aqua:golangci/golangci-lint"
+# `build` already built @voidable/ui; reuse its manifest instead of rebuilding.
+VOIDABLE_SKIP_UI_BUILD=1 mise run ci

@@ -32,6 +32,12 @@ type declaration struct {
 	Members       []member    `json:"members"`
 	Attributes    []attribute `json:"attributes"`
 	Events        []event     `json:"events"`
+	Slots         []slot      `json:"slots"`
+}
+
+type slot struct {
+	Name        string `json:"name"`
+	Description string `json:"description"`
 }
 
 type member struct {
@@ -116,6 +122,9 @@ func element(path string, d declaration) domain.Element {
 	for _, ev := range d.Events {
 		detail, fields := domain.ParseDetail(ev.Type.Text)
 		e.Events = append(e.Events, domain.Event{Name: ev.Name, Detail: detail, Fields: fields, Description: ev.Description})
+	}
+	for _, sl := range d.Slots {
+		e.Slots = append(e.Slots, domain.Slot{Name: sl.Name, Description: sl.Description})
 	}
 	return e
 }

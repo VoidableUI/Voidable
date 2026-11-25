@@ -1,8 +1,15 @@
 {
-  "note": "STAND-IN. Hand-written for the voidable CLI spike, not derived from component source. Snippets exist for six components only. These facts belong in the Custom Elements Manifest (slots, allowed parents, examples, related elements).",
+  "note": "Hand-written knowledge the manifest does not carry yet (allowed parents, converters that read \"false\", hints for attributes agents guess, canonical examples for a few components). Each entry belongs in the Custom Elements Manifest; tests keep falseString in step with packages/ui/src.",
   "parents": {
     "void-option": ["void-multiselect", "void-combobox"],
-    "void-dropdown-menu-item": ["void-dropdown-menu"]
+    "void-dropdown-menu-item": ["void-dropdown-menu"],
+    "void-tab-panel": ["void-tabs"],
+    "void-carousel-slide": ["void-carousel"],
+    "void-segmented-control-item": ["void-segmented-control"]
+  },
+  "falseString": {
+    "void-dialog": ["closable"],
+    "void-drawer": ["closable"]
   },
   "hints": {
     "void-input": {"label": "wrap the control in <void-field label=\"...\">"},

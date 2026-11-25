@@ -102,6 +102,8 @@ func attrType(a domain.Attribute) string {
 
 func attrDefault(a domain.Attribute) string {
 	switch {
+	case a.Kind == domain.KindBoolean && a.Default == "true" && a.FalseString:
+		return ` =true (write ="false" to turn it off)`
 	case a.Kind == domain.KindBoolean && a.Default == "true":
 		return " =true (cannot be unset from HTML; set the property to false)"
 	case a.Kind == domain.KindBoolean, a.Default == "", a.Default == "''", a.Default == "null", a.Default == "undefined":
@@ -145,6 +147,16 @@ func refText(p *printer, r *domain.Reference) {
 			p.f("%s\n", line)
 		}
 	}
+	if len(r.Slots) > 0 {
+		p.f("%s", "slots:\n")
+		for _, s := range r.Slots {
+			name := s.Name
+			if name == "" {
+				name = "(default)"
+			}
+			p.f(" %s # %s\n", name, s.Description)
+		}
+	}
 	if len(r.Parents) > 0 {
 		p.f("parents: %s [stand-in]\n", strings.Join(r.Parents, ", "))
 	}
@@ -168,6 +180,17 @@ func refMarkdown(p *printer, r *domain.Reference) {
 		p.f("%s", "| Attribute | Type | Default | Description |\n|---|---|---|---|\n")
 		for _, a := range r.Attributes {
 			p.f("| `%s` | `%s` | %s | %s |\n", a.Name, mdEscape(attrType(a)), mdCode(a.Default), mdEscape(a.Description))
+		}
+		p.f("%s", "\n")
+	}
+	if len(r.Slots) > 0 {
+		p.f("%s", "| Slot | Description |\n|---|---|\n")
+		for _, s := range r.Slots {
+			name := "(default)"
+			if s.Name != "" {
+				name = "`" + s.Name + "`"
+			}
+			p.f("| %s | %s |\n", name, mdEscape(s.Description))
 		}
 		p.f("%s", "\n")
 	}

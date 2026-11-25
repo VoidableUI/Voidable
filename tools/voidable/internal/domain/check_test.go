@@ -30,11 +30,12 @@ func testCatalog() *Catalog {
 			Attributes: []Attribute{attr("variant", "'outline' | 'filled'", "outline"), attr("color", "'default' | 'error'", "default"), attr("disabled", "boolean", "false")},
 			Events:     []Event{{Name: "void-click", Detail: "{}"}}},
 		{Tag: "void-sidebar", Class: "VoidSidebar",
-			Attributes: []Attribute{attr("collapsed", "boolean", "false"), {Name: "collapsedwidth", Field: "collapsedWidth", Type: "string", Kind: KindString}},
-			Properties: []Property{{Name: "collapsed", Attribute: "collapsed"}, {Name: "collapsedWidth", Attribute: "collapsedwidth"}},
+			Attributes: []Attribute{attr("collapsed", "boolean", "false"), {Name: "collapsed-width", Field: "collapsedWidth", Type: "string", Kind: KindString}},
+			Properties: []Property{{Name: "collapsed", Attribute: "collapsed"}, {Name: "collapsedWidth", Attribute: "collapsed-width"}},
 			Events:     []Event{{Name: "void-toggle", Detail: "{ collapsed: boolean }"}}},
 		{Tag: "void-input", Class: "VoidInput", Attributes: []Attribute{attr("name", "string", ""), attr("value", "string", "")}},
 		{Tag: "void-dialog", Class: "VoidDialog", Attributes: []Attribute{attr("closable", "boolean", "true")}},
+		{Tag: "void-nav-bar", Class: "VoidNavBar", Attributes: []Attribute{attr("bordered", "boolean", "true")}},
 		{Tag: "void-slider", Class: "VoidSlider", Attributes: []Attribute{attr("step", "number", "1")}},
 		{Tag: "void-select", Class: "VoidSelect"},
 		{Tag: "void-multiselect", Class: "VoidMultiselect", Properties: []Property{{Name: "values", Type: "string[]"}}},
@@ -45,7 +46,8 @@ func testCatalog() *Catalog {
 func testLibrary(t *testing.T) *Library {
 	t.Helper()
 	sup := &Supplement{
-		Parents: map[string][]string{"void-option": {"void-multiselect"}},
+		Parents:     map[string][]string{"void-option": {"void-multiselect"}},
+		FalseString: map[string][]string{"void-dialog": {"closable"}},
 		Hints:   map[string]map[string]string{"void-input": {"label": "wrap in <void-field>"}},
 	}
 	lib, err := NewLibrary(context.Background(), stubManifest{testCatalog()}, stubSupplement{sup}, nil)
@@ -71,11 +73,13 @@ func TestCheckTag(t *testing.T) {
 		{"color primary", Tag{Name: "void-button", Lang: LangHTML, Attrs: []AttrToken{a("color", "primary", SyntaxAttr)}}, []Rule{RuleInvalidValue}, "allowed: default|error"},
 		{"dynamic value skipped", Tag{Name: "void-button", Lang: LangERB, Attrs: []AttrToken{dyn(a("color", "<%= c %>", SyntaxAttr))}}, nil, ""},
 		{"bool false", Tag{Name: "void-button", Lang: LangHTML, Attrs: []AttrToken{a("disabled", "false", SyntaxAttr)}}, []Rule{RuleBooleanFalse}, "remove it"},
-		{"bool default true", Tag{Name: "void-dialog", Lang: LangHTML, Attrs: []AttrToken{a("closable", "false", SyntaxAttr)}}, []Rule{RuleBooleanFalse}, "property"},
-		{"collapsed-width", Tag{Name: "void-sidebar", Lang: LangHTML, Attrs: []AttrToken{a("collapsed-width", "4rem", SyntaxAttr)}}, []Rule{RuleUnknownAttribute}, "did you mean collapsedwidth"},
-		{"html case folding", Tag{Name: "void-sidebar", Lang: LangHEEx, Attrs: []AttrToken{a("collapsedWidth", "4rem", SyntaxAttr)}}, nil, ""},
+		{"bool default true, converter reads false", Tag{Name: "void-dialog", Lang: LangHTML, Attrs: []AttrToken{a("closable", "false", SyntaxAttr)}}, nil, ""},
+		{"bool default true, plain boolean", Tag{Name: "void-nav-bar", Lang: LangHTML, Attrs: []AttrToken{a("bordered", "false", SyntaxAttr)}}, []Rule{RuleBooleanFalse}, "property"},
+		{"kebab-case attribute", Tag{Name: "void-sidebar", Lang: LangHTML, Attrs: []AttrToken{a("collapsed-width", "4rem", SyntaxAttr)}}, nil, ""},
+		{"removed lowercase attribute", Tag{Name: "void-sidebar", Lang: LangHTML, Attrs: []AttrToken{a("collapsedwidth", "4rem", SyntaxAttr)}}, []Rule{RuleUnknownAttribute}, "did you mean collapsed-width"},
+		{"html case folding", Tag{Name: "void-sidebar", Lang: LangHEEx, Attrs: []AttrToken{a("collapsedWidth", "4rem", SyntaxAttr)}}, []Rule{RuleUnknownAttribute}, "did you mean collapsed-width"},
 		{"jsx camel property", Tag{Name: "void-sidebar", Lang: LangJSX, Attrs: []AttrToken{a("collapsedWidth", "4rem", SyntaxAttr), a("className", "x", SyntaxAttr)}}, nil, ""},
-		{"jsx unknown camel", Tag{Name: "void-sidebar", Lang: LangJSX, Attrs: []AttrToken{a("collapseWidth", "4rem", SyntaxAttr)}}, []Rule{RuleUnknownAttribute}, "collapsedwidth"},
+		{"jsx unknown camel", Tag{Name: "void-sidebar", Lang: LangJSX, Attrs: []AttrToken{a("collapseWidth", "4rem", SyntaxAttr)}}, []Rule{RuleUnknownAttribute}, "collapsed-width"},
 		{"label hint", Tag{Name: "void-input", Lang: LangHTML, Attrs: []AttrToken{a("label", "Email", SyntaxAttr)}}, []Rule{RuleUnknownAttribute}, "void-field"},
 		{"globals", Tag{Name: "void-input", Lang: LangHTML, Attrs: []AttrToken{a("id", "x", SyntaxAttr), a("aria-label", "x", SyntaxAttr), a("data-x", "1", SyntaxAttr), a("slot", "a", SyntaxAttr)}}, nil, ""},
 		{"directives and spreads skipped", Tag{Name: "void-input", Lang: LangHEEx, Attrs: []AttrToken{a("phx-change", "x", SyntaxDirective), a("{@rest}", "", SyntaxSpread)}}, nil, ""},

@@ -11,6 +11,9 @@ type Supplement struct {
 	// Hints maps tag -> attribute -> advice for attributes agents commonly
 	// guess but that do not exist.
 	Hints map[string]map[string]string `json:"hints"`
+	// FalseString maps a tag to the default-true boolean attributes whose
+	// converter reads "false" as false (the manifest does not say).
+	FalseString map[string][]string `json:"falseString"`
 }
 
 // Node is a parsed snippet node. Tag is empty for a text node.

@@ -106,11 +106,11 @@ func TestStdioSession(t *testing.T) {
 		want    []string
 	}{
 		{"check jsx", "voidable_check", map[string]any{"lang": "jsx", "markup": `<void-button color="primary" onvoid-click={go}>Go</void-button>
-<void-sidebar collapsed-width="4rem" />`},
-			false, []string{"input:1:14: [invalid-value] color=\"primary\"", "input:2:15: [unknown-attribute] unknown attribute collapsed-width", "did you mean collapsedwidth"}},
+<void-sidebar collapsedwidth="4rem" />`},
+			false, []string{"input:1:14: [invalid-value] color=\"primary\"", "input:2:15: [unknown-attribute] unknown attribute collapsedwidth", "did you mean collapsed-width"}},
 		{"check clean", "voidable_check", map[string]any{"markup": `<void-button variant="filled">Go</void-button>`}, false, []string{"ok"}},
 		{"ref index", "voidable_ref", map[string]any{}, false, []string{"void-button ", "void-select "}},
-		{"ref tag", "voidable_ref", map[string]any{"tag": "void-slider"}, false, []string{"showvalue: boolean (prop showValue)", "void-change detail={ value: number }"}},
+		{"ref tag", "voidable_ref", map[string]any{"tag": "void-slider"}, false, []string{"show-value: boolean (prop showValue)", "void-change detail={ value: number }"}},
 		{"ref unknown", "voidable_ref", map[string]any{"tag": "void-buton"}, true, []string{"did you mean void-button"}},
 		{"snippet heex", "voidable_snippet", map[string]any{"tag": "void-select", "lang": "heex"}, false, []string{"<.select name=\"plan\"", "<option value=\"pro\">Pro</option>"}},
 	}

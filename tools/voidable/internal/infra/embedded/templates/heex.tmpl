@@ -36,7 +36,11 @@ defmodule VoidableUI.Components do
 {{- end}}
 {{- range .Attributes}}
 {{- if ne .Name "id"}}
+{{- if .FalseString}}
+      {{.Name}}={to_string(@{{assign .}})}
+{{- else}}
       {{.Name}}={@{{assign .}}}
+{{- end}}
 {{- end}}
 {{- end}}
 {{- if .Events}}
