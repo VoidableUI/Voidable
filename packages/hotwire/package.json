@@ -1,7 +1,14 @@
 {
   "name": "@voidable/ui-hotwire",
   "version": "0.0.0",
+  "description": "Hotwire (Turbo and Stimulus) integration for Voidable UI web components",
+  "keywords": ["hotwire", "turbo", "stimulus", "rails", "web-components", "custom-elements", "void-ui"],
+  "homepage": "https://voidable.dev",
+  "bugs": {
+    "url": "https://github.com/VoidableUI/Voidable/issues"
+  },
   "type": "module",
+  "sideEffects": false,
   "license": "MIT",
   "exports": {
     ".": {
@@ -30,7 +37,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/VoidableUI/Voidable",
+    "url": "git+https://github.com/VoidableUI/Voidable.git",
     "directory": "packages/hotwire"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

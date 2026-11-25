@@ -11,14 +11,13 @@ violations=0
 err() { echo "ERROR: $*" >&2; violations=1; }
 
 # 1. package.json must declare wildcard subpath exports for components
-# Expected:
+# Expected: one public specifier per component, and no bare "./*" wildcard.
 #   "./components/*": { ... "default": "./dist/components/*.js" }
-#   "./*":            { ... "default": "./dist/components/*.js" }
 node -e "
   const p = require('./$PKG_JSON');
   const e = p.exports || {};
   if (!e['./components/*']) { console.error('missing exports[\"./components/*\"]'); process.exit(1); }
-  if (!e['./*'])            { console.error('missing exports[\"./*\"] wildcard'); process.exit(1); }
+  if (e['./*'])             { console.error('exports[\"./*\"] duplicates ./components/*; keep one specifier per module'); process.exit(1); }
   if (!Array.isArray(p.sideEffects)) { console.error('missing top-level sideEffects array'); process.exit(1); }
   if (!p.sideEffects.includes('./dist/components/*.js')) {
     console.error('sideEffects must include \"./dist/components/*.js\"'); process.exit(1);

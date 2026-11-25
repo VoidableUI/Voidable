@@ -1,7 +1,14 @@
 {
   "name": "@voidable/ui-solid",
   "version": "0.0.0",
+  "description": "SolidJS primitives for Voidable UI web components",
+  "keywords": ["solid", "solid-js", "web-components", "custom-elements", "void-ui"],
+  "homepage": "https://voidable.dev",
+  "bugs": {
+    "url": "https://github.com/VoidableUI/Voidable/issues"
+  },
   "type": "module",
+  "sideEffects": false,
   "license": "MIT",
   "exports": {
     ".": {
@@ -27,7 +34,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/VoidableUI/Voidable",
+    "url": "git+https://github.com/VoidableUI/Voidable.git",
     "directory": "packages/solid"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

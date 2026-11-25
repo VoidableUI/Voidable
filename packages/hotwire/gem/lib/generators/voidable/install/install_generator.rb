@@ -115,8 +115,8 @@ module Voidable
             <<~JS
               // For smaller bundles, replace the bulk import below with
               // per-component imports for only the elements you use, e.g.:
-              //   import "@voidable/ui/button";
-              //   import "@voidable/ui/input";
+              //   import "@voidable/ui/components/button";
+              //   import "@voidable/ui/components/input";
               // See the available components under @voidable/ui's exports.
               import "@voidable/ui";
               import "@voidable/ui-hotwire";

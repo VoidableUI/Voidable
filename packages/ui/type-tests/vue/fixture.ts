@@ -7,7 +7,7 @@
 // types exercises the augmentation without an SFC compiler in this package.
 import type {} from '@voidable/ui/types/vue';
 import type { GlobalComponents } from 'vue';
-import type { BarChartData } from '@voidable/ui/bar-chart';
+import type { BarChartData } from '@voidable/ui/components/bar-chart';
 
 type Instance<T extends keyof GlobalComponents> = InstanceType<GlobalComponents[T]>;
 type Props<T extends keyof GlobalComponents> = Instance<T>['$props'];

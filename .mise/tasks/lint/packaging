@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+#MISE description="Pack every published npm package and check the tarballs: publint, are-the-types-wrong, exports targets, stray maps, metadata"
+#MISE depends=["build"]
+set -euo pipefail
+
+node scripts/packaging/check.mjs

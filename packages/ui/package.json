@@ -1,7 +1,17 @@
 {
   "name": "@voidable/ui",
   "version": "0.0.0",
+  "description": "Lit 3 web components for Voidable UI: light DOM, no visual CSS until a theme is loaded",
+  "keywords": ["web-components", "lit", "custom-elements", "ui", "component-library", "design-system", "light-dom", "void-ui"],
+  "homepage": "https://voidable.dev",
+  "bugs": {
+    "url": "https://github.com/VoidableUI/Voidable/issues"
+  },
   "type": "module",
+  "sideEffects": [
+    "./dist/index.js",
+    "./dist/components/*.js"
+  ],
   "license": "MIT",
   "exports": {
     ".": {
@@ -16,6 +26,7 @@
       "types": "./dist/components/*.d.ts",
       "default": "./dist/components/*.js"
     },
+    "./components/charts/*": null,
     "./types/elements": {
       "types": "./dist/types/elements.d.ts"
     },
@@ -34,18 +45,8 @@
     "./custom-elements.json": "./dist/custom-elements.json",
     "./components.json": "./dist/components.json",
     "./vscode.html-custom-data.json": "./dist/vscode.html-custom-data.json",
-    "./web-types.json": "./dist/web-types.json",
-    "./*": {
-      "types": "./dist/components/*.d.ts",
-      "default": "./dist/components/*.js"
-    }
+    "./web-types.json": "./dist/web-types.json"
   },
-  "sideEffects": [
-    "./dist/index.js",
-    "./dist/components/*.js",
-    "./src/index.ts",
-    "./src/components/*.ts"
-  ],
   "files": ["dist"],
   "customElements": "dist/custom-elements.json",
   "web-types": "./dist/web-types.json",
@@ -54,10 +55,8 @@
     "test": "vitest run",
     "typecheck": "tsc --noEmit && tsc -p type-tests/react && tsc -p type-tests/solid && tsc -p type-tests/svelte && tsc -p type-tests/vue"
   },
-  "dependencies": {
-    "lit": "^3.3.0"
-  },
   "peerDependencies": {
+    "lit": "^3.3.0",
     "@types/react": ">=19",
     "solid-js": ">=1.8.0",
     "svelte": ">=5",
@@ -78,6 +77,7 @@
     }
   },
   "devDependencies": {
+    "lit": "^3.3.0",
     "@custom-elements-manifest/analyzer": "^0.11.0",
     "@types/react": "^19.0.0",
     "solid-js": "^1.8.0",
@@ -91,7 +91,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/VoidableUI/Voidable",
+    "url": "git+https://github.com/VoidableUI/Voidable.git",
     "directory": "packages/ui"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

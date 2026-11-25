@@ -1,7 +1,14 @@
 {
   "name": "@voidable/ui-vue",
   "version": "0.0.0",
+  "description": "Vue composables for Voidable UI web components",
+  "keywords": ["vue", "web-components", "custom-elements", "composables", "void-ui"],
+  "homepage": "https://voidable.dev",
+  "bugs": {
+    "url": "https://github.com/VoidableUI/Voidable/issues"
+  },
   "type": "module",
+  "sideEffects": false,
   "license": "MIT",
   "exports": {
     ".": {
@@ -27,7 +34,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/VoidableUI/Voidable",
+    "url": "git+https://github.com/VoidableUI/Voidable.git",
     "directory": "packages/vue"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

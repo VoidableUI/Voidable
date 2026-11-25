@@ -1,7 +1,14 @@
 {
   "name": "@voidable/ui-svelte",
   "version": "0.0.0",
+  "description": "Svelte stores for Voidable UI web components",
+  "keywords": ["svelte", "web-components", "custom-elements", "stores", "void-ui"],
+  "homepage": "https://voidable.dev",
+  "bugs": {
+    "url": "https://github.com/VoidableUI/Voidable/issues"
+  },
   "type": "module",
+  "sideEffects": false,
   "license": "MIT",
   "exports": {
     ".": {
@@ -27,7 +34,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/VoidableUI/Voidable",
+    "url": "git+https://github.com/VoidableUI/Voidable.git",
     "directory": "packages/svelte"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

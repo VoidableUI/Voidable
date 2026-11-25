@@ -7,7 +7,7 @@
 // a .svelte compiler in this package.
 import type {} from '@voidable/ui/types/svelte';
 import type { SvelteHTMLElements } from 'svelte/elements';
-import type { BarChartData } from '@voidable/ui/bar-chart';
+import type { BarChartData } from '@voidable/ui/components/bar-chart';
 
 type Attrs<T extends keyof SvelteHTMLElements> = SvelteHTMLElements[T];
 

@@ -1,7 +1,7 @@
 // Type-level test for @voidable/ui/types/react. Compiled (not run) by
 // `pnpm typecheck` against the generated dist/types after a build.
 import type {} from '@voidable/ui/types/react';
-import type { BarChartData } from '@voidable/ui/bar-chart';
+import type { BarChartData } from '@voidable/ui/components/bar-chart';
 
 const data: BarChartData = { series: [{ name: 'A', values: [1, 2, 3] }], labels: ['x', 'y', 'z'] };
 
