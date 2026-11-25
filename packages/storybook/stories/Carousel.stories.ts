@@ -38,8 +38,8 @@ export const Default: Story = {
       ?autoplay=${args.autoplay}
       interval=${args.interval ?? 5000}
       size=${args.size ?? 'md'}
-      ?controls=${args.controls ?? true}
-      ?indicators=${args.indicators ?? true}
+      controls=${String(args.controls ?? true)}
+      indicators=${String(args.indicators ?? true)}
       orientation=${args.orientation ?? 'horizontal'}
     >
       <void-carousel-slide>
@@ -64,8 +64,8 @@ export const WithLoop: Story = {
       ?autoplay=${args.autoplay}
       interval=${args.interval ?? 5000}
       size=${args.size ?? 'md'}
-      ?controls=${args.controls ?? true}
-      ?indicators=${args.indicators ?? true}
+      controls=${String(args.controls ?? true)}
+      indicators=${String(args.indicators ?? true)}
       orientation=${args.orientation ?? 'horizontal'}
     >
       <void-carousel-slide>

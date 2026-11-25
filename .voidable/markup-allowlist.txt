@@ -9,21 +9,3 @@
 # become a real void-button variant, being added on a separate branch). The
 # usages stay as they are.
 invalid-value void-button variant=ghost 100
-
-# void-input forwards native input attributes and types that it does not
-# declare. Decide whether to declare them, so types, manifest and behaviour agree.
-unknown-attribute void-input autocomplete 36
-unknown-attribute void-action-input minlength 3
-invalid-value void-input type=time 10
-invalid-value void-input type=datetime-local 10
-
-# The theme styles these colors but the components' color types omit them:
-# widen the types or drop the styles.
-invalid-value void-toast color=caution 10
-invalid-value void-stat color=highlight 1
-
-# void-stat has no description attribute; add it or change the usages.
-unknown-attribute void-stat description 8
-
-# step="any" becomes NaN on void-number-input: support it or reject it loudly.
-invalid-value void-number-input step=any 12

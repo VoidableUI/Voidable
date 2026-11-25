@@ -33,11 +33,14 @@ defmodule VoidableUI.Components do
   *when their content is static*. Avoid it on `dialog`/`drawer` (the server
   drives `open`), `input`, `checkbox`, `switch` and other value-bound controls.
 
-  ## `closable={false}`
+  ## Booleans that default to true
 
-  `dialog` and `drawer` render `closable="true"` or `closable="false"`; the
-  core component reads the string `"false"` as false, so the server can turn
-  `closable` off and back on with an ordinary attribute patch.
+  Every boolean that defaults to true in the core component (`closable` on
+  `dialog` and `drawer`, `dismissable` on `toast`, `bordered` on `nav_bar`,
+  `controls` and `indicators` on `carousel`, `show_input` on `color_picker`,
+  `icon` on `error_fallback`) renders as `"true"` or `"false"`. The core
+  component reads the string `"false"` as false, so the server can turn the
+  attribute off and back on with an ordinary attribute patch.
   """
 
   use Phoenix.Component
@@ -335,7 +338,11 @@ defmodule VoidableUI.Components do
   attr :name, :string, default: nil
   attr :size, :string, default: nil
   attr :error, :string, default: nil
-  attr :rest, :global
+  attr :autocomplete, :string, default: nil
+  attr :minlength, :integer, default: nil
+  attr :maxlength, :integer, default: nil
+  attr :pattern, :string, default: nil
+  attr :rest, :global, include: ~w(inputmode enterkeyhint autocapitalize spellcheck)
 
   def input(assigns) do
     ~H"""
@@ -350,6 +357,10 @@ defmodule VoidableUI.Components do
       name={@name}
       size={@size}
       error={@error}
+      autocomplete={@autocomplete}
+      minlength={@minlength}
+      maxlength={@maxlength}
+      pattern={@pattern}
       phx-hook="VoidEvent"
       data-void-events="void-input,void-change"
       {@rest}
@@ -373,7 +384,10 @@ defmodule VoidableUI.Components do
   attr :resize, :string, default: nil
   attr :size, :string, default: nil
   attr :error, :string, default: nil
-  attr :rest, :global
+  attr :autocomplete, :string, default: nil
+  attr :minlength, :integer, default: nil
+  attr :maxlength, :integer, default: nil
+  attr :rest, :global, include: ~w(inputmode enterkeyhint autocapitalize spellcheck)
 
   def textarea(assigns) do
     ~H"""
@@ -389,6 +403,9 @@ defmodule VoidableUI.Components do
       resize={@resize}
       size={@size}
       error={@error}
+      autocomplete={@autocomplete}
+      minlength={@minlength}
+      maxlength={@maxlength}
       phx-hook="VoidEvent"
       data-void-events="void-input,void-change"
       {@rest}
@@ -803,7 +820,7 @@ defmodule VoidableUI.Components do
       id={@id || auto_id("void-toast", @rest)}
       color={@color}
       duration={@duration}
-      dismissable={@dismissable}
+      dismissable={to_string(@dismissable)}
       heading={@heading}
       phx-hook="VoidEvent"
       data-void-events="void-close"
@@ -1059,7 +1076,7 @@ defmodule VoidableUI.Components do
       message={@message}
       retryable={@retryable}
       retry-label={@retry_label}
-      icon={@icon}
+      icon={to_string(@icon)}
       {@rest}
     />
     """
@@ -1202,7 +1219,7 @@ defmodule VoidableUI.Components do
 
   def nav_bar(assigns) do
     ~H"""
-    <void-nav-bar sticky={@sticky} bordered={@bordered} variant={@variant} {@rest}>
+    <void-nav-bar sticky={@sticky} bordered={to_string(@bordered)} variant={@variant} {@rest}>
       {render_slot(@inner_block)}
     </void-nav-bar>
     """
@@ -1446,6 +1463,7 @@ defmodule VoidableUI.Components do
   attr :label, :string, default: nil
   attr :value, :string, default: nil
   attr :delta, :string, default: nil
+  attr :description, :string, default: nil
   attr :trend, :string, default: nil
   attr :color, :string, default: nil
   attr :size, :string, default: nil
@@ -1457,6 +1475,7 @@ defmodule VoidableUI.Components do
       label={@label}
       value={@value}
       delta={@delta}
+      description={@description}
       trend={@trend}
       color={@color}
       size={@size}
@@ -1586,8 +1605,8 @@ defmodule VoidableUI.Components do
       autoplay={@autoplay}
       interval={@interval}
       size={@size}
-      controls={@controls}
-      indicators={@indicators}
+      controls={to_string(@controls)}
+      indicators={to_string(@indicators)}
       orientation={@orientation}
       phx-hook="VoidEvent"
       data-void-events="void-change"
@@ -1694,10 +1713,10 @@ defmodule VoidableUI.Components do
 
   @doc "Renders a `<void-number-input>` numeric stepper."
   attr :id, :string, default: nil
-  attr :value, :integer, default: nil
-  attr :min, :integer, default: nil
-  attr :max, :integer, default: nil
-  attr :step, :integer, default: nil
+  attr :value, :any, default: nil
+  attr :min, :any, default: nil
+  attr :max, :any, default: nil
+  attr :step, :any, default: nil, doc: "a number, or `\"any\"` for no step constraint (the buttons then step by 1)"
   attr :precision, :integer, default: nil
   attr :disabled, :boolean, default: false
   attr :readonly, :boolean, default: false
@@ -1945,7 +1964,7 @@ defmodule VoidableUI.Components do
   attr :value, :string, default: nil
   attr :disabled, :boolean, default: false
   attr :size, :string, default: nil
-  attr :show_input, :boolean, default: false
+  attr :show_input, :boolean, default: true
   attr :variant, :string, default: nil
   attr :open, :boolean, default: false
   attr :rest, :global
@@ -1957,7 +1976,7 @@ defmodule VoidableUI.Components do
       value={@value}
       disabled={@disabled}
       size={@size}
-      show-input={@show_input}
+      show-input={to_string(@show_input)}
       variant={@variant}
       open={@open}
       phx-hook="VoidEvent"
@@ -1982,7 +2001,12 @@ defmodule VoidableUI.Components do
   attr :icon, :string, default: nil
   attr :action_label, :string, default: nil
   attr :position, :string, default: nil
-  attr :rest, :global
+  attr :type, :string, default: nil
+  attr :autocomplete, :string, default: nil
+  attr :minlength, :integer, default: nil
+  attr :maxlength, :integer, default: nil
+  attr :pattern, :string, default: nil
+  attr :rest, :global, include: ~w(inputmode enterkeyhint autocapitalize spellcheck)
 
   def action_input(assigns) do
     ~H"""
@@ -1997,6 +2021,11 @@ defmodule VoidableUI.Components do
       icon={@icon}
       action-label={@action_label}
       position={@position}
+      type={@type}
+      autocomplete={@autocomplete}
+      minlength={@minlength}
+      maxlength={@maxlength}
+      pattern={@pattern}
       phx-hook="VoidEvent"
       data-void-events="void-input,void-change,void-action"
       {@rest}

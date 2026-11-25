@@ -24,7 +24,7 @@ const meta: Meta = {
     placeholder: { control: 'text' },
     label: { control: 'text' },
     size: { control: 'select', options: ['sm', 'md', 'lg'] },
-    color: { control: 'select', options: ['default', 'error', 'warning', 'success', 'info', 'notice'] },
+    color: { control: 'select', options: ['default', 'error', 'warning', 'caution', 'success', 'info', 'notice'] },
     controls: { control: 'select', options: ['sides', 'right', 'none'] },
   },
   render: (args) => html`
@@ -107,5 +107,18 @@ export const WithUnit: Story = {
       <void-number-input value="180" unit="°" min="0" max="360" step="15"></void-number-input>
       <void-number-input value="1200" prefix="€" unit="/mo" precision="0"></void-number-input>
     </div>
+  `,
+};
+
+export const StepAny: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story: '`step="any"` accepts any decimal, like the native input. The stepper buttons and arrow keys then step by 1.',
+      },
+    },
+  },
+  render: () => html`
+    <void-number-input step="any" value="2.375" style="max-width: 18rem;"></void-number-input>
   `,
 };
