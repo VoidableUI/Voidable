@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+#MISE description="Cross-compile, package and checksum the voidable binaries (needs VERSION; publishes nothing)"
+set -euo pipefail
+
+exec scripts/release/binaries.sh
