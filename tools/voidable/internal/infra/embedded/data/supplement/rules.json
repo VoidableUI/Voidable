@@ -9,7 +9,8 @@
   },
   "falseString": {
     "void-dialog": ["closable"],
-    "void-drawer": ["closable"]
+    "void-drawer": ["closable"],
+    "void-gauge": ["tick-max", "tick-min"]
   },
   "hints": {
     "void-input": {"label": "wrap the control in <void-field label=\"...\">"},
