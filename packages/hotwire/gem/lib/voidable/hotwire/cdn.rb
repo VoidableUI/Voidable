@@ -17,6 +17,25 @@ module Voidable
       UI_URL = "#{BASE}/@voidable/ui@#{NPM_VERSION}/+esm".freeze
       UI_HOTWIRE_URL = "#{BASE}/@voidable/ui-hotwire@#{NPM_VERSION}/dist/index.js".freeze
       THEME_CSS_URL = "#{BASE}/@voidable/theme@#{NPM_VERSION}/src/index.css".freeze
+
+      # The autoloader (@voidable/ui/autoloader) imports each component from a
+      # file next to it, so it is pinned as the raw dist file, not as a +esm
+      # bundle (jsDelivr would bundle a private copy of the shared base code
+      # into every component). Raw files import `lit` by bare name, so lit's
+      # three entry points are pinned too, to the same +esm URLs the +esm
+      # bundle of @voidable/ui itself uses.
+      UI_AUTOLOADER_URL = "#{BASE}/@voidable/ui@#{NPM_VERSION}/dist/autoloader.js".freeze
+      LIT_URL = "#{BASE}/lit@3/+esm".freeze
+      LIT_DECORATORS_URL = "#{BASE}/lit@3/decorators.js/+esm".freeze
+      LIT_DIRECTIVES_LIVE_URL = "#{BASE}/lit@3/directives/live.js/+esm".freeze
+
+      # Import map entries for the autoloader setup, in pin order.
+      AUTOLOADER_PINS = {
+        "@voidable/ui/autoloader" => UI_AUTOLOADER_URL,
+        "lit" => LIT_URL,
+        "lit/decorators.js" => LIT_DECORATORS_URL,
+        "lit/directives/live.js" => LIT_DIRECTIVES_LIVE_URL
+      }.freeze
     end
   end
 end
