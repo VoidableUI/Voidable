@@ -72,6 +72,7 @@ export default defineConfig({
             { label: 'Design Philosophy', slug: 'getting-started/design-philosophy' },
             { label: 'Component Authoring', slug: 'getting-started/component-authoring' },
             { label: 'Theming', slug: 'getting-started/theming' },
+            { label: 'Theme builder', link: '/theme/' },
             { label: 'Design Tokens', slug: 'getting-started/tokens' },
             { label: 'Migrating from the framework packages', slug: 'getting-started/migrating-from-framework-packages' },
             { label: 'Measuring agent-friendliness', slug: 'getting-started/agent-evals' },
