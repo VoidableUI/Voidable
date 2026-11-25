@@ -113,3 +113,6 @@ console.log(
     `(${allowed.size - stale.length} known gap(s) allowlisted in ${ALLOWLIST})`,
 );
 EOF
+
+# Story controls: no argTypes override of a real attribute, and no args value outside a union.
+node packages/storybook/scripts/check-stories.mjs
