@@ -2,9 +2,6 @@ import type { PropertyValues } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
 
-/** Overlays whose panels are absolutely positioned inside their host (see {@link VoidTable}`#revealOverlays`). */
-const OPEN_OVERLAY = '[open], void-tooltip[visible]';
-
 /** Table row groups, rows and cells, with the roles a browser may drop once their `display` changes. */
 /** What marks a header cell as something to use (select all, sort) rather than only a column name. */
 const CONTROLS = 'button, a[href], input, select, textarea, [tabindex], [role="checkbox"], [role="button"], [role="switch"]';
@@ -56,8 +53,7 @@ interface Column {
  * focusable and labelled (`label`, else the `<caption>`, else `aria-label`) only while it actually
  * overflows, and fades its edges while there is more to scroll to. `max-height` makes the region
  * scroll vertically too, which is what `sticky-header` needs; without it a sticky header sticks to
- * the page. A scroll region clips what is opened in a cell, so while an overlay is open the region
- * makes room for it (and scrolls it into view).
+ * the page.
  *
  * @cssprop --void-table-max-height - Height at which a scrollable table starts scrolling vertically.
  */
@@ -88,7 +84,6 @@ export class VoidTable extends VoidElement {
 
   #mutations: MutationObserver | null = null;
   #resize: ResizeObserver | null = null;
-  #raf = 0;
   #queued = false;
   #autoLabels = new WeakMap<Element, string>();
   #autoStack = new WeakMap<Element, string>();
@@ -99,13 +94,13 @@ export class VoidTable extends VoidElement {
 
   override connectedCallback(): void {
     super.connectedCallback();
-    this.#mutations ??= new MutationObserver((records) => this.#onMutations(records));
+    this.#mutations ??= new MutationObserver(() => this.#schedule());
     this.#mutations.observe(this, {
       childList: true,
       subtree: true,
       characterData: true,
       attributes: true,
-      attributeFilter: ['data-label', 'data-stack', 'data-align', 'role', 'colspan', 'open', 'visible', 'aria-expanded'],
+      attributeFilter: ['data-label', 'data-stack', 'data-align', 'role', 'colspan'],
     });
     if (typeof ResizeObserver !== 'undefined') {
       this.#resize ??= new ResizeObserver(() => this.#schedule());
@@ -120,8 +115,6 @@ export class VoidTable extends VoidElement {
     this.#mutations?.disconnect();
     this.#resize?.disconnect();
     this.removeEventListener('scroll', this.#onScroll);
-    if (this.#raf) cancelAnimationFrame(this.#raf);
-    this.#raf = 0;
   }
 
   protected override updated(changed: PropertyValues): void {
@@ -139,14 +132,6 @@ export class VoidTable extends VoidElement {
   }
 
   #onScroll = (): void => this.#syncEdges();
-
-  #onMutations(records: MutationRecord[]): void {
-    const isOpenState = (r: MutationRecord) =>
-      r.type === 'attributes' && ['open', 'visible', 'aria-expanded'].includes(r.attributeName ?? '');
-    if (records.some(isOpenState)) this.#scheduleOverlays();
-    // Open state alone does not change what the table's cells say.
-    if (records.some((r) => !isOpenState(r))) this.#schedule();
-  }
 
   /** Coalesces every trigger (mutations, resizes, property changes) into one pass after layout. */
   #schedule(): void {
@@ -300,58 +285,6 @@ export class VoidTable extends VoidElement {
     const pos = Math.abs(this.scrollLeft);
     this.setHostAttribute('data-overflow-start', pos > 1 ? '' : null);
     this.setHostAttribute('data-overflow-end', pos < max - 1 ? '' : null);
-  }
-
-  // ── Overlays opened from a cell ───────────────────────────────────────────
-
-  /**
-   * Overlays (dropdown menu, popover, hover card, tooltip, date picker) place their panel with
-   * `position: absolute` inside their own host, so a scroll region clips them. While one is open the
-   * region grows downwards to contain it and scrolls it into view sideways. A table without
-   * `scrollable` clips nothing and needs none of this.
-   *
-   * Becomes unnecessary once overlays render in the browser's top layer, which no ancestor clips.
-   */
-  #scheduleOverlays(): void {
-    if (this.#raf) cancelAnimationFrame(this.#raf);
-    // Two frames: the host's `open` attribute changes first, its panel renders after.
-    this.#raf = requestAnimationFrame(() => {
-      this.#raf = requestAnimationFrame(() => {
-        this.#raf = 0;
-        this.#revealOverlays();
-      });
-    });
-  }
-
-  #revealOverlays(): void {
-    const open = Array.from(this.querySelectorAll(OPEN_OVERLAY)).filter((el) => el.localName.startsWith('void-'));
-    this.setHostAttribute('data-overlay', open.length ? '' : null);
-    if (!this.scrollable) return;
-    this.setHostStyle('--void-table-room', null);
-    let bottom = 0;
-    let left = Infinity;
-    let right = -Infinity;
-    for (const host of open) {
-      for (const el of host.querySelectorAll('*')) {
-        if (getComputedStyle(el).position !== 'absolute' || !el.checkVisibility?.()) continue;
-        const rect = el.getBoundingClientRect();
-        if (!rect.width || !rect.height) continue;
-        bottom = Math.max(bottom, rect.bottom);
-        left = Math.min(left, rect.left);
-        right = Math.max(right, rect.right);
-      }
-    }
-    if (!bottom) return;
-    const region = this.getBoundingClientRect();
-    const table = this.querySelector('table')?.getBoundingClientRect() ?? region;
-    const room = Math.ceil(bottom - table.bottom);
-    if (room > 0) {
-      this.setHostStyle('--void-table-room', `${room}px`);
-      // A region that scrolls vertically shows the overlay by scrolling to it.
-      if (this.scrollHeight > this.clientHeight + room) this.scrollTop += Math.max(0, bottom - region.bottom);
-    }
-    if (right > region.right) this.scrollLeft += Math.ceil(right - region.right);
-    else if (left < region.left) this.scrollLeft -= Math.ceil(region.left - left);
   }
 }
 

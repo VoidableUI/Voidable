@@ -1,0 +1,16 @@
+/* Aurora — one electric colour in the dark.
+   A vivid green accent on a pure page, cool greys, soft 8px corners
+   and quiet hairlines. */
+[data-void-theme="aurora"] {
+  --void-accent-hue: 162;
+  --void-accent-chroma: 0.19;
+  --void-neutral-hue: 200;
+  --void-neutral-chroma: 0.008;
+  --void-page-tint: 0;
+  --void-contrast: 0.25;
+  --void-chrome: 0.35;
+  --void-radius: 8px;
+  --void-density: 1;
+  --void-rhythm: 1.1;
+  --void-font-size: 0.875rem;
+}

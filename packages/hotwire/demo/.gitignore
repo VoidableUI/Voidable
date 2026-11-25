@@ -33,3 +33,6 @@
 # Ignore key files for decrypting credentials and more.
 /config/*.key
 
+
+# Local built packages, written by the browser tests (tests/browser/server).
+/public/voidable-local

@@ -18,7 +18,7 @@ const fail = (m) => errors.push(m);
 const rel = (f) => path.relative(L.ROOT, f);
 
 // ── 1. Layers ───────────────────────────────────────────────────────────────
-const EXPECTED = ['void.reset', 'void.tokens', 'void.themes', 'void.type', 'void.components', 'void.patterns', 'void.a11y'];
+const EXPECTED = ['void.reset', 'void.tokens', 'void.themes', 'void.type', 'void.components', 'void.patterns', 'void.skins', 'void.a11y'];
 const statement = L.readLayersStatement();
 const order = statement.replace(/^@layer\s+|;$/g, '').split(',').map((s) => s.trim());
 if (order.filter((n) => n.startsWith('void.')).join() !== EXPECTED.join()) fail(`src/layers.css: the void.* layers must be ${EXPECTED.join(', ')} in that order (got ${order.filter((n) => n.startsWith('void.')).join(', ')})`);
@@ -51,7 +51,7 @@ const SKIP = new Set(['index.css', 'core.css', 'layers.css', 'base.css']);
 const walk = (d) => fs.readdirSync(d, { withFileTypes: true }).flatMap((e) => (e.isDirectory() ? walk(path.join(d, e.name)) : [path.join(d, e.name)]));
 const srcFiles = walk(SRC).filter((f) => f.endsWith('.css')).map((f) => path.relative(SRC, f));
 for (const f of srcFiles) {
-  if (SKIP.has(f) || f.startsWith('themes/')) continue;
+  if (SKIP.has(f) || /^(themes|skins)\//.test(f)) continue;
   const n = seen.get(f) ?? 0;
   if (n !== 1) fail(`src/${f} is imported ${n} times by src/core.css (it must be exactly once, or it is never built)`);
 }
@@ -71,7 +71,7 @@ const OPT_IN = /\[data-(void-[a-z-]+|theme|shape|anim-speed)\b/;
 const GLOBAL_OK = new Set(['base.css']);
 const APP_SHELL_CLASS = /^\.(detail|info-grid|subtable|modal-actions)/;
 for (const f of srcFiles) {
-  if (GLOBAL_OK.has(f) || f.startsWith('themes/') || ['layers.css', 'index.css', 'core.css'].includes(f)) continue;
+  if (GLOBAL_OK.has(f) || /^(themes|skins)\//.test(f) || ['layers.css', 'index.css', 'core.css'].includes(f)) continue;
   for (const { selector, text, rule } of L.selectorsOf(L.read(path.join(SRC, f)), f)) {
     if (L.tagsOfSelector(selector).size > 0 || L.classesOfSelector(selector).size > 0 || OPT_IN.test(text)) continue;
     // App-shell layout classes are opt-in by class name (unprefixed: the framework scaffolds use them).
@@ -153,7 +153,7 @@ else {
       if (!fs.existsSync(dir)) fail(`package.json exports["${key}"] -> ${t}: directory does not exist`);
     } else if (!fs.existsSync(path.join(L.ROOT, t))) fail(`package.json exports["${key}"] -> ${t}: file does not exist`);
   }
-  for (const key of ['./components/*', './patterns/*', './themes/*']) if (!pkg.exports[key]) fail(`package.json exports["${key}"] is missing`);
+  for (const key of ['./components/*', './patterns/*', './themes/*', './skins/*']) if (!pkg.exports[key]) fail(`package.json exports["${key}"] is missing`);
   if (!pkg.files?.includes('dist') || !pkg.files?.includes('src')) fail('package.json "files" must include both dist (the built stylesheets) and src (the sources)');
   if (fs.existsSync(path.join(DIST, 'void.min.css.map'))) fail('dist/void.min.css.map exists: the packaging lint rejects source maps');
 }

@@ -12,7 +12,11 @@
      type        the data-void-type roles
      components  every void-* component, and its pre-upgrade state
      patterns    CSS-only elements, media and glass, app-shell classes
-     a11y        forced-colors adjustments
+     skins       opt-in skins (data-void-skin): derived-token overrides, then
+                 direct rules on components and patterns, so a skin must
+                 beat both whatever the specificity
+     a11y        forced-colors adjustments, above the skins so a skin
+                 never hides a focus ring or a forced colour
 
    CSS an application writes outside any layer beats all of them, whatever
    its specificity, so it needs no !important and no selector tricks.
@@ -22,4 +26,4 @@
    sit relative to the theme whichever stylesheet loads first: `theme` and
    `base` (a framework's reset) under the theme, `components` and
    `utilities` over it. Without a framework they are empty. */
-@layer theme, base, void.reset, void.tokens, void.themes, void.type, void.components, void.patterns, void.a11y, components, utilities;
+@layer theme, base, void.reset, void.tokens, void.themes, void.type, void.components, void.patterns, void.skins, void.a11y, components, utilities;

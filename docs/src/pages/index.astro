@@ -625,7 +625,7 @@ const ogImage = new URL('/og.png', canonical).href;
           <span class="nav-wordmark">voidable</span>
           <ul class="nav-links">
             <li><a href="/getting-started/introduction/">Docs</a></li>
-            <li><a href="/getting-started/theming/">Theming</a></li>
+            <li><a href="/theme/">Theme builder</a></li>
             <li><a href="/patterns/overview/">Patterns</a></li>
             <li><a href="/storybook/">Components</a></li>
             <li><a href="/showcase/dashboard">Showcase</a></li>
@@ -665,7 +665,7 @@ const ogImage = new URL('/og.png', canonical).href;
         </div>
         <div class="hero-actions">
           <void-button variant="filled" size="lg"><a href="/getting-started/installation/">Get started</a></void-button>
-          <void-button variant="outline" size="lg"><a href="/getting-started/theming/">Make a theme</a></void-button>
+          <void-button variant="outline" size="lg"><a href="/theme/">Make a theme</a></void-button>
         </div>
       </void-media-content>
       <a class="hero-credit" href="/patterns/ui-over-imagery/#the-photographs">Photograph: NASA</a>
@@ -714,8 +714,12 @@ const ogImage = new URL('/og.png', canonical).href;
               {themes.map((t, i) => (
 <pre class="theme-source" data-theme-panel={t.id} hidden={i !== 0}><code set:html={sourceOf(t)} /></pre>
               ))}
+              <void-actions>
+                <void-button variant="filled"><a id="theme-open" href="/theme/?theme=void">Open it in the theme builder</a></void-button>
+                <void-button variant="ghost"><a href="/getting-started/theming/">What each knob does</a></void-button>
+              </void-actions>
               <p class="theme-note">
-                This is the whole theme. Text contrast is checked for every theme in both colour schemes, so no setting takes it below 4.5:1.
+                This is the whole theme. Turn the knobs yourself in the builder and leave with your own. Text contrast is checked for every theme in both colour schemes, so no setting takes it below 4.5:1.
               </p>
             </div>
           </div>
@@ -931,6 +935,7 @@ const ogImage = new URL('/og.png', canonical).href;
           <span class="nav-wordmark">voidable</span>
           <ul class="footer-links">
             <li><a href="/getting-started/introduction/">Docs</a></li>
+            <li><a href="/theme/">Theme builder</a></li>
             <li><a href="/getting-started/theming/">Theming</a></li>
             <li><a href="/patterns/overview/">Patterns</a></li>
             <li><a href="/storybook/">Storybook</a></li>
@@ -964,6 +969,8 @@ const ogImage = new URL('/og.png', canonical).href;
         document.querySelectorAll<HTMLElement>('[data-theme-panel]').forEach((el) => {
           el.hidden = el.dataset.themePanel !== theme;
         });
+        // The builder opens on the theme being looked at.
+        document.getElementById('theme-open')?.setAttribute('href', `/theme/?theme=${theme}`);
       });
     </script>
   </body>

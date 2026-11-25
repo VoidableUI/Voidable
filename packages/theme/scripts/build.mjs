@@ -12,6 +12,7 @@
 //   components/<name>   one component, with what it needs to render on its own
 //   patterns/<name>     one group of CSS-only elements
 //   themes/<name>       one demonstration theme, in its layer
+//   skins/<name>        one skin (data-void-skin), in the layer above the patterns
 // plus exports.json. No source map: the bundle is flattened from many files and the
 // packaging lint rejects maps (they would point at sources the package does not publish
 // under those names); the unminified file is the readable form.
@@ -134,7 +135,7 @@ await emit('core', `@import '${abs('core.css')}';`);
 await emit('void', `@import '${abs('core.css')}';\n${imp('base.css', 'void.reset')}`);
 
 // per component
-const exportsJson = { layers: L.voidLayers(), components: {}, patterns: {}, themes: [] };
+const exportsJson = { layers: L.voidLayers(), components: {}, patterns: {}, themes: [], skins: [] };
 const tagsOfFile = (rel) => L.tagsOfCss(L.read(abs(rel)), rel);
 for (const name of components) {
   if (L.SHARED.has(name)) continue;
@@ -179,6 +180,13 @@ for (const f of L.listCss('themes')) {
   const n = path.basename(f, '.css');
   await emit(`themes/${n}`, `${statement}\n${imp(f, 'void.themes')}`);
   exportsJson.themes.push(n);
+}
+
+// skins
+for (const f of L.listCss('skins')) {
+  const n = path.basename(f, '.css');
+  await emit(`skins/${n}`, `${statement}\n${imp(f, 'void.skins')}`);
+  exportsJson.skins.push(n);
 }
 
 fs.writeFileSync(path.join(DIST, 'exports.json'), `${JSON.stringify(exportsJson, null, 2)}\n`);

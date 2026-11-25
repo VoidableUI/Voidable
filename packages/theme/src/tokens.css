@@ -214,8 +214,10 @@
   );
   /* On a media surface or glass the backdrop is unknown, so a coloured
      accent moves toward white (dark) or black (light), as the status
-     colours do. Zero on the page. */
-  --void-accent-shift: 0%;
+     colours do. On the page it is zero, except for the most saturated
+     accents (chroma above 0.2) on a tinted page, which would otherwise
+     fall just short of 4.5:1 as text on the lifted surfaces. */
+  --void-accent-shift: calc(400% * var(--void-page-level) * max(0, var(--void-accent-c) - 0.2));
   --void-color-accent:       color-mix(in srgb, oklch(var(--void-scheme-dark) 0 0) var(--void-accent-shift), oklch(var(--void-accent-l) var(--void-accent-c) var(--void-accent-hue)));
   --void-color-accent-hover: color-mix(in srgb, var(--void-color-accent) 92%, var(--void-color-bg));
 

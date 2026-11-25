@@ -27,7 +27,15 @@
     "./patterns/*": "./dist/patterns/*",
     "./themes/*": "./dist/themes/*",
     "./dist/*": "./dist/*",
-    "./src/*": "./src/*"
+    "./src/*": "./src/*",
+    "./skins/*": "./dist/skins/*",
+    "./dtcg/*": "./dist/dtcg/*",
+    "./json/*": "./dist/json/*",
+    "./knobs.json": "./dist/knobs.json",
+    "./names": {
+      "types": "./dist/names.d.ts",
+      "default": "./dist/names.js"
+    }
   },
   "files": ["src", "dist"],
   "repository": {
@@ -39,7 +47,8 @@
     "access": "public"
   },
   "scripts": {
-    "build": "node scripts/build.mjs",
+    "build": "node scripts/build.mjs && node scripts/export-tokens.mjs",
+    "test": "node --test test/",
     "generate": "node scripts/build.mjs --generated-only"
   },
   "devDependencies": {

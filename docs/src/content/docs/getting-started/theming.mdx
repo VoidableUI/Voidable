@@ -1,14 +1,18 @@
 ---
 title: Theming
-description: Retheme Voidable by setting about a dozen knobs. What each knob does, three copy-paste themes, theming a subtree, type roles and layout rhythm, with live examples.
+description: Retheme Voidable by setting about a dozen knobs. What each knob does, the theme builder, eight copy-paste themes, a skin that goes beyond the knobs, tokens for design tools, type roles and layout rhythm, with live examples.
 ---
 
-import KnobPlayground from '../../../components/KnobPlayground.astro';
 import ThemeDemo from '../../../components/ThemeDemo.astro';
 
 Voidable separates structure from style. Components ship with **zero visual CSS**: all appearance comes from `--void-*` CSS custom properties defined in `@voidable/theme`.
 
 The theme is built to be rethemed by changing a handful of inputs, by a person or by an AI agent. You do not edit hundreds of tokens. You set **knobs**, and every colour, size, radius and duration is derived from them in plain CSS, in both colour schemes, with no build step.
+
+<div class="vd-row not-content">
+  <void-button variant="filled"><a href="/theme/">Open the theme builder</a></void-button>
+  <span data-void-type="caption">Turn the knobs on a real application and leave with the CSS. This page is the reference for what each knob does.</span>
+</div>
 
 ## The knobs
 
@@ -40,15 +44,31 @@ Set these on `:root`. Everything else follows.
 
 The knobs are declared, with the same explanations, in `@voidable/theme/knobs` (`src/knobs.css`).
 
-### Try them
+### Try them: the theme builder
 
-Move a knob and the preview follows. Nothing below is special-cased: the sliders set custom properties on the preview's wrapper, and the theme derives the rest. The CSS underneath is what to paste into your stylesheet.
+The [theme builder](/theme/) puts every knob on this page next to a real application (an overview, a data table, a form, a settings page and a page over a photograph), at desktop and phone width, in dark and light at once. It measures contrast as you go and gives you the theme four ways: the CSS to paste, a file to download, a link, and a description for an AI agent.
 
-<KnobPlayground />
+A link to the builder **is** a theme. Every knob is a URL parameter named after it without the `--void-` prefix, so a person or an agent can write one by hand:
+
+```
+https://voidable.dev/theme/?accent-hue=162&accent-chroma=0.19&radius=8&rhythm=1.1
+https://voidable.dev/theme/?theme=dune&radius=0
+https://voidable.dev/theme/?skin=loft&accent-hue=258&accent-chroma=0.15
+```
+
+| Parameter | Value |
+|---|---|
+| a knob, without `--void-` (`accent-hue`, `radius`, `font-size`, ...) | The knob's value. A bare number takes the knob's unit: `radius=8` is `8px`, `font-size=0.875` is `0.875rem`. `font-sans` and `font-mono` take a font-family list, or a short key: `inter`, `system`, `humanist`, `geometric`, `rounded`, `serif`, `mono` (and `jetbrains`, `system` for the monospace). |
+| `theme` | A shipped theme to start from; the other parameters override it. |
+| `skin` | `loft` (see [Skins](#skins-beyond-the-knobs)). |
+| `name` | The theme's name, used for the selector and the file name. |
+| `screen`, `scheme`, `device` | What the preview shows: `overview`, `table`, `form`, `settings` or `live`; `dark`, `light` or `both`; `desktop` or `phone`. |
+
+Knobs you leave out keep their defaults, so the bare URL is the default theme. Values that are not valid for a knob are ignored. The same data (names, ranges, defaults, every shipped theme) is published as `@voidable/theme/knobs.json`.
 
 ## Writing a theme
 
-A theme is a file that sets knobs and nothing else. The package ships three as examples; each is about a dozen lines.
+A theme is a file that sets knobs and nothing else. The package ships eight; each is about a dozen lines.
 
 ```css
 /* themes/dune.css — warm, rounded, comfortable */
@@ -81,13 +101,20 @@ A theme is a file that sets knobs and nothing else. The package ships three as e
 | `void` | The default, written out: monochrome, hairlines, 4px corners, 36px controls. |
 | `dune` | Warm, rounded, comfortable: a terracotta accent, sand-tinted greys on a soft page, filled containers. |
 | `console` | Dense and sharp: square corners, compact controls, a signal-green accent, monospace throughout. |
+| `orbit` | Mission control, at rest: no accent colour, cool greys, lines you can barely see, almost square corners and a great deal of room. |
+| `capsule` | Everything is a pill: fully rounded controls, no accent colour, faint chrome. |
+| `aurora` | One electric colour: a vivid green accent on a pure page, cool greys, 8px corners. |
+| `iris` | Violet, tinted through: a violet accent and greys of the same hue on a softly tinted page. |
+| `paper` | Editorial: a serif the operating system already has, off-white paper, an ink-blue accent, larger text and wide margins. |
+
+Each is one click away in the builder: [void](/theme/?theme=void), [dune](/theme/?theme=dune), [console](/theme/?theme=console), [orbit](/theme/?theme=orbit), [capsule](/theme/?theme=capsule), [aurora](/theme/?theme=aurora), [iris](/theme/?theme=iris), [paper](/theme/?theme=paper).
 
 Every theme works in dark and in light. You do not write a second block for light: both schemes are the same formulas.
 
 The same components under each theme, live. Switch the site between dark and light to see the other half.
 
 <div class="vd-themes not-content">
-  {['void', 'dune', 'console'].map((theme) => (
+  {['void', 'dune', 'console', 'orbit', 'capsule', 'aurora', 'iris', 'paper'].map((theme) => (
     <div class="vd-themed" data-void-theme={theme}>
       <span data-void-type="label">{theme}</span>
       <div class="vd-stack">
@@ -108,7 +135,7 @@ The same components under each theme, live. Switch the site between dark and lig
   ))}
 </div>
 
-The other two, to copy:
+Two more, to copy (the rest are in `@voidable/theme/themes/`):
 
 ```css
 /* themes/void.css — the default, written out */
@@ -146,7 +173,93 @@ The other two, to copy:
 
 ### Contrast is checked for you
 
-`mise run lint:contrast` evaluates the derived colours for the default knobs, for every file in `themes/`, and for the extremes of each colour knob, in both schemes. It fails if any text pair drops below 4.5:1 or any control border below 3:1, and if a theme file sets anything other than a knob.
+`mise run lint:contrast` evaluates the derived colours for the default knobs, for every file in `themes/` and `skins/`, and for the extremes of each colour knob, in both schemes. It fails if any text pair drops below 4.5:1 or any control border below 3:1, and if a theme file sets anything other than a knob. The theme builder shows the same measurement live for the theme you are making.
+
+## Skins: beyond the knobs
+
+A theme changes values. A **skin** changes structure: what a container is, whether anything has a line around it, what casts a shadow. It is a separate stylesheet that overrides derived tokens and, where a component offers no token, restyles the element itself. It never edits a component's own CSS, and it composes with every knob and every theme.
+
+The package ships one, **Loft**: a soft tinted page, containers that are lighter than the page and float on a shadow, and no hairlines around anything.
+
+```css
+@import '@voidable/theme';
+@import '@voidable/theme/skins/loft.css';
+```
+
+```html
+<html data-void-skin="loft">
+```
+
+Put the attribute on `<html>`, or on an element that also carries `data-void-theme`. Live, the default look and Loft, each with the default knobs and with Dune:
+
+<div class="vd-themes vd-themes-2 not-content">
+  {[['', 'void', 'Default'], ['loft', 'void', 'Loft'], ['', 'dune', 'Dune'], ['loft', 'dune', 'Dune + Loft']].map(([skin, theme, label]) => (
+    <div class="vd-themed vd-skinned" data-void-theme={theme} data-void-skin={skin || undefined} data-theme="light">
+      <span data-void-type="label">{label}</span>
+      <void-card>
+        <div class="vd-stack">
+          <span><span data-void-type="value">41</span> <span data-void-type="unit">of 44</span></span>
+          <span data-void-type="caption">Stations online</span>
+        </div>
+      </void-card>
+      <void-input value="Kiruna 3" aria-label="Station name"></void-input>
+      <div class="vd-row">
+        <void-button variant="filled">Save</void-button>
+        <void-button>Schedule</void-button>
+      </div>
+    </div>
+  ))}
+</div>
+
+See it on whole screens in the builder: [Loft](/theme/?skin=loft&scheme=light), [Loft with Aurora](/theme/?theme=aurora&skin=loft&scheme=light).
+
+### What a skin could not reach
+
+Loft was written to find out how far a theme author gets without touching component CSS. Its file has two parts: one rule of token overrides, then the rules that had to name an element because no token existed. The first part did less than half the work. The second part is the list of override points the components and patterns are missing:
+
+| # | Element | What Loft needed | Why a token could not do it |
+|---|---|---|---|
+| 1 | `void-nav-bar` | A lifted surface and a shadow in place of the bottom rule | It reads the page colour and the shared divider colour directly; it has no background, border or shadow token |
+| 2 | `void-page-head` | No rule under the title | The rule is the shared divider colour, so removing it by token removes every divider |
+| 3 | `void-section` | A surface: background, padding, radius, shadow | The pattern has no surface at all, as tokens or as an attribute |
+| 4 | `void-figures`, `void-figure` | Tiles with a gap in place of hairline-divided cells | The row draws its dividers and paddings itself, with selectors specific enough that an override has to match them |
+| 5 | `void-rows`, `void-description-list`, `void-table` | Rules between items only, not above the first and below the last | No token or attribute separates the outer rules from the inner ones |
+| 6 | `void-button` | A soft edge and a shadow on the outline button | The border colour is `--tone-border`, a private, unprefixed property declared on the button itself, so an ancestor cannot set it; there is no shadow token |
+| 7 | `void-card`, `void-panel` | A shadow on the default container | Only the `elevated` variant casts one, and it also changes the fill |
+| 8 | `void-alert` | The container radius and no border | It takes the control radius and a tone border with no token for either |
+
+Three more things the tokens could not express, which Loft works around or leaves alone:
+
+- **The derived tokens are declared on a closed list of elements** (`:root`, `[data-theme]`, `[data-void-theme]`, `[data-shape]`, the surfaces). A skin cannot add its own attribute to that list, which is why `data-void-skin` has to sit on one of those elements.
+- **The media and glass surfaces derive their own tokens**, so a skin's token overrides stop at a `void-glass` panel and have to be repeated for it.
+- **The colour scheme a theme prefers cannot be set by the theme.** Loft is designed light-first, but dark stays the default unless the page sets `data-theme`.
+
+Where a component token did exist it worked: `--void-color-control-fill` gave every outline button and badge a filled surface, `--void-table-surface` repainted the table's sticky cells, and the radius, shadow and surface tokens restyled dialogs, menus, inputs and cards with no selectors at all. Component tokens for the eight rows above ([#46](https://github.com/VoidableUI/Voidable/issues/46)) would reduce Loft to its first rule.
+
+## Tokens for design tools
+
+The theme is CSS, computed in the browser. For tools that cannot run CSS, the package also ships every token **resolved**, for each theme and skin in both colour schemes:
+
+| Import | What it is |
+|---|---|
+| `@voidable/theme/dtcg/<theme>.<scheme>.tokens.json` | [Design Tokens Community Group](https://www.designtokens.org/TR/2025.10/format/) format (Format Module 2025.10, the first stable version), for Tokens Studio, Style Dictionary and anything else that reads it. For example `dtcg/dune.light.tokens.json`. |
+| `@voidable/theme/dtcg/voidable.resolver.json` | A DTCG resolver document (Resolver Module 2025.10) that lists those files as the contexts of one `theme` modifier. |
+| `@voidable/theme/json/<theme>.<scheme>.json` | A flat map of custom property to resolved CSS value: `{ "--void-color-bg": "#000000", ... }`. |
+| `@voidable/theme/knobs.json` | The knobs as data: name, range, step, unit, default and description, every shipped theme's values, and the builder's URL. |
+| `@voidable/theme/names` | A TypeScript module: `tokenNames`, `knobNames`, `themeNames`, `skinNames`, the types `TokenName`, `KnobName`, `ThemeName`, `SkinName`, and `cssVar(name)`. |
+
+```ts
+import tokens from '@voidable/theme/json/dune.light.json' with { type: 'json' };
+import { cssVar, type TokenName } from '@voidable/theme/names';
+
+tokens['--void-color-bg'];            // the resolved page colour, as hex
+const gap: TokenName = '--void-gap-group';
+element.style.gap = cssVar(gap);      // "var(--void-gap-group)"
+```
+
+In the DTCG files `--void-<group>-<name>` is the token `<group>.<name>` (`color.bg`, `space.4`, `radius.md`), the knobs are `knob.<name>`, and the type roles are also given as composite `typography.<role>` tokens. Colours are sRGB components with a hex fallback; lengths keep `rem` where the source is in `rem`. Values the format has no type for (keywords, `em` tracking, and the three tokens that depend on the viewport) are listed under `$extensions` and are in the flat JSON as CSS text.
+
+The values are computed at build time by a small evaluator in the package, so building needs no browser, and a test compares every exported value, for every theme, with what Chromium computes from the same CSS. For a theme of your own, the builder's **Design tokens** tab exports the knobs or the resolved tokens in the same format.
 
 ## Theming part of a page
 

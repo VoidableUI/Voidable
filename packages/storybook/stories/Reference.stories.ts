@@ -86,7 +86,9 @@ export const LiveOverImagery: Story = {
 // Every theme knob as a control. The knobs are set inline on a wrapper that
 // carries data-void-theme, so everything under it is derived again: this is
 // the same mechanism an application uses to retheme part of a page. Pick a
-// screen, move a knob, and copy the values into a theme file.
+// screen, move a knob, and copy the values into a theme file. The theme
+// builder on the site (voidable.dev/theme/) is the same idea for everyone
+// else: these screens, every knob, and the theme to copy, download or link.
 const screens: Record<string, [string, string]> = {
   'Application screen': ['overview', overview],
   'Data table': ['table', table],

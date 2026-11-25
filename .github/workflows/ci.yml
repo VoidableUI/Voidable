@@ -37,3 +37,195 @@ jobs:
           # `mise run` would otherwise install every tool in mise.toml (erlang,
           # elixir, ruby, php) that the step above deliberately skipped.
           MISE_TASK_RUN_AUTO_INSTALL: "false"
+
+  # Real-browser suite (tests/browser): Chromium, Firefox and WebKit against
+  # the built packages. Kept out of `mise run ci`, which needs no browsers.
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+
+      - uses: jdx/mise-action@5228313ee0372e111a38da051671ca30fc5a96db # v3.6.3
+        with:
+          install_args: "node npm:pnpm"
+        env:
+          MISE_NOT_FOUND_AUTO_INSTALL: "false"
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+
+      - name: Install browsers and their system libraries
+        run: mise run test:browser:install -- --with-deps
+        env:
+          MISE_TASK_RUN_AUTO_INSTALL: "false"
+
+      - name: Run the browser suite
+        run: mise run test:browser
+        env:
+          MISE_TASK_RUN_AUTO_INSTALL: "false"
+
+      - name: Upload traces and screenshots
+        if: failure()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: browser-test-results
+          path: |
+            tests/browser/test-results/
+            tests/browser/playwright-report/
+          retention-days: 14
+
+  # Server-backed suites (tests/browser/server): real apps started by
+  # Playwright on the built packages, one job per framework so each installs
+  # only its own toolchain (mise-action caches the installed tools). `server`
+  # is the Rails demo and needs Ruby; `phoenix` and `laravel` follow.
+  server:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+
+      - uses: jdx/mise-action@5228313ee0372e111a38da051671ca30fc5a96db # v3.6.3
+        with:
+          install_args: "node npm:pnpm ruby"
+        env:
+          MISE_NOT_FOUND_AUTO_INSTALL: "false"
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-chromium-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+
+      - name: Cache the Rails demo's gems
+        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
+        with:
+          path: ~/.local/share/mise/installs/ruby/*/lib/ruby/gems
+          key: rails-demo-gems-${{ runner.os }}-${{ hashFiles('mise.toml', 'packages/hotwire/demo/Gemfile', 'packages/hotwire/gem/*.gemspec') }}
+
+      - name: Install Chromium and its system libraries
+        run: mise run test:browser:install -- --with-deps
+        env:
+          VOID_BROWSERS: chromium
+          MISE_TASK_RUN_AUTO_INSTALL: "false"
+
+      - name: Run the Rails suite
+        run: mise run test:server
+        env:
+          VOID_SERVER_APPS: rails
+          MISE_TASK_RUN_AUTO_INSTALL: "false"
+
+      - name: Upload traces and screenshots
+        if: failure()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: server-test-results
+          path: |
+            tests/browser/test-results/server/
+            tests/browser/playwright-report/server/
+          retention-days: 14
+
+  # Phoenix LiveView: the LiveView demo (packages/liveview/demo) with the
+  # live_voidable Hex package and the built adapter. Needs Erlang and Elixir.
+  phoenix:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+
+      - uses: jdx/mise-action@5228313ee0372e111a38da051671ca30fc5a96db # v3.6.3
+        with:
+          install_args: "node npm:pnpm erlang elixir"
+        env:
+          MISE_NOT_FOUND_AUTO_INSTALL: "false"
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-chromium-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+
+      - name: Cache the Phoenix demo's dependencies and build
+        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
+        with:
+          path: |
+            packages/liveview/demo/deps
+            packages/liveview/demo/_build
+            ~/.mix
+            ~/.hex
+          key: phoenix-demo-${{ runner.os }}-${{ hashFiles('mise.toml', 'packages/liveview/demo/mix.lock', 'packages/liveview/hex/mix.exs') }}
+
+      - name: Install Chromium and its system libraries
+        run: mise run test:browser:install -- --with-deps
+        env:
+          VOID_BROWSERS: chromium
+          MISE_TASK_RUN_AUTO_INSTALL: "false"
+
+      - name: Run the Phoenix suite
+        run: mise run test:server
+        env:
+          VOID_SERVER_APPS: phoenix
+          MISE_TASK_RUN_AUTO_INSTALL: "false"
+
+      - name: Upload traces and screenshots
+        if: failure()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: phoenix-test-results
+          path: |
+            tests/browser/test-results/server/
+            tests/browser/playwright-report/server/
+          retention-days: 14
+
+  # Laravel Livewire: the Laravel example (examples/laravel) with Livewire,
+  # Alpine and the built adapter. Needs PHP and Composer.
+  laravel:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+
+      - uses: jdx/mise-action@5228313ee0372e111a38da051671ca30fc5a96db # v3.6.3
+        with:
+          install_args: "node npm:pnpm php"
+        env:
+          MISE_NOT_FOUND_AUTO_INSTALL: "false"
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-chromium-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+
+      - name: Cache the Laravel example's Composer packages
+        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
+        with:
+          path: |
+            examples/laravel/vendor
+            ~/.cache/composer
+          key: laravel-example-${{ runner.os }}-${{ hashFiles('mise.toml', 'examples/laravel/composer.lock') }}
+
+      - name: Install Chromium and its system libraries
+        run: mise run test:browser:install -- --with-deps
+        env:
+          VOID_BROWSERS: chromium
+          MISE_TASK_RUN_AUTO_INSTALL: "false"
+
+      - name: Run the Laravel suite
+        run: mise run test:server
+        env:
+          VOID_SERVER_APPS: laravel
+          MISE_TASK_RUN_AUTO_INSTALL: "false"
+
+      - name: Upload traces and screenshots
+        if: failure()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: laravel-test-results
+          path: |
+            tests/browser/test-results/server/
+            tests/browser/playwright-report/server/
+          retention-days: 14

@@ -1,0 +1,155 @@
+/* ============================================================
+   Loft — a skin: soft, lifted, filled.
+
+   A theme sets knobs. A skin goes further: it changes how the
+   derived tokens are computed and what the containers are, so the
+   same components take a different structure. Loft has a soft
+   tinted page, containers that are lighter than the page and float
+   on a shadow, and no hairlines around anything.
+
+     @import '@voidable/theme';
+     @import '@voidable/theme/skins/loft.css';
+
+     <html data-void-skin="loft">
+
+   It composes with every knob and every theme (data-void-theme),
+   in dark and light. Put the attribute on <html>, or on an element
+   that also carries data-void-theme.
+
+   The file has two parts. The first rule only overrides tokens.
+   The rules after it restyle elements directly, and every one of
+   them is there because the component or pattern offers no token
+   for what Loft needed: they are the list of missing override
+   points (see the theming guide, "What a skin could not reach").
+   ============================================================ */
+
+/* ── Part 1: tokens ── */
+[data-void-skin="loft"],
+[data-void-skin="loft"] :where([data-theme], [data-void-theme], [data-shape]) {
+  /* The page is always the soft page (what --void-page-tint: 1 gives). */
+  --void-page-level: 1;
+
+  /* Containers are lighter than the page: white on the soft page in
+     light, a lifted shade in dark. */
+  --void-color-surface: color-mix(in srgb, oklch(var(--void-fg)) calc(5% * var(--void-scheme-dark)), color-mix(in srgb, oklch(1 0 0) calc(100% * (1 - var(--void-scheme-dark))), var(--void-color-bg)));
+  --void-color-bg-elevated: color-mix(in srgb, oklch(var(--void-fg)) calc(7% * var(--void-scheme-dark)), color-mix(in srgb, oklch(1 0 0) calc(100% * (1 - var(--void-scheme-dark))), var(--void-color-page)));
+  /* A control that draws no fill of its own sits on the same surface. */
+  --void-color-control-fill: var(--void-color-surface);
+
+  /* Dividers are seams inside a container, not lines around it. */
+  --void-alpha-divider: calc(0.07 + 0.05 * var(--void-chrome-level));
+
+  /* Containers are rounder than the controls in them. */
+  --void-radius-lg: min(calc(var(--void-radius-base) * 3), calc(var(--void-radius-base) + 10px), 28px);
+  --void-radius-xl: min(calc(var(--void-radius-base) * 5), calc(var(--void-radius-base) + 18px), 36px);
+
+  /* Shadows are soft, wide and tinted with the neutral hue. */
+  --void-loft-shade: 0.16 0.03 var(--void-neutral-hue);
+  --void-loft-shadow: 0 1px 2px oklch(var(--void-loft-shade) / calc(0.05 + 0.25 * var(--void-scheme-dark))), 0 6px 20px -6px oklch(var(--void-loft-shade) / calc(0.10 + 0.30 * var(--void-scheme-dark)));
+  --void-shadow-sm: 0 1px 2px oklch(var(--void-loft-shade) / calc(0.08 + 0.32 * var(--void-scheme-dark))), 0 1px 1px oklch(var(--void-loft-shade) / 0.04);
+  --void-shadow-md: 0 2px 4px oklch(var(--void-loft-shade) / calc(0.05 + 0.25 * var(--void-scheme-dark))), 0 12px 32px -8px oklch(var(--void-loft-shade) / calc(0.16 + 0.44 * var(--void-scheme-dark)));
+  --void-shadow-lg: 0 4px 8px oklch(var(--void-loft-shade) / calc(0.05 + 0.25 * var(--void-scheme-dark))), 0 24px 56px -12px oklch(var(--void-loft-shade) / calc(0.20 + 0.50 * var(--void-scheme-dark)));
+  --void-shadow-xl: 0 8px 16px oklch(var(--void-loft-shade) / calc(0.06 + 0.24 * var(--void-scheme-dark))), 0 40px 96px -16px oklch(var(--void-loft-shade) / calc(0.24 + 0.56 * var(--void-scheme-dark)));
+}
+
+/* A glass panel derives its own tokens; it takes the container radii. */
+[data-void-skin="loft"] :is(void-glass, [data-void-surface="glass"]) {
+  --void-radius-lg: min(calc(var(--void-radius-base) * 3), calc(var(--void-radius-base) + 10px), 28px);
+  --void-radius-xl: min(calc(var(--void-radius-base) * 5), calc(var(--void-radius-base) + 18px), 36px);
+}
+
+/* ── Part 2: what the tokens could not reach ──
+   Each rule below exists because the element has no token for the
+   property Loft needed, so the skin has to name the element and set
+   the property itself. Each is a missing override point, numbered as
+   in the theming guide. None of them edits a component's own file. */
+
+/* 1. void-nav-bar has no token for its background, its border or a
+      shadow: it reads the page colour and the divider directly. */
+[data-void-skin="loft"] void-nav-bar:not([data-void-surface]) {
+  background: var(--void-color-surface);
+  border-bottom-color: transparent;
+  box-shadow: var(--void-loft-shadow);
+}
+
+/* 2. void-page-head draws its rule with the shared divider colour, so
+      it cannot be removed without removing every divider. */
+[data-void-skin="loft"] void-page-head {
+  padding-bottom: 0;
+  border-bottom-color: transparent;
+}
+
+/* 3. void-section has no surface at all: no background, padding,
+      radius or shadow, as tokens or otherwise. A titled section, or
+      one that holds a table, becomes a card. (The table's own
+      component token for what its sticky cells are painted with does
+      exist, and is used.) */
+[data-void-skin="loft"] void-section void-table {
+  --void-table-surface: var(--void-color-surface);
+}
+
+[data-void-skin="loft"] void-section:has(> :is(void-section-head, h2, h3, void-table)) {
+  padding: calc(var(--void-container-padding) * 1.2);
+  border-radius: var(--void-radius-xl);
+  background: var(--void-color-surface);
+  box-shadow: var(--void-loft-shadow);
+}
+
+/* 4. void-figures draws its dividers itself and void-figure has no
+      surface, so a row of figures cannot become a row of tiles. The
+      :nth-child(n) is only there to match the specificity of the
+      pattern's own first-in-row rules. */
+[data-void-skin="loft"] void-figures {
+  gap: var(--void-gap-inside);
+  border-block: 0;
+}
+
+[data-void-skin="loft"] void-figures > void-figure:nth-child(n) {
+  padding: var(--void-container-padding);
+  border: 0;
+  border-radius: var(--void-radius-xl);
+  background: var(--void-color-surface);
+  box-shadow: var(--void-loft-shadow);
+}
+
+/* 5. Lists draw a rule above the first item and below the last, and
+      there is no way to ask for the rules between items only. Inside
+      a card the outer rules double the card's edge. */
+[data-void-skin="loft"] void-section:has(> :is(void-section-head, h2, h3, void-table)) void-rows,
+[data-void-skin="loft"] void-section:has(> :is(void-section-head, h2, h3, void-table)) void-description-list > dl {
+  border-top: 0;
+}
+
+[data-void-skin="loft"] void-section:has(> :is(void-section-head, h2, h3, void-table)) void-row:last-child,
+[data-void-skin="loft"] void-section:has(> :is(void-section-head, h2, h3, void-table)) void-description-list:not([layout="grid"]) > dl > div:last-child,
+[data-void-skin="loft"] void-section:has(> :is(void-section-head, h2, h3, void-table)) void-table tbody tr:last-child > td {
+  border-bottom-color: transparent;
+}
+
+/* 6. void-button keeps its border colour in --tone-border, a private
+      property declared on the button itself, so an ancestor cannot
+      set it; and it has no shadow token. The outline button becomes a
+      raised button: its label identifies it, so its edge may be soft. */
+[data-void-skin="loft"] void-button:is([variant="outline"], :not([variant])):is([color="default"], :not([color])) {
+  --tone-border: var(--void-color-border-strong);
+  box-shadow: var(--void-shadow-sm);
+}
+
+[data-void-skin="loft"] void-button[variant="filled"] {
+  box-shadow: var(--void-shadow-sm);
+}
+
+/* 7. void-card and void-panel cast a shadow only as the elevated
+      variant, which also changes their fill; the default container
+      has no shadow or border-colour token. */
+[data-void-skin="loft"] :is(void-card, void-panel):not([variant="bordered"]) {
+  border-color: transparent;
+  box-shadow: var(--void-loft-shadow);
+}
+
+/* 8. void-alert takes the control radius and a tone border, with no
+      token for either, so it cannot follow the containers around it. */
+[data-void-skin="loft"] void-alert:not([variant="filled"]) {
+  border-color: transparent;
+  border-radius: var(--void-radius-lg);
+}

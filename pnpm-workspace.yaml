@@ -4,3 +4,4 @@ packages:
   - examples/*
   - docs
   - evals
+  - tests/browser

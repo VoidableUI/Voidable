@@ -77,7 +77,36 @@ They are documented in full in [`src/knobs.css`](./src/knobs.css).
 
 ### Themes
 
-A theme is a file that sets knobs and nothing else. Three ship as examples, each about a dozen lines: `void` (the default), `dune` (warm, rounded, comfortable) and `console` (dense, sharp, monospace).
+Turn them on a real application in the [theme builder](https://voidable.dev/theme/) and copy the result. A link to the builder is a theme: every knob is a query parameter named after it without `--void-` (`https://voidable.dev/theme/?accent-hue=162&accent-chroma=0.19&radius=8`).
+
+A theme is a file that sets knobs and nothing else. Eight ship, each about a dozen lines: `void` (the default), `dune` (warm, rounded, comfortable), `console` (dense, sharp, monospace), `orbit` (monochrome, very airy), `capsule` (pill controls), `aurora` (a vivid green accent), `iris` (violet, on a tinted page) and `paper` (a serif, editorial).
+
+### Skins
+
+A skin changes structure, which knobs cannot. `loft` is soft and elevated: a tinted page, white cards with shadows, no hairlines. It combines with any theme and any knobs.
+
+```css
+@import '@voidable/theme';
+@import '@voidable/theme/skins/loft.css';
+```
+
+```html
+<html data-void-skin="loft">
+```
+
+### Tokens as data
+
+Every token, resolved for each theme and skin in both colour schemes, for tools that cannot run CSS:
+
+| Import | Contents |
+|---|---|
+| `@voidable/theme/dtcg/<theme>.<scheme>.tokens.json` | [Design Tokens Community Group](https://www.designtokens.org/TR/2025.10/format/) format, Format Module 2025.10 (Tokens Studio, Style Dictionary) |
+| `@voidable/theme/dtcg/voidable.resolver.json` | A DTCG resolver document listing those files |
+| `@voidable/theme/json/<theme>.<scheme>.json` | `{ "--void-color-bg": "#000000", ... }`: custom property to resolved CSS value |
+| `@voidable/theme/knobs.json` | The knobs as data: range, step, unit, default, description, and each shipped theme's values |
+| `@voidable/theme/names` | `tokenNames`, `knobNames`, `themeNames`, `skinNames`, `cssVar()`, and the types `TokenName`, `KnobName`, `ThemeName`, `SkinName` |
+
+`<theme>` is a theme or skin name, `<scheme>` is `dark` or `light`: `@voidable/theme/dtcg/dune.light.tokens.json`. The values are computed at build time and tested to equal what Chromium computes from the CSS.
 
 ```css
 @import '@voidable/theme';

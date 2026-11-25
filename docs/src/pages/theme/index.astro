@@ -1,0 +1,777 @@
+---
+// The theme builder. Turn the knobs, watch a real application change, leave
+// with a theme: the dozen-line CSS, a link that carries every knob, a
+// description for an agent, and the tokens as DTCG JSON.
+//
+// The preview is ./preview.astro in an iframe (see there for why). The
+// controls are generated from the knob data in @voidable/theme
+// (build/knobs.js); the presets are the theme files of the package, read
+// here, so this page cannot drift from what is published. The page itself
+// is built from Voidable components and patterns, in the default theme:
+// the chrome does not move while you turn a knob.
+import '@voidable/theme';
+import '../../../../packages/theme/src/skins/loft.css';
+import knobsCss from '../../../../packages/theme/src/knobs.css?raw';
+import iconBrandGithub from '@tabler/icons/outline/brand-github.svg?raw';
+import iconSun from '@tabler/icons/outline/sun.svg?raw';
+import iconMoon from '@tabler/icons/outline/moon.svg?raw';
+import iconDice from '@tabler/icons/outline/dice-5.svg?raw';
+import iconCopy from '@tabler/icons/outline/copy.svg?raw';
+import iconDownload from '@tabler/icons/outline/download.svg?raw';
+import iconLink from '@tabler/icons/outline/link.svg?raw';
+import iconReset from '@tabler/icons/outline/arrow-back-up.svg?raw';
+import { declarations, ruleBody, stripComments } from '../../../../packages/theme/build/css-eval.js';
+import { fontStacks, knobs, skins } from '../../../../packages/theme/build/knobs.js';
+import { DTCG_VERSION, readTheme } from '../../../../packages/theme/build/tokens.js';
+
+// Every theme file of the package is a preset; its stylesheet is loaded so a
+// preset's swatch can draw itself with data-void-theme.
+import.meta.glob('../../../../packages/theme/src/themes/*.css', { eager: true });
+const themeFiles = import.meta.glob<string>('../../../../packages/theme/src/themes/*.css', { eager: true, query: '?raw', import: 'default' });
+
+const defaults = declarations(ruleBody(stripComments(knobsCss), /^:root\s*\{/m));
+const order = ['void', 'orbit', 'capsule', 'aurora', 'iris', 'dune', 'paper', 'console'];
+const presets = Object.entries(themeFiles)
+  .map(([path, css]) => {
+    const id = path.split('/').pop()!.replace('.css', '');
+    // "/* Dune — warm, rounded, comfortable." is the first line of every theme file.
+    const head = /\/\*\s*(\S+)\s+—\s+([^\n]+)/.exec(css);
+    return { id, label: head?.[1] ?? id, blurb: (head?.[2] ?? '').replace(/\.$/, ''), values: readTheme(css) };
+  })
+  .sort((a, b) => (order.indexOf(a.id) + 99) % 99 - (order.indexOf(b.id) + 99) % 99);
+
+const knob = (name: string) => knobs.find((k) => k.name === name)!;
+const data = { defaults, presets: Object.fromEntries(presets.map((p) => [p.id, p.values])) };
+
+const screens = [
+  { id: 'overview', label: 'Overview' },
+  { id: 'table', label: 'Table' },
+  { id: 'form', label: 'Form' },
+  { id: 'settings', label: 'Settings' },
+  { id: 'live', label: 'Imagery' },
+];
+
+// The pairs the contrast readout shows. `on` and `fg` are colour tokens;
+// `kind` is how the sample is drawn.
+const pairs = [
+  { id: 'text', label: 'Text', fg: 'text', on: 'bg', min: 4.5, kind: 'text' },
+  { id: 'secondary', label: 'Secondary text', fg: 'text-secondary', on: 'bg', min: 4.5, kind: 'text' },
+  { id: 'muted', label: 'Muted text', fg: 'text-muted', on: 'bg', min: 4.5, kind: 'text' },
+  { id: 'card', label: 'Muted, on a card', fg: 'text-muted', on: 'surface', min: 4.5, kind: 'text' },
+  { id: 'accent', label: 'Accent as text', fg: 'accent', on: 'bg', min: 4.5, kind: 'text' },
+  { id: 'on-accent', label: 'On the accent', fg: 'text-on-accent', on: 'accent', min: 4.5, kind: 'text' },
+  { id: 'error', label: 'Error text', fg: 'error', on: 'bg', min: 4.5, kind: 'text' },
+  { id: 'success', label: 'Success text', fg: 'success', on: 'bg', min: 4.5, kind: 'text' },
+  { id: 'control', label: 'Control border', fg: 'border-control', on: 'bg', min: 3, kind: 'border' },
+  { id: 'focus', label: 'Focus ring', fg: 'border-focus', on: 'bg', min: 3, kind: 'border' },
+];
+
+const title = 'Theme builder · Voidable';
+const description = 'Turn a dozen knobs and watch a real application change. Leave with a dozen lines of CSS, a link that carries every knob, a prompt for your agent and the tokens as DTCG JSON.';
+const canonical = new URL('/theme/', Astro.site ?? 'https://voidable.dev').href;
+const ogImage = new URL('/og.png', canonical).href;
+---
+
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Voidable" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+    <script is:inline>
+      // The site's own scheme, before first paint: the last choice, else the system's.
+      try {
+        const saved = localStorage.getItem('voidable-scheme');
+        const scheme = saved ?? (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+        document.documentElement.setAttribute('data-theme', scheme);
+      } catch {}
+    </script>
+  </head>
+  <body>
+    <a class="tb-skip" href="#tb-export">Skip to the export</a>
+    <void-shell>
+      <void-nav-bar bordered sticky>
+        <void-brand><a href="/">voidable</a></void-brand>
+        <void-nav-links>
+          <a href="/getting-started/introduction/">Docs</a>
+          <a href="/theme/" aria-current="page">Theme builder</a>
+          <a href="/getting-started/theming/">Theming</a>
+          <a href="/patterns/overview/">Patterns</a>
+          <a href="/storybook/">Components</a>
+        </void-nav-links>
+        <void-spacer></void-spacer>
+        <void-button id="tb-scheme" variant="ghost" aria-label="Switch the site between dark and light">
+          <span class="tb-icon tb-sun" set:html={iconSun} />
+          <span class="tb-icon tb-moon" set:html={iconMoon} />
+        </void-button>
+        <void-nav-links data-void-hide="narrow">
+          <a href="https://github.com/VoidableUI/Voidable" target="_blank" rel="noopener"><span class="tb-icon" set:html={iconBrandGithub} />GitHub</a>
+        </void-nav-links>
+      </void-nav-bar>
+
+      <main class="tb">
+        <header class="tb-head">
+          <div class="tb-head-text">
+            <span data-void-type="label">Theme builder</span>
+            <h1>Turn a dozen knobs. Leave with a theme.</h1>
+            <p data-void-type="lede">A real application, restyled live by the dozen inputs every Voidable theme is made of.</p>
+          </div>
+          <void-actions class="tb-head-actions">
+            <void-button id="tb-surprise"><span class="tb-icon" set:html={iconDice} />Surprise me</void-button>
+            <void-button id="tb-copy-link" class="tb-wide-only"><span class="tb-icon" set:html={iconLink} /><span data-label>Copy link</span></void-button>
+            <void-button id="tb-copy-css" variant="filled"><span class="tb-icon" set:html={iconCopy} /><span data-label>Copy CSS</span></void-button>
+          </void-actions>
+        </header>
+
+        <div class="tb-work">
+          <!-- ── Controls ── -->
+          <aside class="tb-rail" aria-label="Theme controls">
+            <section class="tb-group">
+              <div class="tb-group-head">
+                <h2 data-void-type="label">Start from</h2>
+                <void-button id="tb-reset" variant="ghost" size="sm"><span class="tb-icon" set:html={iconReset} />Reset</void-button>
+              </div>
+              <div class="tb-presets">
+                {presets.map((p) => (
+                  <void-button class="tb-preset" data-preset={p.id} title={p.blurb} aria-pressed="false">
+                    <span class="tb-swatch" data-void-theme={p.id} aria-hidden="true"><span></span></span>
+                    {p.label}
+                  </void-button>
+                ))}
+                {skins.map((s) => (
+                  <void-button class="tb-preset" data-preset-skin={s.id} title={s.description} aria-pressed="false">
+                    <span class="tb-swatch tb-swatch-skin" data-void-theme data-void-skin={s.id} aria-hidden="true"><span></span></span>
+                    {s.label}
+                  </void-button>
+                ))}
+              </div>
+            </section>
+
+            <section class="tb-group">
+              <h2 data-void-type="label">Colour</h2>
+              <div class="tb-sub">
+                <h3>Accent</h3>
+                <p id="tb-accent-note" data-void-type="caption">Primary actions, selection and focus.</p>
+              </div>
+              <div class="tb-knob tb-strip tb-strip-hue" data-row="--void-accent-hue">
+                <void-field label="Hue"><void-slider data-knob="--void-accent-hue" min="0" max="360" step="1"></void-slider></void-field>
+                <output data-out="--void-accent-hue"></output>
+              </div>
+              <div class="tb-knob tb-strip tb-strip-chroma" data-row="--void-accent-chroma">
+                <void-field label="Vividness"><void-slider data-knob="--void-accent-chroma" min={knob('--void-accent-chroma').min} max={knob('--void-accent-chroma').max} step={knob('--void-accent-chroma').step}></void-slider></void-field>
+                <output data-out="--void-accent-chroma"></output>
+              </div>
+              <div class="tb-sub">
+                <h3>Neutrals</h3>
+                <p data-void-type="caption">The tint of text, lines and surfaces.</p>
+              </div>
+              <div class="tb-knob tb-strip tb-strip-nhue" data-row="--void-neutral-hue">
+                <void-field label="Hue"><void-slider data-knob="--void-neutral-hue" min="0" max="360" step="1"></void-slider></void-field>
+                <output data-out="--void-neutral-hue"></output>
+              </div>
+              <div class="tb-knob tb-strip tb-strip-nchroma" data-row="--void-neutral-chroma">
+                <void-field label="Tint"><void-slider data-knob="--void-neutral-chroma" min="0" max={knob('--void-neutral-chroma').max} step={knob('--void-neutral-chroma').step}></void-slider></void-field>
+                <output data-out="--void-neutral-chroma"></output>
+              </div>
+              <div class="tb-sub">
+                <h3>Page</h3>
+              </div>
+              {[
+                { name: '--void-page-tint', label: 'Page tint', hint: 'Pure black or white, to soft paper.' },
+                { name: '--void-contrast', label: 'Contrast', hint: 'Secondary text and control borders. Never below AA.' },
+                { name: '--void-chrome', label: 'Chrome', hint: 'Divider lines and container fills.' },
+              ].map((k) => (
+                <div class="tb-knob" data-row={k.name} title={k.hint}>
+                  <void-field label={k.label}><void-slider data-knob={k.name} min={knob(k.name).min} max={knob(k.name).max} step={knob(k.name).step}></void-slider></void-field>
+                  <output data-out={k.name}></output>
+                </div>
+              ))}
+            </section>
+
+            <section class="tb-group">
+              <h2 data-void-type="label">Shape</h2>
+              <div class="tb-knob" data-row="--void-radius">
+                <void-field label="Corner radius"><void-slider data-knob="--void-radius" min="0" max="20" step="1"></void-slider></void-field>
+                <output data-out="--void-radius"></output>
+              </div>
+              <void-switch id="tb-pill" class="tb-switch">Pill-shaped controls</void-switch>
+              <void-field label="Structure" helper="Loft is a skin: it changes what containers are, not only their values.">
+                <void-segmented-control id="tb-skin" value="none" aria-label="Structure">
+                  <void-segmented-control-item value="none">Hairline</void-segmented-control-item>
+                  {skins.map((s) => <void-segmented-control-item value={s.id}>{s.label}</void-segmented-control-item>)}
+                </void-segmented-control>
+              </void-field>
+            </section>
+
+            <section class="tb-group">
+              <h2 data-void-type="label">Space</h2>
+              {[
+                { name: '--void-density', label: 'Density', hint: 'The size of controls and the space inside components.' },
+                { name: '--void-rhythm', label: 'Rhythm', hint: 'The space between groups and sections.' },
+              ].map((k) => (
+                <div class="tb-knob" data-row={k.name} title={k.hint}>
+                  <void-field label={k.label}><void-slider data-knob={k.name} min={knob(k.name).min} max={knob(k.name).max} step={knob(k.name).step}></void-slider></void-field>
+                  <output data-out={k.name}></output>
+                </div>
+              ))}
+            </section>
+
+            <section class="tb-group">
+              <h2 data-void-type="label">Type</h2>
+              <void-field label="Typeface">
+                <void-select data-font="--void-font-sans">
+                  {Object.entries(fontStacks['--void-font-sans']).map(([key, f]) => <option value={key}>{f.label}</option>)}
+                  <option value="custom" hidden>Custom</option>
+                </void-select>
+              </void-field>
+              <void-field label="Monospace" helper="Labels, code and ids.">
+                <void-select data-font="--void-font-mono">
+                  {Object.entries(fontStacks['--void-font-mono']).map(([key, f]) => <option value={key}>{f.label}</option>)}
+                  <option value="custom" hidden>Custom</option>
+                </void-select>
+              </void-field>
+              <div class="tb-knob" data-row="--void-font-size">
+                <void-field label="Text size"><void-slider data-knob="--void-font-size" min={knob('--void-font-size').min} max={knob('--void-font-size').max} step={knob('--void-font-size').step}></void-slider></void-field>
+                <output data-out="--void-font-size"></output>
+              </div>
+            </section>
+
+            <section class="tb-group">
+              <h2 data-void-type="label">Motion</h2>
+              <div class="tb-knob" data-row="--void-anim-scale">
+                <void-field label="Animation" helper="Your system's reduced-motion setting always wins."><void-slider data-knob="--void-anim-scale" min="0" max="2" step="0.1"></void-slider></void-field>
+                <output data-out="--void-anim-scale"></output>
+              </div>
+            </section>
+          </aside>
+
+          <!-- ── Preview ── -->
+          <section class="tb-stage" aria-label="Preview">
+            <void-toolbar class="tb-bar">
+              <void-segmented-control id="tb-screen" value="overview" aria-label="Screen">
+                {screens.map((s) => <void-segmented-control-item value={s.id}>{s.label}</void-segmented-control-item>)}
+              </void-segmented-control>
+              <void-spacer></void-spacer>
+              <void-segmented-control id="tb-device" value="desktop" aria-label="Width" class="tb-wide-only">
+                <void-segmented-control-item value="desktop">Desktop</void-segmented-control-item>
+                <void-segmented-control-item value="phone">Phone</void-segmented-control-item>
+              </void-segmented-control>
+              <void-segmented-control id="tb-view" value="both" aria-label="Colour scheme">
+                <void-segmented-control-item value="dark">Dark</void-segmented-control-item>
+                <void-segmented-control-item value="light">Light</void-segmented-control-item>
+                <void-segmented-control-item value="both" class="tb-wide-only">Both</void-segmented-control-item>
+              </void-segmented-control>
+            </void-toolbar>
+
+            <div class="tb-canvas" id="tb-canvas" data-device="desktop" data-view="both">
+              <div class="tb-frames" id="tb-frames"></div>
+            </div>
+
+            <section class="tb-contrast" aria-labelledby="tb-contrast-title">
+              <div class="tb-contrast-head">
+                <h2 id="tb-contrast-title" data-void-type="label">Contrast, measured now</h2>
+                <void-badge id="tb-contrast-badge" variant="outline" color="success">Checking</void-badge>
+              </div>
+              <ul class="tb-pairs">
+                {pairs.map((p) => (
+                  <li class="tb-pair" data-pair={p.id} data-fg={p.fg} data-on={p.on} data-min={p.min} data-kind={p.kind}>
+                    <span class="tb-samples" aria-hidden="true">
+                      <span class="tb-sample" data-scheme="dark">{p.kind === 'text' ? 'Aa' : ''}</span>
+                      <span class="tb-sample" data-scheme="light">{p.kind === 'text' ? 'Aa' : ''}</span>
+                    </span>
+                    <span class="tb-pair-text">
+                      <span class="tb-pair-name">{p.label}</span>
+                      <span class="tb-pair-ratio" data-void-type="code"><span data-ratio="dark">–</span> · <span data-ratio="light">–</span></span>
+                    </span>
+                  </li>
+                ))}
+              </ul>
+              <p data-void-type="caption">Contrast ratios in dark, then in light, measured from the colours the browser computed for these knobs. Text needs 4.5:1 and the two borders 3:1 (WCAG AA). The same arithmetic runs in CI over every theme and the extremes of every knob (<code>lint:contrast</code>), which is why no setting here can fail.</p>
+            </section>
+          </section>
+        </div>
+
+        <!-- ── Export ── -->
+        <section class="tb-export" id="tb-export" aria-labelledby="tb-export-title" tabindex="-1">
+          <void-section-head>
+            <h2 id="tb-export-title">Take it with you</h2>
+            <p>This is the whole theme. Nothing else is generated: the rest is derived from these lines by the stylesheet you already load.</p>
+          </void-section-head>
+
+          <div class="tb-export-grid">
+            <void-tabs id="tb-tabs" value="css" class="tb-tabs">
+              <void-tab-panel tab="css" label="theme.css">
+                <pre class="tb-code" tabindex="0" aria-label="Theme CSS"><code id="tb-css"></code></pre>
+                <void-actions>
+                  <void-button id="tb-copy-css-2" variant="filled"><span class="tb-icon" set:html={iconCopy} /><span data-label>Copy CSS</span></void-button>
+                  <void-button id="tb-download-css"><span class="tb-icon" set:html={iconDownload} />Download <span id="tb-filename">theme.css</span></void-button>
+                </void-actions>
+              </void-tab-panel>
+              <void-tab-panel tab="link" label="Link">
+                <void-field label="A link to this theme" helper="Every knob is a parameter named after it (--void-radius is radius), so a person or an agent can also write this link by hand.">
+                  <void-input id="tb-url" readonly></void-input>
+                </void-field>
+                <void-actions>
+                  <void-button id="tb-copy-link-2" variant="filled"><span class="tb-icon" set:html={iconLink} /><span data-label>Copy link</span></void-button>
+                </void-actions>
+              </void-tab-panel>
+              <void-tab-panel tab="prompt" label="Prompt">
+                <p class="tb-prompt" id="tb-prompt" tabindex="0"></p>
+                <void-actions>
+                  <void-button id="tb-copy-prompt" variant="filled"><span class="tb-icon" set:html={iconCopy} /><span data-label>Copy prompt</span></void-button>
+                </void-actions>
+              </void-tab-panel>
+              <void-tab-panel tab="tokens" label="Design tokens">
+                <p class="tb-note">The knobs, or every token they resolve to, as <a href="https://www.designtokens.org/TR/2025.10/format/">Design Tokens Community Group</a> JSON (format {DTCG_VERSION}) for Tokens Studio, Style Dictionary and other design tools. Colours are sRGB with a hex fallback.</p>
+                <void-actions>
+                  <void-button id="tb-dtcg-knobs"><span class="tb-icon" set:html={iconDownload} />Knobs</void-button>
+                  <void-button id="tb-dtcg-dark"><span class="tb-icon" set:html={iconDownload} />Resolved, dark</void-button>
+                  <void-button id="tb-dtcg-light"><span class="tb-icon" set:html={iconDownload} />Resolved, light</void-button>
+                </void-actions>
+                <p class="tb-note">The shipped themes are already exported in the package: <code>@voidable/theme/dtcg/dune.light.tokens.json</code>.</p>
+              </void-tab-panel>
+            </void-tabs>
+
+            <void-stack class="tb-use">
+              <void-field label="Name" helper="Optional. A named theme applies where you put data-void-theme; without a name it applies to the whole page.">
+                <void-input id="tb-name" placeholder="acme"></void-input>
+              </void-field>
+              <div>
+                <span data-void-type="label">Use it</span>
+                <pre class="tb-code tb-code-quiet" tabindex="0" aria-label="How to use the theme"><code id="tb-usage"></code></pre>
+              </div>
+            </void-stack>
+          </div>
+        </section>
+      </main>
+
+      <footer class="tb-foot">
+        <void-nav-links>
+          <a href="/getting-started/theming/">What each knob does</a>
+          <a href="/getting-started/theming/#skins-beyond-the-knobs">Skins</a>
+          <a href="/getting-started/theming/#tokens-for-design-tools">Tokens for design tools</a>
+          <a href="/storybook/">Storybook</a>
+        </void-nav-links>
+        <span data-void-type="caption">voidable.dev · MIT</span>
+      </footer>
+    </void-shell>
+
+    <!-- Probes for the contrast readout: a themed region per scheme. -->
+    <div class="tb-probes" aria-hidden="true">
+      <div id="tb-probe-dark" data-void-theme data-theme="dark"></div>
+      <div id="tb-probe-light" data-void-theme data-theme="light"></div>
+    </div>
+    <div class="tb-live" id="tb-live" role="status" aria-live="polite"></div>
+    <script type="application/json" id="tb-data" set:html={JSON.stringify(data)} />
+
+    <script>
+      import * as ui from '@voidable/ui';
+      import { start } from '../../lib/theme-builder';
+      document.documentElement.dataset.voidElements = String(Object.keys(ui).length);
+      // Development warnings, `astro dev` only.
+      if (import.meta.env.DEV) import('@voidable/ui/dev');
+      start();
+    </script>
+
+    <style is:global>
+      html {
+        /* The workspace is wider than a reading page; the bar lines up with it. */
+        --void-measure-page: 100rem;
+        font-family: var(--void-font-sans);
+        color: var(--void-color-text);
+        background: var(--void-color-bg);
+        scroll-padding-top: var(--void-space-16);
+      }
+
+      .tb-skip {
+        position: absolute;
+        inset: var(--void-space-2) auto auto var(--void-space-2);
+        z-index: var(--void-z-tooltip);
+        padding: var(--void-space-2) var(--void-space-3);
+        background: var(--void-color-bg-elevated);
+        border-radius: var(--void-radius-md);
+        box-shadow: var(--void-ring-hair), var(--void-shadow-md);
+        transform: translateY(-200%);
+      }
+      .tb-skip:focus-visible { transform: none; }
+
+      .tb-icon {
+        display: inline-flex;
+        width: 1rem;
+        height: 1rem;
+        flex: none;
+      }
+      .tb-icon svg { width: 100%; height: 100%; }
+      void-nav-links > a:has(.tb-icon) { display: inline-flex; align-items: center; gap: var(--void-space-2); }
+      [data-theme="dark"] .tb-moon, [data-theme="light"] .tb-sun { display: none; }
+
+      /* One column, wider than a reading page: this is a workspace. */
+      .tb {
+        --tb-rail: 20rem;
+        box-sizing: border-box;
+        width: 100%;
+        max-width: 100rem;
+        margin-inline: auto;
+        padding: var(--void-gap-stack) var(--void-gutter) var(--void-gap-section);
+        display: flex;
+        flex-direction: column;
+        gap: var(--void-gap-stack);
+      }
+
+      .tb-head {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: var(--void-gap-stack) var(--void-gap-group);
+      }
+      .tb-head-text { display: flex; flex-direction: column; gap: var(--void-space-2); }
+      .tb-head h1 {
+        margin: 0;
+        font-size: clamp(var(--void-text-2xl), 2.6vw, var(--void-text-4xl));
+        font-weight: var(--void-weight-medium);
+        letter-spacing: var(--void-tracking-tighter);
+        line-height: var(--void-leading-snug);
+      }
+      .tb-head p { margin: 0; }
+
+      .tb-work {
+        display: grid;
+        grid-template-columns: var(--tb-rail) minmax(0, 1fr);
+        gap: var(--void-gap-group);
+        align-items: start;
+      }
+
+      /* ── Rail ──
+         As long as it needs to be: the page scrolls and the preview stays. */
+      .tb-rail {
+        display: flex;
+        flex-direction: column;
+        gap: var(--void-gap-group);
+        min-width: 0;
+      }
+      .tb-group { display: flex; flex-direction: column; gap: var(--void-gap-inside); }
+      .tb-group > h2, .tb-group-head > h2 { margin: 0; }
+      .tb-group-head { display: flex; align-items: center; justify-content: space-between; min-height: var(--void-control-height-sm); }
+      .tb-sub { display: flex; flex-direction: column; gap: var(--void-space-0h); margin-top: var(--void-space-2); }
+      .tb-sub h3 { margin: 0; font-size: var(--void-text-base); font-weight: var(--void-weight-medium); }
+      .tb-sub p { margin: 0; }
+      .tb-group void-field { width: 100%; }
+
+      /* Presets: each draws its own swatch from its theme file. */
+      .tb-presets { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--void-space-2); }
+      .tb-preset {
+        flex-direction: column;
+        gap: var(--void-space-2);
+        padding: var(--void-space-3) var(--void-space-1) var(--void-space-2);
+        font-size: var(--void-text-sm);
+        font-weight: var(--void-weight-normal);
+        border-color: var(--void-color-border);
+      }
+      .tb-preset[aria-pressed="true"] { border-color: var(--void-color-border-focus); background: var(--void-color-bg-hover); }
+      .tb-swatch {
+        display: grid;
+        place-items: center;
+        width: 2.25rem;
+        height: 2.25rem;
+        border-radius: var(--void-radius-full);
+        background: var(--void-color-page);
+        box-shadow: inset 0 0 0 1px var(--void-color-border-strong);
+      }
+      /* The inner shape is the theme's accent with the theme's corner. */
+      .tb-swatch > span {
+        width: 1rem;
+        height: 1rem;
+        background: var(--void-color-accent);
+        border-radius: min(var(--void-radius-md), 0.5rem);
+      }
+      /* The skin's swatch is a lifted card on its soft page. */
+      .tb-swatch-skin > span {
+        background: var(--void-color-surface);
+        box-shadow: var(--void-shadow-md);
+        border-radius: var(--void-radius-sm);
+      }
+
+      /* A knob: the field, with its value at the end of the label row. */
+      .tb-knob { position: relative; }
+      .tb-knob output {
+        position: absolute;
+        inset: 0 0 auto auto;
+        font-family: var(--void-font-mono);
+        font-size: var(--void-text-xs);
+        font-variant-numeric: tabular-nums;
+        line-height: var(--void-leading-normal);
+        color: var(--void-color-text-secondary);
+        pointer-events: none;
+      }
+      .tb-knob void-slider { min-height: var(--void-space-6); }
+
+      /* Colour strips: the track is the range of colours the knob covers. */
+      .tb-strip void-slider input[type="range"] {
+        height: 0.75rem;
+        border-radius: var(--void-radius-full);
+        box-shadow: inset 0 0 0 1px var(--void-color-border-strong);
+      }
+      .tb-strip void-slider input[type="range"]::-webkit-slider-thumb {
+        width: 1.125rem;
+        height: 1.125rem;
+        background: var(--void-color-bg);
+        border: 2px solid var(--void-color-text);
+      }
+      .tb-strip void-slider input[type="range"]::-moz-range-thumb {
+        width: 0.875rem;
+        height: 0.875rem;
+        background: var(--void-color-bg);
+        border: 2px solid var(--void-color-text);
+      }
+      .tb-strip void-slider input[type="range"]::-moz-range-track { background: transparent; }
+      .tb-rail { --tb-l: 0.72; }
+      .tb-strip-hue, .tb-strip-nhue {
+        --tb-hues: oklch(var(--tb-l) var(--tb-c) 0), oklch(var(--tb-l) var(--tb-c) 30), oklch(var(--tb-l) var(--tb-c) 60), oklch(var(--tb-l) var(--tb-c) 90), oklch(var(--tb-l) var(--tb-c) 120), oklch(var(--tb-l) var(--tb-c) 150), oklch(var(--tb-l) var(--tb-c) 180), oklch(var(--tb-l) var(--tb-c) 210), oklch(var(--tb-l) var(--tb-c) 240), oklch(var(--tb-l) var(--tb-c) 270), oklch(var(--tb-l) var(--tb-c) 300), oklch(var(--tb-l) var(--tb-c) 330), oklch(var(--tb-l) var(--tb-c) 360);
+      }
+      .tb-strip-hue { --tb-c: 0.16; }
+      .tb-strip-nhue { --tb-c: 0.07; }
+      .tb-strip-hue void-slider input[type="range"],
+      .tb-strip-nhue void-slider input[type="range"] { background: linear-gradient(to right, var(--tb-hues)); }
+      .tb-strip-chroma void-slider input[type="range"] { background: linear-gradient(to right, oklch(var(--tb-l) 0 var(--tb-accent-hue, 250)), oklch(var(--tb-l) 0.25 var(--tb-accent-hue, 250))); }
+      .tb-strip-nchroma void-slider input[type="range"] { background: linear-gradient(to right, oklch(var(--tb-l) 0 var(--tb-neutral-hue, 60)), oklch(var(--tb-l) 0.09 var(--tb-neutral-hue, 60))); }
+      /* With no accent colour the hue has nothing to act on. */
+      .tb-rail[data-mono] .tb-strip-hue void-slider input[type="range"] { opacity: 0.35; }
+
+      .tb-switch { display: flex; align-items: center; justify-content: space-between; gap: var(--void-gap-inside); width: 100%; font-size: var(--void-text-base); }
+      #tb-skin { width: fit-content; }
+
+      /* ── Stage ── */
+      .tb-stage {
+        position: sticky;
+        top: calc(var(--void-control-height) + var(--void-space-10));
+        display: flex;
+        flex-direction: column;
+        gap: var(--void-gap-inside);
+        min-width: 0;
+      }
+      .tb-bar { row-gap: var(--void-space-2); }
+
+      .tb-canvas {
+        position: relative;
+        display: grid;
+        place-items: center;
+        height: clamp(26rem, calc(100svh - 17.5rem), 52rem);
+        padding: var(--void-space-6);
+        border-radius: var(--void-radius-xl);
+        background: var(--void-color-bg-secondary);
+        overflow: hidden;
+      }
+      .tb-canvas[data-device="desktop"] { padding: var(--void-space-5); }
+      .tb-frames { position: relative; display: flex; gap: var(--void-space-6); align-items: flex-start; justify-content: center; }
+      .tb-frame {
+        position: relative;
+        flex: none;
+        overflow: hidden;
+        border-radius: var(--void-radius-lg);
+        box-shadow: var(--void-ring-hair-strong), var(--void-shadow-lg);
+        background: var(--void-color-bg);
+      }
+      .tb-frame iframe { display: block; border: 0; transform-origin: 0 0; background: transparent; }
+      /* Both schemes at desktop width: the light frame lies over the dark
+         one and is clipped at the divider. It mirrors the frame beneath it. */
+      .tb-frame[data-mirror] iframe { pointer-events: none; }
+      .tb-frame[data-mirror][data-overlay] {
+        position: absolute;
+        inset: 0;
+        clip-path: inset(0 0 0 var(--tb-split, 50%));
+        box-shadow: none;
+        background: transparent;
+        pointer-events: none;
+      }
+      .tb-divider {
+        position: absolute;
+        inset: 0 auto 0 var(--tb-split, 50%);
+        width: var(--void-space-6);
+        margin-left: calc(var(--void-space-6) / -2);
+        display: grid;
+        place-items: center;
+        cursor: ew-resize;
+        touch-action: none;
+        z-index: 2;
+        border-radius: var(--void-radius-sm);
+      }
+      .tb-divider::before {
+        content: "";
+        position: absolute;
+        inset: 0 auto 0 50%;
+        width: 2px;
+        margin-left: -1px;
+        background: var(--void-color-text);
+        opacity: 0.55;
+      }
+      .tb-divider::after {
+        content: "";
+        position: relative;
+        width: var(--void-space-3);
+        height: var(--void-space-10);
+        border-radius: var(--void-radius-full);
+        background: var(--void-color-bg-elevated);
+        box-shadow: var(--void-ring-hair-strong), var(--void-shadow-md);
+      }
+      .tb-divider:focus-visible { outline: var(--void-focus-ring-width) solid var(--void-focus-ring-color); outline-offset: calc(var(--void-focus-ring-offset) * -1); }
+      .tb-tag {
+        position: absolute;
+        inset: auto auto var(--void-space-3) var(--void-space-3);
+        z-index: 1;
+        padding: var(--void-space-0h) var(--void-space-2);
+        border-radius: var(--void-radius-full);
+        background: var(--void-color-bg-elevated);
+        box-shadow: var(--void-ring-hair), var(--void-shadow-sm);
+        font-family: var(--void-type-label-family);
+        font-size: var(--void-type-label-size);
+        letter-spacing: var(--void-type-label-tracking);
+        text-transform: var(--void-type-label-case);
+        color: var(--void-color-text);
+        pointer-events: none;
+      }
+      .tb-tag[data-end] { inset: auto var(--void-space-3) var(--void-space-3) auto; }
+
+      /* ── Contrast ── */
+      .tb-contrast { display: flex; flex-direction: column; gap: var(--void-gap-inside); padding-top: var(--void-space-2); }
+      .tb-contrast-head { display: flex; align-items: center; gap: var(--void-space-3); }
+      .tb-contrast-head h2 { margin: 0; }
+      .tb-contrast p { margin: 0; max-width: 46rem; }
+      .tb-contrast code, .tb-note code { font-family: var(--void-font-mono); font-size: 0.92em; color: var(--void-color-text); }
+      .tb-pairs {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(10.5rem, 1fr));
+        gap: var(--void-space-4) var(--void-gap-inside);
+      }
+      .tb-pair { display: flex; align-items: center; gap: var(--void-space-3); min-width: 0; }
+      .tb-samples { display: flex; flex: none; border-radius: var(--void-radius-md); overflow: hidden; box-shadow: var(--void-ring-hair-strong); }
+      .tb-sample {
+        display: grid;
+        place-items: center;
+        width: 2rem;
+        height: 2rem;
+        font-size: var(--void-text-sm);
+        font-weight: var(--void-weight-medium);
+        /* set by the builder: the pair's own colours */
+        background: var(--tb-on, transparent);
+        color: var(--tb-fg, inherit);
+      }
+      .tb-pair[data-kind="border"] .tb-sample::before {
+        content: "";
+        width: 0.875rem;
+        height: 0.875rem;
+        border: 1.5px solid var(--tb-fg, currentColor);
+        border-radius: var(--void-radius-xs);
+      }
+      .tb-pair-text { display: flex; flex-direction: column; min-width: 0; }
+      .tb-pair-name { font-size: var(--void-text-sm); color: var(--void-color-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .tb-pair-ratio { font-size: var(--void-text-xs); color: var(--void-color-text-secondary); white-space: nowrap; }
+      .tb-pair[data-fail] .tb-pair-ratio { color: var(--void-color-error); }
+
+      /* ── Export ── */
+      .tb-export {
+        display: flex;
+        flex-direction: column;
+        gap: var(--void-gap-stack);
+        padding-top: var(--void-gap-group);
+        border-top: 1px solid var(--void-color-border);
+        outline: none;
+      }
+      .tb-export-grid { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: var(--void-gap-group); align-items: start; }
+      .tb-tabs void-tab-panel[active] { display: flex; flex-direction: column; gap: var(--void-gap-inside); padding-top: var(--void-gap-inside); }
+      .tb-code {
+        margin: 0;
+        padding: var(--void-space-4) var(--void-space-5);
+        border-radius: var(--void-radius-lg);
+        background: var(--void-color-bg-secondary);
+        font-family: var(--void-font-mono);
+        font-size: var(--void-text-sm);
+        line-height: var(--void-leading-relaxed);
+        color: var(--void-color-text);
+        overflow-x: auto;
+        tab-size: 2;
+      }
+      .tb-code:focus-visible, .tb-prompt:focus-visible { outline: var(--void-focus-ring-width) solid var(--void-focus-ring-color); outline-offset: var(--void-focus-ring-offset); }
+      .tb-code .k { color: var(--void-color-text-secondary); }
+      .tb-code-quiet { margin-top: var(--void-space-2); font-size: var(--void-text-xs); }
+      .tb-prompt {
+        margin: 0;
+        padding: var(--void-space-4) var(--void-space-5);
+        border-radius: var(--void-radius-lg);
+        background: var(--void-color-bg-secondary);
+        font-size: var(--void-text-base);
+        line-height: var(--void-leading-relaxed);
+        overflow-wrap: anywhere;
+      }
+      .tb-note { margin: 0; color: var(--void-color-text-secondary); line-height: var(--void-leading-relaxed); max-width: 40rem; }
+      .tb-note a { color: var(--void-color-text); }
+
+      .tb-foot {
+        box-sizing: border-box;
+        width: 100%;
+        max-width: 100rem;
+        margin-inline: auto;
+        padding: var(--void-gap-stack) var(--void-gutter) var(--void-gap-group);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: var(--void-gap-inside);
+        border-top: 1px solid var(--void-color-border);
+      }
+      .tb-foot void-nav-links { margin-inline-start: calc(var(--void-space-3) * -1); flex-wrap: wrap; }
+
+      .tb-probes { position: absolute; width: 0; height: 0; overflow: hidden; visibility: hidden; }
+      .tb-live { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+
+      /* ── Narrow: the preview stays in view while the knobs scroll under it ── */
+      @media (max-width: 60rem) {
+        .tb { gap: var(--void-gap-stack); padding-top: var(--void-gap-stack); }
+        .tb-work { grid-template-columns: minmax(0, 1fr); gap: var(--void-gap-stack); }
+        .tb-stage { display: contents; position: static; }
+        .tb-bar { order: 1; }
+        .tb-canvas {
+          order: 2;
+          position: sticky;
+          top: 0;
+          z-index: var(--void-z-sticky);
+          height: 46svh;
+          min-height: 16rem;
+          padding: var(--void-space-3);
+          margin-inline: calc(var(--void-gutter) * -1);
+          border-radius: 0;
+          border-bottom: 1px solid var(--void-color-border);
+        }
+        .tb-rail { order: 3; }
+        .tb-contrast { order: 4; }
+        .tb-wide-only { display: none; }
+        .tb-export-grid { grid-template-columns: minmax(0, 1fr); gap: var(--void-gap-stack); }
+        .tb-head-actions { width: 100%; }
+        .tb-head p { display: none; }
+        void-nav-bar[sticky] { position: static; }
+      }
+      @media (max-width: 30rem) {
+        .tb-presets { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+        .tb-bar void-segmented-control { max-width: 100%; }
+        /* five screens in one row on a phone */
+        #tb-screen { --void-control-padding: var(--void-space-2); --void-control-text: var(--void-text-sm); width: 100%; }
+        #tb-screen void-segmented-control-item { flex: 1; }
+      }
+    </style>
+  </body>
+</html>

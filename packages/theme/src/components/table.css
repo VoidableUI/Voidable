@@ -11,7 +11,6 @@
      --void-table-fade                  width of the scroll-edge fade
      --void-table-sticky-top            offset of a sticky header from the top
      --void-table-max-height            height at which [scrollable] scrolls vertically
-     --void-table-room                  set by the component while an overlay is open
    ============================================================ */
 
 void-table {
@@ -25,7 +24,6 @@ void-table {
   --void-table-fade: var(--void-space-8);
   --void-table-sticky-top: 0;
   --void-table-max-height: none;
-  --void-table-room: 0;
 
   /* visible: nothing here clips a menu, popover or tooltip opened from a cell.
      Scrolling is opt-in with [scrollable]. */
@@ -167,8 +165,6 @@ void-table[inset] {
 void-table[scrollable] {
   overflow-x: auto;
   overflow-y: hidden;
-  /* Room for an open menu or popover, which a region would otherwise clip. */
-  padding-block-end: var(--void-table-room);
   scrollbar-width: thin;
   scrollbar-color: var(--void-color-border-strong) transparent;
 }
@@ -241,12 +237,6 @@ void-table[scrollable][sticky-column][data-overflow-start]:not([data-overflow-en
 
 void-table[scrollable][sticky-column]:dir(rtl)[data-overflow-start][data-overflow-end] {
   mask-image: linear-gradient(to left, currentcolor calc(100% - var(--void-table-fade)), transparent);
-}
-
-/* An open overlay inside the table stacks above what follows the table. */
-void-table[data-overlay] {
-  position: relative;
-  z-index: var(--void-z-dropdown);
 }
 
 /* ── Sticky header and first column ──

@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+#MISE description="Run the server-backed browser suite: start real apps (the Rails, Phoenix LiveView and Laravel Livewire demos) on the built packages and drive them with Playwright"
+#MISE depends=["build"]
+set -euo pipefail
+
+# Needs Chromium (`mise run test:browser:install -- chromium`) and each app's
+# toolchain from mise.toml (Ruby for Rails, Erlang and Elixir for Phoenix, PHP
+# for Laravel: `mise install ruby` and so on).
+# Playwright prepares and starts every app in tests/browser/server/apps.mjs,
+# waits until it answers, runs its specs and stops it. Examples:
+#   mise run test:server
+#   VOID_SERVER_APPS=rails mise run test:server -- --grep "Turbo Stream"
+#   VOID_SERVER_APPS=phoenix,laravel mise run test:server
+cd tests/browser
+exec ./node_modules/.bin/playwright test -c playwright.server.config.ts "$@"

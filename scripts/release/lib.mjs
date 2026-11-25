@@ -19,12 +19,14 @@ export const SEMVER = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/;
 
 // Paths whose changes can produce a release (git pathspecs). Matches the old
 // per-package workflows: anything under a package directory, plus the release
-// workflow itself. Storybook and the placeholder `voidable` gem are not
+// workflow itself. Storybook, the placeholder `voidable` gem and the demo
+// apps (packages/*/demo, demo-vite: none is published or deployed) are not
 // released, so changes there alone do not count.
 export const RELEASE_PATHSPECS = [
   'packages',
   ':(exclude)packages/storybook',
   ':(exclude)packages/voidable-gem',
+  ':(exclude,glob)packages/*/demo*/**',
   '.github/workflows/release.yml',
 ];
 
