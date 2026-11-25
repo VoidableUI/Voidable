@@ -186,10 +186,7 @@ describe('VoidDonutChart', () => {
       expect(segs(el)).toHaveLength(2);
     });
 
-    // BUG: a single segment (100%) produces an arc whose start and end points coincide
-    // (sweep of exactly 2*PI through arcPath), which SVG renders as nothing, so the ring
-    // is invisible. gauge.ts clamps the sweep for this case; donut-chart.ts:263 does not.
-    it.fails('renders a visible ring for a single 100% segment', async () => {
+    it('renders a visible ring for a single 100% segment', async () => {
       const el = await mount<VoidDonutChart>(TAG, { data: { segments: [{ name: 'only', value: 5 }] } });
       const [seg] = segs(el);
       expect(seg).toBeDefined();
@@ -197,10 +194,7 @@ describe('VoidDonutChart', () => {
       expect(`${n[0]},${n[1]}`).not.toBe(`${n[7]},${n[8]}`);
     });
 
-    // BUG: a NaN value makes the total NaN; the guard `total === 0` does not catch it, so
-    // every segment (including the valid ones) silently disappears. donut-chart.ts:223-224.
-    // Expected: ignore non-finite values and still draw the valid segment.
-    it.fails('still draws valid segments when another value is NaN', async () => {
+    it('still draws valid segments when another value is NaN', async () => {
       const el = await mount<VoidDonutChart>(TAG, {
         data: { segments: [{ name: 'a', value: 1 }, { name: 'b', value: NaN }] },
       });

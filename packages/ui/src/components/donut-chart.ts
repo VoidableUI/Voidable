@@ -13,6 +13,11 @@ export interface DonutChartData {
   segments: DonutChartSegment[];
 }
 
+/** Non-finite values (NaN, Infinity) count as zero. */
+function fin(v: number): number {
+  return Number.isFinite(v) ? v : 0;
+}
+
 function easeOutCubic(t: number) {
   return 1 - Math.pow(1 - t, 3);
 }
@@ -99,9 +104,9 @@ export class VoidDonutChart extends VoidElement {
     this._targetValues.clear();
     const segments = this._data.segments;
     for (let i = 0; i < segments.length; i++) {
-      this._targetValues.set(i, segments[i]!.value);
+      this._targetValues.set(i, fin(segments[i]!.value));
     }
-    this._targetTotal = segments.reduce((s, x) => s + x.value, 0);
+    this._targetTotal = segments.reduce((s, x) => s + fin(x.value), 0);
   }
 
   connectedCallback() {
@@ -148,7 +153,7 @@ export class VoidDonutChart extends VoidElement {
     const fullSweep = 2 * Math.PI;
     let cum = 0;
     for (let i = 0; i < segments.length; i++) {
-      const segValue = segments[i]!.value;
+      const segValue = fin(segments[i]!.value);
       const segSweep = (segValue / this._targetTotal) * fullSweep;
       if (angle >= cum && angle < cum + segSweep) {
         if (this._hoverSegment !== i) this._hoverSegment = i;
@@ -220,7 +225,7 @@ export class VoidDonutChart extends VoidElement {
 
   render() {
     const { segments } = this._data;
-    const total = segments.reduce((s, x) => s + x.value, 0);
+    const total = segments.reduce((s, x) => s + fin(x.value), 0);
     if (segments.length === 0 || total === 0) {
       return html`<svg viewBox="0 0 ${this.size} ${this.size}" role="img" aria-label=${this.ariaLabel || 'Donut chart'}></svg>`;
     }
@@ -316,7 +321,7 @@ export class VoidDonutChart extends VoidElement {
     hi: number,
   ): unknown {
     const seg = segments[hi]!;
-    const display = this._displayValues.get(hi) ?? seg.value;
+    const display = this._displayValues.get(hi) ?? fin(seg.value);
     const totalSum = [...this._displayValues.values()].reduce((s, v) => s + v, 0)
       || this._targetTotal || 1;
     const pct = Math.round((display / totalSum) * 100);

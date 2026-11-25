@@ -208,7 +208,7 @@ export class VoidGauge extends VoidElement {
   @property({ type: Number }) thickness = 14;
   @property({ reflect: true }) circular: 'full' | 'semi' | 'triple' = 'triple';
   @property({ reflect: true }) variant: 'filled' | 'outline' | 'wireframe' = 'filled';
-  @property({ type: Boolean, attribute: 'show-value', reflect: true }) showValue = true;
+  @property({ type: Boolean, attribute: 'show-value', reflect: true, converter: defaultTrueBoolean }) showValue = true;
   /** When true, render the unit right next to the value (e.g. "75%").
       When false (default), render it on the line below. Short units like
       % or ° look better inline; longer multi-char units often look
@@ -255,7 +255,9 @@ export class VoidGauge extends VoidElement {
   }) gaps: boolean | number = false;
   @property({ attribute: 'aria-label' }) ariaLabel = '';
 
-  zones: GaugeZone[] = [];
+  /** Colour bands over the value range. Assign an array of `{ from, to, color }`;
+      the fill takes the colour of the zone containing the value. Property only. */
+  @property({ attribute: false }) zones: GaugeZone[] = [];
 
   private _data: GaugeData = {};
 
@@ -294,6 +296,19 @@ export class VoidGauge extends VoidElement {
   private _animStart = 0;
   private _animDuration = 0;
   private _rafHandle = 0;
+  private _hasAnimated = false;
+
+  protected willUpdate(changed: Map<PropertyKey, unknown>) {
+    super.willUpdate?.(changed as never);
+    if (changed.has('value') || changed.has('min') || changed.has('max')) {
+      this._refreshTargets();
+      // After the entry animation has run, animate from the displayed value
+      // to the new target instead of leaving the old value on screen.
+      if (this._hasAnimated && this.isConnected) {
+        this._startAnimation(new Map(this._displaySegments), this._displayValue, true);
+      }
+    }
+  }
 
   private _refreshTargets() {
     const segs = this._data.segments ?? [];
@@ -379,12 +394,13 @@ export class VoidGauge extends VoidElement {
       : segments;
     const displayedTotal = [...this._displaySegments.values()].reduce((s, v) => s + v, 0)
       || this._displayValue || 1;
+    const filledSweep = fillEndAngle - startAngle;
     let cum = startAngle;
     for (let i = 0; i < sorted.length; i++) {
       const seg = sorted[i]!;
       const origIdx = segments.indexOf(seg);
       const display = this._displaySegments.get(origIdx) ?? 0;
-      const segSweep = (display / displayedTotal) * totalSweep;
+      const segSweep = (display / displayedTotal) * filledSweep;
       if (angle >= cum && angle < cum + segSweep) {
         if (this._hoverSegment !== origIdx) this._hoverSegment = origIdx;
         this._hoverX = mx;
@@ -415,6 +431,7 @@ export class VoidGauge extends VoidElement {
     this._segmentsFrom = fromSegs;
     this._displayValueFrom = isUpdate ? fromValue : 0;
     this._animStart = performance.now();
+    this._hasAnimated = true;
 
     if (this._animDuration <= 0) {
       this._displayValue = this._targetValue;
@@ -468,6 +485,9 @@ export class VoidGauge extends VoidElement {
     for (const zone of this.zones) {
       if (v >= zone.from && v <= zone.to) return zone.color;
     }
+    // below the first zone: use the zone that starts lowest
+    const lowest = this.zones.reduce((a, b) => (b.from < a.from ? b : a));
+    if (v < lowest.from) return lowest.color;
     // fallback to last zone if over max
     return this.zones[this.zones.length - 1]!.color;
   }
@@ -585,7 +605,6 @@ export class VoidGauge extends VoidElement {
     cy: number,
     r: number,
     startAngle: number,
-    totalSweep: number,
     displayedTotal: number,
     fillEndAngle: number,
   ) {
@@ -623,7 +642,7 @@ export class VoidGauge extends VoidElement {
       const displayVal = this._displaySegments.get(origIdx) ?? 0;
       if (displayVal <= 0 || displayedTotal <= 0) { cumAngle += 0; continue; }
 
-      const segSweep = (displayVal / displayedTotal) * totalSweep;
+      const segSweep = (displayVal / displayedTotal) * filledSweep;
       const segEnd = Math.min(cumAngle + segSweep, fillEndAngle);
       // Pad only at INTERIOR boundaries — leave the very first segment's
       // start and the very last segment's end un-padded so there's no gap
@@ -781,7 +800,7 @@ export class VoidGauge extends VoidElement {
     const r = this.size / 2 - margin;
     const vbH = this._viewBoxHeight();
 
-    const displayedTotal = this._resolveTotal();
+    const displayedTotal = [...this._displaySegments.values()].reduce((s, v) => s + v, 0);
     const clamped = Math.max(this.min, Math.min(this.max, this._displayValue));
     const ratio = this.max - this.min === 0 ? 0 : (clamped - this.min) / (this.max - this.min);
     const fillEndAngle = startAngle + Math.max(0, Math.min(1, ratio)) * totalSweep;
@@ -827,7 +846,7 @@ export class VoidGauge extends VoidElement {
         ` : nothing}
 
         <!-- Segment overlays -->
-        ${this._renderSegments(cx, cy, r, startAngle, totalSweep, displayedTotal, fillEndAngle)}
+        ${this._renderSegments(cx, cy, r, startAngle, displayedTotal, fillEndAngle)}
 
         <!-- Tick marks (outside the band) -->
         ${this._renderTicks(cx, cy, r)}

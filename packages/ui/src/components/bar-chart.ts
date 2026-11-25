@@ -90,7 +90,7 @@ export class VoidBarChart extends VoidElement {
   private _refreshTargets() {
     this._targets.clear();
     this._data.series.forEach((s, si) => {
-      s.values.forEach((v, bi) => this._targets.set(this._key(si, bi), v));
+      s.values.forEach((v, bi) => this._targets.set(this._key(si, bi), Number.isFinite(v) ? v : 0));
     });
   }
 
@@ -165,7 +165,7 @@ export class VoidBarChart extends VoidElement {
   render() {
     const { series, labels = [] } = this._data;
     if (series.length === 0) {
-      return html`<svg viewBox="0 0 600 ${this.height}" aria-label=${this.ariaLabel}></svg>`;
+      return html`<svg viewBox="0 0 600 ${this.height}" role="img" aria-label=${this.ariaLabel || 'Bar chart'}></svg>`;
     }
 
     const topMargin = 16, rightMargin = 16, bottomMargin = 32, leftMargin = 40;
@@ -173,7 +173,7 @@ export class VoidBarChart extends VoidElement {
     const innerWidth = width - leftMargin - rightMargin;
     const innerHeight = this.height - topMargin - bottomMargin;
     const numCategories = Math.max(...series.map(s => s.values.length));
-    const allValues = series.flatMap(s => s.values);
+    const allValues = series.flatMap(s => s.values).filter(Number.isFinite);
     const maxValue = Math.max(...allValues, 0);
     const domainMax = niceStepLocal(maxValue * 1.1) || 1;
     const yScale = new LinearScale([0, domainMax], [topMargin + innerHeight, topMargin]);
