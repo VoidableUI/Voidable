@@ -66,8 +66,25 @@ for (const [mode, overrides] of [['dark', {}], ['light', light]]) {
     if (!ok || verbose) console.log(`${ok ? 'ok  ' : 'FAIL'} [${mode}] ${label}: ${r.toFixed(2)} (min ${min})`);
   };
   for (const t of ['text', 'text-secondary']) for (const s of surfaces) check(`${t} on ${s}`, c(t), c(s), 4.5);
-  // Known gap (tracked in issue #10 follow-up): light text-muted is 4.40 on bg-secondary and 3.82 on bg-hover.
-  for (const s of mode === 'dark' ? surfaces : ['bg', 'bg-elevated']) check(`text-muted on ${s}`, c('text-muted'), c(s), 4.5);
+  for (const s of surfaces) check(`text-muted on ${s}`, c('text-muted'), c(s), 4.5);
+  // Component pairings reported in rendered pages (tab labels, multiselect placeholder).
+  check('inactive tab label (text-muted) on bg', c('text-muted'), c('bg'), 4.5);
+  check('inactive tab label (text-muted) on bg-secondary card', c('text-muted'), c('bg-secondary'), 4.5);
+  check('multiselect placeholder (text-muted) on its bg-secondary trigger', c('text-muted'), c('bg-secondary'), 4.5);
+  // Tone tints (outline badge, stat): --void-tone-tint of the tone over the page.
+  const tint = +/^(\d+)%$/.exec(env['--void-tone-tint'])[1] / 100;
+  const tintOf = (name, base) => over({ rgb: c(name).rgb, a: tint }, base);
+  const tones = ['accent', ...statuses];
+  for (const st of tones) for (const s of ['bg', 'bg-secondary']) {
+    const base = c(s);
+    // Known gap: over bg-secondary the status colours themselves sit at ~4.5:1 (light) and
+    // 4.4:1 (dark notice), so any tint pushes them under; gated on the page background only.
+    if (s === 'bg') check(`outline badge text (${st}) on its tint over ${s}`, c(st), tintOf(st, base), 4.5);
+    check(`stat label (text-secondary) on ${st} tint over ${s}`, c('text-secondary'), tintOf(st, base), 4.5);
+  }
+  for (const st of statuses) check(`stat delta (${st}) on its own tint over bg`, c(st), tintOf(st, c('bg')), 4.5);
+  // Focus ring (accordion trigger and every other :focus-visible), incl. the hover surface it sits on.
+  for (const s of ['bg', 'bg-secondary', 'bg-elevated', 'bg-hover']) check(`focus-ring-color on ${s}`, resolve('var(--void-focus-ring-color)', env), c(s), 3);
   for (const st of statuses) for (const s of ['bg', 'bg-secondary']) {
     check(`${st} text on ${s}`, c(st), c(s), 4.5);
     if (s === 'bg') check(`${st} text on own subtle tint over ${s}`, c(st), over(c(`${st}-subtle`), c(s)), 4.5);
@@ -77,6 +94,15 @@ for (const [mode, overrides] of [['dark', {}], ['light', light]]) {
   for (const s of ['bg', 'bg-secondary', 'bg-elevated']) check(`border-control on ${s}`, c('border-control'), c(s), 3);
   check('border-control vs bg-secondary fill, on bg page', over(c('border-control'), c('bg')), c('bg-secondary'), 1);
   for (const s of ['bg', 'bg-secondary', 'bg-elevated']) check(`border-focus on ${s}`, c('border-focus'), c(s), 3);
+}
+
+// ── the default button's border is the control boundary token ──
+// The button reflects color="default", so a bare void-button[color] selector
+// would also turn the default border into a 36% tone mix (2.27:1 in light).
+const buttonCss = fs.readFileSync(dir + 'components/button.css', 'utf8');
+if (/void-button\[color\]\s*\{[^}]*--tone-border/.test(buttonCss)) {
+  failures++;
+  console.log('FAIL button.css: void-button[color] must exclude color="default" when overriding --tone-border');
 }
 
 // ── light blocks must stay identical ─────────────────────

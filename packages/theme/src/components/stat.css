@@ -1,6 +1,6 @@
 void-stat {
   --tone: var(--void-color-accent);
-  --tone-subtle: color-mix(in srgb, var(--tone) 14%, transparent);
+  --tone-subtle: color-mix(in srgb, var(--tone) var(--void-tone-tint), transparent);
   --tone-border: color-mix(in srgb, var(--tone) 36%, transparent);
 
   display: flex;
@@ -15,7 +15,7 @@ void-stat {
 .void-stat-label {
   font-family: var(--void-font-sans);
   font-size: var(--void-text-xs);
-  color: var(--void-color-text-muted);
+  color: var(--void-color-text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.06em;
 }

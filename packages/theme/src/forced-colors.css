@@ -47,4 +47,57 @@
   .void-switch-thumb {
     background: ButtonText;
   }
+
+  /* Selected state: backgrounds and accent colours are remapped, so a selected
+     tab, segment or day would match the unselected ones. System colours are
+     preserved, so mark selection with Highlight / HighlightText. */
+  .void-tabs-tab[aria-selected="true"] {
+    color: Highlight;
+    border-bottom-color: Highlight;
+  }
+
+  void-segmented-control-item[aria-checked="true"],
+  .void-calendar-day.selected {
+    background: Highlight;
+    color: HighlightText;
+  }
+
+  void-segmented-control-item[aria-checked="true"] {
+    forced-color-adjust: none;
+  }
+
+  /* Track and fill are plain backgrounds, which forced colours repaint to
+     Canvas: outline the track and fill the value with Highlight. */
+  .void-progress-track {
+    border: 1px solid ButtonText;
+  }
+
+  .void-progress-fill {
+    background: Highlight;
+  }
+
+  void-slider input[type="range"] {
+    border: 1px solid ButtonText;
+    background: linear-gradient(
+      to right,
+      Highlight var(--void-slider-fill, 50%),
+      Canvas var(--void-slider-fill, 50%)
+    );
+    forced-color-adjust: none;
+  }
+
+  void-slider input[type="range"]::-webkit-slider-thumb {
+    background: Highlight;
+    border: 2px solid ButtonText;
+  }
+
+  void-slider input[type="range"]::-moz-range-track {
+    background: Canvas;
+    border: 1px solid ButtonText;
+  }
+
+  void-slider input[type="range"]::-moz-range-thumb {
+    background: Highlight;
+    border: 2px solid ButtonText;
+  }
 }

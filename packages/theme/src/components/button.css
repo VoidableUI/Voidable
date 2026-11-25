@@ -72,8 +72,9 @@ void-button[color="info"]    { --tone: var(--void-color-info); }
 void-button[color="notice"]  { --tone: var(--void-color-notice); }
 
 /* Coloured buttons keep a tone-derived border; only the default
-   (accent) button uses the control boundary token. */
-void-button[color] {
+   (accent) button uses the control boundary token. The attribute is
+   reflected, so the default button carries color="default". */
+void-button[color]:not([color="default"]) {
   --tone-border: color-mix(in srgb, var(--tone) 36%, transparent);
 }
 

@@ -29,8 +29,8 @@ void-accordion-item {
 }
 
 .void-accordion-trigger:focus-visible {
-  outline: 2px solid var(--void-color-border);
-  outline-offset: -2px;
+  outline: var(--void-focus-ring-width) solid var(--void-focus-ring-color);
+  outline-offset: calc(var(--void-focus-ring-width) * -1);
 }
 
 .void-accordion-chevron {

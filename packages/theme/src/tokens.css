@@ -59,6 +59,10 @@
   --void-color-notice-subtle:    color-mix(in srgb, var(--void-color-notice)    14%, transparent);
   --void-color-highlight-subtle: color-mix(in srgb, var(--void-color-highlight) 14%, transparent);
 
+  /* Strength of the tone tints behind outline badges and stats. The light
+     blocks use less so tone-coloured text on the tint keeps 4.5:1. */
+  --void-tone-tint: 14%;
+
   /* Named spacing aliases */
   --void-spacing-xs: var(--void-space-xs);
   --void-spacing-sm: var(--void-space-sm);
@@ -88,7 +92,7 @@
   /* Text */
   --void-color-text:           var(--void-stone-900);
   --void-color-text-secondary: var(--void-stone-600);
-  --void-color-text-muted:     var(--void-stone-500);
+  --void-color-text-muted:     var(--void-stone-550);
   --void-color-text-tertiary:  var(--void-stone-400);
   --void-color-text-disabled:  var(--void-stone-300);
   --void-color-text-on-accent: var(--void-white);
@@ -124,6 +128,9 @@
   --void-color-info-subtle:      color-mix(in srgb, var(--void-color-info)      8%, transparent);
   --void-color-notice-subtle:    color-mix(in srgb, var(--void-color-notice)    8%, transparent);
   --void-color-highlight-subtle: color-mix(in srgb, var(--void-color-highlight) 8%, transparent);
+
+  /* Tone tint strength (see the dark block) */
+  --void-tone-tint: 8%;
 }
 
 /* ── Light theme via OS preference ──
@@ -146,7 +153,7 @@
     /* Text */
     --void-color-text:           var(--void-stone-900);
     --void-color-text-secondary: var(--void-stone-600);
-    --void-color-text-muted:     var(--void-stone-500);
+    --void-color-text-muted:     var(--void-stone-550);
     --void-color-text-tertiary:  var(--void-stone-400);
     --void-color-text-disabled:  var(--void-stone-300);
     --void-color-text-on-accent: var(--void-white);
@@ -182,7 +189,20 @@
     --void-color-info-subtle:      color-mix(in srgb, var(--void-color-info)      8%, transparent);
     --void-color-notice-subtle:    color-mix(in srgb, var(--void-color-notice)    8%, transparent);
     --void-color-highlight-subtle: color-mix(in srgb, var(--void-color-highlight) 8%, transparent);
+
+    /* Tone tint strength (see the dark block) */
+    --void-tone-tint: 8%;
   }
+}
+
+/* ── Nested themes ──
+   Text colour inherits, so a [data-theme] region inside a page of the other
+   theme would keep the page's text colour. Re-resolve it from the region's
+   own tokens (color-scheme is already set per theme above). The background
+   is deliberately not painted here: body paints it for the root, and a
+   region's surfaces come from the components inside it. */
+[data-theme] {
+  color: var(--void-color-text);
 }
 
 /* ── Shape: sharp ── */

@@ -33,7 +33,7 @@ void-badge[color="highlight"] { --tone: var(--void-color-highlight); }
 
 /* Variants */
 void-badge[variant="outline"] {
-  background: color-mix(in srgb, var(--tone) 14%, transparent);
+  background: color-mix(in srgb, var(--tone) var(--void-tone-tint), transparent);
   border: 1px solid color-mix(in srgb, var(--tone) 36%, transparent);
   color: var(--tone);
 }
