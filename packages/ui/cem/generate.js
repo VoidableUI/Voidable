@@ -1,33 +1,24 @@
 #!/usr/bin/env node
 // Derive editor metadata, framework typings and a component summary from
-// dist/custom-elements.json. Runs as the last step of `pnpm build` in
-// packages/ui, after `vite build` (which empties dist/) and `cem analyze`.
+// dist/custom-elements.json. Runs in the @voidable/ui build after `vite build`
+// (which empties dist/) and `cem analyze`; `node cem/check-types.js` then
+// compiles the generated .d.ts files so a bad generation fails the build.
 //
-// Outputs (all under dist/, all build artefacts, none committed):
+// Outputs (all under dist/, all build artefacts, none committed); see
+// ./USAGE.md for how consumers use them:
 //
 //   custom-elements.json          written by the analyzer, not by this script
 //   vscode.html-custom-data.json  VS Code HTML custom data (html.customData)
 //   web-types.json                JetBrains web-types (package.json "web-types")
 //   components.json               summary: component/tag counts and tag list
-//   types/elements.d.ts           shared per-tag property and event maps
+//   types/elements.d.ts           shared per-tag property, attribute and event maps
 //   types/react.d.ts              React 19 JSX.IntrinsicElements augmentation
 //   types/solid.d.ts              Solid JSX.IntrinsicElements augmentation
 //   types/vue.d.ts                Vue GlobalComponents augmentation
 //   types/svelte.d.ts             Svelte 5 SvelteHTMLElements augmentation
-//
-// Consuming the summary (e.g. from the docs site, which already depends on
-// @voidable/ui via the workspace):
-//
-//   import summary from '@voidable/ui/components.json' with { type: 'json' };
-//   summary.componentCount   // number of component modules
-//   summary.tagCount         // number of registered custom element tags
-//   summary.tags             // sorted tag names
-//   summary.components       // [{ module, tags: [...] }]
-//
-// The import only resolves after `mise run build` (dist/ is not committed).
 
-import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
-import { dirname, resolve } from 'node:path';
+import { readFileSync, readdirSync, statSync, writeFileSync, mkdirSync } from 'node:fs';
+import { dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -36,6 +27,7 @@ const pkg = JSON.parse(readFileSync(resolve(root, 'package.json'), 'utf8'));
 const manifest = JSON.parse(readFileSync(resolve(dist, 'custom-elements.json'), 'utf8'));
 
 const HEADER = 'Generated from custom-elements.json by packages/ui/cem/generate.js. Do not edit.';
+const IDENTIFIER = /^[A-Za-z$][\w$]*$/;
 
 // ---------------------------------------------------------------------------
 // Collect elements
@@ -48,8 +40,22 @@ const HEADER = 'Generated from custom-elements.json by packages/ui/cem/generate.
  *   attribute?: string }} Prop
  * @typedef {{ name: string, type: string, description?: string }} Evt
  * @typedef {{ tagName: string, className: string, module: string, description?: string,
- *   attributes: Attr[], properties: Prop[], events: Evt[] }} El
+ *   attributes: Attr[], properties: Prop[], extraAttributes: Attr[], events: Evt[] }} El
  */
+
+/**
+ * A member frameworks may set on the element: a public, writable, plainly
+ * named instance field that is either a reactive property (has an attribute)
+ * or declared by the component itself (e.g. `data` on charts). Fields inherited
+ * from the base class that are not reactive properties are DOM plumbing.
+ */
+function isSettable(m) {
+  if (m.kind !== 'field' || m.static || m.readonly) return false;
+  if (m.privacy === 'private' || m.privacy === 'protected') return false;
+  if (!IDENTIFIER.test(m.name) || m.name.startsWith('_')) return false;
+  if (m.attribute) return true;
+  return !m.inheritedFrom || (m.inheritedFrom.module ?? '').startsWith('dist/components/');
+}
 
 /** @type {El[]} */
 const elements = [];
@@ -58,40 +64,32 @@ for (const mod of manifest.modules) {
     if (decl.kind !== 'class' || !decl.tagName) continue;
     const members = decl.members ?? [];
     const fields = new Map(members.filter((m) => m.kind === 'field').map((m) => [m.name, m]));
+    const attributes = (decl.attributes ?? []).map((a) => {
+      const field = a.fieldName ? fields.get(a.fieldName) : undefined;
+      return {
+        name: a.name,
+        type: a.type?.text,
+        default: a.default,
+        description: a.description || field?.description || undefined,
+        reflects: Boolean(field?.reflects),
+        fieldName: a.fieldName,
+      };
+    });
     elements.push({
       tagName: decl.tagName,
       className: decl.name,
       module: mod.path,
       description: decl.description || undefined,
-      attributes: (decl.attributes ?? []).map((a) => {
-        const field = a.fieldName ? fields.get(a.fieldName) : undefined;
-        return {
-          name: a.name,
-          type: a.type?.text,
-          default: a.default,
-          description: a.description || field?.description || undefined,
-          reflects: Boolean(field?.reflects),
-          fieldName: a.fieldName,
-        };
-      }),
-      // Public, writable instance properties: what frameworks may set.
-      properties: members
-        .filter(
-          (m) =>
-            m.kind === 'field' &&
-            !m.static &&
-            !m.readonly &&
-            m.privacy !== 'private' &&
-            m.privacy !== 'protected' &&
-            !m.name.startsWith('_'),
-        )
-        .map((m) => ({
-          name: m.name,
-          type: m.type?.text,
-          default: m.default,
-          description: m.description || undefined,
-          attribute: m.attribute,
-        })),
+      attributes,
+      // Attributes with no backing property (from cem/supplement.js).
+      extraAttributes: attributes.filter((a) => !a.fieldName),
+      properties: members.filter(isSettable).map((m) => ({
+        name: m.name,
+        type: m.type?.text,
+        default: m.default,
+        description: m.description || undefined,
+        attribute: m.attribute,
+      })),
       events: (decl.events ?? [])
         .filter((e) => e.name)
         .map((e) => ({ name: e.name, type: e.type?.text ?? 'CustomEvent', description: e.description })),
@@ -111,11 +109,17 @@ const write = (rel, content) => {
 };
 const json = (value) => `${JSON.stringify(value, null, 2)}\n`;
 
-/** `'a' | 'b'` -> ['a', 'b']; anything that is not a pure string-literal union -> null. */
+/**
+ * `'a' | 'b' | null` -> ['a', 'b']; null/undefined members are dropped (an
+ * absent attribute already means null). Anything else -> null.
+ */
 function literalUnion(type) {
   if (!type) return null;
-  const parts = type.split('|').map((s) => s.trim());
-  if (!parts.every((p) => /^'[^']*'$/.test(p) || /^"[^"]*"$/.test(p))) return null;
+  const parts = type
+    .split('|')
+    .map((s) => s.trim())
+    .filter((p) => p !== 'null' && p !== 'undefined');
+  if (!parts.length || !parts.every((p) => /^'[^']*'$/.test(p) || /^"[^"]*"$/.test(p))) return null;
   return parts.map((p) => p.slice(1, -1));
 }
 const isBoolean = (type) => type === 'boolean';
@@ -217,7 +221,7 @@ write(
 
 const byModule = new Map();
 for (const el of elements) {
-  const name = el.module.replace(/^src\/components\//, '').replace(/\.ts$/, '');
+  const name = el.module.replace(/^dist\/components\//, '').replace(/\.js$/, '');
   if (!byModule.has(name)) byModule.set(name, []);
   byModule.get(name).push(el.tagName);
 }
@@ -251,17 +255,26 @@ write(
 // Framework typings (types only, no runtime)
 // ---------------------------------------------------------------------------
 
-/** dist/types/x.d.ts -> ../components/button.js */
-const moduleSpecifier = (srcPath) => `../${srcPath.replace(/^src\//, '').replace(/\.ts$/, '.js')}`;
+/** dist/components/button.js -> ../components/button.js (from dist/types/). */
+const moduleSpecifier = (distModule) => `../${distModule.replace(/^dist\//, '')}`;
 
-// Exported type names per module (interfaces/type aliases are not recorded in
-// the manifest), so event detail types can be imported rather than guessed.
-const exportedTypes = new Map();
-for (const mod of manifest.modules) {
-  const source = readFileSync(resolve(root, mod.path), 'utf8');
+// Exported type names per source file (interfaces/type aliases are not in the
+// manifest), so event detail types can be imported rather than guessed. Every
+// src/*.ts has a declaration file at the same path under dist/.
+function sourceFiles(dir) {
+  return readdirSync(dir).flatMap((name) => {
+    const path = join(dir, name);
+    return statSync(path).isDirectory() ? sourceFiles(path) : path.endsWith('.ts') ? [path] : [];
+  });
+}
+const exportedTypes = new Map(); // dist specifier -> Set<name>
+for (const file of sourceFiles(resolve(root, 'src'))) {
   const names = new Set();
-  for (const m of source.matchAll(/^export\s+(?:interface|type|class)\s+(\w+)/gm)) names.add(m[1]);
-  exportedTypes.set(mod.path, names);
+  for (const m of readFileSync(file, 'utf8').matchAll(/^export\s+(?:declare\s+)?(?:interface|type|class)\s+(\w+)/gm)) {
+    names.add(m[1]);
+  }
+  const rel = relative(resolve(root, 'src'), file).split('\\').join('/');
+  exportedTypes.set(`../${rel.replace(/\.ts$/, '.js')}`, names);
 }
 const GLOBAL_TYPES = new Set([
   'CustomEvent', 'Record', 'Date', 'File', 'Array', 'Partial', 'Readonly', 'HTMLElement', 'Event',
@@ -273,21 +286,16 @@ const addImport = (specifier, name) => {
   imports.get(specifier).add(name);
 };
 
-/** Resolve referenced type names in an event type; fall back to plain CustomEvent. */
+/** Resolve referenced type names in an event type; fall back to CustomEvent<unknown>. */
 function resolveEventType(el, type) {
   const refs = [...type.matchAll(/\b[A-Z]\w*\b/g)].map((m) => m[0]).filter((n) => !GLOBAL_TYPES.has(n));
   for (const ref of refs) {
-    const own = exportedTypes.get(el.module);
-    if (own?.has(ref)) {
-      addImport(moduleSpecifier(el.module), ref);
-      continue;
-    }
-    const owner = manifest.modules.find((m) => exportedTypes.get(m.path)?.has(ref));
-    if (owner) {
-      addImport(moduleSpecifier(owner.path), ref);
-      continue;
-    }
-    return 'CustomEvent<unknown>';
+    const own = moduleSpecifier(el.module);
+    const spec = exportedTypes.get(own)?.has(ref)
+      ? own
+      : [...exportedTypes.entries()].find(([, names]) => names.has(ref))?.[0];
+    if (!spec) return 'CustomEvent<unknown>';
+    addImport(spec, ref);
   }
   return type;
 }
@@ -298,14 +306,20 @@ const pascal = (s) => camel(s).replace(/^./, (c) => c.toUpperCase());
 
 const elementLines = [];
 const propLines = [];
+const attrLines = [];
 const eventLines = [];
 for (const el of elements) {
   addImport(moduleSpecifier(el.module), el.className);
   elementLines.push(`  ${q(el.tagName)}: ${el.className};`);
-  propLines.push(
-    el.properties.length
-      ? `  ${q(el.tagName)}: Partial<Pick<${el.className}, ${el.properties.map((p) => q(p.name)).join(' | ')}>>;`
-      : `  ${q(el.tagName)}: {};`,
+  const pick = el.properties.length
+    ? `Partial<Pick<${el.className}, ${el.properties.map((p) => q(p.name)).join(' | ')}>>`
+    : '{}';
+  const extra = el.extraAttributes.length
+    ? ` & { ${el.extraAttributes.map((a) => `${q(a.name)}?: ${a.type ?? 'string'}`).join('; ')} }`
+    : '';
+  propLines.push(`  ${q(el.tagName)}: ${pick}${extra};`);
+  attrLines.push(
+    `  ${q(el.tagName)}: ${el.attributes.length ? el.attributes.map((a) => q(a.name)).join(' | ') : 'never'};`,
   );
   eventLines.push(
     el.events.length
@@ -328,12 +342,20 @@ export interface VoidElementTagNameMap {
 ${elementLines.join('\n')}
 }
 
-/** Public, writable properties of each element (all optional, as set from markup). */
+/**
+ * Public, writable properties of each element (all optional, as set from
+ * markup), plus attributes that have no backing property.
+ */
 export interface VoidElementProperties {
 ${propLines.join('\n')}
 }
 
-/** \`void-*\` events dispatched by each element, keyed by event name. */
+/** HTML attribute names of each element. */
+export interface VoidElementAttributeNames {
+${attrLines.join('\n')}
+}
+
+/** \`void-*\` events dispatched by (or bubbling through) each element, keyed by event name. */
 export interface VoidElementEvents {
 ${eventLines.join('\n')}
 }
@@ -342,28 +364,37 @@ export type VoidTagName = keyof VoidElementTagNameMap;
 `,
 );
 
-const perTag = (fn) => elements.map((el) => `      ${q(el.tagName)}: ${fn(el)};`).join('\n');
+const perTag = (fn, indent = '      ') => elements.map((el) => `${indent}${q(el.tagName)}: ${fn(el)};`).join('\n');
 const eventHandlers = (el, keyFn) =>
   el.events.length
     ? `{ ${el.events.map((e) => `${q(keyFn(e.name))}?: (event: VoidElementEvents[${q(el.tagName)}][${q(e.name)}]) => void`).join('; ')} }`
     : '{}';
-const typesImport = "import type { VoidElementTagNameMap, VoidElementProperties, VoidElementEvents } from './elements.js';";
+const typesImport =
+  "import type { VoidElementTagNameMap, VoidElementProperties, VoidElementAttributeNames, VoidElementEvents } from './elements.js';";
 
-// React 19 sets known properties on custom elements and maps `on<event>`
-// props to addEventListener('<event>'), so `onvoid-change` listens to
-// `void-change`. React 18 sets everything as attributes and ignores these
-// handlers; use @voidable/ui-react there.
+// React 19 sets known properties on custom elements, passes `class` through as
+// an attribute and maps `on<event>` props to addEventListener('<event>'), so
+// `onvoid-change` listens to `void-change`. React 18 sets everything as
+// attributes and ignores these handlers, so under @types/react 18 every tag
+// resolves to a type whose only (required) key names the requirement.
 write(
   'types/react.d.ts',
   `// ${HEADER}
 // Usage: import type {} from '@voidable/ui/types/react';  (React 19+)
-import type { DetailedHTMLProps, HTMLAttributes } from 'react';
+import type { DetailedHTMLProps, HTMLAttributes, ReactElement } from 'react';
 ${typesImport}
 
+// @types/react 19 types ReactElement props as \`unknown\`; 18 used \`any\`.
+type IsAny<T> = 0 extends 1 & T ? true : false;
+type VoidRequiresReact19 = { '@voidable/ui/types/react requires React 19 and @types/react >= 19': never };
+
 type VoidReactProps<T extends keyof VoidElementTagNameMap, H> =
-  Omit<DetailedHTMLProps<HTMLAttributes<VoidElementTagNameMap[T]>, VoidElementTagNameMap[T]>, keyof VoidElementProperties[T]> &
-  VoidElementProperties[T] &
-  H;
+  IsAny<ReactElement['props']> extends true
+    ? VoidRequiresReact19
+    : Omit<DetailedHTMLProps<HTMLAttributes<VoidElementTagNameMap[T]>, VoidElementTagNameMap[T]>, keyof VoidElementProperties[T]> &
+        VoidElementProperties[T] &
+        { class?: string } &
+        H;
 
 declare module 'react' {
   namespace JSX {
@@ -375,8 +406,9 @@ ${perTag((el) => `VoidReactProps<${q(el.tagName)}, ${eventHandlers(el, (n) => `o
 `,
 );
 
-// Solid sets props on custom elements as properties; `on:<event>` attaches a
-// native listener with the exact (case-sensitive) event name.
+// Solid sets props on custom elements as properties; \`on:<event>\` attaches a
+// native listener with the exact (case-sensitive) event name. \`prop:\`,
+// \`attr:\` and \`bool:\` force property, attribute or boolean-attribute writes.
 write(
   'types/solid.d.ts',
   `// ${HEADER}
@@ -384,9 +416,15 @@ write(
 import type { JSX } from 'solid-js';
 ${typesImport}
 
+type VoidSolidNamespaced<T extends keyof VoidElementTagNameMap> =
+  { [K in keyof VoidElementProperties[T] & string as \`prop:\${K}\`]?: VoidElementProperties[T][K] } &
+  { [K in VoidElementAttributeNames[T] as \`attr:\${K}\`]?: string | number | boolean | null } &
+  { [K in VoidElementAttributeNames[T] as \`bool:\${K}\`]?: boolean };
+
 type VoidSolidProps<T extends keyof VoidElementTagNameMap, H> =
   Omit<JSX.HTMLAttributes<VoidElementTagNameMap[T]>, keyof VoidElementProperties[T]> &
   VoidElementProperties[T] &
+  VoidSolidNamespaced<T> &
   H;
 
 declare module 'solid-js' {
@@ -399,7 +437,7 @@ ${perTag((el) => `VoidSolidProps<${q(el.tagName)}, ${eventHandlers(el, (n) => `o
 `,
 );
 
-// Svelte 5 sets props as properties when the element has them; `on<event>`
+// Svelte 5 sets props as properties when the element has them; \`on<event>\`
 // attributes attach a listener for '<event>' (case preserved).
 write(
   'types/svelte.d.ts',
@@ -415,15 +453,17 @@ type VoidSvelteProps<T extends keyof VoidElementTagNameMap, H> =
 
 declare module 'svelte/elements' {
   interface SvelteHTMLElements {
-${perTag((el) => `VoidSvelteProps<${q(el.tagName)}, ${eventHandlers(el, (n) => `on${n}`)}>`)}
+${perTag((el) => `VoidSvelteProps<${q(el.tagName)}, ${eventHandlers(el, (n) => `on${n}`)}>`, '    ')}
   }
 }
-`.replace(/^ {6}'/gm, "    '"),
+`,
 );
 
 // Vue: the DefineCustomElement pattern from the Vue docs ("Non-Vue Web
 // Components and TypeScript"). Templates use \`@void-change\`, which Vue
 // compiles to an \`onVoidChange\` prop and Volar checks against \`$emit\`.
+// Vue's HTMLAttributes has no \`slot\`, which light-DOM children of these
+// elements routinely carry.
 write(
   'types/vue.d.ts',
   `// ${HEADER}
@@ -433,14 +473,14 @@ ${typesImport}
 
 type VoidVueElement<T extends keyof VoidElementTagNameMap, H> = new () => VoidElementTagNameMap[T] & {
   /** @deprecated Template prop types only; do not read \`$props\` from an element ref. */
-  $props: Omit<HTMLAttributes, keyof VoidElementProperties[T]> & VoidElementProperties[T] & H & PublicProps;
+  $props: Omit<HTMLAttributes, keyof VoidElementProperties[T]> & VoidElementProperties[T] & { slot?: string } & H & PublicProps;
   /** @deprecated Template event types only; do not call \`$emit\` on an element ref. */
   $emit: EmitFn<{ [K in keyof VoidElementEvents[T]]: (event: VoidElementEvents[T][K]) => void }>;
 };
 
 declare module 'vue' {
   interface GlobalComponents {
-${perTag((el) => `VoidVueElement<${q(el.tagName)}, ${eventHandlers(el, (n) => `on${pascal(n)}`)}>`).replace(/^ {6}'/gm, "    '")}
+${perTag((el) => `VoidVueElement<${q(el.tagName)}, ${eventHandlers(el, (n) => `on${pascal(n)}`)}>`, '    ')}
   }
 }
 `,

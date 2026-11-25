@@ -1,11 +1,17 @@
-// Cross-checks dist/custom-elements.json (built by `cem analyze`, which parses
-// with its own bundled TypeScript 5.x) against the component source parsed
-// independently here with the repo's TypeScript. Requires a prior build;
-// `mise run test` depends on `mise run build`.
+// Cross-checks dist/custom-elements.json against what Lit itself registered at
+// runtime: every element class is imported and its `elementProperties` /
+// `observedAttributes` (which include base classes and mixins) are the
+// expectation. Nothing here shares logic with the analyzer plugins in cem/.
+// Requires a prior build; `mise run test` depends on `mise run build`.
 import { describe, it, expect } from 'vitest';
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { resolve } from 'node:path';
 import ts from 'typescript';
+import type { PropertyDeclaration, ReactiveElement } from 'lit';
+import { ancestorEvents, childAttributes } from '../cem/supplement.js';
+
+// Registers every element (each module calls customElements.define).
+const modules = import.meta.glob('../src/components/*.ts', { eager: true });
 
 const root = resolve(__dirname, '..');
 const manifestPath = resolve(root, 'dist/custom-elements.json');
@@ -19,129 +25,79 @@ interface ManifestMember {
   reflects?: boolean;
   static?: boolean;
   privacy?: string;
+  readonly?: boolean;
 }
 interface ManifestClass {
   kind: string;
   name: string;
   tagName?: string;
   members?: ManifestMember[];
-  attributes?: { name: string; fieldName?: string; type?: { text: string } }[];
+  attributes?: { name: string; fieldName?: string; type?: { text: string }; default?: string }[];
   events?: { name: string; type?: { text: string } }[];
+  superclass?: { name: string; module?: string };
 }
 interface Manifest {
   modules: { path: string; declarations?: ManifestClass[] }[];
 }
+type LitClass = typeof ReactiveElement & { elementProperties: Map<PropertyKey, PropertyDeclaration> };
 
-interface SourceProperty {
-  name: string;
-  attribute: string | null;
-  reflects: boolean;
-  type: string | null;
-  initializer: string | null;
-  litType: string | null;
-}
-interface SourceElement {
-  tag: string;
-  className: string;
-  module: string;
-  properties: SourceProperty[];
-  events: Set<string>;
+/** Lit's attribute name for a reactive property (null when attribute: false). */
+function litAttribute(name: string, options: PropertyDeclaration): string | null {
+  if (options.attribute === false) return null;
+  if (typeof options.attribute === 'string') return options.attribute;
+  return name.toLowerCase();
 }
 
-function optionValue(options: ts.ObjectLiteralExpression | undefined, key: string) {
-  const prop = options?.properties.find(
-    (p): p is ts.PropertyAssignment => ts.isPropertyAssignment(p) && p.name.getText() === key,
-  );
-  return prop?.initializer;
+/** A manifest type text must be compatible with Lit's `type` converter hint. */
+function typeMatchesConverter(text: string | undefined, converter: unknown): boolean {
+  if (!text) return false;
+  const parts = text.split('|').map((s) => s.trim());
+  switch (converter) {
+    case Boolean:
+      return parts.includes('boolean');
+    case Number:
+      return parts.includes('number') || parts.every((p) => /^-?\d/.test(p));
+    case String:
+      return parts.some((p) => p === 'string' || /^'.*'$/.test(p));
+    case Array:
+      return parts.some((p) => p.endsWith('[]') || p.startsWith('Array<'));
+    default:
+      return true; // custom converter or untyped: any declared type is acceptable
+  }
 }
 
-function readSource(): SourceElement[] {
+/** Evaluate a manifest default (source text) without module scope; undefined when it needs scope. */
+function evaluateDefault(text: string): { ok: true; value: unknown } | { ok: false } {
+  try {
+    return { ok: true, value: new Function(`return (${text});`)() };
+  } catch {
+    return { ok: false };
+  }
+}
+
+/** Dispatched `void-*` event names per class, read from source (runtime cannot list them). */
+function sourceEvents(): Map<string, Set<string>> {
+  const out = new Map<string, Set<string>>();
   const dir = resolve(root, 'src/components');
-  const out: SourceElement[] = [];
   for (const file of readdirSync(dir).filter((f) => f.endsWith('.ts'))) {
-    const module = `src/components/${file}`;
     const sf = ts.createSourceFile(file, readFileSync(resolve(dir, file), 'utf8'), ts.ScriptTarget.Latest, true);
-    const classes = new Map<string, ts.ClassDeclaration>();
-    const defines: [string, string][] = [];
-
-    const visit = (node: ts.Node) => {
-      if (ts.isClassDeclaration(node) && node.name) classes.set(node.name.text, node);
+    const visit = (node: ts.Node, cls: string | null) => {
+      const name = ts.isClassDeclaration(node) && node.name ? node.name.text : cls;
       if (
-        ts.isCallExpression(node) &&
-        node.expression.getText() === 'customElements.define' &&
-        ts.isStringLiteralLike(node.arguments[0]) &&
-        ts.isIdentifier(node.arguments[1])
+        name &&
+        ts.isNewExpression(node) &&
+        node.expression.getText() === 'CustomEvent' &&
+        node.arguments?.[0] &&
+        ts.isStringLiteralLike(node.arguments[0])
       ) {
-        defines.push([node.arguments[0].text, node.arguments[1].text]);
+        if (!out.has(name)) out.set(name, new Set());
+        out.get(name)!.add(node.arguments[0].text);
       }
-      ts.forEachChild(node, visit);
+      ts.forEachChild(node, (child) => visit(child, name));
     };
-    visit(sf);
-
-    for (const [tag, className] of defines) {
-      const cls = classes.get(className);
-      if (!cls) throw new Error(`${module}: ${tag} registers unknown class ${className}`);
-      const properties: SourceProperty[] = [];
-      for (const member of cls.members) {
-        const dec = ts.getDecorators(member as ts.HasDecorators)?.find(
-          (d) => ts.isCallExpression(d.expression) && d.expression.expression.getText() === 'property',
-        );
-        if (!dec || !member.name || !ts.isPropertyDeclaration(member)) continue;
-        const call = dec.expression as ts.CallExpression;
-        const options = call.arguments.find(ts.isObjectLiteralExpression);
-        const attr = optionValue(options, 'attribute');
-        const name = member.name.getText();
-        properties.push({
-          name,
-          attribute:
-            attr && attr.kind === ts.SyntaxKind.FalseKeyword
-              ? null
-              : attr && ts.isStringLiteralLike(attr)
-                ? attr.text
-                : name.toLowerCase(), // Lit's default attribute name
-          reflects: optionValue(options, 'reflect')?.kind === ts.SyntaxKind.TrueKeyword,
-          type: member.type?.getText() ?? null,
-          initializer: member.initializer?.getText() ?? null,
-          litType: optionValue(options, 'type')?.getText() ?? null,
-        });
-      }
-      const events = new Set<string>();
-      const findEvents = (node: ts.Node) => {
-        if (
-          ts.isNewExpression(node) &&
-          node.expression.getText() === 'CustomEvent' &&
-          node.arguments?.[0] &&
-          ts.isStringLiteralLike(node.arguments[0])
-        ) {
-          events.add(node.arguments[0].text);
-        }
-        ts.forEachChild(node, findEvents);
-      };
-      cls.members.forEach(findEvents);
-      out.push({ tag, className, module, properties, events });
-    }
+    visit(sf, null);
   }
   return out;
-}
-
-const LIT_TYPES: Record<string, string> = {
-  String: 'string',
-  Number: 'number',
-  Boolean: 'boolean',
-  Array: 'unknown[]',
-  Object: 'object',
-};
-
-/** Annotation, else the initializer's literal type, else Lit's `type` option. */
-function expectedType(prop: SourceProperty): string | undefined {
-  if (prop.type) return prop.type;
-  const init = prop.initializer;
-  if (init !== null) {
-    if (/^(['"`]).*\1$/s.test(init)) return 'string';
-    if (/^-?\d/.test(init)) return 'number';
-    if (init === 'true' || init === 'false') return 'boolean';
-  }
-  return prop.litType ? LIT_TYPES[prop.litType] : undefined;
 }
 
 describe('custom-elements.json', () => {
@@ -157,49 +113,106 @@ describe('custom-elements.json', () => {
     (m.declarations ?? []).filter((d) => d.tagName).map((d) => ({ module: m.path, decl: d })),
   );
   const byTag = new Map(declared.map((d) => [d.decl.tagName!, d]));
-  const source = readSource();
 
-  it('contains exactly the tags registered via customElements.define', () => {
-    expect([...byTag.keys()].sort()).toEqual(source.map((s) => s.tag).sort());
+  // Tags registered by importing the component modules, and which module did it.
+  const registered = new Map<string, { cls: LitClass; module: string }>();
+  for (const [path, exports] of Object.entries(modules)) {
+    for (const value of Object.values(exports as Record<string, unknown>)) {
+      if (typeof value !== 'function') continue;
+      const tag = customElements.getName?.(value as CustomElementConstructor);
+      if (tag?.startsWith('void-')) {
+        registered.set(tag, { cls: value as LitClass, module: path.replace('../src/', 'dist/').replace(/\.ts$/, '.js') });
+      }
+    }
+  }
+  const eventsBySource = sourceEvents();
+
+  it('contains exactly the tags registered at runtime', () => {
+    expect(registered.size).toBeGreaterThan(0);
+    expect([...byTag.keys()].sort()).toEqual([...registered.keys()].sort());
     expect(declared.length).toBe(byTag.size); // no duplicate tags
   });
 
-  it('covers every component module', () => {
-    const modules = readdirSync(resolve(root, 'src/components')).filter((f) => f.endsWith('.ts'));
-    expect(new Set(source.map((s) => s.module)).size).toBe(modules.length);
-    expect(new Set(declared.map((d) => d.module)).size).toBe(modules.length);
+  it('points modules and references at shipped dist files', () => {
+    const shipped = (p: string) => p === 'dist/index.js' || p === 'dist/base.js' || /^dist\/components\/[^/]+\.js$/.test(p);
+    for (const m of manifest.modules) expect(shipped(m.path), m.path).toBe(true);
+    const refs: string[] = [];
+    const walk = (v: unknown) => {
+      if (Array.isArray(v)) v.forEach(walk);
+      else if (v && typeof v === 'object') {
+        const mod = (v as { module?: unknown }).module;
+        if (typeof mod === 'string') refs.push(mod);
+        Object.values(v).forEach(walk);
+      }
+    };
+    walk(manifest.modules);
+    for (const r of refs) expect(shipped(r), r).toBe(true);
   });
 
-  describe.each(source.map((s) => [s.tag, s] as const))('%s', (_tag, el) => {
-    const { module, decl } = byTag.get(el.tag)!;
+  it('ships no private, protected, internal or computed-key members', () => {
+    for (const { decl } of declared) {
+      for (const m of decl.members ?? []) {
+        expect(m.privacy, `${decl.tagName}.${m.name}`).toBeUndefined();
+        expect(m.name, `${decl.tagName}.${m.name}`).toMatch(/^[A-Za-z$][\w$]*$/);
+        expect(m.name.startsWith('_'), `${decl.tagName}.${m.name}`).toBe(false);
+      }
+    }
+  });
 
-    it('maps to the defining class and module', () => {
-      expect(decl.name).toBe(el.className);
-      expect(module).toBe(el.module);
+  describe.each([...registered.keys()].sort().map((tag) => [tag] as const))('%s', (tag) => {
+    const { cls, module: runtimeModule } = registered.get(tag)!;
+    const entry = byTag.get(tag);
+    const decl = entry?.decl;
+    const reactive = [...cls.elementProperties.entries()].filter(
+      (e): e is [string, PropertyDeclaration] => typeof e[0] === 'string' && !e[1].state,
+    );
+    const supplemented = new Set((childAttributes[tag as keyof typeof childAttributes] ?? []).map((a) => a.name));
+
+    it('maps to the registering class and module', () => {
+      expect(decl?.name).toBe(cls.name);
+      expect(entry?.module).toBe(runtimeModule);
     });
 
-    it('records every @property with attribute, reflect flag, type and default', () => {
-      const attributes = new Map((decl.attributes ?? []).map((a) => [a.name, a]));
-      for (const prop of el.properties) {
-        const field = decl.members?.find((m) => m.kind === 'field' && m.name === prop.name);
-        expect(field, `field ${prop.name}`).toBeDefined();
-        expect(field!.attribute ?? null, `${prop.name}.attribute`).toBe(prop.attribute);
-        expect(Boolean(field!.reflects), `${prop.name}.reflects`).toBe(prop.reflects);
-        expect(field!.default, `${prop.name}.default`).toBe(prop.initializer ?? undefined);
-        expect(field!.type?.text, `${prop.name}.type`).toBe(expectedType(prop));
-        if (prop.attribute) {
-          expect(attributes.get(prop.attribute)?.fieldName, `attribute ${prop.attribute}`).toBe(prop.name);
+    it('has exactly the observed attributes', () => {
+      const manifestAttrs = (decl?.attributes ?? []).map((a) => a.name).filter((n) => !supplemented.has(n));
+      expect(manifestAttrs.sort()).toEqual([...(cls.observedAttributes ?? [])].sort());
+    });
+
+    it('records every reactive property with attribute, reflect flag, type and default', () => {
+      const instance = document.createElement(tag) as unknown as Record<string, unknown>;
+      for (const [name, options] of reactive) {
+        const field = decl?.members?.find((m) => m.kind === 'field' && m.name === name);
+        if (!field) {
+          // Non-public reactive property (stripped from the published
+          // manifest): its attribute is still public API and must be listed.
+          const attr = litAttribute(name, options);
+          expect(attr, `field ${name} is missing and has no attribute`).not.toBeNull();
+          const entry = decl?.attributes?.find((a) => a.name === attr);
+          expect(entry, `attribute ${attr} of non-public property ${name}`).toBeDefined();
+          expect(entry!.fieldName, `attribute ${attr} links to a stripped field`).toBeUndefined();
+          expect(typeMatchesConverter(entry!.type?.text, options.type), `${attr}.type ${entry!.type?.text}`).toBe(true);
+          continue;
         }
-      }
-      const attributeFields = el.properties.filter((p) => p.attribute).length;
-      expect(decl.attributes?.length ?? 0).toBe(attributeFields);
-      for (const attr of decl.attributes ?? []) {
-        expect(attr.type?.text, `attribute ${attr.name} type`).toBeDefined();
+        expect(field!.attribute ?? null, `${name}.attribute`).toBe(litAttribute(name, options));
+        expect(Boolean(field!.reflects), `${name}.reflects`).toBe(Boolean(options.reflect));
+        expect(typeMatchesConverter(field!.type?.text, options.type), `${name}.type ${field!.type?.text}`).toBe(true);
+        if (field!.default !== undefined) {
+          const evaluated = evaluateDefault(field!.default);
+          if (evaluated.ok) expect(instance[name], `${name}.default ${field!.default}`).toEqual(evaluated.value);
+        } else {
+          expect(instance[name], `${name} has a runtime default but none in the manifest`).toBeUndefined();
+        }
+        const attr = litAttribute(name, options);
+        if (attr) {
+          expect(decl?.attributes?.find((a) => a.name === attr)?.fieldName, `attribute ${attr}`).toBe(name);
+        }
       }
     });
 
     it('records every dispatched void-* event', () => {
-      expect((decl.events ?? []).map((e) => e.name).sort()).toEqual([...el.events].sort());
+      const own = eventsBySource.get(cls.name) ?? new Set<string>();
+      const bubbled = ancestorEvents.filter((a) => a.tag === tag).flatMap((a) => a.events);
+      expect((decl?.events ?? []).map((e) => e.name).sort()).toEqual([...new Set([...own, ...bubbled])].sort());
     });
   });
 });

@@ -50,7 +50,7 @@
   "customElements": "dist/custom-elements.json",
   "web-types": "./dist/web-types.json",
   "scripts": {
-    "build": "vite build && cem analyze && node cem/generate.js",
+    "build": "vite build && cem analyze && node cem/generate.js && node cem/check-types.js",
     "test": "vitest run",
     "typecheck": "tsc --noEmit && tsc -p type-tests/react && tsc -p type-tests/solid && tsc -p type-tests/svelte && tsc -p type-tests/vue"
   },
