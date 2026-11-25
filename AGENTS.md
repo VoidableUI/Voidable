@@ -241,6 +241,9 @@ set -euo pipefail
 | `mise run test:browser` | Real-browser suite (Playwright; Chromium, Firefox, WebKit) against the built packages; not part of `ci` |
 | `mise run test:browser:install` | Download the browsers for it (`-- --with-deps` adds system libraries on Debian/Ubuntu) |
 | `mise run test:server` | Server-backed suite: starts the Rails, Phoenix LiveView and Laravel Livewire demos on the built packages and drives each (`VOID_SERVER_APPS=rails,phoenix,laravel` selects; each needs its toolchain from `mise.toml`) |
+| `mise run shots` | Photograph the reference pages (every theme and skin, dark and light, 1440 and 390 px) and build the review gallery in `tmp/shots/gallery`; filters `--page --theme --skin --scheme --width --smoke --stories` |
+| `mise run shots:compare -- <base> [<head>]` | Before/after gallery for two refs, each built in a temporary worktree (`tmp/shots/compare/gallery`) |
+| `mise run shots:check` | Check a gallery in Chromium: layout at 1440 and 390 px, keyboard, every view, axe |
 | `mise run test:coverage` | Unit tests with V8 coverage, per-package summary (no thresholds) |
 
 ### Browser Tests

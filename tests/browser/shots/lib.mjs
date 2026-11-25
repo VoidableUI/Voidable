@@ -41,7 +41,11 @@ export function discoverLooks(root) {
   if (existsSync(list)) {
     ({ themes = [], skins = [] } = JSON.parse(readFileSync(list, 'utf8')));
   } else {
-    const names = (dir) => (existsSync(join(dist, dir)) ? readdirSync(join(dist, dir)).filter((f) => /^[\w-]+\.css$/.test(f)).map((f) => f.replace(/\.css$/, '')) : []);
+    // A ref from before the theme package had a generated export list: read its source directories.
+    const names = (dir) => {
+      const d = [join(dist, dir), join(root, 'packages/theme/src', dir)].find(existsSync);
+      return d ? readdirSync(d).filter((f) => /^[\w-]+\.css$/.test(f)).map((f) => f.replace(/\.css$/, '')).sort() : [];
+    };
     themes = names('themes');
     skins = names('skins');
   }
@@ -151,6 +155,13 @@ ${html}
 
 const types = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.woff2': 'font/woff2', '.jpg': 'image/jpeg', '.png': 'image/png', '.svg': 'image/svg+xml' };
 
+/** The theme of a checkout that publishes its source (no dist): src/index.css with its imports inlined. */
+function bundleLegacyCss(root) {
+  const entry = join(root, 'packages/theme/src/index.css');
+  if (!existsSync(entry)) throw new Error(`${root} has no packages/theme/dist/void.css and no src/index.css`);
+  return esbuild.buildSync({ entryPoints: [entry], bundle: true, write: false, loader: { '.css': 'css' }, logLevel: 'error' }).outputFiles[0].text;
+}
+
 /** Bundles the checkout's built @voidable/ui into one classic script that sets window.VoidUI. */
 export async function bundleUi(root) {
   const entry = join(root, 'packages/ui/dist/index.js');
@@ -185,6 +196,7 @@ export async function serveReference(root) {
   const hydrate = readFileSync(join(referenceDir(TOOLING_ROOT), 'hydrate.js'));
   const mediaDir = [join(root, 'docs/public/media'), join(TOOLING_ROOT, 'docs/public/media')].find(existsSync);
 
+  let legacyCss;
   const send = (res, status, body, type) => {
     res.writeHead(status, { 'content-type': type, 'cache-control': 'no-store' });
     res.end(body);
@@ -207,7 +219,13 @@ export async function serveReference(root) {
         if (!spec) return send(res, 404, 'not found', 'text/plain');
         return send(res, 200, readFileSync(join(here, '../node_modules', spec)), types['.woff2']);
       }
-      if (path.startsWith('/theme/')) return file(res, themeDist, path.slice('/theme/'.length));
+      if (path.startsWith('/theme/')) {
+        const rel = path.slice('/theme/'.length);
+        if (existsSync(join(themeDist, rel))) return file(res, themeDist, rel);
+        // An older ref has no dist: the stylesheet is its source, bundled (the entry @imports its parts).
+        if (rel === 'void.css') return send(res, 200, legacyCss ??= bundleLegacyCss(root), types['.css']);
+        return file(res, join(root, 'packages/theme/src'), rel);
+      }
       if (path.startsWith('/media/') && mediaDir) return file(res, mediaDir, path.slice('/media/'.length));
       const m = /^\/p\/([\w-]+)$/.exec(path);
       if (m) {
