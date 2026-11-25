@@ -78,22 +78,22 @@ defmodule DemoWeb.UIShowcases do
       <h3>Colors</h3>
       <div style="display: flex; flex-direction: column; gap: 0.75rem;">
         <VoidableUI.Components.alert events>
-          Default -- general-purpose status message.
+          <void-alert-description>Default -- general-purpose status message.</void-alert-description>
         </VoidableUI.Components.alert>
         <VoidableUI.Components.alert events color="error">
-          Error -- something went wrong and needs attention.
+          <void-alert-description>Error -- something went wrong and needs attention.</void-alert-description>
         </VoidableUI.Components.alert>
         <VoidableUI.Components.alert events color="warning">
-          Warning -- proceed with caution.
+          <void-alert-description>Warning -- proceed with caution.</void-alert-description>
         </VoidableUI.Components.alert>
         <VoidableUI.Components.alert events color="success">
-          Success -- the operation completed successfully.
+          <void-alert-description>Success -- the operation completed successfully.</void-alert-description>
         </VoidableUI.Components.alert>
         <VoidableUI.Components.alert events color="info">
-          Info -- here is some useful information.
+          <void-alert-description>Info -- here is some useful information.</void-alert-description>
         </VoidableUI.Components.alert>
         <VoidableUI.Components.alert events color="notice">
-          Notice -- a routine notification for your awareness.
+          <void-alert-description>Notice -- a routine notification for your awareness.</void-alert-description>
         </VoidableUI.Components.alert>
       </div>
     </div>
@@ -101,22 +101,22 @@ defmodule DemoWeb.UIShowcases do
       <h3>Filled Variant</h3>
       <div style="display: flex; flex-direction: column; gap: 0.75rem;">
         <VoidableUI.Components.alert events variant="filled">
-          Default filled alert.
+          <void-alert-description>Default filled alert.</void-alert-description>
         </VoidableUI.Components.alert>
         <VoidableUI.Components.alert events variant="filled" color="error">
-          Error filled alert.
+          <void-alert-description>Error filled alert.</void-alert-description>
         </VoidableUI.Components.alert>
         <VoidableUI.Components.alert events variant="filled" color="warning">
-          Warning filled alert.
+          <void-alert-description>Warning filled alert.</void-alert-description>
         </VoidableUI.Components.alert>
         <VoidableUI.Components.alert events variant="filled" color="success">
-          Success filled alert.
+          <void-alert-description>Success filled alert.</void-alert-description>
         </VoidableUI.Components.alert>
         <VoidableUI.Components.alert events variant="filled" color="info">
-          Info filled alert.
+          <void-alert-description>Info filled alert.</void-alert-description>
         </VoidableUI.Components.alert>
         <VoidableUI.Components.alert events variant="filled" color="notice">
-          Notice filled alert.
+          <void-alert-description>Notice filled alert.</void-alert-description>
         </VoidableUI.Components.alert>
       </div>
     </div>
@@ -124,13 +124,13 @@ defmodule DemoWeb.UIShowcases do
       <h3>Dismissible</h3>
       <div style="display: flex; flex-direction: column; gap: 0.75rem;">
         <VoidableUI.Components.alert events color="info" dismissible>
-          This alert can be dismissed. Click the close button.
+          <void-alert-description>This alert can be dismissed. Click the close button.</void-alert-description>
         </VoidableUI.Components.alert>
         <VoidableUI.Components.alert events color="success" dismissible>
-          Your changes have been saved successfully.
+          <void-alert-description>Your changes have been saved successfully.</void-alert-description>
         </VoidableUI.Components.alert>
         <VoidableUI.Components.alert events color="error" dismissible>
-          Failed to submit the form. Please try again.
+          <void-alert-description>Failed to submit the form. Please try again.</void-alert-description>
         </VoidableUI.Components.alert>
       </div>
     </div>
@@ -191,8 +191,11 @@ defmodule DemoWeb.UIShowcases do
     <div class="showcase-section">
       <h3>Default</h3>
       <p>Dialogs are shown inline for demo purposes. In practice, they overlay the page.</p>
-      <VoidableUI.Components.dialog events heading="Confirm Action" open>
-        <p>Are you sure you want to proceed? This action cannot be undone.</p>
+      <VoidableUI.Components.dialog events open>
+        <void-dialog-title>Confirm Action</void-dialog-title>
+        <void-dialog-body>
+          <p>Are you sure you want to proceed? This action cannot be undone.</p>
+        </void-dialog-body>
       </VoidableUI.Components.dialog>
     </div>
     <div class="showcase-section">
@@ -228,8 +231,11 @@ defmodule DemoWeb.UIShowcases do
     <div class="showcase-section">
       <h3>Default (Right Side)</h3>
       <p>Only one drawer is shown open to avoid layout issues. Drawers slide in from the specified side.</p>
-      <VoidableUI.Components.drawer events heading="Settings" side="right" open>
-        <p>Drawer content goes here. Use drawers for secondary navigation, settings panels, or detail views.</p>
+      <VoidableUI.Components.drawer events side="right" open>
+        <void-drawer-title>Settings</void-drawer-title>
+        <void-drawer-body>
+          <p>Drawer content goes here. Use drawers for secondary navigation, settings panels, or detail views.</p>
+        </void-drawer-body>
       </VoidableUI.Components.drawer>
     </div>
     <div class="showcase-section">
@@ -267,11 +273,13 @@ defmodule DemoWeb.UIShowcases do
       <p>Click the button to toggle the popover.</p>
       <div class="showcase-row" style="padding: 4rem;">
         <VoidableUI.Components.popover events>
-          <VoidableUI.Components.button events>Open Popover</VoidableUI.Components.button>
-          <div>
-            <p style="margin: 0 0 0.5rem;">Popover content</p>
-            <p style="margin: 0; opacity: 0.7;">Click outside or press Escape to close.</p>
-          </div>
+          <void-popover-trigger><VoidableUI.Components.button events>Open Popover</VoidableUI.Components.button></void-popover-trigger>
+          <void-popover-content>
+            <div>
+              <p style="margin: 0 0 0.5rem;">Popover content</p>
+              <p style="margin: 0; opacity: 0.7;">Click outside or press Escape to close.</p>
+            </div>
+          </void-popover-content>
         </VoidableUI.Components.popover>
       </div>
     </div>
@@ -279,20 +287,28 @@ defmodule DemoWeb.UIShowcases do
       <h3>Positions</h3>
       <div class="showcase-row" style="padding: 6rem; gap: 1.5rem;">
         <VoidableUI.Components.popover events position="top">
-          <VoidableUI.Components.button events>Top</VoidableUI.Components.button>
-          <div>Opens above</div>
+          <void-popover-trigger><VoidableUI.Components.button events>Top</VoidableUI.Components.button></void-popover-trigger>
+          <void-popover-content>
+            <div>Opens above</div>
+          </void-popover-content>
         </VoidableUI.Components.popover>
         <VoidableUI.Components.popover events position="bottom">
-          <VoidableUI.Components.button events>Bottom</VoidableUI.Components.button>
-          <div>Opens below</div>
+          <void-popover-trigger><VoidableUI.Components.button events>Bottom</VoidableUI.Components.button></void-popover-trigger>
+          <void-popover-content>
+            <div>Opens below</div>
+          </void-popover-content>
         </VoidableUI.Components.popover>
         <VoidableUI.Components.popover events position="left">
-          <VoidableUI.Components.button events>Left</VoidableUI.Components.button>
-          <div>Opens to the left</div>
+          <void-popover-trigger><VoidableUI.Components.button events>Left</VoidableUI.Components.button></void-popover-trigger>
+          <void-popover-content>
+            <div>Opens to the left</div>
+          </void-popover-content>
         </VoidableUI.Components.popover>
         <VoidableUI.Components.popover events position="right">
-          <VoidableUI.Components.button events>Right</VoidableUI.Components.button>
-          <div>Opens to the right</div>
+          <void-popover-trigger><VoidableUI.Components.button events>Right</VoidableUI.Components.button></void-popover-trigger>
+          <void-popover-content>
+            <div>Opens to the right</div>
+          </void-popover-content>
         </VoidableUI.Components.popover>
       </div>
     </div>
@@ -335,59 +351,81 @@ defmodule DemoWeb.UIShowcases do
     <div class="showcase-section">
       <h3>Default</h3>
       <VoidableUI.Components.tabs events value="one">
-        <VoidableUI.Components.tab_panel tab="one" label="First">
+        <void-tabs-list>
+          <void-tabs-trigger value="one">First</void-tabs-trigger>
+          <void-tabs-trigger value="two">Second</void-tabs-trigger>
+          <void-tabs-trigger value="three">Third</void-tabs-trigger>
+        </void-tabs-list>
+        <void-tabs-content value="one">
           <p>Content 1</p>
-        </VoidableUI.Components.tab_panel>
-        <VoidableUI.Components.tab_panel tab="two" label="Second">
+        </void-tabs-content>
+        <void-tabs-content value="two">
           <p>Content 2</p>
-        </VoidableUI.Components.tab_panel>
-        <VoidableUI.Components.tab_panel tab="three" label="Third">
+        </void-tabs-content>
+        <void-tabs-content value="three">
           <p>Content 3</p>
-        </VoidableUI.Components.tab_panel>
+        </void-tabs-content>
       </VoidableUI.Components.tabs>
     </div>
     <div class="showcase-section">
       <h3>Sizes</h3>
       <p>Small tabs:</p>
       <VoidableUI.Components.tabs events value="a" size="sm">
-        <VoidableUI.Components.tab_panel tab="a" label="Alpha">
+        <void-tabs-list>
+          <void-tabs-trigger value="a">Alpha</void-tabs-trigger>
+          <void-tabs-trigger value="b">Beta</void-tabs-trigger>
+        </void-tabs-list>
+        <void-tabs-content value="a">
           <p>Small tab A</p>
-        </VoidableUI.Components.tab_panel>
-        <VoidableUI.Components.tab_panel tab="b" label="Beta">
+        </void-tabs-content>
+        <void-tabs-content value="b">
           <p>Small tab B</p>
-        </VoidableUI.Components.tab_panel>
+        </void-tabs-content>
       </VoidableUI.Components.tabs>
       <p>Medium tabs:</p>
       <VoidableUI.Components.tabs events value="a">
-        <VoidableUI.Components.tab_panel tab="a" label="Alpha">
+        <void-tabs-list>
+          <void-tabs-trigger value="a">Alpha</void-tabs-trigger>
+          <void-tabs-trigger value="b">Beta</void-tabs-trigger>
+        </void-tabs-list>
+        <void-tabs-content value="a">
           <p>Medium tab A</p>
-        </VoidableUI.Components.tab_panel>
-        <VoidableUI.Components.tab_panel tab="b" label="Beta">
+        </void-tabs-content>
+        <void-tabs-content value="b">
           <p>Medium tab B</p>
-        </VoidableUI.Components.tab_panel>
+        </void-tabs-content>
       </VoidableUI.Components.tabs>
       <p>Large tabs:</p>
       <VoidableUI.Components.tabs events value="a" size="lg">
-        <VoidableUI.Components.tab_panel tab="a" label="Alpha">
+        <void-tabs-list>
+          <void-tabs-trigger value="a">Alpha</void-tabs-trigger>
+          <void-tabs-trigger value="b">Beta</void-tabs-trigger>
+        </void-tabs-list>
+        <void-tabs-content value="a">
           <p>Large tab A</p>
-        </VoidableUI.Components.tab_panel>
-        <VoidableUI.Components.tab_panel tab="b" label="Beta">
+        </void-tabs-content>
+        <void-tabs-content value="b">
           <p>Large tab B</p>
-        </VoidableUI.Components.tab_panel>
+        </void-tabs-content>
       </VoidableUI.Components.tabs>
     </div>
     <div class="showcase-section">
       <h3>With Rich Content</h3>
       <VoidableUI.Components.tabs events value="overview">
-        <VoidableUI.Components.tab_panel tab="overview" label="Overview">
+        <void-tabs-list>
+          <void-tabs-trigger value="overview">Overview</void-tabs-trigger>
+          <void-tabs-trigger value="api">API</void-tabs-trigger>
+          <void-tabs-trigger value="examples">Examples</void-tabs-trigger>
+        </void-tabs-list>
+        <void-tabs-content value="overview">
           <p>This is the overview panel with some content about the component.</p>
-        </VoidableUI.Components.tab_panel>
-        <VoidableUI.Components.tab_panel tab="api" label="API">
+        </void-tabs-content>
+        <void-tabs-content value="api">
           <p>API reference documentation goes here.</p>
-        </VoidableUI.Components.tab_panel>
-        <VoidableUI.Components.tab_panel tab="examples" label="Examples">
+        </void-tabs-content>
+        <void-tabs-content value="examples">
           <p>Code examples and usage patterns are shown here.</p>
-        </VoidableUI.Components.tab_panel>
+        </void-tabs-content>
       </VoidableUI.Components.tabs>
     </div>
     """
@@ -402,26 +440,41 @@ defmodule DemoWeb.UIShowcases do
     <div class="showcase-section">
       <h3>Default</h3>
       <VoidableUI.Components.accordion>
-        <VoidableUI.Components.accordion_item events heading="What is Voidable UI?" open>
-          <p style="margin: 0;">Voidable UI is a design system built with Lit web components. It uses Light DOM for seamless CSS integration.</p>
+        <VoidableUI.Components.accordion_item events open>
+          <void-accordion-trigger>What is Voidable UI?</void-accordion-trigger>
+          <void-accordion-content>
+            <p style="margin: 0;">Voidable UI is a design system built with Lit web components. It uses Light DOM for seamless CSS integration.</p>
+          </void-accordion-content>
         </VoidableUI.Components.accordion_item>
-        <VoidableUI.Components.accordion_item events heading="How do I install it?">
-          <p style="margin: 0 0 8px;">Install via npm:</p>
-          <code>npm install @voidable/ui @voidable/theme</code>
+        <VoidableUI.Components.accordion_item events>
+          <void-accordion-trigger>How do I install it?</void-accordion-trigger>
+          <void-accordion-content>
+            <p style="margin: 0 0 8px;">Install via npm:</p>
+            <code>npm install @voidable/ui @voidable/theme</code>
+          </void-accordion-content>
         </VoidableUI.Components.accordion_item>
-        <VoidableUI.Components.accordion_item events heading="Is it accessible?">
-          <p style="margin: 0;">Yes. All components use proper ARIA attributes, keyboard navigation, and focus management.</p>
+        <VoidableUI.Components.accordion_item events>
+          <void-accordion-trigger>Is it accessible?</void-accordion-trigger>
+          <void-accordion-content>
+            <p style="margin: 0;">Yes. All components use proper ARIA attributes, keyboard navigation, and focus management.</p>
+          </void-accordion-content>
         </VoidableUI.Components.accordion_item>
       </VoidableUI.Components.accordion>
     </div>
     <div class="showcase-section">
       <h3>Multiple Open (with multiple attribute)</h3>
       <VoidableUI.Components.accordion multiple>
-        <VoidableUI.Components.accordion_item events heading="Section A" open>
-          Content for section A. Multiple sections can be open at once.
+        <VoidableUI.Components.accordion_item events open>
+          <void-accordion-trigger>Section A</void-accordion-trigger>
+          <void-accordion-content>
+            Content for section A. Multiple sections can be open at once.
+          </void-accordion-content>
         </VoidableUI.Components.accordion_item>
-        <VoidableUI.Components.accordion_item events heading="Section B" open>
-          Content for section B. This is also open simultaneously.
+        <VoidableUI.Components.accordion_item events open>
+          <void-accordion-trigger>Section B</void-accordion-trigger>
+          <void-accordion-content>
+            Content for section B. This is also open simultaneously.
+          </void-accordion-content>
         </VoidableUI.Components.accordion_item>
       </VoidableUI.Components.accordion>
     </div>

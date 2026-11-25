@@ -2,6 +2,7 @@ package domain
 
 import (
 	"fmt"
+	"slices"
 	"strings"
 )
 
@@ -34,6 +35,14 @@ func checkName(el *Element, t Tag) []Finding {
 	}
 	if rule.Content && (!t.Content.Known && !t.SelfClosing || t.Content.Text || t.Content.Dynamic) {
 		return nil
+	}
+	if len(rule.Parts) > 0 && (!t.Content.Known && !t.SelfClosing || t.Content.Dynamic) {
+		return nil
+	}
+	for _, part := range rule.Parts {
+		if slices.Contains(t.Content.Tags, part) {
+			return nil
+		}
 	}
 	for _, want := range rule.Ancestors {
 		for _, have := range t.Ancestors {
@@ -130,6 +139,9 @@ func nameMessage(el *Element, r *NameRule) string {
 	ways = append(ways, "aria-label")
 	if r.Content {
 		ways = append(ways, "text inside it")
+	}
+	for _, p := range r.Parts {
+		ways = append(ways, "a <"+p+"> part")
 	}
 	for _, a := range r.Ancestors {
 		switch {

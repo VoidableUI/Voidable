@@ -12,19 +12,27 @@
 <body>
   <main>
     <h1>Projects</h1>
-    <void-card id="project-card" heading="Apollo">
-      <p>Launch site and mission control dashboards.</p>
+    <void-card id="project-card">
+      <void-card-header>
+        <void-card-title>Apollo</void-card-title>
+      </void-card-header>
+      <void-card-body>
+        <p>Launch site and mission control dashboards.</p>
+      </void-card-body>
     </void-card>
     <div><void-button id="delete-trigger" color="error">Delete project</void-button></div>
     <p id="status" role="status"></p>
   </main>
 
-  <void-dialog id="confirm" heading="Delete Apollo?" size="sm">
-    <p>This permanently deletes the project and its data. This can't be undone.</p>
-    <div class="actions">
+  <void-dialog id="confirm" size="sm">
+    <void-dialog-title>Delete Apollo?</void-dialog-title>
+    <void-dialog-body>
+      <p>This permanently deletes the project and its data. This can't be undone.</p>
+    </void-dialog-body>
+    <void-dialog-actions>
       <void-button id="cancel">Cancel</void-button>
       <void-button id="confirm-delete" color="error" variant="filled">Delete</void-button>
-    </div>
+    </void-dialog-actions>
   </void-dialog>
 
   <script type="module">

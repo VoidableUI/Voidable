@@ -95,9 +95,19 @@ type Element struct {
 
 	// CSSOnly marks a styled element: a void-* tag that @voidable/theme
 	// styles and @voidable/ui never registers. It has no JavaScript, no
-	// properties and no events, and is not in the manifest; the supplement
-	// declares it.
+	// properties and no events. The page patterns are declared in the
+	// supplement; the CSS-only parts of components come from the manifest's
+	// voidParts.
 	CSSOnly bool `json:"cssOnly,omitempty"`
+
+	// Parts is the element's explicit parts (#52), from the manifest's
+	// voidParts: on a component, and on a part that has parts of its own.
+	Parts *Parts `json:"parts,omitempty"`
+	// PartOf is the component (or part) this element is a part of.
+	PartOf string `json:"partOf,omitempty"`
+	// Removed is advice for tags this component's parts replaced (from
+	// voidParts.legacy.tags), keyed by the removed tag.
+	Removed map[string]string `json:"-"`
 }
 
 // Attribute returns the attribute with the given (exact) name.
@@ -224,6 +234,9 @@ type NameRule struct {
 	// Content is true when the element's own text (or a named icon inside it)
 	// names it.
 	Content bool `json:"content,omitempty"`
+	// Parts are descendant part elements whose presence names the element (a
+	// dialog's title part).
+	Parts []string `json:"parts,omitempty"`
 	// Ancestors name the element when an enclosing element has the tag and
 	// carries one of the attributes (none listed: the tag alone is enough).
 	// The tag `label` is the native element.

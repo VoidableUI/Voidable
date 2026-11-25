@@ -386,103 +386,7 @@ describe('VoidMultiselect keyboard', () => {
   });
 });
 
-describe('VoidTabs keyboard', () => {
-  async function mount(value = '', spec: Array<{ tab: string; disabled?: boolean }> = [{ tab: 'a' }, { tab: 'b' }, { tab: 'c' }]) {
-    const el = document.createElement('void-tabs') as VoidTabs;
-    if (value) el.value = value;
-    for (const s of spec) {
-      const p = document.createElement('void-tab-panel') as VoidTabPanel;
-      p.tab = s.tab;
-      p.label = s.tab.toUpperCase();
-      if (s.disabled) p.disabled = true;
-      el.appendChild(p);
-    }
-    document.body.appendChild(el);
-    await el.updateComplete;
-    return el;
-  }
-  const tabs = (el: Element) => Array.from(el.querySelectorAll<HTMLButtonElement>('.void-tabs-tab'));
-  const stops = (el: Element) => tabs(el).map(t => t.getAttribute('tabindex'));
-
-  it('with no value the first enabled tab is the single tab stop', async () => {
-    expect(stops(await mount())).toEqual(['0', '-1', '-1']);
-    expect(stops(await mount('', [{ tab: 'a', disabled: true }, { tab: 'b' }]))).toEqual(['-1', '0']);
-  });
-
-  it('the selected tab is the tab stop', async () => {
-    expect(stops(await mount('b'))).toEqual(['-1', '0', '-1']);
-  });
-
-  it('Home and End focus the first and last tab and prevent default', async () => {
-    const el = await mount('b');
-    const t = tabs(el);
-    const e = press(t[1]!, 'End');
-    expect(document.activeElement).toBe(t[2]);
-    expect(e.defaultPrevented).toBe(true);
-    press(t[2]!, 'Home');
-    expect(document.activeElement).toBe(t[0]);
-  });
-
-  it('arrow keys skip a disabled tab', async () => {
-    const el = await mount('a', [{ tab: 'a' }, { tab: 'b', disabled: true }, { tab: 'c' }]);
-    const t = tabs(el);
-    expect(t[1]!.disabled).toBe(true);
-    press(t[0]!, 'ArrowRight');
-    expect(document.activeElement).toBe(t[2]);
-    press(t[2]!, 'ArrowLeft');
-    expect(document.activeElement).toBe(t[0]);
-  });
-
-  it('manual activation (default): arrows move focus only; Enter or Space (a click) selects', async () => {
-    const el = await mount('a');
-    const t = tabs(el);
-    press(t[0]!, 'ArrowRight');
-    expect(el.value).toBe('a');
-    t[1]!.click();
-    expect(el.value).toBe('b');
-  });
-
-  it('activation="auto": arrow keys select the focused tab', async () => {
-    const el = await mount('a');
-    el.activation = 'auto';
-    await el.updateComplete;
-    const t = tabs(el);
-    const changes: unknown[] = [];
-    el.addEventListener('void-change', (e) => changes.push((e as CustomEvent).detail));
-    press(t[0]!, 'ArrowRight');
-    await el.updateComplete;
-    expect(el.value).toBe('b');
-    press(t[1]!, 'End');
-    await el.updateComplete;
-    expect(el.value).toBe('c');
-    expect(changes).toEqual([{ value: 'b' }, { value: 'c' }]);
-  });
-
-  it('modified arrows are left to the browser', async () => {
-    const el = await mount('a');
-    expect(press(tabs(el)[0]!, 'ArrowRight', { altKey: true }).defaultPrevented).toBe(false);
-  });
-
-  it('the visible panel is a tab stop and each panel names its tab', async () => {
-    const el = await mount('b');
-    const panels = Array.from(el.querySelectorAll('void-tab-panel'));
-    await Promise.all(panels.map(p => p.updateComplete));
-    expect(panels.map(p => p.getAttribute('tabindex'))).toEqual([null, '0', null]);
-    expect(panels.map(p => p.getAttribute('aria-labelledby'))).toEqual(tabs(el).map(t => t.id));
-  });
-
-  it('a panel added later gets a tab and the roving stop stays single', async () => {
-    const el = await mount('a');
-    const late = document.createElement('void-tab-panel') as VoidTabPanel;
-    late.tab = 'z';
-    late.label = 'Z';
-    el.appendChild(late);
-    await new Promise((r) => setTimeout(r));
-    await el.updateComplete;
-    expect(tabs(el)).toHaveLength(4);
-    expect(stops(el).filter(s => s === '0')).toHaveLength(1);
-  });
-});
+// Tabs keyboard behaviour (roving tab stop, arrows, Home/End, activation) is in tests/components/tabs.test.ts.
 
 describe('VoidField control lookup', () => {
   it('labels the visible native input, not the hidden input inside a checkbox, and the host for a checkbox', async () => {
@@ -522,33 +426,31 @@ describe('VoidField control lookup', () => {
 });
 
 describe('VoidTooltip trigger', () => {
-  it('describes a trigger that arrives after the tooltip rendered, never the bubble itself', async () => {
+  it('describes a control that arrives after the tooltip connected, never the content itself', async () => {
     const el = document.createElement('void-tooltip') as VoidTooltip;
-    el.text = 'Tip';
+    el.innerHTML = '<void-tooltip-trigger></void-tooltip-trigger><void-tooltip-content>Tip</void-tooltip-content>';
     document.body.appendChild(el);
     await el.updateComplete;
-    const bubble = el.querySelector('.void-tooltip-bubble')!;
-    expect(bubble.hasAttribute('aria-describedby')).toBe(false);
+    const content = el.querySelector('void-tooltip-content')!;
     const button = document.createElement('button');
-    el.appendChild(button);
+    el.querySelector('void-tooltip-trigger')!.appendChild(button);
     await new Promise((r) => setTimeout(r));
-    expect(button.getAttribute('aria-describedby')).toBe(bubble.id);
-    expect(bubble.hasAttribute('aria-describedby')).toBe(false);
+    expect(button.getAttribute('aria-describedby')).toBe(content.id);
+    expect(content.hasAttribute('aria-describedby')).toBe(false);
   });
 
-  it('keeps existing descriptions and releases a trigger that is replaced', async () => {
+  it('keeps existing descriptions and releases a control that is replaced', async () => {
     const el = document.createElement('void-tooltip') as VoidTooltip;
-    el.text = 'Tip';
-    el.innerHTML = '<button aria-describedby="other">A</button>';
+    el.innerHTML = '<void-tooltip-trigger><button aria-describedby="other">A</button></void-tooltip-trigger><void-tooltip-content>Tip</void-tooltip-content>';
     document.body.appendChild(el);
     await el.updateComplete;
-    const bubble = el.querySelector('.void-tooltip-bubble')!;
+    const content = el.querySelector('void-tooltip-content')!;
     const a = el.querySelector('button')!;
-    expect(a.getAttribute('aria-describedby')).toBe(`other ${bubble.id}`);
+    expect(a.getAttribute('aria-describedby')).toBe(`other ${content.id}`);
     const b = document.createElement('span');
-    el.insertBefore(b, a);
+    a.before(b);
     await new Promise((r) => setTimeout(r));
-    expect(b.getAttribute('aria-describedby')).toBe(bubble.id);
+    expect(b.getAttribute('aria-describedby')).toBe(content.id);
     expect(a.getAttribute('aria-describedby')).toBe('other');
   });
 });

@@ -16,7 +16,14 @@
 //   r  tags it cannot work without (somewhere below it)
 //   x  advice for attributes people guess that do not exist
 //   n  what names the element (supplement.js accessibleName): a attributes, c content names it,
-//      p ancestors as [tag, ...attributes], h the hint
+//      t part tags whose presence names it, p ancestors as [tag, ...attributes], h the hint
+//   q  its explicit parts (#52), from the manifest's voidParts:
+//        k 'parts' (only parts as children) or 'any'; o ordered; t transparent
+//        wrapper tags; s the one-line correct markup; l advice for loose
+//        children (the implicit form it replaced); n the parts, each
+//        { t tag, r required, x max, c wraps one control }
+//   c  1 for a CSS-only part (styled by the theme, never registered)
+// Also exported: `removed`, tags that were replaced by parts, with the fix.
 // Also exported: `styled`, the tags of the CSS-only elements (the page patterns
 // and the media surface). @voidable/theme styles them and nothing registers
 // them, so they are not in the manifest and must not be reported as unknown.
@@ -47,6 +54,35 @@ function encode(text, falseString) {
 }
 
 const tags = {};
+const removed = {};
+
+/** The compact parts entry of a component or part. */
+function partsEntry(spec, skeleton) {
+  const q = { k: spec.children ?? 'any', s: skeleton, n: spec.parts.map((p) => ({ t: p.tag, ...(p.required ? { r: 1 } : {}), ...(p.max ? { x: p.max } : {}), ...(p.control ? { c: 1 } : {}) })) };
+  if (spec.ordered) q.o = 1;
+  if (spec.transparent?.length) q.t = spec.transparent;
+  if (spec.legacy?.children) q.l = spec.legacy.children;
+  return q;
+}
+
+/** Table entries for the parts of `owner` (CSS-only parts get their own entry; registered ones gain `q`). */
+function addParts(owner, module, spec, skeleton) {
+  for (const part of spec.parts) {
+    if (part.cssOnly) {
+      const entry = { m: module, a: {}, e: [], p: [owner], c: 1 };
+      for (const a of part.attributes ?? []) entry.a[a.name] = encode(a.type?.text, false);
+      tags[part.tag] = entry;
+    }
+    if (part.parts) {
+      later.push(() => {
+        tags[part.tag].q = partsEntry(part, skeleton);
+        addParts(part.tag, module, part, skeleton);
+      });
+    }
+  }
+}
+const later = [];
+
 for (const mod of manifest.modules) {
   const match = /^dist\/components\/([^/]+)\.js$/.exec(mod.path);
   if (!match) continue;
@@ -64,11 +100,18 @@ for (const mod of manifest.modules) {
       const n = decl.voidName;
       entry.n = { a: n.attributes, h: n.hint };
       if (n.content) entry.n.c = 1;
+      if (n.parts?.length) entry.n.t = n.parts;
       if (n.ancestors?.length) entry.n.p = n.ancestors.map((x) => [x.tag, ...(x.attributes ?? [])]);
     }
     tags[decl.tagName] = entry;
+    if (decl.voidParts) {
+      entry.q = partsEntry(decl.voidParts, decl.voidParts.skeleton);
+      for (const [tag, advice] of Object.entries(decl.voidParts.legacy?.tags ?? {})) removed[tag] = advice;
+      later.push(() => addParts(decl.tagName, match[1], decl.voidParts, decl.voidParts.skeleton));
+    }
   }
 }
+while (later.length) later.shift()();
 if (Object.keys(tags).length === 0) throw new Error('custom-elements.json contains no components in dist/components/');
 for (const [tag, entry] of Object.entries(tags)) {
   for (const t of [...(entry.p ?? []), ...(entry.r ?? [])]) {
@@ -94,6 +137,9 @@ export const table: DevTable = ${JSON.stringify(sorted)};
 
 /** CSS-only \`void-*\` tags: styled by the theme, never registered, never "unknown". */
 export const styled: readonly string[] = ${JSON.stringify(styled)};
+
+/** Tags that were replaced by explicit parts, with the fix. */
+export const removed: Readonly<Record<string, string>> = ${JSON.stringify(removed)};
 `,
 );
 console.log(`[cem] dev table: ${Object.keys(sorted).length} tags, ${styled.length} styled`);

@@ -12,8 +12,11 @@ function createAccordion(): VoidAccordion {
 
 function createItem(heading = 'Test', content = 'Content'): VoidAccordionItem {
   const el = document.createElement(TAG_ITEM) as VoidAccordionItem;
-  el.heading = heading;
-  el.textContent = content;
+  const trigger = document.createElement('void-accordion-trigger');
+  trigger.textContent = heading;
+  const body = document.createElement('void-accordion-content');
+  body.textContent = content;
+  el.append(trigger, body);
   return el;
 }
 
@@ -82,8 +85,8 @@ describe('VoidAccordionItem', () => {
       el = document.createElement(TAG_ITEM) as VoidAccordionItem;
     });
 
-    it('heading defaults to empty string', () => {
-      expect(el.heading).toBe('');
+    it('has no heading property (the heading is the trigger part)', () => {
+      expect('heading' in el).toBe(false);
     });
 
     it('open defaults to false', () => {
@@ -100,55 +103,61 @@ describe('VoidAccordionItem', () => {
       await el.updateComplete;
     });
 
-    it('renders trigger button', () => {
-      expect(el.querySelector('.void-accordion-trigger')).not.toBeNull();
+    it('renders nothing of its own: the item holds exactly the author parts', () => {
+      expect([...el.children].map((c) => c.localName)).toEqual(['void-accordion-trigger', 'void-accordion-content']);
     });
 
-    it('renders content div', () => {
-      expect(el.querySelector('.void-accordion-content')).not.toBeNull();
+    it('makes the trigger a focusable button', () => {
+      const trigger = el.querySelector('void-accordion-trigger') as HTMLElement;
+      expect(trigger.getAttribute('role')).toBe('button');
+      expect(trigger.getAttribute('tabindex')).toBe('0');
     });
 
     it('trigger contains heading text', () => {
-      const trigger = el.querySelector('.void-accordion-trigger') as HTMLElement;
+      const trigger = el.querySelector('void-accordion-trigger') as HTMLElement;
       expect(trigger.textContent).toContain('My Section');
     });
 
     it('trigger has aria-expanded="false" when closed', () => {
-      const trigger = el.querySelector('.void-accordion-trigger') as HTMLElement;
+      const trigger = el.querySelector('void-accordion-trigger') as HTMLElement;
       expect(trigger.getAttribute('aria-expanded')).toBe('false');
     });
 
     it('trigger has aria-expanded="true" when open', async () => {
       el.open = true;
       await el.updateComplete;
-      const trigger = el.querySelector('.void-accordion-trigger') as HTMLElement;
+      const trigger = el.querySelector('void-accordion-trigger') as HTMLElement;
       expect(trigger.getAttribute('aria-expanded')).toBe('true');
     });
 
     it('trigger aria-controls matches content id', () => {
-      const trigger = el.querySelector('.void-accordion-trigger') as HTMLElement;
-      const content = el.querySelector('.void-accordion-content') as HTMLElement;
+      const trigger = el.querySelector('void-accordion-trigger') as HTMLElement;
+      const content = el.querySelector('void-accordion-content') as HTMLElement;
       expect(trigger.getAttribute('aria-controls')).toBe(content.id);
     });
 
     it('content has role="region"', () => {
-      const content = el.querySelector('.void-accordion-content') as HTMLElement;
+      const content = el.querySelector('void-accordion-content') as HTMLElement;
       expect(content.getAttribute('role')).toBe('region');
     });
 
     it('content aria-labelledby matches trigger id', () => {
-      const trigger = el.querySelector('.void-accordion-trigger') as HTMLElement;
-      const content = el.querySelector('.void-accordion-content') as HTMLElement;
+      const trigger = el.querySelector('void-accordion-trigger') as HTMLElement;
+      const content = el.querySelector('void-accordion-content') as HTMLElement;
       expect(content.getAttribute('aria-labelledby')).toBe(trigger.id);
     });
 
-    it('renders chevron SVG inside trigger', () => {
-      const chevron = el.querySelector('.void-accordion-chevron');
-      expect(chevron).not.toBeNull();
+    it('keeps an author id on the content and points aria-controls at it', async () => {
+      const item = createItem('Ids', 'Body');
+      item.querySelector('void-accordion-content')!.id = 'server-id';
+      document.body.appendChild(item);
+      await item.updateComplete;
+      expect(item.querySelector('void-accordion-content')!.id).toBe('server-id');
+      expect(item.querySelector('void-accordion-trigger')!.getAttribute('aria-controls')).toBe('server-id');
     });
 
-    it('user content is placed inside .void-accordion-content', async () => {
-      const content = el.querySelector('.void-accordion-content') as HTMLElement;
+    it('user content stays inside the content part', async () => {
+      const content = el.querySelector('void-accordion-content') as HTMLElement;
       expect(content.textContent).toContain('My Content');
     });
   });
@@ -183,14 +192,14 @@ describe('VoidAccordionItem', () => {
     });
 
     it('opens on trigger click', async () => {
-      const trigger = el.querySelector('.void-accordion-trigger') as HTMLElement;
+      const trigger = el.querySelector('void-accordion-trigger') as HTMLElement;
       trigger.click();
       await el.updateComplete;
       expect(el.open).toBe(true);
     });
 
     it('closes on second trigger click', async () => {
-      const trigger = el.querySelector('.void-accordion-trigger') as HTMLElement;
+      const trigger = el.querySelector('void-accordion-trigger') as HTMLElement;
       trigger.click();
       await el.updateComplete;
       trigger.click();
@@ -209,20 +218,17 @@ describe('VoidAccordionItem', () => {
     });
 
     /**
-     * Models a native <button>: Enter fires click on keydown unless the keydown was
-     * default-prevented; Space fires click on keyup (Firefox does so even when keydown
-     * was default-prevented). happy-dom does not synthesise these clicks itself.
+     * The trigger part is a role="button" element, not a native <button>: the
+     * browser synthesises no click for Enter or Space, so the item handles the
+     * keydown itself.
      */
     function press(trigger: HTMLElement, key: 'Enter' | ' '): void {
-      const down = new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true });
-      trigger.dispatchEvent(down);
-      if (key === 'Enter' && !down.defaultPrevented) trigger.click();
+      trigger.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true }));
       trigger.dispatchEvent(new KeyboardEvent('keyup', { key, bubbles: true, cancelable: true }));
-      if (key === ' ') trigger.click();
     }
 
     it('Enter key toggles open exactly once', async () => {
-      const trigger = el.querySelector('.void-accordion-trigger') as HTMLElement;
+      const trigger = el.querySelector('void-accordion-trigger') as HTMLElement;
       const events: boolean[] = [];
       el.addEventListener('void-toggle', (e) => events.push((e as CustomEvent).detail.open));
       press(trigger, 'Enter');
@@ -232,7 +238,7 @@ describe('VoidAccordionItem', () => {
     });
 
     it('Space key toggles open exactly once', async () => {
-      const trigger = el.querySelector('.void-accordion-trigger') as HTMLElement;
+      const trigger = el.querySelector('void-accordion-trigger') as HTMLElement;
       const events: boolean[] = [];
       el.addEventListener('void-toggle', (e) => events.push((e as CustomEvent).detail.open));
       press(trigger, ' ');
@@ -242,7 +248,7 @@ describe('VoidAccordionItem', () => {
     });
 
     it('a second Enter / Space activation closes it again', async () => {
-      const trigger = el.querySelector('.void-accordion-trigger') as HTMLElement;
+      const trigger = el.querySelector('void-accordion-trigger') as HTMLElement;
       press(trigger, 'Enter');
       press(trigger, ' ');
       await el.updateComplete;
@@ -250,7 +256,7 @@ describe('VoidAccordionItem', () => {
     });
 
     it('other keys do not toggle', async () => {
-      const trigger = el.querySelector('.void-accordion-trigger') as HTMLElement;
+      const trigger = el.querySelector('void-accordion-trigger') as HTMLElement;
       trigger.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true }));
       await el.updateComplete;
       expect(el.open).toBe(false);
@@ -269,7 +275,7 @@ describe('VoidAccordionItem', () => {
     it('dispatches void-toggle on click', async () => {
       let fired = false;
       el.addEventListener('void-toggle', () => { fired = true; });
-      const trigger = el.querySelector('.void-accordion-trigger') as HTMLElement;
+      const trigger = el.querySelector('void-accordion-trigger') as HTMLElement;
       trigger.click();
       await el.updateComplete;
       expect(fired).toBe(true);
@@ -278,7 +284,7 @@ describe('VoidAccordionItem', () => {
     it('void-toggle detail contains open state', async () => {
       let detail: { open: boolean } | null = null;
       el.addEventListener('void-toggle', (e) => { detail = (e as CustomEvent).detail; });
-      const trigger = el.querySelector('.void-accordion-trigger') as HTMLElement;
+      const trigger = el.querySelector('void-accordion-trigger') as HTMLElement;
       trigger.click();
       await el.updateComplete;
       expect(detail).toEqual({ open: true });
@@ -287,7 +293,7 @@ describe('VoidAccordionItem', () => {
     it('void-toggle bubbles', async () => {
       let firedOnParent = false;
       document.body.addEventListener('void-toggle', () => { firedOnParent = true; }, { once: true });
-      const trigger = el.querySelector('.void-accordion-trigger') as HTMLElement;
+      const trigger = el.querySelector('void-accordion-trigger') as HTMLElement;
       trigger.click();
       await el.updateComplete;
       expect(firedOnParent).toBe(true);
@@ -298,7 +304,7 @@ describe('VoidAccordionItem', () => {
       await el.updateComplete;
       let detail: { open: boolean } | null = null;
       el.addEventListener('void-toggle', (e) => { detail = (e as CustomEvent).detail; });
-      const trigger = el.querySelector('.void-accordion-trigger') as HTMLElement;
+      const trigger = el.querySelector('void-accordion-trigger') as HTMLElement;
       trigger.click();
       await el.updateComplete;
       expect(detail).toEqual({ open: false });
@@ -314,13 +320,13 @@ describe('VoidAccordionItem', () => {
       await item2.updateComplete;
       await item3.updateComplete;
 
-      const trigger1 = item1.querySelector('.void-accordion-trigger') as HTMLElement;
+      const trigger1 = item1.querySelector('void-accordion-trigger') as HTMLElement;
       trigger1.click();
       await item1.updateComplete;
       await item2.updateComplete;
       expect(item1.open).toBe(true);
 
-      const trigger2 = item2.querySelector('.void-accordion-trigger') as HTMLElement;
+      const trigger2 = item2.querySelector('void-accordion-trigger') as HTMLElement;
       trigger2.click();
       await item1.updateComplete;
       await item2.updateComplete;
@@ -335,11 +341,11 @@ describe('VoidAccordionItem', () => {
       await item1.updateComplete;
       await item2.updateComplete;
 
-      const trigger1 = item1.querySelector('.void-accordion-trigger') as HTMLElement;
+      const trigger1 = item1.querySelector('void-accordion-trigger') as HTMLElement;
       trigger1.click();
       await item1.updateComplete;
 
-      const trigger2 = item2.querySelector('.void-accordion-trigger') as HTMLElement;
+      const trigger2 = item2.querySelector('void-accordion-trigger') as HTMLElement;
       trigger2.click();
       await item2.updateComplete;
 
@@ -355,7 +361,7 @@ describe('VoidAccordionItem', () => {
       document.body.appendChild(el);
       await el.updateComplete;
       expect(el.open).toBe(true);
-      const trigger = el.querySelector('.void-accordion-trigger') as HTMLElement;
+      const trigger = el.querySelector('void-accordion-trigger') as HTMLElement;
       expect(trigger.getAttribute('aria-expanded')).toBe('true');
     });
   });

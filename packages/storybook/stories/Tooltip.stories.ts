@@ -15,7 +15,7 @@ const meta: Meta = {
       },
     },
   },
-  argTypes: argTypesFor('void-tooltip'),
+  argTypes: argTypesFor('void-tooltip', { text: { control: { type: 'text' }, description: 'Story control: the text of the <void-tooltip-content> part.' } }),
 };
 
 export default meta;
@@ -30,8 +30,9 @@ export const Default: Story = {
     delay: 200,
   },
   render: (args) => html`
-    <void-tooltip text=${args.text} position=${args.position} align=${args.align} ?open=${args.open} .delay=${args.delay}>
-      <button style="padding: 0.5rem 1rem; cursor: pointer;">Hover me</button>
+    <void-tooltip position=${args.position} align=${args.align} ?open=${args.open} .delay=${args.delay}>
+      <void-tooltip-trigger><button style="padding: 0.5rem 1rem; cursor: pointer;">Hover me</button></void-tooltip-trigger>
+      <void-tooltip-content>${args.text}</void-tooltip-content>
     </void-tooltip>
   `,
 };
@@ -39,17 +40,21 @@ export const Default: Story = {
 export const Positions: Story = {
   render: () => html`
     <div style="display: flex; align-items: center; gap: 4rem; padding: 3rem;">
-      <void-tooltip text="Top tooltip" position="top">
-        <button style="padding: 0.5rem 1rem; cursor: pointer;">Top</button>
+      <void-tooltip position="top">
+        <void-tooltip-trigger><button style="padding: 0.5rem 1rem; cursor: pointer;">Top</button></void-tooltip-trigger>
+        <void-tooltip-content>Top tooltip</void-tooltip-content>
       </void-tooltip>
-      <void-tooltip text="Bottom tooltip" position="bottom">
-        <button style="padding: 0.5rem 1rem; cursor: pointer;">Bottom</button>
+      <void-tooltip position="bottom">
+        <void-tooltip-trigger><button style="padding: 0.5rem 1rem; cursor: pointer;">Bottom</button></void-tooltip-trigger>
+        <void-tooltip-content>Bottom tooltip</void-tooltip-content>
       </void-tooltip>
-      <void-tooltip text="Left tooltip" position="left">
-        <button style="padding: 0.5rem 1rem; cursor: pointer;">Left</button>
+      <void-tooltip position="left">
+        <void-tooltip-trigger><button style="padding: 0.5rem 1rem; cursor: pointer;">Left</button></void-tooltip-trigger>
+        <void-tooltip-content>Left tooltip</void-tooltip-content>
       </void-tooltip>
-      <void-tooltip text="Right tooltip" position="right">
-        <button style="padding: 0.5rem 1rem; cursor: pointer;">Right</button>
+      <void-tooltip position="right">
+        <void-tooltip-trigger><button style="padding: 0.5rem 1rem; cursor: pointer;">Right</button></void-tooltip-trigger>
+        <void-tooltip-content>Right tooltip</void-tooltip-content>
       </void-tooltip>
     </div>
   `,
@@ -59,8 +64,9 @@ export const OnText: Story = {
   render: () => html`
     <p style="font-size: 1rem;">
       Hover over
-      <void-tooltip text="This is an explanation">
-        <span style="text-decoration: underline dotted; cursor: help;">this term</span>
+      <void-tooltip>
+        <void-tooltip-trigger><span style="text-decoration: underline dotted; cursor: help;">this term</span></void-tooltip-trigger>
+        <void-tooltip-content>This is an explanation</void-tooltip-content>
       </void-tooltip>
       for details.
     </p>
@@ -70,11 +76,13 @@ export const OnText: Story = {
 export const WithDelay: Story = {
   render: () => html`
     <div style="display: flex; gap: 2rem; padding: 2rem;">
-      <void-tooltip text="No delay" .delay=${0}>
-        <button style="padding: 0.5rem 1rem; cursor: pointer;">Instant</button>
+      <void-tooltip .delay=${0}>
+        <void-tooltip-trigger><button style="padding: 0.5rem 1rem; cursor: pointer;">Instant</button></void-tooltip-trigger>
+        <void-tooltip-content>No delay</void-tooltip-content>
       </void-tooltip>
-      <void-tooltip text="800ms delay" .delay=${800}>
-        <button style="padding: 0.5rem 1rem; cursor: pointer;">Slow</button>
+      <void-tooltip .delay=${800}>
+        <void-tooltip-trigger><button style="padding: 0.5rem 1rem; cursor: pointer;">Slow</button></void-tooltip-trigger>
+        <void-tooltip-content>800ms delay</void-tooltip-content>
       </void-tooltip>
     </div>
   `,

@@ -140,14 +140,14 @@ describe('chrome of components without regions', () => {
     expect(item.querySelector('.void-nav-menu-trigger')).toBe(trigger);
     expect(trigger.getAttribute('aria-haspopup')).toBe('true');
 
-    const tip = await mount<Host>('<void-tooltip text="t"><button id="b">b</button></void-tooltip>');
+    // The tooltip has explicit parts (#52): nothing to confine; a morph that
+    // strips the control's aria-describedby (consumer markup) gets it back.
+    const tip = await mount<Host>('<void-tooltip><void-tooltip-trigger><button id="b">b</button></void-tooltip-trigger><void-tooltip-content>t</void-tooltip-content></void-tooltip>');
     tip.voidBeforeMorph();
-    expect(Array.from(tip.children).map(c => c.id)).toEqual(['b']);
-    // A morph strips the trigger's aria-describedby (consumer markup); the update after re-projection puts it back.
+    expect(Array.from(tip.children).map(c => c.localName)).toEqual(['void-tooltip-trigger', 'void-tooltip-content']);
     tip.querySelector('#b')!.removeAttribute('aria-describedby');
     await settle();
-    expect(tip.querySelectorAll('.void-tooltip-bubble')).toHaveLength(1);
-    expect(tip.querySelector('#b')!.getAttribute('aria-describedby')).toBe(tip.querySelector('.void-tooltip-bubble')!.id);
+    expect(tip.querySelector('#b')!.getAttribute('aria-describedby')).toBe(tip.querySelector('void-tooltip-content')!.id);
   });
 
   it('breadcrumbs: items are lifted out of their list items and put back into the same ones', async () => {
@@ -257,17 +257,18 @@ describe('reflected attributes removed from outside', () => {
 });
 
 describe('tabs', () => {
-  it('activates the panel named by the initial value even when panels upgrade after the tabs', async () => {
-    const tabs = await mount<Host>('<void-tabs value="b"><void-tab-panel tab="a" label="A">a</void-tab-panel><void-tab-panel tab="b" label="B">b</void-tab-panel></void-tabs>');
-    const panels = Array.from(tabs.querySelectorAll('void-tab-panel')) as Host[];
-    expect(panels.map(p => p.active)).toEqual([false, true]);
+  it('activates the content named by the initial value', async () => {
+    const tabs = await mount<Host>('<void-tabs value="b"><void-tabs-list><void-tabs-trigger value="a">A</void-tabs-trigger><void-tabs-trigger value="b">B</void-tabs-trigger></void-tabs-list><void-tabs-content value="a">a</void-tabs-content><void-tabs-content value="b">b</void-tabs-content></void-tabs>');
+    const panels = Array.from(tabs.querySelectorAll('void-tabs-content'));
+    expect(panels.map(p => p.hasAttribute('active'))).toEqual([false, true]);
   });
 
-  it('gives incoming panels the ids the live panels have, so morphers pair them instead of replacing them', async () => {
-    const tabs = await mount<Host>('<void-tabs value="a"><void-tab-panel tab="a" label="A">a</void-tab-panel><void-tab-panel tab="b" label="B">b</void-tab-panel></void-tabs>');
-    const next = server('<void-tabs value="a"><void-tab-panel tab="b" label="B">b</void-tab-panel><void-tab-panel tab="c" label="C">c</void-tab-panel></void-tabs>');
+  it('gives incoming parts the generated ids of the live parts at the same place, so morphers pair them', async () => {
+    const tabs = await mount<Host>('<void-tabs value="a"><void-tabs-list><void-tabs-trigger value="a">A</void-tabs-trigger><void-tabs-trigger value="b">B</void-tabs-trigger></void-tabs-list><void-tabs-content value="a">a</void-tabs-content><void-tabs-content value="b">b</void-tabs-content></void-tabs>');
+    const next = server('<void-tabs value="a"><void-tabs-list><void-tabs-trigger value="a">A</void-tabs-trigger><void-tabs-trigger value="b">B</void-tabs-trigger><void-tabs-trigger value="c">C</void-tabs-trigger></void-tabs-list><void-tabs-content value="a">a</void-tabs-content><void-tabs-content value="b">b</void-tabs-content><void-tabs-content value="c">c</void-tabs-content></void-tabs>');
     tabs.voidBeforeMorph(next);
-    const ids = Array.from(next.children).map(p => p.getAttribute('id'));
-    expect(ids).toEqual([(tabs.querySelector('void-tab-panel[tab="b"]') as Element).id, null]);
+    const live = Array.from(tabs.querySelectorAll('void-tabs-content')).map(p => p.id);
+    const ids = Array.from(next.querySelectorAll('void-tabs-content')).map(p => p.getAttribute('id'));
+    expect(ids).toEqual([live[0], live[1], null]);
   });
 });

@@ -1,10 +1,12 @@
 <% if resource.errors.any? %>
   <void-alert color="error" data-turbo-temporary>
-    <%= pluralize(resource.errors.count, "error") %> prohibited this operation:
-    <ul class="devise-error-list">
-      <% resource.errors.full_messages.each do |message| %>
-        <li><%= message %></li>
-      <% end %>
-    </ul>
+    <void-alert-description>
+      <%= pluralize(resource.errors.count, "error") %> prohibited this operation:
+          <ul class="devise-error-list">
+            <% resource.errors.full_messages.each do |message| %>
+              <li><%= message %></li>
+            <% end %>
+          </ul>
+    </void-alert-description>
   </void-alert>
 <% end %>

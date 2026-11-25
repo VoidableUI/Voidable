@@ -28,9 +28,11 @@ const togglePasswordVisibility = (e: Event) => {
 const formWrapper = (content: unknown) => html`
   <div style="max-width: 28rem; margin: 0 auto; padding: 2rem;">
     <void-card>
-      <div style="padding: var(--void-space-6);">
-        ${content}
-      </div>
+      <void-card-body>
+        <div style="padding: var(--void-space-6);">
+          ${content}
+        </div>
+      </void-card-body>
     </void-card>
   </div>
 `;
@@ -76,7 +78,7 @@ export const WithErrors: Story = {
     <h1 style="margin: 0 0 var(--void-space-5) 0; font-family: var(--void-font-sans); font-size: var(--void-text-xl); font-weight: var(--void-weight-bold); color: var(--void-color-text);">Sign in</h1>
 
     <form style="display: flex; flex-direction: column; gap: var(--void-space-4);">
-      <void-alert color="error">Invalid Email or password.</void-alert>
+      <void-alert color="error"><void-alert-description>Invalid Email or password.</void-alert-description></void-alert>
 
       <void-field label="Email">
         <void-input type="email" placeholder="you@example.com" autocomplete="email"></void-input>

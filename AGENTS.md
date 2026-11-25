@@ -38,6 +38,8 @@ Counts of components, custom elements and adapter packages are not maintained by
 
 All components extend `VoidElement`, a base class that overrides `createRenderRoot()` to return `this`, eliminating Shadow DOM. This allows CSS custom properties from any ancestor scope to style components without piercing boundaries.
 
+Exception (#52): `<void-dialog>`, `<void-drawer>` and `<void-alert dismissible>` attach a small shadow root (`attachChrome` in `packages/ui/src/parts.ts`) for internal structure the author never writes: the native `<dialog>` that `showModal()` needs, around a `<slot>`, and a close or dismiss button. The author's parts stay light-DOM children; the theme styles the internals through `::part(surface)` and `::part(close)`.
+
 ### Theme Separation (Core Tenet)
 
 Without a theme package loaded, components are completely devoid of styling. `@voidable/ui` ships **zero visual CSS**. All visual properties resolve through `--void-*` CSS custom properties defined by a theme package. Component CSS may reference `var(--void-*)` tokens but those tokens have **no fallback values** in the component package. Theme loading is the consumer's responsibility.
@@ -324,12 +326,43 @@ The docs Open Graph image is generated from `docs/scripts/og-image.svg` with `mi
 4. Components have zero visual styling without a theme loaded.
 5. Never hardcode color values — always use `var(--void-*)`.
 6. Never import CSS in the `@voidable/ui` package entry point.
-7. Components that host consumer children use `ProjectionController` (`packages/ui/src/projection.ts`), never a `childNodes` snapshot; region containers hold no Lit bindings.
+7. Components with regions take **explicit parts** (`PartsController`, `packages/ui/src/parts.ts`; see "Explicit parts" below). Components not converted yet still host consumer children with `ProjectionController` (`packages/ui/src/projection.ts`), never a `childNodes` snapshot; region containers hold no Lit bindings. New components use parts.
 8. Form controls use the `NativeFormControl` or `InternalsFormControl` mixin (`packages/ui/src/form-control.ts`).
 9. Multi-word properties declare a kebab-case `attribute` (enforced by the manifest test).
 10. A component whose host is not its control declares `static labelTarget` (a selector) so `aria-label` / `aria-labelledby` on the host move onto the control, and attributes the user edits while focused (`value` of a text field) are listed in `static editState` (`packages/ui/src/base.ts`).
 11. Boolean ARIA a component manages is written as `"true"` and removed (not `"false"`) where absence is the convention (`aria-disabled`, `aria-required`); `aria-pressed`, `aria-checked` and `aria-expanded` keep `"false"`.
 12. Overlays (anything that opens above the page) use `OverlayController` (`packages/ui/src/overlay.ts`): a native `<dialog>` with `showModal()` for modals, `popover="manual"` for everything else, CSS anchor positioning with the built-in JS positioner as fallback, and the shared stack for Escape, outside presses, focus return and the counted scroll lock. Never add document-level listeners or `z-index` stacking for an overlay. `void-open` / `void-close` come from the controller, carry a `reason` and do not bubble. Browser baseline: the Popover API (Chrome 114, Firefox 125, Safari 17); see `docs/src/content/docs/components/overlays.mdx`.
+
+### Explicit parts (#52)
+
+A component with regions (title, body, trigger, list of tabs) is written with part elements, plain `void-<component>-<region>` tags the component finds where they are and never moves. The rules and the full inventory are in `docs/src/content/docs/guides/composition.mdx`; the machine-readable form is `voidParts` in `packages/ui/cem/supplement.js`, which feeds the manifest, the React part wrappers (`packages/react/scripts/parts.mjs`), the dev warnings (`packages/ui/cem/dev-table.js`), and `voidable check` / `ref` / `snippet` / the skill.
+
+Rules: one way per component (remove the implicit form, no compatibility path; record it under `removed` so both checkers report it with the fix); names end in `-trigger`, `-content`, `-title`, `-description`, `-body`, `-actions`, `-header`, `-footer`, `-item`, `-list` or `-separator`; at most two levels; a part with no behaviour is CSS-only (styled by the theme, never `customElements.define`d); a trigger part wraps exactly one control and is `display: contents`; state lives on the parent's reflected attributes (`open`, `value`) or as a plain attribute the parent writes on a part (`active`); ids are generated only when missing and never replace an author or server id.
+
+Recipe for converting a component:
+
+1. **Design** the parts: write the target markup, decide attribute-or-part (on-screen content is a part, settings stay attributes), and add `voidParts` (tag, `required`, `max`, `ordered`, `control` for triggers, `transparent` wrappers such as `form`, a one-line `fix`) and `removed` entries (old tag or attribute → what to write) in `packages/ui/cem/supplement.js`.
+2. **Component**: replace `ProjectionController` and `render()` with a `PartsController` (`tags`: every part tag; `onChange`: an idempotent `_wire()` that looks the parts up and writes roles, ids and ARIA through `set` / `provide` / `token` / `id`). Overlays pass `attr` / `style` hooks to `OverlayController` so the parts controller owns what it writes. Delete the removed properties.
+3. **Theme**: style the part tags in the component's own CSS file (tag selectors, state from the parent's attributes); add the closed or not-yet-revealed state to `packages/theme/src/pre-upgrade.css`; `node packages/theme/scripts/build.mjs` regenerates the scoped reset with the new tags.
+4. **Tokens when converting**: the theme's component CSS is written against the three tiers (see "Three tiers" above), and a conversion keeps it that way; a part selector is only a new place to read the same tokens. Take the new selectors and layout from the converted CSS, then express every value as the component read it before the conversion (`git show master:packages/theme/src/components/<name>.css` against the converted file shows what to carry over): lines are `var(--void-rule-head)` under a header or title, `var(--void-rule-between)` between items and above a footer, `var(--void-rule-edge)` for the end of a list, never `1px solid var(--void-color-border)`; the box of a card-like part is `var(--void-container-*)`, of an overlay `var(--void-float-*)`; padding is `--void-container-padding` (aliased once to a private `--_void-<name>-padding` on the host when several parts read it). Every public token in the component's `@tokens` comment keeps its meaning on the new structure: a token that styled the generated header styles `void-<name>-header` and its title, and the comment says which parts it reaches (`Padding of the header (inline), the body and the footer`). Do not add part-named tokens (`--void-card-header-rule`) unless the three conditions of the token rule hold: a skin or design really treats that part differently from the rest of the component. Shadow internals (dialog, drawer, dismissible alert) are styled through `::part(surface)` and `::part(close)`: custom properties inherit into the shadow root, so `var(--void-dialog-radius, ...)` read in a `::part()` rule works and one declaration on the host or an ancestor overrides it. `::part()` rules sit in the same cascade layer as the rest of the theme and lose to unlayered application CSS, as intended. Finish with `mise run lint:component-tokens`, `lint:theme`, `lint:undefined-tokens` and a look at the component under Loft and Slab (`?skin=slab` in the theme builder): neither skin may need a selector.
+5. **Generated outputs**: `mise run build` regenerates the manifest, React wrappers and dev table; rewrite the snippets in `tools/voidable/internal/infra/embedded/data/supplement/snippets/`; add a case to `tools/voidable/internal/cli/testdata/bad/parts.html`.
+6. **Adapters and templates**: HEEx function components in `packages/liveview/hex/lib/voidable_ui/components.ex` (drop removed attrs, document the parts), Rails generator templates in `packages/hotwire/gem`, Blade docs, the React README.
+7. **Usages**: convert every usage (docs pages and data, stories, examples, demos, evals solutions, browser pages and specs). `python3`-style converters are fine; then `mise run lint:markup` must pass with an empty `.voidable/markup-allowlist.txt`, and `mise run warnings:sweep` must pass.
+8. **Tests**: unit tests for structure (nodes unmoved), ARIA wiring, late, reordered and removed parts, morph carry-over (`voidBeforeMorph`) and the dev warnings; browser specs in Chromium and Firefox; `mise run evals -- contract` and `mise run evals:calibrate`.
+9. **Docs**: the component page, the composition inventory row (status becomes Parts), keyboard and component notes data, Storybook argTypes.
+
+Checklist per component: parts in the supplement and the manifest; implicit form gone and reported by the dev warnings and `voidable check`, each with the fix; no node moved after upgrade; layout identical before and after upgrade; generated ids only when missing; React wrapper exported; HEEx, ERB and Blade updated; every usage converted; `lint:markup` and `warnings:sweep` clean; `Breaking (0.x):` line in the commit.
+
+Remaining components, in the order to convert them (grouping and open questions in the composition guide's inventory):
+
+1. **Disclosure**: collapsible, panel (the same trigger/content and header/body shapes as accordion and card).
+2. **Notices**: banner, toast, error-fallback (title, description, actions; error-fallback keeps its built-in default text, an owner decision).
+3. **Navigation**: nav-menu and nav-menu-item, nav-bar, breadcrumbs.
+4. **Menus**: menu, menu-item, menu-group (icon and shortcut as parts or attributes is open).
+5. **Carousel**: carousel and carousel-slide (renaming the slide to `-item` is open).
+6. **Fields**: field, checkbox-group, radio-group, then checkbox and radio (label, description, error parts; the `label`/`helper`/`error` attributes are used everywhere, so this group needs an owner decision first).
+7. **Shadow internals**: tag, scroll-area (no parts; their rendered buttons and viewport move into a shadow root like the alert's dismiss button).
+8. **Pickers**: combobox, multiselect, option, select (the content part for options; select's native options are open).
 
 ### CSS Selector Strategy
 

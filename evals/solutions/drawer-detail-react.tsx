@@ -48,22 +48,25 @@ export default function App() {
           </li>
         ))}
       </ul>
-      <void-drawer ref={drawer} side="right" open={selected !== null} heading={selected ? `Order #${selected.id}` : ''} onvoid-close={close}>
-        {selected && (
-          <div style={{ display: 'grid', gap: 'var(--void-space-3)' }}>
-            <p>Customer: {selected.customer}</p>
-            <p>
-              Status: <void-badge color={COLOR[selected.status]}>{selected.status}</void-badge>
-            </p>
-            <p>Total: {selected.total}</p>
-            <h3>Items</h3>
-            <ul>
-              {selected.items.map((i) => (
-                <li key={i}>{i}</li>
-              ))}
-            </ul>
-          </div>
-        )}
+      <void-drawer ref={drawer} side="right" open={selected !== null} onvoid-close={close}>
+        <void-drawer-title>{selected ? `Order #${selected.id}` : ''}</void-drawer-title>
+        <void-drawer-body>
+          {selected && (
+            <div style={{ display: 'grid', gap: 'var(--void-space-3)' }}>
+              <p>Customer: {selected.customer}</p>
+              <p>
+                Status: <void-badge color={COLOR[selected.status]}>{selected.status}</void-badge>
+              </p>
+              <p>Total: {selected.total}</p>
+              <h3>Items</h3>
+              <ul>
+                {selected.items.map((i) => (
+                  <li key={i}>{i}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </void-drawer-body>
       </void-drawer>
     </main>
   );

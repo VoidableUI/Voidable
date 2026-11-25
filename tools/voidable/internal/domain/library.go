@@ -36,6 +36,9 @@ func NewLibrary(ctx context.Context, ms ManifestSource, ss SupplementSource, p F
 	if sup.Hints == nil {
 		sup.Hints = map[string]map[string]string{}
 	}
+	if sup.Removed == nil {
+		sup.Removed = map[string]string{}
+	}
 	for i := range cat.Elements {
 		el := &cat.Elements[i]
 		if len(el.AllowedParents) > 0 {
@@ -43,6 +46,9 @@ func NewLibrary(ctx context.Context, ms ManifestSource, ss SupplementSource, p F
 		}
 		if len(el.AttrHints) > 0 {
 			sup.Hints[el.Tag] = el.AttrHints
+		}
+		for tag, advice := range el.Removed {
+			sup.Removed[tag] = advice
 		}
 	}
 	for tag, names := range sup.FalseString {
@@ -105,7 +111,8 @@ func (l *Library) Reference(ctx context.Context, tag string) (*Reference, error)
 		// Nothing is missing from the manifest: the element is not in it.
 		return r, nil
 	}
-	if len(e.Slots) == 0 {
+	// Components with explicit parts (#52) take no slots: their parts say where content goes.
+	if len(e.Slots) == 0 && e.Parts == nil {
 		r.Missing = append(r.Missing, "slots")
 	}
 	missingDesc := 0

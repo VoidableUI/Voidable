@@ -1,16 +1,15 @@
-/* The host only carries attributes; the native <dialog> is the panel. Before
-   the element upgrades, its content must not show inline. */
+/* The host only carries attributes. Its parts (title, description, body,
+   actions) are its own children, shown inside a native <dialog> that lives in
+   the host's shadow root (::part(surface)), with the close button
+   (::part(close)). Before the element upgrades there is no <dialog>, so the
+   parts must not show inline (pre-upgrade.css). */
 void-drawer {
   display: contents;
 }
 
-void-drawer:not(:defined) {
-  display: none;
-}
-
 /* Modal panel in the top layer (showModal), pinned to one edge; ::backdrop and
    transitions in overlay.css. */
-.void-drawer-panel {
+void-drawer::part(surface) {
   box-sizing: border-box;
   position: fixed;
   inset: auto;
@@ -26,12 +25,12 @@ void-drawer:not(:defined) {
   color: var(--void-color-text);
 }
 
-.void-drawer-panel[open] {
+void-drawer[open]::part(surface) {
   display: flex;
   translate: 0 0;
 }
 
-void-drawer[side="left"] .void-drawer-panel {
+void-drawer[side="left"]::part(surface) {
   left: 0;
   top: 0;
   height: 100%;
@@ -39,7 +38,7 @@ void-drawer[side="left"] .void-drawer-panel {
   translate: -100% 0;
 }
 
-void-drawer[side="right"] .void-drawer-panel {
+void-drawer[side="right"]::part(surface) {
   right: 0;
   top: 0;
   height: 100%;
@@ -47,7 +46,7 @@ void-drawer[side="right"] .void-drawer-panel {
   translate: 100% 0;
 }
 
-void-drawer[side="top"] .void-drawer-panel {
+void-drawer[side="top"]::part(surface) {
   top: 0;
   left: 0;
   width: 100%;
@@ -55,7 +54,7 @@ void-drawer[side="top"] .void-drawer-panel {
   translate: 0 -100%;
 }
 
-void-drawer[side="bottom"] .void-drawer-panel {
+void-drawer[side="bottom"]::part(surface) {
   bottom: 0;
   left: 0;
   width: 100%;
@@ -63,62 +62,54 @@ void-drawer[side="bottom"] .void-drawer-panel {
   translate: 0 100%;
 }
 
-void-drawer .void-drawer-panel[open] {
+void-drawer[open]::part(surface) {
   translate: 0 0;
 }
 
 @starting-style {
-  void-drawer[side="left"] .void-drawer-panel[open] { translate: -100% 0; }
-  void-drawer[side="right"] .void-drawer-panel[open] { translate: 100% 0; }
-  void-drawer[side="top"] .void-drawer-panel[open] { translate: 0 -100%; }
-  void-drawer[side="bottom"] .void-drawer-panel[open] { translate: 0 100%; }
+  void-drawer[side="left"][open]::part(surface) { translate: -100% 0; }
+  void-drawer[side="right"][open]::part(surface) { translate: 100% 0; }
+  void-drawer[side="top"][open]::part(surface) { translate: 0 -100%; }
+  void-drawer[side="bottom"][open]::part(surface) { translate: 0 100%; }
 }
 
-void-drawer[side="left"] .void-drawer-panel,
-void-drawer[side="right"] .void-drawer-panel {
+void-drawer[side="left"]::part(surface),
+void-drawer[side="right"]::part(surface) {
   width: 24rem;
 }
 
-void-drawer[side="top"] .void-drawer-panel,
-void-drawer[side="bottom"] .void-drawer-panel {
+void-drawer[side="top"]::part(surface),
+void-drawer[side="bottom"]::part(surface) {
   height: 24rem;
 }
 
-void-drawer[side="left"][size="sm"] .void-drawer-panel,
-void-drawer[side="right"][size="sm"] .void-drawer-panel {
+void-drawer[side="left"][size="sm"]::part(surface),
+void-drawer[side="right"][size="sm"]::part(surface) {
   width: 16rem;
 }
 
-void-drawer[side="left"][size="lg"] .void-drawer-panel,
-void-drawer[side="right"][size="lg"] .void-drawer-panel {
+void-drawer[side="left"][size="lg"]::part(surface),
+void-drawer[side="right"][size="lg"]::part(surface) {
   width: 36rem;
 }
 
-void-drawer[side="top"][size="sm"] .void-drawer-panel,
-void-drawer[side="bottom"][size="sm"] .void-drawer-panel {
+void-drawer[side="top"][size="sm"]::part(surface),
+void-drawer[side="bottom"][size="sm"]::part(surface) {
   height: 16rem;
 }
 
-void-drawer[side="top"][size="lg"] .void-drawer-panel,
-void-drawer[side="bottom"][size="lg"] .void-drawer-panel {
+void-drawer[side="top"][size="lg"]::part(surface),
+void-drawer[side="bottom"][size="lg"]::part(surface) {
   height: 36rem;
 }
 
-.void-drawer-heading[hidden] {
-  display: none;
-}
-
-.void-drawer-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: var(--void-space-4) var(--void-container-padding);
-  border-bottom: 1px solid var(--void-color-border);
+void-drawer-title {
+  display: block;
   flex-shrink: 0;
-}
-
-.void-drawer-heading {
   margin: 0;
+  /* Room for the close button, which is laid over the end of the row. */
+  padding: var(--void-space-4) calc(var(--void-container-padding) + 1.25rem + var(--void-space-2)) var(--void-space-4) var(--void-container-padding);
+  border-bottom: var(--void-rule-head);
   font-family: var(--void-type-heading-family);
   font-size: var(--void-type-heading-size);
   line-height: var(--void-type-heading-leading);
@@ -127,14 +118,52 @@ void-drawer[side="bottom"][size="lg"] .void-drawer-panel {
   color: var(--void-type-heading-color);
 }
 
-.void-drawer-close {
+void-drawer[closable="false"] void-drawer-title {
+  padding-inline-end: var(--void-container-padding);
+}
+
+/* A description joins the title's row: the hairline moves below it. */
+void-drawer-title:has(+ void-drawer-description) {
+  padding-bottom: var(--void-space-1);
+  border-bottom: none;
+}
+
+void-drawer-description {
+  display: block;
+  flex-shrink: 0;
+  padding: 0 var(--void-container-padding) var(--void-space-4);
+  border-bottom: var(--void-rule-head);
+  font-size: var(--void-type-body-size);
+  color: var(--void-color-text-secondary);
+}
+
+void-drawer-body {
+  display: block;
+  padding: var(--void-container-padding);
+  overflow-y: auto;
+  flex: 1;
+}
+
+void-drawer-actions {
+  display: flex;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+  justify-content: flex-end;
+  gap: var(--void-space-2);
+  padding: var(--void-space-4) var(--void-container-padding);
+  border-top: var(--void-rule-between);
+}
+
+void-drawer::part(close) {
+  position: absolute;
+  top: calc(var(--void-space-4) + (var(--void-type-heading-size) * var(--void-type-heading-leading) - 1.25rem) / 2);
+  inset-inline-end: var(--void-container-padding);
   display: inline-flex;
   align-items: center;
   justify-content: center;
   width: 1.25rem;
   height: 1.25rem;
   padding: 0;
-  margin-left: auto;
   border: none;
   border-radius: var(--void-radius-md);
   background: transparent;
@@ -143,21 +172,14 @@ void-drawer[side="bottom"][size="lg"] .void-drawer-panel {
   cursor: pointer;
   opacity: 0.6;
   transition: opacity var(--void-duration-normal) var(--void-ease-in-out);
-  flex-shrink: 0;
 }
 
-.void-drawer-close:hover {
+void-drawer::part(close):hover {
   opacity: 1;
 }
 
-.void-drawer-close:focus-visible {
+void-drawer::part(close):focus-visible {
   opacity: 1;
   outline: var(--void-focus-ring-width) solid currentColor;
   outline-offset: var(--void-focus-ring-offset);
-}
-
-.void-drawer-body {
-  padding: var(--void-container-padding);
-  overflow-y: auto;
-  flex: 1;
 }

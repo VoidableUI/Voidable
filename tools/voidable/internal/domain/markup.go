@@ -118,6 +118,16 @@ type Tag struct {
 	SelfClosing bool        `json:"selfClosing,omitempty"`
 	// Parent is the nearest enclosing `void-*` element, if any.
 	Parent string `json:"parent,omitempty"`
+	// ParentIndex is the index of that element among the tags the scanner
+	// returned for the same source, or -1.
+	ParentIndex int `json:"-"`
+	// Closed is true when the scanner found the element's end tag, so its
+	// children are all known.
+	Closed bool `json:"-"`
+	// Dynamic is true when the element's content holds template expressions
+	// (`{children}`, `<%= %>`, `@foreach`, `${...}`): parts may come from them,
+	// so missing parts are not reported.
+	Dynamic bool `json:"-"`
 
 	// Mention marks a tag written in backticks in prose or a doc string: it is
 	// named for the unknown-element check but is not markup.
@@ -147,6 +157,9 @@ type Content struct {
 	// Dynamic is true when something the scanner cannot evaluate may render
 	// content: an expression, a slot, a yielded block, a framework component.
 	Dynamic bool `json:"dynamic,omitempty"`
+	// Tags are the void-* elements written inside (their start tags), so a
+	// name rule can look for the part that names its owner.
+	Tags []string `json:"tags,omitempty"`
 }
 
 // Ancestor is an enclosing element and its attributes.

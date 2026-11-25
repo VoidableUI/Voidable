@@ -8,9 +8,10 @@ void-alert {
   --_void-tone-subtle: color-mix(in srgb, var(--_void-tone) var(--void-tone-tint), transparent);
   --_void-tone-border: color-mix(in srgb, var(--_void-tone) 36%, transparent);
 
+  position: relative;
   display: flex;
-  align-items: flex-start;
-  gap: var(--void-space-3);
+  flex-direction: column;
+  gap: var(--void-space-1);
   padding: var(--void-space-3) var(--void-container-padding);
   border: var(--void-alert-border-width, var(--void-container-border-width)) solid var(--void-alert-border, var(--_void-tone-border));
   border-radius: var(--void-alert-radius, var(--void-radius-md));
@@ -35,10 +36,26 @@ void-alert[color="success"] { --_void-tone: var(--void-color-success); }
 void-alert[color="info"]    { --_void-tone: var(--void-color-info); }
 void-alert[color="notice"]  { --_void-tone: var(--void-color-notice); }
 
-.void-alert-close {
-  order: 1;
-  margin-left: auto;
-  flex-shrink: 0;
+/* Parts (CSS-only): an optional title and the message. */
+void-alert-title {
+  display: block;
+  font-weight: var(--void-weight-medium);
+}
+
+void-alert-description {
+  display: block;
+}
+
+/* The close button of a dismissible alert lives in the alert's shadow root;
+   the text keeps clear of it. */
+void-alert[dismissible] {
+  padding-inline-end: calc(var(--void-container-padding) + 1.25rem + var(--void-space-3));
+}
+
+void-alert::part(close) {
+  position: absolute;
+  top: var(--void-space-3);
+  inset-inline-end: var(--void-container-padding);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -55,11 +72,11 @@ void-alert[color="notice"]  { --_void-tone: var(--void-color-notice); }
   transition: opacity var(--void-duration-fast) var(--void-ease-in-out);
 }
 
-.void-alert-close:hover {
+void-alert::part(close):hover {
   opacity: 1;
 }
 
-.void-alert-close:focus-visible {
+void-alert::part(close):focus-visible {
   opacity: 1;
   outline: var(--void-focus-ring-width) solid currentColor;
   outline-offset: var(--void-focus-ring-offset);

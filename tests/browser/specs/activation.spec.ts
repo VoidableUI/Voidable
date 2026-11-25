@@ -137,6 +137,39 @@ for (const [name, trigger, host] of [['dropdown-menu', 'dd-t', 'dd'], ['popover'
   });
 }
 
+// Hover cards and tooltips open on hover and focus, not on a click: the button inside
+// their trigger part still gets exactly one click and one void-click from each route,
+// and the overlay is open after the mouse is over it or the keyboard is on it.
+for (const [name, trigger, host] of [['hover-card', 'hc-t', 'hc'], ['tooltip', 'tip-t', 'tip']] as const) {
+  test.describe(`void-button as the trigger of a ${name}`, () => {
+    for (const route of routes) {
+      test(`${route}: one click, one void-click, and it is open`, async ({ page }) => {
+        await activate(page, trigger, route);
+        expect(await log(page)).toEqual([`click:${trigger}`, `void-click:${trigger}`]);
+        // A tooltip is dismissed by pressing its trigger, as a native one is: it is open after
+        // the keyboard is on it, not after a click.
+        if (name === 'tooltip' && route === 'mouse') return;
+        await expect.poll(() => isOpen(page, host)).toBe(true);
+        await page.keyboard.press('Escape');
+        await expect.poll(() => isOpen(page, host)).toBe(false);
+      });
+    }
+  });
+}
+
+test.describe('a dropdown item with a value activates once', () => {
+  for (const route of routes) {
+    test(`${route}: one click and one void-select`, async ({ page }) => {
+      await activate(page, 'dd-t', 'mouse');
+      await expect.poll(() => isOpen(page, 'dd')).toBe(true);
+      await clear(page);
+      await activate(page, 'dd-two', route);
+      await expect.poll(() => isOpen(page, 'dd')).toBe(false);
+      expect(await log(page)).toEqual(['click:dd-two', 'select:two']);
+    });
+  }
+});
+
 test('ArrowDown still opens the menu and focuses its first item', async ({ page }) => {
   await page.locator('#dd-t').focus();
   await page.keyboard.press('ArrowDown');

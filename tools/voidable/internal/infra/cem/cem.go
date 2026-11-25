@@ -38,12 +38,39 @@ type declaration struct {
 	VoidParents  []string          `json:"voidParents"`
 	VoidRequires []string          `json:"voidRequires"`
 	VoidHints    map[string]string `json:"voidHints"`
+	VoidParts    *partsJSON        `json:"voidParts"`
 	VoidName     *nameRule         `json:"voidName"`
+}
+
+// partsJSON is voidParts as the manifest build writes it (packages/ui/cem/plugins.js).
+type partsJSON struct {
+	Children    string         `json:"children"`
+	Ordered     bool           `json:"ordered"`
+	Transparent []string       `json:"transparent"`
+	Skeleton    string         `json:"skeleton"`
+	Legacy      *domain.Legacy `json:"legacy"`
+	Parts       []partJSON     `json:"parts"`
+}
+
+type partJSON struct {
+	Tag         string         `json:"tag"`
+	Description string         `json:"description"`
+	Required    bool           `json:"required"`
+	Max         int            `json:"max"`
+	CSSOnly     bool           `json:"cssOnly"`
+	Control     bool           `json:"control"`
+	Children    string         `json:"children"`
+	Ordered     bool           `json:"ordered"`
+	Transparent []string       `json:"transparent"`
+	Legacy      *domain.Legacy `json:"legacy"`
+	Attributes  []attribute    `json:"attributes"`
+	Parts       []partJSON     `json:"parts"`
 }
 
 type nameRule struct {
 	Attributes []string `json:"attributes"`
 	Content    bool     `json:"content"`
+	Parts      []string `json:"parts"`
 	Ancestors  []struct {
 		Tag        string   `json:"tag"`
 		Attributes []string `json:"attributes"`
@@ -106,12 +133,27 @@ func Decode(manifestJSON, summaryJSON []byte) (*domain.Catalog, error) {
 		version = s.Version
 	}
 	var els []domain.Element
+	// Parts that are registered elements get their own parts from the tree.
+	own := map[string]*domain.Parts{}
 	for _, mod := range m.Modules {
 		for _, d := range mod.Declarations {
 			if !d.CustomElement || d.TagName == "" {
 				continue
 			}
-			els = append(els, element(mod.Path, d))
+			e := element(mod.Path, d)
+			if d.VoidParts != nil {
+				e.Parts = convertParts(d.VoidParts.Children, d.VoidParts.Ordered, d.VoidParts.Transparent, d.VoidParts.Legacy, d.VoidParts.Skeleton, d.VoidParts.Parts)
+				if d.VoidParts.Legacy != nil {
+					e.Removed = d.VoidParts.Legacy.Tags
+				}
+				els = append(els, partElements(mod.Path, d.TagName, d.VoidParts.Skeleton, d.VoidParts.Parts, own)...)
+			}
+			els = append(els, e)
+		}
+	}
+	for i := range els {
+		if p, ok := own[els[i].Tag]; ok && !els[i].CSSOnly {
+			els[i].Parts = p
 		}
 	}
 	if len(els) == 0 {
@@ -124,7 +166,7 @@ func element(path string, d declaration) domain.Element {
 	e := domain.Element{Tag: d.TagName, Class: d.Name, Module: path, Description: d.Description}
 	e.AllowedParents, e.RequiredChildren, e.AttrHints = d.VoidParents, d.VoidRequires, d.VoidHints
 	if n := d.VoidName; n != nil {
-		e.Name = &domain.NameRule{Attributes: n.Attributes, Content: n.Content, Hint: n.Hint}
+		e.Name = &domain.NameRule{Attributes: n.Attributes, Content: n.Content, Parts: n.Parts, Hint: n.Hint}
 		for _, a := range n.Ancestors {
 			e.Name.Ancestors = append(e.Name.Ancestors, domain.NameAncestor{Tag: a.Tag, Attributes: a.Attributes})
 		}
@@ -160,3 +202,43 @@ func element(path string, d declaration) domain.Element {
 // reference shows one line per attribute. Paragraph breaks are kept as a
 // single space too: these descriptions are sentences, not documents.
 func oneLine(s string) string { return strings.Join(strings.Fields(s), " ") }
+
+func convertParts(children string, ordered bool, transparent []string, legacy *domain.Legacy, skeleton string, list []partJSON) *domain.Parts {
+	if children == "" {
+		children = "any"
+	}
+	p := &domain.Parts{Children: children, Ordered: ordered, Transparent: transparent, Skeleton: skeleton, Legacy: legacy}
+	for _, x := range list {
+		part := domain.Part{Tag: x.Tag, Description: oneLine(x.Description), Required: x.Required, Max: x.Max, CSSOnly: x.CSSOnly, Control: x.Control}
+		if len(x.Parts) > 0 {
+			part.Own = convertParts(x.Children, x.Ordered, x.Transparent, x.Legacy, skeleton, x.Parts)
+		}
+		p.Parts = append(p.Parts, part)
+	}
+	return p
+}
+
+// partElements returns a catalog element for every CSS-only part under owner
+// (they are not declarations of their own), and records the own parts of
+// every part in own.
+func partElements(path, owner, skeleton string, list []partJSON, own map[string]*domain.Parts) []domain.Element {
+	var out []domain.Element
+	for _, x := range list {
+		var sub *domain.Parts
+		if len(x.Parts) > 0 {
+			sub = convertParts(x.Children, x.Ordered, x.Transparent, x.Legacy, skeleton, x.Parts)
+			own[x.Tag] = sub
+			out = append(out, partElements(path, x.Tag, skeleton, x.Parts, own)...)
+		}
+		if !x.CSSOnly {
+			continue
+		}
+		e := domain.Element{Tag: x.Tag, Module: path, Description: oneLine(x.Description), CSSOnly: true, PartOf: owner, AllowedParents: []string{owner}, Parts: sub}
+		for _, a := range x.Attributes {
+			kind, values, nullable := domain.ParseType(a.Type.Text)
+			e.Attributes = append(e.Attributes, domain.Attribute{Name: a.Name, Type: a.Type.Text, Kind: kind, Values: values, Nullable: nullable, Description: oneLine(a.Description)})
+		}
+		out = append(out, e)
+	}
+	return out
+}

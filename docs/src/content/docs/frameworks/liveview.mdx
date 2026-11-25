@@ -31,7 +31,7 @@ end`} />
 
 ## Use LiveView's own bindings
 
-Components are plain elements to LiveView, so its bindings work on them: `phx-click` on a `void-button`, `void-tag`, `void-card`, a dropdown or menu item, or a `void-tab-panel` (a click on its tab counts); `phx-change` and `phx-submit` on the `<form>` around the controls, which all submit under their `name` (a `void-button type="submit"` submits the form). Start there:
+Components are plain elements to LiveView, so its bindings work on them: `phx-click` on a `void-button`, `void-tag`, `void-card`, a dropdown or menu item, or a `void-tabs-trigger`; `phx-change` and `phx-submit` on the `<form>` around the controls, which all submit under their `name` (a `void-button type="submit"` submits the form). Start there:
 
 ```heex
 <form phx-change="validate" phx-submit="save">
@@ -57,14 +57,14 @@ let liveSocket = new LiveSocket('/live', Socket, {
 The hook listens for the Voidable events named in `data-void-events` and forwards each to the server with `pushEvent`, after the browser has finished handling it, so a `phx-click` on the same element still runs first. With the `live_voidable` components (`import VoidableUI.Components`), opt in per element with `events`: `events` bridges all of the component's events, `events={["void-close"]}` only those. Without it no hook is attached:
 
 ```heex
-<.dialog id="confirm" heading="Delete?" events={["void-close"]}>…</.dialog>
+<.dialog id="confirm" events={["void-close"]}><void-dialog-title>Delete?</void-dialog-title>…</.dialog>
 <.combobox name="city" events={["void-select"]}>…</.combobox>
 ```
 
 On plain tags, attach the hook yourself (it needs an id):
 
 ```heex
-<void-dialog id="confirm" heading="Delete?" phx-hook="VoidEvent" data-void-events="void-close">…</void-dialog>
+<void-dialog id="confirm" phx-hook="VoidEvent" data-void-events="void-close"><void-dialog-title>Delete?</void-dialog-title>…</void-dialog>
 ```
 
 You do not need `phx-update="ignore"`: see [DOM preservation](#dom-preservation).

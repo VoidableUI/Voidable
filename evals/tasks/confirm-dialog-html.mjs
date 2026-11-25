@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: MIT
 import { ok } from '../lib/expect.mjs';
 
+// The role="dialog" element of void-dialog and void-drawer is the native <dialog> in the host's shadow root; the author's parts are slotted into it, not its DOM descendants, so the content is scoped by the open host (evals/CONTRACT.md).
+const PANEL = (t) => t.page.locator('void-dialog[open], void-drawer[open], dialog[open], [role="dialog"]');
+
 export default {
   id: 'confirm-dialog-html',
   title: 'Confirm dialog flow',
@@ -47,7 +50,7 @@ export default {
         await t.click('button', /delete project/i);
         const dialog = t.role('dialog', { name: /delete apollo/i });
         await t.visible(dialog, 'dialog');
-        await dialog.first().getByRole('button', { name: /^delete$/i }).click();
+        await PANEL(t).getByRole('button', { name: /^delete$/i }).first().click();
         await t.settle();
         await t.hidden(dialog, 'dialog after Delete');
         await t.visible(t.text(/project deleted/i), 'text "Project deleted"');

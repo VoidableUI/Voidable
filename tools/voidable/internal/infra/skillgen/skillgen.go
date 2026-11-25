@@ -193,7 +193,7 @@ func (b *Builder) wrongUsages(cat *domain.Catalog) string {
 			}
 			sort.Strings(names)
 			for _, n := range names {
-				fmt.Fprintf(&buf, "| `<%s>` | `%s` | %s |\n", tag, n, strings.ReplaceAll(attrs[n], "|", `\|`))
+				fmt.Fprintf(&buf, "| `<%s>` | `%s` | %s |\n", tag, n, strings.ReplaceAll(strings.ReplaceAll(attrs[n], "|", `\|`), "<", "&lt;"))
 			}
 		}
 	}

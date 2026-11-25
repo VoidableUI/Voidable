@@ -48,7 +48,7 @@ for (const engine of ENGINES) {
         const act = v % 5;
         if (act === 0) await page.locator('#t [role=tab]').last().click();
         if (act === 1) await page.locator('#s select').selectOption({ index: 1 });
-        if (act === 2) await page.locator('#dd button[slot=trigger]').click();
+        if (act === 2) await page.locator('#dd void-dropdown-menu-trigger button').click();
         if (act === 3) await page.locator('#cg void-checkbox').first().click();
         if (act === 4) await page.locator('#rg void-radio').nth(1).click();
         await settle(page);
@@ -187,7 +187,7 @@ test.describe('snapshot restore', () => {
       const before = await signature(page, 'root');
       await restore(page, how);
       expect(await signature(page, 'root')).toEqual(before);
-      expect(await page.locator('#root #d .void-dialog-close').count()).toBe(1);
+      expect(await page.locator('#root #d [part="close"]').count()).toBe(1);
     });
 
     test(`${how}: every component restores without duplicating its content`, async ({ page }) => {

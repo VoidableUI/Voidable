@@ -28,6 +28,12 @@
 //    The same plugin writes `voidParents`, `voidRequires` and `voidHints` onto
 //    declarations (allowed ancestors, required children, advice for guessed
 //    attributes); the `voidable` tool and the dev-mode runtime warnings read them.
+//    It also writes `voidParts` (the explicit parts of a component, #52: which
+//    part elements it takes, which are required, how many, in which order,
+//    which are CSS-only and their attributes, the one-line correct markup and
+//    the implicit forms they replaced); everything downstream that knows about
+//    parts (typings, React wrappers, dev warnings, voidable check, docs) reads
+//    it from there.
 //
 // 3b. hostAttributesPlugin: attributes a component sets on its own host with
 //    `setHostAttribute('name', ...)` that are not role, tabindex or aria-*
@@ -41,7 +47,17 @@
 //    underscore/#-prefixed, computed-key and DOM/Lit lifecycle-override members
 //    are removed.
 
-import { accessibleName, allowedParents, ancestorEvents, parentSetAttributes, attributeHints, extraAttributes, eventDetails, requiredChildren } from './supplement.js';
+import {
+  accessibleName,
+  allowedParents,
+  ancestorEvents,
+  parentSetAttributes,
+  attributeHints,
+  extraAttributes,
+  eventDetails,
+  parts,
+  requiredChildren,
+} from './supplement.js';
 
 /** @typedef {import('typescript')} TS */
 
@@ -468,6 +484,11 @@ export function manifestSupplementPlugin() {
             throw new Error(`cem/supplement.js: accessibleName for <${tag}> lists "${name}", which is not an attribute of it`);
           }
         }
+        for (const part of rule.parts ?? []) {
+          // A part of this component (supplement.js `parts`), written before the entry is checked.
+          const owned = parts[tag]?.parts?.some((p) => p.tag === part);
+          if (!owned) throw new Error(`cem/supplement.js: accessibleName for <${tag}> lists part <${part}>, which is not one of its parts`);
+        }
         for (const anc of rule.ancestors ?? []) {
           if (anc.tag !== 'label') get(anc.tag, 'accessibleName');
           const ancDecl = anc.tag === 'label' ? undefined : byTag.get(anc.tag);
@@ -489,6 +510,8 @@ export function manifestSupplementPlugin() {
         decl.voidHints = hints;
       }
 
+      writeParts(byTag, get);
+
       for (const [tag, events] of Object.entries(eventDetails)) {
         const decl = get(tag);
         for (const [name, detail] of Object.entries(events)) {
@@ -502,6 +525,75 @@ export function manifestSupplementPlugin() {
       }
     },
   };
+}
+
+/**
+ * `voidParts` on every component of supplement.js's `parts`: the normalised
+ * part tree, with `cssOnly` set for parts no class registers. Registered parts
+ * get `voidParents` (their enclosing component or part); legacy attributes
+ * become `voidHints` of the tag they were on. Fails on a third level of parts,
+ * a part listed twice, a CSS-only part that declares no description, or advice
+ * for an attribute that still exists.
+ */
+function writeParts(byTag, get) {
+  const seen = new Set();
+  const addHints = (tag, hints) => {
+    const decl = get(tag, 'parts.legacy');
+    for (const name of Object.keys(hints)) {
+      if (decl.attributes?.some((a) => a.name === name)) {
+        throw new Error(`cem/supplement.js parts: <${tag}> still has attribute "${name}"; remove the legacy advice`);
+      }
+    }
+    decl.voidHints = { ...(decl.voidHints ?? {}), ...hints };
+  };
+  const normalise = (owner, part, depth) => {
+    if (depth > 2) throw new Error(`cem/supplement.js parts: <${part.tag}> is a third level of parts under <${owner}>; split the component`);
+    if (!/^void-[a-z0-9-]+$/.test(part.tag)) throw new Error(`cem/supplement.js parts: bad tag ${part.tag}`);
+    if (seen.has(part.tag)) throw new Error(`cem/supplement.js parts: <${part.tag}> is listed twice`);
+    seen.add(part.tag);
+    if (!part.description) throw new Error(`cem/supplement.js parts: <${part.tag}> has no description`);
+    const cssOnly = !byTag.has(part.tag);
+    if (!cssOnly) {
+      const decl = byTag.get(part.tag);
+      decl.voidParents = [...new Set([...(decl.voidParents ?? []), owner])];
+      if (part.attributes) throw new Error(`cem/supplement.js parts: <${part.tag}> is registered; its attributes come from its class`);
+    }
+    if (part.legacy?.attributes) {
+      if (cssOnly) throw new Error(`cem/supplement.js parts: legacy attributes on CSS-only <${part.tag}>`);
+      addHints(part.tag, part.legacy.attributes);
+    }
+    const out = {
+      tag: part.tag,
+      description: part.description,
+      cssOnly,
+      ...(part.required ? { required: true } : {}),
+      ...(part.max ? { max: part.max } : {}),
+      ...(part.control ? { control: true } : {}),
+      ...(part.children ? { children: part.children } : {}),
+      ...(part.ordered ? { ordered: true } : {}),
+      ...(part.transparent ? { transparent: part.transparent } : {}),
+      ...(part.legacy ? { legacy: part.legacy } : {}),
+      ...(cssOnly ? { attributes: (part.attributes ?? []).map((a) => ({ name: a.name, type: { text: a.type }, description: a.description })) } : {}),
+    };
+    if (part.parts) out.parts = part.parts.map((child) => normalise(part.tag, child, depth + 1));
+    return out;
+  };
+  for (const [tag, spec] of Object.entries(parts)) {
+    const decl = get(tag, 'parts');
+    if (!spec.skeleton?.startsWith(`<${tag}`)) throw new Error(`cem/supplement.js parts: <${tag}> needs a skeleton that starts with <${tag}>`);
+    if (spec.legacy?.attributes) addHints(tag, spec.legacy.attributes);
+    decl.voidParts = {
+      children: spec.children ?? 'any',
+      ...(spec.ordered ? { ordered: true } : {}),
+      ...(spec.transparent ? { transparent: spec.transparent } : {}),
+      skeleton: spec.skeleton,
+      ...(spec.legacy ? { legacy: spec.legacy } : {}),
+      parts: spec.parts.map((part) => normalise(tag, part, 1)),
+    };
+    for (const removed of Object.keys(spec.legacy?.tags ?? {})) {
+      if (byTag.has(removed)) throw new Error(`cem/supplement.js parts: legacy tag <${removed}> is still registered`);
+    }
+  }
 }
 
 const HOST_ATTR_SKIP = /^(role|tabindex|aria-.*)$/;

@@ -3,15 +3,27 @@
   <button id="before">before</button>
 
   <void-dropdown-menu id="dd">
-    <void-button slot="trigger" id="dd-t">Open menu</void-button>
-    <void-dropdown-menu-item id="dd-one">One</void-dropdown-menu-item>
-    <void-dropdown-menu-item id="dd-two">Two</void-dropdown-menu-item>
+    <void-dropdown-menu-trigger><void-button id="dd-t">Open menu</void-button></void-dropdown-menu-trigger>
+    <void-dropdown-menu-content>
+      <void-dropdown-menu-item id="dd-one" value="one">One</void-dropdown-menu-item>
+      <void-dropdown-menu-item id="dd-two" value="two">Two</void-dropdown-menu-item>
+    </void-dropdown-menu-content>
   </void-dropdown-menu>
 
   <void-popover id="pop">
-    <void-button slot="trigger" id="pop-t">Open popover</void-button>
-    <div style="width: 200px">Popover content</div>
+    <void-popover-trigger><void-button id="pop-t">Open popover</void-button></void-popover-trigger>
+    <void-popover-content><div style="width: 200px">Popover content</div></void-popover-content>
   </void-popover>
+
+  <void-hover-card id="hc">
+    <void-hover-card-trigger><void-button id="hc-t">Hover card</void-button></void-hover-card-trigger>
+    <void-hover-card-content>Hover card content</void-hover-card-content>
+  </void-hover-card>
+
+  <void-tooltip id="tip">
+    <void-tooltip-trigger><void-button id="tip-t">Tooltip</void-button></void-tooltip-trigger>
+    <void-tooltip-content>Tooltip text</void-tooltip-content>
+  </void-tooltip>
 
   <void-button id="plain">Plain</void-button>
   <void-button id="off" disabled>Off</void-button>
@@ -34,11 +46,12 @@
 <script>
   window.submits = 0;
   window.log = [];
-  for (const id of ['plain', 'off', 'aria-off', 'link', 'submit', 'reset', 'submit-off', 'dd-t', 'pop-t', 'tgl', 'sw', 'ham', 'cb', 'dd-one']) {
+  for (const id of ['plain', 'off', 'aria-off', 'link', 'submit', 'reset', 'submit-off', 'dd-t', 'pop-t', 'hc-t', 'tip-t', 'tgl', 'sw', 'ham', 'cb', 'dd-one', 'dd-two']) {
     const el = document.getElementById(id);
     el.addEventListener('click', () => window.log.push('click:' + id));
     el.addEventListener('void-click', () => window.log.push('void-click:' + id));
   }
+  document.getElementById('dd').addEventListener('void-select', (e) => window.log.push('select:' + e.detail.value));
   // Set after upgrade: the button manages aria-disabled for its own disabled state, an author's later value stands.
   customElements.whenDefined('void-button').then(() => requestAnimationFrame(() => document.getElementById('aria-off').setAttribute('aria-disabled', 'true')));
   document.getElementById('link-a').addEventListener('click', (e) => e.preventDefault());

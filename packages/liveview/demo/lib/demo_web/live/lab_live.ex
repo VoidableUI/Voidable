@@ -224,20 +224,31 @@ defmodule DemoWeb.LabLive do
         <button id="close-dlg-later" type="button" phx-click="close_dialog_later">Close dialog in 400 ms</button>
         <span id="dialog-state">Server thinks the dialog is {if @dialog_open, do: "open", else: "closed"}</span>
       </section>
-      <V.dialog id="dlg" open={@dialog_open} heading="Server dialog" events={["void-close"]}>
-        <p id="dlg-body">Dialog body, ticks {@ticks}</p>
-        <button id="dlg-bump" type="button" phx-click="bump">Bump from inside</button>
+      <V.dialog id="dlg" open={@dialog_open} events={["void-close"]}>
+        <void-dialog-title>Server dialog</void-dialog-title>
+        <void-dialog-body>
+          <p id="dlg-body">Dialog body, ticks {@ticks}</p>
+        </void-dialog-body>
+        <void-dialog-actions>
+          <button id="dlg-bump" type="button" phx-click="bump">Bump from inside</button>
+        </void-dialog-actions>
       </V.dialog>
 
       <section style="display: flex; gap: 2rem; align-items: flex-start; flex-wrap: wrap">
         <V.dropdown_menu id="dd">
-          <button slot="trigger" id="dd-trigger" type="button">Actions {@ticks}</button>
-          <V.dropdown_menu_item>Rename</V.dropdown_menu_item>
-          <V.dropdown_menu_item>Archive</V.dropdown_menu_item>
+          <void-dropdown-menu-trigger><button id="dd-trigger" type="button">Actions {@ticks}</button></void-dropdown-menu-trigger>
+          <void-dropdown-menu-content>
+            <V.dropdown_menu_item>Rename</V.dropdown_menu_item>
+            <V.dropdown_menu_item>Archive</V.dropdown_menu_item>
+          </void-dropdown-menu-content>
         </V.dropdown_menu>
         <V.tabs id="tabs" value={@tab}>
-          <V.tab_panel tab="one" label="One">Panel one, version {@v}</V.tab_panel>
-          <V.tab_panel tab="two" label="Two">Panel two, ticks {@ticks}</V.tab_panel>
+          <void-tabs-list>
+            <void-tabs-trigger value="one">One</void-tabs-trigger>
+            <void-tabs-trigger value="two">Two</void-tabs-trigger>
+          </void-tabs-list>
+          <void-tabs-content value="one">Panel one, version {@v}</void-tabs-content>
+          <void-tabs-content value="two">Panel two, ticks {@ticks}</void-tabs-content>
         </V.tabs>
         <button id="server-tab" type="button" phx-click="server_tab" phx-value-tab="two">Server selects tab two</button>
       </section>

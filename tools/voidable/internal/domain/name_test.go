@@ -15,8 +15,11 @@ func nameLibrary(t *testing.T) *Library {
 		{Tag: "void-button", Class: "VoidButton", Name: &NameRule{Attributes: aria, Content: true, Hint: "an icon-only button needs an aria-label"}},
 		{Tag: "void-input", Class: "VoidInput", Attributes: []Attribute{attr("placeholder", "string", "")},
 			Name: &NameRule{Attributes: aria, Ancestors: field, Hint: "wrap it in a field"}},
-		{Tag: "void-dialog", Class: "VoidDialog", Attributes: []Attribute{attr("heading", "string", "")},
-			Name: &NameRule{Attributes: append([]string{"heading"}, aria...), Hint: "give it a heading"}},
+		// Named by its title part (explicit parts, #52), not by an attribute.
+		{Tag: "void-dialog", Class: "VoidDialog",
+			Name: &NameRule{Attributes: aria, Parts: []string{"void-dialog-title"}, Hint: "write its title as <void-dialog-title>"}},
+		{Tag: "void-drawer", Class: "VoidDrawer",
+			Name: &NameRule{Attributes: aria, Parts: []string{"void-drawer-title"}, Hint: "write its title as <void-drawer-title>"}},
 		{Tag: "void-field", Class: "VoidField", Attributes: []Attribute{attr("label", "string", "")}},
 		{Tag: "void-badge", Class: "VoidBadge"},
 	})
@@ -64,7 +67,12 @@ func TestCheckName(t *testing.T) {
 		{"input in a label", Tag{Name: "void-input", Lang: LangHTML, Labelled: true, Ancestors: []Ancestor{{Name: "label"}}}, false},
 		{"input named by a label for", Tag{Name: "void-input", Lang: LangHTML, Labelled: true}, false},
 		{"input inside a framework component", Tag{Name: "void-input", Lang: LangJSX, InComponent: true}, false},
-		{"dialog heading", Tag{Name: "void-dialog", Lang: LangHTML, Attrs: []AttrToken{a("heading", "Edit", SyntaxAttr)}}, false},
+		{"dialog title part", Tag{Name: "void-dialog", Lang: LangHTML, Content: Content{Known: true, Tags: []string{"void-dialog-title", "void-dialog-body"}}}, false},
+		{"drawer title part", Tag{Name: "void-drawer", Lang: LangHTML, Content: Content{Known: true, Tags: []string{"void-drawer-title"}}}, false},
+		{"dialog with generated content", Tag{Name: "void-dialog", Lang: LangJSX, Content: Content{Known: true, Dynamic: true}}, false},
+		{"dialog with unknown content", Tag{Name: "void-dialog", Lang: LangHTML}, false},
+		{"icon-only button in a trigger part, named", Tag{Name: "void-button", Lang: LangHTML, Content: empty, Ancestors: []Ancestor{{Name: "void-popover-trigger"}}, Attrs: []AttrToken{a("aria-label", "More", SyntaxAttr)}}, false},
+		{"button with text in a trigger part", Tag{Name: "void-button", Lang: LangHTML, Content: text, Ancestors: []Ancestor{{Name: "void-dropdown-menu-trigger"}}}, false},
 		{"dialog aria-label", Tag{Name: "void-dialog", Lang: LangHTML, Attrs: []AttrToken{a("aria-label", "Edit", SyntaxAttr)}}, false},
 		{"a mention in prose", Tag{Name: "void-button", Lang: LangMarkdown, Mention: true, Content: empty}, false},
 		{"a tag that needs no name", Tag{Name: "void-badge", Lang: LangHTML, Content: empty}, false},
@@ -78,7 +86,13 @@ func TestCheckName(t *testing.T) {
 		{"input with only a placeholder", Tag{Name: "void-input", Lang: LangHTML, Attrs: []AttrToken{a("placeholder", "Email", SyntaxAttr)}}, true},
 		{"input in a field with no label", Tag{Name: "void-input", Lang: LangHTML, Ancestors: []Ancestor{field()}}, true},
 		{"input in another element", Tag{Name: "void-input", Lang: LangHTML, Ancestors: []Ancestor{{Name: "void-badge"}}}, true},
-		{"dialog on its own", Tag{Name: "void-dialog", Lang: LangHTML}, true},
+		{"dialog with no title part", Tag{Name: "void-dialog", Lang: LangHTML, Content: Content{Known: true}}, true},
+		{"dialog with other parts only", Tag{Name: "void-dialog", Lang: LangHTML, Content: Content{Known: true, Tags: []string{"void-dialog-body", "void-dialog-actions"}}}, true},
+		{"the old heading attribute names nothing", Tag{Name: "void-dialog", Lang: LangHTML, Content: Content{Known: true}, Attrs: []AttrToken{a("heading", "Edit", SyntaxAttr)}}, true},
+		{"drawer with no title part", Tag{Name: "void-drawer", Lang: LangHTML, Content: Content{Known: true, Tags: []string{"void-dialog-title"}}}, true},
+		{"another component's title does not name it", Tag{Name: "void-drawer", Lang: LangHTML, Content: Content{Known: true, Tags: []string{"void-card-title"}}}, true},
+		{"icon-only button in a trigger part", Tag{Name: "void-button", Lang: LangHTML, Content: empty, Ancestors: []Ancestor{{Name: "void-popover-trigger"}}}, true},
+		{"icon-only button in a tooltip trigger", Tag{Name: "void-button", Lang: LangHTML, Content: empty, Ancestors: []Ancestor{{Name: "void-tooltip-trigger"}}}, true},
 		{"event handler is not a name", Tag{Name: "void-button", Lang: LangHTML, Content: empty, Attrs: []AttrToken{a("aria-label", "x", SyntaxEvent)}}, true},
 	}
 	lib := nameLibrary(t)
@@ -124,7 +138,8 @@ func TestNameMessageSaysHowToFixIt(t *testing.T) {
 	for tag, want := range map[string][]string{
 		"void-button": {"aria-label", "text inside it", "an icon-only button needs an aria-label"},
 		"void-input":  {`an enclosing <void-field label="...">`, "an enclosing <label>", "wrap it in a field"},
-		"void-dialog": {"a heading attribute", "give it a heading"},
+		"void-dialog": {"a <void-dialog-title> part", "aria-label", "write its title as <void-dialog-title>"},
+		"void-drawer": {"a <void-drawer-title> part", "write its title as <void-drawer-title>"},
 	} {
 		f := find(tag)
 		for _, w := range want {
@@ -133,7 +148,7 @@ func TestNameMessageSaysHowToFixIt(t *testing.T) {
 			}
 		}
 	}
-	if s := find("void-dialog").Suggestion; s != `heading="..."` {
+	if s := find("void-dialog").Suggestion; s != `aria-label="..."` {
 		t.Errorf("dialog suggestion = %q", s)
 	}
 	if s := find("void-button").Suggestion; s != `aria-label="..."` {

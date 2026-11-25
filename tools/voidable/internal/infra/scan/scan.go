@@ -10,6 +10,7 @@ import (
 	"bytes"
 	"context"
 	"regexp"
+	"slices"
 	"sort"
 	"strings"
 
@@ -34,16 +35,18 @@ func (Scanner) Scan(_ context.Context, src []byte, lang domain.Lang) ([]domain.T
 	if lang == domain.LangMarkdown {
 		regions = fences(src)
 	}
-	var tags []domain.Tag
 	for _, r := range regions {
-		tags = append(tags, s.scanRegion(r)...)
+		s.done = append(s.done, s.scanRegion(r)...)
 	}
-	return tags, nil
+	return s.done, nil
 }
 
 type state struct {
 	src   []byte
 	lines []int
+	// done holds the tags of earlier regions, so ParentIndex indexes the
+	// whole result.
+	done []domain.Tag
 }
 
 func lineStarts(src []byte) []int {
@@ -151,6 +154,7 @@ func (s *state) scanRegion(r region) []domain.Tag {
 	var tags []domain.Tag
 	var stack []frame
 	labelFor := map[string]bool{}
+	base := len(s.done)
 	for i := r.start; i < r.end; i++ {
 		if end := skipComment(src, i); end > i {
 			i = end - 1
@@ -165,6 +169,8 @@ func (s *state) scanRegion(r region) []domain.Tag {
 			var ok bool
 			if stack, f, ok = closeFrame(stack, kindVoid, name); ok {
 				tags[f.tag].Content = s.analyzeContent(src, f.start, i, r.lang)
+				tags[f.tag].Closed = true
+				tags[f.tag].Dynamic = dynamicContent(src[f.start:i])
 			}
 			continue
 		}
@@ -208,6 +214,7 @@ func (s *state) scanRegion(r region) []domain.Tag {
 			continue
 		}
 		t, next := s.parseTag(src, i, name, r.lang)
+		t.ParentIndex = -1
 		// `<void-x>` in backticks is a mention in prose or a doc string,
 		// not markup: check the name but do not track nesting.
 		if i > 0 && src[i-1] == '`' && next < len(src) && src[next] == '`' && len(t.Attrs) == 0 ||
@@ -220,6 +227,7 @@ func (s *state) scanRegion(r region) []domain.Tag {
 		for k := len(stack) - 1; k >= 0; k-- {
 			if stack[k].kind == kindVoid {
 				t.Parent = stack[k].name
+				t.ParentIndex = base + stack[k].tag
 				break
 			}
 		}
@@ -253,6 +261,24 @@ func (s *state) scanRegion(r region) []domain.Tag {
 	return tags
 }
 
+// dynamicMarkers start template expressions or directives that can produce
+// elements the scanner cannot see.
+var dynamicMarkers = [][]byte{
+	[]byte("{"), []byte("<%"), []byte("<?"), []byte("@foreach"), []byte("@for("), []byte("@each"), []byte("@if"),
+	[]byte("@include"), []byte("@yield"), []byte("<slot"), []byte("<x-slot"), []byte(":for="), []byte("v-for"),
+	[]byte("v-if"), []byte("x-for"), []byte("<template"), []byte("<."), []byte("<x-"), []byte("<%="),
+}
+
+// dynamicContent reports whether element content holds a template expression.
+func dynamicContent(b []byte) bool {
+	for _, m := range dynamicMarkers {
+		if bytes.Contains(b, m) {
+			return true
+		}
+	}
+	return false
+}
+
 // analyzeContent summarises src[from:to], the children of a tag, without
 // parsing them: whether there is static text or something that carries a
 // name, and whether anything it cannot evaluate may render content.
@@ -276,6 +302,9 @@ func (s *state) analyzeContent(src []byte, from, to int, lang domain.Lang) domai
 			name := readTagName(b, i+1)
 			if componentNameIn(b, i+1, lang) != "" || name == "slot" {
 				c.Dynamic = true
+			}
+			if strings.HasPrefix(name, "void-") && !slices.Contains(c.Tags, name) {
+				c.Tags = append(c.Tags, name)
 			}
 			t, next := s.parseTag(b, i, name, lang)
 			for _, a := range t.Attrs {

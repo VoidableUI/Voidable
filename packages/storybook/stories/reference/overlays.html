@@ -12,24 +12,29 @@
         <void-button id="ov-drawer-trigger" onclick="document.getElementById('ov-drawer').open = true">Open drawer</void-button>
 
         <void-popover id="ov-popover">
-          <void-button slot="trigger" id="ov-popover-trigger">Popover</void-button>
-          <void-stack style="width: 16rem">
-            <strong>Pass window</strong>
-            <span>Tracking starts at 14:02 UTC and ends at 14:12 UTC.</span>
-            <void-button size="sm">Open pass</void-button>
-          </void-stack>
+          <void-popover-trigger><void-button id="ov-popover-trigger">Popover</void-button></void-popover-trigger>
+          <void-popover-content>
+            <void-stack style="width: 16rem">
+              <strong>Pass window</strong>
+              <span>Tracking starts at 14:02 UTC and ends at 14:12 UTC.</span>
+              <void-button size="sm">Open pass</void-button>
+            </void-stack>
+          </void-popover-content>
         </void-popover>
 
         <void-dropdown-menu id="ov-menu">
-          <void-button slot="trigger" id="ov-menu-trigger">Actions</void-button>
-          <void-dropdown-menu-item>Edit</void-dropdown-menu-item>
-          <void-dropdown-menu-item>Duplicate</void-dropdown-menu-item>
-          <void-dropdown-menu-item disabled>Archive</void-dropdown-menu-item>
-          <void-dropdown-menu-item destructive>Delete</void-dropdown-menu-item>
+          <void-dropdown-menu-trigger><void-button id="ov-menu-trigger">Actions</void-button></void-dropdown-menu-trigger>
+          <void-dropdown-menu-content>
+            <void-dropdown-menu-item>Edit</void-dropdown-menu-item>
+            <void-dropdown-menu-item>Duplicate</void-dropdown-menu-item>
+            <void-dropdown-menu-item disabled>Archive</void-dropdown-menu-item>
+            <void-dropdown-menu-item destructive>Delete</void-dropdown-menu-item>
+          </void-dropdown-menu-content>
         </void-dropdown-menu>
 
-        <void-tooltip id="ov-tooltip" text="Recalculates the pass table" position="bottom">
-          <void-button id="ov-tooltip-target">Recalculate</void-button>
+        <void-tooltip id="ov-tooltip" position="bottom">
+          <void-tooltip-trigger><void-button id="ov-tooltip-target">Recalculate</void-button></void-tooltip-trigger>
+          <void-tooltip-content>Recalculates the pass table</void-tooltip-content>
         </void-tooltip>
       </void-toolbar>
     </void-section>
@@ -64,23 +69,29 @@
     </void-section>
   </void-page>
 
-  <void-dialog id="ov-dialog" heading="Schedule pass">
-    <p>Assign MRD-0412 to Kiruna 3 for the next available window?</p>
-    <void-field label="Note"><void-input value="Priority downlink"></void-input></void-field>
-    <void-actions justify="end">
+  <void-dialog id="ov-dialog">
+    <void-dialog-title>Schedule pass</void-dialog-title>
+    <void-dialog-body>
+      <p>Assign MRD-0412 to Kiruna 3 for the next available window?</p>
+      <void-field label="Note"><void-input value="Priority downlink"></void-input></void-field>
+    </void-dialog-body>
+    <void-dialog-actions>
       <void-button variant="ghost">Cancel</void-button>
       <void-button variant="filled">Schedule</void-button>
-    </void-actions>
+    </void-dialog-actions>
   </void-dialog>
 
-  <void-drawer id="ov-drawer" heading="Pass details">
-    <void-description-list>
-      <dl>
-        <div><dt>Satellite</dt><dd>MRD-0412</dd></div>
-        <div><dt>Station</dt><dd>Kiruna 3</dd></div>
-        <div><dt>Band</dt><dd>X</dd></div>
-        <div><dt>Duration</dt><dd>9 min 40 s</dd></div>
-      </dl>
-    </void-description-list>
+  <void-drawer id="ov-drawer">
+    <void-drawer-title>Pass details</void-drawer-title>
+    <void-drawer-body>
+      <void-description-list>
+        <dl>
+          <div><dt>Satellite</dt><dd>MRD-0412</dd></div>
+          <div><dt>Station</dt><dd>Kiruna 3</dd></div>
+          <div><dt>Band</dt><dd>X</dd></div>
+          <div><dt>Duration</dt><dd>9 min 40 s</dd></div>
+        </dl>
+      </void-description-list>
+    </void-drawer-body>
   </void-drawer>
 </main>

@@ -87,9 +87,11 @@ const richContent = html`
       <void-button color="success" size="sm">New product</void-button>
     </div>
     <void-card>
-      <p style="margin: 0; font-family: var(--void-font-sans); font-size: var(--void-text-sm); color: var(--void-color-text); line-height: var(--void-leading-relaxed);">
-        Your product catalog is where you manage all items available for sale. Add new products, update pricing, track inventory levels, and control visibility. Use filters and search to quickly find what you need across your entire catalog.
-      </p>
+      <void-card-body>
+        <p style="margin: 0; font-family: var(--void-font-sans); font-size: var(--void-text-sm); color: var(--void-color-text); line-height: var(--void-leading-relaxed);">
+          Your product catalog is where you manage all items available for sale. Add new products, update pricing, track inventory levels, and control visibility. Use filters and search to quickly find what you need across your entire catalog.
+        </p>
+      </void-card-body>
     </void-card>
   </main>
 `;

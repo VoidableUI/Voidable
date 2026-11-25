@@ -26,20 +26,32 @@ export default function App() {
       <section style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(10rem, 1fr))', gap: 'var(--void-space-4)' }}>
         {stats.map((s) => (
           <void-card key={s.label}>
-            <void-stat label={s.label} value={s.value} delta={s.delta} trend={s.trend}></void-stat>
+            <void-card-body>
+              <void-stat label={s.label} value={s.value} delta={s.delta} trend={s.trend}></void-stat>
+            </void-card-body>
           </void-card>
         ))}
       </section>
       <section style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(16rem, 1fr))', gap: 'var(--void-space-4)' }}>
-        <void-card heading="Monthly signups">
-          <void-bar-chart ref={chart} aria-label="Monthly signups"></void-bar-chart>
+        <void-card>
+          <void-card-header>
+            <void-card-title>Monthly signups</void-card-title>
+          </void-card-header>
+          <void-card-body>
+            <void-bar-chart ref={chart} aria-label="Monthly signups"></void-bar-chart>
+          </void-card-body>
         </void-card>
-        <void-card heading="Recent activity">
-          <void-list dividers>
-            <void-list-item>Ada upgraded to Pro</void-list-item>
-            <void-list-item>Grace invited 3 teammates</void-list-item>
-            <void-list-item>Alan exported a report</void-list-item>
-          </void-list>
+        <void-card>
+          <void-card-header>
+            <void-card-title>Recent activity</void-card-title>
+          </void-card-header>
+          <void-card-body>
+            <void-list dividers>
+              <void-list-item>Ada upgraded to Pro</void-list-item>
+              <void-list-item>Grace invited 3 teammates</void-list-item>
+              <void-list-item>Alan exported a report</void-list-item>
+            </void-list>
+          </void-card-body>
         </void-card>
       </section>
     </main>

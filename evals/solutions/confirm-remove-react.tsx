@@ -19,7 +19,7 @@ export default function App() {
   return (
     <main style={{ maxWidth: '36rem', margin: '0 auto', padding: 'var(--void-space-4)', display: 'grid', gap: 'var(--void-space-4)' }}>
       <h1>Team members</h1>
-      {notice && <void-alert color="success">{notice}</void-alert>}
+      {notice && <void-alert color="success"><void-alert-description>{notice}</void-alert-description></void-alert>}
       <void-list dividers>
         {members.map((m) => (
           <void-list-item key={m}>
@@ -33,14 +33,17 @@ export default function App() {
           </void-list-item>
         ))}
       </void-list>
-      <void-dialog open={pending !== null} heading={pending ? `Remove ${pending} from the team?` : ''} size="sm" onvoid-close={() => setPending(null)}>
-        <p>They lose access to every project of this team.</p>
-        <div style={{ display: 'flex', gap: 'var(--void-space-2)', justifyContent: 'flex-end' }}>
+      <void-dialog open={pending !== null} size="sm" onvoid-close={() => setPending(null)}>
+        <void-dialog-title>{pending ? `Remove ${pending} from the team?` : ''}</void-dialog-title>
+        <void-dialog-body>
+          <p>They lose access to every project of this team.</p>
+        </void-dialog-body>
+        <void-dialog-actions>
           <void-button onvoid-click={() => setPending(null)}>Cancel</void-button>
           <void-button color="error" variant="filled" onvoid-click={confirm}>
             Remove
           </void-button>
-        </div>
+        </void-dialog-actions>
       </void-dialog>
     </main>
   );

@@ -32,7 +32,7 @@ function App() {
       </Button>
       <Input placeholder="Name" onVoidChange={(e) => console.log(e.detail.value)} />
       <TagsInput value={['a', 'b']} onVoidChange={(e) => console.log(e.detail.value)} />
-      <Dialog open heading="Confirm">Are you sure?</Dialog>
+      <Dialog open><DialogTitle>Confirm</DialogTitle><DialogBody>Are you sure?</DialogBody></Dialog>
     </div>
   );
 }
@@ -59,14 +59,16 @@ Custom events are exposed as typed `onVoid*` props: `void-change` becomes `onVoi
 
 Overlays (`Dialog`, `Drawer`, `Popover`, `DropdownMenu`, `Tooltip`, `HoverCard`, `Combobox`, `Multiselect`, `DatePicker`) take a controlled `open` and fire `onVoidOpen` / `onVoidClose` with `{ reason }` (`OverlayOpenReason`, `OverlayCloseReason`). Set your state to false in `onVoidClose`, or call `event.preventDefault()` there to keep a user-closed overlay open.
 
-### Triggers
+### Parts
 
-`DropdownMenu`, `Popover` and `HoverCard` need to know which child is the trigger. Give it `slot="trigger"`; every other child is the menu, popover or card content. Without the slot the first child element is used, which goes wrong as soon as React re-keys or swaps that child.
+Components with regions take explicit parts, exported next to them: `DialogTitle`, `DialogBody`, `DialogActions`, `PopoverTrigger`, `PopoverContent`, `DropdownMenuTrigger`, `DropdownMenuContent`, `TabsList`, `TabsTrigger`, `TabsContent`, `CardHeader`, `CardBody` and so on (generated from the manifest; each renders the matching `void-*` tag). A trigger part wraps exactly one element, the button or link that opens the overlay. React can re-key, reorder or conditionally render the parts freely: the component finds them where they are and never moves them.
 
 ```tsx
 <DropdownMenu>
-  <Button slot="trigger">Actions</Button>
-  <DropdownMenuItem onVoidSelect={edit}>Edit</DropdownMenuItem>
+  <DropdownMenuTrigger><Button>Actions</Button></DropdownMenuTrigger>
+  <DropdownMenuContent>
+    <DropdownMenuItem onVoidSelect={edit}>Edit</DropdownMenuItem>
+  </DropdownMenuContent>
 </DropdownMenu>
 ```
 

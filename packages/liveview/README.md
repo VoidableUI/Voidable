@@ -44,7 +44,7 @@ It renders nothing outside the `:dev` environment. `config :live_voidable, dev_w
 ## Events
 
 Use LiveView's own bindings first: `phx-click` works on `button`, `tag`,
-`card`, `dropdown_menu_item`, `menu_item` and `tab_panel` (a click on its tab),
+`card`, `dropdown_menu_item`, `menu_item` and a `<void-tabs-trigger>`,
 and `phx-change` / `phx-submit` on the form around the controls, which all
 submit under their `name`.
 
@@ -56,7 +56,7 @@ pushed to the server as a LiveView event of the same name, after the browser
 has handled it (so a `phx-click` on the same element runs first):
 
 ```heex
-<.dialog id="confirm" heading="Delete?" events={["void-close"]}>...</.dialog>
+<.dialog id="confirm" events={["void-close"]}><void-dialog-title>Delete?</void-dialog-title>...</.dialog>
 ```
 
 

@@ -364,7 +364,7 @@ import iconLogout from '@tabler/icons/outline/logout.svg?raw';
         margin-left: auto;
       }
 
-      #settings-popover :global(.void-popover-body) {
+      #settings-popover :global(void-popover-content) {
         right: 0;
         left: auto;
       }
@@ -714,19 +714,21 @@ import iconLogout from '@tabler/icons/outline/logout.svg?raw';
       <void-sidebar width="220px" collapsed-width="52px" style="--void-sidebar-width: 220px;">
         <div class="sidebar-header">
           <void-dropdown-menu style="width: 100%;">
-            <div class="sidebar-project">
+            <void-dropdown-menu-trigger><div class="sidebar-project">
               <div class="sidebar-project-icon">V</div>
               <div class="sidebar-project-info">
                 <span class="sidebar-project-name">Voidable Cloud</span>
                 <span class="sidebar-project-env">production</span>
               </div>
               <span class="sidebar-chevron" set:html={iconChevronDown} />
-            </div>
-            <void-dropdown-menu-item class="project-item-active">&#x2713;&ensp;Voidable Cloud</void-dropdown-menu-item>
-            <void-dropdown-menu-item>Voidable Staging</void-dropdown-menu-item>
-            <void-dropdown-menu-item>Personal Sandbox</void-dropdown-menu-item>
-            <hr class="project-dropdown-sep">
-            <void-dropdown-menu-item>Create New Project</void-dropdown-menu-item>
+            </div></void-dropdown-menu-trigger>
+            <void-dropdown-menu-content>
+              <void-dropdown-menu-item class="project-item-active">&#x2713;&ensp;Voidable Cloud</void-dropdown-menu-item>
+              <void-dropdown-menu-item>Voidable Staging</void-dropdown-menu-item>
+              <void-dropdown-menu-item>Personal Sandbox</void-dropdown-menu-item>
+              <void-dropdown-menu-separator></void-dropdown-menu-separator>
+              <void-dropdown-menu-item>Create New Project</void-dropdown-menu-item>
+            </void-dropdown-menu-content>
           </void-dropdown-menu>
         </div>
 
@@ -774,22 +776,24 @@ import iconLogout from '@tabler/icons/outline/logout.svg?raw';
             <span class="sidebar-user-role">Admin</span>
           </div>
           <void-popover position="top" id="settings-popover">
-            <button class="sidebar-settings-btn" aria-label="Settings">
+            <void-popover-trigger><button class="sidebar-settings-btn" aria-label="Settings">
               <span class="sidebar-nav-icon" set:html={iconSettings} />
-            </button>
-            <div class="settings-menu">
-              <label class="settings-menu-item">
-                <span class="settings-menu-icon settings-theme-moon" set:html={iconMoon} />
-                <span class="settings-menu-icon settings-theme-sun" set:html={iconSun} />
-                <span class="settings-theme-dark">Dark Mode</span>
-                <span class="settings-theme-light">Light Mode</span>
-                <void-switch id="theme-switch" size="sm"></void-switch>
-              </label>
-              <button class="settings-menu-item settings-sign-out" type="button">
-                <span class="settings-menu-icon" set:html={iconLogout} />
-                <span>Sign Out</span>
-              </button>
-            </div>
+            </button></void-popover-trigger>
+            <void-popover-content>
+              <div class="settings-menu">
+                <label class="settings-menu-item">
+                  <span class="settings-menu-icon settings-theme-moon" set:html={iconMoon} />
+                  <span class="settings-menu-icon settings-theme-sun" set:html={iconSun} />
+                  <span class="settings-theme-dark">Dark Mode</span>
+                  <span class="settings-theme-light">Light Mode</span>
+                  <void-switch id="theme-switch" size="sm"></void-switch>
+                </label>
+                <button class="settings-menu-item settings-sign-out" type="button">
+                  <span class="settings-menu-icon" set:html={iconLogout} />
+                  <span>Sign Out</span>
+                </button>
+              </div>
+            </void-popover-content>
           </void-popover>
         </div>
       </void-sidebar>
@@ -936,9 +940,9 @@ import iconLogout from '@tabler/icons/outline/logout.svg?raw';
       </div>
     </div>
 
-    <!-- User detail dialog — kept empty; content injected dynamically into .void-dialog-body after open -->
-    <void-dialog id="user-dialog" size="lg" heading="User Details"></void-dialog>
-    <void-dialog id="create-key-dialog" size="md" heading="Create API Key"></void-dialog>
+    <!-- User detail dialog — kept empty; content injected dynamically into its void-dialog-body after open -->
+    <void-dialog id="user-dialog" size="lg"><void-dialog-title>User Details</void-dialog-title><void-dialog-body></void-dialog-body></void-dialog>
+    <void-dialog id="create-key-dialog" size="md"><void-dialog-title>Create API Key</void-dialog-title><void-dialog-body></void-dialog-body></void-dialog>
 
     <script>
       import '@voidable/ui';
@@ -1276,11 +1280,11 @@ import iconLogout from '@tabler/icons/outline/logout.svg?raw';
         const user = userData[email];
         if (!user) return;
 
-        dialog.heading = user.name;
+        dialog.querySelector('void-dialog-title')!.textContent = user.name;
         dialog.open = true;
         await dialog.updateComplete;
 
-        const body = dialog.querySelector('.void-dialog-body');
+        const body = dialog.querySelector('void-dialog-body');
         if (!body) return;
 
         const mfaBadge = user.auth.mfaEnabled
@@ -1313,7 +1317,11 @@ import iconLogout from '@tabler/icons/outline/logout.svg?raw';
 
         body.innerHTML = `
           <void-tabs value="auth-status">
-            <void-tab-panel tab="auth-status" label="Auth Status">
+            <void-tabs-list>
+              <void-tabs-trigger value="auth-status">Auth Status</void-tabs-trigger>
+              <void-tabs-trigger value="tokens">Tokens</void-tabs-trigger>
+            </void-tabs-list>
+            <void-tabs-content value="auth-status">
               <div class="info-grid">
                 <div class="info-grid-item">
                   <span class="info-grid-label">Last Login</span>
@@ -1340,8 +1348,8 @@ import iconLogout from '@tabler/icons/outline/logout.svg?raw';
                   <span class="info-grid-value">${user.auth.activeSessions}</span>
                 </div>
               </div>
-            </void-tab-panel>
-            <void-tab-panel tab="tokens" label="Tokens">
+            </void-tabs-content>
+            <void-tabs-content value="tokens">
               <div class="subtable-section">
                 <div class="subtable-section-header">
                   <div class="subtable-section-title">API Keys</div>
@@ -1373,19 +1381,10 @@ import iconLogout from '@tabler/icons/outline/logout.svg?raw';
                   <tbody>${devicesRows}</tbody>
                 </table>
               </div>
-            </void-tab-panel>
+            </void-tabs-content>
           </void-tabs>
         `;
 
-        // Re-sync tabs after custom elements upgrade from innerHTML insertion
-        await new Promise(r => requestAnimationFrame(r));
-        const voidTabs = body.querySelector('void-tabs') as any;
-        if (voidTabs) {
-          voidTabs._panels = Array.from(voidTabs.querySelectorAll('void-tab-panel'));
-          voidTabs.value = 'auth-status';
-          voidTabs.requestUpdate();
-          voidTabs._syncPanels();
-        }
       }
 
       const PAGE_SIZE = 10;
@@ -1423,11 +1422,11 @@ import iconLogout from '@tabler/icons/outline/logout.svg?raw';
       }
 
       async function openCreateKeyDialog() {
-        createKeyDialog.heading = 'Create API Key';
+        createKeyDialog.querySelector('void-dialog-title')!.textContent = 'Create API Key';
         createKeyDialog.open = true;
         await createKeyDialog.updateComplete;
 
-        const body = createKeyDialog.querySelector('.void-dialog-body');
+        const body = createKeyDialog.querySelector('void-dialog-body');
         if (!body) return;
 
         body.innerHTML = `
@@ -1470,7 +1469,7 @@ import iconLogout from '@tabler/icons/outline/logout.svg?raw';
           const name = nameInput?.value?.trim() || 'Untitled Key';
           const token = generateMockToken();
 
-          createKeyDialog.heading = 'API Key Created';
+          createKeyDialog.querySelector('void-dialog-title')!.textContent = 'API Key Created';
           body.innerHTML = `
             <div class="create-key-success">
               <div class="create-key-success-name">${name}</div>
@@ -1511,7 +1510,7 @@ import iconLogout from '@tabler/icons/outline/logout.svg?raw';
 
     <!-- Global styles for dynamically injected dialog content + popover overrides -->
     <style is:global>
-      .toolbar-row void-popover[position="bottom"] .void-popover-body {
+      .toolbar-row void-popover[position="bottom"] void-popover-content {
         left: auto !important;
         right: 0;
       }

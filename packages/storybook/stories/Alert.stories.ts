@@ -29,7 +29,7 @@ export const Default: Story = {
   },
   render: (args) => html`
     <void-alert color=${args.color} variant=${args.variant} ?dismissible=${args.dismissible}>
-      This is an informational alert message.
+      <void-alert-description>This is an informational alert message.</void-alert-description>
     </void-alert>
   `,
 };
@@ -37,12 +37,12 @@ export const Default: Story = {
 export const Colors: Story = {
   render: () => html`
     <div style="display: flex; flex-direction: column; gap: 0.75rem;">
-      <void-alert color="default">Default — general-purpose status message.</void-alert>
-      <void-alert color="error">Error — something went wrong and needs attention.</void-alert>
-      <void-alert color="warning">Warning — proceed with caution.</void-alert>
-      <void-alert color="success">Success — the operation completed successfully.</void-alert>
-      <void-alert color="info">Info — here is some useful information.</void-alert>
-      <void-alert color="notice">Notice — a routine notification for your awareness.</void-alert>
+      <void-alert color="default"><void-alert-description>Default — general-purpose status message.</void-alert-description></void-alert>
+      <void-alert color="error"><void-alert-description>Error — something went wrong and needs attention.</void-alert-description></void-alert>
+      <void-alert color="warning"><void-alert-description>Warning — proceed with caution.</void-alert-description></void-alert>
+      <void-alert color="success"><void-alert-description>Success — the operation completed successfully.</void-alert-description></void-alert>
+      <void-alert color="info"><void-alert-description>Info — here is some useful information.</void-alert-description></void-alert>
+      <void-alert color="notice"><void-alert-description>Notice — a routine notification for your awareness.</void-alert-description></void-alert>
     </div>
   `,
 };
@@ -50,12 +50,12 @@ export const Colors: Story = {
 export const Filled: Story = {
   render: () => html`
     <div style="display: flex; flex-direction: column; gap: 0.75rem;">
-      <void-alert color="default" variant="filled">Default filled alert.</void-alert>
-      <void-alert color="error" variant="filled">Error filled alert.</void-alert>
-      <void-alert color="warning" variant="filled">Warning filled alert.</void-alert>
-      <void-alert color="success" variant="filled">Success filled alert.</void-alert>
-      <void-alert color="info" variant="filled">Info filled alert.</void-alert>
-      <void-alert color="notice" variant="filled">Notice filled alert.</void-alert>
+      <void-alert color="default" variant="filled"><void-alert-description>Default filled alert.</void-alert-description></void-alert>
+      <void-alert color="error" variant="filled"><void-alert-description>Error filled alert.</void-alert-description></void-alert>
+      <void-alert color="warning" variant="filled"><void-alert-description>Warning filled alert.</void-alert-description></void-alert>
+      <void-alert color="success" variant="filled"><void-alert-description>Success filled alert.</void-alert-description></void-alert>
+      <void-alert color="info" variant="filled"><void-alert-description>Info filled alert.</void-alert-description></void-alert>
+      <void-alert color="notice" variant="filled"><void-alert-description>Notice filled alert.</void-alert-description></void-alert>
     </div>
   `,
 };
@@ -64,13 +64,13 @@ export const Dismissible: Story = {
   render: () => html`
     <div style="display: flex; flex-direction: column; gap: 0.75rem;">
       <void-alert color="info" dismissible>
-        This alert can be dismissed. Click the × button to close it.
+        <void-alert-description>This alert can be dismissed. Click the × button to close it.</void-alert-description>
       </void-alert>
       <void-alert color="success" dismissible>
-        Your changes have been saved successfully.
+        <void-alert-description>Your changes have been saved successfully.</void-alert-description>
       </void-alert>
       <void-alert color="error" dismissible>
-        Failed to submit the form. Please try again.
+        <void-alert-description>Failed to submit the form. Please try again.</void-alert-description>
       </void-alert>
     </div>
   `,

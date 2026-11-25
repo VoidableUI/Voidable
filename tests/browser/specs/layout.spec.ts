@@ -75,11 +75,11 @@ test.describe('layout page', () => {
   test('overlays opened inside a card are not clipped by it', async ({ page }) => {
     await page.locator('#card').scrollIntoViewIfNeeded();
     await page.locator('#dd-t').click();
-    await expect.poll(() => fullyVisible(page, '#dd .void-dropdown-menu-panel')).toBe(true);
+    await expect.poll(() => fullyVisible(page, '#dd void-dropdown-menu-content')).toBe(true);
     await page.keyboard.press('Escape');
 
     await page.locator('#po-t').click();
-    await expect.poll(() => fullyVisible(page, '#po .void-popover-body')).toBe(true);
+    await expect.poll(() => fullyVisible(page, '#po void-popover-content')).toBe(true);
     await page.keyboard.press('Escape');
 
     await page.locator('#cb input').click();

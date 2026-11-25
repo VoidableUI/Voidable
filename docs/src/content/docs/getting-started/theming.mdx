@@ -207,7 +207,7 @@ The theme never declares `--void-card-shadow`. That is the whole mechanism: an u
 
 ```html
 <!-- one card -->
-<void-card style="--void-card-padding: var(--void-space-8)">…</void-card>
+<void-card style="--void-card-padding: var(--void-space-8)"><void-card-body>…</void-card-body></void-card>
 ```
 
 Three rules to know:
@@ -268,10 +268,12 @@ Put the attribute on `<html>`, or on an element that also carries `data-void-the
     <div class="vd-themed vd-skinned" data-void-theme={theme} data-void-skin={skin || undefined} data-theme="light">
       <span data-void-type="label">{label}</span>
       <void-card>
-        <div class="vd-stack">
-          <span><span data-void-type="value">41</span> <span data-void-type="unit">of 44</span></span>
-          <span data-void-type="caption">Stations online</span>
-        </div>
+        <void-card-body>
+          <div class="vd-stack">
+            <span><span data-void-type="value">41</span> <span data-void-type="unit">of 44</span></span>
+            <span data-void-type="caption">Stations online</span>
+          </div>
+        </void-card-body>
       </void-card>
       <void-input value="Kiruna 3" aria-label="Station name"></void-input>
       <div class="vd-row">

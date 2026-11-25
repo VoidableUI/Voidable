@@ -2,7 +2,20 @@
 import { describe, it, expect, afterEach } from 'vitest';
 import React, { act, useState } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
-import { Dialog, DropdownMenu, DropdownMenuItem, Tooltip, Button, type OverlayCloseReason } from '../src/index.js';
+import {
+  Dialog,
+  DialogBody,
+  DialogTitle,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+  Button,
+  type OverlayCloseReason,
+} from '../src/index.js';
 import type { VoidDialog, VoidDropdownMenu, VoidTooltip } from '@voidable/ui';
 
 // Controlled open state through the wrappers (React 19): React owns `open`, the overlay reports
@@ -43,13 +56,15 @@ describe('controlled overlays', () => {
       return (
         <Dialog
           open={open}
-          heading="Edit"
           onVoidClose={(e) => {
             reasons.push(e.detail.reason);
             set(false);
           }}
         >
-          <input id="name" aria-label="Name" />
+          <DialogTitle>Edit</DialogTitle>
+          <DialogBody>
+            <input id="name" aria-label="Name" />
+          </DialogBody>
         </Dialog>
       );
     }
@@ -60,7 +75,7 @@ describe('controlled overlays', () => {
     await act(async () => setOpen(true));
     await el.updateComplete;
     expect(el.open).toBe(true);
-    expect(el.querySelector('dialog')!.open).toBe(true);
+    expect(el.shadowRoot!.querySelector('dialog')!.open).toBe(true);
 
     await act(async () => {
       escape(document.activeElement ?? el);
@@ -68,15 +83,18 @@ describe('controlled overlays', () => {
     await el.updateComplete;
     expect(reasons).toEqual(['escape']);
     expect(el.open).toBe(false);
-    expect(el.querySelector('dialog')!.open).toBe(false);
+    expect(el.shadowRoot!.querySelector('dialog')!.open).toBe(false);
   });
 
   it('a controlled Dialog can refuse a close by cancelling void-close', async () => {
     function App() {
       const [open] = useState(true);
       return (
-        <Dialog open={open} heading="Locked" onVoidClose={(e) => e.preventDefault()}>
-          <p>Body</p>
+        <Dialog open={open} onVoidClose={(e) => e.preventDefault()}>
+          <DialogTitle>Locked</DialogTitle>
+          <DialogBody>
+            <p>Body</p>
+          </DialogBody>
         </Dialog>
       );
     }
@@ -105,9 +123,13 @@ describe('controlled overlays', () => {
               setOpen(false);
             }}
           >
-            <Button slot="trigger">Actions</Button>
-            <DropdownMenuItem>Edit</DropdownMenuItem>
-            <DropdownMenuItem keepOpen>Pin</DropdownMenuItem>
+            <DropdownMenuTrigger>
+              <Button>Actions</Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuItem>Edit</DropdownMenuItem>
+              <DropdownMenuItem keepOpen>Pin</DropdownMenuItem>
+            </DropdownMenuContent>
           </DropdownMenu>
         </>
       );
@@ -129,8 +151,11 @@ describe('controlled overlays', () => {
 
   it('Tooltip takes align and open as props', async () => {
     const c = await render(
-      <Tooltip text="Hint" align="start" open>
-        <button type="button">?</button>
+      <Tooltip align="start" open>
+        <TooltipTrigger>
+          <button type="button">?</button>
+        </TooltipTrigger>
+        <TooltipContent>Hint</TooltipContent>
       </Tooltip>,
     );
     const el = c.querySelector('void-tooltip') as VoidTooltip;

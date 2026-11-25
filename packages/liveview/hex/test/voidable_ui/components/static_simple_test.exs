@@ -481,12 +481,11 @@ defmodule VoidableUI.Components.StaticSimpleTest do
 
       html =
         rendered_to_string(~H"""
-        <VoidableUI.Components.tooltip text="Help text" position="top" delay={200}>
+        <VoidableUI.Components.tooltip position="top" delay={200}>
           <button>Info</button>
         </VoidableUI.Components.tooltip>
         """)
 
-      assert html =~ ~s(text="Help text")
       assert html =~ ~s(position="top")
       assert html =~ ~s(delay="200")
       assert html =~ "<button>Info</button>"

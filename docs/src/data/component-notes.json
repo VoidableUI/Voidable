@@ -187,7 +187,7 @@
       "void-open": "Fires when the dialog opens. `detail.reason` is `api`: the dialog opens only when you set `open`. It does not bubble.",
       "void-close": "Fires before the dialog closes, on the dialog only (it does not bubble). `detail.reason` is `escape`, `outside` (the backdrop), `close-button`, `form` (a `method=\"dialog\"` form), `parent` or `api`. Call `preventDefault()` to keep it open when the user caused the close (`escape`, `outside`, `close-button`)."
     },
-    "children": "The dialog body: text, forms and buttons. The `heading` attribute is the title and the dialog's accessible name (without one, set `aria-label`). Focus moves to the first `[autofocus]` element, else the first focusable element, else the close button, and returns to the opener on close."
+    "children": "Explicit parts, in this order: `void-dialog-title` (names the dialog; required), `void-dialog-description`, `void-dialog-body` and `void-dialog-actions`. A `<form method=\"dialog\">` may wrap them. The parts stay where you write them."
   },
   "void-drawer": {
     "group": "overlays",
@@ -195,11 +195,11 @@
       "void-open": "Fires when the drawer opens. `detail.reason` is `api`. It does not bubble.",
       "void-close": "Fires before the drawer closes, on the drawer only (it does not bubble). `detail.reason` is `escape`, `outside` (the backdrop), `close-button`, `form`, `parent` or `api`. Call `preventDefault()` to keep it open when the user caused the close."
     },
-    "children": "The drawer body: any content. The `heading` attribute is the title and the drawer's accessible name (without one, set `aria-label`). Focus is handled as in the dialog."
+    "children": "The same parts as the dialog: `void-drawer-title`, `void-drawer-description`, `void-drawer-body` and `void-drawer-actions`, in that order."
   },
   "void-dropdown-menu": {
     "group": "overlays",
-    "children": "One element marked `slot=\"trigger\"` that opens the menu, then `void-dropdown-menu-item` children for the actions. Choosing an item closes the menu and returns focus to the trigger; give an item `keep-open` to leave it open.",
+    "children": "Two parts: `void-dropdown-menu-trigger`, wrapping the one button that opens the menu, and `void-dropdown-menu-content`, holding the `void-dropdown-menu-item`s (and `void-dropdown-menu-separator`s between groups). Choosing an item closes the menu and returns focus to the trigger; give an item `keep-open` to leave it open.",
     "events": {
       "void-open": "Fires when the menu opens. `detail.reason` is `trigger`, `keyboard` or `api`. It does not bubble.",
       "void-close": "Fires before the menu closes, on the menu only (it does not bubble). `detail.reason` is `trigger`, `select`, `escape`, `outside`, `blur`, `parent` or `api`; `preventDefault()` keeps it open when the user caused the close."
@@ -208,7 +208,7 @@
   "void-dropdown-menu-item": {
     "group": "overlays",
     "events": {
-      "void-select": "Fires when the item is activated by click, Enter or Space; it bubbles to the menu. `detail.item` is the item element; read its text or attributes to tell items apart. A disabled item does not fire it."
+      "void-select": "Fires when the item is activated by click, Enter or Space; it bubbles to the menu. `detail.value` is the item's `value` and `detail.item` the item element. A disabled item does not fire it."
     }
   },
   "void-hover-card": {
@@ -217,7 +217,7 @@
       "void-open": "Fires when the card opens, on hover or focus of the trigger (`detail.reason` is `hover`, `focus` or `api`). It does not bubble.",
       "void-close": "Fires when the card closes (`detail.reason` is `hover`, `blur`, `escape`, `parent` or `api`). It does not bubble."
     },
-    "children": "One element marked `slot=\"trigger\"`, then the card content."
+    "children": "Two parts: `void-hover-card-trigger`, wrapping the link or element that opens it on hover or focus, and `void-hover-card-content`, the card."
   },
   "void-menu": {
     "group": "overlays",
@@ -239,11 +239,11 @@
       "void-open": "Fires when the popover opens. `detail.reason` is `trigger` or `api`. It does not bubble.",
       "void-close": "Fires before the popover closes, on the popover only (it does not bubble). `detail.reason` is `trigger`, `escape`, `outside`, `blur` (focus left it), `parent` or `api`; `preventDefault()` keeps it open when the user caused the close."
     },
-    "children": "One element marked `slot=\"trigger\"`, then the popover content."
+    "children": "Two parts: `void-popover-trigger`, wrapping the one button that toggles it, and `void-popover-content`, the panel."
   },
   "void-tooltip": {
     "group": "overlays",
-    "children": "The one element the tooltip describes; it gets `aria-describedby`. The tip text is the `text` attribute. Put nothing in it the user must read: it appears only on hover or keyboard focus.",
+    "children": "Two parts: `void-tooltip-trigger`, wrapping the one element the tooltip describes (it gets `aria-describedby`), and `void-tooltip-content`, the hint text. Put nothing in it the user must read: it appears only on hover or keyboard focus.",
     "events": {
       "void-open": "Fires when the tooltip appears, on hover or keyboard focus (`detail.reason` is `hover`, `focus` or `api`). It does not bubble.",
       "void-close": "Fires when the tooltip hides (`detail.reason` is `hover`, `blur`, `escape`, `parent` or `api`). It does not bubble."
@@ -294,13 +294,9 @@
   "void-tabs": {
     "group": "navigation",
     "events": {
-      "void-change": "Fires when the user selects a tab. `detail.value` is the `tab` of the panel now shown."
+      "void-change": "Fires when the user selects a tab. `detail.value` is the `value` of the tab now selected."
     },
-    "children": "Takes `void-tab-panel` children, one per tab."
-  },
-  "void-tab-panel": {
-    "group": "navigation",
-    "children": "The content of one tab. The `label` attribute is the tab's text and `tab` its identifier."
+    "children": "Explicit parts: a `void-tabs-list` holding one `void-tabs-trigger` per tab (its `value` names the tab, its text is the label, `disabled` disables it), then one `void-tabs-content` per panel with the matching `value`."
   },
   "void-avatar": {
     "group": "data-display"
@@ -354,7 +350,7 @@
     "events": {
       "void-dismiss": "Fires when the user presses the dismiss button of a `dismissible` alert, just before the alert removes itself from the page."
     },
-    "children": "The message text and any inline markup, such as a link."
+    "children": "Two parts: `void-alert-title` (optional, short) and `void-alert-description`, the message with any inline markup, such as a link."
   },
   "void-banner": {
     "group": "feedback",
@@ -398,11 +394,11 @@
     "events": {
       "void-toggle": "Fires after the item opens or closes. `detail.open` is the new state."
     },
-    "children": "Its `heading` attribute is the title shown on the button; the children are the body that opens and closes."
+    "children": "Two parts: `void-accordion-trigger`, the heading text that opens and closes it, and `void-accordion-content`, the body."
   },
   "void-card": {
     "group": "layout",
-    "children": "The card body: any content. The title comes from the `heading` attribute."
+    "children": "Explicit parts, in this order: `void-card-header` (with `void-card-title` and `void-card-description`, and anything that sits at its far end), `void-card-body` and `void-card-footer`."
   },
   "void-collapsible": {
     "group": "layout",

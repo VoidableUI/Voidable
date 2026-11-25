@@ -95,11 +95,13 @@ const productRows = products.map(
       </td>
       <td style="text-align: right;">
         <void-dropdown-menu align="end">
-          <void-button variant="ghost" size="sm">&#x22EF;</void-button>
-          <void-dropdown-menu-item>View</void-dropdown-menu-item>
-          <void-dropdown-menu-item>Edit</void-dropdown-menu-item>
-          <hr>
-          <void-dropdown-menu-item destructive @click="${openDelete}">Delete</void-dropdown-menu-item>
+          <void-dropdown-menu-trigger><void-button variant="ghost" size="sm">&#x22EF;</void-button></void-dropdown-menu-trigger>
+          <void-dropdown-menu-content>
+            <void-dropdown-menu-item>View</void-dropdown-menu-item>
+            <void-dropdown-menu-item>Edit</void-dropdown-menu-item>
+            <void-dropdown-menu-separator></void-dropdown-menu-separator>
+            <void-dropdown-menu-item destructive @click="${openDelete}">Delete</void-dropdown-menu-item>
+          </void-dropdown-menu-content>
         </void-dropdown-menu>
       </td>
     </tr>
@@ -107,14 +109,17 @@ const productRows = products.map(
 );
 
 const deleteDialog = html`
-  <void-dialog id="delete-dialog" heading="Delete product" size="sm">
-    <p style="font-family: var(--void-font-sans); font-size: var(--void-text-sm); color: var(--void-color-text); margin: 0 0 var(--void-space-4) 0;">
-      Are you sure you want to delete <strong>Widget Pro</strong>? This action cannot be undone.
-    </p>
-    <div style="display: flex; gap: var(--void-space-2); justify-content: flex-end;">
+  <void-dialog id="delete-dialog" size="sm">
+    <void-dialog-title>Delete product</void-dialog-title>
+    <void-dialog-body>
+      <p style="font-family: var(--void-font-sans); font-size: var(--void-text-sm); color: var(--void-color-text); margin: 0 0 var(--void-space-4) 0;">
+        Are you sure you want to delete <strong>Widget Pro</strong>? This action cannot be undone.
+      </p>
+    </void-dialog-body>
+    <void-dialog-actions>
       <void-button variant="ghost" size="sm" @click="${closeDelete}">Cancel</void-button>
       <void-button color="error" size="sm" @click="${closeDelete}">Delete</void-button>
-    </div>
+    </void-dialog-actions>
   </void-dialog>
 `;
 
@@ -189,7 +194,7 @@ export const WithNotice: Story = {
   render: () => html`
     <div class="scaffold-index" style="max-width: 72rem; margin: 0 auto; padding: 2rem;">
       <void-alert color="success" dismissible style="margin-bottom: var(--void-space-4);">
-        Product was successfully created.
+        <void-alert-description>Product was successfully created.</void-alert-description>
       </void-alert>
       ${pageHeader}
       ${sectionHeader}
@@ -206,14 +211,17 @@ export const WithDeleteConfirmation: Story = {
         ${pageHeader}
         ${sectionHeader}
         ${productTable}
-        <void-dialog id="delete-dialog" heading="Delete product" size="sm" .open="${true}">
-          <p style="font-family: var(--void-font-sans); font-size: var(--void-text-sm); color: var(--void-color-text); margin: 0 0 var(--void-space-4) 0;">
-            Are you sure you want to delete <strong>Widget Pro</strong>? This action cannot be undone.
-          </p>
-          <div style="display: flex; gap: var(--void-space-2); justify-content: flex-end;">
+        <void-dialog id="delete-dialog" size="sm" .open="${true}">
+          <void-dialog-title>Delete product</void-dialog-title>
+          <void-dialog-body>
+            <p style="font-family: var(--void-font-sans); font-size: var(--void-text-sm); color: var(--void-color-text); margin: 0 0 var(--void-space-4) 0;">
+              Are you sure you want to delete <strong>Widget Pro</strong>? This action cannot be undone.
+            </p>
+          </void-dialog-body>
+          <void-dialog-actions>
             <void-button variant="ghost" size="sm" @click="${closeDelete}">Cancel</void-button>
             <void-button color="error" size="sm" @click="${closeDelete}">Delete</void-button>
-          </div>
+          </void-dialog-actions>
         </void-dialog>
       </div>
     `;

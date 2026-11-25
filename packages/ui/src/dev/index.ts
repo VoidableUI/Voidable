@@ -10,7 +10,9 @@
 // outside the declared set, `disabled="false"`, a child in the wrong parent or a
 // required child that is missing, an element that needs an accessible name and
 // has none (judged after upgrade, on the live DOM), a `void-*` tag nothing defines, a listener
-// for a `void-*` event nothing dispatches, a script that keeps removing an
+// for a `void-*` event nothing dispatches, a component's parts (#52) missing,
+// repeated, out of order or replaced by the implicit form they superseded (a
+// bare button where a trigger part belongs, a removed tag), a script that keeps removing an
 // attribute a component manages (reported by the component, which stops
 // restoring it). Each message names the element, what
 // is wrong, the valid alternatives and a "did you mean" where one is close.
@@ -31,14 +33,17 @@
 import {
   checkAttribute,
   checkAttributes,
+  checkControl,
   checkDefined,
   checkEvent,
   checkName,
   checkParent,
+  checkParts,
+  checkRemoved,
   checkRequired,
   keyOf,
 } from './rules.js';
-import { styled, table } from './table.generated.js';
+import { removed, styled, table } from './table.generated.js';
 import type { DevWarning } from './types.js';
 
 export type { DevWarning, WarningKind } from './types.js';
@@ -183,9 +188,12 @@ async function flushDeferred(): Promise<void> {
   const autoloading = (globalThis as Record<symbol, unknown>)[AUTOLOADER] !== undefined;
   for (const el of batch) {
     if (!el.isConnected) continue;
-    report(checkDefined(table, el, autoloading, styled));
+    const legacy = checkRemoved(removed, el);
+    report(legacy ?? checkDefined(table, el, autoloading, styled));
     report(checkParent(table, el));
     for (const w of checkRequired(table, el)) report(w);
+    for (const w of checkParts(table, el)) report(w);
+    report(checkControl(table, el));
     report(checkName(table, el));
   }
 }
@@ -266,7 +274,16 @@ export function check(root: ParentNode & Node = document): DevWarning[] {
   const found: DevWarning[] = [];
   for (const el of voidElements(root)) {
     const loader = (globalThis as Record<symbol, unknown>)[AUTOLOADER] !== undefined;
-    for (const w of [...checkAttributes(table, el), checkDefined(table, el, loader), checkParent(table, el), ...checkRequired(table, el), checkName(table, el)]) {
+    const legacy = checkRemoved(removed, el);
+    for (const w of [
+      ...checkAttributes(table, el),
+      legacy ?? checkDefined(table, el, loader, styled),
+      checkParent(table, el),
+      ...checkRequired(table, el),
+      ...checkParts(table, el),
+      checkControl(table, el),
+      checkName(table, el),
+    ]) {
       if (!w || ignored(w)) continue;
       found.push(w);
       report(w);

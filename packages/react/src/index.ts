@@ -56,7 +56,6 @@ export {
   Stepper,
   Switch,
   Table,
-  TabPanel,
   Tabs,
   Tag,
   Textarea,
@@ -91,3 +90,4 @@ export type {
 } from './components.js';
 
 export { useTheme } from './use-theme.js';
+export * from './parts.generated.js';

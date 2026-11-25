@@ -7,6 +7,9 @@ const MESSAGES = [
   { id: 3, subject: 'Release checklist', from: 'Margaret Hamilton', preview: 'Before we ship…', body: 'Before we ship, run the full test suite twice.' },
 ];
 
+// The role="dialog" element of void-dialog and void-drawer is the native <dialog> in the host's shadow root; the author's parts are slotted into it, not its DOM descendants, so the content is scoped by the open host (evals/CONTRACT.md).
+const PANEL = (t) => t.page.locator('void-dialog[open], void-drawer[open], dialog[open], [role="dialog"]');
+
 export default {
   id: 'inbox-drawer-erb',
   title: 'Inbox with a detail side panel (Rails)',
@@ -24,9 +27,9 @@ export default {
         const item = await t.visible(t.text('Quarterly report', { exact: true }), 'message "Quarterly report"');
         await item.click();
         await t.settle();
-        const d = await t.visible(t.role('dialog', { name: /quarterly report/i }), 'dialog "Quarterly report"');
-        await t.visible(d.getByText(/revenue grew 12%/i), 'message body in the panel');
-        await t.visible(d.getByText('Grace Hopper'), 'sender in the panel');
+        await t.visible(t.role('dialog', { name: /quarterly report/i }), 'dialog "Quarterly report"');
+        await t.visible(PANEL(t).getByText(/revenue grew 12%/i), 'message body in the panel');
+        await t.visible(PANEL(t).getByText('Grace Hopper'), 'sender in the panel');
       },
     },
     {
@@ -47,9 +50,9 @@ export default {
         await (await t.visible(t.text('Release checklist', { exact: true }), 'message "Release checklist"')).click();
         await t.settle();
         const d = await t.visible(t.role('dialog', { name: /release checklist/i }), 'dialog "Release checklist"');
-        await t.visible(d.getByText(/run the full test suite/i), 'its body');
-        ok(!(await d.getByText(/revenue grew/i).isVisible().catch(() => false)), 'the panel still shows the first message');
-        await d.getByRole('button', { name: /close/i }).first().click();
+        await t.visible(PANEL(t).getByText(/run the full test suite/i), 'its body');
+        ok(!(await PANEL(t).getByText(/revenue grew/i).first().isVisible().catch(() => false)), 'the panel still shows the first message');
+        await PANEL(t).getByRole('button', { name: /close/i }).first().click();
         await t.settle();
         await t.hidden(d, 'dialog after its close button');
       },

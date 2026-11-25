@@ -11,11 +11,13 @@ function createElement(): VoidPopover {
 
 function createWithChildren(): VoidPopover {
   const el = createElement();
+  const part = document.createElement('void-popover-trigger');
   const trigger = document.createElement('button');
   trigger.textContent = 'Toggle';
-  const content = document.createElement('div');
+  part.appendChild(trigger);
+  const content = document.createElement('void-popover-content');
   content.textContent = 'Popover content';
-  el.appendChild(trigger);
+  el.appendChild(part);
   el.appendChild(content);
   return el;
 }
@@ -96,18 +98,10 @@ describe('VoidPopover', () => {
       el.remove();
     });
 
-    it('creates .void-popover-body element', () => {
-      expect(el.querySelector('.void-popover-body')).not.toBeNull();
-    });
-
-    it('moves content nodes into .void-popover-body', () => {
-      const body = el.querySelector('.void-popover-body');
-      expect(body?.textContent).toContain('Popover content');
-    });
-
-    it('keeps trigger as direct child', () => {
-      const trigger = el.children[0];
-      expect(trigger?.tagName).toBe('BUTTON');
+    it('moves nothing: the trigger and content parts stay as written', () => {
+      expect([...el.children].map((c) => c.localName)).toEqual(['void-popover-trigger', 'void-popover-content']);
+      expect(el.children[0]!.firstElementChild!.tagName).toBe('BUTTON');
+      expect(el.querySelector('void-popover-content')!.textContent).toBe('Popover content');
     });
   });
 
@@ -125,14 +119,14 @@ describe('VoidPopover', () => {
     });
 
     it('toggles open when trigger is clicked', async () => {
-      const trigger = el.children[0] as HTMLElement;
+      const trigger = el.querySelector('void-popover-trigger > button') as HTMLElement;
       trigger.click();
       await el.updateComplete;
       expect(el.open).toBe(true);
     });
 
     it('closes on second trigger click', async () => {
-      const trigger = el.children[0] as HTMLElement;
+      const trigger = el.querySelector('void-popover-trigger > button') as HTMLElement;
       trigger.click();
       await el.updateComplete;
       trigger.click();
@@ -141,7 +135,7 @@ describe('VoidPopover', () => {
     });
 
     it('dispatches void-close when toggled closed via trigger', async () => {
-      const trigger = el.children[0] as HTMLElement;
+      const trigger = el.querySelector('void-popover-trigger > button') as HTMLElement;
       const events: Event[] = [];
       el.addEventListener('void-close', (e) => events.push(e));
       trigger.click();
@@ -182,7 +176,7 @@ describe('VoidPopover', () => {
     });
 
     it('does not close when clicking inside', async () => {
-      const body = el.querySelector('.void-popover-body') as HTMLElement;
+      const body = el.querySelector('void-popover-content') as HTMLElement;
       body.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, button: 0 }));
       await el.updateComplete;
       expect(el.open).toBe(true);
@@ -239,7 +233,7 @@ describe('VoidPopover', () => {
     });
 
     it('does not toggle open on trigger click when trigger="manual"', async () => {
-      const trigger = el.children[0] as HTMLElement;
+      const trigger = el.querySelector('void-popover-trigger > button') as HTMLElement;
       trigger.click();
       await el.updateComplete;
       expect(el.open).toBe(false);
@@ -322,7 +316,7 @@ describe('VoidPopover', () => {
     });
 
     async function mounted(): Promise<VoidPopover> {
-      document.body.innerHTML = '<void-popover id="p"><button slot="trigger" id="t">Open</button><p>text</p><button id="inner">x</button></void-popover>';
+      document.body.innerHTML = '<void-popover id="p"><void-popover-trigger><button id="t">Open</button></void-popover-trigger><void-popover-content><p>text</p><button id="inner">x</button></void-popover-content></void-popover>';
       const el = document.getElementById('p') as VoidPopover;
       await el.updateComplete;
       return el;
@@ -330,7 +324,7 @@ describe('VoidPopover', () => {
 
     it('renders the body as a manual popover named by its trigger, with trigger ARIA', async () => {
       const el = await mounted();
-      const body = el.querySelector('.void-popover-body')!;
+      const body = el.querySelector('void-popover-content')!;
       const t = el.querySelector('#t')!;
       // happy-dom has no Popover API: the controller falls back to [hidden] (browsers keep popover="manual").
       if (typeof HTMLElement.prototype.showPopover === 'function') expect(body.getAttribute('popover')).toBe('manual');
@@ -390,7 +384,7 @@ describe('VoidPopover', () => {
       el.align = 'end';
       el.open = true;
       await el.updateComplete;
-      const body = el.querySelector('.void-popover-body')!;
+      const body = el.querySelector('void-popover-content')!;
       expect(body.getAttribute('data-void-side')).toBe('top');
       expect(body.getAttribute('data-void-align')).toBe('end');
       expect(body.hasAttribute('data-void-position')).toBe(true);

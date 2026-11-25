@@ -1,19 +1,18 @@
-import { html } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
 import { OverlayController } from '../overlay.js';
-import { ProjectionController, triggerRegion } from '../projection.js';
+import { PartsController, triggerControl } from '../parts.js';
 
 /**
  * Rich content preview card that appears on hover for user profiles, link previews, and contextual information panels.
  *
- * Opens after `open-delay` when the pointer rests on the trigger, or at once when the trigger receives keyboard focus,
- * and closes after `close-delay` once pointer and focus have left both trigger and card, or on Escape. The card is
+ * Two parts: `<void-hover-card-trigger>` around the element that shows the card (one element: a link, a
+ * `<void-button>`), and `<void-hover-card-content>`, the card. The parts are the final DOM. The card opens after
+ * `open-delay` when the pointer rests on the trigger, or at once when the trigger receives keyboard focus, and
+ * closes after `close-delay` once pointer and focus have left both trigger and card, or on Escape. The card is
  * supplementary: put nothing in it that is not also reachable without it. It is shown in the top layer and placed
  * with CSS anchor positioning; while closed it is not rendered, so links inside it are neither visible nor tabbable.
  *
- * @slot trigger - The element that shows the card on hover or focus. Mark it with `slot="trigger"`; without one, the first child element is used.
- * @slot - Card content.
  * @fires {CustomEvent<{ reason: 'hover' | 'focus' | 'api' }>} void-open - The card opened.
  * @fires {CustomEvent<{ reason: 'hover' | 'blur' | 'escape' | 'parent' | 'api' }>} void-close - The card is closing.
  * Cancelable when the user caused it.
@@ -30,26 +29,27 @@ export class VoidHoverCard extends VoidElement {
   /** Milliseconds after pointer and focus have left the trigger and card before it closes. Defaults to 300. */
   @property({ type: Number, attribute: 'close-delay' }) closeDelay = 300;
 
-  // The trigger (slot="trigger", else the first element child) goes into the trigger wrapper; everything else goes into the body.
-  protected readonly _projection: ProjectionController = new ProjectionController(this, {
-    regions: [
-      triggerRegion('trigger', () => this.querySelector(':scope > .void-hover-card-trigger'), () => this._projection, this),
-      { name: 'body', target: () => this.querySelector(':scope > .void-hover-card-body') },
-    ],
-    // Trigger ARIA follows the trigger, including one the parser adds after the first render.
-    onChange: () => this.requestUpdate(),
+  protected readonly _parts = new PartsController(this, {
+    tags: ['void-hover-card-trigger', 'void-hover-card-content'],
+    onChange: () => {
+      this._wire();
+      this.requestUpdate();
+    },
   });
 
   protected readonly _overlay = new OverlayController(this, {
     kind: 'hover',
-    surface: () => this.querySelector<HTMLElement>(':scope > .void-hover-card-body'),
+    surface: () => this._parts.one('void-hover-card-content'),
     isOpen: () => this.open,
     setOpen: open => {
       this.open = open;
     },
-    trigger: () => (this._projection.nodes('trigger').find(n => n instanceof HTMLElement) as HTMLElement | undefined) ?? null,
-    anchor: () => this.querySelector(':scope > .void-hover-card-trigger'),
+    trigger: () => triggerControl(this._parts.one('void-hover-card-trigger')),
+    anchor: () => this,
+    hostStyle: (p, v) => this.setHostStyle(p, v),
     placement: () => ({ side: this.position, align: this.align }),
+    attr: (el, name, value) => this._parts.set(el, name, value),
+    style: (el, p, v) => this._parts.style(el, p, v),
   });
 
   private _openTimerId: ReturnType<typeof setTimeout> | undefined;
@@ -61,36 +61,39 @@ export class VoidHoverCard extends VoidElement {
    */
   private _dismissed = false;
 
+  private _wire(): void {
+    const content = this._parts.one('void-hover-card-content');
+    if (!content) return;
+    this._parts.set(content, 'popover', 'manual');
+    this._parts.id(content, 'void-hover-card-content');
+  }
+
   connectedCallback(): void {
     super.connectedCallback();
     this.addEventListener('void-close', this._onClose);
+    this.addEventListener('mouseover', this._onOver);
+    this.addEventListener('mouseout', this._onOut);
+    this.addEventListener('focusin', this._onFocusIn);
+    this.addEventListener('focusout', this._onFocusOut);
   }
 
   disconnectedCallback(): void {
     this.removeEventListener('void-close', this._onClose);
+    this.removeEventListener('mouseover', this._onOver);
+    this.removeEventListener('mouseout', this._onOut);
+    this.removeEventListener('focusin', this._onFocusIn);
+    this.removeEventListener('focusout', this._onFocusOut);
     super.disconnectedCallback();
     clearTimeout(this._openTimerId);
     clearTimeout(this._closeTimerId);
   }
 
-  render() {
-    return html`
-      <div
-        class="void-hover-card-trigger"
-        @mouseenter=${this._onEnter}
-        @mouseleave=${this._onLeave}
-        @focusin=${this._onFocusIn}
-        @focusout=${this._onFocusOut}
-      ></div>
-      <div
-        class="void-hover-card-body"
-        popover="manual"
-        @mouseenter=${this._onBodyEnter}
-        @mouseleave=${this._onLeave}
-        @focusin=${this._onBodyEnter}
-        @focusout=${this._onFocusOut}
-      ></div>
-    `;
+  /** Which part `node` is in: the trigger, the card, or neither. */
+  private _zone(node: EventTarget | null): 'trigger' | 'content' | null {
+    if (!(node instanceof Node)) return null;
+    if (this._parts.one('void-hover-card-trigger')?.contains(node)) return 'trigger';
+    if (this._parts.one('void-hover-card-content')?.contains(node)) return 'content';
+    return null;
   }
 
   private _onClose = (e: Event): void => {
@@ -99,24 +102,37 @@ export class VoidHoverCard extends VoidElement {
     this._dismissed = !!active && active !== this.ownerDocument.body && this.contains(active);
   };
 
-  private _onEnter = (): void => {
+  /** The pointer moved onto the trigger or the card (from somewhere that was neither, or from the other). */
+  private _onOver = (e: MouseEvent): void => {
+    const to = this._zone(e.target);
+    const from = this._zone(e.relatedTarget);
+    if (!to || to === from) return;
+    if (to === 'content') {
+      clearTimeout(this._closeTimerId);
+      return;
+    }
     this._dismissed = false;
     clearTimeout(this._closeTimerId);
     clearTimeout(this._openTimerId);
     this._openTimerId = setTimeout(() => this._overlay.requestOpen('hover'), this.openDelay);
   };
 
-  private _onLeave = (): void => {
+  /** The pointer left the trigger or the card for something that is neither. */
+  private _onOut = (e: MouseEvent): void => {
+    const from = this._zone(e.target);
+    const to = this._zone(e.relatedTarget);
+    if (!from || to === from) return;
+    if (from === 'trigger' && to === 'content') return;
+    if (from === 'content' && to === 'trigger') return;
     clearTimeout(this._openTimerId);
     this._scheduleClose('hover');
   };
 
-  private _onBodyEnter = (): void => {
+  private _onFocusIn = (e: FocusEvent): void => {
+    const zone = this._zone(e.target);
+    if (!zone) return;
     clearTimeout(this._closeTimerId);
-  };
-
-  private _onFocusIn = (): void => {
-    clearTimeout(this._closeTimerId);
+    if (zone === 'content') return;
     clearTimeout(this._openTimerId);
     if (this._dismissed) {
       this._dismissed = false;

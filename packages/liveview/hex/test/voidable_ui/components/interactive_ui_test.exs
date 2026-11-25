@@ -279,7 +279,7 @@ defmodule VoidableUI.Components.InteractiveUITest do
   # ===========================================================================
 
   describe "dialog" do
-    test "renders <void-dialog aria-label="Dialog"> with slot content" do
+    test "renders <void-dialog> with slot content" do
       assigns = %{}
 
       html =
@@ -309,10 +309,9 @@ defmodule VoidableUI.Components.InteractiveUITest do
 
       html =
         rendered_to_string(~H"""
-        <VoidableUI.Components.dialog heading="Title" size="lg">Body</VoidableUI.Components.dialog>
+        <VoidableUI.Components.dialog size="lg">Body</VoidableUI.Components.dialog>
         """)
 
-      assert html =~ ~s(heading="Title")
       assert html =~ ~s(size="lg")
     end
 
@@ -390,7 +389,7 @@ defmodule VoidableUI.Components.InteractiveUITest do
   # ===========================================================================
 
   describe "drawer" do
-    test "renders <void-drawer aria-label="Drawer"> with slot content" do
+    test "renders <void-drawer> with slot content" do
       assigns = %{}
 
       html =
@@ -420,12 +419,11 @@ defmodule VoidableUI.Components.InteractiveUITest do
 
       html =
         rendered_to_string(~H"""
-        <VoidableUI.Components.drawer side="right" size="md" heading="Settings">Body</VoidableUI.Components.drawer>
+        <VoidableUI.Components.drawer side="right" size="md">Body</VoidableUI.Components.drawer>
         """)
 
       assert html =~ ~s(side="right")
       assert html =~ ~s(size="md")
-      assert html =~ ~s(heading="Settings")
     end
 
     test "omits nil-default attributes when not set" do
@@ -779,10 +777,10 @@ defmodule VoidableUI.Components.InteractiveUITest do
 
       html =
         rendered_to_string(~H"""
-        <VoidableUI.Components.accordion_item heading="Section 1">Content</VoidableUI.Components.accordion_item>
+        <VoidableUI.Components.accordion_item><void-accordion-trigger>Section 1</void-accordion-trigger><void-accordion-content>Content</void-accordion-content></VoidableUI.Components.accordion_item>
         """)
 
-      assert html =~ ~s(heading="Section 1")
+      assert html =~ "<void-accordion-trigger>Section 1</void-accordion-trigger>"
     end
 
     test "omits nil-default attributes when not set" do
