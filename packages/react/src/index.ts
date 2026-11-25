@@ -73,6 +73,19 @@ export {
   NavMenuItem,
   PinInput,
   TagsInput,
+  BarChart,
+  LineChart,
+  DonutChart,
+  Gauge,
+} from './components.js';
+
+export type {
+  VoidEvents,
+  BarChartData,
+  LineChartData,
+  DonutChartData,
+  GaugeData,
+  GaugeZone,
 } from './components.js';
 
 export { useTheme } from './use-theme.js';
