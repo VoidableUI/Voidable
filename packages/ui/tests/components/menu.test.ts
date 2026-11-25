@@ -108,14 +108,15 @@ describe('VoidMenu', () => {
       el.remove();
     });
 
-    it('does not render list when closed', () => {
-      expect(el.querySelector('.void-menu-list')).toBeNull();
+    it('hides the list when closed', () => {
+      // The list stays in the DOM so projected items survive close/reopen.
+      expect(el.querySelector<HTMLElement>('.void-menu-list')!.hidden).toBe(true);
     });
 
-    it('renders list when open', async () => {
+    it('shows the list when open', async () => {
       el.open = true;
       await el.updateComplete;
-      expect(el.querySelector('.void-menu-list')).not.toBeNull();
+      expect(el.querySelector<HTMLElement>('.void-menu-list')!.hidden).toBe(false);
     });
 
     it('reflects open attribute', async () => {

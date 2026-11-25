@@ -1,6 +1,7 @@
 import { html, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
+import { ProjectionController } from '../projection.js';
 
 /** Modal overlay for confirmations, detail views, and multi-step forms that require user attention before continuing. */
 export class VoidDialog extends VoidElement {
@@ -9,8 +10,9 @@ export class VoidDialog extends VoidElement {
   @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' | 'xl' = 'md';
   @property({ type: Boolean }) closable = true;
 
-  private _userContent: Node[] = [];
-  private _didSetup = false;
+  protected readonly _projection = new ProjectionController(this, {
+    regions: [{ name: 'body', target: () => this.querySelector(':scope > .void-dialog-backdrop .void-dialog-body') }],
+  });
 
   private _handleKeydown = (e: KeyboardEvent): void => {
     if (e.key === 'Escape' && this.closable) {
@@ -24,9 +26,6 @@ export class VoidDialog extends VoidElement {
     this.setAttribute('aria-modal', 'true');
     if (this.heading) {
       this.setAttribute('aria-label', this.heading);
-    }
-    if (!this._didSetup) {
-      this._userContent = Array.from(this.childNodes);
     }
   }
 
@@ -49,14 +48,6 @@ export class VoidDialog extends VoidElement {
       } else {
         document.body.style.overflow = '';
         document.removeEventListener('keydown', this._handleKeydown);
-      }
-    }
-
-    if (!this._didSetup) {
-      const body = this.querySelector('.void-dialog-body');
-      if (body) {
-        this._didSetup = true;
-        for (const n of this._userContent) body.appendChild(n);
       }
     }
   }
@@ -96,9 +87,9 @@ export class VoidDialog extends VoidElement {
   };
 
   render() {
-    if (!this.open) return nothing;
+    // Always rendered so the projected body survives close/reopen; hidden while closed.
     return html`
-      <div class="void-dialog-backdrop" @click="${this._onBackdropClick}" @keydown="${this._onBackdropKeydown}">
+      <div class="void-dialog-backdrop" ?hidden=${!this.open} @click="${this._onBackdropClick}" @keydown="${this._onBackdropKeydown}">
         <div class="void-dialog-panel">
           <div class="void-dialog-header">
             <span class="void-dialog-heading">${this.heading}</span>

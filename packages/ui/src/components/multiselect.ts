@@ -1,6 +1,7 @@
 import { html, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
+import { ProjectionController } from '../projection.js';
 
 /** Selectable option child element for VoidMultiselect and VoidCombobox. */
 export class VoidOption extends VoidElement {
@@ -22,8 +23,15 @@ export class VoidMultiselect extends VoidElement {
   @property({ type: String, reflect: true }) name = '';
 
   private _open = false;
-  private _options: VoidOption[] = [];
-  private _didSetup = false;
+  // Options stay direct children after the rendered trigger; adding or removing one re-renders the list.
+  protected readonly _projection = new ProjectionController(this, {
+    regions: [{ name: 'options', target: 'after' }],
+    onChange: () => this.requestUpdate(),
+  });
+
+  private get _options(): VoidOption[] {
+    return Array.from(this.querySelectorAll<VoidOption>('void-option'));
+  }
 
   get value(): string[] {
     return this._options.filter(o => o.selected).map(o => o.value);
@@ -31,9 +39,6 @@ export class VoidMultiselect extends VoidElement {
 
   connectedCallback(): void {
     super.connectedCallback();
-    if (!this._didSetup) {
-      this._options = Array.from(this.querySelectorAll('void-option')) as VoidOption[];
-    }
     this.setAttribute('role', 'combobox');
     this.setAttribute('aria-haspopup', 'listbox');
     document.addEventListener('click', this._onDocumentClick);
@@ -48,9 +53,6 @@ export class VoidMultiselect extends VoidElement {
 
   protected override updated(_changed: Map<string, unknown>): void {
     super.updated(_changed);
-    if (!this._didSetup) {
-      this._didSetup = true;
-    }
     this.setAttribute('aria-expanded', String(this._open));
   }
 

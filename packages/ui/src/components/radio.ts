@@ -1,6 +1,7 @@
 import { html } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
+import { ProjectionController } from '../projection.js';
 
 /** Single mutually exclusive option for forms and surveys; typically used inside VoidRadioGroup. */
 export class VoidRadio extends VoidElement {
@@ -11,17 +12,16 @@ export class VoidRadio extends VoidElement {
   @property({ type: String, reflect: true }) color: 'default' | 'error' | 'warning' | 'success' | 'info' | 'notice' = 'default';
   @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' | 'xl' | 'xxl' = 'md';
 
-  private _userContent: Node[] = [];
-  private _didSetup = false;
+  // Consumer label content stays on the host, after the rendered control.
+  protected readonly _projection = new ProjectionController(this, {
+    regions: [{ name: 'label', target: 'after' }],
+  });
 
   connectedCallback(): void {
     super.connectedCallback();
     this.setAttribute('role', 'radio');
     this.setAttribute('tabindex', '0');
     this.setAttribute('aria-checked', String(this.checked));
-    if (!this._didSetup) {
-      this._userContent = Array.from(this.childNodes);
-    }
     this.addEventListener('click', this._handleClick);
     this.addEventListener('keydown', this._handleKeydown);
   }
@@ -40,12 +40,6 @@ export class VoidRadio extends VoidElement {
     if (changed.has('disabled')) {
       this.setAttribute('aria-disabled', String(this.disabled));
       this.setAttribute('tabindex', this.disabled ? '-1' : '0');
-    }
-    if (!this._didSetup) {
-      this._didSetup = true;
-      for (const node of this._userContent) {
-        this.appendChild(node);
-      }
     }
   }
 

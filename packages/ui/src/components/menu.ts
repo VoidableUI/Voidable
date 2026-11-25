@@ -1,6 +1,7 @@
 import { html, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
+import { ProjectionController } from '../projection.js';
 
 /** Always-visible menu panel for command palettes, side panels, and searchable action lists. */
 export class VoidMenu extends VoidElement {
@@ -10,15 +11,13 @@ export class VoidMenu extends VoidElement {
   @property({ type: String }) placeholder = 'Search...';
 
   private _query = '';
-  private _userContent: Node[] = [];
-  private _didSetup = false;
+  protected readonly _projection = new ProjectionController(this, {
+    regions: [{ name: 'list', target: () => this.querySelector(':scope > .void-menu-list') }],
+  });
 
   connectedCallback(): void {
     super.connectedCallback();
     this.setAttribute('role', 'menu');
-    if (!this._didSetup) {
-      this._userContent = Array.from(this.childNodes);
-    }
     document.addEventListener('keydown', this._handleKeydown);
   }
 
@@ -29,14 +28,6 @@ export class VoidMenu extends VoidElement {
 
   protected override updated(changed: Map<string, unknown>): void {
     super.updated(changed);
-
-    if (!this._didSetup) {
-      this._didSetup = true;
-      const list = this.querySelector('.void-menu-list');
-      if (list) {
-        for (const n of this._userContent) list.appendChild(n);
-      }
-    }
 
     if (changed.has('open') && this.open && this.searchable) {
       requestAnimationFrame(() => {
@@ -135,9 +126,9 @@ export class VoidMenu extends VoidElement {
   }
 
   render() {
-    if (!this.open) return nothing;
+    // The list is always rendered so projected items survive close/reopen; hidden while closed.
     return html`
-      ${this.searchable ? html`
+      ${this.open && this.searchable ? html`
         <input
           class="void-menu-search"
           type="text"
@@ -146,7 +137,7 @@ export class VoidMenu extends VoidElement {
           @input=${this._onSearchInput}
         />
       ` : nothing}
-      <div class="void-menu-list" role="listbox" aria-label="Menu options"></div>
+      <div class="void-menu-list" role="listbox" aria-label="Menu options" ?hidden=${!this.open}></div>
     `;
   }
 }
@@ -161,7 +152,9 @@ export class VoidMenuItem extends VoidElement {
   @property({ type: String }) shortcut = '';
   @property({ type: String }) icon = '';
 
-  private _originalContent: Node[] | null = null;
+  protected readonly _projection = new ProjectionController(this, {
+    regions: [{ name: 'label', target: () => this.querySelector(':scope > .void-menu-item-label') }],
+  });
 
   connectedCallback(): void {
     super.connectedCallback();
@@ -169,11 +162,6 @@ export class VoidMenuItem extends VoidElement {
     this.setAttribute('tabindex', this.disabled ? '-1' : '0');
     this.addEventListener('click', this._handleClick);
     this.addEventListener('keydown', this._handleKeydown);
-
-    if (this._originalContent === null) {
-      this._originalContent = Array.from(this.childNodes).map(n => n.cloneNode(true));
-    }
-    this._buildContent();
   }
 
   disconnectedCallback(): void {
@@ -183,43 +171,16 @@ export class VoidMenuItem extends VoidElement {
   }
 
   updated(changed: Map<string, unknown>): void {
+    super.updated(changed);
     if (changed.has('disabled')) {
       this.setAttribute('tabindex', this.disabled ? '-1' : '0');
       this.setAttribute('aria-disabled', String(this.disabled));
     }
   }
 
-  private _buildContent(): void {
-    // Only restructure if we have icon or shortcut
-    if (!this.icon && !this.shortcut) return;
-
-    const fragment = document.createDocumentFragment();
-
-    if (this.icon) {
-      const iconEl = document.createElement('span');
-      iconEl.className = 'void-menu-item-icon';
-      iconEl.textContent = this.icon;
-      fragment.appendChild(iconEl);
-    }
-
-    const labelEl = document.createElement('span');
-    labelEl.className = 'void-menu-item-label';
-    if (this._originalContent) {
-      for (const n of this._originalContent) {
-        labelEl.appendChild(n.cloneNode(true));
-      }
-    }
-    fragment.appendChild(labelEl);
-
-    if (this.shortcut) {
-      const shortcutEl = document.createElement('span');
-      shortcutEl.className = 'void-menu-item-shortcut';
-      shortcutEl.textContent = this.shortcut;
-      fragment.appendChild(shortcutEl);
-    }
-
-    this.textContent = '';
-    this.appendChild(fragment);
+  render() {
+    // The label wrapper is always rendered: it is the stable container consumer content is projected into.
+    return html`${this.icon ? html`<span class="void-menu-item-icon">${this.icon}</span>` : nothing}<span class="void-menu-item-label"></span>${this.shortcut ? html`<span class="void-menu-item-shortcut">${this.shortcut}</span>` : nothing}`;
   }
 
   private _handleClick = (e: Event): void => {
@@ -249,8 +210,9 @@ if (!customElements.get('void-menu-item')) {
 export class VoidMenuGroup extends VoidElement {
   @property({ type: String, reflect: true }) label = '';
 
-  private _userContent: Node[] = [];
-  private _didSetup = false;
+  protected readonly _projection = new ProjectionController(this, {
+    regions: [{ name: 'items', target: () => this.querySelector(':scope > .void-menu-group-items') }],
+  });
 
   connectedCallback(): void {
     super.connectedCallback();
@@ -258,22 +220,12 @@ export class VoidMenuGroup extends VoidElement {
     if (this.label) {
       this.setAttribute('aria-label', this.label);
     }
-    if (!this._didSetup) {
-      this._userContent = Array.from(this.childNodes);
-    }
   }
 
   protected override updated(changed: Map<string, unknown>): void {
     super.updated(changed);
     if (changed.has('label') && this.label) {
       this.setAttribute('aria-label', this.label);
-    }
-    if (!this._didSetup) {
-      this._didSetup = true;
-      const container = this.querySelector('.void-menu-group-items');
-      if (container) {
-        for (const n of this._userContent) container.appendChild(n);
-      }
     }
   }
 

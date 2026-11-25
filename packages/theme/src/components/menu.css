@@ -39,6 +39,11 @@ void-menu[open] {
   overflow-y: auto;
 }
 
+/* Closed: the component keeps this element rendered and sets [hidden]. */
+.void-menu-list[hidden] {
+  display: none;
+}
+
 /* ── Menu item ── */
 void-menu-item {
   display: flex;

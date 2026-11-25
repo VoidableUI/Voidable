@@ -137,16 +137,17 @@ describe('VoidDrawer', () => {
       el.remove();
     });
 
-    it('renders nothing when closed', () => {
-      expect(el.querySelector('.void-drawer-backdrop')).toBeNull();
-      expect(el.querySelector('.void-drawer-panel')).toBeNull();
+    it('hides backdrop and panel when closed', () => {
+      // They stay in the DOM so projected content survives close/reopen.
+      expect(el.querySelector<HTMLElement>('.void-drawer-backdrop')!.hidden).toBe(true);
+      expect(el.querySelector<HTMLElement>('.void-drawer-panel')!.hidden).toBe(true);
     });
 
     it('renders backdrop and panel when open', async () => {
       el.open = true;
       await el.updateComplete;
-      expect(el.querySelector('.void-drawer-backdrop')).not.toBeNull();
-      expect(el.querySelector('.void-drawer-panel')).not.toBeNull();
+      expect(el.querySelector<HTMLElement>('.void-drawer-backdrop')!.hidden).toBe(false);
+      expect(el.querySelector<HTMLElement>('.void-drawer-panel')!.hidden).toBe(false);
     });
 
     it('renders heading when heading is set', async () => {

@@ -1,46 +1,49 @@
+import { html } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
+import { ProjectionController, triggerRegion } from '../projection.js';
 
 /** Trigger-anchored action menu for table row actions, toolbar overflow menus, and context menus. */
 export class VoidDropdownMenu extends VoidElement {
   @property({ type: Boolean, reflect: true }) open = false;
   @property({ type: String, reflect: true }) position: 'bottom-start' | 'bottom-end' | 'top-start' | 'top-end' = 'bottom-start';
 
-  private _triggerEl: Element | null = null;
-  private _panel: HTMLDivElement | null = null;
+  // The trigger (slot="trigger", else the first element child) stays before the panel; everything else goes into the panel.
+  protected readonly _projection: ProjectionController = new ProjectionController(this, {
+    regions: [
+      triggerRegion('trigger', 'before', () => this._projection, this),
+      { name: 'panel', target: () => this.querySelector(':scope > .void-dropdown-menu-panel') },
+    ],
+  });
+
+  private get _triggerEl(): Element | null {
+    return (this._projection.nodes('trigger').find(n => n instanceof Element) as Element | undefined) ?? null;
+  }
 
   connectedCallback(): void {
     super.connectedCallback();
-
-    this._triggerEl = this.children[0] ?? null;
-
-    this._panel = document.createElement('div');
-    this._panel.className = 'void-dropdown-menu-panel';
-    this._panel.setAttribute('role', 'menu');
-
-    const nodes = Array.from(this.childNodes);
-    for (const node of nodes) {
-      if (node !== this._triggerEl) {
-        this._panel.appendChild(node);
-      }
-    }
-
-    this.appendChild(this._panel);
-
-    this._triggerEl?.addEventListener('click', this._handleTriggerClick);
+    // Delegated on the host so a replaced trigger keeps working and reconnects never stack listeners.
+    this.addEventListener('click', this._handleTriggerClick);
     document.addEventListener('mousedown', this._handleOutsideClick);
     document.addEventListener('keydown', this._handleKeydown);
   }
 
   disconnectedCallback(): void {
     super.disconnectedCallback();
-    this._triggerEl?.removeEventListener('click', this._handleTriggerClick);
+    this.removeEventListener('click', this._handleTriggerClick);
     document.removeEventListener('mousedown', this._handleOutsideClick);
     document.removeEventListener('keydown', this._handleKeydown);
   }
 
-  private _handleTriggerClick = (): void => {
-    this.open = !this.open;
+  render() {
+    return html`<div class="void-dropdown-menu-panel" role="menu" ?hidden=${!this.open}></div>`;
+  }
+
+  private _handleTriggerClick = (e: Event): void => {
+    const trigger = this._triggerEl;
+    if (trigger && trigger.contains(e.target as Node)) {
+      this.open = !this.open;
+    }
   };
 
   private _handleOutsideClick = (e: MouseEvent): void => {

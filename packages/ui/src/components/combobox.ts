@@ -1,6 +1,7 @@
 import { html, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
+import { ProjectionController } from '../projection.js';
 import { VoidOption } from './multiselect.js';
 
 /** Filterable dropdown for long option lists like country selectors, user assignment fields, and tag pickers. */
@@ -14,11 +15,18 @@ export class VoidCombobox extends VoidElement {
 
   private _open = false;
   private _query = '';
-  private _options: VoidOption[] = [];
+  // Options stay direct children after the rendered input; adding or removing one re-renders the list.
+  protected readonly _projection = new ProjectionController(this, {
+    regions: [{ name: 'options', target: 'after' }],
+    onChange: () => this.requestUpdate(),
+  });
+
+  private get _options(): VoidOption[] {
+    return Array.from(this.querySelectorAll<VoidOption>('void-option'));
+  }
 
   connectedCallback(): void {
     super.connectedCallback();
-    this._options = Array.from(this.querySelectorAll<VoidOption>('void-option'));
     this.setAttribute('role', 'combobox');
     this.setAttribute('aria-autocomplete', 'list');
     document.addEventListener('click', this._onDocumentClick);

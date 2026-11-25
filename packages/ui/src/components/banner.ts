@@ -1,6 +1,7 @@
 import { html, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
+import { ProjectionController } from '../projection.js';
 
 /** Full-width site-level announcement for maintenance windows, cookie consent, and promotional messaging. */
 export class VoidBanner extends VoidElement {
@@ -8,25 +9,14 @@ export class VoidBanner extends VoidElement {
   @property({ type: Boolean, reflect: true }) dismissable = false;
   @property({ type: String, reflect: true }) variant: 'subtle' | 'filled' = 'subtle';
 
-  private _userContent: Node[] = [];
-  private _didSetup = false;
+  // Consumer content stays on the host, after the rendered close button.
+  protected readonly _projection = new ProjectionController(this, {
+    regions: [{ name: 'content', target: 'after' }],
+  });
 
   connectedCallback(): void {
     super.connectedCallback();
     this.setAttribute('role', 'banner');
-    if (!this._didSetup) {
-      this._userContent = Array.from(this.childNodes);
-    }
-  }
-
-  protected override updated(_changed: Map<string, unknown>): void {
-    super.updated(_changed);
-    if (!this._didSetup) {
-      this._didSetup = true;
-      for (const node of this._userContent) {
-        this.appendChild(node);
-      }
-    }
   }
 
   private _close(): void {

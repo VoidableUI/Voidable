@@ -1,5 +1,7 @@
+import { html } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
+import { ProjectionController, triggerRegion } from '../projection.js';
 
 /** Anchored overlay for contextual detail and mini-forms that need more room than a tooltip. */
 export class VoidPopover extends VoidElement {
@@ -8,53 +10,40 @@ export class VoidPopover extends VoidElement {
   @property({ type: String, reflect: true }) align: 'start' | 'center' | 'end' = 'start';
   @property({ type: String, reflect: true }) trigger: 'click' | 'manual' = 'click';
 
-  private _triggerEl: Element | null = null;
-  private _contentNodes: Node[] = [];
-  private _didSetup = false;
+  // The trigger (slot="trigger", else the first element child) stays the host's first child; everything else goes into the body.
+  protected readonly _projection: ProjectionController = new ProjectionController(this, {
+    regions: [
+      triggerRegion('trigger', 'before', () => this._projection, this),
+      { name: 'body', target: () => this.querySelector(':scope > .void-popover-body') },
+    ],
+  });
+
+  private get _triggerEl(): Element | null {
+    return (this._projection.nodes('trigger').find(n => n instanceof Element) as Element | undefined) ?? null;
+  }
 
   connectedCallback(): void {
     super.connectedCallback();
-    if (!this._didSetup) {
-      this._triggerEl = this.children[0] ?? null;
-      this._contentNodes = Array.from(this.childNodes).filter(n => n !== this._triggerEl);
-    }
+    // Delegated on the host so a replaced trigger keeps working and reconnects never stack listeners.
+    this.addEventListener('click', this._handleTriggerClick);
     document.addEventListener('mousedown', this._handleOutsideClick);
     document.addEventListener('keydown', this._handleKeydown);
   }
 
   disconnectedCallback(): void {
     super.disconnectedCallback();
+    this.removeEventListener('click', this._handleTriggerClick);
     document.removeEventListener('mousedown', this._handleOutsideClick);
     document.removeEventListener('keydown', this._handleKeydown);
   }
 
-  protected override updated(changed: Map<string, unknown>): void {
-    super.updated(changed);
-    if (!this._didSetup) {
-      this._didSetup = true;
-      if (this._triggerEl) {
-        this.appendChild(this._triggerEl);
-        if (this.trigger === 'click') {
-          this._triggerEl.addEventListener('click', this._handleTriggerClick);
-        }
-      }
-      const body = document.createElement('div');
-      body.className = 'void-popover-body';
-      for (const node of this._contentNodes) {
-        body.appendChild(node);
-      }
-      this.appendChild(body);
-    }
-
-    if (changed.has('trigger') && this._triggerEl) {
-      this._triggerEl.removeEventListener('click', this._handleTriggerClick);
-      if (this.trigger === 'click') {
-        this._triggerEl.addEventListener('click', this._handleTriggerClick);
-      }
-    }
+  render() {
+    return html`<div class="void-popover-body"></div>`;
   }
 
-  private _handleTriggerClick = (): void => {
+  private _handleTriggerClick = (e: Event): void => {
+    const trigger = this._triggerEl;
+    if (this.trigger !== 'click' || !trigger || !trigger.contains(e.target as Node)) return;
     this.open = !this.open;
     if (!this.open) {
       this._dispatchClose();

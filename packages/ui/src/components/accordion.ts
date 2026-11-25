@@ -1,6 +1,7 @@
 import { html } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
+import { ProjectionController } from '../projection.js';
 
 /** Collapsible section container for FAQs, settings panels, and long-form content organized into expandable items. */
 export class VoidAccordion extends VoidElement {
@@ -17,28 +18,10 @@ export class VoidAccordionItem extends VoidElement {
   @property({ type: Boolean, reflect: true }) open = false;
 
   private _id = Math.random().toString(36).slice(2);
-  private _userContent: Node[] = [];
-  private _didSetup = false;
-
-  connectedCallback(): void {
-    super.connectedCallback();
-    if (!this._didSetup) {
-      this._userContent = Array.from(this.childNodes);
-    }
-  }
-
-  protected override updated(changed: Map<string, unknown>): void {
-    super.updated(changed);
-    if (!this._didSetup) {
-      this._didSetup = true;
-      const content = this.querySelector('.void-accordion-content');
-      if (content) {
-        for (const node of this._userContent) {
-          content.appendChild(node);
-        }
-      }
-    }
-  }
+  // Consumer content is projected into the collapsible content region.
+  protected readonly _projection = new ProjectionController(this, {
+    regions: [{ name: 'content', target: () => this.querySelector(':scope > .void-accordion-content') }],
+  });
 
   private _handleClick = (e: Event): void => {
     e.preventDefault();

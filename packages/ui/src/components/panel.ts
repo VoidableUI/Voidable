@@ -1,23 +1,23 @@
 import { html, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
+import { ProjectionController } from '../projection.js';
 
 /** Bordered or elevated content region for grouping related settings, dashboard sections, and detail blocks. */
 export class VoidPanel extends VoidElement {
   @property({ type: String, reflect: true }) label = '';
   @property({ type: String, reflect: true }) variant: 'default' | 'bordered' | 'elevated' = 'default';
 
-  private _userContent: Node[] = [];
-  private _didSetup = false;
+  // Consumer content stays on the host, after the rendered label.
+  protected readonly _projection = new ProjectionController(this, {
+    regions: [{ name: 'content', target: 'after' }],
+  });
 
   connectedCallback(): void {
     super.connectedCallback();
     this.setAttribute('role', 'region');
     if (this.label) {
       this.setAttribute('aria-label', this.label);
-    }
-    if (!this._didSetup) {
-      this._userContent = Array.from(this.childNodes);
     }
   }
 
@@ -28,12 +28,6 @@ export class VoidPanel extends VoidElement {
         this.setAttribute('aria-label', this.label);
       } else {
         this.removeAttribute('aria-label');
-      }
-    }
-    if (!this._didSetup) {
-      this._didSetup = true;
-      for (const node of this._userContent) {
-        this.appendChild(node);
       }
     }
   }

@@ -1,5 +1,7 @@
+import { html } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
+import { ProjectionController, triggerRegion } from '../projection.js';
 
 /** Rich content preview card that appears on hover for user profiles, link previews, and contextual information panels. */
 export class VoidHoverCard extends VoidElement {
@@ -8,18 +10,18 @@ export class VoidHoverCard extends VoidElement {
   @property({ type: Number, attribute: 'open-delay' }) openDelay = 300;
   @property({ type: Number, attribute: 'close-delay' }) closeDelay = 300;
 
-  private _triggerEl: Element | null = null;
-  private _contentNodes: Node[] = [];
-  private _didSetup = false;
+  // The trigger (slot="trigger", else the first element child) goes into the trigger wrapper; everything else goes into the body.
+  protected readonly _projection: ProjectionController = new ProjectionController(this, {
+    regions: [
+      triggerRegion('trigger', () => this.querySelector(':scope > .void-hover-card-trigger'), () => this._projection, this),
+      { name: 'body', target: () => this.querySelector(':scope > .void-hover-card-body') },
+    ],
+  });
   private _openTimerId: ReturnType<typeof setTimeout> | undefined;
   private _closeTimerId: ReturnType<typeof setTimeout> | undefined;
 
   connectedCallback(): void {
     super.connectedCallback();
-    if (!this._didSetup) {
-      this._triggerEl = this.children[0] ?? null;
-      this._contentNodes = Array.from(this.childNodes).filter(n => n !== this._triggerEl);
-    }
     document.addEventListener('keydown', this._handleKeydown);
   }
 
@@ -30,42 +32,24 @@ export class VoidHoverCard extends VoidElement {
     document.removeEventListener('keydown', this._handleKeydown);
   }
 
-  protected override updated(changed: Map<string, unknown>): void {
-    super.updated(changed);
-    if (!this._didSetup) {
-      this._didSetup = true;
-
-      if (this._triggerEl) {
-        const wrapper = document.createElement('div');
-        wrapper.className = 'void-hover-card-trigger';
-        wrapper.setAttribute('aria-haspopup', 'dialog');
-        wrapper.setAttribute('aria-expanded', String(this.open));
-        wrapper.appendChild(this._triggerEl);
-        wrapper.addEventListener('mouseenter', this._onTriggerEnter);
-        wrapper.addEventListener('mouseleave', this._onTriggerLeave);
-        wrapper.addEventListener('focusin', this._onFocusIn);
-        wrapper.addEventListener('focusout', this._onFocusOut);
-        this.appendChild(wrapper);
-      }
-
-      const body = document.createElement('div');
-      body.className = 'void-hover-card-body';
-      body.setAttribute('role', 'dialog');
-      body.addEventListener('mouseenter', this._onBodyEnter);
-      body.addEventListener('mouseleave', this._onBodyLeave);
-      for (const node of this._contentNodes) {
-        body.appendChild(node);
-      }
-      this.appendChild(body);
-    }
-
-    if (changed.has('open')) {
-      const wrapper = this.querySelector('.void-hover-card-trigger');
-      if (wrapper) {
-        wrapper.setAttribute('aria-expanded', String(this.open));
-      }
-    }
+  // The body carried role="dialog" without a name before it moved into this template; naming it is
+  // ARIA work tracked separately (#7), so the rule is suspended here rather than changing semantics.
+  /* eslint-disable lit-a11y/accessible-name */
+  render() {
+    return html`
+      <div
+        class="void-hover-card-trigger"
+        aria-haspopup="dialog"
+        aria-expanded=${String(this.open)}
+        @mouseenter=${this._onTriggerEnter}
+        @mouseleave=${this._onTriggerLeave}
+        @focusin=${this._onFocusIn}
+        @focusout=${this._onFocusOut}
+      ></div>
+      <div class="void-hover-card-body" role="dialog" @mouseenter=${this._onBodyEnter} @mouseleave=${this._onBodyLeave}></div>
+    `;
   }
+  /* eslint-enable lit-a11y/accessible-name */
 
   private _onTriggerEnter = (): void => {
     clearTimeout(this._closeTimerId);
