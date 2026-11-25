@@ -6,7 +6,6 @@
 // browser context and so a new Rails session with the default lab state.
 import { test as base, expect, type Page } from '@playwright/test';
 import { typeFast, withoutMoveBefore } from '../shared';
-import { expectedFailure } from '../../helpers/test';
 
 const test = base.extend<{ errors: string[] }>({
   errors: [
@@ -180,7 +179,6 @@ test('an open dialog keeps its dialog role and name through a refresh morph', as
 });
 
 test('server changes win: selected value, new options, and a dialog the server opens and closes', async ({ page }) => {
-  expectedFailure('untracked:turbo-server-open-dialog-ignored', 'a refresh morph whose HTML adds `open` to a closed void-dialog leaves it closed: the attribute and the property stay false, though the response contains <void-dialog open>');
   // The native select inside void-select, located directly: its field label is checked in the controls test above.
   const select = page.locator('#lab-select select');
   await server(page, '#lab-select-c');

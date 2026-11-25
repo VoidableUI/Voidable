@@ -28,9 +28,15 @@ type Morphable = Element & {
   voidUnchanged?: (incoming: Element) => boolean;
 };
 
+const started = new WeakMap<Document, () => void>();
+
 export const VoidTurbo = {
   /** Start listening. Returns a function that removes the listener. */
   start(target: Document = document): () => void {
+    // Idempotent: a second start() on the same document (an app that starts it
+    // in two entry points) shares the first listener.
+    const running = started.get(target);
+    if (running) return running;
     const onBeforeMorphElement = ((event: CustomEvent<{ newElement?: Element }>) => {
       const el = event.target as Morphable;
       const next = event.detail?.newElement;
@@ -46,6 +52,11 @@ export const VoidTurbo = {
     }) as EventListener;
 
     target.addEventListener('turbo:before-morph-element', onBeforeMorphElement);
-    return () => target.removeEventListener('turbo:before-morph-element', onBeforeMorphElement);
+    const stop = () => {
+      target.removeEventListener('turbo:before-morph-element', onBeforeMorphElement);
+      started.delete(target);
+    };
+    started.set(target, stop);
+    return stop;
   },
 };

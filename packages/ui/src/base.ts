@@ -115,6 +115,9 @@ type DevHook = { report?: (warning: { kind: string; tag: string; subject: string
  *   {@link VoidElement.clientState}; groups re-apply state they keep in their
  *   children in {@link morphedCallback}.
  */
+/** Incoming elements whose state rule a host has applied, so a repeated call with the same one is a no-op. */
+const reconciled = new WeakMap<Element, Element>();
+
 export class VoidElement extends LitElement {
   /** @internal The element's projection controller (see ProjectionController). */
   declare [PROJECTION_KEY]?: ProjectionController;
@@ -595,7 +598,14 @@ export class VoidElement extends LitElement {
         }
         this.#applyHostLabel();
       }
-      this.#reconcileIncoming(incoming, copy);
+      // The same incoming element twice (two adapters or listeners on one
+      // morph, as `VoidTurbo.start()` called twice): the second call must not
+      // compare it with the baseline the first one recorded from it, which
+      // would read every server change as "unchanged" and undo it.
+      if (reconciled.get(incoming) !== this) {
+        reconciled.set(incoming, this);
+        this.#reconcileIncoming(incoming, copy);
+      }
       this.#carryOwnedAttributes(incoming);
     }
     // This element is itself such a copy, being morphed while detached.
