@@ -19,7 +19,7 @@ void-bar-chart svg {
 /* Gridlines */
 void-bar-chart .void-bar-chart-grid line {
   stroke: var(--void-chart-grid);
-  stroke-width: 1;
+  stroke-width: var(--void-chart-stroke-hairline);
   shape-rendering: crispEdges;
 }
 
@@ -48,14 +48,14 @@ void-bar-chart .void-bar-chart-bar {
 void-bar-chart[variant="outline"] .void-bar-chart-bar {
   fill: color-mix(in srgb, var(--series-color, var(--void-color-accent)) 18%, transparent);
   stroke: var(--series-color, var(--void-color-accent));
-  stroke-width: 1.5;
+  stroke-width: var(--void-chart-stroke-thin);
 }
 
 /* 'wireframe' variant — stroke only, no fill */
 void-bar-chart[variant="wireframe"] .void-bar-chart-bar {
   fill: none;
   stroke: var(--series-color, var(--void-color-accent));
-  stroke-width: 1.5;
+  stroke-width: var(--void-chart-stroke-thin);
 }
 
 /* Value labels above bars */

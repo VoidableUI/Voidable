@@ -250,6 +250,13 @@
   --void-chart-axis:       var(--void-color-border-strong);
   --void-chart-tick-label: var(--void-color-text-muted);
 
+  /* Chart stroke widths (SVG user units) */
+  --void-chart-stroke-none:     0;
+  --void-chart-stroke-hairline: 1;
+  --void-chart-stroke-thin:     1.5;
+  --void-chart-stroke-medium:   2;
+  --void-chart-stroke-thick:    3px;
+
   /* ── Motion — easings ── */
   --void-ease-in:     cubic-bezier(0.4, 0, 1, 0.2);
   --void-ease-out:    cubic-bezier(0, 0, 0.2, 1);

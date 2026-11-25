@@ -22,19 +22,19 @@ void-donut-chart svg {
 void-donut-chart .void-donut-chart-segment {
   fill: var(--segment-color, var(--void-color-accent));
   stroke: var(--segment-color, var(--void-color-accent));
-  stroke-width: 0;
+  stroke-width: var(--void-chart-stroke-none);
 }
 
 /* 'outline' variant — tinted fill + stroke */
 void-donut-chart[variant="outline"] .void-donut-chart-segment {
   fill: color-mix(in srgb, var(--segment-color, var(--void-color-accent)) 18%, transparent);
-  stroke-width: 1.5;
+  stroke-width: var(--void-chart-stroke-thin);
 }
 
 /* 'wireframe' variant — stroke only */
 void-donut-chart[variant="wireframe"] .void-donut-chart-segment {
   fill: none;
-  stroke-width: 1.5;
+  stroke-width: var(--void-chart-stroke-thin);
 }
 
 /* Center total (when show-total) */
@@ -59,7 +59,7 @@ void-donut-chart .void-donut-chart-labels text {
   letter-spacing: var(--void-tracking-wide);
   paint-order: stroke;
   stroke: var(--void-color-bg);
-  stroke-width: 3px;
+  stroke-width: var(--void-chart-stroke-thick);
   stroke-linejoin: round;
   stroke-linecap: round;
   pointer-events: none;
@@ -70,7 +70,7 @@ void-donut-chart .void-donut-chart-labels text {
 void-donut-chart .void-donut-chart-tooltip-bg {
   fill: var(--void-color-bg-elevated);
   stroke: var(--void-color-border);
-  stroke-width: 1;
+  stroke-width: var(--void-chart-stroke-hairline);
 }
 
 void-donut-chart .void-donut-chart-tooltip-name {

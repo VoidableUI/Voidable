@@ -18,7 +18,7 @@ void-line-chart svg {
 
 void-line-chart .void-line-chart-grid line {
   stroke: var(--void-chart-grid);
-  stroke-width: 1;
+  stroke-width: var(--void-chart-stroke-hairline);
   shape-rendering: crispEdges;
 }
 
@@ -40,7 +40,7 @@ void-line-chart .void-line-chart-series {
 void-line-chart .void-line-chart-line {
   fill: none;
   stroke: var(--series-color, var(--void-color-accent));
-  stroke-width: 2;
+  stroke-width: var(--void-chart-stroke-medium);
   stroke-linejoin: round;
   stroke-linecap: round;
 }
@@ -79,7 +79,7 @@ void-line-chart .void-line-chart-values text {
 /* Vertical hairline at the hovered x */
 void-line-chart .void-line-chart-hairline {
   stroke: var(--void-color-border-strong);
-  stroke-width: 1;
+  stroke-width: var(--void-chart-stroke-hairline);
   stroke-dasharray: 3 3;
   pointer-events: none;
 }
@@ -88,7 +88,7 @@ void-line-chart .void-line-chart-hairline {
 void-line-chart .void-line-chart-marker {
   fill: var(--void-color-bg);
   stroke: var(--marker-color, var(--void-color-accent));
-  stroke-width: 2;
+  stroke-width: var(--void-chart-stroke-medium);
   rx: 2;
   ry: 2;
   pointer-events: none;
@@ -98,7 +98,7 @@ void-line-chart .void-line-chart-marker {
 void-line-chart .void-line-chart-tooltip-bg {
   fill: var(--void-color-bg-elevated);
   stroke: var(--void-color-border);
-  stroke-width: 1;
+  stroke-width: var(--void-chart-stroke-hairline);
   pointer-events: none;
 }
 
