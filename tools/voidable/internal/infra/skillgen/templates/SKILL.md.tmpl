@@ -215,7 +215,7 @@ Components communicate with `CustomEvent`s named `void-*` that bubble and carry 
 | Solid | `on:void-change={handler}` |
 | Alpine | `x-on:void-change="value = $event.detail.value"` |
 | Stimulus / Hotwire | `data-action="void-change->my-controller#handle"` |
-| Phoenix LiveView | `phx-hook="VoidEvent"` with `data-void-events="void-change"`, or the generated HEEx components |
+| Phoenix LiveView | `phx-click` / `phx-change` / `phx-submit` first; else `events={["void-change"]}` on the HEEx component (or `phx-hook="VoidEvent"` with `data-void-events="void-change"` on a plain tag) |
 
 ## Plausible but wrong
 

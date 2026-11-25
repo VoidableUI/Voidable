@@ -39,14 +39,16 @@ func TestGenerate(t *testing.T) {
 			"attr :open_delay, :any, default: nil",
 			"open-delay={@open_delay}",
 			`id={@id || "void-hover-card-#{unique_id()}"}`,
-			`data-void-events="void-open,void-close"`,
-			"attr :closable, :boolean, default: true",
-			"closable={to_string(@closable)}", // converter reads "false": never drop the attribute
+			`data-void-events={void_events(@events, "void-open,void-close")}`,
+			"phx-hook={void_hook(@events)}",
+			"attr :events, :any, default: nil",
+			"attr :closable, :boolean, default: nil",
+			"closable={@closable != nil && to_string(@closable)}", // written only when set, as "true" or "false"
 			"attr :trend, :string, default: nil\n", // nullable enum: no values
 		}},
 		{"blade", 3, "resources/views/components/dialog.blade.php", []string{
-			"'closable' => true, // boolean",
-			`closable="{{ $closable ? 'true' : 'false' }}"`,
+			"'closable' => null, // boolean",
+			`@if(!is_null($closable)) closable="{{ $closable ? 'true' : 'false' }}" @endif`,
 			`@if(!is_null($trend)) trend="{{ $trend }}" @endif`,
 			"{{ $attributes }}",
 		}},

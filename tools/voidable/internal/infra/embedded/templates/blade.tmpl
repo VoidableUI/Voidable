@@ -13,7 +13,7 @@
 <{{.Tag}}
 {{- range .Attributes}}
 {{- if .FalseString}}
-    {{.Name}}="{{"{{"}} ${{camel .Name}} ? 'true' : 'false' {{"}}"}}"
+    @if(!is_null(${{camel .Name}})) {{.Name}}="{{"{{"}} ${{camel .Name}} ? 'true' : 'false' {{"}}"}}" @endif
 {{- else if isBool .}}
     @if(${{camel .Name}}) {{.Name}} @endif
 {{- else}}
