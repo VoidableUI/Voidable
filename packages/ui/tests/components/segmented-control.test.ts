@@ -65,23 +65,23 @@ describe('VoidSegmentedControlItem', () => {
     expect(el.hasAttribute('disabled')).toBe(true);
   });
 
-  it('has role="radio" and is focusable', async () => {
+  it('has role="radio" and aria-checked="false" on its own', async () => {
     const el = document.createElement(ITEM) as VoidSegmentedControlItem;
     document.body.appendChild(el);
     await el.updateComplete;
     expect(el.getAttribute('role')).toBe('radio');
-    expect(el.getAttribute('tabindex')).toBe('0');
+    expect(el.getAttribute('aria-checked')).toBe('false');
+    expect(el.getAttribute('tabindex')).toBe('-1');
   });
 
-  it('removes itself from the tab order when disabled', async () => {
-    const el = document.createElement(ITEM) as VoidSegmentedControlItem;
-    el.disabled = true;
-    document.body.appendChild(el);
-    await el.updateComplete;
-    expect(el.getAttribute('tabindex')).toBe('-1');
-    el.disabled = false;
-    await el.updateComplete;
-    expect(el.getAttribute('tabindex')).toBe('0');
+  it('is focusable by script but not a tab stop when disabled, and exposes aria-disabled', async () => {
+    const el = await mount({ value: 'a' }, [{ value: 'a' }, { value: 'b', disabled: true }]);
+    const b = itemsOf(el)[1]!;
+    expect(b.getAttribute('tabindex')).toBe('-1');
+    expect(b.getAttribute('aria-disabled')).toBe('true');
+    b.disabled = false;
+    await b.updateComplete;
+    expect(b.hasAttribute('aria-disabled')).toBe(false);
   });
 });
 
@@ -147,10 +147,7 @@ describe('VoidSegmentedControl', () => {
       expect(checked(el)).toEqual(['false', 'false', 'false']);
     });
 
-    // BUG: aria-checked is only synchronised on connect and when `value` changes, so an item
-    // added afterwards (e.g. framework rendering items late) has no aria-checked at all, even
-    // if it is the selected one. segmented-control.ts:49-54. Expected: late items are synced.
-    it.fails('syncs aria-checked on items added after connect', async () => {
+    it('syncs aria-checked on items added after connect', async () => {
       const el = await mount({ value: 'late' }, [{ value: 'a' }]);
       const item = document.createElement(ITEM) as VoidSegmentedControlItem;
       item.value = 'late';
@@ -160,12 +157,44 @@ describe('VoidSegmentedControl', () => {
       expect(item.getAttribute('aria-checked')).toBe('true');
     });
 
-    // BUG: every enabled item keeps tabindex="0", so Tab walks through every segment. A radiogroup
-    // should expose a single tab stop (roving tabindex) with arrows moving selection.
-    // segmented-control.ts:14 / :27. Expected: only the checked item has tabindex 0.
-    it.fails('uses a single tab stop (roving tabindex) for the checked item', async () => {
+    it('uses a single tab stop (roving tabindex) for the checked item', async () => {
       const el = await mount({ value: 'b' });
       expect(itemsOf(el).map((i) => i.getAttribute('tabindex'))).toEqual(['-1', '0', '-1']);
+    });
+
+    it('makes the first enabled item the tab stop when nothing is checked', async () => {
+      const el = await mount({}, [{ value: 'a', disabled: true }, { value: 'b' }, { value: 'c' }]);
+      expect(itemsOf(el).map((i) => i.getAttribute('tabindex'))).toEqual(['-1', '0', '-1']);
+    });
+
+    it('moves the tab stop with the selection', async () => {
+      const el = await mount({ value: 'a' });
+      itemsOf(el)[2]!.click();
+      expect(itemsOf(el).map((i) => i.getAttribute('tabindex'))).toEqual(['-1', '-1', '0']);
+    });
+
+    it('moves the tab stop when the checked item is removed', async () => {
+      const el = await mount({ value: 'b' });
+      itemsOf(el)[1]!.remove();
+      await new Promise((r) => setTimeout(r));
+      expect(itemsOf(el).map((i) => i.getAttribute('tabindex'))).toEqual(['0', '-1']);
+    });
+
+    it('has first-paint state the moment an item connects (no await)', () => {
+      const el = document.createElement(TAG) as VoidSegmentedControl;
+      el.setAttribute('value', 'b');
+      document.body.appendChild(el);
+      const item = document.createElement(ITEM) as VoidSegmentedControlItem;
+      item.setAttribute('value', 'b');
+      el.appendChild(item);
+      // (happy-dom runs connectedCallback before the item is findable from its parent, so the
+      // roving tab stop is only asserted in the browser probes; aria-checked comes from the group.)
+      expect(item.getAttribute('aria-checked')).toBe('true');
+    });
+
+    it('takes every item out of the tab order when the group is disabled', async () => {
+      const el = await mount({ value: 'b', disabled: true });
+      expect(itemsOf(el).map((i) => i.getAttribute('tabindex'))).toEqual(['-1', '-1', '-1']);
     });
   });
 
@@ -284,12 +313,34 @@ describe('VoidSegmentedControl', () => {
       expect(el.value).toBe('a');
     });
 
-    // BUG: with no selection (current index -1) ArrowLeft computes (-1 - 1 + n) % n, landing on
-    // the second-to-last item instead of the last. segmented-control.ts:89. Expected: last item.
-    it.fails('selects the last item on ArrowLeft when nothing is selected', async () => {
+    it('selects the last item on ArrowLeft when nothing is selected', async () => {
       const el = await mount();
       press(el, 'ArrowLeft');
       expect(el.value).toBe('c');
+    });
+
+    it('moves from the focused item, not from the checked one', async () => {
+      const el = await mount({ value: 'a' });
+      const items = itemsOf(el);
+      items[2]!.focus();
+      press(items[2]!, 'ArrowLeft');
+      expect(el.value).toBe('b');
+      expect(document.activeElement).toBe(items[1]);
+    });
+
+    it('Space selects the focused item', async () => {
+      const el = await mount({ value: 'a' });
+      const e = press(itemsOf(el)[1]!, ' ');
+      expect(el.value).toBe('b');
+      expect(e.defaultPrevented).toBe(true);
+    });
+
+    it('does not fire void-change when the focused item is already checked', async () => {
+      const el = await mount({ value: 'a' });
+      let fired = false;
+      el.addEventListener('void-change', () => { fired = true; });
+      press(itemsOf(el)[0]!, ' ');
+      expect(fired).toBe(false);
     });
 
     it('ignores other keys', async () => {
@@ -305,9 +356,7 @@ describe('VoidSegmentedControl', () => {
       expect(el.value).toBe('a');
     });
 
-    // BUG: with no enabled items, items[NaN] is undefined and `.focus()` throws a TypeError from
-    // inside the keydown listener. segmented-control.ts:87-93. Expected: no-op.
-    it.fails('does not throw when there are no enabled items', async () => {
+    it('does not throw when there are no enabled items', async () => {
       const el = await mount({}, []);
       expect(() => {
         const items = Array.from(el.querySelectorAll('void-segmented-control-item:not([disabled])'));

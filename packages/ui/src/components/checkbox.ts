@@ -58,7 +58,7 @@ export class VoidCheckbox extends NativeFormControl(VoidElement) {
 
   render() {
     return html`
-      <input type="checkbox" .checked=${this.checked} .indeterminate=${this.indeterminate} ?disabled=${this.formDisabled} ?required=${this.required} name=${this.name} value=${this.value} form=${this.formAttr ?? nothing} tabindex="-1" aria-hidden="true" @focus=${this._onNativeFocus} />
+      <input type="checkbox" .checked=${this.checked} .indeterminate=${this.indeterminate} ?disabled=${this.formDisabled} ?required=${this.required} name=${this.name} value=${this.value} form=${this.formAttr ?? nothing} tabindex="-1" aria-hidden="true" inert @invalid=${this._onNativeInvalid} @focus=${this._onNativeFocus} />
       <span class="void-checkbox-box">
         ${this.checked ? html`<svg viewBox="0 0 12 12" fill="none"><path d="M2.5 6l2.5 2.5 4.5-5" stroke="currentColor" stroke-width="var(--void-icon-stroke-width)" stroke-linecap="round" stroke-linejoin="round"/></svg>` : ''}
         ${this.indeterminate && !this.checked ? html`<svg viewBox="0 0 12 12" fill="none"><path d="M3 6h6" stroke="currentColor" stroke-width="var(--void-icon-stroke-width)" stroke-linecap="round"/></svg>` : ''}
@@ -89,6 +89,18 @@ export class VoidCheckbox extends NativeFormControl(VoidElement) {
   /** The browser focuses the native input to report validity; hand focus to the host. */
   private _onNativeFocus = (): void => {
     this.focus();
+  };
+
+  /**
+   * The native input is `inert`, so assistive technology and axe see one widget (the host)
+   * rather than a focusable input nested in it. An inert input cannot be focused, which
+   * would silently block submission of a required control, so it is made focusable for the
+   * moment the browser reports validity.
+   */
+  private _onNativeInvalid = (e: Event): void => {
+    const input = e.target as HTMLInputElement;
+    input.inert = false;
+    setTimeout(() => { input.inert = true; });
   };
 
   protected formSyncNative(): void {

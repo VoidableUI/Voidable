@@ -9,7 +9,18 @@ const meta: Meta = {
   parameters: {
     docs: {
       description: {
-        component: 'Section switcher for detail pages, settings screens, and documentation layouts that organize related content into named panels without a full page navigation. Only the active panel is visible.',
+        component: `Section switcher for detail pages, settings screens, and documentation layouts that organize related content into named panels without a full page navigation. Only the active panel is visible.
+
+**Keyboard**
+
+Pattern: tabs, manual activation by default (\`activation="auto"\` selects on focus). Roving tabindex.
+
+| Key | Action |
+|-----|--------|
+| Right Arrow / Left Arrow | Focus the next / previous tab (wraps) |
+| Home / End | Focus the first / last tab |
+| Enter / Space | Select the focused tab (manual activation) |
+| Tab | Move to the visible panel |`,
       },
     },
   },
@@ -72,6 +83,26 @@ export const FallbackLabel: Story = {
     <void-tabs value="tab-one">
       <void-tab-panel tab="tab-one">Tab one content (label falls back to tab id)</void-tab-panel>
       <void-tab-panel tab="tab-two">Tab two content</void-tab-panel>
+    </void-tabs>
+  `,
+};
+
+export const AutomaticActivation: Story = {
+  render: () => html`
+    <void-tabs value="one" activation="auto">
+      <void-tab-panel tab="one" label="First">Arrow keys select the focused tab.</void-tab-panel>
+      <void-tab-panel tab="two" label="Second">Content 2</void-tab-panel>
+      <void-tab-panel tab="three" label="Third">Content 3</void-tab-panel>
+    </void-tabs>
+  `,
+};
+
+export const DisabledTab: Story = {
+  render: () => html`
+    <void-tabs value="one">
+      <void-tab-panel tab="one" label="First">Content 1</void-tab-panel>
+      <void-tab-panel tab="two" label="Second" disabled>Content 2</void-tab-panel>
+      <void-tab-panel tab="three" label="Third">Content 3</void-tab-panel>
     </void-tabs>
   `,
 };

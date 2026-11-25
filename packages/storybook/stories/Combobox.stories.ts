@@ -9,7 +9,20 @@ const meta: Meta = {
   parameters: {
     docs: {
       description: {
-        component: 'Filterable dropdown for long option lists like country selectors, user assignment fields, and tag pickers. Users can type to narrow results before selecting.',
+        component: `Filterable dropdown for long option lists like country selectors, user assignment fields, and tag pickers. Users can type to narrow results before selecting.
+
+**Keyboard**
+
+Pattern: combobox with listbox popup. The native input is the combobox; \`aria-activedescendant\` marks the highlighted option.
+
+| Key | Action |
+|-----|--------|
+| Down Arrow / Up Arrow | Open the list, or highlight the next / previous option (wraps) |
+| Alt + Down Arrow | Open without highlighting |
+| Enter | Choose the highlighted option; with none highlighted it is left alone, so a surrounding form submits |
+| Escape | Close the list |
+| Home / End | Move the text cursor |
+| Tab | Close the list and move on |`,
       },
     },
   },
@@ -110,6 +123,17 @@ export const Disabled: Story = {
       <void-option value="svelte">Svelte</void-option>
       <void-option value="angular">Angular</void-option>
       <void-option value="solid">Solid</void-option>
+      <void-option value="lit">Lit</void-option>
+    </void-combobox>
+  `,
+};
+
+export const DisabledOption: Story = {
+  render: () => html`
+    <void-combobox placeholder="Select a framework...">
+      <void-option value="react">React</void-option>
+      <void-option value="vue">Vue</void-option>
+      <void-option value="svelte" disabled>Svelte (unavailable)</void-option>
       <void-option value="lit">Lit</void-option>
     </void-combobox>
   `,

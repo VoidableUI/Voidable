@@ -35,11 +35,6 @@ export class VoidInput extends NativeFormControl(VoidElement) {
   /** Spell checking of the native control (`spellcheck`). Defaults to true; `spellcheck="false"` turns it off from markup. */
   @property({ converter: defaultTrueBoolean }) override spellcheck = true;
 
-  connectedCallback(): void {
-    super.connectedCallback();
-    this.setHostAttribute('role', 'textbox');
-  }
-
   render() {
     return html`
       <input

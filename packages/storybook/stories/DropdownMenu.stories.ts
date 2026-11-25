@@ -10,7 +10,21 @@ const meta: Meta = {
   parameters: {
     docs: {
       description: {
-        component: 'Trigger-anchored action menus for row actions in tables, toolbar overflow menus, and context menus. Supports keyboard navigation and a destructive item variant.',
+        component: `Trigger-anchored action menus for row actions in tables, toolbar overflow menus, and context menus. Supports keyboard navigation and a destructive item variant.
+
+**Keyboard**
+
+Pattern: menu button. The trigger gets \`aria-haspopup\`, \`aria-expanded\` and \`aria-controls\`.
+
+| Key | Action |
+|-----|--------|
+| Enter / Space / Down Arrow (trigger) | Open and focus the first item |
+| Up Arrow (trigger) | Open and focus the last item |
+| Down Arrow / Up Arrow / Home / End | Move between items (wraps) |
+| Characters | Jump to the next item starting with them |
+| Enter / Space (item) | Activate the item |
+| Escape | Close and return focus to the trigger |
+| Tab | Close and move on |`,
       },
     },
   },

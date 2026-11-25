@@ -37,8 +37,9 @@ describe('VoidInput', () => {
     expect(input).not.toBeNull();
   });
 
-  it('sets role=textbox', () => {
-    expect(el.getAttribute('role')).toBe('textbox');
+  it('leaves the textbox role to the native input (the host has none)', () => {
+    expect(el.hasAttribute('role')).toBe(false);
+    expect(el.querySelector('input')!.getAttribute('role')).toBeNull();
   });
 
   it('renders error message when error is set', async () => {

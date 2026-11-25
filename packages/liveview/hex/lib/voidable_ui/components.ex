@@ -582,12 +582,13 @@ defmodule VoidableUI.Components do
   @doc "Renders a `<void-option>` inside a multiselect or combobox."
   attr :value, :string, required: true
   attr :selected, :boolean, default: false
+  attr :disabled, :boolean, default: false
   attr :rest, :global
   slot :inner_block, required: true
 
   def option(assigns) do
     ~H"""
-    <void-option value={@value} selected={@selected} {@rest}>
+    <void-option value={@value} selected={@selected} disabled={@disabled} {@rest}>
       {render_slot(@inner_block)}
     </void-option>
     """
@@ -663,6 +664,7 @@ defmodule VoidableUI.Components do
   attr :id, :string, default: nil
   attr :value, :string, default: nil
   attr :size, :string, default: nil
+  attr :activation, :string, default: nil
   attr :rest, :global
   slot :inner_block, required: true
 
@@ -672,6 +674,7 @@ defmodule VoidableUI.Components do
       id={@id || auto_id("void-tabs", @rest)}
       value={@value}
       size={@size}
+      activation={@activation}
       phx-hook="VoidEvent"
       data-void-events="void-change"
       {@rest}
@@ -689,12 +692,13 @@ defmodule VoidableUI.Components do
   attr :tab, :string, required: true
   attr :label, :string, default: nil
   attr :active, :boolean, default: false
+  attr :disabled, :boolean, default: false
   attr :rest, :global
   slot :inner_block, required: true
 
   def tab_panel(assigns) do
     ~H"""
-    <void-tab-panel tab={@tab} label={@label} active={@active} {@rest}>
+    <void-tab-panel tab={@tab} label={@label} active={@active} disabled={@disabled} {@rest}>
       {render_slot(@inner_block)}
     </void-tab-panel>
     """
