@@ -21,6 +21,11 @@ void-dropdown-menu > hr {
   transition: opacity var(--void-duration-fast) var(--void-ease-in-out);
 }
 
+/* Closed: the component keeps this element rendered and sets [hidden]. */
+.void-dropdown-menu-panel[hidden] {
+  display: none;
+}
+
 void-dropdown-menu[open] .void-dropdown-menu-panel {
   display: block;
 }

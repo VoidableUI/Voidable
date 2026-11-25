@@ -16,6 +16,11 @@ void-dialog[open] {
   justify-content: center;
 }
 
+/* Closed: the component keeps this element rendered and sets [hidden]. */
+.void-dialog-backdrop[hidden] {
+  display: none;
+}
+
 .void-dialog-panel {
   background: var(--void-color-bg-elevated);
   border: 1px solid var(--void-color-border);
