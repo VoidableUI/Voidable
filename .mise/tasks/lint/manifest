@@ -1,0 +1,104 @@
+#!/usr/bin/env bash
+#MISE description="Fail when a tag in the Custom Elements Manifest has no Storybook story, React wrapper or LiveView hex component"
+#MISE depends=["build"]
+set -euo pipefail
+
+# Reads packages/ui/dist/custom-elements.json (built by `mise run build`) and
+# checks every registered tag against three hand-written surfaces:
+#
+#   story   a `<void-x` usage or a quoted 'void-x' (meta `component:`,
+#           createElement) in packages/storybook/stories/*.stories.*
+#   react   a quoted 'void-x' tag literal in packages/react/src (the wrapWc /
+#           createElement tag argument)
+#   hex     a `<void-x` usage in packages/liveview/hex/lib/**/*.ex
+#
+# Known gaps live in .mise/manifest-drift-allowlist.txt. The check fails on
+# any gap not in the allowlist, and on allowlist entries that are no longer
+# gaps (or name unknown tags), so the list can only shrink.
+
+node --input-type=module - <<'EOF'
+import { readFileSync, readdirSync, existsSync, statSync } from 'node:fs';
+import { join } from 'node:path';
+
+const MANIFEST = 'packages/ui/dist/custom-elements.json';
+const ALLOWLIST = '.mise/manifest-drift-allowlist.txt';
+
+if (!existsSync(MANIFEST)) {
+  console.error(`ERROR: ${MANIFEST} not found; run \`mise run build\` first`);
+  process.exit(1);
+}
+
+const manifest = JSON.parse(readFileSync(MANIFEST, 'utf8'));
+const tags = manifest.modules
+  .flatMap((m) => m.declarations ?? [])
+  .filter((d) => d.tagName)
+  .map((d) => d.tagName)
+  .sort();
+
+function files(dir, test) {
+  if (!existsSync(dir)) return [];
+  return readdirSync(dir).flatMap((name) => {
+    const path = join(dir, name);
+    if (statSync(path).isDirectory()) return files(path, test);
+    return test(name) ? [path] : [];
+  });
+}
+const read = (list) => list.map((f) => readFileSync(f, 'utf8')).join('\n');
+
+const escape = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+const usesTag = (text, tag) => new RegExp(`<${escape(tag)}(?=[\\s>/])`).test(text);
+const quotesTag = (text, tag) => new RegExp(`(['"\`])${escape(tag)}\\1`).test(text);
+
+const surfaces = {
+  story: { text: read(files('packages/storybook/stories', (n) => /\.stories\.[jt]sx?$/.test(n))), has: (t, tag) => usesTag(t, tag) || quotesTag(t, tag) },
+  react: { text: read(files('packages/react/src', (n) => /\.[jt]sx?$/.test(n))), has: quotesTag },
+  hex: { text: read(files('packages/liveview/hex/lib', (n) => /\.exs?$/.test(n))), has: usesTag },
+};
+
+for (const [name, s] of Object.entries(surfaces)) {
+  if (!s.text) {
+    console.error(`ERROR: no source files found for surface "${name}"`);
+    process.exit(1);
+  }
+}
+
+const gaps = new Set();
+for (const tag of tags) {
+  for (const [name, s] of Object.entries(surfaces)) {
+    if (!s.has(s.text, tag)) gaps.add(`${name} ${tag}`);
+  }
+}
+
+const allowed = new Map();
+readFileSync(ALLOWLIST, 'utf8').split('\n').forEach((raw, i) => {
+  const line = raw.replace(/#.*/, '').trim();
+  if (!line) return;
+  const [surface, tag, ...rest] = line.split(/\s+/);
+  if (!surfaces[surface] || !tag || rest.length) {
+    console.error(`ERROR: ${ALLOWLIST}:${i + 1}: expected "<story|react|hex> <tag>", got "${raw.trim()}"`);
+    process.exit(1);
+  }
+  allowed.set(`${surface} ${tag}`, i + 1);
+});
+
+const unexpected = [...gaps].filter((g) => !allowed.has(g));
+const stale = [...allowed.keys()].filter((g) => !gaps.has(g));
+
+let failed = false;
+if (unexpected.length) {
+  failed = true;
+  console.error(`ERROR: ${unexpected.length} tag(s) missing from a surface (add the story/wrapper/component):`);
+  for (const g of unexpected) console.error(`  ${g}`);
+}
+if (stale.length) {
+  failed = true;
+  console.error(`ERROR: ${stale.length} allowlist entr(ies) in ${ALLOWLIST} are no longer gaps; delete them:`);
+  for (const g of stale) console.error(`  line ${allowed.get(g)}: ${g}`);
+}
+if (failed) process.exit(1);
+
+console.log(
+  `Manifest drift lint passed: ${tags.length} tags checked against stories, React wrappers and hex components ` +
+    `(${allowed.size} known gap(s) allowlisted in ${ALLOWLIST})`,
+);
+EOF
