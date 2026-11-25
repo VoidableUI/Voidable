@@ -392,7 +392,8 @@ test.describe('toast', () => {
     }, opts);
 
   test('shows a polite status, auto-dismisses, and an error is an alert', async ({ page }) => {
-    await show(page, { message: 'Saved', heading: 'OK', duration: 300 });
+    // Long enough to check the toast before it goes, short enough to watch it go.
+    await show(page, { message: 'Saved', heading: 'OK', duration: 1500 });
     await show(page, { message: 'Failed', color: 'error', duration: 0 });
     await expect(page.locator('void-toast', { hasText: 'Saved' })).toHaveAttribute('role', 'status');
     await expect(page.locator('void-toast', { hasText: 'Failed' })).toHaveAttribute('role', 'alert');
