@@ -19,6 +19,11 @@ import type { KnownIssue } from '../helpers/known-issues';
 export interface Fact {
   /** ARIA role as the browser exposes it: button, link, textbox, checkbox, tab, dialog, menuitem... */
   role: string;
+  /**
+   * Locate the element by this CSS selector (and `text`) instead of by role: for an element with no
+   * role of its own, such as an author-written part that only carries `aria-current`.
+   */
+  selector?: string;
   /** Accessible name, exact (case and surrounding whitespace aside). */
   name?: string;
   /** Text content, for elements whose name does not come from content (status, alert, tabpanel). Substring. */

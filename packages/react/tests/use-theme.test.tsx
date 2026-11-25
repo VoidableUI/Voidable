@@ -50,6 +50,7 @@ const resolveInCss = (value: string | null) => {
 beforeEach(() => {
   osLight = false;
   stubMatchMedia();
+  stubMutationObserver();
 });
 
 afterEach(async () => {
@@ -59,7 +60,36 @@ afterEach(async () => {
   document.documentElement.removeAttribute('data-theme');
   document.documentElement.removeAttribute('style');
   globalThis.matchMedia = realMatchMedia;
+  globalThis.MutationObserver = realMutationObserver;
+  observers.clear();
 });
+
+/**
+ * A MutationObserver the test controls. happy-dom's keeps its callback behind a WeakRef to a closure nothing else
+ * holds, so once the garbage collector runs (more likely on a busy machine) it silently stops reporting and the
+ * hook never hears about the change. The hook's contract is "re-read the scheme when told <html> changed", so the
+ * test tells it, deterministically.
+ */
+const observers = new Set<{ callback: MutationCallback }>();
+const realMutationObserver = globalThis.MutationObserver;
+
+function stubMutationObserver(): void {
+  globalThis.MutationObserver = class {
+    private entry: { callback: MutationCallback };
+    constructor(callback: MutationCallback) { this.entry = { callback }; }
+    observe() { observers.add(this.entry); }
+    disconnect() { observers.delete(this.entry); }
+    takeRecords() { return []; }
+  } as unknown as typeof MutationObserver;
+}
+
+/** Changes <html> and notifies the observers, as the browser does after the change. */
+async function mutateRoot(change: () => void): Promise<void> {
+  await act(async () => {
+    change();
+    for (const o of [...observers]) o.callback([], undefined as never);
+  });
+}
 
 const text = (c: HTMLElement) => c.querySelector('#theme')!.textContent;
 
@@ -80,16 +110,13 @@ describe('useTheme without the theme stylesheet', () => {
     osLight = true;
     document.documentElement.setAttribute('data-theme', 'system');
     expect(text(await mount())).toBe('light');
-    await act(async () => { document.documentElement.setAttribute('data-theme', 'sepia'); await Promise.resolve(); });
+    await mutateRoot(() => document.documentElement.setAttribute('data-theme', 'sepia'));
     expect(text(container!)).toBe('light');
   });
 
   it('updates when data-theme changes', async () => {
     const c = await mount();
-    await act(async () => {
-      document.documentElement.setAttribute('data-theme', 'light');
-      await Promise.resolve();
-    });
+    await mutateRoot(() => document.documentElement.setAttribute('data-theme', 'light'));
     expect(text(c)).toBe('light');
   });
 });
@@ -99,7 +126,7 @@ describe('useTheme with the theme stylesheet', () => {
     // Loft prefers light: with data-theme unset the CSS resolves light although the OS is dark.
     resolveInCss('light');
     expect(text(await mount())).toBe('light');
-    await act(async () => { resolveInCss('dark'); await Promise.resolve(); });
+    await mutateRoot(() => resolveInCss('dark'));
     expect(text(container!)).toBe('dark');
   });
 });
