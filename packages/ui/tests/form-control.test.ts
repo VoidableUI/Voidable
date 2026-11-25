@@ -187,7 +187,7 @@ describe('native-control strategy', () => {
       <void-slider name="c" value="3"></void-slider>
       <void-action-input name="d" value="4"></void-action-input>
       <void-checkbox name="e" checked></void-checkbox>
-      <void-select name="f" value="x"><option value="x">X</option></void-select>
+      <void-select value="x"><select name="f"><option value="x">X</option></select></void-select>
       <void-radio-group name="g" value="y"><void-radio value="y"></void-radio></void-radio-group>
       <void-checkbox-group name="h"><void-checkbox value="z" checked></void-checkbox></void-checkbox-group>
     `);
@@ -216,7 +216,7 @@ describe('native-control strategy', () => {
       <void-slider name="c" value="3"></void-slider>
       <void-action-input name="d" value="4"></void-action-input>
       <void-checkbox name="e" checked></void-checkbox>
-      <void-select name="f"><option value="x">X</option></void-select>
+      <void-select><select name="f"><option value="x">X</option></select></void-select>
     `);
     for (const host of Array.from(form.children)) {
       expect(host.querySelectorAll('[name]').length, host.tagName).toBe(1);
@@ -252,7 +252,7 @@ describe('native-control strategy', () => {
       <void-checkbox name="b" checked disabled></void-checkbox>
       <fieldset disabled>
         <void-input name="c" value="3"></void-input>
-        <void-select name="d"><option value="x">X</option></void-select>
+        <void-select><select name="d"><option value="x">X</option></select></void-select>
       </fieldset>
       <void-input name="e" value="5"></void-input>
     `);
@@ -284,7 +284,7 @@ describe('native-control strategy', () => {
       <void-checkbox name="c"></void-checkbox>
       <void-checkbox name="d" checked></void-checkbox>
       <void-slider name="e" value="10"></void-slider>
-      <void-select name="f" value="y"><option value="x">X</option><option value="y">Y</option></void-select>
+      <void-select value="y"><select name="f"><option value="x">X</option><option value="y">Y</option></select></void-select>
     `);
     const input = form.querySelector('void-input') as VoidInput;
     const ta = form.querySelector('void-textarea') as VoidTextarea;
@@ -330,7 +330,7 @@ describe('native-control strategy', () => {
 
 describe('void-select value and placeholder', () => {
   it('applies programmatic value changes after first render without void-change', async () => {
-    const form = await mount('<void-select name="s" value="a"><option value="a">A</option><option value="b">B</option><option value="c">C</option></void-select>');
+    const form = await mount('<void-select value="a"><select name="s"><option value="a">A</option><option value="b">B</option><option value="c">C</option></select></void-select>');
     const el = form.querySelector('void-select') as VoidSelect;
     const spy = vi.fn();
     el.addEventListener('void-change', spy);
@@ -342,7 +342,7 @@ describe('void-select value and placeholder', () => {
   });
 
   it('user changes update value and fire void-change', async () => {
-    const form = await mount('<void-select name="s"><option value="a">A</option><option value="b">B</option></void-select>');
+    const form = await mount('<void-select><select name="s"><option value="a">A</option><option value="b">B</option></select></void-select>');
     const el = form.querySelector('void-select') as VoidSelect;
     const spy = vi.fn();
     el.addEventListener('void-change', spy);
@@ -354,12 +354,12 @@ describe('void-select value and placeholder', () => {
   });
 
   it('without value or placeholder, value reflects the option the native select shows', async () => {
-    const form = await mount('<void-select name="s"><option value="a">A</option><option value="b">B</option></void-select>');
+    const form = await mount('<void-select><select name="s"><option value="a">A</option><option value="b">B</option></select></void-select>');
     expect((form.querySelector('void-select') as VoidSelect).value).toBe('a');
   });
 
   it('renders the placeholder as a hidden, disabled, initially selected empty option', async () => {
-    const form = await mount('<void-select name="s" placeholder="Pick one"><option value="a">A</option></void-select>');
+    const form = await mount('<void-select><select name="s"><option value="" disabled selected hidden>Pick one</option><option value="a">A</option></select></void-select>');
     const el = form.querySelector('void-select') as VoidSelect;
     const native = form.querySelector('select')!;
     const ph = native.options[0];
@@ -529,8 +529,8 @@ describe('internals strategy with ElementInternals (fake)', () => {
       <void-toggle-group name="fmt" multiple value="b,i"><void-toggle value="b"></void-toggle><void-toggle value="i"></void-toggle><void-toggle value="u"></void-toggle></void-toggle-group>
       <void-toggle-group name="align" value=""><void-toggle value="l"></void-toggle></void-toggle-group>
       <void-segmented-control name="view" value="grid"><void-segmented-control-item value="grid"></void-segmented-control-item></void-segmented-control>
-      <void-combobox name="country" value="nl"><void-option value="nl">NL</void-option></void-combobox>
-      <void-multiselect name="roles"><void-option value="a" selected>A</void-option><void-option value="b">B</void-option><void-option value="c" selected>C</void-option></void-multiselect>
+      <void-combobox name="country" value="nl"><void-combobox-content><void-option value="nl">NL</void-option></void-combobox-content></void-combobox>
+      <void-multiselect name="roles"><void-multiselect-content><void-option value="a" selected>A</void-option><void-option value="b">B</void-option><void-option value="c" selected>C</void-option></void-multiselect-content></void-multiselect>
       <void-editable name="title" value="Hello"></void-editable>
       <void-file-upload name="files"></void-file-upload>
     `);
@@ -575,7 +575,7 @@ describe('internals strategy with ElementInternals (fake)', () => {
   it('tracks user and programmatic changes', async () => {
     const form = await mount(`
       <void-switch name="s"></void-switch>
-      <void-multiselect name="m"><void-option value="a">A</void-option><void-option value="b">B</void-option></void-multiselect>
+      <void-multiselect name="m"><void-multiselect-content><void-option value="a">A</void-option><void-option value="b">B</void-option></void-multiselect-content></void-multiselect>
       <void-toggle-group name="t" multiple><void-toggle value="x"></void-toggle><void-toggle value="y"></void-toggle></void-toggle-group>
     `);
     (form.querySelector('void-switch') as HTMLElement).click();
@@ -642,7 +642,7 @@ describe('internals strategy with ElementInternals (fake)', () => {
       <void-pin-input name="p" length="4" value="12"></void-pin-input>
       <void-color-picker name="c" value="#00ff00"></void-color-picker>
       <void-toggle-group name="t" multiple value="x"><void-toggle value="x"></void-toggle><void-toggle value="y"></void-toggle></void-toggle-group>
-      <void-multiselect name="m"><void-option value="a" selected>A</void-option><void-option value="b">B</void-option></void-multiselect>
+      <void-multiselect name="m"><void-multiselect-content><void-option value="a" selected>A</void-option><void-option value="b">B</void-option></void-multiselect-content></void-multiselect>
       <void-tags-input name="g"></void-tags-input>
     `);
     const sw = form.querySelector('void-switch') as VoidSwitch;
@@ -693,7 +693,7 @@ describe('internals strategy with ElementInternals (fake)', () => {
   });
 
   it('required sets valueMissing while empty', async () => {
-    const form = await mount('<void-switch name="s" required></void-switch><void-multiselect name="m" required><void-option value="a">A</void-option></void-multiselect>');
+    const form = await mount('<void-switch name="s" required></void-switch><void-multiselect name="m" required><void-multiselect-content><void-option value="a">A</void-option></void-multiselect-content></void-multiselect>');
     const sw = form.querySelector('void-switch') as VoidSwitch;
     const ms = form.querySelector('void-multiselect') as VoidMultiselect;
     expect(sw.checkValidity()).toBe(false);
@@ -816,7 +816,7 @@ describe('review: synchronous form value (finding 1)', () => {
       <void-switch name="s"></void-switch>
       <void-checkbox name="c"></void-checkbox>
       <void-input name="i" value="a"></void-input>
-      <void-multiselect name="m"><void-option value="a">A</void-option></void-multiselect>
+      <void-multiselect name="m"><void-multiselect-content><void-option value="a">A</void-option></void-multiselect-content></void-multiselect>
       <void-radio-group name="r" value="x"><void-radio value="x"></void-radio><void-radio value="y"></void-radio></void-radio-group>
     `);
     (form.querySelector('void-switch') as VoidSwitch).checked = true;
