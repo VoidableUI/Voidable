@@ -7,9 +7,9 @@
         "dev": "vite"
     },
     "dependencies": {
-        "@voidable/ui": "file:../../packages/ui",
-        "@voidable/theme": "file:../../packages/theme",
-        "@voidable/ui-alpine": "file:../../packages/alpine",
+        "@voidable/ui": "link:../../packages/ui",
+        "@voidable/theme": "link:../../packages/theme",
+        "@voidable/ui-alpine": "link:../../packages/alpine",
         "alpinejs": "^3.14.0"
     },
     "devDependencies": {

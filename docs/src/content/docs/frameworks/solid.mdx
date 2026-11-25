@@ -2,70 +2,155 @@
 title: Solid
 ---
 
-SolidJS handles custom elements natively in JSX. The `@voidable/ui-solid` package provides a `useTheme` signal.
+Solid renders custom elements natively, so Solid needs no adapter package: `@voidable/ui` and its generated typings are the whole setup. The two major versions differ in how they handle custom elements, so each has its own section. Everything below was run in a browser, with Solid 1.9.20 and with Solid 2.0.4.
 
 ## Install
 
 ```bash
-npm install @voidable/ui @voidable/theme @voidable/ui-solid
+npm install @voidable/ui @voidable/theme
 ```
 
-## Vite config
-
-Add the SolidJS plugin to your Vite config:
-
-```js
-// vite.config.js
-import solid from 'vite-plugin-solid';
-
-export default {
-  plugins: [solid()],
-};
-```
-
-## Usage
-
-Use `<void-*>` elements directly in Solid JSX:
+Register the elements and load the theme once, in your entry file:
 
 ```tsx
+// src/index.tsx (Solid 1; Solid 2 imports render from '@solidjs/web')
 import '@voidable/ui';
+import '@voidable/theme';
+import { render } from 'solid-js/web';
+import App from './App';
 
-function App() {
+render(() => <App />, document.getElementById('app')!);
+```
+
+## Solid 1
+
+Use `vite-plugin-solid` 2.x. Load the typings from `tsconfig.json`; they register every `<void-*>` tag in `JSX.IntrinsicElements`:
+
+```jsonc
+// tsconfig.json
+{
+  "compilerOptions": {
+    "jsx": "preserve",
+    "jsxImportSource": "solid-js",
+    "types": ["vite/client", "@voidable/ui/types/solid"]
+  }
+}
+```
+
+Solid 1 sets properties on custom elements, so strings, booleans, numbers, arrays and objects keep their type. Listen to events with `on:`:
+
+```tsx
+import { createSignal } from 'solid-js';
+
+export default function App() {
+  const [name, setName] = createSignal('');
+  const [tags] = createSignal(['design', 'ship']);
+
   return (
     <>
-      <void-button variant="filled" onClick={() => console.log('clicked')}>
-        Save
-      </void-button>
+      <void-button variant="filled" on:void-click={() => console.log('clicked')}>Save</void-button>
 
-      <void-input placeholder="Your name" />
+      <void-input value={name()} disabled={false} on:void-input={(e) => setName(e.detail.value)} />
 
-      <void-alert color="info">
-        Custom elements work natively in Solid.
-      </void-alert>
+      <void-tags-input value={tags()} />
     </>
   );
 }
 ```
 
-Listen to custom events with `on:` syntax. Cast the event to `CustomEvent` so TypeScript knows the shape of `detail`:
+`e.detail` is typed from the element. `prop:`, `attr:` and `bool:` prefixes force a property, an attribute or a boolean attribute, and are typed per element. Solid lowercases attribute names, so a camelCase property (a chart's `showValues`, for example) must be written with `prop:`, as `prop:showValues={true}`; the typings reject the plain camelCase form, which would silently not reach the element. The typings check the `detail` of known `void-*` events, but accept any `on:` event name, so a misspelled event name is not an error.
 
-```tsx
-<void-input
-  on:void-change={(e: CustomEvent<{ value: string }>) => setValue(e.detail.value)}
-/>
-```
+## Solid 2
 
-## Theme signal
+Solid 2 moved the JSX types to `@solidjs/web`, removed the `on:` namespace, and sets plain attributes as HTML attributes. Use `vite-plugin-solid` 3 (a pre-release, `3.0.0-next`, at the time of writing) and load the Solid 2 typings, which are a separate entry point:
 
-Track the active theme as a reactive signal:
-
-```tsx
-import { useTheme } from '@voidable/ui-solid';
-
-function ThemeIndicator() {
-  const theme = useTheme(); // Accessor<'dark' | 'light'>
-  return <span>Current theme: {theme()}</span>;
+```jsonc
+// tsconfig.json
+{
+  "compilerOptions": {
+    "jsx": "preserve",
+    "jsxImportSource": "@solidjs/web",
+    "types": ["vite/client", "@voidable/ui/types/solid2"]
+  }
 }
 ```
 
-The signal observes the `data-theme` attribute on `<html>` via `MutationObserver` and cleans up via `onCleanup`.
+(`@voidable/ui/types/solid` augments `solid-js` and does nothing under Solid 2.)
+
+Because plain attributes are strings, anything that is not a string, number or boolean needs `prop:`, and so does any camelCase property. The typings enforce this: an array or object property written as a plain attribute is a type error, and `prop:value={tags()}` is correct. Custom events need a `ref` that adds the listener. This helper, typed from the generated event map, is all it takes:
+
+```tsx
+import type { VoidElementEvents, VoidElementTagNameMap } from '@voidable/ui/types/elements';
+
+function on<T extends keyof VoidElementEvents & keyof VoidElementTagNameMap, K extends keyof VoidElementEvents[T] & string>(
+  _tag: T,
+  type: K,
+  handler: (event: VoidElementEvents[T][K]) => void,
+) {
+  return (el: VoidElementTagNameMap[T]) => el.addEventListener(type, handler as EventListener);
+}
+```
+
+```tsx
+import { createSignal } from 'solid-js';
+
+export default function App() {
+  const [name, setName] = createSignal('');
+  const [tags] = createSignal(['design', 'ship']);
+
+  return (
+    <>
+      <void-button variant="filled" ref={on('void-button', 'void-click', () => console.log('clicked'))}>Save</void-button>
+
+      <void-input value={name()} ref={on('void-input', 'void-input', (e) => setName(e.detail.value))} />
+
+      <void-tags-input prop:value={tags()} />
+    </>
+  );
+}
+```
+
+Here `e.detail.value` is a `string` and a wrong tag/event pair is a type error.
+
+## Two-way binding
+
+Solid has no binding syntax, so bind the property and listen for the change event. This works for every control in both versions (Solid 2 uses the `ref={on(...)}` form for the listener):
+
+```tsx
+const [text, setText] = createSignal('a');
+const [choice, setChoice] = createSignal('b');
+const [agreed, setAgreed] = createSignal(false);
+
+<void-input value={text()} on:void-input={(e) => setText(e.detail.value)} />
+
+<void-select value={choice()} on:void-change={(e) => setChoice(e.detail.value)}>
+  <option value="a">A</option>
+  <option value="b">B</option>
+  <option value="c">C</option>
+</void-select>
+
+<void-checkbox checked={agreed()} on:void-change={(e) => setAgreed(e.detail.checked)}>I agree</void-checkbox>
+```
+
+## Theme
+
+Track the active theme (the `data-theme` attribute on `<html>`) with a signal of your own, in either version:
+
+```ts
+// src/use-theme.ts
+import { createSignal, onCleanup } from 'solid-js';
+
+export type Theme = 'dark' | 'light';
+
+const read = (): Theme => (document.documentElement.getAttribute('data-theme') as Theme | null) ?? 'dark';
+
+export function useTheme() {
+  const [theme, setTheme] = createSignal<Theme>(read());
+  const observer = new MutationObserver(() => setTheme(read()));
+  observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+  onCleanup(() => observer.disconnect());
+  return theme;
+}
+```
+
+If you used the removed `@voidable/ui-solid` package, see [Migrating from the framework packages](/getting-started/migrating-from-framework-packages/).

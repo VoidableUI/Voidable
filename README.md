@@ -1,6 +1,6 @@
 # Voidable
 
-Voidable is a framework-agnostic web component library built on Lit 3, with adapters for React, Vue, Solid, Svelte, Angular, Hotwire, Alpine and LiveView. Every component renders in the Light DOM and carries no visual CSS of its own.
+Voidable is a framework-agnostic web component library built on Lit 3, with adapters for React, Hotwire, Alpine and LiveView, and setup guides for Vue, Solid, Svelte and Angular (which need no adapter package). Every component renders in the Light DOM and carries no visual CSS of its own.
 
 The core idea: components are **devoid** of style until you load a theme. `@voidable/ui` ships structure and behavior only; all colors, spacing and shape come from `--void-*` CSS custom properties defined by `@voidable/theme` (or by your own theme). Because there is no Shadow DOM, your CSS and your tokens reach every part of every component.
 
@@ -36,13 +36,9 @@ Without a bundler, use a stylesheet link and a CDN module import; see the [`@voi
 
 | Package | Path | Registry | Description |
 |---------|------|----------|-------------|
-| `@voidable/ui` | [`packages/ui`](packages/ui) | npm | Lit web components (core) |
+| `@voidable/ui` | [`packages/ui`](packages/ui) | npm | Lit web components (core), generated typings for Vue, Solid and Svelte, and the Angular forms accessor |
 | `@voidable/theme` | [`packages/theme`](packages/theme) | npm | Design tokens, reset and component styles |
 | `@voidable/ui-react` | [`packages/react`](packages/react) | npm | React wrappers with event bridging |
-| `@voidable/ui-vue` | [`packages/vue`](packages/vue) | npm | Vue composables |
-| `@voidable/ui-solid` | [`packages/solid`](packages/solid) | npm | Solid utilities |
-| `@voidable/ui-svelte` | [`packages/svelte`](packages/svelte) | npm | Svelte utilities |
-| `@voidable/ui-angular` | [`packages/angular`](packages/angular) | npm | Angular module and theme service |
 | `@voidable/ui-hotwire` | [`packages/hotwire`](packages/hotwire) | npm | Stimulus controller and Turbo morph protection |
 | `@voidable/ui-alpine` | [`packages/alpine`](packages/alpine) | npm | Alpine.js plugin and Livewire morph protection |
 | `@voidable/ui-liveview` | [`packages/liveview`](packages/liveview) | npm | Phoenix LiveView hooks |

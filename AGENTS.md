@@ -11,13 +11,9 @@ A component library monorepo built on Lit 3 web components with framework adapte
 
 | Package | Path | Description |
 |---------|------|-------------|
-| `@voidable/ui` | `packages/ui/` | Lit web components (core) |
+| `@voidable/ui` | `packages/ui/` | Lit web components (core), generated typings (`@voidable/ui/types/*`), Angular forms accessor (`@voidable/ui/angular`) |
 | `@voidable/theme` | `packages/theme/` | CSS custom properties, design tokens, resets |
 | `@voidable/ui-react` | `packages/react/` | React adapter |
-| `@voidable/ui-solid` | `packages/solid/` | SolidJS adapter |
-| `@voidable/ui-vue` | `packages/vue/` | Vue adapter |
-| `@voidable/ui-svelte` | `packages/svelte/` | Svelte adapter |
-| `@voidable/ui-angular` | `packages/angular/` | Angular adapter (`VoidableModule`, `ThemeService`) |
 | `@voidable/ui-hotwire` | `packages/hotwire/` | Stimulus controller and Turbo morph protection |
 | `@voidable/ui-alpine` | `packages/alpine/` | Alpine.js plugin and Livewire morph protection |
 | `@voidable/ui-liveview` | `packages/liveview/` | Phoenix LiveView hooks |
@@ -49,8 +45,7 @@ Without a theme package loaded, components are completely devoid of styling. `@v
 ### Framework Adapters
 
 - **React** (`@voidable/ui-react`): Uses a `wrapWc` factory + `useWcEvents` hook pattern. React does not forward custom events to Custom Elements natively, so the adapter bridges this gap.
-- **SolidJS / Vue / Svelte**: These frameworks handle Custom Elements natively. Adapters export composable hooks only with minimal wrapping.
-- **Angular** (`@voidable/ui-angular`): `VoidableModule` enables `CUSTOM_ELEMENTS_SCHEMA`; `ThemeService` exposes the active theme as a signal.
+- **SolidJS / Vue / Svelte / Angular**: No package. A package survives only if it holds runtime behaviour a user cannot get from `@voidable/ui` plus its generated output, so these frameworks are served by configuration, documented in `docs/src/content/docs/frameworks/`, and by what the `@voidable/ui` build generates from the Custom Elements Manifest (`packages/ui/cem/generate.js`, never hand-maintained): typings at `@voidable/ui/types/{elements,react,solid,solid2,svelte,vue}` (Solid 2 is a separate entry because its JSX namespace lives in `@solidjs/web` and it dropped `on:`), and for Angular a component-agnostic `ControlValueAccessor` at `@voidable/ui/angular` (`VoidValueAccessor`, written in Angular's partial-compilation format from `cem/angular-accessor.*.template`; its selector and per-tag table come from the manifest). Angular's template type checker cannot check custom element bindings, so there are no Angular typings. Do not add a package for these frameworks; extend the generator.
 - **Hotwire / Alpine / LiveView**: Server-rendered stacks. Each adapter bridges Voidable custom events to the framework (Stimulus controller, `x-void-on` directive, LiveView hooks) and protects component state across DOM morphs.
 
 ### Module Federation Support

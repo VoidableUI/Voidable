@@ -12,7 +12,7 @@ Voidable is a **framework-agnostic web component library** built on [Lit 3](http
 - **{stats.elements} custom elements** ({stats.components} components) covering layout, forms, data display, feedback, and navigation
 - **CSS token system** with dark/light themes via `data-theme` attribute
 - **Zero visual CSS in components** — all styling flows through `@voidable/theme`
-- **{stats.adapters} framework adapter packages** for React, Vue, Solid, Svelte, Angular, Hotwire, Alpine, and LiveView, plus guides for Lit, Qwik, Astro, and vanilla JS
+- **{stats.adapters} framework adapter packages** for React, Hotwire, Alpine, and LiveView, plus guides for Vue, Solid, Svelte, Angular, Lit, Qwik, Astro, and vanilla JS (the first four of those need no package, only configuration and generated typings)
 
 ## Quick start
 
@@ -36,10 +36,6 @@ npm install @voidable/ui @voidable/theme
 | `@voidable/theme` | CSS custom properties and design tokens (`--void-*`) |
 | `@voidable/ui` | Lit 3 web components (Light DOM) |
 | `@voidable/ui-react` | React wrapper components with event bridging |
-| `@voidable/ui-vue` | Vue `useTheme` composable |
-| `@voidable/ui-solid` | Solid `useTheme` signal |
-| `@voidable/ui-svelte` | Svelte `theme` readable store |
-| `@voidable/ui-angular` | Angular module + `ThemeService` |
 | `@voidable/ui-hotwire` | Stimulus controller + Turbo morph protection |
 | `@voidable/ui-alpine` | Alpine.js plugin with event directive and Livewire morph protection |
 | `@voidable/ui-liveview` | Phoenix LiveView hooks and DOM preservation |

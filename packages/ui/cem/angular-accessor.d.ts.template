@@ -1,0 +1,20 @@
+// @@HEADER@@
+import * as i0 from '@angular/core';
+import type { ElementRef } from '@angular/core';
+import type { ControlValueAccessor } from '@angular/forms';
+
+/**
+ * ControlValueAccessor for every Void form control (@@COUNT@@ tags, see the
+ * selector): `ngModel`, `formControl` and `formControlName` work on them once
+ * this directive is imported.
+ */
+export declare class VoidValueAccessor implements ControlValueAccessor {
+  constructor(elementRef: ElementRef<HTMLElement>);
+  writeValue(value: unknown): void;
+  registerOnChange(fn: (value: unknown) => void): void;
+  registerOnTouched(fn: () => void): void;
+  setDisabledState(isDisabled: boolean): void;
+  handleEvent(event: Event): void;
+  static ɵfac: i0.ɵɵFactoryDeclaration<VoidValueAccessor, never>;
+  static ɵdir: i0.ɵɵDirectiveDeclaration<VoidValueAccessor, '@@SELECTOR@@', never, {}, {}, never, never, true, never>;
+}

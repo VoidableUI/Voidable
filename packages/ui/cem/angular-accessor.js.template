@@ -1,0 +1,60 @@
+// @@HEADER@@
+// Usage: import { VoidValueAccessor } from '@voidable/ui/angular';
+//
+// Written in Angular's partial-compilation format (what ngc emits for a
+// library): the Angular CLI's linker turns the ɵɵngDeclare* calls into compiled
+// code in the consumer's build. A plain decorated class would need the JIT
+// compiler and fail in every AOT application.
+import * as i0 from '@angular/core';
+import { NG_VALUE_ACCESSOR } from '@angular/forms';
+
+/** Per tag: the property that holds the value, the detail key that carries a new one, and the empty value. */
+const CONTROLS = {
+@@TABLE@@
+};
+
+export class VoidValueAccessor {
+  constructor(elementRef) {
+    this.element = elementRef.nativeElement;
+    this.control = CONTROLS[this.element.localName];
+    this.onChange = () => {};
+    this.onTouched = () => {};
+  }
+  writeValue(value) {
+    this.element[this.control.prop] = value ?? this.control.empty();
+  }
+  registerOnChange(fn) {
+    this.onChange = fn;
+  }
+  registerOnTouched(fn) {
+    this.onTouched = fn;
+  }
+  setDisabledState(isDisabled) {
+    this.element.disabled = isDisabled;
+  }
+  /** Ignores events that bubble up from nested controls (a group's checkboxes, a radio group's radios). */
+  handleEvent(event) {
+    const detail = event.detail;
+    if (event.target === this.element && detail && this.control.key in detail) {
+      this.onChange(detail[this.control.key]);
+    }
+  }
+  static ɵfac = i0.ɵɵngDeclareFactory({
+    minVersion: '12.0.0',
+    version: '19.0.0',
+    ngImport: i0,
+    type: VoidValueAccessor,
+    deps: [{ token: i0.ElementRef }],
+    target: i0.ɵɵFactoryTarget.Directive,
+  });
+  static ɵdir = i0.ɵɵngDeclareDirective({
+    minVersion: '14.0.0',
+    version: '19.0.0',
+    type: VoidValueAccessor,
+    isStandalone: true,
+    selector: '@@SELECTOR@@',
+    host: { listeners: { @@LISTENERS@@, focusout: 'onTouched()' } },
+    providers: [{ provide: NG_VALUE_ACCESSOR, useExisting: VoidValueAccessor, multi: true }],
+    ngImport: i0,
+  });
+}

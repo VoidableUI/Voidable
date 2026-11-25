@@ -71,6 +71,6 @@ Each of the three is a knob (`--void-density`, `--void-rhythm`, `--void-chrome`)
 
 ## Framework Adapters
 
-Each framework adapter is a separate package (`@voidable/ui-react`, `@voidable/ui-vue`, etc.). Adapters provide framework-idiomatic wrappers and type definitions — no additional styling. `@voidable/ui` and `@voidable/theme` are peer dependencies.
+A framework gets its own package only when it needs runtime behaviour that `@voidable/ui` cannot provide (`@voidable/ui-react` for React wrappers and event bridging, `@voidable/ui-hotwire`, `@voidable/ui-alpine` and `@voidable/ui-liveview` for server-rendered stacks). Everything else is configuration plus typings generated from the component manifest and shipped in `@voidable/ui` (`@voidable/ui/types/*`, and `@voidable/ui/angular` for Angular forms). No adapter adds styling.
 
 Server-side frameworks (LiveView, Hotwire) use a dual-package architecture: an npm package for client-side hooks and controllers, plus a native server-side package (Hex for Elixir, gem for Ruby) providing template helpers.

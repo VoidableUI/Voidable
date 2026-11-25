@@ -449,6 +449,15 @@ var directivePrefixes = []string{
 	"up-", "data-turbo", "turbo-",
 }
 
+// angularFormDirectives are the Angular forms directives that bind a form
+// control to an element (`ngModel`, `formControl`, `formControlName`). They
+// configure Angular's ControlValueAccessor (see @voidable/ui/angular), not the
+// element, so they are not attributes of it.
+var angularFormDirectives = map[string]bool{
+	"ngModel": true, "ngDefaultControl": true, "[ngModel]": true, "[ngModelOptions]": true,
+	"formControl": true, "[formControl]": true, "formControlName": true, "[formControlName]": true,
+}
+
 // classify strips framework prefixes and sets the token's syntax.
 func classify(t *domain.AttrToken, lang domain.Lang) {
 	raw := t.Raw
@@ -470,7 +479,7 @@ func classify(t *domain.AttrToken, lang domain.Lang) {
 		t.Name = raw[5:]
 	case strings.HasPrefix(raw, "[attr.") && strings.HasSuffix(raw, "]"):
 		set(raw[6:len(raw)-1], domain.SyntaxBound)
-	case hasAnyPrefix(raw, directivePrefixes):
+	case hasAnyPrefix(raw, directivePrefixes), angularFormDirectives[raw]:
 		set(raw, domain.SyntaxDirective)
 	case strings.HasPrefix(raw, "[") && strings.HasSuffix(raw, "]"):
 		set(raw[1:len(raw)-1], domain.SyntaxProperty)

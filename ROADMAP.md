@@ -4,12 +4,8 @@
 
 **66 components** (78 custom element tags) shipped across `@voidable/ui` + `@voidable/theme`, all with Storybook stories. Counts are derived from `packages/ui/src` (one file per component in `src/components/`, one tag per `customElements.define`); the docs site computes them at build time.
 
-**8 framework adapter packages:**
+**Framework adapter packages** (Vue, Solid, Svelte and Angular need no package: `@voidable/ui` ships generated typings in `@voidable/ui/types/*` and an Angular forms accessor in `@voidable/ui/angular`):
 - `@voidable/ui-react` — React 18/19 — **implemented** (typed wrappers, event bridging, ref forwarding, useTheme hook)
-- `@voidable/ui-vue` — Vue 3.4+ — native CE (useTheme composable; Vue handles CEs natively)
-- `@voidable/ui-solid` — Solid 1.8+ — native CE (useTheme hook; Solid handles CEs natively)
-- `@voidable/ui-svelte` — Svelte 5+ — native CE (theme store; Svelte handles CEs natively)
-- `@voidable/ui-angular` — Angular 18/19/20 — partial (VoidableModule + ThemeService, no directive wrappers)
 - `@voidable/ui-liveview` — Phoenix LiveView 1.0+ — **implemented** (VoidHooks JS + HEEx function components)
 - `@voidable/ui-hotwire` — Stimulus/Turbo — **implemented** (VoidTurbo morph integration + Ruby gem helpers)
 - `@voidable/ui-alpine` — Alpine.js — **implemented** (x-void-on directive, x-void-preserve, $voidable magic)
@@ -114,7 +110,7 @@ Enterprise-grade components surveyed across 10 premium libraries (Syncfusion, Te
 
 ## Phase 3: Framework Adapters
 
-8 framework adapter packages (`@voidable/ui-*`) expose `@voidable/ui` Lit web components to each framework's idioms. Guides for Lit, Qwik, Astro and vanilla JS also exist on the docs site; they are guides, not packages. Server-side companions: `live_voidable` (Hex), `voidable-hotwire` (RubyGems), `voidable/laravel` (Composer).
+Framework adapter packages (`@voidable/ui-*`) expose `@voidable/ui` Lit web components to each framework's idioms. Guides for Vue, Solid, Svelte, Angular, Lit, Qwik, Astro and vanilla JS exist on the docs site; they are guides, not packages. Server-side companions: `live_voidable` (Hex), `voidable-hotwire` (RubyGems), `voidable/laravel` (Composer).
 
 ### Adapter Status
 
@@ -124,10 +120,10 @@ Enterprise-grade components surveyed across 10 premium libraries (Syncfusion, Te
 | **LiveView** | ✅ Done | `VoidHooks` JS (mount/update/destroy lifecycle, listener diffing), HEEx function components for the UI components (chart elements not yet covered) with phx-hook wiring | — |
 | **Hotwire** | ✅ Done | `VoidTurbo` morph integration, Ruby gem `Helpers` module (`void_attrs`) | — |
 | **Alpine** | ✅ Done | `VoidableAlpine` plugin, `x-void-on` directive, `x-void-preserve`, `$voidable` magic | — |
-| **Angular** | Partial | `VoidableModule` (exports `CUSTOM_ELEMENTS_SCHEMA`), signal-based `ThemeService` with `DestroyRef` cleanup | Directive wrappers, `[(ngModel)]` support, typed templates |
-| **Vue** | ✅ Native CE | `useTheme` composable (Vue handles CEs natively) | Optional: Vue plugin, `v-model` support, typed props |
-| **Solid** | ✅ Native CE | `useTheme` hook (Solid handles CEs natively) | Optional: JSX type augmentation |
-| **Svelte** | ✅ Native CE | Theme store utility (Svelte handles CEs natively) | Optional: typed wrappers, two-way binding |
+| **Angular** | ✅ No package | Guide: `CUSTOM_ELEMENTS_SCHEMA`, `VoidValueAccessor` in `@voidable/ui/angular` (`ngModel`, `formControl`, `formControlName` on every form control, generated from the manifest) | Typed templates (Angular does not type-check custom element bindings) |
+| **Vue** | ✅ No package | Guide, generated typings (`@voidable/ui/types/vue`) | `v-model` (use property + event) |
+| **Solid** | ✅ No package | Guide, generated typings for Solid 1 and 2 (`@voidable/ui/types/solid`, `solid2`) | — |
+| **Svelte** | ✅ No package | Guide, generated typings (`@voidable/ui/types/svelte`) | `bind:` (not possible on custom elements; use property + event) |
 
 ---
 
