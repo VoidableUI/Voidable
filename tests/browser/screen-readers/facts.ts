@@ -95,7 +95,7 @@ export type Step =
   /** Activate the element reached (VoiceOver: VO+Space, NVDA: Enter). Focus-only roles (slider, spinbutton, textbox) just take focus. */
   | { act: true }
   /** Press a key on the focused element. */
-  | { press: string }
+  | { press: string; /** Press it this many times (default 1), per reader: NVDA may spend the first Escape leaving focus mode. */ times?: PerReader<number> }
   /** Type text into the focused element. */
   | { type: string }
   /** Within the speech since the last action: this must have been announced (and, in the tree, be true now). */

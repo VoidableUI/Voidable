@@ -126,7 +126,8 @@ export const scenarios: Scenario[] = [
       { hear: { role: 'dialog', name: 'Profile settings', description: 'Change how your name appears.', describedByReference: true } },
       { focus: 'void-dialog' },
       { walk: 10, unreachable: { role: 'button', name: 'Background action' } },
-      { press: 'Escape' },
+      // NVDA in focus mode on the name field can spend the first Escape on leaving focus mode (browse mode) before the page sees it: press it twice there; a second Escape on a closed dialog does nothing.
+      { press: 'Escape', times: { NVDA: 2 } },
       { focus: '#opener' },
       { hear: { role: 'button', name: 'Edit profile' } },
     ],

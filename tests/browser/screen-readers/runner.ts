@@ -155,7 +155,7 @@ export async function runScenario(reader: Reader, page: Page, scenario: Scenario
         await reader.act();
       } else if ('press' in step) {
         await begin();
-        await reader.press(step.press);
+        for (let n = pick(step.times, reader.name) ?? 1; n > 0; n--) await reader.press(step.press);
       } else if ('type' in step) {
         await begin();
         await reader.type(step.type);
