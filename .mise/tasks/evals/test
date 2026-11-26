@@ -5,4 +5,4 @@
 set -euo pipefail
 
 cd evals
-node --test test/
+node --test "test/**/*.test.mjs"

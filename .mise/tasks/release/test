@@ -2,4 +2,4 @@
 #MISE description="Unit-test the release scripts (bump rules, plan, version lint patterns)"
 set -euo pipefail
 
-node --test scripts/release/
+node --test "scripts/release/*.test.mjs"
