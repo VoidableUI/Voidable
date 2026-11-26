@@ -1,0 +1,117 @@
+---
+title: Translation
+description: The words the components write themselves (accessible names, placeholders, errors, chart table headers) and the locale they format dates and numbers in follow the page's lang. How to register a language, what each message is for, and what replaces one.
+---
+
+import Messages from '../../../components/api/Messages.astro';
+
+The components write a few words of their own: the name of a close button, the hint in a search field, the headers of a chart's data table, an error for a date that was typed wrongly. They are English until you say otherwise, and they follow the `lang` of the page, a section or one element. Dates, month and weekday names, and numbers follow the same `lang`.
+
+```html
+<html lang="fr">
+  <!-- every component below speaks French -->
+  <div lang="ar" dir="rtl"> <!-- except this section, which speaks Arabic -->
+```
+
+## Use a shipped language
+
+Import the language once, next to the components. It registers itself.
+
+```js
+import '@voidable/ui';
+import '@voidable/ui/messages/fr';
+import '@voidable/ui/messages/ar';
+```
+
+Two languages ship, each as its own opt-in module so that an application pays for the ones it uses:
+
+| Module | Language | Notes |
+| --- | --- | --- |
+| `@voidable/ui/messages/fr` | French | |
+| `@voidable/ui/messages/ar` | Arabic (Modern Standard) | Right-to-left, six plural forms. Set `dir="rtl"` as well: see [Right-to-left](/guides/accessibility/#right-to-left). |
+
+:::caution
+These are a **starting set to review**, not a finished translation. They were written to prove the mechanism and to give you something to start from. Have a native speaker read them in context before you ship them, and correct them with `registerMessages` (below) rather than waiting for a release. Corrections are welcome as pull requests.
+:::
+
+## How a message is found
+
+For an element, the language is its closest `lang` attribute, which includes the `<html>` element; an empty `lang=""` is skipped. A message is looked up in that language, then with the region and script taken off, then in English, one message at a time: `pt-BR`, then `pt`, then `en`. A language that translates only some messages falls back to English for the rest.
+
+When `lang` changes on the element or any ancestor, or when a language is registered, every component that has written a message redraws it. One observer on the page does this for all of them, started when the first component asks for a message, so a page of components with no strings pays nothing. Neither the module nor its observer is imported by components that write no words.
+
+What you write on an element always wins over a message: an `aria-label`, a `placeholder`, a `label`, the `heading` of an error fallback, a `<void-menu-empty>` part. The table below says which attribute replaces which message.
+
+## Register a language
+
+`registerMessages(locale, messages)` adds a language or overrides messages of one that exists, including English. It can be called at any time; components already on the page redraw.
+
+```js
+import { registerMessages } from '@voidable/ui/messages';
+
+registerMessages('de', {
+  close: 'Schließen',
+  'pagination.next': 'Nächste Seite',
+  'pagination.previous': 'Vorherige Seite',
+  // A message is a string, or a function of the parameters it takes.
+  removeItem: ({ name }) => `${name} entfernen`,
+});
+
+// Change one English message for the whole application.
+registerMessages('en', { 'pagination.next': 'Next' });
+```
+
+`registerMessages` is also exported from `@voidable/ui`. Types: `Messages` is the set a language gives (any of the keys), `MessageKey` the keys and `MessageParameters` the parameters of each, so a missing parameter or a misspelt key is a type error.
+
+### Messages with a count, a name or an order
+
+A message that takes parameters can be a function, so a language can put the words in its own order and choose the form for a number. The function receives the parameters and a context with `plural` (the language's plural rules, from `Intl.PluralRules`), `number` (a number written for the language) and `locale`.
+
+```js
+registerMessages('ru', {
+  'indicator.count': ({ count }, c) =>
+    c.plural(count, {
+      one: `${count} уведомление`,
+      few: `${count} уведомления`,
+      many: `${count} уведомлений`,
+      other: `${count} уведомления`,
+    }),
+  'carousel.slide': ({ index, count }) => `${index} из ${count}`,
+});
+```
+
+A language with six forms (Arabic) writes `zero`, `one`, `two`, `few`, `many` and `other`; `other` is always required. The shipped `@voidable/ui/messages/ar` is a worked example.
+
+### Add a language
+
+1. Copy `messages/fr.ts` from the package source (or start from the table below) and translate every message. Leave a message out and that one stays in the parent language or English.
+2. Keep each message short and write what a screen reader should say; names are read in the middle of other speech.
+3. Check the messages with parameters in a real sentence: the parameter names are in the table, and a function can reorder them.
+4. Register it before the components render (an import in your entry file), set `lang` on the page and look at it in right-to-left if the language is written that way.
+
+## Dates, numbers and the week
+
+A calendar and a date picker follow the closest `lang` for month and weekday names, the day numbers and the long date each day announces (`lundi 15 janvier 2024`). Set `locale` on one of them to use another language than the page's. Without a `lang` anywhere the locale is `en-US`: earlier versions always used `en-US`, even in a page marked `lang="de"`; see [Upgrading](/guides/upgrading/#language-and-locale-011).
+
+The week starts on the day the locale's week information gives (`Intl.Locale`, so Monday for `fr`, Sunday for `en-US`, Saturday for `ar-EG`). `first-day` (0 is Sunday, 6 is Saturday) overrides it. A browser that does not provide week information starts on Sunday. Month and weekday names are always Gregorian, whatever calendar the language prefers.
+
+A date picker's typed-date parsing is unchanged: it reads ISO `YYYY-MM-DD` always, and the way `format` writes the date. `format` is not locale driven.
+
+A number input writes its value with the language's digits and decimal separator and reads what was typed the same way (`1234,5` in French), and the data tables of the charts format their numbers for the same language. The form value is always a plain number.
+
+## What it does not do
+
+- **The development warnings** (`@voidable/ui/dev`), `voidable check` and every other message for developers stay in English.
+- **An element inside a shadow root of your own** is not watched for `lang` changes (the observer watches the document), though it uses the language it finds when it renders.
+- **Text you write** (labels, titles, option names) is yours to translate: the library only translates what it writes.
+- **Text that was already written when the language changed**: an error such as a refused file or date stays as it was written until the next one; the control's own names and placeholders redraw.
+
+## Server-rendered applications
+
+Set `lang` on `<html>` in the layout. A server patch that changes `lang` on the root redraws the strings without resetting a component's state (a typed date, an open calendar, a chosen value): the change is an attribute of an ancestor, so the components redraw in place, and no morph touches them.
+
+## Every message
+
+The table is generated from the catalogue in `@voidable/ui/messages`, so it is always the list the installed version has. Each component's page shows its own rows under "Words it writes", and `voidable ref <tag>` prints them as well.
+
+<Messages />

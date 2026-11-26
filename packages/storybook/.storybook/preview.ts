@@ -10,6 +10,9 @@ import '@voidable/theme/themes/paper.css';
 import '@voidable/theme/skins/loft.css';
 import '@voidable/theme/skins/slab.css';
 import '@voidable/ui';
+// The shipped languages, for the Locale toolbar: each registers itself.
+import '@voidable/ui/messages/fr';
+import '@voidable/ui/messages/ar';
 // Development warnings: misused attributes, values and children reach the console, so a story that
 // misuses a component is caught by `mise run test:warnings` and by anyone looking at it.
 import '@voidable/ui/dev';
@@ -37,6 +40,19 @@ const preview: Preview = {
         title: 'Direction',
       },
     },
+    // The language of the words the components write and of dates and numbers: sets `lang` on the page.
+    // The shipped French and Arabic are a starting set; pair Arabic with Direction: Right to left.
+    locale: {
+      toolbar: {
+        icon: 'globe',
+        items: [
+          { value: 'en', title: 'English' },
+          { value: 'fr', title: 'Français' },
+          { value: 'ar', title: 'العربية' },
+        ],
+        title: 'Locale',
+      },
+    },
     // The shipped themes: each is a file that only sets theme knobs.
     voidTheme: {
       toolbar: {
@@ -61,6 +77,7 @@ const preview: Preview = {
   initialGlobals: {
     theme: 'dark',
     direction: 'ltr',
+    locale: 'en',
     voidTheme: 'void',
     voidSkin: 'none',
   },
@@ -71,6 +88,7 @@ const preview: Preview = {
       const root = document.documentElement;
       root.setAttribute('data-theme', theme);
       root.setAttribute('dir', context.globals['direction'] ?? 'ltr');
+      root.setAttribute('lang', context.globals['locale'] ?? 'en');
       root.setAttribute('data-void-theme', voidTheme);
       const voidSkin = context.globals['voidSkin'] ?? 'none';
       if (voidSkin === 'none') root.removeAttribute('data-void-skin');

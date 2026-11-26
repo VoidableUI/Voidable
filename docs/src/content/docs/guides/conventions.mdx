@@ -85,6 +85,18 @@ The [events guide](/guides/events/) lists every event with its detail.
 There is no attribute called `position`: it meant four different things. `start` and `end` name a side in the reading direction (they swap in right-to-left): the convention for any side that follows it (sidebar, action input `icon-side`, drawer). `left` and `right` are for literal edges: the drawer's screen edges. On an anchored overlay (popover, tooltip, hover card, dropdown menu) they are placed against the anchor with logical offsets, so in right-to-left `left` is on the right of the anchor. A toast container or indicator `placement` keeps its physical corners. A combined value such as `position="bottom-end"` is written as two attributes, `side="bottom" align="end"`.
 *Why*: `side` and `align` are the words CSS anchor positioning and the common positioning libraries use; `orientation` is the ARIA attribute (`aria-orientation`) every one of these components already writes.
 
+## Words and locale
+
+**A word a component writes is a message, never a literal in the component.** Every accessible name, placeholder, error and table header comes from the catalogue in `@voidable/ui/messages` (`msg(this, 'pagination.next')`), in the language of the element's closest `lang`, and has an entry in `packages/ui/cem/messages-meta.js`, which the build checks against the sources. A component that writes no words does not import the module.
+*Why*: a string in a template cannot be translated, and one that cannot be found cannot be reviewed; with one catalogue the Translation guide, the reference and `voidable ref` list every word from one place.
+
+**What the author writes wins.** An `aria-label`, a `placeholder`, a `label`, a `heading`, a part: the message is only the default for the one element that has none, and the component never overwrites a name it did not write itself (`nameHost` in the module does this for names on the host). The manifest records which attribute replaces which message (`voidMessages`), so the reference can say "named by `aria-label`, default from messages".
+*Why*: the author knows what the control is for ("Search orders"), and an overridden default must not come back when `lang` changes.
+
+**A default that is a message is an empty attribute.** `placeholder`, `heading`, `retry-label`, `action-label` and `label` default to `''`, and the component reads `this.placeholder || msg(…)`. An attribute that carried English as its default could not tell "the author wrote this" from "the default".
+
+**Formats follow `lang`, then an own `locale`.** Dates, numbers and the first day of the week use the element's `locale` if it has the attribute, else the closest `lang`, else `en-US` (`localeOf(el, own)`); never the browser's own setting and never a hard-coded `en-US`. Month and weekday names are Gregorian. See [Translation](/guides/translation/).
+
 ## Booleans
 
 **No attribute defaults to true.** A boolean attribute is on when it is present, exactly as in HTML, so a default-true boolean could only be turned off with `attr="false"`, which every other boolean treats as true. What is shown by default is turned off with a `hide-` attribute:

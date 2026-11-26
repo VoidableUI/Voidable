@@ -80,6 +80,16 @@ Charts take their data from markup and carry a data table; two things in existin
 
 New: the `data` attribute (a gauge's `zones` too) with JSON, `show-table`, and the adapter helpers (React `data` as an attribute, Rails `void_bar_chart` and the other chart helpers, Blade `<x-voidable::bar-chart>` and the other chart components). See [Accessibility](/guides/accessibility/#charts-and-gauges) and the [conventions](/guides/conventions/).
 
+## Language and locale (0.11)
+
+The words the components write and the locale they format in follow `lang` now (see [Translation](/guides/translation/)). In a page with no `lang` nothing changes, apart from the points below.
+
+- **The calendar and date picker follow `lang`, not `en-US`.** `locale` defaulted to `en-US` whatever the page said; it is empty now, and the locale is the closest `lang` (else `en-US`). A page marked `lang="de"` now gets German month and weekday names, a Monday start and German digits where it got English ones. Write `locale="en-US"` on the element to keep the old behaviour. `first-day` defaulted to `0`; it is `null` now and the locale's first day of the week applies (Monday in French or German, Saturday in `ar-EG`); write `first-day="0"` to keep Sunday. Any code that read `calendar.locale` or `calendar.firstDay` to get the effective value gets `''` and `null` until you set them.
+- **Defaults that were English text are empty.** `placeholder` of the combobox, multiselect, tags input, compose input, editable and date picker, the error fallback's `heading` and `retry-label`, the action input's `action-label`, and the spinner's `label` default to `''` instead of `Search...`, `Select...`, `Add tag...`, `Type a message...`, `Click to edit`, `Select date`, `Something went wrong`, `Try again`, `Action` and `Loading`. The component shows the same English (from the `*.placeholder`, `errorFallback.*`, `actionInput.action` and `spinner.label` messages), so nothing changes on screen; code that read the property to find the default reads `''`. The spinner no longer reflects `label="Loading"` to its host.
+- **A name you write is no longer overwritten.** Breadcrumbs, sidebar, stepper, PIN input, status dot, indicator, calendar, toast container and the like wrote their name over an `aria-label` you had put on the element; yours is kept now. A status dot with your own name no longer says `Online`.
+- **Number formatting follows `lang`.** The number input writes its value in the language's digits and decimal separator, without grouping, and reads typed text the same way (`1,5` is 1.5 under `lang="fr"`, and 15 under `lang="en"`). The form value is unchanged. The chart tables used the browser's language when the page had no `lang`; they use `en-US` now.
+- **Two English texts changed.** The file upload's size error reads "is larger than the limit of 5,000 bytes." (it said "5000 byte limit"), and an indicator's name groups digits of large counts ("1,234 notifications").
+
 ## 4. Check again
 
 Run `voidable check` until it reports nothing, then run your application with the development warnings loaded and open each page once: a clean console means the markup is right.

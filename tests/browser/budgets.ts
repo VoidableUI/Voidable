@@ -65,7 +65,10 @@ export const reference = {
   /** 200 open/close cycles of a dialog. */
   dialog200Ms: 318,
   /** Gzipped size of `import '@voidable/ui'` (everything, Lit included), minified. */
-  rootEntryGzipKB: 70,
+  // 69.9 -> 77.3 kB with the messages (issue 29): the English catalogue (about 100 strings and the plural and
+  // number helpers), the registry and the wiring in the components that write words. fr and ar are separate
+  // modules and are not in it; the shared base chunk and the single-component figure did not grow.
+  rootEntryGzipKB: 77.3,
   /** Gzipped size of `import '@voidable/ui/components/button'` (one component, Lit included), minified. */
   singleComponentGzipKB: 10.1,
 };
