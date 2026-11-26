@@ -35,11 +35,13 @@ mapfile -t PACKAGES < <(GROUP="$GROUP" node --input-type=module -e "
 node scripts/release/stamp.mjs "$VERSION"
 node scripts/release/check.mjs --stamped "$VERSION"
 
-# Every adapter needs the core's build output (types); the theme needs no build.
+# Every adapter needs the core's build output (types). Every package in the
+# group is built before it is packed, the theme included: its exports point at
+# dist/, and 0.8.0 went to npm without it because this step skipped the theme.
 pnpm --filter @voidable/ui build
 for entry in "${PACKAGES[@]}"; do
   name="${entry%% *}"
-  case "$name" in @voidable/ui|@voidable/theme) ;; *) pnpm --filter "$name" build ;; esac
+  case "$name" in @voidable/ui) ;; *) pnpm --filter "$name" build ;; esac
 done
 
 mkdir -p "$OUT"
