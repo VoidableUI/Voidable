@@ -42,9 +42,12 @@
 
   window.perf = {
     // Machine speed: plain DOM work with no components, to scale budgets on slower machines.
+    // Unknown tags, not <button> and <input>: the theme styles every native control, so
+    // with those the figure measured the theme's style cost (it grew 3x as the theme did)
+    // and not the machine, and budgets scaled by it stopped meaning anything.
     async calibrate() {
       return timed(() => {
-        root.innerHTML = Array.from({ length: 4000 }, (_, i) => `<div class="c"><span>${i}</span><button>b${i}</button><input value="${i}"></div>`).join('');
+        root.innerHTML = Array.from({ length: 4000 }, (_, i) => `<x-row style="display:flex"><x-a>${i}</x-a><x-b>b${i}</x-b><x-c>${i}</x-c></x-row>`).join('');
         root.getBoundingClientRect();
       }).finally(clear);
     },
