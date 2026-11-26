@@ -33,6 +33,19 @@ describe('VoidNumberInput', () => {
     expect((el as unknown as { formSubmission(): unknown }).formSubmission()).toBe('');
   });
 
+  it('gives the spinbutton an aria-valuetext of the formatted value, so a range is not read as a percentage (#75)', async () => {
+    el.min = 0;
+    el.max = 18;
+    el.value = 2;
+    await el.updateComplete;
+    const input = el.querySelector('input')!;
+    expect(input.getAttribute('aria-valuenow')).toBe('2');
+    expect(input.getAttribute('aria-valuetext')).toBe('2');
+    el.value = null;
+    await el.updateComplete;
+    expect(input.hasAttribute('aria-valuetext')).toBe(false);
+  });
+
   it('steps from empty to min going up and to max going down', async () => {
     el.min = 1;
     el.max = 10;
