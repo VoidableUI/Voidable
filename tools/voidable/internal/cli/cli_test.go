@@ -148,6 +148,32 @@ func TestCheckJSONAndClean(t *testing.T) {
 	}
 }
 
+// A selectable (many rows) table with no checkbox in a header cell is a hint: reported, and the exit status stays 0.
+func TestCheckSelectAllHint(t *testing.T) {
+	dir := t.TempDir()
+	page := filepath.Join(dir, "table.html")
+	src := `<void-table selectable aria-label="One"><table><thead><tr><th>Name</th></tr></thead><tbody><tr><td><input type="checkbox" aria-label="Row"></td></tr></tbody></table></void-table>
+<void-table selectable aria-label="Two"><table><thead><tr><th><input type="checkbox" aria-label="All"></th></tr></thead><tbody><tr><td>x</td></tr></tbody></table></void-table>
+<void-table selectable aria-label="Three"><table><thead><tr><th><void-checkbox aria-label="All"></void-checkbox></th></tr></thead></table></void-table>
+<void-table selectable="single" aria-label="Four"><table><thead><tr><th>Name</th></tr></thead></table></void-table>
+`
+	if err := os.WriteFile(page, []byte(src), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	out, err := run(t, "check", page)
+	if err != nil {
+		t.Fatalf("a hint must not fail the check: %v\n%s", err, out)
+	}
+	if !strings.Contains(out, "table.html:1:") || !strings.Contains(out, "warning: [select-all]") {
+		t.Errorf("no hint for the table without a header checkbox:\n%s", out)
+	}
+	for _, line := range []string{"table.html:2:", "table.html:3:", "table.html:4:"} {
+		if strings.Contains(out, line) {
+			t.Errorf("a table that selects fine was reported (%s):\n%s", line, out)
+		}
+	}
+}
+
 // A `keys` attribute that is wrong or removes an essential key is a warning: reported, and the exit status stays 0.
 func TestCheckKeysWarnings(t *testing.T) {
 	dir := t.TempDir()

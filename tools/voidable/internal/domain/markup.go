@@ -163,6 +163,10 @@ type Content struct {
 	// Native are the other (lowercase, non-void) elements written inside,
 	// so a component that enhances a native control can tell it is there.
 	Native []string `json:"native,omitempty"`
+	// HeaderCheckbox is true when a checkbox (a <void-checkbox> or an
+	// <input type="checkbox">) is written inside a <th>: the select-all of a
+	// selectable table.
+	HeaderCheckbox bool `json:"headerCheckbox,omitempty"`
 }
 
 // Ancestor is an enclosing element and its attributes.

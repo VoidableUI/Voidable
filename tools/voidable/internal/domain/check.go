@@ -36,6 +36,10 @@ const (
 	// action names, names an action the element does not have, or leaves an
 	// essential action (`close` on a modal, `activate` on a button) with no key.
 	RuleKeys Rule = "keys"
+	// RuleSelectAll is a hint, a warning that does not fail the check: a
+	// `selectable` (many rows) table with no checkbox in a header cell has no
+	// select-all.
+	RuleSelectAll Rule = "select-all"
 )
 
 // SeverityWarning marks a finding that is reported but does not fail the check.
@@ -132,6 +136,10 @@ func (c *Checker) CheckTag(file string, t Tag) []Finding {
 		out = append(out, nf)
 	}
 	if nf, ok := checkNative(el, t); ok {
+		nf.File = file
+		out = append(out, nf)
+	}
+	if nf, ok := checkSelectAll(t); ok {
 		nf.File = file
 		out = append(out, nf)
 	}
@@ -317,6 +325,30 @@ func checkKeys(el *Element, a AttrToken, f findingFn) []Finding {
 		}
 	}
 	return out
+}
+
+// checkSelectAll hints that a table which selects many rows (`selectable`, not
+// `selectable="single"`) has no checkbox in a header cell, so it has no
+// select-all. It is a hint, not a failure: a table may select by row click or
+// leave the choice to another control. Content the scanner cannot see in full,
+// and a `selectable` that is an expression, are not judged.
+func checkSelectAll(t Tag) (Finding, bool) {
+	if t.Name != "void-table" || t.Mention || !t.Closed || t.Dynamic || !t.Content.Known || t.Content.Dynamic || t.Content.HeaderCheckbox {
+		return Finding{}, false
+	}
+	for _, a := range t.Attrs {
+		if a.Name != "selectable" || a.Syntax != SyntaxAttr {
+			continue
+		}
+		if a.Dynamic || strings.TrimSpace(a.Value) == "single" {
+			return Finding{}, false
+		}
+		return Finding{
+			Line: a.Line, Col: a.Col, Rule: RuleSelectAll, Tag: t.Name, Attr: a.Name, Severity: SeverityWarning,
+			Message: "<void-table selectable> has no checkbox in a header cell, so it has no select-all; write <th data-stack=\"select\"><input type=\"checkbox\" aria-label=\"Select all rows\"></th> (selectable=\"single\" needs none)",
+		}, true
+	}
+	return Finding{}, false
 }
 
 func (c *Checker) unknownAttr(el *Element, a AttrToken, f findingFn) Finding {

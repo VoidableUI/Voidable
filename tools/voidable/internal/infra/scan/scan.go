@@ -291,6 +291,8 @@ func dynamicContent(b []byte) bool {
 func (s *state) analyzeContent(src []byte, from, to int, lang domain.Lang) domain.Content {
 	c := domain.Content{Known: true}
 	b := src[:to]
+	// header is how many <th> are open at this point: a checkbox inside one is a select-all.
+	header := 0
 	for i := from; i < to; i++ {
 		if end := skipComment(b, i); end > i {
 			i = end - 1
@@ -301,6 +303,9 @@ func (s *state) analyzeContent(src []byte, from, to int, lang domain.Lang) domai
 			c.Dynamic = true
 			i = skipERB(b, i) - 1
 		case ch == '<' && i+1 < to && (b[i+1] == '/' || b[i+1] == '!'):
+			if b[i+1] == '/' && header > 0 && readTagName(b, i+2) == "th" {
+				header--
+			}
 			for i < to && b[i] != '>' {
 				i++
 			}
@@ -315,6 +320,12 @@ func (s *state) analyzeContent(src []byte, from, to int, lang domain.Lang) domai
 				c.Native = append(c.Native, name)
 			}
 			t, next := s.parseTag(b, i, name, lang)
+			if name == "th" && !t.SelfClosing {
+				header++
+			}
+			if header > 0 && isCheckbox(name, t.Attrs) {
+				c.HeaderCheckbox = true
+			}
 			for _, a := range t.Attrs {
 				switch {
 				case a.Syntax == domain.SyntaxSpread:
@@ -348,6 +359,23 @@ func readTagName(src []byte, i int) string {
 		j++
 	}
 	return string(src[i:j])
+}
+
+// isCheckbox reports whether a start tag is a checkbox: a <void-checkbox>, or an <input> whose type is
+// checkbox (or an expression, which may be).
+func isCheckbox(name string, attrs []domain.AttrToken) bool {
+	if name == "void-checkbox" {
+		return true
+	}
+	if name != "input" {
+		return false
+	}
+	for _, a := range attrs {
+		if strings.EqualFold(a.Name, "type") && (a.Dynamic || strings.EqualFold(strings.TrimSpace(a.Value), "checkbox")) {
+			return true
+		}
+	}
+	return false
 }
 
 // isNameAttr reports whether a child element's attribute gives it an

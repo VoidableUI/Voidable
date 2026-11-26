@@ -137,6 +137,59 @@ The charts take their data as the JSON `data` attribute (a gauge's `zones` too),
 
 A Livewire update that leaves a chart's data unchanged leaves the chart alone (no new animation); changed data redraws it. Each chart carries a visually hidden data table captioned with `aria-label`, and `show-table` shows it below the chart. The example app's charts lab (`/lab/charts`) is tested against real Livewire in `tests/browser/server/laravel/charts.spec.ts`.
 
+## Tables the server drives
+
+`<void-table manual>` never reorders or hides a row: it fires `void-sort`, `void-filter` and `void-change`, and the Livewire component answers by rendering the order, the visible rows, `sort`, `sort-direction`, `filter` and `value`. The `voidable/laravel` package has Blade components for the table and its parts (`<x-voidable::table>`, `table-filter`, `table-empty`, `table-selection`, `table-select-all`). `value` and `keys` take a PHP array and are written as the JSON attributes the element reads; every other attribute passes through as written.
+
+```blade
+{{-- resources/views/livewire/orders.blade.php --}}
+<x-voidable::table manual selectable aria-label="Orders"
+    :sort="$sort" :sort-direction="$direction" :total-rows="$total" :value="$selected"
+    x-void-on:void-sort="$wire.sortBy($event.detail.column, $event.detail.direction)"
+    x-void-on:void-change="$wire.select($event.detail.value, $event.detail.all)">
+  <table>
+    <thead><tr>
+      <th data-stack="select"><input type="checkbox" aria-label="Select all rows"></th>
+      <th data-key="name" data-sort>Name</th>
+    </tr></thead>
+    <tbody>
+      @foreach ($orders as $order)
+        <tr wire:key="order-{{ $order->id }}" data-value="{{ $order->id }}">
+          <td><input type="checkbox" aria-label="Select order {{ $order->id }}"></td>
+          <td>{{ $order->name }}</td>
+        </tr>
+      @endforeach
+    </tbody>
+  </table>
+  <x-voidable::table-selection hidden><span data-count></span> selected</x-voidable::table-selection>
+  <x-voidable::table-select-all hidden>
+    <button type="button">Select all {{ number_format($total) }} rows</button>
+  </x-voidable::table-select-all>
+</x-voidable::table>
+```
+
+```php
+// app/Livewire/Orders.php
+public string $sort = 'name';
+public string $direction = 'ascending';
+public array $selected = [];
+public bool $allSelected = false;
+
+public function sortBy(string $column, string $direction): void
+{
+    [$this->sort, $this->direction] = [$column, $direction];
+    $this->resetPage();
+}
+
+public function select(array $value, bool $all): void
+{
+    // $all: the user chose every row of the query, not only this page's.
+    [$this->selected, $this->allSelected] = [$value, $all];
+}
+```
+
+With `total-rows` greater than the rows on the page, the part inside `table-select-all` appears once the header checkbox is checked; its button sets `all-selected` and fires `void-change` with `all: true`, and the component applies the bulk action to the whole query. Native checkboxes in the rows (above) are the right choice at thousands of rows. The table's words (the select-all name, the count announcement) follow `lang`; select-all by keyboard is off until you bind it with `:keys="['selectAll' => ['Control+a', 'Meta+a']]"`. See [Table](/components/table/#server-mode-manual).
+
 ## Development warnings
 
 A misspelled attribute, an invalid value or a child in the wrong parent does nothing and says nothing. In Laravel, `@voidableScripts` also loads `@voidable/ui/dev` when `voidable.dev_warnings` is on, which by default is the `local` environment only (`VOIDABLE_DEV_WARNINGS=false` turns it off, `VOIDABLE_DEV_WARNINGS=throw` makes warnings throw for browser tests). Without Laravel, import it from your bundle in development only:
