@@ -98,7 +98,7 @@ losing a key: nothing typed is lost and focus stays in the field.
 
 ## Charts and gauges
 
-The charts take their data as a property of the element, which markup cannot set. The `bar_chart`, `line_chart`, `donut_chart` and `gauge` components encode `data` (and a gauge's `zones`) as JSON in `data-void-props` and attach the `VoidProps` hook from `VoidHooks`, which assigns each key to the element once it is defined. Render new data and the chart animates to it; an unchanged value assigns nothing. The first, static render is an empty element: the chart draws when the socket connects.
+The charts take their data as the JSON `data` attribute (a gauge's `zones` too), so the first, static render already contains it and the chart draws with no script and no hook. The `bar_chart`, `line_chart`, `donut_chart` and `gauge` components encode `data` (and `zones`) for you from maps and lists. Render new data and the chart animates to it; an unchanged value leaves the attribute alone and does not animate again. Each chart carries a visually hidden data table captioned with `aria_label` (the drawing is hidden from assistive technology); `show_table` shows it below the chart.
 
 ```heex
 <.bar_chart id="revenue" data={%{labels: ["Q1", "Q2"], series: [%{name: "2025", values: [4, 8]}]}} aria_label="Revenue by quarter" />
