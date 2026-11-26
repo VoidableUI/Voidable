@@ -98,7 +98,7 @@
       },
       {
         "keys": "Right Arrow, Left Arrow",
-        "action": "Move focus to the next or previous tab (wraps). With `activation=\"auto\"` the tab is selected too"
+        "action": "Move focus to the next or previous tab (wraps). With `activation=\"auto\"` the tab is selected too. In right-to-left pages the keys swap: Left Arrow is next"
       },
       {
         "keys": "Home, End",
@@ -123,7 +123,7 @@
       },
       {
         "keys": "Left Arrow, Up Arrow",
-        "action": "Select the previous item (wraps). With nothing selected, the last"
+        "action": "Select the previous item (wraps). With nothing selected, the last. In right-to-left pages Left Arrow selects the next item and Right Arrow the previous (Up Arrow and Down Arrow do not swap)"
       },
       {
         "keys": "Space",
@@ -206,7 +206,7 @@
     "rows": [
       {
         "keys": "Left Arrow / Right Arrow",
-        "action": "Moves focus to the previous or next day"
+        "action": "Moves focus to the previous or next day. In right-to-left pages Left Arrow is the next day and Right Arrow the previous (Up Arrow and Down Arrow do not swap)"
       },
       {
         "keys": "Up Arrow / Down Arrow",
@@ -255,7 +255,7 @@
       },
       {
         "keys": "Left Arrow / Right Arrow",
-        "action": "Moves to the previous or next cell"
+        "action": "Moves to the previous or next cell. In right-to-left pages Left Arrow is the next cell"
       }
     ]
   },
@@ -277,7 +277,7 @@
     "rows": [
       {
         "keys": "Left Arrow / Right Arrow",
-        "action": "Previous or next slide (horizontal carousels)"
+        "action": "Previous or next slide (horizontal carousels). In right-to-left pages Left Arrow is the next slide"
       },
       {
         "keys": "Up Arrow / Down Arrow",
@@ -294,7 +294,7 @@
     "rows": [
       {
         "keys": "Right Arrow / Left Arrow",
-        "action": "Moves focus to the next or previous entry, wrapping at the ends (Down Arrow / Up Arrow in a vertical menu)"
+        "action": "Moves focus to the next or previous entry, wrapping at the ends (Down Arrow / Up Arrow in a vertical menu). In right-to-left pages the horizontal keys swap"
       },
       {
         "keys": "Enter, Space",
@@ -311,7 +311,7 @@
     "rows": [
       {
         "keys": "Right Arrow / Left Arrow",
-        "action": "Moves focus to the next or previous toggle, wrapping at the ends (horizontal)"
+        "action": "Moves focus to the next or previous toggle, wrapping at the ends (horizontal). In right-to-left pages the horizontal keys swap"
       },
       {
         "keys": "Down Arrow / Up Arrow",

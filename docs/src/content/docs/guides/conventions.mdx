@@ -74,13 +74,13 @@ The [events guide](/guides/events/) lists every event with its detail.
 
 | Attribute | Means | Values | On |
 | --- | --- | --- | --- |
-| `side` | Which side of its anchor it opens on, or which edge of the page it sits on | `top`, `right`, `bottom`, `left` | popover, tooltip, hover card, dropdown menu, drawer, sidebar |
+| `side` | Which side of its anchor it opens on, or which edge of the page it sits on | `top`, `right`, `bottom`, `left` (drawer also `start`, `end`); sidebar `start`, `end` | popover, tooltip, hover card, dropdown menu, drawer, sidebar |
 | `align` | Where it sits along that side | `start`, `center`, `end` | popover, tooltip, hover card, dropdown menu |
 | `placement` | A corner or region of the viewport (or of its anchor) | `top-right`, `top-left`, `bottom-right`, `bottom-left` (toast container also `top-center`, `bottom-center`, `inline`) | toast container, indicator |
-| `icon-side`, `tooltip-side` | The side of a control's own icon button and of its tooltip | `left`, `right`; `top`, `right`, `bottom`, `left` | action input |
+| `icon-side`, `tooltip-side` | The side of a control's own icon button and of its tooltip | `start`, `end`; `top`, `right`, `bottom`, `left` | action input |
 | `orientation` | Horizontal versus vertical layout | `horizontal`, `vertical` (scroll area also `both`) | carousel, checkbox group, divider, nav menu, radio group, toggle group, scroll area |
 
-There is no attribute called `position`: it meant four different things. The values are physical today; logical `start` and `end` (for right-to-left pages) will be added to the same attributes, so no second rename is needed. A combined value such as `position="bottom-end"` is written as two attributes, `side="bottom" align="end"`.
+There is no attribute called `position`: it meant four different things. `start` and `end` name a side in the reading direction (they swap in right-to-left): the convention for any side that follows it (sidebar, action input `icon-side`, drawer). `left` and `right` are for literal edges: the drawer's screen edges. On an anchored overlay (popover, tooltip, hover card, dropdown menu) they are placed against the anchor with logical offsets, so in right-to-left `left` is on the right of the anchor. A toast container or indicator `placement` keeps its physical corners. A combined value such as `position="bottom-end"` is written as two attributes, `side="bottom" align="end"`.
 *Why*: `side` and `align` are the words CSS anchor positioning and the common positioning libraries use; `orientation` is the ARIA attribute (`aria-orientation`) every one of these components already writes.
 
 ## Booleans
