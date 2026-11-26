@@ -20,7 +20,7 @@ export class VoidEditable extends InternalsFormControl(VoidElement) {
   /** While focus is inside, a morph does not apply the server's value over what the user is typing. */
   static override editState = ['value'];
   /**
-   * The committed text. As an attribute it is the initial value and the form's reset target. Text still
+   * The committed text. Reflected to the attribute as it changes; the form's reset target stays the value it started with. Text still
    * being edited is not part of it until committed.
    */
   @property({ type: String, reflect: true }) value = '';

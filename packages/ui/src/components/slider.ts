@@ -13,10 +13,10 @@ export class VoidSlider extends NativeFormControl(VoidElement) {
   static override labelTarget = 'input';
 
   /**
-   * Current position, between `min` and `max`. Defaults to 50. As an attribute it is the initial value;
-   * read the `value` property for the current one.
+   * Current position, between `min` and `max`. Defaults to 50. Reflected to the `value` attribute as it
+   * moves; the form's reset target stays the value the slider started with.
    */
-  @property({ type: Number }) value: number = 50;
+  @property({ type: Number, reflect: true }) value: number = 50;
   /** Lowest value. Defaults to 0. */
   @property({ type: Number }) min: number = 0;
   /** Highest value. Defaults to 100. */

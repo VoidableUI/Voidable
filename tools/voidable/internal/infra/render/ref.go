@@ -102,8 +102,6 @@ func attrType(a domain.Attribute) string {
 
 func attrDefault(a domain.Attribute) string {
 	switch {
-	case a.Kind == domain.KindBoolean && a.Default == "true" && a.FalseString:
-		return ` =true (write ="false" to turn it off)`
 	case a.Kind == domain.KindBoolean && a.Default == "true":
 		return " =true (cannot be unset from HTML; set the property to false)"
 	case a.Kind == domain.KindBoolean, a.Default == "", a.Default == "''", a.Default == "null", a.Default == "undefined":

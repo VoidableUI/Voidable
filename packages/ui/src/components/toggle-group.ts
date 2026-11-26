@@ -6,8 +6,8 @@ import type { VoidToggle } from './toggle.js';
 /** Multi-button toggle set for text editor toolbars and filter chips where one or many options can be active. */
 export class VoidToggleGroup extends InternalsFormControl(VoidElement) {
   /**
-   * Comma-separated `value`s of the pressed toggles (`bold,italic`), or the single pressed value. As an
-   * attribute it is the initial state and the form's reset target. Without it (or with an empty one) the
+   * Comma-separated `value`s of the pressed toggles (`bold,italic`), or the single pressed value. Reflected to the
+   * attribute as the pressed toggles change; the form's reset target stays the state it started with. Without it (or with an empty one) the
    * toggles that carry `pressed` in the markup set the initial value (the first of them unless
    * `multiple`); a non-empty `value` wins over their `pressed`.
    */

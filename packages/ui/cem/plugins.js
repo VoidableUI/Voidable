@@ -145,14 +145,6 @@ export function litPropertyPlugin() {
           if (attr && !attr.type) attr.type = { text: litType };
         }
 
-        // A boolean that defaults to true and uses the `defaultTrueBoolean`
-        // converter reads the string "false" as false. Record it so tools
-        // (the voidable CLI's checker and generators) derive the list from
-        // source instead of keeping a hand-written copy.
-        if (attr && option('converter')?.initializer.getText() === 'defaultTrueBoolean') {
-          attr.falseString = true;
-        }
-
         if (field && field.default === undefined && ts.isPropertyDeclaration(member) && member.initializer) {
           field.default = member.initializer.getText();
           if (attr && attr.default === undefined) attr.default = field.default;

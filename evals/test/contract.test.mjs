@@ -11,6 +11,7 @@ import { existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { CONTRACT } from '../contract/contract.mjs';
+import { VALUE_REFLECTION } from '../contract/value.mjs';
 import { contractMarkdown } from '../contract/doc.mjs';
 import { EVALS } from '../lib/paths.mjs';
 import { ROOT } from '../lib/paths.mjs';
@@ -38,6 +39,32 @@ test('state handles marked (reflected) are reflected attributes in the manifest'
     const probe = CONTRACT[d.tagName].probe;
     if (probe?.event) assert.ok(events.has(probe.event) || decls.some((x) => (x.events || []).some((e) => e.name === probe.event)), `${d.tagName}: probe event ${probe.event} is not in the manifest`);
   }
+});
+
+test('every element with a value follows the value reflection rule or is excluded with a reason', { skip: noManifest }, () => {
+  const problems = [];
+  const withValue = decls.filter((d) => (d.members || []).some((m) => m.kind === 'field' && m.name === 'value'));
+  for (const d of withValue) {
+    const rule = VALUE_REFLECTION[d.tagName];
+    if (!rule) {
+      problems.push(`${d.tagName}: has a value and no entry in evals/contract/value.mjs (reflect it, or exclude it with a reason)`);
+      continue;
+    }
+    const field = d.members.find((m) => m.kind === 'field' && m.name === 'value');
+    if (rule.excluded) {
+      if (typeof rule.excluded !== 'string' || rule.excluded.length < 20) problems.push(`${d.tagName}: the exclusion needs a written reason`);
+    } else if (!(field.reflects && field.attribute === 'value')) {
+      problems.push(`${d.tagName}: value is not a reflected "value" attribute in the manifest`);
+    }
+  }
+  const tags = new Set(decls.map((d) => d.tagName));
+  for (const tag of Object.keys(VALUE_REFLECTION)) if (!tags.has(tag)) problems.push(`${tag}: in value.mjs but not in the manifest`);
+  for (const [tag, rule] of Object.entries(VALUE_REFLECTION)) {
+    if (rule.excluded) continue;
+    for (const k of ['html', 'set', 'afterSet', 'write']) if (rule[k] === undefined) problems.push(`${tag}: value.mjs entry lacks ${k}`);
+    if (rule.user && rule.afterUser === undefined) problems.push(`${tag}: value.mjs entry has user steps and no afterUser`);
+  }
+  assert.deepEqual(problems, []);
 });
 
 test('CONTRACT.md is generated from contract.mjs (mise run evals -- contract)', () => {
@@ -107,4 +134,55 @@ for (const [tag, c] of Object.entries(CONTRACT)) {
     if (p.visible) assert.ok(await page.getByRole(p.visible.role, { name: p.visible.name }).first().isVisible(), `${p.visible.role} "${p.visible.name}" is not visible`);
     if (p.event) assert.ok((await page.evaluate(() => window.__events)).includes(p.event), `${p.event} did not fire`);
   });
+}
+
+// Value reflection (contract/value.mjs): after what a user does, after a property set and after an attribute
+// write, `value` is the attribute and the property agrees; the sets fire no void-change.
+async function steps(list) {
+  for (const s of list) {
+    if (s.fill) await page.getByLabel(s.fill.label).first().fill(s.fill.text);
+    if (s.click) await page.getByRole(s.click.role, { name: s.click.name, exact: true }).first().click();
+    if (s.clickOption) await page.getByRole('option', { name: s.clickOption }).first().click();
+    if (s.press) await page.getByRole(s.press.role, { name: s.press.name, exact: true }).first().press(s.press.key);
+    if (s.select) await page.getByLabel(s.select.label).first().selectOption(s.select.value);
+    if (s.type) {
+      await page.getByLabel(s.type.label, { exact: true }).first().focus();
+      await page.keyboard.type(s.type.text);
+    }
+    if (s.key) await page.keyboard.press(s.key);
+  }
+  await page.evaluate(settleInPage);
+}
+
+for (const [tag, rule] of Object.entries(VALUE_REFLECTION)) {
+  if (rule.excluded) continue;
+  test(`${tag}: value is reflected after ${rule.user ? 'a user change, ' : ''}a property set and an attribute write`, { skip: noBrowser }, async () => {
+    await mount(rule.html);
+    const host = page.locator(tag).first();
+    const attr = () => host.getAttribute('value');
+    if (rule.user) {
+      await steps(rule.user);
+      assert.equal(await attr(), rule.afterUser, `${tag}[value] after the user changed it`);
+    }
+    await page.evaluate(() => {
+      window.__changes = 0;
+      document.addEventListener('void-change', () => { window.__changes++; }, true);
+    });
+    await host.evaluate((el, v) => { el.value = v; }, rule.set);
+    await page.evaluate(settleInPage);
+    assert.equal(await attr(), rule.afterSet, `${tag}[value] after the property was set`);
+    await host.evaluate((el, v) => el.setAttribute('value', v), rule.write.attribute);
+    await page.evaluate(settleInPage);
+    assert.deepEqual(await host.evaluate((el) => el.value), rule.write.property, `${tag}.value after the attribute was written`);
+    assert.equal(await page.evaluate(() => window.__changes), 0, `${tag}: void-change fired for a property or attribute set`);
+  });
+  if (rule.secret) {
+    test(`${tag}: a secret is not put in the value attribute`, { skip: noBrowser }, async () => {
+      await mount(rule.secret.html);
+      await steps(rule.secret.user);
+      const value = await page.locator(tag).first().getAttribute('value');
+      assert.ok(!(value ?? '').includes(rule.secret.text), `${tag}[value] holds the typed secret`);
+      assert.equal(await page.locator(tag).first().evaluate((el) => el.value), rule.secret.text, `${tag}.value lost the typed secret`);
+    });
+  }
 }

@@ -51,11 +51,12 @@ export class VoidSelect extends VoidElement {
   }
 
   /**
-   * `value` of the chosen option (the native select's value). As an attribute it is the initial choice, applied
-   * once an option with that value exists; without it the options' own `selected` decide, as in plain HTML.
+   * `value` of the chosen option (the native select's value), reflected to the attribute as the choice
+   * changes. Written in markup it is the initial choice, applied once an option with that value exists (and
+   * what a form reset returns to); without it the options' own `selected` decide, as in plain HTML.
    * @default ''
    */
-  @property({ type: String })
+  @property({ type: String, reflect: true })
   get value(): string {
     const select = this.select;
     if (this._wanted !== null && !(select && hasOption(select, this._wanted))) return this._wanted;
@@ -69,7 +70,18 @@ export class VoidSelect extends VoidElement {
     this.requestUpdate('value', old);
   }
 
+  /** The value last handed to Lit, to notice a choice made inside the select (the user, a morph, new options). */
+  private _reflected: string | null = null;
+  /** The `value` attribute the markup wrote (or the server's last), which a form reset returns to; read before reflection can change it. */
+  private _initial: string | null = null;
+  private _initialRead = false;
+
   override connectedCallback(): void {
+    if (!this._initialRead) {
+      this._initialRead = true;
+      this._initial = this.getAttribute('value');
+      this._serverValue ??= this.getAttribute('value') ?? '';
+    }
     super.connectedCallback();
     // Capture: the select's change reaches the host even where it does not bubble (a synthetic one).
     this.addEventListener('change', this._onChange, true);
@@ -90,6 +102,32 @@ export class VoidSelect extends VoidElement {
     if (this._serverValue === null) this._serverValue = this.getAttribute('value') ?? '';
     this._apply();
     this._watchForm(select.form);
+    this._reflectChoice();
+  }
+
+  /** The choice is made inside the native select; ask for an update when it is no longer what the attribute shows. */
+  private _reflectChoice(): void {
+    if (!this._morphing && this.value !== this._reflected) this.requestUpdate();
+  }
+
+  /**
+   * Between voidBeforeMorph and morphedCallback the native select holds whatever the morph library left in
+   * it (it re-syncs the options from the server's `selected`), not the user's choice: nothing is reflected
+   * then, or the attribute would take that transient value before the choice is put back.
+   */
+  private _morphing = false;
+  /** The `value` attribute the server sent in a morph that changed it (null: it sent none). */
+  private _serverValueText: string | null = null;
+
+  protected override willUpdate(changed: Map<string, unknown>): void {
+    super.willUpdate(changed);
+    if (this._morphing) return;
+    const now = this.value;
+    if (now === this._reflected) return;
+    const old = this._reflected;
+    this._reflected = now;
+    // Lit reflects a property that was set; the choice is set inside the select, so say it changed.
+    if (!changed.has('value')) this.requestUpdate('value', old);
   }
 
   /** Pushes the wanted value into the select (once an option has it); then the select is the truth. */
@@ -130,6 +168,7 @@ export class VoidSelect extends VoidElement {
   private _onChange = (e: Event): void => {
     if (e.target !== this.select) return;
     this._wanted = null;
+    this._reflectChoice();
     this.dispatchEvent(new CustomEvent('void-change', { bubbles: true, composed: true, detail: { value: this.value } }));
   };
 
@@ -145,8 +184,9 @@ export class VoidSelect extends VoidElement {
   /** After a reset the options' `selected` decide; an initial `value` attribute is applied again. */
   private _onReset = (): void => {
     setTimeout(() => {
-      const initial = this.getAttribute('value');
+      const initial = this._initial;
       if (initial !== null && this.isConnected) this.value = initial;
+      else this._reflectChoice();
     });
   };
 
@@ -159,6 +199,16 @@ export class VoidSelect extends VoidElement {
       const now = theirs ? selectedAttrs(theirs) : '';
       const value = incoming.getAttribute('value') ?? '';
       this._serverValueChanged = value !== this._serverValue;
+      // The server's new initial choice is the one a reset returns to.
+      this._serverValueText = this._serverValueChanged ? incoming.getAttribute('value') : null;
+      if (this._serverValueChanged) this._initial = this._serverValueText;
+      this._morphing = true;
+      // A morph that never reaches morphedCallback must not leave reflection off.
+      setTimeout(() => {
+        if (!this._morphing) return;
+        this._morphing = false;
+        this._reflectChoice();
+      }, 100);
       const serverChanged = now !== this._serverSelection || this._serverValueChanged;
       this._serverSelection = now;
       this._serverValue = value;
@@ -172,22 +222,27 @@ export class VoidSelect extends VoidElement {
     const valueChanged = this._serverValueChanged;
     this._keep = null;
     this._serverValueChanged = false;
+    const serverValue = this._serverValueText;
+    this._serverValueText = null;
+    this._morphing = false;
     const select = this.select;
     if (!select) return;
     // Server markup does not carry the aria-invalid the error wrote.
     if (this.error) this._markInvalid(select);
     // Morph libraries sync the select from its options' `selected` after the host's attributes, which would
     // undo a new `value` attribute (the server's choice): apply it again once the options are in place.
-    const value = this.getAttribute('value');
-    if (valueChanged && value !== null) {
-      this.value = value;
+    if (valueChanged && serverValue !== null) {
+      this.value = serverValue;
       return;
     }
-    if (!keep) return;
-    const wanted = new Set(keep);
-    for (const option of Array.from(select.options)) {
-      if (option.selected !== wanted.has(option.value)) option.selected = wanted.has(option.value);
+    if (keep) {
+      const wanted = new Set(keep);
+      for (const option of Array.from(select.options)) {
+        if (option.selected !== wanted.has(option.value)) option.selected = wanted.has(option.value);
+      }
     }
+    // The morph may have moved the choice inside the select.
+    this._reflectChoice();
   }
 }
 

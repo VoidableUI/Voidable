@@ -289,6 +289,93 @@ describe('select', () => {
   });
 });
 
+describe('reflected value (#67)', () => {
+  it('a text field keeps what the user entered through a morph to the markup the server last sent', async () => {
+    const input = await mount<Host>('<void-input name="q" value="seed"></void-input>');
+    const native = input.querySelector('input')!;
+    native.value = 'typed';
+    native.dispatchEvent(new Event('input', { bubbles: true }));
+    await settle();
+    expect(input.getAttribute('value')).toBe('typed');
+    await morph(input, '<void-input name="q" value="seed"></void-input>');
+    expect(input.value).toBe('typed');
+    expect(input.getAttribute('value')).toBe('typed');
+    expect(native.value).toBe('typed');
+  });
+
+  it('a text field takes a value the server changed, and a reset returns to it', async () => {
+    const form = await mount<HTMLFormElement>('<form><void-input name="q" value="seed"></void-input></form>');
+    const input = form.querySelector('void-input') as Host;
+    input.value = 'typed';
+    await settle();
+    await morph(input, '<void-input name="q" value="from server"></void-input>');
+    expect(input.value).toBe('from server');
+    expect(input.getAttribute('value')).toBe('from server');
+    input.value = 'later';
+    await settle();
+    form.reset();
+    await new Promise((r) => setTimeout(r, 10));
+    await settle();
+    expect(input.value).toBe('from server');
+  });
+
+  it('a select keeps the pick the reflected attribute shows when the server markup is unchanged', async () => {
+    const markup = '<void-select value="a"><select name="k"><option value="a">a</option><option value="b">b</option></select></void-select>';
+    const sel = await mount<Host>(markup);
+    const native = sel.querySelector('select')!;
+    native.value = 'b';
+    native.dispatchEvent(new Event('change'));
+    await settle();
+    expect(sel.getAttribute('value')).toBe('b');
+    const next = server(markup);
+    sel.voidBeforeMorph(next);
+    morphAttributes(sel, next);
+    native.value = 'a'; // what a morph library syncing the options does
+    await settle();
+    await new Promise((r) => setTimeout(r, 0));
+    expect(sel.value).toBe('b');
+    expect(sel.getAttribute('value')).toBe('b');
+  });
+});
+
+describe('reflected value, server markup without a value attribute', () => {
+  it('a select keeps the pick when the morph library resets the native select before the server value arrives', async () => {
+    // LiveView: the server renders value="" first and the user's pick comes back as the server's value.
+    const markup = (v: string) => `<void-select value="${v}"><select name="k"><option value="" disabled selected hidden>Choose</option><option value="a">a</option></select></void-select>`;
+    const sel = await mount<Host>(markup(''));
+    const native = sel.querySelector('select')!;
+    native.value = 'a';
+    native.dispatchEvent(new Event('change'));
+    await settle();
+    const next = server(markup('a'));
+    sel.voidBeforeMorph(next);
+    morphAttributes(sel, next);
+    native.value = ''; // the morph library re-syncs the options from the server's `selected`
+    await settle();
+    await new Promise((r) => setTimeout(r, 0));
+    expect(sel.value).toBe('a');
+    expect(sel.getAttribute('value')).toBe('a');
+  });
+
+  it('a select keeps the user pick when the server never writes value', async () => {
+    const markup = '<void-select><select name="k"><option value="a">a</option><option value="b">b</option></select></void-select>';
+    const sel = await mount<Host>(markup);
+    const native = sel.querySelector('select')!;
+    native.value = 'b';
+    native.dispatchEvent(new Event('change'));
+    await settle();
+    expect(sel.getAttribute('value')).toBe('b');
+    const next = server(markup);
+    sel.voidBeforeMorph(next);
+    morphAttributes(sel, next);
+    native.value = 'a';
+    await settle();
+    await new Promise((r) => setTimeout(r, 0));
+    expect(sel.value).toBe('b');
+    expect(sel.getAttribute('value')).toBe('b');
+  });
+});
+
 describe('keyed list edits (breadcrumbs, explicit parts)', () => {
   // The items are the author's own nodes in the trail itself: nothing wraps them, so every direct DOM edit a
   // framework makes leaves exactly the order it made.

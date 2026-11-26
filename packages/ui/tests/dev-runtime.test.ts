@@ -220,7 +220,7 @@ describe('the generated table', () => {
     for (const [tag, entry] of Object.entries(table)) {
       const el = document.createElement(tag);
       for (const [name, rule] of Object.entries(entry.a)) {
-        el.setAttribute(name, Array.isArray(rule) ? String(rule[rule.length - 1]) : rule === 3 ? '3' : '');
+        el.setAttribute(name, Array.isArray(rule) ? String(rule[rule.length - 1]) : rule === 2 ? '3' : '');
       }
       for (const name of entry.h ?? []) el.setAttribute(name, '');
       for (const w of checkAttributes(table, el)) throw new Error(`${tag}: ${w.message}`);
@@ -246,11 +246,6 @@ describe('the generated table', () => {
     const manifest = JSON.parse(readFileSync(resolve(__dirname, '../dist/custom-elements.json'), 'utf8'));
     const decl = manifest.modules.flatMap((m: { declarations?: { tagName?: string }[] }) => m.declarations ?? []).find((d: { tagName?: string }) => d.tagName === 'void-option');
     expect(decl.voidParents).toEqual(table['void-option'].p);
-  });
-
-  it('has no boolean that reads "false" as off (#23: every boolean is off when absent)', () => {
-    const accepting = Object.entries(table).flatMap(([tag, e]) => Object.entries(e.a).filter(([, r]) => r === 2).map(([n]) => `${tag}.${n}`));
-    expect(accepting).toEqual([]);
   });
 });
 

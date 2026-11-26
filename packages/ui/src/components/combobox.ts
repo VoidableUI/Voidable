@@ -40,10 +40,10 @@ export class VoidCombobox extends InternalsFormControl(VoidElement) {
   static override labelTarget = 'input[role=combobox]';
 
   /**
-   * `value` of the chosen `void-option`. As an attribute it is the initial choice (without it, an option marked
-   * `selected` is); read the `value` property for the current one.
+   * `value` of the chosen `void-option`. Reflected to the attribute as the choice changes. Written in markup
+   * it is the initial choice (without it, an option marked `selected` is), which a form reset restores.
    */
-  @property({ type: String }) value = '';
+  @property({ type: String, reflect: true }) value = '';
   /**
    * Hint shown in the search field while it is empty. Defaults to `Search...`. It is also the field's
    * accessible name when no `void-field` label names it.
@@ -115,7 +115,11 @@ export class VoidCombobox extends InternalsFormControl(VoidElement) {
     return this._options.filter(opt => optionLabel(opt).toLowerCase().includes(q));
   }
 
+  /** The markup wrote a `value` attribute (read before the reflected default can add one). */
+  private _authoredValue: boolean | null = null;
+
   override connectedCallback(): void {
+    this._authoredValue ??= this.hasAttribute('value');
     super.connectedCallback();
     // A press on an option chooses it; mousedown keeps focus in the input.
     this.addEventListener('mousedown', this._onPointerDown);
@@ -127,7 +131,7 @@ export class VoidCombobox extends InternalsFormControl(VoidElement) {
   /** Without an initial value, an option marked `selected` is the initial choice (as in a native select). */
   private _adoptSelected(options: VoidOption[]): void {
     if (this._initial) return;
-    if (this.value || this.hasAttribute('value')) {
+    if (this.value || this._authoredValue) {
       this._initial = true;
       return;
     }
