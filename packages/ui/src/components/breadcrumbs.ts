@@ -1,6 +1,7 @@
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
 import { PartsController } from '../parts.js';
+import { msg, nameHost } from '../messages.js';
 
 const LIST = 'void-breadcrumbs-list';
 const ITEM = 'void-breadcrumbs-item';
@@ -37,10 +38,16 @@ export class VoidBreadcrumbs extends VoidElement {
   connectedCallback(): void {
     super.connectedCallback();
     this.setHostAttribute('role', 'navigation');
-    this.setHostAttribute('aria-label', 'Breadcrumb');
+    this._name();
+  }
+
+  /** The landmark's name: the author's `aria-label`, else the message. */
+  private _name(): void {
+    nameHost(this, msg(this, 'breadcrumbs.label'), (n, v) => this.setHostAttribute(n, v));
   }
 
   protected override updated(changed: Map<string, unknown>): void {
+    this._name();
     super.updated(changed);
     if (changed.has('separator')) {
       // A CSS string, read by `content` in breadcrumbs.css.

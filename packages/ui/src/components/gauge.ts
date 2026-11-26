@@ -1,5 +1,6 @@
 import { html, svg, nothing } from 'lit';
 import { VoidElement } from '../base.js';
+import { msg } from '../messages.js';
 import { property, state } from 'lit/decorators.js';
 import { guard } from 'lit/directives/guard.js';
 import { useProjection } from '../projection.js';
@@ -965,7 +966,7 @@ export class VoidGauge extends VoidElement {
    */
   private _table() {
     const { value, min, max, unit, segmentsSort, _data: data } = this;
-    const label = this.ariaLabel || 'Gauge chart';
+    const label = this.ariaLabel || msg(this, 'chart.gauge');
     return guard([value, min, max, unit, segmentsSort, data, label, chartLocale(this)], () => {
       let table: ChartTable | null;
       const segments = data.segments ?? [];
@@ -976,7 +977,7 @@ export class VoidGauge extends VoidElement {
         const n = tableNumbers(this);
         const reading = data.value ?? value;
         const withUnit = (v: number) => n.number(v) + (unit ? (/^[\p{L}]/u.test(unit) ? ` ${unit}` : unit) : '');
-        table = { caption: label, head: ['Value', 'Minimum', 'Maximum'], rows: [{ cells: [withUnit(reading), withUnit(min), withUnit(max)] }] };
+        table = { caption: label, head: [msg(this, 'chart.value'), msg(this, 'chart.minimum'), msg(this, 'chart.maximum')], rows: [{ cells: [withUnit(reading), withUnit(min), withUnit(max)] }] };
       }
       return dataTable('void-gauge-table', table);
     });

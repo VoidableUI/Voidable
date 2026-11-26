@@ -1,6 +1,7 @@
 import { html, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
+import { msg, nameHost } from '../messages.js';
 import { useProjection } from '../projection.js';
 
 useProjection();
@@ -18,7 +19,16 @@ export class VoidStepper extends VoidElement {
   connectedCallback(): void {
     super.connectedCallback();
     this.setHostAttribute('role', 'navigation');
-    this.setHostAttribute('aria-label', 'Progress');
+    this._name();
+  }
+
+  private _name(): void {
+    nameHost(this, msg(this, 'stepper.label'), (n, v) => this.setHostAttribute(n, v));
+  }
+
+  protected override updated(changed: Map<string, unknown>): void {
+    super.updated(changed);
+    this._name();
   }
 
   render() {

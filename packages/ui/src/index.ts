@@ -78,3 +78,6 @@ export { VoidDonutChart } from './components/donut-chart.js';
 export type { DonutChartData, DonutChartSegment } from './components/donut-chart.js';
 export { VoidGauge } from './components/gauge.js';
 export type { GaugeData, GaugeSegment, GaugeZone } from './components/gauge.js';
+
+export { registerMessages, msg, langOf, localeOf } from './messages.js';
+export type { Message, MessageKey, MessageParameters, MessageContext, Messages } from './messages.js';

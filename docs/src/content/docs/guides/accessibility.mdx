@@ -44,9 +44,13 @@ Arrow keys follow the direction too (the test is `:dir(rtl)` on the component, s
 
 What does not follow yet:
 
-- Built-in strings and glyphs: the pagination `«` and `»`, the breadcrumb separator you supply and the default `→` of `void-delta` are written text and do not mirror. Labels the components generate are in English.
+- Glyphs: the pagination `«` and `»`, the breadcrumb separator you supply and the default `→` of `void-delta` are written text and do not mirror.
 - Attributes that name a physical place keep their meaning (on a popover, tooltip, hover card or dropdown menu, `side="left"` and `"right"` mirror with the direction): drawer `side="left" | "right"` (the screen edges; `start` and `end` follow the direction), toast `placement`, indicator `placement`, and the color picker (its hue and saturation axes are a colour scale, not text). The sidebar `side` and the action input `icon-side` take `start` and `end`, which follow the direction.
-- Locale: the calendar, date picker and number input do not yet take a locale, and a page that mixes scripts needs `dir` on the right element.
+- A page that mixes scripts needs `dir` on the right element: `lang` chooses the language of the words and formats, `dir` the direction, and neither implies the other.
+
+### Words and locale
+
+The words the components write themselves (names such as "Close" and "Previous month", placeholders, errors, the headers of a chart's data table) and the locale of dates and numbers follow the closest `lang`, as the direction follows `dir`. Import a language (`@voidable/ui/messages/ar`) or register your own, and set `lang` and `dir` together: `<html lang="ar" dir="rtl">`. The calendar and date picker take month and weekday names and the first day of the week from the language, the number input and the chart tables write numbers in its digits, and a `placeholder`, `aria-label` or `label` you write always wins. See [Translation](/guides/translation/). The shipped French and Arabic messages are a starting set to review before you rely on them.
 
 ## Known limitations
 

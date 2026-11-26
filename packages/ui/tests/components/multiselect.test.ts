@@ -63,7 +63,7 @@ describe('VoidMultiselect', () => {
     });
 
     it('placeholder defaults to "Select..."', () => {
-      expect(el.placeholder).toBe('Select...');
+      expect(el.placeholder).toBe('');
     });
 
     it('disabled defaults to false', () => {

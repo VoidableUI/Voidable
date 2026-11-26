@@ -239,7 +239,7 @@
       },
       {
         "keys": "Home / End",
-        "action": "Moves focus to the first or last day of the week (the week starts on `first-day`)"
+        "action": "Moves focus to the first or last day of the week (the week starts on `first-day`, else on the locale's first day)"
       },
       {
         "keys": "Page Up / Page Down",

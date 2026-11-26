@@ -110,6 +110,42 @@ type Element struct {
 	// from the manifest's voidRenamed (source: `renamed` in
 	// packages/ui/cem/supplement.js).
 	Renamed *Renamed `json:"-"`
+	// Messages are the words the component writes itself (accessible names,
+	// placeholders, errors), from the manifest's voidMessages (source:
+	// packages/ui/cem/messages-meta.js and src/messages.ts, #29): the English
+	// default and what replaces it on an element.
+	Messages []Message `json:"messages,omitempty"`
+}
+
+// Message is one built-in string of a component: its key in the messages
+// registry (`@voidable/ui/messages`), the English it starts as and what an
+// author writes to replace it on one element.
+type Message struct {
+	Key      string           `json:"key"`
+	Default  string           `json:"default"`
+	Override *MessageOverride `json:"override"`
+}
+
+// MessageOverride says what replaces a Message on an element: an attribute
+// (of the element, or of the part On), or a part the author writes. A nil
+// override means only registerMessages changes it.
+type MessageOverride struct {
+	Attribute string `json:"attribute,omitempty"`
+	On        string `json:"on,omitempty"`
+	Part      string `json:"part,omitempty"`
+}
+
+// String says it in a phrase: "aria-label", "aria-label on <x>", "a <x> part" or "registerMessages() only".
+func (o *MessageOverride) String() string {
+	switch {
+	case o == nil:
+		return "registerMessages() only"
+	case o.Part != "":
+		return "a <" + o.Part + "> part"
+	case o.On != "":
+		return o.Attribute + " on <" + o.On + ">"
+	}
+	return o.Attribute
 }
 
 // NativeControl is a native element a component enhances in place: Tag must

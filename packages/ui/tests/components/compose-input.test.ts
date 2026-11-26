@@ -32,7 +32,7 @@ describe('VoidComposeInput', () => {
     });
 
     it('placeholder defaults to "Type a message..."', () => {
-      expect(el.placeholder).toBe('Type a message...');
+      expect(el.placeholder).toBe('');
     });
 
     it('disabled defaults to false', () => {

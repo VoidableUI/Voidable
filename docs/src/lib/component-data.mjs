@@ -235,6 +235,7 @@ export function loadComponentData() {
       hints: d.voidHints ?? {},
       renamed: d.voidRenamed ?? null,
       hostAttributes: d.voidHostAttributes ?? [],
+      messages: d.voidMessages ?? [],
       mixins,
       form,
       note,

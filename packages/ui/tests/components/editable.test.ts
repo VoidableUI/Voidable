@@ -27,7 +27,7 @@ describe('VoidEditable', () => {
     expect(el.value).toBe('');
     expect(el.editing).toBe(false);
     expect(el.disabled).toBe(false);
-    expect(el.placeholder).toBe('Click to edit');
+    expect(el.placeholder).toBe('');
     expect(el.submitMode).toBe('both');
     expect(el.size).toBe('md');
   });

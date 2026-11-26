@@ -49,6 +49,7 @@ function stub(c, tokens) {
   if (c.form) heading('Form behaviour', `<FormBehaviour tag="${t}" />`);
   if (c.keyboard) heading('Keyboard', `<KeyTable tag="${t}" />`);
   heading('Accessibility', `<Accessibility tag="${t}" />`);
+  if (c.messages.length) heading('Words it writes', `<Messages tag="${t}" />`);
   heading('Common mistakes', `<Mistakes tag="${t}" />`);
   heading('Related', `<Related tag="${t}" />`);
 
@@ -68,6 +69,7 @@ import Placement from '../../../components/api/Placement.astro';
 import FormBehaviour from '../../../components/api/FormBehaviour.astro';
 import KeyTable from '../../../components/api/KeyTable.astro';
 import Accessibility from '../../../components/api/Accessibility.astro';
+import Messages from '../../../components/api/Messages.astro';
 import Mistakes from '../../../components/api/Mistakes.astro';
 import Related from '../../../components/api/Related.astro';
 

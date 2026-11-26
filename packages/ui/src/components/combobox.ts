@@ -2,6 +2,7 @@ import { html, nothing } from 'lit';
 import { live } from 'lit/directives/live.js';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
+import { msg } from '../messages.js';
 import { InternalsFormControl } from '../form-control.js';
 import { OverlayController, type OverlayCloseReason } from '../overlay.js';
 import { PartsController } from '../parts.js';
@@ -45,10 +46,11 @@ export class VoidCombobox extends InternalsFormControl(VoidElement) {
    */
   @property({ type: String, reflect: true }) value = '';
   /**
-   * Hint shown in the search field while it is empty. Defaults to `Search...`. It is also the field's
+   * Hint shown in the search field while it is empty. Defaults to the `combobox.placeholder` message (English: `Search...`). It is also the field's
    * accessible name when no `void-field` label names it.
    */
-  @property({ type: String }) placeholder = 'Search...';
+  @property({ type: String }) placeholder = '';
+  private get _hint(): string { return this.placeholder || msg(this, 'combobox.placeholder'); }
   /** Stop the field opening and exclude the value from the form submission. */
   @property({ type: Boolean, reflect: true }) disabled = false;
   /** Size step: `sm`, `md` (default) or `lg`. */
@@ -195,8 +197,9 @@ export class VoidCombobox extends InternalsFormControl(VoidElement) {
       // Named only while open, so that the field's label finds one element (the control) while closed.
       const labelledby = open ? input?.getAttribute('aria-labelledby') ?? null : null;
       this._parts.set(content, 'aria-labelledby', labelledby);
-      this._parts.set(content, 'aria-label', open && !labelledby ? input?.getAttribute('aria-label') || this.placeholder || null : null);
-      // "No options found" is drawn by the theme while nothing matches.
+      this._parts.set(content, 'aria-label', open && !labelledby ? input?.getAttribute('aria-label') || this._hint || null : null);
+      // The "no options" text is drawn by the theme while nothing matches, from this property.
+      this.setHostStyle('--_void-combobox-empty', JSON.stringify(msg(this, 'combobox.empty'))); // style-ok
       this._parts.set(content, 'empty', shown === 0);
       if (input) {
         this._parts.set(input, 'aria-activedescendant', open && this._active ? this._parts.id(this._active, 'void-option') : null);
@@ -218,8 +221,8 @@ export class VoidCombobox extends InternalsFormControl(VoidElement) {
         class="void-combobox-input"
         role="combobox"
         .value=${live(open ? this._query : (chosen ? optionLabel(chosen) : this.value || ''))}
-        placeholder=${this.placeholder}
-        aria-label=${this.placeholder}
+        placeholder=${this._hint}
+        aria-label=${this._hint}
         ?disabled=${this.disabled}
         autocomplete="off"
         aria-autocomplete="list"

@@ -1,4 +1,5 @@
 import { html, nothing, type TemplateResult } from 'lit';
+import { localeOf, msg } from '../../messages.js';
 
 /** Reports a problem with a chart's data through the element's dev warning. */
 export type ChartWarn = (subject: string, message: string) => void;
@@ -69,9 +70,9 @@ export function normalizeSegments<S extends { name: string; value: number }>(raw
   return raw.filter(isRecord).map((s) => ({ ...s, name: String(s.name ?? ''), value: s.value })) as unknown as S[];
 }
 
-/** The language the text of `el` is in: its closest `lang`, else the browser's. */
-export function chartLocale(el: Element): string | undefined {
-  return el.closest('[lang]')?.getAttribute('lang') || undefined;
+/** The locale the text of `el` is in: its closest `lang` (the page's included), else `en-US`. */
+export function chartLocale(el: Element): string {
+  return localeOf(el);
 }
 
 /** Numbers the way a reader of this element's language expects them, with their full precision (up to three decimals). */
@@ -125,7 +126,7 @@ export function seriesTable(
   for (let i = 0; i < rowCount; i++) {
     rows.push({ header: labels[i] ?? String(i + 1), cells: series.map((s) => n.number(s.values[i] as number)) });
   }
-  return { caption, head: ['Label', ...series.map((s) => s.name)], rows };
+  return { caption, head: [msg(el, 'chart.label'), ...series.map((s) => s.name)], rows };
 }
 
 /** The table of named parts of a whole (donut segments, gauge segments): name, value and share. */
@@ -140,7 +141,7 @@ export function segmentsTable(
   const total = segments.reduce((s, x) => s + fin(x.value), 0);
   return {
     caption,
-    head: ['Segment', 'Value', 'Share'],
+    head: [msg(el, 'chart.segment'), msg(el, 'chart.value'), msg(el, 'chart.share')],
     rows: segments.map((s) => ({ header: s.name, cells: [n.number(s.value), total > 0 ? n.percent(fin(s.value) / total) : '–'] })),
   };
 }

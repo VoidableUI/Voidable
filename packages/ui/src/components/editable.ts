@@ -2,6 +2,7 @@ import { html, nothing } from 'lit';
 import { live } from 'lit/directives/live.js';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
+import { msg } from '../messages.js';
 import { InternalsFormControl } from '../form-control.js';
 import { isFocusParked } from '../projection.js';
 
@@ -31,8 +32,9 @@ export class VoidEditable extends InternalsFormControl(VoidElement) {
   @property({ type: Boolean, reflect: true }) editing = false;
   /** Stop the field entering edit mode and exclude the value from the form submission. */
   @property({ type: Boolean, reflect: true }) disabled = false;
-  /** Text shown while the value is empty and the field is not being edited. Defaults to `Click to edit`. */
-  @property({ type: String }) placeholder = 'Click to edit';
+  /** Text shown while the value is empty and the field is not being edited. Defaults to the `editable.placeholder` message (English: `Click to edit`). */
+  @property({ type: String }) placeholder = '';
+  private get _hint(): string { return this.placeholder || msg(this, 'editable.placeholder'); }
   /**
    * How an edit is committed: `enter` only on Enter (blur cancels), `blur` only when focus leaves, or
    * `both` (default).
@@ -67,7 +69,7 @@ export class VoidEditable extends InternalsFormControl(VoidElement) {
         role="button"
         tabindex=${this.formDisabled ? nothing : '0'}
         @keydown=${this._handlePreviewKeydown}
-      >${this.value || html`<span class="void-editable-placeholder">${this.placeholder}</span>`}</span>
+      >${this.value || html`<span class="void-editable-placeholder">${this._hint}</span>`}</span>
       <input
         class="void-editable-input"
         .value=${live(this._draft ?? this.value)}
