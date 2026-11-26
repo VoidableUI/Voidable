@@ -14,7 +14,7 @@ export class VoidToggle extends VoidElement {
    */
   @property({ type: Boolean, reflect: true }) pressed = false;
   /** What this toggle stands for: the value it contributes to a parent `<void-toggle-group>`, and `detail.value` of its `void-change`. */
-  @property({ type: String }) value = '';
+  @property({ type: String, reflect: true }) value = '';
   /** Ignore clicks and keys, and take the toggle out of the tab order. A `<fieldset disabled>` ancestor does the same. */
   @property({ type: Boolean, reflect: true }) disabled = false;
   /**

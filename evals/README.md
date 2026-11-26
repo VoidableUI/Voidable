@@ -85,7 +85,7 @@ A case passes when all of its assertions pass. The report gives the task pass ra
 
 ## Selector and state contract
 
-`CONTRACT.md` (generated from `contract/contract.mjs` with `mise run evals -- contract`) lists for every element its role, where its accessible name comes from, the stable handles for its state, and the gaps where nothing stable exists. `test/contract.test.mjs` checks it against the manifest and in Chromium.
+`CONTRACT.md` (generated from `contract/contract.mjs` with `mise run evals -- contract`) lists for every element its role, where its accessible name comes from, the stable handles for its state, and the gaps where nothing stable exists. `test/contract.test.mjs` checks it against the manifest and in Chromium. It also checks the value reflection rule (`contract/value.mjs`): every control with a `value` reflects it to the attribute after a user change, a property set and an attribute write, or is listed there with the reason it does not, so a control that stops following the rule fails the test.
 
 ## Layout
 

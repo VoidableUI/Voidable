@@ -185,6 +185,14 @@ Dialog and drawer are native `<dialog>` elements opened with `showModal()`, so t
 
 Every overlay takes `open`, `side` and `align` where it is anchored, and fires `void-open` and `void-close` with a `reason` (`escape`, `outside`, `select`, `api`, ...). These two events do not bubble, and `void-close` can be cancelled when the user caused it. Browser baseline: the Popover API (Chrome 114, Firefox 125, Safari 17). Details on the [docs site](https://voidable.dev/components/overlays/).
 
+## For AI agents
+
+The package carries its own reference, generated from the Custom Elements Manifest at build time, so an agent with only `node_modules/@voidable/ui` has it:
+
+- `@voidable/ui/llms.txt` (`dist/llms.txt`): what the library is, install, the composition rules and conventions, one line per element.
+- `@voidable/ui/reference.md` (`dist/reference.md`): every element in full, with its parts, attributes and allowed values, events and their `detail`, and a correct example.
+- `@voidable/ui/custom-elements.json`: the manifest both are generated from.
+
 ## Documentation
 
 - [Docs](https://voidable.dev)

@@ -30,11 +30,6 @@ type Attribute struct {
 	Nullable    bool      `json:"nullable,omitempty"`
 	Default     string    `json:"default,omitempty"`
 	Description string    `json:"description,omitempty"`
-	// FalseString is true when the attribute's converter reads the string
-	// "false" as false (a default-true boolean that markup can turn off).
-	// The manifest does not carry converters; the library sets this from
-	// the supplement.
-	FalseString bool `json:"falseString,omitempty"`
 }
 
 // Slot is a named slot an element projects children into. The default

@@ -29,7 +29,7 @@ void-collapsible-trigger {
   font-family: var(--void-font-sans);
   font-size: var(--void-text-base);
   font-weight: var(--void-weight-medium);
-  text-align: left;
+  text-align: start;
   cursor: pointer;
   user-select: none;
   outline: none;

@@ -63,7 +63,7 @@ void-table caption {
 /* Header cells are labels: the small quiet name of a column. */
 void-table th {
   vertical-align: middle;
-  text-align: left;
+  text-align: start;
   font-family: var(--void-type-label-family);
   font-size: var(--void-type-label-size);
   line-height: var(--void-type-label-leading);

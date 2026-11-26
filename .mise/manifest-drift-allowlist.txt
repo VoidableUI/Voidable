@@ -11,9 +11,3 @@
 # ideally in the change that adds the wrapper, component or story.
 # Do not add new entries to silence the check.
 
-# The four chart components shipped without hex components
-# (issue #13).
-hex void-bar-chart
-hex void-donut-chart
-hex void-gauge
-hex void-line-chart

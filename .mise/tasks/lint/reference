@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+#MISE description="Fail when the reference shipped in the packages (llms.txt, reference.md, each adapter llms.txt) is stale, misses an element, disagrees with `voidable ref` or misses an export"
+#MISE depends=["voidable:binary"]
+set -euo pipefail
+
+node scripts/packaging/check-reference.mjs

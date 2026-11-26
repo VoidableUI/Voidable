@@ -191,7 +191,8 @@ void-media[place="center"] > void-media-content::before {
   }
 
   void-media:is([place="start"], [place="end"]) > void-media-content::before {
-    inset: 0 calc(var(--void-scrim-fade) * -1) 0 0;
+    inset-block: 0;
+    inset-inline: 0 calc(var(--void-scrim-fade) * -1);
   }
 
   void-media[place="end"] > void-media-content {
@@ -201,7 +202,17 @@ void-media[place="center"] > void-media-content::before {
   }
 
   void-media[place="end"] > void-media-content::before {
-    inset: 0 0 0 calc(var(--void-scrim-fade) * -1);
+    inset-block: 0;
+    inset-inline: calc(var(--void-scrim-fade) * -1) 0;
+  }
+
+  /* The gradient's physical direction mirrors with the column it fades from. */
+  void-media:is([place="start"], [place="end"]):dir(rtl) > void-media-content {
+    --scrim-to: to right;
+  }
+
+  void-media[place="end"]:dir(rtl) > void-media-content {
+    --scrim-to: to left;
   }
 }
 

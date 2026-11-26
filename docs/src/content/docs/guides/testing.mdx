@@ -49,7 +49,7 @@ Every interaction that changes a value dispatches a `void-*` event that bubbles 
 ## Two rules
 
 - **Prefer the contract to class names.** `void-card-body` and other rendered classes are styling structure and can change. Roles, names, reflected attributes and event names are the stable surface.
-- **A `value` attribute is the initial value.** Many controls reflect their live state to an attribute (`open`, `checked`, `pressed`, `selected`), but a text value is read from the control: use `inputValue()` or `FormData`, not `[value=…]`.
+- **The `value` attribute is the current value.** Every control reflects its live state to an attribute (`open`, `checked`, `pressed`, `selected`, and `value` after a user change or a property set), so `[value="…"]` selectors and attribute assertions work, and a list is a JSON array (`value='["a","b"]'`). The exceptions are a password field and a masked PIN input, where you read the value from the control (`inputValue()` or `FormData`) because the attribute stays the initial value. See [API conventions](/guides/conventions/).
 
 ## The contract
 

@@ -128,7 +128,9 @@ describe('props', () => {
     const c = await render(<TagsInput value={tags} />);
     const el = c.querySelector('void-tags-input') as HTMLElement & { value: unknown };
     expect(el.value).toBe(tags);
-    expect(el.hasAttribute('value')).toBe(false);
+    // The element reflects the array as JSON (#67); React never wrote "[object Object]".
+    await (el as unknown as { updateComplete: Promise<boolean> }).updateComplete;
+    expect(el.getAttribute('value')).toBe(JSON.stringify(tags));
   });
 
   it('passes object data to charts as a property', async () => {

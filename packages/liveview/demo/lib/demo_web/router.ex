@@ -23,6 +23,7 @@ defmodule DemoWeb.Router do
     # Pages for tests/browser/server/phoenix (live navigation, patches, form, overlays)
     live "/lab", LabLive, :index
     live "/lab/two", LabTwoLive, :index
+    live "/lab/charts", ChartsLive, :index
   end
 
   # Other scopes may use custom stacks.

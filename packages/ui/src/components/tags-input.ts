@@ -2,6 +2,7 @@ import { html, nothing, type PropertyValues } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
 import { InternalsFormControl, type FormSubmission } from '../form-control.js';
+import { valueJsonList } from '../value-list.js';
 
 export type TagValue = string | { text: string; color?: string };
 
@@ -12,9 +13,9 @@ export class VoidTagsInput extends InternalsFormControl(VoidElement) {
 
   /**
    * The tags, as an array of strings or `{ text, color }` objects. Set it as a property from script, or
-   * as a JSON array in the attribute.
+   * as a JSON array in the attribute, which follows the tags as they change.
    */
-  @property({ type: Array }) value: TagValue[] = [];
+  @property({ converter: valueJsonList, reflect: true }) value: TagValue[] = [];
   /** Stop the field accepting input and removing tags, and exclude the values from the form submission. */
   @property({ type: Boolean, reflect: true }) disabled = false;
   /** Show the tags but do not let the user add or remove any. Still submitted. */

@@ -9,8 +9,8 @@ export class VoidComposeInput extends VoidElement {
 
   /** While focus is inside, a morph does not apply the server's value over what the user is typing. */
   static override editState = ['value'];
-  /** The draft text. It is cleared after each send. */
-  @property({ type: String }) value = '';
+  /** The draft text, reflected to the `value` attribute as it changes. It is cleared after each send. */
+  @property({ type: String, reflect: true }) value = '';
   /** Hint shown while the box is empty. Defaults to `Type a message...`. */
   @property({ type: String, reflect: true }) placeholder = 'Type a message...';
   /** Stop the box and the send button reacting. */

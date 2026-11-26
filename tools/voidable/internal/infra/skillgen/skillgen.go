@@ -142,22 +142,13 @@ func (b *Builder) wrongUsages(cat *domain.Catalog) string {
 	}
 
 	buf.WriteString("\n## Booleans\n\nA boolean attribute is on whenever it is present, so `attr=\"false\"` is still on. Leave it out to turn it off.\n\n")
-	var defTrue, falseOK []string
+	var defTrue []string
 	for _, e := range cat.Elements {
 		for _, a := range e.Attributes {
-			if a.Kind != domain.KindBoolean || a.Default != "true" {
-				continue
-			}
-			item := fmt.Sprintf("`%s` on `<%s>`", a.Name, e.Tag)
-			if a.FalseString {
-				falseOK = append(falseOK, item)
-			} else {
-				defTrue = append(defTrue, item)
+			if a.Kind == domain.KindBoolean && a.Default == "true" {
+				defTrue = append(defTrue, fmt.Sprintf("`%s` on `<%s>`", a.Name, e.Tag))
 			}
 		}
-	}
-	if len(falseOK) > 0 {
-		fmt.Fprintf(&buf, "These default to true and accept `\"false\"` in markup: %s.\n\n", strings.Join(falseOK, ", "))
 	}
 	if len(defTrue) > 0 {
 		fmt.Fprintf(&buf, "These default to true and cannot be turned off from markup; set the property from script instead: %s.\n", strings.Join(defTrue, ", "))

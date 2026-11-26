@@ -65,15 +65,33 @@ export interface Fact {
    * (use it when the screen reader says something shorter, such as only "60" for a slider).
    * Strings are matched as normalised substrings, regular expressions against the normalised phrase.
    */
-  spoken?: (string | RegExp)[];
+  spoken?: Spoken | Partial<Record<ReaderName, Spoken>>;
 }
 
 /** How the screen reader moves. `next` is the plain "next item" command; the others are quick navigation. */
-export type Nav = 'next' | 'control' | 'heading' | 'landmark' | 'link' | 'table';
+export type Nav = 'next' | 'control' | 'focusable' | 'heading' | 'landmark' | 'link' | 'table';
+
+export type ReaderName = 'VoiceOver' | 'NVDA';
+export type Spoken = (string | RegExp)[];
+
+/** A value for every reader, or one for each that needs its own: `{ VoiceOver: [...], NVDA: [...] }`. */
+export type PerReader<T> = T | Partial<Record<ReaderName, T>>;
+
+const isPerReader = <T>(v: PerReader<T>): v is Partial<Record<ReaderName, T>> => typeof v === 'object' && v !== null && !Array.isArray(v) && !(v instanceof RegExp);
+
+/** The value `v` has for `reader` (undefined when `v` names other readers only). */
+export function pick<T>(v: PerReader<T> | undefined, reader: ReaderName): T | undefined {
+  return v !== undefined && isPerReader(v) ? v[reader] : (v as T | undefined);
+}
+
+/** The Fact as `reader` is checked against it: its `spoken` words resolved for that reader. */
+export function forReader(fact: Fact, reader: ReaderName): Fact {
+  return fact.spoken === undefined ? fact : { ...fact, spoken: pick(fact.spoken, reader) };
+}
 
 export type Step =
   /** Move until the element is reached, then check the facts the screen reader says about it. */
-  | { reach: Fact; by?: Nav }
+  | { reach: Fact; by?: PerReader<Nav> }
   /** Activate the element reached (VoiceOver: VO+Space, NVDA: Enter). Focus-only roles (slider, spinbutton, textbox) just take focus. */
   | { act: true }
   /** Press a key on the focused element. */
@@ -105,4 +123,10 @@ export interface Scenario {
    * skips the scenario, because the failure is already known and says nothing new.
    */
   knownIssue?: { key: KnownIssue; detail: string };
+  /**
+   * The page is right (the tree replay passes) but this screen reader does not say what a user
+   * needs. The scenario still runs with that reader, as an expected failure, so the job reports
+   * it as known and a fix turns it red. Not used by the tree replay or by the other reader.
+   */
+  readerIssues?: Partial<Record<ReaderName, { key: KnownIssue; detail: string }>>;
 }

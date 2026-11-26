@@ -73,8 +73,8 @@ void-nav-menu-item[current] > void-nav-menu-trigger > *::after {
   content: '';
   position: absolute;
   bottom: 0;
-  left: var(--void-space-3);
-  right: var(--void-space-3);
+  inset-inline-start: var(--void-space-3);
+  inset-inline-end: var(--void-space-3);
   height: 2px; /* token-ok: decorative active indicator */
   background: var(--void-color-accent);
   border-radius: var(--void-radius-full);
@@ -83,8 +83,8 @@ void-nav-menu-item[current] > void-nav-menu-trigger > *::after {
 void-nav-menu[orientation="vertical"] void-nav-menu-item[current] > void-nav-menu-trigger > *::after {
   top: var(--void-space-2);
   bottom: var(--void-space-2);
-  left: 0;
-  right: auto;
+  inset-inline-start: 0;
+  inset-inline-end: auto;
   width: 2px; /* token-ok: decorative active indicator */
   height: auto;
 }
@@ -98,7 +98,7 @@ void-nav-menu-item[disabled] > void-nav-menu-trigger > * {
 void-nav-menu-content {
   position: absolute;
   top: 100%;
-  left: 0;
+  inset-inline-start: 0;
   z-index: var(--void-z-dropdown);
   min-width: 12rem; /* token-ok: intrinsic dropdown minimum width */
   padding: var(--void-space-2);
@@ -126,10 +126,13 @@ void-nav-menu-item[open] > void-nav-menu-content {
   transform: translateY(0);
 }
 
+/* A sub-menu opens towards the end edge, so its slide-in runs the other way in RTL. */
+void-nav-menu:dir(rtl) { --_void-dir: -1; }
+
 void-nav-menu[orientation="vertical"] void-nav-menu-content {
   top: 0;
-  left: 100%;
-  transform: translateX(var(--void-space-1));
+  inset-inline-start: 100%;
+  transform: translateX(calc(var(--_void-dir, 1) * var(--void-space-1)));
 }
 
 void-nav-menu[orientation="vertical"] void-nav-menu-item[open] > void-nav-menu-content {

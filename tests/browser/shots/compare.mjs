@@ -20,6 +20,7 @@ import { join, resolve } from 'node:path';
 import { capture, parseArgs as parseCapture } from './capture.mjs';
 import { buildGallery } from './gallery.mjs';
 import { TOOLING_ROOT } from './lib.mjs';
+import { unsafePaths } from './names.mjs';
 
 const git = (args, cwd = TOOLING_ROOT) => execFileSync('git', args, { cwd, encoding: 'utf8' }).trim();
 
@@ -90,6 +91,8 @@ export async function compare(argv) {
       headLabel: `${headRef ?? 'working tree'} (${headSha})`.slice(0, 40),
       webp: false,
     });
+    const unsafe = unsafePaths(own.out);
+    if (unsafe.length) throw new Error(`paths that artifact upload or Windows rejects: ${unsafe.slice(0, 5).join(', ')}`);
     const changed = data.items.filter((i) => i.status === 'changed');
     const summary = {
       base: { ref: baseRef, sha: baseSha },

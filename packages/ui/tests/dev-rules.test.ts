@@ -24,12 +24,12 @@ const table: DevTable = {
   },
   'void-input': {
     m: 'input',
-    a: { value: 0, max: 3, closable: 2, type: ['text', 'email'] },
+    a: { value: 0, max: 2, closable: 1, type: ['text', 'email'] },
     h: ['dragging'],
     e: ['void-input', 'void-change'],
     x: { label: 'wrap the control in <void-field label="...">' },
   },
-  'void-sidebar': { m: 'sidebar', a: { collapsedwidth: 3, side: ['left', 'right'] }, e: [] },
+  'void-sidebar': { m: 'sidebar', a: { collapsedwidth: 2, side: ['left', 'right'] }, e: [] },
   'void-select': { m: 'select', a: {}, e: ['void-change'] },
   'void-multiselect': { m: 'multiselect', a: {}, e: ['void-change'] },
   'void-option': { m: 'multiselect', a: { value: 0 }, e: [], p: ['void-combobox-content', 'void-multiselect-content'] },
@@ -104,11 +104,10 @@ describe('attributes', () => {
     expect(checkAttribute(table, make('<void-input max="-1.5"></void-input>'), 'max')).toBeUndefined();
   });
 
-  it('reports a boolean set to "false" unless the component reads it', () => {
+  it('reports a boolean set to "false"', () => {
     const w = checkAttribute(table, make('<void-button disabled="false"></void-button>'), 'disabled')!;
     expect(w.kind).toBe('boolean-false');
     expect(w.message).toContain('disabled="false" does not turn it off');
-    expect(checkAttribute(table, make('<void-input closable="false"></void-input>'), 'closable')).toBeUndefined();
     expect(checkAttribute(table, make('<void-button disabled="true"></void-button>'), 'disabled')).toBeUndefined();
     expect(checkAttribute(table, make('<void-button disabled=""></void-button>'), 'disabled')).toBeUndefined();
   });
@@ -326,7 +325,7 @@ describe('renamed in 0.8 (#23)', () => {
   const legacy: DevTable = {
     'void-popover': {
       m: 'popover',
-      a: { side: ['top', 'right', 'bottom', 'left'], align: ['start', 'center', 'end'], variant: ['quiet', 'filled'], stagger: 3 },
+      a: { side: ['top', 'right', 'bottom', 'left'], align: ['start', 'center', 'end'], variant: ['quiet', 'filled'], stagger: 2 },
       e: ['void-open', 'void-close'],
       l: {
         a: { position: { to: 'side', values: { 'bottom-end': 'side="bottom" align="end"' } }, closable: { values: { false: 'hide-close' }, fix: 'remove it' } },

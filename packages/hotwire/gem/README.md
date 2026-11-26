@@ -90,6 +90,10 @@ Voidable::Hotwire.dev_warnings = true    # on, even outside development
 Voidable::Hotwire.dev_warnings = :throw  # thrown errors, for system tests
 ```
 
+## For AI agents
+
+The gem ships `llms.txt` (in the gem's root) describing its helpers, generators and settings. Every element's parts, attributes and events are in the npm package: `node_modules/@voidable/ui/dist/reference.md` (`@voidable/ui/reference.md`), or `voidable ref <tag>` offline.
+
 ## License
 
 MIT

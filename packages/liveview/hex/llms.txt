@@ -1,0 +1,28 @@
+# live_voidable (Hex)
+
+> HEEx function components for Voidable UI web components in Phoenix LiveView. Each renders the matching `<void-*>` element of the npm package `@voidable/ui`; the client half is `@voidable/ui-liveview`.
+
+## Setup
+
+```elixir
+use VoidableUI   # imports VoidableUI.Components
+```
+
+Load `@voidable/ui`, `@voidable/theme` and `@voidable/ui-liveview` (`VoidHooks`, `VoidDOM`) in the asset pipeline. Render `<VoidableUI.Dev.warnings />` in the root layout after the app script for development warnings (`config :live_voidable, dev_warnings: false | true | :throw`).
+
+## API
+
+Components (`VoidableUI.Components`; name is the tag without `void-`, dashes as underscores):
+
+<.badge> <.button> <.divider> <.spinner> <.skeleton> <.status_dot> <.switch> <.avatar> <.alert> <.tag> <.progress> <.panel> <.input> <.textarea> <.select> <.checkbox> <.radio> <.radio_group> <.field> <.option> <.multiselect> <.dialog> <.tabs> <.accordion> <.accordion_item> <.breadcrumbs> <.list> <.list_item> <.toast> <.toast_container> <.stepper> <.drawer> <.card> <.popover> <.tooltip> <.banner> <.scroll_area> <.table> <.pagination> <.error_fallback> <.checkbox_group> <.combobox> <.slider> <.file_upload> <.nav_bar> <.hamburger> <.compose_input> <.sidebar> <.dropdown_menu> <.dropdown_menu_item> <.toggle> <.toggle_group> <.segmented_control> <.segmented_control_item> <.stat> <.indicator> <.menu> <.menu_item> <.menu_group> <.carousel> <.carousel_previous> <.carousel_next> <.calendar> <.date_picker> <.number_input> <.collapsible> <.editable> <.hover_card> <.pin_input> <.tags_input> <.nav_menu> <.nav_menu_item> <.color_picker> <.action_input> <.bar_chart> <.line_chart> <.donut_chart> <.gauge>
+
+Charts take their data from assigns: `<.bar_chart id="sales" data={@sales} />`. The data is passed as JSON and set on the element by the `VoidProps` hook (part of `VoidHooks`), so a chart draws once the socket connects; give each chart an `id`.
+
+- Components with explicit parts (dialog, drawer, popover, hover_card, dropdown_menu, tooltip, tabs, card, alert, accordion_item) take the parts as plain tags inside: `<.dialog id="confirm" open={@open}><void-dialog-title>Delete</void-dialog-title></.dialog>`.
+- Events: LiveView's own bindings first (`phx-click`, `phx-change`, `phx-submit`). Opt in to a Voidable event with `events={true}` or `events={["void-close"]}`: it arrives as `handle_event("void-close", %{"id" => _, "name" => _, "detail" => _}, socket)`.
+- Booleans are present or absent; what is drawn by default is turned off with `hide_*` (`hide_close`, `hide_border`).
+- `VoidableUI.Dev.warnings/1`, `VoidableUI.Dev.url/0`, `VoidableUI.Dev.mode/0`.
+
+## Full reference
+
+Every `<void-*>` element (parts, attributes with allowed values, events with `detail`, examples) is in the npm package: `@voidable/ui/reference.md` (`node_modules/@voidable/ui/dist/reference.md`), summarised in `@voidable/ui/llms.txt`; adapter notes in `@voidable/ui-liveview/llms.txt`. Online: https://voidable.dev/llms.txt. Offline per element: `voidable ref <tag>`.

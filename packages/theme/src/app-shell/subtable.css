@@ -28,7 +28,7 @@
 }
 
 .subtable th {
-  text-align: left;
+  text-align: start;
   padding: var(--void-space-2) var(--void-space-3);
   font-family: var(--void-type-label-family);
   font-size: var(--void-type-label-size);

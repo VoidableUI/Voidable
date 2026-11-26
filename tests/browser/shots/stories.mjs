@@ -15,6 +15,7 @@ import { createServer } from 'node:http';
 import { extname, join, normalize } from 'node:path';
 import { HEIGHTS, SCHEMES, TOOLING_ROOT, WIDTHS } from './lib.mjs';
 import { newContext } from './browser.mjs';
+import { safeName } from './names.mjs';
 
 const types = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.mjs': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.woff2': 'font/woff2', '.jpg': 'image/jpeg', '.png': 'image/png', '.svg': 'image/svg+xml', '.map': 'application/json' };
 
@@ -77,7 +78,7 @@ export async function photographStories(browser, root, outDir, { look = 'void', 
   const worker = async () => {
     while (next < queue.length) {
       const { s, scheme, width } = queue[next++];
-      const rel = `stories/${s.id}/${look}.${scheme}.${width}.png`;
+      const rel = `stories/${safeName(s.id)}/${look}.${scheme}.${width}.png`;
       let page;
       try {
         page = await (await contextFor(scheme, width)).newPage();

@@ -36,6 +36,7 @@ meta="$(tar -xOf "$tarball" metadata.config)"
 echo "$meta" | grep -E '<<"(name|version)">>'
 echo "$meta" | grep -q "{<<\"version\">>,<<\"$VERSION\">>}" || { echo "hex metadata does not carry $VERSION" >&2; exit 1; }
 tar -xOf "$tarball" contents.tar.gz | tar -xzO mix.exs | grep -q "version: \"$VERSION\"" || { echo "packed mix.exs does not carry $VERSION" >&2; exit 1; }
+tar -xOf "$tarball" contents.tar.gz | tar -tz | grep -qx llms.txt || { echo "the hex package does not carry llms.txt" >&2; exit 1; }
 
 if [ "$(node "$ROOT/scripts/release/registry.mjs" published hex "$VERSION")" = "true" ]; then
   result="skip     live_voidable $VERSION (already on Hex)"

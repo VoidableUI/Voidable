@@ -137,3 +137,49 @@ export const VoidHooks: Record<string, Partial<ViewHookInstance> & ThisType<Void
     },
   },
 };
+
+/** Hook instance carrying the last JSON applied by `VoidProps`. */
+interface VoidPropsInstance extends ViewHookInstance {
+  _applied?: string | null;
+  _destroyed?: boolean;
+}
+
+/**
+ * Assigns the properties named in `data-void-props` (a JSON object) to the element, once the element's class
+ * is defined. Properties such as a chart's `data` have no attribute, so server-rendered markup cannot set
+ * them; the hex package's chart components render this hook for you. A patch that leaves the JSON unchanged
+ * assigns nothing, so a chart does not re-animate.
+ */
+function applyProps(hook: VoidPropsInstance): void {
+  const raw = hook.el.dataset.voidProps ?? null;
+  if (raw === hook._applied) return;
+  hook._applied = raw;
+  if (!raw) return;
+  let props: Record<string, unknown>;
+  try {
+    props = JSON.parse(raw);
+  } catch {
+    return;
+  }
+  const assign = () => {
+    if (hook._destroyed || hook._applied !== raw) return;
+    for (const [name, value] of Object.entries(props)) (hook.el as unknown as Record<string, unknown>)[name] = value;
+  };
+  // Assigning before the element upgrades would shadow its accessors with plain properties.
+  if (customElements.get(hook.el.localName)) assign();
+  else void customElements.whenDefined(hook.el.localName).then(assign);
+}
+
+VoidHooks.VoidProps = {
+  mounted(this: VoidPropsInstance) {
+    this._destroyed = false;
+    this._applied = undefined;
+    applyProps(this);
+  },
+  updated(this: VoidPropsInstance) {
+    applyProps(this);
+  },
+  destroyed(this: VoidPropsInstance) {
+    this._destroyed = true;
+  },
+} as (typeof VoidHooks)[string];

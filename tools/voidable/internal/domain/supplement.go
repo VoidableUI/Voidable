@@ -11,9 +11,6 @@ type Supplement struct {
 	// Hints maps tag -> attribute -> advice for attributes agents commonly
 	// guess but that do not exist.
 	Hints map[string]map[string]string `json:"hints"`
-	// FalseString maps a tag to the default-true boolean attributes whose
-	// converter reads "false" as false (the manifest does not say).
-	FalseString map[string][]string `json:"falseString"`
 	// Styled lists the CSS-only elements: void-* tags that @voidable/theme
 	// styles and no JavaScript registers (the patterns and the media
 	// surface). They are not in the manifest, so they are declared here.

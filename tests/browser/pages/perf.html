@@ -42,11 +42,21 @@
 
   window.perf = {
     // Machine speed: plain DOM work with no components, to scale budgets on slower machines.
+    // Run in an iframe with no stylesheet: in the page it measured the theme's style cost
+    // (the theme styles every native control, and the figure tripled as the theme grew),
+    // not the machine, so budgets scaled by it stopped meaning anything.
     async calibrate() {
-      return timed(() => {
-        root.innerHTML = Array.from({ length: 4000 }, (_, i) => `<div class="c"><span>${i}</span><button>b${i}</button><input value="${i}"></div>`).join('');
-        root.getBoundingClientRect();
-      }).finally(clear);
+      const frame = document.createElement('iframe');
+      frame.style.cssText = 'position:fixed;left:0;top:0;width:800px;height:600px;border:0;visibility:hidden';
+      document.body.append(frame);
+      const doc = frame.contentDocument;
+      const t0 = now();
+      doc.body.innerHTML = Array.from({ length: 4000 }, (_, i) => `<div class="c"><span>${i}</span><button>b${i}</button><input value="${i}"></div>`).join('');
+      doc.body.getBoundingClientRect();
+      await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+      const ms = now() - t0;
+      frame.remove();
+      return ms;
     },
     async mixed1000() {
       return timed(() => (root.innerHTML = Array.from({ length: 1000 }, (_, i) => MIX(i)).join(''))).finally(clear);

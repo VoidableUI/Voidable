@@ -35,7 +35,7 @@ void-accordion-trigger {
   font-family: var(--void-font-sans);
   font-size: var(--void-text-base);
   font-weight: var(--void-weight-medium);
-  text-align: left;
+  text-align: start;
   cursor: pointer;
   user-select: none;
   outline: none;
@@ -60,6 +60,11 @@ void-accordion-trigger:hover {
 void-accordion-trigger:focus-visible {
   outline: var(--void-focus-ring-width) solid var(--void-focus-ring-color);
   outline-offset: calc(var(--void-focus-ring-width) * -1);
+}
+
+/* The closed chevron points the way the text reads on, so it mirrors in RTL. */
+void-accordion-trigger:dir(rtl)::after {
+  scale: -1 1;
 }
 
 void-accordion-item[open] > void-accordion-trigger::after {

@@ -350,6 +350,9 @@ export class PartsController implements ReactiveController, MorphParticipant {
       // aria-describedby): a control swapped inside it is a change too.
       const target = r.target as Element;
       if (target.localName?.endsWith('-trigger') && this._tags.has(target.localName)) return this.requestSync();
+      // ...and so is a link button inside it gaining or losing its link (see `triggerControl`).
+      const part = target.localName === 'void-button' ? target.parentElement : null;
+      if (part && part.localName.endsWith('-trigger') && this._tags.has(part.localName)) return this.requestSync();
       for (const list of [r.addedNodes, r.removedNodes]) {
         for (let i = 0; i < list.length; i++) {
           const n = list[i]!;
@@ -484,10 +487,14 @@ export class PartsController implements ReactiveController, MorphParticipant {
 /**
  * The control inside an overlay trigger part: the first element child of
  * `<void-popover-trigger>` (a `<void-button>`, a `<button>`, a link), which gets
- * the trigger ARIA. Null when the trigger holds no element.
+ * the trigger ARIA. Null when the trigger holds no element. A link button
+ * (`<void-button>` holding a direct `<a href>` or `<button>`) is presentational,
+ * so its inner element is the control, the one assistive technology sees.
  */
 export function triggerControl(trigger: Element | null): HTMLElement | null {
-  return (trigger?.firstElementChild as HTMLElement | null) ?? null;
+  const first = (trigger?.firstElementChild as HTMLElement | null) ?? null;
+  if (first?.localName === 'void-button') return first.querySelector<HTMLElement>(':scope > a[href], :scope > button') ?? first;
+  return first;
 }
 
 /**

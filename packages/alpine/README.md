@@ -94,3 +94,7 @@ Dispatch a custom event to a Voidable component from an Alpine expression:
   </void-select>
 </div>
 ```
+
+## For AI agents
+
+`@voidable/ui-alpine/llms.txt` (in the package root) summarises this adapter's API. Every element's parts, attributes and events are in `@voidable/ui/reference.md` (`node_modules/@voidable/ui/dist/reference.md`).

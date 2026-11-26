@@ -1,0 +1,25 @@
+# @voidable/ui-liveview
+
+> Phoenix LiveView hooks for Voidable UI web components. The Hex package `live_voidable` renders the elements as HEEx components; this npm package is the client half.
+
+## Install and use
+
+```sh
+npm install @voidable/ui @voidable/theme @voidable/ui-liveview
+```
+
+```js
+import { VoidHooks, VoidDOM } from '@voidable/ui-liveview';
+
+new LiveSocket('/live', Socket, { hooks: { ...VoidHooks }, dom: VoidDOM });
+```
+
+## API
+
+- `VoidHooks`: LiveView hooks. `VoidProps` sets element properties (such as chart `data`) from JSON the HEEx components render. `VoidEvent` pushes the Voidable events an element opted in to (`events` on the HEEx component) as LiveView events.
+- `VoidDOM`: the `dom` option (`onBeforeElUpdated`); keeps client state across LiveView patches.
+- LiveView's own bindings (`phx-click`, `phx-change`, `phx-submit`) work on the components first; use `events` only for an event no binding covers.
+
+## Full reference
+
+Every `<void-*>` element (parts, attributes with allowed values, events with `detail`, examples) is in the core package: `@voidable/ui/reference.md` (`node_modules/@voidable/ui/dist/reference.md`), summarised in `@voidable/ui/llms.txt`. Online: https://voidable.dev/llms.txt. Offline per element: `voidable ref <tag>`.

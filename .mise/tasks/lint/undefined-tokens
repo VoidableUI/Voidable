@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #MISE description="Ensure every --void-* custom property referenced in the theme, the components, the docs, the stories and the examples is defined in theme CSS or set from TypeScript"
-#MISE depends=["install"]
+#MISE depends=["build"]
 set -euo pipefail
 
 THEME_SRC="packages/theme/src"

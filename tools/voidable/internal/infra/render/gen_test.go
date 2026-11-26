@@ -19,7 +19,7 @@ func genCatalog() *domain.Catalog {
 		{Tag: "void-status-dot", Description: `A "dot".`, Attributes: []domain.Attribute{at("status", "status", "'online' | 'away'", "online")}},
 		{Tag: "void-hover-card", Attributes: []domain.Attribute{at("open-delay", "openDelay", "number", "300"), at("open", "open", "boolean", "false")},
 			Events: []domain.Event{{Name: "void-open"}, {Name: "void-close"}}},
-		{Tag: "void-dialog", Attributes: []domain.Attribute{func() domain.Attribute { a := at("closable", "closable", "boolean", "true"); a.FalseString = true; return a }(), at("trend", "trend", "'up' | null", "null")}},
+		{Tag: "void-dialog", Attributes: []domain.Attribute{at("hide-close", "hideClose", "boolean", "false"), at("trend", "trend", "'up' | null", "null")}},
 	})
 }
 
@@ -42,13 +42,13 @@ func TestGenerate(t *testing.T) {
 			`data-void-events={void_events(@events, "void-open,void-close")}`,
 			"phx-hook={void_hook(@events)}",
 			"attr :events, :any, default: nil",
-			"attr :closable, :boolean, default: nil",
-			"closable={@closable != nil && to_string(@closable)}", // written only when set, as "true" or "false"
+			"attr :hide_close, :boolean, default: false",
+			"hide-close={@hide_close}",
 			"attr :trend, :string, default: nil\n", // nullable enum: no values
 		}},
 		{"blade", 3, "resources/views/components/dialog.blade.php", []string{
-			"'closable' => null, // boolean",
-			`@if(!is_null($closable)) closable="{{ $closable ? 'true' : 'false' }}" @endif`,
+			"'hideClose' => false, // boolean",
+			"@if($hideClose) hide-close @endif",
 			`@if(!is_null($trend)) trend="{{ $trend }}" @endif`,
 			"{{ $attributes }}",
 		}},

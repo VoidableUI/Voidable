@@ -23,7 +23,7 @@ void-switch {
 
 .void-switch-thumb {
   position: absolute;
-  left: 2px;
+  inset-inline-start: 2px;
   width: 0.875rem;
   height: 0.875rem;
   background: var(--void-color-text-secondary);
@@ -38,7 +38,7 @@ void-switch[checked] .void-switch-track {
 }
 
 void-switch[checked] .void-switch-thumb {
-  transform: translateX(1rem);
+  transform: translateX(calc(var(--_void-dir, 1) * 1rem));
   background: var(--void-color-text-on-accent);
 }
 
@@ -61,11 +61,14 @@ void-switch[color="notice"]  { --_void-tone: var(--void-color-notice); }
 
 void-switch[size="sm"] .void-switch-track { width: 1.75rem; height: 1rem; }
 void-switch[size="sm"] .void-switch-thumb { width: 0.625rem; height: 0.625rem; }
-void-switch[size="sm"][checked] .void-switch-thumb { transform: translateX(0.75rem); }
+void-switch[size="sm"][checked] .void-switch-thumb { transform: translateX(calc(var(--_void-dir, 1) * 0.75rem)); }
 
 void-switch[size="lg"] .void-switch-track { width: 2.75rem; height: 1.5rem; }
 void-switch[size="lg"] .void-switch-thumb { width: 1.125rem; height: 1.125rem; }
-void-switch[size="lg"][checked] .void-switch-thumb { transform: translateX(1.25rem); } /* token-ok: track size, not a control height */
+void-switch[size="lg"][checked] .void-switch-thumb { transform: translateX(calc(var(--_void-dir, 1) * 1.25rem)); } /* token-ok: track size, not a control height */
+
+/* The thumb slides towards the end edge, so the shift flips in RTL. */
+void-switch:dir(rtl) { --_void-dir: -1; }
 
 void-switch[disabled] {
   opacity: 0.5;

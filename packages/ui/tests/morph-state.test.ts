@@ -289,6 +289,93 @@ describe('select', () => {
   });
 });
 
+describe('reflected value (#67)', () => {
+  it('a text field keeps what the user entered through a morph to the markup the server last sent', async () => {
+    const input = await mount<Host>('<void-input name="q" value="seed"></void-input>');
+    const native = input.querySelector('input')!;
+    native.value = 'typed';
+    native.dispatchEvent(new Event('input', { bubbles: true }));
+    await settle();
+    expect(input.getAttribute('value')).toBe('typed');
+    await morph(input, '<void-input name="q" value="seed"></void-input>');
+    expect(input.value).toBe('typed');
+    expect(input.getAttribute('value')).toBe('typed');
+    expect(native.value).toBe('typed');
+  });
+
+  it('a text field takes a value the server changed, and a reset returns to it', async () => {
+    const form = await mount<HTMLFormElement>('<form><void-input name="q" value="seed"></void-input></form>');
+    const input = form.querySelector('void-input') as Host;
+    input.value = 'typed';
+    await settle();
+    await morph(input, '<void-input name="q" value="from server"></void-input>');
+    expect(input.value).toBe('from server');
+    expect(input.getAttribute('value')).toBe('from server');
+    input.value = 'later';
+    await settle();
+    form.reset();
+    await new Promise((r) => setTimeout(r, 10));
+    await settle();
+    expect(input.value).toBe('from server');
+  });
+
+  it('a select keeps the pick the reflected attribute shows when the server markup is unchanged', async () => {
+    const markup = '<void-select value="a"><select name="k"><option value="a">a</option><option value="b">b</option></select></void-select>';
+    const sel = await mount<Host>(markup);
+    const native = sel.querySelector('select')!;
+    native.value = 'b';
+    native.dispatchEvent(new Event('change'));
+    await settle();
+    expect(sel.getAttribute('value')).toBe('b');
+    const next = server(markup);
+    sel.voidBeforeMorph(next);
+    morphAttributes(sel, next);
+    native.value = 'a'; // what a morph library syncing the options does
+    await settle();
+    await new Promise((r) => setTimeout(r, 0));
+    expect(sel.value).toBe('b');
+    expect(sel.getAttribute('value')).toBe('b');
+  });
+});
+
+describe('reflected value, server markup without a value attribute', () => {
+  it('a select keeps the pick when the morph library resets the native select before the server value arrives', async () => {
+    // LiveView: the server renders value="" first and the user's pick comes back as the server's value.
+    const markup = (v: string) => `<void-select value="${v}"><select name="k"><option value="" disabled selected hidden>Choose</option><option value="a">a</option></select></void-select>`;
+    const sel = await mount<Host>(markup(''));
+    const native = sel.querySelector('select')!;
+    native.value = 'a';
+    native.dispatchEvent(new Event('change'));
+    await settle();
+    const next = server(markup('a'));
+    sel.voidBeforeMorph(next);
+    morphAttributes(sel, next);
+    native.value = ''; // the morph library re-syncs the options from the server's `selected`
+    await settle();
+    await new Promise((r) => setTimeout(r, 0));
+    expect(sel.value).toBe('a');
+    expect(sel.getAttribute('value')).toBe('a');
+  });
+
+  it('a select keeps the user pick when the server never writes value', async () => {
+    const markup = '<void-select><select name="k"><option value="a">a</option><option value="b">b</option></select></void-select>';
+    const sel = await mount<Host>(markup);
+    const native = sel.querySelector('select')!;
+    native.value = 'b';
+    native.dispatchEvent(new Event('change'));
+    await settle();
+    expect(sel.getAttribute('value')).toBe('b');
+    const next = server(markup);
+    sel.voidBeforeMorph(next);
+    morphAttributes(sel, next);
+    native.value = 'a';
+    await settle();
+    await new Promise((r) => setTimeout(r, 0));
+    expect(sel.value).toBe('b');
+    expect(sel.getAttribute('value')).toBe('b');
+  });
+});
+
 describe('keyed list edits (breadcrumbs, explicit parts)', () => {
   // The items are the author's own nodes in the trail itself: nothing wraps them, so every direct DOM edit a
   // framework makes leaves exactly the order it made.
@@ -568,6 +655,155 @@ describe('a server value of what the user is editing waits while focus is inside
     morphAttributes(el, later);
     await settle();
     expect(el.value).toBe('from the server');
+  });
+});
+
+describe('select: the choice through a patch, whatever the order and timing of the callbacks', () => {
+  // The lab form every server demo carries: a prompt the server always marks
+  // `selected`, an option whose text changes on every render, and the host's
+  // `value` that the server either echoes (it took the user's choice) or
+  // leaves at its last render. Each patch is driven synchronously; the
+  // component's state and the form data are read at every point after it.
+  const PROMPT = '<option value="" disabled selected hidden>Choose</option>';
+  const options = (n: number) => `${PROMPT}<option value="nz">New Zealand (${n})</option><option value="au">Australia</option><option value="fj">Fiji</option>`;
+  const markup = (value: string | null, n = 0) =>
+    `<void-select${value === null ? '' : ` value="${value}"`}><select name="country">${options(n)}</select></void-select>`;
+
+  type Kind = 'replace' | 'resync';
+  type Hook = 'on time' | 'after a frame' | 'after 200 ms' | 'never' | 'no hook';
+
+  /** What the morph library does to the native select: the options re-rendered, and the selection re-synced from their `selected`. */
+  function patchNative(native: HTMLSelectElement, kind: Kind, n: number, html = options(n)): void {
+    if (kind === 'replace') {
+      native.innerHTML = html;
+    } else {
+      // morphdom's OPTION and SELECT handlers: the text patched in place, `selected` rewritten, selectedIndex reset.
+      native.options[1]!.textContent = `New Zealand (${n})`;
+      native.selectedIndex = -1;
+      native.options[0]!.setAttribute('selected', '');
+    }
+    native.selectedIndex = Array.from(native.options).findIndex((o) => o.hasAttribute('selected'));
+  }
+
+  /** Makes the base class's morphedCallback late or absent for this element. */
+  function delayCallback(sel: Host, hook: Hook): void {
+    const proto = Object.getPrototypeOf(sel) as { morphedCallback: () => void };
+    const run = () => proto.morphedCallback.call(sel);
+    const late = hook === 'after a frame' ? 16 : hook === 'after 200 ms' ? 200 : null;
+    if (late !== null) (sel as unknown as { morphedCallback: () => void }).morphedCallback = () => void setTimeout(run, late);
+    if (hook === 'never') (sel as unknown as { morphedCallback: () => void }).morphedCallback = () => {};
+  }
+
+  async function chose(value: string | null) {
+    const form = await mount<HTMLFormElement>(`<form>${markup(value)}</form>`);
+    const sel = form.querySelector('void-select') as Host;
+    const native = sel.querySelector('select')!;
+    native.value = 'au';
+    native.dispatchEvent(new Event('change', { bubbles: true }));
+    await settle();
+    expect(sel.value).toBe('au');
+    return { form, sel, native };
+  }
+
+  /** The component's value, its attribute and what the form submits, at the points after a patch. */
+  async function observe(form: HTMLFormElement, sel: Host, microtask: boolean): Promise<Array<[string, unknown, string | null, FormDataEntryValue | null]>> {
+    const seen: Array<[string, unknown, string | null, FormDataEntryValue | null]> = [];
+    const look = (at: string) => seen.push([at, sel.value, sel.getAttribute('value'), new FormData(form).get('country')]);
+    if (microtask) {
+      await Promise.resolve();
+      look('after a microtask');
+    }
+    await new Promise((r) => setTimeout(r, 0));
+    look('after a task');
+    await new Promise((r) => setTimeout(r, 16));
+    look('after a frame');
+    await new Promise((r) => setTimeout(r, 134));
+    look('after 150 ms');
+    await new Promise((r) => setTimeout(r, 100));
+    await settle();
+    look('after 250 ms');
+    return seen;
+  }
+
+  const want = (value: string, microtask: boolean) =>
+    [...(microtask ? ['after a microtask'] : []), 'after a task', 'after a frame', 'after 150 ms', 'after 250 ms'].map((at) => [at, value, value, value]);
+
+  for (const kind of ['replace', 'resync'] as Kind[]) {
+    for (const hook of ['on time', 'after a frame', 'after 200 ms', 'never', 'no hook'] as Hook[]) {
+      for (const echo of hook === 'no hook' ? [false] : [true, false]) {
+        it(`keeps the user's choice: ${kind} of the options, morphedCallback ${hook}, server value ${echo ? 'echoed' : 'unchanged'}`, async () => {
+          const { form, sel, native } = await chose('');
+          delayCallback(sel, hook);
+          const incoming = server(markup(echo ? 'au' : '', 1));
+          if (hook !== 'no hook') {
+            sel.voidBeforeMorph(incoming);
+            morphAttributes(sel, incoming);
+          }
+          patchNative(native, kind, 1);
+          expect(await observe(form, sel, hook !== 'no hook')).toEqual(want('au', hook !== 'no hook'));
+        });
+      }
+    }
+  }
+
+  it('keeps the choice through two patches before any callback (a patch and the patch that undoes a lock)', async () => {
+    const { form, sel, native } = await chose('');
+    // The server took the choice...
+    const first = server(markup('au', 1));
+    sel.voidBeforeMorph(first);
+    morphAttributes(sel, first);
+    patchNative(native, 'resync', 1);
+    // ...and, in the same task, the live element is morphed to a copy that carries it too.
+    const copy = server(markup('au', 1));
+    sel.voidBeforeMorph(copy);
+    morphAttributes(sel, copy);
+    patchNative(native, 'resync', 1);
+    expect(await observe(form, sel, true)).toEqual(want('au', true));
+  });
+
+  for (const hook of ['on time', 'after 200 ms', 'never'] as Hook[]) {
+    it(`a value the server changes wins, morphedCallback ${hook}`, async () => {
+      const { form, sel, native } = await chose('');
+      delayCallback(sel, hook);
+      const incoming = server(markup('fj', 1));
+      sel.voidBeforeMorph(incoming);
+      morphAttributes(sel, incoming);
+      patchNative(native, 'resync', 1);
+      expect(await observe(form, sel, true)).toEqual(want('fj', true));
+    });
+
+    it(`a selection the server changes (no value attribute) wins, morphedCallback ${hook}`, async () => {
+      const { form, sel, native } = await chose(null);
+      delayCallback(sel, hook);
+      const fiji = options(1).replace(' selected hidden', ' hidden').replace('value="fj"', 'value="fj" selected');
+      const incoming = server(`<void-select><select name="country">${fiji}</select></void-select>`);
+      sel.voidBeforeMorph(incoming);
+      morphAttributes(sel, incoming);
+      patchNative(native, 'replace', 1, fiji);
+      expect(await observe(form, sel, true)).toEqual(want('fj', true));
+    });
+  }
+
+  it('a choice a script makes in the native select (a framework binding, no event) is kept, not written over', async () => {
+    const { form, sel, native } = await chose('');
+    native.value = 'fj';
+    sel.error = 'Pick one';
+    await settle();
+    expect([sel.value, native.value, new FormData(form).get('country')]).toEqual(['fj', 'fj', 'fj']);
+    // A framework re-rendering the options' text in the same pass is not a reset either.
+    native.options[1]!.textContent = 'New Zealand (9)';
+    native.value = 'nz';
+    await settle();
+    expect([sel.value, native.value, new FormData(form).get('country')]).toEqual(['nz', 'nz', 'nz']);
+  });
+
+  it('options replaced without any hook: the same markup keeps the choice, a new `selected` wins', async () => {
+    const { form, sel, native } = await chose(null);
+    patchNative(native, 'replace', 2);
+    expect(await observe(form, sel, false)).toEqual(want('au', false));
+    const fiji = options(3).replace(' selected hidden', ' hidden').replace('value="fj"', 'value="fj" selected');
+    patchNative(native, 'replace', 3, fiji);
+    expect(await observe(form, sel, false)).toEqual(want('fj', false));
   });
 });
 

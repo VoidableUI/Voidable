@@ -65,6 +65,43 @@ export const Disabled: Story = {
   `,
 };
 
+const rewriteOptions = (e: Event) => {
+  // What a server patch does: the options written afresh, the prompt marked `selected` again.
+  const section = (e.target as HTMLElement).closest('div')!;
+  const select = section.querySelector('select')!;
+  const n = Number(section.dataset.renders ?? 0) + 1;
+  section.dataset.renders = String(n);
+  select.innerHTML = `<option value="" disabled selected hidden>Choose a region...</option><option value="nz">New Zealand (render ${n})</option><option value="au">Australia</option><option value="fj">Fiji</option>`;
+  section.querySelector('output')!.textContent = JSON.stringify([...new FormData(section.querySelector('form')!)]);
+};
+
+export const OptionsRewritten: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Choose a region, then rewrite the options as a server patch would (new option elements, the prompt marked `selected`). The choice stays, and the form data read right after the rewrite carries it: the component writes its choice back into the native select after every patch, without waiting for anything.',
+      },
+    },
+  },
+  render: () => html`
+    <div style="display: grid; gap: 12px; max-width: 400px;">
+      <form>
+        <void-select aria-label="Region">
+          <select name="region">
+            <option value="" disabled selected hidden>Choose a region...</option>
+            <option value="nz">New Zealand</option>
+            <option value="au">Australia</option>
+            <option value="fj">Fiji</option>
+          </select>
+        </void-select>
+      </form>
+      <void-button @click=${rewriteOptions}>Rewrite the options</void-button>
+      <output>[]</output>
+    </div>
+  `,
+};
+
 export const LabelledByAriaLabel: Story = {
   parameters: {
     docs: {

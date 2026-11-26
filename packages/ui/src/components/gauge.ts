@@ -214,7 +214,7 @@ export class VoidGauge extends VoidElement {
    * The reading, between `min` and `max`, for a single-value gauge. For a gauge split into segments set
    * `data.segments` instead.
    */
-  @property({ type: Number }) value = 0;
+  @property({ type: Number, reflect: true }) value = 0;
   /** Value at the start of the arc. Defaults to 0. */
   @property({ type: Number }) min = 0;
   /** Value at the end of the arc. Defaults to 100. */

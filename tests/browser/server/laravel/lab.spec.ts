@@ -95,7 +95,9 @@ test.describe('server updates while the user is mid-interaction', () => {
     await expect.poll(() => json(page, '#current').then((c) => c.name)).toBe('typing while polls arrive');
   });
 
-  test('a select the user changed keeps its choice while option text changes under it', async ({ page }) => {
+  test('a select the user changed keeps its choice while option text changes under it', async ({ page, allowErrors }) => {
+    // The choice's $wire.set, or the click that stops polling, cancels a poll in flight (see above).
+    allowErrors.push('signal is aborted');
     await page.locator('#i-country select').selectOption('au');
     await page.click('#poll-on');
     const start = await ticks(page);
@@ -107,7 +109,8 @@ test.describe('server updates while the user is mid-interaction', () => {
     await expect(page.locator('#i-country select')).toHaveCount(1);
   });
 
-  test('checked, selected and chosen client state survive repeated polls', async ({ page }) => {
+  test('checked, selected and chosen client state survive repeated polls', async ({ page, allowErrors }) => {
+    allowErrors.push('signal is aborted');
     await page.locator('#i-remember').click();
     await page.locator('#i-plan void-radio[value=pro]').click();
     await page.locator('#i-news').click();
@@ -129,7 +132,8 @@ test.describe('server updates while the user is mid-interaction', () => {
     await expect(page.locator('#dd-trigger')).toContainText('Actions ');
   });
 
-  test('a selected tab stays selected and its panel text updates', async ({ page }) => {
+  test('a selected tab stays selected and its panel text updates', async ({ page, allowErrors }) => {
+    allowErrors.push('signal is aborted');
     await page.getByRole('tab', { name: 'Two' }).click();
     await page.click('#poll-on');
     const start = await ticks(page);
