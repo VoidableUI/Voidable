@@ -743,7 +743,7 @@ export const FileUpload = wrapWc<VoidFileUpload, {
   name?: string;
   /** Form validation: the control must have a value. */
   required?: boolean;
-} & VoidEvents<{ Change: { value: File[]; files: File[] } }>>('void-file-upload', 'FileUpload');
+} & VoidEvents<{ Change: { value: File[]; files: File[] }; Reject: { rejected: { file: File; reason: 'type' | 'size' | 'count' }[] } }>>('void-file-upload', 'FileUpload');
 
 export const NavBar = wrapWc<VoidNavBar, {
   sticky?: boolean;

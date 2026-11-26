@@ -75,7 +75,8 @@
   "void-file-upload": {
     "group": "forms",
     "events": {
-      "void-change": "Fires when the chosen files change, by dropping, browsing or removing one. `detail.value` (and `detail.files`) is the list of accepted `File`s."
+      "void-change": "Fires when the chosen files change, by dropping, browsing or removing one. `detail.value` (and `detail.files`) is the list of accepted `File`s.",
+      "void-reject": "Fires, without bubbling, when a dropped or browsed file is refused. `detail.rejected` is a list of `{ file, reason }`, `reason` being `type` (not matched by `accept`), `size` (over `max-size`) or `count` (a further file while `multiple` is off). The zone also sets `error` to a message, which makes the drop zone `aria-invalid` and described by it; the next accepted selection clears it."
     }
   },
   "void-input": {

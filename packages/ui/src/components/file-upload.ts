@@ -3,32 +3,46 @@ import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
 import { InternalsFormControl, type FormSubmission } from '../form-control.js';
 import { useProjection } from '../projection.js';
+import { uid } from '../keyboard.js';
 
 useProjection();
 
-/** Drag-and-drop file picker for document uploads, image attachment flows, and import wizards. */
+/** Why a file was not taken: `type` (not matched by `accept`), `size` (over `max-size`) or `count` (more files than the zone takes). */
+export type FileRejectReason = 'type' | 'size' | 'count';
+
+/**
+ * Drag-and-drop file picker for document uploads, image attachment flows, and import wizards.
+ *
+ * @fires {CustomEvent<{ rejected: { file: File; reason: 'type' | 'size' | 'count' }[] }>} void-reject - Files were refused: one entry per file with the reason. Does not bubble.
+ */
 export class VoidFileUpload extends InternalsFormControl(VoidElement) {
   /** The host's `aria-label` / `aria-labelledby` name the inner control. */
   static override labelTarget = '.void-file-upload-dropzone';
 
   /**
    * Comma-separated file types the zone takes, as on a native file input: extensions (`.pdf`), MIME
-   * types (`image/png`) or wildcards (`image/*`). Other files are dropped without an error.
+   * types (`image/png`) or wildcards (`image/*`). Other files are not taken: `void-reject` fires with
+   * reason `type` and the zone shows an error.
    */
   @property({ type: String }) accept = '';
   /** Allow more than one file. Without it a new choice replaces the old one. */
   @property({ type: Boolean, reflect: true }) multiple = false;
   /** Stop the zone reacting and exclude the files from the form submission. */
   @property({ type: Boolean, reflect: true }) disabled = false;
-  /** Largest allowed file in bytes. 0 (the default) means no limit. Larger files are dropped silently. */
+  /** Largest allowed file in bytes. 0 (the default) means no limit. Larger files are rejected with reason `size`. */
   @property({ type: Number, attribute: 'max-size' }) maxSize = 0;
   /**
-   * Message shown under the zone, such as a server-side upload failure. It does not set `aria-invalid`;
-   * the component never produces an error text itself.
+   * Error message shown under the zone; while it is set the drop zone is `aria-invalid` and described by
+   * it. Set it for a server-side upload failure. The zone also sets it itself when it rejects a file
+   * (see `void-reject`) and clears what it set on the next accepted selection; a message you set is
+   * left alone.
    */
   @property({ type: String, reflect: true }) error = '';
 
   private _files: File[] = [];
+  private _uid = uid('void-file-upload-error');
+  /** The message we wrote into `error` (a rejection); an accepted selection clears it only while it is still there. */
+  private _ownError = '';
 
   /** One entry per selected file. */
   protected formSubmission(): FormSubmission {
@@ -66,6 +80,8 @@ export class VoidFileUpload extends InternalsFormControl(VoidElement) {
         tabindex=${this.formDisabled ? '-1' : '0'}
         role="button"
         aria-disabled=${this.formDisabled ? 'true' : nothing}
+        aria-invalid=${this.error ? 'true' : nothing}
+        aria-describedby=${this.error ? this._uid : nothing}
         @click=${this._onDropzoneClick}
         @keydown=${this._onDropzoneKeydown}
         @dragover=${this._onDragOver}
@@ -92,7 +108,7 @@ export class VoidFileUpload extends InternalsFormControl(VoidElement) {
           `)}
         </div>
       ` : nothing}
-      ${this.error ? html`<span class="void-file-upload-error">${this.error}</span>` : nothing}
+      ${this.error ? html`<span class="void-file-upload-error" id=${this._uid} role="alert">${this.error}</span>` : nothing}
     `;
   }
 
@@ -135,21 +151,32 @@ export class VoidFileUpload extends InternalsFormControl(VoidElement) {
   };
 
   private _addFiles(incoming: File[]): void {
-    const valid = incoming.filter(file => {
-      if (this.maxSize > 0 && file.size > this.maxSize) return false;
-      if (this.accept) {
-        const accepted = this.accept.split(',').map(s => s.trim());
-        const matches = accepted.some(type => {
-          if (type.startsWith('.')) return file.name.toLowerCase().endsWith(type.toLowerCase());
-          if (type.endsWith('/*')) return file.type.startsWith(type.slice(0, -1));
-          return file.type === type;
-        });
-        if (!matches) return false;
-      }
-      return true;
-    });
+    const rejected: { file: File; reason: FileRejectReason }[] = [];
+    let valid: File[] = [];
+    const accepted = this.accept.split(',').map(s => s.trim()).filter(Boolean);
+    for (const file of incoming) {
+      if (accepted.length > 0 && !accepted.some(type => {
+        if (type.startsWith('.')) return file.name.toLowerCase().endsWith(type.toLowerCase());
+        if (type.endsWith('/*')) return file.type.startsWith(type.slice(0, -1));
+        return file.type === type;
+      })) rejected.push({ file, reason: 'type' });
+      else if (this.maxSize > 0 && file.size > this.maxSize) rejected.push({ file, reason: 'size' });
+      else valid.push(file);
+    }
+    // Without `multiple` the zone takes one file: the first acceptable one, the rest are over the count.
+    if (!this.multiple && valid.length > 1) {
+      for (const file of valid.slice(1)) rejected.push({ file, reason: 'count' });
+      valid = valid.slice(0, 1);
+    }
+
+    if (rejected.length > 0) {
+      this.error = rejected.map(r => this._message(r.file, r.reason)).join(' ');
+      this._ownError = this.error;
+      this.dispatchEvent(new CustomEvent('void-reject', { bubbles: false, detail: { rejected } }));
+    }
 
     if (valid.length === 0) return;
+    if (rejected.length === 0) this._clearOwnError();
 
     this._files = this.multiple ? [...this._files, ...valid] : valid;
     this.requestUpdate();
@@ -158,6 +185,17 @@ export class VoidFileUpload extends InternalsFormControl(VoidElement) {
       composed: true,
       detail: { value: [...this._files], files: [...this._files] },
     }));
+  }
+
+  private _message(file: File, reason: FileRejectReason): string {
+    if (reason === 'type') return `${file.name} is not an accepted file type.`;
+    if (reason === 'size') return `${file.name} is larger than the ${this.maxSize} byte limit.`;
+    return `${file.name} was not added: only one file can be chosen.`;
+  }
+
+  private _clearOwnError(): void {
+    if (this._ownError && this.error === this._ownError) this.error = '';
+    this._ownError = '';
   }
 
   private _removeFile(index: number): void {

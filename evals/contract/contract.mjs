@@ -98,8 +98,8 @@ export const CONTRACT = {
   'void-file-upload': {
     role: 'inner',
     name: 'the drop zone is a role="button" named "Drop files here or browse", or by aria-label / aria-labelledby on the host (moved onto it); void-field label is not applied',
-    state: ['the chosen file names as text', 'no value attribute: the files are File objects with no string form (excluded from value reflection, see evals/contract/value.mjs)'],
-    gaps: ['files over max-size or not matching accept are dropped silently: no event, no error attribute, nothing to assert', 'no attribute reflects whether a file is chosen'],
+    state: ['the chosen file names as text', 'no value attribute: the files are File objects with no string form (excluded from value reflection, see evals/contract/value.mjs)', 'error (reflected) -> aria-invalid and aria-describedby on the drop zone, the message is a role="alert" element; set by the zone when it rejects a file, cleared by the next accepted selection', 'void-reject (does not bubble): detail.rejected is a list of { file, reason }, reason one of type, size, count'],
+    gaps: ['no attribute reflects whether a file is chosen'],
   },
   'void-gauge': { role: 'img', name: 'aria-label attribute', state: ['value (reflected)'] },
   'void-hamburger': {
