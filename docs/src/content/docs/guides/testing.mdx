@@ -22,7 +22,7 @@ await page.getByRole('tab', { name: 'Activity' }).click();
 // A void-select wraps a native select
 await page.getByLabel('Plan').selectOption('pro');
 
-// A dialog is named by its heading
+// A dialog is named by its title part
 await page.getByRole('button', { name: 'Open' }).click();
 await expect(page.getByRole('dialog', { name: 'Delete project' })).toBeVisible();
 ```
