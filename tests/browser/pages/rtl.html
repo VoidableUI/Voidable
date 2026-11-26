@@ -1,0 +1,31 @@
+<main style="padding: 1rem; display: flex; flex-direction: column; gap: 1.5rem; max-width: 40rem">
+  <void-number-input id="num" value="3" prefix="$" unit="kg" style="width: 14rem"></void-number-input>
+  <void-action-input id="act" action-label="Search" style="width: 16rem"></void-action-input>
+
+  <div style="display: flex; flex-direction: column; gap: 0.5rem; width: 14rem">
+    <void-checkbox id="cb">Check label</void-checkbox>
+    <void-radio-group label="Size" name="rtl-r" value="m"><void-radio id="rd" value="s">Radio label</void-radio><void-radio value="m">M</void-radio></void-radio-group>
+  </div>
+
+  <void-alert id="alert" color="error"><void-alert-description>Something went wrong with the request.</void-alert-description><void-alert-close><button type="button" aria-label="Dismiss">&times;</button></void-alert-close></void-alert>
+
+  <void-tabs id="tabs" value="one"><void-tabs-list><void-tabs-trigger id="t1" value="one">One</void-tabs-trigger><void-tabs-trigger id="t2" value="two">Two</void-tabs-trigger><void-tabs-trigger id="t3" value="three">Three</void-tabs-trigger></void-tabs-list><void-tabs-content value="one">Panel one</void-tabs-content><void-tabs-content value="two">Panel two</void-tabs-content><void-tabs-content value="three">Panel three</void-tabs-content></void-tabs>
+
+  <void-breadcrumbs id="crumbs"><void-breadcrumbs-list><void-breadcrumbs-item id="b1"><a href="/">Home</a></void-breadcrumbs-item><void-breadcrumbs-item id="b2"><a href="/p">Products</a></void-breadcrumbs-item><void-breadcrumbs-item id="b3" aria-current="page">Details</void-breadcrumbs-item></void-breadcrumbs-list></void-breadcrumbs>
+
+  <void-menu open aria-label="Actions" style="width: 14rem"><void-menu-content><void-menu-item id="mi" value="dup">Duplicate<void-menu-item-shortcut id="sc">Ctrl D</void-menu-item-shortcut></void-menu-item></void-menu-content></void-menu>
+
+  <void-toast-container id="tc" placement="inline"><void-toast id="toast" duration="0"><void-toast-title>Saved</void-toast-title><void-toast-description>Your changes were saved.</void-toast-description><void-toast-close id="tclose"><button type="button" aria-label="Dismiss">&times;</button></void-toast-close></void-toast></void-toast-container>
+
+  <void-table id="tbl"><table><thead><tr><th id="th">Name</th><th>Role</th></tr></thead><tbody><tr><td id="td">Alice</td><td>Engineer</td></tr></tbody></table></void-table>
+
+  <void-pagination id="pg" total="5" value="3"></void-pagination>
+
+  <void-switch id="sw" checked>Notify</void-switch>
+
+  <void-select id="sel"><select><option value="a">Alpha</option></select></void-select>
+
+  <div style="height: 12rem; overflow: hidden; position: relative">
+    <void-shell nav="side" style="min-height: 0"><void-sidebar id="sb" style="height: 12rem"><a href="#a">Link</a></void-sidebar><main id="main"><p>Content</p></main></void-shell>
+  </div>
+</main>
