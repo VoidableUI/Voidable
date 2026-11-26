@@ -1,5 +1,7 @@
 # Voidable Roadmap
 
+What 1.0 promises and what must land before it is on the [Road to 1.0](docs/src/content/docs/guides/road-to-1-0.mdx) page.
+
 ## Current State
 
 **66 components** (78 custom element tags) shipped across `@voidable/ui` + `@voidable/theme`, all with Storybook stories. Counts are derived from `packages/ui/src` (one file per component in `src/components/`, one tag per `customElements.define`); the docs site computes them at build time.
