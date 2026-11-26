@@ -130,7 +130,7 @@ Text that means something before upgrade is never hidden: buttons, badges, tags,
 
 Two things are worth doing on the server:
 
-- **Mark the selected tab panel `active`.** Without it the first panel is shown, which is right when the first tab is the initial one and wrong otherwise.
+- **Mark the selected `<void-tabs-content>` with `active`.** Without it the first one is shown, which is right when the first tab is the initial one and wrong otherwise.
 - **Load the theme in `<head>` as a stylesheet.** CSS blocks first paint, so the page never renders without these rules.
 
 Not every component is covered. Components whose size depends on content or data (tables, charts, calendars with other sizes, menus) are not reserved exactly, and an accordion item rendered `open` still shifts slightly when its body gains the component's padding.
