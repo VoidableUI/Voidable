@@ -79,9 +79,9 @@ describe('VoidActionInput', () => {
       expect(el.actionLabel).toBe('Copy link');
     });
 
-    it('does not reflect value to an attribute', async () => {
+    it('reflects value to the attribute', async () => {
       const el = await mount({ value: 'abc' });
-      expect(el.hasAttribute('value')).toBe(false);
+      expect(el.getAttribute('value')).toBe('abc');
     });
 
     it('reads the value attribute', async () => {
