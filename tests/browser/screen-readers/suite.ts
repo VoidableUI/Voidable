@@ -23,6 +23,13 @@ const safe = (s: string) => s.replace(/[^a-z0-9-]+/gi, '-');
 /** Opens the scenario's page, moves the screen reader to its content, runs the steps, and keeps the transcript. */
 async function play(reader: Reader, navigateToWebContent: () => Promise<void>, page: Page, scenario: Scenario, testInfo: TestInfo): Promise<void> {
   testInfo.annotations.push({ type: 'screen-reader', description: `${reader.name} ${reader.version()}` });
+  // A defect already found for this reader: run the scenario as an expected failure, so the job lists it as
+  // known (and prints what was spoken, as the evidence) and a fix turns it red.
+  const issue = scenario.readerIssues?.[reader.name];
+  if (issue) {
+    testInfo.annotations.push({ type: 'known issue', description: `${issue.key}: ${issue.detail}` });
+    testInfo.fail(true, `${issue.key}: ${issue.detail}`);
+  }
   await page.goto(scenario.page);
   await page.waitForFunction(() => typeof (window as any).__settle === 'function' && !!customElements.get('void-button'));
   await page.evaluate(() => (window as any).__settle(document));
@@ -34,6 +41,8 @@ async function play(reader: Reader, navigateToWebContent: () => Promise<void>, p
     transcript = await runScenario(reader, page, scenario);
   } catch (err) {
     transcript = (err as Error & { transcript?: TranscriptEntry[] }).transcript ?? transcript;
+    // An expected failure prints no error of its own: keep what was spoken in the log.
+    if (issue) console.log(`[known issue ${issue.key}] ${(err as Error).message}`);
     throw err;
   } finally {
     // The transcript is the main diagnostic: keep it for passing runs as well.
@@ -65,11 +74,6 @@ export function screenReaderSuite(title: string, scenarios: Scenario[]): void {
       for (const scenario of scenarios) {
         voiceOverTest(scenario.id, async ({ page, voiceOver }, testInfo) => {
           voiceOverTest.skip(!!scenario.knownIssue, `known defect, see the tree test: ${scenario.knownIssue?.key}`);
-          if (scenario.voiceOverIssue) {
-            const { key, detail } = scenario.voiceOverIssue;
-            voiceOverTest.info().annotations.push({ type: 'known issue', description: `${key}: ${detail}` });
-            voiceOverTest.fail(true, `${key}: ${detail}`);
-          }
           await play(voiceOverReader(voiceOver), () => voiceOver.navigateToWebContent(), page, scenario, testInfo);
         });
       }

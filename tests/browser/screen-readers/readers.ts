@@ -39,6 +39,7 @@ export function voiceOverReader(vo: VoiceOverPlaywright): Reader {
           return vo.nextLandmark();
         case 'link':
           return vo.nextLink();
+        case 'focusable':
         case 'control':
           return vo.perform(vo.keyboardCommands.findNextControl);
         case 'table':
@@ -82,6 +83,10 @@ export function nvdaReader(nvda: NVDAPlaywright): Reader {
           return nvda.nextLandmark();
         case 'link':
           return nvda.nextLink();
+        case 'focusable':
+          // Tab, not quick navigation: NVDA's form-field key skips sliders ("no next form field"), and Tab
+          // usually also puts NVDA in focus mode on the control, where arrow keys change its value.
+          return nvda.press('Tab');
         case 'control':
           return nvda.perform(nvda.keyboardCommands.moveToNextFormField);
         case 'table':
