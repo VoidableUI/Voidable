@@ -449,7 +449,7 @@ describe('VoidBarChart', () => {
       const el = await mount<VoidBarChart>(TAG, { data: sample });
       el.ariaLabel = 'New name';
       await el.updateComplete;
-      expect(el.querySelector('svg')!.getAttribute('aria-label')).toBe('New name');
+      expect(el.querySelector('table caption')!.textContent).toBe('New name');
     });
   });
 
