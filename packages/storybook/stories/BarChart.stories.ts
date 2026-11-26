@@ -36,7 +36,7 @@ export const Default: Story = {
 export const WithValues: Story = {
   render: () => html`
     <void-bar-chart
-      show-values
+      show-value
       style="max-width: 600px;"
       .data=${{
         labels: ['Q1', 'Q2', 'Q3', 'Q4'],
@@ -66,8 +66,8 @@ export const MultiSeries: Story = {
 export const NoStagger: Story = {
   render: () => html`
     <void-bar-chart
-      stagger="false"
-      show-values
+      stagger="0"
+      show-value
       style="max-width: 600px;"
       .data=${{
         labels: ['A', 'B', 'C', 'D', 'E'],
@@ -81,7 +81,7 @@ export const CustomStagger: Story = {
   render: () => html`
     <void-bar-chart
       stagger="150"
-      show-values
+      show-value
       style="max-width: 600px;"
       .data=${{
         labels: ['A', 'B', 'C', 'D', 'E'],
@@ -94,7 +94,7 @@ export const CustomStagger: Story = {
 export const Dramatic: Story = {
   render: () => html`
     <void-bar-chart
-      show-values
+      show-value
       style="max-width: 600px; --void-anim-scale: 2;"
       aria-label="Slow animation demo"
       .data=${{
@@ -147,7 +147,7 @@ export const PerBarColors: Story = {
   },
   render: () => html`
     <void-bar-chart
-      show-values
+      show-value
       style="max-width: 600px;"
       aria-label="Per-bar coloring example"
       .data=${{
@@ -179,7 +179,7 @@ export const SharpShape: Story = {
   render: () => html`
     <div data-shape="sharp" style="max-width: 600px;">
       <void-bar-chart
-        show-values
+        show-value
         aria-label="Sharp-cornered bars"
         .data=${{
           labels: ['Q1', 'Q2', 'Q3', 'Q4'],
@@ -200,7 +200,7 @@ export const WithZeroValues: Story = {
   },
   render: () => html`
     <void-bar-chart
-      show-values
+      show-value
       style="max-width: 600px;"
       aria-label="Daily error count with zero days"
       .data=${{
@@ -215,13 +215,13 @@ export const NegativeValues: Story = {
   parameters: {
     docs: {
       description: {
-        story: 'Negative values are bars below a zero baseline: the value axis reaches the lowest value, a baseline is drawn at zero and `show-values` prints a negative value under its bar.',
+        story: 'Negative values are bars below a zero baseline: the value axis reaches the lowest value, a baseline is drawn at zero and `show-value` prints a negative value under its bar.',
       },
     },
   },
   render: () => html`
     <void-bar-chart
-      show-values
+      show-value
       style="max-width: 600px;"
       aria-label="Net change per quarter: Q1 +40, Q2 -25, Q3 +10, Q4 -5"
       .data=${{

@@ -605,8 +605,9 @@ for (const mod of manifest.modules) {
     const detail = Object.fromEntries(
       [...(change.type?.text ?? '').matchAll(/(\w+): ([^;}]+?)\s*(?:;|\})/g)].map((m) => [m[1], m[2]]),
     );
-    // `value` and `checked` together (radio) is ambiguous: a radio is driven by its group.
-    const key = 'value' in detail && 'checked' in detail ? null : ['checked', 'value', 'values'].find((k) => k in detail);
+    // A boolean control carries its state under the attribute's name beside `value` (#23): bind that.
+    // A radio is driven by its group, so it is not bound on its own.
+    const key = decl.tagName === 'void-radio' ? null : ['checked', 'value', 'values'].find((k) => k in detail);
     const prop = key === 'values' ? 'value' : key;
     if (!key || !fields.has(prop)) continue;
     formControls[decl.tagName] = {

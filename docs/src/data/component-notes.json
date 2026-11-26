@@ -17,14 +17,14 @@
   "void-checkbox": {
     "group": "forms",
     "events": {
-      "void-change": "Fires when the user toggles the checkbox. `detail.checked` is the new state."
+      "void-change": "Fires when the user toggles the checkbox. `detail.checked` is the new state and `detail.value` its value."
     },
     "children": "The label text."
   },
   "void-checkbox-group": {
     "group": "forms",
     "events": {
-      "void-change": "Fires when a checkbox in the group is toggled. `detail.values` lists the values of the checked boxes."
+      "void-change": "Fires when a checkbox in the group is toggled. `detail.value` lists the values of the checked boxes."
     },
     "children": "Takes `void-checkbox` children. The `label` attribute names the group."
   },
@@ -63,6 +63,7 @@
   "void-editable": {
     "group": "forms",
     "events": {
+      "void-input": "Fires on every keystroke while editing. `detail.value` is the text so far.",
       "void-change": "Fires when the user commits an edit (Enter or leaving the field). `detail.value` is the new text.",
       "void-cancel": "Fires when the user abandons an edit with Escape; the previous value stays."
     }
@@ -74,7 +75,7 @@
   "void-file-upload": {
     "group": "forms",
     "events": {
-      "void-change": "Fires when the chosen files change, by dropping, browsing or removing one. `detail.files` is the list of accepted `File`s."
+      "void-change": "Fires when the chosen files change, by dropping, browsing or removing one. `detail.value` (and `detail.files`) is the list of accepted `File`s."
     }
   },
   "void-input": {
@@ -87,14 +88,15 @@
   "void-multiselect": {
     "group": "forms",
     "events": {
-      "void-change": "Fires when an option is selected or deselected. `detail.values` lists every selected value."
+      "void-change": "Fires when an option is selected or deselected. `detail.value` lists every selected value."
     },
     "children": "One `void-multiselect-content` holding the `void-option`s, one per choice; mark the initial ones with `selected`. The component renders the trigger and its chips before it."
   },
   "void-number-input": {
     "group": "forms",
     "events": {
-      "void-change": "Fires when the value changes by typing, the step buttons or the arrow keys. `detail.value` is the new number and `detail.previous` the old one."
+      "void-input": "Fires on every keystroke. `detail.value` is the number typed so far, or null while the text is empty or not a number.",
+      "void-change": "Fires when the value is committed: the field loses focus after typing, or the step buttons or arrow keys change it. `detail.value` is the new number and `detail.previous` the old one."
     }
   },
   "void-option": {
@@ -104,7 +106,8 @@
   "void-pin-input": {
     "group": "forms",
     "events": {
-      "void-change": "Fires on every edit of the code. `detail.value` is the characters entered so far.",
+      "void-input": "Fires on every edit of the code. `detail.value` is the characters entered so far.",
+      "void-change": "Fires when focus leaves the cells with a different code from when it came in. `detail.value` is the code.",
       "void-complete": "Fires once every cell is filled. `detail.value` is the full code."
     }
   },
@@ -150,7 +153,7 @@
   "void-switch": {
     "group": "forms",
     "events": {
-      "void-change": "Fires when the user flips the switch. `detail.checked` is the new state."
+      "void-change": "Fires when the user flips the switch. `detail.checked` is the new state and `detail.value` its value."
     },
     "children": "The label text."
   },
@@ -171,7 +174,7 @@
   "void-toggle": {
     "group": "forms",
     "events": {
-      "void-change": "Fires when the user presses the toggle. `detail.pressed` is the new state."
+      "void-change": "Fires when the user presses the toggle. `detail.pressed` is the new state and `detail.value` its value."
     },
     "children": "The label text or an icon (give an icon-only toggle an `aria-label`)."
   },
@@ -258,7 +261,8 @@
   "void-hamburger": {
     "group": "navigation",
     "events": {
-      "void-toggle": "Fires when the user presses the button. `detail.active` is the new state."
+      "void-open": "Fires on the hamburger when the user opens it (`detail.reason` is `trigger`). Does not bubble.",
+      "void-close": "Fires on the hamburger when the user closes it (`detail.reason` is `trigger`). Does not bubble."
     }
   },
   "void-nav-bar": {
@@ -272,8 +276,8 @@
   "void-nav-menu-item": {
     "group": "navigation",
     "events": {
-      "void-open": "Fires when the item opens its panel.",
-      "void-close": "Fires when the item closes its panel."
+      "void-open": "Fires on the item when it opens its panel. `detail.reason` is `hover` or `trigger`. Does not bubble.",
+      "void-close": "Fires on the item when it closes its panel. `detail.reason` is `hover`, `trigger`, `escape`, `outside` or `blur`. Does not bubble."
     },
     "children": "Two parts: `void-nav-menu-trigger`, wrapping the one control (a `<button>` that opens a panel, or an `<a href>` that navigates), and for a panel `void-nav-menu-content` with the links. Hover, click, Enter and Space open the panel; a link trigger just navigates."
   },
@@ -286,7 +290,8 @@
   "void-sidebar": {
     "group": "navigation",
     "events": {
-      "void-toggle": "Fires when the sidebar collapses or expands. `detail.collapsed` is the new state."
+      "void-collapse": "Fires when `toggle()` collapses the sidebar. Does not bubble.",
+      "void-expand": "Fires when `toggle()` expands the sidebar. Does not bubble."
     },
     "children": "The navigation content: links, `void-nav-links` or any markup."
   },
@@ -310,7 +315,7 @@
   "void-carousel": {
     "group": "data-display",
     "events": {
-      "void-change": "Fires when the visible slide changes. `detail.index` is the new slide and `detail.previous` the one before."
+      "void-change": "Fires when the visible slide changes. `detail.value` and `detail.index` are the new slide, `detail.previous` the one before."
     },
     "children": "Explicit parts, in order: `void-carousel-content` holding one `void-carousel-item` per slide, then the optional controls `void-carousel-previous`, `void-carousel-next` (empty, with an `aria-label`) and an empty `void-carousel-indicators` that the carousel fills with dots. A control is shown when you write it."
   },
@@ -352,14 +357,14 @@
   "void-alert": {
     "group": "feedback",
     "events": {
-      "void-close": "Fires when the user presses the control in the `void-alert-close` part, just before the alert removes itself from the page."
+      "void-close": "Fires when the user presses the control in the `void-alert-close` part, with `detail.reason` `close-button`, just before the alert removes itself from the page. Cancelable: `preventDefault()` keeps the alert. Does not bubble."
     },
     "children": "Explicit parts, in this order: `void-alert-title` (optional, short), `void-alert-description` (the message, with any inline markup, such as a link) and `void-alert-close` (optional; wraps the one control that dismisses the alert, and without it the alert cannot be dismissed)."
   },
   "void-banner": {
     "group": "feedback",
     "events": {
-      "void-close": "Fires when the user presses the control in the `void-banner-close` part, just before the banner removes itself from the page."
+      "void-close": "Fires on the banner when the user presses the control in the `void-banner-close` part (`detail.reason` is `close-button`), just before it removes itself from the page. Does not bubble; `preventDefault()` keeps the banner."
     },
     "children": "Explicit parts, in this order: `void-banner-title` (optional, short), `void-banner-description` (the message, with any inline markup such as a link), `void-banner-actions` (optional buttons) and `void-banner-close` (optional; wraps the one control that dismisses the banner, and without it the banner cannot be dismissed)."
   },
@@ -382,7 +387,7 @@
   "void-toast": {
     "group": "feedback",
     "events": {
-      "void-close": "Fires when the toast closes, by timeout or the control in its `void-toast-close` part, just before it removes itself from the page."
+      "void-close": "Fires on the toast when it closes, just before it removes itself from the page. `detail.reason` is `close-button` (its `void-toast-close` part; `preventDefault()` keeps the toast), `timeout` or `api` (`close()`). Does not bubble."
     },
     "children": "Explicit parts, in this order: `void-toast-title` (optional, short), `void-toast-description` (the message), `void-toast-actions` (optional buttons) and `void-toast-close` (optional; wraps the one control that dismisses the toast). `toast({ title, description, actions })` writes the same parts."
   },
@@ -397,7 +402,8 @@
   "void-accordion-item": {
     "group": "layout",
     "events": {
-      "void-toggle": "Fires after the item opens or closes, including when find-in-page opens it. `detail.open` is the new state."
+      "void-open": "Fires after the item opens: `detail.reason` is `trigger` (a click), `keyboard` (Enter or Space) or `find` (find-in-page found text inside). Does not bubble.",
+      "void-close": "Fires before the item closes: `trigger` or `keyboard` when the user closed it (cancelable), `outside` when another item opened in a single-open accordion. Does not bubble."
     },
     "children": "Two parts: `void-accordion-trigger`, the heading text that opens and closes it, and `void-accordion-content`, the body. The body opens and closes with a height animation (none under reduced motion or `--void-anim-scale: 0`)."
   },
@@ -408,7 +414,8 @@
   "void-collapsible": {
     "group": "layout",
     "events": {
-      "void-toggle": "Fires after the section opens or closes, including when find-in-page opens it. `detail.open` is the new state."
+      "void-open": "Fires after the section opens: `detail.reason` is `trigger` (a click), `keyboard` (Enter or Space) or `find` (find-in-page found text inside). Does not bubble.",
+      "void-close": "Fires before the section closes, with `detail.reason` `trigger` or `keyboard`. Cancelable: `preventDefault()` keeps it open. Does not bubble."
     },
     "children": "Two parts: `void-collapsible-trigger`, the heading text that opens and closes it, and `void-collapsible-content`, the body. The body opens and closes with a height animation (none under reduced motion or `--void-anim-scale: 0`)."
   },

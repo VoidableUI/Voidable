@@ -25,15 +25,15 @@ void-toast-container[popover]:not(:popover-open) {
   display: none;
 }
 
-void-toast-container[position='top-right'] { top: 0; right: 0; bottom: auto; left: auto; }
-void-toast-container[position='top-left'] { top: 0; left: 0; bottom: auto; right: auto; }
-void-toast-container[position='bottom-right'] { bottom: 0; right: 0; top: auto; left: auto; }
-void-toast-container[position='bottom-left'] { bottom: 0; left: 0; top: auto; right: auto; }
-void-toast-container[position='top-center'] { top: 0; left: 50%; bottom: auto; right: auto; transform: translateX(-50%); }
-void-toast-container[position='bottom-center'] { bottom: 0; left: 50%; top: auto; right: auto; transform: translateX(-50%); }
+void-toast-container[placement='top-right'] { top: 0; right: 0; bottom: auto; left: auto; }
+void-toast-container[placement='top-left'] { top: 0; left: 0; bottom: auto; right: auto; }
+void-toast-container[placement='bottom-right'] { bottom: 0; right: 0; top: auto; left: auto; }
+void-toast-container[placement='bottom-left'] { bottom: 0; left: 0; top: auto; right: auto; }
+void-toast-container[placement='top-center'] { top: 0; left: 50%; bottom: auto; right: auto; transform: translateX(-50%); }
+void-toast-container[placement='bottom-center'] { bottom: 0; left: 50%; top: auto; right: auto; transform: translateX(-50%); }
 
 /* In-flow strip: the container takes its place in the page layout (position it with sticky, grid, etc. from the app) instead of overlaying content. */
-void-toast-container[position='inline'] {
+void-toast-container[placement='inline'] {
   position: static;
   z-index: auto;
   pointer-events: auto;

@@ -26,10 +26,10 @@ void-indicator {
   padding: 0 4px;
 }
 
-void-indicator[position="top-right"] .void-indicator-dot { top: -4px; right: -4px; }
-void-indicator[position="top-left"] .void-indicator-dot { top: -4px; left: -4px; }
-void-indicator[position="bottom-right"] .void-indicator-dot { bottom: -4px; right: -4px; }
-void-indicator[position="bottom-left"] .void-indicator-dot { bottom: -4px; left: -4px; }
+void-indicator[placement="top-right"] .void-indicator-dot { top: -4px; right: -4px; }
+void-indicator[placement="top-left"] .void-indicator-dot { top: -4px; left: -4px; }
+void-indicator[placement="bottom-right"] .void-indicator-dot { bottom: -4px; right: -4px; }
+void-indicator[placement="bottom-left"] .void-indicator-dot { bottom: -4px; left: -4px; }
 
 void-indicator[color="error"]   { --_void-tone: var(--void-color-error); }
 void-indicator[color="warning"] { --_void-tone: var(--void-color-warning); }

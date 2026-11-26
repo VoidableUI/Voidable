@@ -41,11 +41,11 @@ void-action-input .void-action-input-btn {
   border-radius: 0 var(--void-control-radius) var(--void-control-radius) 0;
 }
 
-void-action-input[position="left"] input.void-action-input-field {
+void-action-input[icon-side="left"] input.void-action-input-field {
   border-radius: 0 var(--void-control-radius) var(--void-control-radius) 0;
 }
 
-void-action-input[position="left"] .void-action-input-btn {
+void-action-input[icon-side="left"] .void-action-input-btn {
   border-radius: var(--void-control-radius) 0 0 var(--void-control-radius);
 }
 
@@ -114,7 +114,7 @@ void-action-input .void-action-input-btn {
 }
 
 /* Button on the left */
-void-action-input[position="left"] .void-action-input-btn {
+void-action-input[icon-side="left"] .void-action-input-btn {
   border-left: none;
   border-right: var(--void-rule-between);
 }
@@ -141,7 +141,7 @@ void-action-input:where([color="error"], [color="warning"], [color="caution"], [
   border-left-color: var(--_void-tone-border);
 }
 
-void-action-input:where([color="error"], [color="warning"], [color="caution"], [color="highlight"], [color="success"], [color="info"], [color="notice"])[position="left"] .void-action-input-btn {
+void-action-input:where([color="error"], [color="warning"], [color="caution"], [color="highlight"], [color="success"], [color="info"], [color="notice"])[icon-side="left"] .void-action-input-btn {
   border-left-color: transparent;
   border-right-color: var(--_void-tone-border);
 }

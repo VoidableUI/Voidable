@@ -23,7 +23,7 @@ export class VoidPopover extends VoidElement {
   /** Whether the popover is open. */
   @property({ type: Boolean, reflect: true }) open = false;
   /** Side of the trigger it opens on; it flips to the opposite side when there is no room. */
-  @property({ type: String, reflect: true }) position: 'top' | 'bottom' | 'left' | 'right' = 'bottom';
+  @property({ type: String, reflect: true }) side: 'top' | 'bottom' | 'left' | 'right' = 'bottom';
   /** Alignment with the trigger along that side. */
   @property({ type: String, reflect: true }) align: 'start' | 'center' | 'end' = 'start';
   /** `click` toggles on trigger clicks; `manual` leaves opening to the `open` attribute or property. */
@@ -48,7 +48,7 @@ export class VoidPopover extends VoidElement {
     haspopup: 'dialog',
     anchor: () => this,
     hostStyle: (p, v) => this.setHostStyle(p, v),
-    placement: () => ({ side: this.position, align: this.align }),
+    placement: () => ({ side: this.side, align: this.align }),
     attr: (el, name, value) => this._parts.set(el, name, value),
     style: (el, p, v) => this._parts.style(el, p, v),
   });

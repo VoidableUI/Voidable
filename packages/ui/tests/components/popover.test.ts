@@ -44,8 +44,8 @@ describe('VoidPopover', () => {
       expect(el.open).toBe(false);
     });
 
-    it('position defaults to "bottom"', () => {
-      expect(el.position).toBe('bottom');
+    it('side defaults to "bottom"', () => {
+      expect(el.side).toBe('bottom');
     });
 
     it('trigger defaults to "click"', () => {
@@ -72,10 +72,10 @@ describe('VoidPopover', () => {
       expect(el.hasAttribute('open')).toBe(true);
     });
 
-    it('reflects position to attribute', async () => {
-      el.position = 'top';
+    it('reflects side to attribute', async () => {
+      el.side = 'top';
       await el.updateComplete;
-      expect(el.getAttribute('position')).toBe('top');
+      expect(el.getAttribute('side')).toBe('top');
     });
 
     it('reflects trigger to attribute', async () => {
@@ -380,7 +380,7 @@ describe('VoidPopover', () => {
 
     it('writes the requested placement on the surface', async () => {
       const el = await mounted();
-      el.position = 'top';
+      el.side = 'top';
       el.align = 'end';
       el.open = true;
       await el.updateComplete;

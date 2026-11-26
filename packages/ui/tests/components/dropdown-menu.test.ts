@@ -67,17 +67,17 @@ describe('VoidDropdownMenu', () => {
   });
 
   describe('defaults and reflection', () => {
-    it('open defaults to false, position to "bottom" and align to "start"', () => {
+    it('open defaults to false, side to "bottom" and align to "start"', () => {
       const el = document.createElement(TAG) as VoidDropdownMenu;
       expect(el.open).toBe(false);
-      expect(el.position).toBe('bottom');
+      expect(el.side).toBe('bottom');
       expect(el.align).toBe('start');
     });
 
-    it('reflects open, position and align', async () => {
-      const el = await mount({ open: true, position: 'top', align: 'end' });
+    it('reflects open, side and align', async () => {
+      const el = await mount({ open: true, side: 'top', align: 'end' });
       expect(el.hasAttribute('open')).toBe(true);
-      expect(el.getAttribute('position')).toBe('top');
+      expect(el.getAttribute('side')).toBe('top');
       expect(el.getAttribute('align')).toBe('end');
     });
 

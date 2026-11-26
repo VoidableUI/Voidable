@@ -32,7 +32,7 @@ export const input: Attrs<'void-input'> = {
   },
 };
 
-export const chart: Attrs<'void-bar-chart'> = { data, height: 240, showValues: true, stagger: 30 };
+export const chart: Attrs<'void-bar-chart'> = { data, height: 240, showValue: true, stagger: 30 };
 
 export const toggle: Attrs<'void-toggle'> = { value: 'a', slot: 'start' };
 export const menu: Attrs<'void-menu'> = {

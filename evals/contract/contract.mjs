@@ -40,7 +40,7 @@ export const CONTRACT = {
   },
   'void-calendar': { role: 'group', name: 'fixed "Calendar"; the grid is named "<Month> <Year>"', state: ['value (reflected, YYYY-MM-DD)', 'aria-selected on the day cell'], gaps: ['day buttons are named with a long date ("Tuesday, November 3, 2026") that depends on locale'] },
   'void-card': { role: null, name: 'none', state: [], gaps: ['the void-card-title part is not a heading, so a card cannot be found by its title with getByRole("heading"); add a heading element inside it'] },
-  'void-carousel': { role: 'region', name: 'none (aria-roledescription="carousel")', state: ['active (reflected)'], gaps: ['no accessible name'] },
+  'void-carousel': { role: 'region', name: 'none (aria-roledescription="carousel")', state: ['index (reflected)'], gaps: ['no accessible name'] },
   'void-carousel-previous': { role: 'button', name: 'aria-label the author writes on it', state: ['aria-disabled at the first slide unless loop'] },
   'void-carousel-next': { role: 'button', name: 'aria-label the author writes on it', state: ['aria-disabled at the last slide unless loop'] },
   'void-checkbox': {
@@ -108,8 +108,8 @@ export const CONTRACT = {
   'void-hamburger': {
     role: 'button',
     name: 'fixed "Menu" / "Close menu"',
-    state: ['active (reflected)', 'aria-expanded'],
-    probe: { html: '<void-hamburger></void-hamburger>', click: { role: 'button', name: 'Menu' }, expect: { host: { active: '', 'aria-expanded': 'true' } }, event: 'void-toggle' },
+    state: ['open (reflected)', 'aria-expanded'],
+    probe: { html: '<void-hamburger></void-hamburger>', click: { role: 'button', name: 'Menu' }, expect: { host: { open: '', 'aria-expanded': 'true' } }, event: 'void-open' },
     gaps: ['the name is fixed and cannot say what it opens; aria-controls is not set'],
   },
   'void-hover-card': { role: 'inner', name: 'the control in its void-hover-card-trigger part', state: ['open (reflected)'], gaps: ['the card is a visual preview: the trigger gets no aria-expanded, and the void-hover-card-content part has no role'] },
@@ -129,7 +129,7 @@ export const CONTRACT = {
   'void-multiselect': { role: 'inner', name: 'void-field label or aria-label / aria-labelledby on the host (moved onto it), on the inner combobox', state: ['open (reflected)', 'aria-expanded and aria-activedescendant on the inner combobox', 'role="listbox" + aria-multiselectable on the void-multiselect-content part', 'role="option" on the void-option children, aria-selected="true" on the chosen ones, active on the highlighted one'], gaps: ['the selected values are a property only (value: string[]), not reflected (#23)'] },
   'void-nav-bar': { role: 'navigation', name: 'none', state: [], gaps: ['role="navigation" on a top bar that usually holds search and account controls; a <nav> inside it makes a nested, unnamed landmark'] },
   'void-nav-menu': { role: 'menubar', name: 'none', state: [] },
-  'void-nav-menu-item': { role: 'none', name: 'the control in its void-nav-menu-trigger part (a button or a link)', state: ['open (reflected)', 'active (reflected)', 'aria-expanded, aria-haspopup and aria-controls on a button trigger', 'aria-current="page" on a link trigger when active'] },
+  'void-nav-menu-item': { role: 'none', name: 'the control in its void-nav-menu-trigger part (a button or a link)', state: ['open (reflected)', 'current (reflected)', 'aria-expanded, aria-haspopup and aria-controls on a button trigger', 'aria-current="page" on a link trigger when current'] },
   'void-number-input': { role: 'inner', name: 'void-field label or aria-label / aria-labelledby on the host (moved onto it), else the label attribute, on the inner role="spinbutton" input', state: ['value (reflected; absent when the field is empty)', 'aria-valuenow on the inner spinbutton (absent when empty)'] },
   'void-option': { role: null, name: 'text content', state: ['role="option", written by the picker whose content part holds it', 'selected (reflected)', 'aria-selected="true" when chosen', 'active (highlighted)', 'disabled (reflected)', 'aria-disabled'], gaps: ['selected is the initial choice: the current choice is aria-selected, not the attribute'] },
   'void-pagination': {

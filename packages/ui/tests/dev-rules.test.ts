@@ -321,3 +321,46 @@ describe('accessible names', () => {
     expect(keyOf(named('<void-input></void-input>')!)).toBe('missing-name|void-input|');
   });
 });
+
+describe('renamed in 0.8 (#23)', () => {
+  const legacy: DevTable = {
+    'void-popover': {
+      m: 'popover',
+      a: { side: ['top', 'right', 'bottom', 'left'], align: ['start', 'center', 'end'], variant: ['quiet', 'filled'], stagger: 3 },
+      e: ['void-open', 'void-close'],
+      l: {
+        a: { position: { to: 'side', values: { 'bottom-end': 'side="bottom" align="end"' } }, closable: { values: { false: 'hide-close' }, fix: 'remove it' } },
+        v: { variant: { subtle: 'quiet' }, stagger: { false: '0' } },
+        e: { 'void-toggle': 'listen for void-open and void-close' },
+      },
+    },
+    'void-accordion-item': { m: 'accordion', a: {}, e: ['void-toggle'] },
+  };
+  const at = (html: string, name: string) => checkAttribute(legacy, make(html), name);
+
+  it.each([
+    ['<void-popover position="top"></void-popover>', 'position', 'Write side="top" instead.'],
+    ['<void-popover position="bottom-end"></void-popover>', 'position', 'Write side="bottom" align="end" instead.'],
+    ['<void-popover closable="false"></void-popover>', 'closable', 'Write hide-close instead.'],
+    ['<void-popover closable></void-popover>', 'closable', 'was removed in Void UI 0.8, so it does nothing. Instead remove it.'],
+    ['<void-popover variant="subtle"></void-popover>', 'variant', 'Write variant="quiet" instead.'],
+    ['<void-popover stagger="false"></void-popover>', 'stagger', 'Write stagger="0" instead.'],
+  ])('%s reports the replacement', (html, name, text) => {
+    const w = at(html, name)!;
+    expect(w.kind).toBe('legacy-markup');
+    expect(w.message).toContain(text);
+  });
+
+  it('reports a listener for a removed event on the element, even if another element still dispatches it', () => {
+    const w = checkEvent(legacy, make('<void-popover></void-popover>'), 'void-toggle')!;
+    expect(w.kind).toBe('legacy-markup');
+    expect(w.message).toContain('listen for void-open and void-close');
+    expect(checkEvent(legacy, make('<void-accordion-item></void-accordion-item>'), 'void-toggle')).toBeUndefined();
+  });
+
+  it('reports a delegated listener for an event nothing dispatches any more', () => {
+    const w = checkEvent(legacy, document, 'void-dismiss', { 'void-dismiss': 'listen for void-close' })!;
+    expect(w.kind).toBe('legacy-markup');
+    expect(w.message).toContain('Instead listen for void-close.');
+  });
+});

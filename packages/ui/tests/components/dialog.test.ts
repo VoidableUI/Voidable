@@ -46,9 +46,9 @@ describe('VoidDialog', () => {
   });
 
   describe('defaults', () => {
-    it('open false, heading empty, size md, closable true', () => {
+    it('open false, heading empty, size md, hideClose false', () => {
       const el = document.createElement(TAG) as VoidDialog;
-      expect([el.open, el.size, el.closable]).toEqual([false, 'md', true]);
+      expect([el.open, el.size, el.hideClose]).toEqual([false, 'md', false]);
       expect('heading' in el).toBe(false);
     });
   });
@@ -273,9 +273,9 @@ describe('VoidDialog', () => {
     });
   });
 
-  describe('closable="false"', () => {
+  describe('hide-close', () => {
     it('has no close button and ignores Escape and backdrop presses', async () => {
-      const el = await mount({ closable: false, open: true });
+      const el = await mount({ hideClose: true, open: true });
       const events: Event[] = [];
       el.addEventListener('void-close', e => events.push(e));
       expect(closeButton(el)!.hidden).toBe(true);
@@ -288,11 +288,11 @@ describe('VoidDialog', () => {
       expect(e.defaultPrevented).toBe(true);
     });
 
-    it('reads closable="false" from markup', async () => {
-      document.body.innerHTML = '<void-dialog id="d" closable="false"></void-dialog>';
+    it('reads hide-close from markup', async () => {
+      document.body.innerHTML = '<void-dialog id="d" hide-close></void-dialog>';
       const el = document.getElementById('d') as VoidDialog;
       await flush(el);
-      expect(el.closable).toBe(false);
+      expect(el.hideClose).toBe(true);
     });
   });
 
@@ -315,7 +315,7 @@ describe('VoidDialog', () => {
       const el = await mount({ open: true }, '<void-dialog-body><p>text</p></void-dialog-body>');
       expect(document.activeElement).toBe(el);
       expect(el.shadowRoot!.activeElement).toBe(closeButton(el));
-      // The closable="false" fallback (the panel itself) is checked in a real
+      // The hide-close fallback (the panel itself) is checked in a real
       // browser (tests/browser): happy-dom's showModal() focuses the hidden
       // close button itself.
     });
@@ -386,7 +386,7 @@ describe('VoidDialog', () => {
     });
 
     it('a non-closable dialog on top shields the one underneath from Escape', async () => {
-      const outer = await mount({ open: true }, '<void-dialog id="inner" closable="false"><void-dialog-body><input></void-dialog-body></void-dialog>');
+      const outer = await mount({ open: true }, '<void-dialog id="inner" hide-close><void-dialog-body><input></void-dialog-body></void-dialog>');
       const inner = outer.querySelector('#inner') as VoidDialog;
       inner.open = true;
       await flush(inner, outer);

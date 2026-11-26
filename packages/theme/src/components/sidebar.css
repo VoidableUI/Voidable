@@ -16,7 +16,7 @@ void-sidebar {
   flex-shrink: 0;
 }
 
-void-sidebar[position="right"] {
+void-sidebar[side="right"] {
   border-right: none;
   border-left: var(--void-sidebar-rule, var(--void-rule));
 }

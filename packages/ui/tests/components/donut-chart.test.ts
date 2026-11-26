@@ -86,18 +86,18 @@ describe('VoidDonutChart', () => {
     it('inner defaults to 0.6', () => expect(el.inner).toBe(0.6));
     it('gaps defaults to false', () => expect(el.gaps).toBe(false));
     it('variant defaults to "filled"', () => expect(el.variant).toBe('filled'));
-    it('showValues defaults to false', () => expect(el.showValues).toBe(false));
+    it('showValue defaults to false', () => expect(el.showValue).toBe(false));
     it('showTotal defaults to false', () => expect(el.showTotal).toBe(false));
     it('ariaLabel defaults to empty', () => expect(el.ariaLabel).toBe(''));
     it('data defaults to no segments', () => expect(el.data).toEqual({ segments: [] }));
   });
 
   describe('attributes and reflection', () => {
-    it('reflects size, variant, show-values and show-total', async () => {
-      const el = await mount<VoidDonutChart>(TAG, { size: 150, variant: 'wireframe', showValues: true, showTotal: true });
+    it('reflects size, variant, show-value and show-total', async () => {
+      const el = await mount<VoidDonutChart>(TAG, { size: 150, variant: 'wireframe', showValue: true, showTotal: true });
       expect(el.getAttribute('size')).toBe('150');
       expect(el.getAttribute('variant')).toBe('wireframe');
-      expect(el.hasAttribute('show-values')).toBe(true);
+      expect(el.hasAttribute('show-value')).toBe(true);
       expect(el.hasAttribute('show-total')).toBe(true);
     });
 
@@ -340,13 +340,13 @@ describe('VoidDonutChart', () => {
     it('renders a value label per non-zero segment', async () => {
       const el = await mount<VoidDonutChart>(TAG, {
         data: { segments: [{ name: 'a', value: 2 }, { name: 'z', value: 0 }, { name: 'b', value: 6 }] },
-        showValues: true,
+        showValue: true,
       });
       expect(texts(el, '.void-donut-chart-labels text')).toEqual(['2', '6']);
     });
 
     it('places each value label inside the ring at the segment mid-angle', async () => {
-      const el = await mount<VoidDonutChart>(TAG, { data: four, showValues: true });
+      const el = await mount<VoidDonutChart>(TAG, { data: four, showValue: true });
       const labels = Array.from(el.querySelectorAll('.void-donut-chart-labels text'));
       const mids = [Math.PI / 4, (3 * Math.PI) / 4, (3 * Math.PI) / 2];
       labels.forEach((l, i) => {
@@ -502,12 +502,12 @@ describe('VoidDonutChart', () => {
     it('toggles total and value labels at runtime', async () => {
       const el = await mount<VoidDonutChart>(TAG, { data: four });
       el.showTotal = true;
-      el.showValues = true;
+      el.showValue = true;
       await settle(el);
       expect(el.querySelector('.void-donut-chart-total')).not.toBeNull();
       expect(el.querySelector('.void-donut-chart-labels')).not.toBeNull();
       el.showTotal = false;
-      el.showValues = false;
+      el.showValue = false;
       await settle(el);
       expect(el.querySelector('.void-donut-chart-total')).toBeNull();
       expect(el.querySelector('.void-donut-chart-labels')).toBeNull();

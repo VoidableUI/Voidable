@@ -86,6 +86,10 @@ func TestScan(t *testing.T) {
 			`void-tag{}@1:41`},
 		{"backtick mention does not nest", domain.LangHEEx, "@doc \"Renders a `<void-field>`.\"\n<void-option>",
 			`void-field{}@1:18 | void-option{}@2:1`},
+		{"stimulus actions name events", domain.LangERB, `<void-hamburger data-action="void-toggle->menu#flip click@window->x#y void-open:once->menu#open">`,
+			`void-hamburger{data-action:attr=void-toggle->menu#flip click@window->x#y void-open:once->menu#open void-toggle:event void-open:event}@1:1`},
+		{"liveview bridge names events", domain.LangHEEx, `<void-alert phx-hook="VoidEvent" data-void-events="void-dismiss, void-click">`,
+			`void-alert{phx-hook:directive=VoidEvent data-void-events:attr=void-dismiss, void-click void-dismiss:event void-click:event}@1:1`},
 		{"markdown fences", domain.LangMarkdown, "Use `<void-tabs>`.\n\n```tsx\n<void-input collapsedWidth={x} />\n```\n\n```html\n<void-input />\n```\n",
 			`void-tabs{}@1:6 | void-input/{collapsedWidth:attr=x!}@4:1 | void-input/{}@8:1`},
 	}

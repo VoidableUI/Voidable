@@ -23,34 +23,34 @@ type Story = StoryObj;
 
 export const Text: Story = {
   name: 'Text (default)',
-  render: () => html`<void-skeleton variant="text"></void-skeleton>`,
+  render: () => html`<void-skeleton shape="text"></void-skeleton>`,
 };
 
 export const Circular: Story = {
   name: 'Circular',
-  render: () => html`<void-skeleton variant="circular"></void-skeleton>`,
+  render: () => html`<void-skeleton shape="circular"></void-skeleton>`,
 };
 
 export const Rectangular: Story = {
   name: 'Rectangular',
-  render: () => html`<void-skeleton variant="rectangular"></void-skeleton>`,
+  render: () => html`<void-skeleton shape="rectangular"></void-skeleton>`,
 };
 
 export const ContentPlaceholder: Story = {
   name: 'ContentPlaceholder',
   render: () => html`
     <div style="display: flex; flex-direction: column; gap: 0.75rem; max-width: 20rem; padding: 1rem; border: 1px solid #e0e0e0; border-radius: 0.5rem;">
-      <void-skeleton variant="rectangular"></void-skeleton>
+      <void-skeleton shape="rectangular"></void-skeleton>
       <div style="display: flex; align-items: center; gap: 0.75rem;">
-        <void-skeleton variant="circular"></void-skeleton>
+        <void-skeleton shape="circular"></void-skeleton>
         <div style="flex: 1; display: flex; flex-direction: column; gap: 0.5rem;">
-          <void-skeleton variant="text"></void-skeleton>
-          <void-skeleton variant="text" style="width: 60%;"></void-skeleton>
+          <void-skeleton shape="text"></void-skeleton>
+          <void-skeleton shape="text" style="width: 60%;"></void-skeleton>
         </div>
       </div>
-      <void-skeleton variant="text"></void-skeleton>
-      <void-skeleton variant="text"></void-skeleton>
-      <void-skeleton variant="text" style="width: 80%;"></void-skeleton>
+      <void-skeleton shape="text"></void-skeleton>
+      <void-skeleton shape="text"></void-skeleton>
+      <void-skeleton shape="text" style="width: 80%;"></void-skeleton>
     </div>
   `,
 };

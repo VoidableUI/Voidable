@@ -16,7 +16,7 @@ function serverMarkup(v: number, o: { heading?: string; toast?: boolean; extraTi
     <void-alert id="ma"><void-alert-description>Alert ${v}</void-alert-description><void-alert-close><button type="button" id="ma-x" aria-label="Dismiss">&times;</button></void-alert-close></void-alert>
     <void-error-fallback id="me" heading="${o.heading ?? 'Oops'}" retryable></void-error-fallback>
     <void-error-fallback id="me2"><void-error-fallback-title>Mine ${v}</void-error-fallback-title>${o.extraTitle ? '<void-error-fallback-description>More</void-error-fallback-description>' : ''}<void-error-fallback-actions><button type="button" id="me2-b">Go</button></void-error-fallback-actions></void-error-fallback>
-    <void-toast-container id="mt" position="inline">${o.toast === false ? '' : `<void-toast id="mtt" duration="0"><void-toast-title>Saved ${v}</void-toast-title><void-toast-description>Done</void-toast-description><void-toast-close><button type="button" id="mt-x" aria-label="Dismiss">&times;</button></void-toast-close></void-toast>`}</void-toast-container>`;
+    <void-toast-container id="mt" placement="inline">${o.toast === false ? '' : `<void-toast id="mtt" duration="0"><void-toast-title>Saved ${v}</void-toast-title><void-toast-description>Done</void-toast-description><void-toast-close><button type="button" id="mt-x" aria-label="Dismiss">&times;</button></void-toast-close></void-toast>`}</void-toast-container>`;
 }
 
 for (const engine of ENGINES) {
@@ -71,7 +71,7 @@ for (const engine of ENGINES) {
       await page.evaluate(() => {
         (window as any).__all = [...document.getElementById('ma')!.querySelectorAll('*')];
         (window as any).__closes = 0;
-        document.addEventListener('void-close', (e) => { if ((e.target as Element).id === 'ma') (window as any).__closes++; });
+        document.addEventListener('void-close', (e) => { if ((e.target as Element).id === 'ma') (window as any).__closes++; }, true);
       });
       await morph(page, serverMarkup(1));
       await morph(page, serverMarkup(2));

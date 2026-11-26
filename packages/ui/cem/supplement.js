@@ -16,14 +16,6 @@
  * @type {Record<string, { name: string, type: string, description: string }[]>}
  */
 export const extraAttributes = {
-  // toggle-group.ts reads `toggle.getAttribute('value')` from each child.
-  'void-toggle': [
-    {
-      name: 'value',
-      type: 'string',
-      description: 'Value this toggle contributes to a parent `<void-toggle-group>`.',
-    },
-  ],
   // card.css: `void-card[scrollable]` opts in to an internal scrollbar; no JS reads it.
   'void-card': [
     {
@@ -42,12 +34,10 @@ export const extraAttributes = {
  * @type {{ tag: string, from: string, events: string[] }[]}
  */
 export const ancestorEvents = [
-  { tag: 'void-accordion', from: 'void-accordion-item', events: ['void-toggle'] },
   { tag: 'void-list', from: 'void-list-item', events: ['void-click'] },
   { tag: 'void-menu', from: 'void-menu-item', events: ['void-select'] },
   { tag: 'void-menu-group', from: 'void-menu-item', events: ['void-select'] },
   { tag: 'void-dropdown-menu', from: 'void-dropdown-menu-item', events: ['void-select'] },
-  { tag: 'void-toast-container', from: 'void-toast', events: ['void-close'] },
 ];
 
 /**
@@ -458,7 +448,7 @@ export const parts = {
   'void-nav-menu': {
     children: 'parts',
     skeleton:
-      '<void-nav-menu><void-nav-menu-item><void-nav-menu-trigger><button type="button">Products</button></void-nav-menu-trigger><void-nav-menu-content><a href="/products/a">Product A</a></void-nav-menu-content></void-nav-menu-item><void-nav-menu-item active><void-nav-menu-trigger><a href="/docs">Docs</a></void-nav-menu-trigger></void-nav-menu-item></void-nav-menu>',
+      '<void-nav-menu><void-nav-menu-item><void-nav-menu-trigger><button type="button">Products</button></void-nav-menu-trigger><void-nav-menu-content><a href="/products/a">Product A</a></void-nav-menu-content></void-nav-menu-item><void-nav-menu-item current><void-nav-menu-trigger><a href="/docs">Docs</a></void-nav-menu-trigger></void-nav-menu-item></void-nav-menu>',
     legacy: { children: 'write each entry as <void-nav-menu-item> with a <void-nav-menu-trigger> around one <button> or <a href>' },
     parts: [
       {
@@ -728,4 +718,88 @@ export const accessibleName = {
   'void-carousel-previous': { attributes: ARIA, content: true, hint: 'give it aria-label="Previous slide"' },
   'void-carousel-next': { attributes: ARIA, content: true, hint: 'give it aria-label="Next slide"' },
   'void-avatar': { attributes: [...ARIA, 'alt', 'initials'], hint: 'set alt to the person\'s name (or initials)' },
+};
+
+/**
+ * API normalisation (#23): attributes, attribute values and events that were
+ * renamed or removed in 0.8, with the form to write instead. The rules they
+ * follow are "API conventions" in AGENTS.md and the API conventions guide. The
+ * manifest plugin writes each entry to the declaration as `voidRenamed` (and
+ * fails when an old attribute or event still exists, or a renamed value is
+ * still allowed); `@voidable/ui/dev` and `voidable check` report every old form
+ * with its replacement (rule `legacy-markup`). Never remove an entry: an
+ * application that upgrades later still gets told what to write.
+ *
+ *   attributes  old attribute -> { to, values, fix }. `to`: the new attribute,
+ *               written with the same value; `values`: the replacement markup
+ *               for one old value (key `''` is the attribute written with no
+ *               value); `fix`: what to do when neither applies.
+ *   values      attribute -> { old value -> new value }.
+ *   events      old event name -> what to listen for instead.
+ * @type {Record<string, { attributes?: Record<string, { to?: string, values?: Record<string, string>, fix?: string }>, values?: Record<string, Record<string, string>>, events?: Record<string, string> }>}
+ */
+const OPEN_CLOSE = 'listen for void-open and void-close on the element itself (they do not bubble; detail.reason says why)';
+const SIDES = ['top', 'right', 'bottom', 'left'];
+/** position -> side, and the combined values (`bottom-end`) -> side plus align. */
+const SIDE_OF = () => ({
+  to: 'side',
+  values: Object.fromEntries(
+    SIDES.flatMap((side) => ['start', 'center', 'end'].map((align) => [`${side}-${align}`, `side="${side}" align="${align}"`])),
+  ),
+});
+/** A default-true boolean replaced by its hide-* inverse. */
+const INVERTED = (to) => ({
+  values: { false: to, true: 'nothing (remove the attribute: it is the default)' },
+  fix: `remove it (it is the default); write ${to} to turn it off`,
+});
+export const renamed = {
+  // Events (#23): void-toggle is gone wherever the state is `open`; every dismissal is a non-bubbling void-close.
+  'void-hamburger': {
+    attributes: { active: { to: 'open' } },
+    events: { 'void-toggle': OPEN_CLOSE },
+  },
+  'void-collapsible': { events: { 'void-toggle': OPEN_CLOSE } },
+  'void-accordion-item': { events: { 'void-toggle': OPEN_CLOSE } },
+  'void-accordion': { events: { 'void-toggle': 'listen for void-open and void-close on each <void-accordion-item> (they do not bubble; or listen on the accordion in the capture phase)' } },
+  'void-alert': { events: { 'void-dismiss': 'listen for void-close on the alert itself (it does not bubble; detail.reason is close-button)' } },
+  'void-sidebar': {
+    attributes: { position: { to: 'side' } },
+    events: { 'void-toggle': 'listen for void-collapse and void-expand on the sidebar (they do not bubble)' },
+  },
+  'void-toast-container': {
+    attributes: { position: { to: 'placement' } },
+    events: { 'void-close': 'listen for void-close on the <void-toast> itself (it does not bubble; detail.reason is close-button, timeout or api)' },
+  },
+  // Placement: `side` is the side of the anchor or the edge of the page, `align` the alignment along it,
+  // `placement` a corner or region of the viewport; no attribute is called `position`.
+  'void-popover': { attributes: { position: SIDE_OF() } },
+  'void-tooltip': { attributes: { position: SIDE_OF() } },
+  'void-hover-card': { attributes: { position: SIDE_OF() } },
+  'void-dropdown-menu': { attributes: { position: SIDE_OF() } },
+  'void-indicator': { attributes: { position: { to: 'placement' } } },
+  'void-action-input': { attributes: { position: { to: 'icon-side' }, 'tooltip-position': { to: 'tooltip-side' } } },
+  'void-scroll-area': { attributes: { direction: { to: 'orientation' } } },
+  // State: an index into a sequence without keys; the current item of a navigation.
+  'void-carousel': { attributes: { active: { to: 'index' } } },
+  'void-nav-menu-item': { attributes: { active: { to: 'current' } } },
+  // show-value, singular, everywhere; a number setting is a number.
+  'void-bar-chart': { attributes: { 'show-values': { to: 'show-value' } }, values: { stagger: { false: '0' } } },
+  'void-donut-chart': { attributes: { 'show-values': { to: 'show-value' } } },
+  'void-line-chart': { attributes: { 'show-values': { to: 'show-value' } } },
+  // No attribute defaults to true: what is shown by default is turned off with hide-*.
+  'void-gauge': {
+    attributes: { 'show-value': INVERTED('hide-value'), 'tick-min': INVERTED('hide-tick-min'), 'tick-max': INVERTED('hide-tick-max') },
+  },
+  'void-color-picker': {
+    attributes: {
+      'show-input': INVERTED('hide-input'),
+      variant: { values: { compact: 'compact', default: 'nothing (remove the attribute: the full picker is the default)' }, fix: 'write compact for the swatch button, nothing for the full picker' },
+    },
+  },
+  'void-error-fallback': { attributes: { icon: INVERTED('hide-icon') } },
+  'void-nav-bar': { attributes: { bordered: INVERTED('hide-border') } },
+  'void-dialog': { attributes: { closable: INVERTED('hide-close') } },
+  'void-drawer': { attributes: { closable: INVERTED('hide-close') } },
+  // One meaning per word: variant is a drawing treatment; a skeleton's form is its shape.
+  'void-skeleton': { attributes: { variant: { to: 'shape' } } },
 };

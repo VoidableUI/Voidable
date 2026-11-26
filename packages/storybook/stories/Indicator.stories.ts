@@ -81,16 +81,16 @@ export const OnButton: Story = {
 export const Positions: Story = {
   render: () => html`
     <div style="display: flex; align-items: center; gap: 3rem; flex-wrap: wrap; padding: 1rem;">
-      <void-indicator color="error" position="top-right">
+      <void-indicator color="error" placement="top-right">
         <void-button variant="outline">Top Right</void-button>
       </void-indicator>
-      <void-indicator color="error" position="top-left">
+      <void-indicator color="error" placement="top-left">
         <void-button variant="outline">Top Left</void-button>
       </void-indicator>
-      <void-indicator color="error" position="bottom-right">
+      <void-indicator color="error" placement="bottom-right">
         <void-button variant="outline">Bottom Right</void-button>
       </void-indicator>
-      <void-indicator color="error" position="bottom-left">
+      <void-indicator color="error" placement="bottom-left">
         <void-button variant="outline">Bottom Left</void-button>
       </void-indicator>
     </div>

@@ -73,7 +73,7 @@
           </div>
           <div class="app-content-header-right">
             <%% unless defined?(Devise) && devise_controller? %>
-              <void-action-input icon="search" placeholder="Search..." size="sm" tooltip-position="bottom" class="app-content-header-search"></void-action-input>
+              <void-action-input icon="search" placeholder="Search..." size="sm" tooltip-side="bottom" class="app-content-header-search"></void-action-input>
             <%% end %>
             <%%= content_for(:header_actions) %>
           </div>
@@ -84,7 +84,7 @@
       </main>
     </div>
 
-    <void-toast-container position="bottom-right">
+    <void-toast-container placement="bottom-right">
       <%% if notice.present? %>
         <void-toast color="success" duration="20000">
           <void-toast-description><%%= notice %></void-toast-description>

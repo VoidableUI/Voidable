@@ -84,15 +84,15 @@ describe('VoidGauge', () => {
     it('thickness defaults to 14', () => expect(el.thickness).toBe(14));
     it('circular defaults to "triple"', () => expect(el.circular).toBe('triple'));
     it('variant defaults to "filled"', () => expect(el.variant).toBe('filled'));
-    it('showValue defaults to true', () => expect(el.showValue).toBe(true));
+    it('hideValue defaults to false', () => expect(el.hideValue).toBe(false));
     it('unitInline defaults to false', () => expect(el.unitInline).toBe(false));
     it('tickMajor and tickMinor default to 0', () => {
       expect(el.tickMajor).toBe(0);
       expect(el.tickMinor).toBe(0);
     });
-    it('tickMin and tickMax default to true', () => {
-      expect(el.tickMin).toBe(true);
-      expect(el.tickMax).toBe(true);
+    it('hideTickMin and hideTickMax default to false', () => {
+      expect(el.hideTickMin).toBe(false);
+      expect(el.hideTickMax).toBe(false);
     });
     it('segmentsSort defaults to "value"', () => expect(el.segmentsSort).toBe('value'));
     it('gaps defaults to false', () => expect(el.gaps).toBe(false));
@@ -112,15 +112,15 @@ describe('VoidGauge', () => {
       expect([el.value, el.min, el.max, el.thickness, el.tickMajor, el.tickMinor]).toEqual([42, -10, 10, 20, 5, 1]);
     });
 
-    it('reflects size, circular, variant, show-value, unit-inline, tick-min and tick-max', async () => {
-      const el = await mount<VoidGauge>(TAG, { size: 180, circular: 'semi', variant: 'outline', unitInline: true });
+    it('reflects size, circular, variant, unit-inline, hide-value, hide-tick-min and hide-tick-max', async () => {
+      const el = await mount<VoidGauge>(TAG, { size: 180, circular: 'semi', variant: 'outline', unitInline: true, hideValue: true, hideTickMin: true, hideTickMax: true });
       expect(el.getAttribute('size')).toBe('180');
       expect(el.getAttribute('circular')).toBe('semi');
       expect(el.getAttribute('variant')).toBe('outline');
       expect(el.hasAttribute('unit-inline')).toBe(true);
-      expect(el.hasAttribute('show-value')).toBe(true);
-      expect(el.hasAttribute('tick-min')).toBe(true);
-      expect(el.hasAttribute('tick-max')).toBe(true);
+      expect(el.hasAttribute('hide-value')).toBe(true);
+      expect(el.hasAttribute('hide-tick-min')).toBe(true);
+      expect(el.hasAttribute('hide-tick-max')).toBe(true);
     });
 
     it('maps segments-sort and aria-label attributes', () => {
@@ -131,23 +131,18 @@ describe('VoidGauge', () => {
       expect(el.ariaLabel).toBe('CPU');
     });
 
-    it('removing the tick-min attribute restores the default (on), as markup without it means', () => {
+    it('removing hide-tick-min restores the min tick, as markup without it means', () => {
       const el = document.createElement(TAG) as VoidGauge;
-      el.setAttribute('tick-min', 'false');
-      el.removeAttribute('tick-min');
-      expect(el.tickMin).toBe(true);
+      el.setAttribute('hide-tick-min', '');
+      expect(el.hideTickMin).toBe(true);
+      el.removeAttribute('hide-tick-min');
+      expect(el.hideTickMin).toBe(false);
     });
 
-    it('tick-min="false" disables the min tick (as documented)', () => {
+    it('hide-tick-max hides the max tick', () => {
       const el = document.createElement(TAG) as VoidGauge;
-      el.setAttribute('tick-min', 'false');
-      expect(el.tickMin).toBe(false);
-    });
-
-    it('tick-max="false" disables the max tick (as documented)', () => {
-      const el = document.createElement(TAG) as VoidGauge;
-      el.setAttribute('tick-max', 'false');
-      expect(el.tickMax).toBe(false);
+      el.setAttribute('hide-tick-max', '');
+      expect(el.hideTickMax).toBe(true);
     });
 
     describe('gaps converter', () => {
@@ -327,8 +322,8 @@ describe('VoidGauge', () => {
       expect(centerText(await mount<VoidGauge>(TAG, { value: 2_500_000, max: 5_000_000 }))).toBe('2.5M');
     });
 
-    it('is hidden when show-value is false', async () => {
-      const el = await mount<VoidGauge>(TAG, { value: 10, showValue: false });
+    it('is hidden with hide-value', async () => {
+      const el = await mount<VoidGauge>(TAG, { value: 10, hideValue: true });
       expect(q(el, '.void-gauge-center-value')).toBeNull();
     });
 
@@ -386,7 +381,7 @@ describe('VoidGauge', () => {
 
     it('toggles the center label', async () => {
       const el = await mount<VoidGauge>(TAG, { value: 50 });
-      el.showValue = false;
+      el.hideValue = true;
       await settle(el);
       expect(q(el, '.void-gauge-center-value')).toBeNull();
     });
@@ -542,7 +537,7 @@ describe('VoidGauge', () => {
     const minor = (el: Element) => qa(el, '.void-gauge-tick-minor');
     const len = (t: Element) => Math.hypot(num(t, 'x2') - num(t, 'x1'), num(t, 'y2') - num(t, 'y1'));
 
-    it('renders no ticks by default (tick-min/max alone do not enable ticks)', async () => {
+    it('renders no ticks by default (the end ticks alone do not enable ticks)', async () => {
       const el = await mount<VoidGauge>(TAG, { value: 50 });
       expect(q(el, '.void-gauge-ticks')).toBeNull();
     });
@@ -560,13 +555,13 @@ describe('VoidGauge', () => {
     });
 
     it('major + minor intervals classify shared positions as major', async () => {
-      const el = await mount<VoidGauge>(TAG, { tickMajor: 25, tickMinor: 5, tickMin: false, tickMax: false });
+      const el = await mount<VoidGauge>(TAG, { tickMajor: 25, tickMinor: 5, hideTickMin: true, hideTickMax: true });
       // Documented example: 4 majors (25..100) and 16 minors.
       expect(major(el)).toHaveLength(4);
       expect(minor(el)).toHaveLength(16);
     });
 
-    it('tick-min / tick-max add forced major ticks at the ends', async () => {
+    it('the end ticks are forced major ticks unless hidden', async () => {
       const el = await mount<VoidGauge>(TAG, { tickMajor: 25, tickMinor: 5 });
       expect(major(el)).toHaveLength(5);
       expect(minor(el)).toHaveLength(16);
@@ -578,15 +573,15 @@ describe('VoidGauge', () => {
       expect(minor(el)).toHaveLength(9);
     });
 
-    it('tick-max forces a major tick at max when it is off-step', async () => {
-      const el = await mount<VoidGauge>(TAG, { tickMajor: 30, tickMin: false });
+    it('forces a major tick at max when it is off-step', async () => {
+      const el = await mount<VoidGauge>(TAG, { tickMajor: 30, hideTickMin: true });
       const ratios = tickEls(el).map((t) => ratioOf(num(t, 'x1'), num(t, 'y1')));
       expect(major(el)).toHaveLength(4); // 30, 60, 90, 100
       expect(ratios[ratios.length - 1]).toBeCloseTo(1, 1);
     });
 
-    it('omits the max tick when off-step and tick-max is disabled', async () => {
-      const el = await mount<VoidGauge>(TAG, { tickMajor: 30, tickMin: false, tickMax: false });
+    it('omits the max tick when off-step and hide-tick-max is set', async () => {
+      const el = await mount<VoidGauge>(TAG, { tickMajor: 30, hideTickMin: true, hideTickMax: true });
       expect(major(el)).toHaveLength(3); // 30, 60, 90
     });
 

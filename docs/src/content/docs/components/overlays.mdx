@@ -15,16 +15,16 @@ The API is declarative and the same everywhere:
 
 ```html
 <void-dialog open><void-dialog-title>Delete project</void-dialog-title><void-dialog-body>…</void-dialog-body></void-dialog>
-<void-dialog closable="false"><void-dialog-title>Must answer</void-dialog-title><void-dialog-body>…</void-dialog-body></void-dialog>
+<void-dialog hide-close><void-dialog-title>Must answer</void-dialog-title><void-dialog-body>…</void-dialog-body></void-dialog>
 
-<void-popover position="bottom" align="end">
+<void-popover side="bottom" align="end">
   <void-popover-trigger><void-button>Details</void-button></void-popover-trigger>
   <void-popover-content>
     <p>Popover content</p>
   </void-popover-content>
 </void-popover>
 
-<void-dropdown-menu position="bottom" align="end">
+<void-dropdown-menu side="bottom" align="end">
   <void-dropdown-menu-trigger><void-button>Actions</void-button></void-dropdown-menu-trigger>
   <void-dropdown-menu-content>
     <void-dropdown-menu-item>Edit</void-dropdown-menu-item>
@@ -32,18 +32,18 @@ The API is declarative and the same everywhere:
   </void-dropdown-menu-content>
 </void-dropdown-menu>
 
-<void-tooltip position="top" align="center"><void-tooltip-trigger><button aria-label="Copy">…</button></void-tooltip-trigger><void-tooltip-content>Copy</void-tooltip-content></void-tooltip>
+<void-tooltip side="top" align="center"><void-tooltip-trigger><button aria-label="Copy">…</button></void-tooltip-trigger><void-tooltip-content>Copy</void-tooltip-content></void-tooltip>
 ```
 
 - `open` (attribute and property) opens and closes every overlay. Tooltip, hover card, combobox, multiselect and date picker reflect it too.
-- `position` is the side of the trigger (`top`, `bottom`, `left`, `right`), and `align` is the alignment along that side (`start`, `center`, `end`). Both flip at the viewport edges.
-- `closable="false"` on a dialog or drawer removes the close button and ignores Escape and backdrop presses. The dialog then closes only when you set `open` to false.
+- `side` is the side of the trigger (`top`, `bottom`, `left`, `right`), and `align` is the alignment along that side (`start`, `center`, `end`). Both flip at the viewport edges.
+- `hide-close` on a dialog or drawer removes the close button and ignores Escape and backdrop presses. The dialog then closes only when you set `open` to false.
 - A `-trigger` part (`<void-popover-trigger>`, `<void-hover-card-trigger>`, `<void-dropdown-menu-trigger>`, `<void-tooltip-trigger>`) wraps the one element that opens the overlay; the `-content` part is the overlay. See [Composition](/guides/composition/).
 - A dropdown menu closes when an item is chosen and returns focus to its trigger. Add `keep-open` to an item, for example a checkbox-style toggle, to keep the menu open.
 
 ## Events
 
-Each overlay fires `void-open` when it opens and `void-close` when it closes. Both carry a `reason` in their `detail`:
+Each overlay fires `void-open` when it opens and `void-close` when it closes. Both carry a `reason` in their `detail`. The vocabulary is the library's one list (see [API conventions](/guides/conventions/#events)): the hamburger, nav menu items, toasts and banners use the same words.
 
 | `void-open` reason | Meaning |
 |--------------------|---------|
@@ -58,14 +58,15 @@ Each overlay fires `void-open` when it opens and `void-close` when it closes. Bo
 | `outside` | A press outside the overlay, including the backdrop of a modal |
 | `blur` | Focus moved out of a non-modal overlay (Tab) |
 | `trigger` | A second click on the trigger |
-| `close-button` | The close button of a dialog or drawer |
+| `close-button` | The close button of a dialog or drawer, or the control in a close part (toast, banner) |
 | `select` | An item or a date was chosen |
 | `hover` | The pointer left a tooltip or hover card |
 | `form` | A `<form method="dialog">` inside the dialog was submitted |
+| `timeout` | A toast's timer ran out |
 | `parent` | The overlay it sits in closed, or a modal opened over it |
 | `api` | `open` was set to false by script, by markup or by a server morph |
 
-`void-close` is fired **before** the overlay closes. When the user caused the close (every reason except `form`, `parent` and `api`), the event is cancelable: call `event.preventDefault()` to keep the overlay open, for example to confirm that unsaved changes should be discarded.
+`void-close` is fired **before** the overlay closes. When the user caused the close (every reason except `form`, `timeout`, `parent` and `api`), the event is cancelable: call `event.preventDefault()` to keep the overlay open, for example to confirm that unsaved changes should be discarded.
 
 Like the native `toggle` and `close` events, `void-open` and `void-close` fire on the overlay itself and **do not bubble**. A popover closing inside a dialog therefore never looks like the dialog closing. Listen on the element, or on an ancestor in the capture phase:
 

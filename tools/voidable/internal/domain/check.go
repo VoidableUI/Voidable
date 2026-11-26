@@ -26,7 +26,8 @@ const (
 	RuleUnknownChild Rule = "unknown-child"
 	// RulePartMisuse: a part is repeated more often than allowed, or out of order.
 	RulePartMisuse Rule = "part-misuse"
-	// RuleLegacyMarkup: a tag that explicit parts replaced.
+	// RuleLegacyMarkup: a tag that explicit parts replaced, or an attribute,
+	// value or event renamed or removed in 0.8 (#23), reported with the fix.
 	RuleLegacyMarkup Rule = "legacy-markup"
 	RuleMissingName  Rule = "missing-name"
 )
@@ -156,6 +157,11 @@ func (c *Checker) checkAttr(el *Element, t Tag, a AttrToken, f findingFn) []Find
 		if _, ok := el.Event(a.Name); ok {
 			return nil
 		}
+		if el.Renamed != nil {
+			if advice, ok := el.Renamed.Events[a.Name]; ok {
+				return []Finding{f(a.Line, a.Col, RuleLegacyMarkup, a.Name, "", "<%s> no longer dispatches %s (removed in 0.8); %s", el.Tag, a.Name, advice)}
+			}
+		}
 		var names []string
 		for _, e := range el.Events {
 			names = append(names, e.Name)
@@ -202,12 +208,36 @@ func (c *Checker) checkAttr(el *Element, t Tag, a AttrToken, f findingFn) []Find
 		}
 	}
 	if attr == nil {
+		if el.Renamed != nil {
+			if r, ok := el.Renamed.Attributes[name]; ok {
+				old := name
+				if a.HasValue && !a.Dynamic {
+					old = fmt.Sprintf("%s=%q", name, a.Value)
+				}
+				hasValue := a.HasValue && !a.Dynamic
+				repl := r.Replacement(a.Value, hasValue)
+				if a.Dynamic && r.To != "" {
+					repl = r.To + " (same value)"
+				}
+				if !r.Renames(a.Value, hasValue) {
+					return []Finding{f(a.Line, a.Col, RuleLegacyMarkup, a.Name, "", "%s on <%s> was removed in 0.8; %s", old, el.Tag, repl)}
+				}
+				return []Finding{f(a.Line, a.Col, RuleLegacyMarkup, a.Name, r.To, "%s on <%s> was renamed in 0.8; write %s", old, el.Tag, repl)}
+			}
+		}
 		return []Finding{c.unknownAttr(el, a, f)}
 	}
 	if !a.HasValue || a.Dynamic || a.Syntax != SyntaxAttr {
 		return nil
 	}
 	v := a.Value
+	// A value renamed in 0.8 (an enum value, or "false" on a number such as
+	// stagger) is reported with its replacement before any type check.
+	if el.Renamed != nil && !contains(attr.Values, v) {
+		if nv, ok := el.Renamed.Values[attr.Name][v]; ok {
+			return []Finding{f(a.Line, a.Col, RuleLegacyMarkup, a.Name, nv, "%s=%q on <%s> was renamed in 0.8; write %s=%q", a.Name, v, el.Tag, a.Name, nv)}
+		}
+	}
 	switch attr.Kind {
 	case KindEnum:
 		if !contains(attr.Values, v) && (!attr.Nullable || v != "") {

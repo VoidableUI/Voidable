@@ -2,7 +2,6 @@ import { html, nothing } from 'lit';
 import { live } from 'lit/directives/live.js';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
-import { defaultTrueBoolean, forwardedSpellcheck } from '../converters.js';
 import { NativeFormControl } from '../form-control.js';
 
 /** Single-line text entry for login forms, search fields, and structured data capture. */
@@ -67,8 +66,11 @@ export class VoidInput extends NativeFormControl(VoidElement) {
   @property({ type: String, attribute: 'enterkeyhint' }) override enterKeyHint: '' | 'enter' | 'done' | 'go' | 'next' | 'previous' | 'search' | 'send' = '';
   /** Capitalisation behaviour of virtual keyboards (`autocapitalize`). */
   @property({ type: String }) override autocapitalize: '' | 'off' | 'none' | 'on' | 'sentences' | 'words' | 'characters' = '';
-  /** Spell checking of the native control (`spellcheck`). Defaults to true; `spellcheck="false"` turns it off from markup. */
-  @property({ converter: defaultTrueBoolean }) override spellcheck = true;
+  /**
+   * The host's `spellcheck` attribute as written (`"true"`, `"false"`, `""`, or absent for the browser default),
+   * forwarded to the native control: the native enumerated attribute, not a boolean.
+   */
+  @property({ type: String, attribute: 'spellcheck' }) protected spellcheckAttr: string | null = null;
 
   render() {
     return html`
@@ -87,7 +89,7 @@ export class VoidInput extends NativeFormControl(VoidElement) {
         inputmode=${this.inputMode || nothing}
         enterkeyhint=${this.enterKeyHint || nothing}
         autocapitalize=${this.autocapitalize || nothing}
-        spellcheck=${forwardedSpellcheck(this) ?? nothing}
+        spellcheck=${this.spellcheckAttr ?? nothing}
         form=${this.formAttr ?? nothing}
         aria-invalid=${this.error ? 'true' : 'false'}
         @input=${this._onInput}

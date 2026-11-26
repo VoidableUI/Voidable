@@ -23,6 +23,9 @@
 //        children (the implicit form it replaced); n the parts, each
 //        { t tag, r required, x max, c wraps one control }
 //   c  1 for a CSS-only part (styled by the theme, never registered)
+//   l  what was renamed or removed in 0.8 (#23), the manifest's voidRenamed:
+//        a old attribute -> { to, values, fix }; v attribute -> { old value -> new };
+//        e old event -> what to listen for instead
 //   v  the native control the author writes inside it, from voidNative: { tag, fix }
 // Also exported: `removed`, tags that were replaced by parts, with the fix.
 // Also exported: `styled`, the tags of the CSS-only elements (the page patterns
@@ -56,6 +59,8 @@ function encode(text, falseString) {
 
 const tags = {};
 const removed = {};
+/** Event names removed in 0.8 (#23), with what to listen for instead (any tag's advice). */
+const renamedEvents = {};
 
 /** The compact parts entry of a component or part. */
 function partsEntry(spec, skeleton) {
@@ -104,6 +109,16 @@ for (const mod of manifest.modules) {
       if (n.parts?.length) entry.n.t = n.parts;
       if (n.ancestors?.length) entry.n.p = n.ancestors.map((x) => [x.tag, ...(x.attributes ?? [])]);
     }
+    if (decl.voidRenamed) {
+      const r = decl.voidRenamed;
+      entry.l = {};
+      if (r.attributes) entry.l.a = r.attributes;
+      if (r.values) entry.l.v = r.values;
+      if (r.events) {
+        entry.l.e = r.events;
+        for (const [name, advice] of Object.entries(r.events)) renamedEvents[name] ??= advice;
+      }
+    }
     if (decl.voidNative) entry.v = { tag: decl.voidNative.tag, fix: decl.voidNative.fix };
     tags[decl.tagName] = entry;
     if (decl.voidParts) {
@@ -142,6 +157,9 @@ export const styled: readonly string[] = ${JSON.stringify(styled)};
 
 /** Tags that were replaced by explicit parts, with the fix. */
 export const removed: Readonly<Record<string, string>> = ${JSON.stringify(removed)};
+
+/** Event names removed in 0.8 (#23), with what to listen for instead. */
+export const renamedEvents: Readonly<Record<string, string>> = ${JSON.stringify(renamedEvents)};
 `,
 );
 console.log(`[cem] dev table: ${Object.keys(sorted).length} tags, ${styled.length} styled`);

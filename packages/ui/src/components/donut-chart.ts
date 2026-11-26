@@ -70,7 +70,7 @@ export class VoidDonutChart extends VoidElement {
    */
   @property({ reflect: true }) variant: 'filled' | 'outline' | 'wireframe' = 'filled';
   /** Print each segment's value on its arc, abbreviated above 1000 (`1.2k`). */
-  @property({ type: Boolean, attribute: 'show-values', reflect: true }) showValues = false;
+  @property({ type: Boolean, attribute: 'show-value', reflect: true }) showValue = false;
   /** Print the sum of the segments in the centre of the ring. */
   @property({ type: Boolean, attribute: 'show-total', reflect: true }) showTotal = false;
   /**
@@ -317,7 +317,7 @@ export class VoidDonutChart extends VoidElement {
             </g>
           `
           : nothing}
-        ${this.showValues
+        ${this.showValue
           ? svg`
             <g class="void-donut-chart-labels">
               ${segments.map((_seg, i) => {

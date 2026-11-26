@@ -1,7 +1,7 @@
 // The checks behind `@voidable/ui/dev`. Pure functions of a DOM element (or a
 // name) and the table generated from the Custom Elements Manifest, so they are
 // testable with a hand-written table and never touch the page.
-import type { AttrRule, DevName, DevTable, DevTag, DevWarning } from './types.js';
+import type { AttrRule, DevName, DevRenamedAttribute, DevTable, DevTag, DevWarning } from './types.js';
 
 const PREFIX = '[voidable]';
 
@@ -106,6 +106,21 @@ function isNumber(value: string): boolean {
   return value.trim() !== '' && Number.isFinite(Number(value));
 }
 
+/**
+ * The markup to write instead of the 0.8-renamed attribute `name="value"`
+ * (#23): the replacement given for that value, else the new name with the same
+ * value, else the advice.
+ */
+export function renamedReplacement(rule: DevRenamedAttribute, value: string): string {
+  if (rule.values && Object.hasOwn(rule.values, value)) return rule.values[value]!;
+  if (rule.to) return value === '' ? rule.to : `${rule.to}="${value}"`;
+  return rule.fix ?? '';
+}
+
+function written(name: string, value: string): string {
+  return value === '' ? name : `${name}="${value}"`;
+}
+
 /** The problem with attribute `name` on `el`, if any. */
 export function checkAttribute(table: DevTable, el: Element, name: string): DevWarning | undefined {
   const tag = table[el.localName];
@@ -117,6 +132,19 @@ export function checkAttribute(table: DevTable, el: Element, name: string): DevW
 
   if (rule === undefined) {
     if (tag.h?.includes(name) || isForeignAttribute(name)) return undefined;
+    const old = tag.l?.a && Object.hasOwn(tag.l.a, name) ? tag.l.a[name] : undefined;
+    if (old) {
+      const renames = !!old.to || (!!old.values && Object.hasOwn(old.values, value));
+      return warning(
+        'legacy-markup',
+        el.localName,
+        name,
+        renames
+          ? `${where}: ${written(name, value)} was renamed in Void UI 0.8, so it does nothing. Write ${renamedReplacement(old, value)} instead.`
+          : `${where}: ${written(name, value)} was removed in Void UI 0.8, so it does nothing. Instead ${renamedReplacement(old, value)}.`,
+        el,
+      );
+    }
     const declared = Object.keys(tag.a).sort();
     const near = suggest(name, declared);
     const hint = Object.hasOwn(tag.x ?? {}, name.toLowerCase()) ? tag.x![name.toLowerCase()] : undefined;
@@ -134,6 +162,17 @@ export function checkAttribute(table: DevTable, el: Element, name: string): DevW
     );
   }
 
+  // A value renamed in 0.8 (an enum value, or "false" on a number such as stagger).
+  const renamedTo = tag.l?.v?.[name] && Object.hasOwn(tag.l.v[name]!, value) ? tag.l.v[name]![value] : undefined;
+  if (renamedTo !== undefined && !(Array.isArray(rule) && rule.includes(value))) {
+    return warning(
+      'legacy-markup',
+      el.localName,
+      name,
+      `${where}: ${name}="${value}" was renamed in Void UI 0.8, so it is ignored. Write ${name}="${renamedTo}" instead.`,
+      el,
+    );
+  }
   if (Array.isArray(rule)) {
     if (rule.includes(value)) return undefined;
     const shown = rule.map((v) => (v === '' ? '""' : v));
@@ -343,13 +382,31 @@ export function checkDefined(
 }
 
 /** A `void-*` event listener for a name nothing dispatches. */
-export function checkEvent(table: DevTable, target: EventTarget, type: string): DevWarning | undefined {
+export function checkEvent(
+  table: DevTable,
+  target: EventTarget,
+  type: string,
+  renamedEvents: Readonly<Record<string, string>> = {},
+): DevWarning | undefined {
   if (!type.startsWith('void-')) return undefined;
-  const all = new Set<string>();
-  for (const t of Object.values(table)) for (const e of t.e) all.add(e);
-  if (all.has(type)) return undefined;
   const el = target instanceof Element ? target : undefined;
   const own: DevTag | undefined = el ? table[el.localName] : undefined;
+  const onWhat0 = el ? describe(el) : target === document ? 'document' : target === window ? 'window' : 'this target';
+  // An event this element dispatched before 0.8 (#23), even if another element still dispatches the name.
+  const ownOld = own?.l?.e && Object.hasOwn(own.l.e, type) && !own.e.includes(type) ? own.l.e[type] : undefined;
+  const all = new Set<string>();
+  for (const t of Object.values(table)) for (const e of t.e) all.add(e);
+  const anyOld = !all.has(type) && Object.hasOwn(renamedEvents, type) ? renamedEvents[type] : undefined;
+  if (ownOld ?? anyOld) {
+    return warning(
+      'legacy-markup',
+      el?.localName ?? '',
+      type,
+      `Listener for "${type}" on ${onWhat0}: ${type} was removed in Void UI 0.8, so it never fires. Instead ${ownOld ?? anyOld}.`,
+      el,
+    );
+  }
+  if (all.has(type)) return undefined;
   const near = suggest(type, own?.e.length ? own.e : [...all]) ?? suggest(type, [...all]);
   const onWhat = el ? describe(el) : target === document ? 'document' : target === window ? 'window' : 'this target';
   const events = own?.e.length ? ` ${el!.localName} dispatches: ${list(own.e)}.` : '';

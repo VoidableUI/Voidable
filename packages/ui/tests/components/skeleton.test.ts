@@ -8,9 +8,9 @@ describe('VoidSkeleton', () => {
     expect(Object.getPrototypeOf(VoidSkeleton)).toBe(VoidElement);
   });
 
-  it('default variant is "text"', () => {
+  it('default shape is "text"', () => {
     const el = document.createElement('void-skeleton') as VoidSkeleton;
-    expect(el.variant).toBe('text');
+    expect(el.shape).toBe('text');
   });
 
   describe('connectedCallback', () => {

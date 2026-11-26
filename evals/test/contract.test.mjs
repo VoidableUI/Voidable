@@ -86,7 +86,8 @@ for (const [tag, c] of Object.entries(CONTRACT)) {
     await mount(p.html);
     await page.evaluate((ev) => {
       window.__events = [];
-      if (ev) document.addEventListener(ev, (e) => window.__events.push(e.type));
+      // Capture phase: void-open and void-close do not bubble.
+      if (ev) document.addEventListener(ev, (e) => window.__events.push(e.type), true);
     }, p.event || null);
     const host = page.locator(tag).first();
     if (p.click) await page.getByRole(p.click.role, { name: p.click.name, exact: true }).first().click();

@@ -29,6 +29,28 @@ export interface DevTag {
   n?: DevName;
   /** The native control the author writes inside it (`select` in `<void-select>`), with the correct markup. */
   v?: { tag: string; fix: string };
+  /** What was renamed or removed in 0.8 (#23), with the form to write instead. */
+  l?: DevRenamed;
+}
+
+/** One renamed or removed attribute (cem/supplement.js `renamed`). */
+export interface DevRenamedAttribute {
+  /** The new attribute, written with the same value. */
+  to?: string;
+  /** Replacement markup for one old value (`''`: written with no value). */
+  values?: Readonly<Record<string, string>>;
+  /** What to do when neither applies. */
+  fix?: string;
+}
+
+/** What was renamed or removed on one tag in 0.8 (#23). */
+export interface DevRenamed {
+  /** Old attribute -> its replacement. */
+  a?: Readonly<Record<string, DevRenamedAttribute>>;
+  /** Attribute -> { old value -> new value }. */
+  v?: Readonly<Record<string, Readonly<Record<string, string>>>>;
+  /** Old event name -> what to listen for instead. */
+  e?: Readonly<Record<string, string>>;
 }
 
 /** The explicit parts of a component (or of a part that has parts of its own). */

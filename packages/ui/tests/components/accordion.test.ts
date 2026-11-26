@@ -229,22 +229,22 @@ describe('VoidAccordionItem', () => {
 
     it('Enter key toggles open exactly once', async () => {
       const trigger = el.querySelector('void-accordion-trigger') as HTMLElement;
-      const events: boolean[] = [];
-      el.addEventListener('void-toggle', (e) => events.push((e as CustomEvent).detail.open));
+      const events: string[] = [];
+      el.addEventListener('void-open', (e) => events.push((e as CustomEvent).detail.reason));
       press(trigger, 'Enter');
       await el.updateComplete;
       expect(el.open).toBe(true);
-      expect(events).toEqual([true]);
+      expect(events).toEqual(['keyboard']);
     });
 
     it('Space key toggles open exactly once', async () => {
       const trigger = el.querySelector('void-accordion-trigger') as HTMLElement;
-      const events: boolean[] = [];
-      el.addEventListener('void-toggle', (e) => events.push((e as CustomEvent).detail.open));
+      const events: string[] = [];
+      el.addEventListener('void-open', (e) => events.push((e as CustomEvent).detail.reason));
       press(trigger, ' ');
       await el.updateComplete;
       expect(el.open).toBe(true);
-      expect(events).toEqual([true]);
+      expect(events).toEqual(['keyboard']);
     });
 
     it('a second Enter / Space activation closes it again', async () => {
@@ -263,8 +263,9 @@ describe('VoidAccordionItem', () => {
     });
   });
 
-  describe('void-toggle event', () => {
+  describe('void-open and void-close (#23)', () => {
     let el: VoidAccordionItem;
+    const trigger = () => el.querySelector('void-accordion-trigger') as HTMLElement;
 
     beforeEach(async () => {
       el = createItem();
@@ -272,42 +273,52 @@ describe('VoidAccordionItem', () => {
       await el.updateComplete;
     });
 
-    it('dispatches void-toggle on click', async () => {
-      let fired = false;
-      el.addEventListener('void-toggle', () => { fired = true; });
-      const trigger = el.querySelector('void-accordion-trigger') as HTMLElement;
-      trigger.click();
+    it('dispatches void-open with reason trigger on click', async () => {
+      let detail: unknown = null;
+      el.addEventListener('void-open', (e) => { detail = (e as CustomEvent).detail; });
+      trigger().click();
       await el.updateComplete;
-      expect(fired).toBe(true);
+      expect(detail).toEqual({ reason: 'trigger' });
     });
 
-    it('void-toggle detail contains open state', async () => {
-      let detail: { open: boolean } | null = null;
-      el.addEventListener('void-toggle', (e) => { detail = (e as CustomEvent).detail; });
-      const trigger = el.querySelector('void-accordion-trigger') as HTMLElement;
-      trigger.click();
-      await el.updateComplete;
-      expect(detail).toEqual({ open: true });
-    });
-
-    it('void-toggle bubbles', async () => {
+    it('does not bubble', async () => {
       let firedOnParent = false;
-      document.body.addEventListener('void-toggle', () => { firedOnParent = true; }, { once: true });
-      const trigger = el.querySelector('void-accordion-trigger') as HTMLElement;
-      trigger.click();
+      const hear = () => { firedOnParent = true; };
+      document.body.addEventListener('void-open', hear);
+      trigger().click();
       await el.updateComplete;
-      expect(firedOnParent).toBe(true);
+      document.body.removeEventListener('void-open', hear);
+      expect(firedOnParent).toBe(false);
     });
 
-    it('void-toggle detail open=false when closing', async () => {
+    it('dispatches a cancelable void-close before closing; preventDefault keeps it open', async () => {
       el.open = true;
       await el.updateComplete;
-      let detail: { open: boolean } | null = null;
-      el.addEventListener('void-toggle', (e) => { detail = (e as CustomEvent).detail; });
-      const trigger = el.querySelector('void-accordion-trigger') as HTMLElement;
-      trigger.click();
+      let detail: unknown = null;
+      el.addEventListener('void-close', (e) => { detail = (e as CustomEvent).detail; e.preventDefault(); }, { once: true });
+      trigger().click();
       await el.updateComplete;
-      expect(detail).toEqual({ open: false });
+      expect(detail).toEqual({ reason: 'trigger' });
+      expect(el.open).toBe(true);
+      trigger().click();
+      await el.updateComplete;
+      expect(el.open).toBe(false);
+    });
+
+    it('in a single-open accordion, the item closed by another opening gets void-close with reason outside', async () => {
+      const acc = document.createElement('void-accordion');
+      const other = createItem();
+      other.open = true;
+      acc.append(el, other);
+      document.body.appendChild(acc);
+      await other.updateComplete;
+      let detail: unknown = null;
+      other.addEventListener('void-close', (e) => { detail = (e as CustomEvent).detail; });
+      trigger().click();
+      await el.updateComplete;
+      expect(other.open).toBe(false);
+      expect(detail).toEqual({ reason: 'outside' });
+      acc.remove();
     });
   });
 
@@ -400,12 +411,12 @@ describe('closed content is hidden="until-found" where the browser supports it',
     const el = createItem();
     document.body.appendChild(el);
     await el.updateComplete;
-    const toggles: boolean[] = [];
-    el.addEventListener('void-toggle', (e) => toggles.push((e as CustomEvent).detail.open));
+    const toggles: string[] = [];
+    el.addEventListener('void-open', (e) => toggles.push((e as CustomEvent).detail.reason));
     el.querySelector('void-accordion-content')!.dispatchEvent(new Event('beforematch', { bubbles: true }));
     await el.updateComplete;
     expect(el.open).toBe(true);
-    expect(toggles).toEqual([true]);
+    expect(toggles).toEqual(['find']);
     expect(el.querySelector('void-accordion-content')!.hasAttribute('hidden')).toBe(false);
     el.remove();
   });

@@ -43,17 +43,20 @@ test.describe('disclosure and notices', () => {
       await expect(page.locator('#co1 void-collapsible-content')).toBeHidden();
     });
 
-    test('moves no node, keeps the author ids, and fires void-toggle', async ({ page }) => {
+    test('moves no node, keeps the author ids, and fires void-open and void-close', async ({ page }) => {
       const tags = await mark(page, '#co1');
       expect(tags).toEqual(['void-collapsible-trigger', 'void-collapsible-content', 'p', 'a']);
       await page.evaluate(() => {
         (window as any).__toggles = [];
-        document.getElementById('co1')!.addEventListener('void-toggle', (e) => (window as any).__toggles.push((e as CustomEvent).detail.open));
+        const co = document.getElementById('co1')!;
+        for (const type of ['void-open', 'void-close']) {
+          co.addEventListener(type, (e) => (window as any).__toggles.push(`${type}:${(e as CustomEvent).detail.reason}`));
+        }
       });
       await page.getByRole('button', { name: 'Shipping details' }).click();
       await page.getByRole('button', { name: 'Shipping details' }).click();
       expect(await sameNodes(page, '#co1')).toBe(true);
-      expect(await page.evaluate(() => (window as any).__toggles)).toEqual([true, false]);
+      expect(await page.evaluate(() => (window as any).__toggles)).toEqual(['void-open:trigger', 'void-close:trigger']);
       const ids = await page.evaluate(() => {
         const c = document.getElementById('co1')!;
         const t = c.querySelector('void-collapsible-trigger')!;
@@ -105,9 +108,10 @@ test.describe('disclosure and notices', () => {
     test('is dismissed by the control in its close part, by keyboard, and fires void-close', async ({ page }) => {
       await page.evaluate(() => {
         (window as any).__closed = 0;
+        // void-close does not bubble: listen in the capture phase.
         document.addEventListener('void-close', (e) => {
-          if ((e.target as Element).id === 'bn1') (window as any).__closed++;
-        });
+          if ((e.target as Element).id === 'bn1' && (e as CustomEvent).detail?.reason === 'close-button') (window as any).__closed++;
+        }, true);
       });
       expect(await mark(page, '#bn1')).toEqual(['void-banner-title', 'void-banner-description', 'void-banner-actions', 'void-button', 'void-banner-close', 'button']);
       await page.locator('#bn1-act').focus();
@@ -136,7 +140,7 @@ test.describe('disclosure and notices', () => {
     test('is dismissed by mouse, Enter and Space, each firing exactly one void-close', async ({ page }) => {
       await page.evaluate(() => {
         (window as any).__closed = [];
-        document.addEventListener('void-close', (e) => (window as any).__closed.push((e.target as Element).id));
+        document.addEventListener('void-close', (e) => (window as any).__closed.push((e.target as Element).id), true);
         document.addEventListener('void-dismiss', () => (window as any).__closed.push('void-dismiss'));
       });
       await page.locator('#al1-close').click();

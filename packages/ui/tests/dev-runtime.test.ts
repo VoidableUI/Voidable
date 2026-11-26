@@ -66,8 +66,8 @@ describe('@voidable/ui/dev', () => {
     const kinds = seen.map((w) => `${w.kind}:${w.tag}`);
     expect(kinds).toContain('legacy-markup:void-tab-panel');
     expect(kinds).toContain('unknown-child:void-popover');
-    expect(kinds).toContain('unknown-attribute:void-dialog');
-    const legacy = seen.find((w) => w.kind === 'legacy-markup')!;
+    expect(kinds).toContain('legacy-markup:void-dialog');
+    const legacy = seen.find((w) => w.kind === 'legacy-markup' && w.tag === 'void-tab-panel')!;
     expect(legacy.message).toContain('<void-tabs-trigger value="a">');
     const stray = seen.find((w) => w.kind === 'unknown-child' && w.tag === 'void-popover')!;
     expect(stray.message).toContain('<void-popover-trigger>');
@@ -248,15 +248,9 @@ describe('the generated table', () => {
     expect(decl.voidParents).toEqual(table['void-option'].p);
   });
 
-  it('marks default-true booleans that read "false" as accepting it', () => {
+  it('has no boolean that reads "false" as off (#23: every boolean is off when absent)', () => {
     const accepting = Object.entries(table).flatMap(([tag, e]) => Object.entries(e.a).filter(([, r]) => r === 2).map(([n]) => `${tag}.${n}`));
-    expect(accepting.length).toBeGreaterThan(0);
-    for (const key of accepting) {
-      const [tag, name] = key.split('.');
-      const el = document.createElement(tag);
-      el.setAttribute(name, 'false');
-      expect(checkAttributes(table, el), key).toEqual([]);
-    }
+    expect(accepting).toEqual([]);
   });
 });
 

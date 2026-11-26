@@ -26,7 +26,7 @@ export const ok = (
         void value;
       }}
     />
-    <void-bar-chart data={data} height={240} showValues variant="outline" stagger={30} />
+    <void-bar-chart data={data} height={240} showValue variant="outline" stagger={30} />
     {/* React 19 passes `class` through to custom elements. */}
     <void-badge class="pill">New</void-badge>
     {/* Attribute read by the parent group (cem/supplement.js). */}

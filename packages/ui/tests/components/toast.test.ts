@@ -75,11 +75,11 @@ describe('VoidToast', () => {
       const el = withClose();
       await el.updateComplete;
       const events: Event[] = [];
-      document.addEventListener('void-close', (e) => events.push(e));
+      el.addEventListener('void-close', (e) => events.push(e));
       (el.querySelector('void-toast-close button') as HTMLButtonElement).click();
       expect(events).toHaveLength(1);
-      expect(events[0].bubbles).toBe(true);
-      expect((events[0] as CustomEvent).composed).toBe(true);
+      expect(events[0].bubbles).toBe(false);
+      expect((events[0] as CustomEvent).detail).toEqual({ reason: 'close-button' });
       expect(document.body.contains(el)).toBe(false);
     });
 
@@ -170,16 +170,16 @@ describe('VoidToastContainer', () => {
   describe('default properties', () => {
     let el: VoidToastContainer;
     beforeEach(() => { el = document.createElement('void-toast-container') as VoidToastContainer; });
-    it('defaults position to "bottom-right"', () => { expect(el.position).toBe('bottom-right'); });
+    it('defaults placement to "bottom-right"', () => { expect(el.placement).toBe('bottom-right'); });
   });
 
   describe('attribute reflection', () => {
-    it('reflects position to attribute', async () => {
+    it('reflects placement to attribute', async () => {
       const el = document.createElement('void-toast-container') as VoidToastContainer;
       document.body.appendChild(el);
-      el.position = 'top-left';
+      el.placement = 'top-left';
       await el.updateComplete;
-      expect(el.getAttribute('position')).toBe('top-left');
+      expect(el.getAttribute('placement')).toBe('top-left');
     });
   });
 
@@ -376,10 +376,10 @@ describe('toast() helper', () => {
     expect(Array.from(t.children).map(c => c.localName)).toEqual(['void-toast-description']);
   });
 
-  it('accepts position="inline" on the container', async () => {
-    document.body.innerHTML = '<void-toast-container position="inline"></void-toast-container>';
+  it('accepts placement="inline" on the container', async () => {
+    document.body.innerHTML = '<void-toast-container placement="inline"></void-toast-container>';
     const c = document.body.firstElementChild as VoidToastContainer;
     await c.updateComplete;
-    expect(c.position).toBe('inline');
+    expect(c.placement).toBe('inline');
   });
 });

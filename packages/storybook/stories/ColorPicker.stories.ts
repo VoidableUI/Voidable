@@ -22,12 +22,12 @@ const meta: Meta = {
         value=${args.value ?? '#000000'}
         size=${args.size || 'md'}
         ?disabled=${args.disabled}
-        .showInput=${args.showInput ?? true}
+        ?hide-input=${args.hideInput}
         .swatches=${args.swatches ?? []}
       ></void-color-picker>
     `;
     // Without its text input the picker has no control to carry an aria-label: the field names it.
-    return args.showInput === false ? html`<void-field label="Colour">${picker}</void-field>` : picker;
+    return args.hideInput ? html`<void-field label="Colour">${picker}</void-field>` : picker;
   },
 };
 
@@ -61,15 +61,15 @@ export const Disabled: Story = {
 };
 
 export const NoInput: Story = {
-  args: { showInput: false, value: '#f59e0b' },
+  args: { hideInput: true, value: '#f59e0b' },
 };
 
 export const Compact: Story = {
   render: () => html`
     <div style="display: flex; gap: var(--void-space-4); align-items: flex-start;">
-      <void-color-picker aria-label="Colour" variant="compact" value="#3b82f6"></void-color-picker>
-      <void-color-picker aria-label="Colour" variant="compact" value="#22c55e" size="sm"></void-color-picker>
-      <void-color-picker aria-label="Colour" variant="compact" value="#ef4444" disabled></void-color-picker>
+      <void-color-picker aria-label="Colour" compact value="#3b82f6"></void-color-picker>
+      <void-color-picker aria-label="Colour" compact value="#22c55e" size="sm"></void-color-picker>
+      <void-color-picker aria-label="Colour" compact value="#ef4444" disabled></void-color-picker>
     </div>
   `,
 };
@@ -77,7 +77,7 @@ export const Compact: Story = {
 export const CompactWithSwatches: Story = {
   render: () => html`
     <void-color-picker aria-label="Colour"
-      variant="compact"
+      compact
       value="#8b5cf6"
       .swatches=${['#ef4444', '#f59e0b', '#22c55e', '#3b82f6', '#8b5cf6', '#ec4899']}
     ></void-color-picker>

@@ -44,7 +44,7 @@ import {
   checkRequired,
   keyOf,
 } from './rules.js';
-import { removed, styled, table } from './table.generated.js';
+import { removed, renamedEvents, styled, table } from './table.generated.js';
 import type { DevWarning } from './types.js';
 
 export type { DevWarning, WarningKind } from './types.js';
@@ -259,7 +259,7 @@ function patchEvents(): void {
   }
   const original = owner.addEventListener;
   owner.addEventListener = function (this: EventTarget, type: string, ...rest: [never, never?]) {
-    if (typeof type === 'string' && type.startsWith('void-')) report(checkEvent(table, this, type));
+    if (typeof type === 'string' && type.startsWith('void-')) report(checkEvent(table, this, type, renamedEvents));
     return (original as (...args: unknown[]) => void).call(this, type, ...rest);
   } as typeof original;
 }

@@ -95,15 +95,13 @@ func TestSkillContentFromManifest(t *testing.T) {
 		return string(f.Content)
 	}
 	for _, c := range []struct{ file, want string }{
-		{"SKILL.md", "`closable` on `<void-dialog>`, `closable` on `<void-drawer>`"},
+		{"SKILL.md", "`hide-close` on `<void-dialog>`"},
 		{"references/components/void-popover.md", "| `<void-popover-trigger>` | required, one, wraps one control, CSS-only |"},
 		{"references/components/void-slider.md", "`show-value`"},
 		{"references/snippets/heex.md", "<.dropdown_menu align=\"end\">"},
 		{"references/snippets/jsx.md", "<void-popover-trigger>"},
-		{"references/wrong-usages.md", "| `<void-gauge>` | `show-value` | `showvalue` |"},
+		{"references/wrong-usages.md", "| `<void-gauge>` | `hide-value` | `hidevalue` |"},
 		{"references/wrong-usages.md", "| `<void-option>` | `<void-combobox-content>`, `<void-multiselect-content>` |"},
-		{"references/wrong-usages.md", "accept `\"false\"` in markup"},
-		{"references/wrong-usages.md", "`icon` on `<void-error-fallback>`"},
 		{"references/elements.md", "| `<void-button>` |"},
 	} {
 		if got := read(c.file); !strings.Contains(got, c.want) {

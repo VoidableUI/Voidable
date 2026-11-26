@@ -27,7 +27,11 @@ if (!customElements.get('void-accordion')) {
  * browser supports `hidden="until-found"` the closed content carries it, so it is out of the accessibility tree and
  * find-in-page opens the item when it finds text inside.
  *
- * @fires {CustomEvent<{ open: boolean }>} void-toggle - The user opened or closed the item, or find-in-page opened it.
+ * @fires {CustomEvent<{ reason: 'trigger' | 'keyboard' | 'find' }>} void-open - The item opened: a click on the trigger,
+ *   Enter or Space on it, or find-in-page found text inside. Does not bubble.
+ * @fires {CustomEvent<{ reason: 'trigger' | 'keyboard' | 'outside' }>} void-close - The item is closing: the user
+ *   closed it (cancelable: `preventDefault()` keeps it open), or another item opened in a single-open accordion
+ *   (`outside`). Does not bubble.
  */
 export class VoidAccordionItem extends VoidElement {
   /**
@@ -81,7 +85,7 @@ export class VoidAccordionItem extends VoidElement {
   /** Find-in-page (or a link, or a text fragment) reached text inside the closed content: open. */
   private _onBeforeMatch = (e: Event): void => {
     if (this.open || e.target !== this._parts.one('void-accordion-content')) return;
-    this._setOpen(true);
+    this._open('find');
   };
 
   private _fromTrigger(e: Event): boolean {
@@ -92,7 +96,7 @@ export class VoidAccordionItem extends VoidElement {
   private _onClick = (e: Event): void => {
     if (!this._fromTrigger(e)) return;
     e.preventDefault();
-    this._toggle();
+    this._toggle('trigger');
   };
 
   private _onKeydown = (e: KeyboardEvent): void => {
@@ -101,22 +105,30 @@ export class VoidAccordionItem extends VoidElement {
     // A real control inside the trigger (a link) keeps its own keys.
     if ((e.target as Element).closest('a, button, input, select, textarea') ) return;
     e.preventDefault();
-    this._toggle();
+    this._toggle('keyboard');
   };
 
-  private _toggle(): void {
-    this._setOpen(!this.open);
+  private _toggle(reason: 'trigger' | 'keyboard'): void {
+    if (this.open) {
+      const go = this.dispatchEvent(new CustomEvent('void-close', { bubbles: false, cancelable: true, detail: { reason } }));
+      if (go) this.open = false;
+    } else {
+      this._open(reason);
+    }
   }
 
-  private _setOpen(open: boolean): void {
-    this.open = open;
+  private _open(reason: 'trigger' | 'keyboard' | 'find'): void {
+    this.open = true;
     const parent = this.parentElement;
-    if (this.open && parent instanceof VoidAccordion && !parent.multiple) {
+    if (parent instanceof VoidAccordion && !parent.multiple) {
       for (const sib of Array.from(parent.children)) {
-        if (sib !== this && sib instanceof VoidAccordionItem) sib.open = false;
+        if (sib !== this && sib instanceof VoidAccordionItem && sib.open) {
+          sib.open = false;
+          sib.dispatchEvent(new CustomEvent('void-close', { bubbles: false, detail: { reason: 'outside' } }));
+        }
       }
     }
-    this.dispatchEvent(new CustomEvent('void-toggle', { bubbles: true, composed: true, detail: { open: this.open } }));
+    this.dispatchEvent(new CustomEvent('void-open', { bubbles: false, detail: { reason } }));
   }
 }
 

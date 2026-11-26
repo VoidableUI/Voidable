@@ -476,8 +476,49 @@ func (s *state) parseTag(src []byte, lt int, name string, lang domain.Lang) (dom
 		}
 		classify(&tok, lang)
 		t.Attrs = append(t.Attrs, tok)
+		t.Attrs = append(t.Attrs, boundEvents(tok)...)
 	}
 	return t, n
+}
+
+// boundEvents are the void-* events a framework attribute listens for by
+// name in its value: Stimulus actions (`data-action="void-change->search#filter"`)
+// and the LiveView bridge (`data-void-events="void-close,void-change"`). Each is
+// reported as an event token at the attribute's position, so a listener for an
+// event the element does not dispatch is found in ERB and HEEx too.
+func boundEvents(tok domain.AttrToken) []domain.AttrToken {
+	if !tok.HasValue || tok.Dynamic {
+		return nil
+	}
+	var names []string
+	switch strings.ToLower(tok.Raw) {
+	case "data-action":
+		for _, action := range strings.Fields(tok.Value) {
+			i := strings.Index(action, "->")
+			if i <= 0 {
+				continue
+			}
+			ev := action[:i]
+			if at := strings.IndexByte(ev, '@'); at >= 0 {
+				ev = ev[:at]
+			}
+			if j := strings.IndexByte(ev, ':'); j >= 0 {
+				ev = ev[:j]
+			}
+			names = append(names, ev)
+		}
+	case "data-void-events":
+		for _, ev := range strings.Split(tok.Value, ",") {
+			names = append(names, strings.TrimSpace(ev))
+		}
+	}
+	var out []domain.AttrToken
+	for _, ev := range names {
+		if strings.HasPrefix(ev, "void-") {
+			out = append(out, domain.AttrToken{Raw: tok.Raw, Name: ev, Syntax: domain.SyntaxEvent, Line: tok.Line, Col: tok.Col})
+		}
+	}
+	return out
 }
 
 func (s *state) token(off int, raw, name string, syn domain.Syntax) domain.AttrToken {

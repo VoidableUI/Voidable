@@ -1,0 +1,74 @@
+---
+title: Upgrading to 0.8
+description: What changed in Voidable 0.8 and how to move an application to it. Run voidable check on your templates first; it reports every old attribute, value, event listener and implicit child with the markup to write instead.
+---
+
+import RenamedTable from '../../../components/api/RenamedTable.astro';
+import PartsMigration from '../../../components/api/PartsMigration.astro';
+
+0.8 is the first release with one version for every package, and it breaks markup in two ways at once: components with regions take [explicit parts](/guides/composition/), and the public API follows one set of [API conventions](/guides/conventions/), so a few attributes, values and events were renamed. There are no compatibility aliases. Instead, every old form is reported, with its replacement, by both checkers.
+
+## 1. Run the checker
+
+Install the [`voidable` tool](/getting-started/for-agents/) and run it on everything that writes markup: templates, components, stories and tests.
+
+```sh
+voidable check app/views app/javascript      # Rails
+voidable check lib/my_app_web                # Phoenix
+voidable check resources/views               # Laravel
+voidable check src                           # React and the others
+```
+
+It reads HTML, JSX and TSX, ERB, HEEx, Blade, Vue, Svelte, Astro, Lit templates and Markdown. Each old form is a `legacy-markup` finding that names what to write instead, for example:
+
+```text
+app/views/layouts/_nav.html.erb:12:3  legacy-markup  active on <void-hamburger> was renamed in 0.8; write open
+app/views/layouts/_nav.html.erb:12:3  legacy-markup  <void-hamburger> no longer dispatches void-toggle (removed in 0.8); listen for void-open and void-close on the element itself (they do not bubble; detail.reason says why)
+```
+
+Listeners count: `voidable check` reads `@void-…`, `x-on:void-…`, `x-void-on:void-…`, `onvoid-…`, a Stimulus `data-action="void-…->controller#method"` and the LiveView bridge's `data-void-events` on a `<void-*>` element. A listener added from script (`addEventListener('void-toggle', …)`) is not markup: load the [development warnings](/getting-started/development-warnings/) once in development, and they report it, with the same advice, the first time it is added.
+
+## 2. Renamed attributes, values and events
+
+This table is generated from the same data the checkers read.
+
+<RenamedTable />
+
+Event **details** changed shape too; the checker cannot see code that reads `event.detail`, so search for these:
+
+| Component | 0.7 detail | 0.8 detail |
+| --- | --- | --- |
+| `void-checkbox`, `void-switch` (`void-change`) | `{ checked }` | `{ value, checked }` |
+| `void-toggle` (`void-change`) | `{ pressed }` | `{ value, pressed }` |
+| `void-checkbox-group`, `void-multiselect` (`void-change`) | `{ values }` | `{ value }` (the array) |
+| `void-collapsible`, `void-accordion-item` | `void-toggle` with `{ open }`, bubbling | `void-open` / `void-close` with `{ reason }`, not bubbling; `void-close` is cancelable when the user closes it |
+| `void-alert` | `void-dismiss`, bubbling, no detail | `void-close` with `{ reason: 'close-button' }`, not bubbling, cancelable |
+| `void-file-upload` (`void-change`) | `{ files }` | `{ value, files }` (both the array) |
+| `void-carousel` (`void-change`) | `{ index, previous }` | `{ value, index, previous }` |
+| `void-hamburger` | `void-toggle` with `{ active }`, bubbling | `void-open` / `void-close` with `{ reason }`, not bubbling |
+| `void-sidebar` | `void-toggle` with `{ collapsed }`, bubbling | `void-collapse` / `void-expand` with `{ reason }`, not bubbling |
+| `void-nav-menu-item` | `void-open` / `void-close`, bubbling, no detail | the same names with `{ reason }`, not bubbling |
+| `void-toast`, `void-banner` | `void-close`, bubbling, no detail | `void-close` with `{ reason }`, not bubbling, cancelable for `close-button` |
+| `void-pin-input` | `void-change` on every character | `void-input` on every character, `void-change` when focus leaves with a new code |
+| `void-number-input`, `void-editable` | no `void-input` | `void-input` on every keystroke |
+
+A handler for an event that no longer bubbles must move onto the element (or listen on an ancestor in the capture phase: `addEventListener('void-close', fn, true)`).
+
+### Properties, CSS selectors and wrappers
+
+Each renamed attribute renamed its property, its React prop and its HEEx attribute with it; the checker reports the markup, not script or stylesheets, so search for these too:
+
+- **Properties**: `position` is `side` (popover, tooltip, hover card, dropdown menu, sidebar), `placement` (toast container, indicator) or `iconSide` (action input, with `tooltipPosition` now `tooltipSide`); `direction` is `orientation` (scroll area); `active` is `index` (carousel) and `current` (nav menu item); `showValues` is `showValue` (charts); skeleton `variant` is `shape`. A default-true boolean became its `hide*` opposite: `closable` is `hideClose`, `showValue` on the gauge is `hideValue`, `tickMin` / `tickMax` are `hideTickMin` / `hideTickMax`, `showInput` is `hideInput`, `icon` on the error fallback is `hideIcon`, `bordered` on the nav bar is `hideBorder`. Bar chart `stagger` is a number only (`0`, not `false`).
+- **CSS**: a selector on an old attribute (`void-toast-container[position="top-left"]`, `void-dialog[closable="false"]`, `void-nav-bar[bordered]`, `void-nav-menu-item[active]`) matches nothing now; select the new attribute (`[placement="top-left"]`, `[hide-close]`, `:not([hide-border])`, `[current]`).
+- **React**: the props follow the properties (`<Popover side="top">`, `<Dialog hideClose>`, `<Gauge hideValue>`, `<ColorPicker compact>`).
+- **Phoenix LiveView**: the function components follow the attributes in snake case (`<.popover side="top">`, `<.dialog hide_close>`, `<.toast_container placement="top-left">`).
+
+## 3. Explicit parts
+
+Components with regions are written with part elements, and the implicit forms are gone. The rules are in [Composition and parts](/guides/composition/). For each converted component, what the old markup was and what to write now:
+
+<PartsMigration />
+
+## 4. Check again
+
+Run `voidable check` until it reports nothing, then run your application with the development warnings loaded and open each page once: a clean console means the markup is right.

@@ -33,7 +33,7 @@ export const input: Props<'void-input'> = {
   },
 };
 
-export const chart: Props<'void-bar-chart'> = { data, height: 240, showValues: true, stagger: 30 };
+export const chart: Props<'void-bar-chart'> = { data, height: 240, showValue: true, stagger: 30 };
 
 // Light-DOM children carry `slot`; the toggle `value` attribute is read by its group.
 export const toggle: Props<'void-toggle'> = { value: 'a', slot: 'start' };

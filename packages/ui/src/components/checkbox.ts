@@ -142,7 +142,7 @@ export class VoidCheckbox extends NativeFormControl(VoidElement) {
     this.checked = !this.checked;
     const input = this.querySelector('input[type="checkbox"]') as HTMLInputElement | null;
     if (input) input.checked = this.checked;
-    this.dispatchEvent(new CustomEvent('void-change', { bubbles: true, composed: true, detail: { checked: this.checked } }));
+    this.dispatchEvent(new CustomEvent('void-change', { bubbles: true, composed: true, detail: { value: this.value, checked: this.checked } }));
   };
 }
 

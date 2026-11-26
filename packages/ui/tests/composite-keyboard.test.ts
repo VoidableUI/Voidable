@@ -329,7 +329,7 @@ describe('VoidMultiselect keyboard', () => {
     press(trigger, ' ');
     await el.updateComplete;
     expect(el.value).toEqual(['vue']);
-    expect(changes).toEqual([{ values: ['react'] }, { values: ['react', 'vue'] }, { values: ['vue'] }]);
+    expect(changes).toEqual([{ value: ['react'] }, { value: ['react', 'vue'] }, { value: ['vue'] }]);
   });
 
   it('skips disabled options and stops at the ends (select-only combobox pattern)', async () => {

@@ -51,15 +51,15 @@ describe('VoidActionInput', () => {
     it('type defaults to "text"', () => expect(el.type).toBe('text'));
     it('icon defaults to "search"', () => expect(el.icon).toBe('search'));
     it('actionLabel defaults to "Action"', () => expect(el.actionLabel).toBe('Action'));
-    it('position defaults to "right"', () => expect(el.position).toBe('right'));
-    it('tooltipPosition defaults to "top"', () => expect(el.tooltipPosition).toBe('top'));
+    it('iconSide defaults to "right"', () => expect(el.iconSide).toBe('right'));
+    it('tooltipSide defaults to "top"', () => expect(el.tooltipSide).toBe('top'));
   });
 
   describe('attributes', () => {
     it('reflects configuration properties', async () => {
       const el = await mount({
         placeholder: 'p', disabled: true, readonly: true, name: 'n', size: 'lg', color: 'error',
-        type: 'password', icon: 'copy', position: 'left', tooltipPosition: 'bottom',
+        type: 'password', icon: 'copy', iconSide: 'left', tooltipSide: 'bottom',
       });
       expect(el.getAttribute('placeholder')).toBe('p');
       expect(el.hasAttribute('disabled')).toBe(true);
@@ -69,8 +69,8 @@ describe('VoidActionInput', () => {
       expect(el.getAttribute('color')).toBe('error');
       expect(el.getAttribute('type')).toBe('password');
       expect(el.getAttribute('icon')).toBe('copy');
-      expect(el.getAttribute('position')).toBe('left');
-      expect(el.getAttribute('tooltip-position')).toBe('bottom');
+      expect(el.getAttribute('icon-side')).toBe('left');
+      expect(el.getAttribute('tooltip-side')).toBe('bottom');
     });
 
     it('maps the action-label attribute to actionLabel', async () => {
@@ -103,14 +103,14 @@ describe('VoidActionInput', () => {
       expect(Array.from(el.children).map((c) => c.localName)).toEqual(['input', 'void-tooltip']);
     });
 
-    it('puts the button first with position="left"', async () => {
-      const el = await mount({ position: 'left' });
+    it('puts the button first with icon-side="left"', async () => {
+      const el = await mount({ iconSide: 'left' });
       expect(Array.from(el.children).map((c) => c.localName)).toEqual(['void-tooltip', 'input']);
     });
 
-    it('moves the button when position changes', async () => {
+    it('moves the button when iconSide changes', async () => {
       const el = await mount();
-      el.position = 'left';
+      el.iconSide = 'left';
       await el.updateComplete;
       expect(el.children[0]!.localName).toBe('void-tooltip');
       expect(el.querySelectorAll('button')).toHaveLength(1);
@@ -142,12 +142,12 @@ describe('VoidActionInput', () => {
       expect(button(el).disabled).toBe(false);
     });
 
-    it('passes the action label and position to the tooltip', async () => {
-      const el = await mount({ actionLabel: 'Copy', tooltipPosition: 'left' });
+    it('passes the action label and side to the tooltip', async () => {
+      const el = await mount({ actionLabel: 'Copy', tooltipSide: 'left' });
       const tip = el.querySelector('void-tooltip')!;
       expect(tip.querySelector('void-tooltip-content')!.textContent).toBe('Copy');
       expect(tip.querySelector('void-tooltip-trigger > button')).not.toBeNull();
-      expect(tip.getAttribute('position')).toBe('left');
+      expect(tip.getAttribute('side')).toBe('left');
     });
 
     it('renders an svg icon in the button', async () => {

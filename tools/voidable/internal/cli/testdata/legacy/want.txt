@@ -1,0 +1,58 @@
+# Every finding `voidable check` must report on this directory, one per line:
+# <file>:<line> <text the message must contain>
+# Each is a legacy-markup finding, and the check must report nothing else.
+page.html:1 write side="top"
+page.html:5 write side="bottom" align="end"
+page.html:6 write side="left"
+page.html:7 write side="right"
+page.html:8 write side="right"
+page.html:9 write placement="top-left"
+page.html:10 write placement="bottom-left"
+page.html:11 write icon-side="left"
+page.html:11 write tooltip-side="bottom"
+page.html:12 write orientation="horizontal"
+page.html:13 write index="1"
+page.html:14 write current
+page.html:15 write show-value
+page.html:15 write stagger="0"
+page.html:16 write show-value
+page.html:17 write show-value
+page.html:18 write hide-value
+page.html:18 write hide-tick-min
+page.html:18 write hide-tick-max to turn it off
+page.html:19 write compact
+page.html:19 write hide-input
+page.html:20 write hide-icon
+page.html:21 write hide-border
+page.html:22 write hide-close
+page.html:23 write hide-close to turn it off
+page.html:24 write shape="circular"
+page.html:25 write open
+page.html:25 listen for void-open and void-close
+page.html:26 listen for void-collapse and void-expand
+page.html:27 listen for void-close on the <void-toast> itself
+page.html:28 nothing (remove the attribute
+page.html:29 listen for void-open and void-close on the element itself
+page.html:30 on each <void-accordion-item>
+page.html:30 listen for void-open and void-close on the element itself
+page.html:31 listen for void-close on the alert itself
+App.tsx:4 write side="bottom"
+App.tsx:8 listen for void-open and void-close
+App.tsx:9 write hide-close
+App.tsx:10 write index
+App.tsx:11 write show-value
+show.html.erb:1 write placement
+show.html.erb:2 write hide-border to turn it off
+show.html.erb:3 listen for void-open and void-close
+show.html.erb:4 write shape="text"
+show.html.erb:5 write orientation="vertical"
+live.html.heex:1 write side="left"
+live.html.heex:1 listen for void-collapse and void-expand
+live.html.heex:2 write hide-value
+live.html.heex:3 write orientation="both"
+live.html.heex:4 write hide-icon
+form.blade.php:1 write side="top"
+form.blade.php:2 write hide-close
+form.blade.php:3 listen for void-close on the <void-toast> itself
+form.blade.php:4 write hide-input to turn it off
+form.blade.php:5 write current

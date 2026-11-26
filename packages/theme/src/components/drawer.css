@@ -121,7 +121,7 @@ void-drawer-title {
   color: var(--void-type-heading-color);
 }
 
-void-drawer[closable="false"] void-drawer-title {
+void-drawer[hide-close] void-drawer-title {
   padding-inline-end: var(--void-container-padding);
 }
 

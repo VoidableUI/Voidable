@@ -31,8 +31,8 @@ describe('VoidNavBar', () => {
       expect(el.sticky).toBe(false);
     });
 
-    it('bordered defaults to true', () => {
-      expect(el.bordered).toBe(true);
+    it('hideBorder defaults to false', () => {
+      expect(el.hideBorder).toBe(false);
     });
 
     it('variant defaults to "default"', () => {
@@ -71,18 +71,18 @@ describe('VoidNavBar', () => {
       expect(el.hasAttribute('sticky')).toBe(false);
     });
 
-    it('reflects bordered=false as the string "false" so markup round-trips', async () => {
-      el.bordered = false;
+    it('reflects hideBorder as hide-border', async () => {
+      el.hideBorder = true;
       await el.updateComplete;
-      expect(el.getAttribute('bordered')).toBe('false');
+      expect(el.hasAttribute('hide-border')).toBe(true);
     });
 
-    it('turns bordered off from markup with bordered="false"', async () => {
+    it('turns the border off from markup with hide-border', async () => {
       const off = document.createElement('void-nav-bar') as VoidNavBar;
-      off.setAttribute('bordered', 'false');
+      off.setAttribute('hide-border', '');
       document.body.appendChild(off);
       await off.updateComplete;
-      expect(off.bordered).toBe(false);
+      expect(off.hideBorder).toBe(true);
       off.remove();
     });
 

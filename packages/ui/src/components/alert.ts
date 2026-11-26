@@ -8,10 +8,11 @@ import { closeControlPressed, removeWithFocus } from '../dismiss.js';
  *
  * Its text is written as parts: an optional `<void-alert-title>`, the `<void-alert-description>` and an optional
  * `<void-alert-close>`. The parts are never moved. The close part wraps the one control the author writes (a
- * `<button type="button" aria-label="Dismiss">`); pressing it fires `void-close` and removes the alert (focus inside
+ * `<button type="button" aria-label="Dismiss">`); pressing it fires `void-close` and, unless that is cancelled, removes the alert (focus inside
  * it moves on to the next focusable element). Without a close part the alert cannot be dismissed.
  *
- * @fires {CustomEvent} void-close - The close control was pressed; the alert removes itself afterwards.
+ * @fires {CustomEvent<{ reason: 'close-button' }>} void-close - The close control was pressed. Cancelable: `preventDefault()`
+ *   keeps the alert; otherwise it removes itself afterwards. Does not bubble.
  */
 export class VoidAlert extends VoidElement {
   /**
@@ -43,8 +44,8 @@ export class VoidAlert extends VoidElement {
 
   private _onClick = (e: Event): void => {
     if (!closeControlPressed(this._parts.one('void-alert-close'), e)) return;
-    this.dispatchEvent(new CustomEvent('void-close', { bubbles: true, composed: true }));
-    removeWithFocus(this);
+    const go = this.dispatchEvent(new CustomEvent('void-close', { bubbles: false, cancelable: true, detail: { reason: 'close-button' } }));
+    if (go) removeWithFocus(this);
   };
 }
 

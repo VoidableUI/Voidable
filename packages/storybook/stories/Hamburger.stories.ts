@@ -19,7 +19,7 @@ const meta: Meta = {
   render: (args) => html`
     <void-hamburger
       size=${args.size || 'md'}
-      ?active=${args.active}
+      ?open=${args.open}
     ></void-hamburger>
   `,
 };
@@ -29,8 +29,8 @@ type Story = StoryObj;
 
 export const Default: Story = {};
 
-export const Active: Story = {
-  args: { active: true },
+export const Open: Story = {
+  args: { open: true },
 };
 
 export const Sizes: Story = {
@@ -46,9 +46,9 @@ export const Sizes: Story = {
 export const SizesActive: Story = {
   render: () => html`
     <div style="display: flex; align-items: center; gap: 16px;">
-      <void-hamburger size="sm" active></void-hamburger>
-      <void-hamburger size="md" active></void-hamburger>
-      <void-hamburger size="lg" active></void-hamburger>
+      <void-hamburger size="sm" open></void-hamburger>
+      <void-hamburger size="md" open></void-hamburger>
+      <void-hamburger size="lg" open></void-hamburger>
     </div>
   `,
 };

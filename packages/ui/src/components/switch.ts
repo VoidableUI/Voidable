@@ -68,7 +68,7 @@ export class VoidSwitch extends InternalsFormControl(VoidElement) {
     this.dispatchEvent(new CustomEvent('void-change', {
       bubbles: true,
       composed: true,
-      detail: { checked: this.checked },
+      detail: { value: this.value, checked: this.checked },
     }));
   };
 

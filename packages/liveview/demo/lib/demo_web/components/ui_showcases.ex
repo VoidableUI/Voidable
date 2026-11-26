@@ -217,7 +217,7 @@ defmodule DemoWeb.UIShowcases do
   &lt;p&gt;This is a large dialog (48rem max-width).&lt;/p&gt;
 &lt;/VoidableUI.Components.dialog&gt;
 
-&lt;VoidableUI.Components.dialog heading="Required Action" closable={false} open&gt;
+&lt;VoidableUI.Components.dialog heading="Required Action" hide_close open&gt;
   &lt;p&gt;This dialog cannot be dismissed.&lt;/p&gt;
 &lt;/VoidableUI.Components.dialog&gt;</code></pre>
       </div>
@@ -257,7 +257,7 @@ defmodule DemoWeb.UIShowcases do
   &lt;p&gt;Bottom drawer with sm size.&lt;/p&gt;
 &lt;/VoidableUI.Components.drawer&gt;
 
-&lt;VoidableUI.Components.drawer heading="Required Step" side="right" closable={false} open&gt;
+&lt;VoidableUI.Components.drawer heading="Required Step" side="right" hide_close open&gt;
   &lt;p&gt;This drawer cannot be dismissed.&lt;/p&gt;
 &lt;/VoidableUI.Components.drawer&gt;</code></pre>
       </div>
@@ -289,25 +289,25 @@ defmodule DemoWeb.UIShowcases do
     <div class="showcase-section">
       <h3>Positions</h3>
       <div class="showcase-row" style="padding: 6rem; gap: 1.5rem;">
-        <VoidableUI.Components.popover events position="top">
+        <VoidableUI.Components.popover events side="top">
           <void-popover-trigger><VoidableUI.Components.button events>Top</VoidableUI.Components.button></void-popover-trigger>
           <void-popover-content>
             <div>Opens above</div>
           </void-popover-content>
         </VoidableUI.Components.popover>
-        <VoidableUI.Components.popover events position="bottom">
+        <VoidableUI.Components.popover events side="bottom">
           <void-popover-trigger><VoidableUI.Components.button events>Bottom</VoidableUI.Components.button></void-popover-trigger>
           <void-popover-content>
             <div>Opens below</div>
           </void-popover-content>
         </VoidableUI.Components.popover>
-        <VoidableUI.Components.popover events position="left">
+        <VoidableUI.Components.popover events side="left">
           <void-popover-trigger><VoidableUI.Components.button events>Left</VoidableUI.Components.button></void-popover-trigger>
           <void-popover-content>
             <div>Opens to the left</div>
           </void-popover-content>
         </VoidableUI.Components.popover>
-        <VoidableUI.Components.popover events position="right">
+        <VoidableUI.Components.popover events side="right">
           <void-popover-trigger><VoidableUI.Components.button events>Right</VoidableUI.Components.button></void-popover-trigger>
           <void-popover-content>
             <div>Opens to the right</div>
@@ -532,7 +532,7 @@ defmodule DemoWeb.UIShowcases do
     <div class="showcase-section">
       <h3>Active</h3>
       <div class="showcase-row">
-        <VoidableUI.Components.hamburger events active />
+        <VoidableUI.Components.hamburger events open />
       </div>
     </div>
     <div class="showcase-section">
@@ -546,9 +546,9 @@ defmodule DemoWeb.UIShowcases do
     <div class="showcase-section">
       <h3>Sizes (Active)</h3>
       <div class="showcase-row">
-        <VoidableUI.Components.hamburger events size="sm" active />
-        <VoidableUI.Components.hamburger events active />
-        <VoidableUI.Components.hamburger events size="lg" active />
+        <VoidableUI.Components.hamburger events size="sm" open />
+        <VoidableUI.Components.hamburger events open />
+        <VoidableUI.Components.hamburger events size="lg" open />
       </div>
     </div>
     """

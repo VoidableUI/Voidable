@@ -11,21 +11,21 @@ void-skeleton {
 }
 
 /* Text variant — single line height */
-void-skeleton[variant="text"] {
+void-skeleton[shape="text"] {
   height: 1em;
   width: 100%;
   border-radius: var(--void-radius-xs);
 }
 
 /* Circular variant */
-void-skeleton[variant="circular"] {
+void-skeleton[shape="circular"] {
   width: 2.5rem;
   height: 2.5rem;
   border-radius: var(--void-radius-full);
 }
 
 /* Rectangular variant */
-void-skeleton[variant="rectangular"] {
+void-skeleton[shape="rectangular"] {
   width: 100%;
   height: 6rem;
 }

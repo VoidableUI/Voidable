@@ -36,7 +36,7 @@ export const Default: Story = {
 export const WithValues: Story = {
   render: () => html`
     <void-line-chart
-      show-values
+      show-value
       style="max-width: 600px;"
       aria-label="Quarterly revenue"
       .data=${{
@@ -128,7 +128,7 @@ export const Dramatic: Story = {
   render: () => html`
     <void-line-chart
       variant="filled"
-      show-values
+      show-value
       style="max-width: 600px; --void-anim-scale: 2;"
       aria-label="Slow animation demo"
       .data=${{

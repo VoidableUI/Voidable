@@ -89,18 +89,18 @@ defmodule VoidableUI.Components.NativeAttributesTest do
     end
   end
 
-  describe "booleans that default to true" do
-    test "render \"true\" by default and \"false\" when turned off" do
+  describe "hide-* booleans (no attribute defaults to true, #23)" do
+    test "render nothing by default and the bare attribute when set" do
       assigns = %{}
 
-      assert rendered_to_string(~H"<C.nav_bar>x</C.nav_bar>") =~ ~s(bordered="true")
-      assert rendered_to_string(~H"<C.nav_bar bordered={false}>x</C.nav_bar>") =~ ~s(bordered="false")
+      refute rendered_to_string(~H"<C.nav_bar>x</C.nav_bar>") =~ "hide-border"
+      assert rendered_to_string(~H"<C.nav_bar hide_border>x</C.nav_bar>") =~ "hide-border"
 
-      assert rendered_to_string(~H"<C.color_picker id='p' />") =~ ~s(show-input="true")
-      assert rendered_to_string(~H"<C.color_picker id='p' show_input={false} />") =~ ~s(show-input="false")
+      refute rendered_to_string(~H"<C.color_picker id='p' />") =~ "hide-input"
+      assert rendered_to_string(~H"<C.color_picker id='p' hide_input />") =~ "hide-input"
 
-      assert rendered_to_string(~H"<C.error_fallback />") =~ ~s(icon="true")
-      assert rendered_to_string(~H"<C.error_fallback icon={false} />") =~ ~s(icon="false")
+      refute rendered_to_string(~H"<C.error_fallback />") =~ "hide-icon"
+      assert rendered_to_string(~H"<C.error_fallback hide_icon />") =~ "hide-icon"
     end
   end
 end

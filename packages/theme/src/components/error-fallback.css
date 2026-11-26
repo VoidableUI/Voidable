@@ -20,7 +20,7 @@ void-error-fallback::before {
   opacity: 0.7;
 }
 
-void-error-fallback[icon="false"]::before {
+void-error-fallback[hide-icon]::before {
   display: none;
 }
 

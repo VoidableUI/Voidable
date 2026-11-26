@@ -1,0 +1,53 @@
+---
+// Every component converted to explicit parts (#52): what the old markup was
+// (the manifest's voidParts.legacy, which `voidable check` and the dev
+// warnings report) and the markup to write now (voidParts.skeleton).
+import { loadComponentData } from '../../lib/component-data.mjs';
+import { inline } from '../../lib/inline.mjs';
+
+const { manifest } = loadComponentData();
+type Item = { what: string; fix: string };
+const rows: { tag: string; items: Item[]; skeleton: string }[] = [];
+const collect = (tag: string, legacy: any, items: Item[]) => {
+  if (!legacy) return;
+  for (const [name, fix] of Object.entries<string>(legacy.attributes ?? {})) items.push({ what: `\`${name}\` on \`<${tag}>\``, fix });
+  for (const [old, fix] of Object.entries<string>(legacy.tags ?? {})) items.push({ what: `\`<${old}>\``, fix });
+  if (legacy.children) items.push({ what: `loose children of \`<${tag}>\``, fix: legacy.children });
+};
+for (const mod of manifest.modules) {
+  for (const d of mod.declarations ?? []) {
+    const p = d.voidParts;
+    if (!d.tagName || !p) continue;
+    const items: Item[] = [];
+    collect(d.tagName, p.legacy, items);
+    const walk = (parts: any[]) => {
+      for (const part of parts ?? []) {
+        collect(part.tag, part.legacy, items);
+        walk(part.parts);
+      }
+    };
+    walk(p.parts);
+    if (items.length) rows.push({ tag: d.tagName, items, skeleton: p.skeleton });
+  }
+}
+rows.sort((a, b) => a.tag.localeCompare(b.tag));
+const lines = rows.flatMap((r) => [
+  ...r.items.map((it, i) => ({ tag: i === 0 ? r.tag : '', what: inline(it.what), fix: it.fix, code: false })),
+  { tag: '', what: 'Correct markup', fix: r.skeleton, code: true },
+]);
+---
+
+<div class="vd-api-table">
+  <table>
+    <thead><tr><th>Component</th><th>0.7 markup</th><th>Write instead</th></tr></thead>
+    <tbody>
+      {lines.map((l) => (
+        <tr>
+          <td>{l.tag && <a href={`/components/${l.tag.replace(/^void-/, '')}/`}><code>{l.tag}</code></a>}</td>
+          <td set:html={l.what} />
+          <td>{l.code ? <code>{l.fix}</code> : l.fix}</td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</div>

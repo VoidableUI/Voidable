@@ -4,7 +4,7 @@
   main { padding: 1rem; max-width: 1100px; margin: auto; }
 </style>
 <!-- Every component @voidable/ui defines, in typical use. specs/axe.spec.ts checks that none is missing. -->
-<void-nav-bar bordered aria-label="Main"><a href="#">Home</a><a href="#">Docs</a><a href="#">Blog</a></void-nav-bar>
+<void-nav-bar aria-label="Main"><a href="#">Home</a><a href="#">Docs</a><a href="#">Blog</a></void-nav-bar>
 <void-sidebar id="k-sidebar" aria-label="Sections"><a href="#s-buttons">Buttons</a><a href="#s-inputs">Inputs</a></void-sidebar>
 <main>
   <h1>Kitchen sink</h1>
@@ -54,7 +54,7 @@
       <void-toggle-group value="bold" aria-label="Format"><void-toggle value="bold">Bold</void-toggle><void-toggle value="italic">Italic</void-toggle></void-toggle-group>
       <void-segmented-control value="list" aria-label="View"><void-segmented-control-item value="list">List</void-segmented-control-item><void-segmented-control-item value="grid">Grid</void-segmented-control-item></void-segmented-control>
       <void-editable value="Editable text"></void-editable>
-      <void-color-picker aria-label="Colour" variant="compact" value="#3366ff"></void-color-picker>
+      <void-color-picker aria-label="Colour" compact value="#3366ff"></void-color-picker>
     </div>
     <void-file-upload aria-label="Attachment"></void-file-upload>
     <void-compose-input aria-label="Message" placeholder="Message"></void-compose-input>
@@ -81,13 +81,13 @@
     <void-alert color="info"><void-alert-description>Info alert message.</void-alert-description></void-alert><void-alert color="error"><void-alert-description>Error alert message.</void-alert-description><void-alert-close><button type="button" aria-label="Dismiss">&times;</button></void-alert-close></void-alert><void-alert color="success" variant="filled"><void-alert-description>Success filled alert.</void-alert-description></void-alert>
     <void-banner color="warning"><void-banner-description>Page-level banner.</void-banner-description><void-banner-close><button type="button" aria-label="Dismiss">&times;</button></void-banner-close></void-banner>
     <div class="row">
-      <void-progress value="40" aria-label="Progress"></void-progress><void-skeleton variant="text" style="width: 200px"></void-skeleton>
+      <void-progress value="40" aria-label="Progress"></void-progress><void-skeleton shape="text" style="width: 200px"></void-skeleton>
       <void-stat label="Revenue" value="$12k" delta="+4%" trend="up" style="width: 200px"></void-stat>
     </div>
     <void-table striped bordered><table><thead><tr><th>Name</th><th>Role</th></tr></thead><tbody><tr><td>Alice</td><td>Engineer</td></tr><tr><td>Ben</td><td>Designer</td></tr></tbody></table></void-table>
     <void-calendar value="2026-11-10"></void-calendar>
     <div class="row">
-      <void-gauge value="67" unit="%" show-value aria-label="CPU 67%" style="max-width: 200px"></void-gauge>
+      <void-gauge value="67" unit="%" aria-label="CPU 67%" style="max-width: 200px"></void-gauge>
       <void-bar-chart id="k-bar" aria-label="Requests per day" style="max-width: 360px"></void-bar-chart>
       <void-line-chart id="k-line" aria-label="Latency" style="max-width: 360px"></void-line-chart>
       <void-donut-chart id="k-donut" aria-label="Traffic sources" style="width: 200px; height: 200px"></void-donut-chart>

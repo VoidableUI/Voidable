@@ -115,7 +115,7 @@ test.describe('dialog', () => {
     `);
   });
 
-  test('closable="false" ignores Escape and the backdrop and has no close button', async ({ page }) => {
+  test('hide-close ignores Escape and the backdrop and has no close button', async ({ page }) => {
     await page.locator('#open-dlg-nc').click();
     await expect(page.locator('#dlg-nc .nc-content')).toBeVisible();
     await expect(page.locator('#dlg-nc [part="close"]')).toBeHidden();
@@ -188,7 +188,7 @@ test.describe('drawer', () => {
     expect(await prop(page, 'drw', 'open')).toBe(false);
   });
 
-  test('closable="false" ignores Escape and the backdrop', async ({ page }) => {
+  test('hide-close ignores Escape and the backdrop', async ({ page }) => {
     await page.locator('#open-drw-nc').click();
     await page.locator('#drw-nc-btn').focus();
     await page.keyboard.press('Escape');

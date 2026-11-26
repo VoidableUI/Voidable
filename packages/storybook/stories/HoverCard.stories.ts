@@ -11,7 +11,7 @@ const meta: Meta = {
   parameters: {
     docs: {
       description: {
-        component: 'Rich content preview card that appears on hover for user profiles, link previews, and contextual information panels. Opens on any side of the trigger (`position`, `align`) and flips at the viewport edges.',
+        component: 'Rich content preview card that appears on hover for user profiles, link previews, and contextual information panels. Opens on any side of the trigger (`side`, `align`) and flips at the viewport edges.',
       },
     },
   },
@@ -50,7 +50,7 @@ export const Default: Story = {
 export const Positions: Story = {
   render: () => html`
     <div style="padding: 8rem; display: flex; gap: 3rem; flex-wrap: wrap; justify-content: center;">
-      <void-hover-card position="top">
+      <void-hover-card side="top">
         <void-hover-card-trigger><button style="padding: 0.5rem 1rem; cursor: pointer;">Top</button></void-hover-card-trigger>
         <void-hover-card-content>
           <div>
@@ -58,7 +58,7 @@ export const Positions: Story = {
           </div>
         </void-hover-card-content>
       </void-hover-card>
-      <void-hover-card position="bottom">
+      <void-hover-card side="bottom">
         <void-hover-card-trigger><button style="padding: 0.5rem 1rem; cursor: pointer;">Bottom</button></void-hover-card-trigger>
         <void-hover-card-content>
           <div>
@@ -66,7 +66,7 @@ export const Positions: Story = {
           </div>
         </void-hover-card-content>
       </void-hover-card>
-      <void-hover-card position="left">
+      <void-hover-card side="left">
         <void-hover-card-trigger><button style="padding: 0.5rem 1rem; cursor: pointer;">Left</button></void-hover-card-trigger>
         <void-hover-card-content>
           <div>
@@ -74,7 +74,7 @@ export const Positions: Story = {
           </div>
         </void-hover-card-content>
       </void-hover-card>
-      <void-hover-card position="right">
+      <void-hover-card side="right">
         <void-hover-card-trigger><button style="padding: 0.5rem 1rem; cursor: pointer;">Right</button></void-hover-card-trigger>
         <void-hover-card-content>
           <div>

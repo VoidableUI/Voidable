@@ -10,7 +10,7 @@ export class VoidIndicator extends VoidElement {
    * Which corner of the wrapped content the dot sits on: `top-right` (default), `top-left`,
    * `bottom-right` or `bottom-left`.
    */
-  @property({ type: String, reflect: true }) position: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left' = 'top-right';
+  @property({ type: String, reflect: true }) placement: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left' = 'top-right';
   /**
    * Number shown in the dot, such as unread notifications. Without it the dot is a plain presence
    * marker. The accessible name becomes `N notifications`.

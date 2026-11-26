@@ -9,10 +9,12 @@ export class VoidToggle extends VoidElement {
   protected readonly _activation = new KeyboardActivation(this, { disabled: () => this.formDisabled });
 
   /**
-   * Whether the toggle is on. It flips on click, Enter or Space and fires `void-change` with `{ pressed
-   * }`. Exposed as `aria-pressed`.
+   * Whether the toggle is on. It flips on click, Enter or Space and fires `void-change` with
+   * `{ value, pressed }`. Exposed as `aria-pressed`.
    */
   @property({ type: Boolean, reflect: true }) pressed = false;
+  /** What this toggle stands for: the value it contributes to a parent `<void-toggle-group>`, and `detail.value` of its `void-change`. */
+  @property({ type: String }) value = '';
   /** Ignore clicks and keys, and take the toggle out of the tab order. A `<fieldset disabled>` ancestor does the same. */
   @property({ type: Boolean, reflect: true }) disabled = false;
   /**
@@ -68,7 +70,7 @@ export class VoidToggle extends VoidElement {
   private _handleClick = (): void => {
     if (this.formDisabled) return;
     this.pressed = !this.pressed;
-    this.dispatchEvent(new CustomEvent('void-change', { bubbles: true, composed: true, detail: { pressed: this.pressed } }));
+    this.dispatchEvent(new CustomEvent('void-change', { bubbles: true, composed: true, detail: { value: this.value, pressed: this.pressed } }));
   };
 }
 

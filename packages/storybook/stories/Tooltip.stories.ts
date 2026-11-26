@@ -24,13 +24,13 @@ type Story = StoryObj;
 export const Default: Story = {
   args: {
     text: 'Hello, tooltip!',
-    position: 'top',
+    side: 'top',
     align: 'center',
     open: false,
     delay: 200,
   },
   render: (args) => html`
-    <void-tooltip position=${args.position} align=${args.align} ?open=${args.open} .delay=${args.delay}>
+    <void-tooltip side=${args.side} align=${args.align} ?open=${args.open} .delay=${args.delay}>
       <void-tooltip-trigger><button style="padding: 0.5rem 1rem; cursor: pointer;">Hover me</button></void-tooltip-trigger>
       <void-tooltip-content>${args.text}</void-tooltip-content>
     </void-tooltip>
@@ -40,19 +40,19 @@ export const Default: Story = {
 export const Positions: Story = {
   render: () => html`
     <div style="display: flex; align-items: center; gap: 4rem; padding: 3rem;">
-      <void-tooltip position="top">
+      <void-tooltip side="top">
         <void-tooltip-trigger><button style="padding: 0.5rem 1rem; cursor: pointer;">Top</button></void-tooltip-trigger>
         <void-tooltip-content>Top tooltip</void-tooltip-content>
       </void-tooltip>
-      <void-tooltip position="bottom">
+      <void-tooltip side="bottom">
         <void-tooltip-trigger><button style="padding: 0.5rem 1rem; cursor: pointer;">Bottom</button></void-tooltip-trigger>
         <void-tooltip-content>Bottom tooltip</void-tooltip-content>
       </void-tooltip>
-      <void-tooltip position="left">
+      <void-tooltip side="left">
         <void-tooltip-trigger><button style="padding: 0.5rem 1rem; cursor: pointer;">Left</button></void-tooltip-trigger>
         <void-tooltip-content>Left tooltip</void-tooltip-content>
       </void-tooltip>
-      <void-tooltip position="right">
+      <void-tooltip side="right">
         <void-tooltip-trigger><button style="padding: 0.5rem 1rem; cursor: pointer;">Right</button></void-tooltip-trigger>
         <void-tooltip-content>Right tooltip</void-tooltip-content>
       </void-tooltip>

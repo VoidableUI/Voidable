@@ -49,7 +49,7 @@ export class VoidLineChart extends VoidElement {
   /** Height of the chart in pixels. Defaults to 220. The width fills the container. */
   @property({ type: Number, reflect: true }) height = 220;
   /** Print each point's value above it, abbreviated above 1000 (`1.2k`). */
-  @property({ type: Boolean, attribute: 'show-values', reflect: true }) showValues = false;
+  @property({ type: Boolean, attribute: 'show-value', reflect: true }) showValue = false;
   /**
    * How the area under each line is drawn: `outline` (default, a light tint), `filled` (a stronger tint)
    * or `wireframe` (no area, just the line).
@@ -289,7 +289,7 @@ export class VoidLineChart extends VoidElement {
           `;
         })}
 
-        ${this.showValues
+        ${this.showValue
           ? series.map((s, si) => {
               return svg`
                 <g class="void-line-chart-values">

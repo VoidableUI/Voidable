@@ -7,7 +7,7 @@ export class VoidSkeleton extends VoidElement {
    * Shape of the placeholder: `text` (one line of text, default), `circular` (for an avatar) or
    * `rectangular` (for an image or card). Size it with CSS width and height.
    */
-  @property({ type: String, reflect: true }) variant: 'text' | 'circular' | 'rectangular' = 'text';
+  @property({ type: String, reflect: true }) shape: 'text' | 'circular' | 'rectangular' = 'text';
 
   connectedCallback(): void {
     super.connectedCallback();

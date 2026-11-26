@@ -11,7 +11,7 @@ export class VoidScrollArea extends VoidElement {
    */
   @property({ type: String, attribute: 'max-height' }) maxHeight = '';
   /** Which way the content scrolls: `vertical` (default), `horizontal` or `both`. */
-  @property({ type: String, reflect: true }) direction: 'vertical' | 'horizontal' | 'both' = 'vertical';
+  @property({ type: String, reflect: true }) orientation: 'vertical' | 'horizontal' | 'both' = 'vertical';
 
   // Consumer content is projected into the scroll viewport.
   protected readonly _projection = new ProjectionController(this, {

@@ -84,28 +84,15 @@ func (b *Builder) Skill(ctx context.Context) (*domain.Skill, error) {
 }
 
 func (b *Builder) skillMD(cat *domain.Catalog) (string, error) {
-	var closable []string
-	for _, e := range cat.Elements {
-		for _, a := range e.Attributes {
-			if a.FalseString {
-				closable = append(closable, fmt.Sprintf("`%s` on `<%s>`", a.Name, e.Tag))
-			}
-		}
-	}
-	list := "none"
-	if len(closable) > 0 {
-		list = joinAnd(closable)
-	}
 	t, err := template.New("SKILL.md").Parse(skillTemplate)
 	if err != nil {
 		return "", fmt.Errorf("parse skill template: %w", err)
 	}
 	var buf bytes.Buffer
 	data := struct {
-		Version   string
-		Count     int
-		FalseList string
-	}{cat.Version, len(cat.Elements), list}
+		Version string
+		Count   int
+	}{cat.Version, len(cat.Elements)}
 	if err := t.Execute(&buf, data); err != nil {
 		return "", fmt.Errorf("render skill template: %w", err)
 	}
@@ -227,15 +214,4 @@ func sortedKeys[V any](m map[string]V) []string {
 	}
 	sort.Strings(out)
 	return out
-}
-
-// joinAnd joins items as "a", "a and b" or "a, b and c".
-func joinAnd(items []string) string {
-	switch len(items) {
-	case 0:
-		return ""
-	case 1:
-		return items[0]
-	}
-	return strings.Join(items[:len(items)-1], ", ") + " and " + items[len(items)-1]
 }

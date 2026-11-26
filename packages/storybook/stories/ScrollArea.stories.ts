@@ -24,10 +24,10 @@ type Story = StoryObj;
 export const Default: Story = {
   args: {
     maxHeight: '200px',
-    direction: 'vertical',
+    orientation: 'vertical',
   },
   render: (args) => html`
-    <void-scroll-area max-height=${args.maxHeight} direction=${args.direction}>
+    <void-scroll-area max-height=${args.maxHeight} orientation=${args.orientation}>
       <p>Line 1 — The scroll area constrains content height and provides a styled scrollbar.</p>
       <p>Line 2 — Scroll down to see more content within this container.</p>
       <p>Line 3 — All content is preserved as Light DOM children.</p>
@@ -41,7 +41,7 @@ export const Default: Story = {
 
 export const Vertical: Story = {
   render: () => html`
-    <void-scroll-area max-height="150px" direction="vertical">
+    <void-scroll-area max-height="150px" orientation="vertical">
       <p>Alpha</p>
       <p>Beta</p>
       <p>Gamma</p>
@@ -55,7 +55,7 @@ export const Vertical: Story = {
 
 export const Horizontal: Story = {
   render: () => html`
-    <void-scroll-area direction="horizontal" style="max-width: 300px;">
+    <void-scroll-area orientation="horizontal" style="max-width: 300px;">
       <div style="display: flex; gap: 1rem; width: max-content;">
         <div style="min-width: 120px; padding: 0.5rem; border: 1px solid var(--void-color-border); border-radius: 4px;">Panel A</div>
         <div style="min-width: 120px; padding: 0.5rem; border: 1px solid var(--void-color-border); border-radius: 4px;">Panel B</div>
@@ -69,7 +69,7 @@ export const Horizontal: Story = {
 
 export const Both: Story = {
   render: () => html`
-    <void-scroll-area max-height="150px" direction="both" style="max-width: 300px;">
+    <void-scroll-area max-height="150px" orientation="both" style="max-width: 300px;">
       <div style="width: 600px;">
         <p>Row 1 — This content is wider than the container and taller than maxHeight.</p>
         <p>Row 2 — Scroll both vertically and horizontally to explore all content.</p>
@@ -83,7 +83,7 @@ export const Both: Story = {
 
 export const NoMaxHeight: Story = {
   render: () => html`
-    <void-scroll-area direction="vertical">
+    <void-scroll-area orientation="vertical">
       <p>When no maxHeight is set, the scroll area grows with its content.</p>
       <p>No scrollbar will appear unless a height constraint is imposed by a parent element.</p>
     </void-scroll-area>

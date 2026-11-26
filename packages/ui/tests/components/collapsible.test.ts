@@ -215,9 +215,9 @@ describe('VoidCollapsible', () => {
       expect(el.open).toBe(false);
     });
 
-    it('does not dispatch void-toggle when disabled', async () => {
+    it('does not dispatch void-open when disabled', async () => {
       let fired = false;
-      el.addEventListener('void-toggle', () => { fired = true; });
+      el.addEventListener('void-open', () => { fired = true; });
       const trigger = el.querySelector('void-collapsible-trigger') as HTMLElement;
       trigger.click();
       await el.updateComplete;
@@ -225,8 +225,9 @@ describe('VoidCollapsible', () => {
     });
   });
 
-  describe('void-toggle event', () => {
+  describe('void-open and void-close (#23)', () => {
     let el: VoidCollapsible;
+    const trigger = () => el.querySelector('void-collapsible-trigger') as HTMLElement;
 
     beforeEach(async () => {
       el = create();
@@ -234,42 +235,44 @@ describe('VoidCollapsible', () => {
       await el.updateComplete;
     });
 
-    it('dispatches void-toggle on click', async () => {
-      let fired = false;
-      el.addEventListener('void-toggle', () => { fired = true; });
-      const trigger = el.querySelector('void-collapsible-trigger') as HTMLElement;
-      trigger.click();
+    it('dispatches void-open with reason trigger on click', async () => {
+      let detail: unknown = null;
+      el.addEventListener('void-open', (e) => { detail = (e as CustomEvent).detail; });
+      trigger().click();
       await el.updateComplete;
-      expect(fired).toBe(true);
+      expect(detail).toEqual({ reason: 'trigger' });
     });
 
-    it('void-toggle detail contains open state', async () => {
-      let detail: { open: boolean } | null = null;
-      el.addEventListener('void-toggle', (e) => { detail = (e as CustomEvent).detail; });
-      const trigger = el.querySelector('void-collapsible-trigger') as HTMLElement;
-      trigger.click();
+    it('dispatches void-open with reason keyboard on Enter', async () => {
+      let detail: unknown = null;
+      el.addEventListener('void-open', (e) => { detail = (e as CustomEvent).detail; });
+      trigger().dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
       await el.updateComplete;
-      expect(detail).toEqual({ open: true });
+      expect(detail).toEqual({ reason: 'keyboard' });
     });
 
-    it('void-toggle bubbles', async () => {
+    it('does not bubble', async () => {
       let firedOnParent = false;
-      document.body.addEventListener('void-toggle', () => { firedOnParent = true; }, { once: true });
-      const trigger = el.querySelector('void-collapsible-trigger') as HTMLElement;
-      trigger.click();
+      const hear = () => { firedOnParent = true; };
+      document.body.addEventListener('void-open', hear);
+      trigger().click();
       await el.updateComplete;
-      expect(firedOnParent).toBe(true);
+      document.body.removeEventListener('void-open', hear);
+      expect(firedOnParent).toBe(false);
     });
 
-    it('void-toggle detail open=false when closing', async () => {
+    it('dispatches a cancelable void-close before closing; preventDefault keeps it open', async () => {
       el.open = true;
       await el.updateComplete;
-      let detail: { open: boolean } | null = null;
-      el.addEventListener('void-toggle', (e) => { detail = (e as CustomEvent).detail; });
-      const trigger = el.querySelector('void-collapsible-trigger') as HTMLElement;
-      trigger.click();
+      let detail: unknown = null;
+      el.addEventListener('void-close', (e) => { detail = (e as CustomEvent).detail; e.preventDefault(); }, { once: true });
+      trigger().click();
       await el.updateComplete;
-      expect(detail).toEqual({ open: false });
+      expect(detail).toEqual({ reason: 'trigger' });
+      expect(el.open).toBe(true);
+      trigger().click();
+      await el.updateComplete;
+      expect(el.open).toBe(false);
     });
   });
 
@@ -378,12 +381,12 @@ describe('closed content is hidden="until-found" where the browser supports it',
     const el = create();
     document.body.appendChild(el);
     await el.updateComplete;
-    const toggles: boolean[] = [];
-    el.addEventListener('void-toggle', (e) => toggles.push((e as CustomEvent).detail.open));
+    const reasons: string[] = [];
+    el.addEventListener('void-open', (e) => reasons.push((e as CustomEvent).detail.reason));
     el.querySelector('void-collapsible-content')!.dispatchEvent(new Event('beforematch', { bubbles: true }));
     await el.updateComplete;
     expect(el.open).toBe(true);
-    expect(toggles).toEqual([true]);
+    expect(reasons).toEqual(['find']);
     expect(el.querySelector('void-collapsible-content')!.hasAttribute('hidden')).toBe(false);
     el.remove();
   });

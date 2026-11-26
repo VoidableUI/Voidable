@@ -21,13 +21,14 @@ export class VoidNavMenu extends VoidElement {
     super.connectedCallback();
     this.setHostAttribute('role', 'menubar');
     this.addEventListener('keydown', this._handleKeydown);
-    this.addEventListener('void-open', this._handleItemOpen as EventListener);
+    // void-open does not bubble: the menu hears its items' in the capture phase.
+    this.addEventListener('void-open', this._handleItemOpen as EventListener, true);
   }
 
   disconnectedCallback(): void {
     super.disconnectedCallback();
     this.removeEventListener('keydown', this._handleKeydown);
-    this.removeEventListener('void-open', this._handleItemOpen as EventListener);
+    this.removeEventListener('void-open', this._handleItemOpen as EventListener, true);
   }
 
   protected override updated(changed: Map<string, unknown>): void {
@@ -41,13 +42,13 @@ export class VoidNavMenu extends VoidElement {
     }
   }
 
-  private _handleItemOpen = (e: CustomEvent): void => {
+  private _handleItemOpen = (e: CustomEvent<{ reason: string }>): void => {
     const target = e.target as VoidNavMenuItem;
+    if (!(target instanceof VoidNavMenuItem)) return;
+    // Opening another item by hovering it moved the pointer away from this one; a press on it was outside.
+    const reason = e.detail?.reason === 'hover' ? 'hover' : 'outside';
     for (const item of this._getItems()) {
-      if (item !== target && item.open) {
-        item.open = false;
-        item.dispatchEvent(new CustomEvent('void-close', { bubbles: true, composed: true }));
-      }
+      if (item !== target && item.open) item._closeDropdown(reason);
     }
   };
 
@@ -76,8 +77,7 @@ export class VoidNavMenu extends VoidElement {
     if (e.key === 'Escape') {
       for (const item of items) {
         if (item.open) {
-          item.open = false;
-          item.dispatchEvent(new CustomEvent('void-close', { bubbles: true, composed: true }));
+          item._closeDropdown('escape');
           item._control()?.focus();
         }
       }
@@ -105,8 +105,9 @@ if (!customElements.get('void-nav-menu')) {
  * link trigger always navigates. The panel closes when the pointer leaves, on Escape, on a press outside or when
  * focus leaves the item.
  *
- * @fires {CustomEvent} void-open - The panel opened.
- * @fires {CustomEvent} void-close - The panel closed.
+ * @fires {CustomEvent<{ reason: 'hover' | 'trigger' }>} void-open - The panel opened. Does not bubble.
+ * @fires {CustomEvent<{ reason: 'hover' | 'trigger' | 'escape' | 'outside' | 'blur' }>} void-close - The panel
+ * closed. Does not bubble.
  */
 export class VoidNavMenuItem extends VoidElement {
   /**
@@ -120,7 +121,7 @@ export class VoidNavMenuItem extends VoidElement {
    * Mark the item as the current section: it is drawn with an underline, and a link trigger gets
    * `aria-current="page"`. Set it on the item that matches the page.
    */
-  @property({ type: Boolean, reflect: true }) active = false;
+  @property({ type: Boolean, reflect: true }) current = false;
 
   private _openTimerId: ReturnType<typeof setTimeout> | undefined;
   private _closeTimerId: ReturnType<typeof setTimeout> | undefined;
@@ -161,7 +162,7 @@ export class VoidNavMenuItem extends VoidElement {
         this._parts.set(control, 'aria-expanded', String(this.open));
         this._parts.set(control, 'aria-controls', this._parts.id(content, 'void-nav-menu-content'));
       }
-      if (this.active && this._isLink(control)) this._parts.set(control, 'aria-current', 'page');
+      if (this.current && this._isLink(control)) this._parts.set(control, 'aria-current', 'page');
       if (this.disabled) {
         this._parts.set(control, 'aria-disabled', 'true');
         if (control.matches('button, void-button, input')) this._parts.set(control, 'disabled', true);
@@ -194,7 +195,7 @@ export class VoidNavMenuItem extends VoidElement {
 
   protected override updated(changed: Map<string, unknown>): void {
     super.updated(changed);
-    if (changed.has('open') || changed.has('disabled') || changed.has('active')) this._parts.sync();
+    if (changed.has('open') || changed.has('disabled') || changed.has('current')) this._parts.sync();
   }
 
   /** A click (or the click Enter and Space make on a button) on the trigger toggles the panel. */
@@ -206,12 +207,12 @@ export class VoidNavMenuItem extends VoidElement {
     clearTimeout(this._openTimerId);
     if (!this.open) {
       this._openedByHover = false;
-      this._openDropdown();
+      this._openDropdown('trigger');
     } else if (this._openedByHover) {
       // The hover already opened it: the click pins it open.
       this._openedByHover = false;
     } else {
-      this._closeDropdown();
+      this._closeDropdown('trigger');
     }
   };
 
@@ -220,7 +221,7 @@ export class VoidNavMenuItem extends VoidElement {
     clearTimeout(this._closeTimerId);
     this._openTimerId = setTimeout(() => {
       if (!this.open) this._openedByHover = true;
-      this._openDropdown();
+      this._openDropdown('hover');
     }, 150);
   };
 
@@ -228,32 +229,33 @@ export class VoidNavMenuItem extends VoidElement {
     if (!this._hasContent) return;
     clearTimeout(this._openTimerId);
     this._closeTimerId = setTimeout(() => {
-      this._closeDropdown();
+      this._closeDropdown('hover');
     }, 300);
   };
 
   private _onFocusOut = (e: FocusEvent): void => {
     const to = e.relatedTarget as Node | null;
-    if (this.open && to && !this.contains(to)) this._closeDropdown();
+    if (this.open && to && !this.contains(to)) this._closeDropdown('blur');
   };
 
   private _onOutsideClick = (e: MouseEvent): void => {
     if (this.open && !this.contains(e.target as Node)) {
-      this._closeDropdown();
+      this._closeDropdown('outside');
     }
   };
 
-  private _openDropdown(): void {
+  private _openDropdown(reason: 'hover' | 'trigger'): void {
     if (!this.open) {
       this.open = true;
-      this.dispatchEvent(new CustomEvent('void-open', { bubbles: true, composed: true }));
+      this.dispatchEvent(new CustomEvent('void-open', { bubbles: false, detail: { reason } }));
     }
   }
 
-  private _closeDropdown(): void {
+  /** @internal Closes the panel for `reason` (the menu calls it for Escape and when another item opens). */
+  _closeDropdown(reason: 'hover' | 'trigger' | 'escape' | 'outside' | 'blur'): void {
     if (this.open) {
       this.open = false;
-      this.dispatchEvent(new CustomEvent('void-close', { bubbles: true, composed: true }));
+      this.dispatchEvent(new CustomEvent('void-close', { bubbles: false, detail: { reason } }));
     }
   }
 }

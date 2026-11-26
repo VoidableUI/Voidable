@@ -111,6 +111,10 @@ type Element struct {
 	// Native is the native control the author writes inside the component
 	// (voidNative in the manifest: `<select>` in `<void-select>`), or nil.
 	Native *NativeControl `json:"native,omitempty"`
+	// Renamed is what was renamed or removed on this element in 0.8 (#23),
+	// from the manifest's voidRenamed (source: `renamed` in
+	// packages/ui/cem/supplement.js).
+	Renamed *Renamed `json:"-"`
 }
 
 // NativeControl is a native element a component enhances in place: Tag must
@@ -118,6 +122,56 @@ type Element struct {
 type NativeControl struct {
 	Tag string `json:"tag"`
 	Fix string `json:"fix"`
+}
+
+// RenamedAttribute is one attribute renamed or removed in 0.8 (#23).
+type RenamedAttribute struct {
+	// To is the new attribute, written with the same value.
+	To string `json:"to,omitempty"`
+	// Values is the replacement markup for one old value ("" is the
+	// attribute written with no value).
+	Values map[string]string `json:"values,omitempty"`
+	// Fix is what to do when neither applies.
+	Fix string `json:"fix,omitempty"`
+}
+
+// Replacement is the markup to write instead of the old attribute with value
+// (hasValue false: written with no value).
+func (r RenamedAttribute) Replacement(value string, hasValue bool) string {
+	key := value
+	if !hasValue {
+		key = ""
+	}
+	if v, ok := r.Values[key]; ok {
+		return v
+	}
+	if r.To != "" {
+		if key == "" {
+			return r.To
+		}
+		return fmt.Sprintf("%s=%q", r.To, value)
+	}
+	return r.Fix
+}
+
+// Renames reports whether the old attribute (with value) has a replacement
+// to write, rather than advice for a removed one.
+func (r RenamedAttribute) Renames(value string, hasValue bool) bool {
+	key := value
+	if !hasValue {
+		key = ""
+	}
+	_, ok := r.Values[key]
+	return ok || r.To != ""
+}
+
+// Renamed is what was renamed or removed on one element in 0.8 (#23).
+type Renamed struct {
+	Attributes map[string]RenamedAttribute `json:"attributes,omitempty"`
+	// Values maps an attribute to its renamed values (old -> new).
+	Values map[string]map[string]string `json:"values,omitempty"`
+	// Events maps a removed event to what to listen for instead.
+	Events map[string]string `json:"events,omitempty"`
 }
 
 // Attribute returns the attribute with the given (exact) name.

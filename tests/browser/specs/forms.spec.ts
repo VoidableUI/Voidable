@@ -222,7 +222,7 @@ test.describe('auto-submit on void-change', () => {
     ['calendar', (p) => p.locator('#i-cal').getByRole('button', { name: 'Wednesday, November 18, 2026' }).click(), 'cal', '2026-11-18'],
     ['file-upload', (p) => p.locator('#i-file input[type=file]').setInputFiles({ name: 'a.txt', mimeType: 'text/plain', buffer: Buffer.from('abc') }), 'doc', 'File(a.txt,3)'],
     ['color-picker', async (p) => { await p.locator('#i-color input[type=text], #i-color input:not([type])').first().click(); await p.keyboard.press('ControlOrMeta+a'); await p.keyboard.type('#00ff00'); await p.keyboard.press('Tab'); }, 'color', '#00ff00'],
-    ['pin-input', async (p) => { await p.locator('#i-pin input').first().click(); await p.keyboard.type('1234'); }, 'pin', '1234'],
+    ['pin-input', async (p) => { await p.locator('#i-pin input').first().click(); await p.keyboard.type('1234'); await p.keyboard.press('Tab'); }, 'pin', '1234'],
   ];
 
   for (const [name, act, field, value] of cases) {

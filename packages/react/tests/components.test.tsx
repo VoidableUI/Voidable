@@ -59,22 +59,22 @@ describe('registration', () => {
   });
 });
 
-describe('booleans that default to true', () => {
-  it('turns an icon off with false and back on with true', async () => {
-    const c = await render(<ErrorFallback icon={false} />);
-    const el = c.querySelector('void-error-fallback') as HTMLElement & { icon: boolean; updateComplete: Promise<boolean> };
+describe('hide-* booleans (no attribute defaults to true, #23)', () => {
+  it('turns the icon off with hideIcon and back on without it', async () => {
+    const c = await render(<ErrorFallback hideIcon />);
+    const el = c.querySelector('void-error-fallback') as HTMLElement & { hideIcon: boolean; updateComplete: Promise<boolean> };
     await el.updateComplete;
-    expect(el.icon).toBe(false);
-    expect(el.getAttribute('icon')).toBe('false');
-    await rerender(<ErrorFallback icon />);
+    expect(el.hideIcon).toBe(true);
+    expect(el.hasAttribute('hide-icon')).toBe(true);
+    await rerender(<ErrorFallback hideIcon={false} />);
     await el.updateComplete;
-    expect(el.icon).toBe(true);
+    expect(el.hideIcon).toBe(false);
   });
 
-  it('works for nav-bar bordered', async () => {
-    const c = await render(<NavBar bordered={false}>x</NavBar>);
-    const el = c.querySelector('void-nav-bar') as HTMLElement & { bordered: boolean };
-    expect(el.bordered).toBe(false);
+  it('works for nav-bar hideBorder', async () => {
+    const c = await render(<NavBar hideBorder>x</NavBar>);
+    const el = c.querySelector('void-nav-bar') as HTMLElement & { hideBorder: boolean };
+    expect(el.hideBorder).toBe(true);
   });
 });
 
@@ -117,10 +117,10 @@ describe('props', () => {
     expect(el.hasAttribute('checked')).toBe(false);
   });
 
-  it('keeps default-true booleans false when passed false', async () => {
-    const c = await render(<Gauge showValue={false} />);
-    const el = c.querySelector('void-gauge') as HTMLElement & { showValue: boolean };
-    expect(el.showValue).toBe(false);
+  it('sets hide-* booleans as properties', async () => {
+    const c = await render(<Gauge hideValue />);
+    const el = c.querySelector('void-gauge') as HTMLElement & { hideValue: boolean };
+    expect(el.hideValue).toBe(true);
   });
 
   it('passes arrays as properties, not strings', async () => {
@@ -180,7 +180,7 @@ describe('events', () => {
   it('types detail for onVoidChange and delivers it', async () => {
     let seen: number | undefined;
     const c = await render(
-      <NumberInput onVoidChange={(e) => { seen = e.detail.value + e.detail.previous; }} />,
+      <NumberInput onVoidChange={(e) => { seen = (e.detail.value ?? 0) + (e.detail.previous ?? 0); }} />,
     );
     c.querySelector('void-number-input')!.dispatchEvent(
       new CustomEvent('void-change', { detail: { value: 2, previous: 1 } }),

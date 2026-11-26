@@ -2,7 +2,6 @@ import { html, nothing } from 'lit';
 import { live } from 'lit/directives/live.js';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
-import { defaultTrueBoolean, forwardedSpellcheck } from '../converters.js';
 import { NativeFormControl } from '../form-control.js';
 
 /** Input field with an attached icon button — used for copy-to-clipboard inputs, search boxes, and similar patterns. */
@@ -50,8 +49,11 @@ export class VoidActionInput extends NativeFormControl(VoidElement) {
   @property({ type: String, attribute: 'enterkeyhint' }) override enterKeyHint: '' | 'enter' | 'done' | 'go' | 'next' | 'previous' | 'search' | 'send' = '';
   /** Capitalisation behaviour of virtual keyboards (`autocapitalize`). */
   @property({ type: String }) override autocapitalize: '' | 'off' | 'none' | 'on' | 'sentences' | 'words' | 'characters' = '';
-  /** Spell checking of the native control (`spellcheck`). Defaults to true; `spellcheck="false"` turns it off from markup. */
-  @property({ converter: defaultTrueBoolean }) override spellcheck = true;
+  /**
+   * The host's `spellcheck` attribute as written (`"true"`, `"false"`, `""`, or absent for the browser default),
+   * forwarded to the native control: the native enumerated attribute, not a boolean.
+   */
+  @property({ type: String, attribute: 'spellcheck' }) protected spellcheckAttr: string | null = null;
   /** Size step: `sm`, `md` (default) or `lg`. */
   @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' = 'md';
   /**
@@ -69,9 +71,9 @@ export class VoidActionInput extends NativeFormControl(VoidElement) {
   /** Accessible name of the button and its tooltip. Defaults to `Action`; say what it does (`Copy link`). */
   @property({ type: String, attribute: 'action-label' }) actionLabel = 'Action';
   /** Which side of the field the button sits on: `right` (default) or `left`. */
-  @property({ type: String, reflect: true }) position: 'left' | 'right' = 'right';
+  @property({ type: String, reflect: true, attribute: 'icon-side' }) iconSide: 'left' | 'right' = 'right';
   /** Where the button's tooltip appears: `top` (default), `bottom`, `left` or `right`. */
-  @property({ type: String, reflect: true, attribute: 'tooltip-position' }) tooltipPosition: 'top' | 'bottom' | 'left' | 'right' = 'top';
+  @property({ type: String, reflect: true, attribute: 'tooltip-side' }) tooltipSide: 'top' | 'bottom' | 'left' | 'right' = 'top';
 
   private _renderIcon() {
     switch (this.icon) {
@@ -132,7 +134,7 @@ export class VoidActionInput extends NativeFormControl(VoidElement) {
 
   render() {
     const btn = html`
-      <void-tooltip position=${this.tooltipPosition}>
+      <void-tooltip side=${this.tooltipSide}>
         <void-tooltip-trigger><button
           class="void-action-input-btn"
           type="button"
@@ -145,7 +147,7 @@ export class VoidActionInput extends NativeFormControl(VoidElement) {
     `;
 
     return html`
-      ${this.position === 'left' ? btn : ''}
+      ${this.iconSide === 'left' ? btn : ''}
       <input
         class="void-action-input-field"
         type=${this.type}
@@ -163,12 +165,12 @@ export class VoidActionInput extends NativeFormControl(VoidElement) {
         inputmode=${this.inputMode || nothing}
         enterkeyhint=${this.enterKeyHint || nothing}
         autocapitalize=${this.autocapitalize || nothing}
-        spellcheck=${forwardedSpellcheck(this) ?? nothing}
+        spellcheck=${this.spellcheckAttr ?? nothing}
         aria-label=${this.placeholder || nothing}
         @input=${this._onInput}
         @change=${this._onChange}
       />
-      ${this.position === 'right' ? btn : ''}
+      ${this.iconSide === 'right' ? btn : ''}
     `;
   }
 }

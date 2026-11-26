@@ -59,11 +59,17 @@ describe('VoidBanner', () => {
 
     it('dispatches void-close when the control in the close part is pressed', async () => {
       const events: Event[] = [];
-      document.addEventListener('void-close', (e) => events.push(e));
+      el.addEventListener('void-close', (e) => events.push(e));
       (el.querySelector('void-banner-close button') as HTMLButtonElement).click();
       expect(events).toHaveLength(1);
-      expect(events[0].bubbles).toBe(true);
-      expect((events[0] as CustomEvent).composed).toBe(true);
+      expect(events[0].bubbles).toBe(false);
+      expect((events[0] as CustomEvent).detail).toEqual({ reason: 'close-button' });
+    });
+
+    it('stays when a listener cancels void-close', async () => {
+      el.addEventListener('void-close', (e) => e.preventDefault(), { once: true });
+      (el.querySelector('void-banner-close button') as HTMLButtonElement).click();
+      expect(el.isConnected).toBe(true);
     });
 
     it('removes itself from the DOM when closed', async () => {

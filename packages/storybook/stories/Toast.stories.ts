@@ -28,7 +28,7 @@ export const Default: Story = {
       VoidToastContainer.show({ description: 'Operation completed successfully.', color: 'default' });
     };
     return html`
-      <void-toast-container position='bottom-right'></void-toast-container>
+      <void-toast-container placement='bottom-right'></void-toast-container>
       <button @click='${show}' style='padding: 0.5rem 1rem; cursor: pointer;'>Show Toast</button>
     `;
   },
@@ -40,7 +40,7 @@ export const Colors: Story = {
       VoidToastContainer.show({ description: message, color: color as any });
     };
     return html`
-      <void-toast-container position='bottom-right'></void-toast-container>
+      <void-toast-container placement='bottom-right'></void-toast-container>
       <div style='display: flex; gap: 0.5rem; flex-wrap: wrap;'>
         <button @click='${() => show('default', 'Default notification.')}' style='padding: 0.5rem 1rem; cursor: pointer;'>Default</button>
         <button @click='${() => show('error', 'Something went wrong.')}' style='padding: 0.5rem 1rem; cursor: pointer;'>Error</button>
@@ -58,7 +58,7 @@ export const WithTitle: Story = {
       VoidToastContainer.show({ description: 'Your file has been saved.', title: 'Saved', color: 'success' });
     };
     return html`
-      <void-toast-container position='bottom-right'></void-toast-container>
+      <void-toast-container placement='bottom-right'></void-toast-container>
       <button @click='${show}' style='padding: 0.5rem 1rem; cursor: pointer;'>Show Toast with Title</button>
     `;
   },
@@ -70,7 +70,7 @@ export const NoDismiss: Story = {
       VoidToastContainer.show({ description: 'Processing in background...', duration: 3000, dismissable: false });
     };
     return html`
-      <void-toast-container position='bottom-right'></void-toast-container>
+      <void-toast-container placement='bottom-right'></void-toast-container>
       <button @click='${show}' style='padding: 0.5rem 1rem; cursor: pointer;'>Show Non-Dismissable Toast</button>
     `;
   },
@@ -87,7 +87,7 @@ export const WithActions: Story = {
       });
     };
     return html`
-      <void-toast-container position='bottom-right'></void-toast-container>
+      <void-toast-container placement='bottom-right'></void-toast-container>
       <button @click='${show}' style='padding: 0.5rem 1rem; cursor: pointer;'>Show Toast with Action</button>
     `;
   },
@@ -99,7 +99,7 @@ export const Persistent: Story = {
       VoidToastContainer.show({ description: 'This toast will not auto-dismiss.', duration: 0 });
     };
     return html`
-      <void-toast-container position='bottom-right'></void-toast-container>
+      <void-toast-container placement='bottom-right'></void-toast-container>
       <button @click='${show}' style='padding: 0.5rem 1rem; cursor: pointer;'>Show Persistent Toast</button>
     `;
   },
@@ -108,10 +108,10 @@ export const Persistent: Story = {
 export const Positions: Story = {
   render: () => {
     const showAt = (position: string) => {
-      let container = document.querySelector(`void-toast-container[position="${position}"]`) as any;
+      let container = document.querySelector(`void-toast-container[placement="${position}"]`) as any;
       if (!container) {
         container = document.createElement('void-toast-container');
-        container.setAttribute('position', position);
+        container.setAttribute('placement', position);
         document.body.appendChild(container);
       }
       const toast = document.createElement('void-toast') as any;
@@ -137,13 +137,13 @@ export const InlinePlacement: Story = {
   parameters: {
     docs: {
       description: {
-        story: '`position="inline"` keeps the container in the page flow, so toasts push content instead of covering it. Style it with `position: sticky` from the app if it should stay in view. A container with no toasts takes no space.',
+        story: '`placement="inline"` keeps the container in the page flow, so toasts push content instead of covering it. Style it with `position: sticky` from the app if it should stay in view. A container with no toasts takes no space.',
       },
     },
   },
   render: () => html`
     <div style="max-width: 28rem;">
-      <void-toast-container position="inline">
+      <void-toast-container placement="inline">
         <void-toast color="caution">
           <void-toast-title>Heads up</void-toast-title>
           <void-toast-description>Your trial ends in 3 days.</void-toast-description>

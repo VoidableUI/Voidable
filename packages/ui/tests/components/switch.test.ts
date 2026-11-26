@@ -127,10 +127,10 @@ describe('VoidSwitch', () => {
     });
 
     it('void-change detail reflects new checked state', () => {
-      let detail: { checked: boolean } | null = null;
+      let detail: { value: string; checked: boolean } | null = null;
       el.addEventListener('void-change', (e) => { detail = (e as CustomEvent).detail; });
       el.click();
-      expect(detail).toEqual({ checked: true });
+      expect(detail).toEqual({ value: 'on', checked: true });
     });
 
     it('void-change bubbles', () => {

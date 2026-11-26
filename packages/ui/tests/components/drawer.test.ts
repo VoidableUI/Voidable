@@ -37,9 +37,9 @@ describe('VoidDrawer', () => {
   });
 
   describe('defaults and reflection', () => {
-    it('open false, side right, size md, heading empty, closable true', () => {
+    it('open false, side right, size md, heading empty, hideClose false', () => {
       const el = document.createElement(TAG) as VoidDrawer;
-      expect([el.open, el.side, el.size, el.closable]).toEqual([false, 'right', 'md', true]);
+      expect([el.open, el.side, el.size, el.hideClose]).toEqual([false, 'right', 'md', false]);
       expect('heading' in el).toBe(false);
     });
 
@@ -76,10 +76,10 @@ describe('VoidDrawer', () => {
       expect(panel(el).getAttribute('aria-label')).toBe('Navigation');
     });
 
-    it('shows the close button only when closable', async () => {
+    it('shows the close button unless hide-close', async () => {
       const el = await mount();
       expect(closeButton(el)!.hidden).toBe(false);
-      el.closable = false;
+      el.hideClose = true;
       await flush(el);
       expect(closeButton(el)!.hidden).toBe(true);
     });
@@ -132,8 +132,8 @@ describe('VoidDrawer', () => {
       expect(el.open).toBe(false);
     });
 
-    it('closable="false" ignores Escape and backdrop presses', async () => {
-      const el = await mount({ closable: false, open: true });
+    it('hide-close ignores Escape and backdrop presses', async () => {
+      const el = await mount({ hideClose: true, open: true });
       press('Escape');
       pointerdown(document.body);
       await flush(el);

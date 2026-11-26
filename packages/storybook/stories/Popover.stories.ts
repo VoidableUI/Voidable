@@ -40,25 +40,25 @@ export const Default: Story = {
 export const Positions: Story = {
   render: () => html`
     <div style="padding: 6rem; display: flex; gap: 1.5rem; flex-wrap: wrap; justify-content: center;">
-      <void-popover position="top">
+      <void-popover side="top">
         <void-popover-trigger><button style="padding: 0.5rem 1rem; cursor: pointer;">Top</button></void-popover-trigger>
         <void-popover-content>
           <div>Opens above</div>
         </void-popover-content>
       </void-popover>
-      <void-popover position="bottom">
+      <void-popover side="bottom">
         <void-popover-trigger><button style="padding: 0.5rem 1rem; cursor: pointer;">Bottom</button></void-popover-trigger>
         <void-popover-content>
           <div>Opens below</div>
         </void-popover-content>
       </void-popover>
-      <void-popover position="left">
+      <void-popover side="left">
         <void-popover-trigger><button style="padding: 0.5rem 1rem; cursor: pointer;">Left</button></void-popover-trigger>
         <void-popover-content>
           <div>Opens to the left</div>
         </void-popover-content>
       </void-popover>
-      <void-popover position="right">
+      <void-popover side="right">
         <void-popover-trigger><button style="padding: 0.5rem 1rem; cursor: pointer;">Right</button></void-popover-trigger>
         <void-popover-content>
           <div>Opens to the right</div>
@@ -118,19 +118,19 @@ export const ManualTrigger: Story = {
 export const Alignment: Story = {
   render: () => html`
     <div style="padding: 6rem 2rem; display: flex; justify-content: space-between;">
-      <void-popover open position="bottom" align="start">
+      <void-popover open side="bottom" align="start">
         <void-popover-trigger><button style="padding: 0.5rem 1rem; cursor: pointer;">Start</button></void-popover-trigger>
         <void-popover-content>
           <div>Aligned to the start edge</div>
         </void-popover-content>
       </void-popover>
-      <void-popover open position="bottom" align="center">
+      <void-popover open side="bottom" align="center">
         <void-popover-trigger><button style="padding: 0.5rem 1rem; cursor: pointer;">Center</button></void-popover-trigger>
         <void-popover-content>
           <div>Centered on the trigger</div>
         </void-popover-content>
       </void-popover>
-      <void-popover open position="bottom" align="end">
+      <void-popover open side="bottom" align="end">
         <void-popover-trigger><button style="padding: 0.5rem 1rem; cursor: pointer;">End</button></void-popover-trigger>
         <void-popover-content>
           <div>Aligned to the end edge</div>

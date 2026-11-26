@@ -79,6 +79,7 @@ export function optionLabel(opt: Element): string {
  * trigger with CSS anchor positioning, flipping above it near the bottom of the viewport. A press outside closes
  * it too.
  *
+ * @fires {CustomEvent<{ value: string[] }>} void-change - An option was chosen or unchosen; `value` is every chosen value.
  * @fires {CustomEvent<{ reason: 'trigger' | 'keyboard' | 'api' }>} void-open - The option list opened.
  * @fires {CustomEvent<{ reason: 'trigger' | 'escape' | 'outside' | 'blur' | 'parent' | 'api' }>} void-close - The option list is closing.
  */
@@ -439,7 +440,7 @@ export class VoidMultiselect extends InternalsFormControl(VoidElement) {
     this.dispatchEvent(new CustomEvent('void-change', {
       bubbles: true,
       composed: true,
-      detail: { values: this.value },
+      detail: { value: this.value },
     }));
   }
 }

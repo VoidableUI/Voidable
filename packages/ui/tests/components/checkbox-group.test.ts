@@ -189,19 +189,19 @@ describe('VoidCheckboxGroup', () => {
       expect(fired).toBe(true);
     });
 
-    it('void-change detail contains values array', () => {
-      let detail: { values: string[] } | null = null;
+    it('void-change detail.value is the array of checked values', () => {
+      let detail: { value: string[] } | null = null;
       el.addEventListener('void-change', (e) => { detail = (e as CustomEvent).detail; });
       cb.click();
       expect(detail).not.toBeNull();
-      expect(Array.isArray(detail!.values)).toBe(true);
+      expect(Array.isArray(detail!.value)).toBe(true);
     });
 
-    it('void-change detail.values includes newly checked value', () => {
-      let detail: { values: string[] } | null = null;
+    it('void-change detail.value includes newly checked value', () => {
+      let detail: { value: string[] } | null = null;
       el.addEventListener('void-change', (e) => { detail = (e as CustomEvent).detail; });
       cb.click();
-      expect(detail!.values).toContain('alpha');
+      expect(detail!.value).toContain('alpha');
     });
 
     it('stops propagation of the child void-change event', () => {
@@ -216,7 +216,7 @@ describe('VoidCheckboxGroup', () => {
     it('void-change bubbles from the group', () => {
       let firedOnBody = false;
       document.body.addEventListener('void-change', (e) => {
-        if ((e as CustomEvent).detail?.values) firedOnBody = true;
+        if (Array.isArray((e as CustomEvent).detail?.value)) firedOnBody = true;
       }, { once: true });
       cb.click();
       expect(firedOnBody).toBe(true);

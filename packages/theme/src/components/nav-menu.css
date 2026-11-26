@@ -65,11 +65,11 @@ void-nav-menu-trigger > *:active {
   background: var(--void-color-bg-hover);
 }
 
-void-nav-menu-item[active] > void-nav-menu-trigger > * {
+void-nav-menu-item[current] > void-nav-menu-trigger > * {
   color: var(--void-color-text);
 }
 
-void-nav-menu-item[active] > void-nav-menu-trigger > *::after {
+void-nav-menu-item[current] > void-nav-menu-trigger > *::after {
   content: '';
   position: absolute;
   bottom: 0;
@@ -80,7 +80,7 @@ void-nav-menu-item[active] > void-nav-menu-trigger > *::after {
   border-radius: var(--void-radius-full);
 }
 
-void-nav-menu[orientation="vertical"] void-nav-menu-item[active] > void-nav-menu-trigger > *::after {
+void-nav-menu[orientation="vertical"] void-nav-menu-item[current] > void-nav-menu-trigger > *::after {
   top: var(--void-space-2);
   bottom: var(--void-space-2);
   left: 0;

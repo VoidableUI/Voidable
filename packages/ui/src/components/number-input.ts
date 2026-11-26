@@ -254,6 +254,10 @@ export class VoidNumberInput extends InternalsFormControl(VoidElement) {
   private _onFieldInput(): void {
     this._pendingText = this._input?.value ?? null;
     this.formSync();
+    // The typed number so far (null while the text is empty or not a number); the commit is void-change.
+    const typed = parseFloat(this._pendingText ?? '');
+    const value: number | null = Number.isNaN(typed) ? null : typed;
+    this.dispatchEvent(new CustomEvent('void-input', { bubbles: true, composed: true, detail: { value } }));
   }
 
   /** Commit on change: browsers fire it before Enter's implicit submission. */

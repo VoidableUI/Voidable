@@ -60,18 +60,18 @@ describe('VoidTooltip', () => {
       expect(el.open).toBe(false);
     });
 
-    it('position defaults to top and delay to 200', () => {
-      expect(el.position).toBe('top');
+    it('side defaults to top and delay to 200', () => {
+      expect(el.side).toBe('top');
       expect(el.delay).toBe(200);
     });
   });
 
   describe('attribute reflection', () => {
-    it('reflects position to attribute', async () => {
+    it('reflects side to attribute', async () => {
       const { el } = await mount();
-      el.position = 'bottom';
+      el.side = 'bottom';
       await el.updateComplete;
-      expect(el.getAttribute('position')).toBe('bottom');
+      expect(el.getAttribute('side')).toBe('bottom');
     });
   });
 
