@@ -107,11 +107,21 @@ export class VoidSelect extends VoidElement {
 
   /** The choice is made inside the native select; ask for an update when it is no longer what the attribute shows. */
   private _reflectChoice(): void {
-    if (this.value !== this._reflected) this.requestUpdate();
+    if (!this._morphing && this.value !== this._reflected) this.requestUpdate();
   }
+
+  /**
+   * Between voidBeforeMorph and morphedCallback the native select holds whatever the morph library left in
+   * it (it re-syncs the options from the server's `selected`), not the user's choice: nothing is reflected
+   * then, or the attribute would take that transient value before the choice is put back.
+   */
+  private _morphing = false;
+  /** The `value` attribute the server sent in a morph that changed it (null: it sent none). */
+  private _serverValueText: string | null = null;
 
   protected override willUpdate(changed: Map<string, unknown>): void {
     super.willUpdate(changed);
+    if (this._morphing) return;
     const now = this.value;
     if (now === this._reflected) return;
     const old = this._reflected;
@@ -190,7 +200,15 @@ export class VoidSelect extends VoidElement {
       const value = incoming.getAttribute('value') ?? '';
       this._serverValueChanged = value !== this._serverValue;
       // The server's new initial choice is the one a reset returns to.
-      if (this._serverValueChanged) this._initial = incoming.getAttribute('value');
+      this._serverValueText = this._serverValueChanged ? incoming.getAttribute('value') : null;
+      if (this._serverValueChanged) this._initial = this._serverValueText;
+      this._morphing = true;
+      // A morph that never reaches morphedCallback must not leave reflection off.
+      setTimeout(() => {
+        if (!this._morphing) return;
+        this._morphing = false;
+        this._reflectChoice();
+      }, 100);
       const serverChanged = now !== this._serverSelection || this._serverValueChanged;
       this._serverSelection = now;
       this._serverValue = value;
@@ -204,15 +222,17 @@ export class VoidSelect extends VoidElement {
     const valueChanged = this._serverValueChanged;
     this._keep = null;
     this._serverValueChanged = false;
+    const serverValue = this._serverValueText;
+    this._serverValueText = null;
+    this._morphing = false;
     const select = this.select;
     if (!select) return;
     // Server markup does not carry the aria-invalid the error wrote.
     if (this.error) this._markInvalid(select);
     // Morph libraries sync the select from its options' `selected` after the host's attributes, which would
     // undo a new `value` attribute (the server's choice): apply it again once the options are in place.
-    const value = this.getAttribute('value');
-    if (valueChanged && value !== null) {
-      this.value = value;
+    if (valueChanged && serverValue !== null) {
+      this.value = serverValue;
       return;
     }
     if (keep) {
