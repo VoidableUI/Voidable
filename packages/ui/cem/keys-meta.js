@@ -72,6 +72,18 @@ export const keysMeta = {
     essential: ['activate'],
     browser: [['Tab', 'Enters the tab list on its tab stop, then moves to the visible panel.']],
   },
+  'void-table': {
+    intro: 'Pattern: the [sortable table](https://www.w3.org/WAI/ARIA/apg/patterns/table/examples/sortable-table/) and a table with a checkbox in each row, not a `grid`: there is no cell navigation, every control is in the tab order. A sortable header is a real `<button>` inside the `<th>`, which carries `aria-sort`. Selection is the row checkboxes and a select-all checkbox in the header.',
+    actions: {
+      selectAll: 'Selects every row shown (after filtering), skipping disabled ones. It has no default key, because the page may use Control + A for something else and because select-all-text is how people copy a table: bind it with `keys=\'{"selectAll":["Control+a","Meta+a"]}\'`. It acts only from inside the body, only when `selectable` allows many rows, and never from a text field.',
+    },
+    browser: [
+      ['Tab, Shift + Tab', 'Move between the sort buttons, the filter field, the select-all and row checkboxes, and the controls in the rows.'],
+      ['Enter, Space (on a sort button)', 'Sorts by the column: ascending, then descending, then not sorted. Focus stays on the button; the new state is announced ("Sorted by Name, ascending").'],
+      ['Space (on a row or select-all checkbox)', 'Toggles it. Select-all acts on the rows shown (after filtering) and skips disabled ones; its state is checked, mixed or unchecked.'],
+      ['Shift + click, Shift + Space (on a row checkbox)', 'Selects (or clears) every row shown between the last row toggled and this one, as one change.'],
+    ],
+  },
   'void-radio': {
     intro: 'Pattern: [radio group](https://www.w3.org/WAI/ARIA/apg/patterns/radio/). One tab stop: the checked radio, or the first enabled one while none is checked. Selection follows focus, so each arrow key fires `void-change`. `<void-radio>` elements outside a group that share a `name` in the same form (or document) work the same way.',
     actions: {

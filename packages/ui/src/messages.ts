@@ -102,6 +102,23 @@ export interface MessageParameters {
   'statusDot.away': undefined;
   'statusDot.offline': undefined;
   'stepper.label': undefined;
+  /** The name of the header checkbox of a selectable table: it selects every row. */
+  'table.selectAll': undefined;
+  /** The name of the header checkbox while a filter hides rows: `count` is how many rows are shown. */
+  'table.selectAllShown': { count: number };
+  /** The announcement after a filter: `shown` of `total` rows. */
+  'table.rowsShown': { shown: number; total: number };
+  /** The announcement of the number of rows (no filter, or a manual table). */
+  'table.rows': { count: number };
+  /** The announcement after a selection changed: how many rows are selected. */
+  'table.selected': { count: number };
+  'table.noneSelected': undefined;
+  /** The announcement after select-all across pages: every one of `count` rows. */
+  'table.allSelected': { count: number };
+  /** The announcements after sorting; `column` is the column's name. */
+  'table.sortedAscending': { column: string };
+  'table.sortedDescending': { column: string };
+  'table.sortCleared': { column: string };
   'tagsInput.placeholder': undefined;
   'toast.region': undefined;
 }
@@ -199,6 +216,16 @@ const english: { [K in MessageKey]: Message<K> } = {
   'statusDot.away': 'Away',
   'statusDot.offline': 'Offline',
   'stepper.label': 'Progress',
+  'table.selectAll': 'Select all rows',
+  'table.selectAllShown': ({ count }, c) => `Select all ${c.number(count)} shown ${c.plural(count, { one: 'row', other: 'rows' })}`,
+  'table.rowsShown': ({ shown, total }, c) => `${c.number(shown)} of ${c.number(total)} ${c.plural(total, { one: 'row', other: 'rows' })}`,
+  'table.rows': ({ count }, c) => `${c.number(count)} ${c.plural(count, { one: 'row', other: 'rows' })}`,
+  'table.selected': ({ count }, c) => `${c.number(count)} selected`,
+  'table.noneSelected': 'No rows selected',
+  'table.allSelected': ({ count }, c) => `All ${c.number(count)} ${c.plural(count, { one: 'row', other: 'rows' })} selected`,
+  'table.sortedAscending': ({ column }) => `Sorted by ${column}, ascending`,
+  'table.sortedDescending': ({ column }) => `Sorted by ${column}, descending`,
+  'table.sortCleared': ({ column }) => `Sorting by ${column} removed`,
   'tagsInput.placeholder': 'Add tag...',
   'toast.region': 'Notifications',
 };

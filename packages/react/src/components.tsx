@@ -721,8 +721,6 @@ export const Table = wrapWc<VoidTable, {
   totalRows?: number;
   /** The user chose every row across the server's pages. */
   allSelected?: boolean;
-  /** Opt-in shortcuts, space separated: `select-all`. */
-  shortcuts?: string;
 } & VoidEvents<{
   Sort: { column: string; direction: 'ascending' | 'descending' | 'none' };
   Filter: { filter: string; shown: number; total: number };

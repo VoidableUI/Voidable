@@ -1,25 +1,11 @@
 import type { ComplexAttributeConverter, PropertyValues } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
-import { InternalsFormControl, type FormSubmission } from '../form-control.js';
-
-/**
- * Every user-facing string the table writes, in one place (to be moved into the messages registry).
- * A function takes the numbers or names the sentence is about.
- */
-const STRINGS = {
-  selectAll: 'Select all rows',
-  selectAllShown: (n: number) => `Select all ${n} shown rows`,
-  rowsShown: (shown: number, total: number) => `${shown} of ${total} rows`,
-  rows: (n: number) => `${n} rows`,
-  selected: (n: number) => `${n} selected`,
-  noneSelected: 'No rows selected',
-  allSelected: (n: number) => `All ${n} rows selected`,
-  ascending: 'ascending',
-  descending: 'descending',
-  sortedBy: (column: string, direction: string) => `Sorted by ${column}, ${direction}`,
-  sortCleared: (column: string) => `Sorting by ${column} removed`,
-};
+import { InternalsFormControl, type FormSubmission, type FormValidityResult } from '../form-control.js';
+import { actionFor } from '../keyboard.js';
+import { keysConverter, type KeyOverrides } from '../keys.js';
+import { tableKeys } from '../keymaps/table.js';
+import { localeOf, msg } from '../messages.js';
 
 /** A list of row values in a `value` attribute: a JSON array; empty is no attribute at all (a plain table carries none). */
 const rowValues: ComplexAttributeConverter<string[]> = {
@@ -79,6 +65,48 @@ function setBox(b: HTMLElement, checked: boolean, indeterminate = false): void {
 
 /** Case- and accent-insensitive form of text, for matching. */
 const fold = (s: string): string => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+
+const separators = new Map<string, { group: string; decimal: string }>();
+/** The group and decimal separators a locale writes numbers with. */
+function separatorsOf(locale: string): { group: string; decimal: string } {
+  let s = separators.get(locale);
+  if (!s) {
+    s = { group: ',', decimal: '.' };
+    try {
+      for (const p of new Intl.NumberFormat(locale).formatToParts(-12345.6)) {
+        if (p.type === 'group') s.group = p.value;
+        else if (p.type === 'decimal') s.decimal = p.value;
+      }
+    } catch {
+      // An unknown locale writes numbers as English does.
+    }
+    separators.set(locale, s);
+  }
+  return s;
+}
+
+/** A number as a reader of `locale` writes it ("1.234,5" in German, "1 234,5" in French, Arabic-Indic digits in Arabic). */
+function parseNumber(raw: string, locale: string): number {
+  const { group, decimal } = separatorsOf(locale);
+  let s = raw
+    .replace(/[٠-٩]/g, (d) => String(d.charCodeAt(0) - 0x660))
+    .replace(/[۰-۹]/g, (d) => String(d.charCodeAt(0) - 0x6f0))
+    .replace(/[\s  ]/g, '')
+    .replace(/[−–]/g, '-');
+  if (group.trim() !== '') s = s.split(group).join('');
+  if (decimal !== '.') s = s.split(decimal).join('.');
+  const n = Number(s);
+  return Number.isNaN(n) ? Number.parseFloat(s.replace(/[^\d.+\-eE]/g, '')) : n;
+}
+
+/** A count as the reader's locale writes it (the number in a `data-count` element). */
+function formatCount(n: number, locale: string): string {
+  try {
+    return new Intl.NumberFormat(locale).format(n);
+  } catch {
+    return String(n);
+  }
+}
 
 const collators = new Map<string, Intl.Collator>();
 function collator(lang: string): Intl.Collator {
@@ -175,7 +203,7 @@ interface Column {
  * **Server mode.** `manual` leaves ordering, visibility and selection markup to the server: the table only
  * updates header state and fires the events.
  *
- * Shortcuts are opt-in: `shortcuts="select-all"` lets Ctrl or Cmd plus A inside the body select every shown row.
+ * Shortcuts are opt-in: the `selectAll` key action has no default key, and `keys='{"selectAll":["Control+a","Meta+a"]}'` lets Ctrl or Cmd plus A inside the body select every shown row.
  *
  * @cssprop --void-table-max-height - Height at which a scrollable table starts scrolling vertically.
  * @fires {CustomEvent<{ column: string, direction: 'ascending' | 'descending' | 'none' }>} void-sort - A user activated a sortable header; cancelable.
@@ -228,8 +256,10 @@ export class VoidTable extends InternalsFormControl(VoidElement) {
   @property({ type: Number, reflect: true, attribute: 'total-rows' }) totalRows: number | null = null;
   /** Every row across the server's pages is selected (the user activated the select-all part). The server applies the action to the full set. */
   @property({ type: Boolean, reflect: true, attribute: 'all-selected' }) allSelected = false;
-  /** Opt-in keyboard shortcuts, separated by spaces: `select-all` (Ctrl or Cmd plus A in the body selects the shown rows). */
-  @property({ type: String, reflect: true }) shortcuts: string | null = null;
+  /** Key actions (JSON): `{"selectAll":["Control+a","Meta+a"]}` turns on select-all by keyboard, which has no default key. */
+  @property({ attribute: 'keys', converter: keysConverter }) keys: KeyOverrides | null = null;
+  /** @internal The actions of this element and their default keys. */
+  static readonly keyMap = tableKeys;
 
   /** Selected row values: the component's own state, the single source of truth. */
   #selected = new Set<string>();
@@ -245,6 +275,8 @@ export class VoidTable extends InternalsFormControl(VoidElement) {
   #selDirty = true;
   #hiddenDirty = false;
   #sortSig = '';
+  /** The locale the cached sort keys were read for. */
+  #keyLocale = '';
   #filterSig = '';
   #adopted = false;
   #anchor: string | null = null;
@@ -342,9 +374,17 @@ export class VoidTable extends InternalsFormControl(VoidElement) {
     this.requestUpdate('value', undefined);
   }
 
-  /** One entry per selected row. */
+  /**
+   * One entry per selected row. A table that is not `selectable` has nothing to submit: it is form-associated
+   * (that is fixed per class, so it is listed in `form.elements` either way) but it adds no entry to the form.
+   */
   protected formSubmission(): FormSubmission {
-    return this.value;
+    return this.selectable === null ? null : this.value;
+  }
+
+  /** `required` means "select at least one row": it has no meaning on a table that is not `selectable`. */
+  protected override formValidity(): FormValidityResult | null {
+    return this.selectable === null ? null : super.formValidity();
   }
 
   /**
@@ -381,6 +421,11 @@ export class VoidTable extends InternalsFormControl(VoidElement) {
       const input = this.#filterInput();
       const text = this.filter ?? '';
       if (input && input.value !== text) input.value = text;
+    }
+    // A redraw with nothing changed is the language changing (the messages registry): sort and name for it.
+    if (changed.size === 0) {
+      this.#sortSig = '';
+      this.#selDirty = true;
     }
     if (changed.has('sort') || changed.has('sortDirection')) this.#sortSig = '';
     if (changed.has('selectable') || changed.has('allSelected') || changed.has('totalRows')) this.#selDirty = true;
@@ -602,7 +647,7 @@ export class VoidTable extends InternalsFormControl(VoidElement) {
       }
     }
     if (filtering || parts.length > 0) {
-      const message = filtering && !this.manual ? STRINGS.rowsShown(shown, total) : STRINGS.rows(shown);
+      const message = filtering && !this.manual ? msg(this, 'table.rowsShown', { shown, total }) : msg(this, 'table.rows', { count: shown });
       if (this.#message === null) this.#message = message;
       else if (message !== this.#message) {
         this.#message = message;
@@ -674,19 +719,16 @@ export class VoidTable extends InternalsFormControl(VoidElement) {
     }
   }
 
-  #lang(): string {
-    return this.closest('[lang]')?.getAttribute('lang') ?? '';
-  }
-
   /** What a cell is compared by: its `data-sort-value`, else its text; null when empty (empty cells sort last). */
   #sortKey(row: Row, col: number, type: SortType): number | string | null {
     const cell = cellsOf(row.el)[col];
     if (!cell) return null;
-    const raw = (cell.getAttribute('data-sort-value') ?? cell.textContent ?? '').replace(/\s+/g, ' ').trim();
+    const authored = cell.getAttribute('data-sort-value');
+    const raw = (authored ?? cell.textContent ?? '').replace(/\s+/g, ' ').trim();
     if (raw === '') return null;
     if (type === 'number') {
-      let n = Number(raw);
-      if (Number.isNaN(n)) n = Number.parseFloat(raw.replace(/,/g, '').replace(/[^\d.+\-eE]/g, ''));
+      // A data-sort-value is machine-readable (1234.5); the text of a cell is written for the reader's locale (1.234,5).
+      const n = authored !== null && !Number.isNaN(Number(raw)) ? Number(raw) : parseNumber(raw, localeOf(this));
       return Number.isNaN(n) ? null : n;
     }
     if (type === 'date') {
@@ -705,9 +747,13 @@ export class VoidTable extends InternalsFormControl(VoidElement) {
     let order = rows;
     if (col >= 0) {
       const type = cols[col]!.type ?? 'text';
-      const coll = collator(this.#lang());
+      const locale = localeOf(this);
+      const coll = collator(locale);
+      // Numbers are read for the locale, so a change of language reads them again.
+      const relocale = this.#keyLocale !== locale;
+      this.#keyLocale = locale;
       for (const r of rows) {
-        if (r.keyCol !== col) {
+        if (relocale || r.keyCol !== col) {
           r.key = this.#sortKey(r, col, type);
           r.keyCol = col;
         }
@@ -837,7 +883,7 @@ export class VoidTable extends InternalsFormControl(VoidElement) {
     if (headBox) {
       setBox(headBox, all, !all && count > 0);
       const filtering = !!this.filter?.trim();
-      const name = filtering ? STRINGS.selectAllShown(shown.length) : STRINGS.selectAll;
+      const name = filtering ? msg(this, 'table.selectAllShown', { count: shown.length }) : msg(this, 'table.selectAll');
       const current = headBox.getAttribute('aria-label');
       const mine = this.#autoName.get(headBox);
       const authored = headBox.hasAttribute('aria-labelledby') || (current !== null && current !== mine);
@@ -849,11 +895,12 @@ export class VoidTable extends InternalsFormControl(VoidElement) {
     const total = this.value.length;
     const n = this.allSelected && this.totalRows !== null ? this.totalRows : total;
     const multiple = this.selectable !== 'single';
+    const counted = formatCount(n, localeOf(this));
     for (const p of this.getElementsByTagName('void-table-selection')) {
       if (!this.#owns(p)) continue;
       this.#setHidden(p, n === 0);
       for (const c of p.querySelectorAll('[data-count]')) {
-        if (c.textContent !== String(n)) c.textContent = String(n);
+        if (c.textContent !== counted) c.textContent = counted;
       }
     }
     for (const p of this.getElementsByTagName('void-table-select-all')) {
@@ -870,7 +917,7 @@ export class VoidTable extends InternalsFormControl(VoidElement) {
     this.requestUpdate('value', undefined);
     this.#paint();
     const value = this.value;
-    this.#say(value.length ? STRINGS.selected(value.length) : STRINGS.noneSelected);
+    this.#say(value.length ? msg(this, 'table.selected', { count: value.length }) : msg(this, 'table.noneSelected'));
     this.#mutations?.takeRecords();
     this.dispatchEvent(new CustomEvent('void-change', { bubbles: true, composed: true, detail: { value, all: false } }));
   }
@@ -927,7 +974,7 @@ export class VoidTable extends InternalsFormControl(VoidElement) {
     if (this.allSelected || this.totalRows === null) return;
     this.allSelected = true;
     this.#paint();
-    this.#say(STRINGS.allSelected(this.totalRows));
+    this.#say(msg(this, 'table.allSelected', { count: this.totalRows }));
     this.#mutations?.takeRecords();
     this.dispatchEvent(new CustomEvent('void-change', { bubbles: true, composed: true, detail: { value: this.value, all: true } }));
   }
@@ -961,7 +1008,7 @@ export class VoidTable extends InternalsFormControl(VoidElement) {
     this.sort = next === 'none' ? null : key;
     this.sortDirection = next === 'none' ? null : next;
     const name = (th.getAttribute('data-label') ?? th.textContent ?? '').replace(/\s+/g, ' ').trim();
-    this.#say(next === 'none' ? STRINGS.sortCleared(name) : STRINGS.sortedBy(name, STRINGS[next]));
+    this.#say(next === 'none' ? msg(this, 'table.sortCleared', { column: name }) : msg(this, next === 'ascending' ? 'table.sortedAscending' : 'table.sortedDescending', { column: name }));
   }
 
   #onChange = (e: Event): void => {
@@ -1005,11 +1052,13 @@ export class VoidTable extends InternalsFormControl(VoidElement) {
     }, FILTER_DEBOUNCE);
   };
 
-  /** Opt-in only (`shortcuts="select-all"`): Ctrl or Cmd plus A inside the body selects the rows shown. */
+  /**
+   * The `selectAll` key action, which has no default key (an application binds one with `keys`): selects the rows
+   * shown, only from the body, only when `selectable` allows many rows, never from a text field.
+   */
   #onKeydown = (e: KeyboardEvent): void => {
-    if (e.key.toLowerCase() !== 'a' || !(e.ctrlKey || e.metaKey) || e.shiftKey || e.altKey) return;
     if (this.selectable === null || this.selectable === 'single') return;
-    if (!(this.shortcuts ?? '').split(/\s+/).includes('select-all')) return;
+    if (actionFor(this, e) !== 'selectAll') return;
     const t = e.target;
     if (!(t instanceof Element) || !t.closest('tbody') || t.closest('input:not([type="checkbox"]), textarea, select, [contenteditable]:not([contenteditable="false"])')) return;
     e.preventDefault();

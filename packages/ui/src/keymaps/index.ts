@@ -12,6 +12,7 @@ import { dropdownMenuKeys, menuKeys } from './menu.js';
 import { navMenuKeys } from './nav-menu.js';
 import { overlayKeys } from './overlay.js';
 import { calendarKeys, comboboxKeys, datePickerKeys, multiselectKeys } from './pickers.js';
+import { tableKeys } from './table.js';
 import { tabsKeys } from './tabs.js';
 
 export const keyMaps: Record<string, KeyMap> = {
@@ -45,6 +46,7 @@ export const keyMaps: Record<string, KeyMap> = {
   'void-segmented-control': choiceKeys,
   'void-segmented-control-item': pressKeys,
   'void-switch': activateKeys,
+  'void-table': tableKeys,
   'void-tabs': tabsKeys,
   'void-tags-input': tagsInputKeys,
   'void-toggle': activateKeys,

@@ -22,7 +22,13 @@ const keyed: Record<string, KeyAction[]> = {};
 for (const m of manifest.modules) for (const d of m.declarations ?? []) if (d.tagName && d.voidKeys && (d.attributes ?? []).some((a: any) => a.name === 'keys')) keyed[d.tagName] = d.voidKeys.actions;
 
 /** Where a key reaches the component, and what to do first, for the elements whose keys act on a part or an open state. */
-const setup: Record<string, { target?: string; action?: string; prepare?: string; snippet?: string; watch?: 'open' }> = {
+const setup: Record<string, { target?: string; action?: string; prepare?: string; snippet?: string; markup?: string; watch?: 'open' }> = {
+  // A shortcut: no default key, so the cases bind one first. It needs a selectable table with a body checkbox.
+  'void-table': {
+    target: 'tbody td',
+    action: 'selectAll',
+    markup: '<void-table selectable aria-label="Orders"><table><thead><tr><th><input type="checkbox" aria-label="Select all"></th><th>Order</th></tr></thead><tbody><tr data-value="1"><td><input type="checkbox" aria-label="Select 1"></td><td>1</td></tr><tr data-value="2"><td><input type="checkbox" aria-label="Select 2"></td><td>2</td></tr></tbody></table></void-table>',
+  },
   'void-tabs': { target: 'void-tabs-trigger', action: 'last' },
   'void-toggle-group': { target: 'void-toggle', action: 'last' },
   'void-segmented-control': { target: 'void-segmented-control-item', action: 'last' },
@@ -70,7 +76,7 @@ async function mount(page: Page, tag: string, keys?: unknown) {
     const el = d.querySelector(tag) as any;
     if (keys !== undefined) el.keys = keys;
     await (window as any).__settle(d);
-  }, { markup: html(setup[tag]?.snippet ?? tag), tag, keys });
+  }, { markup: setup[tag]?.markup ?? html(setup[tag]?.snippet ?? tag), tag, keys });
 }
 
 async function prepare(page: Page, tag: string) {
@@ -83,11 +89,11 @@ async function prepare(page: Page, tag: string) {
 }
 
 /** Sends a keydown to the target; true when something called preventDefault (the component acted on it). */
-async function send(page: Page, tag: string, key: string, init: { shift?: boolean; alt?: boolean } = {}) {
+async function send(page: Page, tag: string, key: string, init: { shift?: boolean; alt?: boolean; ctrl?: boolean } = {}) {
   return page.evaluate(async ({ tag, key, sel, init, watch }) => {
     const root = document.querySelector(`#case ${tag}`) as HTMLElement;
     const target = ((sel ? root.querySelector(sel) : null) ?? root) as HTMLElement;
-    const e = new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true, composed: true, shiftKey: !!init.shift, altKey: !!init.alt });
+    const e = new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true, composed: true, shiftKey: !!init.shift, altKey: !!init.alt, ctrlKey: !!init.ctrl });
     target.focus?.();
     const open = (root as any).open;
     target.dispatchEvent(e);
@@ -97,21 +103,28 @@ async function send(page: Page, tag: string, key: string, init: { shift?: boolea
 }
 
 /** A key string as a keydown: the key, with the modifiers it names. */
-function parse(spec: string): { key: string; shift: boolean; alt: boolean } {
+function parse(spec: string): { key: string; shift: boolean; alt: boolean; ctrl: boolean } {
   const parts = spec.split('+');
   const key = spec.endsWith('++') ? '+' : parts[parts.length - 1]!;
   const mods = spec.endsWith('++') ? parts.slice(0, -2) : parts.slice(0, -1);
   const named = key === 'Space' ? ' ' : key;
-  return { key: named, shift: mods.includes('Shift'), alt: mods.includes('Alt') };
+  return { key: named, shift: mods.includes('Shift'), alt: mods.includes('Alt'), ctrl: mods.includes('Control') };
 }
 
-/** The first default key of the action that a keydown on the target can express. */
-function pick(tag: string): { action: string; spec: string } {
+/** The key an application binds to an action that has no default key (a shortcut: opt-in). */
+const SHORTCUT = 'Control+a';
+
+/**
+ * The first default key of the action that a keydown on the target can express. An action with no default key is
+ * a shortcut: `optIn` is true and `spec` is the key the cases bind to it first.
+ */
+function pick(tag: string): { action: string; spec: string; optIn: boolean } {
   const list = keyed[tag]!;
   const want = setup[tag]?.action;
   const a = list.find((x) => x.action === want) ?? list.find((x) => x.action === 'activate') ?? list.find((x) => x.keys.some((k) => k !== 'Printable' && !k.includes('Inline'))) ?? list[0]!;
+  if (a.keys.length === 0) return { action: a.action, spec: SHORTCUT, optIn: true };
   const spec = a.keys.find((k) => k !== 'Printable') ?? a.keys[0]!;
-  return { action: a.action, spec: spec.replace('ArrowInlineEnd', 'ArrowRight').replace('ArrowInlineStart', 'ArrowLeft') };
+  return { action: a.action, spec: spec.replace('ArrowInlineEnd', 'ArrowRight').replace('ArrowInlineStart', 'ArrowLeft'), optIn: false };
 }
 
 test.describe('every element with key actions', () => {
@@ -126,9 +139,9 @@ test.describe('every element with key actions', () => {
   for (const tag of tags) {
     test.describe(tag, () => {
       test('(a) a capture-phase preventDefault stops the default key', async ({ page }) => {
-        const { spec } = pick(tag);
+        const { action, spec, optIn } = pick(tag);
         const k = parse(spec);
-        await mount(page, tag);
+        await mount(page, tag, optIn ? { [action]: [spec] } : undefined);
         await prepare(page, tag);
         await page.evaluate(() => {
           (window as any).__cancel = (e: KeyboardEvent) => e.preventDefault();
@@ -152,13 +165,25 @@ test.describe('every element with key actions', () => {
       });
 
       test('(c) an empty list turns the action off', async ({ page }) => {
-        const { action, spec } = pick(tag);
+        const { action, spec, optIn } = pick(tag);
         const k = parse(spec);
-        await mount(page, tag);
+        await mount(page, tag, optIn ? { [action]: [spec] } : undefined);
         await prepare(page, tag);
         await page.evaluate(({ t, a }) => { (document.querySelector(`#case ${t}`) as any).keys = { [a]: [] }; }, { t: tag, a: action });
         await settle(page);
         expect(await send(page, tag, k.key, k), `${spec} still acts`).toBe(false);
+      });
+
+      test('(d) an action with no default key does nothing until an application binds one', async ({ page }) => {
+        const { action, spec, optIn } = pick(tag);
+        test.skip(!optIn, 'every key of this element is on by default');
+        const k = parse(spec);
+        await mount(page, tag);
+        await prepare(page, tag);
+        expect(await send(page, tag, k.key, k), `${spec} acts with no binding`).toBe(false);
+        await page.evaluate(({ t, a, s }) => { (document.querySelector(`#case ${t}`) as any).keys = { [a]: [s] }; }, { t: tag, a: action, s: spec });
+        await settle(page);
+        expect(await send(page, tag, k.key, k), `${spec} does nothing once bound`).toBe(true);
       });
     });
   }

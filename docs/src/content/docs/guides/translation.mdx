@@ -91,7 +91,7 @@ A language with six forms (Arabic) writes `zero`, `one`, `two`, `few`, `many` an
 
 ## Dates, numbers and the week
 
-A calendar and a date picker follow the closest `lang` for month and weekday names, the day numbers and the long date each day announces (`lundi 15 janvier 2024`). Set `locale` on one of them to use another language than the page's. Without a `lang` anywhere the locale is `en-US`: earlier versions always used `en-US`, even in a page marked `lang="de"`; see [Upgrading](/guides/upgrading/#language-and-locale-011).
+A calendar and a date picker follow the closest `lang` for month and weekday names, the day numbers and the long date each day announces (`lundi 15 janvier 2024`). Set `locale` on one of them to use another language than the page's. Without a `lang` anywhere the locale is `en-US`: earlier versions always used `en-US`, even in a page marked `lang="de"`; see [Upgrading](/guides/upgrading/#language-and-locale-012).
 
 The week starts on the day the locale's week information gives (`Intl.Locale`, so Monday for `fr`, Sunday for `en-US`, Saturday for `ar-EG`). `first-day` (0 is Sunday, 6 is Saturday) overrides it. A browser that does not provide week information starts on Sunday. Month and weekday names are always Gregorian, whatever calendar the language prefers.
 

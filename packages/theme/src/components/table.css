@@ -137,8 +137,9 @@ void-table td[data-stack="actions"] > * + * {
 void-table td[data-stack="actions"]:last-child > :last-child {
   margin-inline-end: calc(var(--void-control-padding-sm) * -1.25);
 }
+/* Every other row that is shown: a row a filter hides does not count, so the stripes stay even. `:where` keeps the specificity of a plain `:nth-child`. */
 
-void-table[striped] tbody tr:nth-child(even) {
+void-table[striped] tbody tr:nth-child(even of :where(:not([hidden]))) {
   background: var(--void-color-bg-secondary);
 }
 
@@ -291,7 +292,7 @@ void-table[sticky-column] thead th:first-child {
 }
 
 /* Striped and hovered rows tint the sticky cell too. */
-void-table[sticky-column][striped] tbody tr:nth-child(even) > :first-child,
+void-table[sticky-column][striped] tbody tr:nth-child(even of :where(:not([hidden]))) > :first-child,
 void-table[sticky-column][hoverable] tbody tr:hover > :first-child {
   background-image: linear-gradient(var(--void-color-bg-secondary), var(--void-color-bg-secondary));
 }

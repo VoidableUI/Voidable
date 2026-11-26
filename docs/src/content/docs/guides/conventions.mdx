@@ -135,7 +135,7 @@ What is not a treatment is not a variant: the skeleton's form is `shape` (`text`
 **A key is an action, and an element's actions have the same names everywhere.** An element reads its keys through a map of action to keys (its `keyMap`), never by comparing `e.key` in a handler, and an application can switch an action off or move it (`keys`, `configureKeys`; see [Customising keys](/components/keyboard/#customising-keys)). Two rules follow:
 
 1. **A key handler returns early for an event that is already `defaultPrevented`** (and while a text composition is in progress), so an application can take a key by cancelling it before the element sees it.
-2. **The default keys are the standard keys of the control and stay on; a shortcut is opt-in.** An action with no default key is how an application adds one. No element binds Control or Meta by default.
+2. **A focused control's own keys are on by default; a shortcut is opt-in.** The standard keys of a widget once it has focus (Space on a checkbox, arrows in a tablist, Enter on a sort button) are its default bindings, and an application can cancel, rebind or unbind them. A shortcut, a key that acts on more than the control the user is in (select every row with Control + A), is an action with **no default binding** that the application switches on by giving it a key (`keys='{"selectAll":["Control+a","Meta+a"]}'`). No element binds Control or Meta by default, and none acts from a text field.
 
 The vocabulary:
 

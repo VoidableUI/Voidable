@@ -212,7 +212,7 @@ describe('VoidTable data features', () => {
       await settle(el);
       expect(vals(el)).toEqual(['a']);
       const head = el.querySelector('thead input') as HTMLInputElement;
-      expect(head.getAttribute('aria-label')).toBe('Select all 1 shown rows');
+      expect(head.getAttribute('aria-label')).toBe('Select all 1 shown row');
       click(head);
       expect(el.value).toEqual(['a']);
       el.filter = null;
@@ -284,16 +284,36 @@ describe('VoidTable data features', () => {
       const press = (): boolean => boxes(el)[0]!.dispatchEvent(new KeyboardEvent('keydown', { key: 'a', ctrlKey: true, bubbles: true, cancelable: true }));
       expect(press()).toBe(true);
       expect(el.value).toEqual([]);
-      el.setAttribute('shortcuts', 'select-all');
+      el.setAttribute('keys', '{"selectAll":["Control+a","Meta+a"]}');
       expect(press()).toBe(false);
       expect(el.value).toHaveLength(4);
     });
 
     it('does not select when a text input is the target', async () => {
-      const el = make('selectable shortcuts="select-all"', SEL_ROWS.replace('<td>a</td>', '<td><input type="text"></td>'), SEL_HEAD);
+      const el = make('selectable keys=\'{"selectAll":["Control+a"]}\'', SEL_ROWS.replace('<td>a</td>', '<td><input type="text"></td>'), SEL_HEAD);
       await settle(el);
       const text = el.querySelector('tbody input[type="text"]')!;
       text.dispatchEvent(new KeyboardEvent('keydown', { key: 'a', ctrlKey: true, bubbles: true, cancelable: true }));
+      expect(el.value).toEqual([]);
+    });
+
+    it('Ctrl+A leaves a key the application already took (defaultPrevented) and honours Meta+A when bound', async () => {
+      const el = make('selectable keys=\'{"selectAll":["Control+a","Meta+a"]}\'', SEL_ROWS, SEL_HEAD);
+      await settle(el);
+      const taken = (e: KeyboardEvent) => e.preventDefault();
+      document.addEventListener('keydown', taken, true);
+      boxes(el)[0]!.dispatchEvent(new KeyboardEvent('keydown', { key: 'a', ctrlKey: true, bubbles: true, cancelable: true }));
+      document.removeEventListener('keydown', taken, true);
+      expect(el.value).toEqual([]);
+      boxes(el)[0]!.dispatchEvent(new KeyboardEvent('keydown', { key: 'a', metaKey: true, bubbles: true, cancelable: true }));
+      expect(el.value).toHaveLength(4);
+    });
+
+    it('selectAll has no default key and is ignored in single mode', async () => {
+      const el = make('selectable="single" keys=\'{"selectAll":["Control+a"]}\'', SEL_ROWS, SEL_HEAD);
+      await settle(el);
+      const handled = !boxes(el)[0]!.dispatchEvent(new KeyboardEvent('keydown', { key: 'a', ctrlKey: true, bubbles: true, cancelable: true }));
+      expect(handled).toBe(false);
       expect(el.value).toEqual([]);
     });
 

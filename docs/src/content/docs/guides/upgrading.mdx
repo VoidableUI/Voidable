@@ -80,7 +80,17 @@ Charts take their data from markup and carry a data table; two things in existin
 
 New: the `data` attribute (a gauge's `zones` too) with JSON, `show-table`, and the adapter helpers (React `data` as an attribute, Rails `void_bar_chart` and the other chart helpers, Blade `<x-voidable::bar-chart>` and the other chart components). See [Accessibility](/guides/accessibility/#charts-and-gauges) and the [conventions](/guides/conventions/).
 
-## Language and locale (0.11)
+## 0.12.0 at a glance
+
+Three things change behaviour, and only for code that relied on them:
+
+- **The calendar and date picker default to the page's language**, not `en-US` (see "Language and locale" below). Write `locale="en-US"` to keep the old look.
+- **Shift + Arrow on a tab list and Alt + Up on a closed combobox are no longer handled** (see "Keys" below): they are left to the browser.
+- **`KeyboardActivation` loses its `enter` and `space` options** (internal API; the element's `keyMap` decides).
+
+Nothing else breaks. New in 0.12.0: the [testing helper](/guides/testing/) (`@voidable/ui/testing`), the messages registry with French and Arabic (`@voidable/ui/messages`), key actions (`keys`, `configureKeys`, `@voidable/ui/keys`), and sorting, filtering and selection in `void-table` (below). The sections that follow say what each does to existing markup.
+
+## Language and locale (0.12)
 
 The words the components write and the locale they format in follow `lang` now (see [Translation](/guides/translation/)). In a page with no `lang` nothing changes, apart from the points below.
 
@@ -121,6 +131,6 @@ These changes make the role and name each component exposes match the WAI-ARIA p
 - **Hamburger `void-open` reason**: Enter and Space now report `keyboard`, as every other overlay does, and a click still reports `trigger`. A handler that compared `detail.reason` with `trigger` to mean "the user opened it" must accept both; `void-close` is still `trigger`.
 - **Date picker** takes a typed date. The field was read-only; it is a text field now, so Space types a space once text has been typed (it still opens the calendar on an untouched field, as Enter does), and a typed date is read on blur and Enter in `format` or as ISO. A refused date keeps the text and sets `error` (the new attribute, with `aria-invalid` and a described-by message) and blocks form submission; `void-change` fires only for a date that was taken, and `detail.date` is `null` when the field is cleared. If you wrapped the field to keep users from typing, listen for `void-change` as before: nothing else changed.
 
-## Table sorting, filtering and selection
+## Table sorting, filtering and selection (0.12)
 
-Nothing breaks. `void-table` gains `data-sort` on header cells, `sort`, `sort-direction`, `filter`, `filter-columns`, `selectable`, `value`, `manual`, `total-rows`, `all-selected` and `shortcuts` on the host, the parts `<void-table-filter>`, `<void-table-empty>`, `<void-table-selection>` and `<void-table-select-all>`, and the events `void-sort`, `void-filter` and `void-change`. A table that uses none of them behaves, and costs, as before. Two things to know if you already did this by hand: a table with a `name` and `selectable` is now a form control (one entry per selected row), and `[hidden]` on a `<tr>` is respected in a stacked table. See [Table](/components/table/).
+Nothing breaks. `void-table` gains `data-sort` on header cells, `sort`, `sort-direction`, `filter`, `filter-columns`, `selectable`, `value`, `manual`, `total-rows`, `all-selected` and `keys` on the host, the parts `<void-table-filter>`, `<void-table-empty>`, `<void-table-selection>` and `<void-table-select-all>`, and the events `void-sort`, `void-filter` and `void-change`. A table that uses none of them behaves, and costs, as before. Two things to know if you already did this by hand: a table with a `name` and `selectable` is now a form control (one entry per selected row), and `[hidden]` on a `<tr>` is respected in a stacked table. A table without `selectable` submits nothing and ignores `required`, though it is listed in `form.elements`. Select-all by keyboard is the `selectAll` key action, which has no default key: write `keys='{"selectAll":["Control+a","Meta+a"]}'` to turn it on. See [Table](/components/table/).

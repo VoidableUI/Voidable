@@ -1130,7 +1130,6 @@ defmodule VoidableUI.Components do
   attr :name, :string, default: nil
   attr :total_rows, :integer, default: nil
   attr :all_selected, :boolean, default: false
-  attr :shortcuts, :string, default: nil, doc: "opt-in shortcuts: `select-all`"
   attr :events, :any, default: nil, doc: @events_doc
   attr :striped, :boolean, default: false
   attr :hoverable, :boolean, default: false
@@ -1160,7 +1159,6 @@ defmodule VoidableUI.Components do
       name={@name}
       total-rows={@total_rows}
       all-selected={@all_selected}
-      shortcuts={@shortcuts}
       phx-hook={void_hook(@events)}
       data-void-events={void_events(@events, "void-sort,void-filter,void-change")}
       striped={@striped}

@@ -90,6 +90,48 @@ registerMessages('ar', {
   'statusDot.away': 'بعيد',
   'statusDot.offline': 'غير متصل',
   'stepper.label': 'التقدّم',
+  'table.selectAll': 'تحديد كل الصفوف',
+  'table.selectAllShown': ({ count }, c) =>
+    c.plural(count, {
+      zero: 'لا صفوف معروضة',
+      one: 'تحديد الصف المعروض',
+      two: 'تحديد الصفين المعروضين',
+      few: `تحديد الصفوف المعروضة (${c.number(count)})`,
+      many: `تحديد الصفوف المعروضة (${c.number(count)})`,
+      other: `تحديد الصفوف المعروضة (${c.number(count)})`,
+    }),
+  'table.rowsShown': ({ shown, total }, c) =>
+    `${c.number(shown)} من ${c.plural(total, {
+      zero: 'لا صفوف',
+      one: 'صف واحد',
+      two: 'صفين',
+      few: `${c.number(total)} صفوف`,
+      many: `${c.number(total)} صفًا`,
+      other: `${c.number(total)} صف`,
+    })}`,
+  'table.rows': ({ count }, c) =>
+    c.plural(count, {
+      zero: 'لا صفوف',
+      one: 'صف واحد',
+      two: 'صفان',
+      few: `${c.number(count)} صفوف`,
+      many: `${c.number(count)} صفًا`,
+      other: `${c.number(count)} صف`,
+    }),
+  'table.selected': ({ count }, c) =>
+    c.plural(count, {
+      zero: 'لا شيء محدد',
+      one: 'محدد صف واحد',
+      two: 'محدد صفان',
+      few: `محددة ${c.number(count)} صفوف`,
+      many: `محدد ${c.number(count)} صفًا`,
+      other: `محدد ${c.number(count)} صف`,
+    }),
+  'table.noneSelected': 'لم يُحدد أي صف',
+  'table.allSelected': ({ count }, c) => `تم تحديد جميع الصفوف (${c.number(count)})`,
+  'table.sortedAscending': ({ column }) => `مرتب حسب ${column}، تصاعديًا`,
+  'table.sortedDescending': ({ column }) => `مرتب حسب ${column}، تنازليًا`,
+  'table.sortCleared': ({ column }) => `أُزيل الترتيب حسب ${column}`,
   'tagsInput.placeholder': 'أضف وسمًا...',
   'toast.region': 'الإشعارات',
 });

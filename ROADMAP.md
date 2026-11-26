@@ -76,9 +76,9 @@ The API review before 1.0 listed what is still missing against mainstream librar
 | Rating, Toolbar, Fieldset, Tree View, Listbox | Tier B above |
 | Context Menu, Menubar, Alert Dialog, Timeline, Password Input, Splitter, KBD | Tier C above |
 | Area, pie, scatter and sparkline charts | Not yet tiered: chart types beside bar, donut, line and gauge |
-| Data grid | Partly shipped ([#89](https://github.com/VoidableUI/Voidable/issues/89)): `void-table` sorts (one column, text, number and date), filters (all or chosen columns, an empty part, a live count), selects (rows, range, select-all with a mixed state, form value, "all N rows" across server pages) and has a `manual` server mode for LiveView, Livewire and Turbo. Remaining, not tiered: virtualised rows, per-column filters, multi-column sort, column resizing and reordering, inline editing, grouping, export, and client-side pagination of filtered rows |
-| A visually hidden data table for charts | Not yet tiered: charts are `role="img"` with an `aria-label` only |
-| Translatable built-in strings ("Close", "No options found", "Calendar", "PIN input") | Not yet tiered: a labels mechanism for every component |
+| Data grid | Partly shipped ([#89](https://github.com/VoidableUI/Voidable/issues/89)): `void-table` sorts (one column, text, number and date), filters (all or chosen columns, an empty part, a live count), selects (rows, range, select-all with a mixed state, form value, "all N rows" across server pages) and has a `manual` server mode for LiveView, Livewire and Turbo, with its words in the messages catalogue and select-all by keyboard as an opt-in key action. Remaining, not tiered: virtualised rows, per-column filters, multi-column sort, column resizing and reordering, inline editing, grouping, export, and client-side pagination of filtered rows |
+| A visually hidden data table for charts | Shipped in 0.10: a chart is a `figure` with a visually hidden data table |
+| Translatable built-in strings ("Close", "No options found", "Calendar", "PIN input") | Shipped in 0.12.0: the messages registry (`@voidable/ui/messages`) with French and Arabic, following `lang`; every built-in string, the table's included, is a message |
 
 The renames of what authors write shipped in 0.8 ([API conventions](docs/src/content/docs/guides/conventions.mdx)). Left for a later release, because they add rather than rename:
 
