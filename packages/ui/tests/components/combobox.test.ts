@@ -49,7 +49,7 @@ describe('VoidCombobox', () => {
     });
 
     it('placeholder defaults to "Search..."', () => {
-      expect(el.placeholder).toBe('Search...');
+      expect(el.placeholder).toBe('');
     });
 
     it('value defaults to empty string', () => {

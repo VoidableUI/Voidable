@@ -5,6 +5,7 @@ import React, { forwardRef, useCallback, useEffect, useLayoutEffect, useRef } fr
 // Registers every `<void-*>` custom element (idempotent `customElements.define`
 // guards live in the core package). See README "Element registration".
 import '@voidable/ui';
+import type { KeyOverrides } from '@voidable/ui';
 
 import type {
   VoidBadge,
@@ -123,6 +124,8 @@ export type VoidEvents<M> = {
 type VoidProps<P = object> = P &
   Omit<React.HTMLAttributes<HTMLElement>, keyof P> & {
     children?: React.ReactNode;
+    /** Key bindings for this element's actions, as an object: `{ close: [], next: ['j'] }`. `[]` or `null` switches an action off. Only the elements with key actions read it (see the keyboard guide). */
+    keys?: KeyOverrides;
   };
 
 // ---------------------------------------------------------------------------
@@ -309,6 +312,17 @@ const JSON_PROPS: Record<string, readonly string[]> = {
   'void-donut-chart': ['data'],
   'void-gauge': ['data', 'zones'],
 };
+
+/** The elements with key actions: their `keys` prop (an object) is written as the JSON `keys` attribute. A test keeps this list equal to the manifest's. */
+export const KEYED_TAGS = [
+  'void-accordion-item', 'void-button', 'void-calendar', 'void-carousel', 'void-carousel-next', 'void-carousel-previous',
+  'void-checkbox', 'void-collapsible', 'void-combobox', 'void-compose-input', 'void-date-picker', 'void-dialog',
+  'void-drawer', 'void-dropdown-menu', 'void-dropdown-menu-item', 'void-editable', 'void-file-upload', 'void-hamburger',
+  'void-hover-card', 'void-menu', 'void-menu-item', 'void-multiselect', 'void-nav-menu', 'void-number-input',
+  'void-pin-input', 'void-popover', 'void-radio', 'void-segmented-control', 'void-segmented-control-item', 'void-switch',
+  'void-table', 'void-tabs', 'void-tags-input', 'void-toggle', 'void-toggle-group', 'void-tooltip',
+] as const;
+for (const t of KEYED_TAGS) JSON_PROPS[t] = [...(JSON_PROPS[t] ?? []), 'keys'];
 
 function wrapWc<E extends HTMLElement, P = object>(
   tag: string,
@@ -686,7 +700,32 @@ export const Table = wrapWc<VoidTable, {
   maxHeight?: string;
   /** Accessible name of the scroll region (default: the caption). */
   label?: string;
-}>('void-table', 'Table');
+  /** Key (`data-key` of the header cell, else its position) of the sorted column. */
+  sort?: string;
+  /** Direction of the sort; `sort` without it is ascending. */
+  sortDirection?: 'ascending' | 'descending';
+  /** Hides the rows that do not contain every word (no case, no accents). */
+  filter?: string;
+  /** Keys of the columns `filter` looks at (default: all). */
+  filterColumns?: string;
+  /** Wire the row checkboxes: `""` or `true` for many rows, `"single"` for one. */
+  selectable?: string | boolean;
+  /** The server renders order, visibility, `aria-sort` and selection; the table only fires events. */
+  manual?: boolean;
+  /** The selected row values (`data-value` of the rows, else their position). Form value when `name` is set. */
+  value?: string[];
+  name?: string;
+  /** At least one row selected, for a form. */
+  required?: boolean;
+  /** Rows in all, across the server's pages: lets `<TableSelectAll>` offer "all N rows". */
+  totalRows?: number;
+  /** The user chose every row across the server's pages. */
+  allSelected?: boolean;
+} & VoidEvents<{
+  Sort: { column: string; direction: 'ascending' | 'descending' | 'none' };
+  Filter: { filter: string; shown: number; total: number };
+  Change: { value: string[]; all: boolean };
+}>>('void-table', 'Table');
 
 export const Pagination = wrapWc<VoidPagination, {
   total?: number;

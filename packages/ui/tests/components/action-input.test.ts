@@ -50,7 +50,7 @@ describe('VoidActionInput', () => {
     it('color defaults to "default"', () => expect(el.color).toBe('default'));
     it('type defaults to "text"', () => expect(el.type).toBe('text'));
     it('icon defaults to "search"', () => expect(el.icon).toBe('search'));
-    it('actionLabel defaults to "Action"', () => expect(el.actionLabel).toBe('Action'));
+    it('actionLabel defaults to empty: the actionInput.action message names the button', () => expect(el.actionLabel).toBe(''));
     it('iconSide defaults to "end"', () => expect(el.iconSide).toBe('end'));
     it('tooltipSide defaults to "top"', () => expect(el.tooltipSide).toBe('top'));
   });

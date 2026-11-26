@@ -3,7 +3,8 @@
 // The pickers (#52) before and after their script: written as the final DOM
 // (a native <select>, the content part of options), they take the same space
 // before the upgrade as after it, and the upgrade moves none of their nodes.
-import { test, expect, settle } from '../helpers/test';
+import { voidReady } from '@voidable/ui/testing';
+import { test, expect } from '../helpers/test';
 
 const IDS = ['select', 'combobox', 'multiselect', 'after'];
 
@@ -15,7 +16,9 @@ test('the pickers do not shift the layout when their script arrives late', async
     await route.continue();
   });
   await page.goto('/pickers', { waitUntil: 'commit' });
-  await page.waitForFunction(() => document.readyState !== 'loading' && !!document.getElementById('after'));
+  // Poll on a timer, not on animation frames: WebKit paints no frame while the script is held, so a
+  // frame-polled wait that starts before the page is parsed never finishes.
+  await page.waitForFunction(() => document.readyState !== 'loading' && !!document.getElementById('after'), undefined, { polling: 50 });
   const boxes = () =>
     page.evaluate((ids) => ids.map((id) => {
       const r = document.getElementById(id)!.getBoundingClientRect();
@@ -31,8 +34,7 @@ test('the pickers do not shift the layout when their script arrives late', async
   const before = await boxes();
   const count = await marks();
   release();
-  await page.waitForFunction(() => !!customElements.get('void-multiselect') && typeof (window as any).__settle === 'function');
-  await settle(page);
+  await voidReady(page, { expect: ['void-multiselect'] });
   const after = await boxes();
   for (let i = 0; i < IDS.length; i++) {
     expect(Math.abs(after[i]!.top - before[i]!.top), `${IDS[i]} top`).toBeLessThanOrEqual(1);

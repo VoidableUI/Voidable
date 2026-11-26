@@ -27,14 +27,16 @@ func attr(name, typ, def string) Attribute {
 func testCatalog() *Catalog {
 	return NewCatalog("1.2.3", []Element{
 		{Tag: "void-button", Class: "VoidButton",
-			Attributes: []Attribute{attr("variant", "'outline' | 'filled'", "outline"), attr("color", "'default' | 'error'", "default"), attr("disabled", "boolean", "false")},
-			Events:     []Event{{Name: "void-click", Detail: "{}"}}},
+			Attributes: []Attribute{attr("variant", "'outline' | 'filled'", "outline"), attr("color", "'default' | 'error'", "default"), attr("disabled", "boolean", "false"), attr("keys", "KeyOverrides | null", "null")},
+			Events:     []Event{{Name: "void-click", Detail: "{}"}},
+			Keys:       &Keys{Actions: []KeyAction{{Action: "activate", Keys: []string{"Enter", "Space"}, Labels: []string{"Enter", "Space"}, Description: "Presses the button.", Essential: true}}}},
 		{Tag: "void-sidebar", Class: "VoidSidebar",
 			Attributes: []Attribute{attr("collapsed", "boolean", "false"), {Name: "collapsed-width", Field: "collapsedWidth", Type: "string", Kind: KindString}},
 			Properties: []Property{{Name: "collapsed", Attribute: "collapsed"}, {Name: "collapsedWidth", Attribute: "collapsed-width"}},
 			Events:     []Event{{Name: "void-toggle", Detail: "{ collapsed: boolean }"}}},
 		{Tag: "void-input", Class: "VoidInput", Attributes: []Attribute{attr("name", "string", ""), attr("value", "string", "")}},
-		{Tag: "void-dialog", Class: "VoidDialog", Attributes: []Attribute{attr("closable", "boolean", "true")}},
+		{Tag: "void-dialog", Class: "VoidDialog", Attributes: []Attribute{attr("closable", "boolean", "true"), attr("keys", "KeyOverrides | null", "null")},
+			Keys: &Keys{Actions: []KeyAction{{Action: "close", Keys: []string{"Escape"}, Labels: []string{"Escape"}, Description: "Closes the dialog.", Essential: true}}}},
 		{Tag: "void-nav-bar", Class: "VoidNavBar", Attributes: []Attribute{attr("bordered", "boolean", "true")}},
 		{Tag: "void-slider", Class: "VoidSlider", Attributes: []Attribute{attr("step", "number", "1")}},
 		{Tag: "void-select", Class: "VoidSelect"},
@@ -47,9 +49,11 @@ func testCatalog() *Catalog {
 				Attributes: map[string]RenamedAttribute{
 					"position": {To: "side", Values: map[string]string{"bottom-end": `side="bottom" align="end"`}},
 					"closable": {Values: map[string]string{"false": "hide-close"}, Fix: "remove it (it is the default)"},
+					"tooltip-position": {To: "tooltip-side"},
 				},
 				Values: map[string]map[string]string{"variant": {"subtle": "quiet"}, "stagger": {"false": "0"}},
 				Events: map[string]string{"void-toggle": "listen for void-open and void-close"},
+				Since:  &RenamedSince{Attributes: map[string]string{"tooltip-position": "0.11"}, Values: map[string]string{"variant": "0.10"}, Events: map[string]string{"void-toggle": "0.9"}},
 			}},
 	})
 }
@@ -109,10 +113,21 @@ func TestCheckTag(t *testing.T) {
 		{"renamed attribute in jsx", Tag{Name: "void-popover", Lang: LangJSX, Attrs: []AttrToken{a("position", "left", SyntaxAttr)}}, []Rule{RuleLegacyMarkup}, `write side="left"`},
 		{"inverted boolean, false", Tag{Name: "void-popover", Lang: LangHTML, Attrs: []AttrToken{a("closable", "false", SyntaxAttr)}}, []Rule{RuleLegacyMarkup}, "write hide-close"},
 		{"inverted boolean, present", Tag{Name: "void-popover", Lang: LangHTML, Attrs: []AttrToken{a("closable", "", SyntaxAttr)}}, []Rule{RuleLegacyMarkup}, "closable on <void-popover> was removed in 0.8; remove it"},
-		{"renamed value", Tag{Name: "void-popover", Lang: LangHTML, Attrs: []AttrToken{a("variant", "subtle", SyntaxAttr)}}, []Rule{RuleLegacyMarkup}, `write variant="quiet"`},
+		{"renamed value", Tag{Name: "void-popover", Lang: LangHTML, Attrs: []AttrToken{a("variant", "subtle", SyntaxAttr)}}, []Rule{RuleLegacyMarkup}, `variant="subtle" on <void-popover> was renamed in 0.10; write variant="quiet"`},
 		{"renamed value on a number", Tag{Name: "void-popover", Lang: LangHTML, Attrs: []AttrToken{a("stagger", "false", SyntaxAttr)}}, []Rule{RuleLegacyMarkup}, `write stagger="0"`},
 		{"current value", Tag{Name: "void-popover", Lang: LangHTML, Attrs: []AttrToken{a("variant", "quiet", SyntaxAttr), a("side", "top", SyntaxAttr), a("stagger", "0", SyntaxAttr)}}, nil, ""},
-		{"removed event", Tag{Name: "void-popover", Lang: LangERB, Attrs: []AttrToken{a("void-toggle", "", SyntaxEvent)}}, []Rule{RuleLegacyMarkup}, "no longer dispatches void-toggle (removed in 0.8); listen for void-open and void-close"},
+		{"removed event", Tag{Name: "void-popover", Lang: LangERB, Attrs: []AttrToken{a("void-toggle", "", SyntaxEvent)}}, []Rule{RuleLegacyMarkup}, "no longer dispatches void-toggle (removed in 0.9); listen for void-open and void-close"},
+		{"renamed attribute, dated release", Tag{Name: "void-popover", Lang: LangHTML, Attrs: []AttrToken{a("tooltip-position", "top", SyntaxAttr)}}, []Rule{RuleLegacyMarkup}, `tooltip-position="top" on <void-popover> was renamed in 0.11; write tooltip-side="top"`},
+		// Key actions (#90): a warning each, and nothing for a valid rebinding.
+		{"keys rebinding", Tag{Name: "void-button", Lang: LangHTML, Attrs: []AttrToken{a("keys", `{"activate":["Enter","x"]}`, SyntaxAttr)}}, nil, ""},
+		{"keys not json", Tag{Name: "void-button", Lang: LangHTML, Attrs: []AttrToken{a("keys", `activate:Enter`, SyntaxAttr)}}, []Rule{RuleKeys}, "not a JSON object"},
+		{"keys not an object", Tag{Name: "void-button", Lang: LangHTML, Attrs: []AttrToken{a("keys", `["Enter"]`, SyntaxAttr)}}, []Rule{RuleKeys}, "not a JSON object"},
+		{"keys unknown action", Tag{Name: "void-button", Lang: LangHTML, Attrs: []AttrToken{a("keys", `{"activte":["Enter"]}`, SyntaxAttr)}}, []Rule{RuleKeys}, `no key action "activte" (did you mean activate?)`},
+		{"keys essential unbound", Tag{Name: "void-dialog", Lang: LangHTML, Attrs: []AttrToken{a("keys", `{"close":[]}`, SyntaxAttr)}}, []Rule{RuleKeys}, `leaves "close" with no key`},
+		{"keys essential null", Tag{Name: "void-button", Lang: LangHTML, Attrs: []AttrToken{a("keys", `{"activate":null}`, SyntaxAttr)}}, []Rule{RuleKeys}, "essential"},
+		{"keys essential moved", Tag{Name: "void-dialog", Lang: LangHTML, Attrs: []AttrToken{a("keys", `{"close":"q"}`, SyntaxAttr)}}, nil, ""},
+		{"keys entities", Tag{Name: "void-dialog", Lang: LangHTML, Attrs: []AttrToken{a("keys", `{&quot;close&quot;:[]}`, SyntaxAttr)}}, []Rule{RuleKeys}, "essential"},
+		{"keys dynamic", Tag{Name: "void-dialog", Lang: LangHEEx, Attrs: []AttrToken{dyn(a("keys", "{@keys}", SyntaxAttr))}}, nil, ""},
 	}
 	c := NewChecker(testLibrary(t), stubScanner{})
 	for _, tt := range tests {

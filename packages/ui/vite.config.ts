@@ -19,6 +19,13 @@ const entry: Record<string, string> = {
   base: resolve(__dirname, 'src/base-entry.ts'),
   autoloader: resolve(__dirname, 'src/autoloader.ts'),
   dev: resolve(__dirname, 'src/dev/index.ts'),
+  testing: resolve(__dirname, 'src/testing/index.ts'),
+  messages: resolve(__dirname, 'src/messages.ts'),
+  keys: resolve(__dirname, 'src/keys.ts'),
+  // Not exported: the build reads it to write each element's key actions into the manifest (cem/keys.js).
+  keymaps: resolve(__dirname, 'src/keymaps/index.ts'),
+  'messages/fr': resolve(__dirname, 'src/messages/fr.ts'),
+  'messages/ar': resolve(__dirname, 'src/messages/ar.ts'),
   ...componentEntries,
 };
 

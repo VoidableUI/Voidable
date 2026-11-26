@@ -78,6 +78,13 @@ const eventDetail = (type) => {
 const esc = (s) => String(s ?? '').replace(/\|/g, '\\|').replace(/\r?\n/g, ' ');
 const code = (s) => (s ? `\`${esc(s)}\`` : '');
 
+/** What replaces a built-in string on an element (voidMessages[].override), as a phrase. */
+function overrideText(o) {
+  if (!o) return '`registerMessages()` only';
+  if (o.part) return `a \`<${o.part}>\` part you write`;
+  return o.on ? `\`${o.attribute}\` on \`<${o.on}>\`` : `\`${o.attribute}\``;
+}
+
 function partRule(ps) {
   let rule = ps.children === 'parts' ? 'only these parts as children' : 'parts mixed with other content';
   if (ps.ordered) rule += ', in this order';
@@ -139,6 +146,8 @@ export function collectElements(manifest, supplement) {
         requires: d.voidRequires ?? [],
         hints: d.voidHints ?? {},
         parts: d.voidParts,
+        messages: d.voidMessages ?? [],
+        keys: d.voidKeys,
       });
     }
   }
@@ -242,6 +251,22 @@ function renderElement(el, byTag, snippets) {
     for (const e of el.events) out.push(`| \`${e.name}\` | ${code(e.detail)} | ${esc(e.description)} |`);
     out.push('');
   }
+  if (el.messages?.length) {
+    out.push('Words it writes itself (English; the language follows the closest `lang`, see the Translation guide at https://voidable.dev/guides/translation/):', '', '| Message | Default | Replaced by |', '|---|---|---|');
+    for (const m of el.messages) out.push(`| \`${m.key}\` | ${esc(m.default)} | ${overrideText(m.override)} |`);
+    out.push('');
+  }
+  if (el.keys) {
+    out.push(
+      'Keys (an action can be rebound or switched off with the `keys` attribute, `keys=\'{"next":["l"],"close":[]}\'`, or for every element of the tag with `configureKeys(tag, {...})`; removing a key can make the control unusable from the keyboard):',
+      '',
+      '| Action | Default keys | What it does |',
+      '|---|---|---|',
+    );
+    for (const k of el.keys.actions) out.push(`| \`${k.action}\`${k.essential ? ' (essential)' : ''} | ${esc(k.labels.join(', '))} | ${esc(k.description)} |`);
+    if (el.keys.browser?.length) out.push('', `The browser's own, not remappable: ${el.keys.browser.map((r) => `${esc(r.keys)} (${esc(r.action)})`).join('; ')}`);
+    out.push('');
+  }
   if (el.parents.length) out.push(`Allowed inside: ${el.parents.map((p) => `\`<${p}>\``).join(', ')}.`, '');
   if (el.requires.length) out.push(`Needs at least one: ${el.requires.map((p) => `\`<${p}>\``).join(', ')}.`, '');
   const hints = Object.entries(el.hints);
@@ -317,6 +342,14 @@ export function buildReference({ manifest, supplement, snippets, version }) {
     '- `@voidable/ui/custom-elements.json`: the Custom Elements Manifest it is generated from.',
     '- `@voidable/ui/llms.txt`: this file. The docs site serves the same in `/llms.txt` and `/llms-full.txt`: https://voidable.dev',
     '- `voidable ref <tag>` prints one element offline; `voidable check <file>` checks markup (https://voidable.dev/getting-started/for-agents/).',
+    '',
+    '## Testing',
+    '',
+    '- Find components by role, accessible name and reflected attributes (`aria-checked`, `open`, `value`), never by class names; wait for `void-*` events, not for time.',
+    "- `@voidable/ui/testing` (a test build only; it adds nothing to any element): `import '@voidable/ui/testing'` in the page sets `data-void-ready` on `<html>` while every `void-*` element is defined and has rendered, so any tool can wait for `html[data-void-ready]` (Capybara `have_css`, Wallaby `assert_has`, Dusk `waitFor`, Cypress, Playwright). `whenReady()` does it from a script in the page.",
+    "- Playwright, with nothing loaded in the page: `import { animationsOff, gotoReady, voidReady } from '@voidable/ui/testing'`; `await animationsOff(page)` before `page.goto`, then `await gotoReady(page, url)`, and `await voidReady(page)` after a change that adds components.",
+    '- Animation off: `data-anim-speed="off"` on `<html>` (or Playwright `reducedMotion: \'reduce\'`). Transitions, accordion and collapsible height changes and chart draw-in become immediate; timers do not (a toast still closes after its `duration`, tooltip and hover-card delays remain): wait for `void-close` and `void-open`.',
+    '- Recipes for Rails (Capybara), Phoenix (Wallaby, LiveViewTest) and Laravel (Dusk, Pest): https://voidable.dev/guides/testing/',
     '',
     `## Elements (${registered})`,
     '',

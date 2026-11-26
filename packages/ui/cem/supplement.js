@@ -562,6 +562,29 @@ export const parts = {
     legacy: { attributes: { label: 'write the heading as <void-menu-group-label>...</void-menu-group-label> first in the group' } },
     parts: [{ tag: 'void-menu-group-label', max: 1, description: 'Heading of the group; names it for assistive technology.' }],
   },
+  'void-table': {
+    children: 'any',
+    skeleton:
+      '<void-table selectable filter-columns="name" aria-label="Team"><void-table-filter><input type="search" aria-label="Filter team"></void-table-filter><table><thead><tr><th data-stack="select"><void-checkbox></void-checkbox></th><th data-key="name" data-sort>Name</th><th data-key="seats" data-sort="number" data-align="end">Seats</th></tr></thead><tbody><tr data-value="ada"><td><void-checkbox aria-label="Select Ada"></void-checkbox></td><td>Ada</td><td>4</td></tr></tbody></table><void-table-empty hidden>No one matches.</void-table-empty><void-table-selection hidden><span data-count></span> selected<void-button size="sm">Remove</void-button></void-table-selection></void-table>',
+    parts: [
+      { tag: 'void-table-filter', max: 1, children: 'any', description: 'Holds the native search input (or a void-input) that filters the rows; typing is debounced. Place it anywhere inside the void-table.' },
+      { tag: 'void-table-empty', max: 1, children: 'any', description: 'Shown (the component removes `hidden`) while the filter matches no row. Write it with `hidden`.' },
+      {
+        tag: 'void-table-selection',
+        max: 1,
+        children: 'any',
+        description:
+          'Shown while any row is selected; holds the bulk actions. An element with `data-count` inside it receives the number of selected rows. Write it with `hidden`.',
+      },
+      {
+        tag: 'void-table-select-all',
+        max: 1,
+        children: 'any',
+        description:
+          'With `total-rows` greater than the rows present, shown when select-all is checked; a button inside it ("Select all 1,250 rows") sets `all-selected` and fires void-change with `all: true`. Write it with `hidden`.',
+      },
+    ],
+  },
   'void-carousel': {
     children: 'parts',
     ordered: true,
@@ -742,7 +765,10 @@ export const accessibleName = {
  *               value); `fix`: what to do when neither applies.
  *   values      attribute -> { old value -> new value }.
  *   events      old event name -> what to listen for instead.
- * @type {Record<string, { attributes?: Record<string, { to?: string, values?: Record<string, string>, fix?: string }>, values?: Record<string, Record<string, string>>, events?: Record<string, string> }>}
+ *   since       the release a rename was made in, for what `voidable check` prints ("was renamed in 0.10"):
+ *               { attributes?, values?, events? }, each mapping a name (attribute, attribute with renamed
+ *               values, event) to a release such as '0.10'. Anything not listed is '0.8', where this table began.
+ * @type {Record<string, { attributes?: Record<string, { to?: string, values?: Record<string, string>, fix?: string }>, values?: Record<string, Record<string, string>>, events?: Record<string, string>, since?: { attributes?: Record<string, string>, values?: Record<string, string>, events?: Record<string, string> } }>}
  */
 const OPEN_CLOSE = 'listen for void-open and void-close on the element itself (they do not bubble; detail.reason says why)';
 const SIDES = ['top', 'right', 'bottom', 'left'];
@@ -773,6 +799,7 @@ export const renamed = {
   'void-sidebar': {
     attributes: { position: { to: 'side', values: START_END } },
     values: { side: { left: 'start', right: 'end' } },
+    since: { values: { side: '0.10' } },
     events: { 'void-toggle': 'listen for void-collapse and void-expand on the sidebar (they do not bubble)' },
   },
   'void-toast-container': {
@@ -789,6 +816,7 @@ export const renamed = {
   'void-action-input': {
     attributes: { position: { to: 'icon-side', values: START_END_ICON }, 'tooltip-position': { to: 'tooltip-side' } },
     values: { 'icon-side': { left: 'start', right: 'end' } },
+    since: { values: { 'icon-side': '0.10' } },
   },
   'void-scroll-area': { attributes: { direction: { to: 'orientation' } } },
   // State: an index into a sequence without keys; the current item of a navigation.

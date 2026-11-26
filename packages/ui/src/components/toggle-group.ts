@@ -1,11 +1,18 @@
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
-import { inlineKeys } from '../keyboard.js';
+import { actionFor } from '../keyboard.js';
+import { keysConverter, type KeyOverrides } from '../keys.js';
+import { toggleGroupKeys, toggleGroupVerticalKeys } from '../keymaps/choice.js';
 import { InternalsFormControl, type FormSubmission } from '../form-control.js';
 import type { VoidToggle } from './toggle.js';
 
 /** Multi-button toggle set for text editor toolbars and filter chips where one or many options can be active. */
 export class VoidToggleGroup extends InternalsFormControl(VoidElement) {
+  /** Key bindings for this element's actions, as JSON (`{"next":["ArrowRight"]}`); `[]` switches an action off. See the keyboard guide. */
+  @property({ attribute: 'keys', converter: keysConverter }) keys: KeyOverrides | null = null;
+  /** @internal The actions of this element and their default keys (horizontal; a vertical group starts with ArrowDown and ArrowUp). */
+  static readonly keyMap = toggleGroupKeys;
+
   /**
    * Comma-separated `value`s of the pressed toggles (`bold,italic`), or the single pressed value. Reflected to the
    * attribute as the pressed toggles change; the form's reset target stays the state it started with. Without it (or with an empty one) the
@@ -161,17 +168,13 @@ export class VoidToggleGroup extends InternalsFormControl(VoidElement) {
     const toggles = this._toggles().filter(t => !t.disabled);
     if (!toggles.length) return;
 
-    const horizontal = this.orientation === 'horizontal';
-    const keys = inlineKeys(this);
-    const forward = horizontal ? keys.next : 'ArrowDown';
-    const backward = horizontal ? keys.prev : 'ArrowUp';
-
-    if (e.key !== forward && e.key !== backward) return;
+    const action = actionFor(this, e, this.orientation === 'horizontal' ? toggleGroupKeys : toggleGroupVerticalKeys);
+    if (action !== 'next' && action !== 'previous') return;
 
     e.preventDefault();
     const currentIndex = toggles.indexOf(e.target as VoidToggle);
     let nextIndex: number;
-    if (e.key === forward) {
+    if (action === 'next') {
       nextIndex = currentIndex < 0 ? 0 : (currentIndex + 1) % toggles.length;
     } else {
       nextIndex = currentIndex < 0 ? toggles.length - 1 : (currentIndex - 1 + toggles.length) % toggles.length;

@@ -1,0 +1,3 @@
+{{-- A <void-table>: `value` (the selected row values, an array or a JSON string) and `keys` (key actions, an array or a JSON string) become JSON attributes. Every other attribute passes through as written (selectable, manual, sort, sort-direction, filter, filter-columns, total-rows, all-selected, striped, aria-label...); the table and its parts are the slot. --}}
+@props(['value' => null, 'keys' => null])
+<void-table {{ $attributes }}@if (! is_null($value)) value="{{ is_string($value) ? $value : json_encode(array_values($value)) }}"@endif @if (! is_null($keys)) keys="{{ is_string($keys) ? $keys : json_encode($keys) }}"@endif>{{ $slot }}</void-table>

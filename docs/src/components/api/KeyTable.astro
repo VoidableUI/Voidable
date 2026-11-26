@@ -1,6 +1,6 @@
 ---
-// One keyboard table. Rows live in docs/src/data/keyboard.json, which the
-// component pages and the Keyboard and ARIA page both render.
+// One keyboard table, generated from the manifest's `voidKeys` (the key actions the component's code reads, with
+// the words from packages/ui/cem/keys-meta.js). The component pages and the Keyboard and ARIA page both render it.
 import { inline } from '../../lib/inline.mjs';
 import { loadComponentData } from '../../lib/component-data.mjs';
 
@@ -9,20 +9,43 @@ interface Props {
   /** Leave out the pattern paragraph (the Keyboard and ARIA page shows it itself). */
   bare?: boolean;
 }
+interface KeyAction { action: string; labels: string[]; description: string; essential?: boolean }
+interface BrowserRow { keys: string; action: string }
 const { tag, bare } = Astro.props;
-const k = loadComponentData().keyboard[tag];
-const rows: { keys: string; action: string }[] = k.rows;
+const k = loadComponentData().keyboard[tag] as { intro?: string; note?: string; actions: KeyAction[]; browser?: BrowserRow[] };
 const intro: string | undefined = bare ? undefined : k.intro;
 ---
 
 {intro && <p set:html={inline(intro)} />}
-<div class="vd-api-table">
-  <table>
-    <thead><tr><th>Key</th><th>Action</th></tr></thead>
-    <tbody>
-      {rows.map((r) => (
-        <tr><td set:html={inline(r.keys)} /><td set:html={inline(r.action)} /></tr>
-      ))}
-    </tbody>
-  </table>
-</div>
+{k.actions.length > 0 && (
+  <div class="vd-api-table">
+    <table>
+      <thead><tr><th>Key</th><th>Action</th><th>What it does</th></tr></thead>
+      <tbody>
+        {k.actions.map((a) => (
+          <tr>
+            <td>{a.labels.join(', ')}</td>
+            <td><code>{a.action}</code>{a.essential && <> (essential)</>}</td>
+            <td set:html={inline(a.description)} />
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+)}
+{k.note && <p set:html={inline(k.note)} />}
+{k.browser && k.browser.length > 0 && (
+  <>
+    <p>The browser's own keys (a native control the component wraps, or focus itself). They are not actions and cannot be remapped:</p>
+    <div class="vd-api-table">
+      <table>
+        <thead><tr><th>Key</th><th>What it does</th></tr></thead>
+        <tbody>
+          {k.browser.map((r) => (
+            <tr><td set:html={inline(r.keys)} /><td set:html={inline(r.action)} /></tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </>
+)}

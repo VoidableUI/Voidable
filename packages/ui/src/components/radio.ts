@@ -4,7 +4,9 @@ import { VoidElement } from '../base.js';
 import { KeyboardActivation } from '../keyboard-activation.js';
 import { NativeFormControl } from '../form-control.js';
 import { ProjectionController } from '../projection.js';
-import { inlineKeys, stepEnabled } from '../keyboard.js';
+import { actionFor, stepEnabled } from '../keyboard.js';
+import { keysConverter, type KeyOverrides } from '../keys.js';
+import { radioKeys } from '../keymaps/choice.js';
 
 // Shift+Tab into a group with nothing checked lands on its last radio, as with native radios.
 let tabbingBack = false;
@@ -15,8 +17,13 @@ if (typeof document !== 'undefined') {
 
 /** Single mutually exclusive option for forms and surveys; typically used inside VoidRadioGroup. */
 export class VoidRadio extends NativeFormControl(VoidElement) {
-  /** Enter and Space fire a real `click`, as on a native button. */
-  protected readonly _activation = new KeyboardActivation(this, { enter: false, disabled: () => this.formDisabled });
+  /** Key bindings for this element's actions, as JSON (`{"next":["ArrowRight"]}`); `[]` switches an action off. See the keyboard guide. */
+  @property({ attribute: 'keys', converter: keysConverter }) keys: KeyOverrides | null = null;
+  /** @internal The actions of this element and their default keys. */
+  static readonly keyMap = radioKeys;
+
+  /** Space fires a real `click`, as on a native button. */
+  protected readonly _activation = new KeyboardActivation(this, { disabled: () => this.formDisabled });
 
   /** Whether this radio is the selected one. Checking one radio unchecks the others with the same `name`. */
   @property({ type: Boolean, reflect: true }) checked = false;
@@ -143,10 +150,9 @@ export class VoidRadio extends NativeFormControl(VoidElement) {
    * as for a pointer click). The inline arrows follow the reading direction.
    */
   private _handleKeydown = (e: KeyboardEvent): void => {
-    if (e.altKey || e.ctrlKey || e.metaKey || e.defaultPrevented || e.target !== this) return;
-    const keys = inlineKeys(this);
-    const forward = e.key === keys.next || e.key === 'ArrowDown';
-    if (!forward && e.key !== keys.prev && e.key !== 'ArrowUp') return;
+    const action = actionFor(this, e);
+    if ((action !== 'next' && action !== 'previous') || e.target !== this) return;
+    const forward = action === 'next';
     e.preventDefault();
     const peers = this._peers();
     const next = peers[stepEnabled(peers.map(r => r.formDisabled), peers.indexOf(this), forward ? 1 : -1)];

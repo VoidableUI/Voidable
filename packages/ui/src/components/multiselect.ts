@@ -1,8 +1,11 @@
 import { html, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
+import { msg } from '../messages.js';
 import { InternalsFormControl, type FormSubmission } from '../form-control.js';
-import { edgeEnabled, isPrintable, stepEnabled, Typeahead } from '../keyboard.js';
+import { actionFor, edgeEnabled, stepEnabled, Typeahead } from '../keyboard.js';
+import { keysConverter, type KeyOverrides } from '../keys.js';
+import { multiselectKeys } from '../keymaps/pickers.js';
 import { OverlayController, type OverlayCloseReason, type OverlayOpenReason } from '../overlay.js';
 import { PartsController } from '../parts.js';
 import { ProjectionController } from '../projection.js';
@@ -85,14 +88,20 @@ export function optionLabel(opt: Element): string {
  * @fires {CustomEvent<{ reason: 'trigger' | 'escape' | 'outside' | 'blur' | 'parent' | 'api' }>} void-close - The option list is closing.
  */
 export class VoidMultiselect extends InternalsFormControl(VoidElement) {
+  /** Key bindings for this element's actions, as JSON (`{"close":["Escape"]}`); `[]` switches an action off. See the keyboard guide. */
+  @property({ attribute: 'keys', converter: keysConverter }) keys: KeyOverrides | null = null;
+  /** @internal The actions of this element and their default keys. */
+  static readonly keyMap = multiselectKeys;
+
   /** The host's `aria-label` / `aria-labelledby` name the inner control. */
   static override labelTarget = '[role=combobox]';
 
   /**
-   * Text shown in the trigger while nothing is selected. Defaults to `Select...`. It is also the
+   * Text shown in the trigger while nothing is selected. Defaults to the `multiselect.placeholder` message (English: `Select...`). It is also the
    * trigger's accessible name when no `void-field` label names it.
    */
-  @property({ type: String }) placeholder = 'Select...';
+  @property({ type: String }) placeholder = '';
+  private get _hint(): string { return this.placeholder || msg(this, 'multiselect.placeholder'); }
   /** Stop the trigger opening and exclude the values from the form submission. */
   @property({ type: Boolean, reflect: true }) disabled = false;
   /** Size step: `sm`, `md` (default) or `lg`. */
@@ -251,7 +260,7 @@ export class VoidMultiselect extends InternalsFormControl(VoidElement) {
     // Named only while open, so that the field's label finds one element (the control) while closed.
     const labelledby = open ? trigger?.getAttribute('aria-labelledby') ?? null : null;
     this._parts.set(content, 'aria-labelledby', labelledby);
-    this._parts.set(content, 'aria-label', open && !labelledby ? trigger?.getAttribute('aria-label') || this.placeholder || null : null);
+    this._parts.set(content, 'aria-label', open && !labelledby ? trigger?.getAttribute('aria-label') || this._hint || null : null);
     if (trigger) {
       this._parts.set(trigger, 'aria-activedescendant', open && this._active ? this._parts.id(this._active, 'void-option') : null);
     }
@@ -274,11 +283,11 @@ export class VoidMultiselect extends InternalsFormControl(VoidElement) {
         class="void-multiselect-trigger"
         role="combobox"
         tabindex=${this.formDisabled ? '-1' : '0'}
-        aria-label=${this.placeholder}
+        aria-label=${this._hint}
         aria-haspopup="listbox"
         aria-expanded=${String(open)}
         aria-controls=${this._controls(open)}
-        aria-description=${count ? `${count} selected` : nothing}
+        aria-description=${count ? msg(this, 'multiselect.selected', { count }) : nothing}
         aria-disabled=${this.formDisabled ? 'true' : nothing}
         aria-required=${this.required ? 'true' : nothing}
         aria-invalid=${this.error ? 'true' : nothing}
@@ -292,12 +301,12 @@ export class VoidMultiselect extends InternalsFormControl(VoidElement) {
                   type="button"
                   class="void-multiselect-pill-remove"
                   tabindex="-1"
-                  aria-label="Remove ${optionLabel(opt)}"
+                  aria-label=${msg(this, 'removeItem', { name: optionLabel(opt) })}
                   data-value=${opt.value}
                 >×</button>
               </span>
             `)
-          : html`<span class="void-multiselect-placeholder">${this.placeholder}</span>`
+          : html`<span class="void-multiselect-placeholder">${this._hint}</span>`
         }
       </div>
       ${this.error ? html`<span class="void-multiselect-error">${this.error}</span>` : nothing}
@@ -379,72 +388,59 @@ export class VoidMultiselect extends InternalsFormControl(VoidElement) {
   }
 
   private _onTriggerKeydown = (e: KeyboardEvent): void => {
-    if (this.formDisabled || e.target !== e.currentTarget || e.isComposing) return;
-    const options = this._options;
-    const disabled = options.map(o => o.disabled);
-    const key = e.key;
-    if (!this.open) {
-      if (key === 'Home' || key === 'End') {
-        e.preventDefault();
-        this._openList(key === 'Home' ? 'first' : 'last');
-      } else if (key === 'ArrowUp') {
-        e.preventDefault();
-        this._openList('first');
-      } else if (key === 'Enter' || key === ' ' || key === 'ArrowDown') {
-        e.preventDefault();
-        this._openList('selected');
-      } else if (isPrintable(e)) {
-        e.preventDefault();
-        this._openList('selected');
-        this._typeaheadTo(e.key);
-      }
+    if (this.formDisabled || e.target !== e.currentTarget) return;
+    const action = actionFor(this, e);
+    if (!action) {
+      // Tab leaves: close the list first (focus-out would too).
+      if (e.key === 'Tab' && this.open && !e.defaultPrevented) this._close('blur');
       return;
     }
-    switch (key) {
-      case 'ArrowDown':
-        e.preventDefault();
-        if (!e.altKey) this._moveActive(this._stepBy(1));
+    if (!this.open) {
+      // Closed, every movement key opens the list where it would have gone.
+      if (action === 'first' || action === 'last') this._openList(action);
+      else if (action === 'previous') this._openList('first');
+      else if (action === 'next' || action === 'activate') this._openList('selected');
+      else if (action === 'typeahead') {
+        this._openList('selected');
+        this._typeaheadTo(e.key);
+      } else return;
+      e.preventDefault();
+      return;
+    }
+    const disabled = this._options.map(o => o.disabled);
+    switch (action) {
+      case 'next':
+        this._moveActive(this._stepBy(1));
         break;
-      case 'ArrowUp':
-        e.preventDefault();
-        if (e.altKey) this._close('escape');
-        else this._moveActive(this._stepBy(-1));
+      case 'previous':
+        this._moveActive(this._stepBy(-1));
         break;
-      case 'PageDown':
-        e.preventDefault();
+      case 'nextPage':
         this._moveActive(this._stepBy(10));
         break;
-      case 'PageUp':
-        e.preventDefault();
+      case 'previousPage':
         this._moveActive(this._stepBy(-10));
         break;
-      case 'Home':
-        e.preventDefault();
+      case 'first':
         this._moveActive(edgeEnabled(disabled, 1));
         break;
-      case 'End':
-        e.preventDefault();
+      case 'last':
         this._moveActive(edgeEnabled(disabled, -1));
         break;
-      case 'Enter':
-      case ' ':
-        e.preventDefault();
+      case 'activate':
         if (this._active && !this._active.disabled) this._toggleOption(this._active);
         break;
-      case 'Escape':
-        e.preventDefault();
+      case 'close':
         e.stopPropagation();
         this._close('escape');
         break;
-      case 'Tab':
-        this._close('blur');
+      case 'typeahead':
+        this._typeaheadTo(e.key);
         break;
       default:
-        if (isPrintable(e)) {
-          e.preventDefault();
-          this._typeaheadTo(e.key);
-        }
+        return;
     }
+    e.preventDefault();
   };
 
   private _typeaheadTo(char: string): void {

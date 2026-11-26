@@ -533,6 +533,13 @@ test.describe('a close the page cancels', () => {
         }
       }
       // The API is not a user: its close cannot be cancelled, whatever the page says.
+      if (c.id === 'cb') {
+        // The last route took focus off the input, and the combobox asks to close on that blur 150 ms
+        // later (a timer, so the request can land after this point and before the API close). That
+        // request answers the click above, not the API close. Put focus back so a timer still pending
+        // finds it there and does nothing; one that already fired is cleared with the log below.
+        await page.locator('#cb input').focus();
+      }
       await clearLog(page);
       await setOpen(page, c.id, false);
       await expect.poll(() => isOpen(page, c.id)).toBe(false);

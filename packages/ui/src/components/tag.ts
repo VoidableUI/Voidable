@@ -2,6 +2,7 @@ import { html, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
 import { ProjectionController } from '../projection.js';
+import { msg } from '../messages.js';
 
 /**
  * Removable label chip for selected filters, applied tags, and multi-value inputs.
@@ -34,7 +35,7 @@ export class VoidTag extends VoidElement {
 
   render() {
     if (!this.removable) return nothing;
-    return html`<button type="button" class="void-tag-close" aria-label="Remove" @click="${this._remove}">×</button>`;
+    return html`<button type="button" class="void-tag-close" aria-label=${msg(this, 'remove')} @click="${this._remove}">×</button>`;
   }
 
   private _remove(): void {

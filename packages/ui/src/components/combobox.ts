@@ -2,11 +2,14 @@ import { html, nothing } from 'lit';
 import { live } from 'lit/directives/live.js';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
+import { msg } from '../messages.js';
 import { InternalsFormControl } from '../form-control.js';
 import { OverlayController, type OverlayCloseReason } from '../overlay.js';
 import { PartsController } from '../parts.js';
 import { isFocusParked, ProjectionController } from '../projection.js';
-import { edgeEnabled, stepEnabled } from '../keyboard.js';
+import { actionFor, edgeEnabled, stepEnabled } from '../keyboard.js';
+import { keysConverter, type KeyOverrides } from '../keys.js';
+import { comboboxKeys } from '../keymaps/pickers.js';
 import { optionLabel, VoidOption } from './multiselect.js';
 
 /**
@@ -36,6 +39,11 @@ import { optionLabel, VoidOption } from './multiselect.js';
  * @fires {CustomEvent<{ reason: 'escape' | 'outside' | 'blur' | 'select' | 'parent' | 'api' }>} void-close - The option list is closing.
  */
 export class VoidCombobox extends InternalsFormControl(VoidElement) {
+  /** Key bindings for this element's actions, as JSON (`{"close":["Escape"]}`); `[]` switches an action off. See the keyboard guide. */
+  @property({ attribute: 'keys', converter: keysConverter }) keys: KeyOverrides | null = null;
+  /** @internal The actions of this element and their default keys. */
+  static readonly keyMap = comboboxKeys;
+
   /** The host's `aria-label` / `aria-labelledby` name the inner control. */
   static override labelTarget = 'input[role=combobox]';
 
@@ -45,10 +53,11 @@ export class VoidCombobox extends InternalsFormControl(VoidElement) {
    */
   @property({ type: String, reflect: true }) value = '';
   /**
-   * Hint shown in the search field while it is empty. Defaults to `Search...`. It is also the field's
+   * Hint shown in the search field while it is empty. Defaults to the `combobox.placeholder` message (English: `Search...`). It is also the field's
    * accessible name when no `void-field` label names it.
    */
-  @property({ type: String }) placeholder = 'Search...';
+  @property({ type: String }) placeholder = '';
+  private get _hint(): string { return this.placeholder || msg(this, 'combobox.placeholder'); }
   /** Stop the field opening and exclude the value from the form submission. */
   @property({ type: Boolean, reflect: true }) disabled = false;
   /** Size step: `sm`, `md` (default) or `lg`. */
@@ -195,8 +204,9 @@ export class VoidCombobox extends InternalsFormControl(VoidElement) {
       // Named only while open, so that the field's label finds one element (the control) while closed.
       const labelledby = open ? input?.getAttribute('aria-labelledby') ?? null : null;
       this._parts.set(content, 'aria-labelledby', labelledby);
-      this._parts.set(content, 'aria-label', open && !labelledby ? input?.getAttribute('aria-label') || this.placeholder || null : null);
-      // "No options found" is drawn by the theme while nothing matches.
+      this._parts.set(content, 'aria-label', open && !labelledby ? input?.getAttribute('aria-label') || this._hint || null : null);
+      // The "no options" text is drawn by the theme while nothing matches, from this property.
+      this.setHostStyle('--_void-combobox-empty', JSON.stringify(msg(this, 'combobox.empty'))); // style-ok
       this._parts.set(content, 'empty', shown === 0);
       if (input) {
         this._parts.set(input, 'aria-activedescendant', open && this._active ? this._parts.id(this._active, 'void-option') : null);
@@ -218,8 +228,8 @@ export class VoidCombobox extends InternalsFormControl(VoidElement) {
         class="void-combobox-input"
         role="combobox"
         .value=${live(open ? this._query : (chosen ? optionLabel(chosen) : this.value || ''))}
-        placeholder=${this.placeholder}
-        aria-label=${this.placeholder}
+        placeholder=${this._hint}
+        aria-label=${this._hint}
         ?disabled=${this.disabled}
         autocomplete="off"
         aria-autocomplete="list"
@@ -296,26 +306,30 @@ export class VoidCombobox extends InternalsFormControl(VoidElement) {
   private _onInputKeydown = (e: KeyboardEvent): void => {
     if (this.disabled || e.isComposing) return;
     const key = e.key;
-    if (key === 'ArrowDown' || key === 'ArrowUp') {
+    const action = actionFor(this, e);
+    if (action === 'next' || action === 'previous') {
       e.preventDefault();
       if (!this.open) {
         this._query = '';
         this._overlay.requestOpen('keyboard');
-        if (!e.altKey) {
-          // Opening highlights the chosen option, else the first (Down) or last (Up) one.
-          const visible = this._visible;
-          const chosen = visible.find(o => o.value === this.value && !o.disabled);
-          if (chosen) this._active = chosen;
-          else this._moveActive(key === 'ArrowDown' ? 'next' : 'prev');
-        }
-      } else if (!e.altKey) {
-        this._moveActive(key === 'ArrowDown' ? 'next' : 'prev');
-      } else if (key === 'ArrowUp') {
-        // Alt+ArrowUp: back to the field, list closed.
-        this._close('escape');
+        // Opening highlights the chosen option, else the first (next) or last (previous) one.
+        const visible = this._visible;
+        const chosen = visible.find(o => o.value === this.value && !o.disabled);
+        if (chosen) this._active = chosen;
+        else this._moveActive(action === 'next' ? 'next' : 'prev');
+      } else {
+        this._moveActive(action === 'next' ? 'next' : 'prev');
       }
       this.requestUpdate();
-    } else if (key === 'Enter') {
+    } else if (action === 'open') {
+      // Opens the list without highlighting an option.
+      e.preventDefault();
+      if (!this.open) {
+        this._query = '';
+        this._overlay.requestOpen('keyboard');
+      }
+      this.requestUpdate();
+    } else if (action === 'activate') {
       if (this.open && this._active && !this._active.disabled) {
         e.preventDefault();
         this._selectOption(this._active);
@@ -323,13 +337,14 @@ export class VoidCombobox extends InternalsFormControl(VoidElement) {
         // Nothing highlighted: close the list; the key goes on to a surrounding form.
         this._close('escape');
       }
-    } else if (key === 'Escape') {
+    } else if (action === 'close') {
+      // Closes this list only (a second Escape reaches an enclosing dialog).
       if (this.open) {
         e.preventDefault();
         e.stopPropagation();
         this._close('escape');
       }
-    } else if (key === 'ArrowLeft' || key === 'ArrowRight' || key === 'Home' || key === 'End') {
+    } else if (!e.defaultPrevented && (key === 'ArrowLeft' || key === 'ArrowRight' || key === 'Home' || key === 'End')) {
       // Text editing keys: the cursor moves in the field, the highlight leaves the list.
       if (this._active) {
         this._active = null;

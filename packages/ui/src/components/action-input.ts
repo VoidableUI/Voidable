@@ -5,6 +5,7 @@ import { VoidElement } from '../base.js';
 import { NativeFormControl } from '../form-control.js';
 import { dropReflectedValue, valueReflection } from '../secret-value.js';
 import { useProjection } from '../projection.js';
+import { msg } from '../messages.js';
 
 useProjection();
 
@@ -73,8 +74,9 @@ export class VoidActionInput extends NativeFormControl(VoidElement) {
    * or `arrow-right`. Any other value draws the search icon.
    */
   @property({ type: String, reflect: true }) icon: string = 'search';
-  /** Accessible name of the button and its tooltip. Defaults to `Action`; say what it does (`Copy link`). */
-  @property({ type: String, attribute: 'action-label' }) actionLabel = 'Action';
+  /** Accessible name of the button and its tooltip. Defaults to the `actionInput.action` message (English: `Action`); say what it does (`Copy link`). */
+  @property({ type: String, attribute: 'action-label' }) actionLabel = '';
+  private get _action(): string { return this.actionLabel || msg(this, 'actionInput.action'); }
   /** Which side of the field the button sits on, in the reading direction: `end` (default) or `start`. */
   @property({ type: String, reflect: true, attribute: 'icon-side' }) iconSide: 'start' | 'end' = 'end';
   /** Where the button's tooltip appears: `top` (default), `bottom`, `left` or `right`. */
@@ -154,10 +156,10 @@ export class VoidActionInput extends NativeFormControl(VoidElement) {
           class="void-action-input-btn"
           type="button"
           ?disabled=${this.disabled}
-          aria-label=${this.actionLabel}
+          aria-label=${this._action}
           @click=${this._onAction}
         >${this._renderIcon()}</button></void-tooltip-trigger>
-        <void-tooltip-content>${this.actionLabel}</void-tooltip-content>
+        <void-tooltip-content>${this._action}</void-tooltip-content>
       </void-tooltip>
     `;
 

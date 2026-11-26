@@ -10,9 +10,10 @@
 //     built binary rather than re-implementing its generator, so a page and
 //     `voidable gen snippet` cannot disagree;
 //   - evals/contract/contract.mjs (role, accessible name, state handles);
-//   - docs/src/data/keyboard.json and docs/src/data/component-notes.json, the
-//     only hand-written inputs: keyboard tables and what a human supplies
-//     (group, what children it takes, related components).
+//   - the manifest's `voidKeys` (key actions and default keys, from
+//     packages/ui/src/keymaps/ and cem/keys-meta.js), which are the keyboard tables;
+//   - docs/src/data/component-notes.json, the only hand-written input: what a
+//     human supplies (group, what children it takes, related components).
 //
 // Plain ESM with no Astro imports so astro.config.mjs, the lint and the page
 // components share it.
@@ -135,8 +136,11 @@ export function loadComponentData() {
   }
   const manifest = readJson(MANIFEST);
   const snippets = JSON.parse(execFileSync(BINARY, ['gen', 'snippet', '--all'], { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 }));
-  const keyboard = readJson(join(ROOT, 'docs/src/data/keyboard.json'));
   const notes = readJson(join(ROOT, 'docs/src/data/component-notes.json'));
+  // The keyboard tables are the manifest's `voidKeys` (the key actions in the code and cem/keys-meta.js).
+  const keyboard = Object.fromEntries(
+    manifest.modules.flatMap((m) => (m.declarations ?? []).filter((d) => d.tagName && d.voidKeys).map((d) => [d.tagName, d.voidKeys])),
+  );
   cache = { manifest, snippets, keyboard, notes, components: [], byTag: new Map() };
   cache.version = manifest.version ?? '';
 
@@ -235,6 +239,7 @@ export function loadComponentData() {
       hints: d.voidHints ?? {},
       renamed: d.voidRenamed ?? null,
       hostAttributes: d.voidHostAttributes ?? [],
+      messages: d.voidMessages ?? [],
       mixins,
       form,
       note,

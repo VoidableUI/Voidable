@@ -42,6 +42,8 @@ type declaration struct {
 	VoidName     *nameRule             `json:"voidName"`
 	VoidNative   *domain.NativeControl `json:"voidNative"`
 	VoidRenamed  *domain.Renamed       `json:"voidRenamed"`
+	VoidMessages []domain.Message      `json:"voidMessages"`
+	VoidKeys     *domain.Keys          `json:"voidKeys"`
 }
 
 // partsJSON is voidParts as the manifest build writes it (packages/ui/cem/plugins.js).
@@ -166,6 +168,8 @@ func element(path string, d declaration) domain.Element {
 	e.AllowedParents, e.RequiredChildren, e.AttrHints = d.VoidParents, d.VoidRequires, d.VoidHints
 	e.Native = d.VoidNative
 	e.Renamed = d.VoidRenamed
+	e.Messages = d.VoidMessages
+	e.Keys = d.VoidKeys
 	if n := d.VoidName; n != nil {
 		e.Name = &domain.NameRule{Attributes: n.Attributes, Content: n.Content, Parts: n.Parts, Hint: n.Hint}
 		for _, a := range n.Ancestors {

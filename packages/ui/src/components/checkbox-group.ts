@@ -4,6 +4,7 @@ import { VoidElement } from '../base.js';
 import { NativeFormControl } from '../form-control.js';
 import { ProjectionController } from '../projection.js';
 import { valueList } from '../value-list.js';
+import { msg } from '../messages.js';
 import type { VoidCheckbox } from './checkbox.js';
 
 /** A checkbox's value, from its attribute until it has upgraded. */
@@ -96,7 +97,7 @@ export class VoidCheckboxGroup extends NativeFormControl(VoidElement) {
     const anchor = this.required && this.value.length === 0 ? boxes.find((b) => !b.formDisabled) : undefined;
     for (const box of boxes) {
       const input = box.querySelector<HTMLInputElement>('input[type="checkbox"]');
-      input?.setCustomValidity(box === anchor ? 'Please check at least one box.' : '');
+      input?.setCustomValidity(box === anchor ? msg(this, 'checkboxGroup.required') : '');
     }
   }
 

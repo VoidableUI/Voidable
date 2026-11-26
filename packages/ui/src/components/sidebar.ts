@@ -1,5 +1,6 @@
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
+import { msg, nameHost } from '../messages.js';
 
 /**
  * Collapsible side navigation for app shells, admin panels, and documentation sites.
@@ -39,7 +40,7 @@ export class VoidSidebar extends VoidElement {
   connectedCallback(): void {
     super.connectedCallback();
     this.setHostAttribute('role', 'navigation');
-    this.setHostAttribute('aria-label', 'Sidebar navigation');
+    this._name();
     this._updateWidth();
   }
 
@@ -47,7 +48,12 @@ export class VoidSidebar extends VoidElement {
     super.disconnectedCallback();
   }
 
+  private _name(): void {
+    nameHost(this, msg(this, 'sidebar.label'), (n, v) => this.setHostAttribute(n, v));
+  }
+
   updated(changed: Map<string, unknown>): void {
+    this._name();
     if (changed.has('collapsed') || changed.has('width') || changed.has('collapsedWidth')) {
       this._updateWidth();
     }

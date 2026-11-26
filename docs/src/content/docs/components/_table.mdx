@@ -233,6 +233,258 @@ A card pads its content, which doubles the padding of a table's first and last c
 </void-card>
 ```
 
+## Sorting
+
+`data-sort` on a header cell makes its column sortable, and nothing else changes in your markup. The component puts a real `<button>` around the header's content (the one place it adds an element to a cell; your nodes stay inside it), writes `aria-sort` on the `<th>`, and cycles **ascending, descending, none** when the button is pressed. Pressing it also says "Sorted by Name, ascending" in a polite live region, because a screen reader reads `aria-sort` when you move through the table, not when you press the button.
+
+<div class="vd-example not-content">
+  <div class="vd-box">
+    <void-table aria-label="Ground stations" sort="name">
+      <table>
+        <thead>
+          <tr>
+            <th data-key="name" data-sort>Station</th>
+            <th data-key="passes" data-sort="number" data-align="end">Passes</th>
+            <th data-key="seen" data-sort="date">Last contact</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Svalbard 1</td><td>212</td><td data-sort-value="2026-11-02">2 Nov</td></tr>
+          <tr><td>Éclair Base</td><td>9</td><td data-sort-value="2026-01-15">15 Jan</td></tr>
+          <tr><td>Troll</td><td>0</td><td></td></tr>
+          <tr><td>Punta Arenas 10</td><td>176</td><td data-sort-value="2026-10-20">20 Oct</td></tr>
+          <tr><td>Punta Arenas 2</td><td>1,020</td><td data-sort-value="2026-09-30">30 Sep</td></tr>
+        </tbody>
+      </table>
+    </void-table>
+  </div>
+</div>
+
+```html
+<void-table aria-label="Ground stations">
+  <table>
+    <thead>
+      <tr>
+        <th data-key="name" data-sort>Station</th>
+        <th data-key="passes" data-sort="number" data-align="end">Passes</th>
+        <th data-key="seen" data-sort="date">Last contact</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>Svalbard 1</td><td>212</td><td data-sort-value="2026-11-02">2 Nov</td></tr>
+    </tbody>
+  </table>
+</void-table>
+```
+
+| Attribute | On | Means |
+|---|---|---|
+| `data-sort` | `<th>` | The column is sortable. `data-sort="number"` or `"date"` compares as numbers or dates; text (the default) uses `Intl.Collator` for the closest `lang` with numeric collation, so "apple 2" comes before "apple 10" and, under `lang="sv"`, "ä" after "z" |
+| `data-sort-value` | `<td>` | The value compared instead of the cell's text: an ISO date for a date, the raw number for a number |
+| `data-key` | `<th>` | The column's name for `sort`, `filter-columns` and events. Without it, its position (`"0"`, `"1"`) |
+| `sort`, `sort-direction` | host | The column key and `ascending` or `descending`. Reflected and settable; `sort` without a direction is ascending |
+
+Empty cells sort last in both directions. One column is sorted at a time: multi-column sorting is not supported. The `void-sort` event carries `{ column, direction }`, where `direction` is the state the column goes to (`none` when the cycle returns to the unsorted order) and can be cancelled. Rows return to the order the server rendered them when the sort is cleared.
+
+## Filtering
+
+`filter` on the host hides the body rows that do not contain **every** word, ignoring case and accents ("jose" finds "José"). `filter-columns` limits it to some columns by `data-key` (default: every column except those marked `data-stack="select"`, `"actions"` or `"hide"`). Rows that do not match get `hidden`; they are not removed, so their state survives and they come back when the filter is cleared. A `<void-table-filter>` part holding a native `<input type="search">` (or a `<void-input>`) is wired to the filter, with a short pause after the last keystroke; setting the attribute applies at once and fills the field.
+
+<div class="vd-example not-content">
+  <div class="vd-box">
+    <void-table aria-label="Team" filter-columns="name role">
+      <void-table-filter><input type="search" aria-label="Filter the team" placeholder="Filter by name or role" /></void-table-filter>
+      <table>
+        <thead><tr><th data-key="name">Name</th><th data-key="role">Role</th><th data-key="city">City</th></tr></thead>
+        <tbody>
+          <tr><td>Ada</td><td>Engineer</td><td>London</td></tr>
+          <tr><td>José</td><td>Designer</td><td>Madrid</td></tr>
+          <tr><td>Grace</td><td>Admiral</td><td>Arlington</td></tr>
+          <tr><td>Linus</td><td>Engineer</td><td>Helsinki</td></tr>
+        </tbody>
+      </table>
+      <void-table-empty hidden>No one matches.</void-table-empty>
+    </void-table>
+  </div>
+</div>
+
+```html
+<void-table aria-label="Team" filter-columns="name role">
+  <void-table-filter><input type="search" aria-label="Filter the team"></void-table-filter>
+  <table>…</table>
+  <void-table-empty hidden>No one matches.</void-table-empty>
+</void-table>
+```
+
+- A visually hidden live region says "1 of 4 rows" after the filter changes. It exists before it speaks, as the toast container's announcers do.
+- `<void-table-empty>` (write it with `hidden`) is shown while no row matches.
+- The `void-filter` event carries `{ filter, shown, total }` once per pause in typing.
+- Per-column filters are not part of this version: use `filter-columns` or your own controls that set `filter`.
+- Rows you hide yourself with `hidden` stay hidden and are not counted.
+
+## Selection
+
+`selectable` makes the rows selectable; `selectable="single"` allows one row. You write the checkboxes, a native `<input type="checkbox">` or a `<void-checkbox>`, in the column marked `data-stack="select"` and, for many rows, a select-all checkbox in its header cell. The component finds and wires them and moves nothing.
+
+<div class="vd-example not-content">
+  <div class="vd-box">
+    <void-table selectable aria-label="Orders">
+      <table>
+        <thead>
+          <tr>
+            <th data-stack="select"><void-checkbox aria-label="Select all rows"></void-checkbox></th>
+            <th data-key="id" data-sort="number">Order</th>
+            <th data-key="who">Customer</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr data-value="o1"><td><void-checkbox aria-label="Select order 1"></void-checkbox></td><td>1</td><td>Ada</td></tr>
+          <tr data-value="o2"><td><void-checkbox aria-label="Select order 2"></void-checkbox></td><td>2</td><td>Grace</td></tr>
+          <tr data-value="o3"><td><void-checkbox aria-label="Select order 3"></void-checkbox></td><td>3</td><td>Linus</td></tr>
+          <tr data-value="o4" data-disabled><td><void-checkbox aria-label="Select order 4" disabled></void-checkbox></td><td>4</td><td>Alan</td></tr>
+        </tbody>
+      </table>
+      <void-table-selection hidden><span data-count></span> selected <void-button size="sm">Archive</void-button></void-table-selection>
+    </void-table>
+  </div>
+</div>
+
+```html
+<void-table selectable name="orders" aria-label="Orders">
+  <table>
+    <thead>
+      <tr>
+        <th data-stack="select"><void-checkbox aria-label="Select all rows"></void-checkbox></th>
+        <th>Order</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr data-value="o1"><td><void-checkbox aria-label="Select order 1"></void-checkbox></td><td>1</td></tr>
+    </tbody>
+  </table>
+  <void-table-selection hidden><span data-count></span> selected <void-button size="sm">Archive</void-button></void-table-selection>
+</void-table>
+```
+
+- **Value.** A row is identified by `data-value`, else its position. `value` on the host is the selected row values as a JSON array (`value='["o1","o3"]'`), in row order, reflected and settable. With `name` the table is a form control: one entry per selected row, `required` means at least one, and a form reset clears it.
+- **Event.** `void-change` carries `{ value, all }` once per user action: a click, a Shift range or select-all each fire one event, however many rows change. Setting `value` does not fire it.
+- **Rows.** The component writes `aria-selected` on each row (the theme shades `[aria-selected="true"]`) and keeps the checkboxes in step with `value`.
+- **Range.** Shift + click (or Shift + Space) on a row checkbox selects every row shown between it and the last row you toggled.
+- **Select all.** The header checkbox is checked when every selectable row shown is selected, **mixed** when some are, unchecked when none. Its name says what it does: "Select all rows", and "Select all 12 shown rows" while a filter is on (a name you write is kept). A `selectable` table with many rows needs that checkbox in the `data-stack="select"` header cell: without one there is no select-all.
+- **Scope.** Select-all acts on the rows **currently shown**, after filtering. Rows hidden by the filter keep whatever selection they had, so clearing the filter shows the header as mixed when only some are selected. Disabled rows (a disabled checkbox, or `data-disabled` on the row) are skipped and do not count towards "all".
+- **Summary.** `<void-table-selection>` (write it with `hidden`) is shown while anything is selected and is meant to hold the bulk actions. The component writes the count as text into any element inside it that has `data-count`, which a server can render too. The count is announced politely, once per action.
+- **Shortcut.** Select-all by keyboard is a key action, `selectAll`, and has no default key (shortcuts are opt-in: the page may use Ctrl or Cmd + A for something else, and select-all-text is how people copy a table). Bind it with `keys='{"selectAll":["Control+a","Meta+a"]}'` (or `configureKeys('void-table', …)`); it then acts only inside the table body, only when `selectable` allows many rows, and never from a text field. A listener that cancels the key first keeps it. See [Customising keys](/components/keyboard/#customising-keys).
+- **Language.** Everything the table says itself (the name of the select-all checkbox, the count announced after a filter or a selection, the sort announcement) is a message of the [catalogue](/guides/translation/), in English, French and Arabic, and follows the closest `lang`; a name you write on the select-all checkbox wins, and `registerMessages()` replaces the rest. Text columns sort with `Intl.Collator`, and numbers in a cell are read with the separators of that language ("1.234,5" under `lang="de"`); a `data-sort-value` is always read as a plain number. The count in a `data-count` element is written with that language's digits and grouping.
+- **Many rows.** At thousands of rows, write a native `<input type="checkbox">` in each row rather than a `<void-checkbox>`: with 5,000 rows, component checkboxes take seconds to render and to select all, native ones do not. The table wires either kind the same way.
+- **Striped rows.** `striped` shades every other row that is shown, so a filter that hides rows does not leave two shaded rows side by side (the selector skips `[hidden]` rows, with no work per row).
+- **Form.** A table is form-associated, which is fixed for the element, so it is listed in `form.elements` whether or not it takes part. Without `selectable` it submits nothing, even with a `name`, and `required` is ignored; with `selectable` and a `name` it submits one entry per selected row.
+
+## Server mode: `manual`
+
+`manual` is for a table the server drives (LiveView, Livewire, Turbo). The table never reorders or hides a row. It updates the header state (`aria-sort`, the select-all checkbox, the parts), fires `void-sort`, `void-filter` and `void-change`, and the server answers by rendering the order, the visible rows, `aria-sort` and the selection. The host's own attributes (`sort`, `sort-direction`, `filter`, `value`) are what the server renders too: an attribute the server changes wins, one it leaves alone keeps what the user did. The `voidable/laravel` Blade components (`<x-voidable::table>` and its parts) and the gem's `void_table` helpers write `value` and `keys` as JSON for you; full Livewire and Turbo examples, with select-all across pages, are in [Alpine and Livewire](/frameworks/alpine/#tables-the-server-drives) and [Hotwire](/frameworks/hotwire/#tables-the-server-drives).
+
+```html
+<void-table manual selectable sort="name" sort-direction="ascending" value='["o2"]' aria-label="Orders">
+  <table>
+    <thead><tr><th data-stack="select"><input type="checkbox" aria-label="Select all rows"></th><th data-key="name" data-sort>Name</th></tr></thead>
+    <tbody>…</tbody>
+  </table>
+</void-table>
+```
+
+**Phoenix LiveView.** Bridge the events with `events` on the `live_voidable` table (each arrives as a LiveView event whose `"detail"` is the event's detail) and render the order, the rows and the state from assigns:
+
+```heex
+<.table manual selectable sort={@sort} sort_direction={@dir} value={@selected}
+        total_rows={@total} events={["void-sort", "void-change"]} label="Orders">
+  <table>
+    <thead><tr>
+      <th data-stack="select"><.checkbox /></th>
+      <th data-key="name" data-sort>Name</th>
+    </tr></thead>
+    <tbody>
+      <tr :for={o <- @orders} id={"o-#{o.id}"} data-value={o.id}>…</tr>
+    </tbody>
+  </table>
+</.table>
+```
+
+```elixir
+def handle_event("void-sort", %{"detail" => %{"column" => col, "direction" => dir}}, socket) do
+  {:noreply, socket |> assign(sort: col, dir: dir) |> assign_orders()}
+end
+
+def handle_event("void-change", %{"detail" => %{"value" => ids, "all" => all}}, socket) do
+  {:noreply, assign(socket, selected: ids, all_selected: all)}
+end
+```
+
+**Laravel Livewire.** Listen with `x-void-on` and call the component, which re-renders the table and the Alpine morph keeps what the user did:
+
+```blade
+<void-table manual selectable aria-label="Orders"
+  sort="{{ $sort }}" sort-direction="{{ $direction }}" value='@json($selected)'
+  x-void-on:void-sort="$wire.sortBy($event.detail.column, $event.detail.direction)"
+  x-void-on:void-change="$wire.select($event.detail.value, $event.detail.all)">
+  <table>
+    <thead><tr><th data-stack="select"><input type="checkbox" aria-label="Select all rows"></th>…</tr></thead>
+    <tbody>…</tbody>
+  </table>
+</void-table>
+```
+
+**Hotwire (Turbo).** A Stimulus action reads the event and asks the server for the new page; with `<meta name="turbo-refresh-method" content="morph">` Turbo morphs the answer into the table:
+
+```erb
+<void-table manual aria-label="Orders" sort="<%= params[:sort] %>" sort-direction="<%= params[:dir] %>"
+            data-controller="orders" data-action="void-sort->orders#sort">
+  …
+</void-table>
+```
+
+```js
+// app/javascript/controllers/orders_controller.js
+import { Controller } from '@hotwired/stimulus';
+import { Turbo } from '@hotwired/turbo-rails';
+
+export default class extends Controller {
+  sort({ detail: { column, direction } }) {
+    const params = new URLSearchParams(location.search);
+    if (direction === 'none') params.delete('sort'); else params.set('sort', column);
+    params.set('dir', direction);
+    Turbo.visit(`${location.pathname}?${params}`, { action: 'replace' });
+  }
+}
+```
+
+### Across pages
+
+In `manual` mode the table only knows the rows it was given, so "all" means **this page**, and the client never holds the ids of the other pages. For "select all 1,250 rows" the server sets `total-rows="1250"`. When select-all is checked and `total-rows` exceeds the rows present, a `<void-table-select-all>` part (write it with `hidden`) is shown; a button inside it ("Select all 1,250 rows") sets `all-selected` on the host and fires `void-change` with `{ value, all: true }`. `value` stays the page's values. Changing any checkbox clears `all-selected` again. The server reads `all` and applies the action to the whole set.
+
+```html
+<void-table manual selectable total-rows="1250" aria-label="Orders">
+  <table>
+    <thead><tr><th data-stack="select"><input type="checkbox" aria-label="Select all rows"></th>…</tr></thead>
+    <tbody>…</tbody>
+  </table>
+  <void-table-select-all hidden><button type="button">Select all 1,250 rows</button></void-table-select-all>
+</void-table>
+```
+
+Pagination is the server's too: with `manual`, put a [`void-pagination`](/components/pagination/) beside the table and render the page. Paginating the filtered rows on the client is not supported.
+
+## Server patches
+
+When a morph replaces the rows of an automatic (not `manual`) table, the table applies one coalesced pass: the current sort and filter are applied to the new rows, and the selection is kept **by row value**. Rows that are no longer there leave `value` quietly, with no `void-change`, because nobody chose that; a row that comes back is not selected again. What the checkboxes show during a patch is never read back: the table's own `value` is the state, and it is written onto the checkboxes after the patch. A `value`, `sort` or `filter` the server changes wins, as for every component; rows the server renders with checked boxes and no `value` start the selection once, when the table first sees them.
+
+## Stacked, sticky and right-to-left
+
+A sortable header's button and the select-all checkbox are controls, so they stay visible above the stacked blocks while the other header cells leave the screen (see Stack above): sorting and selecting stay reachable at every width. Sticky headers and columns, and right-to-left (the sort direction is drawn after the label, on the reading side), work as before.
+
+## Performance
+
+The table does nothing extra until an attribute asks for it. For 5,000 rows, sorting detaches and reattaches the rows in one pass (keeping focus), a cell's text and sort value is read once and kept until the markup changes, so each keystroke of a filter only compares strings, and select-all is one pass and one event.
+
 ## Density
 
 Cell padding, the spacing of stacked blocks and the row actions follow the theme's [`--void-density`](/getting-started/theming/) knob, like every control. `compact` is a fixed tighter padding for dense reports.

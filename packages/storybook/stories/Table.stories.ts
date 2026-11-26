@@ -394,3 +394,159 @@ export const SelectionInBothPresentations: Story = {
     </div>
   `,
 };
+
+const stationRows = [
+  ['svalbard', 'Svalbard 1', '212', '2026-11-02', '2 Nov'],
+  ['eclair', 'Éclair Base', '9', '2026-01-15', '15 Jan'],
+  ['troll', 'Troll', '0', '', ''],
+  ['punta10', 'Punta Arenas 10', '176', '2026-10-20', '20 Oct'],
+  ['punta2', 'Punta Arenas 2', '1020', '2026-09-30', '30 Sep'],
+];
+
+const sortableHead = html`
+  <thead>
+    <tr>
+      <th data-key="name" data-sort>Station</th>
+      <th data-key="passes" data-sort="number" data-align="end">Passes</th>
+      <th data-key="seen" data-sort="date">Last contact</th>
+    </tr>
+  </thead>
+`;
+
+export const Sortable: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          '`data-sort` on a header cell (`"number"` or `"date"`; text by default) makes the column sortable: the header becomes a button, `aria-sort` follows, and activating it cycles ascending, descending, none. A cell\'s `data-sort-value` is what is compared (ISO dates, raw numbers); text uses `Intl.Collator` for the closest `lang`, numeric; empty cells sort last in both directions.',
+      },
+    },
+  },
+  render: () => html`
+    <void-table aria-label="Ground stations">
+      <table>
+        ${sortableHead}
+        <tbody>
+          ${stationRows.map(([, name, passes, iso, text]) => html`<tr><td>${name}</td><td>${passes}</td><td data-sort-value=${iso}>${text}</td></tr>`)}
+        </tbody>
+      </table>
+    </void-table>
+  `,
+};
+
+export const Filterable: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'A `<void-table-filter>` part holding a search input filters the rows as you type (after a short pause): every word must match, ignoring case and accents, in the columns of `filter-columns` or all of them. Rows that do not match get `hidden`; a polite live region says "N of M rows"; `<void-table-empty>` shows while nothing matches.',
+      },
+    },
+  },
+  render: () => html`
+    <void-table aria-label="Ground stations" filter-columns="name">
+      <void-table-filter><input type="search" aria-label="Filter stations" placeholder="Filter stations"></void-table-filter>
+      <table>
+        ${sortableHead}
+        <tbody>
+          ${stationRows.map(([, name, passes, iso, text]) => html`<tr><td>${name}</td><td>${passes}</td><td data-sort-value=${iso}>${text}</td></tr>`)}
+        </tbody>
+      </table>
+      <void-table-empty hidden>No station matches.</void-table-empty>
+    </void-table>
+  `,
+};
+
+export const Selectable: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          '`selectable` wires the checkboxes you write: the header checkbox selects the rows shown (checked, mixed or unchecked), Shift + click selects a range, `value` is the selected row values (`data-value`), and `void-table-selection` shows the count and the bulk actions while anything is selected.',
+      },
+    },
+  },
+  render: () => html`
+    <void-table selectable aria-label="Ground stations" name="stations">
+      <void-table-filter><input type="search" aria-label="Filter stations" placeholder="Filter stations"></void-table-filter>
+      <table>
+        <thead>
+          <tr>
+            <th data-stack="select"><void-checkbox aria-label="Select all rows"></void-checkbox></th>
+            <th data-key="name" data-sort>Station</th>
+            <th data-key="passes" data-sort="number" data-align="end">Passes</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${stationRows.map(([id, name, passes]) => html`
+            <tr data-value=${id}>
+              <td><void-checkbox aria-label=${`Select ${name}`}></void-checkbox></td>
+              <td>${name}</td>
+              <td>${passes}</td>
+            </tr>
+          `)}
+        </tbody>
+      </table>
+      <void-table-selection hidden><span data-count></span> selected <void-button size="sm">Archive</void-button></void-table-selection>
+    </void-table>
+  `,
+};
+
+export const ServerMode: Story = {
+  name: 'Server mode (manual)',
+  parameters: {
+    docs: {
+      description: {
+        story:
+          '`manual`: the table never reorders or hides a row. It fires `void-sort`, `void-filter` and `void-change` and updates the header; the server renders the order, `aria-sort` and the selection. `total-rows` lets the select-all part offer "all N rows" across pages.',
+      },
+    },
+  },
+  render: () => html`
+    <void-table manual selectable total-rows="1250" aria-label="Orders">
+      <table>
+        <thead>
+          <tr>
+            <th data-stack="select"><void-checkbox aria-label="Select all rows"></void-checkbox></th>
+            <th data-key="name" data-sort>Customer</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr data-value="1"><td><void-checkbox aria-label="Select Ada"></void-checkbox></td><td>Ada</td></tr>
+          <tr data-value="2"><td><void-checkbox aria-label="Select Grace"></void-checkbox></td><td>Grace</td></tr>
+          <tr data-value="3"><td><void-checkbox aria-label="Select Linus"></void-checkbox></td><td>Linus</td></tr>
+        </tbody>
+      </table>
+      <void-table-select-all hidden><button type="button">Select all 1,250 rows</button></void-table-select-all>
+    </void-table>
+  `,
+};
+
+export const SortAndSelectStacked: Story = {
+  name: 'Sorting and selecting, stacked',
+  parameters: {
+    docs: {
+      description: { story: 'The sort buttons and the select-all checkbox are controls, so they stay visible above the stacked blocks.' },
+    },
+  },
+  render: () => html`
+    <div style="max-width: 20rem">
+      <void-table stack="always" selectable aria-label="Ground stations">
+        <table>
+          <thead>
+            <tr>
+              <th data-stack="select"><void-checkbox aria-label="Select all rows"></void-checkbox></th>
+              <th data-stack="title" data-key="name" data-sort>Station</th>
+              <th data-key="passes" data-sort="number">Passes</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${stationRows.slice(0, 3).map(([id, name, passes]) => html`
+              <tr data-value=${id}><td><void-checkbox aria-label=${`Select ${name}`}></void-checkbox></td><td>${name}</td><td>${passes}</td></tr>
+            `)}
+          </tbody>
+        </table>
+      </void-table>
+    </div>
+  `,
+};

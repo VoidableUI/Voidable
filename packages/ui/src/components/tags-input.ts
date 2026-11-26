@@ -1,6 +1,10 @@
 import { html, nothing, type PropertyValues } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
+import { msg } from '../messages.js';
+import { actionFor } from '../keyboard.js';
+import { keysConverter, type KeyOverrides } from '../keys.js';
+import { tagsInputKeys } from '../keymaps/fields.js';
 import { InternalsFormControl, type FormSubmission } from '../form-control.js';
 import { valueJsonList } from '../value-list.js';
 import { useProjection } from '../projection.js';
@@ -11,6 +15,11 @@ export type TagValue = string | { text: string; color?: string };
 
 /** Multi-tag input field for email recipients, category labels, keyword tagging, and comma-separated value entry. */
 export class VoidTagsInput extends InternalsFormControl(VoidElement) {
+  /** Key bindings for this element's actions, as JSON (`{"add":["Enter",";"]}`); `[]` switches an action off. See the keyboard guide. */
+  @property({ attribute: 'keys', converter: keysConverter }) keys: KeyOverrides | null = null;
+  /** @internal The actions of this element and their default keys. */
+  static readonly keyMap = tagsInputKeys;
+
   /** The host's `aria-label` / `aria-labelledby` name the inner control. */
   static override labelTarget = '.void-tags-input-field';
 
@@ -25,8 +34,9 @@ export class VoidTagsInput extends InternalsFormControl(VoidElement) {
   @property({ type: Boolean, reflect: true }) readonly = false;
   /** Maximum number of tags. Once reached, the entry field is hidden. Unlimited by default. */
   @property({ type: Number }) max = Infinity;
-  /** Hint in the entry field. Defaults to `Add tag...`. */
-  @property({ type: String }) placeholder = 'Add tag...';
+  /** Hint in the entry field. Defaults to the `tagsInput.placeholder` message (English: `Add tag...`). */
+  @property({ type: String }) placeholder = '';
+  private get _hint(): string { return this.placeholder || msg(this, 'tagsInput.placeholder'); }
   /** Size step: `sm`, `md` (default) or `lg`. */
   @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' = 'md';
   /** Status colour of the tags: `default`, `error`, `warning`, `caution`, `success`, `info`, `notice` or `highlight`. */
@@ -84,7 +94,7 @@ export class VoidTagsInput extends InternalsFormControl(VoidElement) {
                   ? html`<button
                       type="button"
                       class="void-tags-input-tag-remove"
-                      aria-label="Remove ${text}"
+                      aria-label=${msg(this, 'removeItem', { name: text })}
                       @click=${(e: Event) => { e.stopPropagation(); this._removeTag(i); }}
                     >×</button>`
                   : nothing}
@@ -96,7 +106,7 @@ export class VoidTagsInput extends InternalsFormControl(VoidElement) {
           ? html`<input
               class="void-tags-input-field"
               type="text"
-              placeholder=${this.value.length === 0 ? this.placeholder : ''}
+              placeholder=${this.value.length === 0 ? this._hint : ''}
               ?disabled=${this.disabled}
               @keydown=${this._onKeydown}
               @input=${this._onFieldInput}
@@ -137,14 +147,15 @@ export class VoidTagsInput extends InternalsFormControl(VoidElement) {
   private _onKeydown(e: KeyboardEvent): void {
     const input = e.target as HTMLInputElement;
 
-    if (e.key === 'Enter' || e.key === ',') {
+    const action = actionFor(this, e);
+    if (action === 'add') {
       e.preventDefault();
       const raw = input.value;
       // Clear first so the form value never counts the text twice.
       input.value = '';
       this._addTag(raw);
       this.formSync();
-    } else if (e.key === 'Backspace' && input.value === '' && this.value.length > 0) {
+    } else if (action === 'removeLast' && input.value === '' && this.value.length > 0) {
       this._removeTag(this.value.length - 1);
     }
   }

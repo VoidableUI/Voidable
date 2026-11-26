@@ -3,6 +3,7 @@ title: Keyboard and ARIA
 description: How the composite widgets are operated from the keyboard and what they expose to assistive technology.
 ---
 
+import { Aside } from '@astrojs/starlight/components';
 import KeyTable from '../../../components/api/KeyTable.astro';
 
 The widgets that have more than one part (combobox, multiselect, tabs, menus, segmented control, dialogs, popovers, date picker) follow the matching [WAI-ARIA Authoring Practices](https://www.w3.org/WAI/ARIA/apg/patterns/) pattern. The widget role sits on the element that holds focus, never on the `<void-*>` host around it, so assistive technology sees one widget with one name.
@@ -11,7 +12,7 @@ Disabled options, tabs and items are skipped by every key below. Children can ar
 
 Inside a `<void-dialog>`, Escape closes the open list or menu first; the dialog stays open until the next Escape. Escape and outside presses always go to the topmost open overlay only; see [Overlays](/components/overlays/) for stacking, focus return and the `void-open` / `void-close` events.
 
-The tables below are the same ones shown on each component's page; both read `docs/src/data/keyboard.json`.
+The tables below are the same ones shown on each component's page; both are generated from the key actions in the manifest (the same ones the components read).
 
 ## Combobox
 
@@ -24,6 +25,10 @@ The tables below are the same ones shown on each component's page; both read `do
 ## Tabs
 
 <KeyTable tag="void-tabs" />
+
+## Table
+
+<KeyTable tag="void-table" />
 
 ## Segmented control
 
@@ -104,3 +109,59 @@ Components built on a native control (input, textarea, select, checkbox, radio, 
 ### Date picker
 
 <KeyTable tag="void-date-picker" />
+
+## Customising keys
+
+Every key above that a Voidable element handles is a named action (`close`, `next`, `activate`, ...), and every one can be turned off or moved. The browser's own keys (Tab, the keys of a native `<input>` or `<select>` the element wraps) are listed as "the browser's own keys" in the tables and cannot be remapped.
+
+There are three levels, and the most specific wins for each action:
+
+1. The `keys` attribute (JSON) or property on one element:
+
+   ```html
+   <void-tabs value="a" keys='{"next": ["j"], "previous": ["k"]}'>
+     <void-tabs-list>
+       <void-tabs-trigger value="a">A</void-tabs-trigger>
+       <void-tabs-trigger value="b">B</void-tabs-trigger>
+     </void-tabs-list>
+     <void-tabs-content value="a">First</void-tabs-content>
+     <void-tabs-content value="b">Second</void-tabs-content>
+   </void-tabs>
+   ```
+
+   A dialog whose Escape key is moved to another key:
+
+   ```html
+   <void-dialog open keys='{"close": ["Control+["]}'>
+     <void-dialog-title>Settings</void-dialog-title>
+     <void-dialog-body>...</void-dialog-body>
+   </void-dialog>
+   ```
+
+2. `configureKeys(tag, overrides)` for every element of a tag:
+
+   ```js
+   import { configureKeys } from '@voidable/ui/keys'; // also exported from '@voidable/ui'
+
+   configureKeys('void-combobox', { close: ['Escape', 'Control+['] });
+   ```
+
+3. `configureKeys('*', overrides)` for the action of that name in every component (`{ close: ['q'] }` rebinds `close` everywhere).
+
+`configureKeys(tag, null)` clears a level. An action's value is a key, a list of keys, or an empty list or `null` to turn the action off. An action name the element does not have is reported by the [development warnings](/getting-started/development-warnings/) and by `voidable check` (rule `keys`, a warning). The names are the ones in the "Action" column of each table and in the [conventions](/guides/conventions/#key-actions).
+
+A key is written as `Key`, or `Modifier+Key` with `Shift`, `Control`, `Alt` and `Meta`: `Escape`, `ArrowDown`, `Space`, `Shift+PageUp`, `Control+Enter`. Letters match in either case unless `Shift` is named, and Control, Alt and Meta must match exactly. `Printable` is any character key (type-ahead). The default inline arrows follow the reading direction (Left Arrow moves to the next item in a right-to-left page); a key you write is literal, so `["ArrowRight"]` is the right arrow in both directions.
+
+In React, `keys` is an object (`<Tabs keys={{ next: ['j'] }}>`). In HEEx, Blade and ERB write the JSON attribute as in HTML, from the data you have: `keys={Jason.encode!(%{close: []})}`, `keys="{{ json_encode(['close' => []]) }}"`, `keys: { close: [] }.to_json`. A server morph keeps the attribute like any other.
+
+### Shortcuts
+
+An application shortcut is the same mechanism: bind a key to an action that has no default key, or to any action. No Voidable element binds a shortcut by default (no default key uses Control or Meta), so shortcuts are opt-in and belong to the application.
+
+### Cancelling a key
+
+Every key handler returns early for a key whose `defaultPrevented` is already true, so a listener on `document` (capture phase) that calls `preventDefault()` stops the element acting on it. Use that to take a key over for a moment, and `keys` to move one for good.
+
+<Aside type="caution" title="Removing a key can make a control unusable from the keyboard">
+Each essential action is marked in the tables. If you switch off `activate` on a button, or `next` and `previous` on a tab list, a keyboard user has no other way to do it. Move the key rather than remove it, unless the action is offered some other way.
+</Aside>

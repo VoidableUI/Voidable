@@ -1,6 +1,7 @@
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
 import { MORPH_PARTICIPANTS, PartsController, type MorphParticipant } from '../parts.js';
+import { msg } from '../messages.js';
 
 const TAGS = ['void-error-fallback-title', 'void-error-fallback-description', 'void-error-fallback-actions'] as const;
 
@@ -23,8 +24,8 @@ const DEFAULT = 'data-void-default';
  * @fires {CustomEvent} void-retry - The built-in retry button was pressed (the element retries nothing itself).
  */
 export class VoidErrorFallback extends VoidElement {
-  /** Headline of the built-in default. Defaults to `Something went wrong`. Ignored when the author writes parts. */
-  @property({ type: String }) heading = 'Something went wrong';
+  /** Headline of the built-in default. Defaults to the `errorFallback.heading` message (English: `Something went wrong`). Ignored when the author writes parts. */
+  @property({ type: String }) heading = '';
   /** Detail shown under the headline in the built-in default, such as what failed or what to try. Optional. */
   @property({ type: String }) message = '';
   /**
@@ -32,10 +33,13 @@ export class VoidErrorFallback extends VoidElement {
    * anything itself, so listen for the event and reload. Ignored when the author writes parts.
    */
   @property({ type: Boolean, reflect: true }) retryable = false;
-  /** Text of the built-in retry button. Defaults to `Try again`. Only used with `retryable`. */
-  @property({ type: String, attribute: 'retry-label' }) retryLabel = 'Try again';
+  /** Text of the built-in retry button. Defaults to the `errorFallback.retry` message (English: `Try again`). Only used with `retryable`. */
+  @property({ type: String, attribute: 'retry-label' }) retryLabel = '';
   /** Leave out the warning icon above the headline (it is drawn by default). */
   @property({ type: Boolean, attribute: 'hide-icon', reflect: true }) hideIcon = false;
+
+  /** The built-in text last written, so a change of language rewrites it. */
+  private _shown = '';
 
   protected readonly _parts = new PartsController(this, {
     tags: [...TAGS],
@@ -72,7 +76,11 @@ export class VoidErrorFallback extends VoidElement {
 
   protected override updated(changed: Map<string, unknown>): void {
     super.updated(changed);
-    if (['heading', 'message', 'retryable', 'retryLabel'].some(k => changed.has(k))) this._parts.sync();
+    const shown = `${this.heading || msg(this, 'errorFallback.heading')}\n${this.retryLabel || msg(this, 'errorFallback.retry')}`;
+    if (['heading', 'message', 'retryable', 'retryLabel'].some(k => changed.has(k)) || shown !== this._shown) {
+      this._shown = shown;
+      this._parts.sync();
+    }
   }
 
   /** Parts the author wrote. */
@@ -96,7 +104,8 @@ export class VoidErrorFallback extends VoidElement {
         keep.add(el);
       };
       ensure('void-error-fallback-title', el => {
-        if (el.textContent !== this.heading) el.textContent = this.heading;
+        const heading = this.heading || msg(this, 'errorFallback.heading');
+        if (el.textContent !== heading) el.textContent = heading;
       });
       if (this.message) {
         ensure('void-error-fallback-description', el => {
@@ -111,7 +120,8 @@ export class VoidErrorFallback extends VoidElement {
             button.type = 'button';
             el.append(button);
           }
-          if (button.textContent !== this.retryLabel) button.textContent = this.retryLabel;
+          const retry = this.retryLabel || msg(this, 'errorFallback.retry');
+          if (button.textContent !== retry) button.textContent = retry;
         });
       }
       this._order(keep);

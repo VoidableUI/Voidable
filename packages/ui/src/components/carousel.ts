@@ -1,8 +1,12 @@
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
-import { inlineKeys } from '../keyboard.js';
+import { actionFor } from '../keyboard.js';
 import { KeyboardActivation } from '../keyboard-activation.js';
+import { keysConverter, type KeyOverrides } from '../keys.js';
+import { activateKeys } from '../keymaps/activation.js';
+import { carouselKeys, carouselVerticalKeys } from '../keymaps/carousel.js';
 import { PartsController } from '../parts.js';
+import { msg } from '../messages.js';
 
 /**
  * Previous-slide control of a `<void-carousel>`: a button the theme draws as an arrow over the slides. Write it
@@ -10,6 +14,11 @@ import { PartsController } from '../parts.js';
  * It is aria-disabled on the first slide unless the carousel has `loop`.
  */
 export class VoidCarouselPrevious extends VoidElement {
+  /** Key bindings for this element's actions, as JSON (`{"activate":["Enter"]}`); `[]` switches an action off. See the keyboard guide. */
+  @property({ attribute: 'keys', converter: keysConverter }) keys: KeyOverrides | null = null;
+  /** @internal The actions of this element and their default keys. */
+  static readonly keyMap = activateKeys;
+
   /** Enter and Space fire a real `click`, as on a native button. */
   protected readonly _activation = new KeyboardActivation(this, {
     disabled: () => this.getAttribute('aria-disabled') === 'true',
@@ -32,6 +41,11 @@ if (!customElements.get('void-carousel-previous')) {
  * aria-disabled on the last slide unless the carousel has `loop`.
  */
 export class VoidCarouselNext extends VoidElement {
+  /** Key bindings for this element's actions, as JSON (`{"activate":["Enter"]}`); `[]` switches an action off. See the keyboard guide. */
+  @property({ attribute: 'keys', converter: keysConverter }) keys: KeyOverrides | null = null;
+  /** @internal The actions of this element and their default keys. */
+  static readonly keyMap = activateKeys;
+
   /** Enter and Space fire a real `click`, as on a native button. */
   protected readonly _activation = new KeyboardActivation(this, {
     disabled: () => this.getAttribute('aria-disabled') === 'true',
@@ -61,6 +75,11 @@ if (!customElements.get('void-carousel-next')) {
  * `value` and `index` are both the new slide's index.
  */
 export class VoidCarousel extends VoidElement {
+  /** Key bindings for this element's actions, as JSON (`{"next":["ArrowRight"]}`); `[]` switches an action off. See the keyboard guide. */
+  @property({ attribute: 'keys', converter: keysConverter }) keys: KeyOverrides | null = null;
+  /** @internal The actions of this element and their default keys (horizontal; a vertical carousel starts with ArrowDown and ArrowUp). */
+  static readonly keyMap = carouselKeys;
+
   /**
    * Zero-based index of the slide being shown. Set it to jump to a slide; the arrows, indicators and
    * arrow keys update it and fire `void-change`.
@@ -102,6 +121,9 @@ export class VoidCarousel extends VoidElement {
     onChange: () => this._wire(),
   });
 
+  /** The name this wrote on the indicators, so one the author wrote is told apart from it. */
+  private _indicatorsName: string | null = null;
+
   /** The slides, in document order. */
   private get _slides(): HTMLElement[] {
     return this._parts.all('void-carousel-item');
@@ -118,7 +140,7 @@ export class VoidCarousel extends VoidElement {
       this._parts.provide(slide, 'role', 'group');
       this._parts.provide(slide, 'aria-roledescription', 'slide');
       // The numbering follows the slides as they come and go; a label the author wrote is never replaced.
-      const label = `${i + 1} of ${count}`;
+      const label = msg(this, 'carousel.slide', { index: i + 1, count });
       const current = slide.getAttribute('aria-label');
       if (current === null || current === this._labels.get(slide)) {
         this._parts.set(slide, 'aria-label', label);
@@ -145,7 +167,12 @@ export class VoidCarousel extends VoidElement {
     const indicators = this._parts.one('void-carousel-indicators');
     if (!indicators) return;
     this._parts.provide(indicators, 'role', 'tablist');
-    this._parts.provide(indicators, 'aria-label', 'Slide indicators');
+    const name = msg(this, 'carousel.indicators');
+    const named = indicators.getAttribute('aria-label');
+    if (named === null || named === this._indicatorsName) {
+      this._parts.set(indicators, 'aria-label', name);
+      this._indicatorsName = name;
+    }
     const dots = Array.from(indicators.children).filter((c): c is HTMLButtonElement => c.localName === 'button');
     while (dots.length > count) dots.pop()!.remove();
     while (dots.length < count) {
@@ -159,7 +186,7 @@ export class VoidCarousel extends VoidElement {
       const selected = i === this.index;
       if (dot.getAttribute('aria-selected') !== String(selected)) dot.setAttribute('aria-selected', String(selected));
       if (dot.hasAttribute('active') !== selected) dot.toggleAttribute('active', selected);
-      const label = `Go to slide ${i + 1}`;
+      const label = msg(this, 'carousel.goTo', { index: i + 1, count });
       if (dot.getAttribute('aria-label') !== label) dot.setAttribute('aria-label', label);
     });
   }
@@ -264,15 +291,12 @@ export class VoidCarousel extends VoidElement {
   };
 
   private _onKeydown = (e: KeyboardEvent): void => {
-    const isHorizontal = this.orientation === 'horizontal';
-    const keys = inlineKeys(this);
-    const prevKey = isHorizontal ? keys.prev : 'ArrowUp';
-    const nextKey = isHorizontal ? keys.next : 'ArrowDown';
+    const action = actionFor(this, e, this.orientation === 'horizontal' ? carouselKeys : carouselVerticalKeys);
 
-    if (e.key === prevKey) {
+    if (action === 'previous') {
       e.preventDefault();
       this._prev();
-    } else if (e.key === nextKey) {
+    } else if (action === 'next') {
       e.preventDefault();
       this._next();
     }

@@ -19,8 +19,8 @@ describe('VoidErrorFallback', () => {
       el = document.createElement('void-error-fallback') as VoidErrorFallback;
     });
 
-    it('defaults heading to "Something went wrong"', () => {
-      expect(el.heading).toBe('Something went wrong');
+    it('has no heading of its own by default: the errorFallback.heading message is shown', () => {
+      expect(el.heading).toBe('');
     });
 
     it('defaults message to empty string', () => {
@@ -31,8 +31,8 @@ describe('VoidErrorFallback', () => {
       expect(el.retryable).toBe(false);
     });
 
-    it('defaults retryLabel to "Try again"', () => {
-      expect(el.retryLabel).toBe('Try again');
+    it('has no retry label of its own by default', () => {
+      expect(el.retryLabel).toBe('');
     });
 
     it('defaults hideIcon to false', () => {

@@ -1,5 +1,6 @@
 import { html, svg, nothing } from 'lit';
 import { VoidElement } from '../base.js';
+import { msg } from '../messages.js';
 import { property, state } from 'lit/decorators.js';
 import { LinearScale, BandScale } from './charts/scale.js';
 import { guard } from 'lit/directives/guard.js';
@@ -307,7 +308,7 @@ export class VoidBarChart extends VoidElement {
   /** The data table for assistive technology (and `show-table`), from the data as given, not the animated state. */
   private _table() {
     const data = this._data;
-    const label = this.ariaLabel || 'Bar chart';
+    const label = this.ariaLabel || msg(this, 'chart.bar');
     return guard([data, label, chartLocale(this)], () =>
       dataTable('void-bar-chart-table', seriesTable(this, label, data.series, data.labels ?? [])));
   }

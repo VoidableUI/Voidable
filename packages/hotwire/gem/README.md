@@ -90,6 +90,29 @@ Voidable::Hotwire.dev_warnings = true    # on, even outside development
 Voidable::Hotwire.dev_warnings = :throw  # thrown errors, for system tests
 ```
 
+## Testing
+
+System tests (Capybara) wait for components with a selector. Load `@voidable/ui/testing` in the test environment, which sets `data-void-ready` on `<html>` while every `void-*` element is defined and rendered, and render `data-anim-speed="off"` there to switch motion off:
+
+```js
+// app/javascript/application.js
+if (navigator.webdriver) import("@voidable/ui/testing")   // pin it in the importmap, or import it from your bundle
+```
+
+```erb
+<html <%= tag.attributes(data: { anim_speed: ("off" if Rails.env.test?) }) %>>
+```
+
+```ruby
+def wait_for_voidable = expect(page).to have_css("html[data-void-ready]", wait: 10)
+
+visit settings_path
+wait_for_voidable
+click_button "Save"
+```
+
+A toast still closes after its `duration` with animation off: it is a timer, not an animation. See [Testing](https://voidable.dev/guides/testing/).
+
 ## For AI agents
 
 The gem ships `llms.txt` (in the gem's root) describing its helpers, generators and settings. Every element's parts, attributes and events are in the npm package: `node_modules/@voidable/ui/dist/reference.md` (`@voidable/ui/reference.md`), or `voidable ref <tag>` offline.

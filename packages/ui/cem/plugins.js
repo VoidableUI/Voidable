@@ -572,6 +572,14 @@ function writeRenamed(get) {
     if (spec.attributes || decl.voidRenamed?.attributes) out.attributes = { ...(decl.voidRenamed?.attributes ?? {}), ...(spec.attributes ?? {}) };
     if (spec.values) out.values = spec.values;
     if (spec.events) out.events = spec.events;
+    for (const [kind, versions] of Object.entries(spec.since ?? {})) {
+      const names = kind === 'attributes' ? spec.attributes : kind === 'values' ? spec.values : spec.events;
+      for (const [name, version] of Object.entries(versions)) {
+        if (!/^\d+\.\d+$/.test(version)) throw new Error(`cem/supplement.js renamed: <${tag}> since ${kind} ${name}: "${version}" is not a release like "0.10"`);
+        if (!names || !Object.hasOwn(names, name)) throw new Error(`cem/supplement.js renamed: <${tag}> since lists ${kind} "${name}", which it does not rename`);
+      }
+    }
+    if (spec.since) out.since = spec.since;
     decl.voidRenamed = out;
   }
 }

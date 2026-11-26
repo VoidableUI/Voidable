@@ -1,0 +1,54 @@
+---
+// The words a component writes itself (accessible names, placeholders, errors), from the manifest's voidMessages
+// (src/messages.ts and packages/ui/cem/messages-meta.js). With no `tag`, the whole catalogue, for the Translation guide.
+import { loadComponentData } from '../../lib/component-data.mjs';
+import { inline } from '../../lib/inline.mjs';
+
+interface Props { tag?: string }
+const { tag } = Astro.props;
+const data = loadComponentData();
+const all: any[] = data.manifest.voidMessages ?? [];
+const rows: any[] = tag ? (data.byTag.get(tag)?.messages ?? []) : all;
+const purpose = new Map(all.map((m) => [m.key, m.purpose]));
+const link = (t: string) => `/components/${t.replace(/^void-/, '')}/`;
+const replaced = (o: any) =>
+  !o ? 'only <code>registerMessages()</code>'
+  : o.part ? `a <code>&lt;${o.part}&gt;</code> part you write`
+  : o.on ? `<code>${o.attribute}</code> on <code>&lt;${o.on}&gt;</code>`
+  : `<code>${o.attribute}</code>`;
+---
+
+{
+  tag && (
+    <p>
+      The English below is what a page without <code>lang</code> sees; the language follows the closest <code>lang</code>
+      (see <a href="/guides/translation/">Translation</a>). What you write on the element always wins over a message.
+    </p>
+  )
+}
+<div class="vd-api-table">
+  <table>
+    <thead>
+      <tr>
+        <th>Message</th>
+        <th>English</th>
+        {!tag && <th>Used by</th>}
+        <th>What it is for</th>
+        <th>Replaced by</th>
+      </tr>
+    </thead>
+    <tbody>
+      {
+        rows.map((m: any) => (
+          <tr>
+            <td><code>{m.key}</code></td>
+            <td>{m.default}</td>
+            {!tag && <td>{m.tags.map((t: string, i: number) => <Fragment>{i > 0 && ', '}<a href={link(t)}><code>{t}</code></a></Fragment>)}</td>}
+            <td set:html={inline(purpose.get(m.key) ?? '')} />
+            <td set:html={replaced(m.override)} />
+          </tr>
+        ))
+      }
+    </tbody>
+  </table>
+</div>

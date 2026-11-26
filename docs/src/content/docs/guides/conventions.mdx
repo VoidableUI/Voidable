@@ -85,6 +85,18 @@ The [events guide](/guides/events/) lists every event with its detail.
 There is no attribute called `position`: it meant four different things. `start` and `end` name a side in the reading direction (they swap in right-to-left): the convention for any side that follows it (sidebar, action input `icon-side`, drawer). `left` and `right` are for literal edges: the drawer's screen edges. On an anchored overlay (popover, tooltip, hover card, dropdown menu) they are placed against the anchor with logical offsets, so in right-to-left `left` is on the right of the anchor. A toast container or indicator `placement` keeps its physical corners. A combined value such as `position="bottom-end"` is written as two attributes, `side="bottom" align="end"`.
 *Why*: `side` and `align` are the words CSS anchor positioning and the common positioning libraries use; `orientation` is the ARIA attribute (`aria-orientation`) every one of these components already writes.
 
+## Words and locale
+
+**A word a component writes is a message, never a literal in the component.** Every accessible name, placeholder, error and table header comes from the catalogue in `@voidable/ui/messages` (`msg(this, 'pagination.next')`), in the language of the element's closest `lang`, and has an entry in `packages/ui/cem/messages-meta.js`, which the build checks against the sources. A component that writes no words does not import the module.
+*Why*: a string in a template cannot be translated, and one that cannot be found cannot be reviewed; with one catalogue the Translation guide, the reference and `voidable ref` list every word from one place.
+
+**What the author writes wins.** An `aria-label`, a `placeholder`, a `label`, a `heading`, a part: the message is only the default for the one element that has none, and the component never overwrites a name it did not write itself (`nameHost` in the module does this for names on the host). The manifest records which attribute replaces which message (`voidMessages`), so the reference can say "named by `aria-label`, default from messages".
+*Why*: the author knows what the control is for ("Search orders"), and an overridden default must not come back when `lang` changes.
+
+**A default that is a message is an empty attribute.** `placeholder`, `heading`, `retry-label`, `action-label` and `label` default to `''`, and the component reads `this.placeholder || msg(…)`. An attribute that carried English as its default could not tell "the author wrote this" from "the default".
+
+**Formats follow `lang`, then an own `locale`.** Dates, numbers and the first day of the week use the element's `locale` if it has the attribute, else the closest `lang`, else `en-US` (`localeOf(el, own)`); never the browser's own setting and never a hard-coded `en-US`. Month and weekday names are Gregorian. See [Translation](/guides/translation/).
+
 ## Booleans
 
 **No attribute defaults to true.** A boolean attribute is on when it is present, exactly as in HTML, so a default-true boolean could only be turned off with `attr="false"`, which every other boolean treats as true. What is shown by default is turned off with a `hide-` attribute:
@@ -117,3 +129,30 @@ A setting that is a number is a number: the bar chart's `stagger` is the delay i
 What is not a treatment is not a variant: the skeleton's form is `shape` (`text`, `circular`, `rectangular`) and the colour picker's swatch-button form is the boolean `compact`.
 `show-value` (singular) prints values on every chart, as on the slider.
 *Why*: an agent that knows `variant="filled"` on a button should get the same meaning on a badge, not a layout change.
+
+## Key actions
+
+**A key is an action, and an element's actions have the same names everywhere.** An element reads its keys through a map of action to keys (its `keyMap`), never by comparing `e.key` in a handler, and an application can switch an action off or move it (`keys`, `configureKeys`; see [Customising keys](/components/keyboard/#customising-keys)). Two rules follow:
+
+1. **A key handler returns early for an event that is already `defaultPrevented`** (and while a text composition is in progress), so an application can take a key by cancelling it before the element sees it.
+2. **A focused control's own keys are on by default; a shortcut is opt-in.** The standard keys of a widget once it has focus (Space on a checkbox, arrows in a tablist, Enter on a sort button) are its default bindings, and an application can cancel, rebind or unbind them. A shortcut, a key that acts on more than the control the user is in (select every row with Control + A), is an action with **no default binding** that the application switches on by giving it a key (`keys='{"selectAll":["Control+a","Meta+a"]}'`). No element binds Control or Meta by default, and none acts from a text field.
+
+The vocabulary:
+
+| Action | Meaning |
+| --- | --- |
+| `activate` | Press, toggle or select the focused item |
+| `open`, `openLast` | Open a list or menu (and move to its last item) |
+| `close`, `cancel` | Close a layer; abandon an edit |
+| `submit`, `send` | Confirm an edit; send a message |
+| `leave` | Leave an open panel with Tab |
+| `next`, `previous`, `first`, `last` | Move between items |
+| `nextPage`, `previousPage` | Move a page of items |
+| `typeahead` | Jump to the item that starts with the typed characters |
+| `increment`, `decrement` | Step a number |
+| `previousDay`, `nextDay`, `previousWeek`, `nextWeek`, `startOfWeek`, `endOfWeek`, `previousMonth`, `nextMonth`, `previousYear`, `nextYear` | Move the calendar's focused date |
+| `deleteBackward`, `deleteForward` | Clear the box before or after the cursor |
+| `add`, `removeLast` | Add a tag; remove the last one |
+| `selectAll` | Select every row shown (a shortcut: no default key) |
+
+*Why*: one action name on every component lets `configureKeys('*', { close: [] })` mean the same everywhere, and lets the manifest, the reference and the checker list the keys from the code that reads them.

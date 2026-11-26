@@ -1,6 +1,7 @@
 import { html, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
+import { msg } from '../messages.js';
 import { useProjection } from '../projection.js';
 
 useProjection();
@@ -78,8 +79,8 @@ export class VoidPagination extends VoidElement {
       : html`<a class="void-pagination-btn" href=${this._href(target)} aria-label=${label}
           @click=${(e: MouseEvent) => this._onLinkClick(e, target)}>${glyph}</a>`;
     return html`
-      <nav role="navigation" aria-label="Pagination">
-        ${edge('Previous page', '«', this.value - 1, this.value <= 1)}
+      <nav role="navigation" aria-label=${msg(this, 'pagination.label')}>
+        ${edge(msg(this, 'pagination.previous'), '«', this.value - 1, this.value <= 1)}
         ${pages.map((p) => {
           if (p === 'ellipsis') {
             ellipsisCount++;
@@ -92,7 +93,7 @@ export class VoidPagination extends VoidElement {
             @click=${(e: MouseEvent) => this._onLinkClick(e, p)}
           >${p}</a>`;
         })}
-        ${edge('Next page', '»', this.value + 1, this.value >= this.total)}
+        ${edge(msg(this, 'pagination.next'), '»', this.value + 1, this.value >= this.total)}
       </nav>
     `;
   }
@@ -151,13 +152,13 @@ export class VoidPagination extends VoidElement {
     let ellipsisCount = 0;
 
     return html`
-      <nav role="navigation" aria-label="Pagination">
+      <nav role="navigation" aria-label=${msg(this, 'pagination.label')}>
         <button
           type="button"
           class="void-pagination-btn"
           ?disabled=${this.value <= 1}
           @click=${() => this._go(this.value - 1)}
-          aria-label="Previous page"
+          aria-label=${msg(this, 'pagination.previous')}
         >«</button>
         ${pages.map((p) => {
           if (p === 'ellipsis') {
@@ -179,7 +180,7 @@ export class VoidPagination extends VoidElement {
           class="void-pagination-btn"
           ?disabled=${this.value >= this.total}
           @click=${() => this._go(this.value + 1)}
-          aria-label="Next page"
+          aria-label=${msg(this, 'pagination.next')}
         >»</button>
       </nav>
     `;

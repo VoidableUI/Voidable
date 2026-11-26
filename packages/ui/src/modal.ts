@@ -2,6 +2,9 @@ import { property } from 'lit/decorators.js';
 import { VoidElement } from './base.js';
 import { OverlayController } from './overlay.js';
 import { attachChrome, PartsController } from './parts.js';
+import { msg } from './messages.js';
+import { keysConverter, type KeyOverrides } from './keys.js';
+import { overlayKeys } from './keymaps/overlay.js';
 
 /**
  * The shared modal behind `<void-dialog>` and `<void-drawer>`.
@@ -16,6 +19,11 @@ import { attachChrome, PartsController } from './parts.js';
  * @internal
  */
 export class VoidModal extends VoidElement {
+  /** Key bindings for this element's actions, as JSON (`{"close":["Escape"]}`); `[]` switches an action off, which leaves a modal with no keyboard exit. See the keyboard guide. */
+  @property({ attribute: 'keys', converter: keysConverter }) keys: KeyOverrides | null = null;
+  /** @internal The actions of this element and their default keys. */
+  static readonly keyMap = overlayKeys;
+
   /** Whether it is open. Set or remove the attribute (or property) to open and close it; the server may do the same through a morph. */
   @property({ type: Boolean, reflect: true }) open = false;
   /**
@@ -42,7 +50,7 @@ export class VoidModal extends VoidElement {
   private _chrome(): ShadowRoot {
     return attachChrome(
       this,
-      '<dialog part="surface"><button type="button" part="close" aria-label="Close">&times;</button><slot></slot></dialog>'
+      '<dialog part="surface"><button type="button" part="close">&times;</button><slot></slot></dialog>'
     );
   }
 
@@ -66,8 +74,9 @@ export class VoidModal extends VoidElement {
   // first or a dialog opened with hide-close focuses it.
   protected override willUpdate(changed: Map<string, unknown>): void {
     super.willUpdate(changed);
+    const close = this._chrome().querySelector('button')!;
+    close.setAttribute('aria-label', msg(this, 'close'));
     if (changed.has('hideClose')) {
-      const close = this._chrome().querySelector('button')!;
       close.hidden = this.hideClose;
       // Out of ::part(close) while hidden: the theme's display rule comes from
       // the outer tree and would outrank the [hidden] rule and any inline style.

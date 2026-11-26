@@ -23,8 +23,9 @@ describe('VoidSpinner', () => {
     expect(el.size).toBe('md');
   });
 
-  it('default label is "Loading"', () => {
-    expect(el.label).toBe('Loading');
+  it('has no label of its own by default: the spinner.label message names it', () => {
+    expect(el.label).toBe('');
+    expect(el.querySelector('[data-void-sr]')?.textContent ?? 'Loading').toBe('Loading');
   });
 
   it('sets role="status" on connect', () => {

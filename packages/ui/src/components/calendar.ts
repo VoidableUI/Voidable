@@ -4,8 +4,11 @@ import { VoidElement } from '../base.js';
 import { live } from 'lit/directives/live.js';
 import { InternalsFormControl, type FormValidityResult } from '../form-control.js';
 import { OverlayController } from '../overlay.js';
-import { inlineKeys, uid } from '../keyboard.js';
+import { actionFor, uid } from '../keyboard.js';
+import { keysConverter, type KeyOverrides } from '../keys.js';
+import { calendarKeys, datePickerKeys } from '../keymaps/pickers.js';
 import { useProjection } from '../projection.js';
+import { localeOf, msg, nameHost } from '../messages.js';
 
 useProjection();
 
@@ -72,12 +75,51 @@ function parseDisplay(text: string, fmt: string): string | null {
   return toISO(y, m - 1, d);
 }
 
+/**
+ * The day a week starts on, 0 (Sunday) to 6: the author's number when there is one, else what `Intl.Locale` says
+ * for `locale` (`getWeekInfo()`, or the older `weekInfo` property; Monday is 1 and Sunday 7 there), else Sunday.
+ */
+function firstDayOf(locale: string, own: number | null): number {
+  if (own !== null && Number.isFinite(own)) return ((Math.trunc(own) % 7) + 7) % 7;
+  try {
+    const l = new Intl.Locale(locale) as Intl.Locale & { getWeekInfo?: () => { firstDay: number }; weekInfo?: { firstDay: number } };
+    const info = typeof l.getWeekInfo === 'function' ? l.getWeekInfo() : l.weekInfo;
+    if (info && Number.isInteger(info.firstDay)) return info.firstDay % 7;
+  } catch {
+    // An unknown tag or an engine without week information: Sunday.
+  }
+  return 0;
+}
+
+/** Gregorian names for a date, whatever calendar the locale prefers: the grid is Gregorian. */
+function dateFormat(locale: string, options: Intl.DateTimeFormatOptions): Intl.DateTimeFormat {
+  try {
+    return new Intl.DateTimeFormat(locale, { ...options, calendar: 'gregory' });
+  } catch {
+    return new Intl.DateTimeFormat('en-US', options);
+  }
+}
+
+/** Whole numbers in the digits of `locale`, without grouping. */
+function numberFormat(locale: string): Intl.NumberFormat {
+  try {
+    return new Intl.NumberFormat(locale, { useGrouping: false });
+  } catch {
+    return new Intl.NumberFormat('en-US', { useGrouping: false });
+  }
+}
+
 /* ── VoidCalendar ── */
 
 type CalendarView = 'days' | 'months' | 'years';
 
 /** Date selection for booking flows, scheduling UIs, and form fields with locale-aware formatting and min/max constraints. */
 export class VoidCalendar extends InternalsFormControl(VoidElement) {
+  /** Key bindings for this element's actions, as JSON (`{"nextWeek":["ArrowDown","j"]}`); `[]` switches an action off. See the keyboard guide. */
+  @property({ attribute: 'keys', converter: keysConverter }) keys: KeyOverrides | null = null;
+  /** @internal The actions of this element and their default keys. */
+  static readonly keyMap = calendarKeys;
+
   /**
    * Selected date as an ISO `YYYY-MM-DD` string. Empty means no selection. It is what the form submits
    * and the reset target; picking a day updates it and fires `void-change`.
@@ -92,12 +134,27 @@ export class VoidCalendar extends InternalsFormControl(VoidElement) {
   /** Size step: `sm`, `md` (default) or `lg`. */
   @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' = 'md';
   /**
-   * BCP 47 language tag for month and weekday names and the long date announced for each day, such as
-   * `de-DE`. Defaults to `en-US`.
+   * BCP 47 language tag for month and weekday names, the numbers and the long date announced for each day, such
+   * as `de-DE`. Without it the calendar follows the closest `lang` (the page's included), and `en-US` where there
+   * is none. Month and day names are always for the Gregorian calendar.
    */
-  @property({ type: String }) locale = 'en-US';
-  /** Day the week starts on, as a number from 0 (Sunday, the default) to 6 (Saturday). Use 1 for Monday. */
-  @property({ attribute: 'first-day', type: Number }) firstDay = 0;
+  @property({ type: String }) locale = '';
+  /**
+   * Day the week starts on, as a number from 0 (Sunday) to 6 (Saturday). Use 1 for Monday. Without it the week
+   * starts on the day the locale's week information gives (`Intl.Locale`), and on Sunday where the browser
+   * does not provide it.
+   */
+  @property({ attribute: 'first-day', type: Number }) firstDay: number | null = null;
+
+  /** The locale the calendar formats in: its `locale`, else the closest `lang`, else `en-US`. */
+  private get _locale(): string {
+    return localeOf(this, this.locale);
+  }
+
+  /** The first day of the week, 0 (Sunday) to 6: `first-day`, else the locale's, else Sunday. */
+  private get _week(): number {
+    return firstDayOf(this._locale, this.firstDay);
+  }
 
   private _viewYear = 0;
   private _viewMonth = 0;
@@ -109,14 +166,19 @@ export class VoidCalendar extends InternalsFormControl(VoidElement) {
   connectedCallback(): void {
     super.connectedCallback();
     this.setHostAttribute('role', 'group');
-    this.setHostAttribute('aria-label', 'Calendar');
+    this._name();
     if (!this._didInit) {
       this._didInit = true;
       this._initView();
     }
   }
 
+  private _name(): void {
+    nameHost(this, msg(this, 'calendar.label'), (n, v) => this.setHostAttribute(n, v));
+  }
+
   updated(changed: Map<string, unknown>): void {
+    this._name();
     super.updated(changed);
     if (changed.has('value')) {
       this._syncViewToValue();
@@ -161,14 +223,16 @@ export class VoidCalendar extends InternalsFormControl(VoidElement) {
     const dayNames = this._getDayNames();
     const cells = this._buildDayCells();
     const weeks = Array.from({ length: cells.length / 7 }, (_, i) => cells.slice(i * 7, i * 7 + 7));
-    const monthLabel = this._getMonthName(this._viewMonth);
+    const nf = numberFormat(this._locale);
+    const fullDate = dateFormat(this._locale, { dateStyle: 'full' });
+    const monthLabel = dateFormat(this._locale, { month: 'long', year: 'numeric' }).format(new Date(this._viewYear, this._viewMonth, 1));
 
     return html`
       <div class="void-calendar-header">
         <button
           type="button"
           class="void-calendar-nav"
-          aria-label="Previous month"
+          aria-label=${msg(this, 'calendar.previousMonth')}
           ?disabled=${this.disabled}
           @click=${this._prevMonth}
         >
@@ -177,21 +241,21 @@ export class VoidCalendar extends InternalsFormControl(VoidElement) {
         <button
           type="button"
           class="void-calendar-title"
-          aria-label="Switch to month picker"
+          aria-label=${msg(this, 'calendar.chooseMonth')}
           ?disabled=${this.disabled}
           @click=${this._showMonths}
-        >${monthLabel} ${this._viewYear}</button>
+        >${monthLabel}</button>
         <button
           type="button"
           class="void-calendar-nav"
-          aria-label="Next month"
+          aria-label=${msg(this, 'calendar.nextMonth')}
           ?disabled=${this.disabled}
           @click=${this._nextMonth}
         >
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="var(--void-icon-stroke-width)" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"></polyline></svg>
         </button>
       </div>
-      <div class="void-calendar-grid" role="grid" aria-label="${monthLabel} ${this._viewYear}" @keydown=${this._onDayKeydown}>
+      <div class="void-calendar-grid" role="grid" aria-label="${monthLabel}" @keydown=${this._onDayKeydown}>
         <div class="void-calendar-weekdays" role="row">
           ${dayNames.map(n => html`<div class="void-calendar-weekday" role="columnheader" aria-label=${n.long}>${n.short}</div>`)}
         </div>
@@ -208,12 +272,12 @@ export class VoidCalendar extends InternalsFormControl(VoidElement) {
                       type="button"
                       class="void-calendar-day${isSelected ? ' selected' : ''}${isToday ? ' today' : ''}${cell.outside ? ' outside' : ''}"
                       ?disabled=${isDisabled}
-                      aria-label=${this._formatFullDate(cell.iso)}
+                      aria-label=${this._formatFullDate(cell.iso, fullDate)}
                       aria-current=${isToday ? 'date' : nothing}
                       tabindex=${cell.iso === this._focusDate ? '0' : '-1'}
                       data-date=${cell.iso}
                       @click=${() => this._selectDate(cell.iso)}
-                    >${cell.day}</button>
+                    >${nf.format(cell.day)}</button>
                   </div>
                 `;
               })}
@@ -224,38 +288,35 @@ export class VoidCalendar extends InternalsFormControl(VoidElement) {
     `;
   }
 
-  private _formatFullDate(iso: string): string {
+  private _formatFullDate(iso: string, fmt: Intl.DateTimeFormat): string {
     const p = toDateParts(iso);
     if (!p) return iso;
     try {
-      return new Intl.DateTimeFormat(this.locale, { dateStyle: 'full' }).format(new Date(p[0], p[1], p[2]));
+      return fmt.format(new Date(p[0], p[1], p[2]));
     } catch {
       return iso;
     }
   }
 
   private _getDayNames(): Array<{ short: string; long: string }> {
-    const fmt = new Intl.DateTimeFormat(this.locale, { weekday: 'short' });
-    const longFmt = new Intl.DateTimeFormat(this.locale, { weekday: 'long' });
+    const fmt = dateFormat(this._locale, { weekday: 'short' });
+    const longFmt = dateFormat(this._locale, { weekday: 'long' });
     const names: Array<{ short: string; long: string }> = [];
     // Jan 2024 starts on Monday — use a known Sunday: Jan 7 2024
     for (let i = 0; i < 7; i++) {
-      const d = new Date(2024, 0, 7 + ((this.firstDay + i) % 7));
+      const d = new Date(2024, 0, 7 + ((this._week + i) % 7));
       names.push({ short: fmt.format(d), long: longFmt.format(d) });
     }
     return names;
   }
 
-  private _getMonthName(m: number): string {
-    return new Intl.DateTimeFormat(this.locale, { month: 'long' }).format(new Date(2024, m, 1));
-  }
 
   private _buildDayCells(): Array<{ day: number; iso: string; outside: boolean; disabled: boolean }> {
     const y = this._viewYear;
     const m = this._viewMonth;
     const total = daysInMonth(y, m);
     const firstDow = new Date(y, m, 1).getDay();
-    const offset = (firstDow - this.firstDay + 7) % 7;
+    const offset = (firstDow - this._week + 7) % 7;
     const cells: Array<{ day: number; iso: string; outside: boolean; disabled: boolean }> = [];
 
     // Previous month padding
@@ -295,7 +356,7 @@ export class VoidCalendar extends InternalsFormControl(VoidElement) {
   /* ── Month picker view ── */
 
   private _renderMonths() {
-    const fmt = new Intl.DateTimeFormat(this.locale, { month: 'short' });
+    const fmt = dateFormat(this._locale, { month: 'short' });
     const months = Array.from({ length: 12 }, (_, i) => ({
       index: i,
       name: fmt.format(new Date(2024, i, 1)),
@@ -306,7 +367,7 @@ export class VoidCalendar extends InternalsFormControl(VoidElement) {
         <button
           type="button"
           class="void-calendar-nav"
-          aria-label="Previous year"
+          aria-label=${msg(this, 'calendar.previousYear')}
           ?disabled=${this.disabled}
           @click=${this._prevYear}
         >
@@ -315,14 +376,14 @@ export class VoidCalendar extends InternalsFormControl(VoidElement) {
         <button
           type="button"
           class="void-calendar-title"
-          aria-label="Switch to year picker"
+          aria-label=${msg(this, 'calendar.chooseYear')}
           ?disabled=${this.disabled}
           @click=${this._showYears}
-        >${this._viewYear}</button>
+        >${numberFormat(this._locale).format(this._viewYear)}</button>
         <button
           type="button"
           class="void-calendar-nav"
-          aria-label="Next year"
+          aria-label=${msg(this, 'calendar.nextYear')}
           ?disabled=${this.disabled}
           @click=${this._nextYear}
         >
@@ -357,17 +418,17 @@ export class VoidCalendar extends InternalsFormControl(VoidElement) {
         <button
           type="button"
           class="void-calendar-nav"
-          aria-label="Previous years"
+          aria-label=${msg(this, 'calendar.previousYears')}
           ?disabled=${this.disabled}
           @click=${this._prevYearsPage}
         >
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="var(--void-icon-stroke-width)" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"></polyline></svg>
         </button>
-        <span class="void-calendar-title void-calendar-title--static">${start} – ${start + 11}</span>
+        <span class="void-calendar-title void-calendar-title--static">${numberFormat(this._locale).format(start)} – ${numberFormat(this._locale).format(start + 11)}</span>
         <button
           type="button"
           class="void-calendar-nav"
-          aria-label="Next years"
+          aria-label=${msg(this, 'calendar.nextYears')}
           ?disabled=${this.disabled}
           @click=${this._nextYearsPage}
         >
@@ -381,7 +442,7 @@ export class VoidCalendar extends InternalsFormControl(VoidElement) {
             class="void-calendar-year${y === currentYear ? ' current' : ''}"
             ?disabled=${this.disabled}
             @click=${() => this._pickYear(y)}
-          >${y}</button>
+          >${numberFormat(this._locale).format(y)}</button>
         `)}
       </div>
     `;
@@ -501,35 +562,37 @@ export class VoidCalendar extends InternalsFormControl(VoidElement) {
     let handled = true;
     let newBase: Date | null = null;
 
-    switch (e.key) {
-      case inlineKeys(this).prev:
+    const action = actionFor(this, e);
+    switch (action) {
+      case 'previousDay':
         d--;
         break;
-      case inlineKeys(this).next:
+      case 'nextDay':
         d++;
         break;
-      case 'ArrowUp':
+      case 'previousWeek':
         d -= 7;
         break;
-      case 'ArrowDown':
+      case 'nextWeek':
         d += 7;
         break;
-      case 'Home':
-        d -= (new Date(y, m, d).getDay() - this.firstDay + 7) % 7;
+      case 'startOfWeek':
+        d -= (new Date(y, m, d).getDay() - this._week + 7) % 7;
         break;
-      case 'End':
-        d += 6 - ((new Date(y, m, d).getDay() - this.firstDay + 7) % 7);
+      case 'endOfWeek':
+        d += 6 - ((new Date(y, m, d).getDay() - this._week + 7) % 7);
         break;
-      case 'PageUp':
-      case 'PageDown': {
-        const delta = e.key === 'PageUp' ? -1 : 1;
-        const target = e.shiftKey ? new Date(y + delta, m, 1) : new Date(y, m + delta, 1);
+      case 'previousMonth':
+      case 'nextMonth':
+      case 'previousYear':
+      case 'nextYear': {
+        const delta = action === 'previousMonth' || action === 'previousYear' ? -1 : 1;
+        const target = action.endsWith('Year') ? new Date(y + delta, m, 1) : new Date(y, m + delta, 1);
         d = Math.min(d, daysInMonth(target.getFullYear(), target.getMonth()));
         newBase = target;
         break;
       }
-      case 'Enter':
-      case ' ':
+      case 'activate':
         this._selectDate(currentDate);
         e.preventDefault();
         return;
@@ -592,6 +655,11 @@ declare global {
  * The calendar popup is closing. Cancelable when the user caused it.
  */
 export class VoidDatePicker extends InternalsFormControl(VoidElement) {
+  /** Key bindings for this element's actions, as JSON (`{"close":["Escape"]}`); `[]` switches an action off. See the keyboard guide. */
+  @property({ attribute: 'keys', converter: keysConverter }) keys: KeyOverrides | null = null;
+  /** @internal The actions of this element and their default keys. */
+  static readonly keyMap = datePickerKeys;
+
   /** The host's `aria-label` / `aria-labelledby` name the inner control. */
   static override labelTarget = '.void-date-picker-input';
 
@@ -609,16 +677,17 @@ export class VoidDatePicker extends InternalsFormControl(VoidElement) {
   /** Size step: `sm`, `md` (default) or `lg`. */
   @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' = 'md';
   /**
-   * BCP 47 language tag for the calendar's month and weekday names, such as `de-DE`. Defaults to
-   * `en-US`. It does not change `format`.
+   * BCP 47 language tag for the calendar's month and weekday names and numbers, such as `de-DE`. Without it the
+   * calendar follows the closest `lang`, and `en-US` where there is none. It does not change `format`.
    */
-  @property({ type: String }) locale = 'en-US';
-  /** Day the calendar week starts on, as a number from 0 (Sunday, the default) to 6 (Saturday). */
-  @property({ attribute: 'first-day', type: Number }) firstDay = 0;
+  @property({ type: String }) locale = '';
+  /** Day the calendar week starts on, as a number from 0 (Sunday) to 6 (Saturday). Without it, the locale's first day of the week, else Sunday. */
+  @property({ attribute: 'first-day', type: Number }) firstDay: number | null = null;
   /** Whether the calendar dropdown is showing. Clicking the field or button toggles it; Escape closes it. */
   @property({ type: Boolean, reflect: true }) open = false;
-  /** Hint shown in the field while no date is chosen. Defaults to `Select date`. */
-  @property({ type: String }) placeholder = 'Select date';
+  /** Hint shown in the field while no date is chosen. Defaults to the `datePicker.placeholder` message (English: `Select date`). */
+  @property({ type: String }) placeholder = '';
+  private get _hint(): string { return this.placeholder || msg(this, 'datePicker.placeholder'); }
   /**
    * How the date is written in the field, using `YYYY`, `MM` and `DD`. Defaults to `MM/DD/YYYY`. A date
    * typed into the field is read the same way (and as ISO `YYYY-MM-DD` always); the value stays `YYYY-MM-DD`.
@@ -682,11 +751,11 @@ export class VoidDatePicker extends InternalsFormControl(VoidElement) {
         <input
           class="void-date-picker-input"
           .value=${live(this._draft ?? display)}
-          placeholder=${this.placeholder}
+          placeholder=${this._hint}
           ?disabled=${this.disabled}
           autocomplete="off"
           role="combobox"
-          aria-label=${this.placeholder}
+          aria-label=${this._hint}
           aria-haspopup="dialog"
           aria-expanded=${String(this.open)}
           aria-controls=${this._dropdownId}
@@ -700,7 +769,7 @@ export class VoidDatePicker extends InternalsFormControl(VoidElement) {
         <button
           type="button"
           class="void-date-picker-icon"
-          aria-label="Toggle calendar"
+          aria-label=${msg(this, 'datePicker.toggle')}
           ?disabled=${this.disabled}
           tabindex="-1"
           @click=${this._toggle}
@@ -715,15 +784,15 @@ export class VoidDatePicker extends InternalsFormControl(VoidElement) {
       </div>
       ${message ? html`<span class="void-date-picker-error" id=${this._errorId} role="alert">${message}</span>` : nothing}
       ${this.open ? html`
-        <div class="void-date-picker-dropdown" id=${this._dropdownId} role="dialog" aria-label="Choose date" popover="manual">
+        <div class="void-date-picker-dropdown" id=${this._dropdownId} role="dialog" aria-label=${msg(this, 'datePicker.dialog')} popover="manual">
           <void-calendar
             value=${this.value}
             min=${this.min}
             max=${this.max}
             ?disabled=${this.disabled}
             size=${this.size}
-            locale=${this.locale}
-            first-day=${this.firstDay}
+            locale=${this.locale || nothing}
+            first-day=${this.firstDay ?? nothing}
             @void-change=${this._onCalendarChange}
           ></void-calendar>
         </div>
@@ -771,9 +840,9 @@ export class VoidDatePicker extends InternalsFormControl(VoidElement) {
       : this.max && iso > this.max ? { rangeOverflow: true }
       : null;
     if (flags || !iso) {
-      const message = flags?.rangeUnderflow ? `Choose ${formatDisplay(this.min, this.format)} or a later date.`
-        : flags?.rangeOverflow ? `Choose ${formatDisplay(this.max, this.format)} or an earlier date.`
-        : `Enter a date as ${this.format} or YYYY-MM-DD.`;
+      const message = flags?.rangeUnderflow ? msg(this, 'datePicker.tooEarly', { date: formatDisplay(this.min, this.format) })
+        : flags?.rangeOverflow ? msg(this, 'datePicker.tooLate', { date: formatDisplay(this.max, this.format) })
+        : msg(this, 'datePicker.invalid', { format: this.format });
       this._rejected = { flags: flags ?? { badInput: true }, message };
       if (!this.error || this.error === this._ownError) {
         this.error = message;
@@ -848,15 +917,16 @@ export class VoidDatePicker extends InternalsFormControl(VoidElement) {
   };
 
   private _onInputKeydown = (e: KeyboardEvent): void => {
-    if (e.key === 'Enter' && this._draft !== null && this._draft.trim() !== this._display) {
+    const action = actionFor(this, e);
+    if (action === 'activate' && e.key === 'Enter' && this._draft !== null && this._draft.trim() !== this._display) {
       // Text was typed: Enter takes it (it does not open the calendar).
       e.preventDefault();
       this._commit();
       if (!this._rejected && this.open) this._overlay.requestClose('select');
-    } else if (e.key === 'Enter' || (e.key === ' ' && this._draft === null)) {
+    } else if (action === 'activate' && (e.key !== ' ' || this._draft === null)) {
       e.preventDefault();
       if (!this.disabled) this._overlay.toggle('keyboard');
-    } else if (e.key === 'ArrowDown' && !this.disabled) {
+    } else if (action === 'open' && !this.disabled) {
       // Into the calendar, opening it if a click on the field left it open with focus here.
       e.preventDefault();
       if (this.open) void this._focusDay();

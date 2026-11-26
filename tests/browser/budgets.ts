@@ -62,12 +62,27 @@ export const reference = {
    *  the build host and on hosted runners alike whatever their calibration, so dividing by the
    *  calibration (15 ms) made the test fail on any runner that calibrated fast. */
   select5000Ms: 41,
+  /** A 5,000-row table with a native checkbox in each row: sort by text, by number, a filter, the next
+   *  keystroke of it, and select-all (one pass, one event). Measured 442, 470, 100, 81 and 184 ms at a
+   *  calibration of 101 ms, divided by the 1.27 scale. */
+  table5000SortTextMs: 350,
+  table5000SortNumberMs: 370,
+  table5000FilterFirstMs: 80,
+  table5000FilterNextMs: 65,
+  table5000SelectAllMs: 145,
   /** 200 open/close cycles of a dialog. */
   dialog200Ms: 318,
   /** Gzipped size of `import '@voidable/ui'` (everything, Lit included), minified. */
-  rootEntryGzipKB: 70,
+  // 69.9 -> 77.3 kB with the messages (issue 29): the English catalogue (about 100 strings and the plural and
+  // number helpers), the registry and the wiring in the components that write words. fr and ar are separate
+  // modules and are not in it; the shared base chunk and the single-component figure did not grow.
+  // 77.3 -> 83.3 kB on the combined 0.12.0 tree (messages, key actions with the maps of every element, the table's
+  // sorting, filtering and selection and its messages; the testing entry and the locales are separate), measured on
+  // the build host on the integrated tree.
+  rootEntryGzipKB: 83.3,
   /** Gzipped size of `import '@voidable/ui/components/button'` (one component, Lit included), minified. */
-  singleComponentGzipKB: 10.1,
+  // 10.1 -> 10.6 kB on the combined tree: the button reads its key map and the shared resolver (key actions).
+  singleComponentGzipKB: 10.6,
 };
 
 /** Leak limits for the 200 dialog cycles (absolute, not scaled). */

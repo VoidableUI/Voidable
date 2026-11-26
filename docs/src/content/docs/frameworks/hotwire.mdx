@@ -464,6 +464,61 @@ The charts take their data as the JSON `data` attribute, so the first response a
 
 A Turbo page-refresh morph that leaves a chart's data unchanged leaves the chart alone (no new animation); changed data redraws it. Each chart carries a visually hidden data table captioned with `aria_label`, and `show_table: true` shows it below the chart. The Rails demo's charts lab (`/charts_lab`) is tested against the real gem in `tests/browser/server/rails/charts.spec.ts`.
 
+## Tables the server drives
+
+`<void-table manual>` never reorders or hides a row: it fires `void-sort`, `void-filter` and `void-change`, and the server answers with the order, the visible rows and the selection. The gem has helpers for the table and its parts (`void_table`, `void_table_filter`, `void_table_empty`, `void_table_selection`, `void_table_select_all`). They take a block, write `value:` (an array) and `keys:` (a hash) as the JSON attributes the element reads, turn underscores into dashes and leave `data:` and `aria:` to Rails. A Stimulus action asks for the new page and, with `<meta name="turbo-refresh-method" content="morph">`, Turbo morphs the answer into the table, which keeps what the user did.
+
+```erb
+<%= void_table(manual: true, selectable: true, sort: params[:sort], sort_direction: params[:dir],
+      value: @selected, total_rows: @total, aria_label: "Orders",
+      data: { controller: "orders", action: "void-sort->orders#sort void-change->orders#select" }) do %>
+  <table>
+    <thead><tr>
+      <th data-stack="select"><input type="checkbox" aria-label="Select all rows"></th>
+      <th data-key="name" data-sort>Name</th>
+    </tr></thead>
+    <tbody>
+      <% @orders.each do |order| %>
+        <tr id="<%= dom_id(order) %>" data-value="<%= order.id %>">
+          <td><input type="checkbox" aria-label="Select order <%= order.id %>"></td>
+          <td><%= order.name %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+  <%= void_table_selection(hidden: true) do %><span data-count></span> selected<% end %>
+  <%= void_table_select_all(hidden: true) do %>
+    <button type="button">Select all <%= number_with_delimiter(@total) %> rows</button>
+  <% end %>
+<% end %>
+```
+
+```js
+// app/javascript/controllers/orders_controller.js
+import { Controller } from '@hotwired/stimulus';
+import { Turbo } from '@hotwired/turbo-rails';
+
+export default class extends Controller {
+  sort({ detail: { column, direction } }) {
+    const params = new URLSearchParams(location.search);
+    if (direction === 'none') params.delete('sort'); else params.set('sort', column);
+    params.set('dir', direction);
+    Turbo.visit(`${location.pathname}?${params}`, { action: 'replace' });
+  }
+
+  // `all` is true after "Select all 1,250 rows": the server applies the action to the whole query.
+  select({ detail: { value, all } }) {
+    fetch('/orders/selection', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': document.querySelector('meta[name=csrf-token]').content },
+      body: JSON.stringify({ ids: value, all }),
+    });
+  }
+}
+```
+
+With `total_rows` greater than the rows on the page, the part inside `void_table_select_all` appears once the header checkbox is checked; its button sets `all-selected` and fires `void-change` with `all: true`. Native checkboxes in the rows (above) are the right choice at thousands of rows. The table's words follow `lang`; select-all by keyboard is off until you bind it with `keys: { selectAll: ["Control+a", "Meta+a"] }`. See [Table](/components/table/#server-mode-manual).
+
 ## Scaffolds
 
 The gem overrides Rails' default scaffold templates so `rails generate scaffold` produces Voidable-styled views automatically. The engine registers templates via `config.generators.templates.unshift`, requiring no extra configuration.

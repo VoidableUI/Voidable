@@ -2,6 +2,10 @@ import { html, nothing } from 'lit';
 import { live } from 'lit/directives/live.js';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
+import { msg } from '../messages.js';
+import { actionFor } from '../keyboard.js';
+import { keysConverter, type KeyOverrides } from '../keys.js';
+import { editableFieldKeys, editableKeys, editablePreviewKeys } from '../keymaps/fields.js';
 import { InternalsFormControl } from '../form-control.js';
 import { isFocusParked } from '../projection.js';
 
@@ -14,6 +18,11 @@ import { isFocusParked } from '../projection.js';
  * the previous value. Use `both` (default) or `blur` to commit on blur.
  */
 export class VoidEditable extends InternalsFormControl(VoidElement) {
+  /** Key bindings for this element's actions, as JSON (`{"cancel":[]}`); `[]` switches an action off. See the keyboard guide. */
+  @property({ attribute: 'keys', converter: keysConverter }) keys: KeyOverrides | null = null;
+  /** @internal The actions of this element and their default keys. */
+  static readonly keyMap = editableKeys;
+
   /** The host's `aria-label` / `aria-labelledby` name the inner control. */
   static override labelTarget = '.void-editable-preview, .void-editable-input';
 
@@ -31,8 +40,9 @@ export class VoidEditable extends InternalsFormControl(VoidElement) {
   @property({ type: Boolean, reflect: true }) editing = false;
   /** Stop the field entering edit mode and exclude the value from the form submission. */
   @property({ type: Boolean, reflect: true }) disabled = false;
-  /** Text shown while the value is empty and the field is not being edited. Defaults to `Click to edit`. */
-  @property({ type: String }) placeholder = 'Click to edit';
+  /** Text shown while the value is empty and the field is not being edited. Defaults to the `editable.placeholder` message (English: `Click to edit`). */
+  @property({ type: String }) placeholder = '';
+  private get _hint(): string { return this.placeholder || msg(this, 'editable.placeholder'); }
   /**
    * How an edit is committed: `enter` only on Enter (blur cancels), `blur` only when focus leaves, or
    * `both` (default).
@@ -67,7 +77,7 @@ export class VoidEditable extends InternalsFormControl(VoidElement) {
         role="button"
         tabindex=${this.formDisabled ? nothing : '0'}
         @keydown=${this._handlePreviewKeydown}
-      >${this.value || html`<span class="void-editable-placeholder">${this.placeholder}</span>`}</span>
+      >${this.value || html`<span class="void-editable-placeholder">${this._hint}</span>`}</span>
       <input
         class="void-editable-input"
         .value=${live(this._draft ?? this.value)}
@@ -85,7 +95,7 @@ export class VoidEditable extends InternalsFormControl(VoidElement) {
 
   private _handlePreviewKeydown = (e: KeyboardEvent): void => {
     if (this.formDisabled || this.editing) return;
-    if (e.key === 'Enter' || e.key === ' ') {
+    if (actionFor(this, e, editablePreviewKeys) === 'activate') {
       e.preventDefault();
       this._enterEditMode();
     }
@@ -112,12 +122,13 @@ export class VoidEditable extends InternalsFormControl(VoidElement) {
   }
 
   private _handleInputKeydown = (e: KeyboardEvent): void => {
-    if (e.key === 'Escape') {
+    const action = actionFor(this, e, editableFieldKeys);
+    if (action === 'cancel') {
       e.preventDefault();
       this._cancel();
       return;
     }
-    if (e.key === 'Enter' && (this.submitMode === 'enter' || this.submitMode === 'both')) {
+    if (action === 'submit' && (this.submitMode === 'enter' || this.submitMode === 'both')) {
       e.preventDefault();
       this._confirm();
     }

@@ -70,21 +70,9 @@ export class Typeahead {
   }
 }
 
-/** True when `el` renders right-to-left (`dir`, `lang`-derived direction or CSS `direction`). */
-export function isRtl(el: Element): boolean {
-  try {
-    if (el.matches(':dir(rtl)')) return true;
-  } catch { /* an engine without :dir() */ }
-  return getComputedStyle(el).direction === 'rtl';
-}
+export { actionFor, inlineKeys, isRtl } from './keys.js';
+export type { KeyMap, KeyOverrides } from './keys.js';
 
-/**
- * The keys that move along the inline axis for `el`: `next` is ArrowRight in
- * left-to-right and ArrowLeft in right-to-left; `prev` is the opposite.
- */
-export function inlineKeys(el: Element): { next: 'ArrowLeft' | 'ArrowRight'; prev: 'ArrowLeft' | 'ArrowRight' } {
-  return isRtl(el) ? { next: 'ArrowLeft', prev: 'ArrowRight' } : { next: 'ArrowRight', prev: 'ArrowLeft' };
-}
 
 let nextId = 0;
 /** A document-unique id for ARIA relationships. */

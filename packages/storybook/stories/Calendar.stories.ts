@@ -1,4 +1,4 @@
-import { html } from 'lit';
+import { html, nothing } from 'lit';
 import type { Meta, StoryObj } from '@storybook/web-components-vite';
 import '@voidable/ui';
 import '@voidable/theme';
@@ -32,8 +32,8 @@ export const Default: Story = {
       max=${args.max || ''}
       ?disabled=${args.disabled}
       size=${args.size || 'md'}
-      locale=${args.locale || 'en-US'}
-      first-day=${args.firstDay ?? 0}
+      locale=${args.locale || nothing}
+      first-day=${args.firstDay ?? nothing}
     ></void-calendar>
   `,
 };
@@ -53,6 +53,13 @@ export const WithMinMax: Story = {
 export const MondayStart: Story = {
   render: () => html`
     <void-calendar value="2024-06-15" first-day="1"></void-calendar>
+  `,
+};
+
+/** Follows the closest `lang` (use the Locale toolbar), or its own `locale`; the week starts where the locale's does. */
+export const OwnLocale: Story = {
+  render: () => html`
+    <void-calendar value="2024-06-15" locale="de-DE"></void-calendar>
   `,
 };
 

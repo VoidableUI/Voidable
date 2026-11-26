@@ -110,6 +110,88 @@ type Element struct {
 	// from the manifest's voidRenamed (source: `renamed` in
 	// packages/ui/cem/supplement.js).
 	Renamed *Renamed `json:"-"`
+	// Messages are the words the component writes itself (accessible names,
+	// placeholders, errors), from the manifest's voidMessages (source:
+	// packages/ui/cem/messages-meta.js and src/messages.ts, #29): the English
+	// default and what replaces it on an element.
+	Messages []Message `json:"messages,omitempty"`
+	// Keys are the element's key actions and their default keys (#90), from
+	// the manifest's voidKeys (source: src/keymaps/ and cem/keys-meta.js).
+	// Nil when the element handles no keys of its own.
+	Keys *Keys `json:"keys,omitempty"`
+}
+
+// Keys is what an element's `keys` attribute can rebind or turn off, and the
+// keys that are not its to remap.
+type Keys struct {
+	Intro   string      `json:"intro,omitempty"`
+	Note    string      `json:"note,omitempty"`
+	Actions []KeyAction `json:"actions"`
+	// Browser lists keys that belong to a native control the element wraps (or
+	// to focus itself); they cannot be remapped.
+	Browser []KeyRow `json:"browser,omitempty"`
+}
+
+// KeyAction is one named action with its default bindings. Keys are the
+// bindings as written (`ArrowInlineEnd` follows the reading direction),
+// Labels the same for a reader.
+type KeyAction struct {
+	Action      string   `json:"action"`
+	Keys        []string `json:"keys"`
+	Labels      []string `json:"labels"`
+	Description string   `json:"description"`
+	// Essential: without a key for it the control can become unusable from
+	// the keyboard (`close` on a modal, `activate` on a button).
+	Essential bool `json:"essential,omitempty"`
+}
+
+// KeyRow is one key the browser owns.
+type KeyRow struct {
+	Keys   string `json:"keys"`
+	Action string `json:"action"`
+}
+
+// Action returns the named action.
+func (k *Keys) Action(name string) (KeyAction, bool) {
+	if k != nil {
+		for _, a := range k.Actions {
+			if a.Action == name {
+				return a, true
+			}
+		}
+	}
+	return KeyAction{}, false
+}
+
+// Message is one built-in string of a component: its key in the messages
+// registry (`@voidable/ui/messages`), the English it starts as and what an
+// author writes to replace it on one element.
+type Message struct {
+	Key      string           `json:"key"`
+	Default  string           `json:"default"`
+	Override *MessageOverride `json:"override"`
+}
+
+// MessageOverride says what replaces a Message on an element: an attribute
+// (of the element, or of the part On), or a part the author writes. A nil
+// override means only registerMessages changes it.
+type MessageOverride struct {
+	Attribute string `json:"attribute,omitempty"`
+	On        string `json:"on,omitempty"`
+	Part      string `json:"part,omitempty"`
+}
+
+// String says it in a phrase: "aria-label", "aria-label on <x>", "a <x> part" or "registerMessages() only".
+func (o *MessageOverride) String() string {
+	switch {
+	case o == nil:
+		return "registerMessages() only"
+	case o.Part != "":
+		return "a <" + o.Part + "> part"
+	case o.On != "":
+		return o.Attribute + " on <" + o.On + ">"
+	}
+	return o.Attribute
 }
 
 // NativeControl is a native element a component enhances in place: Tag must
@@ -167,6 +249,45 @@ type Renamed struct {
 	Values map[string]map[string]string `json:"values,omitempty"`
 	// Events maps a removed event to what to listen for instead.
 	Events map[string]string `json:"events,omitempty"`
+	// Since dates the renames the table did not begin with (see RenamedSince).
+	Since *RenamedSince `json:"since,omitempty"`
+}
+
+// RenamedSince is the release each rename was made in, where it is not the
+// release the table began with (0.8): attributes, attributes with renamed
+// values, and events, by name, as written in the supplement's `since`.
+type RenamedSince struct {
+	Attributes map[string]string `json:"attributes,omitempty"`
+	Values     map[string]string `json:"values,omitempty"`
+	Events     map[string]string `json:"events,omitempty"`
+}
+
+// FirstRenamedRelease is the release the renamed table began with: a rename it
+// does not date was made in it.
+const FirstRenamedRelease = "0.8"
+
+func releaseOf(dated func(*RenamedSince) map[string]string, r *Renamed, name string) string {
+	if r != nil && r.Since != nil {
+		if v, ok := dated(r.Since)[name]; ok {
+			return v
+		}
+	}
+	return FirstRenamedRelease
+}
+
+// AttributeRelease is the release the attribute was renamed or removed in.
+func (r *Renamed) AttributeRelease(name string) string {
+	return releaseOf(func(s *RenamedSince) map[string]string { return s.Attributes }, r, name)
+}
+
+// ValueRelease is the release the values of the attribute were renamed in.
+func (r *Renamed) ValueRelease(attr string) string {
+	return releaseOf(func(s *RenamedSince) map[string]string { return s.Values }, r, attr)
+}
+
+// EventRelease is the release the event was removed in.
+func (r *Renamed) EventRelease(name string) string {
+	return releaseOf(func(s *RenamedSince) map[string]string { return s.Events }, r, name)
 }
 
 // Attribute returns the attribute with the given (exact) name.

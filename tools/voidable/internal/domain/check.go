@@ -2,7 +2,9 @@ package domain
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"html"
 	"sort"
 	"strconv"
 	"strings"
@@ -30,7 +32,18 @@ const (
 	// value or event renamed or removed in 0.8 (#23), reported with the fix.
 	RuleLegacyMarkup Rule = "legacy-markup"
 	RuleMissingName  Rule = "missing-name"
+	// RuleKeys (a warning, #90): a `keys` attribute that is not a JSON object of
+	// action names, names an action the element does not have, or leaves an
+	// essential action (`close` on a modal, `activate` on a button) with no key.
+	RuleKeys Rule = "keys"
+	// RuleSelectAll is a hint, a warning that does not fail the check: a
+	// `selectable` (many rows) table with no checkbox in a header cell has no
+	// select-all.
+	RuleSelectAll Rule = "select-all"
 )
+
+// SeverityWarning marks a finding that is reported but does not fail the check.
+const SeverityWarning = "warning"
 
 // Finding is one problem in a source file.
 type Finding struct {
@@ -42,6 +55,9 @@ type Finding struct {
 	Attr       string `json:"attr,omitempty"`
 	Message    string `json:"message"`
 	Suggestion string `json:"suggestion,omitempty"`
+	// Severity is "warning" for a finding that does not fail the check; empty
+	// for every other finding.
+	Severity string `json:"severity,omitempty"`
 	// Value is the attribute's literal value when it has one (invalid-value
 	// findings use it to match allowlist entries).
 	Value string `json:"value,omitempty"`
@@ -123,6 +139,10 @@ func (c *Checker) CheckTag(file string, t Tag) []Finding {
 		nf.File = file
 		out = append(out, nf)
 	}
+	if nf, ok := checkSelectAll(t); ok {
+		nf.File = file
+		out = append(out, nf)
+	}
 	return out
 }
 
@@ -159,7 +179,7 @@ func (c *Checker) checkAttr(el *Element, t Tag, a AttrToken, f findingFn) []Find
 		}
 		if el.Renamed != nil {
 			if advice, ok := el.Renamed.Events[a.Name]; ok {
-				return []Finding{f(a.Line, a.Col, RuleLegacyMarkup, a.Name, "", "<%s> no longer dispatches %s (removed in 0.8); %s", el.Tag, a.Name, advice)}
+				return []Finding{f(a.Line, a.Col, RuleLegacyMarkup, a.Name, "", "<%s> no longer dispatches %s (removed in %s); %s", el.Tag, a.Name, el.Renamed.EventRelease(a.Name), advice)}
 			}
 		}
 		var names []string
@@ -220,9 +240,9 @@ func (c *Checker) checkAttr(el *Element, t Tag, a AttrToken, f findingFn) []Find
 					repl = r.To + " (same value)"
 				}
 				if !r.Renames(a.Value, hasValue) {
-					return []Finding{f(a.Line, a.Col, RuleLegacyMarkup, a.Name, "", "%s on <%s> was removed in 0.8; %s", old, el.Tag, repl)}
+					return []Finding{f(a.Line, a.Col, RuleLegacyMarkup, a.Name, "", "%s on <%s> was removed in %s; %s", old, el.Tag, el.Renamed.AttributeRelease(name), repl)}
 				}
-				return []Finding{f(a.Line, a.Col, RuleLegacyMarkup, a.Name, r.To, "%s on <%s> was renamed in 0.8; write %s", old, el.Tag, repl)}
+				return []Finding{f(a.Line, a.Col, RuleLegacyMarkup, a.Name, r.To, "%s on <%s> was renamed in %s; write %s", old, el.Tag, el.Renamed.AttributeRelease(name), repl)}
 			}
 		}
 		return []Finding{c.unknownAttr(el, a, f)}
@@ -230,12 +250,15 @@ func (c *Checker) checkAttr(el *Element, t Tag, a AttrToken, f findingFn) []Find
 	if !a.HasValue || a.Dynamic || a.Syntax != SyntaxAttr {
 		return nil
 	}
+	if name == "keys" && el.Keys != nil {
+		return checkKeys(el, a, f)
+	}
 	v := a.Value
 	// A value renamed in 0.8 (an enum value, or "false" on a number such as
 	// stagger) is reported with its replacement before any type check.
 	if el.Renamed != nil && !contains(attr.Values, v) {
 		if nv, ok := el.Renamed.Values[attr.Name][v]; ok {
-			return []Finding{f(a.Line, a.Col, RuleLegacyMarkup, a.Name, nv, "%s=%q on <%s> was renamed in 0.8; write %s=%q", a.Name, v, el.Tag, a.Name, nv)}
+			return []Finding{f(a.Line, a.Col, RuleLegacyMarkup, a.Name, nv, "%s=%q on <%s> was renamed in %s; write %s=%q", a.Name, v, el.Tag, el.Renamed.ValueRelease(attr.Name), a.Name, nv)}
 		}
 	}
 	switch attr.Kind {
@@ -257,6 +280,75 @@ func (c *Checker) checkAttr(el *Element, t Tag, a AttrToken, f findingFn) []Find
 		}
 	}
 	return nil
+}
+
+// checkKeys judges a literal `keys` attribute (#90): it must be a JSON object
+// of action names, each an action the element has, and no essential action may
+// be left without a key. All of it is a warning: the page still works, but a
+// control may no longer be usable from the keyboard.
+func checkKeys(el *Element, a AttrToken, f findingFn) []Finding {
+	warn := func(suggestion, format string, args ...any) Finding {
+		x := f(a.Line, a.Col, RuleKeys, a.Name, suggestion, format, args...)
+		x.Severity = SeverityWarning
+		return x
+	}
+	var names []string
+	for _, k := range el.Keys.Actions {
+		names = append(names, k.Action)
+	}
+	var spec map[string]json.RawMessage
+	if err := json.Unmarshal([]byte(html.UnescapeString(a.Value)), &spec); err != nil || spec == nil {
+		return []Finding{warn("", "keys on <%s> is not a JSON object of action names to keys, so it is ignored; write keys='{\"%s\":[\"...\"]}'", el.Tag, names[0])}
+	}
+	actions := make([]string, 0, len(spec))
+	for name := range spec {
+		actions = append(actions, name)
+	}
+	sort.Strings(actions)
+	var out []Finding
+	for _, name := range actions {
+		action, ok := el.Keys.Action(name)
+		if !ok {
+			s := Suggest(name, names)
+			out = append(out, warn(s, "<%s> has no key action %q%s; it has: %s", el.Tag, name, didYouMean(s, ""), strings.Join(names, ", ")))
+			continue
+		}
+		var one string
+		var many []string
+		raw := spec[name]
+		if string(raw) != "null" && json.Unmarshal(raw, &one) != nil && json.Unmarshal(raw, &many) != nil {
+			out = append(out, warn("", "keys.%s on <%s> must be a key, a list of keys or null", name, el.Tag))
+			continue
+		}
+		if action.Essential && one == "" && len(many) == 0 {
+			out = append(out, warn("", "keys on <%s> leaves %q with no key; it is essential, so the control may no longer be usable from the keyboard. Bind it to another key instead of removing it", el.Tag, name))
+		}
+	}
+	return out
+}
+
+// checkSelectAll hints that a table which selects many rows (`selectable`, not
+// `selectable="single"`) has no checkbox in a header cell, so it has no
+// select-all. It is a hint, not a failure: a table may select by row click or
+// leave the choice to another control. Content the scanner cannot see in full,
+// and a `selectable` that is an expression, are not judged.
+func checkSelectAll(t Tag) (Finding, bool) {
+	if t.Name != "void-table" || t.Mention || !t.Closed || t.Dynamic || !t.Content.Known || t.Content.Dynamic || t.Content.HeaderCheckbox {
+		return Finding{}, false
+	}
+	for _, a := range t.Attrs {
+		if a.Name != "selectable" || a.Syntax != SyntaxAttr {
+			continue
+		}
+		if a.Dynamic || strings.TrimSpace(a.Value) == "single" {
+			return Finding{}, false
+		}
+		return Finding{
+			Line: a.Line, Col: a.Col, Rule: RuleSelectAll, Tag: t.Name, Attr: a.Name, Severity: SeverityWarning,
+			Message: "<void-table selectable> has no checkbox in a header cell, so it has no select-all; write <th data-stack=\"select\"><input type=\"checkbox\" aria-label=\"Select all rows\"></th> (selectable=\"single\" needs none)",
+		}, true
+	}
+	return Finding{}, false
 }
 
 func (c *Checker) unknownAttr(el *Element, a AttrToken, f findingFn) Finding {

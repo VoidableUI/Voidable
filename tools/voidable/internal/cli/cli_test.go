@@ -148,6 +148,66 @@ func TestCheckJSONAndClean(t *testing.T) {
 	}
 }
 
+// A selectable (many rows) table with no checkbox in a header cell is a hint: reported, and the exit status stays 0.
+func TestCheckSelectAllHint(t *testing.T) {
+	dir := t.TempDir()
+	page := filepath.Join(dir, "table.html")
+	src := `<void-table selectable aria-label="One"><table><thead><tr><th>Name</th></tr></thead><tbody><tr><td><input type="checkbox" aria-label="Row"></td></tr></tbody></table></void-table>
+<void-table selectable aria-label="Two"><table><thead><tr><th><input type="checkbox" aria-label="All"></th></tr></thead><tbody><tr><td>x</td></tr></tbody></table></void-table>
+<void-table selectable aria-label="Three"><table><thead><tr><th><void-checkbox aria-label="All"></void-checkbox></th></tr></thead></table></void-table>
+<void-table selectable="single" aria-label="Four"><table><thead><tr><th>Name</th></tr></thead></table></void-table>
+`
+	if err := os.WriteFile(page, []byte(src), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	out, err := run(t, "check", page)
+	if err != nil {
+		t.Fatalf("a hint must not fail the check: %v\n%s", err, out)
+	}
+	if !strings.Contains(out, "table.html:1:") || !strings.Contains(out, "warning: [select-all]") {
+		t.Errorf("no hint for the table without a header checkbox:\n%s", out)
+	}
+	for _, line := range []string{"table.html:2:", "table.html:3:", "table.html:4:"} {
+		if strings.Contains(out, line) {
+			t.Errorf("a table that selects fine was reported (%s):\n%s", line, out)
+		}
+	}
+}
+
+// A `keys` attribute that is wrong or removes an essential key is a warning: reported, and the exit status stays 0.
+func TestCheckKeysWarnings(t *testing.T) {
+	dir := t.TempDir()
+	page := filepath.Join(dir, "keys.html")
+	src := `<void-dialog keys='{"close":[]}'><void-dialog-title>Title</void-dialog-title></void-dialog>
+<void-button keys='{"activte":["Enter"]}'>One</void-button>
+<void-button keys="Enter">Two</void-button>
+<void-button keys='{"activate":["Enter","x"]}'>Three</void-button>
+`
+	if err := os.WriteFile(page, []byte(src), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	out, err := run(t, "check", page)
+	if err != nil {
+		t.Fatalf("warnings must not fail the check: %v\n%s", err, out)
+	}
+	for _, w := range []string{
+		`keys.html:1:14: warning: [keys] keys on <void-dialog> leaves "close" with no key`,
+		`keys.html:2:14: warning: [keys] <void-button> has no key action "activte" (did you mean activate?)`,
+		`keys.html:3:14: warning: [keys] keys on <void-button> is not a JSON object`,
+	} {
+		if !strings.Contains(out, w) {
+			t.Errorf("missing %q in:\n%s", w, out)
+		}
+	}
+	if strings.Contains(out, "keys.html:4:") {
+		t.Errorf("a valid rebinding was reported:\n%s", out)
+	}
+	out, _ = run(t, "check", "--format", "json", page)
+	if !strings.Contains(out, `"severity": "warning"`) {
+		t.Errorf("json has no severity: %s", out)
+	}
+}
+
 func TestRefAndGen(t *testing.T) {
 	tests := []struct {
 		args []string
@@ -156,7 +216,9 @@ func TestRefAndGen(t *testing.T) {
 		{[]string{"ref"}, []string{"elements.", "void-button Action trigger"}},
 		{[]string{"ref", "void-button", "--format", "markdown"}, []string{"## `<void-button>`", "| `variant` | `outline\\|filled\\|ghost` |"}},
 		{[]string{"ref", "void-button", "--format", "json"}, []string{`"tag": "void-button"`, `"values": [`}},
-		{[]string{"ref", "--size"}, []string{"text     index", "164 elements"}},
+		{[]string{"ref", "void-tabs"}, []string{"keys (rebind or switch off", "next: Right Arrow (Left Arrow in right-to-left text)"}},
+		{[]string{"ref", "void-dialog", "--format", "markdown"}, []string{"| Action | Default keys | What it does |", "| `close` (essential) | Escape |"}},
+		{[]string{"ref", "--size"}, []string{"text     index", "168 elements"}},
 		{[]string{"gen", "snippet", "void-dialog", "--lang", "jsx"}, []string{`<void-dialog size="sm" onvoid-close=`, `<void-dialog-title>Delete project</void-dialog-title>`, `<void-button color="error" variant="filled">Delete</void-button>`}},
 		{[]string{"gen", "snippet", "void-dropdown-menu", "--lang", "erb"}, []string{`data-action="void-select->my-controller#handle"`}},
 		{[]string{"gen", "heex"}, []string{"defmodule VoidableUI.Components do", "def status_dot(assigns) do"}},

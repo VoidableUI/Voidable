@@ -2,6 +2,7 @@ import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
 import { PartsController } from '../parts.js';
 import { closeControlPressed, removeWithFocus } from '../dismiss.js';
+import { msg, nameHost } from '../messages.js';
 
 /**
  * Temporary notification for action confirmations, error alerts, and copy-to-clipboard feedback.
@@ -173,7 +174,7 @@ export class VoidToastContainer extends VoidElement {
   connectedCallback() {
     super.connectedCallback();
     this.setHostAttribute('role', 'region');
-    this.setHostAttribute('aria-label', 'Notifications');
+    this._name();
     // Neither the toasts nor the container are live regions: the two announcers below speak for them.
     if (typeof this.showPopover === 'function') this.setHostAttribute('popover', 'manual');
     this._ensureAnnouncers();
@@ -186,6 +187,15 @@ export class VoidToastContainer extends VoidElement {
     this._observer.observe(this, { childList: true });
     this._syncShown(true);
     for (const toast of this.querySelectorAll(':scope > void-toast')) this._announce(toast as VoidToast);
+  }
+
+  private _name(): void {
+    nameHost(this, msg(this, 'toast.region'), (n, v) => this.setHostAttribute(n, v));
+  }
+
+  protected override updated(changed: Map<string, unknown>): void {
+    super.updated(changed);
+    this._name();
   }
 
   disconnectedCallback() {
@@ -344,7 +354,7 @@ function buildToast(options: ToastOptions): VoidToast {
     const close = part('close');
     const button = document.createElement('button');
     button.type = 'button';
-    button.setAttribute('aria-label', 'Dismiss');
+    button.setAttribute('aria-label', msg(document.querySelector('void-toast-container') ?? document.documentElement, 'dismiss'));
     button.innerHTML = '&times;';
     close.append(button);
     toast.append(close);

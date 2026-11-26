@@ -4,6 +4,10 @@ import { property, query } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
 import { isFocusParked } from '../projection.js';
 import { InternalsFormControl, type FormSubmission } from '../form-control.js';
+import { localeOf, msg } from '../messages.js';
+import { actionFor } from '../keyboard.js';
+import { keysConverter, type KeyOverrides } from '../keys.js';
+import { numberInputKeys } from '../keymaps/fields.js';
 
 /**
  * Precise numeric entry for quantity selectors, price fields, and settings with increment/decrement controls.
@@ -11,6 +15,11 @@ import { InternalsFormControl, type FormSubmission } from '../form-control.js';
  * name, which `<void-field>` supplies), and the stepper buttons are its own buttons.
  */
 export class VoidNumberInput extends InternalsFormControl(VoidElement) {
+  /** Key bindings for this element's actions, as JSON (`{"increment":["ArrowUp","k"]}`); `[]` switches an action off. See the keyboard guide. */
+  @property({ attribute: 'keys', converter: keysConverter }) keys: KeyOverrides | null = null;
+  /** @internal The actions of this element and their default keys. */
+  static readonly keyMap = numberInputKeys;
+
   /** The host's `aria-label` / `aria-labelledby` name the inner control. */
   static override labelTarget = 'input[role=spinbutton]';
 
@@ -59,7 +68,7 @@ export class VoidNumberInput extends InternalsFormControl(VoidElement) {
    */
   @property({ type: String, reflect: true }) controls: 'sides' | 'right' | 'none' = 'sides';
   /**
-   * Accessible name of the field when it is not inside a `void-field`. Defaults to `Number input`, so
+   * Accessible name of the field when it is not inside a `void-field`. Defaults to the `numberInput.label` message (English: `Number input`), so
    * set it.
    */
   @property({ type: String }) label: string = '';
@@ -104,7 +113,7 @@ export class VoidNumberInput extends InternalsFormControl(VoidElement) {
   protected formSubmission(): FormSubmission {
     const text = this._pendingText;
     if (text !== null) {
-      const parsed = parseFloat(text);
+      const parsed = this._parse(text);
       if (!isNaN(parsed)) return String(this._clamp(parsed));
       if (!text.trim()) return '';
     }
@@ -115,8 +124,39 @@ export class VoidNumberInput extends InternalsFormControl(VoidElement) {
     return Math.min(Math.max(v, this.min), this.max);
   }
 
+  /** The value as the reader's language writes it (decimal separator, digits), without grouping, with `precision` decimals when set. */
   private _format(v: number): string {
-    return this.precision >= 0 ? v.toFixed(this.precision) : String(v);
+    const locale = localeOf(this);
+    const digits = this.precision >= 0 ? { minimumFractionDigits: this.precision, maximumFractionDigits: this.precision } : { maximumFractionDigits: 20 };
+    try {
+      return new Intl.NumberFormat(locale, { useGrouping: false, ...digits }).format(v);
+    } catch {
+      return this.precision >= 0 ? v.toFixed(this.precision) : String(v);
+    }
+  }
+
+  /**
+   * Reads typed text the way the language writes numbers: its digits, decimal and grouping separators and minus
+   * sign. `NaN` when it is not a number. A plain `1.5` still reads as 1.5 where the decimal separator is a comma.
+   */
+  private _parse(text: string): number {
+    let nf: Intl.NumberFormat;
+    try {
+      nf = new Intl.NumberFormat(localeOf(this));
+    } catch {
+      return parseFloat(text);
+    }
+    const parts = nf.formatToParts(-12345.6);
+    const symbol = (type: string, fallback: string) => parts.find(p => p.type === type)?.value ?? fallback;
+    const group = symbol('group', ',');
+    const decimal = symbol('decimal', '.');
+    const digits = new Map<string, string>();
+    for (let d = 0; d < 10; d++) digits.set(nf.format(d), String(d));
+    let s = Array.from(text.trim()).map(ch => digits.get(ch) ?? ch).join('');
+    s = s.split(group).join('').replace(/[\s  ]/g, '');
+    s = decimal === '.' ? s : s.split(decimal).join('.');
+    s = s.replace(/[−؜‎‏]/g, c => (c === '−' ? '-' : ''));
+    return parseFloat(s);
   }
 
   /** Round to `precision` decimals (`precision="0"` gives integers); untouched when precision is unset. */
@@ -225,10 +265,11 @@ export class VoidNumberInput extends InternalsFormControl(VoidElement) {
 
   private _onKeydown(e: KeyboardEvent): void {
     if (this.formDisabled || this.readonly) return;
-    if (e.key === 'ArrowUp') {
+    const action = actionFor(this, e);
+    if (action === 'increment') {
       e.preventDefault();
       this._increment();
-    } else if (e.key === 'ArrowDown') {
+    } else if (action === 'decrement') {
       e.preventDefault();
       this._decrement();
     }
@@ -239,7 +280,7 @@ export class VoidNumberInput extends InternalsFormControl(VoidElement) {
     // blurs it and fires change: the user is still typing, commit nothing.
     if (!this._input || this.readonly || isFocusParked(this)) return;
     this._pendingText = null;
-    const parsed = parseFloat(this._input.value);
+    const parsed = this._parse(this._input.value);
     if (!this._input.value.trim()) {
       // Cleared: the field is empty again.
       this._commit(null);
@@ -255,7 +296,7 @@ export class VoidNumberInput extends InternalsFormControl(VoidElement) {
     this._pendingText = this._input?.value ?? null;
     this.formSync();
     // The typed number so far (null while the text is empty or not a number); the commit is void-change.
-    const typed = parseFloat(this._pendingText ?? '');
+    const typed = this._parse(this._pendingText ?? '');
     const value: number | null = Number.isNaN(typed) ? null : typed;
     this.dispatchEvent(new CustomEvent('void-input', { bubbles: true, composed: true, detail: { value } }));
   }
@@ -271,7 +312,7 @@ export class VoidNumberInput extends InternalsFormControl(VoidElement) {
         class="void-number-input-btn void-number-input-btn-dec"
         type="button"
         ?disabled=${this.disabled || this.readonly || (this.value !== null && this.value <= this.min)}
-        aria-label="Decrement"
+        aria-label=${msg(this, 'numberInput.decrement')}
         @pointerdown=${(e: PointerEvent) => { e.preventDefault(); this._startRepeat(-1); }}
         @pointerup=${() => this._stopRepeat()}
         @pointercancel=${() => this._stopRepeat()}
@@ -289,7 +330,7 @@ export class VoidNumberInput extends InternalsFormControl(VoidElement) {
         class="void-number-input-btn void-number-input-btn-inc"
         type="button"
         ?disabled=${this.disabled || this.readonly || (this.value !== null && this.value >= this.max)}
-        aria-label="Increment"
+        aria-label=${msg(this, 'numberInput.increment')}
         @pointerdown=${(e: PointerEvent) => { e.preventDefault(); this._startRepeat(1); }}
         @pointerup=${() => this._stopRepeat()}
         @pointercancel=${() => this._stopRepeat()}
@@ -320,7 +361,7 @@ export class VoidNumberInput extends InternalsFormControl(VoidElement) {
         aria-required=${this.required ? 'true' : nothing}
         aria-valuemin=${isFinite(this.min) ? this.min : nothing}
         aria-valuemax=${isFinite(this.max) ? this.max : nothing}
-        aria-label=${this.label || 'Number input'}
+        aria-label=${this.label || msg(this, 'numberInput.label')}
         @keydown=${this._onKeydown}
         @blur=${this._onBlur}
         @input=${this._onFieldInput}
