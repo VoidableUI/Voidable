@@ -101,4 +101,10 @@ describe('buildPayload', () => {
     expect(buildPayload(el, 'void-click', undefined)).toMatchObject({ id: null, name: null, detail: {} });
     expect(buildPayload(el, 'void-click', 5)).toMatchObject({ detail: 5 });
   });
+
+  it('takes the name of the native select inside a void-select (#52)', () => {
+    const el = document.createElement('void-select');
+    el.innerHTML = '<select name="plan"><option value="a">A</option></select>';
+    expect(buildPayload(el, 'void-change', { value: 'a' })).toMatchObject({ name: 'plan', value: 'a' });
+  });
 });

@@ -13,7 +13,7 @@
       `<void-badge color="info">B${i}</void-badge>`,
       `<void-checkbox name="c${i}">Check ${i}</void-checkbox>`,
       `<void-card><void-card-header><void-card-title>Card ${i}</void-card-title></void-card-header><void-card-body><p>Body ${i}</p></void-card-body></void-card>`,
-      `<void-select name="s${i}" aria-label="Select ${i}"><option value="a">A</option><option value="b">B</option></void-select>`,
+      `<void-select aria-label="Select ${i}"><select name="s${i}"><option value="a">A</option><option value="b">B</option></select></void-select>`,
       `<void-switch>S${i}</void-switch>`,
       `<void-tag>T${i}</void-tag>`,
       `<void-alert color="info"><void-alert-description>Alert ${i}</void-alert-description></void-alert>`,
@@ -64,7 +64,7 @@
       return { first, morph, intact };
     },
     async select5000() {
-      const ms = await timed(() => (root.innerHTML = `<void-select id="big" name="big" placeholder="Pick" aria-label="Big">${Array.from({ length: 5000 }, (_, i) => `<option value="${i}">Option ${i}</option>`).join('')}</void-select>`));
+      const ms = await timed(() => (root.innerHTML = `<void-select id="big" aria-label="Big"><select name="big"><option value="" disabled selected hidden>Pick</option>${Array.from({ length: 5000 }, (_, i) => `<option value="${i}">Option ${i}</option>`).join('')}</select></void-select>`));
       const big = document.getElementById('big');
       big.value = '4321';
       await big.updateComplete;

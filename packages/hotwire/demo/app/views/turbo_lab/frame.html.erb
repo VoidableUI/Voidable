@@ -4,17 +4,22 @@
   <%= form_with url: turbo_lab_frame_path, method: :post, id: "frame-form" do %>
     <void-field label="Title"><void-input id="f-title" name="title"></void-input></void-field>
     <void-field label="Kind">
-      <void-select id="f-kind" name="kind" placeholder="Choose…">
-        <option value="x">Ex</option>
-        <option value="y">Why</option>
+      <void-select id="f-kind">
+        <select name="kind">
+          <option value="" disabled selected hidden>Choose…</option>
+          <option value="x">Ex</option>
+          <option value="y">Why</option>
+        </select>
       </void-select>
     </void-field>
     <void-switch id="f-urgent" name="urgent" value="yes">Urgent</void-switch>
     <void-field label="Seats"><void-number-input id="f-seats" name="seats" min="1" max="10" value="2"></void-number-input></void-field>
     <void-field label="Skills">
       <void-multiselect id="f-skills" name="skills[]" placeholder="Pick many">
-        <void-option value="css">CSS</void-option>
-        <void-option value="js">JS</void-option>
+        <void-multiselect-content>
+          <void-option value="css">CSS</void-option>
+          <void-option value="js">JS</void-option>
+        </void-multiselect-content>
       </void-multiselect>
     </void-field>
     <void-button id="f-save" type="submit" variant="filled">Save in frame</void-button>

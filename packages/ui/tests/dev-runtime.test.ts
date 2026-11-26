@@ -7,7 +7,7 @@ import { afterEach, beforeAll, describe, expect, it } from 'vitest';
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { VoidDevError, check, configure, reset, settled, warnings, type DevWarning } from '../src/dev/index.js';
-import { checkAttributes, checkEvent } from '../src/dev/rules.js';
+import { checkAttributes, checkEvent, checkParts } from '../src/dev/rules.js';
 import { styled, table } from '../src/dev/table.generated.js';
 
 const tick = () => new Promise<void>((r) => setTimeout(r, 0));
@@ -52,7 +52,7 @@ describe('@voidable/ui/dev', () => {
     const by = Object.fromEntries(seen.map((w) => [w.kind === 'undefined-element' ? `${w.kind}:${w.tag}` : w.kind, w]));
     expect(by['undefined-element:void-buton'].message).toContain('Did you mean <void-button>?');
     expect(by['undefined-element:void-tabs'].message).toContain('@voidable/ui/components/tabs.js');
-    expect(by['wrong-parent'].message).toContain('<void-multiselect> or <void-combobox>');
+    expect(by['wrong-parent'].message).toContain('<void-combobox-content> or <void-multiselect-content>');
     expect(by['missing-part'].message).toContain('<void-tabs-list>');
     expect(by['missing-part'].message).toContain('Correct markup:');
   });
@@ -107,6 +107,22 @@ describe('@voidable/ui/dev', () => {
     expect(seen.filter((w) => w.kind !== 'undefined-element' && (w.tag === 'void-error-fallback' || w.tag === 'void-banner'))).toEqual([]);
   });
 
+  it('reports the picker forms before parts (#52): options straight in a combobox, options straight in a select', async () => {
+    document.body.innerHTML =
+      '<void-combobox name="c"><void-option value="a">A</void-option></void-combobox>' +
+      '<void-select name="s"><option value="a">A</option></void-select>';
+    await settled();
+    const kinds = seen.map((w) => `${w.kind}:${w.tag}:${w.subject}`);
+    expect(kinds).toContain('missing-part:void-combobox:void-combobox-content');
+    expect(kinds).toContain('wrong-parent:void-option:void-combobox');
+    expect(kinds).toContain('legacy-markup:void-select:select');
+    expect(kinds).toContain('unknown-attribute:void-select:name');
+    const legacy = seen.find((w) => w.kind === 'legacy-markup' && w.tag === 'void-select')!;
+    expect(legacy.message).toContain('<void-select><select name="plan">');
+    expect(seen.find((w) => w.tag === 'void-select' && w.subject === 'name')!.message).toContain('native <select>');
+    expect(seen.find((w) => w.kind === 'missing-part' && w.tag === 'void-combobox')!.message).toContain('<void-combobox-content><void-option');
+  });
+
   it('reports a part outside its parent, parts out of order and a trigger without one control', async () => {
     document.body.innerHTML =
       '<void-card><void-dialog-title>Stray</void-dialog-title><void-card-body>b</void-card-body></void-card>' +
@@ -129,6 +145,15 @@ describe('@voidable/ui/dev', () => {
       '<void-breadcrumbs><void-breadcrumbs-list><void-breadcrumbs-item><a href="/">Home</a></void-breadcrumbs-item><void-breadcrumbs-item aria-current="page">Page</void-breadcrumbs-item></void-breadcrumbs-list></void-breadcrumbs>';
     await settled();
     expect(seen.filter((w) => w.kind !== 'undefined-element')).toEqual([]);
+  });
+
+  it('does not take what a picker renders beside its content part (between the projection markers) for a stray child', () => {
+    document.body.innerHTML =
+      '<void-combobox><!--void-projection--><input><span>error</span><!--/void-projection--><void-combobox-content><void-option value="a">A</void-option></void-combobox-content></void-combobox>' +
+      '<void-multiselect><void-multiselect-content><void-option value="a">A</void-option></void-multiselect-content><!--void-projection--><div></div><!--/void-projection--></void-multiselect>';
+    for (const el of Array.from(document.body.children)) expect(checkParts(table, el)).toEqual([]);
+    document.body.innerHTML = '<void-combobox><input><void-combobox-content></void-combobox-content></void-combobox>';
+    expect(checkParts(table, document.body.firstElementChild!).map((w) => w.kind)).toEqual(['unknown-child']);
   });
 
   it('reports breadcrumb items written without the list part, with the correct markup', async () => {
@@ -209,7 +234,9 @@ describe('the generated table', () => {
   });
 
   it('carries the parents, required children and hints from the manifest, not from a list in the dev entry', () => {
-    expect(table['void-option'].p).toEqual(['void-multiselect', 'void-combobox']);
+    expect(table['void-option'].p).toEqual(['void-combobox-content', 'void-multiselect-content']);
+    expect(table['void-select'].v?.tag).toBe('select');
+    expect(table['void-select'].x?.name).toContain('<select name=');
     expect(table['void-tabs'].q?.n.map((p) => p.t)).toEqual(['void-tabs-list', 'void-tabs-content']);
     expect(table['void-tabs-trigger'].c).toBe(1);
     expect(table['void-input'].x?.label).toContain('void-field');

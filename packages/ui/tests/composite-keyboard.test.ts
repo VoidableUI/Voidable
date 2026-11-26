@@ -29,13 +29,19 @@ function press(el: Element, key: string, init: KeyboardEventInit = {}): Keyboard
 interface Opt { value: string; label: string; disabled?: boolean; selected?: boolean }
 
 function options(el: Element, opts: Opt[]): void {
+  // The options live in the picker's content part (#52).
+  let content = el.querySelector(`${el.localName}-content`);
+  if (!content) {
+    content = document.createElement(`${el.localName}-content`);
+    el.appendChild(content);
+  }
   for (const o of opts) {
     const opt = document.createElement('void-option') as VoidOption;
     opt.value = o.value;
     opt.textContent = o.label;
     if (o.disabled) opt.disabled = true;
     if (o.selected) opt.selected = true;
-    el.appendChild(opt);
+    content.appendChild(opt);
   }
 }
 
@@ -113,7 +119,9 @@ describe('VoidCombobox keyboard', () => {
     expect(input.getAttribute('aria-expanded')).toBe('true');
     expect(input.getAttribute('aria-controls')).toBe(el.querySelector('[role=listbox]')!.id);
     expect(active(el)!.textContent).toBe('React');
-    expect(active(el)!.getAttribute('aria-selected')).toBe('true');
+    // The highlight is `active` (and aria-activedescendant); aria-selected marks the chosen option only.
+    expect(active(el)!.hasAttribute('active')).toBe(true);
+    expect(active(el)!.hasAttribute('aria-selected')).toBe(false);
   });
 
   it('ArrowUp opens the list on the last enabled option', async () => {
@@ -183,7 +191,8 @@ describe('VoidCombobox keyboard', () => {
     input.value = 'l';
     input.dispatchEvent(new Event('input', { bubbles: true }));
     await el.updateComplete;
-    expect([...el.querySelectorAll('[role=option]')].map(o => o.textContent)).toEqual(['Svelte', 'Lit']);
+    // Filtered-out options stay in place, hidden (#52).
+    expect([...el.querySelectorAll('[role=option]:not([hidden])')].map(o => o.textContent)).toEqual(['Svelte', 'Lit']);
     expect(input.hasAttribute('aria-activedescendant')).toBe(false);
     press(input, 'ArrowDown');
     await el.updateComplete;
@@ -297,7 +306,7 @@ describe('VoidMultiselect keyboard', () => {
     await el.updateComplete;
     const list = el.querySelector('[role=listbox]')!;
     expect(list.getAttribute('aria-multiselectable')).toBe('true');
-    expect([...list.querySelectorAll('[role=option]')].map(o => o.getAttribute('aria-selected'))).toEqual(['true', 'false']);
+    expect([...list.querySelectorAll('[role=option]')].map(o => o.getAttribute('aria-selected'))).toEqual(['true', null]);
     expect(list.querySelector('[role=option]')!.hasAttribute('tabindex')).toBe(false);
     expect(active(el)!.textContent!.trim()).toBe('A'); // starts on the first selected option
   });
@@ -323,7 +332,7 @@ describe('VoidMultiselect keyboard', () => {
     expect(changes).toEqual([{ values: ['react'] }, { values: ['react', 'vue'] }, { values: ['vue'] }]);
   });
 
-  it('skips disabled options and wraps', async () => {
+  it('skips disabled options and stops at the ends (select-only combobox pattern)', async () => {
     const { el, trigger } = await mount();
     press(trigger, 'End');
     press(trigger, 'ArrowUp');
@@ -331,6 +340,10 @@ describe('VoidMultiselect keyboard', () => {
     expect(active(el)!.textContent!.trim()).toBe('Vue'); // Svelte skipped
     press(trigger, 'Home');
     press(trigger, 'ArrowUp');
+    await el.updateComplete;
+    expect(active(el)!.textContent!.trim()).toBe('React');
+    press(trigger, 'End');
+    press(trigger, 'ArrowDown');
     await el.updateComplete;
     expect(active(el)!.textContent!.trim()).toBe('Lit');
   });

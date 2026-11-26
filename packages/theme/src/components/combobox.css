@@ -50,9 +50,10 @@ void-combobox[error]:not([error='']) .void-combobox-input:focus {
   line-height: var(--void-type-caption-leading);
 }
 
-/* A popover="manual" surface in the top layer, at least as wide as the field;
-   placement, flipping and transitions are shared (overlay.css). */
-.void-combobox-dropdown {
+/* The content part: a popover="manual" surface in the top layer, at least as
+   wide as the field; placement, flipping and transitions are shared
+   (overlay.css). */
+void-combobox-content {
   --void-overlay-gap: var(--void-space-1);
   min-width: var(--void-overlay-anchor-width);
   color: var(--void-color-text);
@@ -65,7 +66,14 @@ void-combobox[error]:not([error='']) .void-combobox-input:focus {
   padding: var(--void-space-1) 0;
 }
 
-.void-combobox-option {
+/* Each option is the author's void-option, wired as role="option": `active`
+   marks the highlighted one (aria-activedescendant), aria-selected the chosen
+   one. The typed text filters options out with `hidden`. */
+void-combobox-content > void-option {
+  /* Flex, so rich content (an avatar, then the name) lines up. */
+  display: flex;
+  align-items: center;
+  gap: var(--void-space-2);
   padding: var(--void-space-2) var(--void-space-3);
   cursor: pointer;
   color: var(--void-color-text);
@@ -73,15 +81,19 @@ void-combobox[error]:not([error='']) .void-combobox-input:focus {
   user-select: none;
   transition: background var(--void-duration-fast) var(--void-ease-in-out);
 }
-.void-combobox-option:hover { background: var(--void-color-bg-hover); }
-.void-combobox-option[data-active] { background: var(--void-color-bg-hover); }
-.void-combobox-option[aria-disabled='true'] { opacity: 0.5; cursor: default; }
-.void-combobox-option[aria-selected='true'] {
+void-combobox-content > void-option[hidden] { display: none; }
+void-combobox-content > void-option:hover { background: var(--void-color-bg-hover); }
+void-combobox-content > void-option[aria-selected='true'] { font-weight: var(--void-weight-medium); }
+void-combobox-content > void-option[active] {
   background: var(--void-color-accent);
   color: var(--void-color-text-on-accent);
 }
+void-combobox-content > void-option[disabled] { opacity: 0.5; cursor: default; }
 
-.void-combobox-empty {
+/* Nothing matches what was typed. */
+void-combobox-content[empty]::after {
+  content: 'No options found';
+  display: block;
   padding: var(--void-space-2) var(--void-space-3);
   color: var(--void-color-text-muted);
   font-size: var(--_void-field-text);

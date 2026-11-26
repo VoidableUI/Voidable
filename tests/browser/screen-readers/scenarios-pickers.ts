@@ -1,10 +1,9 @@
 // SPDX-License-Identifier: MIT
 //
-// Select, combobox and multiselect, kept apart from scenarios.ts on purpose: their
-// markup is being redesigned (AGENTS.md, "Explicit parts (#52)", the "To convert"
-// and "Open" rows of docs/src/content/docs/guides/composition.mdx). When it lands,
-// update tests/browser/pages/sr-pickers.html and the facts here (and nothing
-// else): the specs, the runner and the workflow take whatever is listed.
+// Select, combobox and multiselect, in their explicit-parts markup (#52): a native
+// <select> inside void-select, and the options in the content part of the other two
+// (tests/browser/pages/sr-pickers.html). The highlighted option of a combobox is its
+// aria-activedescendant and is not selected; aria-selected marks the chosen one.
 import type { Scenario } from './facts';
 
 export const pickerScenarios: Scenario[] = [
@@ -21,16 +20,16 @@ export const pickerScenarios: Scenario[] = [
   },
   {
     id: 'combobox',
-    title: 'A combobox announces expanded, the active option as you arrow, and the chosen value',
+    title: 'A combobox announces expanded, the highlighted option as you arrow, and the chosen value',
     page: '/sr-pickers',
     steps: [
       { reach: { role: 'combobox', name: 'Framework', expanded: false }, by: 'control' },
       { act: true },
       { hear: { role: 'combobox', name: 'Framework', expanded: true } },
       { press: 'ArrowDown' },
-      { hear: { role: 'option', name: 'React', selected: true, position: { n: 1, of: 3, within: '#framework' } } },
+      { hear: { role: 'option', name: 'React', selected: false, position: { n: 1, of: 3, within: '#framework' } } },
       { press: 'ArrowDown' },
-      { hear: { role: 'option', name: 'Vue', selected: true, position: { n: 2, of: 3, within: '#framework' } } },
+      { hear: { role: 'option', name: 'Vue', selected: false, position: { n: 2, of: 3, within: '#framework' } } },
       { press: 'Enter' },
       { hear: { role: 'combobox', name: 'Framework', expanded: false, value: 'Vue', spoken: [/vue/] } },
     ],

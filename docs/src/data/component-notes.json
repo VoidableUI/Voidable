@@ -39,7 +39,7 @@
     "events": {
       "void-change": "Fires when the user chooses an option. `detail.value` is its value."
     },
-    "children": "Takes `void-option` children, one per choice."
+    "children": "One `void-combobox-content` holding the `void-option`s, one per choice. The component renders the input before it."
   },
   "void-compose-input": {
     "group": "forms",
@@ -89,7 +89,7 @@
     "events": {
       "void-change": "Fires when an option is selected or deselected. `detail.values` lists every selected value."
     },
-    "children": "Takes `void-option` children, one per choice. Mark the initial ones with `selected`."
+    "children": "One `void-multiselect-content` holding the `void-option`s, one per choice; mark the initial ones with `selected`. The component renders the trigger and its chips before it."
   },
   "void-number-input": {
     "group": "forms",
@@ -98,7 +98,8 @@
     }
   },
   "void-option": {
-    "group": "forms"
+    "group": "forms",
+    "children": "Text, or rich content (an icon, a second line) with `label` giving the plain text shown once it is chosen. Only inside `void-combobox-content` or `void-multiselect-content`."
   },
   "void-pin-input": {
     "group": "forms",
@@ -137,7 +138,7 @@
     "events": {
       "void-change": "Fires when the user chooses an option. `detail.value` is its value."
     },
-    "children": "Native `option` and `optgroup` elements, not `void-option`."
+    "children": "One native `<select>` carrying `name`, `required`, `disabled` and the native `option` and `optgroup` elements; not `void-option`. A prompt is a first `<option value=\"\" disabled selected hidden>`."
   },
   "void-slider": {
     "group": "forms",

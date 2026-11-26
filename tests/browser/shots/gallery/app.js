@@ -55,7 +55,7 @@ $('summary').innerHTML = compare
 // ── Filters ──
 const filters = { set: 'screens', page: 'all', look: 'all', scheme: 'all', width: 'all', status: compare ? 'changed' : 'all' };
 const select = (id, name, options) =>
-  `<void-field label="${name}" class="filter"><void-select id="f-${id}" aria-label="${name}">${options.map(([v, t]) => `<option value="${esc(v)}"${filters[id] === v ? ' selected' : ''}>${esc(t)}</option>`).join('')}</void-select></void-field>`;
+  `<void-field label="${name}" class="filter"><void-select id="f-${id}" aria-label="${name}"><select>${options.map(([v, t]) => `<option value="${esc(v)}"${filters[id] === v ? ' selected' : ''}>${esc(t)}</option>`).join('')}</select></void-select></void-field>`;
 const seg = (id, name, options) =>
   `<void-segmented-control id="f-${id}" value="${filters[id]}" aria-label="${name}" size="sm">${options.map(([v, t]) => `<void-segmented-control-item value="${esc(v)}">${esc(t)}</void-segmented-control-item>`).join('')}</void-segmented-control>`;
 $('filters').innerHTML = [

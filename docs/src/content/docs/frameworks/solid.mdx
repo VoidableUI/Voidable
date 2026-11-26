@@ -124,9 +124,11 @@ const [agreed, setAgreed] = createSignal(false);
 <void-input aria-label="Text input" value={text()} on:void-input={(e) => setText(e.detail.value)} />
 
 <void-select aria-label="Choose an option" value={choice()} on:void-change={(e) => setChoice(e.detail.value)}>
-  <option value="a">A</option>
-  <option value="b">B</option>
-  <option value="c">C</option>
+  <select>
+    <option value="a">A</option>
+    <option value="b">B</option>
+    <option value="c">C</option>
+  </select>
 </void-select>
 
 <void-checkbox checked={agreed()} on:void-change={(e) => setAgreed(e.detail.checked)}>I agree</void-checkbox>

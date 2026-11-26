@@ -233,14 +233,18 @@ const ogImage = new URL('/og.png', canonical).href;
               <h2 data-void-type="label">Type</h2>
               <void-field label="Typeface">
                 <void-select data-font="--void-font-sans">
-                  {Object.entries(fontStacks['--void-font-sans']).map(([key, f]) => <option value={key}>{f.label}</option>)}
-                  <option value="custom" hidden>Custom</option>
+                  <select>
+                    {Object.entries(fontStacks['--void-font-sans']).map(([key, f]) => <option value={key}>{f.label}</option>)}
+                    <option value="custom" hidden>Custom</option>
+                  </select>
                 </void-select>
               </void-field>
               <void-field label="Monospace" helper="Labels, code and ids.">
                 <void-select data-font="--void-font-mono">
-                  {Object.entries(fontStacks['--void-font-mono']).map(([key, f]) => <option value={key}>{f.label}</option>)}
-                  <option value="custom" hidden>Custom</option>
+                  <select>
+                    {Object.entries(fontStacks['--void-font-mono']).map(([key, f]) => <option value={key}>{f.label}</option>)}
+                    <option value="custom" hidden>Custom</option>
+                  </select>
                 </void-select>
               </void-field>
               <div class="tb-knob" data-row="--void-font-size">

@@ -69,7 +69,8 @@ export const eventDetails = {
  * @type {Record<string, string[]>}
  */
 export const allowedParents = {
-  'void-option': ['void-multiselect', 'void-combobox'],
+  // Inside the list part of either picker (#52): a void-option written straight into the picker is the old form.
+  'void-option': ['void-combobox-content', 'void-multiselect-content'],
   'void-segmented-control-item': ['void-segmented-control'],
   // An item also sits inside a group (its parent part is the content, anywhere above it).
   'void-menu-item': ['void-menu-group'],
@@ -95,7 +96,15 @@ export const requiredChildren = {
 export const attributeHints = {
   'void-input': { label: 'wrap the control in <void-field label="...">' },
   'void-textarea': { label: 'wrap the control in <void-field label="...">' },
-  'void-select': { label: 'wrap the control in <void-field label="...">; options are native <option> children' },
+  'void-select': {
+    label: 'wrap the control in <void-field label="...">',
+    name: 'put name on the native <select> inside: <void-select><select name="...">...</select></void-select>',
+    required: 'put required on the native <select> inside: <void-select><select name="..." required>...</select></void-select>',
+    disabled: 'put disabled on the native <select> inside: <void-select><select name="..." disabled>...</select></void-select>',
+    multiple: 'put multiple on the native <select> inside, or use <void-multiselect>',
+    autocomplete: 'put autocomplete on the native <select> inside',
+    placeholder: 'write the prompt as the first option of the native <select>: <option value="" disabled selected hidden>Choose...</option>',
+  },
   'void-stat': {
     unit: 'use <void-figure> with data-void-type="value" and "unit" spans',
     caption: 'use <void-figure> with a data-void-type="caption" span',
@@ -165,6 +174,25 @@ const anchoredParts = (tag, verb, control, content, legacy) => ({
       description: `Wraps the one element that ${verb} (a <void-button>, a <button>, a link); that element gets the ARIA.`,
     },
     { tag: `${tag}-content`, required: true, max: 1, description: 'Shown in the top layer next to the trigger.' },
+  ],
+});
+
+
+const pickerParts = (tag, what, options) => ({
+  children: 'parts',
+  skeleton: `<${tag} name="${options.name}" placeholder="${options.placeholder}"><${tag}-content>${options.items}</${tag}-content></${tag}>`,
+  legacy: { children: `put the <void-option>s in <${tag}-content>: <${tag}><${tag}-content><void-option value="a">A</void-option></${tag}-content></${tag}>` },
+  parts: [
+    {
+      tag: `${tag}-content`,
+      required: true,
+      max: 1,
+      children: 'any',
+      description: `The option list (role="listbox"${what}) shown in the top layer under the ${tag === 'void-combobox' ? 'field' : 'trigger'}; holds the \`<void-option>\`s, which stay where they are.`,
+      attributes: tag === 'void-combobox'
+        ? [{ name: 'empty', type: 'boolean', description: 'Set by the combobox while no option matches the typed text; the theme then shows "No options found".' }]
+        : [],
+    },
   ],
 });
 
@@ -587,6 +615,32 @@ export const parts = {
       },
     ],
   },
+  'void-combobox': pickerParts('void-combobox', '', {
+    name: 'country',
+    placeholder: 'Search countries',
+    items: '<void-option value="de">Germany</void-option><void-option value="fr">France</void-option>',
+  }),
+  'void-multiselect': pickerParts('void-multiselect', ', aria-multiselectable', {
+    name: 'skills',
+    placeholder: 'Choose skills',
+    items: '<void-option value="js" selected>JavaScript</void-option><void-option value="go">Go</void-option>',
+  }),
+};
+
+/**
+ * Components that enhance a native control the author writes inside them
+ * (#52): the control is the final DOM and carries the form attributes.
+ * Written to the declaration as `voidNative`: `tag` is the native element that
+ * must be inside, `fix` the correct markup, quoted by `voidable check` and the
+ * development warnings when it is missing (the old form, options written
+ * straight into the component).
+ * @type {Record<string, { tag: string, fix: string }>}
+ */
+export const nativeControls = {
+  'void-select': {
+    tag: 'select',
+    fix: 'write a native <select> (with the name and the options) inside: <void-select><select name="plan"><option value="free">Free</option><option value="pro">Pro</option></select></void-select>',
+  },
 };
 
 /**
@@ -597,7 +651,10 @@ export const parts = {
  * the part instead, as `active` on a tabs trigger.)
  * @type {Record<string, string[]>}
  */
-export const parentSetAttributes = {};
+export const parentSetAttributes = {
+  // combobox.ts and multiselect.ts mark the highlighted option (aria-activedescendant).
+  'void-option': ['active'],
+};
 
 // Shorthands for the entries below.
 const ARIA = ['aria-label', 'aria-labelledby', 'title'];

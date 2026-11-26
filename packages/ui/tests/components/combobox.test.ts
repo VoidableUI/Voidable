@@ -13,12 +13,14 @@ if (!customElements.get('void-combobox')) {
 
 function createWithOptions(opts: Array<{ value: string; label: string }>): VoidCombobox {
   const el = document.createElement('void-combobox') as VoidCombobox;
+  const content = document.createElement('void-combobox-content');
   for (const opt of opts) {
     const o = document.createElement('void-option') as VoidOption;
     o.value = opt.value;
     o.textContent = opt.label;
-    el.appendChild(o);
+    content.appendChild(o);
   }
+  el.appendChild(content);
   return el;
 }
 
@@ -122,7 +124,7 @@ describe('VoidCombobox', () => {
       const input = el.querySelector('.void-combobox-input') as HTMLInputElement;
       input.dispatchEvent(new FocusEvent('focus', { bubbles: true }));
       await el.updateComplete;
-      expect(el.querySelector('.void-combobox-dropdown')).not.toBeNull();
+      expect(el.open).toBe(true);
     });
 
     it('closes dropdown on Escape key', async () => {
@@ -131,7 +133,7 @@ describe('VoidCombobox', () => {
       await el.updateComplete;
       document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
       await el.updateComplete;
-      expect(el.querySelector('.void-combobox-dropdown')).toBeNull();
+      expect(el.open).toBe(false);
     });
 
     it('closes dropdown when clicking outside', async () => {
@@ -141,7 +143,7 @@ describe('VoidCombobox', () => {
       document.body.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, button: 0 }));
       await el.updateComplete;
       await el.updateComplete;
-      expect(el.querySelector('.void-combobox-dropdown')).toBeNull();
+      expect(el.open).toBe(false);
     });
 
     it('aria-expanded becomes true when open', async () => {
@@ -174,7 +176,7 @@ describe('VoidCombobox', () => {
       const input = el.querySelector('.void-combobox-input') as HTMLInputElement;
       input.dispatchEvent(new FocusEvent('focus', { bubbles: true }));
       await el.updateComplete;
-      const options = el.querySelectorAll('.void-combobox-option');
+      const options = el.querySelectorAll('void-option:not([hidden])');
       expect(options.length).toBe(3);
     });
 
@@ -185,7 +187,7 @@ describe('VoidCombobox', () => {
       input.value = 'vue';
       input.dispatchEvent(new InputEvent('input', { bubbles: true }));
       await el.updateComplete;
-      const options = el.querySelectorAll('.void-combobox-option');
+      const options = el.querySelectorAll('void-option:not([hidden])');
       expect(options.length).toBe(1);
       expect(options[0].textContent?.trim()).toBe('Vue');
     });
@@ -197,8 +199,8 @@ describe('VoidCombobox', () => {
       input.value = 'zzz';
       input.dispatchEvent(new InputEvent('input', { bubbles: true }));
       await el.updateComplete;
-      expect(el.querySelector('.void-combobox-empty')).not.toBeNull();
-      expect(el.querySelectorAll('.void-combobox-option').length).toBe(0);
+      expect(el.querySelector('void-combobox-content')!.hasAttribute('empty')).toBe(true);
+      expect(el.querySelectorAll('void-option:not([hidden])').length).toBe(0);
     });
 
     it('filtering is case-insensitive', async () => {
@@ -208,7 +210,7 @@ describe('VoidCombobox', () => {
       input.value = 'REACT';
       input.dispatchEvent(new InputEvent('input', { bubbles: true }));
       await el.updateComplete;
-      const options = el.querySelectorAll('.void-combobox-option');
+      const options = el.querySelectorAll('void-option:not([hidden])');
       expect(options.length).toBe(1);
       expect(options[0].textContent?.trim()).toBe('React');
     });
@@ -235,21 +237,21 @@ describe('VoidCombobox', () => {
     });
 
     it('clicking option sets value', async () => {
-      const option = el.querySelector('.void-combobox-option') as HTMLElement;
+      const option = el.querySelector('void-option:not([hidden])') as HTMLElement;
       option.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
       await el.updateComplete;
       expect(el.value).toBe('react');
     });
 
     it('clicking option closes dropdown', async () => {
-      const option = el.querySelector('.void-combobox-option') as HTMLElement;
+      const option = el.querySelector('void-option:not([hidden])') as HTMLElement;
       option.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
       await el.updateComplete;
-      expect(el.querySelector('.void-combobox-dropdown')).toBeNull();
+      expect(el.open).toBe(false);
     });
 
     it('clicking option sets input display value', async () => {
-      const option = el.querySelector('.void-combobox-option') as HTMLElement;
+      const option = el.querySelector('void-option:not([hidden])') as HTMLElement;
       option.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
       await el.updateComplete;
       const input = el.querySelector('.void-combobox-input') as HTMLInputElement;
@@ -259,7 +261,7 @@ describe('VoidCombobox', () => {
     it('dispatches void-change with correct value detail', async () => {
       let detail: { value: string } | null = null;
       el.addEventListener('void-change', (e) => { detail = (e as CustomEvent).detail; });
-      const option = el.querySelector('.void-combobox-option') as HTMLElement;
+      const option = el.querySelector('void-option:not([hidden])') as HTMLElement;
       option.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
       await el.updateComplete;
       expect(detail?.value).toBe('react');
@@ -288,7 +290,7 @@ describe('VoidCombobox', () => {
     it('void-change bubbles', async () => {
       let firedOnParent = false;
       document.body.addEventListener('void-change', () => { firedOnParent = true; }, { once: true });
-      const option = el.querySelector('.void-combobox-option') as HTMLElement;
+      const option = el.querySelector('void-option:not([hidden])') as HTMLElement;
       option.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
       await el.updateComplete;
       expect(firedOnParent).toBe(true);
@@ -297,7 +299,7 @@ describe('VoidCombobox', () => {
     it('void-change detail has value property', async () => {
       let detail: unknown = null;
       el.addEventListener('void-change', (e) => { detail = (e as CustomEvent).detail; });
-      const option = el.querySelector('.void-combobox-option') as HTMLElement;
+      const option = el.querySelector('void-option:not([hidden])') as HTMLElement;
       option.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
       await el.updateComplete;
       expect(detail).toHaveProperty('value');
@@ -325,7 +327,7 @@ describe('VoidCombobox', () => {
       const input = el.querySelector('.void-combobox-input') as HTMLInputElement;
       input.dispatchEvent(new FocusEvent('focus', { bubbles: true }));
       await el.updateComplete;
-      expect(el.querySelector('.void-combobox-dropdown')).toBeNull();
+      expect(el.open).toBe(false);
     });
   });
 

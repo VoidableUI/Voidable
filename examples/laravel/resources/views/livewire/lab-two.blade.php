@@ -8,9 +8,12 @@
         <void-input id="two-note" name="note" x-void-on:void-input="$wire.set('note', $event.detail.value)" value="{{ $note }}"></void-input>
     </void-field>
     <void-field label="Choice">
-        <void-select id="two-choice" name="choice" placeholder="Choose…" x-void-on:void-change="$wire.set('choice', $event.detail.value)" value="{{ $choice }}">
-            <option value="x">Ex</option>
-            <option value="y">Why</option>
+        <void-select id="two-choice" x-void-on:void-change="$wire.set('choice', $event.detail.value)" value="{{ $choice }}">
+            <select name="choice">
+                <option value="" disabled selected hidden>Choose…</option>
+                <option value="x">Ex</option>
+                <option value="y">Why</option>
+            </select>
         </void-select>
     </void-field>
     <void-button id="two-count" variant="filled" wire:click="increment">Count {{ $count }}</void-button>
@@ -26,10 +29,13 @@
             <void-textarea id="p-bio" name="user[bio]"></void-textarea>
         </void-field>
         <void-field label="Country">
-            <void-select id="p-country" name="user[country]" placeholder="Choose…">
-                <option value="nz">New Zealand</option>
-                <option value="au">Australia</option>
-                <option value="fj">Fiji</option>
+            <void-select id="p-country">
+                <select name="user[country]">
+                    <option value="" disabled selected hidden>Choose…</option>
+                    <option value="nz">New Zealand</option>
+                    <option value="au">Australia</option>
+                    <option value="fj">Fiji</option>
+                </select>
             </void-select>
         </void-field>
         <void-checkbox id="p-remember" name="user[remember_me]" value="1">Remember me</void-checkbox>
@@ -43,8 +49,10 @@
         </void-field>
         <void-field label="Skills">
             <void-multiselect id="p-skills" name="skills[]" placeholder="Pick many">
-                <void-option value="css">CSS</void-option>
-                <void-option value="js">JS</void-option>
+                <void-multiselect-content>
+                    <void-option value="css">CSS</void-option>
+                    <void-option value="js">JS</void-option>
+                </void-multiselect-content>
             </void-multiselect>
         </void-field>
         <button id="post-save" type="submit">Post</button>

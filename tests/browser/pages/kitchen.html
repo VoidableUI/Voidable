@@ -30,7 +30,7 @@
     </div>
     <div class="row">
       <void-field label="Message"><void-textarea placeholder="Write…"></void-textarea></void-field>
-      <void-field label="Pick"><void-select placeholder="Choose…"><option value="a">Alpha</option><option value="b">Beta</option></void-select></void-field>
+      <void-field label="Pick"><void-select><select><option value="" disabled selected hidden>Choose…</option><option value="a">Alpha</option><option value="b">Beta</option></select></void-select></void-field>
       <void-field label="Count"><void-number-input value="3"></void-number-input></void-field>
     </div>
     <div class="row">
@@ -47,8 +47,8 @@
     <div class="row">
       <void-field label="Date"><void-date-picker></void-date-picker></void-field>
       <void-field label="Find"><void-action-input action-label="Search"></void-action-input></void-field>
-      <void-field label="Framework"><void-combobox placeholder="Pick"><void-option value="react">React</void-option><void-option value="vue">Vue</void-option></void-combobox></void-field>
-      <void-field label="Skills"><void-multiselect placeholder="Pick many"><void-option value="css">CSS</void-option><void-option value="js">JS</void-option></void-multiselect></void-field>
+      <void-field label="Framework"><void-combobox placeholder="Pick"><void-combobox-content><void-option value="react">React</void-option><void-option value="vue">Vue</void-option></void-combobox-content></void-combobox></void-field>
+      <void-field label="Skills"><void-multiselect placeholder="Pick many"><void-multiselect-content><void-option value="css">CSS</void-option><void-option value="js">JS</void-option></void-multiselect-content></void-multiselect></void-field>
     </div>
     <div class="row">
       <void-toggle-group value="bold" aria-label="Format"><void-toggle value="bold">Bold</void-toggle><void-toggle value="italic">Italic</void-toggle></void-toggle-group>

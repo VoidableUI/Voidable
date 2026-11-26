@@ -259,18 +259,33 @@ describe('tabs (explicit parts, #52)', () => {
 });
 
 describe('select', () => {
-  it('falls back to the value attribute when the picked option is removed', async () => {
-    const sel = await mount<Host>('<void-select name="k" value="b"><option value="a">a</option><option value="b">b</option><option value="c">c</option></void-select>');
+  const markup = (value: string, selected = '') =>
+    `<void-select value="${value}"><select name="k"><option value="a">a</option><option value="b"${selected === 'b' ? ' selected' : ''}>b</option><option value="c">c</option></select></void-select>`;
+
+  it('keeps the pick through a morph that does not change the selection, though the morpher resets the native one', async () => {
+    const sel = await mount<Host>(markup('b'));
     const native = sel.querySelector('select')!;
     native.value = 'c';
     native.dispatchEvent(new Event('change'));
+    sel.voidBeforeMorph(server(markup('b')));
+    native.value = 'b'; // what a morph library syncing the options does
     await settle();
+    await new Promise((r) => setTimeout(r, 0));
     expect(sel.value).toBe('c');
-    sel.voidBeforeMorph(server('<void-select name="k" value="b"><option value="a">a</option><option value="b">b</option></void-select>'));
-    sel.querySelector('option[value=c]')!.remove();
+    expect(native.value).toBe('c');
+  });
+
+  it('takes the server value when the server changed the value attribute', async () => {
+    const sel = await mount<Host>(markup('b'));
+    const native = sel.querySelector('select')!;
+    native.value = 'c';
+    native.dispatchEvent(new Event('change'));
+    sel.voidBeforeMorph(server(markup('a')));
+    sel.setAttribute('value', 'a'); // the morph applies the server attribute
     await settle();
-    expect(sel.value).toBe('b');
-    expect(sel.querySelector('select')!.value).toBe('b');
+    await new Promise((r) => setTimeout(r, 0));
+    expect(sel.value).toBe('a');
+    expect(native.value).toBe('a');
   });
 });
 
@@ -426,7 +441,9 @@ describe('reset default follows the server', () => {
 
 describe('appending to a rendered host (Solid keyed lists)', () => {
   it('an option inserted before null is in place at once, so later nextSibling reads are right', async () => {
-    const sel = await mount<Host>('<void-select name="s"><option value="a">a</option><option value="x">x</option><option value="b">b</option><option value="y">y</option></void-select>');
+    const host = await mount<Host>('<void-select><select name="s"><option value="a">a</option><option value="x">x</option><option value="b">b</option><option value="y">y</option></select></void-select>');
+    // The options are children of the author's <select> (#52), which is their parent for Solid too.
+    const sel = host.querySelector('select')!;
     const [a, x, b, y] = Array.from(sel.querySelectorAll('option'));
     // reconcileArrays: [a, x, b, y] -> [y, b, x, a]
     let node = y.nextSibling;

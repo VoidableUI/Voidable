@@ -65,14 +65,17 @@ describe('new core props', () => {
   it('form props from the forms branch reach the element', async () => {
     const c = await render(
       <form>
-        <Select name="s" required>
-          <option value="a">A</option>
+        <Select>
+          <select name="s" required>
+            <option value="a">A</option>
+          </select>
         </Select>
         <SegmentedControl name="seg" disabled required />
         <Switch name="sw" value="yes" required />
       </form>,
     );
-    expect(c.querySelector('void-select')!.getAttribute('name')).toBe('s');
+    // The native select inside carries the form attributes (#52).
+    expect(c.querySelector('void-select > select')!.getAttribute('name')).toBe('s');
     const seg = c.querySelector('void-segmented-control') as VoidSegmentedControl;
     expect([seg.name, seg.disabled, seg.required]).toEqual(['seg', true, true]);
     const sw = c.querySelector('void-switch') as VoidSwitch;

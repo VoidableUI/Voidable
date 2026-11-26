@@ -60,12 +60,10 @@ export const CONTRACT = {
   'void-combobox': {
     role: 'inner',
     name: 'void-field label or aria-label / aria-labelledby on the host (moved onto it), on the inner role="combobox" input (aria-label falls back to the placeholder)',
-    state: ['open (reflected)', 'aria-expanded on the inner combobox', 'role="option" with data-selected on the rendered options', 'value (property only: the attribute is the initial value and is not updated)'],
-    probe: { html: '<void-field label="Fruit"><void-combobox name="f"><void-option value="a">Apple</void-option><void-option value="b">Banana</void-option></void-combobox></void-field>', fill: { label: 'Fruit', text: 'ban' }, clickOption: 'Banana', event: 'void-change' },
+    state: ['open (reflected)', 'aria-expanded and aria-activedescendant on the inner combobox', 'role="listbox" on the void-combobox-content part', 'role="option" on the void-option children, aria-selected="true" on the chosen one, active on the highlighted one, hidden on the ones the text filters out', 'value (property only: the attribute is the initial value and is not updated)'],
+    probe: { html: '<void-field label="Fruit"><void-combobox name="f"><void-combobox-content><void-option value="a">Apple</void-option><void-option value="b">Banana</void-option></void-combobox-content></void-combobox></void-field>', fill: { label: 'Fruit', text: 'ban' }, clickOption: 'Banana', event: 'void-change' },
     gaps: [
       'the current value is not reflected to an attribute: [value=...] selectors and attribute assertions see the initial value only',
-      'aria-selected on the rendered options marks the keyboard-active option, not the chosen one; the choice is only in data-selected',
-      'the void-option children are not the options a user sees: the list renders its own role="option" copies',
     ],
   },
   'void-compose-input': { role: null, name: 'void-field label or aria-label / aria-labelledby on the host (moved onto it), on the inner textarea', state: ['value (property only: the attribute is the initial value and is not updated)'], gaps: ['the current value is not reflected to an attribute: [value=...] selectors and attribute assertions see the initial value only', 'no role on the host; the send button has no stable name'] },
@@ -128,12 +126,12 @@ export const CONTRACT = {
   'void-menu': { role: null, name: 'aria-label on the host, copied to the void-menu-content part (default "Menu")', state: ['open (reflected)', 'role="menu" on the void-menu-content part', 'empty attribute on the host while a search matches nothing'] },
   'void-menu-group': { role: 'group', name: 'its void-menu-group-label part (aria-labelledby)', state: [] },
   'void-menu-item': { role: 'menuitem', name: 'text content', state: ['value (reflected)', 'disabled (reflected)', 'aria-disabled'] },
-  'void-multiselect': { role: 'inner', name: 'void-field label or aria-label / aria-labelledby on the host (moved onto it), on the inner combobox', state: ['open (reflected)', 'aria-expanded on the inner combobox', 'role="option" + aria-selected on rendered options'], gaps: ['the selected values are a property only (value: string[]), not reflected (#23)'] },
+  'void-multiselect': { role: 'inner', name: 'void-field label or aria-label / aria-labelledby on the host (moved onto it), on the inner combobox', state: ['open (reflected)', 'aria-expanded and aria-activedescendant on the inner combobox', 'role="listbox" + aria-multiselectable on the void-multiselect-content part', 'role="option" on the void-option children, aria-selected="true" on the chosen ones, active on the highlighted one'], gaps: ['the selected values are a property only (value: string[]), not reflected (#23)'] },
   'void-nav-bar': { role: 'navigation', name: 'none', state: [], gaps: ['role="navigation" on a top bar that usually holds search and account controls; a <nav> inside it makes a nested, unnamed landmark'] },
   'void-nav-menu': { role: 'menubar', name: 'none', state: [] },
   'void-nav-menu-item': { role: 'none', name: 'the control in its void-nav-menu-trigger part (a button or a link)', state: ['open (reflected)', 'active (reflected)', 'aria-expanded, aria-haspopup and aria-controls on a button trigger', 'aria-current="page" on a link trigger when active'] },
   'void-number-input': { role: 'inner', name: 'void-field label or aria-label / aria-labelledby on the host (moved onto it), else the label attribute, on the inner role="spinbutton" input', state: ['value (reflected; absent when the field is empty)', 'aria-valuenow on the inner spinbutton (absent when empty)'] },
-  'void-option': { role: null, name: 'text content', state: ['selected (reflected)'], gaps: ['not the element users interact with (see void-combobox)'] },
+  'void-option': { role: null, name: 'text content', state: ['role="option", written by the picker whose content part holds it', 'selected (reflected)', 'aria-selected="true" when chosen', 'active (highlighted)', 'disabled (reflected)', 'aria-disabled'], gaps: ['selected is the initial choice: the current choice is aria-selected, not the attribute'] },
   'void-pagination': {
     role: 'inner',
     name: 'the rendered nav is named "Pagination"; buttons by page number, "Previous page", "Next page"',
@@ -160,7 +158,7 @@ export const CONTRACT = {
     state: ['aria-checked'],
     probe: { html: '<void-segmented-control value="m" aria-label="Period"><void-segmented-control-item value="m">Monthly</void-segmented-control-item><void-segmented-control-item value="y">Yearly</void-segmented-control-item></void-segmented-control>', click: { role: 'radio', name: 'Yearly' }, expect: { radio: { name: 'Yearly', 'aria-checked': 'true' } }, event: 'void-change' },
   },
-  'void-select': { role: 'inner', name: 'void-field label or aria-label / aria-labelledby on the host (moved onto it), on the native select', state: ['value (property only: the attribute is the initial value and is not updated)', 'native select value'], gaps: ['the current value is not reflected to an attribute: [value=...] selectors and attribute assertions see the initial value only'] },
+  'void-select': { role: 'inner', name: 'void-field label or aria-label / aria-labelledby on the host (moved onto it), on the native select written inside it', state: ['value (property only: the attribute is the initial value and is not updated)', 'native select value and :checked option'], gaps: ['the current value is not reflected to an attribute: [value=...] selectors and attribute assertions see the initial value only'] },
   'void-sidebar': {
     role: 'navigation',
     name: 'fixed "Sidebar navigation" unless aria-label is set',

@@ -419,7 +419,7 @@ To leave a subtree completely alone (Turbo neither morphs nor replaces it), give
 <div id="player" data-turbo-permanent>…</div>
 ```
 
-A `<void-select>` with thousands of options costs as much to morph as a plain `<select>` of that size, a second or more: that is Turbo diffing every option. For very large option lists give the field an id and `data-turbo-permanent`, or use `<void-combobox>`, which renders only the options that match what was typed.
+A `<void-select>` with thousands of options costs as much to morph as the plain `<select>` it wraps, a second or more: that is Turbo diffing every option. For very large option lists give the field an id and `data-turbo-permanent`, or use `<void-combobox>`, which renders only the options that match what was typed.
 
 ## Usage in ERB templates
 

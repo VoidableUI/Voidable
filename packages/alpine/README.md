@@ -62,9 +62,11 @@ Server-side attribute changes to a preserved element are ignored too, so use it
 for elements the client fully owns:
 
 ```html
-<void-select x-void-preserve wire:model="status">
-  <option value="active">Active</option>
-  <option value="inactive">Inactive</option>
+<void-select x-void-preserve aria-label="Status">
+  <select wire:model="status">
+    <option value="active">Active</option>
+    <option value="inactive">Inactive</option>
+  </select>
 </void-select>
 ```
 
@@ -83,13 +85,12 @@ Dispatch a custom event to a Voidable component from an Alpine expression:
 
 ```blade
 <div x-data="{ selected: @entangle('selected') }">
-  <void-select
-    x-void-on:void-change="selected = $event.detail.value"
-    x-void-preserve
-  >
-    @foreach($options as $option)
-      <option value="{{ $option->id }}">{{ $option->name }}</option>
-    @endforeach
+  <void-select aria-label="Option" x-void-on:void-change="selected = $event.detail.value">
+    <select>
+      @foreach($options as $option)
+        <option value="{{ $option->id }}">{{ $option->name }}</option>
+      @endforeach
+    </select>
   </void-select>
 </div>
 ```

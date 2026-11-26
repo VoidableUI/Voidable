@@ -903,10 +903,12 @@ defmodule DemoWeb.StaticShowcases do
       <h3>With Select</h3>
       <VoidableUI.Components.field label="Country" helper="Select your country of residence">
         <VoidableUI.Components.select>
-          <option value="">Choose...</option>
-          <option value="us">United States</option>
-          <option value="uk">United Kingdom</option>
-          <option value="ca">Canada</option>
+          <select>
+            <option value="">Choose...</option>
+            <option value="us">United States</option>
+            <option value="uk">United Kingdom</option>
+            <option value="ca">Canada</option>
+          </select>
         </VoidableUI.Components.select>
       </VoidableUI.Components.field>
     </div>

@@ -24,10 +24,13 @@
             <void-textarea id="i-bio" name="user[bio]" x-void-on:void-input="$wire.set('user.bio', $event.detail.value)" value="{{ $user['bio'] }}"></void-textarea>
         </void-field>
         <void-field label="Country">
-            <void-select id="i-country" name="user[country]" placeholder="Choose…" x-void-on:void-change="$wire.set('user.country', $event.detail.value)" value="{{ $user['country'] }}">
-                <option value="nz">New Zealand ({{ $ticks }})</option>
-                <option value="au">Australia</option>
-                <option value="fj">Fiji</option>
+            <void-select id="i-country" x-void-on:void-change="$wire.set('user.country', $event.detail.value)" value="{{ $user['country'] }}">
+                <select name="user[country]">
+                    <option value="" disabled selected hidden>Choose…</option>
+                    <option value="nz">New Zealand ({{ $ticks }})</option>
+                    <option value="au">Australia</option>
+                    <option value="fj">Fiji</option>
+                </select>
             </void-select>
         </void-field>
         <void-checkbox id="i-remember" name="user[remember_me]" value="1" x-void-on:void-change="$wire.set('user.remember_me', $event.detail.checked)" @checked($user['remember_me'])>Remember me</void-checkbox>
@@ -51,16 +54,20 @@
         </void-field>
         <void-field label="Framework">
             <void-combobox id="i-fw" name="user[framework]" placeholder="Pick" x-void-on:void-change="$wire.set('user.framework', $event.detail.value)" value="{{ $user['framework'] }}">
-                <void-option value="react">React</void-option>
-                <void-option value="vue">Vue</void-option>
-                <void-option value="lit">Lit</void-option>
+                <void-combobox-content>
+                    <void-option value="react">React</void-option>
+                    <void-option value="vue">Vue</void-option>
+                    <void-option value="lit">Lit</void-option>
+                </void-combobox-content>
             </void-combobox>
         </void-field>
         <void-field label="Skills">
             <void-multiselect id="i-skills" name="user[skills][]" placeholder="Pick many" x-void-on:void-change="$wire.set('user.skills', $event.detail.values)">
-                <void-option value="css" @selected(in_array('css', $user['skills']))>CSS</void-option>
-                <void-option value="js" @selected(in_array('js', $user['skills']))>JS</void-option>
-                <void-option value="html" @selected(in_array('html', $user['skills']))>HTML</void-option>
+                <void-multiselect-content>
+                    <void-option value="css" @selected(in_array('css', $user['skills']))>CSS</void-option>
+                    <void-option value="js" @selected(in_array('js', $user['skills']))>JS</void-option>
+                    <void-option value="html" @selected(in_array('html', $user['skills']))>HTML</void-option>
+                </void-multiselect-content>
             </void-multiselect>
         </void-field>
         <div style="display: flex; gap: 1rem">
@@ -106,10 +113,12 @@
     <section style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap">
         <void-button id="bridge-btn" variant="filled" data-name="bridge"
             x-void-on:void-click="$wire.logEvent('void-click', {id: $el.id, name: $el.dataset.name, detail: $event.detail ?? {}})">Bridge button</void-button>
-        <void-select aria-label="Bridge select" id="bridge-select" name="bridge_select" placeholder="Bridge select"
-            x-void-on:void-change="$wire.logEvent('void-change', {id: $el.id, name: $el.getAttribute('name'), detail: $event.detail})">
-            <option value="a">A</option>
-            <option value="b">B</option>
+        <void-select aria-label="Bridge select" id="bridge-select" x-void-on:void-change="$wire.logEvent('void-change', {id: $el.id, name: $el.querySelector('select').name, detail: $event.detail})">
+            <select name="bridge_select">
+                <option value="" disabled selected hidden>Bridge select</option>
+                <option value="a">A</option>
+                <option value="b">B</option>
+            </select>
         </void-select>
         <void-checkbox id="bridge-check" name="bridge_check" value="1"
             x-void-on:void-change="$wire.logEvent('void-change', {id: $el.id, name: $el.getAttribute('name'), detail: $event.detail})">Bridge check</void-checkbox>

@@ -20,10 +20,11 @@ Pattern: select-only combobox with a multiselectable listbox. The trigger is the
 |-----|--------|
 | Enter / Space / Down Arrow / Up Arrow | Open the list |
 | Home / End | Open on the first / last option; when open, highlight it |
-| Down Arrow / Up Arrow (open) | Highlight the next / previous option (wraps) |
+| Down Arrow / Up Arrow (open) | Highlight the next / previous option; stops at the ends |
+| Page Down / Page Up (open) | Move the highlight ten options |
 | Enter / Space (open) | Toggle the highlighted option; the list stays open |
 | Characters (open) | Jump to the next option starting with them |
-| Escape / Tab | Close the list |`,
+| Alt + Up Arrow / Escape / Tab | Close the list |`,
       },
     },
   },
@@ -41,12 +42,14 @@ export const Default: Story = {
       error=${args.error || ''}
       placeholder=${args.placeholder || 'Select frameworks...'}
     >
-      <void-option value="react">React</void-option>
-      <void-option value="vue">Vue</void-option>
-      <void-option value="svelte">Svelte</void-option>
-      <void-option value="angular">Angular</void-option>
-      <void-option value="solid">Solid</void-option>
-      <void-option value="lit">Lit</void-option>
+      <void-multiselect-content>
+        <void-option value="react">React</void-option>
+        <void-option value="vue">Vue</void-option>
+        <void-option value="svelte">Svelte</void-option>
+        <void-option value="angular">Angular</void-option>
+        <void-option value="solid">Solid</void-option>
+        <void-option value="lit">Lit</void-option>
+      </void-multiselect-content>
     </void-multiselect>
   `,
 };
@@ -54,12 +57,14 @@ export const Default: Story = {
 export const Preselected: Story = {
   render: () => html`
     <void-multiselect placeholder="Select frameworks...">
-      <void-option value="react" selected>React</void-option>
-      <void-option value="vue" selected>Vue</void-option>
-      <void-option value="svelte" selected>Svelte</void-option>
-      <void-option value="angular">Angular</void-option>
-      <void-option value="solid">Solid</void-option>
-      <void-option value="lit">Lit</void-option>
+      <void-multiselect-content>
+        <void-option value="react" selected>React</void-option>
+        <void-option value="vue" selected>Vue</void-option>
+        <void-option value="svelte" selected>Svelte</void-option>
+        <void-option value="angular">Angular</void-option>
+        <void-option value="solid">Solid</void-option>
+        <void-option value="lit">Lit</void-option>
+      </void-multiselect-content>
     </void-multiselect>
   `,
 };
@@ -68,16 +73,22 @@ export const Sizes: Story = {
   render: () => html`
     <div style="display: flex; flex-direction: column; gap: 12px; max-width: 400px;">
       <void-multiselect size="sm" placeholder="Small">
-        <void-option value="a">Option A</void-option>
-        <void-option value="b">Option B</void-option>
+        <void-multiselect-content>
+          <void-option value="a">Option A</void-option>
+          <void-option value="b">Option B</void-option>
+        </void-multiselect-content>
       </void-multiselect>
       <void-multiselect size="md" placeholder="Medium">
-        <void-option value="a">Option A</void-option>
-        <void-option value="b">Option B</void-option>
+        <void-multiselect-content>
+          <void-option value="a">Option A</void-option>
+          <void-option value="b">Option B</void-option>
+        </void-multiselect-content>
       </void-multiselect>
       <void-multiselect size="lg" placeholder="Large">
-        <void-option value="a">Option A</void-option>
-        <void-option value="b">Option B</void-option>
+        <void-multiselect-content>
+          <void-option value="a">Option A</void-option>
+          <void-option value="b">Option B</void-option>
+        </void-multiselect-content>
       </void-multiselect>
     </div>
   `,
@@ -86,9 +97,11 @@ export const Sizes: Story = {
 export const WithError: Story = {
   render: () => html`
     <void-multiselect error="Please select at least one option" placeholder="Select frameworks...">
-      <void-option value="react">React</void-option>
-      <void-option value="vue">Vue</void-option>
-      <void-option value="svelte">Svelte</void-option>
+      <void-multiselect-content>
+        <void-option value="react">React</void-option>
+        <void-option value="vue">Vue</void-option>
+        <void-option value="svelte">Svelte</void-option>
+      </void-multiselect-content>
     </void-multiselect>
   `,
 };
@@ -96,9 +109,11 @@ export const WithError: Story = {
 export const Disabled: Story = {
   render: () => html`
     <void-multiselect disabled placeholder="Select frameworks...">
-      <void-option value="react">React</void-option>
-      <void-option value="vue">Vue</void-option>
-      <void-option value="svelte">Svelte</void-option>
+      <void-multiselect-content>
+        <void-option value="react">React</void-option>
+        <void-option value="vue">Vue</void-option>
+        <void-option value="svelte">Svelte</void-option>
+      </void-multiselect-content>
     </void-multiselect>
   `,
 };
@@ -106,10 +121,12 @@ export const Disabled: Story = {
 export const DisabledOption: Story = {
   render: () => html`
     <void-multiselect placeholder="Select skills...">
-      <void-option value="css">CSS</void-option>
-      <void-option value="js">JavaScript</void-option>
-      <void-option value="go" disabled>Go (unavailable)</void-option>
-      <void-option value="rust">Rust</void-option>
+      <void-multiselect-content>
+        <void-option value="css">CSS</void-option>
+        <void-option value="js">JavaScript</void-option>
+        <void-option value="go" disabled>Go (unavailable)</void-option>
+        <void-option value="rust">Rust</void-option>
+      </void-multiselect-content>
     </void-multiselect>
   `,
 };

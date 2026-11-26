@@ -17,7 +17,7 @@ None of this gates a release: the workflow is its own file, has no `workflow_cal
 | File | Role |
 |---|---|
 | `facts.ts` | The vocabulary: `Fact` (role, name, states, value, position...), `Step` (`reach`, `act`, `press`, `type`, `hear`, `walk`, `cell`, `focus`, `check`), `Scenario`. No Guidepup imports. |
-| `scenarios.ts`, `scenarios-pickers.ts` | The scenarios. Select, combobox and multiselect are apart because their markup is being redesigned (see below). |
+| `scenarios.ts`, `scenarios-pickers.ts` | The scenarios. Select, combobox and multiselect have their own file (see below). |
 | `words.ts` | Turns a `Fact` into loose speech expectations: the vocabulary tables (role words, state words) live only here. |
 | `tree.ts` | Replays steps against the accessibility tree. |
 | `runner.ts`, `readers.ts`, `suite.ts` | Replays steps with Guidepup: a search for each element, marks into the spoken log, a transcript per step. |
@@ -70,7 +70,7 @@ VOID_SR_BROWSER=chromium mise run test:screen-readers   # another browser (macOS
 
 ## Select, combobox and multiselect
 
-Their markup is being redesigned on another branch (AGENTS.md "Explicit parts (#52)", the "To convert" and "Open" rows of `docs/src/content/docs/guides/composition.mdx`). Their scenarios, tree spec and page are kept apart (`scenarios-pickers.ts`, `specs/screen-reader-tree-pickers.spec.ts`, `specs/pickers.spec.ts`, `pages/sr-pickers.html`) so that updating them touches only those files.
+They use their explicit-parts markup (#52; the "Pickers" section of `docs/src/content/docs/guides/composition.mdx`): a native `<select>` inside `<void-select>`, and the options in `<void-combobox-content>` and `<void-multiselect-content>`. A combobox's highlighted option is its `aria-activedescendant` and is not selected; `aria-selected` marks the chosen one. Their scenarios, tree spec and page stay in their own files (`scenarios-pickers.ts`, `specs/screen-reader-tree-pickers.spec.ts`, `specs/pickers.spec.ts`, `pages/sr-pickers.html`).
 
 ## Results and the accessibility statement
 

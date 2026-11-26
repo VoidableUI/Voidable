@@ -9,7 +9,7 @@ Components are built on the platform: native controls where there is one, ARIA r
 
 ## What you get
 
-- **Native controls underneath.** `<void-input>`, `<void-textarea>`, `<void-select>`, `<void-slider>`, `<void-checkbox>` and `<void-radio>` render a real `<input>`, `<textarea>` or `<select>`. Focus, selection, autofill, the on-screen keyboard and screen-reader behaviour are the browser's.
+- **Native controls underneath.** `<void-input>`, `<void-textarea>`, `<void-slider>`, `<void-checkbox>` and `<void-radio>` render a real `<input>` or `<textarea>`, and `<void-select>` enhances the real `<select>` you write inside it. Focus, selection, autofill, the on-screen keyboard and screen-reader behaviour are the browser's.
 - **Roles and states on the element.** A `<void-switch>` is `role="switch"` with `aria-checked`, a `<void-dialog>` renders a native `<dialog>` opened with `showModal()` (the browser exposes it as a modal dialog and makes the page behind it inert), a `<void-progress>` is `role="progressbar"` with `aria-valuenow`. The role, name source and state handles of every component are in the table below and on its page.
 - **Keyboard support.** Interactive components handle the keys their pattern calls for. The keys are listed on the [keyboard page](/components/keyboard/) and in each component's page.
 - **Labels and errors wired for you.** A `<void-field>` names the control inside it (`for` on a native control, `aria-labelledby` otherwise), describes it with the helper text, and while `error` is set marks it `aria-invalid` and describes it with the message.

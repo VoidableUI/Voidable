@@ -37,6 +37,7 @@ import {
   checkDefined,
   checkEvent,
   checkName,
+  checkNative,
   checkParent,
   checkParts,
   checkRemoved,
@@ -193,6 +194,7 @@ async function flushDeferred(): Promise<void> {
     report(checkParent(table, el));
     for (const w of checkRequired(table, el)) report(w);
     for (const w of checkParts(table, el)) report(w);
+    report(checkNative(table, el));
     report(checkControl(table, el));
     report(checkName(table, el));
   }
@@ -281,6 +283,7 @@ export function check(root: ParentNode & Node = document): DevWarning[] {
       checkParent(table, el),
       ...checkRequired(table, el),
       ...checkParts(table, el),
+      checkNative(table, el),
       checkControl(table, el),
       checkName(table, el),
     ]) {

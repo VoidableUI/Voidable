@@ -1,7 +1,9 @@
 <void-checkbox id="item-check-<%= n %>" name="item[<%= n %>]" value="1"><%= local_assigns[:label] || "Item" %> <%= n %></void-checkbox>
-<void-select aria-label="Choose an option" id="item-select-<%= n %>" name="pick[<%= n %>]" value="b">
-  <option value="a">Option a</option>
-  <option value="b">Option b</option>
-  <option value="c">Option c</option>
+<void-select aria-label="Choose an option" id="item-select-<%= n %>" value="b">
+  <select name="pick[<%= n %>]">
+    <option value="a">Option a</option>
+    <option value="b">Option b</option>
+    <option value="c">Option c</option>
+  </select>
 </void-select>
 <void-button id="item-button-<%= n %>" variant="filled" size="sm" onclick="this.dataset.clicked = (+this.dataset.clicked || 0) + 1">Click <%= n %></void-button>

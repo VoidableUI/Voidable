@@ -31,7 +31,7 @@ afterEach(() => {
 });
 
 const CASES: [string, string, string][] = [
-  ['void-select', '<option value="a">A</option>', 'select'],
+  ['void-select', '<select><option value="a">A</option></select>', 'select'],
   ['void-input', '', 'input'],
   ['void-textarea', '', 'textarea'],
   ['void-number-input', '', 'input[role=spinbutton]'],

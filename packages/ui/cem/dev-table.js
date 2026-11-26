@@ -23,6 +23,7 @@
 //        children (the implicit form it replaced); n the parts, each
 //        { t tag, r required, x max, c wraps one control }
 //   c  1 for a CSS-only part (styled by the theme, never registered)
+//   v  the native control the author writes inside it, from voidNative: { tag, fix }
 // Also exported: `removed`, tags that were replaced by parts, with the fix.
 // Also exported: `styled`, the tags of the CSS-only elements (the page patterns
 // and the media surface). @voidable/theme styles them and nothing registers
@@ -103,6 +104,7 @@ for (const mod of manifest.modules) {
       if (n.parts?.length) entry.n.t = n.parts;
       if (n.ancestors?.length) entry.n.p = n.ancestors.map((x) => [x.tag, ...(x.attributes ?? [])]);
     }
+    if (decl.voidNative) entry.v = { tag: decl.voidNative.tag, fix: decl.voidNative.fix };
     tags[decl.tagName] = entry;
     if (decl.voidParts) {
       entry.q = partsEntry(decl.voidParts, decl.voidParts.skeleton);

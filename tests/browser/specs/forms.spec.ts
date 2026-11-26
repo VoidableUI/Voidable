@@ -241,7 +241,7 @@ test.describe('auto-submit on void-change', () => {
 const CONTROLS: { tag: string; html: string; set: string; expect: Entries }[] = [
   { tag: 'void-input', html: '<void-input name="f"></void-input>', set: 'el.value = "x"', expect: [['f', 'x']] },
   { tag: 'void-textarea', html: '<void-textarea name="f"></void-textarea>', set: 'el.value = "x"', expect: [['f', 'x']] },
-  { tag: 'void-select', html: '<void-select name="f"><option value="a">A</option><option value="b">B</option></void-select>', set: 'el.value = "b"', expect: [['f', 'b']] },
+  { tag: 'void-select', html: '<void-select><select name="f"><option value="a">A</option><option value="b">B</option></select></void-select>', set: 'el.value = "b"', expect: [['f', 'b']] },
   { tag: 'void-checkbox', html: '<void-checkbox name="f" value="on1">C</void-checkbox>', set: 'el.checked = true', expect: [['f', 'on1']] },
   { tag: 'void-switch', html: '<void-switch name="f" value="on1">S</void-switch>', set: 'el.checked = true', expect: [['f', 'on1']] },
   { tag: 'void-checkbox-group', html: '<void-checkbox-group name="f" label="G"><void-checkbox value="a">A</void-checkbox><void-checkbox value="b">B</void-checkbox></void-checkbox-group>', set: 'el.value = ["b"]', expect: [['f', 'b']] },
@@ -255,8 +255,8 @@ const CONTROLS: { tag: string; html: string; set: string; expect: Entries }[] = 
   { tag: 'void-color-picker', html: '<void-color-picker name="f" value="#000000"></void-color-picker>', set: 'el.value = "#abcdef"', expect: [['f', '#abcdef']] },
   { tag: 'void-toggle-group', html: '<void-toggle-group name="f" multiple aria-label="T"><void-toggle value="a">A</void-toggle><void-toggle value="b">B</void-toggle></void-toggle-group>', set: 'el.value = "a,b"', expect: [['f', 'a'], ['f', 'b']] },
   { tag: 'void-segmented-control', html: '<void-segmented-control name="f" value="a" aria-label="S"><void-segmented-control-item value="a">A</void-segmented-control-item><void-segmented-control-item value="b">B</void-segmented-control-item></void-segmented-control>', set: 'el.value = "b"', expect: [['f', 'b']] },
-  { tag: 'void-combobox', html: '<void-combobox name="f"><void-option value="a">A</void-option><void-option value="b">B</void-option></void-combobox>', set: 'el.value = "b"', expect: [['f', 'b']] },
-  { tag: 'void-multiselect', html: '<void-multiselect name="f"><void-option value="a">A</void-option><void-option value="b">B</void-option></void-multiselect>', set: 'el.value = ["a", "b"]', expect: [['f', 'a'], ['f', 'b']] },
+  { tag: 'void-combobox', html: '<void-combobox name="f"><void-combobox-content><void-option value="a">A</void-option><void-option value="b">B</void-option></void-combobox-content></void-combobox>', set: 'el.value = "b"', expect: [['f', 'b']] },
+  { tag: 'void-multiselect', html: '<void-multiselect name="f"><void-multiselect-content><void-option value="a">A</void-option><void-option value="b">B</void-option></void-multiselect-content></void-multiselect>', set: 'el.value = ["a", "b"]', expect: [['f', 'a'], ['f', 'b']] },
   { tag: 'void-editable', html: '<void-editable name="f" value="a"></void-editable>', set: 'el.value = "b"', expect: [['f', 'b']] },
   { tag: 'void-action-input', html: '<void-action-input name="f" action-label="Go"></void-action-input>', set: 'el.value = "x"', expect: [['f', 'x']] },
 ];
@@ -302,7 +302,7 @@ test.describe('required controls block submission until filled', () => {
   const REQUIRED = [
     ...CONTROLS.filter((c) => !['void-slider', 'void-color-picker', 'void-segmented-control', 'void-editable', 'void-calendar'].includes(c.tag)).map((c) =>
       // A select without a placeholder selects its first option, which is valid, as a native select does.
-      c.tag === 'void-select' ? { ...c, html: c.html.replace('<void-select name="f"', '<void-select name="f" placeholder="Pick"') }
+      c.tag === 'void-select' ? { ...c, html: c.html.replace('<select name="f">', '<select name="f"><option value="" disabled selected hidden>Pick</option>') }
         // A number-input without a value is empty.
         : c.tag === 'void-number-input' ? { ...c, html: '<void-number-input name="f"></void-number-input>' }
           : c,

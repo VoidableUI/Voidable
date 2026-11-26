@@ -4,7 +4,7 @@
     <void-field label="Full name"><void-input id="i-name" name="user[name]"></void-input></void-field>
     <void-field label="Email"><void-input id="i-email" type="email" name="user[email]"></void-input></void-field>
     <void-field label="Bio"><void-textarea id="i-bio" name="user[bio]"></void-textarea></void-field>
-    <void-field label="Country"><void-select id="i-country" name="user[country]" placeholder="Choose…"><option value="nz">New Zealand</option><option value="au">Australia</option><option value="fj">Fiji</option></void-select></void-field>
+    <void-field label="Country"><void-select id="i-country"><select name="user[country]"><option value="" disabled selected hidden>Choose…</option><option value="nz">New Zealand</option><option value="au">Australia</option><option value="fj">Fiji</option></select></void-select></void-field>
     <void-checkbox id="i-remember" name="user[remember_me]" value="1">Remember me</void-checkbox>
     <void-checkbox-group id="i-langs" label="Languages" name="user[langs][]"><void-checkbox value="en">English</void-checkbox><void-checkbox value="mi">Māori</void-checkbox><void-checkbox value="fr">French</void-checkbox></void-checkbox-group>
     <void-radio-group id="i-plan" label="Plan" name="user[plan]"><void-radio value="free">Free</void-radio><void-radio value="pro">Pro</void-radio><void-radio value="team">Team</void-radio></void-radio-group>
@@ -20,8 +20,8 @@
       <void-field label="Colour"><void-color-picker id="i-color" name="color" value="#ff0000" show-input></void-color-picker></void-field>
       <void-toggle-group id="i-fmt" name="fmt" multiple aria-label="Format"><void-toggle value="bold">Bold</void-toggle><void-toggle value="italic">Italic</void-toggle></void-toggle-group>
       <void-segmented-control id="i-view" name="view" value="list" aria-label="View"><void-segmented-control-item value="list">List</void-segmented-control-item><void-segmented-control-item value="grid">Grid</void-segmented-control-item></void-segmented-control>
-      <void-field label="Framework"><void-combobox id="i-fw" name="framework" placeholder="Pick"><void-option value="react">React</void-option><void-option value="vue">Vue</void-option><void-option value="lit">Lit</void-option></void-combobox></void-field>
-      <void-field label="Skills"><void-multiselect id="i-skills" name="skills" placeholder="Pick many"><void-option value="css">CSS</void-option><void-option value="js">JS</void-option><void-option value="html">HTML</void-option></void-multiselect></void-field>
+      <void-field label="Framework"><void-combobox id="i-fw" name="framework" placeholder="Pick"><void-combobox-content><void-option value="react">React</void-option><void-option value="vue">Vue</void-option><void-option value="lit">Lit</void-option></void-combobox-content></void-combobox></void-field>
+      <void-field label="Skills"><void-multiselect id="i-skills" name="skills" placeholder="Pick many"><void-multiselect-content><void-option value="css">CSS</void-option><void-option value="js">JS</void-option><void-option value="html">HTML</void-option></void-multiselect-content></void-multiselect></void-field>
       <void-editable id="i-title" name="title" value="Untitled"></void-editable>
       <void-file-upload aria-label="Document" id="i-file" name="doc"></void-file-upload>
     </fieldset>

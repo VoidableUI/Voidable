@@ -8,23 +8,27 @@
       },
       {
         "keys": "Up Arrow",
-        "action": "Opens the list on the last option, or highlights the previous option (wraps)"
+        "action": "Opens the list on the chosen option, else the last, or highlights the previous option (wraps)"
       },
       {
         "keys": "Alt + Down Arrow",
         "action": "Opens the list without highlighting an option"
       },
       {
+        "keys": "Alt + Up Arrow",
+        "action": "Closes the list; focus stays in the field"
+      },
+      {
         "keys": "Enter",
-        "action": "Chooses the highlighted option and closes the list. With no option highlighted the key is left alone, so a surrounding form submits"
+        "action": "Chooses the highlighted option and closes the list. With no option highlighted the list closes and the key is left alone, so a surrounding form submits"
       },
       {
         "keys": "Escape",
         "action": "Closes the list (a second Escape reaches an enclosing dialog)"
       },
       {
-        "keys": "Home, End",
-        "action": "Move the text cursor"
+        "keys": "Left Arrow, Right Arrow, Home, End",
+        "action": "Move the text cursor; the highlight leaves the list"
       },
       {
         "keys": "Tab",
@@ -40,16 +44,28 @@
     "intro": "Pattern: [select-only combobox](https://www.w3.org/WAI/ARIA/apg/patterns/combobox/examples/combobox-select-only/) with a [multiselectable listbox](https://www.w3.org/WAI/ARIA/apg/patterns/listbox/) popup. The trigger is the `combobox` (focusable, `aria-haspopup=\"listbox\"`, `aria-expanded`); the list is `aria-multiselectable` and the list stays open while options are toggled. The remove buttons on the selected pills are for the pointer; from the keyboard, toggle the option in the list.",
     "rows": [
       {
-        "keys": "Enter, Space, Down Arrow, Up Arrow",
+        "keys": "Enter, Space, Down Arrow",
         "action": "Open the list, highlighting the first selected option, else the first"
       },
       {
-        "keys": "Home, End",
-        "action": "Open the list on the first or last option"
+        "keys": "Up Arrow, Home",
+        "action": "Open the list on the first option"
+      },
+      {
+        "keys": "End",
+        "action": "Open the list on the last option"
+      },
+      {
+        "keys": "Characters",
+        "action": "Open the list on the next option that starts with the typed text"
       },
       {
         "keys": "Down Arrow, Up Arrow (open)",
-        "action": "Highlight the next or previous option (wraps)"
+        "action": "Highlight the next or previous option; stops at the ends"
+      },
+      {
+        "keys": "Page Down, Page Up (open)",
+        "action": "Move the highlight ten options"
       },
       {
         "keys": "Home, End (open)",
@@ -64,8 +80,8 @@
         "action": "Jump to the next option that starts with the typed text"
       },
       {
-        "keys": "Escape",
-        "action": "Closes the list (a second Escape reaches an enclosing dialog)"
+        "keys": "Alt + Up Arrow, Escape",
+        "action": "Close the list (a second Escape reaches an enclosing dialog)"
       },
       {
         "keys": "Tab",

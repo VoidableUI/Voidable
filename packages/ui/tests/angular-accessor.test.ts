@@ -49,11 +49,12 @@ describe('VoidValueAccessor', () => {
   it('claims a selector for every form control and for nothing else', () => {
     expect(tags.length).toBeGreaterThanOrEqual(15);
     for (const tag of tags) expect(customElements.get(tag), `${tag} is not a registered element`).toBeTruthy();
-    for (const tag of ['void-input', 'void-select', 'void-checkbox', 'void-switch', 'void-number-input', 'void-multiselect']) {
+    for (const tag of ['void-input', 'void-checkbox', 'void-switch', 'void-number-input', 'void-multiselect', 'void-combobox']) {
       expect(tags).toContain(tag);
     }
-    // Not form controls, or driven by a group instead.
-    for (const tag of ['void-button', 'void-radio', 'void-tabs', 'void-carousel', 'void-pagination']) {
+    // Not form controls, or driven by a group instead. void-select wraps a native <select> (#52):
+    // Angular's own SelectControlValueAccessor binds that select.
+    for (const tag of ['void-button', 'void-radio', 'void-tabs', 'void-carousel', 'void-pagination', 'void-select']) {
       expect(tags).not.toContain(tag);
     }
     for (const kind of ['ngModel', 'formControl', 'formControlName']) {
@@ -90,20 +91,8 @@ describe('VoidValueAccessor', () => {
     expect(onChange).toHaveBeenLastCalledWith(true);
   });
 
-  it('select: writes the value and reports a choice', async () => {
-    const { el, accessor, onChange } = await mount(
-      '<void-select><option value="a">A</option><option value="b">B</option></void-select>',
-    );
-    accessor.writeValue('b');
-    expect(el.value).toBe('b');
-    const select = el.querySelector('select') as HTMLSelectElement;
-    select.value = 'a';
-    select.dispatchEvent(new Event('change', { bubbles: true }));
-    expect(onChange).toHaveBeenLastCalledWith('a');
-  });
-
   it('array-valued control: the multiselect value is the `values` of its event', async () => {
-    const { el, accessor } = await mount('<void-multiselect><void-option value="a">A</void-option><void-option value="b">B</void-option></void-multiselect>');
+    const { el, accessor } = await mount('<void-multiselect><void-multiselect-content><void-option value="a">A</void-option><void-option value="b">B</void-option></void-multiselect-content></void-multiselect>');
     accessor.writeValue(['a', 'b']);
     expect(el.value).toEqual(['a', 'b']);
     accessor.writeValue(null);

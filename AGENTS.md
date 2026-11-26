@@ -361,7 +361,6 @@ Remaining components, in the order to convert them (grouping and open questions 
 
 1. **Fields**: field, checkbox-group, radio-group, then checkbox and radio (label, description, error parts; the `label`/`helper`/`error` attributes are used everywhere, so this group needs an owner decision first).
 2. **Generated internals**: tag, scroll-area (no parts; the owner's rule is that nothing but dialog and drawer has a shadow root, so their remove button and viewport are to be settled as author-written parts like the notices' `-close`, or as light-DOM content the component keeps rendering; an owner decision).
-3. **Pickers**: combobox, multiselect, option, select (the content part for options; select's native options are open).
 
 ### CSS Selector Strategy
 

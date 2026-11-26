@@ -69,6 +69,65 @@ An alert, a banner and a toast can be dismissed, and the control that does it is
 
 Pressing the control fires `void-close` (it bubbles and cannot be cancelled) and removes the element. Without a `-close` part there is no control, so the element cannot be dismissed (a toast still closes itself after its `duration`). The component renders no button of its own, and no shadow root, so the page, the framework and a server morph all see the control as ordinary markup. If focus was inside the element when it closed, it moves to the next focusable element after it (or the last one before it), so keyboard users are not sent back to the top of the page.
 
+## Pickers
+
+The three pickers were converted together, because they share the option element and the same question: who renders the control the user types in or presses.
+
+```html
+<void-field label="Plan">
+  <void-select>
+    <select name="plan" required>
+      <option value="" disabled selected hidden>Choose a plan</option>
+      <option value="free">Free</option>
+      <option value="pro">Pro</option>
+    </select>
+  </void-select>
+</void-field>
+
+<void-field label="Country">
+  <void-combobox name="country" placeholder="Search countries">
+    <void-combobox-content>
+      <void-option value="de">Germany</void-option>
+      <void-option value="fr" selected>France</void-option>
+    </void-combobox-content>
+  </void-combobox>
+</void-field>
+
+<void-field label="Labels">
+  <void-multiselect name="labels" placeholder="Pick labels">
+    <void-multiselect-content>
+      <void-option value="bug">Bug</void-option>
+      <void-option value="docs" selected>Docs</void-option>
+    </void-multiselect-content>
+  </void-multiselect>
+</void-field>
+```
+
+### Select: the native control, enhanced in place
+
+`<void-select>` used to move the options into a `<select>` it rendered itself. Now you write the `<select>`: it carries `name`, `required`, `disabled`, `multiple` and `autocomplete`, and it is the form control, so submission, validation, reset, `<fieldset disabled>` and autofill are the browser's own and work before the script loads. A prompt is an ordinary first option, `<option value="" disabled selected hidden>`. The component names the select from its field, marks it invalid from `error`, styles it, and keeps `value`, `size`, `error` and the `void-change` event. A `value` attribute on the host is still the initial choice and the reset target, so the [state rule](/guides/server-rendered/) is unchanged. Where the browser supports the customizable select (`appearance: base-select`, Chromium today), the theme styles its picker as a float surface; elsewhere the native picker opens. There is no custom listbox. React, Vue, Svelte, Solid and Angular bind the native select directly (`value`/`onChange`, `v-model`, `bind:value`, `[(ngModel)]`).
+
+### Combobox and multiselect: the content part
+
+The option list is a part you write, `<void-combobox-content>` or `<void-multiselect-content>`, holding `<void-option>` elements. The component renders the input (combobox) or the trigger with its chips (multiselect) before it, as chrome. The content becomes the `role="listbox"` popup in the top layer, each option gets `role="option"` and an id, `aria-activedescendant` on the input points at the highlighted option (which also gets `active`), and `aria-selected="true"` marks the chosen ones. Filtering sets `hidden` on options that do not match and `empty` on the content when none does. No option is moved or copied.
+
+### One option element
+
+`<void-option>` takes `value`, `selected`, `disabled` and `label`. Its children are what the list shows, and may be rich (an avatar, a secondary line); `label` is the plain text shown in the input or chip once chosen, and defaults to the text content. Groups are not offered yet: a group would be a third level, and it waits for a need.
+
+### What was considered
+
+| | (a) content part, rendered input | (b) author-written native `<input>` | (c) keep the projection |
+|---|---|---|---|
+| Nodes never moved | Yes | Yes | No: options are moved into a rendered list |
+| Typing through morphs (60 keys, a morph after each) | 0 lost under Turbo, morphdom and Alpine | 60 of 60 lost under Turbo and morphdom: the morph writes the server's `value` onto the input | 0 lost |
+| Forms | Form-associated host | Native | Form-associated host |
+| Layout shift on upgrade | None (pre-upgrade CSS hides the content) | None | None (options hidden until moved) |
+| Guessable markup | Same shape as the dropdown menu | Needs an `<input>` with the right attributes | Options straight inside |
+| Size of markup | One wrapper | One wrapper and an input | Smallest |
+
+(a) was chosen. For the select, the same comparison favoured the native control: it is the most guessable markup there is, it works before the script, and a morph of the server's `<select>` is the native morph every server framework already handles. The measurements (Chromium, 5,000 options, medians of seven runs) were 30 to 60 ms for a first render of the select, against 115 to 195 ms for the projection; about 90 ms for the combobox and 85 ms for the multiselect, against 200 to 270 ms; and about 130 ms for a Turbo morph of either, against about 2 s. Two costs were found and avoided: writing `aria-selected="false"` on every option costs Chromium's accessibility tree about 5 s at 5,000 options, so only the chosen options carry the attribute; and a morph library resets a native select's selection when it syncs the options, so the component keeps the user's choice when the server did not change the selection, the `value` attribute or the options' `selected`.
+
 ## Frameworks and morphs
 
 Parts are ordinary children, so every framework renders them directly. React has wrappers for them next to the components (`DialogTitle`, `TabsTrigger`, `PopoverContent` and the rest, generated from the manifest). Vue, Svelte, Solid, Angular, ERB, HEEx and Blade write the tags as they are. A part can arrive late, be reordered, re-keyed or removed, including while the overlay is open or the user is typing in it: the component looks its parts up when something changes and rewires them.
@@ -96,8 +155,11 @@ The machine-readable form of this table is the `voidParts` entry of each compone
 | `<void-banner>` | `-title`, `-description` (required), `-actions`, `-close` (one control) | Without `-close` it cannot be dismissed. |
 | `<void-toast>` | `-title`, `-description` (required), `-actions`, `-close` (one control) | `toast()` writes the same parts. |
 | `<void-error-fallback>` | `-title`, `-description`, `-actions` | Write none and the component writes its default from `heading`, `message` and `retryable`; any part replaces it. |
+| `<void-combobox>` | `-content` (required) holding `<void-option>`s | The input is rendered by the component, before the content. |
+| `<void-multiselect>` | `-content` (required) holding `<void-option>`s | The trigger and its chips are rendered by the component. |
+| `<void-select>` | A native `<select>` (required), with native `<option>`s | No parts: the native control is enhanced in place. |
 
-Every part above except the dropdown menu item and the accordion item is CSS-only.
+Every part above except the dropdown menu item, the accordion item and `<void-option>` is CSS-only.
 
 ### Inventory
 
@@ -127,8 +189,8 @@ What every component does today, and what it becomes. **Parts** components are c
 | checkbox, radio | Projects the label text after a rendered native input | No parts: label as content; the control in a shadow root | To convert (open: form association) |
 | tag | Projects the label before a rendered remove button | No parts: remove button in a shadow root, as the alert | To convert |
 | scroll-area | Projects content into a rendered viewport | No parts: viewport in a shadow root | To convert |
-| select | Moves native `<option>`s into a rendered `<select>` | No parts: keeps native options (open: customizable `<select>`) | Open |
-| combobox, multiselect, option | Projects `void-option`s after a rendered input | `void-combobox-content` / `void-multiselect-content` holding `void-option` | To convert (open) |
+| select | Native `<select>` written inside | Enhances the native `<select>` in place | Parts (no parts) |
+| combobox, multiselect, option | `-content` part holding `void-option` | `void-combobox-content` / `void-multiselect-content` holding `void-option` | Parts |
 | action-input, avatar, badge, bar-chart, button, calendar, date-picker, color-picker, compose-input, divider, donut-chart, editable, file-upload, gauge, hamburger, indicator, input, line-chart, list, list-item, number-input, pagination, pin-input, progress, segmented-control, segmented-control-item, sidebar, skeleton, slider, spinner, stat, status-dot, stepper, switch, table, tags-input, textarea, toast-container, toggle, toggle-group | Text content, attributes, or content generated from data | Unchanged | No parts |
 
 ## What to avoid
@@ -140,4 +202,4 @@ What every component does today, and what it becomes. **Parts** components are c
 
 ## Parents
 
-Some elements only work in the right container: a part only inside its component, `<void-dropdown-menu-item>` in a `<void-dropdown-menu-content>`, `<void-accordion-item>` in a `<void-accordion>`, `<void-option>` in a `<void-combobox>` or `<void-multiselect>`, and a `<void-select>` takes native `<option>` elements. Each component page lists these under **Children and placement**, from the same data that `voidable check` and the [development warnings](/getting-started/development-warnings/) use, so a wrong parent is reported in the editor, in CI and in the console.
+Some elements only work in the right container: a part only inside its component, `<void-dropdown-menu-item>` in a `<void-dropdown-menu-content>`, `<void-accordion-item>` in a `<void-accordion>`, `<void-option>` in a `<void-combobox-content>` or `<void-multiselect-content>`, and a `<void-select>` takes a native `<select>` holding native `<option>` elements. Each component page lists these under **Children and placement**, from the same data that `voidable check` and the [development warnings](/getting-started/development-warnings/) use, so a wrong parent is reported in the editor, in CI and in the console.

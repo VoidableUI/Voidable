@@ -73,11 +73,13 @@ export const Default: Story = {
 
               <void-field label="Category">
                 <void-select>
-                  <option value="">Select...</option>
-                  <option value="1">Electronics</option>
-                  <option value="2">Accessories</option>
-                  <option value="3">Premium</option>
-                  <option value="4">Misc</option>
+                  <select>
+                    <option value="">Select...</option>
+                    <option value="1">Electronics</option>
+                    <option value="2">Accessories</option>
+                    <option value="3">Premium</option>
+                    <option value="4">Misc</option>
+                  </select>
                 </void-select>
               </void-field>
 

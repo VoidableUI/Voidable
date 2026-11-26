@@ -33,14 +33,13 @@
     {{-- 4. void-select with event handling --}}
     <section class="mb-8">
         <h2 class="text-lg font-semibold mb-2">Select with event handling</h2>
-        <void-select aria-label="Choose a framework"
-            x-void-preserve
-            x-void-on:void-change="$wire.set('selectedOption', $event.detail.value)"
-            placeholder="Choose a framework..."
-        >
-            <option value="laravel">Laravel</option>
-            <option value="livewire">Livewire</option>
-            <option value="alpine">Alpine.js</option>
+        <void-select aria-label="Choose a framework" x-void-preserve x-void-on:void-change="$wire.set('selectedOption', $event.detail.value)">
+            <select>
+                <option value="" disabled selected hidden>Choose a framework...</option>
+                <option value="laravel">Laravel</option>
+                <option value="livewire">Livewire</option>
+                <option value="alpine">Alpine.js</option>
+            </select>
         </void-select>
         <p class="mt-2 text-sm text-gray-400">Selected: <span class="text-white">{{ $selectedOption }}</span></p>
     </section>

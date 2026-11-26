@@ -1,235 +1,204 @@
 import { html, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
-import { NativeFormControl } from '../form-control.js';
-import { ProjectionController } from '../projection.js';
+import { PartsController } from '../parts.js';
 
-/** Marks the placeholder `<option>` the component inserts into its native select. */
-const PLACEHOLDER_ATTR = 'data-void-placeholder';
-
-/** Native dropdown for small option sets in forms where a simple pick-one is sufficient. */
-export class VoidSelect extends NativeFormControl(VoidElement) {
+/**
+ * Native dropdown for small option sets in forms where a simple pick-one is sufficient.
+ *
+ * Wraps the author's own native `<select>` and enhances it in place: `<void-select><select name="plan"><option
+ * value="free">Free</option></select></void-select>`. The select, its options and its form attributes (`name`,
+ * `required`, `disabled`, `multiple`, `autocomplete`, `form`) are plain HTML and the final DOM, so the control
+ * submits, validates, resets and autofills as a native select does, before and after the script loads. The
+ * component styles it (`size`, `error`), names it from the host's `aria-label` or a `void-field` label, exposes
+ * `value` and `void-change`, and keeps the user's choice through server morphs the server did not change it in.
+ * A prompt is a first option with an empty value: `<option value="" disabled selected hidden>Choose a
+ * plan</option>`.
+ *
+ * @fires {CustomEvent<{ value: string }>} void-change - The user chose an option.
+ */
+export class VoidSelect extends VoidElement {
   /** The host's `aria-label` / `aria-labelledby` name the inner control. */
   static override labelTarget = 'select';
 
-  /**
-   * `value` of the chosen option. As an attribute it picks the initially selected option; read or set
-   * the `value` property for the current choice.
-   */
-  @property({ type: String }) value = '';
-  /**
-   * Stop the select opening and exclude it from the form submission. Also disabled by an enclosing
-   * `<fieldset disabled>`.
-   */
-  @property({ type: Boolean, reflect: true }) disabled = false;
-  /**
-   * The control must have a value before its form can be submitted. An empty control is invalid
-   * (`valueMissing`) and the browser reports it, as for a native field.
-   */
-  @property({ type: Boolean, reflect: true }) required = false;
-  /**
-   * Key the chosen value is submitted under in the form's `FormData`. Without a name the select submits
-   * nothing.
-   */
-  @property({ type: String, reflect: true }) name = '';
   /** Size step: `sm`, `md` (default) or `lg`. */
   @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' = 'md';
   /**
-   * Mark the select invalid: it gets the error styling and `aria-invalid`. The message itself is shown
-   * by the wrapping `void-field`, whose own `error` attribute sets this one.
+   * Mark the select invalid: it gets the error styling, `aria-invalid` and the message under it. Inside a
+   * `void-field`, set `error` on the field instead, which shows the message.
    */
   @property({ type: String, reflect: true }) error = '';
-  /**
-   * Prompt shown while nothing is chosen, such as `Choose a plan`. The element adds a hidden, disabled
-   * first option for it, so it can never be submitted; pair it with `required` to force a choice.
-   */
-  @property({ type: String, reflect: true }) placeholder = '';
 
-  // Consumer <option>/<optgroup> children are projected into the native <select>.
-  protected readonly _projection = new ProjectionController(this, {
-    regions: [{ name: 'options', target: () => this.querySelector(':scope > select') }],
-    onChange: () => this._syncOptions(),
+  /** The value the host's `value` attribute or a property set asked for, kept until an option has it. */
+  private _wanted: string | null = null;
+  /** The server's selection at its last render (`selected` options, in order), for the morph rule. */
+  private _serverSelection: string | null = null;
+  private _serverValue: string | null = null;
+  /** The user's selection, captured before a morph the server did not change it in, put back after. */
+  private _keep: string[] | null = null;
+  /** The server changed the host's `value` attribute in this morph: it wins over the options' `selected`. */
+  private _serverValueChanged = false;
+  private _form: HTMLFormElement | null = null;
+
+  protected readonly _parts = new PartsController(this, {
+    tags: ['select', 'option', 'optgroup'],
+    onChange: () => this._wire(),
   });
-  private _didSyncOptions = false;
-  /**
-   * The placeholder option. The native select is a projection container, which must
-   * hold no Lit bindings (a Lit child part there clears the projected options when it
-   * switches branches), so the placeholder is inserted and removed imperatively.
-   */
-  private _placeholderOption: HTMLOptionElement | null = null;
-  /** The value captured as the reset target, to tell whether anything has moved it since. */
-  private _defaultValue: string | undefined = undefined;
-  /** The value last seen on an option, to tell a removed selection from a value that has no option yet. */
-  private _matchedValue: string | null = null;
 
-  protected override willUpdate(changed: Map<string, unknown>): void {
-    super.willUpdate(changed);
-    if (!this.hasUpdated) {
-      // Adopt the native select's initial choice before the first render, so the
-      // reset target captured in this update is right and no second render follows.
-      if (!this.value && !this.placeholder) this.value = this._initialNativeValue();
-    } else if (changed.has('placeholder')) {
-      this._syncOptions();
-    }
+  /** The native select this component enhances. */
+  get select(): HTMLSelectElement | null {
+    return this._parts.one<HTMLSelectElement>('select');
+  }
+
+  /**
+   * `value` of the chosen option (the native select's value). As an attribute it is the initial choice, applied
+   * once an option with that value exists; without it the options' own `selected` decide, as in plain HTML.
+   * @default ''
+   */
+  @property({ type: String })
+  get value(): string {
+    const select = this.select;
+    if (this._wanted !== null && !(select && hasOption(select, this._wanted))) return this._wanted;
+    return select?.value ?? this._wanted ?? '';
+  }
+
+  set value(next: string) {
+    const old = this.value;
+    this._wanted = next === null || next === undefined ? null : String(next);
+    this._apply();
+    this.requestUpdate('value', old);
+  }
+
+  override connectedCallback(): void {
+    super.connectedCallback();
+    // Capture: the select's change reaches the host even where it does not bubble (a synthetic one).
+    this.addEventListener('change', this._onChange, true);
+  }
+
+  override disconnectedCallback(): void {
+    super.disconnectedCallback();
+    this.removeEventListener('change', this._onChange, true);
+    this._watchForm(null);
+  }
+
+  /** Writes the invalid state on the select, applies a wanted value once its option exists, follows its form. */
+  private _wire(): void {
+    const select = this.select;
+    if (!select) return;
+    this._markInvalid(select);
+    if (this._serverSelection === null) this._serverSelection = selectedAttrs(select);
+    if (this._serverValue === null) this._serverValue = this.getAttribute('value') ?? '';
+    this._apply();
+    this._watchForm(select.form);
+  }
+
+  /** Pushes the wanted value into the select (once an option has it); then the select is the truth. */
+  private _apply(): void {
+    const select = this.select;
+    if (!select || this._wanted === null || !hasOption(select, this._wanted)) return;
+    if (select.value !== this._wanted) select.value = this._wanted;
+    this._wanted = null;
   }
 
   protected override updated(changed: Map<string, unknown>): void {
     super.updated(changed);
-    if (!this._didSyncOptions) {
-      this._didSyncOptions = true;
-      this._syncOptions();
+    if (changed.has('error')) {
+      const select = this.select;
+      if (select) this._markInvalid(select);
     }
   }
 
-  /**
-   * Single sync point between the projected options and the native select. Runs
-   * after the first render, whenever options are added, removed or reordered, when
-   * the placeholder changes, and after the projection recovers from a morph or clone
-   * (a fresh native select). Keeps the placeholder option in place, adopts the native
-   * select's choice when there is no value and no placeholder, pushes the value into
-   * the native select, and, while nothing has moved the value away from the reset
-   * target, re-captures that target, so a select upgraded before the parser added its
-   * options does not keep a default captured from an empty list.
-   */
-  private _syncOptions(): void {
-    const select = this.querySelector<HTMLSelectElement>(':scope > select');
-    if (!select) return;
-    const pristine = this._defaultValue !== undefined && this.value === this._defaultValue;
-    this._syncPlaceholder(select);
-    this._reconcileRemovedSelection(select);
-    if (!this.value && !this.placeholder && select.value) {
-      this.value = select.value;
-    }
-    if (pristine) {
-      this.formCaptureDefault();
-    } else if (this._defaultValue !== undefined) {
-      // Keep the reset target on the options: a morph of the unprojected host
-      // strips `selected` attributes the server markup does not carry.
-      this.formWriteNativeDefault(this._defaultValue);
-    }
-    // Last, so toggling default-selected attributes cannot change the selection.
-    this._applyValue();
-  }
+  /** The select we last marked `aria-invalid` (a `void-field` with an error marks it too; that stays theirs). */
+  private _invalid: HTMLSelectElement | null = null;
 
-  /**
-   * When the option the value points at has been removed (the user picked it and the
-   * server, or a framework, removed it), fall back to the option the `value` attribute
-   * names (what the server says is selected), else the way a native select does (the
-   * placeholder if there is one, else the first enabled option, else nothing), so the
-   * property, the native select and the submitted value agree. A value that never had
-   * an option (options still being parsed or rendered) is left alone. The change is
-   * programmatic, so no void-change is dispatched.
-   */
-  private _reconcileRemovedSelection(select: HTMLSelectElement): void {
-    const options = Array.from(select.options);
-    if (options.some((o) => o.value === this.value)) {
-      this._matchedValue = this.value;
-      return;
+  private _markInvalid(select: HTMLSelectElement): void {
+    if (this.error) {
+      if (select.getAttribute('aria-invalid') !== 'true') select.setAttribute('aria-invalid', 'true');
+      this._invalid = select;
+    } else if (this._invalid) {
+      if (this._invalid.getAttribute('aria-invalid') === 'true' && !this._invalid.hasAttribute('data-void-field-invalid')) {
+        this._invalid.removeAttribute('aria-invalid');
+      }
+      this._invalid = null;
     }
-    if (this._matchedValue === null || this._matchedValue !== this.value) return;
-    const attr = this.getAttribute('value');
-    const named = attr !== null ? options.find((o) => o.value === attr && !o.disabled) : undefined;
-    this.value = named ? named.value : this.placeholder ? '' : (options.find((o) => !o.disabled)?.value ?? '');
-    this._matchedValue = options.some((o) => o.value === this.value) ? this.value : null;
-  }
-
-  /** Inserts, updates or removes the placeholder option; drops stale copies (from a morph, clone or recovery). */
-  private _syncPlaceholder(select: HTMLSelectElement): void {
-    let own = this._placeholderOption;
-    if (own && (own.parentNode !== select || this._projection.regionOf(own))) own = null;
-    for (const stale of Array.from(this.querySelectorAll<HTMLOptionElement>(`option[${PLACEHOLDER_ATTR}]`))) {
-      if (stale !== own) stale.remove();
-    }
-    if (!this.placeholder) {
-      own?.remove();
-      this._placeholderOption = null;
-      return;
-    }
-    if (!own) {
-      own = this.ownerDocument.createElement('option');
-      own.className = 'void-select-placeholder';
-      own.setAttribute(PLACEHOLDER_ATTR, '');
-      this._projection.own(own);
-      own.value = '';
-      own.disabled = true;
-      own.hidden = true;
-      // Default-selected while the value is empty, like a native placeholder option.
-      own.toggleAttribute('selected', !this.value);
-    }
-    if (own.textContent !== this.placeholder) own.textContent = this.placeholder;
-    if (select.firstChild !== own) select.insertBefore(own, select.firstChild);
-    this._placeholderOption = own;
-  }
-
-  /**
-   * What a native select would show for the consumer's options before they are
-   * projected: the options are still direct children of the host at this point.
-   */
-  private _initialNativeValue(): string {
-    const probe = this.ownerDocument.createElement('select');
-    for (const node of Array.from(this.querySelectorAll(':scope > option, :scope > optgroup'))) {
-      probe.appendChild(node.cloneNode(true));
-    }
-    return probe.value;
-  }
-
-  /** Push the value into the native select without firing void-change. */
-  private _applyValue(): void {
-    const select = this.querySelector<HTMLSelectElement>(':scope > select');
-    if (!select) return;
-    if (select.value !== this.value) select.value = this.value;
-    // A value set in code that names an existing option counts as matched, like a picked one.
-    if (this.value && select.value === this.value) this._matchedValue = this.value;
-  }
-
-  /** Programmatic value sets reach the native select synchronously (a same-tick requestSubmit() sees them). */
-  protected override formSyncNative(): void {
-    this._applyValue();
-  }
-
-  protected override formCaptureDefault(): void {
-    super.formCaptureDefault();
-    this._defaultValue = this.value;
-  }
-
-  /** The initial value becomes the default-selected option (what native reset selects). */
-  protected override formWriteNativeDefault(state: unknown): void {
-    const select = this.querySelector('select');
-    if (!select) return;
-    const value = String(state ?? '');
-    const options = Array.from(select.options);
-    if (options.some((o) => o.value === value)) {
-      // The `selected` content attribute is defaultSelected.
-      for (const option of options) option.toggleAttribute('selected', option.value === value);
-    }
-  }
-
-  protected override formReadNative(): void {
-    const select = this.querySelector('select');
-    if (select) this.value = select.value;
   }
 
   render() {
-    return html`
-      <select
-        ?disabled=${this.disabled}
-        ?required=${this.required}
-        name=${this.name}
-        form=${this.formAttr ?? nothing}
-        aria-invalid=${this.error ? 'true' : 'false'}
-        @change=${this._onChange}
-      ></select>
-      ${this.error ? html`<span class="void-select-error">${this.error}</span>` : ''}
-    `;
+    return this.error ? html`<span class="void-select-error">${this.error}</span>` : nothing;
   }
 
-  private _onChange(e: Event): void {
-    const select = e.target as HTMLSelectElement;
-    this.value = select.value;
-    // The user picked an existing option: if it is removed later, fall back (see _reconcileRemovedSelection).
-    this._matchedValue = this.value;
+  private _onChange = (e: Event): void => {
+    if (e.target !== this.select) return;
+    this._wanted = null;
     this.dispatchEvent(new CustomEvent('void-change', { bubbles: true, composed: true, detail: { value: this.value } }));
+  };
+
+  // ── Form reset ──
+
+  private _watchForm(form: HTMLFormElement | null): void {
+    if (form === this._form) return;
+    this._form?.removeEventListener('reset', this._onReset);
+    this._form = form;
+    form?.addEventListener('reset', this._onReset);
   }
+
+  /** After a reset the options' `selected` decide; an initial `value` attribute is applied again. */
+  private _onReset = (): void => {
+    setTimeout(() => {
+      const initial = this.getAttribute('value');
+      if (initial !== null && this.isConnected) this.value = initial;
+    });
+  };
+
+  // ── Morphs: the user's choice stays unless the server changed the selection ──
+
+  override voidBeforeMorph(incoming?: Element | null): boolean {
+    const select = this.select;
+    if (incoming && incoming !== this && select) {
+      const theirs = incoming.querySelector('select');
+      const now = theirs ? selectedAttrs(theirs) : '';
+      const value = incoming.getAttribute('value') ?? '';
+      this._serverValueChanged = value !== this._serverValue;
+      const serverChanged = now !== this._serverSelection || this._serverValueChanged;
+      this._serverSelection = now;
+      this._serverValue = value;
+      this._keep = serverChanged ? null : Array.from(select.selectedOptions, o => o.value);
+    }
+    return super.voidBeforeMorph(incoming);
+  }
+
+  protected override morphedCallback(): void {
+    const keep = this._keep;
+    const valueChanged = this._serverValueChanged;
+    this._keep = null;
+    this._serverValueChanged = false;
+    const select = this.select;
+    if (!select) return;
+    // Server markup does not carry the aria-invalid the error wrote.
+    if (this.error) this._markInvalid(select);
+    // Morph libraries sync the select from its options' `selected` after the host's attributes, which would
+    // undo a new `value` attribute (the server's choice): apply it again once the options are in place.
+    const value = this.getAttribute('value');
+    if (valueChanged && value !== null) {
+      this.value = value;
+      return;
+    }
+    if (!keep) return;
+    const wanted = new Set(keep);
+    for (const option of Array.from(select.options)) {
+      if (option.selected !== wanted.has(option.value)) option.selected = wanted.has(option.value);
+    }
+  }
+}
+
+function hasOption(select: HTMLSelectElement, value: string): boolean {
+  for (const o of Array.from(select.options)) if (o.value === value) return true;
+  return false;
+}
+
+/** The values of the options the markup marks `selected`. */
+function selectedAttrs(select: Element): string {
+  return Array.from(select.querySelectorAll('option[selected]'), o => (o as HTMLOptionElement).value).join('\u0000');
 }
 
 if (!customElements.get('void-select')) {

@@ -439,14 +439,14 @@ export const Textarea = wrapWc<VoidTextarea, {
   spellcheck?: boolean;
 } & VoidEvents<{ Input: { value: string }; Change: { value: string } }>>('void-textarea', 'Textarea');
 
+/**
+ * Wraps a native `<select>` the author writes inside it, with the form attributes (`name`, `required`,
+ * `disabled`) on that select: `<Select><select name="plan">...</select></Select>`.
+ */
 export const Select = wrapWc<VoidSelect, {
   value?: string;
-  disabled?: boolean;
-  required?: boolean;
-  name?: string;
   size?: 'sm' | 'md' | 'lg';
   error?: string;
-  placeholder?: string;
 } & VoidEvents<{ Change: { value: string } }>>('void-select', 'Select');
 
 export const Checkbox = wrapWc<VoidCheckbox, {
@@ -504,11 +504,14 @@ export const Multiselect = wrapWc<VoidMultiselect, {
   open?: boolean;
 } & VoidEvents<{ Change: { values: string[] } } & OverlayEvents>>('void-multiselect', 'Multiselect');
 
+/** One option of a `<Combobox>` or `<Multiselect>`, inside its `<ComboboxContent>` / `<MultiselectContent>`. */
 export const Option = wrapWc<VoidOption, {
   value?: string;
   selected?: boolean;
   /** Listed but cannot be highlighted or chosen. */
   disabled?: boolean;
+  /** Text shown once chosen, when the content is more than plain text. */
+  label?: string;
 }>('void-option', 'Option');
 
 /**

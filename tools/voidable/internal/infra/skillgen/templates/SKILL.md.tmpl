@@ -250,12 +250,12 @@ Elements render into the light DOM: there is no shadow root, so your own CSS app
 
   A trigger part wraps exactly one element (the button or link). The dialog and drawer take `-title`, `-description`, `-body` and `-actions`; the card takes `-header` (with `-title` and `-description`), `-body` and `-footer`; the alert takes `-title` and `-description`; an accordion item takes `-trigger` and `-content`; the dropdown menu puts its `<void-dropdown-menu-item>` children in `-content`. Settings that are not regions stay attributes (`size`, `position`, `open`, `value`).
 - **Families.** `<void-accordion>` holds `<void-accordion-item>`, `<void-radio-group>` holds `<void-radio>`.
-- **Options.** `<void-select>` takes native `<option>` children. `<void-multiselect>` and `<void-combobox>` take `<void-option>` children. Never put `<void-option>` inside `<void-select>`.
+- **Options.** `<void-select>` wraps a native `<select>` you write inside it, with the form attributes (`name`, `required`, `disabled`) and native `<option>`s on that select: `<void-select><select name="plan"><option value="free">Free</option></select></void-select>`; a prompt is a first `<option value="" disabled selected hidden>`. `<void-combobox>` and `<void-multiselect>` take their `<void-option>`s inside their content part: `<void-combobox name="country"><void-combobox-content><void-option value="de">Germany</void-option></void-combobox-content></void-combobox>`. Never put `<void-option>` inside `<void-select>`.
 - **Self-closing.** In HTML-like templates (plain HTML, ERB, HEEx outside components, Blade, Astro) write `<void-input></void-input>`: the parser ignores the slash of `<void-input />` and swallows what follows into it. JSX, Vue, Svelte and Solid templates may self-close.
 
 ## Forms
 
-- Form controls (`void-input`, `void-textarea`, `void-select`, `void-checkbox`, `void-radio`, `void-switch`, `void-slider`, `void-number-input`, `void-date-picker`, ...) declare `name`, `required` and `form`, and take part in native form submission, validation, reset and `<fieldset disabled>`. Use a normal `<form>` and `name` the controls; do not collect values by hand.
+- Form controls (`void-input`, `void-textarea`, `void-checkbox`, `void-radio`, `void-switch`, `void-slider`, `void-number-input`, `void-date-picker`, ...) declare `name`, `required` and `form`, and take part in native form submission, validation, reset and `<fieldset disabled>`. Use a normal `<form>` and `name` the controls; do not collect values by hand. `void-select` is the exception: its form attributes go on the native `<select>` inside it.
 - Labels, helper text and error messages belong to `<void-field label="Email" helper="..." error="...">` wrapped around the control. `label` is not an attribute of the controls themselves.
 - Submit with `<void-button type="submit">`. Buttons default to `type="button"`.
 - `void-input` takes `type` of text, email, password, number, tel, url or search. Its other native attributes (`autocomplete`, `minlength`, types such as `time`) are not declared; the checker flags them.
@@ -283,7 +283,9 @@ Components communicate with `CustomEvent`s named `void-*` that bubble and carry 
 - `unit` or `caption` on `void-stat`: use `void-figure`. `align` on `void-split` or `void-actions`: it is `valign` and `justify`.
 - `variant="primary"`, `variant="solid"`, `color="primary"` or `color="danger"` on buttons and badges: use the listed values (`color` is `default`, `error`, `warning`, `success`, `info`, `notice`).
 - `label="..."` on an input, textarea or select: wrap the control in `<void-field label="...">`.
-- `<void-option>` in `<void-select>`: use native `<option>`.
+- `<void-option>` in `<void-select>`: use native `<option>`s inside a native `<select>`.
+- A `<void-select>` with `name` on it and the `<option>`s straight inside: put the `name` and the options on a native `<select>` inside it.
+- `<void-option>`s straight inside `<void-combobox>` or `<void-multiselect>`: wrap them in `<void-combobox-content>` / `<void-multiselect-content>`.
 - A `void-tab` element, hand-made tab buttons or `slot="trigger"`: write the explicit parts (`void-tabs-trigger`, `void-popover-trigger`, ...).
 - `heading` on a dialog, drawer, card or accordion item, `text` on a tooltip: the title or hint is a part (`void-dialog-title`, `void-tooltip-content`).
 - `showvalue`, `collapsedwidth` and other lowercased spellings: the attributes are kebab-case.

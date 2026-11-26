@@ -160,6 +160,9 @@ type Content struct {
 	// Tags are the void-* elements written inside (their start tags), so a
 	// name rule can look for the part that names its owner.
 	Tags []string `json:"tags,omitempty"`
+	// Native are the other (lowercase, non-void) elements written inside,
+	// so a component that enhances a native control can tell it is there.
+	Native []string `json:"native,omitempty"`
 }
 
 // Ancestor is an enclosing element and its attributes.

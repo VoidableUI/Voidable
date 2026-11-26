@@ -78,7 +78,7 @@ Run `voidable check` on every file you write, and fix what it reports before sho
 ## Rules that avoid the common mistakes
 
 - **Use components for controls, patterns for layout.** Page structure (a shell, a page head, a section, a toolbar, a label and value) comes from [patterns](/patterns/overview/). Do not write layout CSS for them.
-- **Look attributes up; do not guess.** `color="primary"` on a button, a `label` attribute on an input (use `<void-field label>`), and `<void-option>` inside `<void-select>` (which takes native `<option>`) all do nothing. Every component page has a **Common mistakes** section, and `voidable ref` is the same data.
+- **Look attributes up; do not guess.** `color="primary"` on a button, a `label` attribute on an input (use `<void-field label>`), and `<void-option>` inside `<void-select>` (which takes a native `<select>` with native `<option>`s) all do nothing. Every component page has a **Common mistakes** section, and `voidable ref` is the same data.
 - **A boolean attribute is on when present.** `disabled="false"` is still disabled. Remove the attribute. The few that default to on accept `="false"`; they are [listed here](/components/overview/#attributes-shared-across-components).
 - **A control is a form control.** Give it a `name` and put it in a `<form>` (see [Forms](/guides/forms/)). Do not mirror its value into script state.
 - **Listen to `void-*` events,** not to clicks on internals. See [Events](/guides/events/).

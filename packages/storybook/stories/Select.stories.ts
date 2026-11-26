@@ -10,7 +10,7 @@ const meta: Meta = {
   parameters: {
     docs: {
       description: {
-        component: 'Native dropdown for small option sets where a simple pick-one is sufficient. Use Combobox when options need search, or Multiselect when multiple values can be chosen.',
+        component: 'Native dropdown for small option sets where a simple pick-one is sufficient. Write the native `<select>` (with `name`, `required`, `disabled` and the options) inside `<void-select>`: it is the form control and works before the script loads. Use Combobox when options need search, or Multiselect when multiple values can be chosen.',
       },
     },
   },
@@ -22,11 +22,13 @@ type Story = StoryObj;
 
 export const Default: Story = {
   render: (args) => html`
-    <void-select aria-label="Choose an option" size=${args.size || 'md'} ?disabled=${args.disabled} error=${args.error || ''}>
-      <option value="">Select an option...</option>
-      <option value="1">Option 1</option>
-      <option value="2">Option 2</option>
-      <option value="3">Option 3</option>
+    <void-select aria-label="Choose an option" size=${args.size || 'md'} error=${args.error || ''}>
+      <select name="choice">
+        <option value="" disabled selected hidden>Select an option...</option>
+        <option value="1">Option 1</option>
+        <option value="2">Option 2</option>
+        <option value="3">Option 3</option>
+      </select>
     </void-select>
   `,
 };
@@ -34,9 +36,11 @@ export const Default: Story = {
 export const WithError: Story = {
   render: () => html`
     <void-select aria-label="Choose an option" error="Please select an option">
-      <option value="">Select an option...</option>
-      <option value="1">Option 1</option>
-      <option value="2">Option 2</option>
+      <select>
+        <option value="">Select an option...</option>
+        <option value="1">Option 1</option>
+        <option value="2">Option 2</option>
+      </select>
     </void-select>
   `,
 };
@@ -44,17 +48,19 @@ export const WithError: Story = {
 export const Sizes: Story = {
   render: () => html`
     <div style="display: flex; flex-direction: column; gap: 12px; max-width: 400px;">
-      <void-select aria-label="Choose an option" size="sm"><option>Small</option></void-select>
-      <void-select aria-label="Choose an option" size="md"><option>Medium</option></void-select>
-      <void-select aria-label="Choose an option" size="lg"><option>Large</option></void-select>
+      <void-select aria-label="Choose an option" size="sm"><select><option>Small</option></select></void-select>
+      <void-select aria-label="Choose an option" size="md"><select><option>Medium</option></select></void-select>
+      <void-select aria-label="Choose an option" size="lg"><select><option>Large</option></select></void-select>
     </div>
   `,
 };
 
 export const Disabled: Story = {
   render: () => html`
-    <void-select aria-label="Choose an option" disabled>
-      <option>Disabled select</option>
+    <void-select aria-label="Choose an option">
+      <select disabled>
+        <option>Disabled select</option>
+      </select>
     </void-select>
   `,
 };
@@ -69,8 +75,10 @@ export const LabelledByAriaLabel: Story = {
   },
   render: () => html`
     <void-select aria-label="Sort by">
-      <option value="new">Newest</option>
-      <option value="old">Oldest</option>
+      <select>
+        <option value="new">Newest</option>
+        <option value="old">Oldest</option>
+      </select>
     </void-select>
   `,
 };

@@ -42,7 +42,7 @@ func TestMissingNameInEveryDialect(t *testing.T) {
 <void-button><.icon name="x" /></void-button>
 <void-input {@rest}></void-input>
 <.field label="Email"><void-input></void-input></.field>`,
-			`<void-select></void-select>`},
+			`<void-select><select></select></void-select>`},
 		{"a.blade.php",
 			`<void-button aria-label="{{ __('Close') }}"><svg></svg></void-button>
 <void-button>{{ $slot }}</void-button>

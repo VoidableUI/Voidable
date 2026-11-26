@@ -116,7 +116,7 @@ func TestStdioSession(t *testing.T) {
 		{"ref index", "voidable_ref", map[string]any{}, false, []string{"void-button ", "void-select "}},
 		{"ref tag", "voidable_ref", map[string]any{"tag": "void-slider"}, false, []string{"show-value: boolean (prop showValue)", "void-change detail={ value: number }"}},
 		{"ref unknown", "voidable_ref", map[string]any{"tag": "void-buton"}, true, []string{"did you mean void-button"}},
-		{"snippet heex", "voidable_snippet", map[string]any{"tag": "void-select", "lang": "heex"}, false, []string{"<.select name=\"plan\"", "<option value=\"pro\">Pro</option>"}},
+		{"snippet heex", "voidable_snippet", map[string]any{"tag": "void-select", "lang": "heex"}, false, []string{"<.select>", "<select name=\"plan\">", "<option value=\"pro\">Pro</option>"}},
 	}
 	for i, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

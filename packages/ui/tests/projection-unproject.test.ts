@@ -98,8 +98,8 @@ describe('voidBeforeMorph()', () => {
     expect(a.textContent).toBe('a2');
   });
 
-  it('keeps component state: select value', async () => {
-    const sel = mount('<void-select value="y"><option value="x">x</option><option value="y">y</option><option value="z">z</option></void-select>');
+  it('keeps component state: select value (the native select is the author\'s, never parked)', async () => {
+    const sel = mount('<void-select value="y"><select><option value="x">x</option><option value="y">y</option><option value="z">z</option></select></void-select>');
     await settle(sel);
     const native = sel.querySelector('select')!;
     native.value = 'z';

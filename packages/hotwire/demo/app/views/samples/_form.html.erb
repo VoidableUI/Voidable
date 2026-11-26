@@ -41,9 +41,11 @@
         <void-input type="time" name="sample[opens_at]" value="<%= sample.opens_at&.strftime('%H:%M') %>"></void-input>
       </void-field>
       <void-field label="Category">
-        <void-select name="sample[category_id]">
-          <option value="">Select...</option>
-          <%= options_from_collection_for_select(Category.all, :id, :name, sample.category_id) %>
+        <void-select>
+          <select name="sample[category_id]">
+            <option value="">Select...</option>
+            <%= options_from_collection_for_select(Category.all, :id, :name, sample.category_id) %>
+          </select>
         </void-select>
       </void-field>
       <void-field label="Avatar">

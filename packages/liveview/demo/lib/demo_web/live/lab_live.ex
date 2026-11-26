@@ -170,10 +170,13 @@ defmodule DemoWeb.LabLive do
           <V.textarea id="i-bio" name="user[bio]" value={@f["bio"]} />
         </V.field>
         <V.field label="Country">
-          <V.select id="i-country" name="user[country]" value={@f["country"]} placeholder="Choose…">
-            <option value="nz">New Zealand ({@ticks})</option>
-            <option value="au">Australia</option>
-            <option value="fj">Fiji</option>
+          <V.select id="i-country" value={@f["country"]}>
+            <select name="user[country]">
+              <option value="" disabled selected hidden>Choose…</option>
+              <option value="nz">New Zealand ({@ticks})</option>
+              <option value="au">Australia</option>
+              <option value="fj">Fiji</option>
+            </select>
           </V.select>
         </V.field>
         <V.checkbox id="i-remember" name="user[remember_me]" value="1" checked={checked?(@f, "remember_me")}>
@@ -199,16 +202,20 @@ defmodule DemoWeb.LabLive do
         </V.field>
         <V.field label="Framework">
           <V.combobox id="i-fw" name="user[framework]" placeholder="Pick" value={@f["framework"]}>
-            <V.option value="react">React</V.option>
-            <V.option value="vue">Vue</V.option>
-            <V.option value="lit">Lit</V.option>
+            <void-combobox-content>
+              <V.option value="react">React</V.option>
+              <V.option value="vue">Vue</V.option>
+              <V.option value="lit">Lit</V.option>
+            </void-combobox-content>
           </V.combobox>
         </V.field>
         <V.field label="Skills">
           <V.multiselect id="i-skills" name="user[skills][]" placeholder="Pick many">
-            <V.option value="css" selected={"css" in skills(@f)}>CSS</V.option>
-            <V.option value="js" selected={"js" in skills(@f)}>JS</V.option>
-            <V.option value="html" selected={"html" in skills(@f)}>HTML</V.option>
+            <void-multiselect-content>
+              <V.option value="css" selected={"css" in skills(@f)}>CSS</V.option>
+              <V.option value="js" selected={"js" in skills(@f)}>JS</V.option>
+              <V.option value="html" selected={"html" in skills(@f)}>HTML</V.option>
+            </void-multiselect-content>
           </V.multiselect>
         </V.field>
         <div style="display: flex; gap: 1rem">
@@ -255,9 +262,12 @@ defmodule DemoWeb.LabLive do
 
       <section style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap">
         <V.button id="bridge-btn" variant="filled" name="bridge" events>Bridge button</V.button>
-        <V.select id="bridge-select" name="bridge_select" placeholder="Bridge select" events>
-          <option value="a">A</option>
-          <option value="b">B</option>
+        <V.select id="bridge-select" aria-label="Bridge select" events>
+          <select name="bridge_select">
+            <option value="" disabled selected hidden>Bridge select</option>
+            <option value="a">A</option>
+            <option value="b">B</option>
+          </select>
         </V.select>
         <V.checkbox id="bridge-check" name="bridge_check" value="1" events>Bridge check</V.checkbox>
         <V.switch id="bridge-switch" name="bridge_switch" events>Bridge switch</V.switch>

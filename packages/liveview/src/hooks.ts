@@ -50,7 +50,9 @@ export function buildPayload(el: HTMLElement, event: string, detail: unknown): R
   return {
     ...fields,
     id: el.id || null,
-    name: el.getAttribute("name"),
+    // A component that enhances a native control written inside it (void-select, #52)
+    // has its name on that control.
+    name: el.getAttribute("name") ?? Array.from(el.children).find((c) => c.localName === "select")?.getAttribute("name") ?? null,
     event,
     detail: detail ?? {},
   };

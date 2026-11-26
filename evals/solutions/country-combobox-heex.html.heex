@@ -6,7 +6,9 @@
     </void-field>
     <void-field label="Country">
       <void-combobox name="address[country]" value={@address.country} placeholder="Search countries" required>
-        <void-option :for={c <- @countries} value={c.code}>{c.name}</void-option>
+        <void-combobox-content>
+          <void-option :for={c <- @countries} value={c.code}>{c.name}</void-option>
+        </void-combobox-content>
       </void-combobox>
     </void-field>
     <void-field label="Postal code">

@@ -1,7 +1,3 @@
-void-option {
-  display: none;
-}
-
 void-multiselect {
   --_void-field-height: var(--void-control-height);
   --_void-field-padding: var(--void-control-padding);
@@ -89,9 +85,10 @@ void-multiselect[open] .void-multiselect-trigger {
   opacity: 1;
 }
 
-/* A popover="manual" surface in the top layer, at least as wide as the field;
-   placement, flipping and transitions are shared (overlay.css). */
-.void-multiselect-dropdown {
+/* The content part: a popover="manual" surface in the top layer, at least as
+   wide as the field; placement, flipping and transitions are shared
+   (overlay.css). */
+void-multiselect-content {
   --void-overlay-gap: var(--void-space-1);
   min-width: var(--void-overlay-anchor-width);
   color: var(--void-color-text);
@@ -104,7 +101,12 @@ void-multiselect[open] .void-multiselect-trigger {
   padding: var(--void-space-1) 0;
 }
 
-.void-multiselect-option {
+/* Each option is the author's void-option, wired as role="option": `active`
+   marks the highlighted one (aria-activedescendant), aria-selected the chosen
+   ones. The theme draws the checkbox before the option's content (::before)
+   and its check mark over it (::after). */
+void-multiselect-content > void-option {
+  position: relative;
   display: flex;
   align-items: center;
   gap: var(--void-space-2);
@@ -116,39 +118,45 @@ void-multiselect[open] .void-multiselect-trigger {
   transition: background var(--void-duration-fast) var(--void-ease-in-out);
 }
 
-.void-multiselect-option:hover,
-.void-multiselect-option[data-active] {
+void-multiselect-content > void-option:hover,
+void-multiselect-content > void-option[active] {
   background: var(--void-color-bg-hover);
 }
 
-.void-multiselect-option[aria-disabled="true"] {
+void-multiselect-content > void-option[disabled] {
   opacity: 0.5;
   cursor: default;
 }
 
-.void-multiselect-checkbox {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+void-multiselect-content > void-option::before {
+  content: '';
   flex-shrink: 0;
+  box-sizing: border-box;
   width: 1rem;
   height: 1rem;
   border: 1.5px solid var(--void-color-border-control);
   border-radius: var(--void-radius-sm);
   background: transparent;
-  color: var(--void-color-text-on-accent);
   transition: background var(--void-duration-fast) var(--void-ease-in-out),
               border-color var(--void-duration-fast) var(--void-ease-in-out);
 }
 
-.void-multiselect-option[aria-selected="true"] .void-multiselect-checkbox {
+void-multiselect-content > void-option[aria-selected="true"]::before {
   background: var(--void-color-accent);
   border-color: var(--void-color-accent);
 }
 
-.void-multiselect-checkbox svg {
+/* The check mark, centred on the checkbox (the same 12-unit check the option
+   rendered before #52, drawn as a mask in the ink colour). */
+void-multiselect-content > void-option[aria-selected="true"]::after {
+  content: '';
+  position: absolute;
+  inset-inline-start: calc(var(--void-space-3) + 0.1875rem);
+  top: calc(50% - 0.3125rem);
   width: 0.625rem;
   height: 0.625rem;
+  background: var(--void-color-text-on-accent);
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' fill='none'%3E%3Cpath d='M2.5 6l2.5 2.5 4.5-5' stroke='black' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
 }
 
 void-multiselect[error]:not([error=""]) .void-multiselect-trigger {

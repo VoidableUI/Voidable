@@ -48,10 +48,12 @@ export const WithSelect: Story = {
   render: () => html`
     <void-field label="Country" helper="Select your country of residence">
       <void-select>
-        <option value="">Choose...</option>
-        <option value="us">United States</option>
-        <option value="uk">United Kingdom</option>
-        <option value="ca">Canada</option>
+        <select>
+          <option value="">Choose...</option>
+          <option value="us">United States</option>
+          <option value="uk">United Kingdom</option>
+          <option value="ca">Canada</option>
+        </select>
       </void-select>
     </void-field>
   `,

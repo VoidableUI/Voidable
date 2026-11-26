@@ -1,9 +1,8 @@
 // SPDX-License-Identifier: MIT
 //
 // The accessibility-tree companion of the select, combobox and multiselect
-// screen-reader scenarios. Separate from screen-reader-tree.spec.ts because the
-// markup of these three components is being redesigned: update
-// screen-readers/scenarios-pickers.ts and pages/sr-pickers.html when it lands.
+// screen-reader scenarios, in their own file (screen-readers/scenarios-pickers.ts,
+// pages/sr-pickers.html) since their explicit-parts markup (#52) was designed apart.
 import { pickerScenarios } from '../screen-readers/scenarios-pickers';
 import { treeSuite } from '../screen-readers/tree';
 

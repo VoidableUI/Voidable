@@ -1058,10 +1058,12 @@ import iconLogout from '@tabler/icons/outline/logout.svg?raw';
                   <div class="filter-section">
                     <span class="filter-label">Latency</span>
                     <void-select aria-label="Choose an option" size="sm">
-                      <option value="all">All</option>
-                      <option value="fast">&lt; 50ms</option>
-                      <option value="moderate">50–200ms</option>
-                      <option value="slow">&gt; 200ms</option>
+                      <select>
+                        <option value="all">All</option>
+                        <option value="fast">&lt; 50ms</option>
+                        <option value="moderate">50–200ms</option>
+                        <option value="slow">&gt; 200ms</option>
+                      </select>
                     </void-select>
                   </div>
                   <div class="filter-actions">

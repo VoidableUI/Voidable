@@ -87,17 +87,6 @@ describe('recovery after the markers are removed (morph)', () => {
     expect(el.querySelector('.void-projection-fixture-trigger')!.textContent!.trim()).toBe('Back');
   });
 
-  it('select gets a fresh native select with the right value', async () => {
-    const el = mount('<void-select value="y"><option value="x">x</option><option value="y">y</option></void-select>');
-    await settle(el);
-    morphChildren(el, '<option value="x">x</option><option value="y">y2</option>');
-    await settle(el);
-    const selects = el.querySelectorAll('select');
-    expect(selects.length).toBe(1);
-    expect(selects[0].options.length).toBe(2);
-    expect(selects[0].value).toBe('y');
-  });
-
   it('recovers when only one marker is removed, without duplicating chrome or content', async () => {
     const el = mount('<void-projection-fixture><p id="c">c</p></void-projection-fixture>');
     await settle(el);
@@ -173,17 +162,6 @@ describe('cloneNode / outerHTML of a rendered host', () => {
     const body = clone.querySelector('.void-projection-fixture-inner')!;
     expect(body.children.length).toBe(1);
     expect(body.firstElementChild!.id).toBe('c');
-  });
-
-  it('a clone of a select has one native select with the value applied', async () => {
-    const el = mount('<void-select value="y"><option value="x">x</option><option value="y">y</option></void-select>');
-    await settle(el);
-    const clone = el.cloneNode(true) as Host;
-    document.body.appendChild(clone);
-    await settle(clone);
-    expect(clone.querySelectorAll('select').length).toBe(1);
-    expect(clone.querySelector('select')!.options.length).toBe(2);
-    expect(clone.querySelector('select')!.value).toBe('y');
   });
 
   it('nested projecting hosts inside a cloned host are each cleaned up once', async () => {
@@ -310,16 +288,6 @@ describe('insertion order for observed nodes', () => {
     el.prepend(x, y);
     await settle(el);
     expect(ids(el.querySelector('.void-projection-fixture-inner'))).toEqual(['x', 'y', 'a']);
-  });
-
-  it('prepend lands first in a select', async () => {
-    const el = mount('<void-select><option value="a">a</option></void-select>');
-    await settle(el);
-    const o = document.createElement('option');
-    o.value = 'first';
-    el.prepend(o);
-    await settle(el);
-    expect(Array.from(el.querySelector('select')!.options).map(x => x.value)).toEqual(['first', 'a']);
   });
 
 });

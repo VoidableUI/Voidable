@@ -48,10 +48,13 @@
         <void-input name="full_name" value={fullName} onvoid-input={(e) => (fullName = e.detail.value)}></void-input>
       </void-field>
       <void-field label="Role" error={errors.role || ''}>
-        <void-select name="role" placeholder="Choose a role" value={role} onvoid-change={(e) => (role = e.detail.value)}>
-          <option value="developer">Developer</option>
-          <option value="designer">Designer</option>
-          <option value="manager">Manager</option>
+        <void-select value={role} onvoid-change={(e) => (role = e.detail.value)}>
+          <select name="role">
+            <option value="" disabled selected hidden>Choose a role</option>
+            <option value="developer">Developer</option>
+            <option value="designer">Designer</option>
+            <option value="manager">Manager</option>
+          </select>
         </void-select>
       </void-field>
     </div>

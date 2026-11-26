@@ -311,6 +311,8 @@ func (s *state) analyzeContent(src []byte, from, to int, lang domain.Lang) domai
 			}
 			if strings.HasPrefix(name, "void-") && !slices.Contains(c.Tags, name) {
 				c.Tags = append(c.Tags, name)
+			} else if !strings.HasPrefix(name, "void-") && name != "" && isLower(name[0]) && !slices.Contains(c.Native, name) {
+				c.Native = append(c.Native, name)
 			}
 			t, next := s.parseTag(b, i, name, lang)
 			for _, a := range t.Attrs {
