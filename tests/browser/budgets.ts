@@ -76,9 +76,13 @@ export const reference = {
   // 69.9 -> 77.3 kB with the messages (issue 29): the English catalogue (about 100 strings and the plural and
   // number helpers), the registry and the wiring in the components that write words. fr and ar are separate
   // modules and are not in it; the shared base chunk and the single-component figure did not grow.
-  rootEntryGzipKB: 77.3,
+  // 77.3 -> 83.3 kB on the combined 0.12.0 tree (messages, key actions with the maps of every element, the table's
+  // sorting, filtering and selection and its messages; the testing entry and the locales are separate), measured on
+  // the build host on the integrated tree.
+  rootEntryGzipKB: 83.3,
   /** Gzipped size of `import '@voidable/ui/components/button'` (one component, Lit included), minified. */
-  singleComponentGzipKB: 10.1,
+  // 10.1 -> 10.6 kB on the combined tree: the button reads its key map and the shared resolver (key actions).
+  singleComponentGzipKB: 10.6,
 };
 
 /** Leak limits for the 200 dialog cycles (absolute, not scaled). */
