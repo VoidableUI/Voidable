@@ -1,5 +1,5 @@
 // Rasterise docs/scripts/og-image.svg to docs/public/og.png (1200x630).
-// Run with: mise run docs:og
+// Run with: mise run docs_og
 // The PNG is committed; rerun only when the SVG changes.
 import { readFile, writeFile } from 'node:fs/promises';
 import sharp from 'sharp';
