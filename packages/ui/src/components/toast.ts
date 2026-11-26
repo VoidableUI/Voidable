@@ -195,7 +195,6 @@ export class VoidToastContainer extends VoidElement {
       el.setAttribute('role', role);
       el.setAttribute('aria-live', kind);
       el.setAttribute('aria-atomic', 'true');
-      el.style.cssText = 'position:absolute;width:1px;height:1px;margin:-1px;padding:0;border:0;overflow:hidden;clip-path:inset(50%);white-space:nowrap;pointer-events:none';
       this.prepend(el);
     }
   }
