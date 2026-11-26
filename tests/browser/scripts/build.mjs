@@ -46,7 +46,7 @@ await Promise.all([
   // The shipped languages register themselves; a page uses one through its lang (specs/i18n.spec.ts).
   iife('ui', `import * as ui from '@voidable/ui'; import '@voidable/ui/messages/fr'; import '@voidable/ui/messages/ar'; window.VoidUI = ui;`),
   // The testing entry, as a test build would load it: it starts the data-void-ready watcher.
->>>>>>> origin/feat/i18n-messages
+  iife('testing', `import '@voidable/ui/testing';`),
   esbuild.build({
     ...common,
     entryPoints: [require.resolve('@voidable/theme')],
