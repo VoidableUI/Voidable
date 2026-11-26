@@ -37,10 +37,19 @@ export interface ReadyOptions {
  * A page object as Playwright's `Page`. Only what the helpers call is listed, so
  * this module needs no Playwright types.
  */
+/* eslint-disable @typescript-eslint/no-explicit-any -- structural stand-in for Playwright's Page, whose overloads differ by version */
 export interface PageLike {
   evaluate(fn: any, arg?: any): Promise<any>;
   addInitScript(script: any, arg?: any): Promise<any>;
   goto(url: string, options?: any): Promise<any>;
+}
+/* eslint-enable @typescript-eslint/no-explicit-any */
+
+/** What settleInPage reads of a Lit element. */
+interface Renderable extends Element {
+  isUpdatePending?: boolean;
+  hasUpdated?: boolean;
+  updateComplete?: PromiseLike<unknown>;
 }
 
 const READY_ATTRIBUTE = 'data-void-ready';
@@ -62,7 +71,7 @@ async function settleInPage(options: ReadyOptions = {}, node?: ParentNode): Prom
   const run = async (): Promise<void> => {
     if (document.readyState !== 'complete') await new Promise<void>((resolve) => addEventListener('load', () => resolve(), { once: true }));
     for (let round = 0; round < 100; round++) {
-      const autoloader = (globalThis as any)[Symbol.for('voidable.autoloader')];
+      const autoloader = (globalThis as Record<symbol, { ready(): Promise<void> } | undefined>)[Symbol.for('voidable.autoloader')];
       if (autoloader) {
         waiting = 'the autoloader to define every tag';
         await autoloader.ready();
@@ -73,7 +82,7 @@ async function settleInPage(options: ReadyOptions = {}, node?: ParentNode): Prom
       }
       const root = node ?? (options.scope ? document.querySelector(options.scope) : document);
       if (!root) throw new Error(`whenReady: nothing matches the scope "${options.scope}"`);
-      const pending = (Array.from(root.querySelectorAll('*')) as any[]).filter(
+      const pending = (Array.from(root.querySelectorAll('*')) as Renderable[]).filter(
         (el) => el.localName.startsWith('void-') && customElements.get(el.localName) && (el.isUpdatePending || el.hasUpdated === false),
       );
       if (!pending.length) return;
