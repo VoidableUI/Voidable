@@ -37,9 +37,11 @@ void-progress[indeterminate] .void-progress-fill {
   animation: void-progress-indeterminate 1.5s ease-in-out infinite;
 }
 
+void-progress:dir(rtl) { --_void-dir: -1; }
+
 @keyframes void-progress-indeterminate {
-  0% { transform: translateX(-100%); }
-  100% { transform: translateX(350%); }
+  0% { transform: translateX(calc(var(--_void-dir, 1) * -100%)); }
+  100% { transform: translateX(calc(var(--_void-dir, 1) * 350%)); }
 }
 
 /* Reduced motion: indeterminate state becomes a static, dimmed full bar

@@ -45,6 +45,12 @@ void-tabs-list {
   mask-image: linear-gradient(to right, transparent, black var(--_void-tabs-fade-start), black calc(100% - var(--_void-tabs-fade-end)), transparent);
 }
 
+/* The fade follows the scroll direction, which runs from the right in RTL. */
+void-tabs-list:dir(rtl) {
+  -webkit-mask-image: linear-gradient(to left, transparent, black var(--_void-tabs-fade-start), black calc(100% - var(--_void-tabs-fade-end)), transparent);
+  mask-image: linear-gradient(to left, transparent, black var(--_void-tabs-fade-start), black calc(100% - var(--_void-tabs-fade-end)), transparent);
+}
+
 void-tabs-list::-webkit-scrollbar {
   display: none;
 }

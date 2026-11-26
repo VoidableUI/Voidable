@@ -12,7 +12,7 @@ void-select {
 void-select::after {
   content: '';
   position: absolute;
-  right: var(--_void-field-padding);
+  inset-inline-end: var(--_void-field-padding);
   /* Centred on the control, which is the first row of the host. */
   top: calc((var(--_void-field-height) - 0.75rem) / 2);
   width: 0.75rem;
@@ -30,7 +30,7 @@ void-select select {
   width: 100%;
   height: var(--_void-field-height);
   padding: 0 var(--_void-field-padding);
-  padding-right: calc(var(--_void-field-padding) * 2 + 0.75rem);
+  padding-inline-end: calc(var(--_void-field-padding) * 2 + 0.75rem);
   background: var(--void-field-surface);
   border: var(--void-control-border-width) solid var(--void-field-border);
   border-radius: var(--void-control-radius);

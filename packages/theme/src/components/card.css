@@ -113,24 +113,24 @@ void-card-footer {
 
 /* The first part takes the top corners, the last the bottom ones. */
 void-card > :first-child {
-  border-top-left-radius: var(--_void-card-inner-radius);
-  border-top-right-radius: var(--_void-card-inner-radius);
+  border-start-start-radius: var(--_void-card-inner-radius);
+  border-start-end-radius: var(--_void-card-inner-radius);
 }
 
 void-card > :last-child {
-  border-bottom-left-radius: var(--_void-card-inner-radius);
-  border-bottom-right-radius: var(--_void-card-inner-radius);
+  border-end-start-radius: var(--_void-card-inner-radius);
+  border-end-end-radius: var(--_void-card-inner-radius);
 }
 
 /* Edge-to-edge media: the first and last child follow the body's corners. */
 void-card[padding="none"] > void-card-body > :first-child {
-  border-top-left-radius: inherit;
-  border-top-right-radius: inherit;
+  border-start-start-radius: inherit;
+  border-start-end-radius: inherit;
 }
 
 void-card[padding="none"] > void-card-body > :last-child {
-  border-bottom-left-radius: inherit;
-  border-bottom-right-radius: inherit;
+  border-end-start-radius: inherit;
+  border-end-end-radius: inherit;
 }
 
 void-card[padding="none"] > void-card-body {
