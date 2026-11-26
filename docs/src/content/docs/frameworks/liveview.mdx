@@ -83,6 +83,20 @@ def handle_event("void-change", %{"value" => value}, socket) do
 end
 ```
 
+## Charts and gauges
+
+The charts take their data as a property of the element, which markup cannot set. The `bar_chart`, `line_chart`, `donut_chart` and `gauge` components encode `data` (and a gauge's `zones`) as JSON in `data-void-props` and attach the `VoidProps` hook from `VoidHooks`, which assigns each key to the element once it is defined. Render new data and the chart animates to it; an unchanged value assigns nothing. The first, static render is an empty element: the chart draws when the socket connects.
+
+```heex
+<.bar_chart id="revenue" data={%{labels: ["Q1", "Q2"], series: [%{name: "2025", values: [4, 8]}]}} aria_label="Revenue by quarter" />
+<.line_chart id="visits" data={@visits} interpolation="step" aria_label="Visitors per day" />
+<.donut_chart id="sources" data={%{segments: [%{name: "Search", value: 40}]}} show_total aria_label="Traffic by source" />
+<.gauge id="disk" value={42} unit="%" aria_label="Disk usage" />
+<.gauge id="storage" data={%{segments: [%{name: "Used", value: 40}]}} aria_label="Storage" />
+```
+
+A gauge with a single `value` is plain attributes and needs no hook. Pass an `id` when you render several charts on one page. Set `aria_label` and state the key figures in the text around the chart.
+
 ## DOM preservation
 
 `VoidDOM` is a separate export from `@voidable/ui-liveview` (not part of `VoidHooks`). Wire its callback into your `LiveSocket` constructor via the `dom` option so morphdom patches are safe for every `<void-*>` component:

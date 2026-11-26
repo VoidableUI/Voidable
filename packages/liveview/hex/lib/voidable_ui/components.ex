@@ -2209,4 +2209,190 @@ defmodule VoidableUI.Components do
     />
     """
   end
+
+  # ---------------------------------------------------------------------------
+  # Charts (data is a property of the element, set by the VoidProps hook)
+  # ---------------------------------------------------------------------------
+
+  @chart_data_doc """
+  The chart's data, a map that is encoded as JSON and assigned to the element's `data` property by
+  the `VoidProps` hook (register `VoidHooks` from `@voidable/ui-liveview`). Keys may be atoms or
+  strings. Render a new value to update the chart; an unchanged value does not re-animate it.
+  The chart draws once the socket has connected: the first, static render is an empty element.
+  """
+
+  # The data-void-props value for the properties that are set, or nil (no hook) when none is.
+  defp void_props(props) do
+    case Enum.reject(props, fn {_name, value} -> is_nil(value) end) do
+      [] -> nil
+      set -> Phoenix.json_library().encode!(Map.new(set))
+    end
+  end
+
+  @doc """
+  Renders a `<void-bar-chart>`. Pass `data` as `%{series: [%{name: "2025", values: [4, 8]}], labels: ["Q1", "Q2"]}`.
+
+  Set `aria_label` (the chart is an image to assistive technology) and state the key figures in the
+  text around it.
+  """
+  attr :id, :string, default: nil
+  attr :data, :any, default: nil, doc: @chart_data_doc
+  attr :height, :integer, default: nil
+  attr :show_value, :boolean, default: false
+  attr :variant, :string, default: nil
+  attr :stagger, :integer, default: nil
+  attr :aria_label, :string, default: nil
+  attr :rest, :global
+
+  def bar_chart(assigns) do
+    assigns = assign(assigns, :props, void_props(data: assigns.data))
+
+    ~H"""
+    <void-bar-chart
+      id={@id || auto_id("void-bar-chart", @rest)}
+      height={@height}
+      show-value={@show_value}
+      variant={@variant}
+      stagger={@stagger}
+      aria-label={@aria_label}
+      phx-hook={@props && "VoidProps"}
+      data-void-props={@props}
+      {@rest}
+    />
+    """
+  end
+
+  @doc """
+  Renders a `<void-line-chart>`. Pass `data` as `%{series: [%{name: "Visitors", values: [3, 5, 4]}], labels: ["Mon", "Tue", "Wed"]}`.
+
+  Set `aria_label` (the chart is an image to assistive technology) and state the key figures in the
+  text around it.
+  """
+  attr :id, :string, default: nil
+  attr :data, :any, default: nil, doc: @chart_data_doc
+  attr :height, :integer, default: nil
+  attr :show_value, :boolean, default: false
+  attr :variant, :string, default: nil
+  attr :interpolation, :string, default: nil
+  attr :aria_label, :string, default: nil
+  attr :rest, :global
+
+  def line_chart(assigns) do
+    assigns = assign(assigns, :props, void_props(data: assigns.data))
+
+    ~H"""
+    <void-line-chart
+      id={@id || auto_id("void-line-chart", @rest)}
+      height={@height}
+      show-value={@show_value}
+      variant={@variant}
+      interpolation={@interpolation}
+      aria-label={@aria_label}
+      phx-hook={@props && "VoidProps"}
+      data-void-props={@props}
+      {@rest}
+    />
+    """
+  end
+
+  @doc """
+  Renders a `<void-donut-chart>`. Pass `data` as `%{segments: [%{name: "Search", value: 40}, %{name: "Direct", value: 25}]}`.
+
+  `gaps` is `true` (a small gap), `false` or a number (percent of the ring given to gaps). Set
+  `aria_label` (the chart is an image to assistive technology) and state the key figures in the text
+  around it.
+  """
+  attr :id, :string, default: nil
+  attr :data, :any, default: nil, doc: @chart_data_doc
+  attr :size, :integer, default: nil
+  attr :inner, :float, default: nil
+  attr :gaps, :any, default: nil
+  attr :variant, :string, default: nil
+  attr :show_value, :boolean, default: false
+  attr :show_total, :boolean, default: false
+  attr :aria_label, :string, default: nil
+  attr :rest, :global
+
+  def donut_chart(assigns) do
+    assigns = assign(assigns, :props, void_props(data: assigns.data))
+
+    ~H"""
+    <void-donut-chart
+      id={@id || auto_id("void-donut-chart", @rest)}
+      size={@size}
+      inner={@inner}
+      gaps={@gaps}
+      variant={@variant}
+      show-value={@show_value}
+      show-total={@show_total}
+      aria-label={@aria_label}
+      phx-hook={@props && "VoidProps"}
+      data-void-props={@props}
+      {@rest}
+    />
+    """
+  end
+
+  @doc """
+  Renders a `<void-gauge>`.
+
+  For a single reading pass `value` (with `min`, `max` and `unit`): it is a plain attribute and needs no
+  hook. For a gauge split into parts pass `data` as `%{segments: [%{name: "Used", value: 40}]}`, and
+  for colour bands pass `zones` as `[%{from: 0, to: 60, color: "success"}]`; both are properties of the
+  element and are set by the `VoidProps` hook. Set `aria_label` and state the reading in the text
+  around the gauge.
+
+  `circular` is `"full"`, `"semi"` or `"triple"`; `gaps` is `true`, `false` or a number.
+  """
+  attr :id, :string, default: nil
+  attr :value, :any, default: nil
+  attr :min, :any, default: nil
+  attr :max, :any, default: nil
+  attr :unit, :string, default: nil
+  attr :data, :any, default: nil, doc: @chart_data_doc
+  attr :zones, :any, default: nil, doc: "Colour bands, a list of `%{from: 0, to: 60, color: \"success\"}`, set like `data`."
+  attr :size, :integer, default: nil
+  attr :thickness, :integer, default: nil
+  attr :circular, :string, default: nil
+  attr :variant, :string, default: nil
+  attr :hide_value, :boolean, default: false
+  attr :unit_inline, :boolean, default: false
+  attr :tick_major, :integer, default: nil
+  attr :tick_minor, :integer, default: nil
+  attr :hide_tick_min, :boolean, default: false
+  attr :hide_tick_max, :boolean, default: false
+  attr :segments_sort, :string, default: nil
+  attr :gaps, :any, default: nil
+  attr :aria_label, :string, default: nil
+  attr :rest, :global
+
+  def gauge(assigns) do
+    assigns = assign(assigns, :props, void_props(data: assigns.data, zones: assigns.zones))
+
+    ~H"""
+    <void-gauge
+      id={@id || auto_id("void-gauge", @rest)}
+      value={@value}
+      min={@min}
+      max={@max}
+      unit={@unit}
+      size={@size}
+      thickness={@thickness}
+      circular={@circular}
+      variant={@variant}
+      hide-value={@hide_value}
+      unit-inline={@unit_inline}
+      tick-major={@tick_major}
+      tick-minor={@tick_minor}
+      hide-tick-min={@hide_tick_min}
+      hide-tick-max={@hide_tick_max}
+      segments-sort={@segments_sort}
+      gaps={@gaps}
+      aria-label={@aria_label}
+      phx-hook={@props && "VoidProps"}
+      data-void-props={@props}
+      {@rest}
+    />
+    """
+  end
 end
