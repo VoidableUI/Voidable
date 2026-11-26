@@ -2,6 +2,8 @@ import { html } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
 import { KeyboardActivation } from '../keyboard-activation.js';
+import { keysConverter, type KeyOverrides } from '../keys.js';
+import { activateKeys } from '../keymaps/activation.js';
 import { isInDisabledFieldset, watchDisabledAncestors } from '../form-control.js';
 import { useProjection } from '../projection.js';
 import { msg } from '../messages.js';
@@ -17,6 +19,11 @@ useProjection();
  * @fires {CustomEvent<{ reason: 'trigger' }>} void-close - The user closed it. Does not bubble.
  */
 export class VoidHamburger extends VoidElement {
+  /** Key bindings for this element's actions, as JSON (`{"activate":["Enter"]}`); `[]` switches an action off. See the keyboard guide. */
+  @property({ attribute: 'keys', converter: keysConverter }) keys: KeyOverrides | null = null;
+  /** @internal The actions of this element and their default keys. */
+  static readonly keyMap = activateKeys;
+
   /** Enter and Space fire a real `click`, as on a native button. */
   protected readonly _activation = new KeyboardActivation(this, {
     disabled: () => isInDisabledFieldset(this),

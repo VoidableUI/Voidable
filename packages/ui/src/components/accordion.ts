@@ -2,6 +2,9 @@ import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
 import { PartsController } from '../parts.js';
 import { ClosedContent } from '../disclosure.js';
+import { actionFor } from '../keyboard.js';
+import { keysConverter, type KeyOverrides } from '../keys.js';
+import { activateKeys } from '../keymaps/activation.js';
 
 /**
  * Collapsible section container for FAQs, settings panels, and long-form content organized into expandable items.
@@ -34,6 +37,11 @@ if (!customElements.get('void-accordion')) {
  *   (`outside`). Does not bubble.
  */
 export class VoidAccordionItem extends VoidElement {
+  /** Key bindings for this element's actions, as JSON (`{"activate":["Enter"]}`); `[]` switches an action off. See the keyboard guide. */
+  @property({ attribute: 'keys', converter: keysConverter }) keys: KeyOverrides | null = null;
+  /** @internal The actions of this element and their default keys. */
+  static readonly keyMap = activateKeys;
+
   /**
    * Whether the content is shown. Add the attribute to start open; it is updated when the user toggles
    * the item.
@@ -100,8 +108,7 @@ export class VoidAccordionItem extends VoidElement {
   };
 
   private _onKeydown = (e: KeyboardEvent): void => {
-    if (e.key !== 'Enter' && e.key !== ' ') return;
-    if (!this._fromTrigger(e) || e.defaultPrevented) return;
+    if (actionFor(this, e) !== 'activate' || !this._fromTrigger(e)) return;
     // A real control inside the trigger (a link) keeps its own keys.
     if ((e.target as Element).closest('a, button, input, select, textarea') ) return;
     e.preventDefault();

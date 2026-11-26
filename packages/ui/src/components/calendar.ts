@@ -4,7 +4,9 @@ import { VoidElement } from '../base.js';
 import { live } from 'lit/directives/live.js';
 import { InternalsFormControl, type FormValidityResult } from '../form-control.js';
 import { OverlayController } from '../overlay.js';
-import { inlineKeys, uid } from '../keyboard.js';
+import { actionFor, uid } from '../keyboard.js';
+import { keysConverter, type KeyOverrides } from '../keys.js';
+import { calendarKeys, datePickerKeys } from '../keymaps/pickers.js';
 import { useProjection } from '../projection.js';
 import { localeOf, msg, nameHost } from '../messages.js';
 
@@ -113,6 +115,11 @@ type CalendarView = 'days' | 'months' | 'years';
 
 /** Date selection for booking flows, scheduling UIs, and form fields with locale-aware formatting and min/max constraints. */
 export class VoidCalendar extends InternalsFormControl(VoidElement) {
+  /** Key bindings for this element's actions, as JSON (`{"nextWeek":["ArrowDown","j"]}`); `[]` switches an action off. See the keyboard guide. */
+  @property({ attribute: 'keys', converter: keysConverter }) keys: KeyOverrides | null = null;
+  /** @internal The actions of this element and their default keys. */
+  static readonly keyMap = calendarKeys;
+
   /**
    * Selected date as an ISO `YYYY-MM-DD` string. Empty means no selection. It is what the form submits
    * and the reset target; picking a day updates it and fires `void-change`.
@@ -555,35 +562,37 @@ export class VoidCalendar extends InternalsFormControl(VoidElement) {
     let handled = true;
     let newBase: Date | null = null;
 
-    switch (e.key) {
-      case inlineKeys(this).prev:
+    const action = actionFor(this, e);
+    switch (action) {
+      case 'previousDay':
         d--;
         break;
-      case inlineKeys(this).next:
+      case 'nextDay':
         d++;
         break;
-      case 'ArrowUp':
+      case 'previousWeek':
         d -= 7;
         break;
-      case 'ArrowDown':
+      case 'nextWeek':
         d += 7;
         break;
-      case 'Home':
+      case 'startOfWeek':
         d -= (new Date(y, m, d).getDay() - this._week + 7) % 7;
         break;
-      case 'End':
+      case 'endOfWeek':
         d += 6 - ((new Date(y, m, d).getDay() - this._week + 7) % 7);
         break;
-      case 'PageUp':
-      case 'PageDown': {
-        const delta = e.key === 'PageUp' ? -1 : 1;
-        const target = e.shiftKey ? new Date(y + delta, m, 1) : new Date(y, m + delta, 1);
+      case 'previousMonth':
+      case 'nextMonth':
+      case 'previousYear':
+      case 'nextYear': {
+        const delta = action === 'previousMonth' || action === 'previousYear' ? -1 : 1;
+        const target = action.endsWith('Year') ? new Date(y + delta, m, 1) : new Date(y, m + delta, 1);
         d = Math.min(d, daysInMonth(target.getFullYear(), target.getMonth()));
         newBase = target;
         break;
       }
-      case 'Enter':
-      case ' ':
+      case 'activate':
         this._selectDate(currentDate);
         e.preventDefault();
         return;
@@ -646,6 +655,11 @@ declare global {
  * The calendar popup is closing. Cancelable when the user caused it.
  */
 export class VoidDatePicker extends InternalsFormControl(VoidElement) {
+  /** Key bindings for this element's actions, as JSON (`{"close":["Escape"]}`); `[]` switches an action off. See the keyboard guide. */
+  @property({ attribute: 'keys', converter: keysConverter }) keys: KeyOverrides | null = null;
+  /** @internal The actions of this element and their default keys. */
+  static readonly keyMap = datePickerKeys;
+
   /** The host's `aria-label` / `aria-labelledby` name the inner control. */
   static override labelTarget = '.void-date-picker-input';
 
@@ -903,15 +917,16 @@ export class VoidDatePicker extends InternalsFormControl(VoidElement) {
   };
 
   private _onInputKeydown = (e: KeyboardEvent): void => {
-    if (e.key === 'Enter' && this._draft !== null && this._draft.trim() !== this._display) {
+    const action = actionFor(this, e);
+    if (action === 'activate' && e.key === 'Enter' && this._draft !== null && this._draft.trim() !== this._display) {
       // Text was typed: Enter takes it (it does not open the calendar).
       e.preventDefault();
       this._commit();
       if (!this._rejected && this.open) this._overlay.requestClose('select');
-    } else if (e.key === 'Enter' || (e.key === ' ' && this._draft === null)) {
+    } else if (action === 'activate' && (e.key !== ' ' || this._draft === null)) {
       e.preventDefault();
       if (!this.disabled) this._overlay.toggle('keyboard');
-    } else if (e.key === 'ArrowDown' && !this.disabled) {
+    } else if (action === 'open' && !this.disabled) {
       // Into the calendar, opening it if a click on the field left it open with focus here.
       e.preventDefault();
       if (this.open) void this._focusDay();

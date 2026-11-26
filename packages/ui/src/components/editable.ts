@@ -3,6 +3,9 @@ import { live } from 'lit/directives/live.js';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
 import { msg } from '../messages.js';
+import { actionFor } from '../keyboard.js';
+import { keysConverter, type KeyOverrides } from '../keys.js';
+import { editableFieldKeys, editableKeys, editablePreviewKeys } from '../keymaps/fields.js';
 import { InternalsFormControl } from '../form-control.js';
 import { isFocusParked } from '../projection.js';
 
@@ -15,6 +18,11 @@ import { isFocusParked } from '../projection.js';
  * the previous value. Use `both` (default) or `blur` to commit on blur.
  */
 export class VoidEditable extends InternalsFormControl(VoidElement) {
+  /** Key bindings for this element's actions, as JSON (`{"cancel":[]}`); `[]` switches an action off. See the keyboard guide. */
+  @property({ attribute: 'keys', converter: keysConverter }) keys: KeyOverrides | null = null;
+  /** @internal The actions of this element and their default keys. */
+  static readonly keyMap = editableKeys;
+
   /** The host's `aria-label` / `aria-labelledby` name the inner control. */
   static override labelTarget = '.void-editable-preview, .void-editable-input';
 
@@ -87,7 +95,7 @@ export class VoidEditable extends InternalsFormControl(VoidElement) {
 
   private _handlePreviewKeydown = (e: KeyboardEvent): void => {
     if (this.formDisabled || this.editing) return;
-    if (e.key === 'Enter' || e.key === ' ') {
+    if (actionFor(this, e, editablePreviewKeys) === 'activate') {
       e.preventDefault();
       this._enterEditMode();
     }
@@ -114,12 +122,13 @@ export class VoidEditable extends InternalsFormControl(VoidElement) {
   }
 
   private _handleInputKeydown = (e: KeyboardEvent): void => {
-    if (e.key === 'Escape') {
+    const action = actionFor(this, e, editableFieldKeys);
+    if (action === 'cancel') {
       e.preventDefault();
       this._cancel();
       return;
     }
-    if (e.key === 'Enter' && (this.submitMode === 'enter' || this.submitMode === 'both')) {
+    if (action === 'submit' && (this.submitMode === 'enter' || this.submitMode === 'both')) {
       e.preventDefault();
       this._confirm();
     }

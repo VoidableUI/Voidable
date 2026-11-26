@@ -1,7 +1,10 @@
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
 import { KeyboardActivation } from '../keyboard-activation.js';
-import { isPrintable, stepEnabled, Typeahead } from '../keyboard.js';
+import { actionFor, stepEnabled, Typeahead } from '../keyboard.js';
+import { keysConverter, type KeyOverrides } from '../keys.js';
+import { activateKeys } from '../keymaps/activation.js';
+import { menuKeys } from '../keymaps/menu.js';
 import { PartsController } from '../parts.js';
 import { msg } from '../messages.js';
 
@@ -22,6 +25,11 @@ import { msg } from '../messages.js';
  * field), Enter or Space activate the item (`void-select`), Escape closes the menu.
  */
 export class VoidMenu extends VoidElement {
+  /** Key bindings for this element's actions, as JSON (`{"close":[]}`); `[]` switches an action off. See the keyboard guide. */
+  @property({ attribute: 'keys', converter: keysConverter }) keys: KeyOverrides | null = null;
+  /** @internal The actions of this element and their default keys. */
+  static readonly keyMap = menuKeys;
+
   /**
    * Whether the menu is shown. It starts hidden: add `open` to show it (the menu has no trigger of its own).
    * Escape sets it back to false.
@@ -148,8 +156,9 @@ export class VoidMenu extends VoidElement {
   private _handleKeydown = (e: KeyboardEvent): void => {
     if (!this.open) return;
     const target = e.target as HTMLElement;
+    const action = actionFor(this, e);
 
-    if (e.key === 'Escape') {
+    if (action === 'close') {
       e.preventDefault();
       // Closes this menu only: a surrounding dialog must not see the same Escape.
       e.stopPropagation();
@@ -157,7 +166,6 @@ export class VoidMenu extends VoidElement {
       this._clearSearch();
       return;
     }
-    if (e.altKey || e.ctrlKey || e.metaKey) return;
 
     const items = this._focusableItems;
     const inSearch = this._inSearch(target);
@@ -166,16 +174,16 @@ export class VoidMenu extends VoidElement {
     const search = this._searchInput();
     let next: HTMLElement | undefined;
 
-    if (e.key === 'ArrowDown') {
+    if (action === 'next') {
       next = inSearch || current < 0 ? items[0] : items[stepEnabled(disabled, current, 1)];
-    } else if (e.key === 'ArrowUp') {
+    } else if (action === 'previous') {
       if (search && current === 0) next = search;
       else next = inSearch || current < 0 ? items[items.length - 1] : items[stepEnabled(disabled, current, -1)];
-    } else if (e.key === 'Home' && !inSearch) {
+    } else if (action === 'first' && !inSearch) {
       next = items[0];
-    } else if (e.key === 'End' && !inSearch) {
+    } else if (action === 'last' && !inSearch) {
       next = items[items.length - 1];
-    } else if (isPrintable(e) && !inSearch && current >= 0 && !(e.key === ' ')) {
+    } else if (action === 'typeahead' && !inSearch && current >= 0 && !(e.key === ' ')) {
       // Type-ahead among the visible items (the search field takes typing itself).
       const i = this._typeahead.match(e.key, items.map(it => it.textContent ?? ''), disabled, current);
       if (i >= 0) {
@@ -242,6 +250,11 @@ if (!customElements.get('void-menu')) {
  * @fires {CustomEvent<{ item: VoidMenuItem; value: string }>} void-select - The item was chosen.
  */
 export class VoidMenuItem extends VoidElement {
+  /** Key bindings for this element's actions, as JSON (`{"activate":["Enter"]}`); `[]` switches an action off. See the keyboard guide. */
+  @property({ attribute: 'keys', converter: keysConverter }) keys: KeyOverrides | null = null;
+  /** @internal The actions of this element and their default keys. */
+  static readonly keyMap = activateKeys;
+
   /** Enter and Space fire a real `click`, as on a native button. */
   protected readonly _activation = new KeyboardActivation(this, { disabled: () => this.disabled });
 

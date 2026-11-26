@@ -1,6 +1,8 @@
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
 import { KeyboardActivation } from '../keyboard-activation.js';
+import { keysConverter, type KeyOverrides } from '../keys.js';
+import { activateKeys } from '../keymaps/activation.js';
 import { isInDisabledFieldset, watchDisabledAncestors } from '../form-control.js';
 
 /**
@@ -13,6 +15,11 @@ import { isInDisabledFieldset, watchDisabledAncestors } from '../form-control.js
  * disabled); on an inner `<button>` it disables that button.
  */
 export class VoidButton extends VoidElement {
+  /** Key bindings for this element's actions, as JSON (`{"activate":["Enter"]}`); `[]` switches an action off. See the keyboard guide. */
+  @property({ attribute: 'keys', converter: keysConverter }) keys: KeyOverrides | null = null;
+  /** @internal The actions of this element and their default keys. */
+  static readonly keyMap = activateKeys;
+
   /*
    * Not form-associated. Its form is the one it sits in; `type="submit"` calls
    * form.requestSubmit() (which runs validation and fires `submit`),
@@ -71,8 +78,7 @@ export class VoidButton extends VoidElement {
    */
   protected readonly _activation = new KeyboardActivation(this, {
     disabled: () => this.formDisabled,
-    enter: () => !this._control,
-    space: () => !this._control,
+    when: () => !this._control,
   });
 
   /** The form the button sits in. */

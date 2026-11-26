@@ -2,6 +2,8 @@ import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
 import { OverlayController } from '../overlay.js';
 import { PartsController, triggerControl } from '../parts.js';
+import { keysConverter, type KeyOverrides } from '../keys.js';
+import { overlayKeys } from '../keymaps/overlay.js';
 
 /**
  * Rich content preview card that appears on hover for user profiles, link previews, and contextual information panels.
@@ -18,6 +20,11 @@ import { PartsController, triggerControl } from '../parts.js';
  * Cancelable when the user caused it.
  */
 export class VoidHoverCard extends VoidElement {
+  /** Key bindings for this element's actions, as JSON (`{"close":["Escape"]}`); `[]` switches an action off. See the keyboard guide. */
+  @property({ attribute: 'keys', converter: keysConverter }) keys: KeyOverrides | null = null;
+  /** @internal The actions of this element and their default keys. */
+  static readonly keyMap = overlayKeys;
+
   /** Whether the card is shown. It opens and closes itself from hover, focus and Escape; set it to drive it from script. */
   @property({ type: Boolean, reflect: true }) open = false;
   /** Side of the trigger the card opens on; it flips to the opposite side when there is no room. */

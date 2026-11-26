@@ -2,7 +2,9 @@ import { html, nothing, type PropertyDeclaration, type PropertyValues } from 'li
 import { live } from 'lit/directives/live.js';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
-import { inlineKeys } from '../keyboard.js';
+import { actionFor } from '../keyboard.js';
+import { keysConverter, type KeyOverrides } from '../keys.js';
+import { pinInputKeys } from '../keymaps/fields.js';
 import { InternalsFormControl } from '../form-control.js';
 import { dropReflectedValue, valueReflection } from '../secret-value.js';
 import { isFocusParked } from '../projection.js';
@@ -17,6 +19,11 @@ import { msg, nameHost } from '../messages.js';
  * @fires {CustomEvent<{ value: string }>} void-complete - Every cell is filled.
  */
 export class VoidPinInput extends InternalsFormControl(VoidElement) {
+  /** Key bindings for this element's actions, as JSON (`{"previous":["ArrowLeft"]}`); `[]` switches an action off. See the keyboard guide. */
+  @property({ attribute: 'keys', converter: keysConverter }) keys: KeyOverrides | null = null;
+  /** @internal The actions of this element and their default keys. */
+  static readonly keyMap = pinInputKeys;
+
   /** While focus is inside, a morph does not apply the server's value over what the user is typing. */
   static override editState = ['value'];
   /** Number of cells, so the number of characters in the code. Defaults to 6. */
@@ -178,7 +185,8 @@ export class VoidPinInput extends InternalsFormControl(VoidElement) {
   private _onKeydown(e: KeyboardEvent, index: number): void {
     const input = e.target as HTMLInputElement;
 
-    if (e.key === 'Backspace') {
+    const action = actionFor(this, e);
+    if (action === 'deleteBackward') {
       if (input.value) {
         input.value = '';
         this._syncValue();
@@ -189,13 +197,13 @@ export class VoidPinInput extends InternalsFormControl(VoidElement) {
         this._syncValue();
       }
       e.preventDefault();
-    } else if (e.key === inlineKeys(this).prev) {
+    } else if (action === 'previous') {
       e.preventDefault();
       this._focusCell(index - 1);
-    } else if (e.key === inlineKeys(this).next) {
+    } else if (action === 'next') {
       e.preventDefault();
       this._focusCell(index + 1);
-    } else if (e.key === 'Delete') {
+    } else if (action === 'deleteForward') {
       input.value = '';
       this._syncValue();
       e.preventDefault();

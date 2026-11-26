@@ -1,7 +1,10 @@
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
 import { KeyboardActivation } from '../keyboard-activation.js';
-import { isPrintable, stepEnabled, Typeahead } from '../keyboard.js';
+import { actionFor, stepEnabled, Typeahead } from '../keyboard.js';
+import { keysConverter, type KeyOverrides } from '../keys.js';
+import { activateKeys } from '../keymaps/activation.js';
+import { dropdownMenuKeys, dropdownPanelKeys, dropdownTriggerKeys } from '../keymaps/menu.js';
 import { OverlayController } from '../overlay.js';
 import { PartsController, triggerControl } from '../parts.js';
 
@@ -27,6 +30,11 @@ import { PartsController, triggerControl } from '../parts.js';
  * The menu is closing. Cancelable when the user caused it (every reason but `parent` and `api`).
  */
 export class VoidDropdownMenu extends VoidElement {
+  /** Key bindings for this element's actions, as JSON (`{"close":[]}`); `[]` switches an action off. See the keyboard guide. */
+  @property({ attribute: 'keys', converter: keysConverter }) keys: KeyOverrides | null = null;
+  /** @internal The actions of this element and their default keys. */
+  static readonly keyMap = dropdownMenuKeys;
+
   /** Whether the menu is open. A click on the trigger toggles it; choosing an item, Escape, Tab or a press outside closes it. */
   @property({ type: Boolean, reflect: true }) open = false;
   /** Side of the trigger the menu opens on; it flips to the opposite side when there is no room. */
@@ -139,14 +147,14 @@ export class VoidDropdownMenu extends VoidElement {
    * Escape is handled by the shared overlay stack (it closes only the topmost overlay).
    */
   private _handleKeydown = (e: KeyboardEvent): void => {
-    if (e.defaultPrevented || e.altKey || e.ctrlKey || e.metaKey || e.isComposing) return;
     const target = e.target as HTMLElement;
     const trigger = this._triggerEl;
     if (trigger && this._parts.one('void-dropdown-menu-trigger')?.contains(target)) {
-      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+      const onTrigger = actionFor(this, e, dropdownTriggerKeys);
+      if (onTrigger === 'open' || onTrigger === 'openLast') {
         e.preventDefault();
-        this._openAndFocus(e.key === 'ArrowDown' ? 'first' : 'last');
-      } else if ((e.key === 'Enter' || e.key === ' ') && !isNativelyActivated(trigger, target)) {
+        this._openAndFocus(onTrigger === 'open' ? 'first' : 'last');
+      } else if (onTrigger === 'activate' && !isNativelyActivated(trigger, target)) {
         // void-button and custom triggers do not turn Enter or Space into a click.
         e.preventDefault();
         if (this.open) this._overlay.requestClose('trigger');
@@ -161,14 +169,15 @@ export class VoidDropdownMenu extends VoidElement {
     const current = items.indexOf(item as HTMLElement);
     const none = items.map(() => false);
     let next: HTMLElement | undefined;
-    if (e.key === 'ArrowDown') next = items[stepEnabled(none, current, 1)];
-    else if (e.key === 'ArrowUp') next = items[stepEnabled(none, current, -1)];
-    else if (e.key === 'Home') next = items[0];
-    else if (e.key === 'End') next = items[items.length - 1];
-    else if (e.key === 'Tab') {
+    const action = actionFor(this, e, dropdownPanelKeys);
+    if (action === 'next') next = items[stepEnabled(none, current, 1)];
+    else if (action === 'previous') next = items[stepEnabled(none, current, -1)];
+    else if (action === 'first') next = items[0];
+    else if (action === 'last') next = items[items.length - 1];
+    else if (action === 'leave') {
       this._overlay.requestClose('blur');
       return;
-    } else if (isPrintable(e) && e.key !== ' ') {
+    } else if (action === 'typeahead' && e.key !== ' ') {
       const i = this._typeahead.match(e.key, items.map(it => it.textContent ?? ''), none, current);
       if (i >= 0) {
         e.preventDefault();
@@ -198,6 +207,11 @@ if (!customElements.get('void-dropdown-menu')) {
  * @fires {CustomEvent<{ item: VoidDropdownMenuItem; value: string }>} void-select - The item was chosen.
  */
 export class VoidDropdownMenuItem extends VoidElement {
+  /** Key bindings for this element's actions, as JSON (`{"activate":["Enter"]}`); `[]` switches an action off. See the keyboard guide. */
+  @property({ attribute: 'keys', converter: keysConverter }) keys: KeyOverrides | null = null;
+  /** @internal The actions of this element and their default keys. */
+  static readonly keyMap = activateKeys;
+
   /** What the item stands for, passed as `detail.value` of `void-select` (empty when not set). */
   @property({ type: String, reflect: true }) value = '';
   /** Enter and Space fire a real `click`, as on a native button. */

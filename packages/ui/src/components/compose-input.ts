@@ -2,12 +2,20 @@ import { html } from 'lit';
 import { property, query } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
 import { msg } from '../messages.js';
+import { actionFor } from '../keyboard.js';
+import { keysConverter, type KeyOverrides } from '../keys.js';
+import { composeInputKeys } from '../keymaps/fields.js';
 import { useProjection } from '../projection.js';
 
 useProjection();
 
 /** Rich text entry area for messaging UIs, comment boxes, and social post composers. */
 export class VoidComposeInput extends VoidElement {
+  /** Key bindings for this element's actions, as JSON (`{"send":["Control+Enter"]}`); `[]` switches an action off. See the keyboard guide. */
+  @property({ attribute: 'keys', converter: keysConverter }) keys: KeyOverrides | null = null;
+  /** @internal The actions of this element and their default keys. */
+  static readonly keyMap = composeInputKeys;
+
   /** The host's `aria-label` / `aria-labelledby` name the inner control. */
   static override labelTarget = 'textarea';
 
@@ -64,7 +72,7 @@ export class VoidComposeInput extends VoidElement {
   }
 
   private _onKeydown(e: KeyboardEvent): void {
-    if (e.key === 'Enter' && !e.shiftKey) {
+    if (actionFor(this, e) === 'send') {
       e.preventDefault();
       this._onSend();
     }
