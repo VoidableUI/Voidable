@@ -5,6 +5,7 @@ import React, { forwardRef, useCallback, useEffect, useLayoutEffect, useRef } fr
 // Registers every `<void-*>` custom element (idempotent `customElements.define`
 // guards live in the core package). See README "Element registration".
 import '@voidable/ui';
+import type { KeyOverrides } from '@voidable/ui';
 
 import type {
   VoidBadge,
@@ -123,6 +124,8 @@ export type VoidEvents<M> = {
 type VoidProps<P = object> = P &
   Omit<React.HTMLAttributes<HTMLElement>, keyof P> & {
     children?: React.ReactNode;
+    /** Key bindings for this element's actions, as an object: `{ close: [], next: ['j'] }`. `[]` or `null` switches an action off. Only the elements with key actions read it (see the keyboard guide). */
+    keys?: KeyOverrides;
   };
 
 // ---------------------------------------------------------------------------
@@ -309,6 +312,17 @@ const JSON_PROPS: Record<string, readonly string[]> = {
   'void-donut-chart': ['data'],
   'void-gauge': ['data', 'zones'],
 };
+
+/** The elements with key actions: their `keys` prop (an object) is written as the JSON `keys` attribute. A test keeps this list equal to the manifest's. */
+export const KEYED_TAGS = [
+  'void-accordion-item', 'void-button', 'void-calendar', 'void-carousel', 'void-carousel-next', 'void-carousel-previous',
+  'void-checkbox', 'void-collapsible', 'void-combobox', 'void-compose-input', 'void-date-picker', 'void-dialog',
+  'void-drawer', 'void-dropdown-menu', 'void-dropdown-menu-item', 'void-editable', 'void-file-upload', 'void-hamburger',
+  'void-hover-card', 'void-menu', 'void-menu-item', 'void-multiselect', 'void-nav-menu', 'void-number-input',
+  'void-pin-input', 'void-popover', 'void-radio', 'void-segmented-control', 'void-segmented-control-item', 'void-switch',
+  'void-tabs', 'void-tags-input', 'void-toggle', 'void-toggle-group', 'void-tooltip',
+] as const;
+for (const t of KEYED_TAGS) JSON_PROPS[t] = [...(JSON_PROPS[t] ?? []), 'keys'];
 
 function wrapWc<E extends HTMLElement, P = object>(
   tag: string,

@@ -79,6 +79,10 @@ Most other clients take the same thing as JSON:
 
 Run `voidable skill install` in a project to write the skill to `.claude/skills/voidable` as well.
 
+### Keys (`keys`)
+
+`voidable check` warns (it does not fail the run) about a `keys` attribute that is not a JSON object, names an action the element does not have (with the closest name it has), or switches off an action the element lists as essential (`activate` on a button, `next` on a tabs list). `voidable ref <element>` lists the actions and their default keys. See [Customising keys](/components/keyboard/#customising-keys).
+
 ### Accessible names (`missing-name`)
 
 `voidable check` reports a control that has no accessible name: a `<void-button>` with only an icon and no `aria-label`, a `<void-input>`, `<void-select>`, `<void-slider>`, `<void-textarea>` or other form control with no label (no enclosing `<void-field label>` or `<label>`, no `<label for>`, no `aria-label` or `aria-labelledby`), a `<void-dialog>` or `<void-drawer>` with no `-title` part or `aria-label`, an avatar with no `alt`. A `placeholder` is not a name. Which components need one, and which attributes, text or ancestors supply it, is data in the Custom Elements Manifest (`accessibleName` in `packages/ui/cem/supplement.js`), not a list in the tool.
