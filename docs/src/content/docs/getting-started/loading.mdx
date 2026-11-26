@@ -16,6 +16,8 @@ A custom element does nothing until its module has loaded and called `customElem
 | `import '@voidable/ui/components/button'` | Exactly the components you import | A bundler app that uses a handful of components and wants them in the main bundle. |
 | `import '@voidable/ui/autoloader'` | Each component the first time its tag appears | Server-rendered pages (Rails, Phoenix, Laravel, Django) and any page where the set of components varies by route or arrives later. |
 
+{stats.bundleSize && stats.smallestComponentSize ? <p>Sizes from the built packages, minified and gzipped, Lit included: the whole library is {stats.bundleSize}, and the cheapest single component is {stats.smallestComponentSize}. Each further component adds its own code only; Lit and the shared base code are paid for once.</p> : null}
+
 ## The autoloader
 
 The autoloader registers nothing when it loads. It scans the document for `<void-*>` tags, then keeps watching, and imports the module for each tag the first time it sees it. Content added later is found the same way, whoever adds it: Turbo Drive, Turbo Streams and frames, Phoenix LiveView patches, Livewire, htmx, or your own `innerHTML`.

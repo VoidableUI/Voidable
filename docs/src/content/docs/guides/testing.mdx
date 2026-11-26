@@ -44,12 +44,12 @@ expect(body).toMatchObject({ email: 'a@b.co', alerts: 'on' });
 
 ## Wait for events, not time
 
-Every interaction that changes a value dispatches a `void-*` event that bubbles. Wait for it instead of sleeping (see [Events](/guides/events/)).
+Every interaction that changes a value dispatches a `void-*` event that bubbles (`void-open` and `void-close` fire on the element and do not bubble: wait for them on the element). Wait for it instead of sleeping (see [Events](/guides/events/)).
 
 ## Two rules
 
 - **Prefer the contract to class names.** `void-card-body` and other rendered classes are styling structure and can change. Roles, names, reflected attributes and event names are the stable surface.
-- **A `value` attribute is the initial value.** Many controls reflect their live state to an attribute (`open`, `checked`, `active`, `selected`), but a text value is read from the control: use `inputValue()` or `FormData`, not `[value=…]`.
+- **A `value` attribute is the initial value.** Many controls reflect their live state to an attribute (`open`, `checked`, `pressed`, `selected`), but a text value is read from the control: use `inputValue()` or `FormData`, not `[value=…]`.
 
 ## The contract
 
