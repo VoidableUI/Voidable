@@ -26,6 +26,7 @@ import { launch, newContext } from './browser.mjs';
 import { mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { SCHEMES, TOOLING_ROOT, WIDTHS, pageDocument, serveReference } from './lib.mjs';
+import { safeName } from './names.mjs';
 import { PAGES, SMOKE_LOOKS } from './pages.mjs';
 
 export function parseArgs(argv) {
@@ -147,7 +148,7 @@ export async function capture(opts) {
   const worker = async () => {
     while (next < jobs.length) {
       const job = jobs[next++];
-      const rel = `${job.page.id}/${job.look.id}.${job.scheme}.${job.width}.png`;
+      const rel = `${safeName(job.page.id)}/${job.look.id}.${job.scheme}.${job.width}.png`;
       try {
         const { errors, height } = await photograph(browser, server.url, job, join(opts.out, rel));
         shots.push({ page: job.page.id, look: job.look.id, scheme: job.scheme, width: job.width, file: rel, height, ...(errors.length ? { errors } : {}) });

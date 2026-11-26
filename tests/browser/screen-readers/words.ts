@@ -69,7 +69,7 @@ interface Detail {
 
 /** Words to check beyond the identity (name and role), from the states a Fact lists. */
 export function detailsOf(fact: Fact): Detail[] {
-  if (fact.spoken) {
+  if (Array.isArray(fact.spoken)) {
     return fact.spoken.map((w) => ({
       label: String(w),
       test: (p) => (typeof w === 'string' ? contains(p, w) : w.test(p)),

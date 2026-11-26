@@ -15,7 +15,7 @@
 //     element"), so extra items a screen reader announces (groups, landmarks,
 //     static text) only cost moves, never a failure.
 import { expect, type Page } from '@playwright/test';
-import type { Fact, Nav, Scenario, Step } from './facts';
+import { forReader, pick, type Fact, type Nav, type Scenario, type Step } from './facts';
 import type { Reader } from './readers';
 import { describeFact, heard, identityOf, matchFact, normalise } from './words';
 
@@ -104,7 +104,7 @@ export async function runScenario(reader: Reader, page: Page, scenario: Scenario
     const phrasesFrom = (await reader.log()).length;
     try {
       if ('reach' in step) {
-        await reach(step.reach, step.by ?? 'next');
+        await reach(forReader(step.reach, reader.name), pick(step.by, reader.name) ?? 'next');
         reached = step.reach;
       } else if ('act' in step) {
         if (!reached) throw new Error('act needs an element reached first');
@@ -117,7 +117,7 @@ export async function runScenario(reader: Reader, page: Page, scenario: Scenario
         await begin();
         await reader.type(step.type);
       } else if ('hear' in step) {
-        await hear(step.hear);
+        await hear(forReader(step.hear, reader.name));
       } else if ('walk' in step) {
         await begin();
         for (let n = 0; n < step.walk; n++) await reader.move('next');
