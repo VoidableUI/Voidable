@@ -33,6 +33,7 @@ void-drawer[open]::part(surface) {
   translate: 0 0;
 }
 
+/* "left" and "right" name the screen edge, so these stay physical (the API takes no start or end). */
 void-drawer[side="left"]::part(surface) {
   left: 0;
   top: 0;
@@ -51,7 +52,7 @@ void-drawer[side="right"]::part(surface) {
 
 void-drawer[side="top"]::part(surface) {
   top: 0;
-  left: 0;
+  inset-inline-start: 0;
   width: 100%;
   border-bottom: var(--void-float-border-width) solid var(--void-float-border);
   translate: 0 -100%;
@@ -59,7 +60,7 @@ void-drawer[side="top"]::part(surface) {
 
 void-drawer[side="bottom"]::part(surface) {
   bottom: 0;
-  left: 0;
+  inset-inline-start: 0;
   width: 100%;
   border-top: var(--void-float-border-width) solid var(--void-float-border);
   translate: 0 100%;
@@ -111,7 +112,8 @@ void-drawer-title {
   flex-shrink: 0;
   margin: 0;
   /* Room for the close button, which is laid over the end of the row. */
-  padding: var(--_void-drawer-title-inset) calc(var(--void-container-padding) + 1.5rem + var(--void-space-2)) var(--_void-drawer-title-inset) var(--void-container-padding);
+  padding-block: var(--_void-drawer-title-inset);
+  padding-inline: var(--void-container-padding) calc(var(--void-container-padding) + 1.5rem + var(--void-space-2));
   border-bottom: var(--void-rule-head);
   font-family: var(--void-type-heading-family);
   font-size: var(--void-type-heading-size);

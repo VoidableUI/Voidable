@@ -26,6 +26,8 @@ void-indicator {
   padding: 0 4px;
 }
 
+/* The placements name corners of the target (top-right is the top right corner
+   in either direction), so these stay physical. */
 void-indicator[placement="top-right"] .void-indicator-dot { top: -4px; right: -4px; }
 void-indicator[placement="top-left"] .void-indicator-dot { top: -4px; left: -4px; }
 void-indicator[placement="bottom-right"] .void-indicator-dot { bottom: -4px; right: -4px; }

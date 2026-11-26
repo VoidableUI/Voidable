@@ -34,7 +34,7 @@ void-color-picker {
   border: 2px solid var(--void-white);
   box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.3), inset 0 0 0 1px rgba(0, 0, 0, 0.3); /* token-ok: thumb contrast ring */
   pointer-events: none;
-  left: var(--void-cp-area-x, 0%);
+  left: var(--void-cp-area-x, 0%); /* physical: the saturation axis is a colour scale, not text flow */
   top: var(--void-cp-area-y, 0%);
   transform: translate(-50%, -50%);
 }
@@ -63,7 +63,7 @@ void-color-picker {
   border: 2px solid var(--void-white);
   box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.3); /* token-ok: thumb contrast ring */
   pointer-events: none;
-  left: var(--void-cp-hue-x, 0%);
+  left: var(--void-cp-hue-x, 0%); /* physical: the hue axis is a colour scale, not text flow */
   top: 50%;
   transform: translate(-50%, -50%);
   background: var(--void-cp-hue);
@@ -235,7 +235,7 @@ void-color-picker {
 .void-color-picker-compact-dropdown {
   position: absolute;
   top: calc(100% + var(--void-space-2));
-  left: 0;
+  inset-inline-start: 0;
   z-index: var(--void-z-dropdown);
   background: var(--void-float-surface);
   border: var(--void-float-border-width) solid var(--void-float-border);

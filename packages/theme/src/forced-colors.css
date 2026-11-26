@@ -117,6 +117,14 @@
     forced-color-adjust: none;
   }
 
+  void-slider input[type="range"]:dir(rtl) {
+    background: linear-gradient(
+      to left,
+      Highlight var(--void-slider-fill, 50%),
+      Canvas var(--void-slider-fill, 50%)
+    );
+  }
+
   void-slider input[type="range"]::-webkit-slider-thumb {
     background: Highlight;
     border: 2px solid ButtonText;

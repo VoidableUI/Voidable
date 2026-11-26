@@ -56,7 +56,8 @@ void-dialog-title {
   display: block;
   margin: 0;
   /* Room for the close button, which is laid over the end of the row. */
-  padding: var(--_void-dialog-title-inset) calc(var(--void-container-padding) + 1.5rem + var(--void-space-2)) var(--_void-dialog-title-inset) var(--void-container-padding);
+  padding-block: var(--_void-dialog-title-inset);
+  padding-inline: var(--void-container-padding) calc(var(--void-container-padding) + 1.5rem + var(--void-space-2));
   border-bottom: var(--void-rule-head);
   font-family: var(--void-type-heading-family);
   font-size: var(--void-type-heading-size);
