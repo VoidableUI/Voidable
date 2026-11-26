@@ -90,6 +90,7 @@ describe('radio group: arrow keys', () => {
     key(radios()[1]!, 'ArrowDown');
     expect(stops()).toBe('-1,-1,0');
     expect(radios().map(r => r.querySelector<HTMLInputElement>('input')!.checked).join(',')).toBe('false,false,true');
+    await Promise.all(radios().map(r => r.updateComplete));
     expect(radios().map(r => r.getAttribute('aria-checked')).join(',')).toBe('false,false,true');
   });
 
