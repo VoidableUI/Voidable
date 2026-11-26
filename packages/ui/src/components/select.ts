@@ -283,15 +283,38 @@ export class VoidSelect extends VoidElement {
   }
 
   /**
+   * Brings the choice up to date synchronously, where the form or a morph is about to read it: a patch of
+   * the select whose mutations are not delivered yet is handled now (the choice goes back in). With none
+   * since the choice was last written into the select, a difference is a script's choice
+   * (`select.value = …`, no event), which the select keeps, as in plain HTML.
+   */
+  private _flush(): void {
+    const select = this.select;
+    if (!select || this._morphQueued) return;
+    this._finishReset();
+    const records = this._observer?.takeRecords() ?? [];
+    if (records.length) {
+      this._onMutations(records);
+      return;
+    }
+    if (this._pending || !this._choice) return;
+    const now = chosen(select);
+    if (!now.length || (now.length === this._choice.length && now.every((v, i) => v === this._choice![i]))) return;
+    const old = this.value;
+    this._choice = now;
+    this._changed(old);
+  }
+
+  /**
    * The form is building its data (a submit, `new FormData(form)`, a LiveView event) from the native select.
-   * Nothing may have told us yet that something reset it (a morph that only set properties, with no adapter
-   * and no mutation): write the choice into it now and correct the entries it already contributed.
+   * A patch may have reset it a moment ago, before its mutations were delivered or the morph's microtask
+   * ran: write the choice into it now and correct the entries it already contributed.
    */
   private _onFormData = (e: FormDataEvent): void => {
     const select = this.select;
     if (!select || select.form !== e.target) return;
-    this._finishReset();
     const before = submits(select);
+    this._flush();
     this._apply();
     if (!select.name) return;
     const after = submits(select);
@@ -349,6 +372,8 @@ export class VoidSelect extends VoidElement {
    */
   override voidBeforeMorph(incoming?: Element | null): boolean {
     if (incoming && incoming !== this) {
+      // Before the morph touches the select, it holds the client's state.
+      this._flush();
       // A copy of a rendered element (LiveView morphs to a clone of a locked one, which it patched) carries
       // what it recorded from the server's markup; its own options may have been re-synced from the live one.
       const recorded = incoming instanceof VoidSelect ? incoming._serverSelection : null;

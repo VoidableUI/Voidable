@@ -180,28 +180,21 @@ test.describe('the native select patched with no hook at all', () => {
     expectChoice(await run(p, { initial: page(null, 0), next: '', nextSelect: select(1, 'fj'), patch: 'native innerHTML', callback: 'on time' }), 'fj');
   });
 
-  test('a submit right after a patch that only reset the selection sends the choice', async ({ page: p }) => {
-    const sent = await p.evaluate(async (html) => {
+  test('a script that sets the native value without an event: the form sends it, and a later morph keeps it', async ({ page: p }) => {
+    const seen = await p.evaluate(async ([a, b]) => {
       const w = window as any;
-      await w.__morph.render(html);
+      await w.__morph.render(a);
       const host = document.getElementById('s') as any;
       const form = document.getElementById('f') as HTMLFormElement;
       const native = host.querySelector('select') as HTMLSelectElement;
-      native.value = 'au';
-      native.dispatchEvent(new Event('change', { bubbles: true }));
+      native.value = 'fj';
+      const out: unknown[] = [new FormData(form).getAll('country')];
+      w.__morph.morphNow(b);
+      out.push(new FormData(form).getAll('country'));
       await w.__settle(document.getElementById('root'));
-      const out: unknown[] = [];
-      form.addEventListener('submit', (e) => {
-        e.preventDefault();
-        out.push(new FormData(form).getAll('country'), native.value);
-      });
-      // A morph library resetting the selection by property alone: no mutation, no hook.
-      native.selectedIndex = 0;
-      form.requestSubmit();
-      out.push(native.value);
+      out.push(host.value, native.value);
       return out;
-    }, page('', 0));
-    // The submission carries the choice, and the native select holds it from then on.
-    expect(sent).toEqual([['au'], 'au', 'au']);
+    }, [page('', 0), page('', 1)]);
+    expect(seen).toEqual([['fj'], ['fj'], 'fj', 'fj']);
   });
 });
