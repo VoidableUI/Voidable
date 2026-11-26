@@ -1109,7 +1109,29 @@ defmodule VoidableUI.Components do
   overflows (`label`, else the `<caption>`); `max_height` adds vertical scrolling for
   `sticky_header`, and `sticky_column` keeps the first column in view. `inset` is for a table
   inside a card or panel.
+
+  ## Sorting, filtering and selection
+
+  Mark header cells with `data-sort` and rows with `data-value`, and the table sorts, filters
+  (`filter`, `filter_columns`) and selects (`selectable`, `value`) in the browser. For a table the
+  server drives, pass `manual`: the table never reorders or hides a row, it pushes `void-sort`,
+  `void-filter` and `void-change` through `events` (the payload is in `"detail"`) and you render
+  `sort`, `sort_direction`, `filter`, `value` and the rows. `value` is a list of row values.
+  `total_rows` and `all_selected` support "select all N rows" across pages.
   """
+  attr :id, :string, default: nil
+  attr :sort, :string, default: nil, doc: "key of the sorted column (`data-key` of its header, else its position)"
+  attr :sort_direction, :string, default: nil, values: [nil, "ascending", "descending"]
+  attr :filter, :string, default: nil
+  attr :filter_columns, :string, default: nil
+  attr :selectable, :any, default: nil, doc: "`true` for many rows, `\"single\"` for one"
+  attr :manual, :boolean, default: false
+  attr :value, :any, default: nil, doc: "the selected row values, a list (or its JSON)"
+  attr :name, :string, default: nil
+  attr :total_rows, :integer, default: nil
+  attr :all_selected, :boolean, default: false
+  attr :shortcuts, :string, default: nil, doc: "opt-in shortcuts: `select-all`"
+  attr :events, :any, default: nil, doc: @events_doc
   attr :striped, :boolean, default: false
   attr :hoverable, :boolean, default: false
   attr :compact, :boolean, default: false
@@ -1127,6 +1149,20 @@ defmodule VoidableUI.Components do
   def table(assigns) do
     ~H"""
     <void-table
+      id={if @events, do: @id || auto_id("void-table", {@name, @rest}), else: @id}
+      sort={@sort}
+      sort-direction={@sort_direction}
+      filter={@filter}
+      filter-columns={@filter_columns}
+      selectable={@selectable}
+      manual={@manual}
+      value={chart_json(@value)}
+      name={@name}
+      total-rows={@total_rows}
+      all-selected={@all_selected}
+      shortcuts={@shortcuts}
+      phx-hook={void_hook(@events)}
+      data-void-events={void_events(@events, "void-sort,void-filter,void-change")}
       striped={@striped}
       hoverable={@hoverable}
       compact={@compact}
