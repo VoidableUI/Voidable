@@ -100,6 +100,8 @@ export default defineConfig({
             { label: 'Server-rendered apps', slug: 'guides/server-rendered' },
             { label: 'Accessibility', slug: 'guides/accessibility' },
             { label: 'Accessibility statement', slug: 'guides/accessibility-statement' },
+            { label: 'Screen reader results', slug: 'guides/screen-reader-results' },
+            { label: 'Browser support', slug: 'guides/browser-support' },
             { label: 'Translation', slug: 'guides/translation' },
             { label: 'Testing', slug: 'guides/testing' },
             { label: 'Editor setup and typings', slug: 'guides/editor-setup' },

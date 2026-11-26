@@ -1,0 +1,63 @@
+name: Assistive technology report
+description: Report what a screen reader, voice control or other assistive technology did with Voidable components, including when everything worked
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Reports from people who use assistive technology every day are the most useful thing this project is missing. A report that says "it all worked" is as useful as one that finds a problem. See [Screen reader results](https://voidable.dev/guides/screen-reader-results/) for what has been tested and what has not (mobile screen readers, JAWS, voice control, switch access and magnification have not).
+  - type: input
+    id: technology
+    attributes:
+      label: Assistive technology and its version
+      description: For example VoiceOver on iOS 19.1, TalkBack 15.1 on Android 15, JAWS 2026, Voice Control on macOS 15, a switch interface.
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Device, operating system and browser
+      description: With versions. For example iPhone 15 and Safari, or Pixel 8 and Chrome 140.
+    validations:
+      required: true
+  - type: input
+    id: package
+    attributes:
+      label: "@voidable/ui and @voidable/theme versions"
+      description: Or the page of the documentation site you used.
+    validations:
+      required: true
+  - type: checkboxes
+    id: components
+    attributes:
+      label: Components you tried
+      options:
+        - label: Button and icon-only button
+        - label: Field with a required and an invalid input, and its error
+        - label: Checkbox, radio group and switch
+        - label: Slider and number input
+        - label: Select, combobox and multiselect
+        - label: Dialog (open, read, close, where focus lands)
+        - label: Dropdown menu
+        - label: Tabs
+        - label: Accordion and collapsible
+        - label: Toast and alert
+        - label: Table and charts
+        - label: Calendar and date picker
+        - label: Other (say which below)
+  - type: textarea
+    id: results
+    attributes:
+      label: What you heard or could do, component by component
+      description: For each one, the name, the role and the state (checked, expanded, selected, invalid) you heard, and anything missing, wrong, repeated or confusing. Say "it worked" where it did. Quote what was spoken if you can.
+    validations:
+      required: true
+  - type: textarea
+    id: could-not
+    attributes:
+      label: Anything you could not do
+      description: A task you could not finish, or could finish only by a workaround.
+  - type: textarea
+    id: settings
+    attributes:
+      label: Settings that matter
+      description: Verbosity, speech rate, language, braille, anything unusual that could change what you heard.

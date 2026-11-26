@@ -1,0 +1,140 @@
+---
+title: Screen reader results
+description: What VoiceOver and NVDA said in the most recent scripted runs, scenario by scenario, which scenarios pass, which are known defects, which are intermittent, and what has not been tested at all.
+---
+
+import ScreenReaderResults from '../../../components/api/ScreenReaderResults.astro';
+
+This page records what two real screen readers said when a script moved through each component's test page. Every string in the tables below is copied from the spoken-phrase transcripts that the [Screen readers workflow](https://github.com/VoidableUI/Voidable/blob/master/.github/workflows/screen-readers.yml) uploads; none is written from memory or from the markup. Read it with the [accessibility statement](/guides/accessibility-statement/), which says what the project aims for and what it checks, and with the [accessibility guide](/guides/accessibility/).
+
+**This is an automated run, not a test by people.** A script presses the screen reader's navigation keys and reads a log. It finds regressions and gross errors. It does not tell whether a flow is understandable, whether the wording is what a daily user expects, or how a component behaves with the settings, speech rate, braille display or habits of a real user. No person who relies on a screen reader has tested Voidable. Treat these results as evidence that the markup is exposed to the two readers below, not as a statement that the components are accessible to people who use screen readers.
+
+## What was run
+
+| | VoiceOver | NVDA |
+|---|---|---|
+| Screen reader | VoiceOver, the one in macOS 15 (the runner reports Darwin 24.6.0). Guidepup identifies it as `0.0.1-VoiceOver4`, which is Guidepup's own label, not an Apple version number. | NVDA as bundled by Guidepup, identified as `0.2.1-2026.3`. The NVDA release number itself is **to confirm**. |
+| System | macOS 15, GitHub runner image `macos15 20261123.0558.1`, Apple silicon | Windows Server 2025 Datacenter (10.0.26100), runner image `win25-vs2026 20261116.315.1` |
+| Browser | Playwright's WebKit build (the Safari engine, not the Safari application) | Playwright's Chromium build (the Chrome engine, not the Chrome application) |
+| Driver | Guidepup 0.40.0, `@guidepup/playwright` 0.21.0, Playwright 1.65.1 | the same |
+| Run | [45894154091](https://github.com/VoidableUI/Voidable/actions/runs/45894154091), 2026-11-26, 21:11 UTC | the same run, 2026-11-26, 21:21 UTC |
+| Commit | `5155dda`, a pull request branch (no run exists on `master` yet: the workflow has only run on pull requests) | the same |
+| Language | English | English |
+
+A second run, [45887492653](https://github.com/VoidableUI/Voidable/actions/runs/45887492653) (2026-11-26, about 19:57 UTC, pull request branch `integrate/0.11.0`), is used below only to show which results change from run to run. The versions of WebKit and Chromium inside Playwright 1.65.1 are **to confirm**.
+
+The table of the last recorded run, generated from `docs/src/data/screen-reader-results.json`:
+
+<ScreenReaderResults />
+
+Playwright counts a scenario that is expected to fail, and does fail, as "passed", so the "passed" counts in that table include the known defects below. The breakdown that follows separates them.
+
+## Summary
+
+Each reader ran the same 26 scenarios.
+
+| | VoiceOver (WebKit) | NVDA (Chromium) |
+|---|---|---|
+| Spoken as expected | 22 | 17 |
+| Known defect (expected failure, speech recorded) | 3: dialog description, multiselect selection, dropdown menu first item | 2: checked radio, collapsed accordion |
+| Intermittent (failed, then passed on a retry) | 1: toast | 4: select, combobox, multiselect, checkbox |
+| Failed with no speech recorded | 0 | 3: tabs, table, chart table |
+
+Two of the 26 scenarios, `link-button-one-control` and `breadcrumbs-list`, only check the page and speak nothing; they are counted among the passes. The failed NVDA scenarios heard only empty strings for every move (40 moves of the "next" command in each), so they say nothing about the components: see [Known defects](#known-defects-and-unexplained-results).
+
+## What each reader said
+
+"Said" is a phrase from the transcript of the run above. Where a scenario takes several steps, the phrases are in the order they were heard. A dash means the reader said nothing the script could match.
+
+### Buttons, links and form controls
+
+| Scenario | VoiceOver | NVDA |
+|---|---|---|
+| Button | `Save changes button` | `Save changes, button` |
+| Link button | `Read the documentation link` | `clickable, Read the documentation, same page, link` |
+| Icon-only button | `Close panel button` | `Close panel, button` |
+| Field, required | `Email address We never share it. required edit text email field` | `section, Email address, edit, required, We never share it.` |
+| Field, invalid | `abc Insertion on word: abc , between characters: and Invite code Enter the six character code. invalid data edit text` | `Invite code, edit, invalid entry, Enter the six character code., abc` |
+| Checkbox | `Accept the terms unchecked checkbox`, then after activation `checked Accept the terms checkbox` | `Accept the terms, check box, not checked`, then `checked` (intermittent) |
+| Radio group | `Free selected radio button, 1 of 3`, `Pro radio button, 2 of 3`, then `selected Pro radio button, 2 of 3` | `Plan, grouping, Free, radio button, not checked` for the radio that is checked (known defect) |
+| Switch | `Weekly newsletter off switch`, then `on Weekly newsletter switch` | `Weekly newsletter, switch, off`, then `on` |
+| Slider | `50 Volume slider`, then `60` | `Volume, slider, 50`, then `60` |
+| Number input | `2 Seats stepper` | `Seats, spin button, editable, 2`, then `3` |
+| Select | `Choose a country Country collapsed pop up button, group`, then after typing "Aus" `Australia menu item (2 of 3) menu.` | `Country, combo box, collapsed, Choose a country`, then `Australia` (intermittent) |
+| Combobox | `Framework Pick a framework list box pop up expanded combo box.`, then `React (1 of 3) React (1 of 3) completion selected`, `Vue (2 of 3) completion selected.`, and after Enter `Vue.` | `Framework, combo box, expanded, has auto complete, editable, Pick a framework, blank`, then `Framework, list. React, 1 of 3`, `Vue, 2 of 3`, and after Enter `Framework, combo box, collapsed, has auto complete, editable, Vue` (intermittent) |
+| Multiselect | `CSS (1 of 3). CSS (1 of 3) completion selected.`; after Enter, only `You are currently on a selectable (null), inside of a list box.` (known defect) | `Skills, list. CSS, 1 of 3`, then after Enter `selected` (intermittent) |
+
+### Overlays, disclosure and messages
+
+| Scenario | VoiceOver | NVDA |
+|---|---|---|
+| Dialog | `Profile settings web dialog with 6 items Ada Insertion on word: Ada , between characters: and Display name edit text`; the description is not spoken (known defect) | `button. Profile settings, dialog, Change how your name appears.. sr-dialog, document. Profile settings, dialog, Change how your name appears.. Display name, edit, Ada` |
+| Dropdown menu | `Actions menu pop up button`; after the menu opens, nothing about the first item (known defect) | `clickable, Actions, menu button, collapsed, sub Menu`; after opening `Rename, 1 of 3`; after Down `Duplicate, 2 of 3` |
+| Tabs | `Account sections tab group`, `Profile selected tab, 1 of 3`, `Billing tab, 2 of 3`, and after activation `Billing selected tab, 2 of 3` | no speech recorded |
+| Accordion | `How do refunds work? collapsed button`, then `How do refunds work? expanded button`, then `How do refunds work? region` and `Refunds arrive within five days.` | `clickable, How do refunds work?, button, expanded` for the collapsed trigger (known defect) |
+| Collapsible | `Shipping details collapsed button`, `Shipping details expanded button`, `Shipping details collapsed button` | `clickable, Shipping details, button, collapsed`, then `expanded`, then `collapsed` |
+| Toast | `Changes saved. Your profile is up to date.` on the retry; silent on the first attempt (intermittent) | `Changes saved. Your profile is up to date.` |
+| Alert | `Payment failed. You are currently on a selectable text.` | `clickable, Payment failed` |
+| Tooltip | `Bold Make the selection bold button` | `Bold, button, Make the selection bold` |
+
+### Tables, charts and navigation
+
+| Scenario | VoiceOver | NVDA |
+|---|---|---|
+| Table | `TEAM MEMBERS table 3 columns, 3 rows.`, then `ROLE Engineer column 2 of 3.` | no speech recorded |
+| Chart data table | `Visitors by day table 2 columns, 4 rows.`, then `Visitors 120 column 2 of 2` | no speech recorded |
+| Breadcrumbs | `Breadcrumb navigation.`, then `KEYBOARDS current page 3 of 3.` | `Breadcrumb, navigation landmark, list, with 3 items, HOME, same page, link`, then `current page, KEYBOARDS` |
+| Pagination | `Pagination navigation.`, then `3 dimmed current page button.` | `Pagination, navigation landmark, Previous page, button`, then `3, button, unavailable, current page` |
+
+The assertions behind these are loose by design: they look for the name, a word for the role and a word for each state, never a whole sentence (see the [statement](/guides/accessibility-statement/#scripted-screen-reader-runs)). A scenario passes when those words were heard; the strings above show what else came with them. Some phrases above are from the script's own movement (VoiceOver reading the control before the one it was sent to, for example).
+
+## Known defects and unexplained results
+
+The known defects are tracked in [issue 75](https://github.com/VoidableUI/Voidable/issues/75). Each runs as an expected failure with the speech recorded, so a fix turns the scenario red and the record is removed.
+
+- **Radio group on NVDA.** A checked radio is spoken as `not checked`, and without its position in the group, where VoiceOver says `Free selected radio button, 1 of 3`. The cause is not found.
+- **Accordion on NVDA.** A collapsed trigger is spoken as `expanded`, where VoiceOver says `collapsed`, and where the same NVDA says `collapsed` for the dropdown menu and collapsible triggers. The cause is not found.
+- **Multiselect on VoiceOver.** After Enter chooses an option, VoiceOver says only `You are currently on a selectable (null), inside of a list box.`; NVDA says `selected`. The cause is not found.
+- **Dropdown menu on VoiceOver.** Focus moves to the first item (a page-side check passes) but VoiceOver says nothing about it. This one is not reproducible every time: in the earlier run one attempt reported "expected to fail, but passed" (the item was spoken) and another did not speak it.
+- **Dialog description on VoiceOver.** The name is spoken and the description is not, while NVDA speaks both. The description is correct in the accessibility tree, and a copy of it as `aria-description` made no difference, so this looks like VoiceOver behaviour rather than a component defect. It is kept as an expected failure as a record of the difference.
+- **Tabs, table and chart data table on NVDA: no speech, unexplained.** In both runs NVDA heard only empty strings while the script moved 40 times, so the script never reached the tab or table. The accessibility-tree checks for the same scenarios pass in Chromium, Firefox and WebKit, and VoiceOver reads them. Whether this is the components, NVDA with Chromium on this runner, or the script is not known; do not read it as "NVDA reads these correctly" or as "NVDA cannot read them".
+
+Fixed in earlier runs and confirmed: the number input value (VoiceOver spoke a percentage of the range, now `2 Seats stepper`) and the toast announcement.
+
+## Intermittent results
+
+A hosted runner is not a stable test bench, and a screen reader on it less so. Between the two runs, these changed without a code change that would explain them:
+
+- NVDA: `select` failed all three attempts in the earlier run and passed on a retry in the later one; `field-required-invalid` failed all three attempts in the earlier run (NVDA heard only `f`) and passed in the later one; `combobox` passed in the earlier run and needed a retry in the later one; `multiselect` and `checkbox` needed a retry in both.
+- VoiceOver: `field-required-invalid` needed a retry in the earlier run (VoiceOver kept reading `Last form element ... Invite code` and never reached the email field) and passed in the later one; `toast` needed a retry in the later run and `dropdown-menu` in the earlier one.
+
+A scenario that passes only after a retry is counted as intermittent here, not as passing.
+
+## What has not been tested
+
+None of the following has been tested, by script or by a person:
+
+- **Mobile screen readers:** VoiceOver on iOS and iPadOS, and TalkBack on Android. Touch exploration, swipe navigation and the rotor behave differently from the desktop commands the script uses.
+- **JAWS**, and Narrator on Windows.
+- **Orca** on Linux (Guidepup supports it; the project does not run it).
+- **Other browser pairings:** VoiceOver with Chrome or Firefox, NVDA with Firefox or Edge, JAWS with anything.
+- **Voice control** (Voice Control on macOS and iOS, Windows Voice Access, Dragon): whether every control can be addressed by its visible name.
+- **Switch access** and keyboard-only scanning.
+- **Screen magnification** and zoom to 400%, and text spacing overrides.
+- **Braille displays.**
+- **Languages other than English**, including a screen reader running in French or Arabic.
+- **Real use:** tasks done by people who use these tools every day, which is the test that matters.
+
+## Help with a mobile pass
+
+If you use VoiceOver on iOS or TalkBack on Android, a short pass over the components below, reported with the [assistive technology report form](https://github.com/VoidableUI/Voidable/issues/new?template=assistive-technology-report.yml), is the most useful thing you can give this project. You do not need to read code. The component pages on this site show each component working.
+
+1. Note your device, operating system version, screen reader and its version, and browser with its version. Turn off any setting you would not normally use.
+2. Open a documentation page that has the component. Swipe to it with your usual gesture.
+3. For each of these, say what was announced and whether you could finish the task: a button and an icon-only button; a text field with a required and an invalid state and its error; a checkbox, a radio group and a switch; a slider; a select and a combobox; a dialog (open it, read it, close it, see where focus lands); a dropdown menu; tabs; an accordion; a toast; a table; the date picker.
+4. For each, record: the name you heard, the role you heard, the state you heard (checked, expanded, selected, invalid), and anything that was missing, wrong, repeated or confusing. Say plainly "it worked" when it did.
+5. Report what you found, including that it all worked. A report of nothing wrong is as useful as a defect.
+
+## Reporting results
+
+Use the [assistive technology report form](https://github.com/VoidableUI/Voidable/issues/new?template=assistive-technology-report.yml) for a pass with any assistive technology, or [open an issue](https://github.com/VoidableUI/Voidable/issues/new/choose) for a single defect. Maintainers: to record a new scripted run, download the artifacts of a run of the Screen readers workflow and merge them with `mise run test:screen-readers:record -- <folder>`; this page and the table above are then updated from the same data.

@@ -1,0 +1,91 @@
+---
+title: Browser support
+description: Which browser engines and versions Voidable needs, derived from the platform features it uses, what is tested in CI, what degrades in an older browser, and the support policy proposed for 1.0.
+---
+
+Voidable targets current browsers and nothing older than the platform features it uses. It has no build step that compiles CSS down for older engines, no polyfills, and no support for Internet Explorer or the legacy Edge. This page lists what the code needs, what CI runs, and how the library behaves where a feature is missing.
+
+**What is settled and what is not.** The table and the degradation notes below are derived from the source of `@voidable/theme` and `@voidable/ui`, and from the release versions of each platform feature. The minimum versions are the ones the code implies; the project has **not** tested any browser older than the current one in CI, so a minimum here means "the feature exists from this version", not "this was checked". A version marked "to confirm" has not been checked against a browser compatibility source. The support policy at the end is a proposal for the owner to confirm in the [road to 1.0](/guides/road-to-1-0/#platform), not a promise.
+
+## The short version
+
+Full fidelity needs, at least:
+
+| Engine | Minimum implied by the code | What sets it |
+|---|---|---|
+| Chromium (Chrome, Edge, and other Chromium browsers) | 120 | `:dir()`; everything else is 114 or older, with the Popover API at 114 |
+| Firefox | 128 | `@property` (Firefox 128); `:has()` is 121 |
+| Safari (macOS and iOS) | 17 | The Popover API (17); `:has()` and `@property` are 15.4 and 16.4 |
+
+Below these, the library still loads, because the components use feature detection for the scripting features, but some rules in the theme do not apply, as described under [what degrades](#what-degrades-in-an-older-browser). The theme's source comment says "Chrome 111, Firefox 113, Safari 16.2" for `color-mix()` and `oklch()`; that is the floor for colours alone, and the other rows in the table raise it.
+
+Anchor positioning, `@starting-style` and the other newer features are not required: each has a fallback. Browsers that ship them (Chromium 125 and later, Firefox 147 and later, Safari 26 and later for anchor positioning) get the native behaviour.
+
+## What the library uses
+
+Each row names a feature, where Voidable uses it, and the first version of each engine that supports it. "To confirm" marks a version I could not check. For overlays the same data is on the [Overlays](/components/overlays/#browser-support) page.
+
+| Feature | Where it is used | Chromium | Firefox | Safari | Without it |
+|---|---|---|---|---|---|
+| Custom elements, ES2022 modules, Lit 3 | every component; the TypeScript target is ES2022 | to confirm (the Vite 8 default build target applies; none is set in the repository) | to confirm | to confirm | the components do not run |
+| Cascade layers (`@layer`) | `layers.css`: the theme's whole layer order | 99 | 97 | 15.4 | the theme does not load as designed |
+| `oklch()` | `tokens.css`, `media/`, skins: derived colours | 111 | 113 | 15.4 | colours fail |
+| `color-mix()` | 24 theme files: tints, borders, states | 111 | 113 | 16.2 | colours fail |
+| `@property` | `primitives.css`, `components/overlay.css`, `components/tabs.css`, `patterns/shell.css` | 85 | 128 | 16.4 | the property is untyped: animations of it do not interpolate, and `--void-anim-scale` is not forced to a number for the charts (to confirm the chart effect) |
+| `:has()` | `pre-upgrade.css`, button, alert, toast, dialog, drawer, number input, colour picker and others | 105 | 121 | 15.4 | the rule is dropped, with the state it styles |
+| `:dir(rtl)` | switch, slider, accordion, carousel, drawer, tabs, progress, nav menu, `forced-colors.css` | 120 | 49 | 16.4 | the right-to-left adjustment is dropped; each `:dir()` rule is its own rule, so nothing else is lost; the keyboard code catches the error and treats the page as left-to-right |
+| Container queries (`container-type`, `@container`) | `components/table.css`: the `stack` attribute | 105 | 110 | 16 | the table does not stack |
+| `<dialog>`, `showModal()` | dialog, drawer | 37 | 98 | 15.4 | (required) |
+| Popover API (`popover`, `showPopover()`, `:popover-open`) | every non-modal overlay and the toast container | 114 | 125 | 17 | the panel uses the `hidden` attribute and fixed positioning, and is not in the top layer |
+| CSS anchor positioning (`anchor-name`, `position-anchor`, `position-area`, `position-try`) | `components/overlay.css`: placement | 125 | 147 | 26 | a built-in positioner places and flips the panel |
+| `@starting-style` | `overlay.css`, `dialog.css`, `drawer.css`: entry transitions | 117 | 129 | 17.5 | no entry transition |
+| `transition-behavior: allow-discrete` | `overlay.css`: exit transitions | 117 | partial (see Overlays) | 17.4 | no exit transition |
+| Scroll-driven animations (`animation-timeline: scroll()`) | tabs edge fade, app shell: inside `@supports (animation-timeline: scroll())` | 115 | to confirm | to confirm | the edge fade does not appear |
+| `appearance: base-select`, `::picker(select)` | `components/select.css`, inside `@supports (appearance: base-select)` | 135 | no | the source comment says 27 (to confirm) | the native select list keeps the browser's look |
+| `backdrop-filter` | `tokens.css`, `media/surface.css`, `patterns/shell.css`; a `@supports not` rule gives a solid fallback | 76 | 103 | 9 with a prefix (to confirm unprefixed) | a solid surface instead of glass |
+| `svh`, `dvh` units | dialog, drawer, `media/media.css`, app shell | 108 | 101 | 15.4 | the declaration is dropped |
+| `scrollbar-width` | segmented control, scroll area, tabs, table, app shell | 121 | 64 | 18.2 | the scrollbar is not hidden or thinned |
+| `aspect-ratio`, `inset` | donut chart, colour picker, media, overlays, toast and others | 88 and 87 | 89 and 66 | 15 and 14.1 | |
+| `prefers-reduced-motion`, `prefers-contrast`, `prefers-color-scheme` | tokens and every animation | 74, 96, 76 | 63, 101, 67 | 10.1, 14.1, 12.1 (all to confirm) | the preference is not honoured |
+| `prefers-reduced-transparency` | `tokens.css`, `media/surface.css` | 118 | to confirm | to confirm | the preference is not honoured |
+| `forced-colors` | `forced-colors.css` and others: a media query | 89 | 89 | to confirm | the rules for forced colours do not apply |
+| Typed `attr()` (`attr(rows type(<number>))`) | `pre-upgrade.css`: reserved height of a textarea before upgrade | 133 | to confirm | to confirm | the textarea's height is not reserved before upgrade |
+| `ElementInternals`, form-associated custom elements | every form control: submission, validity, reset | 77 | 93 | 16.4 | the element does not submit with the form; the code checks for `attachInternals` and keeps the value in the DOM |
+| `checkVisibility()`, `inert`, `getAnimations()`, `Intl.Locale`, `Intl.NumberFormat`, `Intl.DateTimeFormat`, `Intl.PluralRules`, `Intl.Collator` | scripts: checked before use where a fallback exists (`checkVisibility`) | to confirm | to confirm | to confirm | see the source |
+
+The theme also uses relative features not listed because they are older than every row above (`:is()`, `:where()`, `:focus-visible`, custom properties, `calc()`, and `light-dark()` is **not** used). Nested CSS is not used, and the theme build (`lightningcss`) is given no browser targets, so it does not rewrite or lower anything: what is in the source is what ships.
+
+## What is tested in CI
+
+- **Browser suite** (`ci.yml`, job `browser`): every spec in Chromium, Firefox and WebKit, on Linux (`ubuntu-24.04`), each at the build that Playwright 1.65.1 bundles. The versions of those builds are **to confirm**. The WebKit build is Playwright's, which is the Safari engine but is not the Safari application or iOS Safari, and on Linux it is not WebKit as it ships on a Mac.
+- **Chromium only:** axe-core, forced-colours emulation, the performance budgets, the visual review, and the server-backed suites (Rails, Phoenix, Laravel).
+- **Not tested:** any browser version older than the one Playwright bundles; Microsoft Edge itself (it shares Chromium); Safari on macOS or iOS as installed; Chrome on Android; Firefox on Android; browsers with other engines; assistive technology other than the [scripted VoiceOver and NVDA runs](/guides/screen-reader-results/).
+- **Screen readers:** the separate `Screen readers` workflow runs WebKit on macOS 15 and Chromium on Windows Server 2025. It does not gate a release.
+
+## What degrades in an older browser
+
+The aim is that a missing feature costs polish, not function:
+
+- **Overlays.** Without anchor positioning, a built-in positioner places and flips the panel. Without the Popover API, the panel opens and closes through the `hidden` attribute and fixed positioning, but is not in the top layer, so a stacking context can hide it. Without `@starting-style` or `allow-discrete`, an overlay appears or disappears without a transition. Escape, outside presses and focus handling are scripted, so they do not depend on the browser.
+- **Selects.** Without `appearance: base-select` the list is the browser's own. It works the same way and looks like the system.
+- **Tabs and app shell.** Without scroll-driven animations the edge fade is missing.
+- **Surfaces.** Without `backdrop-filter`, glass surfaces are solid.
+- **Forms.** Without `attachInternals`, controls that submit through `ElementInternals` still work as controls and reset on the form's `reset` event, but submit nothing with a native form: the [forms guide](/guides/forms/) says how to read the value.
+- **Right-to-left.** Without `:dir()`, a few mirrored details are left-to-right.
+- **Before the script loads.** The theme styles the not-yet-defined state, so a server-rendered page measures the same before upgrade. See [Loading components](/getting-started/loading/#before-a-component-loads).
+- **Not supported:** a browser without cascade layers, `color-mix()`, `oklch()`, `@property` or `:has()` loses the theme's core rules. The library is not designed to work there.
+
+Where a feature does not degrade the way this list says, that is a bug: [open an issue](https://github.com/VoidableUI/Voidable/issues/new/choose).
+
+## Support policy
+
+The table implies a floor, not a policy. What the code supports is the engines and versions above. What the project **tests** is the current Playwright build of Chromium, Firefox and WebKit. Nothing in the repository says how long a version is supported, how a floor is raised, or whether Voidable promises anything for a browser below the latest.
+
+This is a proposal, for the owner to decide in the [road to 1.0](/guides/road-to-1-0/#platform):
+
+- State the floor of the table above as the supported minimum (Chromium 120, Firefox 128, Safari 17), as "best effort, not tested".
+- Promise and test the **current stable release of each of Chrome, Edge, Firefox and Safari**, and the previous major of each, which is the usual evergreen policy. That is far above the floor, which makes the floor a statement of what the code allows rather than a promise.
+- Raise the floor only in a minor release before 1.0 and in a major release after, with a line in the upgrade guide, as for any other breaking change.
+- Treat engines Playwright cannot drive (iOS Safari and Chrome on Android as installed) as supported through their engines, until a test on a real device says otherwise.
+
+None of these is decided. Open questions: whether the floor should be the table's or "the last two majors"; whether a real Safari on macOS and iOS should be added to CI; whether Firefox on Android and Samsung Internet are supported by name.

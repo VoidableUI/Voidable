@@ -1,6 +1,6 @@
 # Voidable Roadmap
 
-What 1.0 promises and what must land before it is on the [Road to 1.0](docs/src/content/docs/guides/road-to-1-0.mdx) page.
+What 1.0 promises and what must land before it is on the [Road to 1.0](docs/src/content/docs/guides/road-to-1-0.mdx) page. Browser support is on [Browser support](docs/src/content/docs/guides/browser-support.mdx) and what real screen readers said is on [Screen reader results](docs/src/content/docs/guides/screen-reader-results.mdx); the open decisions on both (the support policy, testing the floor, tests by people) are listed on the road to 1.0.
 
 ## Current State
 
