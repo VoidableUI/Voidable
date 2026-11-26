@@ -51,9 +51,11 @@ jobs:
 
   # Real-browser suite (tests/browser): Chromium, Firefox and WebKit against
   # the built packages. Kept out of `mise run ci`, which needs no browsers.
+  # 1,769 tests in three engines take 21 to 26 minutes on a hosted runner; at a
+  # 25-minute limit, slower runners were cancelled a few tests from the end.
   browser:
     runs-on: ubuntu-24.04
-    timeout-minutes: 25
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
 
