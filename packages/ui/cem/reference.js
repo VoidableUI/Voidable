@@ -143,7 +143,7 @@ export function collectElements(manifest, supplement) {
     }
   }
   // CSS-only parts of components (declared in voidParts) and the styled patterns.
-  const addCss = (tag, description, attributes, parents, owner) => {
+  const addCss = (tag, description, attributes, parents, owner, parts) => {
     if (seen.has(tag)) return;
     seen.add(tag);
     elements.push({
@@ -158,11 +158,15 @@ export function collectElements(manifest, supplement) {
       parents,
       requires: [],
       hints: {},
+      parts,
     });
   };
   const visit = (owner, list) => {
     for (const p of list) {
-      if (p.cssOnly) addCss(p.tag, p.description, p.attributes, [owner], owner);
+      if (p.cssOnly) {
+        const own = p.parts ? { children: p.children ?? 'any', ordered: p.ordered, transparent: p.transparent, parts: p.parts } : undefined;
+        addCss(p.tag, p.description, p.attributes, [owner], owner, own);
+      }
       if (p.parts) visit(p.tag, p.parts.parts ?? p.parts);
     }
   };
