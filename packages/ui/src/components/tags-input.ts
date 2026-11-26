@@ -3,6 +3,9 @@ import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
 import { InternalsFormControl, type FormSubmission } from '../form-control.js';
 import { valueJsonList } from '../value-list.js';
+import { useProjection } from '../projection.js';
+
+useProjection();
 
 export type TagValue = string | { text: string; color?: string };
 

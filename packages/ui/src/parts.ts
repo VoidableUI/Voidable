@@ -102,6 +102,10 @@ export class PartsController implements ReactiveController, MorphParticipant {
   /** Attribute names the observer watches: every name ever owned. */
   private readonly _names = new Set<string>();
   private _syncing = false;
+  /** The observer is registered on the host (it is after the first sync of a connection). */
+  private _observing = false;
+  /** A sync owned a name the registered filter does not list yet. */
+  private _namesDirty = false;
   /** Counts sync passes, so a pass can sweep what the previous one wrote and this one did not. */
   private _pass = 0;
 
@@ -154,7 +158,13 @@ export class PartsController implements ReactiveController, MorphParticipant {
     map.set(name, { ...owned, pass: this._syncing ? this._pass : (map.get(name)?.pass ?? 0) });
     if (!this._names.has(name)) {
       this._names.add(name);
-      if (this._observer) this._observe();
+      // A name new to this parent widens the filter. Registering again is not cheap (a connected parent of
+      // five parts learns eight names in its first sync), so during a sync it waits for the end of it, and a
+      // parent that is not observing yet registers once, after its first sync.
+      if (this._observing) {
+        if (this._syncing) this._namesDirty = true;
+        else this._observe();
+      }
     }
   }
 
@@ -272,12 +282,13 @@ export class PartsController implements ReactiveController, MorphParticipant {
 
   hostConnected(): void {
     this._observer ??= new MutationObserver(this._onMutations);
-    this._observe();
     this.sync();
+    if (!this._observing) this._observe();
   }
 
   hostDisconnected(): void {
     this._observer?.disconnect();
+    this._observing = false;
   }
 
   /** Re-wires now (normally it happens on its own). */
@@ -304,6 +315,10 @@ export class PartsController implements ReactiveController, MorphParticipant {
     } finally {
       this._syncing = false;
     }
+    if (this._namesDirty) {
+      this._namesDirty = false;
+      this._observe(true);
+    }
     // Our own writes produce records too; they are only an echo.
     this._observer?.takeRecords();
   }
@@ -318,15 +333,19 @@ export class PartsController implements ReactiveController, MorphParticipant {
     });
   }
 
-  private _observe(): void {
+  /** `echo`: called at the end of a sync, where what is pending is only the echo of its own writes. */
+  private _observe(echo = false): void {
     const observer = this._observer;
     if (!observer || !this.host.isConnected) return;
     // A fresh registration: observing the same node again should replace the
     // options, but not every DOM does (happy-dom keeps the first filter). Keep
     // what was pending; outside a sync it is someone else's change.
-    const pending = observer.takeRecords();
-    observer.disconnect();
-    if (pending.length && !this._syncing) queueMicrotask(() => this._onMutations(pending));
+    if (this._observing) {
+      const pending = observer.takeRecords();
+      observer.disconnect();
+      if (pending.length && !echo && !this._syncing) queueMicrotask(() => this._onMutations(pending));
+    }
+    this._observing = true;
     observer.observe(this.host, {
       childList: true,
       subtree: true,

@@ -27,8 +27,8 @@ const { SRC, DIST } = L;
 const generatedOnly = process.argv.includes('--generated-only');
 
 // ── The one generated source file ───────────────────────────────────────────
-const FOCUS_RING = (S) => {
-  const roots = `:is(${S.join(', ')})`;
+const FOCUS_RING = (tags) => {
+  const roots = `:is(${L.resetRoots(tags).join(', ')})`;
   return `
 /* Forced colours: many components replace the outline with a shadow or a
    border colour for focus, and forced colours drop shadows. Restore a real

@@ -2,6 +2,9 @@ import { html, nothing, type PropertyValues } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
 import { PartsController } from '../parts.js';
+import { useProjection } from '../projection.js';
+
+useProjection();
 
 /**
  * Native dropdown for small option sets in forms where a simple pick-one is sufficient.

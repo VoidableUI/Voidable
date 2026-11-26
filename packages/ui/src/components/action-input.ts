@@ -4,6 +4,9 @@ import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
 import { NativeFormControl } from '../form-control.js';
 import { dropReflectedValue, valueReflection } from '../secret-value.js';
+import { useProjection } from '../projection.js';
+
+useProjection();
 
 /** Input field with an attached icon button — used for copy-to-clipboard inputs, search boxes, and similar patterns. */
 export class VoidActionInput extends NativeFormControl(VoidElement) {

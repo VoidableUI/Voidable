@@ -2,6 +2,9 @@ import { html, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
 import { InternalsFormControl, type FormSubmission } from '../form-control.js';
+import { useProjection } from '../projection.js';
+
+useProjection();
 
 /** Drag-and-drop file picker for document uploads, image attachment flows, and import wizards. */
 export class VoidFileUpload extends InternalsFormControl(VoidElement) {

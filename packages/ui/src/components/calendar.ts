@@ -5,6 +5,9 @@ import { live } from 'lit/directives/live.js';
 import { InternalsFormControl } from '../form-control.js';
 import { OverlayController } from '../overlay.js';
 import { inlineKeys, uid } from '../keyboard.js';
+import { useProjection } from '../projection.js';
+
+useProjection();
 
 /* ── Helpers ── */
 

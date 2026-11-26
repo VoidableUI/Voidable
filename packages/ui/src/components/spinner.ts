@@ -1,6 +1,9 @@
 import { html } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
+import { useProjection } from '../projection.js';
+
+useProjection();
 
 /** Indeterminate loading indicator for async operations, button loading states, and inline fetching. */
 export class VoidSpinner extends VoidElement {

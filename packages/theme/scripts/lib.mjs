@@ -178,12 +178,32 @@ export function closure(name, ownerOfTag) {
 
 // ── Scoped reset ────────────────────────────────────────────────────────────
 
+/** The words a part tag ends in (`void-<component>-<region>`, see "Explicit parts" in AGENTS.md). */
+const PART_SUFFIX = /-(trigger|content|title|description|body|actions|header|footer|item|list|separator|close)$/;
+
+/**
+ * The tags the reset names: `tags` without the parts whose component is in `tags` too. A part is always inside
+ * its component, so `void-card *` already reaches `void-card-body` and everything in it. Every tag in an
+ * `:is()` list is compared on every element, and every ancestor of every element is compared with the list
+ * again (the browser cannot hash `:is()`), so the list's length is paid per element of every page that
+ * loads the theme: 164 tags cost the 500-row table a quarter of its first render (#77).
+ */
+export function resetRoots(tags) {
+  const set = new Set(tags);
+  return [...set]
+    .filter((t) => {
+      const m = PART_SUFFIX.exec(t);
+      return !(m && set.has(t.slice(0, m.index)));
+    })
+    .sort();
+}
+
 /**
  * The reset, scoped to the given tags and everything inside them. Nothing
  * outside a `void-*` element is touched. `:where()` keeps specificity at zero.
  */
 export function resetCss(tags) {
-  const S = [...tags].sort();
+  const S = resetRoots(tags);
   const roots = `:is(${S.join(', ')})`;
   const any = `:where(${roots}, ${roots} *)`;
   const within = (sel) => `:where(${roots} :is(${sel}))`;

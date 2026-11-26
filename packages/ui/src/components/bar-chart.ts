@@ -2,6 +2,9 @@ import { html, svg, nothing } from 'lit';
 import { VoidElement } from '../base.js';
 import { property, state } from 'lit/decorators.js';
 import { LinearScale, BandScale } from './charts/scale.js';
+import { useProjection } from '../projection.js';
+
+useProjection();
 
 export interface BarChartSeries {
   name: string;

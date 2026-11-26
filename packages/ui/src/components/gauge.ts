@@ -1,6 +1,9 @@
 import { html, svg, nothing } from 'lit';
 import { VoidElement } from '../base.js';
 import { property, state } from 'lit/decorators.js';
+import { useProjection } from '../projection.js';
+
+useProjection();
 
 export interface GaugeZone {
   from: number;
