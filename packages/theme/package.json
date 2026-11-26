@@ -53,7 +53,7 @@
   },
   "scripts": {
     "build": "node scripts/build.mjs && node scripts/export-tokens.mjs",
-    "test": "node --test test/",
+    "test": "node --test \"test/*.test.mjs\"",
     "generate": "node scripts/build.mjs --generated-only"
   },
   "devDependencies": {
