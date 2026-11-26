@@ -60,8 +60,15 @@ describe('VoidBadge', () => {
   });
 
   describe('ARIA', () => {
-    it('sets role="status" when connected', () => {
+    it('is not a live region: no role by default', () => {
       const el = document.createElement('void-badge') as VoidBadge;
+      document.body.appendChild(el);
+      expect(el.hasAttribute('role')).toBe(false);
+    });
+
+    it('keeps a role="status" the author opts in with', () => {
+      const el = document.createElement('void-badge') as VoidBadge;
+      el.setAttribute('role', 'status');
       document.body.appendChild(el);
       expect(el.getAttribute('role')).toBe('status');
     });

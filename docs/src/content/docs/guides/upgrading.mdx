@@ -22,8 +22,8 @@ voidable check src                           # React and the others
 It reads HTML, JSX and TSX, ERB, HEEx, Blade, Vue, Svelte, Astro, Lit templates and Markdown. Each old form is a `legacy-markup` finding that names what to write instead, for example:
 
 ```text
-app/views/layouts/_nav.html.erb:12:3  legacy-markup  active on <void-hamburger> was renamed in 0.8; write open
-app/views/layouts/_nav.html.erb:12:3  legacy-markup  <void-hamburger> no longer dispatches void-toggle (removed in 0.8); listen for void-open and void-close on the element itself (they do not bubble; detail.reason says why)
+app/views/layouts/_nav.html.erb:12:3  legacy-markup  active on a nav menu item was renamed in 0.8; write current
+app/views/layouts/_nav.html.erb:12:3  legacy-markup  <void-collapsible> no longer dispatches void-toggle (removed in 0.8); listen for void-open and void-close on the element itself (they do not bubble; detail.reason says why)
 ```
 
 Listeners count: `voidable check` reads `@void-…`, `x-on:void-…`, `x-void-on:void-…`, `onvoid-…`, a Stimulus `data-action="void-…->controller#method"` and the LiveView bridge's `data-void-events` on a `<void-*>` element. A listener added from script (`addEventListener('void-toggle', …)`) is not markup: load the [development warnings](/getting-started/development-warnings/) once in development, and they report it, with the same advice, the first time it is added.
@@ -71,6 +71,31 @@ Components with regions are written with part elements, and the implicit forms a
 
 <PartsMigration />
 
+## Charts and gauges (0.10)
+
+Charts take their data from markup and carry a data table; two things in existing code change:
+
+- **The host role is `figure`, not `img`.** A chart is a figure named by its `aria-label` that holds a visually hidden data table; the drawing is `aria-hidden` and the role and `aria-label` that were on the `<svg>` are gone, so a test that looked for `role="img"` or `getByRole('img', { name })` on a chart looks for `figure` (or the `table`) now. Nothing else in your markup changes: keep the `aria-label`, it is the caption of the table.
+- **LiveView: `VoidProps` is gone.** The `bar_chart`, `line_chart`, `donut_chart` and `gauge` components write `data` (and `zones`) as JSON attributes, so no hook and no generated `id` is needed. Remove `VoidProps` from custom code that used it for charts; if you spread `VoidHooks` into your `LiveSocket`, nothing else changes. `data-void-props` is no longer rendered.
+
+New: the `data` attribute (a gauge's `zones` too) with JSON, `show-table`, and the adapter helpers (React `data` as an attribute, Rails `void_bar_chart` and the other chart helpers, Blade `<x-voidable::bar-chart>` and the other chart components). See [Accessibility](/guides/accessibility/#charts-and-gauges) and the [conventions](/guides/conventions/).
+
 ## 4. Check again
 
 Run `voidable check` until it reports nothing, then run your application with the development warnings loaded and open each page once: a clean console means the markup is right.
+
+## 5. Roles and names (0.10)
+
+These changes make the role and name each component exposes match the WAI-ARIA practices. They need no checker: they change what a screen reader hears, and a few things you wrote may have to move.
+
+- **File upload** fires `void-reject` (it does not bubble) for a file refused by `accept`, `max-size` or, with `multiple` off, for a further file in one choice (`detail.rejected` is a list of `{ file, reason }`, `reason` being `type`, `size` or `count`), and sets `error` to a message while it does. Without `multiple` a drop of several files used to keep all of them; it now keeps the first and rejects the rest as `count`. If you showed your own error for a rejected file, listen for `void-reject` instead. An `error` you set yourself is never cleared by the zone.
+- **Badge** is not a live region any more: it had `role="status"`, so every badge was announced as it was inserted. Write `role="status"` on the one badge whose change must be heard.
+- **Alert** is `role="alert"` for the `error` and `warning` colours and `role="status"` for every other colour (it was always `alert`). Write `role="alert"` on an alert of another colour that must interrupt.
+- **Banner** is never `role="banner"` (the page header landmark, which is invalid inside `<main>` and more than once). It follows the alert: `role="alert"` for the `error` and `warning` colours, `role="status"` for every other colour. Write `role="region"` with an `aria-label` to make it a landmark; a role you write is kept.
+- **Nav bar** stays `role="navigation"`. It adds no role when it sits inside a `<nav>` or an element with a role, or already wraps a `<nav>`, so landmarks never nest (a bar around a `<nav>` used to make two). With more than one navigation landmark on a page, name each with `aria-label`; with one, a name is optional.
+- **Stat** is a `group` named by its `label` (it was an unnamed `figure`), and has no role without a label.
+- **Carousel** slides are named `1 of 4`, not `Slide 1 of 4`, which a reader said twice with the "slide" role description; the slides are not a live region while `autoplay` is on.
+- **Card title** is unchanged and still not a heading, because its level depends on the page: write the heading element you want inside it, `<void-card-title><h3>Billing</h3></void-card-title>`.
+- **Names the checker asks for.** `voidable check` (rule `missing-name`) and the development warnings now report a `<void-carousel>`, `<void-table>`, `<void-panel>` and `<void-hamburger>` with no name, and a `<void-progress>` as before. Name a carousel and a hamburger with `aria-label` (say what they show and what they open: `aria-label="Main navigation"`); a panel by its `<void-panel-title>` part or `aria-label`; a table by a `<caption>` in the native table or by `aria-label` (or `label`) on the `<void-table>`, which the component copies onto the table. A hamburger with no name is still called "Menu" (and "Close menu" while open); with your name it keeps that name while open, because `aria-expanded` says the rest.
+- **Hamburger `void-open` reason**: Enter and Space now report `keyboard`, as every other overlay does, and a click still reports `trigger`. A handler that compared `detail.reason` with `trigger` to mean "the user opened it" must accept both; `void-close` is still `trigger`.
+- **Date picker** takes a typed date. The field was read-only; it is a text field now, so Space types a space once text has been typed (it still opens the calendar on an untouched field, as Enter does), and a typed date is read on blur and Enter in `format` or as ISO. A refused date keeps the text and sets `error` (the new attribute, with `aria-invalid` and a described-by message) and blocks form submission; `void-change` fires only for a date that was taken, and `detail.date` is `null` when the field is cleared. If you wrapped the field to keep users from typing, listen for `void-change` as before: nothing else changed.

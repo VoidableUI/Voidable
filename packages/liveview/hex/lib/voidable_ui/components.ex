@@ -1845,6 +1845,7 @@ defmodule VoidableUI.Components do
   attr :placeholder, :string, default: nil
   attr :format, :string, default: nil
   attr :color, :string, default: nil
+  attr :error, :string, default: nil
   attr :events, :any, default: nil, doc: @events_doc
   attr :rest, :global
 
@@ -1863,6 +1864,7 @@ defmodule VoidableUI.Components do
       placeholder={@placeholder}
       format={@format}
       color={@color}
+      error={@error}
       phx-hook={void_hook(@events)}
       data-void-events={void_events(@events, "void-change")}
       {@rest}
@@ -2211,52 +2213,46 @@ defmodule VoidableUI.Components do
   end
 
   # ---------------------------------------------------------------------------
-  # Charts (data is a property of the element, set by the VoidProps hook)
+  # Charts (data is the JSON `data` attribute, so the first static render already draws)
   # ---------------------------------------------------------------------------
 
   @chart_data_doc """
-  The chart's data, a map that is encoded as JSON and assigned to the element's `data` property by
-  the `VoidProps` hook (register `VoidHooks` from `@voidable/ui-liveview`). Keys may be atoms or
-  strings. Render a new value to update the chart; an unchanged value does not re-animate it.
-  The chart draws once the socket has connected: the first, static render is an empty element.
+  The chart's data, a map that is encoded as JSON into the element's `data` attribute (keys may be atoms
+  or strings), so the first, static render already contains it and the chart draws with no script and no
+  hook. A string is taken as JSON already. Render a new value to update the chart; an unchanged value
+  leaves the attribute alone and does not animate the chart again.
   """
 
-  # The data-void-props value for the properties that are set, or nil (no hook) when none is.
-  defp void_props(props) do
-    case Enum.reject(props, fn {_name, value} -> is_nil(value) end) do
-      [] -> nil
-      set -> Phoenix.json_library().encode!(Map.new(set))
-    end
-  end
+  # The JSON text of a chart's data (a map or list), or nil to leave the attribute off.
+  defp chart_json(nil), do: nil
+  defp chart_json(json) when is_binary(json), do: json
+  defp chart_json(data), do: Phoenix.json_library().encode!(data)
 
   @doc """
   Renders a `<void-bar-chart>`. Pass `data` as `%{series: [%{name: "2025", values: [4, 8]}], labels: ["Q1", "Q2"]}`.
 
-  Set `aria_label` (the chart is an image to assistive technology) and state the key figures in the
-  text around it.
+  Set `aria_label`: the drawing is hidden from assistive technology and a data table captioned with it
+  carries the values; `show_table` shows that table below the chart.
   """
-  attr :id, :string, default: nil
   attr :data, :any, default: nil, doc: @chart_data_doc
   attr :height, :integer, default: nil
   attr :show_value, :boolean, default: false
+  attr :show_table, :boolean, default: false
   attr :variant, :string, default: nil
   attr :stagger, :integer, default: nil
   attr :aria_label, :string, default: nil
   attr :rest, :global
 
   def bar_chart(assigns) do
-    assigns = assign(assigns, :props, void_props(data: assigns.data))
-
     ~H"""
     <void-bar-chart
-      id={@id || auto_id("void-bar-chart", @rest)}
+      data={chart_json(@data)}
       height={@height}
       show-value={@show_value}
+      show-table={@show_table}
       variant={@variant}
       stagger={@stagger}
       aria-label={@aria_label}
-      phx-hook={@props && "VoidProps"}
-      data-void-props={@props}
       {@rest}
     />
     """
@@ -2265,31 +2261,28 @@ defmodule VoidableUI.Components do
   @doc """
   Renders a `<void-line-chart>`. Pass `data` as `%{series: [%{name: "Visitors", values: [3, 5, 4]}], labels: ["Mon", "Tue", "Wed"]}`.
 
-  Set `aria_label` (the chart is an image to assistive technology) and state the key figures in the
-  text around it.
+  Set `aria_label`: the drawing is hidden from assistive technology and a data table captioned with it
+  carries the values; `show_table` shows that table below the chart.
   """
-  attr :id, :string, default: nil
   attr :data, :any, default: nil, doc: @chart_data_doc
   attr :height, :integer, default: nil
   attr :show_value, :boolean, default: false
+  attr :show_table, :boolean, default: false
   attr :variant, :string, default: nil
   attr :interpolation, :string, default: nil
   attr :aria_label, :string, default: nil
   attr :rest, :global
 
   def line_chart(assigns) do
-    assigns = assign(assigns, :props, void_props(data: assigns.data))
-
     ~H"""
     <void-line-chart
-      id={@id || auto_id("void-line-chart", @rest)}
+      data={chart_json(@data)}
       height={@height}
       show-value={@show_value}
+      show-table={@show_table}
       variant={@variant}
       interpolation={@interpolation}
       aria-label={@aria_label}
-      phx-hook={@props && "VoidProps"}
-      data-void-props={@props}
       {@rest}
     />
     """
@@ -2299,10 +2292,9 @@ defmodule VoidableUI.Components do
   Renders a `<void-donut-chart>`. Pass `data` as `%{segments: [%{name: "Search", value: 40}, %{name: "Direct", value: 25}]}`.
 
   `gaps` is `true` (a small gap), `false` or a number (percent of the ring given to gaps). Set
-  `aria_label` (the chart is an image to assistive technology) and state the key figures in the text
-  around it.
+  `aria_label`: the drawing is hidden from assistive technology and a data table captioned with it
+  carries the values; `show_table` shows that table below the chart.
   """
-  attr :id, :string, default: nil
   attr :data, :any, default: nil, doc: @chart_data_doc
   attr :size, :integer, default: nil
   attr :inner, :float, default: nil
@@ -2310,24 +2302,22 @@ defmodule VoidableUI.Components do
   attr :variant, :string, default: nil
   attr :show_value, :boolean, default: false
   attr :show_total, :boolean, default: false
+  attr :show_table, :boolean, default: false
   attr :aria_label, :string, default: nil
   attr :rest, :global
 
   def donut_chart(assigns) do
-    assigns = assign(assigns, :props, void_props(data: assigns.data))
-
     ~H"""
     <void-donut-chart
-      id={@id || auto_id("void-donut-chart", @rest)}
+      data={chart_json(@data)}
       size={@size}
       inner={@inner}
       gaps={@gaps}
       variant={@variant}
       show-value={@show_value}
       show-total={@show_total}
+      show-table={@show_table}
       aria-label={@aria_label}
-      phx-hook={@props && "VoidProps"}
-      data-void-props={@props}
       {@rest}
     />
     """
@@ -2336,21 +2326,20 @@ defmodule VoidableUI.Components do
   @doc """
   Renders a `<void-gauge>`.
 
-  For a single reading pass `value` (with `min`, `max` and `unit`): it is a plain attribute and needs no
-  hook. For a gauge split into parts pass `data` as `%{segments: [%{name: "Used", value: 40}]}`, and
-  for colour bands pass `zones` as `[%{from: 0, to: 60, color: "success"}]`; both are properties of the
-  element and are set by the `VoidProps` hook. Set `aria_label` and state the reading in the text
-  around the gauge.
+  For a single reading pass `value` (with `min`, `max` and `unit`). For a gauge split into parts pass
+  `data` as `%{segments: [%{name: "Used", value: 40}]}`, and for colour bands pass `zones` as
+  `[%{from: 0, to: 60, color: "success"}]`; both are encoded as JSON attributes. Set `aria_label`: the
+  drawing is hidden from assistive technology and a data table captioned with it carries the reading;
+  `show_table` shows that table below the gauge.
 
   `circular` is `"full"`, `"semi"` or `"triple"`; `gaps` is `true`, `false` or a number.
   """
-  attr :id, :string, default: nil
   attr :value, :any, default: nil
   attr :min, :any, default: nil
   attr :max, :any, default: nil
   attr :unit, :string, default: nil
   attr :data, :any, default: nil, doc: @chart_data_doc
-  attr :zones, :any, default: nil, doc: "Colour bands, a list of `%{from: 0, to: 60, color: \"success\"}`, set like `data`."
+  attr :zones, :any, default: nil, doc: "Colour bands, a list of `%{from: 0, to: 60, color: \"success\"}`, encoded like `data`."
   attr :size, :integer, default: nil
   attr :thickness, :integer, default: nil
   attr :circular, :string, default: nil
@@ -2363,19 +2352,19 @@ defmodule VoidableUI.Components do
   attr :hide_tick_max, :boolean, default: false
   attr :segments_sort, :string, default: nil
   attr :gaps, :any, default: nil
+  attr :show_table, :boolean, default: false
   attr :aria_label, :string, default: nil
   attr :rest, :global
 
   def gauge(assigns) do
-    assigns = assign(assigns, :props, void_props(data: assigns.data, zones: assigns.zones))
-
     ~H"""
     <void-gauge
-      id={@id || auto_id("void-gauge", @rest)}
       value={@value}
       min={@min}
       max={@max}
       unit={@unit}
+      data={chart_json(@data)}
+      zones={chart_json(@zones)}
       size={@size}
       thickness={@thickness}
       circular={@circular}
@@ -2388,9 +2377,8 @@ defmodule VoidableUI.Components do
       hide-tick-max={@hide_tick_max}
       segments-sort={@segments_sort}
       gaps={@gaps}
+      show-table={@show_table}
       aria-label={@aria_label}
-      phx-hook={@props && "VoidProps"}
-      data-void-props={@props}
       {@rest}
     />
     """

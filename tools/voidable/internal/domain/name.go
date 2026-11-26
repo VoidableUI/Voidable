@@ -40,7 +40,8 @@ func checkName(el *Element, t Tag) []Finding {
 		return nil
 	}
 	for _, part := range rule.Parts {
-		if slices.Contains(t.Content.Tags, part) {
+		// A void-* part, or a native element the component takes as its part (a table's <caption>).
+		if slices.Contains(t.Content.Tags, part) || slices.Contains(t.Content.Native, part) {
 			return nil
 		}
 	}

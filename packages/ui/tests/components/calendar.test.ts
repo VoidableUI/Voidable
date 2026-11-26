@@ -881,3 +881,168 @@ describe('VoidCalendar accessibility', () => {
     expect(tabStops().map(b => b.dataset.date)).toEqual(['2024-07-06']);
   });
 });
+
+describe('VoidDatePicker typed entry', () => {
+  let el: VoidDatePicker;
+  const input = () => el.querySelector('.void-date-picker-input') as HTMLInputElement;
+  const type = async (text: string) => {
+    input().value = text;
+    input().dispatchEvent(new Event('input', { bubbles: true }));
+    await el.updateComplete;
+  };
+  const blur = async () => {
+    input().dispatchEvent(new FocusEvent('blur'));
+    await el.updateComplete;
+  };
+  const enter = async () => {
+    input().dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }));
+    await el.updateComplete;
+  };
+  let changes: unknown[];
+
+  beforeEach(async () => {
+    el = document.createElement('void-date-picker') as VoidDatePicker;
+    el.min = '2026-01-01';
+    el.max = '2026-12-31';
+    document.body.appendChild(el);
+    await el.updateComplete;
+    changes = [];
+    el.addEventListener('void-change', e => changes.push((e as CustomEvent).detail));
+  });
+
+  afterEach(() => {
+    el.remove();
+  });
+
+  it('is no longer read-only', () => {
+    expect(input().hasAttribute('readonly')).toBe(false);
+  });
+
+  it('takes a date in the format on blur and fires void-change once with the ISO value', async () => {
+    await type('11/03/2026');
+    expect(el.value).toBe('');
+    await blur();
+    expect(el.value).toBe('2026-11-03');
+    expect(el.getAttribute('value')).toBe('2026-11-03');
+    expect(changes).toHaveLength(1);
+    expect((changes[0] as { value: string }).value).toBe('2026-11-03');
+    await blur();
+    expect(changes).toHaveLength(1);
+  });
+
+  it('takes ISO whatever the format, and a one-digit month and day', async () => {
+    await type('2026-02-05');
+    await blur();
+    expect(el.value).toBe('2026-02-05');
+    el.format = 'DD.MM.YYYY';
+    await type('7.3.2026');
+    await blur();
+    expect(el.value).toBe('2026-03-07');
+    expect(input().value).toBe('07.03.2026');
+  });
+
+  it('takes the text on Enter without opening the calendar', async () => {
+    await type('04/05/2026');
+    await enter();
+    expect(el.value).toBe('2026-04-05');
+    expect(el.open).toBe(false);
+    expect(changes).toHaveLength(1);
+  });
+
+  it('Enter on text that was not edited still opens the calendar', async () => {
+    await enter();
+    expect(el.open).toBe(true);
+  });
+
+  it('keeps the calendar in step with the typed date', async () => {
+    el.open = true;
+    await el.updateComplete;
+    await type('11/03/2026');
+    await blur();
+    await el.updateComplete;
+    expect(el.querySelector('void-calendar')!.getAttribute('value')).toBe('2026-11-03');
+  });
+
+  it.each([
+    ['text that is not a date', 'tomorrow', 'MM/DD/YYYY'],
+    ['a day that does not exist', '02/30/2026', 'MM/DD/YYYY'],
+    ['a date before min', '12/31/2025', 'before'],
+    ['a date after max', '01/01/2027', 'after'],
+  ])('refuses %s: keeps the text, sets error, aria-invalid and a description', async (_what, text, hint) => {
+    await type(text);
+    await blur();
+    expect(el.value).toBe('');
+    expect(changes).toHaveLength(0);
+    expect(input().value).toBe(text);
+    expect(el.error).not.toBe('');
+    expect(el.hasAttribute('error')).toBe(true);
+    expect(input().getAttribute('aria-invalid')).toBe('true');
+    const message = el.querySelector('.void-date-picker-error')!;
+    expect(input().getAttribute('aria-describedby')).toBe(message.id);
+    if (hint === 'before') expect(message.textContent).toContain('later');
+    else if (hint === 'after') expect(message.textContent).toContain('earlier');
+    else expect(message.textContent).toContain(hint);
+  });
+
+  it('survives a re-render while the text is refused, and clears when a valid date is typed', async () => {
+    await type('nope');
+    await blur();
+    el.color = 'warning';
+    await el.updateComplete;
+    expect(input().value).toBe('nope');
+    await type('06/15/2026');
+    await blur();
+    expect(el.error).toBe('');
+    expect(input().hasAttribute('aria-invalid')).toBe(false);
+    expect(el.querySelector('.void-date-picker-error')).toBeNull();
+    expect(el.value).toBe('2026-06-15');
+  });
+
+  it('does not wipe text being typed when an unrelated property is patched mid-edit', async () => {
+    await type('06/1');
+    el.size = 'lg';
+    el.placeholder = 'Pick';
+    await el.updateComplete;
+    expect(input().value).toBe('06/1');
+  });
+
+  it('a server patch of value replaces the typed text and the refusal', async () => {
+    await type('nope');
+    await blur();
+    el.setAttribute('value', '2026-05-05');
+    await el.updateComplete;
+    expect(input().value).toBe('05/05/2026');
+    expect(el.error).toBe('');
+  });
+
+  it('an empty field clears the value', async () => {
+    el.value = '2026-05-05';
+    await el.updateComplete;
+    await type('');
+    await blur();
+    expect(el.value).toBe('');
+    expect(changes).toEqual([{ value: '', date: null }]);
+  });
+
+  it('leaves an error the author set alone', async () => {
+    el.error = 'Server says no';
+    await el.updateComplete;
+    await type('06/15/2026');
+    await blur();
+    expect(el.error).toBe('Server says no');
+    expect(el.querySelector('.void-date-picker-error')).toBeNull();
+  });
+
+  it('picking a day in the calendar discards a refused text', async () => {
+    await type('nope');
+    await blur();
+    el.open = true;
+    await el.updateComplete;
+    const cal = el.querySelector('void-calendar')!;
+    cal.dispatchEvent(new CustomEvent('void-change', { detail: { value: '2026-03-03', date: new Date(2026, 2, 3) } }));
+    await el.updateComplete;
+    expect(el.value).toBe('2026-03-03');
+    expect(el.error).toBe('');
+    expect(input().value).toBe('03/03/2026');
+  });
+});

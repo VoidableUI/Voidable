@@ -51,7 +51,7 @@
   "void-date-picker": {
     "group": "forms",
     "events": {
-      "void-change": "Fires when the user picks a day. `detail.value` is the ISO date and `detail.date` the same day as a `Date`."
+      "void-change": "Fires when the user picks a day, or types a date that is accepted (on blur or Enter), once per change. `detail.value` is the ISO date (empty when the field was cleared) and `detail.date` the same day as a `Date` (`null` when cleared). A typed date that is refused fires nothing; `error` says why."
     }
   },
   "void-calendar": {
@@ -75,7 +75,8 @@
   "void-file-upload": {
     "group": "forms",
     "events": {
-      "void-change": "Fires when the chosen files change, by dropping, browsing or removing one. `detail.value` (and `detail.files`) is the list of accepted `File`s."
+      "void-change": "Fires when the chosen files change, by dropping, browsing or removing one. `detail.value` (and `detail.files`) is the list of accepted `File`s.",
+      "void-reject": "Fires, without bubbling, when a dropped or browsed file is refused. `detail.rejected` is a list of `{ file, reason }`, `reason` being `type` (not matched by `accept`), `size` (over `max-size`) or `count` (a further file while `multiple` is off). The zone also sets `error` to a message, which makes the drop zone `aria-invalid` and described by it; the next accepted selection clears it."
     }
   },
   "void-input": {
@@ -261,7 +262,7 @@
   "void-hamburger": {
     "group": "navigation",
     "events": {
-      "void-open": "Fires on the hamburger when the user opens it (`detail.reason` is `trigger`). Does not bubble.",
+      "void-open": "Fires on the hamburger when the user opens it (`detail.reason` is `trigger` for a click and `keyboard` for Enter or Space). Does not bubble.",
       "void-close": "Fires on the hamburger when the user closes it (`detail.reason` is `trigger`). Does not bubble."
     }
   },
@@ -432,17 +433,18 @@
   },
   "void-bar-chart": {
     "group": "charts",
-    "script": "const chart = document.querySelector('void-bar-chart');\nchart.data = {\n  labels: ['Q1', 'Q2', 'Q3', 'Q4'],\n  series: [\n    { name: '2025', values: [120, 180, 150, 210] },\n    { name: '2026', values: [150, 220, 190, 260] },\n  ],\n};"
+    "children": "None. Give the data as the `data` attribute (JSON) or the property; the chart draws a visually hidden data table from it for assistive technology, and `show-table` shows it below the chart."
   },
   "void-donut-chart": {
     "group": "charts",
-    "script": "const chart = document.querySelector('void-donut-chart');\nchart.data = {\n  segments: [\n    { name: 'Search', value: 540 },\n    { name: 'Direct', value: 320 },\n    { name: 'Referral', value: 180 },\n  ],\n};"
+    "children": "None. Give the data as the `data` attribute (JSON) or the property; the chart draws a visually hidden data table from it for assistive technology, and `show-table` shows it below the chart."
   },
   "void-gauge": {
-    "group": "charts"
+    "group": "charts",
+    "children": "None. A single reading is the `value`, `min`, `max` and `unit` attributes; segments are the `data` attribute (JSON) or property and colour bands the `zones` attribute or property. A visually hidden data table carries the reading for assistive technology, and `show-table` shows it below the gauge."
   },
   "void-line-chart": {
     "group": "charts",
-    "script": "const chart = document.querySelector('void-line-chart');\nchart.data = {\n  labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],\n  series: [{ name: 'Visitors', values: [320, 410, 380, 520, 610, 450, 390] }],\n};"
+    "children": "None. Give the data as the `data` attribute (JSON) or the property; the chart draws a visually hidden data table from it for assistive technology, and `show-table` shows it below the chart."
   }
 }

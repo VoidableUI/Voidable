@@ -197,7 +197,7 @@ interface SplitProps {
   events: Record<string, EventListener>;
 }
 
-function splitProps(props: Record<string, unknown>): SplitProps {
+function splitProps(props: Record<string, unknown>, jsonProps: readonly string[] = []): SplitProps {
   const react: Record<string, unknown> = {};
   const elementProps: Record<string, unknown> = {};
   const events: Record<string, EventListener> = {};
@@ -212,6 +212,10 @@ function splitProps(props: Record<string, unknown>): SplitProps {
       react[key] = value;
     } else if (value === undefined) {
       continue;
+    } else if (jsonProps.includes(key)) {
+      // Data that markup can carry (a chart's `data`): written as a JSON attribute, so server rendering
+      // draws it and a client render changes it only when its JSON changes.
+      react[key] = typeof value === 'string' || value === null ? value : JSON.stringify(value);
     } else if (key === 'spellcheck') {
       // The native enumerated attribute, written as "true" or "false" and
       // forwarded by the component to its inner control (#23).
@@ -297,14 +301,24 @@ function useWcProps<E extends HTMLElement>(
 // wrapWc — factory creating forwardRef React components
 // ---------------------------------------------------------------------------
 
+
+/** Props written as JSON attributes, per tag: the element reads them from markup, so server rendering draws them. */
+const JSON_PROPS: Record<string, readonly string[]> = {
+  'void-bar-chart': ['data'],
+  'void-line-chart': ['data'],
+  'void-donut-chart': ['data'],
+  'void-gauge': ['data', 'zones'],
+};
+
 function wrapWc<E extends HTMLElement, P = object>(
   tag: string,
   displayName: string,
 ) {
+  const jsonProps = JSON_PROPS[tag] ?? [];
   const Wrapped = forwardRef<E, VoidProps<P>>((props, externalRef) => {
     const innerRef = useRef<E | null>(null);
 
-    const { react, elementProps, events } = splitProps(props as Record<string, unknown>);
+    const { react, elementProps, events } = splitProps(props as Record<string, unknown>, jsonProps);
     useWcProps(innerRef, elementProps, events);
 
     const setRef = useCallback(
@@ -743,7 +757,7 @@ export const FileUpload = wrapWc<VoidFileUpload, {
   name?: string;
   /** Form validation: the control must have a value. */
   required?: boolean;
-} & VoidEvents<{ Change: { value: File[]; files: File[] } }>>('void-file-upload', 'FileUpload');
+} & VoidEvents<{ Change: { value: File[]; files: File[] }; Reject: { rejected: { file: File; reason: 'type' | 'size' | 'count' }[] } }>>('void-file-upload', 'FileUpload');
 
 export const NavBar = wrapWc<VoidNavBar, {
   sticky?: boolean;
@@ -754,7 +768,7 @@ export const NavBar = wrapWc<VoidNavBar, {
 export const Hamburger = wrapWc<VoidHamburger, {
   open?: boolean;
   size?: 'sm' | 'md' | 'lg';
-} & VoidEvents<{ Open: { reason: 'trigger' }; Close: { reason: 'trigger' } }>>('void-hamburger', 'Hamburger');
+} & VoidEvents<{ Open: { reason: 'trigger' | 'keyboard' }; Close: { reason: 'trigger' } }>>('void-hamburger', 'Hamburger');
 
 export const ComposeInput = wrapWc<VoidComposeInput, {
   value?: string;
@@ -906,11 +920,13 @@ export const DatePicker = wrapWc<VoidDatePicker, {
   placeholder?: string;
   format?: string;
   color?: 'default' | 'error' | 'warning' | 'caution' | 'success' | 'info' | 'notice' | 'highlight';
+  /** Marks the field invalid; the field also sets it when a typed date is refused. */
+  error?: string;
   /** Form field name; the value is submitted under it. */
   name?: string;
   /** Form validation: the control must have a value. */
   required?: boolean;
-} & VoidEvents<{ Change: { value: string; date: Date } } & OverlayEvents>>('void-date-picker', 'DatePicker');
+} & VoidEvents<{ Change: { value: string; date: Date | null } } & OverlayEvents>>('void-date-picker', 'DatePicker');
 
 export const NumberInput = wrapWc<VoidNumberInput, {
   value?: number;
@@ -1070,6 +1086,7 @@ export const BarChart = wrapWc<VoidBarChart, {
   data?: BarChartData;
   height?: number;
   showValue?: boolean;
+  showTable?: boolean;
   variant?: 'filled' | 'outline' | 'wireframe';
   /** Milliseconds between bars as they animate in; 0 animates them together. Default: the theme's. */
   stagger?: number;
@@ -1079,6 +1096,7 @@ export const LineChart = wrapWc<VoidLineChart, {
   data?: LineChartData;
   height?: number;
   showValue?: boolean;
+  showTable?: boolean;
   variant?: 'filled' | 'outline' | 'wireframe';
   interpolation?: 'linear' | 'step';
 }>('void-line-chart', 'LineChart');
@@ -1092,6 +1110,7 @@ export const DonutChart = wrapWc<VoidDonutChart, {
   gaps?: boolean | number;
   variant?: 'filled' | 'outline' | 'wireframe';
   showValue?: boolean;
+  showTable?: boolean;
   showTotal?: boolean;
 }>('void-donut-chart', 'DonutChart');
 
@@ -1107,6 +1126,7 @@ export const Gauge = wrapWc<VoidGauge, {
   circular?: 'full' | 'semi' | 'triple';
   variant?: 'filled' | 'outline' | 'wireframe';
   hideValue?: boolean;
+  showTable?: boolean;
   unitInline?: boolean;
   tickMajor?: number;
   tickMinor?: number;

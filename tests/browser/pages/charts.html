@@ -17,4 +17,18 @@
     // The entrance starts from a frame callback after connecting; let it render.
     await window.__settle(el);
   };
+
+  // Adds markup (charts written with a data attribute, as server HTML would) and resolves once it has
+  // rendered. Elements keep the animation they ask for through their own style.
+  window.addMarkup = async (html) => {
+    const t = document.createElement('template');
+    t.innerHTML = html;
+    const els = [...t.content.children];
+    document.getElementById('root').append(...els);
+    for (const el of els) {
+      await customElements.whenDefined(el.localName);
+      await window.__settle(el);
+      await window.__settle(el);
+    }
+  };
 </script>

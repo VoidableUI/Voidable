@@ -257,6 +257,19 @@ export const scenarios: Scenario[] = [
     ],
   },
   {
+    // A chart is a drawing hidden from the reader plus a visually hidden table of its data (#71): the
+    // reader finds the table by the chart's name and moves through the values like any table.
+    id: 'chart-table',
+    title: 'A chart is read as a data table named by the chart, and a value is read with its series header',
+    page: '/sr-chart',
+    steps: [
+      { reach: { role: 'table', name: 'Visitors by day' }, by: 'table' },
+      { cell: 'down' },
+      { cell: 'right' },
+      { hear: { role: 'cell', name: '120', header: 'Visitors' } },
+    ],
+  },
+  {
     id: 'breadcrumbs',
     title: 'Breadcrumbs are a named navigation landmark of links and the last item is the current page',
     page: '/sr-navigation',

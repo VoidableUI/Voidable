@@ -103,7 +103,9 @@ export type WarningKind =
   /** The element needs an accessible name and nothing gives it one. */
   | 'missing-name'
   /** A page script keeps removing an attribute a component manages on itself; the component stopped restoring it. */
-  | 'attribute-fight';
+  | 'attribute-fight'
+  /** A chart's `data` or `zones` attribute is not valid JSON of the expected shape; the chart draws nothing. */
+  | 'invalid-data';
 
 /** One reported problem. */
 export interface DevWarning {

@@ -162,7 +162,7 @@ describe('VoidTurbo.start', () => {
   });
 
   it('keeps state outside any fixed list: a pressed toggle, a collapsed sidebar, a carousel slide', async () => {
-    document.body.innerHTML = '<void-toggle id="t">B</void-toggle><void-sidebar id="s"></void-sidebar><void-carousel id="c"><void-carousel-content><void-carousel-item>1</void-carousel-item><void-carousel-item>2</void-carousel-item></void-carousel-content></void-carousel>';
+    document.body.innerHTML = '<void-toggle id="t">B</void-toggle><void-sidebar id="s"></void-sidebar><void-carousel id="c" aria-label="Slides"><void-carousel-content><void-carousel-item>1</void-carousel-item><void-carousel-item>2</void-carousel-item></void-carousel-content></void-carousel>';
     await settle();
     stop = VoidTurbo.start();
     const [t, s, c] = ['t', 's', 'c'].map(id => document.getElementById(id) as any);
@@ -172,7 +172,7 @@ describe('VoidTurbo.start', () => {
     await settle();
     await morph(t, '<void-toggle id="t">B</void-toggle>');
     await morph(s, '<void-sidebar id="s"></void-sidebar>');
-    await morph(c, '<void-carousel id="c"><void-carousel-content><void-carousel-item>1</void-carousel-item><void-carousel-item>2</void-carousel-item></void-carousel-content></void-carousel>');
+    await morph(c, '<void-carousel id="c" aria-label="Slides"><void-carousel-content><void-carousel-item>1</void-carousel-item><void-carousel-item>2</void-carousel-item></void-carousel-content></void-carousel>');
     expect([t.pressed, s.collapsed, c.active]).toEqual([true, true, 1]);
   });
 

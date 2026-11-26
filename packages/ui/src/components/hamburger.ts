@@ -10,12 +10,22 @@ useProjection();
 /**
  * Animated open/close toggle for mobile navigation menus and collapsible sidebars.
  *
- * @fires {CustomEvent<{ reason: 'trigger' }>} void-open - The user opened it (click, Enter or Space). Does not bubble.
+ * Name it by what it opens: `aria-label="Main navigation"` (or `aria-labelledby`). Without one it is called "Menu" ("Close menu" while open).
+ *
+ * @fires {CustomEvent<{ reason: 'trigger' | 'keyboard' }>} void-open - The user opened it: `trigger` for a click, `keyboard` for Enter or Space. Does not bubble.
  * @fires {CustomEvent<{ reason: 'trigger' }>} void-close - The user closed it. Does not bubble.
  */
 export class VoidHamburger extends VoidElement {
   /** Enter and Space fire a real `click`, as on a native button. */
-  protected readonly _activation = new KeyboardActivation(this, { disabled: () => isInDisabledFieldset(this) });
+  protected readonly _activation = new KeyboardActivation(this, {
+    disabled: () => isInDisabledFieldset(this),
+    activate: () => {
+      this._byKey = true;
+      try { this.click(); } finally { this._byKey = false; }
+    },
+  });
+  /** A key (Enter, Space) is activating it, so the click it fires reports reason `keyboard`. */
+  private _byKey = false;
 
   /**
    * Whether the menu it controls is open: draws the lines as a close cross and sets `aria-expanded`. It
@@ -41,7 +51,7 @@ export class VoidHamburger extends VoidElement {
     this._syncDisabled();
     this._unwatch = watchDisabledAncestors(this, () => this._syncDisabled());
     this.setHostAttribute('aria-expanded', String(this.open));
-    this.setHostAttribute('aria-label', this.open ? 'Close menu' : 'Menu');
+    this._syncLabel();
     this.addEventListener('click', this._handleClick);
   }
 
@@ -55,17 +65,30 @@ export class VoidHamburger extends VoidElement {
   updated(changed: Map<string, unknown>): void {
     if (changed.has('open')) {
       this.setHostAttribute('aria-expanded', String(this.open));
-      this.setHostAttribute('aria-label', this.open ? 'Close menu' : 'Menu');
+      this._syncLabel();
     }
   }
 
   private _handleClick = (): void => {
     if (isInDisabledFieldset(this)) return;
     this.open = !this.open;
-    const detail = { reason: 'trigger' as const };
-    if (this.open) this.dispatchEvent(new CustomEvent('void-open', { bubbles: false, detail }));
-    else this.dispatchEvent(new CustomEvent('void-close', { bubbles: false, detail }));
+    if (this.open) this.dispatchEvent(new CustomEvent('void-open', { bubbles: false, detail: { reason: this._byKey ? 'keyboard' : 'trigger' } }));
+    else this.dispatchEvent(new CustomEvent('void-close', { bubbles: false, detail: { reason: 'trigger' } }));
   };
+
+  /** The label this component wrote itself, so a name the author wrote is told apart from it. */
+  private _writtenLabel: string | null = null;
+
+  /**
+   * The name is the author's `aria-label` or `aria-labelledby` (say what it opens: "Main navigation"; it stays the
+   * same while open, `aria-expanded` says the rest). Without one it is "Menu", or "Close menu" while open.
+   */
+  private _syncLabel(): void {
+    const current = this.getAttribute('aria-label');
+    if (this.hasAttribute('aria-labelledby') || (current !== null && current !== this._writtenLabel)) return;
+    this._writtenLabel = this.open ? 'Close menu' : 'Menu';
+    this.setHostAttribute('aria-label', this._writtenLabel);
+  }
 
   render() {
     return html`

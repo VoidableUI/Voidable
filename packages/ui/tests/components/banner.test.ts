@@ -29,11 +29,24 @@ describe('VoidBanner', () => {
   });
 
   describe('ARIA', () => {
-    it('sets role="banner" when connected', () => {
+    it('is never role=banner: alert for error and warning, status otherwise, and keeps one the author wrote', async () => {
       const el = document.createElement('void-banner') as VoidBanner;
       document.body.appendChild(el);
-      expect(el.getAttribute('role')).toBe('banner');
+      expect(el.getAttribute('role')).toBe('status');
+      el.color = 'error';
+      await el.updateComplete;
+      expect(el.getAttribute('role')).toBe('alert');
+      el.color = 'info';
+      await el.updateComplete;
+      expect(el.getAttribute('role')).toBe('status');
       el.remove();
+      const own = document.createElement('void-banner') as VoidBanner;
+      own.setAttribute('role', 'region');
+      own.color = 'error';
+      document.body.appendChild(own);
+      await own.updateComplete;
+      expect(own.getAttribute('role')).toBe('region');
+      own.remove();
     });
   });
 

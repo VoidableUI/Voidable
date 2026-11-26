@@ -79,9 +79,22 @@ describe('VoidStat', () => {
   });
 
   describe('ARIA', () => {
-    it('has role="figure"', async () => {
-      const el = await mount();
-      expect(el.getAttribute('role')).toBe('figure');
+    it('is a group named by its label', async () => {
+      const el = await mount({ label: 'Revenue', value: '5' });
+      expect(el.getAttribute('role')).toBe('group');
+      expect(el.getAttribute('aria-labelledby')).toBe(label(el)!.id);
+    });
+
+    it('has no role without a label, and keeps an aria-label the author wrote', async () => {
+      const el = await mount({ value: '5' });
+      expect(el.hasAttribute('role')).toBe(false);
+      expect(el.hasAttribute('aria-labelledby')).toBe(false);
+      const own = document.createElement(TAG) as VoidStat;
+      own.setAttribute('aria-label', 'Mine');
+      own.label = 'Revenue';
+      document.body.appendChild(own);
+      await own.updateComplete;
+      expect(own.hasAttribute('aria-labelledby')).toBe(false);
     });
   });
 

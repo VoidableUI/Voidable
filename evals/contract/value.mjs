@@ -144,3 +144,40 @@ export const VALUE_REFLECTION = {
     excluded: 'the value is a list of File objects the browser only lets a user choose: it has no string form, a file name is private to the page and would leak into the markup, and scripts cannot assign it. The void-change detail carries the files.',
   },
 };
+
+// Data from markup (#71), the named exception to the reflection rule above. A chart's `data` (and a gauge's
+// `zones`) is read from a JSON attribute as well as from the property, so server-rendered markup draws a chart
+// with no script; but it is NOT reflected when the property is set: the data can be large, and writing it back
+// into the markup on every update would cost a serialisation and a DOM write for nothing. The attribute stays as
+// the server wrote it, and an attribute that a server morph leaves unchanged does not animate the chart again.
+//
+// contract.test.mjs checks, in Chromium, for every entry: `html` (carrying the JSON attributes) draws `count`
+// elements matching `draws`; assigning `set` to the property leaves every attribute exactly as written; and
+// against the manifest, that every element with a `data` field is listed, with each attribute declared and
+// not reflected.
+export const DATA_ATTRIBUTES = {
+  'void-bar-chart': {
+    attributes: ['data'],
+    html: '<void-bar-chart aria-label="Sales" data=\'{"series":[{"name":"Sales","values":[1,2,3]}],"labels":["a","b","c"]}\'></void-bar-chart>',
+    draws: '.void-bar-chart-bar', count: 3,
+    set: { series: [{ name: 'Sales', values: [4, 5] }], labels: ['a', 'b'] },
+  },
+  'void-line-chart': {
+    attributes: ['data'],
+    html: '<void-line-chart aria-label="Visits" data=\'{"series":[{"name":"Visits","values":[1,2,3]}],"labels":["a","b","c"]}\'></void-line-chart>',
+    draws: '.void-line-chart-line', count: 1,
+    set: { series: [{ name: 'Visits', values: [4, 5] }, { name: 'Signups', values: [1, 2] }], labels: ['a', 'b'] },
+  },
+  'void-donut-chart': {
+    attributes: ['data'],
+    html: '<void-donut-chart aria-label="Mix" data=\'{"segments":[{"name":"A","value":1},{"name":"B","value":2}]}\'></void-donut-chart>',
+    draws: '.void-donut-chart-segment', count: 2,
+    set: { segments: [{ name: 'A', value: 5 }] },
+  },
+  'void-gauge': {
+    attributes: ['data', 'zones'],
+    html: '<void-gauge aria-label="Memory" data=\'{"segments":[{"name":"Used","value":30},{"name":"Cache","value":20}]}\' zones=\'[{"from":0,"to":100,"color":"green"}]\'></void-gauge>',
+    draws: '.void-gauge-segment', count: 2,
+    set: { segments: [{ name: 'Used', value: 10 }] },
+  },
+};

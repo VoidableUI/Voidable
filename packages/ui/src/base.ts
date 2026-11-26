@@ -275,6 +275,16 @@ export class VoidElement extends LitElement {
    */
   connectedMoveCallback(): void {}
 
+  /**
+   * Reports a problem with this element through `@voidable/ui/dev` when it is loaded (a console warning,
+   * or a thrown `VoidDevError` in a test suite that asked for that); silent otherwise. Never throws on
+   * its own.
+   */
+  protected reportDev(kind: string, subject: string, message: string): void {
+    const dev = (globalThis as Record<symbol, unknown>)[DEV_KEY] as DevHook | undefined;
+    dev?.report?.({ kind, tag: this.localName, subject, message, element: this });
+  }
+
   /** The property-backed attributes `el` carries, or null for none. */
   #readServer(el: Element): Map<string, string> | null {
     if (!el.hasAttributes()) return null;

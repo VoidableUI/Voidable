@@ -332,7 +332,7 @@ void-date-picker {
   font-size: var(--void-control-text);
   line-height: var(--void-leading-normal);
   outline: none;
-  cursor: pointer;
+  cursor: text;
   transition: border-color var(--void-duration-fast) var(--void-ease-in-out),
               box-shadow var(--void-duration-fast) var(--void-ease-in-out);
 }
@@ -409,11 +409,20 @@ void-date-picker[open] .void-date-picker-input {
   padding: var(--void-space-2);
 }
 
+/* The message for a date typed into the field that was not taken. */
+.void-date-picker-error {
+  color: var(--void-color-error);
+  font-size: var(--void-type-caption-size);
+  line-height: var(--void-type-caption-leading);
+}
+
 /* ── Color variants ── */
 
+void-date-picker[error]:not([error=""]) .void-date-picker-input,
 void-date-picker[color="error"] .void-date-picker-input {
   border-color: var(--void-color-error);
 }
+void-date-picker[error]:not([error=""]) .void-date-picker-input:focus,
 void-date-picker[color="error"] .void-date-picker-input:focus {
   box-shadow: 0 0 0 1px var(--void-color-error);
 }

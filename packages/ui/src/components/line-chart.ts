@@ -3,7 +3,9 @@ import { VoidElement } from '../base.js';
 import { property, state } from 'lit/decorators.js';
 import { LinearScale } from './charts/scale.js';
 import { linePath, areaPath, smoothLinePath, smoothAreaPath } from './charts/shape.js';
+import { guard } from 'lit/directives/guard.js';
 import { useProjection } from '../projection.js';
+import { readChartInput, normalizeSeriesData, dataTable, seriesTable, chartLocale, type ChartSource } from './charts/data.js';
 
 useProjection();
 
@@ -44,8 +46,10 @@ function niceStepLocal(raw: number): number {
 
 /**
  * Line chart for trends over time with one or more series, linear or stepped, drawn in SVG with an animated
- * entry. Give it `data` (`{ series: [{ name, values }], labels }`) from script; it has no children. The chart
- * is an image to assistive technology, so set `aria-label` and state the key figures in the surrounding text.
+ * entry. Give it `data` (`{ series: [{ name, values }], labels }`) as the `data` property or as JSON in the
+ * `data` attribute, so server-rendered markup draws it with no script; it has no children. The drawing is
+ * hidden from assistive technology and a visually hidden data table (captioned with `aria-label`) carries
+ * the values instead; add `show-table` to show the table below the chart too.
  */
 export class VoidLineChart extends VoidElement {
 
@@ -64,25 +68,46 @@ export class VoidLineChart extends VoidElement {
    */
   @property({ reflect: true }) interpolation: 'linear' | 'step' = 'linear';
   /**
-   * Accessible name of the chart, such as `Visitors per day`. The chart is an image to assistive
-   * technology, so set it and put the key figures in the text around it.
+   * Accessible name of the chart, such as `Visitors per day`; it is also the caption of the data table.
+   * Set it: the drawing itself is hidden from assistive technology.
    */
   @property({ attribute: 'aria-label' }) ariaLabel = '';
+  /**
+   * Show the data table (one row per point, one column per series) below the chart. The table is always
+   * there for assistive technology; this makes it visible too.
+   */
+  @property({ type: Boolean, attribute: 'show-table', reflect: true }) showTable = false;
 
   private _data: LineChartData = { series: [] };
+  private _source: ChartSource = { text: null };
+  private _entered = false;
 
   /**
    * The chart's data: `{ series: [{ name, values, color? }], labels? }`. `values` are aligned with `labels`
-   * (the names along the horizontal axis); `color` overrides a series' colour. Property only: assign a new
-   * object to update the chart and animate to it.
+   * (the names along the horizontal axis); `color` overrides a series' colour. Give it as a property
+   * (assign a new object to update the chart and animate to it) or as JSON in the `data` attribute:
+   * `<void-line-chart data='{"series":[{"name":"Visitors","values":[3,5,4]}],"labels":["Mon","Tue","Wed"]}'>`.
+   * Invalid JSON draws nothing and is reported by `@voidable/ui/dev`. The property is not reflected to the
+   * attribute (the data can be large), and an attribute a server morph leaves unchanged does not animate again.
+   * @default { series: [] }
    */
+  @property({ attribute: 'data' })
   get data(): LineChartData { return this._data; }
-  set data(next: LineChartData) {
+  set data(input: LineChartData) {
+    const r = readChartInput<LineChartData>(input, this._source, {
+      attr: 'data',
+      shape: '{"series":[{"name":"Visitors","values":[3,5,4]}],"labels":["Mon","Tue","Wed"]}',
+      empty: () => ({ series: [] }),
+      normalize: normalizeSeriesData,
+      warn: (subject, message) => this.reportDev('invalid-data', subject, message),
+    });
+    if (!r) return;
     const prev = new Map(this._display);
-    this._data = next;
+    this._data = r.value;
     this._refreshTargets();
     this.requestUpdate();
-    this.updateComplete.then(() => this._startAnimation(prev, false));
+    // Before the entrance animation has started, it draws whatever is there.
+    if (this._entered) this.updateComplete.then(() => this._startAnimation(prev, false));
   }
 
   @state() private _phase: 'pre' | 'animating' | 'idle' = 'pre';
@@ -108,9 +133,10 @@ export class VoidLineChart extends VoidElement {
 
   connectedCallback() {
     super.connectedCallback();
-    this.setHostAttribute('role', 'img');
+    // A figure, not an image: an image's children are presentational and would hide the data table.
+    this.setHostAttribute('role', 'figure');
     this._refreshTargets();
-    requestAnimationFrame(() => { this._startAnimation(new Map(), true); });
+    requestAnimationFrame(() => { this._entered = true; this._startAnimation(new Map(), true); });
     this.addEventListener('mousemove', this._onMouseMove);
     this.addEventListener('mouseleave', this._onMouseLeave);
   }
@@ -207,7 +233,7 @@ export class VoidLineChart extends VoidElement {
   render() {
     const { series, labels = [] } = this._data;
     if (series.length === 0) {
-      return html`<svg viewBox="0 0 600 ${this.height}" role="img" aria-label=${this.ariaLabel || 'Line chart'}></svg>`;
+      return html`<svg viewBox="0 0 600 ${this.height}" aria-hidden="true"></svg>`;
     }
 
     const topMargin = 16, rightMargin = 16, bottomMargin = 32, leftMargin = 40;
@@ -262,8 +288,7 @@ export class VoidLineChart extends VoidElement {
       <svg
         viewBox="0 0 ${width} ${this.height}"
         preserveAspectRatio="none"
-        role="img"
-        aria-label=${this.ariaLabel || 'Line chart'}
+        aria-hidden="true"
         data-phase=${this._phase}
         style="--reveal: ${this._reveal}"
       >
@@ -319,7 +344,16 @@ export class VoidLineChart extends VoidElement {
           ? this._renderHover(series, labels, xScale, yScale, this._hoverIndex, topMargin, innerHeight, leftMargin, innerWidth)
           : nothing}
       </svg>
+      ${this._table()}
     `;
+  }
+
+  /** The data table for assistive technology (and `show-table`), from the data as given, not the animated state. */
+  private _table() {
+    const data = this._data;
+    const label = this.ariaLabel || 'Line chart';
+    return guard([data, label, chartLocale(this)], () =>
+      dataTable('void-line-chart-table', seriesTable(this, label, data.series, data.labels ?? [])));
   }
 
   private _renderHover(

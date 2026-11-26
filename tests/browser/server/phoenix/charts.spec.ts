@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: MIT
 //
 // The four charts rendered by LiveView components (packages/liveview/demo, /lab/charts): the server's data
-// reaches each element's `data` property through the VoidProps hook, and a server update redraws the chart.
+// is the JSON data attribute of each element, present in the first static render, and a server update redraws.
+
 import { test, expect, settle, ready } from '../shared';
 
 test.beforeEach(async ({ page }) => {
@@ -22,6 +23,20 @@ test('every chart draws the data the server rendered', async ({ page }) => {
   await expect(page.locator('#gauge .void-gauge-center-value')).toContainText('20');
   expect(await prop(page, 'bars', 'data')).toEqual({ labels: ['Q1', 'Q2', 'Q3'], series: [{ name: 'Revenue', values: [4, 8, 6] }] });
   expect(await prop(page, 'gauge-segments', 'zones')).toEqual([{ from: 0, to: 100, color: 'success' }]);
+});
+
+test('the first static render already carries the data, with no hook and no generated id', async ({ page }) => {
+  const html = await (await page.request.get('/lab/charts')).text();
+  expect(html).toMatch(/<void-bar-chart[^>]* data="\{&quot;labels&quot;/);
+  expect(html).toMatch(/<void-gauge[^>]* zones="\[/);
+  expect(html).not.toContain('data-void-props');
+  expect(html).not.toContain('VoidProps');
+});
+
+test('each chart has a data table for assistive technology, and the drawing is hidden from it', async ({ page }) => {
+  await expect(page.locator('#bars svg')).toHaveAttribute('aria-hidden', 'true');
+  await expect(page.locator('#bars table caption')).toHaveText('Revenue by quarter');
+  await expect(page.locator('#bars tbody tr')).toHaveCount(3);
 });
 
 test('the charts keep their accessible names', async ({ page }) => {

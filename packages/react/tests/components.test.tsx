@@ -1,6 +1,7 @@
 import { describe, it, expect, afterEach, vi } from 'vitest';
 import React, { act, createRef } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
+import { renderToString } from 'react-dom/server';
 import {
   Button,
   Calendar,
@@ -133,11 +134,27 @@ describe('props', () => {
     expect(el.getAttribute('value')).toBe(JSON.stringify(tags));
   });
 
-  it('passes object data to charts as a property', async () => {
+  it('passes object data to charts as the JSON data attribute, which the chart reads', async () => {
     const data = { series: [{ name: 'a', values: [1, 2] }], labels: ['x', 'y'] };
     const c = await render(<BarChart data={data} />);
     const el = c.querySelector('void-bar-chart') as HTMLElement & { data: unknown };
-    expect(el.data).toBe(data);
+    expect(el.data).toEqual(data);
+    expect(el.getAttribute('data') ?? JSON.stringify(el.data)).toBe(JSON.stringify(data));
+  });
+
+  it('server-renders a chart with its data in the markup', () => {
+    const data = { series: [{ name: 'a', values: [1, 2] }], labels: ['x', 'y'] };
+    const html = renderToString(<BarChart data={data} aria-label="Sales" />);
+    expect(html).toContain(`data="${JSON.stringify(data).replace(/"/g, '&quot;')}"`);
+  });
+
+  it('does not touch a chart whose data did not change', async () => {
+    const data = { series: [{ name: 'a', values: [1, 2] }], labels: ['x', 'y'] };
+    const c = await render(<BarChart data={data} />);
+    const el = c.querySelector('void-bar-chart') as HTMLElement & { data: unknown };
+    const before = el.data;
+    await rerender(<BarChart data={{ ...data, series: [{ name: 'a', values: [1, 2] }] }} />);
+    expect(el.data).toBe(before);
   });
 
   it('sets camelCase props via their property, not a mangled attribute', async () => {

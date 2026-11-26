@@ -1,0 +1,21 @@
+<% content_for :title, "Charts lab" %>
+<% content_for :subtitle, "Charts drawn from server data, morphed by Turbo" %>
+<% content_for :no_search, "1" %>
+<% content_for :head do %>
+  <%= turbo_refreshes_with method: :morph, scroll: :preserve %>
+<% end %>
+
+<% scale = @lab["scale"] %>
+
+<p id="lab-version">Server version <%= @lab["version"] %></p>
+
+<div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem">
+  <%= button_to "Next version", charts_lab_path, method: :patch, params: { bump: 1 }, id: "lab-bump" %>
+  <%= button_to "Grow", charts_lab_path, method: :patch, params: { scale: 2 }, id: "lab-grow" %>
+</div>
+
+<%= void_bar_chart({ labels: %w[Q1 Q2 Q3], series: [{ name: "Revenue", values: [4 * scale, 8 * scale, 6 * scale] }] }, id: "bars", aria_label: "Revenue by quarter") %>
+<%= void_line_chart({ labels: %w[Mon Tue Wed Thu], series: [{ name: "Visitors", values: [3 * scale, 5 * scale, 4 * scale, 7 * scale] }] }, id: "line", aria_label: "Visitors per day") %>
+<%= void_donut_chart({ segments: [{ name: "Search", value: 40 * scale }, { name: "Direct", value: 25 * scale }, { name: "Social", value: 15 * scale }] }, id: "donut", show_total: true, aria_label: "Traffic by source") %>
+<%= void_gauge(value: 20 * scale, unit: "%", zones: [{ from: 0, to: 100, color: "success" }], id: "gauge", aria_label: "Disk usage") %>
+<%= void_gauge({ segments: [{ name: "Used", value: 30 * scale }, { name: "Cache", value: 20 * scale }] }, id: "gauge-segments", show_table: true, aria_label: "Memory") %>

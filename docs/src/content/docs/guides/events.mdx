@@ -1,13 +1,13 @@
 ---
 title: Events
-description: Every Voidable event is a composed CustomEvent named void-something with its data in detail; all bubble except void-open, void-close, void-collapse and void-expand. How to listen in each framework, and the full list.
+description: Every Voidable event is a composed CustomEvent named void-something with its data in detail; all bubble except void-open, void-close, void-collapse, void-expand and void-reject. How to listen in each framework, and the full list.
 ---
 
 import AllEvents from '../../../components/api/AllEvents.astro';
 
 Components tell your app what happened by dispatching `CustomEvent`s whose names start with `void-`. They all follow the same rules:
 
-- **They bubble and are composed**, so you can listen on the element or on any ancestor, which makes one listener on a `<form>` or a container enough for many controls. The exception is the open-state events, `void-open` and `void-close` (and the sidebar's `void-collapse` and `void-expand`): like the native `toggle` and `close` events they fire on the element that opens, closes or is dismissed and do not bubble, so a popover closing inside a dialog never looks like the dialog closing. That holds for every component that has them: overlays, the hamburger, nav menu items, toasts and banners. Listen on the element, or on an ancestor in the capture phase. They carry `detail.reason` (one vocabulary, listed in [API conventions](/guides/conventions/#events)), and `void-close` is cancelable when the user caused it. See [Overlays](/components/overlays/#events).
+- **They bubble and are composed**, so you can listen on the element or on any ancestor, which makes one listener on a `<form>` or a container enough for many controls. The exceptions are the file upload's `void-reject` (it reports on that one zone) and the open-state events, `void-open` and `void-close` (and the sidebar's `void-collapse` and `void-expand`): like the native `toggle` and `close` events they fire on the element that opens, closes or is dismissed and do not bubble, so a popover closing inside a dialog never looks like the dialog closing. That holds for every component that has them: overlays, the hamburger, nav menu items, toasts and banners. Listen on the element, or on an ancestor in the capture phase. They carry `detail.reason` (one vocabulary, listed in [API conventions](/guides/conventions/#events)), and `void-close` is cancelable when the user caused it. See [Overlays](/components/overlays/#events).
 - **What changed is in `event.detail`**, an object whose fields are listed per event below and on each [component page](/components/overview/). `void-change` and `void-input` always carry `detail.value`, the component's new value in the type of its `value` property (an array for a multi-value control); a control whose state is a boolean also carries it by its attribute's name (`detail.checked`, `detail.pressed`).
 - **`void-input` is per edit, `void-change` is a commit.** On every text-entry control (input, textarea, action input, compose input, number input, PIN input, editable), `void-input` fires on every keystroke and `void-change` when the value is committed, as the native `input` and `change` do. On controls with no in-between state, such as a switch, checkbox or select, `void-change` is the one event.
 - **The native events still fire.** Controls that render a native input also let the browser's own `input` and `change` events bubble, so existing handlers work. Prefer `void-*`, whose `detail` is the same on every control.
@@ -33,7 +33,7 @@ A misspelt event name never fires, and nothing complains; the [development warni
 
 The [framework pages](/frameworks/react/) have the details, including typing and the helpers that write these attributes for you.
 
-Event delegation works as it does for any bubbling event (not for `void-open`, `void-close`, `void-collapse` and `void-expand`, see above):
+Event delegation works as it does for any bubbling event (not for `void-open`, `void-close`, `void-collapse`, `void-expand` and `void-reject`, see above):
 
 ```js
 document.querySelector('form').addEventListener('void-change', (e) => {

@@ -105,26 +105,26 @@ describe('VoidLineChart', () => {
   });
 
   describe('accessibility', () => {
-    it('sets role="img" on the host', async () => {
+    it('is a figure, so its data table stays in the accessibility tree', async () => {
       const el = await mount<VoidLineChart>(TAG, { data: sample });
-      expect(el.getAttribute('role')).toBe('img');
+      expect(el.getAttribute('role')).toBe('figure');
     });
 
-    it('gives the svg role="img" and a default accessible name', async () => {
+    it('hides the drawing from assistive technology', async () => {
       const el = await mount<VoidLineChart>(TAG, { data: sample });
       const svg = el.querySelector('svg')!;
-      expect(svg.getAttribute('role')).toBe('img');
-      expect(svg.getAttribute('aria-label')).toBe('Line chart');
+      expect(svg.getAttribute('aria-hidden')).toBe('true');
+      expect(svg.hasAttribute('role')).toBe(false);
     });
 
-    it('uses the consumer supplied aria-label', async () => {
+    it('captions the data table with the consumer supplied aria-label', async () => {
       const el = await mount<VoidLineChart>(TAG, { data: sample, ariaLabel: 'Signups' });
-      expect(el.querySelector('svg')!.getAttribute('aria-label')).toBe('Signups');
+      expect(el.querySelector('table caption')!.textContent).toBe('Signups');
     });
 
-    it('keeps an accessible name when there is no data', async () => {
-      const el = await mount<VoidLineChart>(TAG, {});
-      expect(el.querySelector('svg')!.getAttribute('aria-label')).toBeTruthy();
+    it('captions the table with a default name', async () => {
+      const el = await mount<VoidLineChart>(TAG, { data: sample });
+      expect(el.querySelector('table caption')!.textContent).toBe('Line chart');
     });
   });
 
