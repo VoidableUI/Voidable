@@ -97,10 +97,8 @@ describe('VoidEvent hook', () => {
 
 describe('VoidProps hook', () => {
   function mountProps(html: string) {
-    const tpl = document.createElement('template');
-    tpl.innerHTML = html;
-    const el = tpl.content.firstElementChild as HTMLElement;
-    document.body.appendChild(el);
+    document.body.insertAdjacentHTML('beforeend', html);
+    const el = document.body.lastElementChild as HTMLElement;
     const hook: any = { el, pushEvent: vi.fn(), pushEventTo: vi.fn() };
     Object.assign(hook, VoidHooks.VoidProps);
     hook.mounted();
