@@ -43,6 +43,9 @@ const table: DevTable = {
   // Named by its title part (#52), or aria-label.
   'void-dialog': { m: 'dialog', a: {}, e: [], n: { a: ['aria-label', 'aria-labelledby', 'title'], t: ['void-dialog-title'], h: 'write its title as <void-dialog-title>' } },
   'void-drawer': { m: 'drawer', a: {}, e: [], n: { a: ['aria-label', 'aria-labelledby', 'title'], t: ['void-drawer-title'], h: 'write its title as <void-drawer-title>' } },
+  // A carousel by aria-label; a table by a native <caption> part, or aria-label or label.
+  'void-carousel': { m: 'carousel', a: {}, e: [], n: { a: ['aria-label', 'aria-labelledby', 'title'], h: 'say what it shows' } },
+  'void-table': { m: 'table', a: { label: 0 }, e: [], n: { a: ['aria-label', 'aria-labelledby', 'title', 'label'], t: ['caption'], h: 'write a <caption>' } },
   'void-dialog-title': { m: 'dialog', a: {}, e: [], c: 1 },
   'void-drawer-title': { m: 'drawer', a: {}, e: [], c: 1 },
   'void-checkbox': {
@@ -276,6 +279,10 @@ describe('accessible names', () => {
     ['a button with text inside a dropdown trigger part', '<void-dropdown-menu-trigger><void-button>Actions</void-button></void-dropdown-menu-trigger>'],
     ['dialog aria-label', '<void-dialog aria-label="Edit profile"></void-dialog>'],
     ['checkbox text', '<void-checkbox>Accept the terms</void-checkbox>'],
+    ['a carousel aria-label', '<void-carousel aria-label="Photos"></void-carousel>'],
+    ['a table caption', '<void-table><table><caption>Team</caption></table></void-table>'],
+    ['a table aria-label', '<void-table aria-label="Team"><table></table></void-table>'],
+    ['a table label', '<void-table label="Team"><table></table></void-table>'],
   ])('%s names it', (_what, html) => {
     expect(named(html)).toBeUndefined();
   });
@@ -294,6 +301,9 @@ describe('accessible names', () => {
     ['an icon-only button inside a tooltip trigger part', `<void-tooltip-trigger><void-button>${ICON}</void-button></void-tooltip-trigger>`],
     ['an avatar with nothing', '<void-avatar></void-avatar>'],
     ['an empty checkbox', '<void-checkbox></void-checkbox>'],
+    ['a carousel with no name', '<void-carousel></void-carousel>'],
+    ['a table with no caption or label', '<void-table><table></table></void-table>'],
+    ['a table with an empty caption', '<void-table><table><caption></caption></table></void-table>'],
   ])('%s is reported', (_what, html) => {
     const w = named(html);
     expect(w?.kind).toBe('missing-name');

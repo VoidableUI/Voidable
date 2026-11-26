@@ -25,7 +25,7 @@ export const CONTRACT = {
     probe: { html: '<void-accordion-item><void-accordion-trigger>Shipping</void-accordion-trigger><void-accordion-content>Ships in 2 days</void-accordion-content></void-accordion-item>', click: { role: 'button', name: 'Shipping' }, expect: { host: { open: '' }, button: { name: 'Shipping', 'aria-expanded': 'true' } } },
   },
   'void-action-input': { role: 'inner', name: 'void-field label or aria-label / aria-labelledby on the host (moved onto it), on the inner input (aria-label falls back to the placeholder); the action button uses action-label', state: ['value (reflected; not for type="password")'], gaps: ['host has no role; void-action is its only signal for the action'] },
-  'void-alert': { role: 'alert', name: 'text content (its void-alert-title and void-alert-description parts)', state: ['color (reflected)', 'a void-alert-close part makes it dismissible', 'role="alert" for color error and warning, role="status" for every other color; a role the author writes is kept'], gaps: [] },
+  'void-alert': { role: 'status', name: 'text content (its void-alert-title and void-alert-description parts)', state: ['color (reflected)', 'a void-alert-close part makes it dismissible', 'role="alert" for color error and warning, role="status" (the default) for every other color; a role the author writes is kept'], gaps: [] },
   'void-avatar': { role: 'img', name: 'alt attribute', state: [], gaps: ['without alt the host is role="img" with an empty aria-label: an unnamed image (axe image-alt / role-img-alt)'] },
   'void-badge': { role: null, name: 'text content', state: ['color (reflected)'], gaps: ['no role by design: a badge is text, not a live region (a table of status badges would announce each one); write role="status" on the one whose change must be heard'] },
   'void-banner': { role: null, name: 'text content (its void-banner-title and void-banner-description parts)', state: ['color (reflected)', 'a void-banner-close part makes it dismissible'], gaps: ['no role by design: banner is the page header landmark, which an announcement is not; write role="status" to have it announced, or role="region" with an aria-label for a landmark'] },
@@ -67,8 +67,8 @@ export const CONTRACT = {
   'void-date-picker': {
     role: 'inner',
     name: 'void-field label or aria-label / aria-labelledby on the host (moved onto it), on the inner role="combobox" input (aria-label falls back to the placeholder)',
-    state: ['value (reflected, YYYY-MM-DD)', 'open (reflected)', 'aria-expanded on the inner combobox', 'role="dialog" calendar popup'],
-    gaps: ['the inner input is readonly: typing a date is impossible, so tests and users must page the calendar (a click on the field opens it with focus kept in the field; ArrowDown or the calendar button moves into it)'],
+    state: ['value (reflected, YYYY-MM-DD)', 'open (reflected)', 'aria-expanded on the inner combobox', 'role="dialog" calendar popup', 'error (reflected) -> aria-invalid and aria-describedby on the inner input; set by the field when typed text is refused (not a date, before min, after max), cleared by a valid date', 'a date typed in format or as ISO is read on blur and on Enter: void-change once with the ISO value'],
+    gaps: ['a click on the field opens the calendar and keeps focus in it, so a second click closes it again'],
   },
   'void-dialog': {
     role: 'inner',
@@ -104,10 +104,10 @@ export const CONTRACT = {
   'void-gauge': { role: 'img', name: 'aria-label attribute', state: ['value (reflected)'] },
   'void-hamburger': {
     role: 'button',
-    name: 'fixed "Menu" / "Close menu"',
+    name: 'aria-label / aria-labelledby the author writes (say what it opens; constant while open, aria-expanded says the rest); without one it is "Menu" / "Close menu", and voidable check reports the missing name',
     state: ['open (reflected)', 'aria-expanded'],
     probe: { html: '<void-hamburger></void-hamburger>', click: { role: 'button', name: 'Menu' }, expect: { host: { open: '', 'aria-expanded': 'true' } }, event: 'void-open' },
-    gaps: ['the name is fixed and cannot say what it opens; aria-controls is not set'],
+    gaps: ['aria-controls is not set; void-open reason is trigger for a click and keyboard for Enter and Space, void-close is always trigger'],
   },
   'void-hover-card': { role: 'inner', name: 'the control in its void-hover-card-trigger part', state: ['open (reflected)'], gaps: ['the card is a visual preview: the trigger gets no aria-expanded, and the void-hover-card-content part has no role'] },
   'void-indicator': { role: 'status', name: 'fixed "notification"', state: ['count (reflected)'], gaps: ['the name does not include the count'] },
@@ -135,10 +135,10 @@ export const CONTRACT = {
     state: ['value (reflected)', 'aria-current="page" on the current page button or link'],
     probe: { html: '<void-pagination total="5" value="1"></void-pagination>', click: { role: 'button', name: '2' }, expect: { button: { name: '2', 'aria-current': 'page' } }, event: 'void-change' },
   },
-  'void-panel': { role: 'region', name: 'its void-panel-title part (aria-labelledby), or aria-label', state: [], gaps: ['without a title part or an aria-label it is an unnamed role="region"'] },
+  'void-panel': { role: 'region', name: 'its void-panel-title part (aria-labelledby), or aria-label; voidable check reports a panel with neither', state: [] },
   'void-pin-input': { role: 'group', name: 'fixed "PIN input"', state: ['value (reflected; not while mask is set)'] },
   'void-popover': { role: null, name: 'the control in its void-popover-trigger part (aria-labelledby on the role="dialog" void-popover-content part)', state: ['open (reflected)', 'aria-haspopup="dialog", aria-expanded and aria-controls on the trigger control'] },
-  'void-progress': { role: 'progressbar', name: 'none', state: ['aria-valuenow', 'aria-valuemin', 'aria-valuemax', 'value (reflected)'], gaps: ['no accessible name'] },
+  'void-progress': { role: 'progressbar', name: 'aria-label / aria-labelledby on the host, or a void-field label; voidable check reports a bare progress', state: ['aria-valuenow', 'aria-valuemin', 'aria-valuemax', 'value (reflected)'] },
   'void-radio': {
     role: 'radio',
     name: 'text content',
@@ -164,7 +164,7 @@ export const CONTRACT = {
   'void-skeleton': { role: 'presentation', name: 'none (aria-hidden)', state: [], gaps: ['the loading region gets no aria-busy; nothing announces loading'] },
   'void-slider': { role: 'inner', name: 'void-field label or aria-label / aria-labelledby on the host (moved onto it), on the inner range input', state: ['aria-valuenow on the inner range input', 'value (reflected)'] },
   'void-spinner': { role: 'status', name: 'label attribute (default "Loading")', state: [] },
-  'void-stat': { role: 'group', name: 'its label (aria-labelledby on the void-stat-label text); no role and no name without a label, an aria-label the author writes wins', state: ['trend (reflected)'] },
+  'void-stat': { role: null, name: 'with a label it is role="group" named by it (aria-labelledby on the void-stat-label text); with none it has no role and no name; an aria-label the author writes wins', state: ['trend (reflected)'] },
   'void-status-dot': { role: 'status', name: 'status attribute ("Online", "Away", "Offline")', state: ['status (reflected)'] },
   'void-stepper': { role: 'navigation', name: 'fixed "Progress"', state: ['value (reflected)', 'aria-current="step" and data-state="completed|active|upcoming" on each step'] },
   'void-switch': {
@@ -173,7 +173,7 @@ export const CONTRACT = {
     state: ['checked (reflected)', 'aria-checked'],
     probe: { html: '<void-switch name="n">Notifications</void-switch>', click: { role: 'switch', name: 'Notifications' }, expect: { host: { checked: '', 'aria-checked': 'true' } }, event: 'void-change' },
   },
-  'void-table': { role: null, name: 'none; the native <table> inside carries the table, row and cell roles', state: ['striped, hoverable, compact, bordered (reflected, presentational)'], gaps: ['no caption or name support; a wide table overflows unless the author wraps it (void-scroll-area)'] },
+  'void-table': { role: null, name: 'a <caption> in the native <table>, or aria-label or label on the void-table (copied onto the table); voidable check reports a table with neither. The native <table> inside carries the table, row and cell roles', state: ['striped (reflected)', 'hoverable (reflected)', 'compact (reflected)', 'bordered (reflected)'], gaps: ['a wide table overflows unless the author wraps it (void-scroll-area)'] },
   'void-tabs': {
     role: 'inner',
     name: 'each void-tabs-trigger part is a role="tab" named by its text; each void-tabs-content part is a tabpanel labelled by its tab',

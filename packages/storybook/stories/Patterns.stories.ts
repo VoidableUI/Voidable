@@ -396,7 +396,7 @@ export const Toolbar: Story = {
           <span>3 of 44</span>
           <void-button variant="ghost">Export</void-button>
         </void-toolbar>
-        <void-table>
+        <void-table aria-label="Stations">
           <table>
             <thead>
               <tr><th>Station</th><th>State</th><th data-numeric>Passes</th><th></th></tr>

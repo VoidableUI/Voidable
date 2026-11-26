@@ -18,6 +18,7 @@ const meta: Meta = {
   argTypes: argTypesFor('void-hamburger'),
   render: (args) => html`
     <void-hamburger
+      aria-label="Menu"
       size=${args.size || 'md'}
       ?open=${args.open}
     ></void-hamburger>
@@ -36,9 +37,9 @@ export const Open: Story = {
 export const Sizes: Story = {
   render: () => html`
     <div style="display: flex; align-items: center; gap: 16px;">
-      <void-hamburger size="sm"></void-hamburger>
-      <void-hamburger size="md"></void-hamburger>
-      <void-hamburger size="lg"></void-hamburger>
+      <void-hamburger aria-label="Menu" size="sm"></void-hamburger>
+      <void-hamburger aria-label="Menu" size="md"></void-hamburger>
+      <void-hamburger aria-label="Menu" size="lg"></void-hamburger>
     </div>
   `,
 };
@@ -46,9 +47,9 @@ export const Sizes: Story = {
 export const SizesActive: Story = {
   render: () => html`
     <div style="display: flex; align-items: center; gap: 16px;">
-      <void-hamburger size="sm" open></void-hamburger>
-      <void-hamburger size="md" open></void-hamburger>
-      <void-hamburger size="lg" open></void-hamburger>
+      <void-hamburger aria-label="Menu" size="sm" open></void-hamburger>
+      <void-hamburger aria-label="Menu" size="md" open></void-hamburger>
+      <void-hamburger aria-label="Menu" size="lg" open></void-hamburger>
     </div>
   `,
 };

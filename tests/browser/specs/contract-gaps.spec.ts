@@ -75,6 +75,122 @@ test.describe('roles of the static elements', () => {
   });
 });
 
+test.describe('accessible names', () => {
+  test('progress, panel and table are found by their names', async ({ page }) => {
+    await mount(page, `<void-progress value="40" aria-label="Uploading photo"></void-progress>
+      <void-panel><void-panel-header><void-panel-title>Billing</void-panel-title></void-panel-header><void-panel-body>x</void-panel-body></void-panel>
+      <void-panel aria-label="Notes"><void-panel-body>y</void-panel-body></void-panel>
+      <void-table aria-label="Invoices"><table><thead><tr><th>No</th></tr></thead><tbody><tr><td>1</td></tr></tbody></table></void-table>
+      <void-table><table><caption>Receipts</caption><thead><tr><th>No</th></tr></thead><tbody><tr><td>1</td></tr></tbody></table></void-table>`);
+    await expect(page.getByRole('progressbar', { name: 'Uploading photo' })).toHaveAttribute('aria-valuenow', '40');
+    await expect(page.getByRole('region', { name: 'Billing' })).toBeVisible();
+    await expect(page.getByRole('region', { name: 'Notes' })).toBeVisible();
+    await expect(page.getByRole('table', { name: 'Invoices' })).toBeVisible();
+    await expect(page.getByRole('table', { name: 'Receipts' })).toBeVisible();
+  });
+
+  test('the hamburger is named by the author, constant while open, with "Menu" as the fallback', async ({ page }) => {
+    await mount(page, '<void-hamburger id="h" aria-label="Main navigation"></void-hamburger><void-hamburger id="d"></void-hamburger>');
+    await page.getByRole('button', { name: 'Main navigation' }).click();
+    await expect(page.getByRole('button', { name: 'Main navigation', expanded: true })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Menu' })).toBeVisible();
+    await page.getByRole('button', { name: 'Menu' }).click();
+    await expect(page.getByRole('button', { name: 'Close menu', expanded: true })).toBeVisible();
+  });
+
+  test('the open reason is keyboard for a key and trigger for a click', async ({ page }) => {
+    await mount(page, '<void-hamburger id="h" aria-label="Nav"></void-hamburger>');
+    await page.evaluate(() => {
+      (window as any).reasons = [];
+      document.getElementById('h')!.addEventListener('void-open', (e: any) => (window as any).reasons.push(e.detail.reason));
+      document.getElementById('h')!.addEventListener('void-close', (e: any) => (window as any).reasons.push(`close:${e.detail.reason}`));
+    });
+    await page.getByRole('button', { name: 'Nav' }).focus();
+    await page.keyboard.press('Enter');
+    await page.keyboard.press('Space');
+    await page.getByRole('button', { name: 'Nav' }).click();
+    expect(await page.evaluate(() => (window as any).reasons)).toEqual(['keyboard', 'close:trigger', 'trigger']);
+  });
+});
+
+test.describe('date picker typed entry', () => {
+  const picker = '<void-date-picker id="dp" aria-label="Start date" min="2026-01-01" max="2026-12-31"></void-date-picker>';
+  const changes = (page: Page) => page.evaluate(() => (window as any).dpChanges as string[]);
+  const prepare = async (page: Page, html = picker) => {
+    await mount(page, html);
+    await page.evaluate(() => {
+      (window as any).dpChanges = [];
+      document.getElementById('dp')!.addEventListener('void-change', (e: any) => (window as any).dpChanges.push(e.detail.value));
+    });
+  };
+
+  test('a typed date is taken on blur: the value, the calendar and one void-change', async ({ page }) => {
+    await prepare(page);
+    const field = page.getByRole('combobox', { name: 'Start date' });
+    await field.click();
+    await field.fill('11/03/2026');
+    await expect(page.locator('#dp')).toHaveAttribute('value', '');
+    await page.keyboard.press('Tab');
+    await expect(page.locator('#dp')).toHaveAttribute('value', '2026-11-03');
+    expect(await changes(page)).toEqual(['2026-11-03']);
+    await expect(field).not.toHaveAttribute('aria-invalid', /.*/);
+    await field.press('ArrowDown');
+    await expect(page.locator('#dp').getByRole('button', { name: 'Tuesday, November 3, 2026' })).toBeFocused();
+  });
+
+  test('Enter takes ISO text and the field shows it in the format', async ({ page }) => {
+    await prepare(page);
+    const field = page.getByRole('combobox', { name: 'Start date' });
+    await field.fill('2026-02-05');
+    await field.press('Enter');
+    await expect(field).toHaveValue('02/05/2026');
+    await expect(page.locator('#dp')).toHaveAttribute('value', '2026-02-05');
+    expect(await changes(page)).toEqual(['2026-02-05']);
+  });
+
+  test('refused text stays, is invalid and described; a valid date clears it', async ({ page }) => {
+    await prepare(page);
+    const field = page.getByRole('combobox', { name: 'Start date' });
+    await field.fill('02/30/2026');
+    await page.keyboard.press('Tab');
+    await expect(field).toHaveValue('02/30/2026');
+    await expect(field).toHaveAttribute('aria-invalid', 'true');
+    await expect(field).toHaveAccessibleDescription(/Enter a date as MM\/DD\/YYYY or YYYY-MM-DD/);
+    expect(await changes(page)).toEqual([]);
+    await field.fill('12/31/2027');
+    await page.keyboard.press('Tab');
+    await expect(field).toHaveAccessibleDescription(/or an earlier date/);
+    await field.fill('06/15/2026');
+    await page.keyboard.press('Tab');
+    await expect(field).not.toHaveAttribute('aria-invalid', /.*/);
+    await expect(field).not.toHaveAttribute('aria-describedby', /.*/);
+    expect(await changes(page)).toEqual(['2026-06-15']);
+  });
+
+  test('a patch of another attribute mid-edit does not wipe the typed text', async ({ page }) => {
+    await prepare(page);
+    const field = page.getByRole('combobox', { name: 'Start date' });
+    await field.click();
+    await page.keyboard.type('06/1');
+    await page.evaluate(() => document.getElementById('dp')!.setAttribute('color', 'warning'));
+    await page.evaluate(() => document.getElementById('dp')!.setAttribute('placeholder', 'Pick a day'));
+    await expect(field).toHaveValue('06/1');
+    await page.keyboard.type('5/2026');
+    await expect(field).toHaveValue('06/15/2026');
+  });
+
+  test('a typed date in a form is submitted as ISO, and a refused one blocks the submit', async ({ page }) => {
+    await mount(page, '<form id="f"><void-date-picker id="dp" name="when" aria-label="When"></void-date-picker></form>');
+    const field = page.getByRole('combobox', { name: 'When' });
+    await field.fill('03/04/2026');
+    await page.keyboard.press('Tab');
+    expect(await page.evaluate(() => new FormData(document.getElementById('f') as HTMLFormElement).get('when'))).toBe('2026-03-04');
+    await field.fill('13/45/2026');
+    await page.keyboard.press('Tab');
+    expect(await page.evaluate(() => (document.getElementById('f') as HTMLFormElement).checkValidity())).toBe(false);
+  });
+});
+
 test.describe('file upload rejection', () => {
   const files = [
     { name: 'a.pdf', mimeType: 'application/pdf', buffer: Buffer.from('abc') },
@@ -82,7 +198,7 @@ test.describe('file upload rejection', () => {
   ];
 
   test('a rejected file fires void-reject, marks the zone invalid and is described', async ({ page }) => {
-    await mount(page, '<void-file-upload id="f" aria-label="Photo" accept=".png" max-size="100"></void-file-upload>');
+    await mount(page, '<void-file-upload id="f" aria-label="Photo" accept=".png" max-size="100" multiple></void-file-upload>');
     await page.evaluate(() => {
       (window as any).rejects = [];
       (window as any).bubbled = 0;

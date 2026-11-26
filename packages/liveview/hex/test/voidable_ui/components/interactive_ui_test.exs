@@ -890,12 +890,12 @@ defmodule VoidableUI.Components.InteractiveUITest do
   # ===========================================================================
 
   describe "hamburger" do
-    test "renders <void-hamburger> self-closing tag" do
+    test "renders the hamburger as a self-closing tag" do
       assigns = %{}
 
       html =
         rendered_to_string(~H"""
-        <VoidableUI.Components.hamburger />
+        <VoidableUI.Components.hamburger aria-label="Menu" />
         """)
 
       assert html =~ "<void-hamburger"

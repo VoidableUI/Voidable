@@ -47,7 +47,7 @@ export const ancestorEvents = [
  */
 export const eventDetails = {
   // Re-dispatches the inner <void-calendar>'s `void-change` detail (`e.detail`).
-  'void-date-picker': { 'void-change': '{ value: string; date: Date }' },
+  'void-date-picker': { 'void-change': '{ value: string; date: Date | null }' },
 };
 
 /**
@@ -566,7 +566,7 @@ export const parts = {
     children: 'parts',
     ordered: true,
     skeleton:
-      '<void-carousel><void-carousel-content><void-carousel-item>One</void-carousel-item><void-carousel-item>Two</void-carousel-item></void-carousel-content><void-carousel-previous aria-label="Previous slide"></void-carousel-previous><void-carousel-next aria-label="Next slide"></void-carousel-next><void-carousel-indicators></void-carousel-indicators></void-carousel>',
+      '<void-carousel aria-label="Slides"><void-carousel-content><void-carousel-item>One</void-carousel-item><void-carousel-item>Two</void-carousel-item></void-carousel-content><void-carousel-previous aria-label="Previous slide"></void-carousel-previous><void-carousel-next aria-label="Next slide"></void-carousel-next><void-carousel-indicators></void-carousel-indicators></void-carousel>',
     legacy: {
       attributes: {
         controls: 'write <void-carousel-previous aria-label="Previous slide"></void-carousel-previous> and <void-carousel-next aria-label="Next slide"></void-carousel-next> after the content; leave them out for no arrows',
@@ -590,7 +590,7 @@ export const parts = {
             required: true,
             description: 'One slide (role="group"); the carousel marks the slide being shown with active.',
             attributes: [
-              { name: 'active', type: 'boolean', description: 'Set by <void-carousel> on the slide being shown.' },
+              { name: 'active', type: 'boolean', description: 'Set by the carousel on the slide being shown.' },
             ],
           },
         ],
@@ -709,7 +709,13 @@ export const accessibleName = {
   // Its placeholder is the name of the input it renders (action-input.ts).
   'void-action-input': control(['placeholder']),
   'void-compose-input': control(),
-  'void-progress': control(),
+  // A progress bar says how far, not of what: it is named by aria-label (or a void-field label around it).
+  'void-progress': { ...control(), hint: 'say what is progressing: aria-label="Uploading photo"' },
+  // The name of a region and of a table says what it holds; a carousel and a hamburger have no text of their own.
+  'void-carousel': { attributes: ARIA, hint: 'say what it shows: aria-label="Product photos"' },
+  'void-panel': { attributes: ARIA, parts: ['void-panel-title'], hint: 'write its title as <void-panel-header><void-panel-title>, or give it an aria-label' },
+  'void-table': { attributes: [...ARIA, 'label'], parts: ['caption'], hint: 'write a <caption> in the table, or give the void-table an aria-label' },
+  'void-hamburger': { attributes: ARIA, hint: 'say what it opens: aria-label="Main navigation"' },
   'void-radio-group': group(['label']),
   'void-checkbox-group': group(['label']),
   // Named by its title part (#52), which is its own child; the native <dialog> in its shadow root is labelled by it.

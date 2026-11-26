@@ -11,7 +11,7 @@ The table sits on the page: hairline dividers, small uppercase column labels, re
 
 <div class="vd-example not-content">
   <div class="vd-box" style="max-width: 36rem">
-    <void-table stack hoverable>
+    <void-table stack hoverable aria-label="Team members">
       <table>
         <thead>
           <tr><th data-stack="title">Station</th><th>State</th><th>Region</th><th data-align="end">Passes</th></tr>
@@ -24,7 +24,7 @@ The table sits on the page: hairline dividers, small uppercase column labels, re
     </void-table>
   </div>
   <div class="vd-box" style="max-width: 20rem">
-    <void-table stack hoverable>
+    <void-table stack hoverable aria-label="Team members">
       <table>
         <thead>
           <tr><th data-stack="title">Station</th><th>State</th><th>Region</th><th data-align="end">Passes</th></tr>
@@ -39,7 +39,7 @@ The table sits on the page: hairline dividers, small uppercase column labels, re
 </div>
 
 ```html
-<void-table stack hoverable>
+<void-table stack hoverable aria-label="Team members">
   <table>
     <thead>
       <tr><th data-stack="title">Station</th><th>State</th><th>Region</th><th data-align="end">Passes</th></tr>
@@ -74,7 +74,7 @@ The breakpoint is a container query, so a table in a sidebar stacks before the s
 
 <div class="vd-example not-content">
   <div class="vd-box" style="max-width: 22rem">
-    <void-table stack hoverable>
+    <void-table stack hoverable aria-label="Team members">
       <table>
         <thead>
           <tr>
@@ -207,7 +207,7 @@ A card pads its content, which doubles the padding of a table's first and last c
       <void-card-title>Team</void-card-title>
     </void-card-header>
     <void-card-body>
-      <void-table inset hoverable>
+      <void-table inset hoverable aria-label="Team members">
         <table>
           <thead>
             <tr><th>Name</th><th>Role</th><th data-align="end">Seats</th></tr>
@@ -228,7 +228,7 @@ A card pads its content, which doubles the padding of a table's first and last c
     <void-card-title>Team</void-card-title>
   </void-card-header>
   <void-card-body>
-    <void-table inset hoverable>…</void-table>
+    <void-table inset hoverable aria-label="Team members">…</void-table>
   </void-card-body>
 </void-card>
 ```

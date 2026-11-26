@@ -11,16 +11,16 @@ How to find every Voidable element and read its state the way a user, an agent d
 | `void-accordion` | — | none | — | no group role or name; the items are only found by their trigger buttons |
 | `void-accordion-item` | — | its void-accordion-trigger part (role="button") names the void-accordion-content part (role="region", aria-labelledby) | open (reflected)<br>aria-expanded on the void-accordion-trigger part<br>closed content is out of the accessibility tree (hidden="until-found" where supported) and opens and closes with a height animation, none under reduced motion | — |
 | `void-action-input` | inner | void-field label or aria-label / aria-labelledby on the host (moved onto it), on the inner input (aria-label falls back to the placeholder); the action button uses action-label | value (reflected; not for type="password") | host has no role; void-action is its only signal for the action |
-| `void-alert` | alert | text content (its void-alert-title and void-alert-description parts) | color (reflected)<br>a void-alert-close part makes it dismissible | always role="alert", so a static, non-urgent notice is announced as urgent; no status variant |
+| `void-alert` | status | text content (its void-alert-title and void-alert-description parts) | color (reflected)<br>a void-alert-close part makes it dismissible<br>role="alert" for color error and warning, role="status" (the default) for every other color; a role the author writes is kept | — |
 | `void-avatar` | img | alt attribute | — | without alt the host is role="img" with an empty aria-label: an unnamed image (axe image-alt / role-img-alt) |
-| `void-badge` | status | text content | color (reflected) | every badge is role="status", a live region: a table of status badges is a page of live regions, and a decorative badge cannot opt out |
-| `void-banner` | banner | text content (its void-banner-title and void-banner-description parts) | color (reflected)<br>a void-banner-close part makes it dismissible | role="banner" is the page header landmark; a second banner, or one inside <main>, is invalid |
+| `void-badge` | — | text content | color (reflected) | no role by design: a badge is text, not a live region (a table of status badges would announce each one); write role="status" on the one whose change must be heard |
+| `void-banner` | — | text content (its void-banner-title and void-banner-description parts) | color (reflected)<br>a void-banner-close part makes it dismissible | no role by design: banner is the page header landmark, which an announcement is not; write role="status" to have it announced, or role="region" with an aria-label for a landmark |
 | `void-bar-chart` | img | aria-label attribute | — | data is a property only (its shape is in the manifest and `voidable ref`); the drawn values are not exposed as text |
 | `void-breadcrumbs` | navigation | fixed "Breadcrumb" | void-breadcrumbs-list is role="list" and each void-breadcrumbs-item in it role="listitem"<br>aria-current="page" on the void-breadcrumbs-item part the author marks | the landmark name is fixed English; there is no attribute to change it |
 | `void-button` | button | text content or aria-label; a link button (an <a href> or <button> inside) is presentational: no role, no tabindex, the inner link or button is the control and is named by its own text | disabled (reflected)<br>aria-disabled="true" while disabled (own or a disabled fieldset), absent otherwise; on a link button it goes on the inner <a> (with tabindex="-1"), a native <button> inside gets disabled | not form-associated: it submits and resets its closest form like a native button but is not in form.elements |
 | `void-calendar` | group | fixed "Calendar"; the grid is named "<Month> <Year>" | value (reflected, YYYY-MM-DD)<br>aria-selected on the day cell | day buttons are named with a long date ("Tuesday, November 3, 2026") that depends on locale |
-| `void-card` | — | none | — | the void-card-title part is not a heading, so a card cannot be found by its title with getByRole("heading"); add a heading element inside it |
-| `void-carousel` | region | none (aria-roledescription="carousel") | index (reflected) | no accessible name |
+| `void-card` | — | none | — | no role by design, and the void-card-title part is not a heading (its level depends on the page): write your own heading element inside it, <void-card-title><h3>...</h3></void-card-title> |
+| `void-carousel` | region | aria-label / aria-labelledby on the host (aria-roledescription="carousel"); the slides are role="group" with aria-roledescription="slide" named "n of m"; the slides are a polite live region, off while autoplay rotates them | index (reflected) | — |
 | `void-carousel-next` | button | aria-label the author writes on it | aria-disabled at the last slide unless loop | — |
 | `void-carousel-previous` | button | aria-label the author writes on it | aria-disabled at the first slide unless loop | — |
 | `void-checkbox` | checkbox | text content | checked (reflected)<br>aria-checked ("mixed" when indeterminate) | — |
@@ -29,7 +29,7 @@ How to find every Voidable element and read its state the way a user, an agent d
 | `void-color-picker` | — | aria-label / aria-labelledby on the host, moved onto the inner hex input | value (reflected)<br>open (reflected) | no role on the host |
 | `void-combobox` | inner | void-field label or aria-label / aria-labelledby on the host (moved onto it), on the inner role="combobox" input (aria-label falls back to the placeholder) | open (reflected)<br>aria-expanded and aria-activedescendant on the inner combobox<br>role="listbox" on the void-combobox-content part<br>role="option" on the void-option children, aria-selected="true" on the chosen one, active on the highlighted one, hidden on the ones the text filters out<br>value (reflected) | — |
 | `void-compose-input` | — | void-field label or aria-label / aria-labelledby on the host (moved onto it), on the inner textarea | value (reflected) | no role on the host; the send button has no stable name |
-| `void-date-picker` | inner | void-field label or aria-label / aria-labelledby on the host (moved onto it), on the inner role="combobox" input (aria-label falls back to the placeholder) | value (reflected, YYYY-MM-DD)<br>open (reflected)<br>aria-expanded on the inner combobox<br>role="dialog" calendar popup | the inner input is readonly: typing a date is impossible, so tests and users must page the calendar (a click on the field opens it with focus kept in the field; ArrowDown or the calendar button moves into it) |
+| `void-date-picker` | inner | void-field label or aria-label / aria-labelledby on the host (moved onto it), on the inner role="combobox" input (aria-label falls back to the placeholder) | value (reflected, YYYY-MM-DD)<br>open (reflected)<br>aria-expanded on the inner combobox<br>role="dialog" calendar popup<br>error (reflected) -> aria-invalid and aria-describedby on the inner input; set by the field when typed text is refused (not a date, before min, after max), cleared by a valid date<br>a date typed in format or as ISO is read on blur and on Enter: void-change once with the ISO value | a click on the field opens the calendar and keeps focus in it, so a second click closes it again |
 | `void-dialog` | inner | its void-dialog-title part (the native dialog in its shadow root is labelled by it), else aria-label on the host | open (reflected)<br>the native <dialog> in its shadow root is open and modal (:modal) while open | the role="dialog" element is the native <dialog> in the shadow root, and the parts are slotted into it, not its DOM descendants: getByRole("dialog").getByRole(...) finds nothing inside; scope by the host instead (locator("void-dialog[open]").getByRole(...)) |
 | `void-divider` | separator | label attribute | aria-orientation | — |
 | `void-donut-chart` | img | aria-label attribute | — | data is a property only (its shape is in the manifest and `voidable ref`); the drawn values are not exposed as text |
@@ -39,9 +39,9 @@ How to find every Voidable element and read its state the way a user, an agent d
 | `void-editable` | — | aria-label / aria-labelledby on the host, moved onto the role="button" preview and the inner input | value (reflected)<br>editing (reflected) | no role on the host |
 | `void-error-fallback` | alert | text content (its void-error-fallback-title part, or the heading attribute while no part is written) | — | void-retry comes only from the built-in retry button; write your own listener for buttons in void-error-fallback-actions |
 | `void-field` | — | its label names the control inside (aria-labelledby, and for= on native controls) | error (reflected) -> aria-invalid and aria-describedby on the control | — |
-| `void-file-upload` | inner | the drop zone is a role="button" named "Drop files here or browse", or by aria-label / aria-labelledby on the host (moved onto it); void-field label is not applied | the chosen file names as text<br>no value attribute: the files are File objects with no string form (excluded from value reflection, see evals/contract/value.mjs) | files over max-size or not matching accept are dropped silently: no event, no error attribute, nothing to assert<br>no attribute reflects whether a file is chosen |
+| `void-file-upload` | inner | the drop zone is a role="button" named "Drop files here or browse", or by aria-label / aria-labelledby on the host (moved onto it); void-field label is not applied | the chosen file names as text<br>no value attribute: the files are File objects with no string form (excluded from value reflection, see evals/contract/value.mjs)<br>error (reflected) -> aria-invalid and aria-describedby on the drop zone, the message is a role="alert" element; set by the zone when it rejects a file, cleared by the next accepted selection<br>void-reject (does not bubble): detail.rejected is a list of { file, reason }, reason one of type, size, count | no attribute reflects whether a file is chosen |
 | `void-gauge` | img | aria-label attribute | value (reflected) | — |
-| `void-hamburger` | button | fixed "Menu" / "Close menu" | open (reflected)<br>aria-expanded | the name is fixed and cannot say what it opens; aria-controls is not set |
+| `void-hamburger` | button | aria-label / aria-labelledby the author writes (say what it opens; constant while open, aria-expanded says the rest); without one it is "Menu" / "Close menu", and voidable check reports the missing name | open (reflected)<br>aria-expanded | aria-controls is not set; void-open reason is trigger for a click and keyboard for Enter and Space, void-close is always trigger |
 | `void-hover-card` | inner | the control in its void-hover-card-trigger part | open (reflected) | the card is a visual preview: the trigger gets no aria-expanded, and the void-hover-card-content part has no role |
 | `void-indicator` | status | fixed "notification" | count (reflected) | the name does not include the count |
 | `void-input` | inner | void-field label or aria-label / aria-labelledby on the host (moved onto it), on the inner input | value (reflected; not for type="password")<br>error (reflected) -> aria-invalid on the inner input<br>disabled (reflected) | — |
@@ -52,16 +52,16 @@ How to find every Voidable element and read its state the way a user, an agent d
 | `void-menu-group` | group | its void-menu-group-label part (aria-labelledby) | — | — |
 | `void-menu-item` | menuitem | text content | value (reflected)<br>disabled (reflected)<br>aria-disabled | — |
 | `void-multiselect` | inner | void-field label or aria-label / aria-labelledby on the host (moved onto it), on the inner combobox | value (reflected, a JSON array of the chosen values)<br>open (reflected)<br>aria-expanded and aria-activedescendant on the inner combobox<br>role="listbox" + aria-multiselectable on the void-multiselect-content part<br>role="option" on the void-option children, aria-selected="true" on the chosen ones, active on the highlighted one | — |
-| `void-nav-bar` | navigation | none | — | role="navigation" on a top bar that usually holds search and account controls; a <nav> inside it makes a nested, unnamed landmark |
+| `void-nav-bar` | — | none | sticky (reflected)<br>hide-border (reflected)<br>variant (reflected) | no role by design: the bar holds search and account controls as well as links; wrap the links in <nav aria-label="Primary"> |
 | `void-nav-menu` | menubar | none | — | — |
 | `void-nav-menu-item` | none | the control in its void-nav-menu-trigger part (a button or a link) | open (reflected)<br>current (reflected)<br>aria-expanded, aria-haspopup and aria-controls on a button trigger<br>aria-current="page" on a link trigger when current | — |
 | `void-number-input` | inner | void-field label or aria-label / aria-labelledby on the host (moved onto it), else the label attribute, on the inner role="spinbutton" input | value (reflected; absent when the field is empty)<br>aria-valuenow on the inner spinbutton (absent when empty) | — |
 | `void-option` | — | text content | role="option", written by the picker whose content part holds it<br>selected (reflected)<br>aria-selected="true" when chosen<br>active (highlighted)<br>disabled (reflected)<br>aria-disabled | selected is the initial choice: the current choice is aria-selected, not the attribute |
 | `void-pagination` | inner | the rendered nav is named "Pagination"; buttons by page number, "Previous page", "Next page" | value (reflected)<br>aria-current="page" on the current page button or link | — |
-| `void-panel` | region | its void-panel-title part (aria-labelledby), or aria-label | — | without a title part or an aria-label it is an unnamed role="region" |
+| `void-panel` | region | its void-panel-title part (aria-labelledby), or aria-label; voidable check reports a panel with neither | — | — |
 | `void-pin-input` | group | fixed "PIN input" | value (reflected; not while mask is set) | — |
 | `void-popover` | — | the control in its void-popover-trigger part (aria-labelledby on the role="dialog" void-popover-content part) | open (reflected)<br>aria-haspopup="dialog", aria-expanded and aria-controls on the trigger control | — |
-| `void-progress` | progressbar | none | aria-valuenow<br>aria-valuemin<br>aria-valuemax<br>value (reflected) | no accessible name |
+| `void-progress` | progressbar | aria-label / aria-labelledby on the host, or a void-field label; voidable check reports a bare progress | aria-valuenow<br>aria-valuemin<br>aria-valuemax<br>value (reflected) | — |
 | `void-radio` | radio | text content | checked (reflected)<br>aria-checked | — |
 | `void-radio-group` | radiogroup | label attribute (aria-label) | value (reflected) | — |
 | `void-scroll-area` | — | none | — | a scrollable region with no role, name or tabindex: keyboard users cannot scroll it (axe scrollable-region-focusable when it overflows) |
@@ -72,11 +72,11 @@ How to find every Voidable element and read its state the way a user, an agent d
 | `void-skeleton` | presentation | none (aria-hidden) | — | the loading region gets no aria-busy; nothing announces loading |
 | `void-slider` | inner | void-field label or aria-label / aria-labelledby on the host (moved onto it), on the inner range input | aria-valuenow on the inner range input<br>value (reflected) | — |
 | `void-spinner` | status | label attribute (default "Loading") | — | — |
-| `void-stat` | figure | none | trend (reflected) | role="figure" without a name; the label is plain text, not linked to the value |
+| `void-stat` | — | with a label it is role="group" named by it (aria-labelledby on the void-stat-label text); with none it has no role and no name; an aria-label the author writes wins | trend (reflected) | — |
 | `void-status-dot` | status | status attribute ("Online", "Away", "Offline") | status (reflected) | — |
 | `void-stepper` | navigation | fixed "Progress" | value (reflected)<br>aria-current="step" and data-state="completed\|active\|upcoming" on each step | — |
 | `void-switch` | switch | text content | checked (reflected)<br>aria-checked | — |
-| `void-table` | — | none; the native <table> inside carries the table, row and cell roles | striped, hoverable, compact, bordered (reflected, presentational) | no caption or name support; a wide table overflows unless the author wraps it (void-scroll-area) |
+| `void-table` | — | a <caption> in the native <table>, or aria-label or label on the void-table (copied onto the table); voidable check reports a table with neither. The native <table> inside carries the table, row and cell roles | striped (reflected)<br>hoverable (reflected)<br>compact (reflected)<br>bordered (reflected) | a wide table overflows unless the author wraps it (void-scroll-area) |
 | `void-tabs` | inner | each void-tabs-trigger part is a role="tab" named by its text; each void-tabs-content part is a tabpanel labelled by its tab | value (reflected)<br>aria-selected and active on the void-tabs-trigger parts<br>active on the visible void-tabs-content part | the tablist has no accessible name unless the author gives the void-tabs-list part an aria-label |
 | `void-tag` | — | text content | removable (reflected)<br>role="listitem" inside a void-list or a role="list" parent | — |
 | `void-tags-input` | inner | void-field label or aria-label / aria-labelledby on the host (moved onto it), on the inner entry input | value (reflected, a JSON array of the tags) | — |
@@ -96,43 +96,37 @@ Every control with a `value` reflects it to the `value` attribute whenever it ch
 - Withheld while it is a secret (3): `void-action-input`, `void-input`, `void-pin-input`. A `type="password"` field and a `mask`ed PIN input keep their text out of the attribute (readable by every script, devtools panel, DOM snapshot and session recorder); there the attribute stays the initial value.
 - Excluded, `void-file-upload`: the value is a list of File objects the browser only lets a user choose: it has no string form, a file name is private to the page and would leak into the markup, and scripts cannot assign it. The void-change detail carries the files.
 
-## Gaps (38)
+## Gaps (32)
 
 - `void-accordion`: no group role or name; the items are only found by their trigger buttons
 - `void-action-input`: host has no role; void-action is its only signal for the action
-- `void-alert`: always role="alert", so a static, non-urgent notice is announced as urgent; no status variant
 - `void-avatar`: without alt the host is role="img" with an empty aria-label: an unnamed image (axe image-alt / role-img-alt)
-- `void-badge`: every badge is role="status", a live region: a table of status badges is a page of live regions, and a decorative badge cannot opt out
-- `void-banner`: role="banner" is the page header landmark; a second banner, or one inside <main>, is invalid
+- `void-badge`: no role by design: a badge is text, not a live region (a table of status badges would announce each one); write role="status" on the one whose change must be heard
+- `void-banner`: no role by design: banner is the page header landmark, which an announcement is not; write role="status" to have it announced, or role="region" with an aria-label for a landmark
 - `void-bar-chart`: data is a property only (its shape is in the manifest and `voidable ref`); the drawn values are not exposed as text
 - `void-breadcrumbs`: the landmark name is fixed English; there is no attribute to change it
 - `void-button`: not form-associated: it submits and resets its closest form like a native button but is not in form.elements
 - `void-calendar`: day buttons are named with a long date ("Tuesday, November 3, 2026") that depends on locale
-- `void-card`: the void-card-title part is not a heading, so a card cannot be found by its title with getByRole("heading"); add a heading element inside it
-- `void-carousel`: no accessible name
+- `void-card`: no role by design, and the void-card-title part is not a heading (its level depends on the page): write your own heading element inside it, <void-card-title><h3>...</h3></void-card-title>
 - `void-color-picker`: no role on the host
 - `void-compose-input`: no role on the host; the send button has no stable name
-- `void-date-picker`: the inner input is readonly: typing a date is impossible, so tests and users must page the calendar (a click on the field opens it with focus kept in the field; ArrowDown or the calendar button moves into it)
+- `void-date-picker`: a click on the field opens the calendar and keeps focus in it, so a second click closes it again
 - `void-dialog`: the role="dialog" element is the native <dialog> in the shadow root, and the parts are slotted into it, not its DOM descendants: getByRole("dialog").getByRole(...) finds nothing inside; scope by the host instead (locator("void-dialog[open]").getByRole(...))
 - `void-donut-chart`: data is a property only (its shape is in the manifest and `voidable ref`); the drawn values are not exposed as text
 - `void-drawer`: as void-dialog: getByRole("dialog") cannot be used as a scope for the parts; scope by the host (locator("void-drawer[open]"))
 - `void-editable`: no role on the host
 - `void-error-fallback`: void-retry comes only from the built-in retry button; write your own listener for buttons in void-error-fallback-actions
-- `void-file-upload`: files over max-size or not matching accept are dropped silently: no event, no error attribute, nothing to assert
 - `void-file-upload`: no attribute reflects whether a file is chosen
-- `void-hamburger`: the name is fixed and cannot say what it opens; aria-controls is not set
+- `void-hamburger`: aria-controls is not set; void-open reason is trigger for a click and keyboard for Enter and Space, void-close is always trigger
 - `void-hover-card`: the card is a visual preview: the trigger gets no aria-expanded, and the void-hover-card-content part has no role
 - `void-indicator`: the name does not include the count
 - `void-line-chart`: data is a property only (its shape is in the manifest and `voidable ref`); the drawn values are not exposed as text
 - `void-list-item`: interactive items stay role="listitem": "selected" has no ARIA equivalent
-- `void-nav-bar`: role="navigation" on a top bar that usually holds search and account controls; a <nav> inside it makes a nested, unnamed landmark
+- `void-nav-bar`: no role by design: the bar holds search and account controls as well as links; wrap the links in <nav aria-label="Primary">
 - `void-option`: selected is the initial choice: the current choice is aria-selected, not the attribute
-- `void-panel`: without a title part or an aria-label it is an unnamed role="region"
-- `void-progress`: no accessible name
 - `void-scroll-area`: a scrollable region with no role, name or tabindex: keyboard users cannot scroll it (axe scrollable-region-focusable when it overflows)
 - `void-sidebar`: no responsive behaviour and no aria-expanded/aria-controls link to a toggle: collapsing is a width change only
 - `void-skeleton`: the loading region gets no aria-busy; nothing announces loading
-- `void-stat`: role="figure" without a name; the label is plain text, not linked to the value
-- `void-table`: no caption or name support; a wide table overflows unless the author wraps it (void-scroll-area)
+- `void-table`: a wide table overflows unless the author wraps it (void-scroll-area)
 - `void-tabs`: the tablist has no accessible name unless the author gives the void-tabs-list part an aria-label
 - `void-toast`: no attribute says whether it is still showing; it is removed from the DOM after duration

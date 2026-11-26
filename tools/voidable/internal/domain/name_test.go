@@ -20,6 +20,9 @@ func nameLibrary(t *testing.T) *Library {
 			Name: &NameRule{Attributes: aria, Parts: []string{"void-dialog-title"}, Hint: "write its title as <void-dialog-title>"}},
 		{Tag: "void-drawer", Class: "VoidDrawer",
 			Name: &NameRule{Attributes: aria, Parts: []string{"void-drawer-title"}, Hint: "write its title as <void-drawer-title>"}},
+		// Named by a native <caption> it takes as its part.
+		{Tag: "void-table", Class: "VoidTable",
+			Name: &NameRule{Attributes: aria, Parts: []string{"caption"}, Hint: "write a <caption>"}},
 		{Tag: "void-field", Class: "VoidField", Attributes: []Attribute{attr("label", "string", "")}},
 		{Tag: "void-badge", Class: "VoidBadge"},
 	})
@@ -73,6 +76,8 @@ func TestCheckName(t *testing.T) {
 		{"dialog with unknown content", Tag{Name: "void-dialog", Lang: LangHTML}, false},
 		{"icon-only button in a trigger part, named", Tag{Name: "void-button", Lang: LangHTML, Content: empty, Ancestors: []Ancestor{{Name: "void-popover-trigger"}}, Attrs: []AttrToken{a("aria-label", "More", SyntaxAttr)}}, false},
 		{"button with text in a trigger part", Tag{Name: "void-button", Lang: LangHTML, Content: text, Ancestors: []Ancestor{{Name: "void-dropdown-menu-trigger"}}}, false},
+		{"table caption", Tag{Name: "void-table", Lang: LangHTML, Content: Content{Known: true, Native: []string{"table", "caption"}}}, false},
+		{"table aria-label", Tag{Name: "void-table", Lang: LangHTML, Content: Content{Known: true}, Attrs: []AttrToken{a("aria-label", "Invoices", SyntaxAttr)}}, false},
 		{"dialog aria-label", Tag{Name: "void-dialog", Lang: LangHTML, Attrs: []AttrToken{a("aria-label", "Edit", SyntaxAttr)}}, false},
 		{"a mention in prose", Tag{Name: "void-button", Lang: LangMarkdown, Mention: true, Content: empty}, false},
 		{"a tag that needs no name", Tag{Name: "void-badge", Lang: LangHTML, Content: empty}, false},
@@ -86,6 +91,7 @@ func TestCheckName(t *testing.T) {
 		{"input with only a placeholder", Tag{Name: "void-input", Lang: LangHTML, Attrs: []AttrToken{a("placeholder", "Email", SyntaxAttr)}}, true},
 		{"input in a field with no label", Tag{Name: "void-input", Lang: LangHTML, Ancestors: []Ancestor{field()}}, true},
 		{"input in another element", Tag{Name: "void-input", Lang: LangHTML, Ancestors: []Ancestor{{Name: "void-badge"}}}, true},
+		{"table with no caption", Tag{Name: "void-table", Lang: LangHTML, Content: Content{Known: true, Native: []string{"table", "tbody"}}}, true},
 		{"dialog with no title part", Tag{Name: "void-dialog", Lang: LangHTML, Content: Content{Known: true}}, true},
 		{"dialog with other parts only", Tag{Name: "void-dialog", Lang: LangHTML, Content: Content{Known: true, Tags: []string{"void-dialog-body", "void-dialog-actions"}}}, true},
 		{"the old heading attribute names nothing", Tag{Name: "void-dialog", Lang: LangHTML, Content: Content{Known: true}, Attrs: []AttrToken{a("heading", "Edit", SyntaxAttr)}}, true},

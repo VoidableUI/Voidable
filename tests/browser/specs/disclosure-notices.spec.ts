@@ -99,8 +99,9 @@ test.describe('disclosure and notices', () => {
       expect(await sameNodes(page, '#pn')).toBe(true);
     });
 
-    test('a panel without a title is an unnamed region and takes no name from nowhere', async ({ page }) => {
+    test('a panel without a title takes no name from nowhere: it keeps its own aria-label and gets no aria-labelledby', async ({ page }) => {
       expect(await page.evaluate(() => document.getElementById('pn-bare')!.hasAttribute('aria-labelledby'))).toBe(false);
+      await expect(page.getByRole('region', { name: 'Bare' })).toBeVisible();
     });
   });
 

@@ -488,8 +488,10 @@ export function manifestSupplementPlugin() {
           }
         }
         for (const part of rule.parts ?? []) {
-          // A part of this component (supplement.js `parts`), written before the entry is checked.
-          const owned = parts[tag]?.parts?.some((p) => p.tag === part);
+          // A part of this component (supplement.js `parts`, at any depth), written before the entry is checked;
+          // or a native element it takes as its part (a table's <caption>).
+          const has = (list) => list?.some((p) => p.tag === part || has(p.parts));
+          const owned = !part.startsWith('void-') || has(parts[tag]?.parts);
           if (!owned) throw new Error(`cem/supplement.js: accessibleName for <${tag}> lists part <${part}>, which is not one of its parts`);
         }
         for (const anc of rule.ancestors ?? []) {

@@ -17,7 +17,7 @@
 
   <void-toast-container id="tc" placement="inline"><void-toast id="toast" duration="0"><void-toast-title>Saved</void-toast-title><void-toast-description>Your changes were saved.</void-toast-description><void-toast-close id="tclose"><button type="button" aria-label="Dismiss">&times;</button></void-toast-close></void-toast></void-toast-container>
 
-  <void-table id="tbl"><table><thead><tr><th id="th">Name</th><th>Role</th></tr></thead><tbody><tr><td id="td">Alice</td><td>Engineer</td></tr></tbody></table></void-table>
+  <void-table id="tbl" aria-label="People"><table><thead><tr><th id="th">Name</th><th>Role</th></tr></thead><tbody><tr><td id="td">Alice</td><td>Engineer</td></tr></tbody></table></void-table>
 
   <void-pagination id="pg" total="5" value="3"></void-pagination>
 
@@ -35,7 +35,7 @@
   <void-toggle-group id="kb-tg" aria-label="Format"><void-toggle id="kb-tg1" value="bold">Bold</void-toggle><void-toggle id="kb-tg2" value="italic">Italic</void-toggle><void-toggle id="kb-tg3" value="under">Under</void-toggle></void-toggle-group>
   <void-segmented-control id="kb-sc" value="a" aria-label="View"><void-segmented-control-item id="kb-sc1" value="a">A</void-segmented-control-item><void-segmented-control-item id="kb-sc2" value="b">B</void-segmented-control-item><void-segmented-control-item id="kb-sc3" value="c">C</void-segmented-control-item></void-segmented-control>
   <void-slider id="kb-slider" aria-label="Level" min="0" max="10" value="5"></void-slider>
-  <void-carousel id="kb-car"><void-carousel-content><void-carousel-item><div style="height: 40px">1</div></void-carousel-item><void-carousel-item><div style="height: 40px">2</div></void-carousel-item><void-carousel-item><div style="height: 40px">3</div></void-carousel-item></void-carousel-content><void-carousel-previous id="kb-car-prev" aria-label="Previous slide"></void-carousel-previous><void-carousel-next id="kb-car-next" aria-label="Next slide"></void-carousel-next></void-carousel>
+  <void-carousel id="kb-car" aria-label="Slides"><void-carousel-content><void-carousel-item><div style="height: 40px">1</div></void-carousel-item><void-carousel-item><div style="height: 40px">2</div></void-carousel-item><void-carousel-item><div style="height: 40px">3</div></void-carousel-item></void-carousel-content><void-carousel-previous id="kb-car-prev" aria-label="Previous slide"></void-carousel-previous><void-carousel-next id="kb-car-next" aria-label="Next slide"></void-carousel-next></void-carousel>
   <void-nav-menu id="kb-nav"><void-nav-menu-item><void-nav-menu-trigger><a id="kb-n1" href="/a">A</a></void-nav-menu-trigger></void-nav-menu-item><void-nav-menu-item><void-nav-menu-trigger><a id="kb-n2" href="/b">B</a></void-nav-menu-trigger></void-nav-menu-item><void-nav-menu-item><void-nav-menu-trigger><a id="kb-n3" href="/c">C</a></void-nav-menu-trigger></void-nav-menu-item></void-nav-menu>
   <void-calendar id="kb-cal" value="2026-11-10"></void-calendar>
   <void-pin-input id="kb-pin" length="4" aria-label="Code"></void-pin-input>
