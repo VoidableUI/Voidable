@@ -16,9 +16,9 @@ void-sidebar {
   flex-shrink: 0;
 }
 
-/* "left" and "right" name which side of the content the sidebar sits on in
+/* "start" and "end" name which side of the content the sidebar sits on in
    the reading direction: the rule follows the inner edge, so it flips with dir. */
-void-sidebar[side="right"] {
+void-sidebar[side="end"] {
   border-inline-end: none;
   border-inline-start: var(--void-sidebar-rule, var(--void-rule));
 }

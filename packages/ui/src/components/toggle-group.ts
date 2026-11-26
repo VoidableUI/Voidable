@@ -1,5 +1,6 @@
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
+import { inlineKeys } from '../keyboard.js';
 import { InternalsFormControl, type FormSubmission } from '../form-control.js';
 import type { VoidToggle } from './toggle.js';
 
@@ -161,8 +162,9 @@ export class VoidToggleGroup extends InternalsFormControl(VoidElement) {
     if (!toggles.length) return;
 
     const horizontal = this.orientation === 'horizontal';
-    const forward = horizontal ? 'ArrowRight' : 'ArrowDown';
-    const backward = horizontal ? 'ArrowLeft' : 'ArrowUp';
+    const keys = inlineKeys(this);
+    const forward = horizontal ? keys.next : 'ArrowDown';
+    const backward = horizontal ? keys.prev : 'ArrowUp';
 
     if (e.key !== forward && e.key !== backward) return;
 

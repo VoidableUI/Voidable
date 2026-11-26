@@ -747,6 +747,8 @@ const SIDE_OF = () => ({
     SIDES.flatMap((side) => ['start', 'center', 'end'].map((align) => [`${side}-${align}`, `side="${side}" align="${align}"`])),
   ),
 });
+const START_END = { left: 'side="start"', right: 'side="end"' };
+const START_END_ICON = { left: 'icon-side="start"', right: 'icon-side="end"' };
 /** A default-true boolean replaced by its hide-* inverse. */
 const INVERTED = (to) => ({
   values: { false: to, true: 'nothing (remove the attribute: it is the default)' },
@@ -763,7 +765,8 @@ export const renamed = {
   'void-accordion': { events: { 'void-toggle': 'listen for void-open and void-close on each <void-accordion-item> (they do not bubble; or listen on the accordion in the capture phase)' } },
   'void-alert': { events: { 'void-dismiss': 'listen for void-close on the alert itself (it does not bubble; detail.reason is close-button)' } },
   'void-sidebar': {
-    attributes: { position: { to: 'side' } },
+    attributes: { position: { to: 'side', values: START_END } },
+    values: { side: { left: 'start', right: 'end' } },
     events: { 'void-toggle': 'listen for void-collapse and void-expand on the sidebar (they do not bubble)' },
   },
   'void-toast-container': {
@@ -777,7 +780,10 @@ export const renamed = {
   'void-hover-card': { attributes: { position: SIDE_OF() } },
   'void-dropdown-menu': { attributes: { position: SIDE_OF() } },
   'void-indicator': { attributes: { position: { to: 'placement' } } },
-  'void-action-input': { attributes: { position: { to: 'icon-side' }, 'tooltip-position': { to: 'tooltip-side' } } },
+  'void-action-input': {
+    attributes: { position: { to: 'icon-side', values: START_END_ICON }, 'tooltip-position': { to: 'tooltip-side' } },
+    values: { 'icon-side': { left: 'start', right: 'end' } },
+  },
   'void-scroll-area': { attributes: { direction: { to: 'orientation' } } },
   // State: an index into a sequence without keys; the current item of a navigation.
   'void-carousel': { attributes: { active: { to: 'index' } } },

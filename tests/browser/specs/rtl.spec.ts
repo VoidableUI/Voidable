@@ -2,9 +2,9 @@
 //
 // Right-to-left layout (#29). Each check measures the same page in both
 // directions and asserts by bounding box that the layout mirrors: what sits at
-// the start edge in LTR sits at the start edge (the right) in RTL. Keyboard
-// arrow direction and built-in strings are not covered here.
-import { test, expect, load, settle, type Page } from '../helpers/test';
+// the start edge in LTR sits at the start edge (the right) in RTL. Arrow keys
+// follow the direction too (last block). Built-in strings are not covered here.
+import { test, expect, load, settle, focusedId, type Page } from '../helpers/test';
 
 type Dir = 'ltr' | 'rtl';
 type Box = { l: number; r: number };
@@ -169,6 +169,209 @@ test.describe('right-to-left layout', () => {
       // The rule is on the inner edge, the side that faces the content.
       if (dir === 'ltr') { expect(rule.right).toBeGreaterThan(0); expect(rule.left).toBe(0); }
       else { expect(rule.left).toBeGreaterThan(0); expect(rule.right).toBe(0); }
+    }
+  });
+
+  test('sidebar side="end": at the end edge, its rule faces the content', async ({ page }) => {
+    for (const dir of DIRS) {
+      await setDir(page, dir);
+      const rule = await page.evaluate(() => {
+        const cs = getComputedStyle(document.getElementById('kb-sb-end')!);
+        return { left: parseFloat(cs.borderLeftWidth), right: parseFloat(cs.borderRightWidth) };
+      });
+      // `end` puts the rule on the start (inner) side of the sidebar.
+      if (dir === 'ltr') { expect(rule.left).toBeGreaterThan(0); expect(rule.right).toBe(0); }
+      else { expect(rule.right).toBeGreaterThan(0); expect(rule.left).toBe(0); }
+    }
+  });
+
+  test('drawer: start and end follow the direction, left and right stay on the screen edge', async ({ page }) => {
+    for (const dir of DIRS) {
+      await setDir(page, dir);
+      const at = await page.evaluate(async () => {
+        const out: Record<string, string> = {};
+        for (const side of ['start', 'end', 'left', 'right']) {
+          const d = document.createElement('void-drawer') as any;
+          d.setAttribute('side', side);
+          d.innerHTML = '<void-drawer-title>T</void-drawer-title><void-drawer-body>B</void-drawer-body>';
+          document.body.append(d);
+          await d.updateComplete;
+          d.open = true;
+          await d.updateComplete;
+          await (window as any).__settle(document);
+          const surface = d.shadowRoot.querySelector('[part~="surface"]') as HTMLElement;
+          const r = surface.getBoundingClientRect();
+          out[side] = Math.abs(r.left) < 2 ? 'left' : Math.abs(r.right - innerWidth) < 2 ? 'right' : `${r.left}..${r.right}`;
+          d.open = false;
+          await d.updateComplete;
+          d.remove();
+        }
+        return out;
+      });
+      expect(at.left, `left (${dir})`).toBe('left');
+      expect(at.right, `right (${dir})`).toBe('right');
+      expect(at.start, `start (${dir})`).toBe(dir === 'ltr' ? 'left' : 'right');
+      expect(at.end, `end (${dir})`).toBe(dir === 'ltr' ? 'right' : 'left');
+    }
+  });
+
+  test('popover: side="left" and "right" are the reading-direction sides of the anchor', async ({ page }) => {
+    for (const dir of DIRS) {
+      await setDir(page, dir);
+      for (const side of ['left', 'right'] as const) {
+        const result = await page.evaluate(async (s) => {
+          const p = document.createElement('void-popover') as any;
+          p.setAttribute('side', s);
+          p.innerHTML = '<void-popover-trigger><button id="rtl-pt" style="margin: 0 auto; display: block">t</button></void-popover-trigger><void-popover-content><p>x</p></void-popover-content>';
+          document.body.append(p);
+          await p.updateComplete;
+          p.open = true;
+          await (window as any).__settle(document);
+          const t = document.getElementById('rtl-pt')!.getBoundingClientRect();
+          const c = p.querySelector('void-popover-content').getBoundingClientRect();
+          const before = c.right <= t.left + 1;
+          const after = c.left >= t.right - 1;
+          p.open = false;
+          await p.updateComplete;
+          p.remove();
+          return before ? 'physical-left' : after ? 'physical-right' : 'overlapping';
+        }, side);
+        // In left-to-right "left" is the physical left; in right-to-left the sides mirror.
+        const mirrored = dir === 'rtl';
+        const expected = (side === 'left') !== mirrored ? 'physical-left' : 'physical-right';
+        expect(result, `${side} (${dir})`).toBe(expected);
+      }
+    }
+  });
+});
+
+// Arrow keys follow the reading direction (#29). In left-to-right ArrowRight
+// moves to the next item; in right-to-left ArrowLeft does. Up and Down never swap.
+test.describe('right-to-left keyboard', () => {
+  test.beforeEach(async ({ page }) => {
+    await load(page, '/rtl');
+  });
+
+  const keys = (dir: Dir) => (dir === 'ltr' ? { next: 'ArrowRight', prev: 'ArrowLeft' } : { next: 'ArrowLeft', prev: 'ArrowRight' });
+
+  const focusIn = (page: Page, sel: string) => page.evaluate((s) => (document.querySelector(s) as HTMLElement).focus(), sel);
+
+  /** Focus the first item, press `next` and then `prev` twice (wrapping): focus lands on item 2, then 1, then 3. */
+  async function expectRoving(page: Page, ids: [string, string, string]) {
+    for (const dir of DIRS) {
+      await setDir(page, dir);
+      const k = keys(dir);
+      await focusIn(page, `#${ids[0]}`);
+      await page.keyboard.press(k.next);
+      expect(await focusedId(page), `next (${dir})`).toBe(ids[1]);
+      await page.keyboard.press(k.prev);
+      expect(await focusedId(page), `prev (${dir})`).toBe(ids[0]);
+      await page.keyboard.press(k.prev);
+      expect(await focusedId(page), `prev wraps (${dir})`).toBe(ids[2]);
+    }
+  }
+
+  test('tabs', async ({ page }) => {
+    await expectRoving(page, ['kb-t1', 'kb-t2', 'kb-t3']);
+  });
+
+  test('toggle group', async ({ page }) => {
+    await expectRoving(page, ['kb-tg1', 'kb-tg2', 'kb-tg3']);
+  });
+
+  test('segmented control', async ({ page }) => {
+    await expectRoving(page, ['kb-sc1', 'kb-sc2', 'kb-sc3']);
+  });
+
+  test('nav menu', async ({ page }) => {
+    await expectRoving(page, ['kb-n1', 'kb-n2', 'kb-n3']);
+  });
+
+  test('tabs: Up and Down are not handled and Home and End stay logical', async ({ page }) => {
+    for (const dir of DIRS) {
+      await setDir(page, dir);
+      await focusIn(page, '#kb-t1');
+      await page.keyboard.press('End');
+      expect(await focusedId(page), `End (${dir})`).toBe('kb-t3');
+      await page.keyboard.press('Home');
+      expect(await focusedId(page), `Home (${dir})`).toBe('kb-t1');
+    }
+  });
+
+  test('carousel', async ({ page }) => {
+    for (const dir of DIRS) {
+      await setDir(page, dir);
+      const k = keys(dir);
+      await page.evaluate(() => { (document.getElementById('kb-car') as any).index = 0; (document.getElementById('kb-car') as HTMLElement).focus(); });
+      await settle(page);
+      await page.keyboard.press(k.next);
+      await settle(page);
+      expect(await page.evaluate(() => (document.getElementById('kb-car') as any).index), `next (${dir})`).toBe(1);
+      await page.keyboard.press(k.prev);
+      await settle(page);
+      expect(await page.evaluate(() => (document.getElementById('kb-car') as any).index), `prev (${dir})`).toBe(0);
+    }
+  });
+
+  test('calendar day grid: left and right swap, up and down do not', async ({ page }) => {
+    for (const dir of DIRS) {
+      await setDir(page, dir);
+      const k = keys(dir);
+      const active = () => page.evaluate(() => document.activeElement?.getAttribute('data-date'));
+      await focusIn(page, '#kb-cal [data-date="2026-11-10"]');
+      await page.keyboard.press(k.next);
+      expect(await active(), `next (${dir})`).toBe('2026-11-11');
+      await page.keyboard.press(k.prev);
+      await page.keyboard.press(k.prev);
+      expect(await active(), `prev (${dir})`).toBe('2026-11-09');
+      await page.keyboard.press('ArrowDown');
+      expect(await active(), `down (${dir})`).toBe('2026-11-16');
+      await page.keyboard.press('ArrowUp');
+      expect(await active(), `up (${dir})`).toBe('2026-11-09');
+    }
+  });
+
+  test('pin input', async ({ page }) => {
+    for (const dir of DIRS) {
+      await setDir(page, dir);
+      const k = keys(dir);
+      const index = () => page.evaluate(() => [...document.querySelectorAll('#kb-pin input')].indexOf(document.activeElement as HTMLInputElement));
+      await focusIn(page, '#kb-pin input');
+      await page.keyboard.press(k.next);
+      expect(await index(), `next (${dir})`).toBe(1);
+      await page.keyboard.press(k.prev);
+      expect(await index(), `prev (${dir})`).toBe(0);
+    }
+  });
+
+  // Native controls: the browser decides. These record what each engine does so a
+  // change shows; they assert only that the two directions are mirror images.
+  test('slider (native range input): the arrow that increases in left-to-right decreases in right-to-left', async ({ page }) => {
+    const press = async (dir: Dir, key: string) => {
+      await setDir(page, dir);
+      return page.evaluate(() => {
+        const i = document.querySelector('#kb-slider input[type="range"]') as HTMLInputElement;
+        i.value = '5';
+        i.focus();
+        return 0;
+      }).then(async () => {
+        await page.keyboard.press(key);
+        return page.evaluate(() => Number((document.querySelector('#kb-slider input[type="range"]') as HTMLInputElement).value));
+      });
+    };
+    expect(await press('ltr', 'ArrowRight'), 'ltr ArrowRight').toBe(6);
+    expect(await press('ltr', 'ArrowLeft'), 'ltr ArrowLeft').toBe(4);
+    expect(await press('rtl', 'ArrowLeft'), 'rtl ArrowLeft').toBe(6);
+    expect(await press('rtl', 'ArrowRight'), 'rtl ArrowRight').toBe(4);
+  });
+
+  test('radio group (native radios): arrows follow the direction', async ({ page }) => {
+    for (const dir of DIRS) {
+      await setDir(page, dir);
+      const k = keys(dir);
+      await page.evaluate(() => { (document.getElementById('kb-r1') as any).focus(); });
+      await page.keyboard.press(k.next);
+      expect(await page.evaluate(() => (document.getElementById('kb-rg') as any).value), `next (${dir})`).toBe('r2');
     }
   });
 });

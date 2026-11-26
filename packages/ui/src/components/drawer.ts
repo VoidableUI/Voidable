@@ -17,8 +17,8 @@ import { VoidModal } from '../modal.js';
  * drawer is closing. Cancelable when the user caused it (`escape`, `outside`, `close-button`).
  */
 export class VoidDrawer extends VoidModal {
-  /** Screen edge the drawer slides in from: `right` (default), `left`, `top` or `bottom`. */
-  @property({ type: String, reflect: true }) side: 'left' | 'right' | 'top' | 'bottom' = 'right';
+  /** Edge the drawer slides in from: `right` (default), `left`, `top` or `bottom` (the screen edges), or `start` or `end` (the side the text starts or ends on, so they swap in right-to-left). */
+  @property({ type: String, reflect: true }) side: 'left' | 'right' | 'start' | 'end' | 'top' | 'bottom' = 'right';
   /** Width of a side drawer, or height of a top or bottom one: `sm`, `md` (default) or `lg`. */
   @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' = 'md';
 }

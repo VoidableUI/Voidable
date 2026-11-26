@@ -36,16 +36,16 @@ describe('VoidSidebar', () => {
     it('width defaults to the theme token', () => expect(el.width).toBe('var(--void-sidebar-width)'));
     it('collapsedWidth defaults to the theme token', () =>
       expect(el.collapsedWidth).toBe('var(--void-sidebar-collapsed-width)'));
-    it('side defaults to "left"', () => expect(el.side).toBe('left'));
+    it('side defaults to "start"', () => expect(el.side).toBe('start'));
   });
 
   describe('attribute reflection', () => {
     it('reflects collapsed, width, collapsedWidth and side', async () => {
-      const el = await mount({ collapsed: true, width: '300px', collapsedWidth: '48px', side: 'right' });
+      const el = await mount({ collapsed: true, width: '300px', collapsedWidth: '48px', side: 'end' });
       expect(el.hasAttribute('collapsed')).toBe(true);
       expect(el.getAttribute('width')).toBe('300px');
       expect(el.getAttribute('collapsed-width')).toBe('48px');
-      expect(el.getAttribute('side')).toBe('right');
+      expect(el.getAttribute('side')).toBe('end');
     });
 
     it('reads the collapsed attribute', async () => {

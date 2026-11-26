@@ -5,10 +5,10 @@ page.html:1 write side="top"
 page.html:5 write side="bottom" align="end"
 page.html:6 write side="left"
 page.html:7 write side="right"
-page.html:8 write side="right"
+page.html:8 write side="end"
 page.html:9 write placement="top-left"
 page.html:10 write placement="bottom-left"
-page.html:11 write icon-side="left"
+page.html:11 write icon-side="start"
 page.html:11 write tooltip-side="bottom"
 page.html:12 write orientation="horizontal"
 page.html:13 write index="1"
@@ -46,7 +46,7 @@ show.html.erb:2 write hide-border to turn it off
 show.html.erb:3 listen for void-open and void-close
 show.html.erb:4 write shape="text"
 show.html.erb:5 write orientation="vertical"
-live.html.heex:1 write side="left"
+live.html.heex:1 write side="start"
 live.html.heex:1 listen for void-collapse and void-expand
 live.html.heex:2 write hide-value
 live.html.heex:3 write orientation="both"
@@ -56,3 +56,5 @@ form.blade.php:2 write hide-close
 form.blade.php:3 listen for void-close on the <void-toast> itself
 form.blade.php:4 write hide-input to turn it off
 form.blade.php:5 write current
+page.html:32 write side="start"
+page.html:33 write icon-side="end"

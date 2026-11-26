@@ -33,7 +33,7 @@ void-drawer[open]::part(surface) {
   translate: 0 0;
 }
 
-/* "left" and "right" name the screen edge, so these stay physical (the API takes no start or end). */
+/* "left" and "right" name the screen edge, so these stay physical; "start" and "end" follow the reading direction. */
 void-drawer[side="left"]::part(surface) {
   left: 0;
   top: 0;
@@ -49,6 +49,26 @@ void-drawer[side="right"]::part(surface) {
   border-left: var(--void-float-border-width) solid var(--void-float-border);
   translate: 100% 0;
 }
+
+void-drawer[side="start"]::part(surface) {
+  inset-inline-start: 0;
+  top: 0;
+  height: 100%;
+  border-inline-end: var(--void-float-border-width) solid var(--void-float-border);
+  translate: -100% 0;
+}
+
+void-drawer[side="end"]::part(surface) {
+  inset-inline-end: 0;
+  top: 0;
+  height: 100%;
+  border-inline-start: var(--void-float-border-width) solid var(--void-float-border);
+  translate: 100% 0;
+}
+
+/* Sliding out toward the inline edge: the direction of the offset flips in right-to-left. */
+void-drawer[side="start"]:dir(rtl):not([open])::part(surface) { translate: 100% 0; }
+void-drawer[side="end"]:dir(rtl):not([open])::part(surface) { translate: -100% 0; }
 
 void-drawer[side="top"]::part(surface) {
   top: 0;
@@ -73,12 +93,16 @@ void-drawer[open]::part(surface) {
 @starting-style {
   void-drawer[side="left"][open]::part(surface) { translate: -100% 0; }
   void-drawer[side="right"][open]::part(surface) { translate: 100% 0; }
+  void-drawer[side="start"][open]::part(surface) { translate: -100% 0; }
+  void-drawer[side="end"][open]::part(surface) { translate: 100% 0; }
+  void-drawer[side="start"]:dir(rtl)[open]::part(surface) { translate: 100% 0; }
+  void-drawer[side="end"]:dir(rtl)[open]::part(surface) { translate: -100% 0; }
   void-drawer[side="top"][open]::part(surface) { translate: 0 -100%; }
   void-drawer[side="bottom"][open]::part(surface) { translate: 0 100%; }
 }
 
-void-drawer[side="left"]::part(surface),
-void-drawer[side="right"]::part(surface) {
+void-drawer:is([side="left"], [side="start"])::part(surface),
+void-drawer:is([side="right"], [side="end"])::part(surface) {
   width: 24rem;
 }
 
@@ -87,13 +111,13 @@ void-drawer[side="bottom"]::part(surface) {
   height: 24rem;
 }
 
-void-drawer[side="left"][size="sm"]::part(surface),
-void-drawer[side="right"][size="sm"]::part(surface) {
+void-drawer:is([side="left"], [side="start"])[size="sm"]::part(surface),
+void-drawer:is([side="right"], [side="end"])[size="sm"]::part(surface) {
   width: 16rem;
 }
 
-void-drawer[side="left"][size="lg"]::part(surface),
-void-drawer[side="right"][size="lg"]::part(surface) {
+void-drawer:is([side="left"], [side="start"])[size="lg"]::part(surface),
+void-drawer:is([side="right"], [side="end"])[size="lg"]::part(surface) {
   width: 36rem;
 }
 
