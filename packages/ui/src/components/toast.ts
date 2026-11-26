@@ -164,7 +164,6 @@ export class VoidToastContainer extends VoidElement {
     if (typeof this.showPopover === 'function') this.setHostAttribute('popover', 'manual');
     this._ensureAnnouncers();
     this._observer ??= new MutationObserver(records => {
-      this._ensureAnnouncers();
       this._syncShown(records.some(r => r.addedNodes.length > 0));
       for (const r of records) {
         for (const n of r.addedNodes) if (n instanceof VoidToast) this._announce(n);
@@ -188,21 +187,34 @@ export class VoidToastContainer extends VoidElement {
    * region it already knows, so a toast's words are written here after the toast is in, never together with it.
    */
   private _ensureAnnouncers(): void {
+    // They live in a shadow root, so a server morph or a snapshot restore of the light DOM never removes or
+    // duplicates them; the toasts are slotted through.
+    const root = this.shadowRoot ?? this.attachShadow({ mode: 'open' });
+    if (root.querySelector('slot')) return;
+    const doc = this.ownerDocument;
+    const style = doc.createElement('style');
+    style.textContent =
+      '[data-void-announcer]{position:absolute;width:1px;height:1px;margin:-1px;padding:0;border:0;overflow:hidden;clip-path:inset(50%);white-space:nowrap;pointer-events:none}';
+    root.append(style);
     for (const [kind, role] of [['polite', 'status'], ['assertive', 'alert']] as const) {
-      if (this.querySelector(`:scope > [data-void-announcer="${kind}"]`)) continue;
-      const el = this.ownerDocument.createElement('div');
+      const el = doc.createElement('div');
       el.setAttribute('data-void-announcer', kind);
       el.setAttribute('role', role);
       el.setAttribute('aria-live', kind);
       el.setAttribute('aria-atomic', 'true');
-      this.prepend(el);
+      root.append(el);
     }
+    root.append(doc.createElement('slot'));
+  }
+
+  private _region(kind: 'polite' | 'assertive'): HTMLElement | null {
+    return this.shadowRoot?.querySelector<HTMLElement>(`[data-void-announcer="${kind}"]`) ?? null;
   }
 
   /** Writes a toast's text into the matching announcer on a later task, after clearing it so a repeat is spoken again. */
   private _announce(toast: VoidToast): void {
     const kind = toast.color === 'error' || toast.color === 'warning' ? 'assertive' : 'polite';
-    const region = this.querySelector<HTMLElement>(`:scope > [data-void-announcer="${kind}"]`);
+    const region = this._region(kind);
     if (!region) return;
     clearTimeout(this._announceTimers.get(region));
     region.textContent = '';

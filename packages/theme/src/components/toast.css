@@ -50,20 +50,6 @@ void-toast-container:not(:has(void-toast)) {
   pointer-events: none;
 }
 
-/* The two announcers the container writes toast text into: out of sight, but in the accessibility tree. */
-void-toast-container > [data-void-announcer] {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  margin: -1px;
-  padding: 0;
-  border: 0;
-  overflow: hidden;
-  clip-path: inset(50%);
-  white-space: nowrap;
-  pointer-events: none;
-}
-
 void-toast {
   --_void-tone: var(--void-color-accent);
   position: relative;

@@ -200,8 +200,8 @@ describe('VoidToastContainer', () => {
       const el = document.createElement('void-toast-container') as VoidToastContainer;
       document.body.appendChild(el);
       expect(el.hasAttribute('aria-live')).toBe(false);
-      const polite = el.querySelector(':scope > [data-void-announcer=polite]')!;
-      const assertive = el.querySelector(':scope > [data-void-announcer=assertive]')!;
+      const polite = el.shadowRoot!.querySelector('[data-void-announcer=polite]')!;
+      const assertive = el.shadowRoot!.querySelector('[data-void-announcer=assertive]')!;
       expect([polite.getAttribute('role'), polite.getAttribute('aria-live'), polite.getAttribute('aria-atomic')]).toEqual(['status', 'polite', 'true']);
       expect([assertive.getAttribute('role'), assertive.getAttribute('aria-live'), assertive.getAttribute('aria-atomic')]).toEqual(['alert', 'assertive', 'true']);
     });
@@ -211,8 +211,8 @@ describe('VoidToastContainer', () => {
       try {
         const el = document.createElement('void-toast-container') as VoidToastContainer;
         document.body.appendChild(el);
-        const polite = el.querySelector(':scope > [data-void-announcer=polite]')!;
-        const assertive = el.querySelector(':scope > [data-void-announcer=assertive]')!;
+        const polite = el.shadowRoot!.querySelector('[data-void-announcer=polite]')!;
+        const assertive = el.shadowRoot!.querySelector('[data-void-announcer=assertive]')!;
         const ok = document.createElement('void-toast') as VoidToast;
         ok.duration = 0;
         ok.innerHTML = '<void-toast-title>Saved</void-toast-title><void-toast-description>All done</void-toast-description>';

@@ -248,8 +248,8 @@ test.describe('disclosure and notices', () => {
       const container = page.locator('#flash');
       // The container is not itself live: its two hidden announcers are, and they speak for the toasts.
       await expect(container).not.toHaveAttribute('aria-live', /.+/);
-      await expect(container.locator('> [role=status]')).toHaveText('Saved. Your changes were saved.');
-      await expect(container.locator('> [role=alert]')).toContainText('Upload failed.');
+      await expect(container.locator('[role=status]')).toHaveText('Saved. Your changes were saved.');
+      await expect(container.locator('[role=alert]')).toContainText('Upload failed.');
       await expect(container).toHaveAttribute('aria-label', 'Notifications');
       const tree = await container.ariaSnapshot();
       expect(tree).toContain('Saved');
@@ -270,7 +270,7 @@ test.describe('disclosure and notices', () => {
       const before = await page.evaluate(() => {
         const c = document.getElementById('flash')!;
         const info = (s: string) => {
-          const el = c.querySelector(`:scope > ${s}`)!;
+          const el = c.shadowRoot!.querySelector(s)!;
           return [el.getAttribute('aria-live'), el.getAttribute('aria-atomic'), el.textContent];
         };
         return { display: getComputedStyle(c).display, toasts: c.querySelectorAll(':scope > void-toast').length, polite: info('[role=status]'), assertive: info('[role=alert]') };
@@ -286,7 +286,7 @@ test.describe('disclosure and notices', () => {
             const c = document.getElementById('flash')!;
             const mo = new MutationObserver(() => {
               mo.disconnect();
-              resolve({ rendered: getComputedStyle(c).display !== 'none', text: c.querySelector(':scope > [role=status]')!.textContent ?? '' });
+              resolve({ rendered: getComputedStyle(c).display !== 'none', text: c.shadowRoot!.querySelector('[role=status]')!.textContent ?? '' });
             });
             mo.observe(c, { childList: true });
             (window as any).VoidUI.toast({ description: 'Changes saved', duration: 0 });
@@ -300,7 +300,7 @@ test.describe('disclosure and notices', () => {
       const seen = await page.evaluate(
         () =>
           new Promise<string[]>((resolve) => {
-            const region = document.querySelector('#flash > [role=status]')!;
+            const region = document.querySelector('#flash [role=status]')!;
             const log: string[] = [];
             new MutationObserver(() => log.push(region.textContent ?? '')).observe(region, { childList: true });
             (window as any).VoidUI.toast({ description: 'Changes saved', duration: 0 });

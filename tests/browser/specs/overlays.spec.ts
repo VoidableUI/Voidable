@@ -413,8 +413,8 @@ test.describe('toast', () => {
     // The toasts are plain groups; the container's announcers speak for them: polite for a status, assertive for an error.
     await expect(page.locator('void-toast', { hasText: 'Saved' })).toHaveAttribute('role', 'group');
     await expect(page.locator('void-toast', { hasText: 'Failed' })).toHaveAttribute('role', 'group');
-    await expect(page.locator('void-toast-container > [role=status]')).toHaveText('OK. Saved');
-    await expect(page.locator('void-toast-container > [role=alert]')).toHaveText('Failed');
+    await expect(page.locator('void-toast-container [role=status]')).toHaveText('OK. Saved');
+    await expect(page.locator('void-toast-container [role=alert]')).toHaveText('Failed');
     expect(await isPerceivable(page.locator('void-toast', { hasText: 'Saved' }))).toBe(true);
     await expect(page.locator('void-toast', { hasText: 'Saved' })).toHaveCount(0);
     await expect(page.locator('void-toast', { hasText: 'Failed' })).toHaveCount(1);
