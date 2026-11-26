@@ -78,6 +78,13 @@ const eventDetail = (type) => {
 const esc = (s) => String(s ?? '').replace(/\|/g, '\\|').replace(/\r?\n/g, ' ');
 const code = (s) => (s ? `\`${esc(s)}\`` : '');
 
+/** What replaces a built-in string on an element (voidMessages[].override), as a phrase. */
+function overrideText(o) {
+  if (!o) return '`registerMessages()` only';
+  if (o.part) return `a \`<${o.part}>\` part you write`;
+  return o.on ? `\`${o.attribute}\` on \`<${o.on}>\`` : `\`${o.attribute}\``;
+}
+
 function partRule(ps) {
   let rule = ps.children === 'parts' ? 'only these parts as children' : 'parts mixed with other content';
   if (ps.ordered) rule += ', in this order';
@@ -139,6 +146,7 @@ export function collectElements(manifest, supplement) {
         requires: d.voidRequires ?? [],
         hints: d.voidHints ?? {},
         parts: d.voidParts,
+        messages: d.voidMessages ?? [],
       });
     }
   }
@@ -240,6 +248,11 @@ function renderElement(el, byTag, snippets) {
   if (el.events.length) {
     out.push('| Event | `detail` | Description |', '|---|---|---|');
     for (const e of el.events) out.push(`| \`${e.name}\` | ${code(e.detail)} | ${esc(e.description)} |`);
+    out.push('');
+  }
+  if (el.messages?.length) {
+    out.push('Words it writes itself (English; the language follows the closest `lang`, see the Translation guide at https://voidable.dev/guides/translation/):', '', '| Message | Default | Replaced by |', '|---|---|---|');
+    for (const m of el.messages) out.push(`| \`${m.key}\` | ${esc(m.default)} | ${overrideText(m.override)} |`);
     out.push('');
   }
   if (el.parents.length) out.push(`Allowed inside: ${el.parents.map((p) => `\`<${p}>\``).join(', ')}.`, '');

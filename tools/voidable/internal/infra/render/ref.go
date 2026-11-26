@@ -165,6 +165,12 @@ func refText(p *printer, r *domain.Reference) {
 			p.f(" %s # %s\n", name, s.Description)
 		}
 	}
+	if len(r.Messages) > 0 {
+		p.f("%s", "words it writes (English default; replaced by):\n")
+		for _, m := range r.Messages {
+			p.f(" %s: %q # %s\n", m.Key, m.Default, m.Override.String())
+		}
+	}
 	if r.Parts != nil {
 		partsText(p, r.Parts, " ")
 		if r.Parts.Skeleton != "" {
@@ -220,6 +226,13 @@ func refMarkdown(p *printer, r *domain.Reference) {
 		p.f("%s", "| Event | Detail |\n|---|---|\n")
 		for _, e := range r.Events {
 			p.f("| `%s` | %s |\n", e.Name, mdCode(e.Detail))
+		}
+		p.f("%s", "\n")
+	}
+	if len(r.Messages) > 0 {
+		p.f("%s", "Words it writes itself (English; the language follows the closest `lang`):\n\n| Message | Default | Replaced by |\n|---|---|---|\n")
+		for _, m := range r.Messages {
+			p.f("| `%s` | %s | %s |\n", m.Key, mdEscape(m.Default), mdCode(m.Override.String()))
 		}
 		p.f("%s", "\n")
 	}
