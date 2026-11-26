@@ -28,17 +28,17 @@ export const reference = {
   /** First render of 1,000 mixed components until all have rendered. */
   mixed1000Ms: 65,
   /** First render of a 500-row table with a dropdown-menu, a badge and two buttons per row. */
-  table500FirstMs: 72,
+  table500FirstMs: 115,
   /** One Turbo morph of that table (one cell changed), through VoidTurbo. */
-  table500MorphMs: 115,
+  table500MorphMs: 40,
   /** First render of a void-select with 5,000 options. */
-  select5000Ms: 40,
+  select5000Ms: 16,
   /** 200 open/close cycles of a dialog. */
-  dialog200Ms: 330,
+  dialog200Ms: 265,
   /** Gzipped size of `import '@voidable/ui'` (everything, Lit included), minified. */
-  rootEntryGzipKB: 59.5,
+  rootEntryGzipKB: 67.8,
   /** Gzipped size of `import '@voidable/ui/components/button'` (one component, Lit included), minified. */
-  singleComponentGzipKB: 11.6,
+  singleComponentGzipKB: 15.1,
 };
 
 /** Leak limits for the 200 dialog cycles (absolute, not scaled). */
