@@ -49,5 +49,5 @@ your controllers with `data-action`:
 
 ## Documentation
 
-- [Storybook](https://voidableui.github.io/Voidable/)
+- [Storybook](https://voidable.dev/storybook/)
 - [GitHub](https://github.com/VoidableUI/Voidable)

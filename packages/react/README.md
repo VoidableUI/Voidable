@@ -19,7 +19,7 @@ import '@voidable/theme';
 ```
 
 ```tsx
-import { Button, Input, Dialog, TagsInput, useTheme } from '@voidable/ui-react';
+import { Button, Input, Dialog, DialogTitle, DialogBody, TagsInput, useTheme } from '@voidable/ui-react';
 import '@voidable/theme';
 
 function App() {
@@ -30,15 +30,15 @@ function App() {
       <Button variant="filled" color="error" onVoidClick={() => {}}>
         Click me
       </Button>
-      <Input placeholder="Name" onVoidChange={(e) => console.log(e.detail.value)} />
-      <TagsInput value={['a', 'b']} onVoidChange={(e) => console.log(e.detail.value)} />
+      <Input aria-label="Name" placeholder="Name" onVoidChange={(e) => console.log(e.detail.value)} />
+      <TagsInput aria-label="Tags" value={['a', 'b']} onVoidChange={(e) => console.log(e.detail.value)} />
       <Dialog open><DialogTitle>Confirm</DialogTitle><DialogBody>Are you sure?</DialogBody></Dialog>
     </div>
   );
 }
 ```
 
-Valid `color` values are `default`, `error`, `warning`, `success`, `info` and `notice` (not every component supports every value; see the component docs).
+Valid `color` values are `default`, `error`, `warning`, `caution`, `success`, `info`, `notice` and `highlight` (not every component supports every value; see the component docs).
 
 All Voidable components are available as React components with ref forwarding. Charts (`BarChart`, `LineChart`, `DonutChart`, `Gauge`) take their data through the `data` prop.
 
@@ -55,7 +55,7 @@ Importing `@voidable/ui-react` also imports `@voidable/ui`, which defines the `<
 
 ### Events
 
-Custom events are exposed as typed `onVoid*` props: `void-change` becomes `onVoidChange`, `void-click` becomes `onVoidClick`, and so on. `event.detail` is typed per component, for example `Switch` `onVoidChange` receives `CustomEvent<{ checked: boolean }>`.
+Custom events are exposed as typed `onVoid*` props: `void-change` becomes `onVoidChange`, `void-click` becomes `onVoidClick`, and so on. `event.detail` is typed per component, for example `Switch` `onVoidChange` receives `CustomEvent<{ value: string; checked: boolean }>`.
 
 Overlays (`Dialog`, `Drawer`, `Popover`, `DropdownMenu`, `Tooltip`, `HoverCard`, `Combobox`, `Multiselect`, `DatePicker`) take a controlled `open` and fire `onVoidOpen` / `onVoidClose` with `{ reason }` (`OverlayOpenReason`, `OverlayCloseReason`). Set your state to false in `onVoidClose`, or call `event.preventDefault()` there to keep a user-closed overlay open.
 
