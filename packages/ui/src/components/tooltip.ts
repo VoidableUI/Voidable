@@ -2,6 +2,8 @@ import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
 import { OverlayController } from '../overlay.js';
 import { PartsController, triggerControl } from '../parts.js';
+import { keysConverter, type KeyOverrides } from '../keys.js';
+import { overlayKeys } from '../keymaps/overlay.js';
 
 /**
  * Hover hint for icon buttons and truncated text that need a label without cluttering the visible interface.
@@ -17,6 +19,11 @@ import { PartsController, triggerControl } from '../parts.js';
  * @fires {CustomEvent<{ reason: 'hover' | 'blur' | 'escape' | 'parent' | 'api' }>} void-close - The tooltip is hiding.
  */
 export class VoidTooltip extends VoidElement {
+  /** Key bindings for this element's actions, as JSON (`{"close":["Escape"]}`); `[]` switches an action off. See the keyboard guide. */
+  @property({ attribute: 'keys', converter: keysConverter }) keys: KeyOverrides | null = null;
+  /** @internal The actions of this element and their default keys. */
+  static readonly keyMap = overlayKeys;
+
   /** Side of the trigger the tooltip appears on; it flips to the opposite side when there is no room. */
   @property({ type: String, reflect: true }) side: 'top' | 'bottom' | 'left' | 'right' = 'top';
   /** Alignment with the trigger along that side. */

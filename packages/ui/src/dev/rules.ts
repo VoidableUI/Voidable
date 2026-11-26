@@ -122,6 +122,35 @@ function written(name: string, value: string): string {
 }
 
 /** The problem with attribute `name` on `el`, if any. */
+/** The `keys` attribute (#90): a JSON object whose names are actions the element has (read from its class, `static keyMap`). */
+function checkKeys(el: Element, value: string, where: string): DevWarning | undefined {
+  if (!value.trim()) return undefined;
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(value);
+  } catch {
+    parsed = undefined;
+  }
+  if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+    return warning('keys', el.localName, 'keys', `${where}: keys must be a JSON object such as {"close":[]}, so it is ignored.`, el);
+  }
+  const map = (customElements.get(el.localName) as { keyMap?: Readonly<Record<string, unknown>> } | undefined)?.keyMap;
+  if (!map) return undefined;
+  const actions = Object.keys(map);
+  for (const action of Object.keys(parsed)) {
+    if (action in map) continue;
+    const near = suggest(action, actions);
+    return warning(
+      'keys',
+      el.localName,
+      action,
+      `${where}: ${el.localName} has no key action "${action}", so it does nothing. ${near ? `Did you mean "${near}"?` : `Its actions: ${actions.join(', ')}.`}`,
+      el,
+    );
+  }
+  return undefined;
+}
+
 export function checkAttribute(table: DevTable, el: Element, name: string): DevWarning | undefined {
   const tag = table[el.localName];
   if (!tag) return undefined;
@@ -129,6 +158,8 @@ export function checkAttribute(table: DevTable, el: Element, name: string): DevW
   const value = el.getAttribute(name);
   if (value === null) return undefined;
   const where = describe(el, name);
+
+  if (name === 'keys' && rule !== undefined) return checkKeys(el, value, where);
 
   if (rule === undefined) {
     if (tag.h?.includes(name) || isForeignAttribute(name)) return undefined;

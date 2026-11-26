@@ -2,6 +2,9 @@ import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
 import { PartsController } from '../parts.js';
 import { ClosedContent } from '../disclosure.js';
+import { actionFor } from '../keyboard.js';
+import { keysConverter, type KeyOverrides } from '../keys.js';
+import { activateKeys } from '../keymaps/activation.js';
 
 /**
  * Simple expand/collapse panel for FAQ sections, spoiler text, and progressive disclosure of secondary content.
@@ -20,6 +23,11 @@ import { ClosedContent } from '../disclosure.js';
  *   `preventDefault()` keeps it open. Does not bubble.
  */
 export class VoidCollapsible extends VoidElement {
+  /** Key bindings for this element's actions, as JSON (`{"activate":["Enter"]}`); `[]` switches an action off. See the keyboard guide. */
+  @property({ attribute: 'keys', converter: keysConverter }) keys: KeyOverrides | null = null;
+  /** @internal The actions of this element and their default keys. */
+  static readonly keyMap = activateKeys;
+
   /** Whether the content is shown. Add the attribute to start open; it follows the user's toggling. */
   @property({ type: Boolean, reflect: true }) open = false;
   /** Stop the panel from toggling. The trigger ignores clicks and Enter or Space. */
@@ -87,8 +95,7 @@ export class VoidCollapsible extends VoidElement {
   };
 
   private _onKeydown = (e: KeyboardEvent): void => {
-    if (e.key !== 'Enter' && e.key !== ' ') return;
-    if (!this._fromTrigger(e) || e.defaultPrevented) return;
+    if (actionFor(this, e) !== 'activate' || !this._fromTrigger(e)) return;
     // A real control inside the trigger (a link) keeps its own keys.
     if ((e.target as Element).closest('a, button, input, select, textarea')) return;
     e.preventDefault();

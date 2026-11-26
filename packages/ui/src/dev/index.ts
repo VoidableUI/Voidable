@@ -315,11 +315,26 @@ export function reset(): void {
   log.length = 0;
 }
 
+/** `configureKeys` (#90) hands its overrides here: an action name the tag's elements do not have is reported. */
+function checkKeyNames(tag: string, overrides: object): void {
+  const map = (customElements.get(tag) as { keyMap?: Readonly<Record<string, unknown>> } | undefined)?.keyMap;
+  if (!map) return;
+  for (const action of Object.keys(overrides)) {
+    if (action in map) continue;
+    report({
+      kind: 'keys',
+      tag,
+      subject: action,
+      message: `[voidable] configureKeys('${tag}'): ${tag} has no key action "${action}", so it does nothing. Its actions: ${Object.keys(map).join(', ')}.`,
+    });
+  }
+}
+
 function start(): void {
   if (typeof document === 'undefined' || (globalThis as Record<symbol, unknown>)[STARTED]) return;
   // `report` is how components reach this module without importing it: they
   // look it up under the same symbol and call it only when it is there.
-  (globalThis as Record<symbol, unknown>)[STARTED] = { settled, check, warnings, report };
+  (globalThis as Record<symbol, unknown>)[STARTED] = { settled, check, warnings, report, keys: checkKeyNames };
   if (globalThis.VOIDABLE_DEV) configure(globalThis.VOIDABLE_DEV);
   watchActivity();
   patchEvents();

@@ -147,6 +147,7 @@ export function collectElements(manifest, supplement) {
         hints: d.voidHints ?? {},
         parts: d.voidParts,
         messages: d.voidMessages ?? [],
+        keys: d.voidKeys,
       });
     }
   }
@@ -253,6 +254,17 @@ function renderElement(el, byTag, snippets) {
   if (el.messages?.length) {
     out.push('Words it writes itself (English; the language follows the closest `lang`, see the Translation guide at https://voidable.dev/guides/translation/):', '', '| Message | Default | Replaced by |', '|---|---|---|');
     for (const m of el.messages) out.push(`| \`${m.key}\` | ${esc(m.default)} | ${overrideText(m.override)} |`);
+    out.push('');
+  }
+  if (el.keys) {
+    out.push(
+      'Keys (an action can be rebound or switched off with the `keys` attribute, `keys=\'{"next":["l"],"close":[]}\'`, or for every element of the tag with `configureKeys(tag, {...})`; removing a key can make the control unusable from the keyboard):',
+      '',
+      '| Action | Default keys | What it does |',
+      '|---|---|---|',
+    );
+    for (const k of el.keys.actions) out.push(`| \`${k.action}\`${k.essential ? ' (essential)' : ''} | ${esc(k.labels.join(', '))} | ${esc(k.description)} |`);
+    if (el.keys.browser?.length) out.push('', `The browser's own, not remappable: ${el.keys.browser.map((r) => `${esc(r.keys)} (${esc(r.action)})`).join('; ')}`);
     out.push('');
   }
   if (el.parents.length) out.push(`Allowed inside: ${el.parents.map((p) => `\`<${p}>\``).join(', ')}.`, '');

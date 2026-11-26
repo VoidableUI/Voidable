@@ -1,6 +1,8 @@
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
-import { inlineKeys } from '../keyboard.js';
+import { actionFor } from '../keyboard.js';
+import { keysConverter, type KeyOverrides } from '../keys.js';
+import { navMenuKeys, navMenuVerticalKeys } from '../keymaps/nav-menu.js';
 import { PartsController, triggerControl } from '../parts.js';
 
 /**
@@ -10,6 +12,11 @@ import { PartsController, triggerControl } from '../parts.js';
  * returns focus to its trigger.
  */
 export class VoidNavMenu extends VoidElement {
+  /** Key bindings for this element's actions, as JSON (`{"close":[]}`); `[]` switches an action off. See the keyboard guide. */
+  @property({ attribute: 'keys', converter: keysConverter }) keys: KeyOverrides | null = null;
+  /** @internal The actions of this element and their default keys (horizontal; a vertical menu starts with ArrowDown and ArrowUp). */
+  static readonly keyMap = navMenuKeys;
+
   /**
    * `horizontal` (default) lays the items out in a row with Left and Right arrow keys; `vertical` stacks
    * them.
@@ -57,18 +64,15 @@ export class VoidNavMenu extends VoidElement {
     const items = this._getItems();
     if (!items.length) return;
 
-    const isHorizontal = this.orientation === 'horizontal';
-    const keys = inlineKeys(this);
-    const nextKey = isHorizontal ? keys.next : 'ArrowDown';
-    const prevKey = isHorizontal ? keys.prev : 'ArrowUp';
+    const action = actionFor(this, e, this.orientation === 'horizontal' ? navMenuKeys : navMenuVerticalKeys);
 
-    if (e.key === nextKey || e.key === prevKey) {
+    if (action === 'next' || action === 'previous') {
       const triggers = items.map(item => item._control()).filter((c): c is HTMLElement => !!c);
       const idx = triggers.indexOf(document.activeElement as HTMLElement);
       // Only from a trigger: arrow keys inside an open panel are the panel's own.
       if (idx < 0) return;
       e.preventDefault();
-      if (e.key === nextKey) {
+      if (action === 'next') {
         (triggers[idx + 1] ?? triggers[0])?.focus();
       } else {
         (triggers[idx - 1] ?? triggers[triggers.length - 1])?.focus();
@@ -76,7 +80,7 @@ export class VoidNavMenu extends VoidElement {
       return;
     }
 
-    if (e.key === 'Escape') {
+    if (action === 'close') {
       for (const item of items) {
         if (item.open) {
           item._closeDropdown('escape');

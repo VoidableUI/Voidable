@@ -5,6 +5,9 @@ import { VoidElement } from '../base.js';
 import { isFocusParked } from '../projection.js';
 import { InternalsFormControl, type FormSubmission } from '../form-control.js';
 import { localeOf, msg } from '../messages.js';
+import { actionFor } from '../keyboard.js';
+import { keysConverter, type KeyOverrides } from '../keys.js';
+import { numberInputKeys } from '../keymaps/fields.js';
 
 /**
  * Precise numeric entry for quantity selectors, price fields, and settings with increment/decrement controls.
@@ -12,6 +15,11 @@ import { localeOf, msg } from '../messages.js';
  * name, which `<void-field>` supplies), and the stepper buttons are its own buttons.
  */
 export class VoidNumberInput extends InternalsFormControl(VoidElement) {
+  /** Key bindings for this element's actions, as JSON (`{"increment":["ArrowUp","k"]}`); `[]` switches an action off. See the keyboard guide. */
+  @property({ attribute: 'keys', converter: keysConverter }) keys: KeyOverrides | null = null;
+  /** @internal The actions of this element and their default keys. */
+  static readonly keyMap = numberInputKeys;
+
   /** The host's `aria-label` / `aria-labelledby` name the inner control. */
   static override labelTarget = 'input[role=spinbutton]';
 
@@ -257,10 +265,11 @@ export class VoidNumberInput extends InternalsFormControl(VoidElement) {
 
   private _onKeydown(e: KeyboardEvent): void {
     if (this.formDisabled || this.readonly) return;
-    if (e.key === 'ArrowUp') {
+    const action = actionFor(this, e);
+    if (action === 'increment') {
       e.preventDefault();
       this._increment();
-    } else if (e.key === 'ArrowDown') {
+    } else if (action === 'decrement') {
       e.preventDefault();
       this._decrement();
     }

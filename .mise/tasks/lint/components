@@ -14,8 +14,7 @@ set -euo pipefail
 #   attributes    every public attribute has a JSDoc description
 #   example       tools/voidable/.../supplement/snippets/<tag>.html exists
 #   group         docs/src/data/component-notes.json places the tag in a group
-#   keyboard      every tag in docs/src/data/keyboard.json is a real tag and has a
-#                 table on the keyboard page
+#   keyboard      every <KeyTable tag> on the keyboard page is an element with key actions (voidKeys in the manifest)
 #   stale         no data entry names a tag the manifest does not have
 
 node --input-type=module - <<'EOF'
@@ -23,7 +22,6 @@ import { readFileSync, existsSync } from 'node:fs';
 
 const manifest = JSON.parse(readFileSync('packages/ui/dist/custom-elements.json', 'utf8'));
 const notes = JSON.parse(readFileSync('docs/src/data/component-notes.json', 'utf8'));
-const keyboard = JSON.parse(readFileSync('docs/src/data/keyboard.json', 'utf8'));
 const snippets = 'tools/voidable/internal/infra/embedded/data/supplement/snippets';
 const groups = new Set(['forms', 'overlays', 'navigation', 'data-display', 'feedback', 'layout', 'charts']);
 
@@ -45,9 +43,10 @@ for (const mod of manifest.modules) {
   }
 }
 for (const t of Object.keys(notes)) if (!tags.has(t)) problems.push(`${t}: in component-notes.json but not in the manifest`);
-for (const t of Object.keys(keyboard)) {
-  if (!tags.has(t)) problems.push(`${t}: in keyboard.json but not in the manifest`);
-  else if (!keyboardPage.includes(`<KeyTable tag="${t}"`)) problems.push(`${t}: in keyboard.json but missing from components/keyboard.mdx (add a <KeyTable tag="${t}" />)`);
+const withKeys = new Set();
+for (const mod of manifest.modules) for (const d of mod.declarations ?? []) if (d.tagName && d.voidKeys) withKeys.add(d.tagName);
+for (const m of keyboardPage.matchAll(/<KeyTable tag="([a-z-]+)"/g)) {
+  if (!withKeys.has(m[1])) problems.push(`${m[1]}: on components/keyboard.mdx but has no key actions in the manifest (voidKeys)`);
 }
 
 if (problems.length) {

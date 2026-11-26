@@ -3,7 +3,9 @@ import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
 import { InternalsFormControl, type FormSubmission } from '../form-control.js';
 import { useProjection } from '../projection.js';
-import { uid } from '../keyboard.js';
+import { actionFor, uid } from '../keyboard.js';
+import { keysConverter, type KeyOverrides } from '../keys.js';
+import { activateKeys } from '../keymaps/activation.js';
 import { localeOf, msg } from '../messages.js';
 
 useProjection();
@@ -17,6 +19,11 @@ export type FileRejectReason = 'type' | 'size' | 'count';
  * @fires {CustomEvent<{ rejected: { file: File; reason: 'type' | 'size' | 'count' }[] }>} void-reject - Files were refused: one entry per file with the reason. Does not bubble.
  */
 export class VoidFileUpload extends InternalsFormControl(VoidElement) {
+  /** Key bindings for this element's actions, as JSON (`{"activate":["Enter"]}`); `[]` switches an action off. See the keyboard guide. */
+  @property({ attribute: 'keys', converter: keysConverter }) keys: KeyOverrides | null = null;
+  /** @internal The actions of this element and their default keys. */
+  static readonly keyMap = activateKeys;
+
   /** The host's `aria-label` / `aria-labelledby` name the inner control. */
   static override labelTarget = '.void-file-upload-dropzone';
 
@@ -130,7 +137,7 @@ export class VoidFileUpload extends InternalsFormControl(VoidElement) {
 
   private _onDropzoneKeydown = (e: KeyboardEvent): void => {
     if (this.formDisabled) return;
-    if (e.key === 'Enter' || e.key === ' ') {
+    if (actionFor(this, e) === 'activate') {
       e.preventDefault();
       this._input?.click();
     }

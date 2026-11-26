@@ -2,6 +2,8 @@ import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
 import { OverlayController } from '../overlay.js';
 import { PartsController, triggerControl } from '../parts.js';
+import { keysConverter, type KeyOverrides } from '../keys.js';
+import { overlayKeys } from '../keymaps/overlay.js';
 
 /**
  * Anchored overlay for contextual detail and mini-forms that need more room than a tooltip.
@@ -20,6 +22,11 @@ import { PartsController, triggerControl } from '../parts.js';
  * popover is closing. Cancelable when the user caused it (every reason but `parent` and `api`).
  */
 export class VoidPopover extends VoidElement {
+  /** Key bindings for this element's actions, as JSON (`{"close":["Escape"]}`); `[]` switches an action off. See the keyboard guide. */
+  @property({ attribute: 'keys', converter: keysConverter }) keys: KeyOverrides | null = null;
+  /** @internal The actions of this element and their default keys. */
+  static readonly keyMap = overlayKeys;
+
   /** Whether the popover is open. */
   @property({ type: Boolean, reflect: true }) open = false;
   /** Side of the trigger it opens on; it flips to the opposite side when there is no room. */

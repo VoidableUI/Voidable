@@ -129,3 +129,29 @@ A setting that is a number is a number: the bar chart's `stagger` is the delay i
 What is not a treatment is not a variant: the skeleton's form is `shape` (`text`, `circular`, `rectangular`) and the colour picker's swatch-button form is the boolean `compact`.
 `show-value` (singular) prints values on every chart, as on the slider.
 *Why*: an agent that knows `variant="filled"` on a button should get the same meaning on a badge, not a layout change.
+
+## Key actions
+
+**A key is an action, and an element's actions have the same names everywhere.** An element reads its keys through a map of action to keys (its `keyMap`), never by comparing `e.key` in a handler, and an application can switch an action off or move it (`keys`, `configureKeys`; see [Customising keys](/components/keyboard/#customising-keys)). Two rules follow:
+
+1. **A key handler returns early for an event that is already `defaultPrevented`** (and while a text composition is in progress), so an application can take a key by cancelling it before the element sees it.
+2. **The default keys are the standard keys of the control and stay on; a shortcut is opt-in.** An action with no default key is how an application adds one. No element binds Control or Meta by default.
+
+The vocabulary:
+
+| Action | Meaning |
+| --- | --- |
+| `activate` | Press, toggle or select the focused item |
+| `open`, `openLast` | Open a list or menu (and move to its last item) |
+| `close`, `cancel` | Close a layer; abandon an edit |
+| `submit`, `send` | Confirm an edit; send a message |
+| `leave` | Leave an open panel with Tab |
+| `next`, `previous`, `first`, `last` | Move between items |
+| `nextPage`, `previousPage` | Move a page of items |
+| `typeahead` | Jump to the item that starts with the typed characters |
+| `increment`, `decrement` | Step a number |
+| `previousDay`, `nextDay`, `previousWeek`, `nextWeek`, `startOfWeek`, `endOfWeek`, `previousMonth`, `nextMonth`, `previousYear`, `nextYear` | Move the calendar's focused date |
+| `deleteBackward`, `deleteForward` | Clear the box before or after the cursor |
+| `add`, `removeLast` | Add a tag; remove the last one |
+
+*Why*: one action name on every component lets `configureKeys('*', { close: [] })` mean the same everywhere, and lets the manifest, the reference and the checker list the keys from the code that reads them.

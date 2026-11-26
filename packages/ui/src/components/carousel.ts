@@ -1,7 +1,10 @@
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
-import { inlineKeys } from '../keyboard.js';
+import { actionFor } from '../keyboard.js';
 import { KeyboardActivation } from '../keyboard-activation.js';
+import { keysConverter, type KeyOverrides } from '../keys.js';
+import { activateKeys } from '../keymaps/activation.js';
+import { carouselKeys, carouselVerticalKeys } from '../keymaps/carousel.js';
 import { PartsController } from '../parts.js';
 import { msg } from '../messages.js';
 
@@ -11,6 +14,11 @@ import { msg } from '../messages.js';
  * It is aria-disabled on the first slide unless the carousel has `loop`.
  */
 export class VoidCarouselPrevious extends VoidElement {
+  /** Key bindings for this element's actions, as JSON (`{"activate":["Enter"]}`); `[]` switches an action off. See the keyboard guide. */
+  @property({ attribute: 'keys', converter: keysConverter }) keys: KeyOverrides | null = null;
+  /** @internal The actions of this element and their default keys. */
+  static readonly keyMap = activateKeys;
+
   /** Enter and Space fire a real `click`, as on a native button. */
   protected readonly _activation = new KeyboardActivation(this, {
     disabled: () => this.getAttribute('aria-disabled') === 'true',
@@ -33,6 +41,11 @@ if (!customElements.get('void-carousel-previous')) {
  * aria-disabled on the last slide unless the carousel has `loop`.
  */
 export class VoidCarouselNext extends VoidElement {
+  /** Key bindings for this element's actions, as JSON (`{"activate":["Enter"]}`); `[]` switches an action off. See the keyboard guide. */
+  @property({ attribute: 'keys', converter: keysConverter }) keys: KeyOverrides | null = null;
+  /** @internal The actions of this element and their default keys. */
+  static readonly keyMap = activateKeys;
+
   /** Enter and Space fire a real `click`, as on a native button. */
   protected readonly _activation = new KeyboardActivation(this, {
     disabled: () => this.getAttribute('aria-disabled') === 'true',
@@ -62,6 +75,11 @@ if (!customElements.get('void-carousel-next')) {
  * `value` and `index` are both the new slide's index.
  */
 export class VoidCarousel extends VoidElement {
+  /** Key bindings for this element's actions, as JSON (`{"next":["ArrowRight"]}`); `[]` switches an action off. See the keyboard guide. */
+  @property({ attribute: 'keys', converter: keysConverter }) keys: KeyOverrides | null = null;
+  /** @internal The actions of this element and their default keys (horizontal; a vertical carousel starts with ArrowDown and ArrowUp). */
+  static readonly keyMap = carouselKeys;
+
   /**
    * Zero-based index of the slide being shown. Set it to jump to a slide; the arrows, indicators and
    * arrow keys update it and fire `void-change`.
@@ -273,15 +291,12 @@ export class VoidCarousel extends VoidElement {
   };
 
   private _onKeydown = (e: KeyboardEvent): void => {
-    const isHorizontal = this.orientation === 'horizontal';
-    const keys = inlineKeys(this);
-    const prevKey = isHorizontal ? keys.prev : 'ArrowUp';
-    const nextKey = isHorizontal ? keys.next : 'ArrowDown';
+    const action = actionFor(this, e, this.orientation === 'horizontal' ? carouselKeys : carouselVerticalKeys);
 
-    if (e.key === prevKey) {
+    if (action === 'previous') {
       e.preventDefault();
       this._prev();
-    } else if (e.key === nextKey) {
+    } else if (action === 'next') {
       e.preventDefault();
       this._next();
     }

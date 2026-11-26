@@ -3,7 +3,9 @@ import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
 import { msg } from '../messages.js';
 import { InternalsFormControl, type FormSubmission } from '../form-control.js';
-import { edgeEnabled, isPrintable, stepEnabled, Typeahead } from '../keyboard.js';
+import { actionFor, edgeEnabled, stepEnabled, Typeahead } from '../keyboard.js';
+import { keysConverter, type KeyOverrides } from '../keys.js';
+import { multiselectKeys } from '../keymaps/pickers.js';
 import { OverlayController, type OverlayCloseReason, type OverlayOpenReason } from '../overlay.js';
 import { PartsController } from '../parts.js';
 import { ProjectionController } from '../projection.js';
@@ -86,6 +88,11 @@ export function optionLabel(opt: Element): string {
  * @fires {CustomEvent<{ reason: 'trigger' | 'escape' | 'outside' | 'blur' | 'parent' | 'api' }>} void-close - The option list is closing.
  */
 export class VoidMultiselect extends InternalsFormControl(VoidElement) {
+  /** Key bindings for this element's actions, as JSON (`{"close":["Escape"]}`); `[]` switches an action off. See the keyboard guide. */
+  @property({ attribute: 'keys', converter: keysConverter }) keys: KeyOverrides | null = null;
+  /** @internal The actions of this element and their default keys. */
+  static readonly keyMap = multiselectKeys;
+
   /** The host's `aria-label` / `aria-labelledby` name the inner control. */
   static override labelTarget = '[role=combobox]';
 
@@ -381,72 +388,59 @@ export class VoidMultiselect extends InternalsFormControl(VoidElement) {
   }
 
   private _onTriggerKeydown = (e: KeyboardEvent): void => {
-    if (this.formDisabled || e.target !== e.currentTarget || e.isComposing) return;
-    const options = this._options;
-    const disabled = options.map(o => o.disabled);
-    const key = e.key;
-    if (!this.open) {
-      if (key === 'Home' || key === 'End') {
-        e.preventDefault();
-        this._openList(key === 'Home' ? 'first' : 'last');
-      } else if (key === 'ArrowUp') {
-        e.preventDefault();
-        this._openList('first');
-      } else if (key === 'Enter' || key === ' ' || key === 'ArrowDown') {
-        e.preventDefault();
-        this._openList('selected');
-      } else if (isPrintable(e)) {
-        e.preventDefault();
-        this._openList('selected');
-        this._typeaheadTo(e.key);
-      }
+    if (this.formDisabled || e.target !== e.currentTarget) return;
+    const action = actionFor(this, e);
+    if (!action) {
+      // Tab leaves: close the list first (focus-out would too).
+      if (e.key === 'Tab' && this.open && !e.defaultPrevented) this._close('blur');
       return;
     }
-    switch (key) {
-      case 'ArrowDown':
-        e.preventDefault();
-        if (!e.altKey) this._moveActive(this._stepBy(1));
+    if (!this.open) {
+      // Closed, every movement key opens the list where it would have gone.
+      if (action === 'first' || action === 'last') this._openList(action);
+      else if (action === 'previous') this._openList('first');
+      else if (action === 'next' || action === 'activate') this._openList('selected');
+      else if (action === 'typeahead') {
+        this._openList('selected');
+        this._typeaheadTo(e.key);
+      } else return;
+      e.preventDefault();
+      return;
+    }
+    const disabled = this._options.map(o => o.disabled);
+    switch (action) {
+      case 'next':
+        this._moveActive(this._stepBy(1));
         break;
-      case 'ArrowUp':
-        e.preventDefault();
-        if (e.altKey) this._close('escape');
-        else this._moveActive(this._stepBy(-1));
+      case 'previous':
+        this._moveActive(this._stepBy(-1));
         break;
-      case 'PageDown':
-        e.preventDefault();
+      case 'nextPage':
         this._moveActive(this._stepBy(10));
         break;
-      case 'PageUp':
-        e.preventDefault();
+      case 'previousPage':
         this._moveActive(this._stepBy(-10));
         break;
-      case 'Home':
-        e.preventDefault();
+      case 'first':
         this._moveActive(edgeEnabled(disabled, 1));
         break;
-      case 'End':
-        e.preventDefault();
+      case 'last':
         this._moveActive(edgeEnabled(disabled, -1));
         break;
-      case 'Enter':
-      case ' ':
-        e.preventDefault();
+      case 'activate':
         if (this._active && !this._active.disabled) this._toggleOption(this._active);
         break;
-      case 'Escape':
-        e.preventDefault();
+      case 'close':
         e.stopPropagation();
         this._close('escape');
         break;
-      case 'Tab':
-        this._close('blur');
+      case 'typeahead':
+        this._typeaheadTo(e.key);
         break;
       default:
-        if (isPrintable(e)) {
-          e.preventDefault();
-          this._typeaheadTo(e.key);
-        }
+        return;
     }
+    e.preventDefault();
   };
 
   private _typeaheadTo(char: string): void {

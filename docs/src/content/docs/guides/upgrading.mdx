@@ -90,6 +90,17 @@ The words the components write and the locale they format in follow `lang` now (
 - **Number formatting follows `lang`.** The number input writes its value in the language's digits and decimal separator, without grouping, and reads typed text the same way (`1,5` is 1.5 under `lang="fr"`, and 15 under `lang="en"`). The form value is unchanged. The chart tables used the browser's language when the page had no `lang`; they use `en-US` now.
 - **Two English texts changed.** The file upload's size error reads "is larger than the limit of 5,000 bytes." (it said "5000 byte limit"), and an indicator's name groups digits of large counts ("1,234 notifications").
 
+## Keys (0.12)
+
+Keys are named actions now that an application can switch off or move (see [Customising keys](/components/keyboard/)): `keys` on an element, `configureKeys` for a tag or for every component, and `voidable check` warns about a `keys` attribute that is not valid JSON, names an action the element does not have, or switches off an essential one. A few behaviours differ from before:
+
+- **A key you cancel is left alone.** Every component ignores a `keydown` whose `defaultPrevented` is true, so a capture-phase listener that cancels Escape now stops a dialog or popover closing (it used to close anyway).
+- **Some modifier combinations no longer act.** Keys must match their modifiers: Shift with an arrow on a tab list, a combobox's Alt+Up (it closes an open list, and does nothing on a closed one now) and Control or Meta with an arrow, Home or End are left to the browser. Shift+Page Up and Page Down are the calendar's previous and next year.
+- **`KeyboardActivation` options.** Code that builds its own element on `KeyboardActivation` (`@voidable/ui`'s internals) loses the `enter` and `space` options: the element's `keyMap` decides.
+- **Static `keyMap` and `keys`.** Every element with key actions has a `keys` property (not reflected) and a static `keyMap`; `isRtl` and `inlineKeys` are unchanged. The radio group takes `keys` on each `<void-radio>`.
+
+No default key changed, and no component binds a shortcut by default.
+
 ## 4. Check again
 
 Run `voidable check` until it reports nothing, then run your application with the development warnings loaded and open each page once: a clean console means the markup is right.

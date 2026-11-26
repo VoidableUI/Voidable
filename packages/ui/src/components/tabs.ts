@@ -1,6 +1,8 @@
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
-import { edgeEnabled, inlineKeys, stepEnabled } from '../keyboard.js';
+import { actionFor, edgeEnabled, stepEnabled } from '../keyboard.js';
+import { keysConverter, type KeyOverrides } from '../keys.js';
+import { tabsKeys } from '../keymaps/tabs.js';
 import { PartsController } from '../parts.js';
 
 const LIST = 'void-tabs-list';
@@ -24,6 +26,11 @@ const CONTENT = 'void-tabs-content';
  * @fires {CustomEvent<{ value: string }>} void-change - The user selected a tab.
  */
 export class VoidTabs extends VoidElement {
+  /** Key bindings for this element's actions, as JSON (`{"next":["ArrowRight","l"]}`); `[]` switches an action off. See the keyboard guide. */
+  @property({ attribute: 'keys', converter: keysConverter }) keys: KeyOverrides | null = null;
+  /** @internal The actions of this element and their default keys. */
+  static readonly keyMap = tabsKeys;
+
   /**
    * The `value` of the selected tab. As an attribute it is the initial tab; selecting a tab updates it (it
    * reflects) and fires `void-change`.
@@ -152,10 +159,11 @@ export class VoidTabs extends VoidElement {
   };
 
   private _onKeydown = (e: KeyboardEvent): void => {
-    if (e.altKey || e.ctrlKey || e.metaKey || e.defaultPrevented) return;
+    const action = actionFor(this, e);
+    if (!action) return;
     const trigger = this._triggerOf(e.target);
     if (!trigger) return;
-    if (e.key === 'Enter' || e.key === ' ') {
+    if (action === 'activate') {
       e.preventDefault();
       this._select(trigger);
       return;
@@ -164,11 +172,10 @@ export class VoidTabs extends VoidElement {
     const index = triggers.indexOf(trigger);
     const disabled = triggers.map(t => this._disabled(t));
     let next = -1;
-    const keys = inlineKeys(this);
-    if (e.key === keys.next) next = stepEnabled(disabled, index, 1);
-    else if (e.key === keys.prev) next = stepEnabled(disabled, index, -1);
-    else if (e.key === 'Home') next = edgeEnabled(disabled, 1);
-    else if (e.key === 'End') next = edgeEnabled(disabled, -1);
+    if (action === 'next') next = stepEnabled(disabled, index, 1);
+    else if (action === 'previous') next = stepEnabled(disabled, index, -1);
+    else if (action === 'first') next = edgeEnabled(disabled, 1);
+    else if (action === 'last') next = edgeEnabled(disabled, -1);
     else return;
     e.preventDefault();
     if (next < 0) return;

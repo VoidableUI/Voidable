@@ -3,6 +3,8 @@ import { VoidElement } from './base.js';
 import { OverlayController } from './overlay.js';
 import { attachChrome, PartsController } from './parts.js';
 import { msg } from './messages.js';
+import { keysConverter, type KeyOverrides } from './keys.js';
+import { overlayKeys } from './keymaps/overlay.js';
 
 /**
  * The shared modal behind `<void-dialog>` and `<void-drawer>`.
@@ -17,6 +19,11 @@ import { msg } from './messages.js';
  * @internal
  */
 export class VoidModal extends VoidElement {
+  /** Key bindings for this element's actions, as JSON (`{"close":["Escape"]}`); `[]` switches an action off, which leaves a modal with no keyboard exit. See the keyboard guide. */
+  @property({ attribute: 'keys', converter: keysConverter }) keys: KeyOverrides | null = null;
+  /** @internal The actions of this element and their default keys. */
+  static readonly keyMap = overlayKeys;
+
   /** Whether it is open. Set or remove the attribute (or property) to open and close it; the server may do the same through a morph. */
   @property({ type: Boolean, reflect: true }) open = false;
   /**

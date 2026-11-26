@@ -2,14 +2,22 @@ import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
 import { KeyboardActivation } from '../keyboard-activation.js';
 import { InternalsFormControl, type FormSubmission } from '../form-control.js';
-import { edgeEnabled, inlineKeys, stepEnabled } from '../keyboard.js';
+import { actionFor, edgeEnabled, stepEnabled } from '../keyboard.js';
+import { keysConverter, type KeyOverrides } from '../keys.js';
+import { pressKeys } from '../keymaps/activation.js';
+import { choiceKeys } from '../keymaps/choice.js';
 
 type ItemGroup = Element & { value?: string; _syncItems?: () => void };
 
 /** Individual option within a VoidSegmentedControl button group. */
 export class VoidSegmentedControlItem extends VoidElement {
+  /** Key bindings for this element's actions, as JSON (`{"activate":["Space"]}`); `[]` switches an action off. See the keyboard guide. */
+  @property({ attribute: 'keys', converter: keysConverter }) keys: KeyOverrides | null = null;
+  /** @internal The actions of this element and their default keys. */
+  static readonly keyMap = pressKeys;
+
   /** Space fires a real `click`, which the control turns into a selection. */
-  protected readonly _activation = new KeyboardActivation(this, { enter: false, disabled: () => this.disabled });
+  protected readonly _activation = new KeyboardActivation(this, { disabled: () => this.disabled });
 
   /**
    * What the parent reports and submits when this segment is selected. Must be unique within the
@@ -65,6 +73,11 @@ if (!customElements.get('void-segmented-control-item')) {
  * items; with nothing selected, the first or the last); Space selects the focused item.
  */
 export class VoidSegmentedControl extends InternalsFormControl(VoidElement) {
+  /** Key bindings for this element's actions, as JSON (`{"next":["ArrowRight"]}`); `[]` switches an action off. See the keyboard guide. */
+  @property({ attribute: 'keys', converter: keysConverter }) keys: KeyOverrides | null = null;
+  /** @internal The actions of this element and their default keys. */
+  static readonly keyMap = choiceKeys;
+
   /**
    * `value` of the selected item. Selection follows focus, so each arrow key changes it and fires
    * `void-change`. Reflected to the attribute as it changes; the form's reset target stays the value it started with.
@@ -153,12 +166,11 @@ export class VoidSegmentedControl extends InternalsFormControl(VoidElement) {
   };
 
   private _handleKeydown = (e: KeyboardEvent): void => {
-    if (e.altKey || e.ctrlKey || e.metaKey || this.formDisabled) return;
+    const action = actionFor(this, e);
+    if ((action !== 'next' && action !== 'previous') || this.formDisabled) return;
     const items = this._items;
     const focused = (e.target as Element | null)?.closest?.('void-segmented-control-item') as VoidSegmentedControlItem | null;
-    const keys = inlineKeys(this);
-    const forward = e.key === keys.next || e.key === 'ArrowDown';
-    if (!forward && e.key !== keys.prev && e.key !== 'ArrowUp') return;
+    const forward = action === 'next';
     e.preventDefault();
     const disabled = items.map(i => i.disabled);
     // Move from the focused item; with none (the key went to the group itself), from the checked one.

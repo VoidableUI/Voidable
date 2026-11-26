@@ -1,24 +1,23 @@
 import type { ReactiveController, ReactiveControllerHost } from 'lit';
+import { actionFor } from './keys.js';
 
 export interface KeyboardActivationOptions {
-  /** Enter activates, on keydown, as a native button does. Default true. */
-  enter?: boolean | (() => boolean);
-  /** Space activates, on keyup, as a native button does. Default true. */
-  space?: boolean | (() => boolean);
+  /** False while the host leaves the keys to an element inside it (a link button). Default: always on. */
+  when?: () => boolean;
   /** True while the element is disabled: no key does anything. */
   disabled?: () => boolean;
   /** What activation does. Default: `host.click()`, a real `click` event that bubbles. */
   activate?: (e: KeyboardEvent) => void;
 }
 
-const on = (v: boolean | (() => boolean) | undefined): boolean => (typeof v === 'function' ? v() : v ?? true);
-
 /**
- * Makes a custom element activate like a native `<button>`: Enter fires a real `click` on keydown, Space fires one
- * on keyup (and only when the same element saw the keydown), and a disabled or `aria-disabled` element does
- * nothing. Everything that listens for `click` (an overlay trigger, `onClick`, `phx-click`, `wire:click`, Alpine
- * `@click`, Turbo, a form's submit) therefore works the same for the keyboard as for the mouse. Keys that land on
- * an element inside the host (a native `<a>`, `<button>` or `<input>` it contains) are left to that element.
+ * Makes a custom element activate like a native `<button>`: the keys of its `activate` action (Enter and Space by
+ * default; see `keymaps/activation.ts`) fire a real `click`, Enter on keydown and Space on keyup (and only when the
+ * same element saw the keydown), and a disabled or `aria-disabled` element does nothing. Everything that listens
+ * for `click` (an overlay trigger, `onClick`, `phx-click`, `wire:click`, Alpine `@click`, Turbo, a form's submit)
+ * therefore works the same for the keyboard as for the mouse. Keys that land on an element inside the host (a
+ * native `<a>`, `<button>` or `<input>` it contains) are left to that element. The host's class says which keys
+ * (`static keyMap`) and an application can rebind or switch them off (`keys`, `configureKeys`).
  */
 export class KeyboardActivation implements ReactiveController {
   private _armed = false;
@@ -57,22 +56,21 @@ export class KeyboardActivation implements ReactiveController {
   };
 
   private _keydown = (e: KeyboardEvent): void => {
-    if (e.target !== this._host || e.defaultPrevented || e.altKey || e.ctrlKey || e.metaKey || e.isComposing) return;
-    if (e.key === 'Enter' && on(this._options.enter)) {
-      if (this._disabled()) return;
-      e.preventDefault();
-      if (!e.repeat) this._activate(e);
-    } else if (e.key === ' ' && on(this._options.space)) {
+    if (e.target !== this._host || this._options.when?.() === false || actionFor(this._host, e) !== 'activate') return;
+    if (e.key === ' ') {
       // Space scrolls the page by default; it activates when released.
       e.preventDefault();
       this._armed = !this._disabled();
+    } else if (!this._disabled()) {
+      e.preventDefault();
+      if (!e.repeat) this._activate(e);
     }
   };
 
   private _keyup = (e: KeyboardEvent): void => {
     if (e.key !== ' ' || e.target !== this._host || !this._armed) return;
     this._armed = false;
-    if (!on(this._options.space) || this._disabled()) return;
+    if (this._options.when?.() === false || this._disabled() || actionFor(this._host, e) !== 'activate') return;
     e.preventDefault();
     this._activate(e);
   };

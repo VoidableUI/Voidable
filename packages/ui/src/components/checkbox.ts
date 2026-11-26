@@ -2,13 +2,20 @@ import { html, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
 import { KeyboardActivation } from '../keyboard-activation.js';
+import { keysConverter, type KeyOverrides } from '../keys.js';
+import { pressKeys } from '../keymaps/activation.js';
 import { NativeFormControl } from '../form-control.js';
 import { ProjectionController } from '../projection.js';
 
 /** Binary or indeterminate selection for form fields, data table row selection, and toggle-able settings. */
 export class VoidCheckbox extends NativeFormControl(VoidElement) {
+  /** Key bindings for this element's actions, as JSON (`{"activate":["Space"]}`); `[]` switches an action off. See the keyboard guide. */
+  @property({ attribute: 'keys', converter: keysConverter }) keys: KeyOverrides | null = null;
+  /** @internal The actions of this element and their default keys. */
+  static readonly keyMap = pressKeys;
+
   /** Enter and Space fire a real `click`, as on a native button. */
-  protected readonly _activation = new KeyboardActivation(this, { enter: false, disabled: () => this.formDisabled });
+  protected readonly _activation = new KeyboardActivation(this, { disabled: () => this.formDisabled });
 
   /**
    * Whether the box is checked. Reflected to the attribute as the user toggles it or a script sets it;
