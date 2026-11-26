@@ -58,7 +58,7 @@ export default function App() {
 }
 ```
 
-`e.detail` is typed from the element. `prop:`, `attr:` and `bool:` prefixes force a property, an attribute or a boolean attribute, and are typed per element. Solid lowercases attribute names, so a camelCase property (a chart's `showValues`, for example) must be written with `prop:`, as `prop:showValues={true}`; the typings reject the plain camelCase form, which would silently not reach the element. The typings check the `detail` of known `void-*` events, but accept any `on:` event name, so a misspelled event name is not an error.
+`e.detail` is typed from the element. `prop:`, `attr:` and `bool:` prefixes force a property, an attribute or a boolean attribute, and are typed per element. Solid lowercases attribute names, so a camelCase property (a chart's `showValue`, for example) must be written with `prop:`, as `prop:showValue={true}`; the typings reject the plain camelCase form, which would silently not reach the element. The typings check the `detail` of known `void-*` events, but accept any `on:` event name, so a misspelled event name is not an error.
 
 ## Solid 2
 

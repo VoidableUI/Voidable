@@ -61,15 +61,25 @@ describe('VoidAlert', () => {
       expect(el.querySelectorAll('button').length).toBe(1);
     });
 
-    it('dispatches exactly one void-close when the control in the close part is pressed', () => {
+    it('dispatches exactly one void-close on itself when the control in the close part is pressed (#23)', () => {
       const events: Event[] = [];
-      document.addEventListener('void-close', (e) => events.push(e));
+      const onDocument: Event[] = [];
+      el.addEventListener('void-close', (e) => events.push(e));
+      const hear = (e: Event) => onDocument.push(e);
+      document.addEventListener('void-close', hear);
       (el.querySelector('void-alert-close button') as HTMLButtonElement).click();
+      document.removeEventListener('void-close', hear);
       expect(events).toHaveLength(1);
-      expect(events[0].bubbles).toBe(true);
-      expect((events[0] as CustomEvent).composed).toBe(true);
-      expect(events[0].cancelable).toBe(false);
-      expect((events[0] as CustomEvent).detail).toBeNull();
+      expect(onDocument).toHaveLength(0);
+      expect(events[0].bubbles).toBe(false);
+      expect(events[0].cancelable).toBe(true);
+      expect((events[0] as CustomEvent).detail).toEqual({ reason: 'close-button' });
+    });
+
+    it('stays when void-close is cancelled', () => {
+      el.addEventListener('void-close', (e) => e.preventDefault(), { once: true });
+      (el.querySelector('void-alert-close button') as HTMLButtonElement).click();
+      expect(document.body.contains(el)).toBe(true);
     });
 
     it('does not fire the old void-dismiss', () => {

@@ -187,10 +187,10 @@ defmodule VoidableUI.Components.StaticSimpleTest do
 
       html =
         rendered_to_string(~H"""
-        <VoidableUI.Components.skeleton variant="circle" />
+        <VoidableUI.Components.skeleton shape="circle" />
         """)
 
-      assert html =~ ~s(variant="circle")
+      assert html =~ ~s(shape="circle")
     end
 
     test "omits nil variant" do
@@ -481,12 +481,12 @@ defmodule VoidableUI.Components.StaticSimpleTest do
 
       html =
         rendered_to_string(~H"""
-        <VoidableUI.Components.tooltip position="top" delay={200}>
+        <VoidableUI.Components.tooltip side="top" delay={200}>
           <button>Info</button>
         </VoidableUI.Components.tooltip>
         """)
 
-      assert html =~ ~s(position="top")
+      assert html =~ ~s(side="top")
       assert html =~ ~s(delay="200")
       assert html =~ "<button>Info</button>"
     end
@@ -500,7 +500,7 @@ defmodule VoidableUI.Components.StaticSimpleTest do
         """)
 
       refute html =~ "text="
-      refute html =~ "position="
+      refute html =~ "side="
       refute html =~ "delay="
     end
 
@@ -559,7 +559,7 @@ defmodule VoidableUI.Components.StaticSimpleTest do
       assert html =~ ~s(retry-label="Try again")
     end
 
-    test "icon defaults to true and renders as boolean attribute" do
+    test "hide-icon is not rendered by default" do
       assigns = %{}
 
       html =
@@ -567,19 +567,19 @@ defmodule VoidableUI.Components.StaticSimpleTest do
         <VoidableUI.Components.error_fallback />
         """)
 
-      # icon defaults to true, so it should be present
-      assert html =~ "icon"
+      # the icon is drawn by default: no attribute
+      refute html =~ "hide-icon"
     end
 
-    test "icon=false renders icon=\"false\" (the core component reads it as off)" do
+    test "hide_icon renders hide-icon" do
       assigns = %{}
 
       html =
         rendered_to_string(~H"""
-        <VoidableUI.Components.error_fallback icon={false} />
+        <VoidableUI.Components.error_fallback hide_icon />
         """)
 
-      assert html =~ ~s(icon="false")
+      assert html =~ "hide-icon"
     end
 
     test "omits nil heading, message and false retryable" do

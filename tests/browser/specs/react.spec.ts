@@ -32,7 +32,7 @@ for (const strict of [false, true]) {
       await page.locator('#r-plan void-radio[value=pro]').click();
       await settle(page);
       const ev = await events(page);
-      expect(ev).toEqual(expect.arrayContaining(['agree:{"checked":true}', 'on:{"checked":false}', expect.stringMatching(/^country:.*"c"/), expect.stringMatching(/^plan:.*"pro"/)]));
+      expect(ev).toEqual(expect.arrayContaining([expect.stringMatching(/^agree:.*"checked":true/), expect.stringMatching(/^on:.*"checked":false/), expect.stringMatching(/^country:.*"c"/), expect.stringMatching(/^plan:.*"pro"/)]));
 
       // State set by the app shows in the elements.
       await api(page, 'setName', 'Grace');

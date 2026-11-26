@@ -24,11 +24,11 @@ type Story = StoryObj;
 export const Default: Story = {
   args: {
     sticky: false,
-    bordered: true,
+    hideBorder: false,
     variant: 'default',
   },
   render: (args) => html`
-    <void-nav-bar ?sticky=${args.sticky} bordered=${String(args.bordered ?? true)} variant=${args.variant}>
+    <void-nav-bar ?sticky=${args.sticky} ?hide-border=${args.hideBorder} variant=${args.variant}>
       <a href="#">Home</a>
       <a href="#">Docs</a>
       <a href="#">Blog</a>
@@ -71,7 +71,7 @@ export const Elevated: Story = {
 
 export const Unborderd: Story = {
   render: () => html`
-    <void-nav-bar .bordered=${false}>
+    <void-nav-bar hide-border>
       <strong style="font-size: var(--void-text-sm); font-weight: var(--void-weight-medium);">Voidable</strong>
       <a href="#">Home</a>
       <a href="#">About</a>

@@ -1,0 +1,112 @@
+---
+title: API conventions
+description: The rules every Voidable component follows for event names and detail shapes, state attributes, placement, booleans and variants, each with its reason, so that what you learnt on two components is right on the third.
+---
+
+Most markup written against Voidable is written by someone, or something, that has seen two or three components and guesses the fourth. These rules make that guess right: the same idea has the same name, the same shape and the same behaviour on every component, and the names are the ones native HTML and ARIA already use. A guess that is wrong fails loudly: `voidable check` and the [development warnings](/getting-started/development-warnings/) report an unknown attribute, a value outside the set and a listener for an event nothing dispatches, and every form that was renamed in 0.8 is reported with what to write instead (see [Upgrading to 0.8](/guides/upgrading/)).
+
+Each rule below says why it is the rule. When you add a component, follow them; when one does not fit, change the rule here first.
+
+## Events
+
+**`void-change` always carries `detail.value`**, the component's new value in the type of its `value` property: a string for a text field or a single choice, a number for a slider or number input, an array for a multi-value control (checkbox group, multiselect, file upload). A control whose state is a boolean also carries that state under its attribute's name, beside `value`: `{ value, checked }` for a checkbox, switch and radio, `{ value, pressed }` for a toggle. Extra keys are allowed (`previous` on a number input and a carousel, `date` on a calendar and date picker, `index` on a carousel) but never replace `value`.
+*Why*: one handler, `(e) => save(e.detail.value)`, works on every control; the boolean under its own name matches what the element exposes (`el.checked`).
+
+**`void-input` per edit, `void-change` on commit**, as the native `input` and `change` events. Every text-entry control (input, textarea, action input, compose input, number input, PIN input, editable) fires `void-input` on each keystroke; `void-change` fires when the value is committed (focus leaves after a change, Enter in an editable, a step button). A control with no in-between state (switch, checkbox, select, tabs) fires only `void-change`.
+*Why*: it is the model every web developer already knows, and a live search and a save-on-blur form need different moments.
+
+**Open and close are `void-open` and `void-close`**, on everything that opens: overlays, the hamburger, nav menu items, collapsibles and accordion items. Every dismissal is `void-close` too (toast, banner, alert). There is no `void-toggle` on these components. Both events:
+
+- fire on the element itself and **do not bubble**, like the native `toggle` and `close` events, so a popover closing inside a dialog never looks like the dialog closing (listen on the element, or on an ancestor in the capture phase);
+- carry `detail.reason`, one word from the list below;
+- `void-close` fires before the element closes and is cancelable when the user caused it: `preventDefault()` keeps it open (or keeps the toast, banner or alert on the page).
+
+| `void-open` reason | Meaning |
+| --- | --- |
+| `trigger` | A click on the trigger (or on the hamburger) |
+| `keyboard` | A key on the trigger (Enter, Space, the arrow keys) |
+| `hover`, `focus` | Pointer hover or keyboard focus |
+| `find` | Find-in-page, a text fragment or an in-page link reached text inside closed content (collapsible, accordion item) |
+| `api` | `open` was set by script, by markup or by a server morph |
+
+| `void-close` reason | Meaning |
+| --- | --- |
+| `escape` | Escape |
+| `outside` | A press outside, including the backdrop of a modal, or opening a sibling nav menu item or accordion item |
+| `blur` | Focus moved out (Tab) |
+| `trigger` | A second click on the trigger |
+| `close-button` | The close button of a dialog or drawer, or the control in a close part (toast, banner, alert) |
+| `select` | An item or a date was chosen |
+| `hover` | The pointer left |
+| `form` | A `<form method="dialog">` inside a dialog was submitted |
+| `timeout` | A toast's timer ran out |
+| `parent` | The overlay it sits in closed, or a modal opened over it |
+| `api` | Closed by script (`open = false`, `close()`), by markup or by a server morph |
+
+*Why*: one pair of names and one vocabulary means a handler written for a dialog is right for a drawer, a toast and a nav menu.
+
+**A state that is not open has its own pair.** The sidebar's `collapsed` is a narrow rail that stays on screen, not a closed panel, so it is not `open`: `toggle()` fires `void-collapse` or `void-expand` (they do not bubble either).
+
+**`void-select` is `{ value, item }`** on every menu-like component (menu, dropdown menu): `value` is the chosen item's `value` attribute and `item` the element.
+
+The [events guide](/guides/events/) lists every event with its detail.
+
+## State attributes
+
+**Anything that opens is `open`**: dialogs, drawers, popovers, menus, pickers, disclosures, nav menu items and the hamburger. It reflects, so `[open]` works in CSS, in tests and in a server morph.
+*Why*: it is the native name (`<details open>`, `<dialog open>`), and one name lets a test write `locator('[open]')` without knowing which component it is.
+
+**A distinct state keeps its own name.** The sidebar's `collapsed` is a narrow rail that stays on the page, not a closed panel, so it is not `open` (a closed sidebar would be gone); the editable's `editing` is a mode of the field, not something that opens.
+*Why*: calling them `open` would make `open="false"` mean "still visible", which is the wrong guess.
+
+**A position in a sequence is `value` where the items have keys, `index` where they do not.** Tabs, pagination, stepper and segmented control take `value`; the carousel, whose slides have no keys, takes `index` (zero-based).
+*Why*: `value` is what a form or a URL carries; an index is only a position, and naming it `index` says so.
+
+**The current item of a navigation is `current`** (nav menu item), the attribute form of `aria-current`, which the component writes on the item's link. `active` is left to the plain attribute a component writes on its own parts (`void-tabs-trigger[active]`, `void-carousel-item[active]`), never an attribute the author sets.
+*Why*: `aria-current` is the ARIA name for "this is where you are"; `active` meant three different things before.
+
+## Placement
+
+| Attribute | Means | Values | On |
+| --- | --- | --- | --- |
+| `side` | Which side of its anchor it opens on, or which edge of the page it sits on | `top`, `right`, `bottom`, `left` | popover, tooltip, hover card, dropdown menu, drawer, sidebar |
+| `align` | Where it sits along that side | `start`, `center`, `end` | popover, tooltip, hover card, dropdown menu |
+| `placement` | A corner or region of the viewport (or of its anchor) | `top-right`, `top-left`, `bottom-right`, `bottom-left` (toast container also `top-center`, `bottom-center`, `inline`) | toast container, indicator |
+| `icon-side`, `tooltip-side` | The side of a control's own icon button and of its tooltip | `left`, `right`; `top`, `right`, `bottom`, `left` | action input |
+| `orientation` | Horizontal versus vertical layout | `horizontal`, `vertical` (scroll area also `both`) | carousel, checkbox group, divider, nav menu, radio group, toggle group, scroll area |
+
+There is no attribute called `position`: it meant four different things. The values are physical today; logical `start` and `end` (for right-to-left pages) will be added to the same attributes, so no second rename is needed. A combined value such as `position="bottom-end"` is written as two attributes, `side="bottom" align="end"`.
+*Why*: `side` and `align` are the words CSS anchor positioning and the common positioning libraries use; `orientation` is the ARIA attribute (`aria-orientation`) every one of these components already writes.
+
+## Booleans
+
+**No attribute defaults to true.** A boolean attribute is on when it is present, exactly as in HTML, so a default-true boolean could only be turned off with `attr="false"`, which every other boolean treats as true. What is shown by default is turned off with a `hide-` attribute:
+
+| Component | Attribute |
+| --- | --- |
+| dialog, drawer | `hide-close`: no close button, and Escape and the backdrop do not close it |
+| gauge | `hide-value`, `hide-tick-min`, `hide-tick-max` |
+| color picker | `hide-input` |
+| error fallback | `hide-icon` |
+| nav bar | `hide-border` |
+
+A setting that is a number is a number: the bar chart's `stagger` is the delay in milliseconds between bars (`stagger="0"` animates them together; absent, the theme's delay).
+*Why*: `attr="false"` meaning false on five components and true on thirty is a guess that fails silently; a `hide-` attribute is guessable and is reported when misspelt.
+
+**`spellcheck` is the native attribute**, an enumerated one: `spellcheck="false"` turns spell checking off, `spellcheck` or `spellcheck="true"` turns it on, absent leaves the browser's default. Text controls forward it to their native field as written.
+
+## Variants and options
+
+`variant` is the drawing treatment, one meaning per word:
+
+| Family | Values | Default |
+| --- | --- | --- |
+| Controls (button, toggle, tags input) | `outline`, `filled`; button also `ghost` | `outline` |
+| Status labels (badge) | `filled`, `outline` | `filled` |
+| Notices (alert, banner) | `subtle`, `filled` | `subtle` |
+| Containers (card, panel, nav bar) | `default`, `elevated`, `bordered` (nav bar: `default`, `elevated`) | `default` |
+| Charts (bar, donut, line, gauge) | `filled`, `outline`, `wireframe` | `filled` (line chart `outline`, a line) |
+
+What is not a treatment is not a variant: the skeleton's form is `shape` (`text`, `circular`, `rectangular`) and the colour picker's swatch-button form is the boolean `compact`.
+`show-value` (singular) prints values on every chart, as on the slider.
+*Why*: an agent that knows `variant="filled"` on a button should get the same meaning on a badge, not a layout change.

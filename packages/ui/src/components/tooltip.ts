@@ -18,7 +18,7 @@ import { PartsController, triggerControl } from '../parts.js';
  */
 export class VoidTooltip extends VoidElement {
   /** Side of the trigger the tooltip appears on; it flips to the opposite side when there is no room. */
-  @property({ type: String, reflect: true }) position: 'top' | 'bottom' | 'left' | 'right' = 'top';
+  @property({ type: String, reflect: true }) side: 'top' | 'bottom' | 'left' | 'right' = 'top';
   /** Alignment with the trigger along that side. */
   @property({ type: String, reflect: true }) align: 'start' | 'center' | 'end' = 'center';
   /** Milliseconds the pointer rests on the trigger before the content appears (keyboard focus shows it at once). Defaults to 200. */
@@ -45,7 +45,7 @@ export class VoidTooltip extends VoidElement {
     },
     trigger: () => this._control(),
     anchor: (): Element => this._control() ?? this,
-    placement: () => ({ side: this.position, align: this.align }),
+    placement: () => ({ side: this.side, align: this.align }),
     attr: (el, name, value) => this._parts.set(el, name, value),
     style: (el, p, v) => this._parts.style(el, p, v),
   });

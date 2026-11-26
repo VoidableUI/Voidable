@@ -37,7 +37,7 @@ export const Default: Story = {
     side: 'right',
     size: 'md',
     heading: 'Drawer',
-    closable: true,
+    hideClose: false,
   },
   render: (args) => html`
     <void-button @click=${openNext}>Open drawer</void-button>
@@ -45,7 +45,7 @@ export const Default: Story = {
       ?open=${args.open}
       side=${args.side}
       size=${args.size}
-      closable=${String(args.closable)}
+      ?hide-close=${args.hideClose}
     >
       <void-drawer-title>${args.heading}</void-drawer-title>
       <void-drawer-body>
@@ -129,7 +129,7 @@ export const WithoutHeading: Story = {
 export const NotClosable: Story = {
   render: () => html`
     <void-button @click=${openNext}>Open required step</void-button>
-    <void-drawer side="right" closable="false">
+    <void-drawer side="right" hide-close>
       <void-drawer-title>Required Step</void-drawer-title>
       <void-drawer-body>
         <p>Escape and the backdrop do not close this drawer; only the action below does.</p>

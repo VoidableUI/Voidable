@@ -153,7 +153,7 @@ export class VoidFileUpload extends InternalsFormControl(VoidElement) {
     this.dispatchEvent(new CustomEvent('void-change', {
       bubbles: true,
       composed: true,
-      detail: { files: [...this._files] },
+      detail: { value: [...this._files], files: [...this._files] },
     }));
   }
 
@@ -163,7 +163,7 @@ export class VoidFileUpload extends InternalsFormControl(VoidElement) {
     this.dispatchEvent(new CustomEvent('void-change', {
       bubbles: true,
       composed: true,
-      detail: { files: [...this._files] },
+      detail: { value: [...this._files], files: [...this._files] },
     }));
   }
 }

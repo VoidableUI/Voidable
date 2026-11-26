@@ -1,6 +1,5 @@
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
-import { defaultTrueBoolean } from '../converters.js';
 
 /**
  * Top application navigation bar for branding, primary links, and user account controls.
@@ -13,8 +12,8 @@ import { defaultTrueBoolean } from '../converters.js';
 export class VoidNavBar extends VoidElement {
   /** Stay at the top of the viewport while the page scrolls. */
   @property({ type: Boolean, reflect: true }) sticky = false;
-  /** Draw a hairline under the bar. On by default; write `bordered="false"` to remove it. */
-  @property({ type: Boolean, reflect: true, converter: defaultTrueBoolean }) bordered = true;
+  /** Leave out the hairline under the bar (it is drawn by default). */
+  @property({ type: Boolean, attribute: 'hide-border', reflect: true }) hideBorder = false;
   /** `default` sits on the page; `elevated` uses the raised surface colour. */
   @property({ type: String, reflect: true }) variant: 'default' | 'elevated' = 'default';
 

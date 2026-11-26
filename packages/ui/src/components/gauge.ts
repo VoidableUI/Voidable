@@ -1,6 +1,5 @@
 import { html, svg, nothing } from 'lit';
 import { VoidElement } from '../base.js';
-import { defaultTrueBoolean } from '../converters.js';
 import { property, state } from 'lit/decorators.js';
 
 export interface GaugeZone {
@@ -231,8 +230,8 @@ export class VoidGauge extends VoidElement {
    * (thin lines only).
    */
   @property({ reflect: true }) variant: 'filled' | 'outline' | 'wireframe' = 'filled';
-  /** Print the reading in the centre. On by default; write `show-value="false"` to hide it. */
-  @property({ type: Boolean, attribute: 'show-value', reflect: true, converter: defaultTrueBoolean }) showValue = true;
+  /** Leave the reading out of the centre (it is printed by default). */
+  @property({ type: Boolean, attribute: 'hide-value', reflect: true }) hideValue = false;
   /** When true, render the unit right next to the value (e.g. "75%").
       When false (default), render it on the line below. Short units like
       % or ° look better inline; longer multi-char units often look
@@ -252,14 +251,14 @@ export class VoidGauge extends VoidElement {
   /** When true (default), force a major tick at `min` (the gauge start
       position). Independent of `tick-major` — useful when min isn't a
       multiple of the major interval but you still want an endpoint
-      marker. Set `tick-min="false"` to disable. */
-  @property({ type: Boolean, attribute: 'tick-min', reflect: true, converter: defaultTrueBoolean }) tickMin = true;
+      marker. Add `hide-tick-min` to leave it out. */
+  @property({ type: Boolean, attribute: 'hide-tick-min', reflect: true }) hideTickMin = false;
   /** When true (default), force a major tick at `max` (the gauge end
       position). Useful when max doesn't naturally fall on a major-interval
       boundary (e.g. max=100 with tick-major=30) but you still want the
       endpoint marked. If max naturally falls on a step, this upgrades the
-      classification to major. Set `tick-max="false"` to disable. */
-  @property({ type: Boolean, attribute: 'tick-max', reflect: true, converter: defaultTrueBoolean }) tickMax = true;
+      classification to major. Add `hide-tick-max` to leave it out. */
+  @property({ type: Boolean, attribute: 'hide-tick-max', reflect: true }) hideTickMax = false;
   /**
    * Order of segments around the arc: `value` (default, largest first) or `manual` (the order of
    * `data.segments`).
@@ -797,7 +796,7 @@ export class VoidGauge extends VoidElement {
     const positions: Array<{ v: number; major: boolean }> = [];
     const step = this.tickMinor > 0 ? this.tickMinor : this.tickMajor;
     if (step <= 0) return nothing;
-    if (this.tickMin) {
+    if (!this.hideTickMin) {
       positions.push({ v: this.min, major: true });
     }
     const eps = step * 1e-6;
@@ -808,10 +807,10 @@ export class VoidGauge extends VoidElement {
     }
     const ratio = (this.max - this.min) / step;
     const onStep = Math.abs(ratio - Math.round(ratio)) < eps;
-    if (this.tickMax || onStep) {
+    if (!this.hideTickMax || onStep) {
       const naturallyMajor = this.tickMajor > 0
         && Math.abs(((this.max - this.min) / this.tickMajor) - Math.round((this.max - this.min) / this.tickMajor)) < 1e-6;
-      positions.push({ v: this.max, major: this.tickMax || naturallyMajor });
+      positions.push({ v: this.max, major: !this.hideTickMax || naturallyMajor });
     }
 
     if (positions.length === 0) return nothing;
@@ -889,7 +888,7 @@ export class VoidGauge extends VoidElement {
         ${this._renderTicks(cx, cy, r)}
 
         <!-- Center label -->
-        ${this.showValue ? this._renderCenter(cx, cy) : nothing}
+        ${!this.hideValue ? this._renderCenter(cx, cy) : nothing}
 
         <!-- Hover tooltip -->
         ${this._hoverSegment !== null && this._data.segments && this._hoverSegment < this._data.segments.length

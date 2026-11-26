@@ -35,8 +35,8 @@ describe('VoidErrorFallback', () => {
       expect(el.retryLabel).toBe('Try again');
     });
 
-    it('defaults icon to true', () => {
-      expect(el.icon).toBe(true);
+    it('defaults hideIcon to false', () => {
+      expect(el.hideIcon).toBe(false);
     });
   });
 

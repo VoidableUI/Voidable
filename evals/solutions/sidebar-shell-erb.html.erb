@@ -52,7 +52,10 @@
   </div>
 </div>
 <script>
-  document.getElementById('menu-button').addEventListener('void-toggle', (e) => {
-    document.getElementById('shell').classList.toggle('menu-open', e.detail.active);
-  });
+  const menuButton = document.getElementById('menu-button');
+  for (const type of ['void-open', 'void-close']) {
+    menuButton.addEventListener(type, () => {
+      document.getElementById('shell').classList.toggle('menu-open', menuButton.open);
+    });
+  }
 </script>

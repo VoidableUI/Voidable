@@ -92,7 +92,10 @@ export class VoidEditable extends InternalsFormControl(VoidElement) {
   };
 
   private _handleInput = (e: Event): void => {
-    if (this.editing) this._draft = (e.target as HTMLInputElement).value;
+    if (!this.editing) return;
+    const value = (e.target as HTMLInputElement).value;
+    this._draft = value;
+    this.dispatchEvent(new CustomEvent('void-input', { bubbles: true, composed: true, detail: { value } }));
   };
 
   private _enterEditMode(): void {

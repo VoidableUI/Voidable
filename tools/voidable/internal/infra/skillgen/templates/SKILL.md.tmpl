@@ -33,7 +33,7 @@ Void UI (`@voidable/ui` {{.Version}}, {{.Count}} elements) is a set of `<void-*>
 
 4. **Write attributes exactly as listed.** Attribute names are kebab-case: `show-value`, `collapsed-width`, `max-size`, `href-template`. In templates that are HTML (HEEx, ERB, Blade, plain HTML) a camelCase name such as `showValue` is lowercased by the parser to `showvalue`, which matches nothing. Enumerated attributes take only the listed values (`variant` on `void-button` is `outline`, `filled` or `ghost`, nothing else). Numbers must be numbers (`step="any"` becomes NaN).
 
-5. **Booleans are present or absent.** `<void-button disabled>` is disabled; `disabled="false"` is still disabled because the attribute is present. To turn a boolean off, leave the attribute out (in JSX write `disabled={false}`). The only attributes that read the string `"false"` are the ones whose reference says so, currently {{.FalseList}}. A boolean whose default is `true` and does not say so cannot be switched off from markup; set the property from script (`el.prop = false`).
+5. **Booleans are present or absent.** `<void-button disabled>` is disabled; `disabled="false"` is still disabled because the attribute is present. To turn a boolean off, leave the attribute out (in JSX write `disabled={false}`). No boolean defaults to true: something drawn by default is turned off with a `hide-*` attribute, such as `hide-close` on `<void-dialog>` or `hide-border` on `<void-nav-bar>`.
 
 6. **Turn on the development warnings and read the console.** `voidable check` only sees source files; `@voidable/ui/dev` runs in the page and also catches markup a server or framework produces at runtime. Import it in development builds only (`import '@voidable/ui/dev';`, or with an import map and no bundler `import '@voidable/ui/dev.js'`; the Rails, LiveView and Laravel packages enable it in development for you). It logs one `[voidable]` `console.warn` per problem, each naming the element, what is wrong, the valid alternatives and a "did you mean": an unknown attribute, a value outside the allowed set, `disabled="false"`, a child in the wrong parent or a required child that is missing, a `void-*` tag that is not defined, a listener for an event nothing dispatches. After you load the page, read the browser console (or the output of your headless browser) and fix every `[voidable]` line; none is noise. In a test suite, `configure({ throw: true })` from `@voidable/ui/dev` turns them into thrown errors. Never import it in production.
 
@@ -233,7 +233,7 @@ Elements render into the light DOM: there is no shadow root, so your own CSS app
 - **Explicit parts.** Components with regions are written with one child element per region, named `<component>-<part>`: `-trigger`, `-content`, `-title`, `-description`, `-body`, `-actions`, `-header`, `-footer`, `-item`, `-list`. The parts are plain `void-*` tags with no JavaScript of their own; the component finds them and wires up roles, ids and ARIA. Each component reference lists its parts and the order they go in, and `voidable check` reports a missing part, a stray child and the old forms with the correct markup:
 
   ```html
-  <void-popover position="bottom" align="start">
+  <void-popover side="bottom" align="start">
     <void-popover-trigger><void-button>Details</void-button></void-popover-trigger>
     <void-popover-content><p>Anchored content.</p></void-popover-content>
   </void-popover>

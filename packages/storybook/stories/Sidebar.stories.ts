@@ -26,14 +26,14 @@ export const Default: Story = {
     collapsed: false,
     width: '240px',
     collapsedWidth: '60px',
-    position: 'left',
+    side: 'left',
   },
   render: (args) => html`
     <void-sidebar
       ?collapsed=${args.collapsed}
       width=${args.width}
       collapsed-width=${args.collapsedWidth}
-      position=${args.position}
+      side=${args.side}
       style="height:300px"
     >
       <div style="padding:14px 12px;font-family:var(--void-font-sans);font-size:var(--void-text-sm);color:var(--void-color-text-secondary)">Sidebar content</div>
@@ -69,7 +69,7 @@ export const WithNavItems: Story = {
 export const RightPosition: Story = {
   render: () => html`
     <div style="display:flex;justify-content:flex-end;height:300px">
-      <void-sidebar position="right" style="height:300px">
+      <void-sidebar side="right" style="height:300px">
         <div style="padding:14px 12px;font-family:var(--void-font-sans);font-size:var(--void-text-sm);color:var(--void-color-text-secondary)">Right sidebar</div>
       </void-sidebar>
     </div>

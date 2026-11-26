@@ -36,16 +36,16 @@ describe('VoidSidebar', () => {
     it('width defaults to the theme token', () => expect(el.width).toBe('var(--void-sidebar-width)'));
     it('collapsedWidth defaults to the theme token', () =>
       expect(el.collapsedWidth).toBe('var(--void-sidebar-collapsed-width)'));
-    it('position defaults to "left"', () => expect(el.position).toBe('left'));
+    it('side defaults to "left"', () => expect(el.side).toBe('left'));
   });
 
   describe('attribute reflection', () => {
-    it('reflects collapsed, width, collapsedWidth and position', async () => {
-      const el = await mount({ collapsed: true, width: '300px', collapsedWidth: '48px', position: 'right' });
+    it('reflects collapsed, width, collapsedWidth and side', async () => {
+      const el = await mount({ collapsed: true, width: '300px', collapsedWidth: '48px', side: 'right' });
       expect(el.hasAttribute('collapsed')).toBe(true);
       expect(el.getAttribute('width')).toBe('300px');
       expect(el.getAttribute('collapsed-width')).toBe('48px');
-      expect(el.getAttribute('position')).toBe('right');
+      expect(el.getAttribute('side')).toBe('right');
     });
 
     it('reads the collapsed attribute', async () => {
@@ -115,24 +115,25 @@ describe('VoidSidebar', () => {
     });
   });
 
-  describe('void-toggle event', () => {
+  describe('void-collapse and void-expand events', () => {
     it('is dispatched by toggle() with the new collapsed state', async () => {
       const el = await mount();
       const details: unknown[] = [];
-      el.addEventListener('void-toggle', (e) => details.push((e as CustomEvent).detail));
+      el.addEventListener('void-collapse', (e) => details.push(['collapse', (e as CustomEvent).detail]));
+      el.addEventListener('void-expand', (e) => details.push(['expand', (e as CustomEvent).detail]));
       el.toggle();
       await el.updateComplete;
       el.toggle(false);
       el.toggle(false);
       await el.updateComplete;
-      expect(details).toEqual([{ collapsed: true }, { collapsed: false }]);
+      expect(details).toEqual([['collapse', { reason: 'api' }], ['expand', { reason: 'api' }]]);
       expect(el.collapsed).toBe(false);
     });
 
     it('is not dispatched when collapsed is set in code or by the server', async () => {
       const el = await mount();
       let count = 0;
-      el.addEventListener('void-toggle', () => count++);
+      for (const name of ['void-collapse', 'void-expand']) el.addEventListener(name, () => count++);
       el.collapsed = true;
       await el.updateComplete;
       el.removeAttribute('collapsed');
@@ -141,20 +142,19 @@ describe('VoidSidebar', () => {
       expect(el.collapsed).toBe(false);
     });
 
-    it('bubbles and is composed', async () => {
+    it('does not bubble, like void-open and void-close', async () => {
       const el = await mount();
       let ev: CustomEvent | null = null;
-      document.body.addEventListener('void-toggle', (e) => { ev = e as CustomEvent; }, { once: true });
+      el.addEventListener('void-collapse', (e) => { ev = e as CustomEvent; }, { once: true });
       el.toggle();
       await el.updateComplete;
-      expect(ev!.bubbles).toBe(true);
-      expect(ev!.composed).toBe(true);
+      expect(ev!.bubbles).toBe(false);
     });
 
     it('is not dispatched for width changes', async () => {
       const el = await mount();
       let count = 0;
-      el.addEventListener('void-toggle', () => count++);
+      for (const name of ['void-collapse', 'void-expand']) el.addEventListener(name, () => count++);
       el.width = '1px';
       await el.updateComplete;
       expect(count).toBe(0);
@@ -163,7 +163,7 @@ describe('VoidSidebar', () => {
     it('is not dispatched on initial render', async () => {
       const el = document.createElement(TAG) as VoidSidebar;
       let count = 0;
-      el.addEventListener('void-toggle', () => count++);
+      for (const name of ['void-collapse', 'void-expand']) el.addEventListener(name, () => count++);
       document.body.appendChild(el);
       await el.updateComplete;
       expect(count).toBe(0);

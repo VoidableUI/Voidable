@@ -30,7 +30,7 @@ export class VoidDropdownMenu extends VoidElement {
   /** Whether the menu is open. A click on the trigger toggles it; choosing an item, Escape, Tab or a press outside closes it. */
   @property({ type: Boolean, reflect: true }) open = false;
   /** Side of the trigger the menu opens on; it flips to the opposite side when there is no room. */
-  @property({ type: String, reflect: true }) position: 'top' | 'bottom' | 'left' | 'right' = 'bottom';
+  @property({ type: String, reflect: true }) side: 'top' | 'bottom' | 'left' | 'right' = 'bottom';
   /** Alignment with the trigger along that side. */
   @property({ type: String, reflect: true }) align: 'start' | 'center' | 'end' = 'start';
 
@@ -57,7 +57,7 @@ export class VoidDropdownMenu extends VoidElement {
     haspopup: 'menu',
     anchor: () => this,
     hostStyle: (p, v) => this.setHostStyle(p, v),
-    placement: () => ({ side: this.position, align: this.align }),
+    placement: () => ({ side: this.side, align: this.align }),
     attr: (el, name, value) => this._parts.set(el, name, value),
     style: (el, p, v) => this._parts.style(el, p, v),
     initialFocus: reason => {

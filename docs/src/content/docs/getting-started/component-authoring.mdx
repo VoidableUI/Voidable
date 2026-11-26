@@ -139,15 +139,15 @@ Standard scales across all components:
 
 Use these exact values. Do not invent alternative names for the same concept.
 
-### Booleans that default to true
+### Booleans
 
-Lit's Boolean converter reads any present attribute as true, so markup can never turn off a property that defaults to true. Give such a property the `defaultTrueBoolean` converter from `src/converters.ts`, which reads the string `"false"` as false:
+Every boolean defaults to false, because a present attribute is always true and markup could never turn a default-true one off. Something drawn by default is turned off with a `hide-` property:
 
 ```ts
-@property({ type: Boolean, reflect: true, converter: defaultTrueBoolean }) icon = true;
+@property({ type: Boolean, attribute: 'hide-icon', reflect: true }) hideIcon = false;
 ```
 
-A test fails when a default-true boolean is added without it, and the manifest records the attribute as `falseString` so the `voidable` checker and generators accept `icon="false"`.
+`tests/no-default-true-booleans.test.ts` fails when a boolean defaults to true. The other naming rules are in [API conventions](/guides/conventions/).
 
 ## CSS
 

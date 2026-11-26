@@ -129,7 +129,7 @@ defmodule VoidableUI.Components.StaticContainerTest do
         <VoidableUI.Components.carousel_next aria-label="Next slide" />
         <void-carousel-indicators></void-carousel-indicators>
       </VoidableUI.Components.carousel>
-      <VoidableUI.Components.nav_menu_item id="n" active>
+      <VoidableUI.Components.nav_menu_item id="n" current>
         <void-nav-menu-trigger><a href="/docs">Docs</a></void-nav-menu-trigger>
       </VoidableUI.Components.nav_menu_item>
       """)
@@ -396,12 +396,12 @@ defmodule VoidableUI.Components.StaticContainerTest do
 
     html =
       rendered_to_string(~H"""
-      <VoidableUI.Components.scroll_area max_height="300px" direction="vertical">Scrollable</VoidableUI.Components.scroll_area>
+      <VoidableUI.Components.scroll_area max_height="300px" orientation="vertical">Scrollable</VoidableUI.Components.scroll_area>
       """)
 
     assert html =~ "<void-scroll-area"
     assert html =~ ~s(max-height="300px")
-    assert html =~ ~s(direction="vertical")
+    assert html =~ ~s(orientation="vertical")
     assert html =~ "Scrollable"
   end
 
@@ -415,7 +415,7 @@ defmodule VoidableUI.Components.StaticContainerTest do
 
     assert html =~ "<void-scroll-area"
     refute html =~ "max-height="
-    refute html =~ "direction="
+    refute html =~ "orientation="
     assert html =~ "Content"
   end
 
@@ -484,7 +484,7 @@ defmodule VoidableUI.Components.StaticContainerTest do
   # nav_bar
   # ---------------------------------------------------------------------------
 
-  test "nav_bar renders void-nav-bar with defaults (bordered=true)" do
+  test "nav_bar renders void-nav-bar with defaults (no hide-border)" do
     assigns = %{}
 
     html =
@@ -493,22 +493,22 @@ defmodule VoidableUI.Components.StaticContainerTest do
       """)
 
     assert html =~ "<void-nav-bar"
-    assert html =~ "bordered"
+    refute html =~ "hide-border"
     refute html =~ "sticky"
     refute html =~ "variant="
     assert html =~ "Nav content"
   end
 
-  test "nav_bar renders sticky when true and bordered=\"false\" when disabled" do
+  test "nav_bar renders sticky and hide-border when set" do
     assigns = %{}
 
     html =
       rendered_to_string(~H"""
-      <VoidableUI.Components.nav_bar sticky={true} bordered={false} variant="transparent">Nav</VoidableUI.Components.nav_bar>
+      <VoidableUI.Components.nav_bar sticky={true} hide_border variant="transparent">Nav</VoidableUI.Components.nav_bar>
       """)
 
     assert html =~ "sticky"
-    assert html =~ ~s(bordered="false")
+    assert html =~ "hide-border"
     assert html =~ ~s(variant="transparent")
   end
 
@@ -533,11 +533,11 @@ defmodule VoidableUI.Components.StaticContainerTest do
 
     html =
       rendered_to_string(~H"""
-      <VoidableUI.Components.toast_container position="top-right" />
+      <VoidableUI.Components.toast_container placement="top-right" />
       """)
 
     assert html =~ "<void-toast-container"
-    assert html =~ ~s(position="top-right")
+    assert html =~ ~s(placement="top-right")
   end
 
   test "toast_container omits nil position" do
@@ -549,7 +549,7 @@ defmodule VoidableUI.Components.StaticContainerTest do
       """)
 
     assert html =~ "<void-toast-container"
-    refute html =~ "position="
+    refute html =~ "placement="
   end
 
   test "toast_container renders optional slot content" do
@@ -557,7 +557,7 @@ defmodule VoidableUI.Components.StaticContainerTest do
 
     html =
       rendered_to_string(~H"""
-      <VoidableUI.Components.toast_container position="bottom-left">Toast children</VoidableUI.Components.toast_container>
+      <VoidableUI.Components.toast_container placement="bottom-left">Toast children</VoidableUI.Components.toast_container>
       """)
 
     assert html =~ "Toast children"

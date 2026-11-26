@@ -58,7 +58,7 @@ export default function App() {
         </void-field>
         <void-button variant="filled">Invite user</void-button>
       </div>
-      <void-scroll-area direction="horizontal">
+      <void-scroll-area orientation="horizontal">
         <void-table hoverable>
           <table>
             <thead>
@@ -81,7 +81,7 @@ export default function App() {
                   </td>
                   <td>
                     <void-dropdown-menu
-                      position="bottom" align="end"
+                      side="bottom" align="end"
                       onvoid-select={(e) => {
                         if (e.detail.item.textContent?.trim() === 'Delete') setRows((rs) => rs.filter((r) => r.id !== u.id));
                       }}

@@ -91,13 +91,13 @@ export const WithValues: Story = {
   parameters: {
     docs: {
       description: {
-        story: 'The `show-values` attribute overlays each segment\'s value at the arc midpoint.',
+        story: 'The `show-value` attribute overlays each segment\'s value at the arc midpoint.',
       },
     },
   },
   render: () => html`
     <void-donut-chart
-      show-values
+      show-value
       gaps="2"
       style="width: 260px; height: 260px;"
       aria-label="Incident types"

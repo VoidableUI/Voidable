@@ -212,6 +212,10 @@ function splitProps(props: Record<string, unknown>): SplitProps {
       react[key] = value;
     } else if (value === undefined) {
       continue;
+    } else if (key === 'spellcheck') {
+      // The native enumerated attribute, written as "true" or "false" and
+      // forwarded by the component to its inner control (#23).
+      elementProps[key] = value;
     } else if (isPrimitiveAttr(value) && key === key.toLowerCase()) {
       react[key] = value;
     } else {
@@ -222,6 +226,11 @@ function splitProps(props: Record<string, unknown>): SplitProps {
 }
 
 function applyProp(el: HTMLElement, key: string, value: unknown): void {
+  if (key === 'spellcheck') {
+    if (value == null) el.removeAttribute('spellcheck');
+    else el.setAttribute('spellcheck', String(value));
+    return;
+  }
   if (key in el) {
     (el as unknown as Record<string, unknown>)[key] = value;
     return;
@@ -345,7 +354,7 @@ export const Spinner = wrapWc<VoidSpinner, {
 }>('void-spinner', 'Spinner');
 
 export const Skeleton = wrapWc<VoidSkeleton, {
-  variant?: 'text' | 'circular' | 'rectangular';
+  shape?: 'text' | 'circular' | 'rectangular';
 }>('void-skeleton', 'Skeleton');
 
 export const StatusDot = wrapWc<VoidStatusDot, {
@@ -363,7 +372,7 @@ export const Switch = wrapWc<VoidSwitch, {
   required?: boolean;
   /** Submitted value when checked (default "on"). */
   value?: string;
-} & VoidEvents<{ Change: { checked: boolean } }>>('void-switch', 'Switch');
+} & VoidEvents<{ Change: { value: string; checked: boolean } }>>('void-switch', 'Switch');
 
 export const Avatar = wrapWc<VoidAvatar, {
   src?: string;
@@ -375,7 +384,7 @@ export const Avatar = wrapWc<VoidAvatar, {
 export const Alert = wrapWc<VoidAlert, {
   color?: 'default' | 'error' | 'warning' | 'caution' | 'success' | 'info' | 'notice' | 'highlight';
   variant?: 'subtle' | 'filled';
-} & VoidEvents<{ Close: null }>>('void-alert', 'Alert');
+} & VoidEvents<{ Close: { reason: 'close-button' } }>>('void-alert', 'Alert');
 
 export const Tag = wrapWc<VoidTag, {
   color?: 'default' | 'error' | 'warning' | 'caution' | 'success' | 'info' | 'notice' | 'highlight';
@@ -459,7 +468,7 @@ export const Checkbox = wrapWc<VoidCheckbox, {
   size?: 'sm' | 'md' | 'lg';
   /** Form validation: the control must have a value. */
   required?: boolean;
-} & VoidEvents<{ Change: { checked: boolean } }>>('void-checkbox', 'Checkbox');
+} & VoidEvents<{ Change: { value: string; checked: boolean } }>>('void-checkbox', 'Checkbox');
 
 export const Radio = wrapWc<VoidRadio, {
   checked?: boolean;
@@ -502,7 +511,7 @@ export const Multiselect = wrapWc<VoidMultiselect, {
   value?: string[];
   /** Whether the option list is showing. */
   open?: boolean;
-} & VoidEvents<{ Change: { values: string[] } } & OverlayEvents>>('void-multiselect', 'Multiselect');
+} & VoidEvents<{ Change: { value: string[] } } & OverlayEvents>>('void-multiselect', 'Multiselect');
 
 /** One option of a `<Combobox>` or `<Multiselect>`, inside its `<ComboboxContent>` / `<MultiselectContent>`. */
 export const Option = wrapWc<VoidOption, {
@@ -530,7 +539,8 @@ export const Option = wrapWc<VoidOption, {
 export const Dialog = wrapWc<VoidDialog, {
   open?: boolean;
   size?: 'sm' | 'md' | 'lg';
-  closable?: boolean;
+  /** No close button; Escape and the backdrop do not close it. */
+  hideClose?: boolean;
 } & VoidEvents<OverlayEvents>>('void-dialog', 'Dialog');
 
 export const Tabs = wrapWc<VoidTabs, {
@@ -547,7 +557,7 @@ export const Accordion = wrapWc<VoidAccordion, {
 /** One item: an `<AccordionTrigger>` (the heading text) followed by an `<AccordionContent>`. */
 export const AccordionItem = wrapWc<VoidAccordionItem, {
   open?: boolean;
-} & VoidEvents<{ Toggle: { open: boolean } }>>('void-accordion-item', 'AccordionItem');
+} & VoidEvents<{ Open: { reason: 'trigger' | 'keyboard' | 'find' }; Close: { reason: 'trigger' | 'keyboard' | 'outside' } }>>('void-accordion-item', 'AccordionItem');
 
 export const Breadcrumbs = wrapWc<VoidBreadcrumbs, {
   separator?: string;
@@ -566,10 +576,10 @@ export const ListItem = wrapWc<VoidListItem, {
 export const Toast = wrapWc<VoidToast, {
   color?: 'default' | 'error' | 'warning' | 'caution' | 'success' | 'info' | 'notice' | 'highlight';
   duration?: number;
-} & VoidEvents<{ Close: null }>>('void-toast', 'Toast');
+} & VoidEvents<{ Close: { reason: 'close-button' | 'timeout' | 'api' } }>>('void-toast', 'Toast');
 
 export const ToastContainer = wrapWc<VoidToastContainer, {
-  position?: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left' | 'top-center' | 'bottom-center' | 'inline';
+  placement?: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left' | 'top-center' | 'bottom-center' | 'inline';
 }>('void-toast-container', 'ToastContainer');
 
 export const Stepper = wrapWc<VoidStepper, {
@@ -581,7 +591,8 @@ export const Drawer = wrapWc<VoidDrawer, {
   open?: boolean;
   side?: 'left' | 'right' | 'top' | 'bottom';
   size?: 'sm' | 'md' | 'lg';
-  closable?: boolean;
+  /** No close button; Escape and the backdrop do not close it. */
+  hideClose?: boolean;
 } & VoidEvents<OverlayEvents>>('void-drawer', 'Drawer');
 
 /** Regions are parts: `<CardHeader>` (with `<CardTitle>`, `<CardDescription>`), `<CardBody>`, `<CardFooter>`. */
@@ -604,7 +615,7 @@ export const Card = wrapWc<VoidCard, {
  */
 export const Popover = wrapWc<VoidPopover, {
   open?: boolean;
-  position?: 'top' | 'bottom' | 'left' | 'right';
+  side?: 'top' | 'bottom' | 'left' | 'right';
   trigger?: 'click' | 'manual';
   /** Alignment along the trigger edge. */
   align?: 'start' | 'center' | 'end';
@@ -619,7 +630,7 @@ export const Popover = wrapWc<VoidPopover, {
  * ```
  */
 export const Tooltip = wrapWc<VoidTooltip, {
-  position?: 'top' | 'bottom' | 'left' | 'right';
+  side?: 'top' | 'bottom' | 'left' | 'right';
   /** Alignment along the trigger edge. */
   align?: 'start' | 'center' | 'end';
   delay?: number;
@@ -630,11 +641,11 @@ export const Tooltip = wrapWc<VoidTooltip, {
 export const Banner = wrapWc<VoidBanner, {
   color?: 'default' | 'error' | 'warning' | 'caution' | 'success' | 'info' | 'notice' | 'highlight';
   variant?: 'subtle' | 'filled';
-} & VoidEvents<{ Close: null }>>('void-banner', 'Banner');
+} & VoidEvents<{ Close: { reason: 'close-button' } }>>('void-banner', 'Banner');
 
 export const ScrollArea = wrapWc<VoidScrollArea, {
   maxHeight?: string;
-  direction?: 'vertical' | 'horizontal' | 'both';
+  orientation?: 'vertical' | 'horizontal' | 'both';
 }>('void-scroll-area', 'ScrollArea');
 
 export const Table = wrapWc<VoidTable, {
@@ -682,7 +693,7 @@ export const ErrorFallback = wrapWc<VoidErrorFallback, {
   message?: string;
   retryable?: boolean;
   retryLabel?: string;
-  icon?: boolean;
+  hideIcon?: boolean;
 } & VoidEvents<{ Retry: null }>>('void-error-fallback', 'ErrorFallback');
 
 export const CheckboxGroup = wrapWc<VoidCheckboxGroup, {
@@ -696,7 +707,7 @@ export const CheckboxGroup = wrapWc<VoidCheckboxGroup, {
   disabled?: boolean;
   /** The values of the checked checkboxes. */
   value?: string[];
-} & VoidEvents<{ Change: { values: string[] } }>>('void-checkbox-group', 'CheckboxGroup');
+} & VoidEvents<{ Change: { value: string[] } }>>('void-checkbox-group', 'CheckboxGroup');
 
 export const Combobox = wrapWc<VoidCombobox, {
   value?: string;
@@ -732,18 +743,18 @@ export const FileUpload = wrapWc<VoidFileUpload, {
   name?: string;
   /** Form validation: the control must have a value. */
   required?: boolean;
-} & VoidEvents<{ Change: { files: File[] } }>>('void-file-upload', 'FileUpload');
+} & VoidEvents<{ Change: { value: File[]; files: File[] } }>>('void-file-upload', 'FileUpload');
 
 export const NavBar = wrapWc<VoidNavBar, {
   sticky?: boolean;
-  bordered?: boolean;
+  hideBorder?: boolean;
   variant?: 'default' | 'elevated';
 }>('void-nav-bar', 'NavBar');
 
 export const Hamburger = wrapWc<VoidHamburger, {
-  active?: boolean;
+  open?: boolean;
   size?: 'sm' | 'md' | 'lg';
-} & VoidEvents<{ Toggle: { active: boolean } }>>('void-hamburger', 'Hamburger');
+} & VoidEvents<{ Open: { reason: 'trigger' }; Close: { reason: 'trigger' } }>>('void-hamburger', 'Hamburger');
 
 export const ComposeInput = wrapWc<VoidComposeInput, {
   value?: string;
@@ -753,11 +764,11 @@ export const ComposeInput = wrapWc<VoidComposeInput, {
 } & VoidEvents<{ Input: { value: string }; Submit: { value: string } }>>('void-compose-input', 'ComposeInput');
 
 export const Sidebar = wrapWc<VoidSidebar, {
-  position?: 'left' | 'right';
+  side?: 'left' | 'right';
   collapsed?: boolean;
   width?: string;
   collapsedWidth?: string;
-} & VoidEvents<{ Toggle: { collapsed: boolean } }>>('void-sidebar', 'Sidebar');
+} & VoidEvents<{ Collapse: { reason: 'api' }; Expand: { reason: 'api' } }>>('void-sidebar', 'Sidebar');
 
 /**
  * ```tsx
@@ -772,7 +783,7 @@ export const Sidebar = wrapWc<VoidSidebar, {
 export const DropdownMenu = wrapWc<VoidDropdownMenu, {
   open?: boolean;
   /** Side of the trigger the menu opens on (flips when there is no room). */
-  position?: 'top' | 'bottom' | 'left' | 'right';
+  side?: 'top' | 'bottom' | 'left' | 'right';
   /** Alignment along the trigger edge. */
   align?: 'start' | 'center' | 'end';
 } & VoidEvents<OverlayEvents>>('void-dropdown-menu', 'DropdownMenu');
@@ -791,10 +802,10 @@ export const Toggle = wrapWc<VoidToggle, {
   disabled?: boolean;
   color?: 'default' | 'error' | 'warning' | 'caution' | 'success' | 'info' | 'notice' | 'highlight';
   size?: 'sm' | 'md' | 'lg';
-  variant?: 'outline' | 'filled' | 'ghost' | 'solid';
+  variant?: 'outline' | 'filled';
   /** Value this toggle contributes to a parent ToggleGroup. */
   value?: string;
-} & VoidEvents<{ Change: { pressed: boolean } }>>('void-toggle', 'Toggle');
+} & VoidEvents<{ Change: { value: string; pressed: boolean } }>>('void-toggle', 'Toggle');
 
 export const SegmentedControl = wrapWc<VoidSegmentedControl, {
   value?: string;
@@ -828,7 +839,7 @@ export const Indicator = wrapWc<VoidIndicator, {
   count?: number;
   ping?: boolean;
   overlay?: boolean;
-  position?: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left';
+  placement?: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left';
 }>('void-indicator', 'Indicator');
 
 /**
@@ -857,13 +868,13 @@ export const MenuItem = wrapWc<VoidMenuItem, {
 export const MenuGroup = wrapWc<VoidMenuGroup, {}>('void-menu-group', 'MenuGroup');
 
 export const Carousel = wrapWc<VoidCarousel, {
-  active?: number;
+  index?: number;
   loop?: boolean;
   autoplay?: boolean;
   interval?: number;
   size?: 'sm' | 'md' | 'lg';
   orientation?: 'horizontal' | 'vertical';
-} & VoidEvents<{ Change: { index: number; previous: number } }>>('void-carousel', 'Carousel');
+} & VoidEvents<{ Change: { value: number; index: number; previous: number } }>>('void-carousel', 'Carousel');
 
 export const CarouselPrevious = wrapWc<VoidCarouselPrevious, {}>('void-carousel-previous', 'CarouselPrevious');
 
@@ -921,7 +932,7 @@ export const NumberInput = wrapWc<VoidNumberInput, {
   name?: string;
   /** Form validation: the control must have a value. */
   required?: boolean;
-} & VoidEvents<{ Change: { value: number; previous: number } }>>('void-number-input', 'NumberInput');
+} & VoidEvents<{ Input: { value: number | null }; Change: { value: number | null; previous: number | null } }>>('void-number-input', 'NumberInput');
 
 export const ToggleGroup = wrapWc<VoidToggleGroup, {
   value?: string;
@@ -939,7 +950,7 @@ export const ToggleGroup = wrapWc<VoidToggleGroup, {
 export const Collapsible = wrapWc<VoidCollapsible, {
   open?: boolean;
   disabled?: boolean;
-} & VoidEvents<{ Toggle: { open: boolean } }>>('void-collapsible', 'Collapsible');
+} & VoidEvents<{ Open: { reason: 'trigger' | 'keyboard' | 'find' }; Close: { reason: 'trigger' | 'keyboard' } }>>('void-collapsible', 'Collapsible');
 
 export const Editable = wrapWc<VoidEditable, {
   value?: string;
@@ -952,7 +963,7 @@ export const Editable = wrapWc<VoidEditable, {
   name?: string;
   /** Form validation: the control must have a value. */
   required?: boolean;
-} & VoidEvents<{ Change: { value: string }; Cancel: null }>>('void-editable', 'Editable');
+} & VoidEvents<{ Input: { value: string }; Change: { value: string }; Cancel: null }>>('void-editable', 'Editable');
 
 /**
  * ```tsx
@@ -964,7 +975,7 @@ export const Editable = wrapWc<VoidEditable, {
  */
 export const HoverCard = wrapWc<VoidHoverCard, {
   open?: boolean;
-  position?: 'top' | 'bottom' | 'left' | 'right';
+  side?: 'top' | 'bottom' | 'left' | 'right';
   /** Alignment along the trigger edge. */
   align?: 'start' | 'center' | 'end';
   openDelay?: number;
@@ -985,7 +996,7 @@ export const PinInput = wrapWc<VoidPinInput, {
   name?: string;
   /** Form validation: the control must have a value. */
   required?: boolean;
-} & VoidEvents<{ Change: { value: string }; Complete: { value: string } }>>('void-pin-input', 'PinInput');
+} & VoidEvents<{ Input: { value: string }; Change: { value: string }; Complete: { value: string } }>>('void-pin-input', 'PinInput');
 
 export const TagsInput = wrapWc<VoidTagsInput, {
   value?: (string | { text: string; color?: string })[];
@@ -1011,16 +1022,16 @@ export const NavMenu = wrapWc<VoidNavMenu, {
 export const NavMenuItem = wrapWc<VoidNavMenuItem, {
   open?: boolean;
   disabled?: boolean;
-  active?: boolean;
-} & VoidEvents<{ Open: null; Close: null }>>('void-nav-menu-item', 'NavMenuItem');
+  current?: boolean;
+} & VoidEvents<{ Open: { reason: 'hover' | 'trigger' }; Close: { reason: 'hover' | 'trigger' | 'escape' | 'outside' | 'blur' } }>>('void-nav-menu-item', 'NavMenuItem');
 
 export const ColorPicker = wrapWc<VoidColorPicker, {
   value?: string;
   disabled?: boolean;
   size?: 'sm' | 'md' | 'lg';
   swatches?: string[];
-  showInput?: boolean;
-  variant?: 'default' | 'compact';
+  hideInput?: boolean;
+  compact?: boolean;
   open?: boolean;
   /** Form field name; the value is submitted under it. */
   name?: string;
@@ -1048,7 +1059,7 @@ export const ActionInput = wrapWc<VoidActionInput, {
   spellcheck?: boolean;
   icon?: string;
   actionLabel?: string;
-  position?: 'left' | 'right';
+  iconSide?: 'left' | 'right';
   /** Form field name; the value is submitted under it. */
   name?: string;
   /** Form validation: the control must have a value. */
@@ -1058,16 +1069,16 @@ export const ActionInput = wrapWc<VoidActionInput, {
 export const BarChart = wrapWc<VoidBarChart, {
   data?: BarChartData;
   height?: number;
-  showValues?: boolean;
+  showValue?: boolean;
   variant?: 'filled' | 'outline' | 'wireframe';
-  /** `true` staggers bars, `false` disables, a number sets the stagger amount. */
-  stagger?: boolean | number;
+  /** Milliseconds between bars as they animate in; 0 animates them together. Default: the theme's. */
+  stagger?: number;
 }>('void-bar-chart', 'BarChart');
 
 export const LineChart = wrapWc<VoidLineChart, {
   data?: LineChartData;
   height?: number;
-  showValues?: boolean;
+  showValue?: boolean;
   variant?: 'filled' | 'outline' | 'wireframe';
   interpolation?: 'linear' | 'step';
 }>('void-line-chart', 'LineChart');
@@ -1080,7 +1091,7 @@ export const DonutChart = wrapWc<VoidDonutChart, {
   /** `false`/`0` seamless, `true` 1% gaps, a number is the percent of the arc used by gaps. */
   gaps?: boolean | number;
   variant?: 'filled' | 'outline' | 'wireframe';
-  showValues?: boolean;
+  showValue?: boolean;
   showTotal?: boolean;
 }>('void-donut-chart', 'DonutChart');
 
@@ -1095,12 +1106,12 @@ export const Gauge = wrapWc<VoidGauge, {
   thickness?: number;
   circular?: 'full' | 'semi' | 'triple';
   variant?: 'filled' | 'outline' | 'wireframe';
-  showValue?: boolean;
+  hideValue?: boolean;
   unitInline?: boolean;
   tickMajor?: number;
   tickMinor?: number;
-  tickMin?: boolean;
-  tickMax?: boolean;
+  hideTickMin?: boolean;
+  hideTickMax?: boolean;
   segmentsSort?: 'value' | 'manual';
   gaps?: boolean | number;
 }>('void-gauge', 'Gauge');

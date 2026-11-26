@@ -147,7 +147,7 @@ export class VoidCheckboxGroup extends NativeFormControl(VoidElement) {
     this.dispatchEvent(new CustomEvent('void-change', {
       bubbles: true,
       composed: true,
-      detail: { values: this.value },
+      detail: { value: this.value },
     }));
   };
 }

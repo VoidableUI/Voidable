@@ -57,6 +57,7 @@ import {
   eventDetails,
   nativeControls,
   parts,
+  renamed,
   requiredChildren,
 } from './supplement.js';
 
@@ -538,8 +539,47 @@ export function manifestSupplementPlugin() {
           event.type = { text: eventType(detail) };
         }
       }
+
+      writeRenamed(get);
     },
   };
+}
+
+/**
+ * `voidRenamed` on every tag of supplement.js's `renamed` (#23). Fails when an
+ * old attribute is still declared, a renamed value is still allowed, an old
+ * event is still dispatched, or a rule says neither what to write nor what to do.
+ */
+function writeRenamed(get) {
+  for (const [tag, spec] of Object.entries(renamed)) {
+    const decl = get(tag, 'renamed');
+    const out = {};
+    for (const [name, rule] of Object.entries(spec.attributes ?? {})) {
+      if (decl.attributes?.some((a) => a.name === name)) {
+        throw new Error(`cem/supplement.js renamed: <${tag}> still has attribute "${name}"`);
+      }
+      if (!rule.to && !rule.fix && !rule.values) throw new Error(`cem/supplement.js renamed: ${tag} ${name} says nothing to write`);
+      if (rule.to && !decl.attributes?.some((a) => a.name === rule.to)) {
+        throw new Error(`cem/supplement.js renamed: <${tag}> has no attribute "${rule.to}" (the new name of "${name}")`);
+      }
+    }
+    for (const [attr, values] of Object.entries(spec.values ?? {})) {
+      const a = decl.attributes?.find((x) => x.name === attr);
+      if (!a) throw new Error(`cem/supplement.js renamed: <${tag}> has no attribute "${attr}"`);
+      for (const old of Object.keys(values)) {
+        if (new RegExp(`'${old.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}'`).test(a.type?.text ?? '')) {
+          throw new Error(`cem/supplement.js renamed: ${attr}="${old}" is still allowed on <${tag}>`);
+        }
+      }
+    }
+    for (const name of Object.keys(spec.events ?? {})) {
+      if (decl.events?.some((e) => e.name === name)) throw new Error(`cem/supplement.js renamed: <${tag}> still dispatches ${name}`);
+    }
+    if (spec.attributes || decl.voidRenamed?.attributes) out.attributes = { ...(decl.voidRenamed?.attributes ?? {}), ...(spec.attributes ?? {}) };
+    if (spec.values) out.values = spec.values;
+    if (spec.events) out.events = spec.events;
+    decl.voidRenamed = out;
+  }
 }
 
 /**
@@ -560,6 +600,9 @@ function writeParts(byTag, get) {
       }
     }
     decl.voidHints = { ...(decl.voidHints ?? {}), ...hints };
+    // The parts replaced these attributes: report them as legacy markup with the fix (#23).
+    const removed = (decl.voidRenamed ??= {}).attributes ??= {};
+    for (const [name, fix] of Object.entries(hints)) removed[name] ??= { fix };
   };
   const normalise = (owner, part, depth) => {
     if (depth > 2) throw new Error(`cem/supplement.js parts: <${part.tag}> is a third level of parts under <${owner}>; split the component`);

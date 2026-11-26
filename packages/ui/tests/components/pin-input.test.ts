@@ -76,17 +76,25 @@ describe('VoidPinInput', () => {
     expect(cells[5].value).toBe('6');
   });
 
-  it('dispatches void-change on input', async () => {
+  it('dispatches void-input on each character and void-change when focus leaves', async () => {
     await el.updateComplete;
     let detail: any;
-    el.addEventListener('void-change', (e: Event) => {
+    let changed: any;
+    el.addEventListener('void-input', (e: Event) => {
       detail = (e as CustomEvent).detail;
     });
+    el.addEventListener('void-change', (e: Event) => {
+      changed = (e as CustomEvent).detail;
+    });
     const cells = el.querySelectorAll<HTMLInputElement>('.void-pin-cell');
+    cells[0].dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
     cells[0].value = '7';
     cells[0].dispatchEvent(new Event('input', { bubbles: true }));
     expect(detail).toBeDefined();
     expect(detail.value).toContain('7');
+    expect(changed).toBeUndefined();
+    cells[0].dispatchEvent(new FocusEvent('focusout', { bubbles: true, relatedTarget: document.body }));
+    expect(changed.value).toContain('7');
   });
 
   it('disabled prevents input', async () => {

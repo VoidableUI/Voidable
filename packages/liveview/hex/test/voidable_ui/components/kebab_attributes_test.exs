@@ -26,12 +26,12 @@ defmodule VoidableUI.Components.KebabAttributesTest do
     refute html =~ ~r/(open|close)delay=/i
   end
 
-  test "tags_input renders allow-duplicates and color_picker renders show-input" do
+  test "tags_input renders allow-duplicates and color_picker renders hide-input" do
     assigns = %{}
     tags = rendered_to_string(~H"<VoidableUI.Components.tags_input name='t' allow_duplicates />")
     assert tags =~ "allow-duplicates"
-    picker = rendered_to_string(~H"<VoidableUI.Components.color_picker name='c' show_input />")
-    assert picker =~ "show-input"
+    picker = rendered_to_string(~H"<VoidableUI.Components.color_picker name='c' hide_input />")
+    assert picker =~ "hide-input"
   end
 
   test "sidebar renders collapsed-width" do

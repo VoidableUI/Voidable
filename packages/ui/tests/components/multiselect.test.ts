@@ -229,13 +229,13 @@ describe('VoidMultiselect', () => {
       expect(fired).toBe(true);
     });
 
-    it('void-change detail contains values array', async () => {
-      let detail: { values: string[] } | null = null;
+    it('void-change detail.value is the array of chosen values (#23)', async () => {
+      let detail: { value: string[] } | null = null;
       el.addEventListener('void-change', (e) => { detail = (e as CustomEvent).detail; });
       const option = el.querySelector('void-option') as HTMLElement;
       option.click();
       await el.updateComplete;
-      expect(Array.isArray(detail?.values)).toBe(true);
+      expect(Array.isArray(detail?.value)).toBe(true);
     });
 
     it('void-change bubbles', async () => {

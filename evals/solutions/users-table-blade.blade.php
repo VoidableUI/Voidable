@@ -15,7 +15,7 @@
         </void-field>
     </div>
 
-    <void-scroll-area direction="horizontal">
+    <void-scroll-area orientation="horizontal">
         <void-table hoverable>
             <table>
                 <thead>
@@ -30,7 +30,7 @@
                                 <void-badge color="{{ ['active' => 'success', 'invited' => 'info', 'suspended' => 'error'][$user->status] }}">{{ ucfirst($user->status) }}</void-badge>
                             </td>
                             <td>
-                                <void-dropdown-menu position="bottom" align="end">
+                                <void-dropdown-menu side="bottom" align="end">
                                   <void-dropdown-menu-trigger><void-button size="sm" aria-label="Actions for {{ $user->name }}">⋯</void-button></void-dropdown-menu-trigger>
                                   <void-dropdown-menu-content>
                                     <void-dropdown-menu-item wire:click="edit({{ $user->id }})">Edit</void-dropdown-menu-item>

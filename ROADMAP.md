@@ -65,6 +65,29 @@ Frequency based on survey of 10 OSS libraries (shadcn, Radix, Chakra, Mantine, D
 
 ---
 
+### Named in the API review (#23)
+
+The API review before 1.0 listed what is still missing against mainstream libraries. Each is in the tiers above or here; the review normalised the existing components and added none of these.
+
+| Component | Where |
+|-----------|-------|
+| Rating, Toolbar, Fieldset, Tree View, Listbox | Tier B above |
+| Context Menu, Menubar, Alert Dialog, Timeline, Password Input, Splitter, KBD | Tier C above |
+| Area, pie, scatter and sparkline charts | Not yet tiered: chart types beside bar, donut, line and gauge |
+| Data grid | Not yet tiered: sorting, filtering and virtualised rows on top of `void-table` |
+| A visually hidden data table for charts | Not yet tiered: charts are `role="img"` with an `aria-label` only |
+| Translatable built-in strings ("Close", "No options found", "Calendar", "PIN input") | Not yet tiered: a labels mechanism for every component |
+
+The renames of what authors write shipped in 0.8 ([API conventions](docs/src/content/docs/guides/conventions.mdx)). Left for a later release, because they add rather than rename:
+
+- **Value reflection as one rule**: free-text controls keep `value` as the initial value, discrete choices reflect the current value, stated per component in the manifest (`reflects`) and read by the docs and the eval contract; each changed control tested through Turbo, morphdom with the LiveView adapter and Alpine morph with the Livewire hooks.
+- **Naming**: `aria-label` on the host as the accessible name everywhere, and `label` only where visible label text is rendered (spinner, table, number input).
+- **Manifest types** that say what markup can express (tags input `value`, colour picker `swatches`).
+- **Error fallback** heading as a part only.
+- The leftover `falseString` support in the manifest build, the checker and the generators, which no attribute uses since no boolean defaults to true.
+
+---
+
 ## Phase 2: Premium Components (17 remaining, 1 partially shipped)
 
 Enterprise-grade components surveyed across 10 premium libraries (Syncfusion, Telerik/Kendo, AG Grid, DevExtreme, MUI X, Ant Design Pro, PrimeReact/Vue, Vaadin, Infragistics, Wijmo). See [COMPONENT-RESEARCH.md](COMPONENT-RESEARCH.md) for full data.

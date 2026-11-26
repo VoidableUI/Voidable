@@ -56,14 +56,15 @@ if (!customElements.get('void-carousel-next')) {
  * The component moves nothing: the content and the items are CSS-only parts the theme slides with a custom
  * property, and the dots are the only nodes it creates, inside your empty `<void-carousel-indicators>`.
  *
- * @fires {CustomEvent<{ index: number; previous: number }>} void-change - The shown slide changed.
+ * @fires {CustomEvent<{ value: number; index: number; previous: number }>} void-change - The shown slide changed;
+ * `value` and `index` are both the new slide's index.
  */
 export class VoidCarousel extends VoidElement {
   /**
    * Zero-based index of the slide being shown. Set it to jump to a slide; the arrows, indicators and
    * arrow keys update it and fire `void-change`.
    */
-  @property({ type: Number, reflect: true }) active = 0;
+  @property({ type: Number, reflect: true }) index = 0;
   /**
    * Wrap around: Next on the last slide goes to the first, and Previous on the first goes to the last.
    * Without it the arrows stop at the ends.
@@ -121,10 +122,10 @@ export class VoidCarousel extends VoidElement {
         this._parts.set(slide, 'aria-label', label);
         this._labels.set(slide, label);
       }
-      this._parts.set(slide, 'active', i === this.active);
+      this._parts.set(slide, 'active', i === this.index);
     });
-    const atStart = !this.loop && this.active === 0;
-    const atEnd = !this.loop && this.active === count - 1;
+    const atStart = !this.loop && this.index === 0;
+    const atEnd = !this.loop && this.index === count - 1;
     const prev = this._parts.one('void-carousel-previous');
     const next = this._parts.one('void-carousel-next');
     if (prev) {
@@ -134,7 +135,7 @@ export class VoidCarousel extends VoidElement {
       this._parts.set(next, 'aria-disabled', atEnd ? 'true' : null);
     }
     this._syncDots(count);
-    this.setHostStyle('--void-carousel-offset', String(this.active));
+    this.setHostStyle('--void-carousel-offset', String(this.index));
   }
 
   /** One dot (`<button role="tab">`) per slide inside the author's empty indicators part. */
@@ -153,7 +154,7 @@ export class VoidCarousel extends VoidElement {
       dots.push(dot);
     }
     dots.forEach((dot, i) => {
-      const selected = i === this.active;
+      const selected = i === this.index;
       if (dot.getAttribute('aria-selected') !== String(selected)) dot.setAttribute('aria-selected', String(selected));
       if (dot.hasAttribute('active') !== selected) dot.toggleAttribute('active', selected);
       const label = `Go to slide ${i + 1}`;
@@ -199,7 +200,7 @@ export class VoidCarousel extends VoidElement {
     const count = this._slides.length;
     if (count === 0) return;
 
-    const previous = this.active;
+    const previous = this.index;
 
     if (this.loop) {
       index = ((index % count) + count) % count;
@@ -209,22 +210,22 @@ export class VoidCarousel extends VoidElement {
 
     if (index === previous) return;
 
-    this.active = index;
+    this.index = index;
     this._parts.sync();
 
     this.dispatchEvent(new CustomEvent('void-change', {
       bubbles: true,
       composed: true,
-      detail: { index: this.active, previous },
+      detail: { value: this.index, index: this.index, previous },
     }));
   }
 
   private _prev = (): void => {
-    this._goTo(this.active - 1);
+    this._goTo(this.index - 1);
   };
 
   private _next = (): void => {
-    this._goTo(this.active + 1);
+    this._goTo(this.index + 1);
   };
 
   /** Clicks on this carousel's arrows and dots (delegated, so replaced controls keep working). */

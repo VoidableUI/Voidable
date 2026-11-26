@@ -143,7 +143,7 @@ describe('VoidToggle', () => {
       el.addEventListener('void-change', (e) => details.push((e as CustomEvent).detail));
       el.click();
       el.click();
-      expect(details).toEqual([{ pressed: true }, { pressed: false }]);
+      expect(details).toEqual([{ value: '', pressed: true }, { value: '', pressed: false }]);
     });
 
     it('bubbles and is composed', async () => {
@@ -185,7 +185,7 @@ describe('VoidToggle', () => {
       let detail: unknown;
       el.addEventListener('void-change', (e) => { detail = (e as CustomEvent).detail; });
       key(el, 'Enter');
-      expect(detail).toEqual({ pressed: true });
+      expect(detail).toEqual({ value: '', pressed: true });
     });
 
     it('ignores other keys', async () => {

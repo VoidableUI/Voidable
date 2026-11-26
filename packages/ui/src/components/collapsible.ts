@@ -14,7 +14,10 @@ import { ClosedContent } from '../disclosure.js';
  * `--void-anim-scale` is 0). Where the browser supports `hidden="until-found"` the closed content carries it, so it is
  * out of the accessibility tree and find-in-page opens the panel when it finds text inside.
  *
- * @fires {CustomEvent<{ open: boolean }>} void-toggle - The user opened or closed the panel, or find-in-page opened it.
+ * @fires {CustomEvent<{ reason: 'trigger' | 'keyboard' | 'find' }>} void-open - The panel opened: a click on the trigger,
+ *   Enter or Space on it, or find-in-page found text inside. Does not bubble.
+ * @fires {CustomEvent<{ reason: 'trigger' | 'keyboard' }>} void-close - The user is closing the panel. Cancelable:
+ *   `preventDefault()` keeps it open. Does not bubble.
  */
 export class VoidCollapsible extends VoidElement {
   /** Whether the content is shown. Add the attribute to start open; it follows the user's toggling. */
@@ -69,7 +72,7 @@ export class VoidCollapsible extends VoidElement {
   private _onBeforeMatch = (e: Event): void => {
     if (this.open || e.target !== this._parts.one('void-collapsible-content')) return;
     this.open = true;
-    this.dispatchEvent(new CustomEvent('void-toggle', { bubbles: true, composed: true, detail: { open: true } }));
+    this.dispatchEvent(new CustomEvent('void-open', { bubbles: false, detail: { reason: 'find' } }));
   };
 
   private _fromTrigger(e: Event): boolean {
@@ -80,7 +83,7 @@ export class VoidCollapsible extends VoidElement {
   private _onClick = (e: Event): void => {
     if (!this._fromTrigger(e)) return;
     e.preventDefault();
-    this._toggle();
+    this._toggle('trigger');
   };
 
   private _onKeydown = (e: KeyboardEvent): void => {
@@ -89,13 +92,18 @@ export class VoidCollapsible extends VoidElement {
     // A real control inside the trigger (a link) keeps its own keys.
     if ((e.target as Element).closest('a, button, input, select, textarea')) return;
     e.preventDefault();
-    this._toggle();
+    this._toggle('keyboard');
   };
 
-  private _toggle(): void {
+  private _toggle(reason: 'trigger' | 'keyboard'): void {
     if (this.disabled) return;
-    this.open = !this.open;
-    this.dispatchEvent(new CustomEvent('void-toggle', { bubbles: true, composed: true, detail: { open: this.open } }));
+    if (this.open) {
+      const go = this.dispatchEvent(new CustomEvent('void-close', { bubbles: false, cancelable: true, detail: { reason } }));
+      if (go) this.open = false;
+    } else {
+      this.open = true;
+      this.dispatchEvent(new CustomEvent('void-open', { bubbles: false, detail: { reason } }));
+    }
   }
 }
 

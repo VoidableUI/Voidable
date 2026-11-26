@@ -6,7 +6,6 @@ description: Every Voidable component, grouped by what it is for, with a one-lin
 import { LinkCard } from '@astrojs/starlight/components';
 import { stats } from '../../../lib/stats';
 import Index from '../../../components/api/Index.astro';
-import FalseStrings from '../../../components/api/FalseStrings.astro';
 
 Voidable ships {stats.elements} custom elements across {stats.components} components (parent and child elements such as `<void-accordion>` and `<void-accordion-item>` count separately; CSS-only parts such as `<void-tabs-trigger>` are not counted). All of them render in the light DOM and are styled entirely by `@voidable/theme` tokens.
 
@@ -47,18 +46,16 @@ If you are an AI agent, read [For AI agents](/getting-started/for-agents/) first
 
 ## Attributes shared across components
 
-### Booleans that default to true
+### Booleans
 
-A boolean attribute normally means true when present and false when absent. A boolean that defaults to true needs a way to say false from markup, so these accept the string `"false"`:
-
-<FalseStrings />
+A boolean attribute means true when present and false when absent, as in HTML: `disabled="false"` is still disabled. No boolean defaults to true. Something drawn by default is turned off with a `hide-` attribute (`hide-close` on a dialog or drawer, `hide-value`, `hide-tick-min` and `hide-tick-max` on a gauge, `hide-input` on a colour picker, `hide-icon` on an error fallback, `hide-border` on a nav bar):
 
 ```html
-<void-error-fallback icon="false"></void-error-fallback>
-<void-nav-bar bordered="false">...</void-nav-bar>
+<void-error-fallback hide-icon></void-error-fallback>
+<void-nav-bar hide-border>...</void-nav-bar>
 ```
 
-A bare attribute, `="true"` or no attribute all keep the default. Setting the property to `false` from JavaScript works too, and reflects as `"false"`.
+See [API conventions](/guides/conventions/#booleans) for the reason.
 
 ### Native text attributes
 

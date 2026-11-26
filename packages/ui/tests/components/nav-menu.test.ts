@@ -104,8 +104,8 @@ describe('VoidNavMenuItem', () => {
       expect(el.disabled).toBe(false);
     });
 
-    it('active defaults to false', () => {
-      expect(el.active).toBe(false);
+    it('current defaults to false', () => {
+      expect(el.current).toBe(false);
     });
   });
 
@@ -197,17 +197,18 @@ describe('VoidNavMenuItem', () => {
       expect(fired).toBe(true);
     });
 
-    it('void-open bubbles', async () => {
+    it('void-open does not bubble', async () => {
       let firedOnParent = false;
       document.body.addEventListener('void-open', () => { firedOnParent = true; }, { once: true });
       el.dispatchEvent(new MouseEvent('mouseenter', { bubbles: true }));
       await new Promise(resolve => setTimeout(resolve, 200));
       await el.updateComplete;
-      expect(firedOnParent).toBe(true);
+      expect(el.open).toBe(true);
+      expect(firedOnParent).toBe(false);
     });
   });
 
-  describe('active attribute', () => {
+  describe('current attribute', () => {
     let el: VoidNavMenuItem;
 
     beforeEach(() => {
@@ -219,18 +220,18 @@ describe('VoidNavMenuItem', () => {
       el.remove();
     });
 
-    it('reflects active to attribute', async () => {
-      el.active = true;
+    it('reflects current to attribute', async () => {
+      el.current = true;
       await el.updateComplete;
-      expect(el.hasAttribute('active')).toBe(true);
+      expect(el.hasAttribute('current')).toBe(true);
     });
 
-    it('removes active attribute when false', async () => {
-      el.active = true;
+    it('removes current attribute when false', async () => {
+      el.current = true;
       await el.updateComplete;
-      el.active = false;
+      el.current = false;
       await el.updateComplete;
-      expect(el.hasAttribute('active')).toBe(false);
+      expect(el.hasAttribute('current')).toBe(false);
     });
   });
 
@@ -268,7 +269,7 @@ describe('VoidNavMenuItem', () => {
     it('a link entry with no panel takes no popup ARIA and navigates', async () => {
       const el = createItem();
       el.innerHTML = '<void-nav-menu-trigger><a href="/docs">Docs</a></void-nav-menu-trigger>';
-      el.active = true;
+      el.current = true;
       document.body.appendChild(el);
       await el.updateComplete;
       const link = el.querySelector('a')!;

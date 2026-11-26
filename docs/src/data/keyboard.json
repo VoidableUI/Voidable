@@ -349,7 +349,7 @@
       },
       {
         "keys": "Escape",
-        "action": "Closes the dialog (`void-close` with `reason` `escape`) and returns focus to the element that opened it, unless `closable=\"false\"` or a listener calls `preventDefault()` on `void-close`. With another overlay open inside it, only that overlay closes"
+        "action": "Closes the dialog (`void-close` with `reason` `escape`) and returns focus to the element that opened it, unless `hide-close` or a listener calls `preventDefault()` on `void-close`. With another overlay open inside it, only that overlay closes"
       },
       {
         "keys": "Enter, Space (on the close button)",
@@ -366,7 +366,7 @@
       },
       {
         "keys": "Escape",
-        "action": "Closes the drawer (`void-close` with `reason` `escape`) and returns focus to the element that opened it, unless `closable=\"false\"` or a listener calls `preventDefault()` on `void-close`"
+        "action": "Closes the drawer (`void-close` with `reason` `escape`) and returns focus to the element that opened it, unless `hide-close` or a listener calls `preventDefault()` on `void-close`"
       },
       {
         "keys": "Enter, Space (on the close button)",

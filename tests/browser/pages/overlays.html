@@ -15,7 +15,7 @@
   </void-dialog>
 
   <void-button id="open-dlg-nc" onclick="document.getElementById('dlg-nc').open = true">Open fixed dialog</void-button>
-  <void-dialog id="dlg-nc" closable="false">
+  <void-dialog id="dlg-nc" hide-close>
     <void-dialog-title>Not closable</void-dialog-title>
     <void-dialog-body>
       <p class="nc-content">Cannot close</p>
@@ -49,7 +49,7 @@
   </void-drawer>
 
   <void-button id="open-drw-nc" onclick="document.getElementById('drw-nc').open = true">Open fixed drawer</void-button>
-  <void-drawer id="drw-nc" closable="false">
+  <void-drawer id="drw-nc" hide-close>
     <void-drawer-title>Fixed drawer</void-drawer-title>
     <void-drawer-body>
       <p class="drw-nc-content">stays</p>
@@ -73,7 +73,7 @@
     <void-tooltip id="tt" delay="50"><void-tooltip-trigger><button id="tt-t">Tip target</button></void-tooltip-trigger><void-tooltip-content>Tooltip text</void-tooltip-content></void-tooltip>
   </div>
 
-  <void-toast-container id="tc" position="bottom-right"></void-toast-container>
+  <void-toast-container id="tc" placement="bottom-right"></void-toast-container>
   <button id="after">after</button>
 </main>
 <script>

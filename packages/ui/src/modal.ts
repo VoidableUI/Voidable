@@ -1,6 +1,5 @@
 import { property } from 'lit/decorators.js';
 import { VoidElement } from './base.js';
-import { defaultTrueBoolean } from './converters.js';
 import { OverlayController } from './overlay.js';
 import { attachChrome, PartsController } from './parts.js';
 
@@ -19,8 +18,11 @@ import { attachChrome, PartsController } from './parts.js';
 export class VoidModal extends VoidElement {
   /** Whether it is open. Set or remove the attribute (or property) to open and close it; the server may do the same through a morph. */
   @property({ type: Boolean, reflect: true }) open = false;
-  /** Set `closable="false"` in markup to hide the close button and ignore Escape and backdrop presses. */
-  @property({ type: Boolean, reflect: true, converter: defaultTrueBoolean }) closable = true;
+  /**
+   * Leave out the close button, and ignore Escape and presses on the backdrop: the user closes it only with a
+   * button you put in its actions part (a forced choice).
+   */
+  @property({ type: Boolean, attribute: 'hide-close', reflect: true }) hideClose = false;
 
   protected readonly _parts = new PartsController(this, {
     tags: ['title', 'description', 'body', 'actions'].map(p => `${this.localName}-${p}`),
@@ -34,7 +36,7 @@ export class VoidModal extends VoidElement {
     setOpen: open => {
       this.open = open;
     },
-    closable: () => this.closable,
+    closable: () => !this.hideClose,
   });
 
   private _chrome(): ShadowRoot {
@@ -61,15 +63,15 @@ export class VoidModal extends VoidElement {
 
   // willUpdate, not updated: the overlay controller opens (and moves focus)
   // in hostUpdated, which runs before updated(), so the button must be hidden
-  // first or a dialog opened with closable="false" focuses it.
+  // first or a dialog opened with hide-close focuses it.
   protected override willUpdate(changed: Map<string, unknown>): void {
     super.willUpdate(changed);
-    if (changed.has('closable')) {
+    if (changed.has('hideClose')) {
       const close = this._chrome().querySelector('button')!;
-      close.hidden = !this.closable;
+      close.hidden = this.hideClose;
       // Out of ::part(close) while hidden: the theme's display rule comes from
       // the outer tree and would outrank the [hidden] rule and any inline style.
-      close.setAttribute('part', this.closable ? 'close' : '');
+      close.setAttribute('part', this.hideClose ? '' : 'close');
     }
   }
 

@@ -96,14 +96,13 @@ A patch that arrives while the user types (the echo of an earlier
 and the clone LiveView patches while it waits for a reply is put back without
 losing a key: nothing typed is lost and focus stays in the field.
 
-## Booleans that default to true
+## Booleans
 
-A boolean that defaults to true in the core component renders as `"true"` or
-`"false"`, which the core components read as true or false (any other value,
-or no attribute, means true): `closable` on `dialog` and `drawer`,
-`bordered` on `nav_bar`, `controls` and
-`indicators` on `carousel`, `show_input` on `color_picker` and `icon` on
-`error_fallback`. Turn one off with `<.error_fallback icon={false} />`.
+Every boolean is off when it is absent. Something drawn by default is
+turned off with a `hide_*` attribute: `hide_close` on `dialog` and `drawer`,
+`hide_border` on `nav_bar`, `hide_input` on `color_picker`, `hide_icon` on
+`error_fallback`, and `hide_value`, `hide_tick_min` and `hide_tick_max` on
+`gauge`. For example `<.error_fallback hide_icon />`.
 
 ## Native input attributes
 

@@ -12,7 +12,8 @@ import { closeControlPressed, removeWithFocus } from '../dismiss.js';
  * container and one built by `toast()` are the same markup. Without a close part the toast cannot be dismissed by
  * the user (it still closes itself after `duration`).
  *
- * @fires {CustomEvent} void-close - The toast closed, by its close control or by its timer; it removes itself afterwards.
+ * @fires {CustomEvent<{ reason: 'close-button' | 'timeout' | 'api' }>} void-close - The toast is closing, by its close
+ * part, its timer or `close()`; it removes itself afterwards. Does not bubble. Cancelable for `close-button`.
  */
 export class VoidToast extends VoidElement {
   /**
@@ -79,7 +80,7 @@ export class VoidToast extends VoidElement {
 
   private _startTimer(): void {
     this._timerStart = Date.now();
-    this._timer = setTimeout(() => this._close(), this._remaining);
+    this._timer = setTimeout(() => this._close('timeout'), this._remaining);
   }
 
   private _pause(): void {
@@ -105,17 +106,18 @@ export class VoidToast extends VoidElement {
 
   private _onClick = (e: Event): void => {
     if (!closeControlPressed(this._parts.one('void-toast-close'), e)) return;
-    this._close();
+    this._close('close-button');
   };
 
-  /** Closes the toast: fires `void-close` and removes it. */
+  /** Closes the toast: fires `void-close` (reason `api`) and removes it. */
   close(): void {
-    this._close();
+    this._close('api');
   }
 
-  private _close() {
-    this.dispatchEvent(new CustomEvent('void-close', { bubbles: true, composed: true }));
-    removeWithFocus(this);
+  /** Fires `void-close`; a listener may cancel a close the user asked for (the close part), which keeps the toast. */
+  private _close(reason: 'close-button' | 'timeout' | 'api') {
+    const go = this.dispatchEvent(new CustomEvent('void-close', { bubbles: false, cancelable: reason === 'close-button', detail: { reason } }));
+    if (go) removeWithFocus(this);
   }
 }
 
@@ -139,7 +141,7 @@ declare global {
 export class VoidToastContainer extends VoidElement {
   /** Where the container sits. The corner and centre values overlay the page at a fixed position; `inline` keeps the container in normal flow so toasts push content instead of covering it. */
   @property({ type: String, reflect: true })
-  position: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left' | 'top-center' | 'bottom-center' | 'inline' = 'bottom-right';
+  placement: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left' | 'top-center' | 'bottom-center' | 'inline' = 'bottom-right';
 
   private _observer: MutationObserver | null = null;
 

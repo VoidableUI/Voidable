@@ -8,7 +8,7 @@ type Opts = Partial<{ active: number; loop: boolean; controls: boolean; indicato
 /** A carousel written with its parts; `controls` and `indicators` default to present, as in the usual markup. */
 function createCarousel(slideCount: number, opts: Opts = {}): VoidCarousel {
   const el = document.createElement('void-carousel') as VoidCarousel;
-  if (opts.active !== undefined) el.active = opts.active;
+  if (opts.active !== undefined) el.index = opts.active;
   if (opts.loop !== undefined) el.loop = opts.loop;
   if (opts.orientation) el.orientation = opts.orientation as 'horizontal' | 'vertical';
   const content = document.createElement('void-carousel-content');
@@ -97,9 +97,9 @@ describe('VoidCarousel', () => {
   });
 
   describe('default property values', () => {
-    it('active defaults to 0', () => {
+    it('index defaults to 0', () => {
       const el = document.createElement('void-carousel') as VoidCarousel;
-      expect(el.active).toBe(0);
+      expect(el.index).toBe(0);
     });
 
     it('loop defaults to false', () => {
@@ -248,16 +248,16 @@ describe('VoidCarousel', () => {
       const next = nextOf(el);
       next.click();
       await el.updateComplete;
-      expect(el.active).toBe(1);
+      expect(el.index).toBe(1);
     });
 
     it('clicking prev goes to previous slide', async () => {
-      el.active = 2;
+      el.index = 2;
       await el.updateComplete;
       const prev = prevOf(el);
       prev.click();
       await el.updateComplete;
-      expect(el.active).toBe(1);
+      expect(el.index).toBe(1);
     });
 
     it('prev is disabled at start without loop', async () => {
@@ -267,7 +267,7 @@ describe('VoidCarousel', () => {
     });
 
     it('next is disabled at end without loop', async () => {
-      el.active = 2;
+      el.index = 2;
       await el.updateComplete;
       const next = nextOf(el);
       expect(next.getAttribute('aria-disabled')).toBe('true');
@@ -276,7 +276,7 @@ describe('VoidCarousel', () => {
     it('a disabled arrow does nothing when clicked', async () => {
       prevOf(el).click();
       await el.updateComplete;
-      expect(el.active).toBe(0);
+      expect(el.index).toBe(0);
     });
   });
 
@@ -289,19 +289,19 @@ describe('VoidCarousel', () => {
     });
 
     it('wraps from last to first on next', async () => {
-      el.active = 2;
+      el.index = 2;
       await el.updateComplete;
       const next = nextOf(el);
       next.click();
       await el.updateComplete;
-      expect(el.active).toBe(0);
+      expect(el.index).toBe(0);
     });
 
     it('wraps from first to last on prev', async () => {
       const prev = prevOf(el);
       prev.click();
       await el.updateComplete;
-      expect(el.active).toBe(2);
+      expect(el.index).toBe(2);
     });
 
     it('prev is not disabled at start with loop', () => {
@@ -310,7 +310,7 @@ describe('VoidCarousel', () => {
     });
 
     it('next is not disabled at end with loop', async () => {
-      el.active = 2;
+      el.index = 2;
       await el.updateComplete;
       const next = nextOf(el);
       expect(next.hasAttribute('aria-disabled')).toBe(false);
@@ -335,7 +335,7 @@ describe('VoidCarousel', () => {
       const dots = el.querySelectorAll('void-carousel-indicators > button');
       (dots[2] as HTMLElement).click();
       await el.updateComplete;
-      expect(el.active).toBe(2);
+      expect(el.index).toBe(2);
     });
   });
 
@@ -397,15 +397,15 @@ describe('VoidCarousel', () => {
     it('ArrowRight advances in horizontal mode', async () => {
       el.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
       await el.updateComplete;
-      expect(el.active).toBe(1);
+      expect(el.index).toBe(1);
     });
 
     it('ArrowLeft goes back in horizontal mode', async () => {
-      el.active = 1;
+      el.index = 1;
       await el.updateComplete;
       el.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true }));
       await el.updateComplete;
-      expect(el.active).toBe(0);
+      expect(el.index).toBe(0);
     });
 
     it('ArrowDown advances in vertical mode', async () => {
@@ -413,16 +413,16 @@ describe('VoidCarousel', () => {
       await el.updateComplete;
       el.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
       await el.updateComplete;
-      expect(el.active).toBe(1);
+      expect(el.index).toBe(1);
     });
 
     it('ArrowUp goes back in vertical mode', async () => {
       el.orientation = 'vertical';
-      el.active = 1;
+      el.index = 1;
       await el.updateComplete;
       el.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp', bubbles: true }));
       await el.updateComplete;
-      expect(el.active).toBe(0);
+      expect(el.index).toBe(0);
     });
   });
 
@@ -442,7 +442,7 @@ describe('VoidCarousel', () => {
       await mount(el, container);
       vi.advanceTimersByTime(1000);
       await el.updateComplete;
-      expect(el.active).toBe(1);
+      expect(el.index).toBe(1);
     });
 
     it('pauses on mouseenter', async () => {
@@ -453,7 +453,7 @@ describe('VoidCarousel', () => {
       el.dispatchEvent(new MouseEvent('mouseenter'));
       vi.advanceTimersByTime(2000);
       await el.updateComplete;
-      expect(el.active).toBe(0);
+      expect(el.index).toBe(0);
     });
 
     it('resumes on mouseleave', async () => {
@@ -466,7 +466,7 @@ describe('VoidCarousel', () => {
       el.dispatchEvent(new MouseEvent('mouseleave'));
       vi.advanceTimersByTime(1000);
       await el.updateComplete;
-      expect(el.active).toBe(1);
+      expect(el.index).toBe(1);
     });
   });
 

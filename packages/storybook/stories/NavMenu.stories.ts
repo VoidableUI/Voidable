@@ -73,7 +73,7 @@ export const WithActiveItem: Story = {
           </div>
         </void-nav-menu-content>
       </void-nav-menu-item>
-      <void-nav-menu-item active>
+      <void-nav-menu-item current>
         <void-nav-menu-trigger><button type="button">Solutions</button></void-nav-menu-trigger>
         <void-nav-menu-content>
           <div style="display: flex; flex-direction: column; gap: var(--void-space-1);">
@@ -91,7 +91,7 @@ export const WithActiveItem: Story = {
 export const Vertical: Story = {
   render: () => html`
     <void-nav-menu orientation="vertical" width="8rem">
-      <void-nav-menu-item active><void-nav-menu-trigger><a href="/dashboard">Dashboard</a></void-nav-menu-trigger></void-nav-menu-item>
+      <void-nav-menu-item current><void-nav-menu-trigger><a href="/dashboard">Dashboard</a></void-nav-menu-trigger></void-nav-menu-item>
       <void-nav-menu-item>
         <void-nav-menu-trigger><button type="button">Settings</button></void-nav-menu-trigger>
         <void-nav-menu-content>

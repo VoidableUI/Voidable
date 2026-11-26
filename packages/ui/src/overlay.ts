@@ -25,7 +25,7 @@ import { restoreParkedFocus } from './projection.js';
  *
  * - **One stack.** Escape and outside pointer presses close only the topmost
  *   overlay, whatever the engine's own close-request rules are, and an overlay
- *   that is not closable (`closable="false"`) swallows them. Overlays nest
+ *   that is not closable (`hide-close`) swallows them. Overlays nest
  *   (a select inside a popover inside a dialog inside a drawer); closing one
  *   closes the overlays opened inside it.
  * - **Counted scroll lock** while any modal is open.
@@ -929,7 +929,7 @@ export class OverlayController implements ReactiveController {
 
   private _onCancel = (e: Event): void => {
     // Escape is routed through the stack (see OverlayRegistry); never let the
-    // dialog close itself, which could bypass closable="false" or void-close.
+    // dialog close itself, which could bypass hide-close or void-close.
     e.preventDefault();
     if (this._registry.top() === this) this.requestClose('escape');
   };

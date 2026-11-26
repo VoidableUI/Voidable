@@ -98,5 +98,5 @@ Use `FormData` or `form.elements`, not a component property, so the code does no
 
 - **`value` as an attribute is the initial value.** It sets the starting state and the reset target. The live value is the element's `value` property; the attribute is not updated as the user types. For forms, read the `FormData`, not the attribute.
 - **`<void-toggle-group>` owns its children's state.** Pressing is recorded in the group's `value`; a `pressed` attribute on a child toggle is overwritten when the group syncs. Put the initial state in the group's `value`, for example `value="bold,italic"`.
-- **Booleans written as `"false"`.** `disabled="false"` is still disabled. The few attributes that default to on, such as `show-input` on the colour picker, are the exception and accept `="false"`; they are listed on the [components overview](/components/overview/#attributes-shared-across-components).
+- **Booleans written as `"false"`.** `disabled="false"` is still disabled: a boolean attribute is on whenever it is present. No boolean defaults to on; what is shown by default is turned off with a `hide-` attribute (`hide-input` on the colour picker), see [API conventions](/guides/conventions/#booleans).
 - **Labels belong to `<void-field>`.** There is no `label` attribute on a control (except groups, where it names the group). The field names the control it wraps.

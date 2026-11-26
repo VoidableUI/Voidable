@@ -34,7 +34,7 @@ describe('VoidIndicator', () => {
   describe('default property values', () => {
     const el = document.createElement(TAG) as VoidIndicator;
     it('color defaults to "default"', () => expect(el.color).toBe('default'));
-    it('position defaults to "top-right"', () => expect(el.position).toBe('top-right'));
+    it('placement defaults to "top-right"', () => expect(el.placement).toBe('top-right'));
     it('count defaults to null', () => expect(el.count).toBeNull());
     it('ping defaults to false', () => expect(el.ping).toBe(false));
     it('size defaults to "md"', () => expect(el.size).toBe('md'));
@@ -42,9 +42,9 @@ describe('VoidIndicator', () => {
 
   describe('attribute reflection', () => {
     it('reflects every property', async () => {
-      const el = await mount({ color: 'error', position: 'bottom-left', count: 3, ping: true, size: 'sm' });
+      const el = await mount({ color: 'error', placement: 'bottom-left', count: 3, ping: true, size: 'sm' });
       expect(el.getAttribute('color')).toBe('error');
-      expect(el.getAttribute('position')).toBe('bottom-left');
+      expect(el.getAttribute('placement')).toBe('bottom-left');
       expect(el.getAttribute('count')).toBe('3');
       expect(el.hasAttribute('ping')).toBe(true);
       expect(el.getAttribute('size')).toBe('sm');

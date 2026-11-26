@@ -28,7 +28,7 @@ Pattern: menu button. The trigger gets \`aria-haspopup\`, \`aria-expanded\` and 
 | Escape | Close and return focus to the trigger |
 | Tab | Close and move on |
 
-The panel opens in the top layer on the \`position\` side (\`top\`, \`bottom\`, \`left\`, \`right\`) with the \`align\` alignment (\`start\`, \`center\`, \`end\`) and flips at the viewport edges.`,
+The panel opens in the top layer on its \`side\` (\`top\`, \`bottom\`, \`left\`, \`right\`) with the \`align\` alignment (\`start\`, \`center\`, \`end\`) and flips at the viewport edges.`,
       },
     },
   },
@@ -79,28 +79,28 @@ export const WithDisabledItems: Story = {
 export const Positions: Story = {
   render: () => html`
     <div style="display: flex; gap: 16px; padding: 80px; flex-wrap: wrap; align-items: center;">
-      <void-dropdown-menu position="bottom" align="start">
+      <void-dropdown-menu side="bottom" align="start">
         <void-dropdown-menu-trigger><void-button>Bottom Start</void-button></void-dropdown-menu-trigger>
         <void-dropdown-menu-content>
           <void-dropdown-menu-item>Item One</void-dropdown-menu-item>
           <void-dropdown-menu-item>Item Two</void-dropdown-menu-item>
         </void-dropdown-menu-content>
       </void-dropdown-menu>
-      <void-dropdown-menu position="bottom" align="end">
+      <void-dropdown-menu side="bottom" align="end">
         <void-dropdown-menu-trigger><void-button>Bottom End</void-button></void-dropdown-menu-trigger>
         <void-dropdown-menu-content>
           <void-dropdown-menu-item>Item One</void-dropdown-menu-item>
           <void-dropdown-menu-item>Item Two</void-dropdown-menu-item>
         </void-dropdown-menu-content>
       </void-dropdown-menu>
-      <void-dropdown-menu position="top" align="start">
+      <void-dropdown-menu side="top" align="start">
         <void-dropdown-menu-trigger><void-button>Top Start</void-button></void-dropdown-menu-trigger>
         <void-dropdown-menu-content>
           <void-dropdown-menu-item>Item One</void-dropdown-menu-item>
           <void-dropdown-menu-item>Item Two</void-dropdown-menu-item>
         </void-dropdown-menu-content>
       </void-dropdown-menu>
-      <void-dropdown-menu position="top" align="end">
+      <void-dropdown-menu side="top" align="end">
         <void-dropdown-menu-trigger><void-button>Top End</void-button></void-dropdown-menu-trigger>
         <void-dropdown-menu-content>
           <void-dropdown-menu-item>Item One</void-dropdown-menu-item>

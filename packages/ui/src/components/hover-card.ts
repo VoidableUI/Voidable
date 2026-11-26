@@ -21,7 +21,7 @@ export class VoidHoverCard extends VoidElement {
   /** Whether the card is shown. It opens and closes itself from hover, focus and Escape; set it to drive it from script. */
   @property({ type: Boolean, reflect: true }) open = false;
   /** Side of the trigger the card opens on; it flips to the opposite side when there is no room. */
-  @property({ type: String, reflect: true }) position: 'top' | 'bottom' | 'left' | 'right' = 'bottom';
+  @property({ type: String, reflect: true }) side: 'top' | 'bottom' | 'left' | 'right' = 'bottom';
   /** Alignment with the trigger along that side. */
   @property({ type: String, reflect: true }) align: 'start' | 'center' | 'end' = 'center';
   /** Milliseconds the pointer rests on the trigger before the card opens (keyboard focus opens it at once). Defaults to 300. */
@@ -47,7 +47,7 @@ export class VoidHoverCard extends VoidElement {
     trigger: () => triggerControl(this._parts.one('void-hover-card-trigger')),
     anchor: () => this,
     hostStyle: (p, v) => this.setHostStyle(p, v),
-    placement: () => ({ side: this.position, align: this.align }),
+    placement: () => ({ side: this.side, align: this.align }),
     attr: (el, name, value) => this._parts.set(el, name, value),
     style: (el, p, v) => this._parts.style(el, p, v),
   });

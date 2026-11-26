@@ -11,7 +11,8 @@ import { closeControlPressed, removeWithFocus } from '../dismiss.js';
  * close part wraps the one control the author writes (a `<void-button aria-label="Dismiss">`); pressing it fires
  * `void-close` and removes the banner (focus inside it moves on to the next focusable element). Without a close part the banner cannot be dismissed.
  *
- * @fires {CustomEvent} void-close - The close control was pressed; the banner removes itself afterwards.
+ * @fires {CustomEvent<{ reason: 'close-button' }>} void-close - The close part was pressed; the banner removes itself
+ * afterwards unless a listener cancels the event. Does not bubble.
  */
 export class VoidBanner extends VoidElement {
   /**
@@ -40,8 +41,8 @@ export class VoidBanner extends VoidElement {
 
   private _onClick = (e: Event): void => {
     if (!closeControlPressed(this._parts.one('void-banner-close'), e)) return;
-    this.dispatchEvent(new CustomEvent('void-close', { bubbles: true, composed: true }));
-    removeWithFocus(this);
+    const go = this.dispatchEvent(new CustomEvent('void-close', { bubbles: false, cancelable: true, detail: { reason: 'close-button' } }));
+    if (go) removeWithFocus(this);
   };
 }
 

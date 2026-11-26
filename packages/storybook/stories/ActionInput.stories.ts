@@ -23,7 +23,7 @@ const meta: Meta = {
       color=${args.color || 'default'}
       icon=${args.icon || 'search'}
       action-label=${args.actionLabel || 'Action'}
-      position=${args.position || 'right'}
+      icon-side=${args.iconSide || 'right'}
       ?disabled=${args.disabled}
       ?readonly=${args.readonly}
       style="width: 320px;"
@@ -93,7 +93,7 @@ export const PasswordPushToReveal: Story = {
 };
 
 export const ButtonLeft: Story = {
-  args: { placeholder: 'Search...', icon: 'search', actionLabel: 'Search', position: 'left' },
+  args: { placeholder: 'Search...', icon: 'search', actionLabel: 'Search', iconSide: 'left' },
 };
 
 export const Icons: Story = {

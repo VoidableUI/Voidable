@@ -7,15 +7,15 @@ void-scroll-area {
   max-height: var(--void-scroll-area-max-height);
 }
 
-void-scroll-area[direction="vertical"] .void-scroll-area-viewport {
+void-scroll-area[orientation="vertical"] .void-scroll-area-viewport {
   overflow-y: auto;
 }
 
-void-scroll-area[direction="horizontal"] .void-scroll-area-viewport {
+void-scroll-area[orientation="horizontal"] .void-scroll-area-viewport {
   overflow-x: auto;
 }
 
-void-scroll-area[direction="both"] .void-scroll-area-viewport {
+void-scroll-area[orientation="both"] .void-scroll-area-viewport {
   overflow: auto;
 }
 

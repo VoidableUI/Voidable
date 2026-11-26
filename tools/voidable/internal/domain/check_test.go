@@ -40,6 +40,17 @@ func testCatalog() *Catalog {
 		{Tag: "void-select", Class: "VoidSelect"},
 		{Tag: "void-multiselect", Class: "VoidMultiselect", Properties: []Property{{Name: "values", Type: "string[]"}}},
 		{Tag: "void-option", Class: "VoidOption"},
+		{Tag: "void-popover", Class: "VoidPopover",
+			Attributes: []Attribute{attr("side", "'top' | 'right' | 'bottom' | 'left'", "bottom"), attr("align", "'start' | 'center' | 'end'", "start"), attr("variant", "'quiet' | 'filled'", "quiet"), attr("stagger", "number", "")},
+			Events:     []Event{{Name: "void-open"}, {Name: "void-close"}},
+			Renamed: &Renamed{
+				Attributes: map[string]RenamedAttribute{
+					"position": {To: "side", Values: map[string]string{"bottom-end": `side="bottom" align="end"`}},
+					"closable": {Values: map[string]string{"false": "hide-close"}, Fix: "remove it (it is the default)"},
+				},
+				Values: map[string]map[string]string{"variant": {"subtle": "quiet"}, "stagger": {"false": "0"}},
+				Events: map[string]string{"void-toggle": "listen for void-open and void-close"},
+			}},
 	})
 }
 
@@ -93,6 +104,17 @@ func TestCheckTag(t *testing.T) {
 		{"option in multiselect", Tag{Name: "void-option", Lang: LangHTML, Parent: "void-multiselect"}, nil, ""},
 		{"self-closing html", Tag{Name: "void-input", Lang: LangHTML, SelfClosing: true}, []Rule{RuleSelfClosing}, "not self-closing"},
 		{"self-closing jsx", Tag{Name: "void-input", Lang: LangJSX, SelfClosing: true}, nil, ""},
+		// Renamed in 0.8 (#23): each old form is legacy-markup with the replacement.
+		{"renamed attribute keeps its value", Tag{Name: "void-popover", Lang: LangHTML, Attrs: []AttrToken{a("position", "top", SyntaxAttr)}}, []Rule{RuleLegacyMarkup}, `position="top" on <void-popover> was renamed in 0.8; write side="top"`},
+		{"renamed attribute, combined value", Tag{Name: "void-popover", Lang: LangHTML, Attrs: []AttrToken{a("position", "bottom-end", SyntaxAttr)}}, []Rule{RuleLegacyMarkup}, `write side="bottom" align="end"`},
+		{"renamed attribute, dynamic value", Tag{Name: "void-popover", Lang: LangHEEx, Attrs: []AttrToken{dyn(a("position", "{@p}", SyntaxAttr))}}, []Rule{RuleLegacyMarkup}, "write side (same value)"},
+		{"renamed attribute in jsx", Tag{Name: "void-popover", Lang: LangJSX, Attrs: []AttrToken{a("position", "left", SyntaxAttr)}}, []Rule{RuleLegacyMarkup}, `write side="left"`},
+		{"inverted boolean, false", Tag{Name: "void-popover", Lang: LangHTML, Attrs: []AttrToken{a("closable", "false", SyntaxAttr)}}, []Rule{RuleLegacyMarkup}, "write hide-close"},
+		{"inverted boolean, present", Tag{Name: "void-popover", Lang: LangHTML, Attrs: []AttrToken{a("closable", "", SyntaxAttr)}}, []Rule{RuleLegacyMarkup}, "closable on <void-popover> was removed in 0.8; remove it"},
+		{"renamed value", Tag{Name: "void-popover", Lang: LangHTML, Attrs: []AttrToken{a("variant", "subtle", SyntaxAttr)}}, []Rule{RuleLegacyMarkup}, `write variant="quiet"`},
+		{"renamed value on a number", Tag{Name: "void-popover", Lang: LangHTML, Attrs: []AttrToken{a("stagger", "false", SyntaxAttr)}}, []Rule{RuleLegacyMarkup}, `write stagger="0"`},
+		{"current value", Tag{Name: "void-popover", Lang: LangHTML, Attrs: []AttrToken{a("variant", "quiet", SyntaxAttr), a("side", "top", SyntaxAttr), a("stagger", "0", SyntaxAttr)}}, nil, ""},
+		{"removed event", Tag{Name: "void-popover", Lang: LangERB, Attrs: []AttrToken{a("void-toggle", "", SyntaxEvent)}}, []Rule{RuleLegacyMarkup}, "no longer dispatches void-toggle (removed in 0.8); listen for void-open and void-close"},
 	}
 	c := NewChecker(testLibrary(t), stubScanner{})
 	for _, tt := range tests {

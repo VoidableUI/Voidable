@@ -31,12 +31,12 @@ describe('VoidScrollArea', () => {
       expect(el.maxHeight).toBe('');
     });
 
-    it('direction defaults to "vertical"', () => {
-      expect(el.direction).toBe('vertical');
+    it('orientation defaults to "vertical"', () => {
+      expect(el.orientation).toBe('vertical');
     });
   });
 
-  describe('direction reflection', () => {
+  describe('orientation reflection', () => {
     let el: VoidScrollArea;
 
     beforeEach(() => {
@@ -44,37 +44,37 @@ describe('VoidScrollArea', () => {
       document.body.appendChild(el);
     });
 
-    it('reflects direction property to attribute', async () => {
-      el.direction = 'horizontal';
+    it('reflects orientation property to attribute', async () => {
+      el.orientation = 'horizontal';
       await el.updateComplete;
-      expect(el.getAttribute('direction')).toBe('horizontal');
+      expect(el.getAttribute('orientation')).toBe('horizontal');
     });
 
-    it('reflects both direction to attribute', async () => {
-      el.direction = 'both';
+    it('reflects both orientation to attribute', async () => {
+      el.orientation = 'both';
       await el.updateComplete;
-      expect(el.getAttribute('direction')).toBe('both');
+      expect(el.getAttribute('orientation')).toBe('both');
     });
 
-    it('reflects vertical direction to attribute', async () => {
-      el.direction = 'vertical';
+    it('reflects vertical orientation to attribute', async () => {
+      el.orientation = 'vertical';
       await el.updateComplete;
-      expect(el.getAttribute('direction')).toBe('vertical');
+      expect(el.getAttribute('orientation')).toBe('vertical');
     });
 
-    it('reads direction from attribute', () => {
-      el.setAttribute('direction', 'horizontal');
-      expect(el.direction).toBe('horizontal');
+    it('reads orientation from attribute', () => {
+      el.setAttribute('orientation', 'horizontal');
+      expect(el.orientation).toBe('horizontal');
     });
 
     it('reads both from attribute', () => {
-      el.setAttribute('direction', 'both');
-      expect(el.direction).toBe('both');
+      el.setAttribute('orientation', 'both');
+      expect(el.orientation).toBe('both');
     });
 
     it('reads vertical from attribute', () => {
-      el.setAttribute('direction', 'vertical');
-      expect(el.direction).toBe('vertical');
+      el.setAttribute('orientation', 'vertical');
+      expect(el.orientation).toBe('vertical');
     });
   });
 

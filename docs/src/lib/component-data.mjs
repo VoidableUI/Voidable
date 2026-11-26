@@ -234,6 +234,7 @@ export function loadComponentData() {
       requires: d.voidRequires ?? [],
       children: childrenOf[tag] ?? [],
       hints: d.voidHints ?? {},
+      renamed: d.voidRenamed ?? null,
       hostAttributes: d.voidHostAttributes ?? [],
       mixins,
       form,

@@ -64,14 +64,13 @@ defmodule VoidableUI.Components do
   them. Avoid it on `dialog`/`drawer` (the server
   drives `open`), `input`, `checkbox`, `switch` and other value-bound controls.
 
-  ## Booleans that default to true
+  ## Booleans
 
-  Every boolean that defaults to true in the core component (`closable` on
-  `dialog` and `drawer`, `bordered` on `nav_bar`,
-  `show_input` on `color_picker`,
-  `icon` on `error_fallback`) renders as `"true"` or `"false"`. The core
-  component reads the string `"false"` as false, so the server can turn the
-  attribute off and back on with an ordinary attribute patch.
+  Every boolean is off when it is absent. Something drawn by default is
+  turned off with a `hide_*` attribute (`hide_close` on `dialog` and
+  `drawer`, `hide_border` on `nav_bar`, `hide_input` on `color_picker`,
+  `hide_icon` on `error_fallback`, `hide_value`, `hide_tick_min` and
+  `hide_tick_max` on `gauge`), rendered as a plain boolean attribute.
   """
 
   use Phoenix.Component
@@ -206,12 +205,12 @@ defmodule VoidableUI.Components do
   # ---------------------------------------------------------------------------
 
   @doc "Renders a `<void-skeleton>` placeholder."
-  attr :variant, :string, default: nil
+  attr :shape, :string, default: nil
   attr :rest, :global
 
   def skeleton(assigns) do
     ~H"""
-    <void-skeleton variant={@variant} {@rest} />
+    <void-skeleton shape={@shape} {@rest} />
     """
   end
 
@@ -713,7 +712,7 @@ defmodule VoidableUI.Components do
   attr :id, :string, default: nil
   attr :open, :boolean, default: false
   attr :size, :string, default: nil
-  attr :closable, :boolean, default: true
+  attr :hide_close, :boolean, default: false
   attr :events, :any, default: nil, doc: @events_doc
   attr :rest, :global
   slot :inner_block, required: true
@@ -724,7 +723,7 @@ defmodule VoidableUI.Components do
       id={@id || auto_id("void-dialog", @rest)}
       open={@open}
       size={@size}
-      closable={to_string(@closable)}
+      hide-close={@hide_close}
       phx-hook={void_hook(@events)}
       data-void-events={void_events(@events, "void-close")}
       {@rest}
@@ -786,7 +785,7 @@ defmodule VoidableUI.Components do
   end
 
   # ---------------------------------------------------------------------------
-  # AccordionItem (interactive — void-toggle)
+  # AccordionItem (interactive — void-open, void-close)
   # ---------------------------------------------------------------------------
 
   @doc """
@@ -807,7 +806,7 @@ defmodule VoidableUI.Components do
       id={@id || auto_id("void-accordion-item", @rest)}
       open={@open}
       phx-hook={void_hook(@events)}
-      data-void-events={void_events(@events, "void-toggle")}
+      data-void-events={void_events(@events, "void-open,void-close")}
       {@rest}
     >
       {render_slot(@inner_block)}
@@ -915,14 +914,14 @@ defmodule VoidableUI.Components do
   # ---------------------------------------------------------------------------
 
   @doc "Renders a `<void-toast-container>` positioning wrapper."
-  attr :position, :string, default: nil
+  attr :placement, :string, default: nil
 
   attr :rest, :global
   slot :inner_block
 
   def toast_container(assigns) do
     ~H"""
-    <void-toast-container position={@position} {@rest}>
+    <void-toast-container placement={@placement} {@rest}>
       {render_slot(@inner_block)}
     </void-toast-container>
     """
@@ -952,7 +951,7 @@ defmodule VoidableUI.Components do
   attr :open, :boolean, default: false
   attr :side, :string, default: nil
   attr :size, :string, default: nil
-  attr :closable, :boolean, default: true
+  attr :hide_close, :boolean, default: false
   attr :events, :any, default: nil, doc: @events_doc
   attr :rest, :global
   slot :inner_block, required: true
@@ -964,7 +963,7 @@ defmodule VoidableUI.Components do
       open={@open}
       side={@side}
       size={@size}
-      closable={to_string(@closable)}
+      hide-close={@hide_close}
       phx-hook={void_hook(@events)}
       data-void-events={void_events(@events, "void-close")}
       {@rest}
@@ -1004,7 +1003,7 @@ defmodule VoidableUI.Components do
   @doc "Renders a `<void-popover>` floating panel: `<void-popover-trigger>` (wrapping one button) and `<void-popover-content>` children."
   attr :id, :string, default: nil
   attr :open, :boolean, default: false
-  attr :position, :string, default: nil, doc: "top, bottom, left or right (flips when there is no room)"
+  attr :side, :string, default: nil, doc: "top, bottom, left or right (flips when there is no room)"
   attr :align, :string, default: nil, doc: "start, center or end"
   attr :trigger, :string, default: nil
   attr :events, :any, default: nil, doc: @events_doc
@@ -1016,7 +1015,7 @@ defmodule VoidableUI.Components do
     <void-popover
       id={@id || auto_id("void-popover", @rest)}
       open={@open}
-      position={@position}
+      side={@side}
       align={@align}
       trigger={@trigger}
       phx-hook={void_hook(@events)}
@@ -1033,7 +1032,7 @@ defmodule VoidableUI.Components do
   # ---------------------------------------------------------------------------
 
   @doc "Renders a `<void-tooltip>` hover tip: `<void-tooltip-trigger>` (wrapping the described element) and `<void-tooltip-content>` (the hint)."
-  attr :position, :string, default: nil
+  attr :side, :string, default: nil
   attr :align, :string, default: nil, doc: "start, center or end"
   attr :delay, :integer, default: nil
   attr :rest, :global
@@ -1041,7 +1040,7 @@ defmodule VoidableUI.Components do
 
   def tooltip(assigns) do
     ~H"""
-    <void-tooltip position={@position} align={@align} delay={@delay} {@rest}>
+    <void-tooltip side={@side} align={@align} delay={@delay} {@rest}>
       {render_slot(@inner_block)}
     </void-tooltip>
     """
@@ -1081,13 +1080,13 @@ defmodule VoidableUI.Components do
 
   @doc "Renders a `<void-scroll-area>` scrollable container."
   attr :max_height, :string, default: nil
-  attr :direction, :string, default: nil
+  attr :orientation, :string, default: nil
   attr :rest, :global
   slot :inner_block, required: true
 
   def scroll_area(assigns) do
     ~H"""
-    <void-scroll-area max-height={@max_height} direction={@direction} {@rest}>
+    <void-scroll-area max-height={@max_height} orientation={@orientation} {@rest}>
       {render_slot(@inner_block)}
     </void-scroll-area>
     """
@@ -1189,7 +1188,7 @@ defmodule VoidableUI.Components do
   attr :message, :string, default: nil
   attr :retryable, :boolean, default: false
   attr :retry_label, :string, default: nil
-  attr :icon, :boolean, default: true
+  attr :hide_icon, :boolean, default: false
   attr :rest, :global
   slot :inner_block
 
@@ -1200,7 +1199,7 @@ defmodule VoidableUI.Components do
       message={@message}
       retryable={@retryable}
       retry-label={@retry_label}
-      icon={to_string(@icon)}
+      hide-icon={@hide_icon}
       {@rest}
     >{render_slot(@inner_block)}</void-error-fallback>
     """
@@ -1340,26 +1339,26 @@ defmodule VoidableUI.Components do
 
   @doc "Renders a `<void-nav-bar>` navigation bar."
   attr :sticky, :boolean, default: false
-  attr :bordered, :boolean, default: true
+  attr :hide_border, :boolean, default: false
   attr :variant, :string, default: nil
   attr :rest, :global
   slot :inner_block, required: true
 
   def nav_bar(assigns) do
     ~H"""
-    <void-nav-bar sticky={@sticky} bordered={to_string(@bordered)} variant={@variant} {@rest}>
+    <void-nav-bar sticky={@sticky} hide-border={@hide_border} variant={@variant} {@rest}>
       {render_slot(@inner_block)}
     </void-nav-bar>
     """
   end
 
   # ---------------------------------------------------------------------------
-  # Hamburger (interactive — void-toggle)
+  # Hamburger (interactive — void-open, void-close)
   # ---------------------------------------------------------------------------
 
   @doc "Renders a `<void-hamburger>` menu toggle."
   attr :id, :string, default: nil
-  attr :active, :boolean, default: false
+  attr :open, :boolean, default: false
   attr :size, :string, default: nil
   attr :events, :any, default: nil, doc: @events_doc
   attr :rest, :global
@@ -1368,10 +1367,10 @@ defmodule VoidableUI.Components do
     ~H"""
     <void-hamburger
       id={@id || auto_id("void-hamburger", @rest)}
-      active={@active}
+      open={@open}
       size={@size}
       phx-hook={void_hook(@events)}
-      data-void-events={void_events(@events, "void-toggle")}
+      data-void-events={void_events(@events, "void-open,void-close")}
       {@rest}
     />
     """
@@ -1406,7 +1405,7 @@ defmodule VoidableUI.Components do
   end
 
   # ---------------------------------------------------------------------------
-  # Sidebar (interactive — void-toggle)
+  # Sidebar (interactive — void-collapse, void-expand)
   # ---------------------------------------------------------------------------
 
   @doc "Renders a `<void-sidebar>` navigation sidebar."
@@ -1424,7 +1423,7 @@ defmodule VoidableUI.Components do
       width={@width}
       collapsed-width={@collapsed_width}
       phx-hook={void_hook(@events)}
-      data-void-events={void_events(@events, "void-toggle")}
+      data-void-events={void_events(@events, "void-collapse,void-expand")}
       {@rest}
     >
       {render_slot(@inner_block)}
@@ -1439,7 +1438,7 @@ defmodule VoidableUI.Components do
   @doc "Renders a `<void-dropdown-menu>` dropdown: `<void-dropdown-menu-trigger>` (wrapping one button) and `<void-dropdown-menu-content>` holding the items."
   attr :id, :string, default: nil
   attr :open, :boolean, default: false
-  attr :position, :string, default: nil, doc: "top, bottom, left or right (flips when there is no room)"
+  attr :side, :string, default: nil, doc: "top, bottom, left or right (flips when there is no room)"
   attr :align, :string, default: nil, doc: "start, center or end"
   attr :events, :any, default: nil, doc: @events_doc
   attr :rest, :global
@@ -1450,7 +1449,7 @@ defmodule VoidableUI.Components do
     <void-dropdown-menu
       id={@id || auto_id("void-dropdown-menu", @rest)}
       open={@open}
-      position={@position}
+      side={@side}
       align={@align}
       phx-hook={void_hook(@events)}
       data-void-events={void_events(@events, "void-select")}
@@ -1632,7 +1631,7 @@ defmodule VoidableUI.Components do
   attr :size, :string, default: nil
   attr :count, :integer, default: nil
   attr :ping, :boolean, default: false
-  attr :position, :string, default: nil
+  attr :placement, :string, default: nil
   attr :rest, :global
   slot :inner_block, required: true
 
@@ -1643,7 +1642,7 @@ defmodule VoidableUI.Components do
       size={@size}
       count={@count}
       ping={@ping}
-      position={@position}
+      placement={@placement}
       {@rest}
     >
       {render_slot(@inner_block)}
@@ -1736,7 +1735,7 @@ defmodule VoidableUI.Components do
   empty `<void-carousel-indicators>` (a control is shown when written).
   """
   attr :id, :string, default: nil
-  attr :active, :integer, default: 0
+  attr :index, :integer, default: 0
   attr :loop, :boolean, default: false
   attr :autoplay, :boolean, default: false
   attr :interval, :integer, default: nil
@@ -1750,7 +1749,7 @@ defmodule VoidableUI.Components do
     ~H"""
     <void-carousel
       id={@id || auto_id("void-carousel", @rest)}
-      active={@active}
+      index={@index}
       loop={@loop}
       autoplay={@autoplay}
       interval={@interval}
@@ -1916,7 +1915,7 @@ defmodule VoidableUI.Components do
   end
 
   # ---------------------------------------------------------------------------
-  # Collapsible (interactive — void-toggle)
+  # Collapsible (interactive — void-open, void-close)
   # ---------------------------------------------------------------------------
 
   @doc """
@@ -1938,7 +1937,7 @@ defmodule VoidableUI.Components do
       open={@open}
       disabled={@disabled}
       phx-hook={void_hook(@events)}
-      data-void-events={void_events(@events, "void-toggle")}
+      data-void-events={void_events(@events, "void-open,void-close")}
       {@rest}
     >
       {render_slot(@inner_block)}
@@ -1984,7 +1983,7 @@ defmodule VoidableUI.Components do
 
   @doc "Renders a `<void-hover-card>` hover-triggered card: `<void-hover-card-trigger>` (wrapping the link) and `<void-hover-card-content>` children."
   attr :open, :boolean, default: false
-  attr :position, :string, default: nil
+  attr :side, :string, default: nil
   attr :align, :string, default: nil, doc: "start, center or end"
   attr :open_delay, :integer, default: nil
   attr :close_delay, :integer, default: nil
@@ -1995,7 +1994,7 @@ defmodule VoidableUI.Components do
     ~H"""
     <void-hover-card
       open={@open}
-      position={@position}
+      side={@side}
       align={@align}
       open-delay={@open_delay}
       close-delay={@close_delay}
@@ -2110,7 +2109,7 @@ defmodule VoidableUI.Components do
   attr :id, :string, default: nil
   attr :open, :boolean, default: false
   attr :disabled, :boolean, default: false
-  attr :active, :boolean, default: false
+  attr :current, :boolean, default: false
   attr :events, :any, default: nil, doc: @events_doc
   attr :rest, :global
   slot :inner_block, required: true
@@ -2121,7 +2120,7 @@ defmodule VoidableUI.Components do
       id={@id || auto_id("void-nav-menu-item", @rest)}
       open={@open}
       disabled={@disabled}
-      active={@active}
+      current={@current}
       phx-hook={void_hook(@events)}
       data-void-events={void_events(@events, "void-open,void-close")}
       {@rest}
@@ -2140,8 +2139,8 @@ defmodule VoidableUI.Components do
   attr :value, :string, default: nil
   attr :disabled, :boolean, default: false
   attr :size, :string, default: nil
-  attr :show_input, :boolean, default: true
-  attr :variant, :string, default: nil
+  attr :hide_input, :boolean, default: false
+  attr :compact, :boolean, default: false
   attr :open, :boolean, default: false
   attr :events, :any, default: nil, doc: @events_doc
   attr :rest, :global
@@ -2153,8 +2152,8 @@ defmodule VoidableUI.Components do
       value={@value}
       disabled={@disabled}
       size={@size}
-      show-input={to_string(@show_input)}
-      variant={@variant}
+      hide-input={@hide_input}
+      compact={@compact}
       open={@open}
       phx-hook={void_hook(@events)}
       data-void-events={void_events(@events, "void-change")}
@@ -2177,7 +2176,7 @@ defmodule VoidableUI.Components do
   attr :color, :string, default: nil
   attr :icon, :string, default: nil
   attr :action_label, :string, default: nil
-  attr :position, :string, default: nil
+  attr :icon_side, :string, default: nil
   attr :type, :string, default: nil
   attr :autocomplete, :string, default: nil
   attr :minlength, :integer, default: nil
@@ -2198,7 +2197,7 @@ defmodule VoidableUI.Components do
       color={@color}
       icon={@icon}
       action-label={@action_label}
-      position={@position}
+      icon-side={@icon_side}
       type={@type}
       autocomplete={@autocomplete}
       minlength={@minlength}

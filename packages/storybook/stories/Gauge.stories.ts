@@ -25,7 +25,7 @@ export const Default: Story = {
     <void-gauge
       value="67"
       unit="%"
-      show-value
+
       circular="triple"
       aria-label="CPU usage: 67%"
       style="max-width: 320px;"
@@ -45,19 +45,19 @@ export const UnitInline: Story = {
     <div style="display: grid; grid-template-columns: repeat(2, max-content); gap: var(--void-space-6) var(--void-space-8);">
       <div>
         <div style="font-family: var(--void-font-mono); font-size: var(--void-text-2xs); text-transform: uppercase; letter-spacing: var(--void-tracking-widest); color: var(--void-color-text-muted); margin-bottom: var(--void-space-2);">stacked (default)</div>
-        <void-gauge value="67" unit="%" show-value circular="triple" style="max-width: 240px;" aria-label="Stacked unit"></void-gauge>
+        <void-gauge value="67" unit="%" circular="triple" style="max-width: 240px;" aria-label="Stacked unit"></void-gauge>
       </div>
       <div>
         <div style="font-family: var(--void-font-mono); font-size: var(--void-text-2xs); text-transform: uppercase; letter-spacing: var(--void-tracking-widest); color: var(--void-color-text-muted); margin-bottom: var(--void-space-2);">inline</div>
-        <void-gauge value="67" unit="%" unit-inline show-value circular="triple" style="max-width: 240px;" aria-label="Inline unit"></void-gauge>
+        <void-gauge value="67" unit="%" unit-inline circular="triple" style="max-width: 240px;" aria-label="Inline unit"></void-gauge>
       </div>
       <div>
         <div style="font-family: var(--void-font-mono); font-size: var(--void-text-2xs); text-transform: uppercase; letter-spacing: var(--void-tracking-widest); color: var(--void-color-text-muted); margin-bottom: var(--void-space-2);">inline with °C</div>
-        <void-gauge value="22" unit="°C" unit-inline show-value min="-10" max="40" circular="triple" style="max-width: 240px;" aria-label="Temperature"></void-gauge>
+        <void-gauge value="22" unit="°C" unit-inline min="-10" max="40" circular="triple" style="max-width: 240px;" aria-label="Temperature"></void-gauge>
       </div>
       <div>
         <div style="font-family: var(--void-font-mono); font-size: var(--void-text-2xs); text-transform: uppercase; letter-spacing: var(--void-tracking-widest); color: var(--void-color-text-muted); margin-bottom: var(--void-space-2);">stacked with GB (longer unit)</div>
-        <void-gauge value="42" unit="GB" show-value max="100" circular="triple" style="max-width: 240px;" aria-label="Storage"></void-gauge>
+        <void-gauge value="42" unit="GB" max="100" circular="triple" style="max-width: 240px;" aria-label="Storage"></void-gauge>
       </div>
     </div>
   `,
@@ -77,7 +77,7 @@ export const FullCircle: Story = {
       unit="GB"
       min="0"
       max="100"
-      show-value
+
       circular="full"
       aria-label="Storage used: 42 GB of 100 GB"
       style="max-width: 320px;"
@@ -99,7 +99,7 @@ export const Semicircle: Story = {
       unit="%"
       min="0"
       max="100"
-      show-value
+
       circular="semi"
       aria-label="Load: 85%"
       style="max-width: 320px;"
@@ -129,7 +129,7 @@ export const WithZones: Story = {
           unit="%"
           min="0"
           max="100"
-          show-value
+
           circular="triple"
           aria-label="Value ${value}%"
           style="max-width: 260px;"
@@ -161,7 +161,7 @@ export const WithSegments: Story = {
       unit="$"
       min="0"
       max="50000"
-      show-value
+
       circular="triple"
       aria-label="Monthly sales target: $50k"
       style="max-width: 320px;"
@@ -189,15 +189,15 @@ export const Variants: Story = {
     <div style="display: flex; flex-direction: column; gap: var(--void-space-8); max-width: 320px;">
       <div>
         <div style="font-family: var(--void-font-mono); font-size: var(--void-text-2xs); text-transform: uppercase; letter-spacing: var(--void-tracking-widest); color: var(--void-color-text-muted); margin-bottom: var(--void-space-2);">filled</div>
-        <void-gauge value="67" unit="%" show-value variant="filled" aria-label="Filled variant"></void-gauge>
+        <void-gauge value="67" unit="%" variant="filled" aria-label="Filled variant"></void-gauge>
       </div>
       <div>
         <div style="font-family: var(--void-font-mono); font-size: var(--void-text-2xs); text-transform: uppercase; letter-spacing: var(--void-tracking-widest); color: var(--void-color-text-muted); margin-bottom: var(--void-space-2);">outline</div>
-        <void-gauge value="67" unit="%" show-value variant="outline" aria-label="Outline variant"></void-gauge>
+        <void-gauge value="67" unit="%" variant="outline" aria-label="Outline variant"></void-gauge>
       </div>
       <div>
         <div style="font-family: var(--void-font-mono); font-size: var(--void-text-2xs); text-transform: uppercase; letter-spacing: var(--void-tracking-widest); color: var(--void-color-text-muted); margin-bottom: var(--void-space-2);">wireframe</div>
-        <void-gauge value="67" unit="%" show-value variant="wireframe" aria-label="Wireframe variant"></void-gauge>
+        <void-gauge value="67" unit="%" variant="wireframe" aria-label="Wireframe variant"></void-gauge>
       </div>
     </div>
   `,
@@ -227,7 +227,7 @@ export const Gaps: Story = {
           unit="%"
           min="0"
           max="100"
-          show-value
+
           circular="triple"
           thickness="18"
           gaps=${gaps as never}
@@ -261,7 +261,7 @@ export const Dramatic: Story = {
       unit="$"
       min="0"
       max="50000"
-      show-value
+
       circular="triple"
       aria-label="Dramatic slow-motion gauge"
       style="max-width: 320px; --void-anim-scale: 2;"
@@ -281,7 +281,7 @@ export const Speedometer: Story = {
   parameters: {
     docs: {
       description: {
-        story: 'Speedometer-style gauge: `tick-major` and `tick-minor` add tick marks inside the band. `tick-min` and `tick-max` (both default true) force endpoint markers — useful when the major interval doesn\'t evenly divide the range. Each tile uses an explicit `zones` setup so the value-fill color is visible in all three variant stories below.',
+        story: 'Speedometer-style gauge: `tick-major` and `tick-minor` add tick marks inside the band. The end ticks are always drawn as major markers (add `hide-tick-min` or `hide-tick-max` to leave one out) — useful when the major interval doesn\'t evenly divide the range. Each tile uses an explicit `zones` setup so the value-fill color is visible in all three variant stories below.',
       },
     },
   },
@@ -340,7 +340,7 @@ function speedoGrid(variant: 'filled' | 'outline' | 'wireframe') {
           <div style="font-family: var(--void-font-mono); font-size: var(--void-text-2xs); text-transform: uppercase; letter-spacing: var(--void-tracking-widest); color: var(--void-color-text-muted); margin-bottom: var(--void-space-2);">${cfg.label}</div>
           <void-gauge
             variant=${variant}
-            show-value
+
             style="max-width: 280px;"
             value=${String(cfg.value)}
             unit=${cfg.unit}

@@ -25,7 +25,7 @@ const slideStyle = 'display: flex; align-items: center; justify-content: center;
 export const Default: Story = {
   render: (args) => html`
     <void-carousel
-      active=${args.active ?? 0}
+      index=${args.index ?? 0}
       ?loop=${args.loop}
       ?autoplay=${args.autoplay}
       interval=${args.interval ?? 5000}
@@ -54,7 +54,7 @@ export const WithLoop: Story = {
   args: { loop: true },
   render: (args) => html`
     <void-carousel
-      active=${args.active ?? 0}
+      index=${args.index ?? 0}
       ?loop=${args.loop ?? true}
       ?autoplay=${args.autoplay}
       interval=${args.interval ?? 5000}

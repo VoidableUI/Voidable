@@ -344,7 +344,7 @@ defmodule VoidableUI.Components.InteractiveUITest do
       refute html =~ ~r/\sopen[\s>]/
     end
 
-    test "renders closable by default (true)" do
+    test "renders no hide-close by default" do
       assigns = %{}
 
       html =
@@ -352,19 +352,19 @@ defmodule VoidableUI.Components.InteractiveUITest do
         <VoidableUI.Components.dialog>Body</VoidableUI.Components.dialog>
         """)
 
-      assert html =~ ~s(closable="true")
+      refute html =~ "hide-close"
     end
 
-    test "renders closable=\"false\" when closable is false" do
+    test "renders hide-close when set" do
       assigns = %{}
 
       html =
         rendered_to_string(~H"""
-        <VoidableUI.Components.dialog closable={false}>Body</VoidableUI.Components.dialog>
+        <VoidableUI.Components.dialog hide_close>Body</VoidableUI.Components.dialog>
         """)
 
-      assert html =~ ~s(closable="false")
-      refute html =~ "data-void-closable"
+      assert html =~ "hide-close"
+      refute html =~ "closable"
     end
 
     test "passes through global attributes" do
@@ -456,7 +456,7 @@ defmodule VoidableUI.Components.InteractiveUITest do
       refute html =~ ~r/\sopen[\s>]/
     end
 
-    test "renders closable by default (true)" do
+    test "renders no hide-close by default" do
       assigns = %{}
 
       html =
@@ -464,19 +464,19 @@ defmodule VoidableUI.Components.InteractiveUITest do
         <VoidableUI.Components.drawer>Body</VoidableUI.Components.drawer>
         """)
 
-      assert html =~ ~s(closable="true")
+      refute html =~ "hide-close"
     end
 
-    test "renders closable=\"false\" when closable is false" do
+    test "renders hide-close when set" do
       assigns = %{}
 
       html =
         rendered_to_string(~H"""
-        <VoidableUI.Components.drawer closable={false}>Body</VoidableUI.Components.drawer>
+        <VoidableUI.Components.drawer hide_close>Body</VoidableUI.Components.drawer>
         """)
 
-      assert html =~ ~s(closable="false")
-      refute html =~ "data-void-closable"
+      assert html =~ "hide-close"
+      refute html =~ "closable"
     end
 
     test "passes through global attributes" do
@@ -527,10 +527,10 @@ defmodule VoidableUI.Components.InteractiveUITest do
 
       html =
         rendered_to_string(~H"""
-        <VoidableUI.Components.popover position="top" trigger="click">Content</VoidableUI.Components.popover>
+        <VoidableUI.Components.popover side="top" trigger="click">Content</VoidableUI.Components.popover>
         """)
 
-      assert html =~ ~s(position="top")
+      assert html =~ ~s(side="top")
       assert html =~ ~s(trigger="click")
     end
 
@@ -542,7 +542,7 @@ defmodule VoidableUI.Components.InteractiveUITest do
         <VoidableUI.Components.popover>Content</VoidableUI.Components.popover>
         """)
 
-      refute html =~ "position="
+      refute html =~ "side="
       refute html =~ "trigger="
     end
 
@@ -732,7 +732,7 @@ defmodule VoidableUI.Components.InteractiveUITest do
   end
 
   # ===========================================================================
-  # 9. AccordionItem (interactive -- void-toggle, has slot)
+  # 9. AccordionItem (interactive -- void-open and void-close, has slot)
   # ===========================================================================
 
   describe "accordion_item" do
@@ -758,7 +758,7 @@ defmodule VoidableUI.Components.InteractiveUITest do
         """)
 
       assert html =~ ~s(phx-hook="VoidEvent")
-      assert html =~ ~s(data-void-events="void-toggle")
+      assert html =~ ~s(data-void-events="void-open,void-close")
     end
 
     test "renders named attributes when provided" do
@@ -910,7 +910,7 @@ defmodule VoidableUI.Components.InteractiveUITest do
         """)
 
       assert html =~ ~s(phx-hook="VoidEvent")
-      assert html =~ ~s(data-void-events="void-toggle")
+      assert html =~ ~s(data-void-events="void-open,void-close")
     end
 
     test "renders named attributes when provided" do
@@ -935,18 +935,18 @@ defmodule VoidableUI.Components.InteractiveUITest do
       refute html =~ "size="
     end
 
-    test "renders active boolean when true" do
+    test "renders open boolean when true" do
       assigns = %{}
 
       html =
         rendered_to_string(~H"""
-        <VoidableUI.Components.hamburger active={true} />
+        <VoidableUI.Components.hamburger open={true} />
         """)
 
-      assert html =~ "active"
+      assert html =~ "open"
     end
 
-    test "omits active when false (default)" do
+    test "omits open when false (default)" do
       assigns = %{}
 
       html =
@@ -954,7 +954,7 @@ defmodule VoidableUI.Components.InteractiveUITest do
         <VoidableUI.Components.hamburger />
         """)
 
-      refute html =~ "active"
+      refute html =~ " open"
     end
 
     test "passes through global attributes" do

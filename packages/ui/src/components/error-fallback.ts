@@ -1,6 +1,5 @@
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
-import { defaultTrueBoolean } from '../converters.js';
 import { MORPH_PARTICIPANTS, PartsController, type MorphParticipant } from '../parts.js';
 
 const TAGS = ['void-error-fallback-title', 'void-error-fallback-description', 'void-error-fallback-actions'] as const;
@@ -35,8 +34,8 @@ export class VoidErrorFallback extends VoidElement {
   @property({ type: Boolean, reflect: true }) retryable = false;
   /** Text of the built-in retry button. Defaults to `Try again`. Only used with `retryable`. */
   @property({ type: String, attribute: 'retry-label' }) retryLabel = 'Try again';
-  /** Show the warning icon above the headline. On by default; write `icon="false"` to hide it. */
-  @property({ type: Boolean, reflect: true, converter: defaultTrueBoolean }) icon = true;
+  /** Leave out the warning icon above the headline (it is drawn by default). */
+  @property({ type: Boolean, attribute: 'hide-icon', reflect: true }) hideIcon = false;
 
   protected readonly _parts = new PartsController(this, {
     tags: [...TAGS],

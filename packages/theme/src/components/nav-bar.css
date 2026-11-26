@@ -1,6 +1,6 @@
 /* @tokens void-nav-bar
    --void-nav-bar-surface  Fill of the bar. A bar over an image (data-void-surface="media") stays transparent.
-   --void-nav-bar-rule     The line under a bordered bar.
+   --void-nav-bar-rule     The line under the bar (unless hide-border).
    --void-nav-bar-shadow   Shadow under the bar. */
 
 void-nav-bar {
@@ -19,7 +19,7 @@ void-nav-bar {
   box-shadow: var(--void-nav-bar-shadow, none);
 }
 
-void-nav-bar[bordered]:not([bordered="false"]) {
+void-nav-bar:not([hide-border]) {
   /* The line's thickness, for the height above (the container border width: 1px, 2px in Slab). */
   --_void-nav-bar-rule-width: var(--void-container-border-width);
   border-bottom: var(--void-nav-bar-rule, var(--void-rule));

@@ -1,0 +1,4 @@
+<void-sidebar position="left" data-void-events="void-toggle"><void-nav-links><.link navigate={~p"/"}>Home</.link></void-nav-links></void-sidebar>
+<void-gauge value={@load} aria-label="Load" show-value="false"></void-gauge>
+<void-scroll-area direction="both"><p :for={row <- @rows}>{row}</p></void-scroll-area>
+<void-error-fallback icon="false"><void-error-fallback-title>{@error}</void-error-fallback-title></void-error-fallback>

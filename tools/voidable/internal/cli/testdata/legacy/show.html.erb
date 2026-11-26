@@ -1,0 +1,5 @@
+<void-toast-container position="<%= @corner %>"></void-toast-container>
+<void-nav-bar bordered><void-brand><%= link_to "Home", root_path %></void-brand></void-nav-bar>
+<void-hamburger aria-label="Menu" data-action="void-toggle->nav#flip"></void-hamburger>
+<void-skeleton variant="text"></void-skeleton>
+<void-scroll-area direction="vertical"><%= render @rows %></void-scroll-area>

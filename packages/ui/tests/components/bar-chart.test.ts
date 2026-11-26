@@ -44,10 +44,10 @@ describe('VoidBarChart', () => {
     const el = document.createElement(TAG) as VoidBarChart;
 
     it('height defaults to 220', () => expect(el.height).toBe(220));
-    it('showValues defaults to false', () => expect(el.showValues).toBe(false));
+    it('showValue defaults to false', () => expect(el.showValue).toBe(false));
     it('variant defaults to "filled"', () => expect(el.variant).toBe('filled'));
     it('ariaLabel defaults to empty', () => expect(el.ariaLabel).toBe(''));
-    it('stagger defaults to true', () => expect(el.stagger).toBe(true));
+    it('stagger defaults to null (the theme decides)', () => expect(el.stagger).toBe(null));
     it('data defaults to an empty series list', () => expect(el.data).toEqual({ series: [] }));
   });
 
@@ -59,18 +59,18 @@ describe('VoidBarChart', () => {
       expect(el.height).toBe(300);
     });
 
-    it('reflects height, variant and show-values', async () => {
-      const el = await mount<VoidBarChart>(TAG, { height: 150, variant: 'outline', showValues: true });
+    it('reflects height, variant and show-value', async () => {
+      const el = await mount<VoidBarChart>(TAG, { height: 150, variant: 'outline', showValue: true });
       expect(el.getAttribute('height')).toBe('150');
       expect(el.getAttribute('variant')).toBe('outline');
-      expect(el.hasAttribute('show-values')).toBe(true);
+      expect(el.hasAttribute('show-value')).toBe(true);
     });
 
-    it('maps the show-values attribute to showValues', async () => {
+    it('maps the show-value attribute to showValue', async () => {
       const el = await mount<VoidBarChart>(TAG, {});
-      el.setAttribute('show-values', '');
+      el.setAttribute('show-value', '');
       await el.updateComplete;
-      expect(el.showValues).toBe(true);
+      expect(el.showValue).toBe(true);
     });
 
     it('maps the aria-label attribute to ariaLabel', async () => {
@@ -80,19 +80,16 @@ describe('VoidBarChart', () => {
       expect(el.ariaLabel).toBe('Revenue');
     });
 
-    describe('stagger converter', () => {
+    describe('stagger attribute', () => {
       const make = async (attr: string | null) => {
         const el = document.createElement(TAG) as VoidBarChart;
         if (attr !== null) el.setAttribute('stagger', attr);
         return el;
       };
 
-      it('empty attribute means true', async () => expect((await make('')).stagger).toBe(true));
-      it('"true" means true', async () => expect((await make('true')).stagger).toBe(true));
-      it('"false" means false', async () => expect((await make('false')).stagger).toBe(false));
+      it('no attribute means the theme default', async () => expect((await make(null)).stagger).toBe(null));
       it('a numeric string means that number', async () => expect((await make('75')).stagger).toBe(75));
-      it('"0" means 0 (not false)', async () => expect((await make('0')).stagger).toBe(0));
-      it('a non-numeric string falls back to true', async () => expect((await make('abc')).stagger).toBe(true));
+      it('"0" means 0', async () => expect((await make('0')).stagger).toBe(0));
     });
   });
 
@@ -366,7 +363,7 @@ describe('VoidBarChart', () => {
     });
   });
 
-  describe('show-values', () => {
+  describe('show-value', () => {
     it('renders no value labels by default', async () => {
       const el = await mount<VoidBarChart>(TAG, { data: sample });
       expect(el.querySelector('.void-bar-chart-values')).toBeNull();
@@ -375,7 +372,7 @@ describe('VoidBarChart', () => {
     it('renders a rounded label above every bar when enabled', async () => {
       const el = await mount<VoidBarChart>(TAG, {
         data: { series: [{ name: 'A', values: [1.4, 2.6, 3] }] },
-        showValues: true,
+        showValue: true,
       });
       const labels = Array.from(el.querySelectorAll('.void-bar-chart-values text'));
       expect(labels.map((t) => t.textContent)).toEqual(['1', '3', '3']);
@@ -386,17 +383,17 @@ describe('VoidBarChart', () => {
     it('abbreviates thousands', async () => {
       const el = await mount<VoidBarChart>(TAG, {
         data: { series: [{ name: 'A', values: [1500, 12000, 999] }] },
-        showValues: true,
+        showValue: true,
       });
       expect(texts(el, '.void-bar-chart-values')).toEqual(['1.5k', '12k', '999']);
     });
 
     it('toggles at runtime', async () => {
       const el = await mount<VoidBarChart>(TAG, { data: sample });
-      el.showValues = true;
+      el.showValue = true;
       await settle(el);
       expect(el.querySelector('.void-bar-chart-values')).not.toBeNull();
-      el.showValues = false;
+      el.showValue = false;
       await settle(el);
       expect(el.querySelector('.void-bar-chart-values')).toBeNull();
     });
@@ -489,8 +486,8 @@ describe('VoidBarChart', () => {
       expect(hs[2]! / hs[0]!).toBeCloseTo(3, 5);
     });
 
-    it('stagger delays later bars (stagger=false starts them together)', async () => {
-      const make = async (stagger: boolean | number) => {
+    it('stagger delays later bars (stagger=0 starts them together)', async () => {
+      const make = async (stagger: number) => {
         const el = document.createElement(TAG) as VoidBarChart;
         el.style.setProperty('--void-duration-chart-enter', '40');
         el.stagger = stagger;
@@ -504,7 +501,7 @@ describe('VoidBarChart', () => {
       const staggered = await make(100000);
       expect(staggered[0]).toBeGreaterThan(0);
       expect(staggered[1]).toBe(0);
-      const together = await make(false);
+      const together = await make(0);
       expect(together[0]).toBeGreaterThan(0);
       expect(together[1]).toBeCloseTo(together[0]!, 5);
     });
@@ -515,7 +512,7 @@ describe('VoidBarChart', () => {
       el.style.setProperty('--void-anim-scale', '1');
       el.style.setProperty('--void-duration-chart-enter', '40');
       el.style.setProperty('--void-stagger-chart-bars', '100000');
-      el.stagger = true;
+      el.stagger = null;
       el.data = { series: [{ name: 'A', values: [2, 4] }] };
       await settle(el);
       await sleep(150);

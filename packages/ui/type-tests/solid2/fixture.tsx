@@ -27,14 +27,14 @@ export const ok = (
         void value;
       })}
     />
-    <void-bar-chart prop:data={data} prop:showValues height={240} variant="outline" stagger={30} />
+    <void-bar-chart prop:data={data} prop:showValue height={240} variant="outline" stagger={30} />
   </div>
 );
 
 // @ts-expect-error: 'huge' is not a valid size
 export const badSize = <void-button size="huge" />;
-// @ts-expect-error: a plain camelCase name is lowercased by the Solid compiler and never reaches the element; use prop:showValues
-export const plainCamel = <void-bar-chart showValues />;
+// @ts-expect-error: a plain camelCase name is lowercased by the Solid compiler and never reaches the element; use prop:showValue
+export const plainCamel = <void-bar-chart showValue />;
 // @ts-expect-error: height is a number
 export const badHeight = <void-bar-chart height="tall" />;
 // @ts-expect-error: object properties are `prop:` only in Solid 2 (a plain attribute would be stringified)

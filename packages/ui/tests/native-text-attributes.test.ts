@@ -59,7 +59,7 @@ describe.each(controls)('%s forwards native attributes', (tag, selector, withPat
     el.inputMode = 'numeric';
     el.enterKeyHint = 'done';
     el.autocapitalize = 'off';
-    el.spellcheck = false;
+    el.setAttribute('spellcheck', 'false');
     await el.updateComplete;
     const n = native(el);
     expect(n.getAttribute('autocomplete')).toBe('one-time-code');
@@ -75,16 +75,24 @@ describe.each(controls)('%s forwards native attributes', (tag, selector, withPat
     el.inputMode = '';
     el.enterKeyHint = '';
     el.autocapitalize = '';
-    el.spellcheck = true;
+    el.setAttribute('spellcheck', 'true');
     await el.updateComplete;
-    for (const attr of ['autocomplete', 'minlength', 'maxlength', 'inputmode', 'enterkeyhint', 'autocapitalize', 'spellcheck']) {
+    for (const attr of ['autocomplete', 'minlength', 'maxlength', 'inputmode', 'enterkeyhint', 'autocapitalize']) {
       expect(n.hasAttribute(attr), attr).toBe(false);
     }
+    // spellcheck is the host's own enumerated attribute, forwarded as written.
+    expect(n.getAttribute('spellcheck')).toBe('true');
   });
 
-  it('forwards spellcheck="true" only when the author wrote it', async () => {
-    const el = await mount(tag, { spellcheck: 'true' });
-    expect(native(el).getAttribute('spellcheck')).toBe('true');
+  it('forwards spellcheck as written, and leaves the browser default without it (#23)', async () => {
+    expect(native(await mount(tag, { spellcheck: 'true' })).getAttribute('spellcheck')).toBe('true');
+    expect(native(await mount(tag, { spellcheck: '' })).getAttribute('spellcheck')).toBe('');
+    expect(native(await mount(tag, {})).hasAttribute('spellcheck')).toBe(false);
+    const el = await mount(tag, { spellcheck: 'false' });
+    expect(native(el).getAttribute('spellcheck')).toBe('false');
+    el.removeAttribute('spellcheck');
+    await el.updateComplete;
+    expect(native(el).hasAttribute('spellcheck')).toBe(false);
   });
 
   it('forwards readonly', async () => {

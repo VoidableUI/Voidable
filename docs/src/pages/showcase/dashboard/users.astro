@@ -775,7 +775,7 @@ import iconLogout from '@tabler/icons/outline/logout.svg?raw';
             <span class="sidebar-user-name">Kaz Walker</span>
             <span class="sidebar-user-role">Admin</span>
           </div>
-          <void-popover position="top" id="settings-popover">
+          <void-popover side="top" id="settings-popover">
             <void-popover-trigger><button class="sidebar-settings-btn" aria-label="Settings">
               <span class="sidebar-nav-icon" set:html={iconSettings} />
             </button></void-popover-trigger>
@@ -981,7 +981,7 @@ import iconLogout from '@tabler/icons/outline/logout.svg?raw';
 
       backdrop?.addEventListener('click', () => {
         appShell?.classList.remove('sidebar-open');
-        if (hamburger) (hamburger as any).active = false;
+        if (hamburger) (hamburger as any).open = false;
       });
 
       // Mock user detail data
@@ -1510,7 +1510,7 @@ import iconLogout from '@tabler/icons/outline/logout.svg?raw';
 
     <!-- Global styles for dynamically injected dialog content + popover overrides -->
     <style is:global>
-      .toolbar-row void-popover[position="bottom"] void-popover-content {
+      .toolbar-row void-popover[side="bottom"] void-popover-content {
         left: auto !important;
         right: 0;
       }

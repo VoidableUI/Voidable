@@ -71,7 +71,7 @@ describe('VoidLineChart', () => {
   describe('default property values', () => {
     const el = document.createElement(TAG) as VoidLineChart;
     it('height defaults to 220', () => expect(el.height).toBe(220));
-    it('showValues defaults to false', () => expect(el.showValues).toBe(false));
+    it('showValue defaults to false', () => expect(el.showValue).toBe(false));
     it('variant defaults to "outline"', () => expect(el.variant).toBe('outline'));
     it('interpolation defaults to "linear"', () => expect(el.interpolation).toBe('linear'));
     it('ariaLabel defaults to empty', () => expect(el.ariaLabel).toBe(''));
@@ -79,14 +79,14 @@ describe('VoidLineChart', () => {
   });
 
   describe('attributes and reflection', () => {
-    it('reflects height, variant, interpolation and show-values', async () => {
+    it('reflects height, variant, interpolation and show-value', async () => {
       const el = await mount<VoidLineChart>(TAG, {
-        height: 120, variant: 'filled', interpolation: 'step', showValues: true,
+        height: 120, variant: 'filled', interpolation: 'step', showValue: true,
       });
       expect(el.getAttribute('height')).toBe('120');
       expect(el.getAttribute('variant')).toBe('filled');
       expect(el.getAttribute('interpolation')).toBe('step');
-      expect(el.hasAttribute('show-values')).toBe(true);
+      expect(el.hasAttribute('show-value')).toBe(true);
     });
 
     it('reads height as a number from the attribute', async () => {
@@ -354,14 +354,14 @@ describe('VoidLineChart', () => {
     });
   });
 
-  describe('show-values', () => {
+  describe('show-value', () => {
     it('renders no value labels by default', async () => {
       const el = await mount<VoidLineChart>(TAG, { data: sample });
       expect(el.querySelector('.void-line-chart-values')).toBeNull();
     });
 
     it('renders a label above each point', async () => {
-      const el = await mount<VoidLineChart>(TAG, { data: sample, showValues: true });
+      const el = await mount<VoidLineChart>(TAG, { data: sample, showValue: true });
       const labels = Array.from(el.querySelectorAll('.void-line-chart-values text'));
       expect(labels.map((l) => l.textContent)).toEqual(['1', '3', '2', '5']);
       const ys = points(lineD(el)).map((p) => p[1]);
@@ -371,7 +371,7 @@ describe('VoidLineChart', () => {
     it('abbreviates thousands', async () => {
       const el = await mount<VoidLineChart>(TAG, {
         data: { series: [{ name: 'A', values: [1500, 12000] }] },
-        showValues: true,
+        showValue: true,
       });
       expect(texts(el, '.void-line-chart-values text')).toEqual(['1.5k', '12k']);
     });

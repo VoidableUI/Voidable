@@ -1,0 +1,48 @@
+---
+// Every attribute, value and event renamed or removed in 0.8 (#23), per
+// component, from the manifest's voidRenamed (source: `renamed` in
+// packages/ui/cem/supplement.js), so this table and what `voidable check`
+// reports are the same list.
+import { loadComponentData } from '../../lib/component-data.mjs';
+
+const { components } = loadComponentData();
+type Row = { kind: string; old: string; now: string };
+const written = (name: string, value: string) => (value === '' ? name : `${name}="${value}"`);
+const groups = components
+  .filter((c: any) => c.renamed)
+  .map((c: any) => {
+    const r = c.renamed;
+    const rows: Row[] = [];
+    for (const [name, rule] of Object.entries<any>(r.attributes ?? {})) {
+      const values = Object.entries<string>(rule.values ?? {});
+      for (const [v, repl] of values) rows.push({ kind: 'attribute', old: written(name, v), now: repl });
+      if (rule.to) rows.push({ kind: 'attribute', old: values.length ? `${name}="…" (any other value)` : name, now: `${rule.to} (same value)` });
+      else if (rule.fix) rows.push({ kind: 'attribute', old: values.length ? `${name} (otherwise)` : name, now: rule.fix });
+    }
+    for (const [attr, map] of Object.entries<Record<string, string>>(r.values ?? {})) {
+      for (const [v, nv] of Object.entries(map)) rows.push({ kind: 'value', old: `${attr}="${v}"`, now: `${attr}="${nv}"` });
+    }
+    for (const [ev, advice] of Object.entries<string>(r.events ?? {})) rows.push({ kind: 'event', old: ev, now: advice });
+    return { tag: c.tag, rows };
+  });
+const MARKUP = /^[a-z-]+(="[^"]*")?( [a-z-]+(="[^"]*")?)*$/;
+const lines = groups.flatMap((g: any) =>
+  g.rows.map((row: Row, i: number) => ({ tag: i === 0 ? g.tag : '', ...row, code: MARKUP.test(row.now) })),
+);
+---
+
+<div class="vd-api-table">
+  <table>
+    <thead><tr><th>Component</th><th>Kind</th><th>0.7</th><th>0.8</th></tr></thead>
+    <tbody>
+      {lines.map((l: any) => (
+        <tr>
+          <td>{l.tag && <a href={`/components/${l.tag.replace(/^void-/, '')}/`}><code>{l.tag}</code></a>}</td>
+          <td>{l.kind}</td>
+          <td><code>{l.old}</code></td>
+          <td>{l.code ? <code>{l.now}</code> : l.now}</td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</div>

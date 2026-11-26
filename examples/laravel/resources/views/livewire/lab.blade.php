@@ -62,7 +62,7 @@
             </void-combobox>
         </void-field>
         <void-field label="Skills">
-            <void-multiselect id="i-skills" name="user[skills][]" placeholder="Pick many" x-void-on:void-change="$wire.set('user.skills', $event.detail.values)">
+            <void-multiselect id="i-skills" name="user[skills][]" placeholder="Pick many" x-void-on:void-change="$wire.set('user.skills', $event.detail.value)">
                 <void-multiselect-content>
                     <void-option value="css" @selected(in_array('css', $user['skills']))>CSS</void-option>
                     <void-option value="js" @selected(in_array('js', $user['skills']))>JS</void-option>

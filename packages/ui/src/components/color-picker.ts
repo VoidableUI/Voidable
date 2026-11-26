@@ -3,7 +3,6 @@ import { live } from 'lit/directives/live.js';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
 import { InternalsFormControl } from '../form-control.js';
-import { defaultTrueBoolean } from '../converters.js';
 
 /** Color selection control with spectrum area, hue slider, hex input, and preset swatches for theme customization and design tools. */
 export class VoidColorPicker extends InternalsFormControl(VoidElement) {
@@ -24,11 +23,11 @@ export class VoidColorPicker extends InternalsFormControl(VoidElement) {
    * (`el.swatches = [red, green]`, each a hex string) or as a JSON array in the attribute.
    */
   @property({ type: Array }) swatches: string[] = [];
-  /** Show the hex text field under the spectrum. On by default; write `show-input="false"` to hide it. */
-  @property({ type: Boolean, attribute: 'show-input', reflect: true, converter: defaultTrueBoolean }) showInput: boolean = true;
-  /** `default` shows the full picker inline; `compact` shows only a swatch button that opens it. */
-  @property({ type: String, reflect: true }) variant: 'default' | 'compact' = 'default';
-  /** Whether the compact variant's picker is open. Only meaningful with `variant="compact"`. */
+  /** Leave out the hex text field under the spectrum (it is shown by default). */
+  @property({ type: Boolean, attribute: 'hide-input', reflect: true }) hideInput = false;
+  /** Show only a swatch button that opens the picker in a popup, instead of the full picker inline. */
+  @property({ type: Boolean, reflect: true }) compact = false;
+  /** Whether the compact variant's picker is open. Only meaningful with `compact`. */
   @property({ type: Boolean, reflect: true }) open: boolean = false;
 
   private _hue: number = 0;
@@ -267,7 +266,7 @@ export class VoidColorPicker extends InternalsFormControl(VoidElement) {
         >
           <div class="void-color-picker-hue-thumb"></div>
         </div>
-        ${this.showInput ? html`
+        ${!this.hideInput ? html`
           <div class="void-color-picker-field">
             <span class="void-color-picker-field-swatch"></span>
             <span class="void-color-picker-field-separator"></span>
@@ -302,7 +301,7 @@ export class VoidColorPicker extends InternalsFormControl(VoidElement) {
   }
 
   render() {
-    if (this.variant === 'compact') {
+    if (this.compact) {
       return html`
         <div class="void-color-picker-compact">
           <button

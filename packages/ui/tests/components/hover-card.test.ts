@@ -44,8 +44,8 @@ describe('VoidHoverCard', () => {
       expect(el.open).toBe(false);
     });
 
-    it('position defaults to "bottom"', () => {
-      expect(el.position).toBe('bottom');
+    it('side defaults to "bottom"', () => {
+      expect(el.side).toBe('bottom');
     });
 
     it('openDelay defaults to 300', () => {
@@ -76,10 +76,10 @@ describe('VoidHoverCard', () => {
       expect(el.hasAttribute('open')).toBe(true);
     });
 
-    it('reflects position to attribute', async () => {
-      el.position = 'top';
+    it('reflects side to attribute', async () => {
+      el.side = 'top';
       await el.updateComplete;
-      expect(el.getAttribute('position')).toBe('top');
+      expect(el.getAttribute('side')).toBe('top');
     });
   });
 

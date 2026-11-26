@@ -94,6 +94,8 @@ export default defineConfig({
             { label: 'Forms', slug: 'guides/forms' },
             { label: 'Composition and children', slug: 'guides/composition' },
             { label: 'Events', slug: 'guides/events' },
+            { label: 'API conventions', slug: 'guides/conventions' },
+            { label: 'Upgrading to 0.8', slug: 'guides/upgrading' },
             { label: 'Server-rendered apps', slug: 'guides/server-rendered' },
             { label: 'Accessibility', slug: 'guides/accessibility' },
             { label: 'Accessibility statement', slug: 'guides/accessibility-statement' },

@@ -234,12 +234,12 @@ describe('reflected attributes removed from outside', () => {
     expect(btn.getAttribute('size')).toBe('md');
   });
 
-  it('a boolean that defaults to true stays true', async () => {
-    const nb = await mount<Host>('<void-nav-bar><a href="#">a</a></void-nav-bar>');
-    expect(nb.bordered).toBe(true);
-    nb.removeAttribute('bordered');
+  it('a removed hide-* boolean goes back to false', async () => {
+    const nb = await mount<Host>('<void-nav-bar hide-border><a href="#">a</a></void-nav-bar>');
+    expect(nb.hideBorder).toBe(true);
+    nb.removeAttribute('hide-border');
     await settle();
-    expect(nb.bordered).toBe(true);
+    expect(nb.hideBorder).toBe(false);
   });
 
   it('is not triggered by the component reflecting a property it set itself', async () => {

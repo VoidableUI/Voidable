@@ -43,8 +43,8 @@ describe('VoidColorPicker', () => {
       expect(el.swatches).toEqual([]);
     });
 
-    it('showInput defaults to true', () => {
-      expect(el.showInput).toBe(true);
+    it('hideInput defaults to false', () => {
+      expect(el.hideInput).toBe(false);
     });
   });
 
@@ -171,8 +171,8 @@ describe('VoidColorPicker', () => {
       expect(el.querySelector('.void-color-picker-input')).not.toBeNull();
     });
 
-    it('hides hex input when showInput is false', async () => {
-      el.showInput = false;
+    it('hides hex input with hideInput', async () => {
+      el.hideInput = true;
       await el.updateComplete;
       expect(el.querySelector('.void-color-picker-input')).toBeNull();
     });

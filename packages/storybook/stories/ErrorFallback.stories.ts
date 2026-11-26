@@ -35,7 +35,7 @@ export const Default: Story = {
       message=${args.message}
       ?retryable=${args.retryable}
       retry-label=${args.retryLabel}
-      icon=${String(args.icon ?? true)}
+      ?hide-icon=${args.hideIcon}
     ></void-error-fallback>
   `,
 };
@@ -76,7 +76,7 @@ export const NoIcon: Story = {
       heading="Page not available"
       message="This content could not be displayed."
       retryable
-      icon="false"
+      hide-icon
     ></void-error-fallback>
   `,
 };

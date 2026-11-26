@@ -17,9 +17,9 @@ const VIRTUAL_ID = 'virtual:voidable-manifest';
 const RESOLVED_ID = '\0' + VIRTUAL_ID;
 
 export interface AttributeSpec {
-  /** The HTML attribute name, e.g. `show-values`. */
+  /** The HTML attribute name, e.g. `show-value`. */
   name: string;
-  /** The property name the stories use as an arg key, e.g. `showValues`. */
+  /** The property name the stories use as an arg key, e.g. `showValue`. */
   field: string;
   /** The type text as the analyzer wrote it, e.g. `'sm' | 'md' | 'lg'`. */
   type: string;

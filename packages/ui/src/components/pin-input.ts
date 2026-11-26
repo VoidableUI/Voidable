@@ -3,8 +3,16 @@ import { live } from 'lit/directives/live.js';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
 import { InternalsFormControl } from '../form-control.js';
+import { isFocusParked } from '../projection.js';
 
-/** Single-character input cells for OTP verification codes, PIN entry, and multi-digit confirmation fields. */
+/**
+ * Single-character input cells for OTP verification codes, PIN entry, and multi-digit confirmation fields.
+ *
+ * @fires {CustomEvent<{ value: string }>} void-input - A character was typed, pasted or deleted.
+ * @fires {CustomEvent<{ value: string }>} void-change - Focus left the cells with a different value from when it came
+ * in (the commit, as a native field's `change`).
+ * @fires {CustomEvent<{ value: string }>} void-complete - Every cell is filled.
+ */
 export class VoidPinInput extends InternalsFormControl(VoidElement) {
   /** While focus is inside, a morph does not apply the server's value over what the user is typing. */
   static override editState = ['value'];
@@ -61,11 +69,37 @@ export class VoidPinInput extends InternalsFormControl(VoidElement) {
     return indices;
   }
 
+  /** The value when focus came into the cells (null while focus is elsewhere). */
+  private _focusValue: string | null = null;
+
   connectedCallback(): void {
     super.connectedCallback();
     this.setHostAttribute('role', 'group');
     this.setHostAttribute('aria-label', 'PIN input');
+    this.addEventListener('focusin', this._onFocusIn);
+    this.addEventListener('focusout', this._onFocusOut);
   }
+
+  disconnectedCallback(): void {
+    super.disconnectedCallback();
+    this.removeEventListener('focusin', this._onFocusIn);
+    this.removeEventListener('focusout', this._onFocusOut);
+  }
+
+  private _onFocusIn = (): void => {
+    this._focusValue ??= this.value;
+  };
+
+  /** Focus left the component: commit, as a native field fires `change` on blur. */
+  private _onFocusOut = (e: FocusEvent): void => {
+    if (e.relatedTarget instanceof Node && this.contains(e.relatedTarget)) return;
+    if (isFocusParked(this)) return;
+    const before = this._focusValue;
+    this._focusValue = null;
+    if (before !== null && before !== this.value) {
+      this.dispatchEvent(new CustomEvent('void-change', { bubbles: true, composed: true, detail: { value: this.value } }));
+    }
+  };
 
   private _getCells(): HTMLInputElement[] {
     return Array.from(this.querySelectorAll<HTMLInputElement>('.void-pin-cell'));
@@ -87,7 +121,7 @@ export class VoidPinInput extends InternalsFormControl(VoidElement) {
     const previous = this.value;
     this.value = this._collectValue();
     if (this.value !== previous) {
-      this.dispatchEvent(new CustomEvent('void-change', {
+      this.dispatchEvent(new CustomEvent('void-input', {
         bubbles: true,
         composed: true,
         detail: { value: this.value },

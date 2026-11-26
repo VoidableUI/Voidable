@@ -110,35 +110,35 @@ defmodule DemoWeb.StaticShowcases do
       <h3>Text (default)</h3>
       <p>Placeholder shapes shown while content is loading.</p>
       <div class="showcase-row">
-        <VoidableUI.Components.skeleton variant="text" />
+        <VoidableUI.Components.skeleton shape="text" />
       </div>
     </div>
     <div class="showcase-section">
       <h3>Circular</h3>
       <div class="showcase-row">
-        <VoidableUI.Components.skeleton variant="circular" />
+        <VoidableUI.Components.skeleton shape="circular" />
       </div>
     </div>
     <div class="showcase-section">
       <h3>Rectangular</h3>
       <div class="showcase-row">
-        <VoidableUI.Components.skeleton variant="rectangular" />
+        <VoidableUI.Components.skeleton shape="rectangular" />
       </div>
     </div>
     <div class="showcase-section">
       <h3>Content Placeholder</h3>
       <div style="display: flex; flex-direction: column; gap: 0.75rem; max-width: 20rem; padding: 1rem; border: 1px solid var(--void-color-border, #e0e0e0); border-radius: 0.5rem;">
-        <VoidableUI.Components.skeleton variant="rectangular" />
+        <VoidableUI.Components.skeleton shape="rectangular" />
         <div style="display: flex; align-items: center; gap: 0.75rem;">
-          <VoidableUI.Components.skeleton variant="circular" />
+          <VoidableUI.Components.skeleton shape="circular" />
           <div style="flex: 1; display: flex; flex-direction: column; gap: 0.5rem;">
-            <VoidableUI.Components.skeleton variant="text" />
-            <VoidableUI.Components.skeleton variant="text" style="width: 60%;" />
+            <VoidableUI.Components.skeleton shape="text" />
+            <VoidableUI.Components.skeleton shape="text" style="width: 60%;" />
           </div>
         </div>
-        <VoidableUI.Components.skeleton variant="text" />
-        <VoidableUI.Components.skeleton variant="text" />
-        <VoidableUI.Components.skeleton variant="text" style="width: 80%;" />
+        <VoidableUI.Components.skeleton shape="text" />
+        <VoidableUI.Components.skeleton shape="text" />
+        <VoidableUI.Components.skeleton shape="text" style="width: 80%;" />
       </div>
     </div>
     """
@@ -284,7 +284,7 @@ defmodule DemoWeb.StaticShowcases do
       <h3>Default</h3>
       <p>A hover-triggered tooltip for supplemental information.</p>
       <div class="showcase-row">
-        <VoidableUI.Components.tooltip position="top">
+        <VoidableUI.Components.tooltip side="top">
           <void-tooltip-trigger><button style="padding: 0.5rem 1rem; cursor: pointer;">Hover me</button></void-tooltip-trigger>
           <void-tooltip-content>Hello, tooltip!</void-tooltip-content>
         </VoidableUI.Components.tooltip>
@@ -293,19 +293,19 @@ defmodule DemoWeb.StaticShowcases do
     <div class="showcase-section">
       <h3>Positions</h3>
       <div class="showcase-row" style="padding: 3rem; gap: 4rem;">
-        <VoidableUI.Components.tooltip position="top">
+        <VoidableUI.Components.tooltip side="top">
           <void-tooltip-trigger><button style="padding: 0.5rem 1rem; cursor: pointer;">Top</button></void-tooltip-trigger>
           <void-tooltip-content>Top tooltip</void-tooltip-content>
         </VoidableUI.Components.tooltip>
-        <VoidableUI.Components.tooltip position="bottom">
+        <VoidableUI.Components.tooltip side="bottom">
           <void-tooltip-trigger><button style="padding: 0.5rem 1rem; cursor: pointer;">Bottom</button></void-tooltip-trigger>
           <void-tooltip-content>Bottom tooltip</void-tooltip-content>
         </VoidableUI.Components.tooltip>
-        <VoidableUI.Components.tooltip position="left">
+        <VoidableUI.Components.tooltip side="left">
           <void-tooltip-trigger><button style="padding: 0.5rem 1rem; cursor: pointer;">Left</button></void-tooltip-trigger>
           <void-tooltip-content>Left tooltip</void-tooltip-content>
         </VoidableUI.Components.tooltip>
-        <VoidableUI.Components.tooltip position="right">
+        <VoidableUI.Components.tooltip side="right">
           <void-tooltip-trigger><button style="padding: 0.5rem 1rem; cursor: pointer;">Right</button></void-tooltip-trigger>
           <void-tooltip-content>Right tooltip</void-tooltip-content>
         </VoidableUI.Components.tooltip>
@@ -366,7 +366,7 @@ defmodule DemoWeb.StaticShowcases do
         heading="Page not available"
         message="This content could not be displayed."
         retryable
-        icon={false}
+        hide_icon
       />
     </div>
     """
@@ -716,7 +716,7 @@ defmodule DemoWeb.StaticShowcases do
     <div class="showcase-section">
       <h3>Vertical</h3>
       <p>A scrollable container with custom scrollbar styling.</p>
-      <VoidableUI.Components.scroll_area max_height="150px" direction="vertical">
+      <VoidableUI.Components.scroll_area max_height="150px" orientation="vertical">
         <p>Line 1: Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
         <p>Line 2: Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
         <p>Line 3: Ut enim ad minim veniam, quis nostrud exercitation ullamco.</p>
@@ -728,7 +728,7 @@ defmodule DemoWeb.StaticShowcases do
     </div>
     <div class="showcase-section">
       <h3>Horizontal</h3>
-      <VoidableUI.Components.scroll_area direction="horizontal" style="max-width: 300px;">
+      <VoidableUI.Components.scroll_area orientation="horizontal" style="max-width: 300px;">
         <div style="display: flex; gap: 1rem; width: max-content;">
           <div style="min-width: 120px; padding: 0.5rem; border: 1px solid var(--void-color-border, #ccc); border-radius: 4px;">Panel A</div>
           <div style="min-width: 120px; padding: 0.5rem; border: 1px solid var(--void-color-border, #ccc); border-radius: 4px;">Panel B</div>
@@ -740,7 +740,7 @@ defmodule DemoWeb.StaticShowcases do
     </div>
     <div class="showcase-section">
       <h3>Both Directions</h3>
-      <VoidableUI.Components.scroll_area max_height="150px" direction="both" style="max-width: 300px;">
+      <VoidableUI.Components.scroll_area max_height="150px" orientation="both" style="max-width: 300px;">
         <div style="width: 600px;">
           <p>Row 1 -- This content is wider than the container and taller than maxHeight.</p>
           <p>Row 2 -- Scroll both vertically and horizontally to explore all content.</p>
@@ -823,7 +823,7 @@ defmodule DemoWeb.StaticShowcases do
     <div class="showcase-section">
       <h3>Default</h3>
       <p>A top-level navigation bar for app-wide links.</p>
-      <VoidableUI.Components.nav_bar bordered>
+      <VoidableUI.Components.nav_bar>
         <a href="#">Home</a>
         <a href="#">Docs</a>
         <a href="#">Blog</a>
@@ -839,7 +839,7 @@ defmodule DemoWeb.StaticShowcases do
     </div>
     <div class="showcase-section">
       <h3>Sticky and Bordered</h3>
-      <VoidableUI.Components.nav_bar sticky bordered>
+      <VoidableUI.Components.nav_bar sticky>
         <strong style="font-size: var(--void-text-sm); font-weight: var(--void-weight-medium);">App</strong>
         <a href="#">Dashboard</a>
         <a href="#">Settings</a>
@@ -858,7 +858,7 @@ defmodule DemoWeb.StaticShowcases do
       <h3>Top Right (default)</h3>
       <p>A positioning container for toast notifications. Toasts appear in the specified corner.</p>
       <div style="position: relative; height: 150px; border: 1px dashed var(--void-color-border, #ccc);">
-        <VoidableUI.Components.toast_container position="top-right">
+        <VoidableUI.Components.toast_container placement="top-right">
           <VoidableUI.Components.toast color="info">
             <void-toast-title>Notification</void-toast-title>
             <void-toast-description>This is a sample toast.</void-toast-description>
@@ -869,7 +869,7 @@ defmodule DemoWeb.StaticShowcases do
     <div class="showcase-section">
       <h3>Bottom Left</h3>
       <div style="position: relative; height: 150px; border: 1px dashed var(--void-color-border, #ccc);">
-        <VoidableUI.Components.toast_container position="bottom-left">
+        <VoidableUI.Components.toast_container placement="bottom-left">
           <VoidableUI.Components.toast color="success">
             <void-toast-title>Saved</void-toast-title>
             <void-toast-description>Your changes have been saved.</void-toast-description>

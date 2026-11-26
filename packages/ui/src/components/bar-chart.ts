@@ -54,7 +54,7 @@ export class VoidBarChart extends VoidElement {
   /** Height of the chart in pixels. Defaults to 220. The width fills the container. */
   @property({ type: Number, reflect: true }) height = 220;
   /** Print each bar's value above it (below it for a negative value), abbreviated above 1000 (`1.2k`). */
-  @property({ type: Boolean, attribute: 'show-values', reflect: true }) showValues = false;
+  @property({ type: Boolean, attribute: 'show-value', reflect: true }) showValue = false;
   /**
    * How bars are drawn: `filled` (default, solid), `outline` (tinted fill with a border) or `wireframe`
    * (border only).
@@ -67,22 +67,10 @@ export class VoidBarChart extends VoidElement {
   @property({ attribute: 'aria-label' }) ariaLabel = '';
 
   /**
-   * Animate the bars in one after another. On by default; `stagger="false"` animates them together, and
-   * a number sets the delay in milliseconds between bars.
+   * Delay in milliseconds between the bars as they animate in, one after another. Without it the theme's
+   * `--void-stagger-chart-bars` applies; `stagger="0"` animates them together.
    */
-  @property({
-    converter: {
-      fromAttribute(v: string | null) {
-        if (v === null || v === '' || v === 'true') return true;
-        if (v === 'false') return false;
-        const n = Number(v);
-        return isNaN(n) ? true : n;
-      },
-      toAttribute(v: boolean | number) {
-        return v === true ? '' : v === false ? 'false' : String(v);
-      },
-    },
-  }) stagger: boolean | number = true;
+  @property({ type: Number }) stagger: number | null = null;
 
   private _data: BarChartData = { series: [] };
 
@@ -140,9 +128,7 @@ export class VoidBarChart extends VoidElement {
     const baseDur = parseFloat(cs.getPropertyValue('--void-duration-chart-enter')) || 700;
     const baseStg = parseFloat(cs.getPropertyValue('--void-stagger-chart-bars')) || 40;
     this._animDuration = baseDur * scale;
-    if (this.stagger === false) {
-      this._staggerMs = 0;
-    } else if (this.stagger === true) {
+    if (this.stagger === null || Number.isNaN(this.stagger)) {
       this._staggerMs = baseStg * scale;
     } else {
       this._staggerMs = this.stagger * scale;
@@ -261,7 +247,7 @@ export class VoidBarChart extends VoidElement {
           `;
         })}
 
-        ${this.showValues
+        ${this.showValue
           ? series.map((s, si) => {
               const subBandWidth = xScale.bandwidth / series.length;
               return svg`

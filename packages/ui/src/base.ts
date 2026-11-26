@@ -35,8 +35,7 @@ function reflectedDefaults(el: VoidElement): ReflectedDefaults {
   for (const [prop, options] of ctor.elementProperties) {
     if (!options.reflect || options.attribute === false) continue;
     const attr = typeof options.attribute === 'string' ? options.attribute : String(prop).toLowerCase();
-    // A custom converter decides what an absent attribute means (gauge's
-    // tick-min: removing it turns the tick off); only Lit's default conversion
+    // A custom converter decides what an absent attribute means; only Lit's default conversion
     // is treated as "not set, use the default".
     const custom = typeof options.converter === 'function' || !!options.converter?.fromAttribute;
     map.set(attr, { prop, value: probe[prop], custom, options });
