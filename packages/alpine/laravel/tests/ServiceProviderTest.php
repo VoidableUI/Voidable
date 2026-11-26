@@ -160,6 +160,52 @@ class ServiceProviderTest extends TestCase
         $this->assertStringNotContainsString(' data=', $html);
     }
 
+    public function test_a_table_component_writes_value_and_keys_as_json_and_passes_the_rest(): void
+    {
+        $html = Blade::render(
+            '<x-voidable::table manual selectable sort="name" sort-direction="ascending" total-rows="1250" :value="$selected" :keys="$keys" aria-label="Orders"><table></table></x-voidable::table>',
+            ['selected' => [3 => 'o2', 7 => 'o5'], 'keys' => ['selectAll' => ['Control+a', 'Meta+a']]],
+        );
+
+        $this->assertStringContainsString('<void-table', $html);
+        $this->assertStringContainsString('sort="name"', $html);
+        $this->assertStringContainsString('sort-direction="ascending"', $html);
+        $this->assertStringContainsString('total-rows="1250"', $html);
+        $this->assertStringContainsString('aria-label="Orders"', $html);
+        $this->assertMatchesRegularExpression('/ manual[ >=]/', $html);
+        $this->assertMatchesRegularExpression('/ selectable[ >=]/', $html);
+        $this->assertSame(['o2', 'o5'], $this->attributeJson($html, 'value'));
+        $this->assertSame(['selectAll' => ['Control+a', 'Meta+a']], $this->attributeJson($html, 'keys'));
+        $this->assertStringContainsString('<table></table></void-table>', $html);
+    }
+
+    public function test_a_table_component_takes_a_json_string_and_writes_neither_attribute_without_them(): void
+    {
+        $html = Blade::render('<x-voidable::table :value="$json" selectable><table></table></x-voidable::table>', ['json' => '["a"]']);
+        $this->assertSame(['a'], $this->attributeJson($html, 'value'));
+
+        $plain = Blade::render('<x-voidable::table striped><table></table></x-voidable::table>');
+        $this->assertStringNotContainsString(' value=', $plain);
+        $this->assertStringNotContainsString(' keys=', $plain);
+    }
+
+    public function test_the_table_parts_are_components(): void
+    {
+        $html = Blade::render(
+            '<x-voidable::table selectable total-rows="40"><table></table>'
+            . '<x-voidable::table-filter><input aria-label="Filter"></x-voidable::table-filter>'
+            . '<x-voidable::table-empty hidden>No rows</x-voidable::table-empty>'
+            . '<x-voidable::table-selection hidden><span data-count></span> selected</x-voidable::table-selection>'
+            . '<x-voidable::table-select-all hidden><button type="button">Select all 40</button></x-voidable::table-select-all>'
+            . '</x-voidable::table>'
+        );
+
+        $this->assertMatchesRegularExpression('/<void-table-filter\s*><input aria-label="Filter"><\/void-table-filter>/', $html);
+        $this->assertMatchesRegularExpression('/<void-table-empty hidden[^>]*>No rows<\/void-table-empty>/', $html);
+        $this->assertMatchesRegularExpression('/<void-table-selection hidden[^>]*><span data-count><\/span> selected<\/void-table-selection>/', $html);
+        $this->assertMatchesRegularExpression('/<void-table-select-all hidden[^>]*><button type="button">Select all 40<\/button><\/void-table-select-all>/', $html);
+    }
+
     private function attributeJson(string $html, string $name): mixed
     {
         $this->assertSame(1, preg_match('/ ' . $name . '="([^"]*)"/', $html, $m), "no $name attribute in $html");

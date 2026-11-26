@@ -41,6 +41,32 @@ module Voidable
       # A single reading is plain attributes (`value:`, `min:`, `max:`); segments go in `data`, colour bands in `zones:`.
       def void_gauge(data = nil, **attributes) = void_chart("void-gauge", data, attributes)
 
+      # The data table (`void-table`) and its parts, for a table the server drives. `value:` (the selected
+      # row values, an array) and `keys:` (key actions, a hash) are written as the one JSON attribute the
+      # element reads, which `tag.void_table value: ids` could not (Rails would join an array with spaces and
+      # turn a hash into `data-*`). The other attributes are the element's own, with underscores for dashes
+      # (`sort_direction:`, `total_rows:`, `all_selected:`, `filter_columns:`); `true` is a boolean attribute
+      # (`manual: true`, `selectable: true`; `selectable: "single"` is one row), `false` and `nil` leave it off.
+      #
+      #   <%= void_table(manual: true, selectable: true, sort: params[:sort], sort_direction: params[:dir],
+      #         value: @selected, total_rows: @total, aria_label: "Orders",
+      #         data: { controller: "orders", action: "void-sort->orders#sort" }) do %>
+      #     <table>…</table>
+      #     <%= void_table_selection(hidden: true) do %><span data-count></span> selected<% end %>
+      #     <%= void_table_select_all(hidden: true) do %><button type="button">Select all <%= @total %></button><% end %>
+      #   <% end %>
+      #
+      # `data:` and `aria:` stay Rails' own hashes. The parts take a block and the same attribute rules.
+      def void_table(**attributes, &block) = void_element("void-table", attributes, TABLE_JSON_ATTRIBUTES, block)
+
+      def void_table_filter(**attributes, &block) = void_element("void-table-filter", attributes, [], block)
+
+      def void_table_empty(**attributes, &block) = void_element("void-table-empty", attributes, [], block)
+
+      def void_table_selection(**attributes, &block) = void_element("void-table-selection", attributes, [], block)
+
+      def void_table_select_all(**attributes, &block) = void_element("void-table-select-all", attributes, [], block)
+
       # Loads the development warnings (@voidable/ui/dev) for importmap apps.
       # Put it after `javascript_importmap_tags` in the layout head. It renders
       # nothing unless Voidable::Hotwire.dev_warnings is on, which by default is
@@ -65,21 +91,37 @@ module Voidable
       private
 
       JSON_ATTRIBUTES = %w[data zones].freeze
+      TABLE_JSON_ATTRIBUTES = %w[value keys].freeze
 
       def void_chart(tag_name, data, attributes)
-        options = {}
         attributes = attributes.merge(data: data) unless data.nil?
+        content_tag(tag_name, "", void_attribute_hash(attributes, JSON_ATTRIBUTES))
+      end
+
+      # An element with content (the table and its parts): the block is the content.
+      def void_element(tag_name, attributes, json, block)
+        options = void_attribute_hash(attributes, json)
+        block ? content_tag(tag_name, options, &block) : content_tag(tag_name, "", options)
+      end
+
+      # Underscores become dashes, `true` is a boolean attribute, `false` and `nil` leave it off, and the
+      # names in `json` are written as JSON (a String is taken as it is). Rails' own `data:` and `aria:`
+      # hashes are left for `content_tag` to expand.
+      def void_attribute_hash(attributes, json)
+        options = {}
         attributes.each do |name, value|
-          name = name.to_s.tr("_", "-")
-          if JSON_ATTRIBUTES.include?(name)
-            options[name] = value.is_a?(String) ? value : value.to_json unless value.nil?
+          key = name.to_s.tr("_", "-")
+          if json.include?(key)
+            options[key] = value.is_a?(String) ? value : value.to_json unless value.nil?
+          elsif %w[data aria].include?(key) && value.is_a?(Hash)
+            options[name.to_sym] = value
           elsif value == true
-            options[name] = ""
+            options[key] = ""
           elsif value != false && !value.nil?
-            options[name] = value
+            options[key] = value
           end
         end
-        content_tag(tag_name, "", options)
+        options
       end
 
       def voidable_dev_pinned?
