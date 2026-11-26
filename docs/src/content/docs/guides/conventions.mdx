@@ -117,3 +117,11 @@ A setting that is a number is a number: the bar chart's `stagger` is the delay i
 What is not a treatment is not a variant: the skeleton's form is `shape` (`text`, `circular`, `rectangular`) and the colour picker's swatch-button form is the boolean `compact`.
 `show-value` (singular) prints values on every chart, as on the slider.
 *Why*: an agent that knows `variant="filled"` on a button should get the same meaning on a badge, not a layout change.
+
+## Shortcuts
+
+**Shortcut keys are opt-in by attribute.** A component never binds a shortcut by default: not a modifier chord (Ctrl or Cmd plus a letter), not a single-key hotkey, nothing that acts without the user having focused that control first. A component that offers one takes the enabled shortcuts in a `shortcuts` attribute, a space-separated list of names (`<void-table shortcuts="select-all">`), so the page decides and one attribute covers every shortcut a component grows. A shortcut never acts from a text field, so the browser's own keys keep working there.
+*Why*: the library cannot know what else the application, the browser or an assistive technology uses that key for, and a key that takes over by default turns a component into a hazard on a page that did not ask for it.
+
+**The keyboard interaction of a focused widget is on by default.** Arrow keys in a tablist, Space on a checkbox, Enter and Space on a sort button, Escape in an open overlay and Shift + click for a range are the widget's own behaviour once it has focus, the interaction its ARIA pattern defines, so they need no attribute.
+*Why*: that is what the pattern promises to a keyboard user; an opt-in there would make the component broken until someone remembers to switch it on.

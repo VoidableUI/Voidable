@@ -474,5 +474,30 @@
         "action": "Moving focus out of the calendar closes it"
       }
     ]
+  },
+  "void-table": {
+    "intro": "Pattern: the [sortable table](https://www.w3.org/WAI/ARIA/apg/patterns/table/examples/sortable-table/) and a table with a checkbox in each row, not a `grid`: there is no cell navigation, every control is in the tab order. A sortable header is a real `<button>` inside the `<th>`, which carries `aria-sort`. Selection is the row checkboxes and a select-all checkbox in the header.",
+    "rows": [
+      {
+        "keys": "Tab, Shift + Tab",
+        "action": "Move between the sort buttons, the filter field, the select-all and row checkboxes, and the controls in the rows"
+      },
+      {
+        "keys": "Enter, Space (on a sort button)",
+        "action": "Sorts by the column: ascending, then descending, then not sorted. Focus stays on the button; the new state is announced (\"Sorted by Name, ascending\")"
+      },
+      {
+        "keys": "Space (on a row or select-all checkbox)",
+        "action": "Toggles it. Select-all acts on the rows shown (after filtering) and skips disabled ones; its state is checked, mixed or unchecked"
+      },
+      {
+        "keys": "Shift + click, Shift + Space (on a row checkbox)",
+        "action": "Selects (or clears) every row shown between the last row toggled and this one, as one change"
+      },
+      {
+        "keys": "Ctrl + A, Cmd + A (inside the body)",
+        "action": "Only with `shortcuts=\"select-all\"` (off by default), and only when `selectable` allows many rows: selects every row shown. Never from a text field, so the browser's own select-all keeps working there"
+      }
+    ]
   }
 }

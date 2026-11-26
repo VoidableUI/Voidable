@@ -346,7 +346,12 @@
     "group": "data-display"
   },
   "void-table": {
-    "group": "data-display"
+    "group": "data-display",
+    "events": {
+      "void-sort": "Fires when the user activates a sortable header, before the table changes. `detail.column` is the column's key and `detail.direction` the state it goes to (`ascending`, `descending` or `none`). Cancelable: `preventDefault()` keeps the current sort. With `manual`, this is all the table does: the server renders the order.",
+      "void-filter": "Fires once the user has paused typing in the `void-table-filter` part. `detail.filter` is the text, `detail.shown` the rows that match (with `manual`, the rows on the page) and `detail.total` all the rows.",
+      "void-change": "Fires when the user changes the selection with a row checkbox, the select-all checkbox, a Shift range or the select-all-rows offer: once, whatever the number of rows. `detail.value` is the selected row values and `detail.all` is true when the user chose every row across the server's pages."
+    }
   },
   "void-tag": {
     "group": "data-display",
