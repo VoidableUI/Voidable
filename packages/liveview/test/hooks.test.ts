@@ -118,8 +118,6 @@ describe('VoidProps hook', () => {
   });
 
   it('waits for the element to be defined, and reassigns only when the JSON changes', async () => {
-    const { el, hook } = mountProps(`<void-props-late id="l" data-void-props='{"data":{"n":1}}'></void-props-late>`);
-    expect(el.data).toBeUndefined();
     class Late extends HTMLElement {
       calls: unknown[] = [];
       set data(v: unknown) {
@@ -127,6 +125,10 @@ describe('VoidProps hook', () => {
       }
     }
     customElements.define('void-props-late', Late);
+    // The element looks undefined when the hook mounts (the class loads after the page).
+    vi.spyOn(customElements, 'get').mockReturnValueOnce(undefined);
+    const { el, hook } = mountProps(`<void-props-late id="l" data-void-props='{"data":{"n":1}}'></void-props-late>`);
+    expect(el.calls).toEqual([]);
     await customElements.whenDefined('void-props-late');
     await Promise.resolve();
     expect(el.calls).toEqual([{ n: 1 }]);
