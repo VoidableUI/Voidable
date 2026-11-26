@@ -44,7 +44,7 @@ describe('VoidTagsInput', () => {
     });
 
     it('placeholder defaults to "Add tag..."', () => {
-      expect(el.placeholder).toBe('Add tag...');
+      expect(el.placeholder).toBe('');
     });
 
     it('size defaults to "md"', () => {

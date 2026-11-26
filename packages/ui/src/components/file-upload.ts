@@ -4,6 +4,7 @@ import { VoidElement } from '../base.js';
 import { InternalsFormControl, type FormSubmission } from '../form-control.js';
 import { useProjection } from '../projection.js';
 import { uid } from '../keyboard.js';
+import { localeOf, msg } from '../messages.js';
 
 useProjection();
 
@@ -100,9 +101,7 @@ export class VoidFileUpload extends InternalsFormControl(VoidElement) {
         @dragleave=${this._onDragLeave}
         @drop=${this._onDrop}
       >
-        <span class="void-file-upload-text">
-          Drop files here or <span class="void-file-upload-browse">browse</span>
-        </span>
+        <span class="void-file-upload-text">${this._prompt()}</span>
       </div>
       ${this._files.length > 0 ? html`
         <div class="void-file-upload-files">
@@ -112,7 +111,7 @@ export class VoidFileUpload extends InternalsFormControl(VoidElement) {
               <button
                 type="button"
                 class="void-file-upload-remove"
-                aria-label="Remove ${file.name}"
+                aria-label=${msg(this, 'removeItem', { name: file.name })}
                 ?disabled=${this.disabled}
                 @click=${() => this._removeFile(index)}
               >×</button>
@@ -200,9 +199,27 @@ export class VoidFileUpload extends InternalsFormControl(VoidElement) {
   }
 
   private _message(file: File, reason: FileRejectReason): string {
-    if (reason === 'type') return `${file.name} is not an accepted file type.`;
-    if (reason === 'size') return `${file.name} is larger than the ${this.maxSize} byte limit.`;
-    return `${file.name} was not added: only one file can be chosen.`;
+    if (reason === 'type') return msg(this, 'fileUpload.rejectType', { name: file.name });
+    if (reason === 'size') {
+      let limit = `${this.maxSize} B`;
+      try {
+        limit = new Intl.NumberFormat(localeOf(this), { style: 'unit', unit: 'byte', unitDisplay: 'long' }).format(this.maxSize);
+      } catch {
+        // An engine without unit formatting keeps the plain number.
+      }
+      return msg(this, 'fileUpload.rejectSize', { name: file.name, limit });
+    }
+    return msg(this, 'fileUpload.rejectCount', { name: file.name });
+  }
+
+  /** "Drop files here or browse": the language's sentence with the word `browse` drawn as the link. */
+  private _prompt() {
+    const browse = msg(this, 'fileUpload.browse');
+    const text = msg(this, 'fileUpload.prompt', { browse });
+    const at = text.indexOf(browse);
+    return at < 0
+      ? text
+      : html`${text.slice(0, at)}<span class="void-file-upload-browse">${browse}</span>${text.slice(at + browse.length)}`;
   }
 
   private _clearOwnError(): void {

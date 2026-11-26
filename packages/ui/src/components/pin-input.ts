@@ -6,6 +6,7 @@ import { inlineKeys } from '../keyboard.js';
 import { InternalsFormControl } from '../form-control.js';
 import { dropReflectedValue, valueReflection } from '../secret-value.js';
 import { isFocusParked } from '../projection.js';
+import { msg, nameHost } from '../messages.js';
 
 /**
  * Single-character input cells for OTP verification codes, PIN entry, and multi-digit confirmation fields.
@@ -54,8 +55,13 @@ export class VoidPinInput extends InternalsFormControl(VoidElement) {
     super.requestUpdate(name, oldValue, valueReflection(this.mask, name, options, () => VoidPinInput.getPropertyOptions('value')));
   }
 
+  private _name(): void {
+    nameHost(this, msg(this, 'pinInput.label'), (n, v) => this.setHostAttribute(n, v));
+  }
+
   protected override updated(changed: PropertyValues): void {
     super.updated(changed);
+    this._name();
     // An input turned into a masked one takes back the value it reflected as text.
     if (this.mask && changed.get('mask') !== undefined) dropReflectedValue(this);
   }
@@ -88,7 +94,7 @@ export class VoidPinInput extends InternalsFormControl(VoidElement) {
   connectedCallback(): void {
     super.connectedCallback();
     this.setHostAttribute('role', 'group');
-    this.setHostAttribute('aria-label', 'PIN input');
+    this._name();
     this.addEventListener('focusin', this._onFocusIn);
     this.addEventListener('focusout', this._onFocusOut);
   }
@@ -239,7 +245,7 @@ export class VoidPinInput extends InternalsFormControl(VoidElement) {
           placeholder=${this.placeholder || nothing}
           ?disabled=${this.disabled}
           autocomplete="one-time-code"
-          aria-label=${`Digit ${i + 1} of ${this._effectiveLength}`}
+          aria-label=${msg(this, 'pinInput.digit', { index: i + 1, count: this._effectiveLength })}
           @input=${(e: Event) => this._onInput(e, i)}
           @keydown=${(e: KeyboardEvent) => this._onKeydown(e, i)}
           @paste=${this._onPaste}

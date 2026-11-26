@@ -1,6 +1,7 @@
 import { html } from 'lit';
 import { property, query } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
+import { msg } from '../messages.js';
 import { useProjection } from '../projection.js';
 
 useProjection();
@@ -14,8 +15,9 @@ export class VoidComposeInput extends VoidElement {
   static override editState = ['value'];
   /** The draft text, reflected to the `value` attribute as it changes. It is cleared after each send. */
   @property({ type: String, reflect: true }) value = '';
-  /** Hint shown while the box is empty. Defaults to `Type a message...`. */
-  @property({ type: String, reflect: true }) placeholder = 'Type a message...';
+  /** Hint shown while the box is empty. Defaults to the `composeInput.placeholder` message (English: `Type a message...`). */
+  @property({ type: String, reflect: true }) placeholder = '';
+  private get _hint(): string { return this.placeholder || msg(this, 'composeInput.placeholder'); }
   /** Stop the box and the send button reacting. */
   @property({ type: Boolean, reflect: true }) disabled = false;
   /** Maximum number of characters. 0 (the default) means no limit. */
@@ -29,7 +31,7 @@ export class VoidComposeInput extends VoidElement {
         <textarea
           class="void-compose-input-textarea"
           .value=${this.value}
-          placeholder=${this.placeholder}
+          placeholder=${this._hint}
           ?disabled=${this.disabled}
           maxlength=${this.maxlength > 0 ? this.maxlength : ''}
           rows="1"
@@ -41,7 +43,7 @@ export class VoidComposeInput extends VoidElement {
           type="button"
           ?disabled=${this.disabled || !this.value}
           @click=${this._onSend}
-          aria-label="Send"
+          aria-label=${msg(this, 'composeInput.send')}
         >
           <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M2 8L14 8M14 8L9 3M14 8L9 13" stroke="currentColor" stroke-width="var(--void-icon-stroke-width)" stroke-linecap="round" stroke-linejoin="round"/>

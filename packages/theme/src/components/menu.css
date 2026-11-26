@@ -142,7 +142,7 @@ void-menu:not([empty]) > void-menu-empty {
 }
 
 void-menu[empty]:not(:has(> void-menu-empty)) > void-menu-content::after {
-  content: "No results found";
+  content: var(--_void-menu-empty, "No results found");
 }
 
 /* ── Size variants ── */

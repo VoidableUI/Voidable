@@ -1,6 +1,7 @@
 import { html, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
+import { msg } from '../messages.js';
 import { InternalsFormControl, type FormSubmission } from '../form-control.js';
 import { edgeEnabled, isPrintable, stepEnabled, Typeahead } from '../keyboard.js';
 import { OverlayController, type OverlayCloseReason, type OverlayOpenReason } from '../overlay.js';
@@ -89,10 +90,11 @@ export class VoidMultiselect extends InternalsFormControl(VoidElement) {
   static override labelTarget = '[role=combobox]';
 
   /**
-   * Text shown in the trigger while nothing is selected. Defaults to `Select...`. It is also the
+   * Text shown in the trigger while nothing is selected. Defaults to the `multiselect.placeholder` message (English: `Select...`). It is also the
    * trigger's accessible name when no `void-field` label names it.
    */
-  @property({ type: String }) placeholder = 'Select...';
+  @property({ type: String }) placeholder = '';
+  private get _hint(): string { return this.placeholder || msg(this, 'multiselect.placeholder'); }
   /** Stop the trigger opening and exclude the values from the form submission. */
   @property({ type: Boolean, reflect: true }) disabled = false;
   /** Size step: `sm`, `md` (default) or `lg`. */
@@ -251,7 +253,7 @@ export class VoidMultiselect extends InternalsFormControl(VoidElement) {
     // Named only while open, so that the field's label finds one element (the control) while closed.
     const labelledby = open ? trigger?.getAttribute('aria-labelledby') ?? null : null;
     this._parts.set(content, 'aria-labelledby', labelledby);
-    this._parts.set(content, 'aria-label', open && !labelledby ? trigger?.getAttribute('aria-label') || this.placeholder || null : null);
+    this._parts.set(content, 'aria-label', open && !labelledby ? trigger?.getAttribute('aria-label') || this._hint || null : null);
     if (trigger) {
       this._parts.set(trigger, 'aria-activedescendant', open && this._active ? this._parts.id(this._active, 'void-option') : null);
     }
@@ -274,11 +276,11 @@ export class VoidMultiselect extends InternalsFormControl(VoidElement) {
         class="void-multiselect-trigger"
         role="combobox"
         tabindex=${this.formDisabled ? '-1' : '0'}
-        aria-label=${this.placeholder}
+        aria-label=${this._hint}
         aria-haspopup="listbox"
         aria-expanded=${String(open)}
         aria-controls=${this._controls(open)}
-        aria-description=${count ? `${count} selected` : nothing}
+        aria-description=${count ? msg(this, 'multiselect.selected', { count }) : nothing}
         aria-disabled=${this.formDisabled ? 'true' : nothing}
         aria-required=${this.required ? 'true' : nothing}
         aria-invalid=${this.error ? 'true' : nothing}
@@ -292,12 +294,12 @@ export class VoidMultiselect extends InternalsFormControl(VoidElement) {
                   type="button"
                   class="void-multiselect-pill-remove"
                   tabindex="-1"
-                  aria-label="Remove ${optionLabel(opt)}"
+                  aria-label=${msg(this, 'removeItem', { name: optionLabel(opt) })}
                   data-value=${opt.value}
                 >×</button>
               </span>
             `)
-          : html`<span class="void-multiselect-placeholder">${this.placeholder}</span>`
+          : html`<span class="void-multiselect-placeholder">${this._hint}</span>`
         }
       </div>
       ${this.error ? html`<span class="void-multiselect-error">${this.error}</span>` : nothing}

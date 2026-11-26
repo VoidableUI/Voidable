@@ -1,6 +1,7 @@
 import { html } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
+import { msg, nameHost } from '../messages.js';
 import { useProjection } from '../projection.js';
 
 useProjection();
@@ -33,7 +34,7 @@ export class VoidIndicator extends VoidElement {
   }
 
   updated(): void {
-    this.setHostAttribute('aria-label', this.count != null ? `${this.count} ${this.count === 1 ? 'notification' : 'notifications'}` : 'notification');
+    nameHost(this, this.count != null ? msg(this, 'indicator.count', { count: this.count }) : msg(this, 'indicator.label'), (n, v) => this.setHostAttribute(n, v));
   }
 
   // The dot is rendered after the consumer content it decorates.

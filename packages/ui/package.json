@@ -12,10 +12,12 @@
     "./dist/index.js",
     "./dist/autoloader.js",
     "./dist/dev.js",
+    "./dist/messages/*.js",
     "./dist/components/*.js",
     "./src/index.ts",
     "./src/autoloader.ts",
     "./src/dev/index.ts",
+    "./src/messages/*.ts",
     "./src/components/*.ts"
   ],
   "license": "MIT",
@@ -31,6 +33,14 @@
     "./autoloader": {
       "types": "./dist/autoloader.d.ts",
       "default": "./dist/autoloader.js"
+    },
+    "./messages": {
+      "types": "./dist/messages.d.ts",
+      "default": "./dist/messages.js"
+    },
+    "./messages/*": {
+      "types": "./dist/messages/*.d.ts",
+      "default": "./dist/messages/*.js"
     },
     "./base": {
       "types": "./dist/base.d.ts",
@@ -74,7 +84,7 @@
   "customElements": "dist/custom-elements.json",
   "web-types": "./dist/web-types.json",
   "scripts": {
-    "build": "rm -rf dist && cem analyze && node cem/autoloader-table.js && node cem/dev-table.js && vite build && node cem/generate.js && node cem/reference.js && node cem/check-types.js",
+    "build": "rm -rf dist && cem analyze && node cem/autoloader-table.js && node cem/dev-table.js && vite build && node cem/messages.js && node cem/generate.js && node cem/reference.js && node cem/check-types.js",
     "test": "vitest run",
     "typecheck": "tsc --noEmit && tsc -p type-tests/react && tsc -p type-tests/solid && tsc -p type-tests/solid2 && tsc -p type-tests/svelte && tsc -p type-tests/vue"
   },

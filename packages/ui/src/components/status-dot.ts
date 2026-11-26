@@ -1,5 +1,6 @@
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
+import { msg, nameHost } from '../messages.js';
 
 /** Presence indicator for user lists and chat rosters showing online/away/offline state at a glance. */
 export class VoidStatusDot extends VoidElement {
@@ -12,22 +13,16 @@ export class VoidStatusDot extends VoidElement {
   connectedCallback(): void {
     super.connectedCallback();
     this.setHostAttribute('role', 'status');
-    this.setHostAttribute('aria-label', this._ariaLabel());
+    this._name();
   }
 
-  updated(changed: Map<string, unknown>): void {
-    if (changed.has('status')) {
-      this.setHostAttribute('aria-label', this._ariaLabel());
-    }
+  updated(): void {
+    this._name();
   }
 
-  private _ariaLabel(): string {
-    switch (this.status) {
-      case 'online': return 'Online';
-      case 'away': return 'Away';
-      case 'offline':
-      default: return 'Offline';
-    }
+  private _name(): void {
+    const text = msg(this, this.status === 'online' ? 'statusDot.online' : this.status === 'away' ? 'statusDot.away' : 'statusDot.offline');
+    nameHost(this, text, (n, v) => this.setHostAttribute(n, v));
   }
 }
 

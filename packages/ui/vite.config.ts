@@ -19,6 +19,9 @@ const entry: Record<string, string> = {
   base: resolve(__dirname, 'src/base-entry.ts'),
   autoloader: resolve(__dirname, 'src/autoloader.ts'),
   dev: resolve(__dirname, 'src/dev/index.ts'),
+  messages: resolve(__dirname, 'src/messages.ts'),
+  'messages/fr': resolve(__dirname, 'src/messages/fr.ts'),
+  'messages/ar': resolve(__dirname, 'src/messages/ar.ts'),
   ...componentEntries,
 };
 

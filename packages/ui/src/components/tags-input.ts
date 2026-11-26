@@ -1,6 +1,7 @@
 import { html, nothing, type PropertyValues } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
+import { msg } from '../messages.js';
 import { InternalsFormControl, type FormSubmission } from '../form-control.js';
 import { valueJsonList } from '../value-list.js';
 import { useProjection } from '../projection.js';
@@ -25,8 +26,9 @@ export class VoidTagsInput extends InternalsFormControl(VoidElement) {
   @property({ type: Boolean, reflect: true }) readonly = false;
   /** Maximum number of tags. Once reached, the entry field is hidden. Unlimited by default. */
   @property({ type: Number }) max = Infinity;
-  /** Hint in the entry field. Defaults to `Add tag...`. */
-  @property({ type: String }) placeholder = 'Add tag...';
+  /** Hint in the entry field. Defaults to the `tagsInput.placeholder` message (English: `Add tag...`). */
+  @property({ type: String }) placeholder = '';
+  private get _hint(): string { return this.placeholder || msg(this, 'tagsInput.placeholder'); }
   /** Size step: `sm`, `md` (default) or `lg`. */
   @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' = 'md';
   /** Status colour of the tags: `default`, `error`, `warning`, `caution`, `success`, `info`, `notice` or `highlight`. */
@@ -84,7 +86,7 @@ export class VoidTagsInput extends InternalsFormControl(VoidElement) {
                   ? html`<button
                       type="button"
                       class="void-tags-input-tag-remove"
-                      aria-label="Remove ${text}"
+                      aria-label=${msg(this, 'removeItem', { name: text })}
                       @click=${(e: Event) => { e.stopPropagation(); this._removeTag(i); }}
                     >×</button>`
                   : nothing}
@@ -96,7 +98,7 @@ export class VoidTagsInput extends InternalsFormControl(VoidElement) {
           ? html`<input
               class="void-tags-input-field"
               type="text"
-              placeholder=${this.value.length === 0 ? this.placeholder : ''}
+              placeholder=${this.value.length === 0 ? this._hint : ''}
               ?disabled=${this.disabled}
               @keydown=${this._onKeydown}
               @input=${this._onFieldInput}

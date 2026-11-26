@@ -3,6 +3,7 @@ import { VoidElement } from '../base.js';
 import { KeyboardActivation } from '../keyboard-activation.js';
 import { isPrintable, stepEnabled, Typeahead } from '../keyboard.js';
 import { PartsController } from '../parts.js';
+import { msg } from '../messages.js';
 
 /**
  * Always-visible menu panel for command palettes, side panels, and searchable action lists.
@@ -58,12 +59,31 @@ export class VoidMenu extends VoidElement {
     return this._items().filter(item => !item.disabled && !item.closest('[hidden]'));
   }
 
+  /** The name the component last wrote on the content part. */
+  private _named: string | null = null;
+
+  /**
+   * Names the content (the author's own `aria-label` on the menu or on the part wins) and writes the empty-state
+   * text the theme draws, both in the language of the element.
+   */
+  private _text(content: HTMLElement | null = this._parts.one('void-menu-content')): void {
+    if (content) {
+      const text = this.getAttribute('aria-label') || msg(this, 'menu.label');
+      const current = content.getAttribute('aria-label');
+      if (current === null || current === this._named) {
+        this._parts.set(content, 'aria-label', text);
+        this._named = text;
+      }
+    }
+    this.setHostStyle('--_void-menu-empty', JSON.stringify(msg(this, 'menu.empty'))); // style-ok
+  }
+
   /** Names the content, links the search field to it and applies the current search. Idempotent. */
   private _wire(): void {
     const content = this._parts.one('void-menu-content');
     if (content) {
       this._parts.provide(content, 'role', 'menu');
-      this._parts.provide(content, 'aria-label', this.getAttribute('aria-label') || 'Menu');
+      this._text(content);
       const input = this._searchInput();
       if (input) this._parts.set(input, 'aria-controls', this._parts.id(content, 'void-menu-content'));
     }
@@ -96,6 +116,7 @@ export class VoidMenu extends VoidElement {
 
   protected override updated(changed: Map<string, unknown>): void {
     super.updated(changed);
+    this._text();
     this._syncTabStop();
 
     if (changed.has('open') && this.open) {

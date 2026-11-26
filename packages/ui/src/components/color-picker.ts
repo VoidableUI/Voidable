@@ -3,6 +3,7 @@ import { live } from 'lit/directives/live.js';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
 import { InternalsFormControl } from '../form-control.js';
+import { msg } from '../messages.js';
 import { useProjection } from '../projection.js';
 
 useProjection();
@@ -328,7 +329,7 @@ export class VoidColorPicker extends InternalsFormControl(VoidElement) {
             />
           </button>
           ${this.open ? html`
-            <div class="void-color-picker-compact-dropdown" role="dialog" aria-label="Color picker">
+            <div class="void-color-picker-compact-dropdown" role="dialog" aria-label=${msg(this, 'colorPicker.label')}>
               ${this._renderPicker()}
             </div>
           ` : nothing}

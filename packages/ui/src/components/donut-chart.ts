@@ -1,5 +1,6 @@
 import { html, svg, nothing, type TemplateResult } from 'lit';
 import { VoidElement } from '../base.js';
+import { msg } from '../messages.js';
 import { property, state } from 'lit/decorators.js';
 import { arcPath } from './charts/shape.js';
 import { guard } from 'lit/directives/guard.js';
@@ -383,7 +384,7 @@ export class VoidDonutChart extends VoidElement {
   /** The data table for assistive technology (and `show-table`), from the data as given, not the animated state. */
   private _table() {
     const segments = this._data.segments;
-    const label = this.ariaLabel || 'Donut chart';
+    const label = this.ariaLabel || msg(this, 'chart.donut');
     return guard([segments, label, chartLocale(this)], () =>
       dataTable('void-donut-chart-table', segmentsTable(this, label, segments)));
   }

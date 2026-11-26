@@ -58,12 +58,12 @@ describe('VoidCalendar', () => {
       expect(el.size).toBe('md');
     });
 
-    it('locale defaults to "en-US"', () => {
-      expect(el.locale).toBe('en-US');
+    it('locale defaults to empty: it follows the closest lang', () => {
+      expect(el.locale).toBe('');
     });
 
-    it('firstDay defaults to 0', () => {
-      expect(el.firstDay).toBe(0);
+    it('firstDay defaults to null: the locale decides, Sunday for English', () => {
+      expect(el.firstDay).toBeNull();
     });
   });
 
@@ -436,8 +436,8 @@ describe('VoidDatePicker', () => {
       expect(el.open).toBe(false);
     });
 
-    it('placeholder defaults to "Select date"', () => {
-      expect(el.placeholder).toBe('Select date');
+    it('placeholder defaults to empty: the datePicker.placeholder message is shown', () => {
+      expect(el.placeholder).toBe('');
     });
 
     it('format defaults to "MM/DD/YYYY"', () => {
@@ -456,12 +456,12 @@ describe('VoidDatePicker', () => {
       expect(el.size).toBe('md');
     });
 
-    it('locale defaults to "en-US"', () => {
-      expect(el.locale).toBe('en-US');
+    it('locale defaults to empty: it follows the closest lang', () => {
+      expect(el.locale).toBe('');
     });
 
-    it('firstDay defaults to 0', () => {
-      expect(el.firstDay).toBe(0);
+    it('firstDay defaults to null: the locale decides, Sunday for English', () => {
+      expect(el.firstDay).toBeNull();
     });
   });
 

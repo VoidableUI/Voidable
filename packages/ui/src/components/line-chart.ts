@@ -1,5 +1,6 @@
 import { html, svg, nothing } from 'lit';
 import { VoidElement } from '../base.js';
+import { msg } from '../messages.js';
 import { property, state } from 'lit/decorators.js';
 import { LinearScale } from './charts/scale.js';
 import { linePath, areaPath, smoothLinePath, smoothAreaPath } from './charts/shape.js';
@@ -351,7 +352,7 @@ export class VoidLineChart extends VoidElement {
   /** The data table for assistive technology (and `show-table`), from the data as given, not the animated state. */
   private _table() {
     const data = this._data;
-    const label = this.ariaLabel || 'Line chart';
+    const label = this.ariaLabel || msg(this, 'chart.line');
     return guard([data, label, chartLocale(this)], () =>
       dataTable('void-line-chart-table', seriesTable(this, label, data.series, data.labels ?? [])));
   }

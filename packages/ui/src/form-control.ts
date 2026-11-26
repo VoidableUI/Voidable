@@ -1,3 +1,4 @@
+import { msg } from './messages.js';
 import { property, state } from 'lit/decorators.js';
 import type { ReactiveElement } from 'lit';
 import type { VoidElement } from './base.js';
@@ -644,7 +645,7 @@ export function InternalsFormControl<T extends Constructor<VoidElement>>(Base: T
       const submission = this.formSubmission();
       const empty = submission === null || submission.length === 0;
       if (!empty) return null;
-      return { flags: { valueMissing: true }, message: 'Please fill out this field.', anchor: this.formValidationAnchor() };
+      return { flags: { valueMissing: true }, message: msg(this, 'valueMissing'), anchor: this.formValidationAnchor() };
     }
 
     formStateRestoreCallback(state: string | File | FormData | null): void {

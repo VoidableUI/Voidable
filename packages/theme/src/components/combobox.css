@@ -92,7 +92,7 @@ void-combobox-content > void-option[disabled] { opacity: 0.5; cursor: default; }
 
 /* Nothing matches what was typed. */
 void-combobox-content[empty]::after {
-  content: 'No options found';
+  content: var(--_void-combobox-empty, 'No options found');
   display: block;
   padding: var(--void-space-2) var(--void-space-3);
   color: var(--void-color-text-muted);

@@ -2,6 +2,7 @@ import { property } from 'lit/decorators.js';
 import { VoidElement } from './base.js';
 import { OverlayController } from './overlay.js';
 import { attachChrome, PartsController } from './parts.js';
+import { msg } from './messages.js';
 
 /**
  * The shared modal behind `<void-dialog>` and `<void-drawer>`.
@@ -42,7 +43,7 @@ export class VoidModal extends VoidElement {
   private _chrome(): ShadowRoot {
     return attachChrome(
       this,
-      '<dialog part="surface"><button type="button" part="close" aria-label="Close">&times;</button><slot></slot></dialog>'
+      '<dialog part="surface"><button type="button" part="close">&times;</button><slot></slot></dialog>'
     );
   }
 
@@ -66,8 +67,9 @@ export class VoidModal extends VoidElement {
   // first or a dialog opened with hide-close focuses it.
   protected override willUpdate(changed: Map<string, unknown>): void {
     super.willUpdate(changed);
+    const close = this._chrome().querySelector('button')!;
+    close.setAttribute('aria-label', msg(this, 'close'));
     if (changed.has('hideClose')) {
-      const close = this._chrome().querySelector('button')!;
       close.hidden = this.hideClose;
       // Out of ::part(close) while hidden: the theme's display rule comes from
       // the outer tree and would outrank the [hidden] rule and any inline style.
