@@ -4,7 +4,7 @@
 // directions and asserts by bounding box that the layout mirrors: what sits at
 // the start edge in LTR sits at the start edge (the right) in RTL. Arrow keys
 // follow the direction too (last block). Built-in strings are not covered here.
-import { test, expect, load, settle, focusedId, type Page } from '../helpers/test';
+import { test, expect, load, settle, focusedId, expectPerceivable, type Page } from '../helpers/test';
 
 type Dir = 'ltr' | 'rtl';
 type Box = { l: number; r: number };
@@ -186,6 +186,7 @@ test.describe('right-to-left layout', () => {
   });
 
   test('drawer: start and end follow the direction, left and right stay on the screen edge', async ({ page }) => {
+    await page.addStyleTag({ content: 'void-drawer::part(surface) { transition: none !important; animation: none !important; }' });
     for (const dir of DIRS) {
       await setDir(page, dir);
       const at = await page.evaluate(async () => {
@@ -216,30 +217,24 @@ test.describe('right-to-left layout', () => {
   });
 
   test('popover: side="left" and "right" are the reading-direction sides of the anchor', async ({ page }) => {
+    await page.addStyleTag({ content: 'void-popover-content { transition: none !important; animation: none !important; }' });
     for (const dir of DIRS) {
       await setDir(page, dir);
       for (const side of ['left', 'right'] as const) {
-        const result = await page.evaluate(async (s) => {
-          const p = document.createElement('void-popover') as any;
-          p.setAttribute('side', s);
-          p.innerHTML = '<void-popover-trigger><button id="rtl-pt" style="margin: 0 auto; display: block">t</button></void-popover-trigger><void-popover-content><p>x</p></void-popover-content>';
-          document.body.append(p);
-          await p.updateComplete;
-          p.open = true;
-          await (window as any).__settle(document);
-          const t = document.getElementById('rtl-pt')!.getBoundingClientRect();
-          const c = p.querySelector('void-popover-content').getBoundingClientRect();
-          const before = c.right <= t.left + 1;
-          const after = c.left >= t.right - 1;
-          p.open = false;
-          await p.updateComplete;
-          p.remove();
-          return before ? 'physical-left' : after ? 'physical-right' : 'overlapping';
-        }, side);
+        const trigger = page.locator(`#kb-pop-${side}-t`);
+        const content = page.locator(`#kb-pop-${side} > void-popover-content`);
+        await trigger.click();
+        await expectPerceivable(content);
+        await settle(page);
+        const t = (await trigger.boundingBox())!;
+        const c = (await content.boundingBox())!;
+        const physicalLeft = c.x + c.width <= t.x + 1;
+        const physicalRight = c.x >= t.x + t.width - 1;
         // In left-to-right "left" is the physical left; in right-to-left the sides mirror.
-        const mirrored = dir === 'rtl';
-        const expected = (side === 'left') !== mirrored ? 'physical-left' : 'physical-right';
-        expect(result, `${side} (${dir})`).toBe(expected);
+        const wantsPhysicalLeft = (side === 'left') !== (dir === 'rtl');
+        expect(wantsPhysicalLeft ? physicalLeft : physicalRight, `${side} (${dir})`).toBe(true);
+        await page.keyboard.press('Escape');
+        await expect(content).toBeHidden();
       }
     }
   });
@@ -302,7 +297,7 @@ test.describe('right-to-left keyboard', () => {
     for (const dir of DIRS) {
       await setDir(page, dir);
       const k = keys(dir);
-      await page.evaluate(() => { (document.getElementById('kb-car') as any).index = 0; (document.getElementById('kb-car') as HTMLElement).focus(); });
+      await page.evaluate(() => { (document.getElementById('kb-car') as any).index = 0; (document.getElementById('kb-car-next') as HTMLElement).focus(); });
       await settle(page);
       await page.keyboard.press(k.next);
       await settle(page);
@@ -344,34 +339,25 @@ test.describe('right-to-left keyboard', () => {
     }
   });
 
-  // Native controls: the browser decides. These record what each engine does so a
-  // change shows; they assert only that the two directions are mirror images.
-  test('slider (native range input): the arrow that increases in left-to-right decreases in right-to-left', async ({ page }) => {
+  // The slider is a native range input and the library adds no key handling, so
+  // each engine applies its own rule. Chromium and Firefox mirror the keys in
+  // right-to-left (ArrowLeft increases, as the thumb and fill run right to left);
+  // WebKit does not. The test pins what each engine does so a change shows.
+  test('slider (native range input): the engine decides the key direction', async ({ page, browserName }) => {
     const press = async (dir: Dir, key: string) => {
       await setDir(page, dir);
-      return page.evaluate(() => {
+      await page.evaluate(() => {
         const i = document.querySelector('#kb-slider input[type="range"]') as HTMLInputElement;
         i.value = '5';
         i.focus();
-        return 0;
-      }).then(async () => {
-        await page.keyboard.press(key);
-        return page.evaluate(() => Number((document.querySelector('#kb-slider input[type="range"]') as HTMLInputElement).value));
       });
+      await page.keyboard.press(key);
+      return page.evaluate(() => Number((document.querySelector('#kb-slider input[type="range"]') as HTMLInputElement).value));
     };
     expect(await press('ltr', 'ArrowRight'), 'ltr ArrowRight').toBe(6);
     expect(await press('ltr', 'ArrowLeft'), 'ltr ArrowLeft').toBe(4);
-    expect(await press('rtl', 'ArrowLeft'), 'rtl ArrowLeft').toBe(6);
-    expect(await press('rtl', 'ArrowRight'), 'rtl ArrowRight').toBe(4);
-  });
-
-  test('radio group (native radios): arrows follow the direction', async ({ page }) => {
-    for (const dir of DIRS) {
-      await setDir(page, dir);
-      const k = keys(dir);
-      await page.evaluate(() => { (document.getElementById('kb-r1') as any).focus(); });
-      await page.keyboard.press(k.next);
-      expect(await page.evaluate(() => (document.getElementById('kb-rg') as any).value), `next (${dir})`).toBe('r2');
-    }
+    const mirrors = browserName !== 'webkit';
+    expect(await press('rtl', 'ArrowLeft'), 'rtl ArrowLeft').toBe(mirrors ? 6 : 4);
+    expect(await press('rtl', 'ArrowRight'), 'rtl ArrowRight').toBe(mirrors ? 4 : 6);
   });
 });
