@@ -1,6 +1,9 @@
 import { html, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
+import { useProjection } from '../projection.js';
+
+useProjection();
 
 /** Multi-step progress tracker for onboarding flows, checkout funnels, and guided wizards. */
 export class VoidStepper extends VoidElement {

@@ -316,6 +316,7 @@ export class VoidNumberInput extends InternalsFormControl(VoidElement) {
         ?readonly=${this.readonly}
         role="spinbutton"
         aria-valuenow=${this.value ?? nothing}
+        aria-valuetext=${this.value === null ? nothing : this._format(this.value)}
         aria-required=${this.required ? 'true' : nothing}
         aria-valuemin=${isFinite(this.min) ? this.min : nothing}
         aria-valuemax=${isFinite(this.max) ? this.max : nothing}

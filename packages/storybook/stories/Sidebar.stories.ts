@@ -11,7 +11,7 @@ const meta: Meta = {
   parameters: {
     docs: {
       description: {
-        component: 'Collapsible navigation panel for app shells, admin dashboards, and documentation sites with a persistent left or right navigation rail. Transitions smoothly between expanded and icon-only collapsed states.',
+        component: 'Collapsible navigation panel for app shells, admin dashboards, and documentation sites with a persistent navigation rail at the start or end of the page. Transitions smoothly between expanded and icon-only collapsed states.',
       },
     },
   },
@@ -26,7 +26,7 @@ export const Default: Story = {
     collapsed: false,
     width: '240px',
     collapsedWidth: '60px',
-    side: 'left',
+    side: 'start',
   },
   render: (args) => html`
     <void-sidebar
@@ -66,11 +66,11 @@ export const WithNavItems: Story = {
   `,
 };
 
-export const RightPosition: Story = {
+export const EndSide: Story = {
   render: () => html`
     <div style="display:flex;justify-content:flex-end;height:300px">
-      <void-sidebar side="right" style="height:300px">
-        <div style="padding:14px 12px;font-family:var(--void-font-sans);font-size:var(--void-text-sm);color:var(--void-color-text-secondary)">Right sidebar</div>
+      <void-sidebar side="end" style="height:300px">
+        <div style="padding:14px 12px;font-family:var(--void-font-sans);font-size:var(--void-text-sm);color:var(--void-color-text-secondary)">End sidebar</div>
       </void-sidebar>
     </div>
   `,

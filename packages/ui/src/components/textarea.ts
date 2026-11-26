@@ -3,6 +3,9 @@ import { live } from 'lit/directives/live.js';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
 import { NativeFormControl } from '../form-control.js';
+import { useProjection } from '../projection.js';
+
+useProjection();
 
 /**
  * Multi-line text entry for comment fields, description inputs, and freeform text that needs more than one line.

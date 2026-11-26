@@ -3,6 +3,9 @@ import { VoidElement } from '../base.js';
 import { property, state } from 'lit/decorators.js';
 import { LinearScale } from './charts/scale.js';
 import { linePath, areaPath, smoothLinePath, smoothAreaPath } from './charts/shape.js';
+import { useProjection } from '../projection.js';
+
+useProjection();
 
 export interface LineChartSeries {
   name: string;

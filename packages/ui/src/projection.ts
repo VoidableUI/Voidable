@@ -1,4 +1,7 @@
 import type { LitElement, ReactiveController } from 'lit';
+import { PROJECTION_KEY, projectionApi, type ProjectionApi } from './projection-api.js';
+
+export { PROJECTION_KEY };
 
 /**
  * Where a projection region puts its nodes.
@@ -82,8 +85,21 @@ export interface ProjectionOptions {
   onChange?: () => void;
 }
 
-/** @internal Instance key under which a host's controller is stored (read by VoidElement's DOM overrides). */
-export const PROJECTION_KEY = '__voidProjection';
+const api: ProjectionApi = {
+  create: host => void new ProjectionController(host),
+  strip: host => stripSerializedChrome(host),
+  isFocusParked: host => isFocusParked(host),
+  restoreParkedFocus: doc => restoreParkedFocus(doc),
+};
+
+/**
+ * @internal Makes projection available to `VoidElement` (see projection-api.ts). Every `ProjectionController`
+ * does it when it is built; a component that renders without a controller of its own calls it at the top level
+ * of its module, so that the default controller exists for it.
+ */
+export function useProjection(): void {
+  projectionApi.current = api;
+}
 
 /** Comment data of the markers that bound Lit's part. Also used to recognise stale markers in clones. */
 const START_DATA = 'void-projection';
@@ -479,6 +495,7 @@ export class ProjectionController implements ReactiveController {
   private _warned = false;
 
   constructor(host: LitElement, options: ProjectionOptions = {}) {
+    useProjection();
     this._host = host as ProjectionHost;
     this._regions = options.regions ?? [];
     this._placement = options.placement ?? (this._regions.length ? 'start' : 'end');

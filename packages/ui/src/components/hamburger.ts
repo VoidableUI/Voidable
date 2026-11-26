@@ -3,6 +3,9 @@ import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
 import { KeyboardActivation } from '../keyboard-activation.js';
 import { isInDisabledFieldset, watchDisabledAncestors } from '../form-control.js';
+import { useProjection } from '../projection.js';
+
+useProjection();
 
 /**
  * Animated open/close toggle for mobile navigation menus and collapsible sidebars.

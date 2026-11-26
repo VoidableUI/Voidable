@@ -4,6 +4,9 @@ import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
 import { NativeFormControl } from '../form-control.js';
 import { dropReflectedValue, valueReflection } from '../secret-value.js';
+import { useProjection } from '../projection.js';
+
+useProjection();
 
 /** Single-line text entry for login forms, search fields, and structured data capture. */
 export class VoidInput extends NativeFormControl(VoidElement) {

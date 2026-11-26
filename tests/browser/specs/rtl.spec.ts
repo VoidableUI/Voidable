@@ -2,9 +2,9 @@
 //
 // Right-to-left layout (#29). Each check measures the same page in both
 // directions and asserts by bounding box that the layout mirrors: what sits at
-// the start edge in LTR sits at the start edge (the right) in RTL. Keyboard
-// arrow direction and built-in strings are not covered here.
-import { test, expect, load, settle, type Page } from '../helpers/test';
+// the start edge in LTR sits at the start edge (the right) in RTL. Arrow keys
+// follow the direction too (last block). Built-in strings are not covered here.
+import { test, expect, load, settle, focusedId, expectPerceivable, type Page } from '../helpers/test';
 
 type Dir = 'ltr' | 'rtl';
 type Box = { l: number; r: number };
@@ -170,5 +170,194 @@ test.describe('right-to-left layout', () => {
       if (dir === 'ltr') { expect(rule.right).toBeGreaterThan(0); expect(rule.left).toBe(0); }
       else { expect(rule.left).toBeGreaterThan(0); expect(rule.right).toBe(0); }
     }
+  });
+
+  test('sidebar side="end": at the end edge, its rule faces the content', async ({ page }) => {
+    for (const dir of DIRS) {
+      await setDir(page, dir);
+      const rule = await page.evaluate(() => {
+        const cs = getComputedStyle(document.getElementById('kb-sb-end')!);
+        return { left: parseFloat(cs.borderLeftWidth), right: parseFloat(cs.borderRightWidth) };
+      });
+      // `end` puts the rule on the start (inner) side of the sidebar.
+      if (dir === 'ltr') { expect(rule.left).toBeGreaterThan(0); expect(rule.right).toBe(0); }
+      else { expect(rule.right).toBeGreaterThan(0); expect(rule.left).toBe(0); }
+    }
+  });
+
+  test('drawer: start and end follow the direction, left and right stay on the screen edge', async ({ page }) => {
+    await page.addStyleTag({ content: 'void-drawer::part(surface) { transition: none !important; animation: none !important; }' });
+    for (const dir of DIRS) {
+      await setDir(page, dir);
+      const at = await page.evaluate(async () => {
+        const out: Record<string, string> = {};
+        for (const side of ['start', 'end', 'left', 'right']) {
+          const d = document.createElement('void-drawer') as any;
+          d.setAttribute('side', side);
+          d.innerHTML = '<void-drawer-title>T</void-drawer-title><void-drawer-body>B</void-drawer-body>';
+          document.body.append(d);
+          await d.updateComplete;
+          d.open = true;
+          await d.updateComplete;
+          await (window as any).__settle(document);
+          const surface = d.shadowRoot.querySelector('[part~="surface"]') as HTMLElement;
+          const r = surface.getBoundingClientRect();
+          out[side] = Math.abs(r.left) < 2 ? 'left' : Math.abs(r.right - innerWidth) < 2 ? 'right' : `${r.left}..${r.right}`;
+          d.open = false;
+          await d.updateComplete;
+          d.remove();
+        }
+        return out;
+      });
+      expect(at.left, `left (${dir})`).toBe('left');
+      expect(at.right, `right (${dir})`).toBe('right');
+      expect(at.start, `start (${dir})`).toBe(dir === 'ltr' ? 'left' : 'right');
+      expect(at.end, `end (${dir})`).toBe(dir === 'ltr' ? 'right' : 'left');
+    }
+  });
+
+  test('popover: side="left" and "right" are the reading-direction sides of the anchor', async ({ page }) => {
+    await page.addStyleTag({ content: 'void-popover-content { transition: none !important; animation: none !important; }' });
+    for (const dir of DIRS) {
+      await setDir(page, dir);
+      for (const side of ['left', 'right'] as const) {
+        const trigger = page.locator(`#kb-pop-${side}-t`);
+        const content = page.locator(`#kb-pop-${side} > void-popover-content`);
+        await trigger.click();
+        await expectPerceivable(content);
+        await settle(page);
+        const t = (await trigger.boundingBox())!;
+        const c = (await content.boundingBox())!;
+        const physicalLeft = c.x + c.width <= t.x + 1;
+        const physicalRight = c.x >= t.x + t.width - 1;
+        // In left-to-right "left" is the physical left; in right-to-left the sides mirror.
+        const wantsPhysicalLeft = (side === 'left') !== (dir === 'rtl');
+        expect(wantsPhysicalLeft ? physicalLeft : physicalRight, `${side} (${dir})`).toBe(true);
+        await page.keyboard.press('Escape');
+        await expect(content).toBeHidden();
+      }
+    }
+  });
+});
+
+// Arrow keys follow the reading direction (#29). In left-to-right ArrowRight
+// moves to the next item; in right-to-left ArrowLeft does. Up and Down never swap.
+test.describe('right-to-left keyboard', () => {
+  test.beforeEach(async ({ page }) => {
+    await load(page, '/rtl');
+  });
+
+  const keys = (dir: Dir) => (dir === 'ltr' ? { next: 'ArrowRight', prev: 'ArrowLeft' } : { next: 'ArrowLeft', prev: 'ArrowRight' });
+
+  const focusIn = (page: Page, sel: string) => page.evaluate((s) => (document.querySelector(s) as HTMLElement).focus(), sel);
+
+  /** Focus the first item, press `next` and then `prev` twice (wrapping): focus lands on item 2, then 1, then 3. */
+  async function expectRoving(page: Page, ids: [string, string, string]) {
+    for (const dir of DIRS) {
+      await setDir(page, dir);
+      const k = keys(dir);
+      await focusIn(page, `#${ids[0]}`);
+      await page.keyboard.press(k.next);
+      expect(await focusedId(page), `next (${dir})`).toBe(ids[1]);
+      await page.keyboard.press(k.prev);
+      expect(await focusedId(page), `prev (${dir})`).toBe(ids[0]);
+      await page.keyboard.press(k.prev);
+      expect(await focusedId(page), `prev wraps (${dir})`).toBe(ids[2]);
+    }
+  }
+
+  test('tabs', async ({ page }) => {
+    await expectRoving(page, ['kb-t1', 'kb-t2', 'kb-t3']);
+  });
+
+  test('toggle group', async ({ page }) => {
+    await expectRoving(page, ['kb-tg1', 'kb-tg2', 'kb-tg3']);
+  });
+
+  test('segmented control', async ({ page }) => {
+    await expectRoving(page, ['kb-sc1', 'kb-sc2', 'kb-sc3']);
+  });
+
+  test('nav menu', async ({ page }) => {
+    await expectRoving(page, ['kb-n1', 'kb-n2', 'kb-n3']);
+  });
+
+  test('tabs: Up and Down are not handled and Home and End stay logical', async ({ page }) => {
+    for (const dir of DIRS) {
+      await setDir(page, dir);
+      await focusIn(page, '#kb-t1');
+      await page.keyboard.press('End');
+      expect(await focusedId(page), `End (${dir})`).toBe('kb-t3');
+      await page.keyboard.press('Home');
+      expect(await focusedId(page), `Home (${dir})`).toBe('kb-t1');
+    }
+  });
+
+  test('carousel', async ({ page }) => {
+    for (const dir of DIRS) {
+      await setDir(page, dir);
+      const k = keys(dir);
+      await page.evaluate(() => { (document.getElementById('kb-car') as any).index = 0; (document.getElementById('kb-car-next') as HTMLElement).focus(); });
+      await settle(page);
+      await page.keyboard.press(k.next);
+      await settle(page);
+      expect(await page.evaluate(() => (document.getElementById('kb-car') as any).index), `next (${dir})`).toBe(1);
+      await page.keyboard.press(k.prev);
+      await settle(page);
+      expect(await page.evaluate(() => (document.getElementById('kb-car') as any).index), `prev (${dir})`).toBe(0);
+    }
+  });
+
+  test('calendar day grid: left and right swap, up and down do not', async ({ page }) => {
+    for (const dir of DIRS) {
+      await setDir(page, dir);
+      const k = keys(dir);
+      const active = () => page.evaluate(() => document.activeElement?.getAttribute('data-date'));
+      await focusIn(page, '#kb-cal [data-date="2026-11-10"]');
+      await page.keyboard.press(k.next);
+      expect(await active(), `next (${dir})`).toBe('2026-11-11');
+      await page.keyboard.press(k.prev);
+      await page.keyboard.press(k.prev);
+      expect(await active(), `prev (${dir})`).toBe('2026-11-09');
+      await page.keyboard.press('ArrowDown');
+      expect(await active(), `down (${dir})`).toBe('2026-11-16');
+      await page.keyboard.press('ArrowUp');
+      expect(await active(), `up (${dir})`).toBe('2026-11-09');
+    }
+  });
+
+  test('pin input', async ({ page }) => {
+    for (const dir of DIRS) {
+      await setDir(page, dir);
+      const k = keys(dir);
+      const index = () => page.evaluate(() => [...document.querySelectorAll('#kb-pin input')].indexOf(document.activeElement as HTMLInputElement));
+      await focusIn(page, '#kb-pin input');
+      await page.keyboard.press(k.next);
+      expect(await index(), `next (${dir})`).toBe(1);
+      await page.keyboard.press(k.prev);
+      expect(await index(), `prev (${dir})`).toBe(0);
+    }
+  });
+
+  // The slider is a native range input and the library adds no key handling, so
+  // each engine applies its own rule. Chromium and Firefox mirror the keys in
+  // right-to-left (ArrowLeft increases, as the thumb and fill run right to left);
+  // WebKit does not. The test pins what each engine does so a change shows.
+  test('slider (native range input): the engine decides the key direction', async ({ page, browserName }) => {
+    const press = async (dir: Dir, key: string) => {
+      await setDir(page, dir);
+      await page.evaluate(() => {
+        const i = document.querySelector('#kb-slider input[type="range"]') as HTMLInputElement;
+        i.value = '5';
+        i.focus();
+      });
+      await page.keyboard.press(key);
+      return page.evaluate(() => Number((document.querySelector('#kb-slider input[type="range"]') as HTMLInputElement).value));
+    };
+    expect(await press('ltr', 'ArrowRight'), 'ltr ArrowRight').toBe(6);
+    expect(await press('ltr', 'ArrowLeft'), 'ltr ArrowLeft').toBe(4);
+    const mirrors = browserName !== 'webkit';
+    expect(await press('rtl', 'ArrowLeft'), 'rtl ArrowLeft').toBe(mirrors ? 6 : 4);
+    expect(await press('rtl', 'ArrowRight'), 'rtl ArrowRight').toBe(mirrors ? 4 : 6);
   });
 });

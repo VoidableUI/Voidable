@@ -13,14 +13,8 @@
 // say what a user needs. Those scenarios still run with that reader, as expected
 // failures, so a fix turns them red and the entry goes.
 export const KNOWN_ISSUES = {
-  'untracked:voiceover-number-input-percent':
-    'VoiceOver speaks a number input as a percentage of its range ("11.1% Seats stepper" for a value of 2) instead of its value; it should say "2". aria-valuenow with aria-valuemin/aria-valuemax and no aria-valuetext is read as a percentage.',
   'untracked:voiceover-dialog-description':
-    'VoiceOver names the dialog ("Profile settings web dialog with 6 items") but never speaks its description, "Change how your name appears.", which is attached with ARIA element references across a shadow root.',
-  'untracked:voiceover-toast-silent':
-    'VoiceOver speaks nothing for a toast: the polite live region receives "Changes saved" and the only phrase logged is empty (""); it should say "Changes saved".',
-  'untracked:nvda-toast-silent':
-    'NVDA speaks nothing for a toast either: the only phrase logged after "Changes saved" was added to the polite live region is empty (""). With VoiceOver too, this is the strongest evidence of a component defect.',
+    'Reader behaviour, not a component defect: VoiceOver says "Profile settings web dialog with 6 items" on entry and does not speak the dialog description ("Change how your name appears."), which it exposes as help text rather than reading it. The dialog is correct in the accessibility tree and NVDA speaks name and description once ("Profile settings, dialog, Change how your name appears."). An aria-description mirror was tried and made no difference, so it was removed. The scenario stays an expected failure as a record of the difference.',
   'untracked:voiceover-multiselect-selection':
     'After Enter chooses an option in a multiselect, VoiceOver says only "You are currently on a selectable (null), inside of a list box." and nothing about the selection; NVDA says "selected".',
   'untracked:voiceover-menu-silent':

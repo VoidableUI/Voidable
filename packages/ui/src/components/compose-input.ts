@@ -1,6 +1,9 @@
 import { html } from 'lit';
 import { property, query } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
+import { useProjection } from '../projection.js';
+
+useProjection();
 
 /** Rich text entry area for messaging UIs, comment boxes, and social post composers. */
 export class VoidComposeInput extends VoidElement {

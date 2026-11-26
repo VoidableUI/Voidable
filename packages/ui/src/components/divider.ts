@@ -1,6 +1,9 @@
 import { html, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
+import { useProjection } from '../projection.js';
+
+useProjection();
 
 /** Visual separator between sections in forms, sidebars, and content layouts; supports optional label text. */
 export class VoidDivider extends VoidElement {

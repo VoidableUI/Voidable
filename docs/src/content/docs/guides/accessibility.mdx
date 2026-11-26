@@ -22,7 +22,7 @@ A component cannot know what your page means. These are yours:
 
 - **An accessible name for anything that has no text.** Give an icon-only `<void-button>` an `aria-label`, a chart an `aria-label` and the key figures in text beside it, a `<void-carousel>` and a `<void-menu>` an `aria-label`, and a `<void-panel>` a `label`. A control without a visible label goes in a `<void-field label="…">`.
 - **Meaningful headings and landmarks.** A card's `heading` is styled text, not an `<h2>`; use your own heading element where the page outline needs one.
-- **Live status where you need it.** Loading, saving and error messages that appear without focus moving should be announced: the [toast container](/components/toast-container/) and [alert](/components/alert/) are live regions; a skeleton is not.
+- **Live status where you need it.** Loading, saving and error messages that appear without focus moving should be announced: the [toast container](/components/toast-container/) announces each toast through hidden live announcers, and [alert](/components/alert/) is a live region; a skeleton is not.
 - **Focus management around your own flows.** Overlays manage focus themselves, see [Overlays](/components/overlays/). An open dialog or drawer moves focus to its `autofocus` element, else its first focusable element, keeps Tab inside it (the page behind is inert), closes on Escape (unless `closable="false"`) and returns focus to the control that opened it. A popover, menu or picker list takes focus when a user opens it, closes on Escape or when focus leaves, and returns focus to its trigger. Where focus goes after your own actions (a deleted row, a submitted form) is up to your code. Name every dialog and drawer with `heading`, or `aria-label` when there is no visible title.
 
 ## Right-to-left
@@ -34,11 +34,13 @@ Set `dir="rtl"` on `<html>` (or on any container) and the theme lays the compone
 - Flow: tabs, breadcrumbs, pagination, radio and checkbox groups, and the order of a row of buttons.
 - Direction of motion and fades: the switch thumb, the carousel slide, the indeterminate progress bar, the slider fill, the scroll fades of tabs, tables and navigation, and the accordion chevron.
 
+Arrow keys follow the direction too (the test is `:dir(rtl)` on the component, so `dir` and `lang` count). In right-to-left, Left Arrow moves to the next item and Right Arrow to the previous in tabs, toggle group, segmented control, radio group, carousel, nav menu, the calendar and date picker day grid and the PIN input. Up Arrow, Down Arrow, Home, End, Page Up and Page Down do not swap. The slider is a native input, so the browser applies its own direction rule to it. The colour picker's saturation area is a physical two-dimensional surface and its keys do not swap.
+
 What does not follow yet:
 
-- Keyboard arrow keys: Left and Right still move by physical direction in tabs, the carousel, sliders and menus. Home, End, Up and Down are unaffected.
 - Built-in strings and glyphs: the pagination `«` and `»`, the breadcrumb separator you supply and the default `→` of `void-delta` are written text and do not mirror. Labels the components generate are in English.
-- Attributes that name a physical place keep their meaning: drawer `side="left" | "right"`, toast `placement`, indicator `placement`, and the color picker (its hue and saturation axes are a colour scale, not text). A sidebar's `side="left" | "right"` names the side of the content in the reading direction.
+- Attributes that name a physical place keep their meaning (on a popover, tooltip, hover card or dropdown menu, `side="left"` and `"right"` mirror with the direction): drawer `side="left" | "right"` (the screen edges; `start` and `end` follow the direction), toast `placement`, indicator `placement`, and the color picker (its hue and saturation axes are a colour scale, not text). The sidebar `side` and the action input `icon-side` take `start` and `end`, which follow the direction.
+- Locale: the calendar, date picker and number input do not yet take a locale, and a page that mixes scripts needs `dir` on the right element.
 
 ## Known limitations
 

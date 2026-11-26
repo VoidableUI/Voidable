@@ -1,5 +1,6 @@
 import { LitElement, ReactiveElement, type PropertyDeclaration, type PropertyValues } from 'lit';
-import { PROJECTION_KEY, ProjectionController, isFocusParked, stripSerializedChrome } from './projection.js';
+import { PROJECTION_KEY, projectionApi } from './projection-api.js';
+import type { ProjectionController } from './projection.js';
 
 /** Per-class cache of reflected property defaults (attribute name -> property and default value). */
 const REFLECTED_DEFAULTS = Symbol('voidReflectedDefaults');
@@ -260,7 +261,7 @@ export class VoidElement extends LitElement {
       // build two. Components without a template (Lit's default render returns
       // noChange) never render chrome and need none.
       if (!this[PROJECTION_KEY] && (this as unknown as { render: unknown }).render !== (LitElement.prototype as unknown as { render: unknown }).render) {
-        new ProjectionController(this);
+        projectionApi.current?.create(this);
       }
     }
     super.connectedCallback();
@@ -593,7 +594,7 @@ export class VoidElement extends LitElement {
       // a locked element, then morphs the live element to that clone): lift
       // its consumer content out of the copied chrome and drop the chrome.
       // Explicit parts have no chrome: a copy shows itself by the ids its parts' controller generated.
-      const copy = stripSerializedChrome(incoming) || (this[MORPH_PARTICIPANTS] ?? []).some(p => p.isCopy?.(incoming));
+      const copy = !!projectionApi.current?.strip(incoming) || (this[MORPH_PARTICIPANTS] ?? []).some(p => p.isCopy?.(incoming));
       // The server stopped naming the host: the moved name goes as well.
       const label = this.#hostLabel;
       if (label) {
@@ -615,7 +616,7 @@ export class VoidElement extends LitElement {
       this.#carryOwnedAttributes(incoming);
     }
     // This element is itself such a copy, being morphed while detached.
-    if (!this.isConnected) stripSerializedChrome(this);
+    if (!this.isConnected) projectionApi.current?.strip(this);
     const projection = this[PROJECTION_KEY];
     if (!projection) return false;
     // Re-entrant: a second morph before re-projection (LiveView applies a
@@ -738,7 +739,7 @@ export class VoidElement extends LitElement {
   /** Focus is inside this element, or parked from inside it by a morph. */
   #editing(): boolean {
     const active = this.ownerDocument.activeElement;
-    return (!!active && active !== this && this.contains(active)) || isFocusParked(this);
+    return (!!active && active !== this && this.contains(active)) || !!projectionApi.current?.isFocusParked(this);
   }
 
   /**

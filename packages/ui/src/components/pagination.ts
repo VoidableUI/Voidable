@@ -1,6 +1,9 @@
 import { html, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
+import { useProjection } from '../projection.js';
+
+useProjection();
 
 /** Page navigation for data tables, search result lists, and content archives. */
 export class VoidPagination extends VoidElement {

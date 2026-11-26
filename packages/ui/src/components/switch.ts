@@ -3,6 +3,9 @@ import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
 import { KeyboardActivation } from '../keyboard-activation.js';
 import { InternalsFormControl, type FormSubmission } from '../form-control.js';
+import { useProjection } from '../projection.js';
+
+useProjection();
 
 /** On/off toggle for feature flags, notification preferences, and settings that take immediate effect. */
 export class VoidSwitch extends InternalsFormControl(VoidElement) {

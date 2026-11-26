@@ -1,6 +1,9 @@
 import { html } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
+import { useProjection } from '../projection.js';
+
+useProjection();
 
 /** Visual progress indicator for file uploads, multi-step processes, and loading states. */
 export class VoidProgress extends VoidElement {

@@ -4,6 +4,9 @@ import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
 import { NativeFormControl } from '../form-control.js';
 import { dropReflectedValue, valueReflection } from '../secret-value.js';
+import { useProjection } from '../projection.js';
+
+useProjection();
 
 /** Input field with an attached icon button — used for copy-to-clipboard inputs, search boxes, and similar patterns. */
 export class VoidActionInput extends NativeFormControl(VoidElement) {
@@ -72,8 +75,8 @@ export class VoidActionInput extends NativeFormControl(VoidElement) {
   @property({ type: String, reflect: true }) icon: string = 'search';
   /** Accessible name of the button and its tooltip. Defaults to `Action`; say what it does (`Copy link`). */
   @property({ type: String, attribute: 'action-label' }) actionLabel = 'Action';
-  /** Which side of the field the button sits on: `right` (default) or `left`. */
-  @property({ type: String, reflect: true, attribute: 'icon-side' }) iconSide: 'left' | 'right' = 'right';
+  /** Which side of the field the button sits on, in the reading direction: `end` (default) or `start`. */
+  @property({ type: String, reflect: true, attribute: 'icon-side' }) iconSide: 'start' | 'end' = 'end';
   /** Where the button's tooltip appears: `top` (default), `bottom`, `left` or `right`. */
   @property({ type: String, reflect: true, attribute: 'tooltip-side' }) tooltipSide: 'top' | 'bottom' | 'left' | 'right' = 'top';
 
@@ -159,7 +162,7 @@ export class VoidActionInput extends NativeFormControl(VoidElement) {
     `;
 
     return html`
-      ${this.iconSide === 'left' ? btn : ''}
+      ${this.iconSide === 'start' ? btn : ''}
       <input
         class="void-action-input-field"
         type=${this.type}
@@ -182,7 +185,7 @@ export class VoidActionInput extends NativeFormControl(VoidElement) {
         @input=${this._onInput}
         @change=${this._onChange}
       />
-      ${this.iconSide === 'right' ? btn : ''}
+      ${this.iconSide === 'end' ? btn : ''}
     `;
   }
 }

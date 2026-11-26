@@ -1,0 +1,28 @@
+<main style="padding: 1rem; display: flex; flex-direction: column; gap: 1rem; max-width: 30rem">
+  <button id="before" type="button">Before</button>
+  <form id="f">
+    <void-radio-group id="plan" label="Plan" name="plan" value="free">
+      <void-radio value="free">Free</void-radio>
+      <void-radio value="pro">Pro</void-radio>
+      <void-radio value="team">Team</void-radio>
+    </void-radio-group>
+    <button id="mid" type="button">Middle</button>
+    <void-radio-group id="none" label="Size" name="size">
+      <void-radio value="s">Small</void-radio>
+      <void-radio value="m">Medium</void-radio>
+      <void-radio value="l">Large</void-radio>
+    </void-radio-group>
+    <void-radio-group id="dis" label="Tier" name="tier" value="a">
+      <void-radio value="a">Tier A</void-radio>
+      <void-radio value="b" disabled>Tier B</void-radio>
+      <void-radio value="c">Tier C</void-radio>
+      <void-radio value="d" disabled>Tier D</void-radio>
+    </void-radio-group>
+    <div id="solo">
+      <void-radio id="red" name="color" value="red">Red</void-radio>
+      <void-radio id="green" name="color" value="green" checked>Green</void-radio>
+      <void-radio id="blue" name="color" value="blue">Blue</void-radio>
+    </div>
+  </form>
+  <button id="after" type="button">After</button>
+</main>

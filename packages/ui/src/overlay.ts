@@ -1,5 +1,5 @@
 import type { ReactiveController, ReactiveControllerHost } from 'lit';
-import { restoreParkedFocus } from './projection.js';
+import { projectionApi } from './projection-api.js';
 
 /**
  * The shared overlay model behind every Void UI component that opens something
@@ -731,7 +731,7 @@ export class OverlayController implements ReactiveController {
           this._watchFade(surface);
           // Shown again after a morph took it out of the document: the item
           // that had focus inside can take it back now.
-          restoreParkedFocus(surface.ownerDocument);
+          projectionApi.current?.restoreParkedFocus(surface.ownerDocument);
         }
       } catch {
         // Disconnected or not a popover any more; the next update tries again.

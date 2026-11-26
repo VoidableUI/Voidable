@@ -11,6 +11,8 @@ export interface Reader {
   readonly name: 'VoiceOver' | 'NVDA';
   /** Move the screen reader's cursor: the plain next item, or quick navigation. */
   move(by: Nav): Promise<void>;
+  /** Put the cursor back at the start of the web content. */
+  restart(): Promise<void>;
   /** Activate the item at the cursor: VoiceOver VO+Space, NVDA Enter. */
   act(): Promise<void>;
   /** Press a key (or shortcut) as the keyboard would. */
@@ -47,6 +49,7 @@ export function voiceOverReader(vo: VoiceOverPlaywright): Reader {
           return vo.perform(vo.keyboardCommands.findNextTable);
       }
     },
+    restart: () => vo.navigateToWebContent(),
     act: () => vo.act(),
     press: (key) => vo.press(key),
     type: (text) => vo.type(text),
@@ -93,6 +96,7 @@ export function nvdaReader(nvda: NVDAPlaywright): Reader {
           return nvda.perform(nvda.keyboardCommands.moveToNextTable);
       }
     },
+    restart: () => nvda.navigateToWebContent(),
     act: () => nvda.act(),
     press: (key) => nvda.press(key),
     type: (text) => nvda.type(text),

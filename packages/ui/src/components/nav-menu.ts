@@ -1,5 +1,6 @@
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
+import { inlineKeys } from '../keyboard.js';
 import { PartsController, triggerControl } from '../parts.js';
 
 /**
@@ -57,8 +58,9 @@ export class VoidNavMenu extends VoidElement {
     if (!items.length) return;
 
     const isHorizontal = this.orientation === 'horizontal';
-    const nextKey = isHorizontal ? 'ArrowRight' : 'ArrowDown';
-    const prevKey = isHorizontal ? 'ArrowLeft' : 'ArrowUp';
+    const keys = inlineKeys(this);
+    const nextKey = isHorizontal ? keys.next : 'ArrowDown';
+    const prevKey = isHorizontal ? keys.prev : 'ArrowUp';
 
     if (e.key === nextKey || e.key === prevKey) {
       const triggers = items.map(item => item._control()).filter((c): c is HTMLElement => !!c);
