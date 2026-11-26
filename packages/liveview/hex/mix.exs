@@ -20,6 +20,8 @@ defmodule VoidableUI.MixProject do
   defp deps do
     [
       {:phoenix_live_view, "~> 1.1"},
+      # The charts encode their data with Phoenix.json_library/0, which every Phoenix app configures.
+      {:jason, "~> 1.4", only: :test},
       {:ex_doc, "~> 0.35", only: :dev, runtime: false}
     ]
   end
