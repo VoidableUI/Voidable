@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-25T21:03:38.131Z",
+  "generatedAt": "2026-11-26T04:50:56.686Z",
   "tasks": {
     "avatar-upload-svelte": {
       "passed": 8,
@@ -24,6 +24,7 @@
       "usedTags": [
         "void-button",
         "void-combobox",
+        "void-combobox-content",
         "void-field",
         "void-option"
       ]
@@ -75,6 +76,7 @@
       "usedTags": [
         "void-button",
         "void-combobox",
+        "void-combobox-content",
         "void-field",
         "void-input",
         "void-option"
