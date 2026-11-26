@@ -73,6 +73,27 @@
       await clear();
       return { first, morph, intact };
     },
+    // A 5,000-row table that sorts, filters and selects. Each time is from the change until every component
+    // has rendered and two frames have painted. The filter step after the first is a keystroke: the rows'
+    // text is cached.
+    async data5000(native) {
+      const box = (label) => (native ? `<input type="checkbox" aria-label="${label}">` : `<void-checkbox aria-label="${label}"></void-checkbox>`);
+      const rows = Array.from({ length: 5000 }, (_, i) => `<tr data-value="r${i}"><td>${box(`Select ${i}`)}</td><td>Item ${(i * 7919) % 5000}</td><td>${(i * 31) % 977}</td></tr>`).join('');
+      const first = await timed(() => (root.innerHTML = `<void-table id="big" selectable aria-label="Big"><table><thead><tr><th data-stack="select">${box("All")}</th><th data-key="name" data-sort>Name</th><th data-key="n" data-sort="number">N</th></tr></thead><tbody>${rows}</tbody></table></void-table>`));
+      const big = document.getElementById('big');
+      const sortText = await timed(() => big.setAttribute('sort', 'name'));
+      const sortNumber = await timed(() => big.setAttribute('sort', 'n'));
+      const filterFirst = await timed(() => big.setAttribute('filter', 'item 4'));
+      const filterNext = await timed(() => big.setAttribute('filter', 'item 49'));
+      big.removeAttribute('filter');
+      await window.__settle(root);
+      let events = 0;
+      big.addEventListener('void-change', () => events++);
+      const selectAll = await timed(() => big.querySelector(native ? 'thead input' : 'thead void-checkbox').click());
+      const result = { first, sortText, sortNumber, filterFirst, filterNext, selectAll, events, selected: big.value.length, ordered: big.querySelector('tbody tr td:nth-child(3)').textContent };
+      await clear();
+      return result;
+    },
     async select5000() {
       const ms = await timed(() => (root.innerHTML = `<void-select id="big" aria-label="Big"><select name="big"><option value="" disabled selected hidden>Pick</option>${Array.from({ length: 5000 }, (_, i) => `<option value="${i}">Option ${i}</option>`).join('')}</select></void-select>`));
       const big = document.getElementById('big');

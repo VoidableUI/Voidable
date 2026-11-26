@@ -87,6 +87,11 @@ export const VALUE_REFLECTION = {
     user: [{ click: { role: 'checkbox', name: 'Write' } }], afterUser: '["w"]',
     set: ['r', 'w'], afterSet: '["r","w"]', write: { attribute: '["r"]', property: ['r'] },
   },
+  'void-table': {
+    html: '<void-table selectable aria-label="Fruit"><table><thead><tr><th>Pick</th><th>Name</th></tr></thead><tbody><tr data-value="a"><td><input type="checkbox" aria-label="Select Apple"></td><td>Apple</td></tr><tr data-value="b"><td><input type="checkbox" aria-label="Select Banana"></td><td>Banana</td></tr></tbody></table></void-table>',
+    user: [{ click: { role: 'checkbox', name: 'Select Banana' } }], afterUser: '["b"]',
+    set: ['a', 'b'], afterSet: '["a","b"]', write: { attribute: '["a"]', property: ['a'] },
+  },
   'void-tags-input': {
     html: '<void-field label="Tags"><void-tags-input name="t"></void-tags-input></void-field>',
     user: [{ fill: { label: 'Tags', text: 'x' } }, { key: 'Enter' }], afterUser: '["x"]',

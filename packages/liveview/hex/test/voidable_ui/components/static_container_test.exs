@@ -351,6 +351,34 @@ defmodule VoidableUI.Components.StaticContainerTest do
     assert html =~ ~s(label="Users")
   end
 
+  test "table renders the data attributes and bridges its events only when asked" do
+    assigns = %{}
+
+    html =
+      rendered_to_string(~H"""
+      <VoidableUI.Components.table manual selectable sort="name" sort_direction="ascending" value={["a", "b"]} total_rows={40} events={["void-sort"]}>Rows</VoidableUI.Components.table>
+      """)
+
+    assert html =~ "manual"
+    assert html =~ "selectable"
+    assert html =~ ~s(sort="name")
+    assert html =~ ~s(sort-direction="ascending")
+    assert html =~ "value="
+    assert html =~ ~s(total-rows="40")
+    assert html =~ ~s(phx-hook="VoidEvent")
+    assert html =~ ~s(data-void-events="void-sort")
+
+    plain =
+      rendered_to_string(~H"""
+      <VoidableUI.Components.table>Rows</VoidableUI.Components.table>
+      """)
+
+    refute plain =~ "phx-hook"
+    refute plain =~ "manual"
+    refute plain =~ "sort"
+    refute plain =~ "value"
+  end
+
   test "table stack takes a breakpoint or always" do
     assigns = %{}
 

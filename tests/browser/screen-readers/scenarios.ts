@@ -257,6 +257,51 @@ export const scenarios: Scenario[] = [
     ],
   },
   {
+    // The filter field comes first on the page, then the table (#89): the count is a polite status.
+    id: 'table-filter',
+    title: 'Filtering a table says how many rows are shown',
+    page: '/sr-table-data',
+    steps: [
+      { reach: { role: 'searchbox', name: 'Filter team' }, by: 'control' },
+      { act: true },
+      { type: 'jose' },
+      { hear: { role: 'status', text: '1 of 3 rows', container: true, spoken: [/1 of 3 rows/] } },
+    ],
+  },
+  {
+    id: 'table-sort',
+    title: 'Sorting a column by its header button says the new state, and the header carries it',
+    page: '/sr-table-data',
+    steps: [
+      { reach: { role: 'button', name: 'Name' }, by: 'control' },
+      { act: true },
+      { hear: { role: 'status', text: 'Sorted by Name, ascending', container: true, spoken: [/sorted by name.*ascending/] } },
+      {
+        check: async (page) => {
+          await expect(page.locator('th[data-sort]')).toHaveAttribute('aria-sort', 'ascending');
+        },
+        note: 'the column header says it is sorted ascending',
+      },
+    ],
+  },
+  {
+    id: 'table-select',
+    title: 'Selecting a row says how many are selected, and select-all is named for what it does',
+    page: '/sr-table-data',
+    steps: [
+      { reach: { role: 'checkbox', name: 'Select all rows' }, by: 'control' },
+      { reach: { role: 'checkbox', name: 'Select Ada' }, by: 'control' },
+      { act: true },
+      { hear: { role: 'status', text: '1 selected', container: true, spoken: [/1 selected/] } },
+      {
+        check: async (page) => {
+          await expect(page.getByRole('checkbox', { name: 'Select all rows' })).toHaveAttribute('aria-checked', 'mixed');
+        },
+        note: 'select-all is mixed while some rows are selected',
+      },
+    ],
+  },
+  {
     // A chart is a drawing hidden from the reader plus a visually hidden table of its data (#71): the
     // reader finds the table by the chart's name and moves through the values like any table.
     id: 'chart-table',

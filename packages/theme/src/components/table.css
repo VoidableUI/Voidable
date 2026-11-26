@@ -471,3 +471,109 @@ void-table[stack="always"] {
     box-shadow: none;
   }
 }
+
+/* ============================================================
+   Sorting, filtering and selection (all opt-in by attribute).
+   ============================================================ */
+
+/* Filtering hides rows with `hidden`; a stacked row is a grid, which would otherwise win over the UA rule. */
+void-table tr[hidden][hidden] {
+  display: none;
+}
+
+/* The polite live region the component adds (rows shown, selection, sort). */
+void-table > [data-void-announcer] {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+/* The parts the author writes: shown or hidden by the component with `hidden`. */
+void-table-filter,
+void-table-empty,
+void-table-select-all {
+  display: block;
+}
+
+void-table-selection {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--void-space-2);
+}
+
+void-table-filter[hidden],
+void-table-empty[hidden],
+void-table-selection[hidden],
+void-table-select-all[hidden] {
+  display: none;
+}
+
+void-table-empty {
+  padding: var(--void-space-6) var(--_void-table-padding-inline);
+  text-align: center;
+  color: var(--void-color-text-secondary);
+}
+
+/* A sortable header: its text is a button that looks like the header. */
+void-table th[data-sort] > button {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--void-space-1);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  color: inherit;
+  cursor: pointer;
+  text-align: inherit;
+}
+
+void-table th[data-sort] > button:focus-visible {
+  outline: var(--void-focus-ring-width) solid var(--void-focus-ring-color);
+  outline-offset: var(--void-focus-ring-offset);
+}
+
+/* The direction is a small chevron after the label, drawn with borders. */
+void-table th[data-sort] > button::after {
+  content: "";
+  inline-size: 0.4em;
+  block-size: 0.4em;
+  border-inline-end: 1px solid currentcolor;
+  border-block-end: 1px solid currentcolor;
+  opacity: 0;
+  transform: translateY(-0.1em) rotate(45deg);
+}
+
+void-table th[data-sort]:hover > button::after {
+  opacity: 0.4;
+}
+
+void-table th[aria-sort="ascending"] > button::after,
+void-table th[aria-sort="descending"] > button::after {
+  opacity: 1;
+}
+
+void-table th[aria-sort="ascending"] > button::after {
+  transform: translateY(0.1em) rotate(-135deg);
+}
+
+void-table th[aria-sort="ascending"],
+void-table th[aria-sort="descending"] {
+  color: var(--void-color-text);
+}
+
+/* A selected row. */
+void-table tbody tr[aria-selected="true"] {
+  background: var(--void-item-surface-selected);
+}

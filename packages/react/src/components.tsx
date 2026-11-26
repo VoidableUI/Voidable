@@ -700,7 +700,34 @@ export const Table = wrapWc<VoidTable, {
   maxHeight?: string;
   /** Accessible name of the scroll region (default: the caption). */
   label?: string;
-}>('void-table', 'Table');
+  /** Key (`data-key` of the header cell, else its position) of the sorted column. */
+  sort?: string;
+  /** Direction of the sort; `sort` without it is ascending. */
+  sortDirection?: 'ascending' | 'descending';
+  /** Hides the rows that do not contain every word (no case, no accents). */
+  filter?: string;
+  /** Keys of the columns `filter` looks at (default: all). */
+  filterColumns?: string;
+  /** Wire the row checkboxes: `""` or `true` for many rows, `"single"` for one. */
+  selectable?: string | boolean;
+  /** The server renders order, visibility, `aria-sort` and selection; the table only fires events. */
+  manual?: boolean;
+  /** The selected row values (`data-value` of the rows, else their position). Form value when `name` is set. */
+  value?: string[];
+  name?: string;
+  /** At least one row selected, for a form. */
+  required?: boolean;
+  /** Rows in all, across the server's pages: lets `<TableSelectAll>` offer "all N rows". */
+  totalRows?: number;
+  /** The user chose every row across the server's pages. */
+  allSelected?: boolean;
+  /** Opt-in shortcuts, space separated: `select-all`. */
+  shortcuts?: string;
+} & VoidEvents<{
+  Sort: { column: string; direction: 'ascending' | 'descending' | 'none' };
+  Filter: { filter: string; shown: number; total: number };
+  Change: { value: string[]; all: boolean };
+}>>('void-table', 'Table');
 
 export const Pagination = wrapWc<VoidPagination, {
   total?: number;

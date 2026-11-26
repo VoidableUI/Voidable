@@ -1,0 +1,21 @@
+<main>
+  <h1>Team</h1>
+  <void-table selectable aria-label="Team members" filter-columns="name">
+    <void-table-filter><input type="search" aria-label="Filter team"></void-table-filter>
+    <table>
+      <thead>
+        <tr>
+          <th data-stack="select"><void-checkbox aria-label="Select all rows"></void-checkbox></th>
+          <th data-key="name" data-sort scope="col">Name</th>
+          <th data-key="role" scope="col">Role</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr data-value="ada"><td><void-checkbox aria-label="Select Ada"></void-checkbox></td><td>Ada</td><td>Engineer</td></tr>
+        <tr data-value="jose"><td><void-checkbox aria-label="Select José"></void-checkbox></td><td>José</td><td>Designer</td></tr>
+        <tr data-value="linus"><td><void-checkbox aria-label="Select Linus"></void-checkbox></td><td>Linus</td><td>Engineer</td></tr>
+      </tbody>
+    </table>
+    <void-table-empty hidden>No one matches.</void-table-empty>
+  </void-table>
+</main>

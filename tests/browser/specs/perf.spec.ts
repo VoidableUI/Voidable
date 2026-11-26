@@ -63,6 +63,34 @@ test('500-row table: first render and one Turbo morph', async ({ page }) => {
   within('500-row table, one Turbo morph', med('morph'), reference.table500MorphMs, 'ms');
 });
 
+test('5,000-row table: sort, filter and select-all stay interactive', async ({ page }) => {
+  test.setTimeout(300_000);
+  type R = { first: number; sortText: number; sortNumber: number; filterFirst: number; filterNext: number; selectAll: number; events: number; selected: number; ordered: string };
+  const measure = async (native: boolean, runs: number) => {
+    const results: R[] = [];
+    for (let i = 0; i < runs; i++) {
+      await load(page, '/perf');
+      results.push((await page.evaluate((n) => (window as any).perf.data5000(n), native)) as R);
+    }
+    return results;
+  };
+  // What the table itself costs: native checkboxes in the rows. Budgeted.
+  const results = await measure(true, 3);
+  const med = (k: 'sortText' | 'sortNumber' | 'filterFirst' | 'filterNext' | 'selectAll') => results.map((r) => r[k]).sort((a, b) => a - b)[1];
+  // Select-all is one pass and one event; the rows are in the order the number sort gives.
+  for (const r of results) expect({ events: r.events, selected: r.selected }).toEqual({ events: 1, selected: 5000 });
+  expect(results[0].ordered).toBe('0');
+  within('5,000-row table, sort by text', med('sortText'), reference.table5000SortTextMs, 'ms');
+  within('5,000-row table, sort by number', med('sortNumber'), reference.table5000SortNumberMs, 'ms');
+  within('5,000-row table, filter', med('filterFirst'), reference.table5000FilterFirstMs, 'ms');
+  within('5,000-row table, next keystroke of the filter', med('filterNext'), reference.table5000FilterNextMs, 'ms');
+  within('5,000-row table, select all', med('selectAll'), reference.table5000SelectAllMs, 'ms');
+  // A void-checkbox in every row is a component each: measured, not budgeted.
+  const [boxes] = await measure(false, 1);
+  expect({ events: boxes.events, selected: boxes.selected }).toEqual({ events: 1, selected: 5000 });
+  console.log(`[perf] 5,000 rows with void-checkbox: first render ${boxes.first.toFixed(0)} ms, sort by text ${boxes.sortText.toFixed(0)} ms, sort by number ${boxes.sortNumber.toFixed(0)} ms, filter ${boxes.filterFirst.toFixed(0)} ms, next keystroke ${boxes.filterNext.toFixed(0)} ms, select all ${boxes.selectAll.toFixed(0)} ms`);
+});
+
 test('a select with 5,000 options', async ({ page }) => {
   const ms = await median(5, async () => {
     const r = await run<{ ms: number; value: string }>(page, 'select5000');

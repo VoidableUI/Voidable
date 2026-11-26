@@ -76,7 +76,7 @@ The API review before 1.0 listed what is still missing against mainstream librar
 | Rating, Toolbar, Fieldset, Tree View, Listbox | Tier B above |
 | Context Menu, Menubar, Alert Dialog, Timeline, Password Input, Splitter, KBD | Tier C above |
 | Area, pie, scatter and sparkline charts | Not yet tiered: chart types beside bar, donut, line and gauge |
-| Data grid | Not yet tiered: sorting, filtering and virtualised rows on top of `void-table` |
+| Data grid | Partly shipped ([#89](https://github.com/VoidableUI/Voidable/issues/89)): `void-table` sorts (one column, text, number and date), filters (all or chosen columns, an empty part, a live count), selects (rows, range, select-all with a mixed state, form value, "all N rows" across server pages) and has a `manual` server mode for LiveView, Livewire and Turbo. Remaining, not tiered: virtualised rows, per-column filters, multi-column sort, column resizing and reordering, inline editing, grouping, export, and client-side pagination of filtered rows |
 | A visually hidden data table for charts | Not yet tiered: charts are `role="img"` with an `aria-label` only |
 | Translatable built-in strings ("Close", "No options found", "Calendar", "PIN input") | Not yet tiered: a labels mechanism for every component |
 
