@@ -1,4 +1,4 @@
-import { html, nothing } from 'lit';
+import { html, nothing, type PropertyValues } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
 import { PartsController } from '../parts.js';
@@ -29,16 +29,24 @@ export class VoidSelect extends VoidElement {
    */
   @property({ type: String, reflect: true }) error = '';
 
-  /** The value the host's `value` attribute or a property set asked for, kept until an option has it. */
-  private _wanted: string | null = null;
-  /** The server's selection at its last render (`selected` options, in order), for the morph rule. */
+  // ── The choice ──
+  //
+  // `_choice` is the one source of truth. It changes only when the user picks in the native select (`input`,
+  // `change`), when script sets `value` or the `value` attribute (which is how a server morph that changed
+  // it arrives), when the server's markup changes which options are `selected`, and when the chosen option
+  // is gone. The native select is never read back otherwise: while a morph library patches it (options
+  // replaced, `selected` rewritten, selectedIndex reset) it holds the server's markup, not the choice.
+  // After every mutation of the select, every morph and every update the choice is written into it again,
+  // and a form that builds its data reads it from there (see `_onFormData`).
+
+  /** The chosen values (one for a single select), or null before anything decided them. */
+  private _choice: string[] | null = null;
+  /** The choice came from `value` and waits for an option that has it. */
+  private _pending = false;
+  /** The options the server's markup marks `selected` at its last render (JSON), for the morph rule. */
   private _serverSelection: string | null = null;
-  private _serverValue: string | null = null;
-  /** The user's selection, captured before a morph the server did not change it in, put back after. */
-  private _keep: string[] | null = null;
-  /** The server changed the host's `value` attribute in this morph: it wins over the options' `selected`. */
-  private _serverValueChanged = false;
-  private _form: HTMLFormElement | null = null;
+  /** The `value` attribute the markup or the server last wrote: what a form reset returns to. */
+  private _initial: string | null = null;
 
   protected readonly _parts = new PartsController(this, {
     tags: ['select', 'option', 'optgroup'],
@@ -58,92 +66,120 @@ export class VoidSelect extends VoidElement {
    */
   @property({ type: String, reflect: true })
   get value(): string {
-    const select = this.select;
-    if (this._wanted !== null && !(select && hasOption(select, this._wanted))) return this._wanted;
-    return select?.value ?? this._wanted ?? '';
+    if (this._choice) return this._choice[0] ?? '';
+    return this.select?.value ?? '';
   }
 
   set value(next: string) {
     const old = this.value;
-    this._wanted = next === null || next === undefined ? null : String(next);
+    if (next === null || next === undefined) {
+      // No value: the options' `selected` decide.
+      const select = this.select;
+      this._choice = select ? marked(select) : null;
+      this._pending = false;
+    } else {
+      this._choice = [String(next)];
+      this._pending = true;
+    }
     this._apply();
     this.requestUpdate('value', old);
   }
 
-  /** The value last handed to Lit, to notice a choice made inside the select (the user, a morph, new options). */
-  private _reflected: string | null = null;
-  /** The `value` attribute the markup wrote (or the server's last), which a form reset returns to; read before reflection can change it. */
-  private _initial: string | null = null;
-  private _initialRead = false;
+  /** Lit writes the reflected attribute during update; any other write of `value` is the markup's or the server's. */
+  private _reflecting = false;
+
+  protected override update(changed: PropertyValues): void {
+    this._reflecting = true;
+    try {
+      super.update(changed);
+    } finally {
+      this._reflecting = false;
+    }
+  }
+
+  /** Asks Lit to reflect the choice when it moved, or when the attribute does not show it yet. */
+  private _changed(old: string): void {
+    const now = this.value;
+    if (now !== old) this.requestUpdate('value', old);
+    else if (this.getAttribute('value') !== now) this.requestUpdate('value', null);
+  }
+
+  override attributeChangedCallback(name: string, old: string | null, value: string | null): void {
+    // The server's (or the author's) value is the new reset target, as a native input's value attribute is.
+    if (name === 'value' && !this._reflecting) this._initial = value;
+    super.attributeChangedCallback(name, old, value);
+  }
 
   override connectedCallback(): void {
-    if (!this._initialRead) {
-      this._initialRead = true;
-      this._initial = this.getAttribute('value');
-      this._serverValue ??= this.getAttribute('value') ?? '';
-    }
     super.connectedCallback();
-    // Capture: the select's change reaches the host even where it does not bubble (a synthetic one).
+    // Capture: the select's events reach the host even where they do not bubble (a synthetic one).
+    this.addEventListener('input', this._onPick, true);
     this.addEventListener('change', this._onChange, true);
   }
 
   override disconnectedCallback(): void {
     super.disconnectedCallback();
+    this.removeEventListener('input', this._onPick, true);
     this.removeEventListener('change', this._onChange, true);
+    this._observe(null);
     this._watchForm(null);
   }
 
-  /** Writes the invalid state on the select, applies a wanted value once its option exists, follows its form. */
+  /** Follows the select (added, replaced), writes its invalid state and the choice, follows its form. */
   private _wire(): void {
     const select = this.select;
+    const replaced = !!select && !!this._observed && select !== this._observed;
+    this._observe(select);
     if (!select) return;
     this._markInvalid(select);
-    if (this._serverSelection === null) this._serverSelection = selectedAttrs(select);
-    if (this._serverValue === null) this._serverValue = this.getAttribute('value') ?? '';
-    this._apply();
     this._watchForm(select.form);
-    this._reflectChoice();
+    if (replaced && !this._morphQueued) this._serverMarked(select);
+    else if (this._serverSelection === null) this._serverSelection = selectedAttrs(select);
+    this._sync();
   }
 
-  /** The choice is made inside the native select; ask for an update when it is no longer what the attribute shows. */
-  private _reflectChoice(): void {
-    if (!this._morphing && this.value !== this._reflected) this.requestUpdate();
+  /** Writes the choice into the select; decides it from the select only where nothing has yet, or its option is gone. */
+  private _sync(): void {
+    const select = this.select;
+    if (!select) return;
+    this._finishReset();
+    const old = this.value;
+    if (this._choice === null || (!this._pending && !select.multiple && this._choice.length === 0)) {
+      if (select.options.length) this._choice = chosen(select);
+    }
+    this._apply();
+    this._changed(old);
   }
 
-  /**
-   * Between voidBeforeMorph and morphedCallback the native select holds whatever the morph library left in
-   * it (it re-syncs the options from the server's `selected`), not the user's choice: nothing is reflected
-   * then, or the attribute would take that transient value before the choice is put back.
-   */
-  private _morphing = false;
-  /** The `value` attribute the server sent in a morph that changed it (null: it sent none). */
-  private _serverValueText: string | null = null;
-
-  protected override willUpdate(changed: Map<string, unknown>): void {
-    super.willUpdate(changed);
-    if (this._morphing) return;
-    const now = this.value;
-    if (now === this._reflected) return;
-    const old = this._reflected;
-    this._reflected = now;
-    // Lit reflects a property that was set; the choice is set inside the select, so say it changed.
-    if (!changed.has('value')) this.requestUpdate('value', old);
-  }
-
-  /** Pushes the wanted value into the select (once an option has it); then the select is the truth. */
+  /** Puts the choice into the native select (properties only: no attribute, so no mutation of its own). */
   private _apply(): void {
     const select = this.select;
-    if (!select || this._wanted === null || !hasOption(select, this._wanted)) return;
-    if (select.value !== this._wanted) select.value = this._wanted;
-    this._wanted = null;
+    const choice = this._choice;
+    if (!select || !choice) return;
+    if (!choice.every(v => hasOption(select, v))) {
+      // A value set in code waits for its option. A choice whose option the server removed follows the select.
+      if (this._pending) return;
+      const old = this.value;
+      this._choice = chosen(select);
+      this._changed(old);
+      return;
+    }
+    this._pending = false;
+    if (!select.multiple) {
+      if (choice.length && select.value !== choice[0]) select.value = choice[0]!;
+      return;
+    }
+    const wanted = new Set(choice);
+    for (const option of Array.from(select.options)) {
+      if (option.selected !== wanted.has(option.value)) option.selected = wanted.has(option.value);
+    }
   }
 
   protected override updated(changed: Map<string, unknown>): void {
     super.updated(changed);
-    if (changed.has('error')) {
-      const select = this.select;
-      if (select) this._markInvalid(select);
-    }
+    const select = this.select;
+    if (changed.has('error') && select) this._markInvalid(select);
+    this._apply();
   }
 
   /** The select we last marked `aria-invalid` (a `void-field` with an error marks it too; that stays theirs). */
@@ -165,85 +201,193 @@ export class VoidSelect extends VoidElement {
     return this.error ? html`<span class="void-select-error">${this.error}</span>` : nothing;
   }
 
+  /** The user picked in the native select: the only time its state becomes the choice. */
+  private _onPick = (e: Event): void => {
+    const select = this.select;
+    if (!select || e.target !== select) return;
+    this._pendingReset = null;
+    const old = this.value;
+    this._choice = chosen(select);
+    this._pending = false;
+    this._changed(old);
+  };
+
   private _onChange = (e: Event): void => {
     if (e.target !== this.select) return;
-    this._wanted = null;
-    this._reflectChoice();
+    this._onPick(e);
     this.dispatchEvent(new CustomEvent('void-change', { bubbles: true, composed: true, detail: { value: this.value } }));
   };
 
-  // ── Form reset ──
+  // ── Mutations of the native select ──
+
+  private _observer: MutationObserver | null = null;
+  private _observed: HTMLSelectElement | null = null;
+
+  private _observe(select: HTMLSelectElement | null): void {
+    if (select === this._observed) return;
+    this._observer?.disconnect();
+    this._observed = select;
+    if (!select) return;
+    this._observer ??= new MutationObserver(this._onMutations);
+    this._observer.observe(select, { childList: true, subtree: true, attributes: true, characterData: true });
+  }
+
+  /**
+   * Anything changed in the select (a morph without the pre-morph hook, options written with innerHTML,
+   * LiveView patching a locked select): options that were replaced may carry a new server selection;
+   * either way the choice goes back in.
+   */
+  private _onMutations = (records: MutationRecord[]): void => {
+    // A morph through the adapters decides in its own microtask, from the server's markup.
+    if (this._morphQueued || !this.isConnected) return;
+    const select = this.select;
+    if (!select) return;
+    let removed = false;
+    let added = false;
+    for (const r of records) {
+      if (r.type !== 'childList') continue;
+      removed ||= Array.from(r.removedNodes).some(isOptionNode);
+      added ||= Array.from(r.addedNodes).some(isOptionNode);
+    }
+    if (removed && added) this._serverMarked(select);
+    this._sync();
+  };
+
+  /**
+   * Options the server rendered afresh: when they mark other options `selected` than its last render did,
+   * that is the server's new selection, and it wins (unless a value set in code still waits for its option).
+   */
+  private _serverMarked(select: HTMLSelectElement): void {
+    const now = selectedAttrs(select);
+    if (now === this._serverSelection) return;
+    this._serverSelection = now;
+    if (this._pending) return;
+    const values = JSON.parse(now) as string[];
+    if (!values.length) return;
+    const old = this.value;
+    this._choice = select.multiple ? values : [values[values.length - 1]!];
+    this._changed(old);
+  }
+
+  // ── Form data and reset ──
+
+  private _form: HTMLFormElement | null = null;
 
   private _watchForm(form: HTMLFormElement | null): void {
     if (form === this._form) return;
     this._form?.removeEventListener('reset', this._onReset);
+    this._form?.removeEventListener('formdata', this._onFormData);
     this._form = form;
     form?.addEventListener('reset', this._onReset);
+    form?.addEventListener('formdata', this._onFormData);
   }
 
-  /** After a reset the options' `selected` decide; an initial `value` attribute is applied again. */
-  private _onReset = (): void => {
+  /**
+   * The form is building its data (a submit, `new FormData(form)`, a LiveView event) from the native select.
+   * Nothing may have told us yet that something reset it (a morph that only set properties, with no adapter
+   * and no mutation): write the choice into it now and correct the entries it already contributed.
+   */
+  private _onFormData = (e: FormDataEvent): void => {
+    const select = this.select;
+    if (!select || select.form !== e.target) return;
+    this._finishReset();
+    const before = submits(select);
+    this._apply();
+    if (!select.name) return;
+    const after = submits(select);
+    if (before.length === after.length && before.every((v, i) => v === after[i])) return;
+    const entries = e.formData.getAll(select.name);
+    for (const v of before) {
+      const i = entries.indexOf(v);
+      if (i >= 0) entries.splice(i, 1);
+    }
+    e.formData.delete(select.name);
+    for (const v of [...entries, ...after]) e.formData.append(select.name, v);
+  };
+
+  /** A reset in progress: the form resets the native select after its reset event, and the choice follows it. */
+  private _pendingReset: Event | null = null;
+
+  private _onReset = (e: Event): void => {
+    this._pendingReset = e;
+    // The form resets its controls after this event: a task later (a reset button's reset included) it has.
+    // Until then anything that reads the choice for the form (form data, a sync) finishes the reset first.
     setTimeout(() => {
-      const initial = this._initial;
-      if (initial !== null && this.isConnected) this.value = initial;
-      else this._reflectChoice();
+      this._finishReset();
+      this._apply();
     });
   };
 
+  /** After a reset the options' `selected` decide; a `value` attribute (the markup's or the server's) is applied again. */
+  private _finishReset(): void {
+    const e = this._pendingReset;
+    if (!e) return;
+    this._pendingReset = null;
+    const select = this.select;
+    if (e.defaultPrevented || !select || !this.isConnected) return;
+    const old = this.value;
+    if (this._initial !== null) {
+      this._choice = [this._initial];
+      this._pending = true;
+    } else {
+      this._choice = marked(select);
+      this._pending = false;
+    }
+    this._apply();
+    this._changed(old);
+  }
+
   // ── Morphs: the user's choice stays unless the server changed the selection ──
 
+  /** A morph through the adapters is in progress; the choice is written back in the microtask after it. */
+  private _morphQueued = false;
+
+  /**
+   * The decision is taken here, from the server's markup, before the morph touches anything: the options
+   * it marks `selected`, compared with its last render. A `value` attribute the server changed arrives
+   * during the morph itself (the morph writes it, which sets `value`) and so wins over them.
+   */
   override voidBeforeMorph(incoming?: Element | null): boolean {
-    const select = this.select;
-    if (incoming && incoming !== this && select) {
-      const theirs = incoming.querySelector('select');
-      const now = theirs ? selectedAttrs(theirs) : '';
-      const value = incoming.getAttribute('value') ?? '';
-      this._serverValueChanged = value !== this._serverValue;
-      // The server's new initial choice is the one a reset returns to.
-      this._serverValueText = this._serverValueChanged ? incoming.getAttribute('value') : null;
-      if (this._serverValueChanged) this._initial = this._serverValueText;
-      this._morphing = true;
-      // A morph that never reaches morphedCallback must not leave reflection off.
-      setTimeout(() => {
-        if (!this._morphing) return;
-        this._morphing = false;
-        this._reflectChoice();
-      }, 100);
-      const serverChanged = now !== this._serverSelection || this._serverValueChanged;
-      this._serverSelection = now;
-      this._serverValue = value;
-      this._keep = serverChanged ? null : Array.from(select.selectedOptions, o => o.value);
+    if (incoming && incoming !== this) {
+      // A copy of a rendered element (LiveView morphs to a clone of a locked one, which it patched) carries
+      // what it recorded from the server's markup; its own options may have been re-synced from the live one.
+      const recorded = incoming instanceof VoidSelect ? incoming._serverSelection : null;
+      const theirs = recorded ?? serverSelect(incoming);
+      // An upgraded element that recorded nothing is the server's markup (Livewire builds it in the document)
+      // or a copy of the live element that no patch reached: what merely repeats the live options is the copy.
+      const copy = recorded === null && incoming instanceof VoidSelect && !!this.select && theirs === selectedAttrs(this.select);
+      if (theirs !== null && !copy) {
+        const changed = this._serverSelection !== null && theirs !== this._serverSelection;
+        this._serverSelection = theirs;
+        const values = JSON.parse(theirs) as string[];
+        if (changed && values.length && !this._pending) {
+          const old = this.value;
+          this._choice = this.select?.multiple ? values : [values[values.length - 1]!];
+          this._changed(old);
+        }
+      }
+      if (!this._morphQueued) {
+        this._morphQueued = true;
+        // The morph runs synchronously after this call (the adapters' contract): this runs once it has.
+        queueMicrotask(this._afterMorph);
+      }
     }
     return super.voidBeforeMorph(incoming);
   }
 
-  protected override morphedCallback(): void {
-    const keep = this._keep;
-    const valueChanged = this._serverValueChanged;
-    this._keep = null;
-    this._serverValueChanged = false;
-    const serverValue = this._serverValueText;
-    this._serverValueText = null;
-    this._morphing = false;
+  private _afterMorph = (): void => {
+    this._morphQueued = false;
+    // What the morph did to the select is its business: the choice was decided above.
+    this._observer?.takeRecords();
     const select = this.select;
-    if (!select) return;
+    if (!this.isConnected || !select) return;
+    // A different select (the morph replaced it): follow it.
+    this._observe(select);
+    this._watchForm(select.form);
     // Server markup does not carry the aria-invalid the error wrote.
-    if (this.error) this._markInvalid(select);
-    // Morph libraries sync the select from its options' `selected` after the host's attributes, which would
-    // undo a new `value` attribute (the server's choice): apply it again once the options are in place.
-    if (valueChanged && serverValue !== null) {
-      this.value = serverValue;
-      return;
-    }
-    if (keep) {
-      const wanted = new Set(keep);
-      for (const option of Array.from(select.options)) {
-        if (option.selected !== wanted.has(option.value)) option.selected = wanted.has(option.value);
-      }
-    }
-    // The morph may have moved the choice inside the select.
-    this._reflectChoice();
-  }
+    this._markInvalid(select);
+    this._sync();
+  };
 }
 
 function hasOption(select: HTMLSelectElement, value: string): boolean {
@@ -251,9 +395,46 @@ function hasOption(select: HTMLSelectElement, value: string): boolean {
   return false;
 }
 
-/** The values of the options the markup marks `selected`. */
+function isOptionNode(n: Node): boolean {
+  return n.nodeName === 'OPTION' || n.nodeName === 'OPTGROUP';
+}
+
+/** The values of the options the markup marks `selected`, in order, as JSON. */
 function selectedAttrs(select: Element): string {
-  return Array.from(select.querySelectorAll('option[selected]'), o => (o as HTMLOptionElement).value).join('\u0000');
+  return JSON.stringify(Array.from(select.querySelectorAll('option[selected]'), o => (o as HTMLOptionElement).value));
+}
+
+/** The incoming element's own select, as `selectedAttrs`, or null when it has none. */
+function serverSelect(incoming: Element): string | null {
+  const select = incoming.querySelector('select');
+  return select ? selectedAttrs(select) : null;
+}
+
+/** What the options' `selected` choose, as the select's default selection is (the last one in a single select). */
+function marked(select: HTMLSelectElement): string[] {
+  const values = JSON.parse(selectedAttrs(select)) as string[];
+  if (select.multiple) return values;
+  if (values.length) return [values[values.length - 1]!];
+  const first = Array.from(select.options).find(o => !o.disabled);
+  return first ? [first.value] : [];
+}
+
+/** The options the native select has selected now (read from each option: `selectedOptions` can be cached). */
+function selectedOptions(select: HTMLSelectElement): HTMLOptionElement[] {
+  return Array.from(select.options).filter(o => o.selected);
+}
+
+/** The values the native select has selected now. */
+function chosen(select: HTMLSelectElement): string[] {
+  return selectedOptions(select).map(o => o.value);
+}
+
+/** The entries the select contributes to its form's data. */
+function submits(select: HTMLSelectElement): string[] {
+  if (!select.name || select.matches(':disabled')) return [];
+  return selectedOptions(select)
+    .filter(o => !o.matches(':disabled'))
+    .map(o => o.value);
 }
 
 if (!customElements.get('void-select')) {
