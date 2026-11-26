@@ -14,6 +14,7 @@ import { mkdirSync, readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import pixelmatch from 'pixelmatch';
 import sharp from 'sharp';
+import { safeName } from './names.mjs';
 
 export const TOLERANCE = 0.1;
 
@@ -83,7 +84,9 @@ export async function diffImages(baseFile, headFile, diffFile) {
   return { changed, ratio: changed / (width * height), bbox: x1 < 0 ? null : { x: x0, y: y0, w: x1 - x0 + 1, h: y1 - y0 + 1 }, size };
 }
 
+// The key names an image by its readable page id; the path it is written to goes through safeName.
 const key = (s) => `${s.page}/${s.look}.${s.scheme}.${s.width}`;
+const diffPath = (s) => `diff/${safeName(s.page)}/${s.look}.${s.scheme}.${s.width}.png`;
 
 /**
  * Image paths are relative to the capture directories; `diff` is relative to outDir.
@@ -94,6 +97,13 @@ export async function compareDirs(baseDir, headDir, outDir, concurrency = 6) {
   const head = JSON.parse(readFileSync(join(headDir, 'manifest.json'), 'utf8'));
   const baseMap = new Map(base.shots.map((s) => [key(s), s]));
   const headMap = new Map(head.shots.map((s) => [key(s), s]));
+  // Two ids that map to one safe name would overwrite each other's files.
+  const seen = new Map();
+  for (const s of [...base.shots, ...head.shots]) {
+    const name = safeName(s.page);
+    if (seen.has(name) && seen.get(name) !== s.page) throw new Error(`pages "${seen.get(name)}" and "${s.page}" map to the same path name "${name}"`);
+    seen.set(name, s.page);
+  }
   const items = [];
   const todo = [];
   for (const [k, h] of headMap) {
@@ -116,8 +126,9 @@ export async function compareDirs(baseDir, headDir, outDir, concurrency = 6) {
   const worker = async () => {
     while (next < todo.length) {
       const { item, k, bf, hf } = todo[next++];
-      const r = await diffImages(bf, hf, join(outDir, 'diff', `${k}.png`));
-      items.push(r.changed ? { ...item, status: 'changed', ...r, diff: `diff/${k}.png` } : { ...item, status: 'same', note: 'differs below the tolerance' });
+      const diff = diffPath(item);
+      const r = await diffImages(bf, hf, join(outDir, diff));
+      items.push(r.changed ? { ...item, status: 'changed', ...r, diff } : { ...item, status: 'same', note: 'differs below the tolerance' });
     }
   };
   await Promise.all(Array.from({ length: concurrency }, worker));
