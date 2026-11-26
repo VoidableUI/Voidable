@@ -107,7 +107,6 @@ export const scenarios: Scenario[] = [
     id: 'number-input',
     title: 'A number input announces its value, and the new value when it changes',
     page: '/sr-controls',
-    readerIssues: { VoiceOver: { key: 'untracked:voiceover-number-input-percent', detail: 'VoiceOver said "11.1% Seats stepper" for a value of 2; it should say "2".' } },
     steps: [
       { reach: { role: 'spinbutton', name: 'Seats', value: '2' }, by: 'control' },
       { act: true },
@@ -193,7 +192,6 @@ export const scenarios: Scenario[] = [
     page: '/sr-notices',
     readerIssues: {
       VoiceOver: { key: 'untracked:voiceover-toast-silent', detail: 'The only phrase VoiceOver logged after the toast appeared was empty.' },
-      NVDA: { key: 'untracked:nvda-toast-silent', detail: 'The only phrase NVDA logged after the toast appeared was empty.' },
     },
     steps: [
       { reach: { role: 'button', name: 'Send notification' }, by: 'control' },

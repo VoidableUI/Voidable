@@ -63,8 +63,8 @@ These are real, current findings, not a complete audit.
 
 **From real screen readers.** The first scripted runs of VoiceOver (macOS, Safari engine) and NVDA (Windows, Chromium) found these. The accessibility tree is correct in each case; what the reader says is not. They are being worked on, and fixes made so far are attempts that have not yet been confirmed by a real run (issue 75):
 
-- Toast: neither reader announced a toast. The live region is now rendered while empty so it exists before the first toast is added; not yet confirmed.
-- Number input (VoiceOver): the value was spoken as a percentage of the range. It now carries `aria-valuetext`; not yet confirmed.
+- Number input (VoiceOver): the value was spoken as a percentage of the range. Fixed with `aria-valuetext`; confirmed on VoiceOver.
+- Toast: neither reader announced a toast. Fixed and confirmed on NVDA by keeping the live region rendered while empty. VoiceOver is still silent; a second attempt is in progress.
 - Dialog description (VoiceOver): the name is spoken, the description was not. It is now also written as `aria-description`; not yet confirmed.
 - Radio (NVDA): the checked radio is spoken as "not checked", without its position in the group. Cause not found.
 - Accordion (NVDA): a collapsed trigger is spoken as "expanded". Cause not found.
