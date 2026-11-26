@@ -118,6 +118,12 @@ export async function runScenario(reader: Reader, page: Page, scenario: Scenario
         await reader.type(step.type);
       } else if ('hear' in step) {
         await hear(forReader(step.hear, reader.name));
+      } else if ('once' in step) {
+        // Give a second, doubled announcement time to arrive, then count the phrases with these words.
+        await page.waitForTimeout(1500);
+        const said = await spokenSince(mark);
+        const hits = said.filter((p) => step.once.test(normalise(p)));
+        if (hits.length !== 1) throw new Error(`expected ${step.once} to be spoken once, heard ${hits.length} time(s).\n  Heard since the last action:\n${tail(said, 20)}`);
       } else if ('walk' in step) {
         await begin();
         for (let n = 0; n < step.walk; n++) await reader.move('next');

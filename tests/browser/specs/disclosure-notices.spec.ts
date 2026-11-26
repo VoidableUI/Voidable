@@ -243,10 +243,13 @@ test.describe('disclosure and notices', () => {
   test.describe('toast', () => {
     test('a server-rendered toast in the container works with no script-built structure', async ({ page }) => {
       expect(await mark(page, '#t-server')).toEqual(['void-toast-title', 'void-toast-description', 'void-toast-close', 'button']);
-      await expect(page.locator('#t-server')).toHaveAttribute('role', 'status');
-      await expect(page.locator('#t-alert')).toHaveAttribute('role', 'alert');
+      await expect(page.locator('#t-server')).toHaveAttribute('role', 'group');
+      await expect(page.locator('#t-alert')).toHaveAttribute('role', 'group');
       const container = page.locator('#flash');
-      await expect(container).toHaveAttribute('aria-live', 'polite');
+      // The container is not itself live: its two hidden announcers are, and they speak for the toasts.
+      await expect(container).not.toHaveAttribute('aria-live', /.+/);
+      await expect(container.locator('> [role=status]')).toHaveText('Saved. Your changes were saved.');
+      await expect(container.locator('> [role=alert]')).toContainText('Upload failed.');
       await expect(container).toHaveAttribute('aria-label', 'Notifications');
       const tree = await container.ariaSnapshot();
       expect(tree).toContain('Saved');
@@ -260,32 +263,51 @@ test.describe('disclosure and notices', () => {
       await expect(page.locator('#t-alert button')).toHaveCount(0);
     });
 
-    test('the live region is rendered and in the accessibility tree before the first toast is added', async ({ page }) => {
+    test('the announcers are in the accessibility tree before the first toast, and the text arrives after it', async ({ page }) => {
       await load(page, '/sr-notices');
-      // Empty, the container is rendered (not display:none) and in the tree as a named, polite region.
+      // Empty, the container is rendered (not display:none) and holds its two announcers, both empty.
       await expect(page.getByRole('region', { name: 'Notifications' })).toHaveCount(1);
       const before = await page.evaluate(() => {
         const c = document.getElementById('flash')!;
-        return { display: getComputedStyle(c).display, live: c.getAttribute('aria-live'), kids: c.children.length };
+        const info = (s: string) => {
+          const el = c.querySelector(`:scope > ${s}`)!;
+          return [el.getAttribute('aria-live'), el.getAttribute('aria-atomic'), el.textContent];
+        };
+        return { display: getComputedStyle(c).display, toasts: c.querySelectorAll(':scope > void-toast').length, polite: info('[role=status]'), assertive: info('[role=alert]') };
       });
       expect(before.display).not.toBe('none');
-      expect(before.live).toBe('polite');
-      expect(before.kids).toBe(0);
-      // At the moment the toast is added, the region is already rendered.
-      const renderedWhenAdded = await page.evaluate(
+      expect(before.toasts).toBe(0);
+      expect(before.polite).toEqual(['polite', 'true', '']);
+      expect(before.assertive).toEqual(['assertive', 'true', '']);
+      // When the toast is inserted the announcer already exists and is still empty; its text comes on a later task.
+      const atInsert = await page.evaluate(
         () =>
-          new Promise<boolean>((resolve) => {
+          new Promise<{ rendered: boolean; text: string }>((resolve) => {
             const c = document.getElementById('flash')!;
             const mo = new MutationObserver(() => {
               mo.disconnect();
-              resolve(getComputedStyle(c).display !== 'none');
+              resolve({ rendered: getComputedStyle(c).display !== 'none', text: c.querySelector(':scope > [role=status]')!.textContent ?? '' });
             });
             mo.observe(c, { childList: true });
             (window as any).VoidUI.toast({ description: 'Changes saved', duration: 0 });
           }),
       );
-      expect(renderedWhenAdded).toBe(true);
-      await expect(page.getByRole('status').filter({ hasText: 'Changes saved' })).toHaveCount(1);
+      expect(atInsert).toEqual({ rendered: true, text: '' });
+      await expect(page.getByRole('status')).toHaveText('Changes saved');
+      // The visible toast is a group, not a second live region.
+      await expect(page.locator('#flash > void-toast')).toHaveAttribute('role', 'group');
+      // The same message again is written again: cleared first, then set.
+      const seen = await page.evaluate(
+        () =>
+          new Promise<string[]>((resolve) => {
+            const region = document.querySelector('#flash > [role=status]')!;
+            const log: string[] = [];
+            new MutationObserver(() => log.push(region.textContent ?? '')).observe(region, { childList: true });
+            (window as any).VoidUI.toast({ description: 'Changes saved', duration: 0 });
+            setTimeout(() => resolve(log), 600);
+          }),
+      );
+      expect(seen).toEqual(['', 'Changes saved']);
       // Emptied again, it leaves the top layer but stays rendered.
       await page.evaluate(() => document.querySelectorAll('#flash > void-toast').forEach((t) => t.remove()));
       await expect.poll(() => page.evaluate(() => document.getElementById('flash')!.matches(':popover-open'))).toBe(false);

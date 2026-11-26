@@ -188,8 +188,8 @@ export const CONTRACT = {
   'void-tag': { role: null, name: 'text content', state: ['removable (reflected)', 'role="listitem" inside a void-list or a role="list" parent'] },
   'void-tags-input': { role: 'inner', name: 'void-field label or aria-label / aria-labelledby on the host (moved onto it), on the inner entry input', state: [], gaps: ['the tags are a property (value: TagValue[]), not reflected'] },
   'void-textarea': { role: 'inner', name: 'void-field label or aria-label / aria-labelledby on the host (moved onto it), on the inner textarea', state: ['value (attribute)', 'error (reflected)'] },
-  'void-toast': { role: 'status', name: 'text content (its void-toast-title and void-toast-description parts; role="alert" for error and warning)', state: ['color (reflected)', 'a void-toast-close part makes it dismissible'], gaps: ['no attribute says whether it is still showing; it is removed from the DOM after duration'] },
-  'void-toast-container': { role: 'region', name: 'fixed "Notifications" (aria-live="polite")', state: [] },
+  'void-toast': { role: 'group', name: 'text content (its void-toast-title and void-toast-description parts); it is not a live region: the container announces it, assertively for error and warning', state: ['color (reflected)', 'a void-toast-close part makes it dismissible'], gaps: ['no attribute says whether it is still showing; it is removed from the DOM after duration'] },
+  'void-toast-container': { role: 'region', name: 'fixed "Notifications"; holds two hidden announcers (role="status" and role="alert") that speak each toast', state: [] },
   'void-toggle': {
     role: 'button',
     name: 'text content',

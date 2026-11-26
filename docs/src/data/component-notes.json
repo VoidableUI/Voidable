@@ -393,7 +393,7 @@
   },
   "void-toast-container": {
     "group": "feedback",
-    "children": "Takes `void-toast` children, written in the markup (a server's flash message) or added by `toast()`."
+    "children": "Takes `void-toast` children, written in the markup (a server's flash message) or added by `toast()`. It holds two visually hidden announcers from the moment it connects (a polite `role=\"status\"` and an assertive `role=\"alert\"`); each toast's title and message are written into the matching one shortly after the toast is added (assertive for `error` and `warning`), and the toast itself is a plain `role=\"group\"`, not a live region."
   },
   "void-accordion": {
     "group": "layout",

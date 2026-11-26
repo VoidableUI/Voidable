@@ -20,10 +20,10 @@ describe('VoidToast', () => {
   });
 
   describe('ARIA', () => {
-    it('sets role="status" when connected', () => {
+    it('is a plain group, not a live region, when connected', () => {
       const el = document.createElement('void-toast') as VoidToast;
       document.body.appendChild(el);
-      expect(el.getAttribute('role')).toBe('status');
+      expect(el.getAttribute('role')).toBe('group');
       el.remove();
     });
   });
@@ -196,10 +196,43 @@ describe('VoidToastContainer', () => {
       expect(el.getAttribute('aria-label')).toBe('Notifications');
     });
 
-    it('sets aria-live="polite" when connected', () => {
+    it('is not itself live, and holds a polite and an assertive announcer from connection', () => {
       const el = document.createElement('void-toast-container') as VoidToastContainer;
       document.body.appendChild(el);
-      expect(el.getAttribute('aria-live')).toBe('polite');
+      expect(el.hasAttribute('aria-live')).toBe(false);
+      const polite = el.querySelector(':scope > [data-void-announcer=polite]')!;
+      const assertive = el.querySelector(':scope > [data-void-announcer=assertive]')!;
+      expect([polite.getAttribute('role'), polite.getAttribute('aria-live'), polite.getAttribute('aria-atomic')]).toEqual(['status', 'polite', 'true']);
+      expect([assertive.getAttribute('role'), assertive.getAttribute('aria-live'), assertive.getAttribute('aria-atomic')]).toEqual(['alert', 'assertive', 'true']);
+    });
+
+    it('writes a toast into the matching announcer after a delay, title then description', async () => {
+      vi.useFakeTimers();
+      try {
+        const el = document.createElement('void-toast-container') as VoidToastContainer;
+        document.body.appendChild(el);
+        const polite = el.querySelector(':scope > [data-void-announcer=polite]')!;
+        const assertive = el.querySelector(':scope > [data-void-announcer=assertive]')!;
+        const ok = document.createElement('void-toast') as VoidToast;
+        ok.duration = 0;
+        ok.innerHTML = '<void-toast-title>Saved</void-toast-title><void-toast-description>All done</void-toast-description>';
+        el.appendChild(ok);
+        await vi.advanceTimersByTimeAsync(0);
+        expect(polite.textContent).toBe('');
+        await vi.advanceTimersByTimeAsync(400);
+        expect(polite.textContent).toBe('Saved. All done');
+        expect(assertive.textContent).toBe('');
+        const bad = document.createElement('void-toast') as VoidToast;
+        bad.color = 'error';
+        bad.duration = 0;
+        bad.innerHTML = '<void-toast-description>Failed</void-toast-description>';
+        el.appendChild(bad);
+        await vi.advanceTimersByTimeAsync(400);
+        expect(assertive.textContent).toBe('Failed');
+      } finally {
+        vi.useRealTimers();
+        document.querySelectorAll('void-toast-container').forEach(c => c.remove());
+      }
     });
   });
 
@@ -264,25 +297,12 @@ describe('VoidToast roles and timer pausing', () => {
     return el;
   }
 
-  it.each([
-    ['error', 'alert'],
-    ['warning', 'alert'],
-    ['default', 'status'],
-    ['success', 'status'],
-    ['info', 'status'],
-  ] as const)('color=%s uses role=%s', async (color, role) => {
+  it.each(['error', 'warning', 'default', 'success', 'info'] as const)('color=%s is a plain group, never a live region', async (color) => {
     const el = await make(color, 0);
-    expect(el.getAttribute('role')).toBe(role);
-  });
-
-  it('updates role when color changes', async () => {
-    const el = await make('default', 0);
-    el.color = 'error';
+    expect(el.getAttribute('role')).toBe('group');
+    el.color = color === 'error' ? 'success' : 'error';
     await el.updateComplete;
-    expect(el.getAttribute('role')).toBe('alert');
-    el.color = 'success';
-    await el.updateComplete;
-    expect(el.getAttribute('role')).toBe('status');
+    expect(el.getAttribute('role')).toBe('group');
   });
 
   it('pauses the dismiss timer on hover and resumes with the remaining time on leave', async () => {

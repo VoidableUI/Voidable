@@ -188,7 +188,7 @@ export const scenarios: Scenario[] = [
   },
   {
     id: 'toast',
-    title: 'A toast is announced politely by its live region without moving focus',
+    title: 'A toast is announced once, politely, by the container\'s status announcer without moving focus',
     page: '/sr-notices',
     readerIssues: {
       VoiceOver: { key: 'untracked:voiceover-toast-silent', detail: 'The only phrase VoiceOver logged after the toast appeared was empty.' },
@@ -197,9 +197,14 @@ export const scenarios: Scenario[] = [
       { reach: { role: 'button', name: 'Send notification' }, by: 'control' },
       { act: true },
       { hear: { role: 'status', text: 'Changes saved', container: true, spoken: [/changes saved/] } },
+      { once: /changes saved/ },
       {
-        check: async (page) => expect(page.getByRole('region', { name: 'Notifications' })).toHaveAttribute('aria-live', 'polite'),
-        note: 'the toast container is a polite live region',
+        check: async (page) => {
+          await expect(page.getByRole('region', { name: 'Notifications' })).not.toHaveAttribute('aria-live', /.+/);
+          await expect(page.locator('#flash > [role=status]')).toHaveAttribute('aria-live', 'polite');
+          await expect(page.locator('#flash > void-toast')).toHaveAttribute('role', 'group');
+        },
+        note: 'the container announces through a polite status announcer; the visible toast is a group, not a second live region',
       },
       { focus: '#notify' },
     ],

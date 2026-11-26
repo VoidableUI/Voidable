@@ -100,6 +100,8 @@ export type Step =
   | { type: string }
   /** Within the speech since the last action: this must have been announced (and, in the tree, be true now). */
   | { hear: Fact }
+  /** Within the speech since the last action, exactly one phrase matches (the same words must not be spoken twice). Screen readers only; the tree has no speech. */
+  | { once: RegExp }
   /** Move on `walk` items; the element must not be reachable (tree: it cannot take focus). */
   | { walk: number; unreachable: Fact }
   /** Table cell navigation from the table reached: one cell right or down. */

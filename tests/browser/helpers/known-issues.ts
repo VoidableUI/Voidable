@@ -16,7 +16,7 @@ export const KNOWN_ISSUES = {
   'untracked:voiceover-dialog-description':
     'Reader behaviour, not a component defect: VoiceOver says "Profile settings web dialog with 6 items" on entry and does not speak the dialog description ("Change how your name appears."), which it exposes as help text rather than reading it. The dialog is correct in the accessibility tree and NVDA speaks name and description once ("Profile settings, dialog, Change how your name appears."). An aria-description mirror was tried and made no difference, so it was removed. The scenario stays an expected failure as a record of the difference.',
   'untracked:voiceover-toast-silent':
-    'VoiceOver speaks nothing for a toast: the polite live region receives "Changes saved" and the only phrase logged is empty (""); it should say "Changes saved". Fix attempted in the toast commit of fix/screen-reader-defects (container stays rendered while empty).',
+    'VoiceOver speaks nothing for a toast: the polite live region receives "Changes saved" and the only phrase logged is empty (""); it should say "Changes saved". First fix (container rendered while empty) confirmed on NVDA only; second attempt: the container owns persistent hidden polite and assertive announcers that speak each toast, and the visible toast is a plain group (see the announcer commit of fix/screen-reader-defects).',
   'untracked:voiceover-multiselect-selection':
     'After Enter chooses an option in a multiselect, VoiceOver says only "You are currently on a selectable (null), inside of a list box." and nothing about the selection; NVDA says "selected".',
   'untracked:voiceover-menu-silent':
