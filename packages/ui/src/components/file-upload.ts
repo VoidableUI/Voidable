@@ -65,6 +65,19 @@ export class VoidFileUpload extends InternalsFormControl(VoidElement) {
     return this.querySelector('input[type="file"]') as HTMLInputElement;
   }
 
+  protected override updated(changed: Map<string, unknown>): void {
+    super.updated(changed);
+    // Written here, not in the template: the drop zone is a role="button", and the template lint (rightly, by
+    // ARIA 1.2's per-role list) refuses aria-invalid there. It is a global attribute and browsers expose it.
+    const zone = this.querySelector('.void-file-upload-dropzone');
+    if (!zone) return;
+    if (this.error) {
+      if (zone.getAttribute('aria-invalid') !== 'true') zone.setAttribute('aria-invalid', 'true');
+    } else if (zone.hasAttribute('aria-invalid')) {
+      zone.removeAttribute('aria-invalid');
+    }
+  }
+
   render() {
     return html`
       <input
@@ -80,7 +93,6 @@ export class VoidFileUpload extends InternalsFormControl(VoidElement) {
         tabindex=${this.formDisabled ? '-1' : '0'}
         role="button"
         aria-disabled=${this.formDisabled ? 'true' : nothing}
-        aria-invalid=${this.error ? 'true' : nothing}
         aria-describedby=${this.error ? this._uid : nothing}
         @click=${this._onDropzoneClick}
         @keydown=${this._onDropzoneKeydown}
