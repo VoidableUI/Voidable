@@ -49,9 +49,9 @@ describe('table messages', () => {
   it('announces a filter in the language of the page', async () => {
     const el = make('fr', 'filter="a"', ROWS, '<th data-key="n">Nom</th><th data-key="v" data-sort="number">Valeur</th>');
     await settle(el);
-    el.filter = 'b';
+    el.filter = 'zz';
     await settle(el);
-    expect((el.querySelector('[data-void-announcer]') as HTMLElement).textContent).toBe('1 sur 2 lignes');
+    expect((el.querySelector('[data-void-announcer]') as HTMLElement).textContent).toBe('0 sur 2 lignes');
   });
 
   it('names the header checkbox and announces a sort in French', async () => {
