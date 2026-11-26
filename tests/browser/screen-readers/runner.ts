@@ -40,13 +40,31 @@ const tail = (phrases: string[], n = 12) => phrases.slice(-n).map((p) => `    - 
 /** Runs the steps; returns the transcript. Throws on the first failing step, with the transcript so far in `error.transcript`. */
 export async function runScenario(reader: Reader, page: Page, scenario: Scenario): Promise<TranscriptEntry[]> {
   const transcript: TranscriptEntry[] = [];
-  let mark = 0;
+  let mark = { n: 0, last: undefined as string | undefined };
   let moved = false;
   let reached: Fact | null = null;
 
-  const spokenSince = async (m: number) => (await reader.log()).slice(m);
+  /**
+   * What was spoken after a point in the log. A screen reader may keep appending to its latest phrase (NVDA joins
+   * speech that follows closely: after Enter on a button the log's last entry grew from "button" to "button.
+   * Profile settings, dialog, ..."), so the last entry before the point also counts, for the part added since.
+   */
+  const since = (log: string[], at: { n: number; last: string | undefined }): string[] => {
+    const out = log.slice(at.n);
+    const cur = at.n > 0 ? log[at.n - 1] : undefined;
+    if (at.last !== undefined && cur !== undefined && cur !== at.last && cur.startsWith(at.last)) {
+      const added = cur.slice(at.last.length).replace(/^[\s.,]+/, '');
+      if (added) out.unshift(added);
+    }
+    return out;
+  };
+  const snapshot = async () => {
+    const log = await reader.log();
+    return { n: log.length, last: log[log.length - 1] };
+  };
+  const spokenSince = async (at: typeof mark) => since(await reader.log(), at);
   const begin = async () => {
-    mark = (await reader.log()).length;
+    mark = await snapshot();
   };
 
   /** Move until a phrase is the element. The very first reach also considers where the cursor already is. */
@@ -62,16 +80,41 @@ export async function runScenario(reader: Reader, page: Page, scenario: Scenario
     }
     moved = true;
     const seen: string[] = [];
+    let restarted = false;
+    let stuck = 0;
+    let previous: string | undefined;
     for (let i = 0; i < MAX_MOVES; i++) {
-      const before = (await reader.log()).length;
+      const before = await snapshot();
       await reader.move(by);
-      const said = (await reader.log()).slice(before);
+      const said = since(await reader.log(), before);
       seen.push(...said);
       // The element may be split over several phrases; judge the words of this move together.
       const joined = said.join(' ');
       if (said.length && matchFact(joined, fact).isElement) return check(fact, said);
+      // Quick navigation does not wrap: past the last control the same phrase repeats. Start again from the top
+      // of the page once (the cursor can begin below the element when the previous scenario left it there).
+      const phrase = said.filter(Boolean).join(' ');
+      stuck = phrase && phrase === previous ? stuck + 1 : 0;
+      previous = phrase || previous;
+      if (stuck >= 2 && !restarted) {
+        restarted = true;
+        stuck = 0;
+        await reader.restart();
+      }
     }
-    throw new Error(`never reached ${describeFact(fact)} in ${MAX_MOVES} moves by "${by}".\n  Heard since the step began:\n${tail(seen, 20)}`);
+    throw new Error(`never reached ${describeFact(fact)} in ${MAX_MOVES} moves by "${by}".\n  Heard since the step began:\n${tail(seen, 20)}\n${await where()}`);
+  }
+
+  /** Where the screen reader and the page are, for a step that never found its element: is the reader on the page at all? */
+  async function where(): Promise<string> {
+    const raw = (await reader.log()).slice(-20).map((p) => `    - ${JSON.stringify(p)}`).join('\n') || '    (nothing)';
+    const page_ = await Promise.resolve()
+      .then(() => page.evaluate(() => {
+        const a = document.activeElement as HTMLElement | null;
+        return { title: document.title, active: a ? `<${a.localName}${a.id ? ` id="${a.id}"` : ''}${a.getAttribute('role') ? ` role="${a.getAttribute('role')}"` : ''}>` : 'none', hasFocus: document.hasFocus() };
+      }))
+      .catch((e: Error) => ({ title: `(page unreachable: ${e.message})`, active: '?', hasFocus: false }));
+    return `  Last 20 raw phrases:\n${raw}\n  Page: title ${JSON.stringify(page_.title)}, active element ${page_.active}, document focused: ${page_.hasFocus}`;
   }
 
   function check(fact: Fact, said: string[]): void {

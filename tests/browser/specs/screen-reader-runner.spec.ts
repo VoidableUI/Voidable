@@ -23,6 +23,7 @@ function fake(items: string[], onAct: Record<string, string> = {}): Reader & { c
       const said = onAct[items[r.cursor]];
       if (said) spoken.push(said);
     },
+    async restart() { r.cursor = -1; },
     async press() {},
     async type() {},
     async cell() {},
@@ -80,4 +81,24 @@ test('a modal that leaks background content is reported', async () => {
     steps: [{ walk: 2, unreachable: { role: 'button', name: 'Background action' } }],
   };
   await expect(runScenario(reader, page, scenario)).rejects.toThrow(/must be unreachable/);
+});
+
+test('starts again from the top once when quick navigation is stuck past the element', async () => {
+  // The cursor begins past the checkbox: the same last phrase repeats until the reader is sent back to the start.
+  const reader = fake(['Accept the terms, check box, not checked', 'Last form element Increment button']);
+  reader.cursor = 1;
+  const scenario: Scenario = { id: 'fake-restart', title: 'x', page: '/sr-controls', steps: [{ reach: { role: 'checkbox', name: 'Accept the terms', checked: false }, by: 'control' }] };
+  await runScenario(reader, page, scenario);
+});
+
+test('speech appended to the last phrase after an action still counts as spoken since it', async () => {
+  const spoken = ['Edit profile, button'];
+  const reader = { ...fake(['Edit profile, button']), log: async () => [...spoken], async act() { spoken[spoken.length - 1] += '. Profile settings, dialog'; } };
+  const scenario: Scenario = {
+    id: 'fake-grow',
+    title: 'x',
+    page: '/sr-dialog',
+    steps: [{ reach: { role: 'button', name: 'Edit profile' }, by: 'control' }, { act: true }, { hear: { role: 'dialog', name: 'Profile settings' } }],
+  };
+  await runScenario(reader, page, scenario);
 });
