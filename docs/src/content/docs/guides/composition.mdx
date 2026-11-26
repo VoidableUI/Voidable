@@ -163,7 +163,7 @@ Every part above except the dropdown menu item, the accordion item and `<void-op
 
 ### Inventory
 
-What every component does today, and what it becomes. **Parts** components are converted. **No parts** components have no regions the author writes and stay as they are. **To convert** components still place their children themselves (the older projection), and their target markup is the proposal for the next round; **open** marks a decision the owner has to make first.
+What every component does today, and what it becomes. **Parts** components are converted. **No parts** components have no regions the author writes and stay as they are. **To convert** and **Projects** components still place their children themselves (the older projection), and their target markup is the proposal for the next round; **open** marks a decision the owner has to make first.
 
 | Component | Today | Target | Status |
 |---|---|---|---|
@@ -184,11 +184,11 @@ What every component does today, and what it becomes. **Parts** components are c
 | nav-bar | Parts | None of its own: `void-brand`, `void-nav-links` and `void-spacer` in the bar | No parts |
 | breadcrumbs | Parts | `void-breadcrumbs-list` holding `void-breadcrumbs-item`, with separators drawn by CSS and the current page marked with `aria-current="page"` | Parts |
 | carousel, carousel-slide | Parts | `void-carousel-content` > `void-carousel-item`, then the optional `-previous`, `-next` and `-indicators` | Parts |
-| field | Projects the control between rendered label, helper and error | `void-field-label`, the control, `void-field-description`, `void-field-error` | To convert (open: `label`/`helper`/`error` attributes are used everywhere) |
-| checkbox-group, radio-group | Projects options below a rendered legend (`label`) | `void-checkbox-group-label` / `void-radio-group-label`, then the options | To convert (open, with field) |
-| checkbox, radio | Projects the label text after a rendered native input | No parts: label as content; the control in a shadow root | To convert (open: form association, and only the dialog and drawer have a shadow root) |
-| tag | Projects the label before a rendered remove button | No parts: remove button in a shadow root, or an author-written part like the alert's `-close` | To convert (open: only the dialog and drawer have a shadow root) |
-| scroll-area | Projects content into a rendered viewport | No parts: viewport in a shadow root | To convert (open: only the dialog and drawer have a shadow root) |
+| field | Projects the control between rendered label, helper and error | `void-field-label`, the control, `void-field-description`, `void-field-error` | Projects, and stays that way: the `label`, `helper` and `error` attributes are kept |
+| checkbox-group, radio-group | Projects options below a rendered legend (`label`) | `void-checkbox-group-label` / `void-radio-group-label`, then the options | Projects, and stays that way, with field |
+| checkbox, radio | Projects the label text after a rendered native input | No parts: label as content | To convert (open: how, without a shadow root, since only the dialog and drawer have one) |
+| tag | Projects the label before a rendered remove button | Unchanged | Projects, and stays that way: not converted, and no shadow root |
+| scroll-area | Projects content into a rendered viewport | Unchanged | Projects, and stays that way: not converted, and no shadow root |
 | select | Native `<select>` written inside | Enhances the native `<select>` in place | Parts (no parts) |
 | combobox, multiselect, option | `-content` part holding `void-option` | `void-combobox-content` / `void-multiselect-content` holding `void-option` | Parts |
 | action-input, avatar, badge, bar-chart, button, calendar, date-picker, color-picker, compose-input, divider, donut-chart, editable, file-upload, gauge, hamburger, indicator, input, line-chart, list, list-item, number-input, pagination, pin-input, progress, segmented-control, segmented-control-item, sidebar, skeleton, slider, spinner, stat, status-dot, stepper, switch, table, tags-input, textarea, toast-container, toggle, toggle-group | Text content, attributes, or content generated from data | Unchanged | No parts |
@@ -197,7 +197,7 @@ What every component does today, and what it becomes. **Parts** components are c
 
 - **Do not put content directly in a component that takes parts.** A bare `<void-button>` inside `<void-popover>`, or a paragraph inside `<void-dialog>`, is reported with the correct markup and is not wired.
 - **Do not set the attributes the component writes on its parts** (`role`, `aria-*`, `tabindex`, `active`, generated ids) unless a component page says so. The component puts back the ones it owns if something else changes them; an id you set is always kept.
-- **Do not replace a component's `innerHTML` to update it** in a component that still projects (the **To convert** rows above). Components with parts take any child changes.
+- **Do not replace a component's `innerHTML` to update it** in a component that still projects (the **To convert** and **Projects** rows above). Components with parts take any child changes.
 - **Do not wrap a component in another to restyle it.** Use the [theme tokens](/getting-started/tokens/), and see [patterns](/patterns/overview/) for page structure such as a shell, a page head or a toolbar.
 
 ## Parents
