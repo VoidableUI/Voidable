@@ -81,8 +81,8 @@ How to find every Voidable element and read its state the way a user, an agent d
 | `void-tag` | — | text content | removable (reflected)<br>role="listitem" inside a void-list or a role="list" parent | — |
 | `void-tags-input` | inner | void-field label or aria-label / aria-labelledby on the host (moved onto it), on the inner entry input | value (reflected, a JSON array of the tags) | — |
 | `void-textarea` | inner | void-field label or aria-label / aria-labelledby on the host (moved onto it), on the inner textarea | value (reflected)<br>error (reflected) | — |
-| `void-toast` | status | text content (its void-toast-title and void-toast-description parts; role="alert" for error and warning) | color (reflected)<br>a void-toast-close part makes it dismissible | no attribute says whether it is still showing; it is removed from the DOM after duration |
-| `void-toast-container` | region | fixed "Notifications" (aria-live="polite") | — | — |
+| `void-toast` | group | text content (its void-toast-title and void-toast-description parts); it is not a live region: the container announces it, assertively for error and warning | color (reflected)<br>a void-toast-close part makes it dismissible | no attribute says whether it is still showing; it is removed from the DOM after duration |
+| `void-toast-container` | region | fixed "Notifications"; holds two hidden announcers (role="status" and role="alert") that speak each toast | — | — |
 | `void-toggle` | button | text content | pressed (reflected)<br>aria-pressed<br>value (reflected, what the toggle stands for) | — |
 | `void-toggle-group` | group | aria-label from the author | value (reflected, comma list when multiple; without one, taken from toggles written with pressed) | — |
 | `void-tooltip` | inner | its void-tooltip-content part (role="tooltip"), linked to the trigger control by aria-describedby | open (reflected) | — |

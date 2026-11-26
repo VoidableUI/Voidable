@@ -82,6 +82,8 @@ export async function runScenario(reader: Reader, page: Page, scenario: Scenario
     const seen: string[] = [];
     let restarted = false;
     let stuck = 0;
+    let silent = 0;
+    let restartedSilent = false;
     let previous: string | undefined;
     for (let i = 0; i < MAX_MOVES; i++) {
       const before = await snapshot();
@@ -99,6 +101,15 @@ export async function runScenario(reader: Reader, page: Page, scenario: Scenario
       if (stuck >= 2 && !restarted) {
         restarted = true;
         stuck = 0;
+        await reader.restart();
+      }
+      // A reader that says nothing at all (every phrase empty) is not on the page: the window may not be in front
+      // or the cursor may be nowhere. Bring the page forward and send the reader to the web content, once.
+      silent = phrase ? 0 : silent + 1;
+      if (silent >= 4 && !restartedSilent) {
+        restartedSilent = true;
+        silent = 0;
+        await page.bringToFront().catch(() => undefined);
         await reader.restart();
       }
     }
