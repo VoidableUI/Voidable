@@ -54,7 +54,8 @@
   "scripts": {
     "build": "node scripts/build.mjs && node scripts/export-tokens.mjs",
     "test": "node --test \"test/*.test.mjs\"",
-    "generate": "node scripts/build.mjs --generated-only"
+    "generate": "node scripts/build.mjs --generated-only",
+    "prepack": "node -e \"require('fs').existsSync('dist/void.css')||(console.error('@voidable/theme: dist/ is missing; run the build before packing'),process.exit(1))\""
   },
   "devDependencies": {
     "lightningcss": "^1.32.0",
