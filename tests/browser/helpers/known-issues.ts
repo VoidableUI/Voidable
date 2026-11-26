@@ -14,7 +14,7 @@
 // failures, so a fix turns them red and the entry goes.
 export const KNOWN_ISSUES = {
   'untracked:voiceover-dialog-description':
-    'VoiceOver names the dialog ("Profile settings web dialog with 6 items") but never speaks its description, "Change how your name appears.", which is attached with ARIA element references across a shadow root. Fix attempted in the dialog-description commit of fix/screen-reader-defects (aria-description text added).',
+    'Reader behaviour, not a component defect: VoiceOver says "Profile settings web dialog with 6 items" on entry and does not speak the dialog description ("Change how your name appears."), which it exposes as help text rather than reading it. The dialog is correct in the accessibility tree and NVDA speaks name and description once ("Profile settings, dialog, Change how your name appears."). An aria-description mirror was tried and made no difference, so it was removed. The scenario stays an expected failure as a record of the difference.',
   'untracked:voiceover-toast-silent':
     'VoiceOver speaks nothing for a toast: the polite live region receives "Changes saved" and the only phrase logged is empty (""); it should say "Changes saved". Fix attempted in the toast commit of fix/screen-reader-defects (container stays rendered while empty).',
   'untracked:voiceover-multiselect-selection':
