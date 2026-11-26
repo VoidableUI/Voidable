@@ -16,7 +16,7 @@ const componentEntries = readdirSync('src/components')
 
 const entry: Record<string, string> = {
   index: resolve(__dirname, 'src/index.ts'),
-  base: resolve(__dirname, 'src/base.ts'),
+  base: resolve(__dirname, 'src/base-entry.ts'),
   autoloader: resolve(__dirname, 'src/autoloader.ts'),
   dev: resolve(__dirname, 'src/dev/index.ts'),
   ...componentEntries,

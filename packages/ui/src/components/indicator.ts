@@ -1,6 +1,9 @@
 import { html } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
+import { useProjection } from '../projection.js';
+
+useProjection();
 
 /** Badge overlay for notification counts on icons and online presence signals on avatars. */
 export class VoidIndicator extends VoidElement {

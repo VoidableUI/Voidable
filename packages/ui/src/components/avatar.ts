@@ -1,6 +1,9 @@
 import { html } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
+import { useProjection } from '../projection.js';
+
+useProjection();
 
 /** User identity display for comment threads, user lists, and profile cards; falls back to initials when no image is provided. */
 export class VoidAvatar extends VoidElement {

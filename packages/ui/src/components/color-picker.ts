@@ -3,6 +3,9 @@ import { live } from 'lit/directives/live.js';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
 import { InternalsFormControl } from '../form-control.js';
+import { useProjection } from '../projection.js';
+
+useProjection();
 
 /** Color selection control with spectrum area, hue slider, hex input, and preset swatches for theme customization and design tools. */
 export class VoidColorPicker extends InternalsFormControl(VoidElement) {

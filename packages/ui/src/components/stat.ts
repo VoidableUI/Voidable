@@ -1,6 +1,9 @@
 import { html } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
+import { useProjection } from '../projection.js';
+
+useProjection();
 
 /** Key metric display for analytics dashboards and KPI summaries with label, value, delta, and trend. */
 export class VoidStat extends VoidElement {

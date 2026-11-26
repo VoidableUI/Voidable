@@ -2,6 +2,9 @@ import { html, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
 import { NativeFormControl } from '../form-control.js';
+import { useProjection } from '../projection.js';
+
+useProjection();
 
 /**
  * Continuous value selection for volume controls, price range filters, and numeric range settings.

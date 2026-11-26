@@ -2,6 +2,9 @@ import { html, svg, nothing, type TemplateResult } from 'lit';
 import { VoidElement } from '../base.js';
 import { property, state } from 'lit/decorators.js';
 import { arcPath } from './charts/shape.js';
+import { useProjection } from '../projection.js';
+
+useProjection();
 
 export interface DonutChartSegment {
   name: string;
