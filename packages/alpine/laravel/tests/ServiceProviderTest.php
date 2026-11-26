@@ -2,6 +2,7 @@
 
 namespace Voidable\Laravel\Tests;
 
+use Illuminate\Support\Facades\Blade;
 use Orchestra\Testbench\TestCase;
 use Voidable\Laravel\VoidableServiceProvider;
 
@@ -126,5 +127,43 @@ class ServiceProviderTest extends TestCase
 
         $this->assertStringContainsString('window.VOIDABLE_DEV = { throw: true };', $html);
         $this->assertLessThan(strpos($html, 'dev.js'), strpos($html, 'VOIDABLE_DEV'));
+    }
+
+    public function test_a_chart_component_writes_the_data_as_one_json_attribute(): void
+    {
+        $data = ['series' => [['name' => 'Sales', 'values' => [1, 2]]], 'labels' => ['Mon', 'Tue']];
+        $html = Blade::render('<x-voidable::bar-chart :data="$data" id="sales" show-value aria-label="Sales" />', ['data' => $data]);
+
+        $this->assertStringContainsString('<void-bar-chart', $html);
+        $this->assertStringContainsString('id="sales"', $html);
+        $this->assertStringContainsString('aria-label="Sales"', $html);
+        $this->assertStringContainsString('show-value', $html);
+        $this->assertSame($data, $this->attributeJson($html, 'data'));
+        $this->assertStringNotContainsString('data-series', $html);
+    }
+
+    public function test_a_chart_component_takes_a_json_string_and_leaves_no_attribute_without_data(): void
+    {
+        $html = Blade::render('<x-voidable::line-chart :data="$json" />', ['json' => '{"series":[]}']);
+        $this->assertSame(['series' => []], $this->attributeJson($html, 'data'));
+
+        $this->assertStringNotContainsString(' data=', Blade::render('<x-voidable::donut-chart aria-label="Empty" />'));
+    }
+
+    public function test_a_gauge_component_writes_data_and_zones(): void
+    {
+        $zones = [['from' => 0, 'to' => 60, 'color' => 'green']];
+        $html = Blade::render('<x-voidable::gauge :value="42" :zones="$zones" unit="%" />', ['zones' => $zones]);
+
+        $this->assertStringContainsString('value="42"', $html);
+        $this->assertSame($zones, $this->attributeJson($html, 'zones'));
+        $this->assertStringNotContainsString(' data=', $html);
+    }
+
+    private function attributeJson(string $html, string $name): mixed
+    {
+        $this->assertSame(1, preg_match('/ ' . $name . '="([^"]*)"/', $html, $m), "no $name attribute in $html");
+
+        return json_decode(html_entity_decode($m[1]), true);
     }
 }
