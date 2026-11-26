@@ -304,7 +304,7 @@ describe('the key maps', () => {
       'next', 'previous', 'first', 'last', 'nextPage', 'previousPage', 'typeahead',
       'increment', 'decrement', 'add', 'removeLast', 'deleteBackward', 'deleteForward',
       'previousDay', 'nextDay', 'previousWeek', 'nextWeek', 'startOfWeek', 'endOfWeek',
-      'previousMonth', 'nextMonth', 'previousYear', 'nextYear',
+      'previousMonth', 'nextMonth', 'previousYear', 'nextYear', 'selectAll',
     ]);
     for (const [tag, map] of Object.entries(keyMaps)) {
       for (const action of Object.keys(map)) expect(vocabulary.has(action), `${tag}: "${action}" is not in the vocabulary`).toBe(true);

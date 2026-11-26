@@ -320,7 +320,7 @@ export const KEYED_TAGS = [
   'void-drawer', 'void-dropdown-menu', 'void-dropdown-menu-item', 'void-editable', 'void-file-upload', 'void-hamburger',
   'void-hover-card', 'void-menu', 'void-menu-item', 'void-multiselect', 'void-nav-menu', 'void-number-input',
   'void-pin-input', 'void-popover', 'void-radio', 'void-segmented-control', 'void-segmented-control-item', 'void-switch',
-  'void-tabs', 'void-tags-input', 'void-toggle', 'void-toggle-group', 'void-tooltip',
+  'void-table', 'void-tabs', 'void-tags-input', 'void-toggle', 'void-toggle-group', 'void-tooltip',
 ] as const;
 for (const t of KEYED_TAGS) JSON_PROPS[t] = [...(JSON_PROPS[t] ?? []), 'keys'];
 

@@ -153,5 +153,6 @@ The vocabulary:
 | `previousDay`, `nextDay`, `previousWeek`, `nextWeek`, `startOfWeek`, `endOfWeek`, `previousMonth`, `nextMonth`, `previousYear`, `nextYear` | Move the calendar's focused date |
 | `deleteBackward`, `deleteForward` | Clear the box before or after the cursor |
 | `add`, `removeLast` | Add a tag; remove the last one |
+| `selectAll` | Select every row shown (a shortcut: no default key) |
 
 *Why*: one action name on every component lets `configureKeys('*', { close: [] })` mean the same everywhere, and lets the manifest, the reference and the checker list the keys from the code that reads them.
