@@ -6,6 +6,7 @@ import { edgeEnabled, isPrintable, stepEnabled, Typeahead } from '../keyboard.js
 import { OverlayController, type OverlayCloseReason, type OverlayOpenReason } from '../overlay.js';
 import { PartsController } from '../parts.js';
 import { ProjectionController } from '../projection.js';
+import { valueList } from '../value-list.js';
 
 /**
  * One option of a `<void-combobox>` or `<void-multiselect>`, inside its `-content` part. The option itself is
@@ -150,20 +151,35 @@ export class VoidMultiselect extends InternalsFormControl(VoidElement) {
     return content ? this._parts.within<VoidOption>(content, 'void-option') : [];
   }
 
+  /** Values asked for while no option exists yet (an attribute parsed ahead of its options), applied when they arrive. */
+  private _wanted: string[] | null = null;
+  /** The serialised value last handed to Lit, to notice a choice made on the options (the user, a morph). */
+  private _reflected: string | null = null;
+
+  /**
+   * The values of the chosen options, as a list. The `value` attribute is the same list as a JSON array
+   * (`value='["a","b"]'`), kept in step as the choice changes; setting it chooses those options.
+   */
+  @property({ converter: valueList, reflect: true })
   get value(): string[] {
-    return this._options.filter(isSelected).map(valueOf);
+    const options = this._options;
+    if (this._wanted && options.length === 0) return [...this._wanted];
+    return options.filter(isSelected).map(valueOf);
   }
 
   /** Select exactly the options whose value is listed. Does not fire void-change. */
   set value(values: string[]) {
-    const wanted = new Set(values ?? []);
-    for (const opt of this._options) {
+    const options = this._options;
+    const list = Array.isArray(values) ? values : [];
+    this._wanted = options.length === 0 ? [...list] : null;
+    const wanted = new Set(list);
+    for (const opt of options) {
       const on = wanted.has(valueOf(opt));
       // An option not upgraded yet (parsed after its picker) takes the attribute, which it reads on upgrade.
       if (opt instanceof VoidOption) opt.selected = on;
       else (opt as Element).toggleAttribute('selected', on);
     }
-    this.requestUpdate();
+    this.requestUpdate('value', undefined);
   }
 
   /** One entry per selected option. */
@@ -191,6 +207,12 @@ export class VoidMultiselect extends InternalsFormControl(VoidElement) {
       this._active = null;
       this._typeahead.reset();
     }
+    // The choice lives on the options: reflect it when it is no longer what the attribute shows.
+    const now = JSON.stringify(this.value);
+    if (now !== this._reflected) {
+      this._reflected = now;
+      if (!changed.has('value')) this.requestUpdate('value', undefined);
+    }
   }
 
   protected override updated(changed: Map<string, unknown>): void {
@@ -210,6 +232,8 @@ export class VoidMultiselect extends InternalsFormControl(VoidElement) {
     const trigger = this._trigger();
     const options = this._options;
     const open = this.open && !this.formDisabled;
+    // Values the attribute asked for before the options were there.
+    if (this._wanted && options.length > 0) this.value = this._wanted;
     if (this._active && (!options.includes(this._active) || this._active.disabled)) this._active = null;
     for (const opt of options) {
       this._parts.set(opt, 'role', 'option');

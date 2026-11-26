@@ -3,7 +3,11 @@ import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
 import { NativeFormControl } from '../form-control.js';
 import { ProjectionController } from '../projection.js';
+import { valueList } from '../value-list.js';
 import type { VoidCheckbox } from './checkbox.js';
+
+/** A checkbox's value, from its attribute until it has upgraded. */
+const boxValue = (el: VoidCheckbox): string => el.value ?? el.getAttribute('value') ?? 'on';
 
 /**
  * Grouped multi-option selection for preference forms, filter panels, and permission editors.
@@ -34,22 +38,50 @@ export class VoidCheckboxGroup extends NativeFormControl(VoidElement) {
   protected readonly _projection = new ProjectionController(this, {
     regions: [{ name: 'items', target: () => this.querySelector(':scope > .void-checkbox-group-items') }],
     onChange: () => {
+      // Values the attribute asked for before the checkboxes were there.
+      if (this._wanted && this._boxes().length > 0) this.value = this._wanted;
       this._syncNames();
       this._syncFormAttr();
       this._syncRequiredValidity();
     },
   });
+  /** Values asked for while no checkbox exists yet (an attribute parsed ahead of its children), applied when they arrive. */
+  private _wanted: string[] | null = null;
+  /** The serialised value last handed to Lit, to notice a choice made on the checkboxes (the user, a morph). */
+  private _reflected: string | null = null;
+
+  /**
+   * The values of the checked checkboxes, as a list. The `value` attribute is the same list as a JSON array
+   * (`value='["a","b"]'`), kept in step as the boxes change; setting it checks those boxes.
+   */
+  @property({ converter: valueList, reflect: true })
   get value(): string[] {
-    return Array.from(this.querySelectorAll('void-checkbox')).filter((el) => (el as VoidCheckbox).checked).map((el) => (el as VoidCheckbox).value);
+    const boxes = this._boxes();
+    if (this._wanted && boxes.length === 0) return [...this._wanted];
+    return boxes.filter((el) => el.checked).map(boxValue);
   }
 
   /** Check exactly the child checkboxes whose value is listed. Does not fire void-change. */
   set value(values: string[]) {
-    const wanted = new Set(values ?? []);
-    for (const el of Array.from(this.querySelectorAll('void-checkbox')) as VoidCheckbox[]) {
-      el.checked = wanted.has(el.value);
+    const boxes = this._boxes();
+    const list = Array.isArray(values) ? values : [];
+    this._wanted = boxes.length === 0 ? [...list] : null;
+    const wanted = new Set(list);
+    for (const el of boxes) {
+      el.checked = wanted.has(boxValue(el));
     }
+    this.requestUpdate('value', undefined);
     this.formSync();
+  }
+
+  protected override willUpdate(changed: Map<string, unknown>): void {
+    super.willUpdate(changed);
+    // The choice lives on the checkboxes: reflect it when it is no longer what the attribute shows.
+    const now = JSON.stringify(this.value);
+    if (now !== this._reflected) {
+      this._reflected = now;
+      if (!changed.has('value')) this.requestUpdate('value', undefined);
+    }
   }
 
   /** The checkboxes reset themselves; the group has no state of its own. */

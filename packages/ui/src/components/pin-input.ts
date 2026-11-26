@@ -1,8 +1,9 @@
-import { html, nothing } from 'lit';
+import { html, nothing, type PropertyDeclaration, type PropertyValues } from 'lit';
 import { live } from 'lit/directives/live.js';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
 import { InternalsFormControl } from '../form-control.js';
+import { dropReflectedValue, valueReflection } from '../secret-value.js';
 import { isFocusParked } from '../projection.js';
 
 /**
@@ -24,10 +25,11 @@ export class VoidPinInput extends InternalsFormControl(VoidElement) {
    */
   @property({ type: String, reflect: true }) groups: string = '';
   /**
-   * The characters entered so far, without separators. As an attribute it is the initial value (and the
-   * form's reset target); read the `value` property for the current one.
+   * The characters entered so far, without separators, reflected to the `value` attribute as they
+   * change; the form's reset target stays the value the cells started with. A `mask`ed input does not
+   * reflect: its attribute is only ever the initial value.
    */
-  @property({ type: String }) value: string = '';
+  @property({ type: String, reflect: true }) value: string = '';
   /** Stop the cells accepting input and exclude the value from the form submission. */
   @property({ type: Boolean, reflect: true }) disabled: boolean = false;
   /**
@@ -46,6 +48,16 @@ export class VoidPinInput extends InternalsFormControl(VoidElement) {
   @property({ type: String, reflect: true }) color: 'default' | 'error' | 'warning' | 'caution' | 'success' | 'info' | 'notice' | 'highlight' = 'default';
   /** Character shown in every empty cell, such as `-`. */
   @property({ type: String }) placeholder: string = '';
+
+  override requestUpdate(name?: PropertyKey, oldValue?: unknown, options?: PropertyDeclaration): void {
+    super.requestUpdate(name, oldValue, valueReflection(this.mask, name, options, () => VoidPinInput.getPropertyOptions('value')));
+  }
+
+  protected override updated(changed: PropertyValues): void {
+    super.updated(changed);
+    // An input turned into a masked one takes back the value it reflected as text.
+    if (this.mask && changed.get('mask') !== undefined) dropReflectedValue(this);
+  }
 
   private get _effectiveLength(): number {
     const g = this._parsedGroups;
