@@ -180,6 +180,27 @@ The `void_attrs` helper generates Alpine.js attributes for wiring Voidable event
 
 `@voidableScripts` also loads `@voidable/ui/dev` when `voidable.dev_warnings` is on, which by default it is for the `local` environment only: misused `<void-*>` markup (a wrong attribute, a value outside the allowed set, a child in the wrong parent) is then reported in the browser console, including what Livewire renders later. Set `VOIDABLE_DEV_WARNINGS=false` to turn it off or `VOIDABLE_DEV_WARNINGS=throw` to turn warnings into thrown errors for browser tests. `voidable.dev_script` is where the file comes from (a self-contained file, `@voidable/ui/dist/dev.js`): by default the copy published with this package's release, never `@latest`. An install whose version is not a release (a path repository, `dev-main`) gets no script; set `VOIDABLE_DEV_SCRIPT` to your own copy, or import `@voidable/ui/dev` from your development bundle.
 
+## Testing
+
+Dusk (and Pest's browser tests, or any driver) waits for components with a selector. Load `@voidable/ui/testing` in the test build, which sets `data-void-ready` on `<html>` while every `void-*` element is defined and rendered, and render `data-anim-speed="off"` there to switch motion off:
+
+```js
+// resources/js/app.js
+if (navigator.webdriver) import('@voidable/ui/testing');
+```
+
+```blade
+<html data-anim-speed="{{ app()->environment('testing') ? 'off' : '' }}">
+```
+
+```php
+$browser->visit('/settings')
+    ->waitFor('html[data-void-ready]')
+    ->press('Save');
+```
+
+An empty `data-anim-speed` is ignored by the theme. A toast still closes after its `duration` with animation off: it is a timer, not an animation. See [Testing](https://voidable.dev/guides/testing/).
+
 ## Requirements
 
 - PHP >= 8.1

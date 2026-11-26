@@ -126,6 +126,28 @@ and `maxlength` (and `pattern` on the single-line inputs); `inputmode`,
 attributes. `number_input` accepts `step="any"` and decimal `value`, `min`
 and `max`, and `stat` takes `description`.
 
+## Testing
+
+`Phoenix.LiveViewTest` sees the server-rendered markup before any component script runs, so there is nothing to wait for: assert on markup (`has_element?(view, "void-switch[checked]")`). For behaviour in a browser (Wallaby, Playwright), load `@voidable/ui/testing` in the test build, which sets `data-void-ready` on `<html>` while the components are defined and rendered, and turn motion off with `data-anim-speed="off"` on `<html>`:
+
+```elixir
+# config/test.exs
+config :my_app, anim_speed: "off"
+```
+
+```heex
+<html lang="en" data-anim-speed={Application.get_env(:my_app, :anim_speed)}>
+```
+
+```elixir
+session
+|> visit("/settings")
+|> assert_has(Query.css("html[data-void-ready]"))
+|> click(Query.button("Save"))
+```
+
+A toast still closes after its `duration` with animation off: it is a timer. See [Testing](https://voidable.dev/guides/testing/).
+
 ## For AI agents
 
 `@voidable/ui-liveview/llms.txt` (npm) and `llms.txt` in the `live_voidable` Hex package summarise this adapter's API, including every HEEx component. Every element's parts, attributes and events are in `@voidable/ui/reference.md` (`node_modules/@voidable/ui/dist/reference.md`).

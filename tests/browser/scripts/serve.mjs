@@ -32,7 +32,7 @@ if (!process.env.VOID_SKIP_BUNDLE) {
 const types = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.map': 'application/json' };
 const states = new Map();
 
-export function layout(body, { theme = 'dark', title = 'Void UI test', load = 'defer' } = {}) {
+export function layout(body, { theme = 'dark', title = 'Void UI test', load = 'defer', testing = false } = {}) {
   const attr = theme === 'none' ? '' : ` data-theme="${theme}"`;
   return `<!doctype html>
 <html lang="en"${attr}>
@@ -43,6 +43,7 @@ export function layout(body, { theme = 'dark', title = 'Void UI test', load = 'd
 <script src="/build/harness.js"></script>
 <link rel="stylesheet" href="/build/theme.css">
 <script${load === 'defer' ? ' defer' : ''} src="/build/ui.js"></script>
+${testing ? '<script defer src="/build/testing.js"></script>' : ''}
 </head>
 <body>
 ${body}
@@ -104,7 +105,7 @@ const server = createServer(async (req, res) => {
     if (!file.startsWith(join(root, 'pages')) || !existsSync(file)) return send(res, 404, 'not found', 'text/plain');
     const src = readFileSync(file, 'utf8');
     if (/^\s*<!doctype/i.test(src)) return send(res, 200, src);
-    return send(res, 200, layout(src, { theme: url.searchParams.get('theme') || 'dark', title: name, load: url.searchParams.get('load') || 'defer' }));
+    return send(res, 200, layout(src, { theme: url.searchParams.get('theme') || 'dark', title: name, load: url.searchParams.get('load') || 'defer', testing: url.searchParams.has('testing') }));
   } catch (err) {
     console.error(err);
     send(res, 500, String(err.stack || err), 'text/plain');

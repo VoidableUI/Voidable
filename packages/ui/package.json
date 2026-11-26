@@ -12,10 +12,12 @@
     "./dist/index.js",
     "./dist/autoloader.js",
     "./dist/dev.js",
+    "./dist/testing.js",
     "./dist/components/*.js",
     "./src/index.ts",
     "./src/autoloader.ts",
     "./src/dev/index.ts",
+    "./src/testing/index.ts",
     "./src/components/*.ts"
   ],
   "license": "MIT",
@@ -27,6 +29,10 @@
     "./dev": {
       "types": "./dist/dev/index.d.ts",
       "default": "./dist/dev.js"
+    },
+    "./testing": {
+      "types": "./dist/testing/index.d.ts",
+      "default": "./dist/testing.js"
     },
     "./autoloader": {
       "types": "./dist/autoloader.d.ts",

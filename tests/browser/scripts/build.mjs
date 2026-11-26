@@ -44,6 +44,8 @@ const iife = (name, contents) =>
 await Promise.all([
   // The root entry, as a consumer importing '@voidable/ui' gets it.
   iife('ui', `import * as ui from '@voidable/ui'; window.VoidUI = ui;`),
+  // The testing entry, as a test build would load it: it starts the data-void-ready watcher.
+  iife('testing', `import '@voidable/ui/testing';`),
   esbuild.build({
     ...common,
     entryPoints: [require.resolve('@voidable/theme')],

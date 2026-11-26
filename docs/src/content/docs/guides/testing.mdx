@@ -46,6 +46,85 @@ expect(body).toMatchObject({ email: 'a@b.co', alerts: 'on' });
 
 Every interaction that changes a value dispatches a `void-*` event that bubbles (`void-open` and `void-close` fire on the element and do not bubble: wait for them on the element). Wait for it instead of sleeping (see [Events](/guides/events/)).
 
+## Wait for the components, not a clock
+
+A page is ready when every `void-*` element on it is defined (its script has arrived) and has finished its first render. `@voidable/ui/testing` reports that in three ways, whichever your test tool prefers.
+
+**A selector, with no script in the test.** Load the module in your test build and wait for `html[data-void-ready]`. The attribute is on `<html>` while the page is ready and is removed while an element is not (a late script, a component a morph, Turbo or LiveView just added), so it also works after the page changes.
+
+```js
+// application entry, test builds only. Production never loads it.
+if (import.meta.env.MODE === 'test') await import('@voidable/ui/testing');
+// or, in any build, only for browsers a test tool drives:
+if (navigator.webdriver) import('@voidable/ui/testing');
+```
+
+```html
+<script type="module">import '@voidable/ui/testing'</script>
+```
+
+**Playwright helpers.** They need nothing loaded in the page:
+
+```ts
+import { animationsOff, gotoReady, voidReady } from '@voidable/ui/testing';
+
+await animationsOff(page);              // before the first navigation
+await gotoReady(page, '/settings');     // page.goto, then voidReady
+await page.getByRole('button', { name: 'Save' }).click();
+await voidReady(page);                  // after a change that adds components
+```
+
+`voidReady(page, { scope, expect, timeout })` takes a CSS `scope` to wait only for one subtree, `expect` to name tags a script will register later (a tag that is still undefined after the page has loaded is taken to be a CSS-only part such as `void-card-body`), and a `timeout` (10 s). When it times out it says what it was waiting for.
+
+**A script in the page.** `await whenReady()` from `@voidable/ui/testing` resolves under the same rules, for Cypress `cy.window()` code and the like.
+
+Ready means defined and first rendered, not "no further update will happen": after you change a value, wait for the event or the attribute you expect, as above. The module adds nothing to any element and loads no component; the only cost is one observer on the document, in the builds that import it.
+
+## Turn animation off
+
+Set `data-anim-speed="off"` on `<html>` (this is the theme's `--void-anim-scale: 0`; see [Theming](/getting-started/theming/)). Everything the theme and the components animate then jumps to its end state: transitions and keyframes, accordion and collapsible height changes, and the chart and gauge draw-in. In Playwright, `animationsOff(page)` does this for every navigation of the page, and `use: { reducedMotion: 'reduce' }` in the config has the same effect through `prefers-reduced-motion` (which the theme honours for the same knob).
+
+Timers are not animations and are left alone: a toast still closes after its `duration`, and tooltip, hover-card and navigation-menu delays still apply. Do not wait for those with a sleep; wait for the `void-close` or `void-open` event, or give the element a short `duration` or `delay` in the test.
+
+## Other test tools
+
+The same two ideas, as plain selectors. The test build must load `@voidable/ui/testing` (above) and, to switch animation off, render `data-anim-speed="off"` on `<html>` in the test environment.
+
+**Rails, Capybara.** Capybara retries a matcher until its wait time ends, so the selector is the whole helper:
+
+```erb
+<html <%= tag.attributes(data: { anim_speed: ("off" if Rails.env.test?) }) %>>
+```
+
+```ruby
+# spec/support/voidable.rb
+def wait_for_voidable = expect(page).to have_css("html[data-void-ready]", wait: 10)
+
+visit settings_path
+wait_for_voidable
+click_button "Save"
+```
+
+**Phoenix, Wallaby.** Put `data-anim-speed={Application.get_env(:my_app, :anim_speed)}` on `<html>` in the root layout and set `config :my_app, anim_speed: "off"` in `config/test.exs` (a `nil` value renders no attribute). Then:
+
+```elixir
+session
+|> visit("/settings")
+|> assert_has(Query.css("html[data-void-ready]"))
+|> click(Query.button("Save"))
+```
+
+Phoenix's `LiveViewTest` has no browser: it sees the server-rendered markup before any component script runs, so there is nothing to wait for. Assert on the markup with `has_element?(view, "void-switch[checked]")` and use a browser test for behaviour.
+
+**Laravel, Dusk and Pest.** Render `data-anim-speed="off"` when `app()->environment('testing')`, then:
+
+```php
+$browser->visit('/settings')
+    ->waitFor('html[data-void-ready]')
+    ->press('Save');
+```
+
+Any other driver (Cypress, Selenium, WebDriver, Testing Library) does the same: wait for `html[data-void-ready]`.
 ## Two rules
 
 - **Prefer the contract to class names.** `void-card-body` and other rendered classes are styling structure and can change. Roles, names, reflected attributes and event names are the stable surface.
