@@ -55,7 +55,12 @@ env:
   # sharp (a dev dependency of the browser suite) builds from source when it finds a
   # system libvips; use its prebuilt binaries, as `mise run install` does.
   SHARP_IGNORE_GLOBAL_LIBVIPS: "1"
+  # Only Node and pnpm are installed (install_args below). Nothing else in mise.toml may be
+  # resolved or installed on these runners: erlang has no Windows build, php needs autoconf,
+  # elixir needs erlang. Disabling them also keeps mise from resolving their versions.
   MISE_NOT_FOUND_AUTO_INSTALL: "false"
+  MISE_TASK_RUN_AUTO_INSTALL: "false"
+  MISE_DISABLE_TOOLS: "erlang,elixir,php,ruby"
 
 jobs:
   voiceover:
@@ -72,6 +77,10 @@ jobs:
       - uses: jdx/mise-action@5228313ee0372e111a38da051671ca30fc5a96db # v3.6.3
         with:
           install_args: "node npm:pnpm"
+        env:
+          MISE_NOT_FOUND_AUTO_INSTALL: "false"
+          MISE_TASK_RUN_AUTO_INSTALL: "false"
+          MISE_DISABLE_TOOLS: "erlang,elixir,php,ruby"
 
       # Guidepup's own workflows configure the machine first, before anything else
       # touches it. --ci avoids the prompts; --macos-record saves a screen recording
@@ -132,6 +141,10 @@ jobs:
       - uses: jdx/mise-action@5228313ee0372e111a38da051671ca30fc5a96db # v3.6.3
         with:
           install_args: "node npm:pnpm"
+        env:
+          MISE_NOT_FOUND_AUTO_INSTALL: "false"
+          MISE_TASK_RUN_AUTO_INSTALL: "false"
+          MISE_DISABLE_TOOLS: "erlang,elixir,php,ruby"
 
       - name: Use English for the user, the culture and the keyboard
         shell: pwsh
