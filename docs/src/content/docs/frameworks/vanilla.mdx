@@ -104,3 +104,13 @@ if (import.meta.env.DEV) import('@voidable/ui/dev');
 With an import map and no bundler, add `<script type="module">import '@voidable/ui/dev.js';</script>` to your development layout only.
 
 It is never part of `@voidable/ui` itself, so production builds are unchanged. See [Development warnings](/getting-started/development-warnings/) for what it reports and how to make warnings throw in tests.
+
+## Check the markup
+
+The development warnings only see pages you open. The `voidable` tool reads the files instead, so it covers every template at once, in the editor and in CI. Install it with `curl -fsSL https://voidable.dev/install.sh | sh` (see [For AI agents](/getting-started/for-agents/#install-it)), then run:
+
+```sh
+voidable check .
+```
+
+It reports unknown elements, attributes and values, children in the wrong parent, controls with no accessible name and every form renamed in 0.8, each with what to write instead (see [Upgrading to 0.8](/guides/upgrading/)).
