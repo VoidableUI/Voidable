@@ -85,7 +85,7 @@ Dispatch a custom event to a Voidable component from an Alpine expression:
 
 ```blade
 <div x-data="{ selected: @entangle('selected') }">
-  <void-select aria-label="Option" x-void-on:void-change="selected = $event.detail.value">
+  <void-select aria-label="Selected item" x-void-on:void-change="selected = $event.detail.value">
     <select>
       @foreach($options as $option)
         <option value="{{ $option->id }}">{{ $option->name }}</option>

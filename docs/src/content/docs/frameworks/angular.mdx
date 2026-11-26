@@ -34,7 +34,7 @@ import { Component, CUSTOM_ELEMENTS_SCHEMA, signal } from '@angular/core';
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   template: `
     <void-button variant="filled" (void-click)="clicks.set(clicks() + 1)">Save</void-button>
-    <void-input aria-label="Text input" [value]="name()" [disabled]="false" (void-input)="name.set($any($event).detail.value)"></void-input>
+    <void-input aria-label="Your name" [value]="name()" [disabled]="false" (void-input)="name.set($any($event).detail.value)"></void-input>
     <void-tags-input aria-label="Tags" [value]="tags"></void-tags-input>
   `,
 })
@@ -63,7 +63,7 @@ onChange(event: Event) {
 ```
 
 ```html
-<void-input aria-label="Text input" (void-change)="onChange($event)"></void-input>
+<void-input aria-label="Your name" (void-change)="onChange($event)"></void-input>
 ```
 
 ## Forms
@@ -80,9 +80,9 @@ import { VoidValueAccessor } from '@voidable/ui/angular';
   imports: [FormsModule, ReactiveFormsModule, VoidValueAccessor],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   template: `
-    <void-input aria-label="Text input" [(ngModel)]="text"></void-input>
+    <void-input aria-label="Comment" [(ngModel)]="text"></void-input>
 
-    <void-select aria-label="Choose an option">
+    <void-select aria-label="Plan">
       <select [(ngModel)]="choice">
         <option value="a">A</option>
         <option value="b">B</option>
@@ -93,8 +93,8 @@ import { VoidValueAccessor } from '@voidable/ui/angular';
     <void-number-input aria-label="Quantity" [(ngModel)]="count" [min]="0" [max]="10"></void-number-input>
 
     <form [formGroup]="form">
-      <void-input aria-label="Text input" formControlName="name"></void-input>
-      <void-switch aria-label="Setting" formControlName="notify"></void-switch>
+      <void-input aria-label="Your name" formControlName="name"></void-input>
+      <void-switch aria-label="Send notifications" formControlName="notify"></void-switch>
     </form>
   `,
 })

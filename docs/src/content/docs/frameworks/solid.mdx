@@ -50,7 +50,7 @@ export default function App() {
     <>
       <void-button variant="filled" on:void-click={() => console.log('clicked')}>Save</void-button>
 
-      <void-input aria-label="Text input" value={name()} disabled={false} on:void-input={(e) => setName(e.detail.value)} />
+      <void-input aria-label="Your name" value={name()} disabled={false} on:void-input={(e) => setName(e.detail.value)} />
 
       <void-tags-input aria-label="Tags" value={tags()} />
     </>
@@ -102,7 +102,7 @@ export default function App() {
     <>
       <void-button variant="filled" ref={on('void-button', 'void-click', () => console.log('clicked'))}>Save</void-button>
 
-      <void-input aria-label="Text input" value={name()} ref={on('void-input', 'void-input', (e) => setName(e.detail.value))} />
+      <void-input aria-label="Your name" value={name()} ref={on('void-input', 'void-input', (e) => setName(e.detail.value))} />
 
       <void-tags-input aria-label="Tags" prop:value={tags()} />
     </>
@@ -121,9 +121,9 @@ const [text, setText] = createSignal('a');
 const [choice, setChoice] = createSignal('b');
 const [agreed, setAgreed] = createSignal(false);
 
-<void-input aria-label="Text input" value={text()} on:void-input={(e) => setText(e.detail.value)} />
+<void-input aria-label="Comment" value={text()} on:void-input={(e) => setText(e.detail.value)} />
 
-<void-select aria-label="Choose an option" value={choice()} on:void-change={(e) => setChoice(e.detail.value)}>
+<void-select aria-label="Plan" value={choice()} on:void-change={(e) => setChoice(e.detail.value)}>
   <select>
     <option value="a">A</option>
     <option value="b">B</option>

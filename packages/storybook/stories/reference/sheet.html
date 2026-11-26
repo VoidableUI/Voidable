@@ -206,10 +206,10 @@
           <void-progress value="70" color="info" aria-label="info"></void-progress>
           <void-progress value="80" color="notice" aria-label="notice"></void-progress>
           <void-progress value="90" color="highlight" aria-label="highlight"></void-progress>
-          <void-progress value="60" size="sm" aria-label="sm"></void-progress>
-          <void-progress value="60" size="md" aria-label="md"></void-progress>
-          <void-progress value="60" size="lg" aria-label="lg"></void-progress>
-          <void-progress indeterminate aria-label="Indeterminate"></void-progress>
+          <void-progress value="60" size="sm" aria-label="Upload progress (sm)"></void-progress>
+          <void-progress value="60" size="md" aria-label="Upload progress (md)"></void-progress>
+          <void-progress value="60" size="lg" aria-label="Upload progress (lg)"></void-progress>
+          <void-progress indeterminate aria-label="Upload progress"></void-progress>
         </void-stack>
         <void-section>
           <span data-void-type="label">Spinner sizes</span>
@@ -264,10 +264,10 @@
           <void-number-input size="sm" value="3" label="Number sm"></void-number-input>
           <void-number-input size="md" value="3" label="Number md"></void-number-input>
           <void-number-input size="lg" value="3" label="Number lg"></void-number-input>
-          <void-input value="Invalid value" error="This value is not accepted." aria-label="Invalid"></void-input>
-          <void-input value="Disabled" disabled aria-label="Disabled"></void-input>
+          <void-input value="Invalid value" error="This value is not accepted." aria-label="Email address"></void-input>
+          <void-input value="Account name" disabled aria-label="Disabled"></void-input>
           <void-number-input value="3" controls="right" label="Number, controls right"></void-number-input>
-          <void-date-picker value="2026-06-15" aria-label="Date"></void-date-picker>
+          <void-date-picker value="2026-06-15" aria-label="Start date"></void-date-picker>
         </void-stack>
         <void-section>
           <span data-void-type="label">Checkbox, eight colours</span>
@@ -317,11 +317,11 @@
         <void-section>
           <span data-void-type="label">Switch sizes and states</span>
           <void-actions>
-            <void-switch size="sm" checked aria-label="sm"></void-switch>
-            <void-switch size="md" checked aria-label="md"></void-switch>
-            <void-switch size="lg" checked aria-label="lg"></void-switch>
-            <void-switch aria-label="Off"></void-switch>
-            <void-switch disabled aria-label="Disabled"></void-switch>
+            <void-switch size="sm" checked aria-label="Auto-renewal (sm)"></void-switch>
+            <void-switch size="md" checked aria-label="Auto-renewal (md)"></void-switch>
+            <void-switch size="lg" checked aria-label="Auto-renewal (lg)"></void-switch>
+            <void-switch aria-label="Auto-renewal"></void-switch>
+            <void-switch disabled aria-label="Auto-renewal (unavailable)"></void-switch>
           </void-actions>
         </void-section>
         <void-stack>
@@ -332,9 +332,9 @@
         <void-section>
           <span data-void-type="label">Segmented control and toggle group, sizes</span>
           <void-actions>
-            <void-segmented-control size="sm" value="b" aria-label="sm"><void-segmented-control-item value="a">One</void-segmented-control-item><void-segmented-control-item value="b">Two</void-segmented-control-item><void-segmented-control-item value="c">Three</void-segmented-control-item></void-segmented-control>
-            <void-segmented-control size="md" value="b" aria-label="md"><void-segmented-control-item value="a">One</void-segmented-control-item><void-segmented-control-item value="b">Two</void-segmented-control-item><void-segmented-control-item value="c">Three</void-segmented-control-item></void-segmented-control>
-            <void-segmented-control size="lg" value="b" aria-label="lg"><void-segmented-control-item value="a">One</void-segmented-control-item><void-segmented-control-item value="b">Two</void-segmented-control-item><void-segmented-control-item value="c">Three</void-segmented-control-item></void-segmented-control>
+            <void-segmented-control size="sm" value="b" aria-label="Period (sm)"><void-segmented-control-item value="a">One</void-segmented-control-item><void-segmented-control-item value="b">Two</void-segmented-control-item><void-segmented-control-item value="c">Three</void-segmented-control-item></void-segmented-control>
+            <void-segmented-control size="md" value="b" aria-label="Period (md)"><void-segmented-control-item value="a">One</void-segmented-control-item><void-segmented-control-item value="b">Two</void-segmented-control-item><void-segmented-control-item value="c">Three</void-segmented-control-item></void-segmented-control>
+            <void-segmented-control size="lg" value="b" aria-label="Period (lg)"><void-segmented-control-item value="a">One</void-segmented-control-item><void-segmented-control-item value="b">Two</void-segmented-control-item><void-segmented-control-item value="c">Three</void-segmented-control-item></void-segmented-control>
             <void-toggle-group size="sm" value="a"><void-toggle value="a">A</void-toggle><void-toggle value="b">B</void-toggle></void-toggle-group>
             <void-toggle-group size="md" value="a"><void-toggle value="a">A</void-toggle><void-toggle value="b">B</void-toggle></void-toggle-group>
             <void-toggle-group size="lg" value="a"><void-toggle value="a">A</void-toggle><void-toggle value="b">B</void-toggle></void-toggle-group>
@@ -403,12 +403,12 @@
       <void-section gap="stack">
         <h2>Charts</h2>
         <void-split>
-          <void-bar-chart aria-label="Bar chart" data-json-data="{&quot;labels&quot;:[&quot;Mon&quot;,&quot;Tue&quot;,&quot;Wed&quot;,&quot;Thu&quot;,&quot;Fri&quot;,&quot;Sat&quot;,&quot;Sun&quot;],&quot;series&quot;:[{&quot;name&quot;:&quot;Requests&quot;,&quot;values&quot;:[1200,1850,1620,2100,1980,1450,1100]},{&quot;name&quot;:&quot;Errors&quot;,&quot;values&quot;:[120,185,162,210,198,145,110]}]}"></void-bar-chart>
-          <void-line-chart aria-label="Line chart" data-json-data="{&quot;labels&quot;:[&quot;Mon&quot;,&quot;Tue&quot;,&quot;Wed&quot;,&quot;Thu&quot;,&quot;Fri&quot;,&quot;Sat&quot;,&quot;Sun&quot;],&quot;series&quot;:[{&quot;name&quot;:&quot;Requests&quot;,&quot;values&quot;:[1200,1850,1620,2100,1980,1450,1100]},{&quot;name&quot;:&quot;Errors&quot;,&quot;values&quot;:[400,620,540,700,660,480,370]}]}"></void-line-chart>
+          <void-bar-chart aria-label="Requests and errors per day, bars" data-json-data="{&quot;labels&quot;:[&quot;Mon&quot;,&quot;Tue&quot;,&quot;Wed&quot;,&quot;Thu&quot;,&quot;Fri&quot;,&quot;Sat&quot;,&quot;Sun&quot;],&quot;series&quot;:[{&quot;name&quot;:&quot;Requests&quot;,&quot;values&quot;:[1200,1850,1620,2100,1980,1450,1100]},{&quot;name&quot;:&quot;Errors&quot;,&quot;values&quot;:[120,185,162,210,198,145,110]}]}"></void-bar-chart>
+          <void-line-chart aria-label="Requests and errors per day, lines" data-json-data="{&quot;labels&quot;:[&quot;Mon&quot;,&quot;Tue&quot;,&quot;Wed&quot;,&quot;Thu&quot;,&quot;Fri&quot;,&quot;Sat&quot;,&quot;Sun&quot;],&quot;series&quot;:[{&quot;name&quot;:&quot;Requests&quot;,&quot;values&quot;:[1200,1850,1620,2100,1980,1450,1100]},{&quot;name&quot;:&quot;Errors&quot;,&quot;values&quot;:[400,620,540,700,660,480,370]}]}"></void-line-chart>
         </void-split>
         <void-split>
           <void-donut-chart aria-label="Donut chart" data-json-data="{&quot;segments&quot;:[{&quot;name&quot;:&quot;Organic&quot;,&quot;value&quot;:4820},{&quot;name&quot;:&quot;Referral&quot;,&quot;value&quot;:2310},{&quot;name&quot;:&quot;Direct&quot;,&quot;value&quot;:1950},{&quot;name&quot;:&quot;Paid&quot;,&quot;value&quot;:980}]}"></void-donut-chart>
-          <void-gauge value="67" unit="%" unit-inline circular="triple" aria-label="Gauge"></void-gauge>
+          <void-gauge value="67" unit="%" unit-inline circular="triple" aria-label="Disk used"></void-gauge>
         </void-split>
       </void-section>
   </void-page>
