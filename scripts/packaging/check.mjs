@@ -113,12 +113,12 @@ try {
     checkExports(name, pkg, files);
     checkMaps(name, root, files);
     run('pnpm', ['exec', 'publint', 'run', '--strict', tgz], name, 'publint');
-    // A CSS-only package has no types or JavaScript for attw to resolve, and a
+    // A CSS-only package has no types or JavaScript for attw to resolve (nor do the llms.txt and reference.md entries), and a
     // package with both (the theme: stylesheets, and a module of token names)
     // has stylesheet entry points attw cannot resolve either: those are left out.
     if (files.some((f) => f.endsWith('.js'))) {
       const stylesheets = Object.entries(pkg.exports ?? {})
-        .filter(([spec, value]) => !spec.includes('*') && targets(value).every(({ target }) => target.endsWith('.css')))
+        .filter(([spec, value]) => !spec.includes('*') && targets(value).every(({ target }) => /\.(css|txt|md)$/.test(target)))
         .map(([spec]) => spec);
       const exclude = stylesheets.length ? ['--exclude-entrypoints', ...stylesheets] : [];
       run('pnpm', ['exec', 'attw', tgz, '--profile', 'esm-only', '--format', 'ascii', ...exclude], name, 'attw');
