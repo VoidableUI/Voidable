@@ -318,9 +318,15 @@ export function buildReference({ manifest, supplement, snippets, version }) {
     '- `@voidable/ui/llms.txt`: this file. The docs site serves the same in `/llms.txt` and `/llms-full.txt`: https://voidable.dev',
     '- `voidable ref <tag>` prints one element offline; `voidable check <file>` checks markup (https://voidable.dev/getting-started/for-agents/).',
     '',
-    `## Elements (${elements.length})`,
+    `## Elements (${registered})`,
     '',
-    ...elements.map((e) => `- \`<${e.tag}>\`${e.cssOnly ? ' (CSS only)' : ''}: ${firstSentence(e.description) || '(no description)'}`),
+    ...elements.filter((e) => !e.cssOnly).map((e) => `- \`<${e.tag}>\`: ${firstSentence(e.description) || '(no description)'}`),
+    '',
+    `## CSS-only parts and patterns (${elements.length - registered})`,
+    '',
+    'Styled by `@voidable/theme`, registered by no JavaScript; write them as plain markup. Each is described in `reference.md`.',
+    '',
+    elements.filter((e) => e.cssOnly).map((e) => `\`<${e.tag}>\``).join(', '),
     '',
   ].join('\n');
 
