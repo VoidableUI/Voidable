@@ -67,6 +67,8 @@ if (problems.length) {
 // ── Bundling (lightningcss, with in-memory entries) ─────────────────────────
 const virtual = new Map();
 const abs = (rel) => path.join(SRC, rel);
+// A path written into CSS source: backslashes would be read as escapes (`\a` is a newline), so use slashes.
+const cssPath = (file) => file.split(path.sep).join('/');
 const resolver = {
   read: (file) => (virtual.has(file) ? virtual.get(file) : fs.readFileSync(file, 'utf8')),
   resolve: (specifier, from) => (specifier.startsWith('virtual:') || path.isAbsolute(specifier) ? specifier : path.resolve(path.dirname(from), specifier)),
@@ -111,7 +113,7 @@ async function emit(rel, entry, { map = false } = {}) {
 fs.rmSync(DIST, { recursive: true, force: true });
 fs.mkdirSync(DIST, { recursive: true });
 
-const imp = (rel, layer) => `@import '${abs(rel)}'${layer ? ` layer(${layer})` : ''};`;
+const imp = (rel, layer) => `@import '${cssPath(abs(rel))}'${layer ? ` layer(${layer})` : ''};`;
 const impVirtual = (name, content, layer) => {
   virtual.set(`virtual:${name}`, content);
   return `@import 'virtual:${name}' layer(${layer});`;
@@ -133,8 +135,8 @@ await emit(
 );
 
 // core and void
-await emit('core', `@import '${abs('core.css')}';`);
-await emit('void', `@import '${abs('core.css')}';\n${imp('base.css', 'components.void.reset')}`);
+await emit('core', `@import '${cssPath(abs('core.css'))}';`);
+await emit('void', `@import '${cssPath(abs('core.css'))}';\n${imp('base.css', 'components.void.reset')}`);
 
 // per component
 const exportsJson = { layers: L.voidLayers(), components: {}, patterns: {}, themes: [], skins: [] };
