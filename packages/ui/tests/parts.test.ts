@@ -123,4 +123,16 @@ describe('PartsController', () => {
     expect(triggerControl(t)!.localName).toBe('a');
     expect(triggerControl(null)).toBeNull();
   });
+
+  it('triggerControl is the inner link or button of a link button, and the button itself otherwise', () => {
+    const t = document.createElement('x-host-trigger');
+    t.innerHTML = '<void-button>Plain</void-button>';
+    expect(triggerControl(t)!.localName).toBe('void-button');
+    t.innerHTML = '<void-button><a href="#">Link</a></void-button>';
+    expect(triggerControl(t)!.localName).toBe('a');
+    t.innerHTML = '<void-button><button>Inner</button></void-button>';
+    expect(triggerControl(t)!.localName).toBe('button');
+    t.innerHTML = '<void-button><a>No href</a></void-button>';
+    expect(triggerControl(t)!.localName).toBe('void-button');
+  });
 });
