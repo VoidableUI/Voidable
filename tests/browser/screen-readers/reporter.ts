@@ -23,6 +23,8 @@ const pkgVersion = (name: string) => {
 export default class ScreenReaderReporter implements Reporter {
   private tests = new Map<string, { status: ScenarioStatus; reader?: string; browser: string }>();
 
+  private known = new Map<string, string>();
+
   onBegin(_config: FullConfig, _suite: Suite): void {}
 
   onTestEnd(test: TestCase, _result: TestResult): void {
@@ -30,6 +32,8 @@ export default class ScreenReaderReporter implements Reporter {
     const status: ScenarioStatus = outcome === 'skipped' ? 'skipped' : outcome === 'flaky' ? 'flaky' : outcome === 'expected' ? 'passed' : 'failed';
     const reader = test.annotations.find((a) => a.type === 'screen-reader')?.description;
     const project = test.parent.project();
+    const issue = test.annotations.find((a) => a.type === 'known issue')?.description;
+    if (issue) this.known.set(test.title, issue.split(': ')[0]);
     this.tests.set(test.title, { status, reader: reader ?? this.tests.get(test.title)?.reader, browser: project?.name ?? 'unknown' });
   }
 
@@ -60,7 +64,7 @@ export default class ScreenReaderReporter implements Reporter {
     const file = join(RESULTS_DIR, `${screenReader}-${run.browser}.json`);
     writeFileSync(file, JSON.stringify(run, null, 2) + '\n');
     if (env.GITHUB_STEP_SUMMARY) {
-      const rows = run.scenarios.map((s) => `| ${s.id} | ${s.status} |`).join('\n');
+      const rows = run.scenarios.map((s) => `| ${s.id} | ${s.status}${known.has(s.id) ? ` (known issue: ${known.get(s.id)})` : ''} |`).join('\n');
       appendFileSync(env.GITHUB_STEP_SUMMARY, `### ${screenReader} ${run.screenReaderVersion} in ${run.browser}\n\n| Scenario | Result |\n|---|---|\n${rows}\n\n`);
     }
   }

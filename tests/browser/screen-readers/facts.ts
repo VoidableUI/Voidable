@@ -105,4 +105,10 @@ export interface Scenario {
    * skips the scenario, because the failure is already known and says nothing new.
    */
   knownIssue?: { key: KnownIssue; detail: string };
+  /**
+   * The page is right (the tree replay passes) but VoiceOver does not say what a user needs.
+   * The scenario still runs with VoiceOver, as an expected failure, so the job reports it as
+   * known and a fix turns it red. Not used by the tree replay or by NVDA.
+   */
+  voiceOverIssue?: { key: KnownIssue; detail: string };
 }

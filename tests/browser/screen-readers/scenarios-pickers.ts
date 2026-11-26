@@ -23,7 +23,9 @@ export const pickerScenarios: Scenario[] = [
     title: 'A combobox announces expanded, the highlighted option as you arrow, and the chosen value',
     page: '/sr-pickers',
     steps: [
-      { reach: { role: 'combobox', name: 'Framework', expanded: false }, by: 'control' },
+      // A combobox opens when it takes focus (void-open reason "focus"), so VoiceOver, which focuses it, says
+      // "expanded", not "collapsed". The tree replay checks the state before it focuses the element.
+      { reach: { role: 'combobox', name: 'Framework', expanded: false, spoken: [/combo ?box/] }, by: 'control' },
       { act: true },
       { hear: { role: 'combobox', name: 'Framework', expanded: true } },
       { press: 'ArrowDown' },
@@ -42,7 +44,8 @@ export const pickerScenarios: Scenario[] = [
       { reach: { role: 'combobox', name: 'Skills', expanded: false }, by: 'control' },
       { act: true },
       { press: 'ArrowDown' },
-      { hear: { role: 'combobox', name: 'Skills', expanded: true } },
+      // Already open from focus: VoiceOver says the highlighted option here, not a state change.
+      { hear: { role: 'combobox', name: 'Skills', expanded: true, spoken: [/css/, /1 of 3/] } },
       { press: 'Enter' },
       { hear: { role: 'option', name: 'CSS', selected: true, position: { n: 1, of: 3, within: '#skills' } } },
     ],

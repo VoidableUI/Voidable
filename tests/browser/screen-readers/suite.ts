@@ -65,6 +65,11 @@ export function screenReaderSuite(title: string, scenarios: Scenario[]): void {
       for (const scenario of scenarios) {
         voiceOverTest(scenario.id, async ({ page, voiceOver }, testInfo) => {
           voiceOverTest.skip(!!scenario.knownIssue, `known defect, see the tree test: ${scenario.knownIssue?.key}`);
+          if (scenario.voiceOverIssue) {
+            const { key, detail } = scenario.voiceOverIssue;
+            voiceOverTest.info().annotations.push({ type: 'known issue', description: `${key}: ${detail}` });
+            voiceOverTest.fail(true, `${key}: ${detail}`);
+          }
           await play(voiceOverReader(voiceOver), () => voiceOver.navigateToWebContent(), page, scenario, testInfo);
         });
       }

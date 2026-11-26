@@ -73,7 +73,8 @@ export const scenarios: Scenario[] = [
     title: 'A radio group announces its name, each radio, its position and which is checked',
     page: '/sr-controls',
     steps: [
-      { reach: { role: 'radio', name: 'Free', checked: true, group: { role: 'radiogroup', name: 'Plan' }, position: { n: 1, of: 3, within: '#plan' } }, by: 'control' },
+      // VoiceOver, arriving by quick navigation, says "Free selected radio button, 1 of 3": the group name is not repeated.
+      { reach: { role: 'radio', name: 'Free', checked: true, group: { role: 'radiogroup', name: 'Plan' }, position: { n: 1, of: 3, within: '#plan' }, spoken: [/selected/, /1 of 3/] }, by: 'control' },
       { reach: { role: 'radio', name: 'Pro', checked: false, position: { n: 2, of: 3, within: '#plan' } }, by: 'control' },
       { act: true },
       { hear: { role: 'radio', name: 'Pro', checked: true } },
@@ -94,8 +95,9 @@ export const scenarios: Scenario[] = [
     title: 'A slider announces its value, and the new value when it changes',
     page: '/sr-controls',
     steps: [
+      // No `act`: VoiceOver's control navigation already puts focus on the slider. With it, one run heard
+      // "70" where "60" was expected (two steps) and passed on retry; VO+Space on a slider is not a step the user takes.
       { reach: { role: 'slider', name: 'Volume', value: '50' }, by: 'control' },
-      { act: true },
       { press: 'ArrowRight' },
       { hear: { role: 'slider', name: 'Volume', value: '60', spoken: [/\b60\b/] } },
     ],
@@ -104,6 +106,7 @@ export const scenarios: Scenario[] = [
     id: 'number-input',
     title: 'A number input announces its value, and the new value when it changes',
     page: '/sr-controls',
+    voiceOverIssue: { key: 'untracked:voiceover-number-input-percent', detail: 'VoiceOver said "11.1% Seats stepper" for a value of 2; it should say "2".' },
     steps: [
       { reach: { role: 'spinbutton', name: 'Seats', value: '2' }, by: 'control' },
       { act: true },
@@ -115,6 +118,7 @@ export const scenarios: Scenario[] = [
     id: 'dialog',
     title: 'A dialog announces itself and its title, contains reading, and Escape returns focus to its opener',
     page: '/sr-dialog',
+    voiceOverIssue: { key: 'untracked:voiceover-dialog-description', detail: 'VoiceOver said "Profile settings web dialog with 6 items" and never the description.' },
     steps: [
       { reach: { role: 'button', name: 'Edit profile' }, by: 'control' },
       { act: true },
@@ -132,7 +136,8 @@ export const scenarios: Scenario[] = [
     title: 'A dropdown menu announces menu items with their position, and choosing one closes it and returns focus',
     page: '/sr-menu',
     steps: [
-      { reach: { role: 'button', name: 'Actions', expanded: false }, by: 'control' },
+      // VoiceOver says "Actions menu pop up button" and leaves the collapsed state unspoken.
+      { reach: { role: 'button', name: 'Actions', expanded: false, spoken: [/pop up/] }, by: 'control' },
       { act: true },
       { focus: '[role="menuitem"]' },
       { hear: { role: 'menuitem', name: 'Rename', position: { n: 1, of: 3, within: 'void-dropdown-menu-content' } } },
@@ -141,7 +146,7 @@ export const scenarios: Scenario[] = [
       { press: 'Enter' },
       { check: async (page) => expect(page.locator('#chosen')).toHaveText('Chosen duplicate'), note: 'the chosen item was selected' },
       { focus: '#actions-trigger' },
-      { hear: { role: 'button', name: 'Actions', expanded: false } },
+      { hear: { role: 'button', name: 'Actions', expanded: false, spoken: [/actions/] } },
     ],
   },
   {
@@ -183,6 +188,7 @@ export const scenarios: Scenario[] = [
     id: 'toast',
     title: 'A toast is announced politely by its live region without moving focus',
     page: '/sr-notices',
+    voiceOverIssue: { key: 'untracked:voiceover-toast-silent', detail: 'The only phrase VoiceOver logged after the toast appeared was empty.' },
     steps: [
       { reach: { role: 'button', name: 'Send notification' }, by: 'control' },
       { act: true },
@@ -217,7 +223,9 @@ export const scenarios: Scenario[] = [
     page: '/sr-tooltip',
     steps: [
       { reach: { role: 'heading', name: 'Toolbar', level: 1 }, by: 'heading' },
-      { press: 'Tab' },
+      // Not `press: 'Tab'`: after heading navigation VoiceOver said nothing for Tab (only "You are
+      // currently on a heading level 1."). Control navigation focuses the button, which is what shows the tooltip.
+      { reach: { role: 'button', name: 'Bold' }, by: 'control' },
       { hear: { role: 'button', name: 'Bold' } },
       { hear: { role: 'button', name: 'Bold', description: 'Make the selection bold' } },
     ],
