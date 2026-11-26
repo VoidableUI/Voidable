@@ -5,7 +5,7 @@
 // machine. Pure functions: no page is opened. A change to the vocabulary tables
 // that breaks one of these is a change to what the screen-reader jobs accept.
 import { test, expect } from '@playwright/test';
-import type { Fact } from '../screen-readers/facts';
+import { forReader, pick, type Fact } from '../screen-readers/facts';
 import { heard, matchFact, normalise } from '../screen-readers/words';
 import { scenarios } from '../screen-readers/scenarios';
 import { pickerScenarios } from '../screen-readers/scenarios-pickers';
@@ -14,6 +14,17 @@ const ok = (phrase: string, fact: Fact) => {
   const v = matchFact(phrase, fact);
   return v.isElement && v.missing.length === 0;
 };
+
+test('wording given per reader applies to that reader only', () => {
+  const fact: Fact = { role: 'button', name: 'Actions', expanded: false, spoken: { VoiceOver: [/pop up/] } };
+  // VoiceOver: the words listed. NVDA: none listed, so the words derived from the states ("collapsed").
+  expect(ok('Actions menu pop up button', forReader(fact, 'VoiceOver'))).toBe(true);
+  expect(ok('Actions, menu button, collapsed', forReader(fact, 'VoiceOver'))).toBe(false);
+  expect(ok('clickable, Actions, menu button, collapsed, sub Menu', forReader(fact, 'NVDA'))).toBe(true);
+  expect(ok('Actions menu pop up button', forReader(fact, 'NVDA'))).toBe(false);
+  expect(pick({ NVDA: 'focusable' }, 'VoiceOver')).toBeUndefined();
+  expect(pick('control', 'NVDA')).toBe('control');
+});
 
 test('normalise drops case, punctuation and accents', () => {
   expect(normalise('Guidepup, heading, level 1')).toBe('guidepup heading level 1');
