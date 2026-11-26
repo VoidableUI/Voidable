@@ -167,6 +167,45 @@ type Renamed struct {
 	Values map[string]map[string]string `json:"values,omitempty"`
 	// Events maps a removed event to what to listen for instead.
 	Events map[string]string `json:"events,omitempty"`
+	// Since dates the renames the table did not begin with (see RenamedSince).
+	Since *RenamedSince `json:"since,omitempty"`
+}
+
+// RenamedSince is the release each rename was made in, where it is not the
+// release the table began with (0.8): attributes, attributes with renamed
+// values, and events, by name, as written in the supplement's `since`.
+type RenamedSince struct {
+	Attributes map[string]string `json:"attributes,omitempty"`
+	Values     map[string]string `json:"values,omitempty"`
+	Events     map[string]string `json:"events,omitempty"`
+}
+
+// FirstRenamedRelease is the release the renamed table began with: a rename it
+// does not date was made in it.
+const FirstRenamedRelease = "0.8"
+
+func releaseOf(dated func(*RenamedSince) map[string]string, r *Renamed, name string) string {
+	if r != nil && r.Since != nil {
+		if v, ok := dated(r.Since)[name]; ok {
+			return v
+		}
+	}
+	return FirstRenamedRelease
+}
+
+// AttributeRelease is the release the attribute was renamed or removed in.
+func (r *Renamed) AttributeRelease(name string) string {
+	return releaseOf(func(s *RenamedSince) map[string]string { return s.Attributes }, r, name)
+}
+
+// ValueRelease is the release the values of the attribute were renamed in.
+func (r *Renamed) ValueRelease(attr string) string {
+	return releaseOf(func(s *RenamedSince) map[string]string { return s.Values }, r, attr)
+}
+
+// EventRelease is the release the event was removed in.
+func (r *Renamed) EventRelease(name string) string {
+	return releaseOf(func(s *RenamedSince) map[string]string { return s.Events }, r, name)
 }
 
 // Attribute returns the attribute with the given (exact) name.

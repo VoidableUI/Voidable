@@ -159,7 +159,7 @@ func (c *Checker) checkAttr(el *Element, t Tag, a AttrToken, f findingFn) []Find
 		}
 		if el.Renamed != nil {
 			if advice, ok := el.Renamed.Events[a.Name]; ok {
-				return []Finding{f(a.Line, a.Col, RuleLegacyMarkup, a.Name, "", "<%s> no longer dispatches %s (removed in 0.8); %s", el.Tag, a.Name, advice)}
+				return []Finding{f(a.Line, a.Col, RuleLegacyMarkup, a.Name, "", "<%s> no longer dispatches %s (removed in %s); %s", el.Tag, a.Name, el.Renamed.EventRelease(a.Name), advice)}
 			}
 		}
 		var names []string
@@ -220,9 +220,9 @@ func (c *Checker) checkAttr(el *Element, t Tag, a AttrToken, f findingFn) []Find
 					repl = r.To + " (same value)"
 				}
 				if !r.Renames(a.Value, hasValue) {
-					return []Finding{f(a.Line, a.Col, RuleLegacyMarkup, a.Name, "", "%s on <%s> was removed in 0.8; %s", old, el.Tag, repl)}
+					return []Finding{f(a.Line, a.Col, RuleLegacyMarkup, a.Name, "", "%s on <%s> was removed in %s; %s", old, el.Tag, el.Renamed.AttributeRelease(name), repl)}
 				}
-				return []Finding{f(a.Line, a.Col, RuleLegacyMarkup, a.Name, r.To, "%s on <%s> was renamed in 0.8; write %s", old, el.Tag, repl)}
+				return []Finding{f(a.Line, a.Col, RuleLegacyMarkup, a.Name, r.To, "%s on <%s> was renamed in %s; write %s", old, el.Tag, el.Renamed.AttributeRelease(name), repl)}
 			}
 		}
 		return []Finding{c.unknownAttr(el, a, f)}
@@ -235,7 +235,7 @@ func (c *Checker) checkAttr(el *Element, t Tag, a AttrToken, f findingFn) []Find
 	// stagger) is reported with its replacement before any type check.
 	if el.Renamed != nil && !contains(attr.Values, v) {
 		if nv, ok := el.Renamed.Values[attr.Name][v]; ok {
-			return []Finding{f(a.Line, a.Col, RuleLegacyMarkup, a.Name, nv, "%s=%q on <%s> was renamed in 0.8; write %s=%q", a.Name, v, el.Tag, a.Name, nv)}
+			return []Finding{f(a.Line, a.Col, RuleLegacyMarkup, a.Name, nv, "%s=%q on <%s> was renamed in %s; write %s=%q", a.Name, v, el.Tag, el.Renamed.ValueRelease(attr.Name), a.Name, nv)}
 		}
 	}
 	switch attr.Kind {

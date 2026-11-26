@@ -742,7 +742,10 @@ export const accessibleName = {
  *               value); `fix`: what to do when neither applies.
  *   values      attribute -> { old value -> new value }.
  *   events      old event name -> what to listen for instead.
- * @type {Record<string, { attributes?: Record<string, { to?: string, values?: Record<string, string>, fix?: string }>, values?: Record<string, Record<string, string>>, events?: Record<string, string> }>}
+ *   since       the release a rename was made in, for what `voidable check` prints ("was renamed in 0.10"):
+ *               { attributes?, values?, events? }, each mapping a name (attribute, attribute with renamed
+ *               values, event) to a release such as '0.10'. Anything not listed is '0.8', where this table began.
+ * @type {Record<string, { attributes?: Record<string, { to?: string, values?: Record<string, string>, fix?: string }>, values?: Record<string, Record<string, string>>, events?: Record<string, string>, since?: { attributes?: Record<string, string>, values?: Record<string, string>, events?: Record<string, string> } }>}
  */
 const OPEN_CLOSE = 'listen for void-open and void-close on the element itself (they do not bubble; detail.reason says why)';
 const SIDES = ['top', 'right', 'bottom', 'left'];
@@ -773,6 +776,7 @@ export const renamed = {
   'void-sidebar': {
     attributes: { position: { to: 'side', values: START_END } },
     values: { side: { left: 'start', right: 'end' } },
+    since: { values: { side: '0.10' } },
     events: { 'void-toggle': 'listen for void-collapse and void-expand on the sidebar (they do not bubble)' },
   },
   'void-toast-container': {
@@ -789,6 +793,7 @@ export const renamed = {
   'void-action-input': {
     attributes: { position: { to: 'icon-side', values: START_END_ICON }, 'tooltip-position': { to: 'tooltip-side' } },
     values: { 'icon-side': { left: 'start', right: 'end' } },
+    since: { values: { 'icon-side': '0.10' } },
   },
   'void-scroll-area': { attributes: { direction: { to: 'orientation' } } },
   // State: an index into a sequence without keys; the current item of a navigation.

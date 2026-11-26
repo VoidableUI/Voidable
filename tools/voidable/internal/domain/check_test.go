@@ -47,9 +47,11 @@ func testCatalog() *Catalog {
 				Attributes: map[string]RenamedAttribute{
 					"position": {To: "side", Values: map[string]string{"bottom-end": `side="bottom" align="end"`}},
 					"closable": {Values: map[string]string{"false": "hide-close"}, Fix: "remove it (it is the default)"},
+					"tooltip-position": {To: "tooltip-side"},
 				},
 				Values: map[string]map[string]string{"variant": {"subtle": "quiet"}, "stagger": {"false": "0"}},
 				Events: map[string]string{"void-toggle": "listen for void-open and void-close"},
+				Since:  &RenamedSince{Attributes: map[string]string{"tooltip-position": "0.11"}, Values: map[string]string{"variant": "0.10"}, Events: map[string]string{"void-toggle": "0.9"}},
 			}},
 	})
 }
@@ -109,10 +111,11 @@ func TestCheckTag(t *testing.T) {
 		{"renamed attribute in jsx", Tag{Name: "void-popover", Lang: LangJSX, Attrs: []AttrToken{a("position", "left", SyntaxAttr)}}, []Rule{RuleLegacyMarkup}, `write side="left"`},
 		{"inverted boolean, false", Tag{Name: "void-popover", Lang: LangHTML, Attrs: []AttrToken{a("closable", "false", SyntaxAttr)}}, []Rule{RuleLegacyMarkup}, "write hide-close"},
 		{"inverted boolean, present", Tag{Name: "void-popover", Lang: LangHTML, Attrs: []AttrToken{a("closable", "", SyntaxAttr)}}, []Rule{RuleLegacyMarkup}, "closable on <void-popover> was removed in 0.8; remove it"},
-		{"renamed value", Tag{Name: "void-popover", Lang: LangHTML, Attrs: []AttrToken{a("variant", "subtle", SyntaxAttr)}}, []Rule{RuleLegacyMarkup}, `write variant="quiet"`},
+		{"renamed value", Tag{Name: "void-popover", Lang: LangHTML, Attrs: []AttrToken{a("variant", "subtle", SyntaxAttr)}}, []Rule{RuleLegacyMarkup}, `variant="subtle" on <void-popover> was renamed in 0.10; write variant="quiet"`},
 		{"renamed value on a number", Tag{Name: "void-popover", Lang: LangHTML, Attrs: []AttrToken{a("stagger", "false", SyntaxAttr)}}, []Rule{RuleLegacyMarkup}, `write stagger="0"`},
 		{"current value", Tag{Name: "void-popover", Lang: LangHTML, Attrs: []AttrToken{a("variant", "quiet", SyntaxAttr), a("side", "top", SyntaxAttr), a("stagger", "0", SyntaxAttr)}}, nil, ""},
-		{"removed event", Tag{Name: "void-popover", Lang: LangERB, Attrs: []AttrToken{a("void-toggle", "", SyntaxEvent)}}, []Rule{RuleLegacyMarkup}, "no longer dispatches void-toggle (removed in 0.8); listen for void-open and void-close"},
+		{"removed event", Tag{Name: "void-popover", Lang: LangERB, Attrs: []AttrToken{a("void-toggle", "", SyntaxEvent)}}, []Rule{RuleLegacyMarkup}, "no longer dispatches void-toggle (removed in 0.9); listen for void-open and void-close"},
+		{"renamed attribute, dated release", Tag{Name: "void-popover", Lang: LangHTML, Attrs: []AttrToken{a("tooltip-position", "top", SyntaxAttr)}}, []Rule{RuleLegacyMarkup}, `tooltip-position="top" on <void-popover> was renamed in 0.11; write tooltip-side="top"`},
 	}
 	c := NewChecker(testLibrary(t), stubScanner{})
 	for _, tt := range tests {
