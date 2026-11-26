@@ -13,7 +13,17 @@ Buttons have three variants of one size: at every size step they share a height 
 
 ## Keyboard and click
 
-A `void-button` activates like a native `<button>`. A mouse click, Enter (on key down) and Space (on key up) each fire one real `click` event, and one `void-click`, so anything that listens for `click` works from the keyboard too: `onClick`, `phx-click`, `wire:click`, Alpine `@click`, an overlay trigger and a form's `type="submit"` or `type="reset"`. A disabled button, or one with `aria-disabled="true"`, does nothing. A link button (an `<a>` inside) follows its link with Enter, and Space does nothing, as on a link.
+A `void-button` activates like a native `<button>`. A mouse click, Enter (on key down) and Space (on key up) each fire one real `click` event, and one `void-click`, so anything that listens for `click` works from the keyboard too: `onClick`, `phx-click`, `wire:click`, Alpine `@click`, an overlay trigger and a form's `type="submit"` or `type="reset"`. A disabled button, or one with `aria-disabled="true"`, does nothing. A link button (an `<a href>` inside) follows its link with Enter, and Space does nothing, as on a link.
+
+## Link buttons
+
+An `<a href>` (or a native `<button>`) as the content makes a link that looks like a button. The inner element is the one control: the accessibility tree has one link, named by its text, one tab stop, and the `void-button` itself has no `role` and no `tabindex` and handles no keys. The whole button is the link's hit area, and the button draws its focus ring when the link has focus. The link may arrive or leave after the first render; the button follows.
+
+```html
+<void-button><a href="/docs">Read the documentation</a></void-button>
+```
+
+A link cannot be disabled, so `disabled` on a link button marks the link `aria-disabled="true"`, takes it out of the tab order (`tabindex="-1"`) and stops clicks and Enter from following it. A native `<button>` inside is disabled for real. Enabling the button takes back exactly what it wrote.
 
 ## Ghost
 

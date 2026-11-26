@@ -293,7 +293,9 @@ describe('keyed list edits (breadcrumbs, explicit parts)', () => {
   // The items are the author's own nodes in the trail itself: nothing wraps them, so every direct DOM edit a
   // framework makes leaves exactly the order it made.
   const items = (bc: Element) => Array.from(bc.children).map(c => c.textContent);
-  const trail = (...t: string[]) => `<void-breadcrumbs>${t.map(x => `<void-breadcrumbs-item>${x}</void-breadcrumbs-item>`).join('')}</void-breadcrumbs>`;
+  const trail = (...t: string[]) => `<void-breadcrumbs><void-breadcrumbs-list>${t.map(x => `<void-breadcrumbs-item>${x}</void-breadcrumbs-item>`).join('')}</void-breadcrumbs-list></void-breadcrumbs>`;
+  // The list part holds the items; every edit below is made on it, as a framework would.
+  const mountTrail = async (...t: string[]) => (await mount<Host>(trail(...t))).firstElementChild as HTMLElement;
   const node = (t: string) => {
     const n = document.createElement('void-breadcrumbs-item');
     n.textContent = t;
@@ -301,7 +303,7 @@ describe('keyed list edits (breadcrumbs, explicit parts)', () => {
   };
 
   it('a reorder by appendChild (React) keeps the nodes and the order', async () => {
-    const bc = await mount<Host>(trail('a', 'b', 'c'));
+    const bc = await mountTrail('a', 'b', 'c');
     const [a, b] = Array.from(bc.children);
     bc.appendChild(a);
     bc.appendChild(b);
@@ -311,7 +313,7 @@ describe('keyed list edits (breadcrumbs, explicit parts)', () => {
   });
 
   it('a node inserted with before() (Svelte) and an insert before the next sibling (Solid)', async () => {
-    const bc = await mount<Host>(trail('b', 'c'));
+    const bc = await mountTrail('b', 'c');
     bc.children[1]!.before(node('x'));
     await settle();
     expect(items(bc)).toEqual(['b', 'x', 'c']);
@@ -321,7 +323,7 @@ describe('keyed list edits (breadcrumbs, explicit parts)', () => {
   });
 
   it('follows a Solid keyed swap and Svelte anchor moves', async () => {
-    const bc = await mount<Host>(trail('a', 'x', 'b', 'y'));
+    const bc = await mountTrail('a', 'x', 'b', 'y');
     const [a, x, b, y] = Array.from(bc.children) as HTMLElement[];
     // reconcileArrays: [a, x, b, y] -> [y, b, x, a]
     let ref = y!.nextSibling;
@@ -344,13 +346,27 @@ describe('keyed list edits (breadcrumbs, explicit parts)', () => {
   });
 
   it('a replaced item keeps its position, and clearing leaves nothing behind', async () => {
-    const bc = await mount<Host>(trail('a', 'b', 'c'));
+    const bc = await mountTrail('a', 'b', 'c');
     bc.children[1]!.replaceWith(node('y'));
     await settle();
     expect(items(bc)).toEqual(['a', 'y', 'c']);
     bc.textContent = '';
     await settle();
     expect(bc.childNodes).toHaveLength(0);
+  });
+
+  it('gives items added later the listitem role and takes it off a removed one', async () => {
+    const nav = await mount<Host>(trail('a', 'b'));
+    const list = nav.firstElementChild!;
+    expect(list.getAttribute('role')).toBe('list');
+    const x = node('x');
+    list.appendChild(x);
+    await settle();
+    expect(x.getAttribute('role')).toBe('listitem');
+    list.removeChild(x);
+    await settle();
+    expect(x.hasAttribute('role')).toBe(false);
+    expect(Array.from(list.children).map(c => c.getAttribute('role'))).toEqual(['listitem', 'listitem']);
   });
 });
 

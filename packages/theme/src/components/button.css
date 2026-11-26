@@ -76,7 +76,8 @@ void-button:active {
 }
 
 /* Focus */
-void-button:focus-visible {
+void-button:focus-visible,
+void-button:has(> :is(a, button):focus-visible) {
   outline: var(--void-focus-ring-width) solid var(--void-focus-ring-color);
   outline-offset: var(--void-focus-ring-offset);
 }
@@ -163,13 +164,13 @@ void-button[aria-label]:has(> i:only-child) {
   min-width: var(--_void-button-height);
 }
 
-/* Link targets — the <a> fills the button and carries the padding, so
-   the whole button is the click target at every size. */
-void-button:has(> a) {
+/* Link buttons — the link (or native button) is the one control: it fills the button and carries the padding, so
+   the whole button is the hit area at every size, and the button draws the focus ring when it has focus. */
+void-button:has(> :is(a, button)) {
   padding: 0;
 }
 
-void-button > a {
+void-button > :is(a, button) {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -179,6 +180,23 @@ void-button > a {
   color: inherit;
   text-decoration: none;
   flex: 1;
+}
+
+void-button > :is(a, button):focus-visible {
+  outline: none;
+}
+
+/* A native button inside is bare: the host draws the button. */
+void-button > button {
+  appearance: none;
+  background: none;
+  border: 0;
+  margin: 0;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  white-space: inherit;
+  cursor: inherit;
 }
 
 /* Disabled */

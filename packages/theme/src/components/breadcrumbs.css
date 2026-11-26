@@ -1,9 +1,14 @@
 void-breadcrumbs {
+  display: block;
+  font-family: var(--void-font-sans);
+}
+
+/* A flex container, never `display: contents`: some engines drop list semantics from boxless lists. */
+void-breadcrumbs-list {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: var(--void-space-2);
-  font-family: var(--void-font-sans);
 }
 
 void-breadcrumbs-item {

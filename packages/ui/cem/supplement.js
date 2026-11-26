@@ -479,14 +479,27 @@ export const parts = {
   'void-breadcrumbs': {
     children: 'parts',
     skeleton:
-      '<void-breadcrumbs><void-breadcrumbs-item><a href="/">Home</a></void-breadcrumbs-item><void-breadcrumbs-item><a href="/docs">Docs</a></void-breadcrumbs-item><void-breadcrumbs-item aria-current="page">Page</void-breadcrumbs-item></void-breadcrumbs>',
-    legacy: { children: 'wrap each crumb (a link, or text for the current page) in <void-breadcrumbs-item> and put aria-current="page" on the current one' },
+      '<void-breadcrumbs><void-breadcrumbs-list><void-breadcrumbs-item><a href="/">Home</a></void-breadcrumbs-item><void-breadcrumbs-item><a href="/docs">Docs</a></void-breadcrumbs-item><void-breadcrumbs-item aria-current="page">Page</void-breadcrumbs-item></void-breadcrumbs-list></void-breadcrumbs>',
+    legacy: {
+      children:
+        'write one <void-breadcrumbs-list> and, in it, one <void-breadcrumbs-item> per crumb (a link, or text for the current page), with aria-current="page" on the current one',
+    },
     parts: [
       {
-        tag: 'void-breadcrumbs-item',
+        tag: 'void-breadcrumbs-list',
         required: true,
-        description:
-          'One crumb: a link, or the current page as text. Mark the current page with aria-current="page"; the theme draws the separators between items.',
+        max: 1,
+        children: 'parts',
+        description: 'The list of crumbs (role="list"): the navigation landmark holds a list, as the ARIA breadcrumb pattern has it.',
+        legacy: { children: 'put each crumb in a <void-breadcrumbs-item>' },
+        parts: [
+          {
+            tag: 'void-breadcrumbs-item',
+            required: true,
+            description:
+              'One crumb (role="listitem"): a link, or the current page as text. Mark the current page with aria-current="page"; the theme draws the separators between items.',
+          },
+        ],
       },
     ],
   },
