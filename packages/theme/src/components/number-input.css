@@ -69,21 +69,21 @@ void-number-input input.void-number-input-field::placeholder {
 }
 
 .void-number-input-prefix {
-  padding-left: var(--_void-field-padding);
+  padding-inline-start: var(--_void-field-padding);
 }
 
 .void-number-input-unit {
-  padding-right: var(--_void-field-padding);
+  padding-inline-end: var(--_void-field-padding);
 }
 
-/* When a prefix is present, the input doesn't need its own left padding */
+/* When a prefix is present, the input doesn't need its own start padding */
 void-number-input:has(.void-number-input-prefix) input.void-number-input-field {
-  padding-left: var(--void-space-1);
+  padding-inline-start: var(--void-space-1);
 }
 
-/* When a unit is present, the input doesn't need its own right padding */
+/* When a unit is present, the input doesn't need its own end padding */
 void-number-input:has(.void-number-input-unit) input.void-number-input-field {
-  padding-right: var(--void-space-1);
+  padding-inline-end: var(--void-space-1);
 }
 
 /* Stepper buttons */
@@ -121,18 +121,18 @@ void-number-input:has(.void-number-input-unit) input.void-number-input-field {
 /* Separator lines between btn and input: the rule between items of one
    group, so a skin that draws its rules in ink draws these too. */
 .void-number-input-btn-dec {
-  border-right: var(--void-rule-between);
+  border-inline-end: var(--void-rule-between);
 }
 
 .void-number-input-btn-inc {
-  border-left: var(--void-rule-between);
+  border-inline-start: var(--void-rule-between);
 }
 
 /* controls="right" — both buttons stacked vertically on the right */
 void-number-input[controls="right"] .void-number-input-btn-group {
   display: flex;
   flex-direction: column;
-  border-left: var(--void-rule-between);
+  border-inline-start: var(--void-rule-between);
 }
 
 void-number-input[controls="right"] .void-number-input-btn {
@@ -147,7 +147,7 @@ void-number-input[controls="right"] .void-number-input-btn-inc {
 
 /* controls="none" — just the input, no separators */
 void-number-input[controls="none"] input.void-number-input-field {
-  text-align: left;
+  text-align: start;
 }
 
 /* Color variants */
@@ -169,15 +169,15 @@ void-number-input:where([color="error"], [color="warning"], [color="caution"], [
 }
 
 void-number-input:where([color="error"], [color="warning"], [color="caution"], [color="highlight"], [color="success"], [color="info"], [color="notice"]) .void-number-input-btn-dec {
-  border-right-color: var(--_void-tone-border);
+  border-inline-end-color: var(--_void-tone-border);
 }
 
 void-number-input:where([color="error"], [color="warning"], [color="caution"], [color="highlight"], [color="success"], [color="info"], [color="notice"]) .void-number-input-btn-inc {
-  border-left-color: var(--_void-tone-border);
+  border-inline-start-color: var(--_void-tone-border);
 }
 
 void-number-input:where([color="error"], [color="warning"], [color="caution"], [color="highlight"], [color="success"], [color="info"], [color="notice"]):where([controls="right"]) .void-number-input-btn-group {
-  border-left-color: var(--_void-tone-border);
+  border-inline-start-color: var(--_void-tone-border);
 }
 
 void-number-input:where([color="error"], [color="warning"], [color="caution"], [color="highlight"], [color="success"], [color="info"], [color="notice"]):where([controls="right"]) .void-number-input-btn-inc {

@@ -17,7 +17,7 @@ Gem::Specification.new do |spec|
   spec.metadata["source_code_uri"] = "https://github.com/VoidableUI/Voidable"
   spec.metadata["changelog_uri"]   = "https://github.com/VoidableUI/Voidable/releases"
 
-  spec.files = Dir["{app,config,lib}/**/*", "LICENSE.md", "README.md"]
+  spec.files = Dir["{app,config,lib}/**/*", "LICENSE.md", "README.md", "llms.txt"]
   spec.require_paths = ["lib"]
 
   spec.add_dependency "railties", ">= 7.0"

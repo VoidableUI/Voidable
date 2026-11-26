@@ -21,6 +21,8 @@ void-toast-container {
   pointer-events: none;
 }
 
+/* The placements name viewport corners (top-right is the top right corner of the
+   screen in either direction), so these stay physical. */
 
 void-toast-container[placement='top-right'] { top: 0; right: 0; bottom: auto; left: auto; }
 void-toast-container[placement='top-left'] { top: 0; left: 0; bottom: auto; right: auto; }
@@ -111,7 +113,7 @@ void-toast-actions {
 void-toast-close {
   position: absolute;
   top: var(--void-space-2);
-  right: var(--void-space-2);
+  inset-inline-end: var(--void-space-2);
   display: flex;
 }
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #MISE description="Component tokens and skins: every component token documented, read and inside the naming grammar, none declared by the theme; every skin one rule of token assignments that names no component and undoes no guarantee"
-#MISE depends=["lint:theme"]
+#MISE depends=["build"]
 set -euo pipefail
 
-# lint:theme has just built packages/theme/dist, which the skin checks read.
+# The build task has already built packages/theme/dist, which the skin checks read.
 node packages/theme/scripts/check-tokens.mjs

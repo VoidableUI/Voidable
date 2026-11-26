@@ -96,6 +96,20 @@ A patch that arrives while the user types (the echo of an earlier
 and the clone LiveView patches while it waits for a reply is put back without
 losing a key: nothing typed is lost and focus stays in the field.
 
+## Charts and gauges
+
+The charts take their data as a property of the element, which markup cannot set. The `bar_chart`, `line_chart`, `donut_chart` and `gauge` components encode `data` (and a gauge's `zones`) as JSON in `data-void-props` and attach the `VoidProps` hook from `VoidHooks`, which assigns each key to the element once it is defined. Render new data and the chart animates to it; an unchanged value assigns nothing. The first, static render is an empty element: the chart draws when the socket connects.
+
+```heex
+<.bar_chart id="revenue" data={%{labels: ["Q1", "Q2"], series: [%{name: "2025", values: [4, 8]}]}} aria_label="Revenue by quarter" />
+<.line_chart id="visits" data={@visits} interpolation="step" aria_label="Visitors per day" />
+<.donut_chart id="sources" data={%{segments: [%{name: "Search", value: 40}]}} show_total aria_label="Traffic by source" />
+<.gauge id="disk" value={42} unit="%" aria_label="Disk usage" />
+<.gauge id="storage" data={%{segments: [%{name: "Used", value: 40}]}} aria_label="Storage" />
+```
+
+A gauge with a single `value` is plain attributes and needs no hook. Pass an `id` when you render several charts on one page. Set `aria_label` and state the key figures in the text around the chart.
+
 ## Booleans
 
 Every boolean is off when it is absent. Something drawn by default is
@@ -111,3 +125,7 @@ and `maxlength` (and `pattern` on the single-line inputs); `inputmode`,
 `enterkeyhint`, `autocapitalize` and `spellcheck` pass through as global
 attributes. `number_input` accepts `step="any"` and decimal `value`, `min`
 and `max`, and `stat` takes `description`.
+
+## For AI agents
+
+`@voidable/ui-liveview/llms.txt` (npm) and `llms.txt` in the `live_voidable` Hex package summarise this adapter's API, including every HEEx component. Every element's parts, attributes and events are in `@voidable/ui/reference.md` (`node_modules/@voidable/ui/dist/reference.md`).

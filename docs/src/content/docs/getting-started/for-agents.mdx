@@ -16,6 +16,18 @@ Voidable is built to be written by agents as well as people, and everything on t
 
 Each component page has the same sections: a description, a live example with its HTML, JSX, ERB, HEEx and Blade source, an attribute table (type, values, default), events with their `detail`, where children go, how it behaves in a form, its keyboard keys, accessibility notes and the common mistakes. The tables are generated from the library's Custom Elements Manifest, so they match the code that ships.
 
+## Read the reference from the installed package
+
+An agent that has only the installed package, with no network and no `voidable` binary, finds the same reference inside it. The `@voidable/ui` build generates both files from the Custom Elements Manifest, so they cannot drift from the code, and a lint (`mise run lint:reference`) fails when either is stale, misses an element or disagrees with `voidable ref`.
+
+| What | Where |
+| --- | --- |
+| What the library is, install, the composition rules and conventions, one line per element | `@voidable/ui/llms.txt` (`node_modules/@voidable/ui/dist/llms.txt`) |
+| Every element in full: parts, attributes and values, events with `detail`, parents, a correct example | `@voidable/ui/reference.md` (`node_modules/@voidable/ui/dist/reference.md`) |
+| The manifest they are generated from | `@voidable/ui/custom-elements.json` |
+
+Each adapter adds a short `llms.txt` for its own API, in the package root, and points at the core reference: `@voidable/ui-react`, `@voidable/ui-hotwire`, `@voidable/ui-alpine`, `@voidable/ui-liveview`, the `voidable-hotwire` gem, the `live_voidable` Hex package and the `voidable/laravel` Composer package.
+
 ## Use the `voidable` tool
 
 The `voidable` command-line tool carries the same knowledge, offline, and checks what you write. It is one static binary: it needs no Go and no Node.

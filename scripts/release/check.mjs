@@ -96,7 +96,7 @@ export function check({ stamped } = {}) {
     for (const h of scanText(text)) err(`${file}:${h.line}`, `${h.what}: "${h.match}"`);
   }
 
-  if (!read(HEX.mixfile).includes('files: ~w(lib mix.exs)')) {
+  if (!/files: ~w\([^)]*\bmix\.exs\b/.test(read(HEX.mixfile))) {
     // Not a version problem, but stamping relies on mix.exs travelling in the package.
     err(HEX.mixfile, 'package files must include mix.exs');
   }

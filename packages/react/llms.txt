@@ -1,0 +1,29 @@
+# @voidable/ui-react
+
+> React wrappers for the Voidable UI web components. One React component per `<void-*>` element, with ref forwarding, typed props and typed `onVoid*` event props.
+
+## Install and use
+
+```sh
+npm install @voidable/ui-react @voidable/ui @voidable/theme react
+```
+
+```tsx
+import '@voidable/theme';
+import { Button, Dialog, DialogTitle, Input, useTheme } from '@voidable/ui-react';
+
+<Button variant="filled" color="error" onVoidClick={() => {}}>Delete</Button>
+<Input aria-label="Name" onVoidChange={(e) => save(e.detail.value)} />
+```
+
+## API
+
+- Naming: `<void-foo-bar>` is `<FooBar>`; its parts are components too (`<void-dialog-title>` is `<DialogTitle>`). Importing the package registers every element.
+- Props are the element's attributes; booleans, arrays and objects are set as properties (`disabled={false}` is really false). `className` maps to `class`; `aria-*` and `data-*` pass through.
+- Events: `void-change` becomes `onVoidChange`, `void-click` `onVoidClick`, and so on; `event.detail` is typed per component. Overlays take a controlled `open` and fire `onVoidOpen` / `onVoidClose` with `{ reason }` (`OverlayOpenReason`, `OverlayCloseReason`); set state false in `onVoidClose`, or `preventDefault()` to keep it open.
+- `useTheme()` returns `'dark' | 'light'`, the scheme the page is in.
+- Types: `VoidEvents`, `OverlayOpenReason`, `OverlayCloseReason`, `BarChartData`, `LineChartData`, `DonutChartData`, `GaugeData`, `GaugeZone`. Charts take `data`.
+
+## Full reference
+
+Every `<void-*>` element (parts, attributes with allowed values, events with `detail`, examples) is in the core package: `@voidable/ui/reference.md` (`node_modules/@voidable/ui/dist/reference.md`), summarised in `@voidable/ui/llms.txt`. Online: https://voidable.dev/llms.txt. Offline per element: `voidable ref <tag>`.

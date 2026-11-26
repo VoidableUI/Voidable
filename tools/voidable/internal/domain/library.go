@@ -51,19 +51,6 @@ func NewLibrary(ctx context.Context, ms ManifestSource, ss SupplementSource, p F
 			sup.Removed[tag] = advice
 		}
 	}
-	for tag, names := range sup.FalseString {
-		el, ok := cat.Element(tag)
-		if !ok {
-			return nil, fmt.Errorf("%w: supplement falseString names unknown element %s", ErrManifest, tag)
-		}
-		for _, n := range names {
-			a, ok := el.Attribute(n)
-			if !ok {
-				return nil, fmt.Errorf("%w: supplement falseString names unknown attribute %s.%s", ErrManifest, tag, n)
-			}
-			a.FalseString = true
-		}
-	}
 	return &Library{cat: cat, sup: sup, parser: p}, nil
 }
 

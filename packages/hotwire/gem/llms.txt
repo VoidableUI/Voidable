@@ -1,0 +1,31 @@
+# voidable-hotwire (RubyGems)
+
+> Rails integration for Voidable UI web components with Hotwire: importmap pins, view helpers and generators. The components themselves are the `<void-*>` custom elements of the npm package `@voidable/ui`; the gem pins it, `@voidable/ui-hotwire` and `@voidable/theme` from the CDN at the gem's own version.
+
+## Setup
+
+```ruby
+gem "voidable-hotwire"
+```
+
+```js
+// app/javascript/application.js
+import "@voidable/ui"          // or "@voidable/ui/autoloader"
+import { VoidTurbo } from "@voidable/ui-hotwire"
+VoidTurbo.start()
+```
+
+`rails generate voidable:install --layout=topbar|sidebar|switching --components=all|autoloader --assets=importmap|vite` sets all of this up.
+
+## API
+
+- `void_attrs(events, action = nil)`: view helper; returns `{ data: { action: "void-click->form#submit" } }` for the Stimulus `data-action`. `<%= tag.void_button "Save", **void_attrs("void-click", "form#submit") %>`. Without an action it adds nothing.
+- `voidable_dev_tags`: view helper; loads the `@voidable/ui/dev` warnings in development (after `javascript_importmap_tags`); renders nothing elsewhere.
+- `Voidable::Hotwire.dev_warnings = false | true | :throw`: initializer setting for those warnings.
+- `Voidable::Hotwire::CDN`: the CDN pins (`UI_URL`, `AUTOLOADER_PINS`).
+- Generators: `voidable:install`, `voidable:devise_views`.
+- Write the elements as plain tags in ERB: `<void-dialog open><void-dialog-title>Delete</void-dialog-title></void-dialog>`.
+
+## Full reference
+
+Every `<void-*>` element (parts, attributes with allowed values, events with `detail`, examples) is in the npm package: `@voidable/ui/reference.md` (`node_modules/@voidable/ui/dist/reference.md`), summarised in `@voidable/ui/llms.txt`; adapter notes in `@voidable/ui-hotwire/llms.txt`. With an importmap and no `node_modules`: https://voidable.dev/llms.txt, or offline per element `voidable ref <tag>`.

@@ -84,7 +84,7 @@ void-multiselect-content,
   position: fixed;
   inset: auto;
   margin: 0;
-  left: var(--void-overlay-x);
+  left: var(--void-overlay-x); /* physical: viewport coordinates from the positioning script */
   top: var(--void-overlay-y);
 }
 

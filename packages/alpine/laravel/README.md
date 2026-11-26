@@ -185,3 +185,7 @@ The `void_attrs` helper generates Alpine.js attributes for wiring Voidable event
 - PHP >= 8.1
 - Laravel >= 10.0
 - `@voidable/ui` and `@voidable/ui-alpine` npm packages installed in your frontend build
+
+## For AI agents
+
+The package ships `llms.txt` (in its root) describing the Blade directives, the helper and the config. Every element's parts, attributes and events are in the npm package: `node_modules/@voidable/ui/dist/reference.md` (`@voidable/ui/reference.md`), or `voidable ref <tag>` offline.

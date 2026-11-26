@@ -1,5 +1,7 @@
 # Voidable Roadmap
 
+What 1.0 promises and what must land before it is on the [Road to 1.0](docs/src/content/docs/guides/road-to-1-0.mdx) page.
+
 ## Current State
 
 **66 components** (78 custom element tags) shipped across `@voidable/ui` + `@voidable/theme`, all with Storybook stories. Counts are derived from `packages/ui/src` (one file per component in `src/components/`, one tag per `customElements.define`); the docs site computes them at build time.
@@ -80,11 +82,11 @@ The API review before 1.0 listed what is still missing against mainstream librar
 
 The renames of what authors write shipped in 0.8 ([API conventions](docs/src/content/docs/guides/conventions.mdx)). Left for a later release, because they add rather than rename:
 
-- **Value reflection as one rule**: free-text controls keep `value` as the initial value, discrete choices reflect the current value, stated per component in the manifest (`reflects`) and read by the docs and the eval contract; each changed control tested through Turbo, morphdom with the LiveView adapter and Alpine morph with the Livewire hooks.
 - **Naming**: `aria-label` on the host as the accessible name everywhere, and `label` only where visible label text is rendered (spinner, table, number input).
 - **Manifest types** that say what markup can express (tags input `value`, colour picker `swatches`).
 - **Error fallback** heading as a part only.
-- The leftover `falseString` support in the manifest build, the checker and the generators, which no attribute uses since no boolean defaults to true.
+
+Shipped from this list ([#67](https://github.com/VoidableUI/Voidable/issues/67)): value reflection as one rule (every control reflects its current `value`; the exceptions are a password field, a masked PIN input and the file upload, written in the [API conventions](docs/src/content/docs/guides/conventions.mdx) and checked in a browser by the eval contract), and the leftover `falseString` support, removed from the manifest build, the checker and the generators.
 
 ---
 

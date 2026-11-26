@@ -3,6 +3,8 @@
 // Server-backed suite: real apps (server/apps.mjs) started by Playwright,
 // driven in Chromium like the pure-browser suite. Run with
 // `mise run test:server`; VOID_SERVER_APPS=rails limits the apps.
+// VOID_CPU_THROTTLE=4 runs every page four times slower (Chromium's CPU
+// throttling, see server/shared.ts), to reproduce what a slow CI runner sees.
 //
 // Each app becomes a web server (prepared and started by server/start.mjs,
 // ready when its readyPath answers) and a project whose specs live in

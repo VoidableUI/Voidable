@@ -17,8 +17,8 @@ export class VoidNumberInput extends InternalsFormControl(VoidElement) {
   /** While focus is inside, a morph does not apply the server's value over what the user is typing. */
   static override editState = ['value'];
   /**
-   * The number, or `null` while the field is empty (the default, and after the user clears it). As an
-   * attribute it is the initial value; an absent or empty attribute is an empty field. It is kept within
+   * The number, or `null` while the field is empty (the default, and after the user clears it). Reflected to
+   * the attribute as it changes (absent while empty); an absent or empty attribute is an empty field. It is kept within
    * `min` and `max` once the user commits an edit. An empty field submits an empty string, and with
    * `required` it is invalid (`valueMissing`), as a native number field.
    */

@@ -1,8 +1,9 @@
-import { html, nothing } from 'lit';
+import { html, nothing, type PropertyDeclaration, type PropertyValues } from 'lit';
 import { live } from 'lit/directives/live.js';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
 import { NativeFormControl } from '../form-control.js';
+import { dropReflectedValue, valueReflection } from '../secret-value.js';
 
 /** Input field with an attached icon button — used for copy-to-clipboard inputs, search boxes, and similar patterns. */
 export class VoidActionInput extends NativeFormControl(VoidElement) {
@@ -12,10 +13,11 @@ export class VoidActionInput extends NativeFormControl(VoidElement) {
   /** While focus is inside, a morph does not apply the server's value over what the user is typing. */
   static override editState = ['value'];
   /**
-   * The text in the field. As an attribute it is the initial value; read or set the `value` property for
-   * the current text.
+   * The text in the field. Reflected to the `value` attribute as it changes, and setting the attribute
+   * sets it; the form's reset target stays the value the field started with. A `type="password"` field
+   * does not reflect: its attribute is only ever the initial value.
    */
-  @property({ type: String }) value = '';
+  @property({ type: String, reflect: true }) value = '';
   /**
    * Hint text shown while the field is empty. It also names the field for assistive technology when
    * there is no `aria-label`.
@@ -98,6 +100,16 @@ export class VoidActionInput extends NativeFormControl(VoidElement) {
       default:
         return html`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="var(--void-icon-stroke-width)" stroke-linecap="round" stroke-linejoin="round" width="1em" height="1em"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 10a7 7 0 1 0 14 0a7 7 0 1 0 -14 0"/><path d="M21 21l-6 -6"/></svg>`;
     }
+  }
+
+  override requestUpdate(name?: PropertyKey, oldValue?: unknown, options?: PropertyDeclaration): void {
+    super.requestUpdate(name, oldValue, valueReflection(this.type === 'password', name, options, () => VoidActionInput.getPropertyOptions('value')));
+  }
+
+  protected override updated(changed: PropertyValues): void {
+    super.updated(changed);
+    // A field turned into a password field takes back the value it reflected as text.
+    if (this.type === 'password' && changed.get('type') !== undefined) dropReflectedValue(this);
   }
 
   protected formWriteNativeDefault(state: unknown): void {

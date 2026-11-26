@@ -10,8 +10,8 @@ export class VoidColorPicker extends InternalsFormControl(VoidElement) {
   static override labelTarget = '.void-color-picker-input, .void-color-picker-compact-input';
 
   /**
-   * Selected colour as a hex string (six digits after the hash). Defaults to black. As an attribute it is the
-   * initial value and the form's reset target.
+   * Selected colour as a hex string (six digits after the hash). Defaults to black. Reflected to the attribute as it
+   * changes; the form's reset target stays the value it started with.
    */
   @property({ type: String, reflect: true }) value: string = '#000000'; // token-ok: default color value
   /** Stop the picker reacting and exclude the value from the form submission. */

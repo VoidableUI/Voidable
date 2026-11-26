@@ -15,10 +15,10 @@ export class VoidRadioGroup extends NativeFormControl(VoidElement) {
   /** Name of the group, shown above the radios and used as its accessible name. */
   @property({ type: String }) label = '';
   /**
-   * `value` of the selected radio. Set it to choose one; it is the initial selection and the form's
-   * reset target.
+   * `value` of the selected radio. Set it to choose one; it follows the user's choice and is reflected
+   * to the attribute. The form's reset target stays the initial selection.
    */
-  @property({ type: String }) value = '';
+  @property({ type: String, reflect: true }) value = '';
   @property({ type: String, reflect: true }) name = '';
   /** Forwarded to the child radios: the browser then requires one of them to be checked. */
   @property({ type: Boolean, reflect: true }) required = false;

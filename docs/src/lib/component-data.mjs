@@ -181,7 +181,6 @@ export function loadComponentData() {
         default: cleanDefault(a.default ?? field?.default),
         description: (a.description ?? field?.description ?? '').trim(),
         reflects: !!field?.reflects,
-        falseString: a.falseString === true,
       };
     });
     const attrNames = new Set(attributes.map((a) => a.name));
@@ -280,14 +279,9 @@ export function commonMistakes(c) {
     }
   }
   const bools = c.attributes.filter((a) => a.isBool);
-  const falseOff = bools.filter((a) => a.falseString);
-  const plain = bools.filter((a) => !a.falseString);
-  if (plain.length) {
-    const n = plain[0].name;
-    out.push({ wrong: `<${c.tag} ${n}="false">`, why: `A boolean attribute is on whenever it is present. \`${n}="false"\` still turns it on: leave the attribute off to turn it off, or set the property (\`el.${plain[0].field ?? n} = false\`).` });
-  }
-  if (falseOff.length) {
-    out.push({ wrong: `<${c.tag} ${falseOff[0].name}>`, why: `${falseOff.map((a) => `\`${a.name}\``).join(', ')} default${falseOff.length === 1 ? 's' : ''} to true here, so writing the bare attribute changes nothing; write \`${falseOff[0].name}="false"\` to turn it off.` });
+  if (bools.length) {
+    const n = bools[0].name;
+    out.push({ wrong: `<${c.tag} ${n}="false">`, why: `A boolean attribute is on whenever it is present. \`${n}="false"\` still turns it on: leave the attribute off to turn it off, or set the property (\`el.${bools[0].field ?? n} = false\`).` });
   }
   for (const p of c.parents) {
     out.push({ wrong: `<${c.tag}> outside <${p}>`, why: `\`${c.tag}\` only works inside \`${p}\` (anywhere above it, not only as a direct child). Alone it does nothing.` });

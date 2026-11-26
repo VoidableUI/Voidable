@@ -96,10 +96,12 @@ export default defineConfig({
             { label: 'Events', slug: 'guides/events' },
             { label: 'API conventions', slug: 'guides/conventions' },
             { label: 'Upgrading to 0.8', slug: 'guides/upgrading' },
+            { label: 'Road to 1.0', slug: 'guides/road-to-1-0' },
             { label: 'Server-rendered apps', slug: 'guides/server-rendered' },
             { label: 'Accessibility', slug: 'guides/accessibility' },
             { label: 'Accessibility statement', slug: 'guides/accessibility-statement' },
             { label: 'Testing', slug: 'guides/testing' },
+            { label: 'Editor setup and typings', slug: 'guides/editor-setup' },
           ],
         },
         {

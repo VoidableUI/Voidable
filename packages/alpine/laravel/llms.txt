@@ -1,0 +1,30 @@
+# voidable/laravel (Composer)
+
+> Laravel integration for Voidable UI web components with Livewire and Alpine.js: Blade directives, a helper and a config file. The components are the `<void-*>` custom elements of the npm package `@voidable/ui`; the JavaScript half is `@voidable/ui-alpine`.
+
+## Setup
+
+```sh
+composer require voidable/laravel
+php artisan vendor:publish --tag=voidable-config   # config/voidable.php
+```
+
+```js
+// resources/js/app.js
+import '@voidable/ui';
+import { VoidableAlpine, registerLivewireHooks } from '@voidable/ui-alpine';
+document.addEventListener('alpine:init', () => window.Alpine.plugin(VoidableAlpine));
+document.addEventListener('livewire:init', registerLivewireHooks);
+```
+
+## API
+
+- `@voidableStyles`: Blade directive; a `<link>` to `config('voidable.theme_path')` (nothing when null).
+- `@voidableScripts`: Blade directive; emits `window.voidableConfig = { alpinePlugin, livewireMorphProtection }` and a module script for `config('voidable.script_path')` (nothing when null). Your bundle imports the components.
+- `void_attrs($events, $handler = null)`: helper; returns `x-data x-void-on:<event>="<handler>"` attributes, escaped, for `{!! void_attrs('void-change', 'name = $event.detail.value') !!}`.
+- Facade `Voidable\Laravel\Facades\Voidable`; `VoidableServiceProvider::devScriptUrl()` returns the CDN URL of the development warnings for this release, or null.
+- Write the elements as plain tags in Blade, with `x-on:void-click` or `x-void-on:void-change` for events and `x-void-preserve` to stop Livewire morphing an element.
+
+## Full reference
+
+Every `<void-*>` element (parts, attributes with allowed values, events with `detail`, examples) is in the npm package: `@voidable/ui/reference.md` (`node_modules/@voidable/ui/dist/reference.md`), summarised in `@voidable/ui/llms.txt`; adapter notes in `@voidable/ui-alpine/llms.txt`. Online: https://voidable.dev/llms.txt. Offline per element: `voidable ref <tag>`.

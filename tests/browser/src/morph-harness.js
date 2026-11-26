@@ -75,6 +75,10 @@
       engines[engine].morph(html);
       await window.__settle(root());
     },
+    /** A server update driven synchronously, without waiting for anything after it: for ordering tests. */
+    morphNow(html) {
+      engines[engine].morph(html);
+    },
     /** The same markup rendered fresh into #ref, the reference a morph must match. */
     async fresh(html) {
       const ref = document.getElementById('ref');

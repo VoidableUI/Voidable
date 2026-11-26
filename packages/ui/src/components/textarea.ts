@@ -16,10 +16,10 @@ export class VoidTextarea extends NativeFormControl(VoidElement) {
   /** While focus is inside, a morph does not apply the server's value over what the user is typing. */
   static override editState = ['value'];
   /**
-   * The text in the box. As an attribute it is the initial value (and the form's reset target); read or
-   * set the `value` property for the current text.
+   * The text in the box. Reflected to the `value` attribute as it changes, and setting the attribute
+   * sets it; the form's reset target stays the value the box started with.
    */
-  @property({ type: String }) value = '';
+  @property({ type: String, reflect: true }) value = '';
   /**
    * Hint text shown while the box is empty. It is not a label: wrap the textarea in `void-field
    * label="..."`.

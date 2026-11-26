@@ -322,7 +322,8 @@ void-date-picker {
      and its 3:1 edge. It used to be drawn with the divider colour, which is
      allowed to be faint, at a height and text size of its own. */
   height: var(--void-control-height);
-  padding: 0 var(--void-space-8) 0 var(--void-control-padding);
+  padding: 0;
+  padding-inline: var(--void-control-padding) var(--void-space-8);
   background: var(--void-field-surface);
   border: var(--void-control-border-width) solid var(--void-field-border);
   border-radius: var(--void-control-radius);
@@ -358,7 +359,7 @@ void-date-picker {
 
 .void-date-picker-icon {
   position: absolute;
-  right: var(--void-space-2);
+  inset-inline-end: var(--void-space-2);
   top: 50%;
   transform: translateY(-50%);
   display: inline-flex;
@@ -469,11 +470,13 @@ void-date-picker[disabled] {
 /* ── Size variants ── */
 
 void-date-picker[size="sm"] .void-date-picker-input {
-  padding: var(--void-space-1) var(--void-space-7) var(--void-space-1) var(--void-space-2);
+  padding-block: var(--void-space-1);
+  padding-inline: var(--void-space-2) var(--void-space-7);
   font-size: var(--void-text-xs);
 }
 
 void-date-picker[size="lg"] .void-date-picker-input {
-  padding: var(--void-space-3) var(--void-space-10) var(--void-space-3) var(--void-space-4);
+  padding-block: var(--void-space-3);
+  padding-inline: var(--void-space-4) var(--void-space-10);
   font-size: var(--void-text-base);
 }

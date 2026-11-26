@@ -1,0 +1,26 @@
+# @voidable/ui-hotwire
+
+> Turbo morph protection for Voidable UI web components. Stimulus handles Voidable's custom events natively, so there is no controller to import.
+
+## Install and use
+
+```sh
+npm install @voidable/ui @voidable/theme @voidable/ui-hotwire
+```
+
+```js
+import '@voidable/theme';
+import '@voidable/ui';              // or '@voidable/ui/autoloader'
+import { VoidTurbo } from '@voidable/ui-hotwire';
+
+VoidTurbo.start(); // idempotent; returns a function that detaches the listener
+```
+
+## API
+
+- `VoidTurbo`: `start()` hooks Turbo morphs so reflected state (`open`, `checked`, `value`, ...) and the component's own `role` / `tabindex` / `aria-*` survive while the server renders the same value; the server wins when it renders a different one.
+- Events: wire them with Stimulus `data-action`: `<void-button data-action="void-click->form#submit">`. The Rails gem's `void_attrs("void-click", "form#submit")` builds the attribute.
+
+## Full reference
+
+Every `<void-*>` element (parts, attributes with allowed values, events with `detail`, examples) is in the core package: `@voidable/ui/reference.md` (`node_modules/@voidable/ui/dist/reference.md`), summarised in `@voidable/ui/llms.txt`. Online: https://voidable.dev/llms.txt. Offline per element: `voidable ref <tag>`.

@@ -1,8 +1,9 @@
-import { html, nothing } from 'lit';
+import { html, nothing, type PropertyDeclaration, type PropertyValues } from 'lit';
 import { live } from 'lit/directives/live.js';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
 import { NativeFormControl } from '../form-control.js';
+import { dropReflectedValue, valueReflection } from '../secret-value.js';
 
 /** Single-line text entry for login forms, search fields, and structured data capture. */
 export class VoidInput extends NativeFormControl(VoidElement) {
@@ -14,10 +15,11 @@ export class VoidInput extends NativeFormControl(VoidElement) {
   /** Native input type. Every text-like type is forwarded to the native control. */
   @property({ type: String, reflect: true }) type: 'text' | 'email' | 'password' | 'number' | 'tel' | 'url' | 'search' | 'date' | 'datetime-local' | 'month' | 'time' | 'week' = 'text';
   /**
-   * The text in the field. As an attribute it is the initial value (and the form's reset target); read
-   * or set the `value` property for the current text.
+   * The text in the field. Reflected to the `value` attribute as it changes, and setting the attribute
+   * sets it; the form's reset target stays the value the field started with. A `type="password"` field
+   * does not reflect: its attribute is only ever the initial value.
    */
-  @property({ type: String }) value = '';
+  @property({ type: String, reflect: true }) value = '';
   /**
    * Hint text shown while the field is empty. It is not a label: wrap the input in `void-field
    * label="..."`.
@@ -71,6 +73,16 @@ export class VoidInput extends NativeFormControl(VoidElement) {
    * forwarded to the native control: the native enumerated attribute, not a boolean.
    */
   @property({ type: String, attribute: 'spellcheck' }) protected spellcheckAttr: string | null = null;
+
+  override requestUpdate(name?: PropertyKey, oldValue?: unknown, options?: PropertyDeclaration): void {
+    super.requestUpdate(name, oldValue, valueReflection(this.type === 'password', name, options, () => VoidInput.getPropertyOptions('value')));
+  }
+
+  protected override updated(changed: PropertyValues): void {
+    super.updated(changed);
+    // A field turned into a password field takes back the value it reflected as text.
+    if (this.type === 'password' && changed.get('type') !== undefined) dropReflectedValue(this);
+  }
 
   render() {
     return html`

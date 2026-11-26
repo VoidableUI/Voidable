@@ -1,0 +1,84 @@
+---
+title: Road to 1.0
+description: What 1.0 will promise, what 0.8 has already settled, what must still land first, what is deliberately left out, and how breaking changes are handled before and after.
+---
+
+Voidable is pre-1.0, and this page says what that means: what 1.0 will promise, what is already decided, what is still open, and what will not be part of it. It names no dates. A checklist item is done when it is done, not when a calendar says so.
+
+## What 1.0 means
+
+The promise of 1.0 is about what you write and what you can rely on reading back. From 1.0 on, these stop breaking within a major version:
+
+- **Author markup**: the tags, the [parts](/guides/composition/) of each component and where they go.
+- **Attributes and their values**, including the state attributes that reflect (`open`, `value` where it reflects) and the element properties that match them.
+- **Events**: their names, whether they bubble, and the shape of `detail` (see [API conventions](/guides/conventions/)).
+- **Token names**: the knobs, the semantic and role tokens, and the documented component tokens, as listed in the [theming guide](/getting-started/theming/) and [Design Tokens](/getting-started/tokens/).
+
+These stay free to change in any release, because they are not the interface:
+
+- **Internals**: how a component is built, which private fields and methods it has, and anything not documented.
+- **Generated DOM inside the two shadow roots** (`void-dialog` and `void-drawer`). You style it through `::part(surface)` and `::part(close)`; its structure is not promised.
+- **Private `--_void-*` tokens.** They are not API.
+- **Visual details of themes and skins**: the exact colours, radii and spacing a shipped theme or skin produces. The knobs that make them are promised; the pixels they yield are not.
+
+## Already settled in 0.8
+
+These are decided and shipped. 1.0 should not reopen them.
+
+- **Explicit parts.** Components with regions are written with part elements the component finds but never moves. See [Composition and parts](/guides/composition/).
+- **The overlay model.** Native `<dialog>`, the Popover API and CSS anchor positioning, with one markup shape and one set of `open` and `close` events. See [Overlays](/components/overlays/).
+- **API conventions.** One set of rules for event names and details, state attributes, placement, booleans and variants, each with its reason. See [API conventions](/guides/conventions/).
+- **Token tiers.** Knobs, semantic and role tokens, then component tokens, with themes that set knobs only and skins that change structure through tokens. See [Theming](/getting-started/theming/) and [Build a skin](/getting-started/skins/).
+- **The release process.** One version for every package, bumped automatically from conventional commits, gated on CI. See [Versions](/getting-started/installation/#versions).
+- **The checker.** `voidable check` and the [development warnings](/getting-started/development-warnings/) report unknown or old markup with what to write instead. See [For AI agents](/getting-started/for-agents/).
+- **Value reflection.** Every control reflects its current `value` to the attribute, whoever changed it, with three written exceptions. See [API conventions](/guides/conventions/).
+- **Before the script loads.** The theme styles the not-yet-defined state so a server-rendered page measures the same before and after upgrade. See [Loading components](/getting-started/loading/#before-a-component-loads).
+
+## What must land before 1.0
+
+Each item is something that would break the promise above if it changed after 1.0, or that the promise depends on being true. Each links to its issue.
+
+### Public API
+
+- [ ] **Naming leftovers from the API review** ([#23](https://github.com/VoidableUI/Voidable/issues/23)): `aria-label` as the accessible name everywhere and `label` only where visible text is rendered, and the error fallback heading as a part only.
+- [ ] **Fields as parts, if decided.** `field`, the checkbox and radio groups and the other components still marked "To convert" in the [inventory](/guides/composition/#inventory) place their children themselves. The open question is whether `label`, `helper` and `error` stay attributes. Whichever way it goes, it has to be settled before 1.0, because it changes author markup.
+- [ ] **Remaining selector and state contract gaps** ([#62](https://github.com/VoidableUI/Voidable/issues/62)), as listed under [known gaps](/guides/accessibility-statement/#known-gaps): places where an element has no stable name or role, or where its state cannot be read reliably. Some need a role or attribute to change, so they belong before 1.0.
+- [ ] **Interaction probes for agents** ([#27](https://github.com/VoidableUI/Voidable/issues/27)): the attribute-driven suite that drives every component through attributes, ARIA and standard events, so that "agent friendly" is measured and not claimed.
+
+### Manifest and adapters
+
+- [ ] **Manifest-derived adapter props** ([#13](https://github.com/VoidableUI/Voidable/issues/13)). Types in the manifest that say what markup can express (tags input `value`, colour picker `swatches`), and the remaining gap that the four chart components have no LiveView components (the entries in the `lint:manifest` allowlist). The allowlist may only shrink, and the target is that it is empty.
+
+### Languages and directions
+
+- [ ] **Right-to-left and translation support** ([#29](https://github.com/VoidableUI/Voidable/issues/29)). Logical properties in the theme, direction-sensitive keyboard behaviour, locale passed through calendar, date picker and number input, and a way to replace the built-in English strings ("Close", "No options found", "Calendar", "PIN input"). A labels mechanism adds attributes or a property to every component, so its shape is part of the API and must be fixed first.
+
+### Platform
+
+- [ ] **One browser support statement** ([#32](https://github.com/VoidableUI/Voidable/issues/32)). The [Overlays](/components/overlays/#browser-support) page has a table for the overlay features. The theme's own requirements (`color-mix()`, `@property`, `oklch()`) are not written down in one place, and the whole statement should be tested against, not only documented.
+- [ ] **Axe and forced colours beyond Chromium.** The browser suite runs every spec in Chromium, Firefox and WebKit, except axe-core and forced-colours emulation, which run in Chromium only (see the [accessibility statement](/guides/accessibility-statement/#what-is-tested-and-how)). Close what can be closed and state what cannot.
+
+### Accessibility
+
+- [ ] **Screen-reader results on real assistive technology** ([#34](https://github.com/VoidableUI/Voidable/issues/34)). The scripted VoiceOver and NVDA runs exist and the [accessibility statement](/guides/accessibility-statement/) is published, but no run has been recorded in its "Last verified" table, and no person who relies on a screen reader has tested the library. A 1.0 should not ship with that table empty.
+
+## What is not part of 1.0
+
+These are deliberately left out. Most of them add rather than change, so they can arrive in any 1.x release without breaking anything.
+
+- **More components.** The components still listed in [ROADMAP.md](https://github.com/VoidableUI/Voidable/blob/master/ROADMAP.md) (rating, toolbar, tree view, listbox, context menu, menubar, timeline, splitter and the rest) and the premium tier (data grid, tree grid, pivot table, scheduler, rich text editor and so on).
+- **More chart types and a table fallback for charts.** Area, pie, scatter and sparkline charts, and a visually hidden data table beside each chart.
+- **Typed templates and two-way binding for the thin framework guides.** Angular does not type-check custom element bindings, and Svelte `bind:` cannot work on custom elements. They stay guides plus generated typings, not packages.
+- **Icebox:** a starter template and StackBlitz demos ([#33](https://github.com/VoidableUI/Voidable/issues/33)), repository clean-up ([#35](https://github.com/VoidableUI/Voidable/issues/35)), a Voidable typeface ([#56](https://github.com/VoidableUI/Voidable/issues/56)) and the hexagon motif ([#59](https://github.com/VoidableUI/Voidable/issues/59)). These are not commitments.
+
+## Breaking changes until then, and after
+
+**Until 1.0**, a minor release (0.8 to 0.9) may contain breaking changes and a patch release does not. The rules are:
+
+- **No compatibility aliases and no deprecation period.** An old form is removed in the release that replaces it.
+- **Every old form is reported.** `voidable check` and the development warnings name the old attribute, value, event or implicit child and say what to write instead, so an upgrade is a checker run and not a search.
+- **An upgrading guide per release**, written before the release, like [Upgrading to 0.8](/guides/upgrading/), with the details the checker cannot see, such as changed `event.detail` shapes, properties and CSS selectors.
+
+Release notes on [GitHub](https://github.com/VoidableUI/Voidable/releases) list what changed in each release.
+
+**From 1.0**, the version follows [semantic versioning](https://semver.org/). A breaking change to the promised surface above is a major release; a new attribute, part, event or component is a minor release; a fix is a patch. The release tooling already works this way: a commit marked breaking bumps the minor version while the major is 0, and the major version once it is not. How long a deprecated form stays in a 1.x release, and how it is announced, is not decided yet.

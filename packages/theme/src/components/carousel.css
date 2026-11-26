@@ -23,7 +23,14 @@ void-carousel-item {
 }
 
 void-carousel[orientation="horizontal"] void-carousel-item {
-  transform: translateX(calc(var(--void-carousel-offset, 0) * -100%));
+  transform: translateX(calc(var(--_void-dir, 1) * var(--void-carousel-offset, 0) * -100%));
+}
+
+/* The items lay out from the right in RTL, so the slide runs the other way and the arrows mirror. */
+void-carousel:dir(rtl) { --_void-dir: -1; }
+
+void-carousel:not([orientation="vertical"]):dir(rtl) :is(void-carousel-previous, void-carousel-next):empty::before {
+  scale: -1 1;
 }
 
 void-carousel[orientation="vertical"] {
