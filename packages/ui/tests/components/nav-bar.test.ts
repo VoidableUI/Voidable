@@ -41,10 +41,10 @@ describe('VoidNavBar', () => {
   });
 
   describe('ARIA', () => {
-    it('sets role="navigation" when connected', () => {
+    it('has no role: the landmark belongs on the links, not on a bar that also holds search and account controls', () => {
       const el = createElement();
       document.body.appendChild(el);
-      expect(el.getAttribute('role')).toBe('navigation');
+      expect(el.hasAttribute('role')).toBe(false);
       el.remove();
     });
   });
@@ -113,7 +113,7 @@ describe('VoidNavBar', () => {
       await el.updateComplete;
       expect(Array.from(el.children)).toEqual(before);
       expect(el.querySelector('.void-nav-bar-content')).toBeNull();
-      expect(el.getAttribute('role')).toBe('navigation');
+      expect(el.hasAttribute('role')).toBe(false);
       container.remove();
     });
   });

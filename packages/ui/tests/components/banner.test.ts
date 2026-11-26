@@ -29,11 +29,16 @@ describe('VoidBanner', () => {
   });
 
   describe('ARIA', () => {
-    it('sets role="banner" when connected', () => {
+    it('has no role (banner is the page header landmark) and keeps one the author wrote', () => {
       const el = document.createElement('void-banner') as VoidBanner;
       document.body.appendChild(el);
-      expect(el.getAttribute('role')).toBe('banner');
+      expect(el.hasAttribute('role')).toBe(false);
       el.remove();
+      const own = document.createElement('void-banner') as VoidBanner;
+      own.setAttribute('role', 'status');
+      document.body.appendChild(own);
+      expect(own.getAttribute('role')).toBe('status');
+      own.remove();
     });
   });
 

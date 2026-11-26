@@ -6,6 +6,11 @@ import { closeControlPressed, removeWithFocus } from '../dismiss.js';
 /**
  * Full-width site-level announcement for maintenance windows, cookie consent, and promotional messaging.
  *
+ * It has no role. `banner` is the page header landmark (at most one per page, never inside `<main>`), which an
+ * announcement is not, and it is not a live region either: it is on the page when the page loads. Where one must be
+ * announced when it appears, write `role="status"` (or `alert`) on it; to make it a landmark users can jump to,
+ * write `role="region"` and an `aria-label`. The component leaves a role you write alone.
+ *
  * Its text is written as parts: an optional `<void-banner-title>`, the `<void-banner-description>`, an optional
  * `<void-banner-actions>` (buttons or links) and an optional `<void-banner-close>`. The parts are never moved. The
  * close part wraps the one control the author writes (a `<void-button aria-label="Dismiss">`); pressing it fires
@@ -30,7 +35,6 @@ export class VoidBanner extends VoidElement {
 
   connectedCallback(): void {
     super.connectedCallback();
-    this.setHostAttribute('role', 'banner');
     this.addEventListener('click', this._onClick);
   }
 

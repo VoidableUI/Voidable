@@ -1,7 +1,6 @@
 {
   "_notes": {
     "_": "Reviewed known violations. Each rule says why it is accepted for now and where it is tracked. Counts are violating nodes per rule per component; see specs/axe.spec.ts.",
-    "landmark-banner-is-top-level": "Untracked: void-banner is role=banner, a page landmark, even when used as an in-page notice inside <main>.",
     "nested-interactive": "Untracked duplicate roles: the color-picker host is a focusable widget around native controls.",
     "scrollable-region-focusable": "Untracked: void-scroll-area's viewport cannot be scrolled by keyboard unless its content is focusable.",
     "target-size": "Untracked: sidebar and breadcrumb links, carousel indicators and the compact colour input are under 24x24 px."
@@ -17,9 +16,6 @@
     }
   },
   "kitchen dark": {
-    "landmark-banner-is-top-level": {
-      "void-banner": 1
-    },
     "nested-interactive": {
       "void-color-picker": 1
     },
@@ -34,9 +30,6 @@
     }
   },
   "kitchen light": {
-    "landmark-banner-is-top-level": {
-      "void-banner": 1
-    },
     "nested-interactive": {
       "void-color-picker": 1
     },

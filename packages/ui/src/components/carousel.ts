@@ -112,12 +112,13 @@ export class VoidCarousel extends VoidElement {
     const slides = this._slides;
     const count = slides.length;
     const content = this._parts.one('void-carousel-content');
-    if (content) this._parts.provide(content, 'aria-live', 'polite');
+    // APG: never a live region while the slides rotate on their own, or every change is read out unasked.
+    if (content) this._parts.set(content, 'aria-live', this.autoplay ? 'off' : 'polite');
     slides.forEach((slide, i) => {
       this._parts.provide(slide, 'role', 'group');
       this._parts.provide(slide, 'aria-roledescription', 'slide');
       // The numbering follows the slides as they come and go; a label the author wrote is never replaced.
-      const label = `Slide ${i + 1} of ${count}`;
+      const label = `${i + 1} of ${count}`;
       const current = slide.getAttribute('aria-label');
       if (current === null || current === this._labels.get(slide)) {
         this._parts.set(slide, 'aria-label', label);

@@ -133,7 +133,7 @@ test.describe('disclosure and notices', () => {
     test('has no shadow root, and its parts and author button are the whole DOM', async ({ page }) => {
       expect(await page.evaluate(() => document.getElementById('al1')!.shadowRoot)).toBeNull();
       expect(await mark(page, '#al1')).toEqual(['void-alert-title', 'void-alert-description', 'void-alert-close', 'button']);
-      await expect(page.locator('#al1')).toHaveAttribute('role', 'alert');
+      await expect(page.locator('#al1')).toHaveAttribute('role', 'status');
       await expect(page.locator('#al1')).not.toHaveAttribute('dismissible');
     });
 
