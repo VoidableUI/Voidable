@@ -784,6 +784,19 @@ describe('select: the choice through a patch, whatever the order and timing of t
     });
   }
 
+  it('a choice a script makes in the native select (a framework binding, no event) is kept, not written over', async () => {
+    const { form, sel, native } = await chose('');
+    native.value = 'fj';
+    sel.error = 'Pick one';
+    await settle();
+    expect([sel.value, native.value, new FormData(form).get('country')]).toEqual(['fj', 'fj', 'fj']);
+    // A framework re-rendering the options' text in the same pass is not a reset either.
+    native.options[1]!.textContent = 'New Zealand (9)';
+    native.value = 'nz';
+    await settle();
+    expect([sel.value, native.value, new FormData(form).get('country')]).toEqual(['nz', 'nz', 'nz']);
+  });
+
   it('options replaced without any hook: the same markup keeps the choice, a new `selected` wins', async () => {
     const { form, sel, native } = await chose(null);
     patchNative(native, 'replace', 2);

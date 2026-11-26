@@ -31,13 +31,17 @@ export class VoidSelect extends VoidElement {
 
   // ── The choice ──
   //
-  // `_choice` is the one source of truth. It changes only when the user picks in the native select (`input`,
-  // `change`), when script sets `value` or the `value` attribute (which is how a server morph that changed
-  // it arrives), when the server's markup changes which options are `selected`, and when the chosen option
-  // is gone. The native select is never read back otherwise: while a morph library patches it (options
-  // replaced, `selected` rewritten, selectedIndex reset) it holds the server's markup, not the choice.
-  // After every mutation of the select, every morph and every update the choice is written into it again,
-  // and a form that builds its data reads it from there (see `_onFormData`).
+  // `_choice` is the one source of truth. It changes when the user picks in the native select (`input`,
+  // `change`), when `value` or the `value` attribute is set (which is how a server morph that changed it
+  // arrives), when the server's markup marks other options `selected` than its last render, when the chosen
+  // option is gone, and when a script chose an option in the select itself (`select.value = …`, as Vue,
+  // Svelte or Angular bindings do) at a moment no patch was under way.
+  //
+  // A patch is never read back. While a morph library patches the select (options replaced, `selected`
+  // rewritten, selectedIndex reset) it holds the server's markup, so after every patch (the adapters'
+  // pre-morph hook, a mutation of the select) a select left at its markup's default selection gets the
+  // choice written back into it. A form building its data first brings all this up to date (`_onFormData`),
+  // so what it submits never depends on when a callback or an observer runs.
 
   /** The chosen values (one for a single select), or null before anything decided them. */
   private _choice: string[] | null = null;
@@ -125,30 +129,58 @@ export class VoidSelect extends VoidElement {
     this._watchForm(null);
   }
 
-  /** Follows the select (added, replaced), writes its invalid state and the choice, follows its form. */
+  /** The select was added, replaced or moved (PartsController): follow it, mark it, write the choice into it. */
   private _wire(): void {
     const select = this.select;
     const replaced = !!select && !!this._observed && select !== this._observed;
+    // Mutations of the select not delivered yet belong to this round.
+    const records = this._observer?.takeRecords() ?? [];
     this._observe(select);
     if (!select) return;
     this._markInvalid(select);
     this._watchForm(select.form);
-    if (replaced && !this._morphQueued) this._serverMarked(select);
-    else if (this._serverSelection === null) this._serverSelection = selectedAttrs(select);
-    this._sync();
+    // A morph through the adapters reconciles in its own microtask.
+    if (this._morphQueued) return;
+    if (this._serverSelection === null) this._serverSelection = selectedAttrs(select);
+    else if (replaced) this._serverMarked(select);
+    this._reconcile(replaced || patched(records) ? 'mutation' : 'none', records);
   }
 
-  /** Writes the choice into the select; decides it from the select only where nothing has yet, or its option is gone. */
-  private _sync(): void {
+  /**
+   * Brings the choice and the native select into agreement. `patch` says what happened to the select since
+   * the choice was last written into it:
+   * - `morph`: a morph through the adapters (between the pre-morph hook and its microtask, which the
+   *   adapters' contract makes the morph's own synchronous run): any difference is the morph's, and the
+   *   choice goes back in;
+   * - `mutation`: the select's options, their text or their `selected` were changed: a select left at its
+   *   markup's default selection (or none) is that patch, and the choice goes back in;
+   * - `none`: nothing.
+   * Any other difference is a choice a script made in the select (`select.value = …`), and the choice follows it.
+   */
+  private _reconcile(patch: 'morph' | 'mutation' | 'none', records: MutationRecord[] = []): void {
     const select = this.select;
     if (!select) return;
     this._finishReset();
+    if (patch === 'mutation' && replacedOptions(records)) this._serverMarked(select);
     const old = this.value;
-    if (this._choice === null || (!this._pending && !select.multiple && this._choice.length === 0)) {
+    const choice = this._choice;
+    if (choice === null || (!this._pending && !select.multiple && choice.length === 0)) {
+      // Nothing decided yet: the select's own selection (its markup, autofill, a restored page) is the start.
       if (select.options.length) this._choice = chosen(select);
+    } else if (patch !== 'morph' && !this._pending && choice.every(v => hasOption(select, v))) {
+      const now = chosen(select);
+      const reset = patch === 'mutation' && same(now, marked(select));
+      if (now.length && !reset && !same(now, choice)) this._choice = now;
     }
     this._apply();
     this._changed(old);
+  }
+
+  /** Reconciles now, taking the mutations of the select not delivered yet (unless a morph's microtask will). */
+  private _flush(): void {
+    if (this._morphQueued || !this.select) return;
+    const records = this._observer?.takeRecords() ?? [];
+    this._reconcile(patched(records) ? 'mutation' : 'none', records);
   }
 
   /** Puts the choice into the native select (properties only: no attribute, so no mutation of its own). */
@@ -179,7 +211,7 @@ export class VoidSelect extends VoidElement {
     super.updated(changed);
     const select = this.select;
     if (changed.has('error') && select) this._markInvalid(select);
-    this._apply();
+    this._flush();
   }
 
   /** The select we last marked `aria-invalid` (a `void-field` with an error marks it too; that stays theirs). */
@@ -201,7 +233,7 @@ export class VoidSelect extends VoidElement {
     return this.error ? html`<span class="void-select-error">${this.error}</span>` : nothing;
   }
 
-  /** The user picked in the native select: the only time its state becomes the choice. */
+  /** The user picked in the native select. */
   private _onPick = (e: Event): void => {
     const select = this.select;
     if (!select || e.target !== select) return;
@@ -233,24 +265,13 @@ export class VoidSelect extends VoidElement {
   }
 
   /**
-   * Anything changed in the select (a morph without the pre-morph hook, options written with innerHTML,
-   * LiveView patching a locked select): options that were replaced may carry a new server selection;
-   * either way the choice goes back in.
+   * Something changed in the select: a morph without the pre-morph hook, options written with innerHTML,
+   * LiveView patching a locked select, a framework re-rendering the options.
    */
   private _onMutations = (records: MutationRecord[]): void => {
-    // A morph through the adapters decides in its own microtask, from the server's markup.
+    // A morph through the adapters reconciles in its own microtask, from the server's markup.
     if (this._morphQueued || !this.isConnected) return;
-    const select = this.select;
-    if (!select) return;
-    let removed = false;
-    let added = false;
-    for (const r of records) {
-      if (r.type !== 'childList') continue;
-      removed ||= Array.from(r.removedNodes).some(isOptionNode);
-      added ||= Array.from(r.addedNodes).some(isOptionNode);
-    }
-    if (removed && added) this._serverMarked(select);
-    this._sync();
+    this._reconcile(patched(records) ? 'mutation' : 'none', records);
   };
 
   /**
@@ -283,32 +304,9 @@ export class VoidSelect extends VoidElement {
   }
 
   /**
-   * Brings the choice up to date synchronously, where the form or a morph is about to read it: a patch of
-   * the select whose mutations are not delivered yet is handled now (the choice goes back in). With none
-   * since the choice was last written into the select, a difference is a script's choice
-   * (`select.value = …`, no event), which the select keeps, as in plain HTML.
-   */
-  private _flush(): void {
-    const select = this.select;
-    if (!select || this._morphQueued) return;
-    this._finishReset();
-    const records = this._observer?.takeRecords() ?? [];
-    if (records.length) {
-      this._onMutations(records);
-      return;
-    }
-    if (this._pending || !this._choice) return;
-    const now = chosen(select);
-    if (!now.length || (now.length === this._choice.length && now.every((v, i) => v === this._choice![i]))) return;
-    const old = this.value;
-    this._choice = now;
-    this._changed(old);
-  }
-
-  /**
    * The form is building its data (a submit, `new FormData(form)`, a LiveView event) from the native select.
    * A patch may have reset it a moment ago, before its mutations were delivered or the morph's microtask
-   * ran: write the choice into it now and correct the entries it already contributed.
+   * ran: bring the choice up to date and into the select now, and correct the entries it already gave.
    */
   private _onFormData = (e: FormDataEvent): void => {
     const select = this.select;
@@ -318,7 +316,7 @@ export class VoidSelect extends VoidElement {
     this._apply();
     if (!select.name) return;
     const after = submits(select);
-    if (before.length === after.length && before.every((v, i) => v === after[i])) return;
+    if (same(before, after)) return;
     const entries = e.formData.getAll(select.name);
     for (const v of before) {
       const i = entries.indexOf(v);
@@ -334,7 +332,7 @@ export class VoidSelect extends VoidElement {
   private _onReset = (e: Event): void => {
     this._pendingReset = e;
     // The form resets its controls after this event: a task later (a reset button's reset included) it has.
-    // Until then anything that reads the choice for the form (form data, a sync) finishes the reset first.
+    // Anything that reads the choice for the form before then (form data, a patch) finishes the reset first.
     setTimeout(() => {
       this._finishReset();
       this._apply();
@@ -362,7 +360,7 @@ export class VoidSelect extends VoidElement {
 
   // ── Morphs: the user's choice stays unless the server changed the selection ──
 
-  /** A morph through the adapters is in progress; the choice is written back in the microtask after it. */
+  /** A morph through the adapters is under way; the choice is written back in the microtask after it. */
   private _morphQueued = false;
 
   /**
@@ -372,7 +370,7 @@ export class VoidSelect extends VoidElement {
    */
   override voidBeforeMorph(incoming?: Element | null): boolean {
     if (incoming && incoming !== this) {
-      // Before the morph touches the select, it holds the client's state.
+      // Before the morph touches the select it holds the client's state: take up anything not seen yet.
       this._flush();
       // A copy of a rendered element (LiveView morphs to a clone of a locked one, which it patched) carries
       // what it recorded from the server's markup; its own options may have been re-synced from the live one.
@@ -402,7 +400,7 @@ export class VoidSelect extends VoidElement {
 
   private _afterMorph = (): void => {
     this._morphQueued = false;
-    // What the morph did to the select is its business: the choice was decided above.
+    // The decision was taken from the server's markup; what the morph did to the select is the patch.
     this._observer?.takeRecords();
     const select = this.select;
     if (!this.isConnected || !select) return;
@@ -411,7 +409,7 @@ export class VoidSelect extends VoidElement {
     this._watchForm(select.form);
     // Server markup does not carry the aria-invalid the error wrote.
     this._markInvalid(select);
-    this._sync();
+    this._reconcile('morph');
   };
 }
 
@@ -420,8 +418,31 @@ function hasOption(select: HTMLSelectElement, value: string): boolean {
   return false;
 }
 
+function same(a: readonly string[], b: readonly string[]): boolean {
+  return a.length === b.length && a.every((v, i) => v === b[i]);
+}
+
 function isOptionNode(n: Node): boolean {
   return n.nodeName === 'OPTION' || n.nodeName === 'OPTGROUP';
+}
+
+/** Mutations that can reset a select's selection: options added, removed or re-texted, `selected` or `multiple` rewritten. */
+function patched(records: readonly MutationRecord[]): boolean {
+  return records.some(r =>
+    r.type === 'attributes' ? r.attributeName === 'selected' || r.attributeName === 'multiple' : true,
+  );
+}
+
+/** Options were replaced (some removed and some added): the server rendered them afresh. */
+function replacedOptions(records: readonly MutationRecord[]): boolean {
+  let removed = false;
+  let added = false;
+  for (const r of records) {
+    if (r.type !== 'childList') continue;
+    removed ||= Array.from(r.removedNodes).some(isOptionNode);
+    added ||= Array.from(r.addedNodes).some(isOptionNode);
+  }
+  return removed && added;
 }
 
 /** The values of the options the markup marks `selected`, in order, as JSON. */
