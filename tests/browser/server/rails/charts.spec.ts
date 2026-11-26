@@ -45,7 +45,7 @@ test('each chart has a data table in the accessibility tree, and the drawing is 
   await expect(table.getByRole('row')).toHaveCount(4);
   await expect(table.getByRole('cell', { name: '8' })).toBeAttached();
   // Out of sight unless show-table asks for it.
-  expect(await page.locator('#bars table').evaluate((t) => t.getBoundingClientRect().width)).toBeLessThanOrEqual(1);
+  expect(await page.locator('#bars table').evaluate((t) => getComputedStyle(t).clipPath)).toBe('inset(50%)');
   await expect(page.locator('#gauge-segments table')).toBeVisible();
 });
 
