@@ -109,6 +109,13 @@ export class VoidModal extends VoidElement {
       reflect.ariaLabelledByElements = title ? [title] : null;
       reflect.ariaDescribedByElements = description ? [description] : null;
     }
+    // VoiceOver named the dialog from the element reference but never spoke the description it was given the same
+    // way. Also write the description as text (`aria-description`, supported by WebKit and Chromium). Where both
+    // exist, the accessible description comes from the reference and the text is the fallback, so nothing is
+    // spoken twice.
+    const text = description?.textContent?.trim();
+    if (text) dialog.setAttribute('aria-description', text);
+    else dialog.removeAttribute('aria-description');
     const label = this.getAttribute('aria-label');
     if (title || !label) dialog.removeAttribute('aria-label');
     else dialog.setAttribute('aria-label', label);

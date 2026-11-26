@@ -79,6 +79,11 @@ describe('VoidDialog', () => {
       }
     });
 
+    it('also writes the description as aria-description text on the dialog (#75)', async () => {
+      const el = await mount({}, '<void-dialog-title>Confirm</void-dialog-title><void-dialog-description>Sure?</void-dialog-description>');
+      expect(panel(el).getAttribute('aria-description')).toBe('Sure?');
+    });
+
     it('keeps a server role on the title', async () => {
       const el = await mount({}, '<void-dialog-title role="none">Confirm</void-dialog-title>');
       expect(el.querySelector('void-dialog-title')!.getAttribute('role')).toBe('none');

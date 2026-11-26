@@ -16,7 +16,7 @@ export const KNOWN_ISSUES = {
   'untracked:voiceover-number-input-percent':
     'VoiceOver speaks a number input as a percentage of its range ("11.1% Seats stepper" for a value of 2) instead of its value; it should say "2". Fix attempted in the number-input commit of fix/screen-reader-defects (aria-valuetext). aria-valuenow with aria-valuemin/aria-valuemax and no aria-valuetext is read as a percentage.',
   'untracked:voiceover-dialog-description':
-    'VoiceOver names the dialog ("Profile settings web dialog with 6 items") but never speaks its description, "Change how your name appears.", which is attached with ARIA element references across a shadow root.',
+    'VoiceOver names the dialog ("Profile settings web dialog with 6 items") but never speaks its description, "Change how your name appears.", which is attached with ARIA element references across a shadow root. Fix attempted in the dialog-description commit of fix/screen-reader-defects (aria-description text added).',
   'untracked:voiceover-toast-silent':
     'VoiceOver speaks nothing for a toast: the polite live region receives "Changes saved" and the only phrase logged is empty (""); it should say "Changes saved". Fix attempted in the toast commit of fix/screen-reader-defects (container stays rendered while empty).',
   'untracked:nvda-toast-silent':
