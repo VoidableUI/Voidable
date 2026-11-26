@@ -20,10 +20,16 @@ Components are built on the platform: native controls where there is one, ARIA r
 
 A component cannot know what your page means. These are yours:
 
-- **An accessible name for anything that has no text.** Give an icon-only `<void-button>` an `aria-label`, a chart an `aria-label` and the key figures in text beside it, a `<void-carousel>` and a `<void-menu>` an `aria-label`, and a `<void-panel>` a `label`. A control without a visible label goes in a `<void-field label="…">`.
+- **An accessible name for anything that has no text.** Give an icon-only `<void-button>` an `aria-label`, a chart an `aria-label` (it captions the chart's data table, see below), a `<void-carousel>` and a `<void-menu>` an `aria-label`, and a `<void-panel>` a `label`. A control without a visible label goes in a `<void-field label="…">`.
 - **Meaningful headings and landmarks.** A card's `heading` is styled text, not an `<h2>`; use your own heading element where the page outline needs one.
 - **Live status where you need it.** Loading, saving and error messages that appear without focus moving should be announced: the [toast container](/components/toast-container/) announces each toast through hidden live announcers, and [alert](/components/alert/) is a live region; a skeleton is not.
 - **Focus management around your own flows.** Overlays manage focus themselves, see [Overlays](/components/overlays/). An open dialog or drawer moves focus to its `autofocus` element, else its first focusable element, keeps Tab inside it (the page behind is inert), closes on Escape (unless `closable="false"`) and returns focus to the control that opened it. A popover, menu or picker list takes focus when a user opens it, closes on Escape or when focus leaves, and returns focus to its trigger. Where focus goes after your own actions (a deleted row, a submitted form) is up to your code. Name every dialog and drawer with `heading`, or `aria-label` when there is no visible title.
+
+## Charts and gauges
+
+A drawing says nothing to a screen reader, so every chart carries the same values as text. `void-bar-chart`, `void-line-chart`, `void-donut-chart` and `void-gauge` are a `figure` (named by `aria-label`) holding a **visually hidden data table**, built from the chart's `data`, and the drawing itself is `aria-hidden`, so nothing is announced twice. A screen reader reaches the table with its table commands: the caption is the chart's `aria-label`, the header cells name the series (a column for each series of a bar or line chart, one row for each label), and a donut or gauge with segments has the columns segment, value and share. A gauge with a single reading has one row: value, minimum and maximum, with its `unit`. Numbers are written for the language of the page (the closest `lang`), with their full precision, not the abbreviated labels of the drawing (`1.2k`).
+
+Add `show-table` to show the table below the chart as well, for readers who want the numbers and for print. The table is built from the data as given, not from the animation. Keep the key figures in the text around the chart if they matter to the page: the table is there for exploring the data, not for the argument.
 
 ## Right-to-left
 

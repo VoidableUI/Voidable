@@ -183,3 +183,44 @@ export const SharpShape: Story = {
     </div>
   `,
 };
+
+export const FromMarkup: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story: 'The data is the JSON `data` attribute, so server-rendered HTML draws the chart with no script and no property. The attribute is not rewritten when the property is set, and an attribute a server morph leaves unchanged does not animate the chart again.',
+      },
+    },
+  },
+  render: () => html`
+    <void-line-chart
+      style="max-width: 600px;"
+      aria-label="Visitors per day"
+      data='{"labels":["Mon","Tue","Wed","Thu","Fri"],"series":[{"name":"Visitors","values":[320,410,380,520,610]}]}'
+    ></void-line-chart>
+  `,
+};
+
+export const WithTable: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story: 'Every chart carries a visually hidden data table, captioned with `aria-label`, for screen readers (the drawing is `aria-hidden`). `show-table` shows it below the chart too: one row per point, one column per series.',
+      },
+    },
+  },
+  render: () => html`
+    <void-line-chart
+      show-table
+      style="max-width: 600px;"
+      aria-label="Traffic by channel"
+      .data=${{
+        labels: ['Mon', 'Tue', 'Wed', 'Thu'],
+        series: [
+          { name: 'Organic', values: [320, 410, 380, 520] },
+          { name: 'Paid', values: [120, 160, 140, 210] },
+        ],
+      }}
+    ></void-line-chart>
+  `,
+};

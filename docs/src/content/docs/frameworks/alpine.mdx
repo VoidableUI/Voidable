@@ -122,6 +122,21 @@ When using Vite to bundle your assets (the standard Laravel + Livewire setup), t
 </head>
 ```
 
+## Charts from server data
+
+The charts take their data as the JSON `data` attribute (a gauge's `zones` too), so the first response already draws them. The `voidable/laravel` package has Blade components that write it from PHP arrays (or a JSON string); every other attribute passes through as written:
+
+```blade
+<x-voidable::bar-chart aria-label="Revenue by quarter" show-value
+    :data="['labels' => ['Q1', 'Q2'], 'series' => [['name' => '2025', 'values' => [4, 8]]]]" />
+<x-voidable::line-chart aria-label="Visitors" :data="$visits" />
+<x-voidable::donut-chart aria-label="Traffic by source" show-total :data="['segments' => $sources]" />
+<x-voidable::gauge aria-label="Disk usage" :value="72" unit="%"
+    :zones="[['from' => 0, 'to' => 60, 'color' => 'var(--void-color-success)']]" />
+```
+
+A Livewire update that leaves a chart's data unchanged leaves the chart alone (no new animation); changed data redraws it. Each chart carries a visually hidden data table captioned with `aria-label`, and `show-table` shows it below the chart. The example app's charts lab (`/lab/charts`) is tested against real Livewire in `tests/browser/server/laravel/charts.spec.ts`.
+
 ## Development warnings
 
 A misspelled attribute, an invalid value or a child in the wrong parent does nothing and says nothing. In Laravel, `@voidableScripts` also loads `@voidable/ui/dev` when `voidable.dev_warnings` is on, which by default is the `local` environment only (`VOIDABLE_DEV_WARNINGS=false` turns it off, `VOIDABLE_DEV_WARNINGS=throw` makes warnings throw for browser tests). Without Laravel, import it from your bundle in development only:

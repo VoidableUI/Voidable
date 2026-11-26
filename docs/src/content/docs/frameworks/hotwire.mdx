@@ -449,6 +449,21 @@ With manual data attributes, use Stimulus `data-action` directly; Stimulus liste
 ></void-input>
 ```
 
+## Charts from server data
+
+The charts take their data as the JSON `data` attribute, so the first response already draws them. Written as `tag.void_bar_chart data: hash`, Rails would turn the hash into `data-*` attributes, so the gem has helpers that write the one attribute the element reads: `void_bar_chart`, `void_line_chart`, `void_donut_chart` and `void_gauge`. Pass a hash or array (or a JSON string) first, then the other attributes with underscores for dashes; `true` is a boolean attribute, `false` and `nil` leave it off.
+
+```erb
+<%= void_bar_chart({ labels: %w[Q1 Q2], series: [{ name: "2025", values: [4, 8] }] },
+      aria_label: "Revenue by quarter", show_value: true) %>
+<%= void_donut_chart({ segments: @sources.map { |name, n| { name: name, value: n } } },
+      aria_label: "Traffic by source", show_total: true) %>
+<%= void_gauge(value: 72, unit: "%", aria_label: "Disk usage",
+      zones: [{ from: 0, to: 60, color: "var(--void-color-success)" }]) %>
+```
+
+A Turbo page-refresh morph that leaves a chart's data unchanged leaves the chart alone (no new animation); changed data redraws it. Each chart carries a visually hidden data table captioned with `aria_label`, and `show_table: true` shows it below the chart. The Rails demo's charts lab (`/charts_lab`) is tested against the real gem in `tests/browser/server/rails/charts.spec.ts`.
+
 ## Scaffolds
 
 The gem overrides Rails' default scaffold templates so `rails generate scaffold` produces Voidable-styled views automatically. The engine registers templates via `config.generators.templates.unshift`, requiring no extra configuration.

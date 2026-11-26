@@ -5,6 +5,8 @@ Rails.application.routes.draw do
   resource :morph_lab, only: %i[show update], controller: "morph_lab" do
     post :stream
   end
+  # Charts drawn from server data (the gem's chart helpers), refreshed by morph.
+  resource :charts_lab, only: %i[show update], controller: "charts_lab"
   # Turbo Drive navigation, Turbo Frames and Turbo Streams on Voidable components.
   get "turbo_lab", to: "turbo_lab#show", as: :turbo_lab
   get "turbo_lab/two", to: "turbo_lab#two", as: :turbo_lab_two

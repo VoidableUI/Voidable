@@ -2,7 +2,7 @@ defmodule DemoWeb.ChartsLive do
   @moduledoc """
   The four charts rendered from the server: the page behind the chart tests in
   `tests/browser/server/phoenix/charts.spec.ts`. The `Grow` button changes every
-  chart's data, which reaches the elements through the `VoidProps` hook.
+  chart's data, which reaches the elements as the JSON `data` attribute.
   """
   use DemoWeb, :live_view
 

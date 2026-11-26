@@ -380,3 +380,38 @@ export const SpeedometerWireframe: Story = {
   },
   render: () => speedoGrid('wireframe'),
 };
+
+export const FromMarkup: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story: 'Segments and colour bands are JSON attributes, `data` and `zones`, so server-rendered HTML draws the gauge with no script and no property. They are not rewritten when the properties are set, and an attribute a server morph leaves unchanged does not animate the gauge again.',
+      },
+    },
+  },
+  render: () => html`
+    <void-gauge
+      value="72"
+      unit="%"
+      circular="semi"
+      aria-label="Disk usage"
+      zones='[{"from":0,"to":60,"color":"var(--void-color-success)"},{"from":60,"to":85,"color":"var(--void-color-warning)"},{"from":85,"to":100,"color":"var(--void-color-error)"}]'
+    ></void-gauge>
+  `,
+};
+
+export const WithTable: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story: 'Every gauge carries a visually hidden data table, captioned with `aria-label`, for screen readers (the drawing is `aria-hidden`). `show-table` shows it too: the reading with its range, or one row per segment.',
+      },
+    },
+  },
+  render: () => html`
+    <div style="display: flex; gap: var(--void-space-8); flex-wrap: wrap;">
+      <void-gauge show-table value="72" unit="%" aria-label="Disk usage"></void-gauge>
+      <void-gauge show-table aria-label="Memory" data='{"segments":[{"name":"Used","value":30},{"name":"Cache","value":20}]}'></void-gauge>
+    </div>
+  `,
+};

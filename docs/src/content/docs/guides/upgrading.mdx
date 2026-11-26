@@ -71,6 +71,15 @@ Components with regions are written with part elements, and the implicit forms a
 
 <PartsMigration />
 
+## Charts and gauges (0.10)
+
+Charts take their data from markup and carry a data table; two things in existing code change:
+
+- **The host role is `figure`, not `img`.** A chart is a figure named by its `aria-label` that holds a visually hidden data table; the drawing is `aria-hidden` and the role and `aria-label` that were on the `<svg>` are gone, so a test that looked for `role="img"` or `getByRole('img', { name })` on a chart looks for `figure` (or the `table`) now. Nothing else in your markup changes: keep the `aria-label`, it is the caption of the table.
+- **LiveView: `VoidProps` is gone.** The `bar_chart`, `line_chart`, `donut_chart` and `gauge` components write `data` (and `zones`) as JSON attributes, so no hook and no generated `id` is needed. Remove `VoidProps` from custom code that used it for charts; if you spread `VoidHooks` into your `LiveSocket`, nothing else changes. `data-void-props` is no longer rendered.
+
+New: the `data` attribute (a gauge's `zones` too) with JSON, `show-table`, and the adapter helpers (React `data` as an attribute, Rails `void_bar_chart` and the other chart helpers, Blade `<x-voidable::bar-chart>` and the other chart components). See [Accessibility](/guides/accessibility/#charts-and-gauges) and the [conventions](/guides/conventions/).
+
 ## 4. Check again
 
 Run `voidable check` until it reports nothing, then run your application with the development warnings loaded and open each page once: a clean console means the markup is right.

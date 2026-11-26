@@ -2,7 +2,9 @@ import { html, svg, nothing, type TemplateResult } from 'lit';
 import { VoidElement } from '../base.js';
 import { property, state } from 'lit/decorators.js';
 import { arcPath } from './charts/shape.js';
+import { guard } from 'lit/directives/guard.js';
 import { useProjection } from '../projection.js';
+import { readChartInput, normalizeSegments, isRecord, dataTable, segmentsTable, chartLocale, type ChartSource } from './charts/data.js';
 
 useProjection();
 
@@ -37,8 +39,10 @@ function formatValue(v: number): string {
 
 /**
  * Donut chart for part-to-whole breakdowns, drawn in SVG with animated segments and an optional total in the
- * centre. Give it `data` (`{ segments: [{ name, value }] }`) from script; it has no children. The chart is an
- * image to assistive technology, so set `aria-label` and state the key figures in the surrounding text.
+ * centre. Give it `data` (`{ segments: [{ name, value }] }`) as the `data` property or as JSON in the `data`
+ * attribute, so server-rendered markup draws it with no script; it has no children. The drawing is hidden
+ * from assistive technology and a visually hidden data table (captioned with `aria-label`) carries the
+ * values instead; add `show-table` to show the table below the chart too.
  */
 export class VoidDonutChart extends VoidElement {
 
@@ -77,19 +81,45 @@ export class VoidDonutChart extends VoidElement {
   /** Print the sum of the segments in the centre of the ring. */
   @property({ type: Boolean, attribute: 'show-total', reflect: true }) showTotal = false;
   /**
-   * Accessible name of the chart, such as `Traffic by source`. The chart is an image to assistive
-   * technology, so set it and put the key figures in the text around it.
+   * Accessible name of the chart, such as `Traffic by source`; it is also the caption of the data table.
+   * Set it: the drawing itself is hidden from assistive technology.
    */
   @property({ attribute: 'aria-label' }) ariaLabel = '';
+  /**
+   * Show the data table (one row per segment: name, value and share) below the chart. The table is always
+   * there for assistive technology; this makes it visible too.
+   */
+  @property({ type: Boolean, attribute: 'show-table', reflect: true }) showTable = false;
 
   private _data: DonutChartData = { segments: [] };
+  private _source: ChartSource = { text: null };
+  private _entered = false;
 
   /**
    * The chart's data: `{ segments: [{ name, value, color? }] }`. Each segment's share of the ring is its
-   * `value` over the sum of all values. Property only: assign a new object to update the chart and animate to it.
+   * `value` over the sum of all values. Give it as a property (assign a new object to update the chart and
+   * animate to it) or as JSON in the `data` attribute:
+   * `<void-donut-chart data='{"segments":[{"name":"Search","value":40},{"name":"Direct","value":25}]}'>`.
+   * Invalid JSON draws nothing and is reported by `@voidable/ui/dev`. The property is not reflected to the
+   * attribute (the data can be large), and an attribute a server morph leaves unchanged does not animate again.
+   * @default { segments: [] }
    */
+  @property({ attribute: 'data' })
   get data(): DonutChartData { return this._data; }
-  set data(next: DonutChartData) {
+  set data(input: DonutChartData) {
+    const r = readChartInput<DonutChartData>(input, this._source, {
+      attr: 'data',
+      shape: '{"segments":[{"name":"Search","value":40},{"name":"Direct","value":25}]}',
+      empty: () => ({ segments: [] }),
+      normalize: (raw) => {
+        if (!isRecord(raw)) return null;
+        const segments = normalizeSegments<DonutChartSegment>(raw.segments ?? []);
+        return segments ? { segments } : null;
+      },
+      warn: (subject, message) => this.reportDev('invalid-data', subject, message),
+    });
+    if (!r) return;
+    const next = r.value;
     const prevSegments = this._data.segments;
     const prevProgress = this._progress;
     const prevDisplayValues = new Map(this._displayValues);
@@ -97,6 +127,8 @@ export class VoidDonutChart extends VoidElement {
     this._data = next;
     this._refreshTargets();
     this.requestUpdate();
+    // Before the entrance animation has started, it draws whatever is there.
+    if (!this._entered) return;
     this.updateComplete.then(() => {
       // Snapshot current displayed state before re-animating
       const fromValues = new Map<number, number>();
@@ -138,9 +170,10 @@ export class VoidDonutChart extends VoidElement {
 
   connectedCallback() {
     super.connectedCallback();
-    this.setHostAttribute('role', 'img');
+    // A figure, not an image: an image's children are presentational and would hide the data table.
+    this.setHostAttribute('role', 'figure');
     this._refreshTargets();
-    requestAnimationFrame(() => { this._startAnimation(new Map(), 0, 0, true); });
+    requestAnimationFrame(() => { this._entered = true; this._startAnimation(new Map(), 0, 0, true); });
     this.addEventListener('mousemove', this._onMouseMove);
     this.addEventListener('mouseleave', this._onMouseLeave);
   }
@@ -254,7 +287,7 @@ export class VoidDonutChart extends VoidElement {
     const { segments } = this._data;
     const total = segments.reduce((s, x) => s + fin(x.value), 0);
     if (segments.length === 0 || total === 0) {
-      return html`<svg viewBox="0 0 ${this.size} ${this.size}" role="img" aria-label=${this.ariaLabel || 'Donut chart'}></svg>`;
+      return html`<svg viewBox="0 0 ${this.size} ${this.size}" aria-hidden="true"></svg>${this._table()}`;
     }
 
     const cx = this.size / 2;
@@ -308,8 +341,7 @@ export class VoidDonutChart extends VoidElement {
     return html`
       <svg
         viewBox="0 0 ${this.size} ${this.size}"
-        role="img"
-        aria-label=${this.ariaLabel || 'Donut chart'}
+        aria-hidden="true"
         data-phase=${this._phase}
       >
         ${arcs}
@@ -344,7 +376,16 @@ export class VoidDonutChart extends VoidElement {
           ? this._renderHoverTooltip(segments, this._hoverSegment)
           : nothing}
       </svg>
+      ${this._table()}
     `;
+  }
+
+  /** The data table for assistive technology (and `show-table`), from the data as given, not the animated state. */
+  private _table() {
+    const segments = this._data.segments;
+    const label = this.ariaLabel || 'Donut chart';
+    return guard([segments, label, chartLocale(this)], () =>
+      dataTable('void-donut-chart-table', segmentsTable(this, label, segments)));
   }
 
   private _renderHoverTooltip(

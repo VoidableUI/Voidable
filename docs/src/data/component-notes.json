@@ -432,17 +432,18 @@
   },
   "void-bar-chart": {
     "group": "charts",
-    "script": "const chart = document.querySelector('void-bar-chart');\nchart.data = {\n  labels: ['Q1', 'Q2', 'Q3', 'Q4'],\n  series: [\n    { name: '2025', values: [120, 180, 150, 210] },\n    { name: '2026', values: [150, 220, 190, 260] },\n  ],\n};"
+    "children": "None. Give the data as the `data` attribute (JSON) or the property; the chart draws a visually hidden data table from it for assistive technology, and `show-table` shows it below the chart."
   },
   "void-donut-chart": {
     "group": "charts",
-    "script": "const chart = document.querySelector('void-donut-chart');\nchart.data = {\n  segments: [\n    { name: 'Search', value: 540 },\n    { name: 'Direct', value: 320 },\n    { name: 'Referral', value: 180 },\n  ],\n};"
+    "children": "None. Give the data as the `data` attribute (JSON) or the property; the chart draws a visually hidden data table from it for assistive technology, and `show-table` shows it below the chart."
   },
   "void-gauge": {
-    "group": "charts"
+    "group": "charts",
+    "children": "None. A single reading is the `value`, `min`, `max` and `unit` attributes; segments are the `data` attribute (JSON) or property and colour bands the `zones` attribute or property. A visually hidden data table carries the reading for assistive technology, and `show-table` shows it below the gauge."
   },
   "void-line-chart": {
     "group": "charts",
-    "script": "const chart = document.querySelector('void-line-chart');\nchart.data = {\n  labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],\n  series: [{ name: 'Visitors', values: [320, 410, 380, 520, 610, 450, 390] }],\n};"
+    "children": "None. Give the data as the `data` attribute (JSON) or the property; the chart draws a visually hidden data table from it for assistive technology, and `show-table` shows it below the chart."
   }
 }

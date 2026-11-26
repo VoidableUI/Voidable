@@ -1,7 +1,12 @@
 import { html, svg, nothing } from 'lit';
 import { VoidElement } from '../base.js';
 import { property, state } from 'lit/decorators.js';
+import { guard } from 'lit/directives/guard.js';
 import { useProjection } from '../projection.js';
+import {
+  readChartInput, normalizeSegments, isRecord, dataTable, segmentsTable, tableNumbers, chartLocale,
+  type ChartSource, type ChartTable,
+} from './charts/data.js';
 
 useProjection();
 
@@ -284,30 +289,82 @@ export class VoidGauge extends VoidElement {
     },
   }) gaps: boolean | number = false;
   /**
-   * Accessible name of the gauge, such as `Disk usage`. The gauge is an image to assistive technology,
-   * so set it and put the figure in the text around it.
+   * Accessible name of the gauge, such as `Disk usage`; it is also the caption of the data table.
+   * Set it: the drawing itself is hidden from assistive technology.
    */
   @property({ attribute: 'aria-label' }) ariaLabel = '';
+  /**
+   * Show the data table (the reading with its range, or one row per segment) below the gauge. The table
+   * is always there for assistive technology; this makes it visible too.
+   */
+  @property({ type: Boolean, attribute: 'show-table', reflect: true }) showTable = false;
 
-  /** Colour bands over the value range. Assign an array of `{ from, to, color }`;
-      the fill takes the colour of the zone containing the value. Property only. */
-  @property({ attribute: false }) zones: GaugeZone[] = [];
+  private _zones: GaugeZone[] = [];
+  private _zonesSource: ChartSource = { text: null };
+
+  /**
+   * Colour bands over the value range: an array of `{ from, to, color }`; the fill takes the colour of the
+   * zone containing the value. Give it as a property or as JSON in the `zones` attribute:
+   * `<void-gauge zones='[{"from":0,"to":60,"color":"green"},{"from":60,"to":100,"color":"red"}]'>`.
+   * Invalid JSON draws no zones and is reported by `@voidable/ui/dev`. Not reflected to the attribute.
+   * @default []
+   */
+  @property({ attribute: 'zones' })
+  get zones(): GaugeZone[] { return this._zones; }
+  set zones(input: GaugeZone[]) {
+    const r = readChartInput<GaugeZone[]>(input, this._zonesSource, {
+      attr: 'zones',
+      shape: '[{"from":0,"to":60,"color":"green"},{"from":60,"to":100,"color":"red"}]',
+      empty: () => [],
+      normalize: (raw) => Array.isArray(raw)
+        ? raw.filter(isRecord).map((z) => ({ from: Number(z.from), to: Number(z.to), color: String(z.color ?? '') }))
+        : null,
+      warn: (subject, message) => this.reportDev('invalid-data', subject, message),
+    });
+    if (r) this._zones = r.value;
+  }
 
   private _data: GaugeData = {};
+  private _source: ChartSource = { text: null };
 
   /**
    * Segmented data: `{ segments: [{ name, value, color? }] }` splits the arc between named parts; the
-   * optional `value` is the headline reading. Property only: assign a new object to update the gauge and
-   * animate to it. For a single reading, set the `value` attribute instead.
+   * optional `value` is the headline reading. Give it as a property (assign a new object to update the
+   * gauge and animate to it) or as JSON in the `data` attribute:
+   * `<void-gauge data='{"segments":[{"name":"Used","value":40},{"name":"Cache","value":15}]}'>`. Invalid
+   * JSON draws nothing and is reported by `@voidable/ui/dev`. The property is not reflected to the
+   * attribute, and an attribute a server morph leaves unchanged does not animate again. For a single
+   * reading, set the `value` attribute instead.
+   * @default {}
    */
+  @property({ attribute: 'data' })
   get data(): GaugeData { return this._data; }
-  set data(next: GaugeData) {
+  set data(input: GaugeData) {
+    const r = readChartInput<GaugeData>(input, this._source, {
+      attr: 'data',
+      shape: '{"segments":[{"name":"Used","value":40},{"name":"Cache","value":15}]}',
+      empty: () => ({}),
+      normalize: (raw) => {
+        if (!isRecord(raw)) return null;
+        const segments = raw.segments === undefined ? undefined : normalizeSegments<GaugeSegment>(raw.segments);
+        if (segments === null) return null;
+        const out: GaugeData = {};
+        if (raw.value !== undefined) out.value = Number(raw.value);
+        if (segments) out.segments = segments;
+        return out;
+      },
+      warn: (subject, message) => this.reportDev('invalid-data', subject, message),
+    });
+    if (!r) return;
+    const next = r.value;
     const prevData = this._data;
     const prevDisplayValue = this._displayValue;
     const prevDisplaySegments = new Map(this._displaySegments);
     this._data = next;
     this._refreshTargets();
     this.requestUpdate();
+    // Before the entrance animation has started, it draws whatever is there.
+    if (!this._hasAnimated) return;
     this.updateComplete.then(() => {
       const prevSegs = prevData.segments ?? [];
       const fromSegs = new Map<number, number>();
@@ -367,7 +424,8 @@ export class VoidGauge extends VoidElement {
 
   connectedCallback() {
     super.connectedCallback();
-    this.setHostAttribute('role', 'img');
+    // A figure, not an image: an image's children are presentational and would hide the data table.
+    this.setHostAttribute('role', 'figure');
     this._refreshTargets();
     requestAnimationFrame(() => {
       const fromSegs = new Map<number, number>();
@@ -849,8 +907,7 @@ export class VoidGauge extends VoidElement {
     return html`
       <svg
         viewBox="0 0 ${this.size} ${vbH}"
-        role="img"
-        aria-label=${this.ariaLabel || 'Gauge chart'}
+        aria-hidden="true"
         data-phase=${this._phase}
       >
         <!-- Track — full arc, always. Gaps between segments reveal the
@@ -898,7 +955,31 @@ export class VoidGauge extends VoidElement {
           ? this._renderHoverTooltip(this._data.segments, this._hoverSegment)
           : nothing}
       </svg>
+      ${this._table()}
     `;
+  }
+
+  /**
+   * The data table for assistive technology (and `show-table`), from the data as given, not the animated
+   * state: the reading with its range, or the segments in the order they are drawn.
+   */
+  private _table() {
+    const { value, min, max, unit, segmentsSort, _data: data } = this;
+    const label = this.ariaLabel || 'Gauge chart';
+    return guard([value, min, max, unit, segmentsSort, data, label, chartLocale(this)], () => {
+      let table: ChartTable | null;
+      const segments = data.segments ?? [];
+      if (segments.length > 0) {
+        const ordered = segmentsSort === 'value' ? [...segments].sort((a, b) => b.value - a.value) : segments;
+        table = segmentsTable(this, label, ordered);
+      } else {
+        const n = tableNumbers(this);
+        const reading = data.value ?? value;
+        const withUnit = (v: number) => n.number(v) + (unit ? (/^[\p{L}]/u.test(unit) ? ` ${unit}` : unit) : '');
+        table = { caption: label, head: ['Value', 'Minimum', 'Maximum'], rows: [{ cells: [withUnit(reading), withUnit(min), withUnit(max)] }] };
+      }
+      return dataTable('void-gauge-table', table);
+    });
   }
 
   private _renderHoverTooltip(segments: GaugeSegment[], hi: number): unknown {

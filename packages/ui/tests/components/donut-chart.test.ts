@@ -132,28 +132,28 @@ describe('VoidDonutChart', () => {
   });
 
   describe('accessibility', () => {
-    it('sets role="img" on the host', async () => {
+    it('is a figure, so its data table stays in the accessibility tree', async () => {
       const el = await mount<VoidDonutChart>(TAG, { data: four });
-      expect(el.getAttribute('role')).toBe('img');
+      expect(el.getAttribute('role')).toBe('figure');
     });
 
-    it('gives the svg role="img" and a default name when populated', async () => {
-      const el = await mount<VoidDonutChart>(TAG, { data: four });
-      const svg = el.querySelector('svg')!;
-      expect(svg.getAttribute('role')).toBe('img');
-      expect(svg.getAttribute('aria-label')).toBe('Donut chart');
+    it('hides the drawing from assistive technology, populated or empty', async () => {
+      for (const props of [{ data: four }, {}]) {
+        const el = await mount<VoidDonutChart>(TAG, props);
+        const svg = el.querySelector('svg')!;
+        expect(svg.getAttribute('aria-hidden')).toBe('true');
+        expect(svg.hasAttribute('role')).toBe(false);
+      }
     });
 
-    it('gives the empty svg role="img" and a default name too', async () => {
-      const el = await mount<VoidDonutChart>(TAG, {});
-      const svg = el.querySelector('svg')!;
-      expect(svg.getAttribute('role')).toBe('img');
-      expect(svg.getAttribute('aria-label')).toBe('Donut chart');
-    });
-
-    it('uses the consumer supplied aria-label', async () => {
+    it('captions the data table with the consumer supplied aria-label', async () => {
       const el = await mount<VoidDonutChart>(TAG, { data: four, ariaLabel: 'Browser share' });
-      expect(el.querySelector('svg')!.getAttribute('aria-label')).toBe('Browser share');
+      expect(el.querySelector('table caption')!.textContent).toBe('Browser share');
+    });
+
+    it('captions the table with a default name', async () => {
+      const el = await mount<VoidDonutChart>(TAG, { data: four });
+      expect(el.querySelector('table caption')!.textContent).toBe('Donut chart');
     });
   });
 

@@ -30,6 +30,16 @@ function App() {
 }
 ```
 
+## Charts
+
+`BarChart`, `LineChart`, `DonutChart` and `Gauge` take their `data` (and a gauge's `zones`) as objects and write them as the JSON `data` attribute, so server rendering (`renderToString`, a framework's SSR) draws the chart, and a re-render with the same data changes nothing and does not animate it again.
+
+```tsx
+<BarChart aria-label="Revenue by quarter" data={{ labels: ['Q1', 'Q2'], series: [{ name: '2025', values: [4, 8] }] }} />
+```
+
+Each chart carries a visually hidden data table captioned with `aria-label`; `showTable` shows it below the chart.
+
 ## Event handling
 
 Voidable components emit `CustomEvent`s (e.g. `void-click`, `void-change`). The React wrappers use `useWcEvents` internally to bridge these to React-style props.
