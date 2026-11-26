@@ -27,8 +27,16 @@ export const calibrationMs = 80;
 // quiet runs, normalised the same way). Old budget -> master measured now -> now: table first render
 // 114 -> 116 -> 105 ms; 1,000 mixed 62 -> 78 -> 73 ms; Turbo morph 37 -> 40 -> 40 ms; select 33 -> 42 -> 41 ms
 // (raw); dialog 276 -> 314 -> 318 ms; root entry 67.8 -> 69.6 -> 69.9 kB; button 15.1 -> 15.1 -> 10.0 kB.
-// The old timing figures read low against master on this host today (an unchanged tree gives the
-// "master measured now" ones), so only the differences between the last two are the change: the table 9% and
+// The old timing figures were re-measured because the host changed, not the code: they were set on a 32-core
+// c5ad.8xlarge, and this session's host is 16 vCPUs (Xeon Platinum 8124M, calibration about 170 ms). Commit
+// d7c26f8, where the old figures were set, measured back to back here (medians of five, normalised) gives
+// mixed 71, table 117.5, morph 40.6, dialog 333 ms and select 38 ms raw: the same as master (78, 116, 40,
+// 314, 42), against the old 62, 114, 37, 276 and 33. A different CPU changes the ratio of the plain-DOM
+// calibration to the workloads, so normalising does not make budgets portable between host types; re-measure
+// d7c26f8 and master together when the host changes. A GitHub runner (calibration about 97 ms, scale 1.2,
+// gh-browser-81 log) read mixed 67, table 131, morph 50 ms and select 30.7 ms raw: the old budgets passed
+// all but the morph narrowly (60 of 67 ms) and, normalised at 15 ms, the select failed; the new ones pass
+// all with room. Only the differences between master and now are the change: the table 9% and
 // the mixed page 7% faster (the scoped reset no longer lists the part tags, a parts controller registers its
 // observer once), the button 5.1 kB smaller (projection.ts loads only where used). The table is still well above
 // its 72 ms of before the parts: about 40% of it is the browser's style and layout of 2,000 theme-styled cells
