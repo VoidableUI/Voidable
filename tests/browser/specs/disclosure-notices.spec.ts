@@ -300,7 +300,7 @@ test.describe('disclosure and notices', () => {
       const seen = await page.evaluate(
         () =>
           new Promise<string[]>((resolve) => {
-            const region = document.querySelector('#flash [role=status]')!;
+            const region = document.getElementById('flash')!.shadowRoot!.querySelector('[role=status]')!;
             const log: string[] = [];
             new MutationObserver(() => log.push(region.textContent ?? '')).observe(region, { childList: true });
             (window as any).VoidUI.toast({ description: 'Changes saved', duration: 0 });
