@@ -159,6 +159,7 @@ export class VoidMultiselect extends InternalsFormControl(VoidElement) {
   /**
    * The values of the chosen options, as a list. The `value` attribute is the same list as a JSON array
    * (`value='["a","b"]'`), kept in step as the choice changes; setting it chooses those options.
+   * @default []
    */
   @property({ converter: valueList, reflect: true })
   get value(): string[] {

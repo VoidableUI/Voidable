@@ -53,6 +53,7 @@ export class VoidCheckboxGroup extends NativeFormControl(VoidElement) {
   /**
    * The values of the checked checkboxes, as a list. The `value` attribute is the same list as a JSON array
    * (`value='["a","b"]'`), kept in step as the boxes change; setting it checks those boxes.
+   * @default []
    */
   @property({ converter: valueList, reflect: true })
   get value(): string[] {

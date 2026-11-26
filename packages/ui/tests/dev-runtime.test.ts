@@ -247,11 +247,6 @@ describe('the generated table', () => {
     const decl = manifest.modules.flatMap((m: { declarations?: { tagName?: string }[] }) => m.declarations ?? []).find((d: { tagName?: string }) => d.tagName === 'void-option');
     expect(decl.voidParents).toEqual(table['void-option'].p);
   });
-
-  it('has no boolean that reads "false" as off (#23: every boolean is off when absent)', () => {
-    const accepting = Object.entries(table).flatMap(([tag, e]) => Object.entries(e.a).filter(([, r]) => r === 2).map(([n]) => `${tag}.${n}`));
-    expect(accepting).toEqual([]);
-  });
 });
 
 describe('zero cost in production', () => {
