@@ -191,9 +191,6 @@ export const scenarios: Scenario[] = [
     id: 'toast',
     title: 'A toast is announced once, politely, by the container\'s status announcer without moving focus',
     page: '/sr-notices',
-    readerIssues: {
-      VoiceOver: { key: 'untracked:voiceover-toast-silent', detail: 'The only phrase VoiceOver logged after the toast appeared was empty.' },
-    },
     steps: [
       { reach: { role: 'button', name: 'Send notification' }, by: 'control' },
       { act: true },
