@@ -64,7 +64,7 @@ export default class ScreenReaderReporter implements Reporter {
     const file = join(RESULTS_DIR, `${screenReader}-${run.browser}.json`);
     writeFileSync(file, JSON.stringify(run, null, 2) + '\n');
     if (env.GITHUB_STEP_SUMMARY) {
-      const rows = run.scenarios.map((s) => `| ${s.id} | ${s.status}${known.has(s.id) ? ` (known issue: ${known.get(s.id)})` : ''} |`).join('\n');
+      const rows = run.scenarios.map((s) => `| ${s.id} | ${s.status}${this.known.has(s.id) ? ` (known issue: ${this.known.get(s.id)})` : ''} |`).join('\n');
       appendFileSync(env.GITHUB_STEP_SUMMARY, `### ${screenReader} ${run.screenReaderVersion} in ${run.browser}\n\n| Scenario | Result |\n|---|---|\n${rows}\n\n`);
     }
   }
