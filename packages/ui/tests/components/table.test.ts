@@ -12,7 +12,8 @@ function createElement(): VoidTable {
 describe('VoidTable', () => {
   describe('class', () => {
     it('extends VoidElement', () => {
-      expect(Object.getPrototypeOf(VoidTable)).toBe(VoidElement);
+      // Through the form-control mixin: the table's selection is a form value.
+      expect(VoidTable.prototype instanceof VoidElement).toBe(true);
     });
 
     it('is registered as void-table', () => {

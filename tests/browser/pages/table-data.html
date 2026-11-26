@@ -1,0 +1,127 @@
+<main style="padding: 1rem; display: flex; flex-direction: column; gap: 2rem; max-width: 48rem">
+  <!-- Sorting: text with accents and empty cells, numbers, ISO dates -->
+  <void-table id="sort" aria-label="Fruit">
+    <table>
+      <thead>
+        <tr>
+          <th data-key="name" data-sort>Name</th>
+          <th data-key="qty" data-sort="number" data-align="end">Quantity</th>
+          <th data-key="date" data-sort="date">Picked</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Zebra apple</td><td>12</td><td data-sort-value="2026-03-02">2 Mar</td></tr>
+        <tr><td>Éclair</td><td>9</td><td data-sort-value="2026-01-15">15 Jan</td></tr>
+        <tr><td>apple 10</td><td>100</td><td></td></tr>
+        <tr><td></td><td></td><td data-sort-value="2025-12-31">31 Dec</td></tr>
+        <tr><td>apple 2</td><td>1.5</td><td data-sort-value="2026-02-01">1 Feb</td></tr>
+      </tbody>
+    </table>
+  </void-table>
+
+  <!-- Swedish collation: a-umlaut sorts after z -->
+  <div lang="sv">
+    <void-table id="sv" aria-label="Ord">
+      <table>
+        <thead><tr><th data-sort>Ord</th></tr></thead>
+        <tbody><tr><td>ära</td></tr><tr><td>zebra</td></tr><tr><td>apa</td></tr></tbody>
+      </table>
+    </void-table>
+  </div>
+
+  <!-- Filtering -->
+  <void-table id="filter" aria-label="Team" filter-columns="name role">
+    <void-table-filter><input type="search" aria-label="Filter team"></void-table-filter>
+    <table>
+      <thead><tr><th data-key="name">Name</th><th data-key="role">Role</th><th data-key="city">City</th></tr></thead>
+      <tbody>
+        <tr><td>Ada</td><td>Engineer</td><td>London</td></tr>
+        <tr><td>José</td><td>Designer</td><td>Madrid</td></tr>
+        <tr><td>Grace</td><td>Admiral</td><td>Engineer Town</td></tr>
+        <tr><td>Linus</td><td>Engineer</td><td>Helsinki</td></tr>
+      </tbody>
+    </table>
+    <void-table-empty hidden>No one matches.</void-table-empty>
+  </void-table>
+
+  <!-- Selection with void-checkbox, in a form -->
+  <form id="form">
+    <void-table id="select" selectable name="rows" aria-label="Orders">
+      <table>
+        <thead>
+          <tr>
+            <th data-stack="select"><void-checkbox aria-label="Select all rows"></void-checkbox></th>
+            <th data-key="id" data-sort="number">Order</th>
+            <th data-key="who">Customer</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr data-value="o1"><td><void-checkbox aria-label="Select order 1"></void-checkbox></td><td>1</td><td>Ada</td></tr>
+          <tr data-value="o2"><td><void-checkbox aria-label="Select order 2"></void-checkbox></td><td>2</td><td>Grace</td></tr>
+          <tr data-value="o3"><td><void-checkbox aria-label="Select order 3"></void-checkbox></td><td>3</td><td>Linus</td></tr>
+          <tr data-value="o4"><td><void-checkbox aria-label="Select order 4"></void-checkbox></td><td>4</td><td>Alan</td></tr>
+          <tr data-value="o5" data-disabled><td><void-checkbox aria-label="Select order 5" disabled></void-checkbox></td><td>5</td><td>Edsger</td></tr>
+        </tbody>
+      </table>
+      <void-table-selection hidden><span data-count></span> selected <button type="button">Archive</button></void-table-selection>
+    </void-table>
+  </form>
+
+  <!-- Native checkboxes, single selection -->
+  <void-table id="native" selectable="single" aria-label="Plans">
+    <table>
+      <thead><tr><th data-stack="select">Pick</th><th>Plan</th></tr></thead>
+      <tbody>
+        <tr data-value="free"><td><input type="checkbox" aria-label="Choose Free"></td><td>Free</td></tr>
+        <tr data-value="pro"><td><input type="checkbox" aria-label="Choose Pro"></td><td>Pro</td></tr>
+      </tbody>
+    </table>
+  </void-table>
+
+  <!-- Server mode: one page of 3 of 40 rows -->
+  <void-table id="manual" manual selectable total-rows="40" aria-label="Server rows">
+    <table>
+      <thead>
+        <tr>
+          <th data-stack="select"><void-checkbox aria-label="Select all rows"></void-checkbox></th>
+          <th data-key="name" data-sort>Name</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr data-value="m1"><td><void-checkbox aria-label="Select m1"></void-checkbox></td><td>Charlie</td></tr>
+        <tr data-value="m2"><td><void-checkbox aria-label="Select m2"></void-checkbox></td><td>Alpha</td></tr>
+        <tr data-value="m3"><td><void-checkbox aria-label="Select m3"></void-checkbox></td><td>Bravo</td></tr>
+      </tbody>
+    </table>
+    <void-table-select-all hidden><button type="button">Select all 40 rows</button></void-table-select-all>
+  </void-table>
+
+  <!-- Stacked -->
+  <div style="max-width: 20rem">
+    <void-table id="stacked" stack="always" selectable aria-label="Stacked">
+      <table>
+        <thead>
+          <tr>
+            <th data-stack="select"><void-checkbox aria-label="Select all rows"></void-checkbox></th>
+            <th data-stack="title" data-key="name" data-sort>Name</th>
+            <th data-key="n" data-sort="number">Count</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr data-value="s1"><td><void-checkbox aria-label="Select Beta"></void-checkbox></td><td>Beta</td><td>2</td></tr>
+          <tr data-value="s2"><td><void-checkbox aria-label="Select Alpha"></void-checkbox></td><td>Alpha</td><td>1</td></tr>
+        </tbody>
+      </table>
+    </void-table>
+  </div>
+
+  <!-- Right-to-left -->
+  <div dir="rtl">
+    <void-table id="rtl" aria-label="RTL">
+      <table>
+        <thead><tr><th data-sort>Name</th><th data-sort="number">N</th></tr></thead>
+        <tbody><tr><td>b</td><td>2</td></tr><tr><td>a</td><td>1</td></tr></tbody>
+      </table>
+    </void-table>
+  </div>
+</main>

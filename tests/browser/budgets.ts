@@ -62,6 +62,14 @@ export const reference = {
    *  the build host and on hosted runners alike whatever their calibration, so dividing by the
    *  calibration (15 ms) made the test fail on any runner that calibrated fast. */
   select5000Ms: 41,
+  /** A 5,000-row table with a native checkbox in each row: sort by text, by number, a filter, the next
+   *  keystroke of it, and select-all (one pass, one event). Measured 442, 470, 100, 81 and 184 ms at a
+   *  calibration of 101 ms, divided by the 1.27 scale. */
+  table5000SortTextMs: 350,
+  table5000SortNumberMs: 370,
+  table5000FilterFirstMs: 80,
+  table5000FilterNextMs: 65,
+  table5000SelectAllMs: 145,
   /** 200 open/close cycles of a dialog. */
   dialog200Ms: 318,
   /** Gzipped size of `import '@voidable/ui'` (everything, Lit included), minified. */
