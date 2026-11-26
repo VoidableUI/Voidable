@@ -105,7 +105,9 @@ export type WarningKind =
   /** A page script keeps removing an attribute a component manages on itself; the component stopped restoring it. */
   | 'attribute-fight'
   /** A chart's `data` or `zones` attribute is not valid JSON of the expected shape; the chart draws nothing. */
-  | 'invalid-data';
+  | 'invalid-data'
+  /** A `keys` attribute that is not a JSON object, or names an action the element does not have (#90). */
+  | 'keys';
 
 /** One reported problem. */
 export interface DevWarning {

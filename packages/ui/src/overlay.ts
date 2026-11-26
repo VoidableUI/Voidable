@@ -1,5 +1,6 @@
 import type { ReactiveController, ReactiveControllerHost } from 'lit';
 import { projectionApi } from './projection-api.js';
+import { actionFor } from './keys.js';
 
 /**
  * The shared overlay model behind every Void UI component that opens something
@@ -347,11 +348,20 @@ class OverlayRegistry {
     this._positioned.clear();
   }
 
-  /** Escape closes the topmost overlay only; a non-closable one swallows it. */
+  /**
+   * The `close` action (Escape unless the application rebound it, see keys.ts) closes the topmost overlay only; a
+   * non-closable one swallows it. A key an application already cancelled (`defaultPrevented`) does nothing here and
+   * the browser honours that too.
+   */
   private _onKeydown = (e: KeyboardEvent): void => {
-    if (e.key !== 'Escape' || e.defaultPrevented || e.isComposing) return;
+    if (e.defaultPrevented || e.isComposing) return;
     const top = this.top();
     if (!top) return;
+    if (actionFor(top.host, e) !== 'close') {
+      // Escape with `close` unbound: a modal must not close from the browser's own close request either.
+      if (e.key === 'Escape' && top.kind === 'modal') e.preventDefault();
+      return;
+    }
     // Handled here for every engine: the native dialog's own close request
     // (which may not be cancelable a second time) must not run as well.
     e.preventDefault();
