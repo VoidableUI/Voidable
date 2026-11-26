@@ -94,27 +94,27 @@ describe('VoidBarChart', () => {
   });
 
   describe('accessibility', () => {
-    it('sets role="img" on the host', async () => {
+    it('is a figure, so its data table stays in the accessibility tree', async () => {
       const el = await mount<VoidBarChart>(TAG, { data: sample });
-      expect(el.getAttribute('role')).toBe('img');
+      expect(el.getAttribute('role')).toBe('figure');
     });
 
-    it('gives the svg role="img" and a default accessible name', async () => {
+    it('hides the drawing from assistive technology', async () => {
       const el = await mount<VoidBarChart>(TAG, { data: sample });
       const svg = el.querySelector('svg')!;
-      expect(svg.getAttribute('role')).toBe('img');
-      expect(svg.getAttribute('aria-label')).toBe('Bar chart');
+      expect(svg.getAttribute('aria-hidden')).toBe('true');
+      expect(svg.hasAttribute('role')).toBe(false);
+      expect(svg.hasAttribute('aria-label')).toBe(false);
     });
 
-    it('uses a consumer supplied aria-label for the svg', async () => {
+    it('captions the data table with the consumer supplied aria-label', async () => {
       const el = await mount<VoidBarChart>(TAG, { data: sample, ariaLabel: 'Monthly sales' });
-      expect(el.querySelector('svg')!.getAttribute('aria-label')).toBe('Monthly sales');
+      expect(el.querySelector('table caption')!.textContent).toBe('Monthly sales');
     });
 
-    it('keeps an accessible name when there is no data', async () => {
-      const el = await mount<VoidBarChart>(TAG, {});
-      const svg = el.querySelector('svg')!;
-      expect(svg.getAttribute('aria-label')).toBeTruthy();
+    it('captions the table with a default name', async () => {
+      const el = await mount<VoidBarChart>(TAG, { data: sample });
+      expect(el.querySelector('table caption')!.textContent).toBe('Bar chart');
     });
   });
 

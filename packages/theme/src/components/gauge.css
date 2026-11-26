@@ -192,3 +192,53 @@ void-gauge .void-gauge-tooltip-pct {
   fill: var(--void-color-text-secondary);
   font-weight: var(--void-weight-normal);
 }
+
+/* The data table: the values as text for assistive technology. Out of sight
+   (the drawing is hidden from it), but in the accessibility tree; show-table
+   puts it below the chart. */
+void-gauge {
+  position: relative;
+}
+
+void-gauge .void-gauge-table {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+void-gauge[show-table] .void-gauge-table {
+  position: static;
+  inline-size: 100%;
+  block-size: auto;
+  margin-block-start: var(--void-space-3);
+  overflow: visible;
+  clip-path: none;
+  white-space: normal;
+  border-collapse: collapse;
+  font-size: var(--void-text-2xs);
+  font-variant-numeric: tabular-nums;
+  text-align: start;
+}
+
+void-gauge[show-table] .void-gauge-table caption {
+  padding-block-end: var(--void-space-1);
+  text-align: start;
+  color: var(--void-color-text-muted);
+}
+
+void-gauge[show-table] .void-gauge-table :is(th, td) {
+  padding: var(--void-space-1) var(--void-space-2);
+  border-block-end: 1px solid var(--void-color-border);
+  text-align: start;
+}
+
+void-gauge[show-table] .void-gauge-table thead th {
+  font-weight: var(--void-weight-medium);
+  color: var(--void-color-text-muted);
+}
