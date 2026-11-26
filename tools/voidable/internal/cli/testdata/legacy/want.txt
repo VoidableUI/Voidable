@@ -1,7 +1,8 @@
 # Every finding `voidable check` must report on this directory, one per line:
 # <file>:<line> <text the message must contain>
+# A rename made after 0.8 says so: the sidebar and action-input values are 0.10.
 # Each is a legacy-markup finding, and the check must report nothing else.
-page.html:1 write side="top"
+page.html:1 position="top" on <void-popover> was renamed in 0.8; write side="top"
 page.html:5 write side="bottom" align="end"
 page.html:6 write side="left"
 page.html:7 write side="right"
@@ -56,5 +57,5 @@ form.blade.php:2 write hide-close
 form.blade.php:3 listen for void-close on the <void-toast> itself
 form.blade.php:4 write hide-input to turn it off
 form.blade.php:5 write current
-page.html:32 write side="start"
-page.html:33 write icon-side="end"
+page.html:32 side="left" on <void-sidebar> was renamed in 0.10; write side="start"
+page.html:33 icon-side="right" on <void-action-input> was renamed in 0.10; write icon-side="end"
