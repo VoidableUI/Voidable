@@ -301,12 +301,20 @@ function useWcProps<E extends HTMLElement>(
 // wrapWc — factory creating forwardRef React components
 // ---------------------------------------------------------------------------
 
+
+/** Props written as JSON attributes, per tag: the element reads them from markup, so server rendering draws them. */
+const JSON_PROPS: Record<string, readonly string[]> = {
+  'void-bar-chart': ['data'],
+  'void-line-chart': ['data'],
+  'void-donut-chart': ['data'],
+  'void-gauge': ['data', 'zones'],
+};
+
 function wrapWc<E extends HTMLElement, P = object>(
   tag: string,
   displayName: string,
-  /** Props written as JSON attributes (the element reads them from markup too). */
-  jsonProps: readonly string[] = [],
 ) {
+  const jsonProps = JSON_PROPS[tag] ?? [];
   const Wrapped = forwardRef<E, VoidProps<P>>((props, externalRef) => {
     const innerRef = useRef<E | null>(null);
 
@@ -1080,7 +1088,7 @@ export const BarChart = wrapWc<VoidBarChart, {
   variant?: 'filled' | 'outline' | 'wireframe';
   /** Milliseconds between bars as they animate in; 0 animates them together. Default: the theme's. */
   stagger?: number;
-}>('void-bar-chart', 'BarChart', ['data']);
+}>('void-bar-chart', 'BarChart');
 
 export const LineChart = wrapWc<VoidLineChart, {
   data?: LineChartData;
@@ -1089,7 +1097,7 @@ export const LineChart = wrapWc<VoidLineChart, {
   showTable?: boolean;
   variant?: 'filled' | 'outline' | 'wireframe';
   interpolation?: 'linear' | 'step';
-}>('void-line-chart', 'LineChart', ['data']);
+}>('void-line-chart', 'LineChart');
 
 export const DonutChart = wrapWc<VoidDonutChart, {
   data?: DonutChartData;
@@ -1102,7 +1110,7 @@ export const DonutChart = wrapWc<VoidDonutChart, {
   showValue?: boolean;
   showTable?: boolean;
   showTotal?: boolean;
-}>('void-donut-chart', 'DonutChart', ['data']);
+}>('void-donut-chart', 'DonutChart');
 
 export const Gauge = wrapWc<VoidGauge, {
   data?: GaugeData;
@@ -1124,4 +1132,4 @@ export const Gauge = wrapWc<VoidGauge, {
   hideTickMax?: boolean;
   segmentsSort?: 'value' | 'manual';
   gaps?: boolean | number;
-}>('void-gauge', 'Gauge', ['data', 'zones']);
+}>('void-gauge', 'Gauge');
