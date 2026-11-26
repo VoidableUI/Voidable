@@ -183,7 +183,7 @@ The composite widgets follow the matching [WAI-ARIA Authoring Practices](https:/
 
 Dialog and drawer are native `<dialog>` elements opened with `showModal()`, so the page behind them is inert, focus moves in, and focus returns to the opener when they close. Popover, hover card, dropdown menu, tooltip, the picker lists and the toast container are `popover="manual"` elements in the top layer, placed next to their trigger with CSS anchor positioning (with a built-in fallback) and flipped at the viewport edges, never clipped by an `overflow` or `transform` ancestor. Open overlays form one stack: Escape and outside presses close only the topmost one, and the page scroll lock is counted.
 
-Every overlay takes `open`, `side` and `align` where it is anchored, and fires `void-open` and `void-close` with a `reason` (`escape`, `outside`, `select`, `api`, ...). These two events do not bubble, and `void-close` can be cancelled when the user caused it. Browser baseline: the Popover API (Chrome 114, Firefox 125, Safari 17). Details on the [docs site](https://voidable.dev/components/overlays/).
+Every overlay takes `open`, `side` and `align` where it is anchored, and fires `void-open` and `void-close` with a `reason` (`escape`, `outside`, `select`, `api`, ...). These two events do not bubble, and `void-close` can be cancelled when the user caused it. Browser baseline for overlays: the Popover API (Chrome 114, Firefox 125, Safari 17); for the whole library see [Browser support](https://voidable.dev/guides/browser-support/). Details on the [docs site](https://voidable.dev/components/overlays/).
 
 ## For AI agents
 

@@ -36,6 +36,10 @@ To check markup before it ships, install the `voidable` tool (`curl -fsSL https:
 
 To load components on demand instead of registering all of them, import `@voidable/ui/autoloader` (see [Loading components](https://voidable.dev/getting-started/loading/)). Without a bundler, use a stylesheet link and a CDN module import; see the [`@voidable/ui` README](packages/ui/README.md#usage-without-a-bundler). Framework guides are in the [docs](https://voidable.dev/frameworks/react/).
 
+## Browsers and assistive technology
+
+Voidable targets current browsers: see [Browser support](https://voidable.dev/guides/browser-support/) for the versions the code needs, what CI runs and what degrades. What has been tested with VoiceOver and NVDA, and what has not been tested at all, is in [Screen reader results](https://voidable.dev/guides/screen-reader-results/) and the [accessibility statement](https://voidable.dev/guides/accessibility-statement/).
+
 ## Packages
 
 | Package | Path | Registry | Description |

@@ -55,12 +55,15 @@ Each item is something that would break the promise above if it changed after 1.
 
 ### Platform
 
-- [ ] **One browser support statement** ([#32](https://github.com/VoidableUI/Voidable/issues/32)). The [Overlays](/components/overlays/#browser-support) page has a table for the overlay features. The theme's own requirements (`color-mix()`, `@property`, `oklch()`) are not written down in one place, and the whole statement should be tested against, not only documented.
+- [x] **One browser support statement written down** ([#32](https://github.com/VoidableUI/Voidable/issues/32)). [Browser support](/guides/browser-support/) lists each platform feature the library uses, where, the first Chromium, Firefox and Safari version with it, what is tested in CI and what degrades. Some versions on it are marked "to confirm".
+- [ ] **Browser support: decide the policy and test the floor.** The page derives a floor (Chromium 120, Firefox 128, Safari 17) from the code and proposes a policy, but nothing older than Playwright's current builds is tested. Open questions for the owner: the policy itself (the floor, or the last two majors of each evergreen engine), whether a real Safari on macOS and iOS joins CI, and how a floor is raised.
 - [ ] **Axe and forced colours beyond Chromium.** The browser suite runs every spec in Chromium, Firefox and WebKit, except axe-core and forced-colours emulation, which run in Chromium only (see the [accessibility statement](/guides/accessibility-statement/#what-is-tested-and-how)). Close what can be closed and state what cannot.
 
 ### Accessibility
 
-- [ ] **Screen-reader results on real assistive technology** ([#34](https://github.com/VoidableUI/Voidable/issues/34)). The scripted VoiceOver and NVDA runs exist and the [accessibility statement](/guides/accessibility-statement/) is published, but no run has been recorded in its "Last verified" table, and no person who relies on a screen reader has tested the library. A 1.0 should not ship with that table empty.
+- [x] **Scripted screen-reader results recorded** ([#34](https://github.com/VoidableUI/Voidable/issues/34)). A run of VoiceOver and NVDA is in the "Last verified" table of the [accessibility statement](/guides/accessibility-statement/), and [Screen reader results](/guides/screen-reader-results/) lists what each reader said, the known defects ([#75](https://github.com/VoidableUI/Voidable/issues/75)) and what is intermittent.
+- [ ] **Screen-reader results from people.** No person who relies on a screen reader has tested the library, and mobile screen readers (VoiceOver on iOS, TalkBack), JAWS, voice control, switch access and magnification are untested. A form for reporting a pass exists. Open question for the owner: what must be done here before 1.0, and by whom.
+- [ ] **Scripted NVDA runs that are stable.** On NVDA the tabs, table and chart-table scenarios record no speech and four scenarios need a retry; the cause is unknown.
 
 ## What is not part of 1.0
 
