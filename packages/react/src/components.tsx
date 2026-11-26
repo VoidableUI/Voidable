@@ -197,7 +197,7 @@ interface SplitProps {
   events: Record<string, EventListener>;
 }
 
-function splitProps(props: Record<string, unknown>): SplitProps {
+function splitProps(props: Record<string, unknown>, jsonProps: readonly string[] = []): SplitProps {
   const react: Record<string, unknown> = {};
   const elementProps: Record<string, unknown> = {};
   const events: Record<string, EventListener> = {};
@@ -212,6 +212,10 @@ function splitProps(props: Record<string, unknown>): SplitProps {
       react[key] = value;
     } else if (value === undefined) {
       continue;
+    } else if (jsonProps.includes(key)) {
+      // Data that markup can carry (a chart's `data`): written as a JSON attribute, so server rendering
+      // draws it and a client render changes it only when its JSON changes.
+      react[key] = typeof value === 'string' || value === null ? value : JSON.stringify(value);
     } else if (key === 'spellcheck') {
       // The native enumerated attribute, written as "true" or "false" and
       // forwarded by the component to its inner control (#23).
@@ -300,11 +304,13 @@ function useWcProps<E extends HTMLElement>(
 function wrapWc<E extends HTMLElement, P = object>(
   tag: string,
   displayName: string,
+  /** Props written as JSON attributes (the element reads them from markup too). */
+  jsonProps: readonly string[] = [],
 ) {
   const Wrapped = forwardRef<E, VoidProps<P>>((props, externalRef) => {
     const innerRef = useRef<E | null>(null);
 
-    const { react, elementProps, events } = splitProps(props as Record<string, unknown>);
+    const { react, elementProps, events } = splitProps(props as Record<string, unknown>, jsonProps);
     useWcProps(innerRef, elementProps, events);
 
     const setRef = useCallback(
@@ -1070,18 +1076,20 @@ export const BarChart = wrapWc<VoidBarChart, {
   data?: BarChartData;
   height?: number;
   showValue?: boolean;
+  showTable?: boolean;
   variant?: 'filled' | 'outline' | 'wireframe';
   /** Milliseconds between bars as they animate in; 0 animates them together. Default: the theme's. */
   stagger?: number;
-}>('void-bar-chart', 'BarChart');
+}>('void-bar-chart', 'BarChart', ['data']);
 
 export const LineChart = wrapWc<VoidLineChart, {
   data?: LineChartData;
   height?: number;
   showValue?: boolean;
+  showTable?: boolean;
   variant?: 'filled' | 'outline' | 'wireframe';
   interpolation?: 'linear' | 'step';
-}>('void-line-chart', 'LineChart');
+}>('void-line-chart', 'LineChart', ['data']);
 
 export const DonutChart = wrapWc<VoidDonutChart, {
   data?: DonutChartData;
@@ -1092,8 +1100,9 @@ export const DonutChart = wrapWc<VoidDonutChart, {
   gaps?: boolean | number;
   variant?: 'filled' | 'outline' | 'wireframe';
   showValue?: boolean;
+  showTable?: boolean;
   showTotal?: boolean;
-}>('void-donut-chart', 'DonutChart');
+}>('void-donut-chart', 'DonutChart', ['data']);
 
 export const Gauge = wrapWc<VoidGauge, {
   data?: GaugeData;
@@ -1107,6 +1116,7 @@ export const Gauge = wrapWc<VoidGauge, {
   circular?: 'full' | 'semi' | 'triple';
   variant?: 'filled' | 'outline' | 'wireframe';
   hideValue?: boolean;
+  showTable?: boolean;
   unitInline?: boolean;
   tickMajor?: number;
   tickMinor?: number;
@@ -1114,4 +1124,4 @@ export const Gauge = wrapWc<VoidGauge, {
   hideTickMax?: boolean;
   segmentsSort?: 'value' | 'manual';
   gaps?: boolean | number;
-}>('void-gauge', 'Gauge');
+}>('void-gauge', 'Gauge', ['data', 'zones']);
