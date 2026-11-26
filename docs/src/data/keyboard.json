@@ -110,6 +110,31 @@
       }
     ]
   },
+  "void-radio-group": {
+    "intro": "Pattern: [radio group](https://www.w3.org/WAI/ARIA/apg/patterns/radio/). `role=\"radiogroup\"` with `role=\"radio\"` items and `aria-checked` from the first paint. One tab stop: the checked radio, or the first enabled one while none is checked. Selection follows focus, so each arrow key fires `void-change`. `<void-radio>` elements outside a group that share a `name` in the same form (or document) work the same way.",
+    "rows": [
+      {
+        "keys": "Tab",
+        "action": "Moves into the group on the checked radio, or the first enabled one while none is checked, and out of it on the next press"
+      },
+      {
+        "keys": "Shift + Tab",
+        "action": "Moves into the group on the checked radio, or the last enabled one while none is checked (as native radios do), and out of it on the next press"
+      },
+      {
+        "keys": "Right Arrow, Down Arrow",
+        "action": "Checks the next enabled radio (wraps) and moves focus to it"
+      },
+      {
+        "keys": "Left Arrow, Up Arrow",
+        "action": "Checks the previous enabled radio (wraps) and moves focus to it. In right-to-left pages Left Arrow checks the next radio and Right Arrow the previous (Up Arrow and Down Arrow do not swap)"
+      },
+      {
+        "keys": "Space",
+        "action": "Checks the focused radio if it is not checked"
+      }
+    ]
+  },
   "void-segmented-control": {
     "intro": "Pattern: [radio group](https://www.w3.org/WAI/ARIA/apg/patterns/radio/). `role=\"radiogroup\"` with `role=\"radio\"` items and `aria-checked` from the first paint. One tab stop: the checked item, or the first enabled item while none is checked. Selection follows focus, so each arrow key fires `void-change`.",
     "rows": [
