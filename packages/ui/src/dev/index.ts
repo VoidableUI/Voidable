@@ -183,6 +183,8 @@ function schedule(el: Element): void {
 }
 
 async function flushDeferred(): Promise<void> {
+  // A timer that outlives its document (a test environment torn down) has nothing left to check.
+  if (typeof document === 'undefined') return;
   await settle();
   const batch = [...pending];
   pending.clear();
