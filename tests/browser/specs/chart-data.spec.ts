@@ -32,7 +32,7 @@ test.describe('on a page', () => {
   });
 
   test('the bars are drawn at full height once the entrance is done', async ({ page }) => {
-    await add(page, barHtml('b'));
+    await add(page, barHtml('b', 'style="--void-anim-scale: 0"'));
     await expect(page.locator('#b svg')).toHaveAttribute('data-phase', 'idle');
     const heights = await page.evaluate(() => [...document.querySelectorAll('#b .void-bar-chart-bar')].map((r) => r.getBoundingClientRect().height));
     expect(heights[2]).toBeGreaterThan(heights[0]!);
