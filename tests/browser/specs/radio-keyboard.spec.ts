@@ -47,7 +47,7 @@ test.describe('radio keyboard', () => {
   });
 
   test('after Shift+Tab out of an unchecked group, Tab comes back on its first radio', async ({ page }) => {
-    await page.locator('#dis [value=a]').focus();
+    await page.locator('#dis void-radio[value=a]').focus();
     await press(page, 'Shift+Tab');
     expect(await active(page)).toBe('none:l');
     await press(page, 'Shift+Tab');
@@ -59,7 +59,7 @@ test.describe('radio keyboard', () => {
   });
 
   test('ArrowDown and ArrowRight check the next radio, ArrowUp and ArrowLeft the previous, and they wrap', async ({ page }) => {
-    await page.locator('#plan [value=free]').focus();
+    await page.locator('#plan void-radio[value=free]').focus();
     const walked: string[] = [];
     for (const k of ['ArrowDown', 'ArrowRight', 'ArrowDown', 'ArrowUp', 'ArrowLeft', 'ArrowLeft']) {
       await press(page, k);
@@ -72,7 +72,7 @@ test.describe('radio keyboard', () => {
   });
 
   test('an arrow key fires one void-change on the group and one click, and updates the form data', async ({ page }) => {
-    await page.locator('#plan [value=free]').focus();
+    await page.locator('#plan void-radio[value=free]').focus();
     await watch(page);
     await press(page, 'ArrowDown');
     expect(await events(page)).toEqual(['click', 'plan:pro']);
@@ -85,7 +85,7 @@ test.describe('radio keyboard', () => {
   });
 
   test('Space checks the focused radio once; on a checked radio it does nothing', async ({ page }) => {
-    await page.locator('#none [value=s]').focus();
+    await page.locator('#none void-radio[value=s]').focus();
     await watch(page);
     await press(page, 'Space');
     expect(await events(page)).toEqual(['click', 'none:s']);
@@ -96,14 +96,14 @@ test.describe('radio keyboard', () => {
   });
 
   test('arrows in an unchecked group move from the focused radio', async ({ page }) => {
-    await page.locator('#none [value=s]').focus();
+    await page.locator('#none void-radio[value=s]').focus();
     await press(page, 'ArrowUp');
     expect(await active(page)).toBe('none:l');
     expect((await form(page)).size).toBe('l');
   });
 
   test('disabled radios are skipped by arrows and never tabbable', async ({ page }) => {
-    await page.locator('#dis [value=a]').focus();
+    await page.locator('#dis void-radio[value=a]').focus();
     await watch(page);
     await press(page, 'ArrowDown');
     expect(await active(page)).toBe('dis:c');
@@ -118,7 +118,7 @@ test.describe('radio keyboard', () => {
   test('in right-to-left the inline arrows swap and Up and Down do not', async ({ page }) => {
     await page.evaluate(() => { document.documentElement.dir = 'rtl'; });
     await settle(page);
-    await page.locator('#plan [value=free]').focus();
+    await page.locator('#plan void-radio[value=free]').focus();
     await press(page, 'ArrowLeft');
     expect(await active(page)).toBe('plan:pro');
     await press(page, 'ArrowRight');
@@ -205,7 +205,7 @@ for (const engine of ['turbo', 'morphdom', 'alpine'] as const) {
 
     test('the focused radio stays focused and the tab stop follows the value the server sends', async ({ page }) => {
       await render(page, markup('a'));
-      await page.locator('#rg [value=a]').focus();
+      await page.locator('#rg void-radio[value=a]').focus();
       await press(page, 'ArrowDown');
       expect(await tabindexes(page, '#rg')).toBe('-1,0,-1');
       // The server repeats itself with the old value (the client's choice is kept) ...
