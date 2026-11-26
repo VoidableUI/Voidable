@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 #MISE description="Fail when a manifest holds a version or a tracked file hand-types a Voidable package version (versions are computed and stamped at release)"
+#MISE depends=["install"]
 set -euo pipefail
 
 node scripts/release/check.mjs "$@"

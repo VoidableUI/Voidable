@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 #MISE description="Verify every @voidable/ui component is tree-shake-friendly: subpath export, sideEffects, self-registers, re-exported from index"
+#MISE depends=["install"]
 set -euo pipefail
 
 UI_DIR="packages/ui"

@@ -2,7 +2,7 @@
 
 Voidable is a framework-agnostic web component library built on Lit 3, with adapters for React, Hotwire, Alpine and LiveView, and setup guides for Vue, Solid, Svelte and Angular (which need no adapter package). Every component renders in the Light DOM and carries no visual CSS of its own.
 
-The core idea: components are **devoid** of style until you load a theme. `@voidable/ui` ships structure and behavior only; all colors, spacing and shape come from `--void-*` CSS custom properties defined by `@voidable/theme` (or by your own theme). Because there is no Shadow DOM, your CSS and your tokens reach every part of every component.
+The core idea: components are **devoid** of style until you load a theme. `@voidable/ui` ships structure and behavior only; all colors, spacing and shape come from `--void-*` CSS custom properties defined by `@voidable/theme` (or by your own theme). Because components render in the light DOM (only the dialog and drawer keep a small shadow root, for the native `<dialog>`), your CSS and your tokens reach every part of every component.
 
 - Docs: https://voidable.dev
 - Storybook: https://voidable.dev/storybook/
@@ -32,6 +32,8 @@ import '@voidable/ui';
 
 In development, `import '@voidable/ui/dev'` (a separate entry, never part of the bundle above) makes a misspelled attribute, an invalid value or a child in the wrong parent say so in the browser console; see [Development warnings](https://voidable.dev/getting-started/development-warnings/).
 
+To check markup before it ships, install the `voidable` tool (`curl -fsSL https://voidable.dev/install.sh | sh`) and run `voidable check src`: it reports unknown elements, attributes and values, missing accessible names and every form renamed in 0.8, with what to write instead. See [For AI agents](https://voidable.dev/getting-started/for-agents/).
+
 To load components on demand instead of registering all of them, import `@voidable/ui/autoloader` (see [Loading components](https://voidable.dev/getting-started/loading/)). Without a bundler, use a stylesheet link and a CDN module import; see the [`@voidable/ui` README](packages/ui/README.md#usage-without-a-bundler). Framework guides are in the [docs](https://voidable.dev/frameworks/react/).
 
 ## Packages
@@ -47,6 +49,7 @@ To load components on demand instead of registering all of them, import `@voidab
 | `live_voidable` | [`packages/liveview/hex`](packages/liveview/hex) | Hex | Phoenix function components |
 | `voidable-hotwire` | [`packages/hotwire/gem`](packages/hotwire/gem) | RubyGems | Rails helpers and asset integration |
 | `voidable/laravel` | [`packages/alpine/laravel`](packages/alpine/laravel) | Composer | Laravel integration for the Alpine adapter |
+| `voidable` (binary) | [`tools/voidable`](tools/voidable) | GitHub release | The command-line tool: `ref`, `check`, `gen snippet` and an MCP server; `curl -fsSL https://voidable.dev/install.sh | sh` |
 | `@voidable/storybook` | [`packages/storybook`](packages/storybook) | private | Storybook, published at voidable.dev/storybook |
 
 The documentation site lives in [`docs`](docs) (Astro Starlight).

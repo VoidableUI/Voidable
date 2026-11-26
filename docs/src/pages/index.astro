@@ -29,8 +29,8 @@ const sourceOf = (t: (typeof themes)[number]) =>
   '\n}';
 
 // Counts, version and bundle size are derived at build time (see src/lib/stats.ts).
-const { version, bundleSize } = stats;
-const description = `Framework-agnostic web component library built with Lit 3. ${stats.elements} custom elements, Light DOM, zero visual CSS, token theming. ${stats.adapters} adapter packages for React, Vue, Solid, Svelte, Angular, Hotwire, Alpine, and LiveView, plus guides for Lit, Qwik, Astro, and vanilla JS.`;
+const { version, bundleSize, smallestComponentSize } = stats;
+const description = `Framework-agnostic web component library built with Lit 3. ${stats.elements} custom elements, Light DOM, zero visual CSS, token theming. ${stats.adapters} adapter packages for React, Hotwire, Alpine, and LiveView, typings for Vue, Solid, Svelte, and Angular, plus guides for Lit, Qwik, Astro, and vanilla JS.`;
 const siteTitle = 'Voidable. Devoid of style.';
 const canonical = new URL('/', Astro.site ?? 'https://voidable.dev').href;
 const ogImage = new URL('/og.png', canonical).href;
@@ -753,7 +753,7 @@ const ogImage = new URL('/og.png', canonical).href;
             <div class="eyebrow">Theming</div>
             <h2 class="section-heading">A dozen knobs.<br/>Every token follows.</h2>
             <p class="section-sub">
-              Accent, neutral tint, contrast, chrome, radius, density, rhythm, type. Every colour, size and radius is derived from them in plain CSS, in dark and in light, with no build step. A theme is a file that sets the knobs and nothing else.
+              Accent, neutral tint, contrast, chrome, radius, density, rhythm, type. Every colour, size and radius is derived from them in plain CSS, in dark and in light, with no build step. A theme is a file that sets the knobs and nothing else; {stats.themes} ship, with {stats.skins} skins that change structure.
             </p>
             <div class="theme-picker">
               <void-segmented-control id="theme-picker" value="void" aria-label="Demonstration theme">
@@ -795,7 +795,7 @@ const ogImage = new URL('/og.png', canonical).href;
         <div class="feature-grid">
           <div class="feature-card">
             <div class="feature-card-title">Light DOM rendering</div>
-            <p class="feature-card-desc">No Shadow DOM barrier. Your CSS reaches into every component without ::part() incantations.</p>
+            <p class="feature-card-desc">Your children, classes and framework bindings stay where you wrote them, and your CSS reaches into components directly. Only the dialog and the drawer keep a small shadow root, for the native dialog they need.</p>
           </div>
           <div class="feature-card">
             <div class="feature-card-title">Knob-driven theming</div>
@@ -806,8 +806,8 @@ const ogImage = new URL('/og.png', canonical).href;
             <p class="feature-card-desc">Singleton-safe customElements.define(). Same library loads once across federated modules.</p>
           </div>
           <div class="feature-card">
-            <div class="feature-card-title">Embedded-grade bundles</div>
-            <p class="feature-card-desc">Pairs with Solid + UnoCSS for bundle sizes that are IoT friendly. Tree-shakes to component-level granularity, or use the autoloader to fetch only the components a page uses.</p>
+            <div class="feature-card-title">Pay for what you use</div>
+            <p class="feature-card-desc">Import one component, or use the autoloader to fetch only the components a page uses.{smallestComponentSize && ` The cheapest single component is ${smallestComponentSize} gzipped, Lit included.`}</p>
           </div>
           <div class="feature-card">
             <div class="feature-card-title">Agent-friendly markup</div>
@@ -921,7 +921,7 @@ const ogImage = new URL('/og.png', canonical).href;
                 </void-field>
               </div>
               <div class="form-full">
-                <void-checkbox-group aria-label="Options">
+                <void-checkbox-group aria-label="Notification types">
                   <void-checkbox value="updates" checked>Product updates</void-checkbox>
                   <void-checkbox value="marketing">Marketing emails</void-checkbox>
                   <void-checkbox value="security" checked>Security alerts</void-checkbox>
@@ -968,7 +968,7 @@ const ogImage = new URL('/og.png', canonical).href;
           {bundleSize && (
             <div class="stat-card">
               <div class="stat-number">{bundleSize}</div>
-              <div data-void-type="label">gzipped runtime</div>
+              <div data-void-type="label">gzipped, whole library</div>
             </div>
           )}
         </div>

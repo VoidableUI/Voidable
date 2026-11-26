@@ -81,7 +81,7 @@ export const DatePickerDefault: Story = {
   argTypes: argTypesFor('void-date-picker'),
   name: 'Date Picker',
   render: (args) => html`
-    <void-date-picker aria-label="Date"
+    <void-date-picker aria-label="Start date"
       value=${args.value || ''}
       min=${args.min || ''}
       max=${args.max || ''}
@@ -99,7 +99,7 @@ export const DatePickerWithValue: Story = {
   argTypes: argTypesFor('void-date-picker'),
   name: 'Date Picker — With Value',
   render: () => html`
-    <void-date-picker aria-label="Date" value="2024-06-15"></void-date-picker>
+    <void-date-picker aria-label="Start date" value="2024-06-15"></void-date-picker>
   `,
 };
 
@@ -146,7 +146,7 @@ export const DatePickerDisabled: Story = {
   argTypes: argTypesFor('void-date-picker'),
   name: 'Date Picker — Disabled',
   render: () => html`
-    <void-date-picker aria-label="Date" disabled value="2024-06-15"></void-date-picker>
+    <void-date-picker aria-label="Start date" disabled value="2024-06-15"></void-date-picker>
   `,
 };
 

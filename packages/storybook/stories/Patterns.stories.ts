@@ -378,14 +378,14 @@ export const Toolbar: Story = {
       <void-section>
         <void-toolbar>
           <void-input type="search" placeholder="Search stations" aria-label="Search stations"></void-input>
-          <void-select aria-label="Region">
+          <void-select aria-label="Station region">
             <select>
               <option>All regions</option>
               <option>Arctic</option>
               <option>Southern</option>
             </select>
           </void-select>
-          <void-select aria-label="State">
+          <void-select aria-label="Station state">
             <select>
               <option>Any state</option>
               <option>Online</option>

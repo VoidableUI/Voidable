@@ -5,13 +5,14 @@ description: A framework-agnostic web component library built with Lit 3.
 
 import { stats } from '../../../lib/stats';
 
-Voidable is a **framework-agnostic web component library** built on [Lit 3](https://lit.dev). Every component renders in the **Light DOM** — no Shadow DOM barriers — so your CSS has full access to component internals.
+Voidable is a **framework-agnostic web component library** built on [Lit 3](https://lit.dev). Components render in the **Light DOM**, so your children, classes and framework bindings stay where you wrote them and your CSS reaches component internals directly. The one exception is the dialog and the drawer, which keep a small shadow root for the native `<dialog>` they are built on.
 
 ## Key features
 
 - **{stats.elements} custom elements** ({stats.components} components) covering layout, forms, data display, feedback, and navigation
-- **CSS token system** with dark/light themes via `data-theme` attribute
+- **CSS token system**: {stats.themes} themes and {stats.skins} skins, each in dark and light, switched with `data-void-theme`, `data-void-skin` and `data-theme`, and a [theme builder](/theme/)
 - **Zero visual CSS in components** — all styling flows through `@voidable/theme`
+- **Current browsers**: the baseline is the Popover API (Chrome and Edge 114, Firefox 125, Safari 17); see [Overlays](/components/overlays/#browser-support)
 - **{stats.adapters} framework adapter packages** for React, Hotwire, Alpine, and LiveView, plus guides for Vue, Solid, Svelte, Angular, Lit, Qwik, Astro, and vanilla JS (the first four of those need no package, only configuration and generated typings)
 
 ## Quick start
@@ -44,6 +45,7 @@ npm install @voidable/ui @voidable/theme
 | `live_voidable` (Hex) | Phoenix function components for HEEx templates |
 | `voidable-hotwire` (Gem) | Rails helper and asset pipeline integration |
 | `voidable/laravel` (Composer) | Laravel service provider for the Alpine/Livewire adapter |
+| `voidable` (binary) | The command-line tool: `ref`, `check`, `gen snippet` and an MCP server (`mcp`). Installed with `curl -fsSL https://voidable.dev/install.sh \| sh`, see [For AI agents](/getting-started/for-agents/) |
 
 ## Resources
 

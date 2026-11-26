@@ -31,7 +31,7 @@ concurrency:
 
 jobs:
   ci:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
@@ -51,9 +51,11 @@ jobs:
 
   # Real-browser suite (tests/browser): Chromium, Firefox and WebKit against
   # the built packages. Kept out of `mise run ci`, which needs no browsers.
+  # 1,769 tests in three engines take 21 to 26 minutes on a hosted runner; at a
+  # 25-minute limit, slower runners were cancelled a few tests from the end.
   browser:
-    runs-on: ubuntu-latest
-    timeout-minutes: 25
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
 
@@ -104,7 +106,7 @@ jobs:
   # nor can be failed by it. Only a pull request can fail it.
   visual:
     if: github.event_name == 'pull_request'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 45
     steps:
       # The whole history: the base commit is built in a worktree of its own.
@@ -160,7 +162,7 @@ jobs:
   #
   # `server` is the Rails demo.
   server:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     env:
       # Gems install into the workspace so one cache entry holds them all.
@@ -219,7 +221,7 @@ jobs:
   # Phoenix LiveView: the LiveView demo (packages/liveview/demo) with the
   # live_voidable Hex package and the built adapter. Needs Erlang and Elixir.
   phoenix:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
@@ -303,7 +305,7 @@ jobs:
   # Laravel Livewire: the Laravel example (examples/laravel) with Livewire,
   # Alpine and the built adapter. Needs PHP and Composer.
   laravel:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0

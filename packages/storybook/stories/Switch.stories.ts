@@ -17,7 +17,7 @@ const meta: Meta = {
   },
   argTypes: argTypesFor('void-switch'),
   render: (args) => html`
-    <void-switch aria-label="Setting"
+    <void-switch aria-label="Email notifications"
       color=${args.color || 'default'}
       size=${args.size || 'md'}
       ?checked=${args.checked}
@@ -38,12 +38,12 @@ export const Checked: Story = {
 export const Colors: Story = {
   render: () => html`
     <div style="display: flex; flex-wrap: wrap; gap: 16px; align-items: center;">
-      <void-switch aria-label="Setting" checked color="default"></void-switch>
-      <void-switch aria-label="Setting" checked color="error"></void-switch>
-      <void-switch aria-label="Setting" checked color="warning"></void-switch>
-      <void-switch aria-label="Setting" checked color="success"></void-switch>
-      <void-switch aria-label="Setting" checked color="info"></void-switch>
-      <void-switch aria-label="Setting" checked color="notice"></void-switch>
+      <void-switch aria-label="Email notifications" checked color="default"></void-switch>
+      <void-switch aria-label="Email notifications" checked color="error"></void-switch>
+      <void-switch aria-label="Email notifications" checked color="warning"></void-switch>
+      <void-switch aria-label="Email notifications" checked color="success"></void-switch>
+      <void-switch aria-label="Email notifications" checked color="info"></void-switch>
+      <void-switch aria-label="Email notifications" checked color="notice"></void-switch>
     </div>
   `,
 };
@@ -51,9 +51,9 @@ export const Colors: Story = {
 export const Sizes: Story = {
   render: () => html`
     <div style="display: flex; align-items: center; gap: 16px;">
-      <void-switch aria-label="Setting" size="sm"></void-switch>
-      <void-switch aria-label="Setting" size="md"></void-switch>
-      <void-switch aria-label="Setting" size="lg"></void-switch>
+      <void-switch aria-label="Email notifications" size="sm"></void-switch>
+      <void-switch aria-label="Email notifications" size="md"></void-switch>
+      <void-switch aria-label="Email notifications" size="lg"></void-switch>
     </div>
   `,
 };
@@ -61,8 +61,8 @@ export const Sizes: Story = {
 export const Disabled: Story = {
   render: () => html`
     <div style="display: flex; align-items: center; gap: 16px;">
-      <void-switch aria-label="Setting" disabled></void-switch>
-      <void-switch aria-label="Setting" disabled checked></void-switch>
+      <void-switch aria-label="Email notifications" disabled></void-switch>
+      <void-switch aria-label="Email notifications" disabled checked></void-switch>
     </div>
   `,
 };

@@ -48,7 +48,7 @@ export const SendMessage: Story = {
 
 export const PasswordReveal: Story = {
   render: () => html`
-    <void-action-input aria-label="Search"
+    <void-action-input aria-label="Password"
       value="secret-password"
       type="password"
       icon="eye"
@@ -78,7 +78,7 @@ export const PasswordPushToReveal: Story = {
       el.icon = 'eye';
     };
     return html`
-      <void-action-input aria-label="Search"
+      <void-action-input aria-label="Password"
         value="secret-password"
         type="password"
         icon="eye"
@@ -100,12 +100,12 @@ export const Icons: Story = {
   render: () => html`
     <div style="display: flex; flex-direction: column; gap: 12px; width: 320px;">
       <void-action-input icon="search" placeholder="Search..." action-label="Search"></void-action-input>
-      <void-action-input aria-label="Search" icon="copy" value="Copy this text" action-label="Copy" readonly></void-action-input>
+      <void-action-input aria-label="Link to copy" icon="copy" value="Copy this text" action-label="Copy" readonly></void-action-input>
       <void-action-input icon="send" placeholder="Type a message..." action-label="Send"></void-action-input>
-      <void-action-input aria-label="Search" icon="eye" value="secret-value" action-label="Show"></void-action-input>
+      <void-action-input aria-label="Password" icon="eye" value="secret-value" action-label="Show"></void-action-input>
       <void-action-input icon="clipboard" placeholder="Paste here..." action-label="Paste"></void-action-input>
       <void-action-input icon="arrow-right" placeholder="Go to..." action-label="Go"></void-action-input>
-      <void-action-input aria-label="Search" icon="x" value="Clear me" action-label="Clear"></void-action-input>
+      <void-action-input aria-label="Draft to clear" icon="x" value="Clear me" action-label="Clear"></void-action-input>
     </div>
   `,
 };

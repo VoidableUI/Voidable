@@ -56,7 +56,7 @@ env:
 jobs:
   plan:
     name: Plan
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     outputs:
       release: ${{ steps.plan.outputs.release }}
       version: ${{ steps.plan.outputs.version }}
@@ -93,7 +93,7 @@ jobs:
     name: Tag
     needs: [plan, ci]
     if: needs.plan.outputs.publish == 'true'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       contents: write
     steps:
@@ -111,7 +111,7 @@ jobs:
   npm-core:
     name: npm (theme and core)
     needs: [plan, tag]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
       id-token: write # npm trusted publishing and provenance
@@ -141,7 +141,7 @@ jobs:
   npm-adapters:
     name: npm (adapters)
     needs: [plan, npm-core]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
       id-token: write # npm trusted publishing and provenance
@@ -156,7 +156,7 @@ jobs:
 
       - run: mise run install
 
-      - name: Build, pack and publish the eight adapters
+      - name: Build, pack and publish the four adapters
         env:
           VERSION: ${{ needs.plan.outputs.version }}
           DRY_RUN: ${{ needs.plan.outputs.dry_run }}
@@ -171,7 +171,7 @@ jobs:
   gem:
     name: RubyGems (voidable-hotwire)
     needs: [plan, npm-adapters]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
       id-token: write # RubyGems trusted publishing
@@ -213,7 +213,7 @@ jobs:
   hex:
     name: Hex (live_voidable)
     needs: [plan, npm-adapters]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
     steps:
@@ -258,7 +258,7 @@ jobs:
   composer:
     name: Composer (voidable/laravel)
     needs: [plan, npm-adapters]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
     steps:
@@ -297,7 +297,7 @@ jobs:
     name: Binaries (voidable)
     needs: [plan, tag]
     if: needs.plan.outputs.publish == 'true'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
     permissions:
       contents: read
@@ -340,7 +340,7 @@ jobs:
   github-release:
     name: GitHub release
     needs: [plan, npm-core, npm-adapters, gem, hex, composer]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       contents: write
     steps:
@@ -375,7 +375,7 @@ jobs:
     if: >-
       !cancelled() && needs.github-release.result == 'success' &&
       needs.binaries.result == 'success'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       contents: write # upload release assets
     steps:
@@ -408,7 +408,7 @@ jobs:
       !cancelled() && needs.ci.result == 'success' &&
       (needs.plan.outputs.pages == 'true' || needs.plan.outputs.dry_run == 'true') &&
       (needs.plan.outputs.publish != 'true' || needs.github-release.result == 'success')
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
     steps:
@@ -444,7 +444,7 @@ jobs:
     if: >-
       !cancelled() && needs.pages-build.result == 'success' &&
       needs.plan.outputs.pages == 'true' && needs.plan.outputs.dry_run != 'true'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       pages: write
       id-token: write

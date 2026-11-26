@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 #MISE description="Check WCAG contrast of the derived theme tokens, in dark and light, for the default knobs, every shipped theme and skin, and the extremes of every colour knob"
+#MISE depends=["install"]
 set -euo pipefail
 
 node - <<'NODE'

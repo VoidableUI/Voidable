@@ -92,7 +92,7 @@ export default defineConfig({
           label: 'Guides',
           items: [
             { label: 'Forms', slug: 'guides/forms' },
-            { label: 'Composition and children', slug: 'guides/composition' },
+            { label: 'Composition and parts', slug: 'guides/composition' },
             { label: 'Events', slug: 'guides/events' },
             { label: 'API conventions', slug: 'guides/conventions' },
             { label: 'Upgrading to 0.8', slug: 'guides/upgrading' },

@@ -21,7 +21,7 @@ Storybook loads `@voidable/ui/dev` (see `.storybook/preview.ts`), so a story tha
 mise run storybook_build
 ```
 
-The task is defined in `.mise/tasks/storybook:build`; run `mise tasks` to see the exact name your mise version exposes. The static site is written to `storybook-static/` at the repository root.
+The task is defined in `.mise/tasks/storybook_build`. The static site is written to `storybook-static/` at the repository root.
 
 ## Documentation
 

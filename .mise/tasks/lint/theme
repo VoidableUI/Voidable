@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 #MISE description="Theme architecture: layer order, every file in its layer, no selector outside void-* markup except the base, justified !important, built output layered and complete"
+#MISE depends=["install"]
 set -euo pipefail
 
 pnpm --filter @voidable/theme build

@@ -72,13 +72,13 @@ const tags = ref(['design', 'ship']);
 <template>
   <void-button variant="filled" @void-click="console.log('clicked')">Save</void-button>
 
-  <void-input aria-label="Text input" :value="name" :disabled="false" @void-input="(e) => (name = e.detail.value)" />
+  <void-input aria-label="Your name" :value="name" :disabled="false" @void-input="(e) => (name = e.detail.value)" />
 
   <void-tags-input aria-label="Tags" :value="tags" />
 </template>
 ```
 
-`e.detail` is typed from the element: `CustomEvent<{ value: string }>` for `void-input`, `{ checked: boolean }` for `void-checkbox`, and so on.
+`e.detail` is typed from the element: `CustomEvent<{ value: string }>` for `void-input`, `{ value: string; checked: boolean }` for `void-checkbox`, and so on.
 
 ## Two-way binding
 
@@ -94,9 +94,9 @@ const agreed = ref(false);
 </script>
 
 <template>
-  <void-input aria-label="Text input" :value="text" @void-input="(e) => (text = e.detail.value)" />
+  <void-input aria-label="Comment" :value="text" @void-input="(e) => (text = e.detail.value)" />
 
-  <void-select aria-label="Choose an option" :value="choice" @void-change="(e) => (choice = e.detail.value)">
+  <void-select aria-label="Plan" :value="choice" @void-change="(e) => (choice = e.detail.value)">
     <select>
       <option value="a">A</option>
       <option value="b">B</option>

@@ -144,7 +144,7 @@ A knob set on an element without that attribute changes nothing below it, becaus
 
 ### Type roles
 
-`data-void-type` applies a named text role: `label`, `value`, `unit`, `caption`, `heading`, `title`, `body`, `code`. Components use the same `--void-type-<role>-*` tokens, so restyling a role restyles it everywhere.
+`data-void-type` applies a named text role: `label`, `value`, `unit`, `caption`, `heading`, `title`, `display`, `lede`, `body`, `code`. Components use the same `--void-type-<role>-*` tokens, so restyling a role restyles it everywhere.
 
 ```html
 <span data-void-type="label">Uptime</span>

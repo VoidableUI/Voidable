@@ -56,7 +56,8 @@
   window.submits = 0;
   window.log = [];
   window.hashes = 0;
-  addEventListener('hashchange', () => window.hashes++);
+  // Count only navigations to a real fragment: a test clearing the hash also fires hashchange, late under load.
+  addEventListener('hashchange', (e) => { if (new URL(e.newURL).hash) window.hashes++; });
   for (const id of ['plain', 'off', 'aria-off', 'link', 'link-off', 'submit', 'reset', 'submit-off', 'dd-t', 'nav-t', 'pop-t', 'hc-t', 'tip-t', 'tgl', 'sw', 'ham', 'cb', 'dd-one', 'dd-two']) {
     const el = document.getElementById(id);
     el.addEventListener('click', () => window.log.push('click:' + id));

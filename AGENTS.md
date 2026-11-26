@@ -231,7 +231,7 @@ set -euo pipefail
 | `mise run build` | Build all packages |
 | `mise run test` | Run all tests |
 | `mise run storybook` | Start Storybook dev server |
-| `mise run storybook:build` | Build Storybook for deployment |
+| `mise run storybook_build` | Build Storybook for deployment |
 | `mise run typecheck` | TypeScript type checking |
 | `mise run lint` | Lint all packages |
 | `mise run clean` | Remove build artifacts and node_modules |
@@ -260,7 +260,7 @@ set -euo pipefail
 | `mise run evals:calibrate` | Score the reference solutions and rewrite `evals/results/calibration.json` |
 | `mise run warnings:sweep` | Load every Storybook story and every built docs page in headless Chromium (needs Chromium: `CHROMIUM_PATH`, default `/usr/bin/chromium`) with `@voidable/ui/dev` running and fail on any `[voidable]` warning. Not part of `ci`; run it after changing components, stories or docs markup |
 | `mise run docs` | Start docs dev server |
-| `mise run docs:build` | Build docs for deployment |
+| `mise run docs_build` | Build docs for deployment |
 | `mise run test:browser` | Real-browser suite (Playwright; Chromium, Firefox, WebKit) against the built packages; not part of `ci` |
 | `mise run test:browser:install` | Download the browsers for it (`-- --with-deps` adds system libraries on Debian/Ubuntu) |
 | `mise run test:screen-readers` | Scripted VoiceOver (macOS) or NVDA (Windows) scenarios through Guidepup; refuses to run on Linux; not part of `ci` or any release gate |

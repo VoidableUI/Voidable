@@ -1,6 +1,6 @@
 ---
 title: Theming
-description: Retheme Voidable in three tiers. Knobs are the dozen inputs everything derives from, semantic tokens are what they derive, and component tokens are per-component override points. The theme builder, eight themes, two skins, tokens for design tools, with live examples.
+description: Retheme Voidable in three tiers. Knobs are the dozen inputs everything derives from, semantic tokens are what they derive, and component tokens are per-component override points. The theme builder, the shipped themes and skins, tokens for design tools, with live examples.
 ---
 
 import ThemeDemo from '../../../components/ThemeDemo.astro';
@@ -69,7 +69,7 @@ https://voidable.dev/theme/?skin=loft&accent-hue=258&accent-chroma=0.15
 |---|---|
 | a knob, without `--void-` (`accent-hue`, `radius`, `font-size`, ...) | The knob's value. A bare number takes the knob's unit: `radius=8` is `8px`, `font-size=0.875` is `0.875rem`. `font-sans` and `font-mono` take a font-family list, or a short key: `inter`, `system`, `humanist`, `geometric`, `rounded`, `serif`, `mono` (and `jetbrains`, `system` for the monospace). |
 | `theme` | A shipped theme to start from; the other parameters override it. |
-| `skin` | `loft` (see [Skins](#skins-beyond-the-knobs)). |
+| `skin` | `loft` or `slab` (see [Skins](#skins)). |
 | `name` | The theme's name, used for the selector and the file name. |
 | `screen`, `scheme`, `device` | What the preview shows: `overview`, `table`, `form`, `settings` or `live`; `dark`, `light` or `both`; `desktop` or `phone`. |
 
@@ -261,7 +261,7 @@ Two ship. **Loft**: a soft tinted page, containers lighter than the page that fl
 <html data-void-skin="loft">
 ```
 
-Put the attribute on `<html>`, or on an element that also carries `data-void-theme`. Live, the default look and the two skins, with the default knobs and with Dune:
+Put the attribute on `<html>`, or on an element that also carries `data-void-theme`. Live, the default look and the shipped skins, with the default knobs and with Dune:
 
 <div class="vd-themes not-content">
   {[['', 'void', 'Default'], ['loft', 'void', 'Loft'], ['slab', 'void', 'Slab'], ['', 'dune', 'Dune'], ['loft', 'dune', 'Dune + Loft'], ['slab', 'dune', 'Dune + Slab']].map(([skin, theme, label]) => (
@@ -330,17 +330,17 @@ Live: the first box sets two knobs inline, the second names a theme, and the thi
 <div class="vd-themes not-content">
   <div class="vd-themed" data-void-theme style="--void-radius: 0px; --void-density: 0.85">
     <span data-void-type="label">Inline knobs</span>
-    <void-input value="Square and compact" aria-label="Example"></void-input>
+    <void-input value="Square and compact" aria-label="Station note"></void-input>
     <div class="vd-row"><void-button variant="filled">Save</void-button><void-button>Schedule</void-button></div>
   </div>
   <div class="vd-themed" data-void-theme="dune">
     <span data-void-type="label">A named theme</span>
-    <void-input value="Warm and rounded" aria-label="Example"></void-input>
+    <void-input value="Warm and rounded" aria-label="Station note"></void-input>
     <div class="vd-row"><void-button variant="filled">Save</void-button><void-button>Schedule</void-button></div>
   </div>
   <div class="vd-themed" data-void-theme="dune" data-theme="light">
     <span data-void-type="label">Theme + light scheme</span>
-    <void-input value="Always light" aria-label="Example"></void-input>
+    <void-input value="Always light" aria-label="Station note"></void-input>
     <div class="vd-row"><void-button variant="filled">Save</void-button><void-button>Schedule</void-button></div>
   </div>
 </div>
@@ -429,8 +429,8 @@ The default look is light and airy, and it gets there with three decisions. Each
 <div class="vd-example not-content">
   <div class="vd-row">
     <void-input aria-label="Search stations" placeholder="Search stations" style="width: 14rem"></void-input>
-    <void-select aria-label="Region"><select><option>All regions</option></select></void-select>
-    <void-segmented-control value="all" aria-label="State">
+    <void-select aria-label="Station region"><select><option>All regions</option></select></void-select>
+    <void-segmented-control value="all" aria-label="Station state">
       <void-segmented-control-item value="all">All</void-segmented-control-item>
       <void-segmented-control-item value="online">Online</void-segmented-control-item>
     </void-segmented-control>
@@ -546,7 +546,7 @@ The theme puts everything in named layers, declared once and in this order, lowe
 - `components.void.themes`: the theme files (they set knobs only).
 - `components.void.type`: the `data-void-type` roles.
 - `components.void.components` and `components.void.patterns`: every component and every CSS-only pattern.
-- `components.void.skins`: a [skin](#skins-beyond-the-knobs). It overrides derived tokens and restyles elements of components and patterns directly, so it has to beat both whatever their selectors' specificity.
+- `components.void.skins`: a [skin](#skins). It overrides derived tokens and restyles elements of components and patterns directly, so it has to beat both whatever their selectors' specificity.
 - `components.void.a11y`: forced-colours adjustments. Above the skins, so a skin can never hide a focus ring or a forced colour.
 
 `theme` and `base` are the framework layers under the theme (Tailwind's preflight is in `base`) and `utilities` is above it, so utility classes such as `rounded-none` or `p-8` win over a component's styles without `!important`. Your own rules written directly in `components` win over the theme's sublayers too.

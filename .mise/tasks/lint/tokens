@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 #MISE description="Ensure raw values use design tokens in theme CSS and UI components"
+#MISE depends=["install"]
 set -euo pipefail
 
 PRIMITIVES="packages/theme/src/primitives.css"
