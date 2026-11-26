@@ -10,14 +10,14 @@ import Example from '../../../components/Example.astro';
 export const toolbar = `
 <void-toolbar>
   <void-input type="search" placeholder="Search stations" aria-label="Search stations"></void-input>
-  <void-select aria-label="Region">
+  <void-select aria-label="Station region">
     <select>
       <option>All regions</option>
       <option>Arctic</option>
       <option>Southern</option>
     </select>
   </void-select>
-  <void-select aria-label="State">
+  <void-select aria-label="Station state">
     <select>
       <option>Any state</option>
       <option>Online</option>
@@ -34,7 +34,7 @@ export const toolbarErb = `
   <void-toolbar>
     <void-input type="search" name="q" value="<%= params[:q] %>"
                 placeholder="Search stations" aria-label="Search stations"></void-input>
-    <void-select aria-label="Region">
+    <void-select aria-label="Station region">
       <select name="region">
         <option value="">All regions</option>
         <%= options_for_select Station.regions.keys.map { [_1.humanize, _1] }, params[:region] %>
@@ -50,7 +50,7 @@ export const toolbarJsx = `
 <void-toolbar>
   <Input type="search" placeholder="Search stations" aria-label="Search stations"
          value={query} onVoidInput={(event) => setQuery(event.detail.value)} />
-  <Select aria-label="Region" value={region} onVoidChange={(event) => setRegion(event.detail.value)}>
+  <Select aria-label="Station region" value={region} onVoidChange={(event) => setRegion(event.detail.value)}>
     <option value="">All regions</option>
     {regions.map((r) => <option key={r} value={r}>{r}</option>)}
   </Select>

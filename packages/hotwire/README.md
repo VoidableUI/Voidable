@@ -39,7 +39,7 @@ your controllers with `data-action`:
 ```erb
 <void-button data-action="void-click->form#submit">Save</void-button>
 
-<void-select aria-label="Choose an option" data-action="void-change->filter#update">
+<void-select aria-label="Filter" data-action="void-change->filter#update">
   <select>
     <option value="a">Option A</option>
     <option value="b">Option B</option>
@@ -49,5 +49,5 @@ your controllers with `data-action`:
 
 ## Documentation
 
-- [Storybook](https://voidableui.github.io/Voidable/)
+- [Storybook](https://voidable.dev/storybook/)
 - [GitHub](https://github.com/VoidableUI/Voidable)

@@ -60,9 +60,9 @@ const sidebar = html`
 
     <!-- Footer -->
     <div style="padding: var(--void-space-3); border-top: 1px solid var(--void-color-border); background: var(--void-color-bg-secondary); display: flex; align-items: center; gap: var(--void-space-2);">
-      <void-avatar initials="KW" size="sm"></void-avatar>
+      <void-avatar initials="AR" size="sm"></void-avatar>
       <div style="display: flex; flex-direction: column;">
-        <span style="font-family: var(--void-font-sans); font-size: var(--void-text-xs); font-weight: var(--void-weight-medium); color: var(--void-color-text);">Kaz Walker</span>
+        <span style="font-family: var(--void-font-sans); font-size: var(--void-text-xs); font-weight: var(--void-weight-medium); color: var(--void-color-text);">Alex Rivera</span>
         <span style="font-family: var(--void-font-sans); font-size: var(--void-text-2xs); color: var(--void-color-text-muted);">Admin</span>
       </div>
       <void-popover side="top" class="sidebar-settings" style="margin-left: auto;">

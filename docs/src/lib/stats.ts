@@ -4,8 +4,7 @@
 // To re-point at a generated manifest, replace the body of `computeStats()`;
 // consumers only use the exported `stats` constant.
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
-import { execSync } from 'node:child_process';
-import { gzipSync } from 'node:zlib';
+import { execFileSync, execSync } from 'node:child_process';
 import { dirname, join, resolve } from 'node:path';
 
 function findRepoRoot(): string {
@@ -66,27 +65,41 @@ function computeStats() {
   // Bare number for install snippets ("0.8.0"); undefined before the first release.
   const versionNumber = version && /^v\d+\.\d+\.\d+$/.test(version) ? version.slice(1) : undefined;
 
-  // Gzipped size of the @voidable/ui build: CI passes VOIDABLE_BUNDLE_SIZE
-  // (same calculation); locally compute it from packages/ui/dist if built.
-  let bundleSize: string | undefined = process.env.VOIDABLE_BUNDLE_SIZE || undefined;
-  if (!bundleSize) {
-    const dist = join(root, 'packages/ui/dist');
-    if (existsSync(dist)) {
-      const js = readdirSyncRecursive(dist).filter((f) => f.endsWith('.js'));
-      if (js.length) {
-        const bytes = gzipSync(Buffer.concat(js.map((f) => readFileSync(f)))).length;
-        bundleSize = `${(bytes / 1024).toFixed(1)} kB`;
-      }
+  // Gzipped size of what an app ships (the whole library, and the cheapest single
+  // component), measured by scripts/release/bundle-size.mjs on the built
+  // packages/ui/dist the way the performance suite measures it (Lit included,
+  // minified). Undefined, so the home page omits the figure, when @voidable/ui is
+  // not built or esbuild is not installed.
+  let bundleSize: string | undefined;
+  let smallestComponentSize: string | undefined;
+  if (existsSync(join(root, 'packages/ui/dist/components'))) {
+    try {
+      const out = execFileSync(process.execPath, [join(root, 'scripts/release/bundle-size.mjs')], { cwd: root, encoding: 'utf8' });
+      const sizes = JSON.parse(out) as { root: number; smallest: number };
+      bundleSize = `${sizes.root.toFixed(1)} kB`;
+      smallestComponentSize = `${sizes.smallest.toFixed(1)} kB`;
+    } catch {
+      /* no figure rather than a wrong one */
     }
   }
 
-  return { components, elements: tags.size, adapters: adapters.length, adapterNames: adapters, version, versionNumber, bundleSize };
-}
+  // Themes and skins: one file each in packages/theme/src/themes and /skins.
+  const cssFiles = (dir: string) => readdirSync(resolve(root, 'packages/theme/src', dir)).filter((f) => f.endsWith('.css'));
+  const themes = cssFiles('themes').length;
+  const skins = cssFiles('skins').length;
 
-function readdirSyncRecursive(dir: string): string[] {
-  return readdirSync(dir, { withFileTypes: true }).flatMap((e) =>
-    e.isDirectory() ? readdirSyncRecursive(join(dir, e.name)) : [join(dir, e.name)],
-  );
+  return {
+    themes,
+    skins,
+    components,
+    elements: tags.size,
+    adapters: adapters.length,
+    adapterNames: adapters,
+    version,
+    versionNumber,
+    bundleSize,
+    smallestComponentSize,
+  };
 }
 
 export const stats = computeStats();

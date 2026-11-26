@@ -115,7 +115,7 @@ The highest bump wins. Docs-only pushes release nothing but redeploy the docs si
 
 **Nothing to bump by hand.** Every `package.json`, the gem's `VERSION` and `mix.exs` carry the placeholder `0.0.0` in the repository. The workflow stamps the computed version into its checkout before building, `pnpm pack` turns each `workspace:*` dependency into that exact version, and the gem's CDN pins derive from its own version. Composer needs no stamp: Packagist reads the tag on the `VoidableUI/laravel` mirror. `mise run lint:versions` (part of `mise run ci`) fails if a manifest holds a real version or a file hand-types one (a CDN URL, a Gemfile or `mix.exs` requirement, a demo pin): link to the latest release, derive the number, or leave it out.
 
-**What a release does**, in order: CI once; create and push the `vX.Y.Z` tag; publish `@voidable/theme` and `@voidable/ui`; publish the eight adapters; push the gem, publish the Hex package and split `voidable/laravel` to its mirror; create the GitHub release with notes generated from the commits since the previous release; deploy the docs and Storybook.
+**What a release does**, in order: CI once; create and push the `vX.Y.Z` tag; publish `@voidable/theme` and `@voidable/ui`; publish the four npm adapters; push the gem, publish the Hex package and split `voidable/laravel` to its mirror; create the GitHub release with notes generated from the commits since the previous release; deploy the docs and Storybook.
 
 ### How to cut a release
 

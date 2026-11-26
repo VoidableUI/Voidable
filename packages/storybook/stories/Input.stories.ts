@@ -16,7 +16,7 @@ const meta: Meta = {
   },
   argTypes: argTypesFor('void-input'),
   render: (args) => html`
-    <void-input aria-label="Text input"
+    <void-input aria-label="Display name"
       type=${args.type || 'text'}
       placeholder=${args.placeholder || 'Enter text...'}
       size=${args.size || 'md'}
@@ -57,11 +57,11 @@ export const Password: Story = {
 export const DateAndTimeTypes: Story = {
   render: () => html`
     <div style="display: flex; flex-direction: column; gap: 12px; max-width: 400px;">
-      <void-input aria-label="Text input" type="date"></void-input>
-      <void-input aria-label="Text input" type="time"></void-input>
-      <void-input aria-label="Text input" type="datetime-local"></void-input>
-      <void-input aria-label="Text input" type="month"></void-input>
-      <void-input aria-label="Text input" type="week"></void-input>
+      <void-input aria-label="Date" type="date"></void-input>
+      <void-input aria-label="Time" type="time"></void-input>
+      <void-input aria-label="Date and time" type="datetime-local"></void-input>
+      <void-input aria-label="Month" type="month"></void-input>
+      <void-input aria-label="Week" type="week"></void-input>
     </div>
   `,
 };

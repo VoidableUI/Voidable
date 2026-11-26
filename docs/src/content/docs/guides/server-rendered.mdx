@@ -7,7 +7,7 @@ A Voidable page is server-rendered by default, because a Voidable component is a
 
 ## Server markup is the source of truth
 
-Because components render into the [light DOM](/guides/composition/), what the server sends is real structure: children are in the document, text is selectable and searchable, and links work, before any script runs. State lives in attributes the server writes (`open`, `checked`, `value`, `active`, `selected`), so a server render can set the initial state of every component.
+Because components render into the [light DOM](/guides/composition/), what the server sends is real structure: children are in the document, text is selectable and searchable, and links work, before any script runs. State lives in attributes the server writes (`open`, `checked`, `value`, `current`, `selected`), so a server render can set the initial state of every component.
 
 Two things are not expressible as attributes and need a little script:
 
@@ -26,7 +26,7 @@ Turbo's morphing page refresh, Livewire, and LiveView patch the DOM by comparing
 el.voidBeforeMorph(incomingElement)
 ```
 
-Called just before a morph compares the element with the server's version, it does two things. It carries the attributes the component manages itself (`role`, `tabindex`, `aria-*`, its custom properties, and reflected properties still at their default) onto the incoming element, so the morph does not strip them. And it takes the rendered parts out of the element and parks them, and returns your children to the element in their original order, so the morph compares your markup with the server's markup like with like. Nothing is destroyed: when the morph finishes the same nodes go back, so a text field keeps its typed text, focus and selection.
+Called just before a morph compares the element with the server's version, it does two things. It carries the attributes the component manages itself (`role`, `tabindex`, `aria-*`, its custom properties, and reflected properties still at their default) onto the incoming element, so the morph does not strip them. For a component with [explicit parts](/guides/composition/), that is all: your parts are the DOM, so it copies what it wrote on them (generated ids, roles, `aria-*`, `active`) onto the matching parts of the incoming element, by id or by position, and there is nothing to take apart. For a component that still projects its children (the **To convert** rows of the composition guide), it also takes the rendered parts out of the element and parks them, and returns your children to the element in their original order, so the morph compares your markup with the server's markup like with like. Nothing is destroyed: when the morph finishes the same nodes go back, so a text field keeps its typed text, focus and selection.
 
 The adapters call it for you:
 

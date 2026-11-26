@@ -139,8 +139,13 @@ h1#_top {
 
 /* A top bar is as wide as its content; on a phone let the example scroll
    rather than the page. (Not on every example: it would clip open menus.) */
-.vd-api-table td:not(:last-child) code {
+.vd-api-table td:first-child code {
   white-space: nowrap;
+}
+
+/* The description column never collapses to a sliver beside long type or detail cells. */
+.vd-api-table td:last-child {
+  min-width: 12rem;
 }
 
 .vd-pattern:has(> void-nav-bar) {
@@ -211,7 +216,7 @@ h1#_top {
 }
 
 .vd-api-table td code {
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
 }
 
 .vd-api-none,

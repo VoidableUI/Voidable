@@ -79,7 +79,7 @@ Every module registers its custom element when it is imported, which needs `cust
 
 ## Component attributes
 
-Components that take a `color` accept `default`, `error`, `warning`, `success`, `info` or `notice`. Buttons take `variant="outline"` (default) or `variant="filled"`. See the docs for each component's attributes.
+Components that take a `color` accept `default`, `error`, `warning`, `caution`, `success`, `info`, `notice` or `highlight`. Buttons take `variant="outline"` (default), `"filled"` or `"ghost"`. See the docs for each component's attributes.
 
 ## Components
 

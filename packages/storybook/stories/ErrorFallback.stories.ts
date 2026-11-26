@@ -27,7 +27,7 @@ export const Default: Story = {
     message: '',
     retryable: false,
     retryLabel: 'Try again',
-    icon: true,
+    hideIcon: false,
   },
   render: (args) => html`
     <void-error-fallback

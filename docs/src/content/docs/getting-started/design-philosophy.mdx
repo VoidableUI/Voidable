@@ -20,11 +20,11 @@ Components override `createRenderRoot()` to render into the Light DOM:
 createRenderRoot() { return this; }
 ```
 
-No Shadow DOM. The consequences of this are significant:
+No Shadow DOM, except for the dialog and the drawer, which keep a small one for the native `<dialog>` they are built on. The consequences of this are significant:
 
 - Your CSS has full access to component internals
 - Theme tokens flow naturally through the cascade
-- No `::part()` or `::slotted()` workarounds
+- No `::part()` or `::slotted()` workarounds (the dialog and drawer surface is the one `::part()` the theme uses)
 - Services receive styling from the shell, not from themselves
 
 Shadow DOM solves encapsulation. Voidable solves the opposite problem: components that are deliberately transparent to their environment.
@@ -44,7 +44,7 @@ page.locator('void-button[variant="filled"]')
 page.locator('void-input[name="email"]')
 ```
 
-No ambiguous `div` class hierarchies. No Shadow DOM barriers to pierce. This was a core design consideration, not a side effect.
+No ambiguous `div` class hierarchies. No shadow boundaries to pierce, except around the dialog and drawer surface. This was a core design consideration, not a side effect.
 
 ## CSS Token Architecture
 

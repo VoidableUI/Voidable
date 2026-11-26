@@ -43,7 +43,7 @@ The tool is not installable with `go install`: the library files it embeds are b
 | Command | Does |
 | --- | --- |
 | `voidable ref` | One line per element. `voidable ref void-select` prints its attributes with types, allowed values and defaults, events, parents and an example. |
-| `voidable check <file or dir>` | Finds unknown elements and attributes, invalid values, a boolean written as `"false"`, children in the wrong parent and controls with no accessible name (`missing-name`: an icon-only button without `aria-label`, an input with no label, a dialog with no heading). One problem per line as `file:line:col`; exit 1 when there are any. Reads HTML, ERB, HEEx, Blade, JSX, Astro, Vue, Svelte, Lit and Markdown. |
+| `voidable check <file or dir>` | Finds unknown elements and attributes, invalid values, a boolean written as `"false"`, children in the wrong parent and controls with no accessible name (`missing-name`: an icon-only button without `aria-label`, an input with no label, a dialog with no title). One problem per line as `file:line:col`; exit 1 when there are any. Reads HTML, ERB, HEEx, Blade, JSX, Astro, Vue, Svelte, Lit and Markdown. |
 | `voidable gen snippet <tag> --lang html\|jsx\|erb\|heex\|blade` | Prints a working example of one element in the language you are writing. |
 | `voidable mcp` | Serves the same three as MCP tools (`voidable_ref`, `voidable_check`, `voidable_snippet`) plus the skill, over stdio. |
 | `voidable skill install` | Writes the Agent Skill into `.claude/skills/voidable`, for clients that load skills from disk. |
@@ -69,7 +69,7 @@ Run `voidable skill install` in a project to write the skill to `.claude/skills/
 
 ### Accessible names (`missing-name`)
 
-`voidable check` reports a control that has no accessible name: a `<void-button>` with only an icon and no `aria-label`, a `<void-input>`, `<void-select>`, `<void-slider>`, `<void-textarea>` or other form control with no label (no enclosing `<void-field label>` or `<label>`, no `<label for>`, no `aria-label` or `aria-labelledby`), a `<void-dialog>` or `<void-drawer>` with no `heading` or `aria-label`, an avatar with no `alt`. A `placeholder` is not a name. Which components need one, and which attributes, text or ancestors supply it, is data in the Custom Elements Manifest (`accessibleName` in `packages/ui/cem/supplement.js`), not a list in the tool.
+`voidable check` reports a control that has no accessible name: a `<void-button>` with only an icon and no `aria-label`, a `<void-input>`, `<void-select>`, `<void-slider>`, `<void-textarea>` or other form control with no label (no enclosing `<void-field label>` or `<label>`, no `<label for>`, no `aria-label` or `aria-labelledby`), a `<void-dialog>` or `<void-drawer>` with no `-title` part or `aria-label`, an avatar with no `alt`. A `placeholder` is not a name. Which components need one, and which attributes, text or ancestors supply it, is data in the Custom Elements Manifest (`accessibleName` in `packages/ui/cem/supplement.js`), not a list in the tool.
 
 It reports only what it is sure of. A value it cannot evaluate counts as a possible name and is never reported: an expression (`aria-label={label}`, `:aria-label`, `<%= t("close") %>`, `{{ __('Close') }}`), a spread or attribute bag (`{...props}`, `{@rest}`, `{{ $attributes }}`, `v-bind="$attrs"`), a slot or yielded content, a framework component inside the element, or a framework component around a control that needs a field. The same rule runs in the browser as a [development warning](/getting-started/development-warnings/#accessible-names), where the name can be computed from the live page.
 
@@ -79,7 +79,7 @@ Run `voidable check` on every file you write, and fix what it reports before sho
 
 - **Use components for controls, patterns for layout.** Page structure (a shell, a page head, a section, a toolbar, a label and value) comes from [patterns](/patterns/overview/). Do not write layout CSS for them.
 - **Look attributes up; do not guess.** `color="primary"` on a button, a `label` attribute on an input (use `<void-field label>`), and `<void-option>` inside `<void-select>` (which takes a native `<select>` with native `<option>`s) all do nothing. Every component page has a **Common mistakes** section, and `voidable ref` is the same data.
-- **A boolean attribute is on when present.** `disabled="false"` is still disabled. Remove the attribute. The few that default to on accept `="false"`; they are [listed here](/components/overview/#attributes-shared-across-components).
+- **A boolean attribute is on when present.** `disabled="false"` is still disabled. Remove the attribute. No boolean defaults to on: what is drawn by default is turned off with a `hide-*` attribute (`hide-close`, `hide-value`, ...), see [API conventions](/guides/conventions/#booleans).
 - **A control is a form control.** Give it a `name` and put it in a `<form>` (see [Forms](/guides/forms/)). Do not mirror its value into script state.
 - **Listen to `void-*` events,** not to clicks on internals. See [Events](/guides/events/).
 - **Do not style with raw values.** Colours, spacing and type come from the [tokens](/getting-started/tokens/).

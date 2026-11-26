@@ -44,7 +44,7 @@ Listen for Voidable custom events and evaluate Alpine expressions:
 <div x-data="{ name: '' }">
   <void-input
     x-void-on:void-change="name = $event.detail.value"
-    placeholder="Name"
+    aria-label="Name" placeholder="Name"
   ></void-input>
 
   <p x-text="name"></p>
@@ -55,7 +55,7 @@ Listen for Voidable custom events and evaluate Alpine expressions:
 
 Prevent Livewire from morphing a Voidable component at all. The directive adds
 `wire:ignore`, which makes Livewire skip the element and its children. This
-matters because Voidable components move their children into Lit-rendered
+matters for the components that still project their children (see "To convert" in the composition guide): they move them into Lit-rendered
 wrappers that a server morph would otherwise strip. (`wire:ignore.self` would
 protect only the element's own attributes and still morph its children.)
 Server-side attribute changes to a preserved element are ignored too, so use it
@@ -76,7 +76,7 @@ Dispatch a custom event to a Voidable component from an Alpine expression:
 
 ```html
 <div x-data>
-  <void-input x-ref="search" placeholder="Search"></void-input>
+  <void-input x-ref="search" aria-label="Search" placeholder="Search"></void-input>
   <button @click="$voidable($refs.search, 'void-clear')">Clear</button>
 </div>
 ```
@@ -85,7 +85,7 @@ Dispatch a custom event to a Voidable component from an Alpine expression:
 
 ```blade
 <div x-data="{ selected: @entangle('selected') }">
-  <void-select aria-label="Option" x-void-on:void-change="selected = $event.detail.value">
+  <void-select aria-label="Selected item" x-void-on:void-change="selected = $event.detail.value">
     <select>
       @foreach($options as $option)
         <option value="{{ $option->id }}">{{ $option->name }}</option>
