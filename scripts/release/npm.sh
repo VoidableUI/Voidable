@@ -4,7 +4,7 @@
 # Build, pack, verify and (unless DRY_RUN) publish the npm packages.
 #
 #   VERSION=0.8.0 scripts/release/npm.sh core      # @voidable/theme, @voidable/ui
-#   VERSION=0.8.0 scripts/release/npm.sh adapters  # the eight @voidable/ui-* adapters
+#   VERSION=0.8.0 scripts/release/npm.sh adapters  # the four @voidable/ui-* adapters
 #   VERSION=0.8.0 scripts/release/npm.sh all
 #
 # DRY_RUN defaults to true: nothing is published unless DRY_RUN=false.

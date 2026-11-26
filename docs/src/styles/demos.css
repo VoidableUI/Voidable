@@ -216,7 +216,7 @@ h1#_top {
 }
 
 .vd-api-table td code {
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
 }
 
 .vd-api-none,
