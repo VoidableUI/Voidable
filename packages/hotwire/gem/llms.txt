@@ -20,6 +20,7 @@ VoidTurbo.start()
 ## API
 
 - `void_attrs(events, action = nil)`: view helper; returns `{ data: { action: "void-click->form#submit" } }` for the Stimulus `data-action`. `<%= tag.void_button "Save", **void_attrs("void-click", "form#submit") %>`. Without an action it adds nothing.
+- `void_bar_chart(data, **attrs)`, `void_line_chart(data, **attrs)`, `void_donut_chart(data, **attrs)`, `void_gauge(data = nil, **attrs)`: view helpers; write the hash or array (or JSON string) as the one JSON `data` attribute the chart reads (a gauge's `zones` too), underscores become dashes, `true` is a boolean attribute, `false` and `nil` are left off. `tag.void_bar_chart data: hash` would write `data-*` attributes, so use these. `<%= void_bar_chart({ labels: %w[Q1 Q2], series: [{ name: "2025", values: [4, 8] }] }, aria_label: "Revenue", show_table: true) %>`. An unchanged `data` after a Turbo morph does not animate again.
 - `voidable_dev_tags`: view helper; loads the `@voidable/ui/dev` warnings in development (after `javascript_importmap_tags`); renders nothing elsewhere.
 - `Voidable::Hotwire.dev_warnings = false | true | :throw`: initializer setting for those warnings.
 - `Voidable::Hotwire::CDN`: the CDN pins (`UI_URL`, `AUTOLOADER_PINS`).
