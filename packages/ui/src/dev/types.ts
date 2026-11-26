@@ -1,9 +1,8 @@
 /**
  * How one attribute's value is validated: `0` any string, `1` boolean, `2`
- * boolean that also reads the string "false", `3` number, a string array is the
- * closed set of allowed values.
+ * number, a string array is the closed set of allowed values.
  */
-export type AttrRule = 0 | 1 | 2 | 3 | readonly string[];
+export type AttrRule = 0 | 1 | 2 | readonly string[];
 
 /** Validation data for one tag, generated from the Custom Elements Manifest. */
 export interface DevTag {

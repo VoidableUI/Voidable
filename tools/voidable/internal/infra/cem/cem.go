@@ -103,9 +103,6 @@ type attribute struct {
 	Default     string  `json:"default"`
 	FieldName   string  `json:"fieldName"`
 	Description string  `json:"description"`
-	// FalseString is written by the manifest build for attributes whose
-	// converter reads the string "false" as false (defaultTrueBoolean).
-	FalseString bool `json:"falseString"`
 }
 
 type event struct {
@@ -180,7 +177,6 @@ func element(path string, d declaration) domain.Element {
 		e.Attributes = append(e.Attributes, domain.Attribute{
 			Name: a.Name, Field: a.FieldName, Type: a.Type.Text, Kind: kind, Values: values,
 			Nullable: nullable, Default: domain.CleanDefault(a.Default), Description: oneLine(a.Description),
-			FalseString: a.FalseString,
 		})
 	}
 	for _, mb := range d.Members {

@@ -185,8 +185,8 @@ export function checkAttribute(table: DevTable, el: Element, name: string): DevW
       el,
     );
   }
-  if (rule === 1 || rule === 2) {
-    if (rule === 1 && value.toLowerCase() === 'false') {
+  if (rule === 1) {
+    if (value.toLowerCase() === 'false') {
       return warning(
         'boolean-false',
         el.localName,
@@ -197,7 +197,7 @@ export function checkAttribute(table: DevTable, el: Element, name: string): DevW
     }
     return undefined;
   }
-  if (rule === 3 && !isNumber(value)) {
+  if (rule === 2 && !isNumber(value)) {
     return warning(
       'invalid-value',
       el.localName,

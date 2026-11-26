@@ -47,8 +47,6 @@ func (Source) Catalog(_ context.Context) (*domain.Catalog, error) {
 type rules struct {
 	Note string `json:"note"`
 
-	FalseString map[string][]string `json:"falseString"`
-
 	Styled []styled `json:"styled"`
 }
 
@@ -93,7 +91,7 @@ func (Source) Supplement(_ context.Context) (*domain.Supplement, error) {
 	if err := json.Unmarshal(raw, &r); err != nil {
 		return nil, fmt.Errorf("decode supplement: %w", err)
 	}
-	sup := &domain.Supplement{Note: r.Note, FalseString: r.FalseString, Snippets: map[string]string{}}
+	sup := &domain.Supplement{Note: r.Note, Snippets: map[string]string{}}
 	for _, s := range r.Styled {
 		if !strings.HasPrefix(s.Tag, "void-") {
 			return nil, fmt.Errorf("decode supplement: styled element %q is not a void-* tag", s.Tag)

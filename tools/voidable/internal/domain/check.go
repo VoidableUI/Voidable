@@ -245,10 +245,6 @@ func (c *Checker) checkAttr(el *Element, t Tag, a AttrToken, f findingFn) []Find
 			return []Finding{f(a.Line, a.Col, RuleInvalidValue, a.Name, s, "%s=%q is not valid on <%s>; allowed: %s", a.Name, v, el.Tag, strings.Join(attr.Values, "|"))}
 		}
 	case KindBoolean:
-		if strings.EqualFold(v, "false") && attr.FalseString {
-			// The converter reads "false" as false: valid markup.
-			return nil
-		}
 		if strings.EqualFold(v, "false") && attr.Default == "true" {
 			return []Finding{f(a.Line, a.Col, RuleBooleanFalse, a.Name, "", "%s=\"false\" on <%s> is true, and %s defaults to true, so its attribute cannot turn it off; set the property (el.%s = false) instead", a.Name, el.Tag, a.Name, attr.Field)}
 		}

@@ -11,8 +11,8 @@ export class VoidCheckbox extends NativeFormControl(VoidElement) {
   protected readonly _activation = new KeyboardActivation(this, { enter: false, disabled: () => this.formDisabled });
 
   /**
-   * Whether the box is checked. Updated when the user toggles it; the attribute is the initial state and
-   * the form's reset target.
+   * Whether the box is checked. Reflected to the attribute as the user toggles it or a script sets it;
+   * the form's reset target stays the state it started with.
    */
   @property({ type: Boolean, reflect: true }) checked = false;
   /**

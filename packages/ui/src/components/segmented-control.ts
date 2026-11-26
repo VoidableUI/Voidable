@@ -67,7 +67,7 @@ if (!customElements.get('void-segmented-control-item')) {
 export class VoidSegmentedControl extends InternalsFormControl(VoidElement) {
   /**
    * `value` of the selected item. Selection follows focus, so each arrow key changes it and fires
-   * `void-change`. As an attribute it is the initial value and the form's reset target.
+   * `void-change`. Reflected to the attribute as it changes; the form's reset target stays the value it started with.
    */
   @property({ type: String, reflect: true }) value = '';
   /** Stop the whole control reacting and exclude the value from the form submission. */

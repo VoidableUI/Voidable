@@ -220,7 +220,7 @@ describe('the generated table', () => {
     for (const [tag, entry] of Object.entries(table)) {
       const el = document.createElement(tag);
       for (const [name, rule] of Object.entries(entry.a)) {
-        el.setAttribute(name, Array.isArray(rule) ? String(rule[rule.length - 1]) : rule === 3 ? '3' : '');
+        el.setAttribute(name, Array.isArray(rule) ? String(rule[rule.length - 1]) : rule === 2 ? '3' : '');
       }
       for (const name of entry.h ?? []) el.setAttribute(name, '');
       for (const w of checkAttributes(table, el)) throw new Error(`${tag}: ${w.message}`);

@@ -37,8 +37,7 @@ const c = loadComponentData().byTag.get(tag)!;
 {
   c.attributes.some((a: any) => a.isBool) && (
     <p class="vd-api-note">
-      A boolean attribute is on whenever it is present.{' '}
-      {c.attributes.some((a: any) => a.falseString) && <Fragment>Those that default to true (<code>{c.attributes.filter((a: any) => a.falseString).map((a: any) => a.name).join(', ')}</code>) turn off with <code>="false"</code>.</Fragment>}
+      A boolean attribute is on whenever it is present.
     </p>
   )
 }

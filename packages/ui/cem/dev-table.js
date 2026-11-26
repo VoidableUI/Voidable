@@ -43,11 +43,10 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const manifest = JSON.parse(readFileSync(resolve(root, 'dist/custom-elements.json'), 'utf8'));
 
 /** @param {string} text the manifest's type text for an attribute */
-function encode(text, falseString) {
+function encode(text) {
   const t = (text ?? 'string').trim();
-  if (t === 'boolean') return falseString ? 2 : 1;
-  if (falseString) throw new Error(`falseString on a non-boolean attribute (${t})`);
-  if (/^number(\s*\|\s*(undefined|null))*$/.test(t)) return 3;
+  if (t === 'boolean') return 1;
+  if (/^number(\s*\|\s*(undefined|null))*$/.test(t)) return 2;
   const parts = t.split('|').map((p) => p.trim());
   const literals = parts.filter((p) => /^'[^']*'$/.test(p)).map((p) => p.slice(1, -1));
   const rest = parts.filter((p) => !/^'[^']*'$/.test(p));
@@ -95,7 +94,7 @@ for (const mod of manifest.modules) {
   for (const decl of mod.declarations ?? []) {
     if (decl.kind !== 'class' || !decl.tagName) continue;
     const entry = { m: match[1], a: {}, e: [] };
-    for (const a of decl.attributes ?? []) entry.a[a.name] = encode(a.type?.text, a.falseString === true);
+    for (const a of decl.attributes ?? []) entry.a[a.name] = encode(a.type?.text);
     for (const ev of decl.events ?? []) entry.e.push(ev.name);
     entry.e.sort();
     if (decl.voidHostAttributes?.length) entry.h = decl.voidHostAttributes;

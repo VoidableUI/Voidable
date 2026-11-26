@@ -50,6 +50,31 @@ export const Disabled: Story = {
   args: { disabled: true, placeholder: 'Disabled input' },
 };
 
+export const ReflectsValue: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story: 'The `value` attribute is the current value: it follows what you type and what a script sets, so `[value="..."]` selectors and server-side assertions can read it. A `type="password"` field keeps its text out of the attribute.',
+      },
+    },
+  },
+  render: () => html`
+    <div style="display: flex; flex-direction: column; gap: 12px; max-width: 400px;">
+      <void-input
+        aria-label="Name"
+        placeholder="Type here"
+        @void-input=${(e: Event) => {
+          const el = e.currentTarget as HTMLElement & { updateComplete: Promise<boolean> };
+          void el.updateComplete.then(() => {
+            el.nextElementSibling!.textContent = `value="${el.getAttribute('value') ?? ''}"`;
+          });
+        }}
+      ></void-input>
+      <code>value=""</code>
+    </div>
+  `,
+};
+
 export const Password: Story = {
   args: { type: 'password', placeholder: 'Enter password...' },
 };

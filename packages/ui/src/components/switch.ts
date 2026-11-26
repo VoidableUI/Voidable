@@ -9,7 +9,7 @@ export class VoidSwitch extends InternalsFormControl(VoidElement) {
   /** Enter and Space fire a real `click`, as on a native button. */
   protected readonly _activation = new KeyboardActivation(this, { disabled: () => this.formDisabled });
 
-  /** Whether the switch is on. The attribute is the initial state and the form's reset target. */
+  /** Whether the switch is on. Reflected to the attribute as it changes; the form's reset target stays the state it started with. */
   @property({ type: Boolean, reflect: true }) checked = false;
   /**
    * Stop the switch reacting and exclude it from the form submission. Also disabled by an enclosing

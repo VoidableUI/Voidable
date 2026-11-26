@@ -58,7 +58,6 @@ func testLibrary(t *testing.T) *Library {
 	t.Helper()
 	sup := &Supplement{
 		Parents:     map[string][]string{"void-option": {"void-multiselect"}},
-		FalseString: map[string][]string{"void-dialog": {"closable"}},
 		Hints:   map[string]map[string]string{"void-input": {"label": "wrap in <void-field>"}},
 	}
 	lib, err := NewLibrary(context.Background(), stubManifest{testCatalog()}, stubSupplement{sup}, nil)
@@ -84,7 +83,6 @@ func TestCheckTag(t *testing.T) {
 		{"color primary", Tag{Name: "void-button", Lang: LangHTML, Attrs: []AttrToken{a("color", "primary", SyntaxAttr)}}, []Rule{RuleInvalidValue}, "allowed: default|error"},
 		{"dynamic value skipped", Tag{Name: "void-button", Lang: LangERB, Attrs: []AttrToken{dyn(a("color", "<%= c %>", SyntaxAttr))}}, nil, ""},
 		{"bool false", Tag{Name: "void-button", Lang: LangHTML, Attrs: []AttrToken{a("disabled", "false", SyntaxAttr)}}, []Rule{RuleBooleanFalse}, "remove it"},
-		{"bool default true, converter reads false", Tag{Name: "void-dialog", Lang: LangHTML, Attrs: []AttrToken{a("closable", "false", SyntaxAttr)}}, nil, ""},
 		{"bool default true, plain boolean", Tag{Name: "void-nav-bar", Lang: LangHTML, Attrs: []AttrToken{a("bordered", "false", SyntaxAttr)}}, []Rule{RuleBooleanFalse}, "property"},
 		{"kebab-case attribute", Tag{Name: "void-sidebar", Lang: LangHTML, Attrs: []AttrToken{a("collapsed-width", "4rem", SyntaxAttr)}}, nil, ""},
 		{"removed lowercase attribute", Tag{Name: "void-sidebar", Lang: LangHTML, Attrs: []AttrToken{a("collapsedwidth", "4rem", SyntaxAttr)}}, []Rule{RuleUnknownAttribute}, "did you mean collapsed-width"},
