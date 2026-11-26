@@ -19,6 +19,32 @@ describe('VoidToast', () => {
     it('defaults duration to 5000', () => { expect(el.duration).toBe(5000); });
   });
 
+  describe('accessible name', () => {
+    const named = async (html: string, attrs: Record<string, string> = {}) => {
+      const el = document.createElement('void-toast') as VoidToast;
+      el.duration = 0;
+      for (const [k, v] of Object.entries(attrs)) el.setAttribute(k, v);
+      el.innerHTML = html;
+      document.body.appendChild(el);
+      await el.updateComplete;
+      await Promise.resolve();
+      return el;
+    };
+    afterEach(() => document.querySelectorAll('void-toast').forEach(t => t.remove()));
+
+    it('is named by its title, or by its message when it has no title', async () => {
+      const a = await named('<void-toast-title>Saved</void-toast-title><void-toast-description>All done</void-toast-description>');
+      expect(a.getAttribute('aria-labelledby')).toBe(a.querySelector('void-toast-title')!.id);
+      const b = await named('<void-toast-description>Only a message</void-toast-description>');
+      expect(b.getAttribute('aria-labelledby')).toBe(b.querySelector('void-toast-description')!.id);
+    });
+
+    it('keeps a name the author gave', async () => {
+      const el = await named('<void-toast-title>Saved</void-toast-title>', { 'aria-label': 'Mine' });
+      expect(el.hasAttribute('aria-labelledby')).toBe(false);
+    });
+  });
+
   describe('ARIA', () => {
     it('is a plain group, not a live region, when connected', () => {
       const el = document.createElement('void-toast') as VoidToast;
