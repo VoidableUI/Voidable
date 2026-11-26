@@ -20,19 +20,23 @@ async function mount(page: Page, html: string): Promise<void> {
 }
 
 test.describe('roles of the static elements', () => {
-  test('badge, banner and nav bar expose no role; an author role is kept', async ({ page }) => {
+  test('badge has no role, banner follows the alert, nav bar is one landmark that never nests', async ({ page }) => {
     await mount(page, `<main>
       <void-badge id="b">Draft</void-badge>
       <void-badge id="b2" role="status">3 new</void-badge>
       <void-banner id="bn"><void-banner-title>Maintenance</void-banner-title><void-banner-description>Saturday.</void-banner-description></void-banner>
-      <void-nav-bar id="nb"><nav aria-label="Primary"><a href="/a">Home</a></nav></void-nav-bar>
-    </main>`);
-    for (const id of ['b', 'bn', 'nb']) await expect(page.locator(`#${id}`)).not.toHaveAttribute('role', /.*/);
-    await expect(page.getByRole('status')).toHaveCount(1);
-    await expect(page.getByRole('status')).toHaveText('3 new');
+      <void-banner id="bn2" color="error"><void-banner-description>Payments are down.</void-banner-description></void-banner>
+    </main>
+    <void-nav-bar id="nb" aria-label="Site"><a href="/a">Home</a></void-nav-bar>
+    <void-nav-bar id="nb2"><nav aria-label="Primary"><a href="/a">Home</a></nav></void-nav-bar>`);
+    await expect(page.locator('#b')).not.toHaveAttribute('role', /.*/);
+    await expect(page.getByRole('status')).toHaveCount(2);
+    await expect(page.getByRole('alert')).toHaveText(/Payments are down/);
     await expect(page.getByRole('banner')).toHaveCount(0);
-    // The one landmark is the author's <nav>, with its name.
-    await expect(page.getByRole('navigation')).toHaveCount(1);
+    await expect(page.locator('#nb')).toHaveAttribute('role', 'navigation');
+    await expect(page.locator('#nb2')).not.toHaveAttribute('role', /.*/);
+    await expect(page.getByRole('navigation')).toHaveCount(2);
+    await expect(page.getByRole('navigation', { name: 'Site' })).toBeVisible();
     await expect(page.getByRole('navigation', { name: 'Primary' })).toBeVisible();
   });
 

@@ -41,11 +41,24 @@ describe('VoidNavBar', () => {
   });
 
   describe('ARIA', () => {
-    it('has no role: the landmark belongs on the links, not on a bar that also holds search and account controls', () => {
+    it('is a navigation landmark', () => {
       const el = createElement();
       document.body.appendChild(el);
-      expect(el.hasAttribute('role')).toBe(false);
+      expect(el.getAttribute('role')).toBe('navigation');
       el.remove();
+    });
+
+    it('adds no role inside a nav or another role, or around a nav, and keeps one the author wrote', async () => {
+      const box = document.createElement('div');
+      box.innerHTML = '<nav><void-nav-bar id="a"></void-nav-bar></nav><div role="banner"><void-nav-bar id="b"></void-nav-bar></div>'
+        + '<void-nav-bar id="c"><nav aria-label="Main"></nav></void-nav-bar><void-nav-bar id="d" role="region"></void-nav-bar>';
+      document.body.appendChild(box);
+      for (const id of ['a', 'b', 'c', 'd']) await (box.querySelector('#' + id) as VoidNavBar).updateComplete;
+      expect(box.querySelector('#a')!.hasAttribute('role')).toBe(false);
+      expect(box.querySelector('#b')!.hasAttribute('role')).toBe(false);
+      expect(box.querySelector('#c')!.hasAttribute('role')).toBe(false);
+      expect(box.querySelector('#d')!.getAttribute('role')).toBe('region');
+      box.remove();
     });
   });
 
@@ -113,7 +126,7 @@ describe('VoidNavBar', () => {
       await el.updateComplete;
       expect(Array.from(el.children)).toEqual(before);
       expect(el.querySelector('.void-nav-bar-content')).toBeNull();
-      expect(el.hasAttribute('role')).toBe(false);
+      expect(el.getAttribute('role')).toBe('navigation');
       container.remove();
     });
   });

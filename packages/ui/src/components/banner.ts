@@ -6,10 +6,10 @@ import { closeControlPressed, removeWithFocus } from '../dismiss.js';
 /**
  * Full-width site-level announcement for maintenance windows, cookie consent, and promotional messaging.
  *
- * It has no role. `banner` is the page header landmark (at most one per page, never inside `<main>`), which an
- * announcement is not, and it is not a live region either: it is on the page when the page loads. Where one must be
- * announced when it appears, write `role="status"` (or `alert`) on it; to make it a landmark users can jump to,
- * write `role="region"` and an `aria-label`. The component leaves a role you write alone.
+ * It never has the `banner` role: that is the page header landmark (at most one per page, never inside
+ * `<main>`), which an announcement is not. Like the alert it carries an announcement, so its role follows its
+ * `color`: `alert` for `error` and `warning`, `status` for the rest. To make it a landmark users can jump to,
+ * write `role="region"` and an `aria-label`; the component leaves a role you write alone.
  *
  * Its text is written as parts: an optional `<void-banner-title>`, the `<void-banner-description>`, an optional
  * `<void-banner-actions>` (buttons or links) and an optional `<void-banner-close>`. The parts are never moved. The
@@ -35,8 +35,24 @@ export class VoidBanner extends VoidElement {
 
   connectedCallback(): void {
     super.connectedCallback();
+    this._syncRole();
     this.addEventListener('click', this._onClick);
   }
+
+  protected override updated(changed: Map<string, unknown>): void {
+    super.updated(changed);
+    if (changed.has('color')) this._syncRole();
+  }
+
+  /** `alert` for the urgent colours, `status` otherwise; a role the author wrote is left alone. */
+  private _syncRole(): void {
+    const current = this.getAttribute('role');
+    if (current !== null && current !== this._writtenRole) return;
+    this._writtenRole = this.color === 'error' || this.color === 'warning' ? 'alert' : 'status';
+    this.setHostAttribute('role', this._writtenRole);
+  }
+
+  private _writtenRole: string | null = null;
 
   disconnectedCallback(): void {
     super.disconnectedCallback();
