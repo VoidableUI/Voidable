@@ -1,6 +1,6 @@
 <main style="padding: 1rem; display: flex; flex-direction: column; gap: 1.5rem; max-width: 40rem">
-  <void-number-input id="num" value="3" prefix="$" unit="kg" style="width: 14rem"></void-number-input>
-  <void-action-input id="act" action-label="Search" style="width: 16rem"></void-action-input>
+  <void-number-input id="num" aria-label="Weight" value="3" prefix="$" unit="kg" style="width: 14rem"></void-number-input>
+  <void-action-input id="act" aria-label="Search" action-label="Search" style="width: 16rem"></void-action-input>
 
   <div style="display: flex; flex-direction: column; gap: 0.5rem; width: 14rem">
     <void-checkbox id="cb">Check label</void-checkbox>
@@ -23,7 +23,7 @@
 
   <void-switch id="sw" checked>Notify</void-switch>
 
-  <void-select id="sel"><select><option value="a">Alpha</option></select></void-select>
+  <void-select id="sel" aria-label="Choice"><select><option value="a">Alpha</option></select></void-select>
 
   <div style="height: 12rem; overflow: hidden; position: relative">
     <void-shell nav="side" style="min-height: 0"><void-sidebar id="sb" style="height: 12rem"><a href="#a">Link</a></void-sidebar><main id="main"><p>Content</p></main></void-shell>
