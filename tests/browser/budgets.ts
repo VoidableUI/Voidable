@@ -23,6 +23,16 @@ export const calibrationMs = 80;
 // rounded up). Before: 65, 72, 115, 40 and 330 ms; 59.5 and 11.6 kB. The calibration now runs in an
 // unstyled iframe: in the page it timed the theme's style cost on native buttons and inputs, which
 // tripled as the theme grew, so scaled budgets had stopped tracking the machine.
+// Re-measured after #77 (same host, master and the change measured back to back, medians of three to five
+// quiet runs, normalised the same way). Old budget -> master measured now -> now: table first render
+// 114 -> 116 -> 105 ms; 1,000 mixed 62 -> 78 -> 73 ms; Turbo morph 37 -> 40 -> 40 ms; select 33 -> 42 -> 41 ms
+// (raw); dialog 276 -> 314 -> 318 ms; root entry 67.8 -> 69.6 -> 69.9 kB; button 15.1 -> 15.1 -> 10.0 kB.
+// The old timing figures read low against master on this host today (an unchanged tree gives the
+// "master measured now" ones), so only the differences between the last two are the change: the table 9% and
+// the mixed page 7% faster (the scoped reset no longer lists the part tags, a parts controller registers its
+// observer once), the button 5.1 kB smaller (projection.ts loads only where used). The table is still well above
+// its 72 ms of before the parts: about 40% of it is the browser's style and layout of 2,000 theme-styled cells
+// and the rest is the components' own connect and update work.
 // Moves, measured on one host with the old and the new commit: the 500-row table's first render
 // grew about 50% (most likely the dropdown menu in each row is now a trigger and a content part, the explicit
 // parts of #52, and every component base gained the state rule and re-entrant morph hooks, #61 #31);
@@ -34,22 +44,22 @@ export const calibrationMs = 80;
 // and the keyboard-activation and form-control chunks are new. The root entry grew from 59.4 to 67.8 kB.
 export const reference = {
   /** First render of 1,000 mixed components until all have rendered. */
-  mixed1000Ms: 62,
+  mixed1000Ms: 73,
   /** First render of a 500-row table with a dropdown-menu, a badge and two buttons per row. */
-  table500FirstMs: 114,
+  table500FirstMs: 105,
   /** One Turbo morph of that table (one cell changed), through VoidTurbo. */
-  table500MorphMs: 37,
+  table500MorphMs: 40,
   /** First render of a void-select with 5,000 options. Not normalised like the others: about two thirds
    *  of it is the browser laying out 5,000 options inside the settle wait, which measured 31 to 34 ms on
    *  the build host and on hosted runners alike whatever their calibration, so dividing by the
    *  calibration (15 ms) made the test fail on any runner that calibrated fast. */
-  select5000Ms: 33,
+  select5000Ms: 41,
   /** 200 open/close cycles of a dialog. */
-  dialog200Ms: 276,
+  dialog200Ms: 318,
   /** Gzipped size of `import '@voidable/ui'` (everything, Lit included), minified. */
-  rootEntryGzipKB: 67.8,
+  rootEntryGzipKB: 70,
   /** Gzipped size of `import '@voidable/ui/components/button'` (one component, Lit included), minified. */
-  singleComponentGzipKB: 15.1,
+  singleComponentGzipKB: 10.1,
 };
 
 /** Leak limits for the 200 dialog cycles (absolute, not scaled). */
