@@ -9,10 +9,10 @@ A Voidable page is server-rendered by default, because a Voidable component is a
 
 Because components render into the [light DOM](/guides/composition/), what the server sends is real structure: children are in the document, text is selectable and searchable, and links work, before any script runs. State lives in attributes the server writes (`open`, `checked`, `value`, `current`, `selected`), so a server render can set the initial state of every component.
 
-Two things are not expressible as attributes and need a little script:
+Two things go a little beyond plain tags:
 
-- **Data for charts and gauges.** `<void-bar-chart>`, `<void-line-chart>`, `<void-donut-chart>` and `<void-gauge>` (for segments) take their `data` as a property. Render the numbers into your page, for example in a JSON `<script type="application/json">` tag, and assign them once the element exists; each [chart page](/components/bar-chart/) shows the code.
-- **Events.** A component tells your app what happened by dispatching `void-*` events. The adapters connect them to the mechanism your framework already uses: Stimulus `data-action`, a LiveView hook, Alpine `x-void-on:`. See [Events](/guides/events/).
+- **Data for charts and gauges** is still markup: `<void-bar-chart>`, `<void-line-chart>`, `<void-donut-chart>` and `<void-gauge>` (for segments and `zones`) read their `data` from a JSON attribute, so the first response draws them with no script: `<void-bar-chart aria-label="Sales" data='{"series":[{"name":"Sales","values":[3,5]}],"labels":["Mon","Tue"]}'>`. Each adapter writes it from your server data ([Rails](/frameworks/hotwire/#charts-from-server-data), [LiveView](/frameworks/liveview/#charts-and-gauges), [Blade](/frameworks/alpine/#charts-from-server-data), [React](/frameworks/react/#charts)). A morph that leaves the attribute unchanged does not animate the chart again.
+- **Events.** A component tells your app what happened by dispatching `void-*` events. The adapters connect them to the mechanism your framework already uses: Stimulus `data-action`, a LiveView `phx-hook`, Alpine `x-void-on:`. See [Events](/guides/events/).
 
 ## Before the components load
 

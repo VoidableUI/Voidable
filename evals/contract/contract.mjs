@@ -29,7 +29,7 @@ export const CONTRACT = {
   'void-avatar': { role: 'img', name: 'alt attribute', state: [], gaps: ['without alt the host is role="img" with an empty aria-label: an unnamed image (axe image-alt / role-img-alt)'] },
   'void-badge': { role: 'status', name: 'text content', state: ['color (reflected)'], gaps: ['every badge is role="status", a live region: a table of status badges is a page of live regions, and a decorative badge cannot opt out'] },
   'void-banner': { role: 'banner', name: 'text content (its void-banner-title and void-banner-description parts)', state: ['color (reflected)', 'a void-banner-close part makes it dismissible'], gaps: ['role="banner" is the page header landmark; a second banner, or one inside <main>, is invalid'] },
-  'void-bar-chart': { role: 'img', name: 'aria-label attribute', state: [], gaps: ['data is a property only (its shape is in the manifest and `voidable ref`); the drawn values are not exposed as text'] },
+  'void-bar-chart': { role: 'figure', name: 'aria-label attribute, which is also the caption of its data table', state: ['show-table (reflected)', 'data: a JSON attribute or the property; the property is not reflected (the data can be large)'] },
   'void-breadcrumbs': { role: 'navigation', name: 'fixed "Breadcrumb"', state: ['void-breadcrumbs-list is role="list" and each void-breadcrumbs-item in it role="listitem"', 'aria-current="page" on the void-breadcrumbs-item part the author marks'], gaps: ['the landmark name is fixed English; there is no attribute to change it'] },
   'void-button': {
     role: 'button',
@@ -78,7 +78,7 @@ export const CONTRACT = {
     probe: { html: '<void-dialog><void-dialog-title>Confirm</void-dialog-title><void-dialog-description>Sure?</void-dialog-description></void-dialog>', set: { open: true }, expect: { host: { open: '' } }, visible: { role: 'dialog', name: 'Confirm' } },
   },
   'void-divider': { role: 'separator', name: 'label attribute', state: ['aria-orientation'] },
-  'void-donut-chart': { role: 'img', name: 'aria-label attribute', state: [], gaps: ['data is a property only (its shape is in the manifest and `voidable ref`); the drawn values are not exposed as text'] },
+  'void-donut-chart': { role: 'figure', name: 'aria-label attribute, which is also the caption of its data table', state: ['show-table (reflected)', 'data: a JSON attribute or the property; the property is not reflected (the data can be large)'] },
   'void-drawer': {
     role: 'inner',
     name: 'its void-drawer-title part (the native dialog in its shadow root is labelled by it), else aria-label on the host',
@@ -101,7 +101,7 @@ export const CONTRACT = {
     state: ['the chosen file names as text', 'no value attribute: the files are File objects with no string form (excluded from value reflection, see evals/contract/value.mjs)'],
     gaps: ['files over max-size or not matching accept are dropped silently: no event, no error attribute, nothing to assert', 'no attribute reflects whether a file is chosen'],
   },
-  'void-gauge': { role: 'img', name: 'aria-label attribute', state: ['value (reflected)'] },
+  'void-gauge': { role: 'figure', name: 'aria-label attribute, which is also the caption of its data table', state: ['value (reflected)', 'show-table (reflected)', 'data and zones: JSON attributes or the properties; the properties are not reflected'] },
   'void-hamburger': {
     role: 'button',
     name: 'fixed "Menu" / "Close menu"',
@@ -117,7 +117,7 @@ export const CONTRACT = {
     state: ['value (reflected; not for type="password")', 'error (reflected) -> aria-invalid on the inner input', 'disabled (reflected)'],
     probe: { html: '<void-field label="Email"><void-input name="email"></void-input></void-field>', fill: { label: 'Email', text: 'a@b.co' }, event: 'void-input' },
   },
-  'void-line-chart': { role: 'img', name: 'aria-label attribute', state: [], gaps: ['data is a property only (its shape is in the manifest and `voidable ref`); the drawn values are not exposed as text'] },
+  'void-line-chart': { role: 'figure', name: 'aria-label attribute, which is also the caption of its data table', state: ['show-table (reflected)', 'data: a JSON attribute or the property; the property is not reflected (the data can be large)'] },
   'void-list': { role: 'list', name: 'none', state: [] },
   'void-list-item': { role: 'listitem', name: 'text content', state: ['selected (reflected)', 'disabled (reflected)'], gaps: ['interactive items stay role="listitem": "selected" has no ARIA equivalent'] },
   'void-menu': { role: null, name: 'aria-label on the host, copied to the void-menu-content part (default "Menu")', state: ['open (reflected)', 'role="menu" on the void-menu-content part', 'empty attribute on the host while a search matches nothing'] },

@@ -11,7 +11,7 @@ import { existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { CONTRACT } from '../contract/contract.mjs';
-import { VALUE_REFLECTION } from '../contract/value.mjs';
+import { DATA_ATTRIBUTES, VALUE_REFLECTION } from '../contract/value.mjs';
 import { contractMarkdown } from '../contract/doc.mjs';
 import { EVALS } from '../lib/paths.mjs';
 import { ROOT } from '../lib/paths.mjs';
@@ -64,6 +64,27 @@ test('every element with a value follows the value reflection rule or is exclude
     for (const k of ['html', 'set', 'afterSet', 'write']) if (rule[k] === undefined) problems.push(`${tag}: value.mjs entry lacks ${k}`);
     if (rule.user && rule.afterUser === undefined) problems.push(`${tag}: value.mjs entry has user steps and no afterUser`);
   }
+  assert.deepEqual(problems, []);
+});
+
+test('every element with a data field takes it as a JSON attribute that is not reflected (#71)', { skip: noManifest }, () => {
+  const problems = [];
+  const withData = decls.filter((d) => (d.members || []).some((m) => m.kind === 'field' && m.name === 'data'));
+  for (const d of withData) {
+    const rule = DATA_ATTRIBUTES[d.tagName];
+    if (!rule) {
+      problems.push(`${d.tagName}: has a data field and no entry in evals/contract/value.mjs (DATA_ATTRIBUTES)`);
+      continue;
+    }
+    for (const name of rule.attributes) {
+      if (!(d.attributes || []).some((a) => a.name === name)) problems.push(`${d.tagName}: the ${name} attribute is not in the manifest`);
+      const field = (d.members || []).find((m) => m.kind === 'field' && m.name === name);
+      if (!field || field.attribute !== name) problems.push(`${d.tagName}: ${name} is not backed by a ${name} attribute in the manifest`);
+      else if (field.reflects) problems.push(`${d.tagName}: ${name} is reflected, and the named exception says it is not`);
+    }
+  }
+  const tags = new Set(decls.map((d) => d.tagName));
+  for (const tag of Object.keys(DATA_ATTRIBUTES)) if (!tags.has(tag)) problems.push(`${tag}: in DATA_ATTRIBUTES but not in the manifest`);
   assert.deepEqual(problems, []);
 });
 
@@ -185,4 +206,20 @@ for (const [tag, rule] of Object.entries(VALUE_REFLECTION)) {
       assert.equal(await page.locator(tag).first().evaluate((el) => el.value), rule.secret.text, `${tag}.value lost the typed secret`);
     });
   }
+}
+
+// Data from markup (contract/value.mjs, DATA_ATTRIBUTES): the JSON attribute draws the chart, and setting the
+// property leaves the attribute as the server wrote it.
+for (const [tag, rule] of Object.entries(DATA_ATTRIBUTES)) {
+  test(`${tag}: ${rule.attributes.join(' and ')} drawn from the attribute, and not reflected from the property`, { skip: noBrowser }, async () => {
+    await mount(rule.html);
+    const host = page.locator(tag).first();
+    assert.equal(await host.locator(rule.draws).count(), rule.count, `${tag}: ${rule.draws} drawn from the attribute`);
+    const before = await host.evaluate((el, names) => names.map((n) => el.getAttribute(n)), rule.attributes);
+    assert.ok(before.every((v) => v !== null), `${tag}: the markup carries the attributes`);
+    await host.evaluate((el, v) => { el.data = v; }, rule.set);
+    await page.evaluate(settleInPage);
+    assert.deepEqual(await host.evaluate((el, names) => names.map((n) => el.getAttribute(n)), rule.attributes), before, `${tag}: the property set rewrote an attribute`);
+    assert.notEqual(await host.locator(rule.draws).count(), rule.count, `${tag}: the property set did not redraw`);
+  });
 }

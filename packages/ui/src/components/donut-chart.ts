@@ -102,6 +102,7 @@ export class VoidDonutChart extends VoidElement {
    * `<void-donut-chart data='{"segments":[{"name":"Search","value":40},{"name":"Direct","value":25}]}'>`.
    * Invalid JSON draws nothing and is reported by `@voidable/ui/dev`. The property is not reflected to the
    * attribute (the data can be large), and an attribute a server morph leaves unchanged does not animate again.
+   * @default { segments: [] }
    */
   @property({ attribute: 'data' })
   get data(): DonutChartData { return this._data; }

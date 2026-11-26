@@ -97,6 +97,7 @@ export class VoidBarChart extends VoidElement {
    * and animate to it) or as JSON in the `data` attribute: `<void-bar-chart data='{"series":[{"name":"Sales","values":[3,5]}],"labels":["Mon","Tue"]}'>`.
    * Invalid JSON draws nothing and is reported by `@voidable/ui/dev`. The property is not reflected to the
    * attribute (the data can be large), and an attribute a server morph leaves unchanged does not animate again.
+   * @default { series: [] }
    */
   @property({ attribute: 'data' })
   get data(): BarChartData { return this._data; }

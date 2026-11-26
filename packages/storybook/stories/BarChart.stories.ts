@@ -231,3 +231,44 @@ export const NegativeValues: Story = {
     ></void-bar-chart>
   `,
 };
+
+export const FromMarkup: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story: 'The data is the JSON `data` attribute, so server-rendered HTML draws the chart with no script and no property. The attribute is not rewritten when the property is set, and an attribute a server morph leaves unchanged does not animate the chart again. Invalid JSON draws nothing and is reported by `@voidable/ui/dev`.',
+      },
+    },
+  },
+  render: () => html`
+    <void-bar-chart
+      style="max-width: 600px;"
+      aria-label="Revenue by quarter"
+      data='{"labels":["Q1","Q2","Q3","Q4"],"series":[{"name":"Revenue","values":[42000,51000,48500,67200]}]}'
+    ></void-bar-chart>
+  `,
+};
+
+export const WithTable: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story: 'Every chart carries a visually hidden data table, captioned with `aria-label`, for screen readers (the drawing is `aria-hidden`). `show-table` shows it below the chart too: one row per category, one column per series.',
+      },
+    },
+  },
+  render: () => html`
+    <void-bar-chart
+      show-table
+      style="max-width: 600px;"
+      aria-label="Quarterly metrics by region"
+      .data=${{
+        labels: ['Q1', 'Q2', 'Q3', 'Q4'],
+        series: [
+          { name: 'North', values: [220, 280, 310, 350] },
+          { name: 'South', values: [180, 200, 240, 270] },
+        ],
+      }}
+    ></void-bar-chart>
+  `,
+};

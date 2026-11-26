@@ -307,6 +307,7 @@ export class VoidGauge extends VoidElement {
    * zone containing the value. Give it as a property or as JSON in the `zones` attribute:
    * `<void-gauge zones='[{"from":0,"to":60,"color":"green"},{"from":60,"to":100,"color":"red"}]'>`.
    * Invalid JSON draws no zones and is reported by `@voidable/ui/dev`. Not reflected to the attribute.
+   * @default []
    */
   @property({ attribute: 'zones' })
   get zones(): GaugeZone[] { return this._zones; }
@@ -334,6 +335,7 @@ export class VoidGauge extends VoidElement {
    * JSON draws nothing and is reported by `@voidable/ui/dev`. The property is not reflected to the
    * attribute, and an attribute a server morph leaves unchanged does not animate again. For a single
    * reading, set the `value` attribute instead.
+   * @default {}
    */
   @property({ attribute: 'data' })
   get data(): GaugeData { return this._data; }

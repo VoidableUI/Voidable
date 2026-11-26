@@ -89,6 +89,7 @@ export class VoidLineChart extends VoidElement {
    * `<void-line-chart data='{"series":[{"name":"Visitors","values":[3,5,4]}],"labels":["Mon","Tue","Wed"]}'>`.
    * Invalid JSON draws nothing and is reported by `@voidable/ui/dev`. The property is not reflected to the
    * attribute (the data can be large), and an attribute a server morph leaves unchanged does not animate again.
+   * @default { series: [] }
    */
   @property({ attribute: 'data' })
   get data(): LineChartData { return this._data; }

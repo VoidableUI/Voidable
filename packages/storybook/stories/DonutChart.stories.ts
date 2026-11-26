@@ -254,3 +254,38 @@ export const SingleSegment: Story = {
     ></void-donut-chart>
   `,
 };
+
+export const FromMarkup: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story: 'The data is the JSON `data` attribute, so server-rendered HTML draws the chart with no script and no property. The attribute is not rewritten when the property is set, and an attribute a server morph leaves unchanged does not animate the chart again.',
+      },
+    },
+  },
+  render: () => html`
+    <void-donut-chart
+      style="width: 220px; height: 220px;"
+      aria-label="Traffic by source"
+      data='{"segments":[{"name":"Search","value":540},{"name":"Direct","value":320},{"name":"Referral","value":180}]}'
+    ></void-donut-chart>
+  `,
+};
+
+export const WithTable: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story: 'Every chart carries a visually hidden data table, captioned with `aria-label`, for screen readers (the drawing is `aria-hidden`). `show-table` shows it below the chart too: one row per segment with its value and share.',
+      },
+    },
+  },
+  render: () => html`
+    <void-donut-chart
+      show-table
+      style="width: 260px;"
+      aria-label="Traffic by source"
+      .data=${{ segments: [{ name: 'Search', value: 540 }, { name: 'Direct', value: 320 }, { name: 'Referral', value: 180 }] }}
+    ></void-donut-chart>
+  `,
+};
