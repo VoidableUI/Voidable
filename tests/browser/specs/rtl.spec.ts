@@ -141,6 +141,8 @@ test.describe('right-to-left layout', () => {
   });
 
   test('switch: the checked thumb sits at the end edge', async ({ page }) => {
+    // The thumb slides when the direction changes; measure it where it rests.
+    await page.addStyleTag({ content: '.void-switch-thumb { transition: none !important; }' });
     await expectNearEnd(page, '#sw .void-switch-thumb', '#sw .void-switch-track', 'checked thumb');
   });
 
