@@ -1,6 +1,7 @@
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
 import { PartsController } from '../parts.js';
+import { ClosedContent } from '../disclosure.js';
 
 /**
  * Collapsible section container for FAQs, settings panels, and long-form content organized into expandable items.
@@ -21,9 +22,12 @@ if (!customElements.get('void-accordion')) {
  * One collapsible item of a `<void-accordion>`: a `<void-accordion-trigger>` followed by a
  * `<void-accordion-content>`. The trigger becomes the button that toggles the item (`role="button"`, a tab stop,
  * Enter and Space, `aria-expanded`, `aria-controls`); the content is the region it names. Closed content is hidden
- * by the theme from the item's `open` attribute, before the script loads as well.
+ * by the theme from the item's `open` attribute, before the script loads as well, and opens and closes with a height
+ * animation (a grid row, no measuring; off under `prefers-reduced-motion` and when `--void-anim-scale` is 0). Where the
+ * browser supports `hidden="until-found"` the closed content carries it, so it is out of the accessibility tree and
+ * find-in-page opens the item when it finds text inside.
  *
- * @fires {CustomEvent<{ open: boolean }>} void-toggle - The user opened or closed the item.
+ * @fires {CustomEvent<{ open: boolean }>} void-toggle - The user opened or closed the item, or find-in-page opened it.
  */
 export class VoidAccordionItem extends VoidElement {
   /**
@@ -37,16 +41,20 @@ export class VoidAccordionItem extends VoidElement {
     onChange: () => this._wire(),
   });
 
+  private readonly _closed = new ClosedContent(this, this._parts);
+
   connectedCallback(): void {
     super.connectedCallback();
     this.addEventListener('click', this._onClick);
     this.addEventListener('keydown', this._onKeydown);
+    this.addEventListener('beforematch', this._onBeforeMatch);
   }
 
   disconnectedCallback(): void {
     super.disconnectedCallback();
     this.removeEventListener('click', this._onClick);
     this.removeEventListener('keydown', this._onKeydown);
+    this.removeEventListener('beforematch', this._onBeforeMatch);
   }
 
   protected override updated(changed: Map<string, unknown>): void {
@@ -67,7 +75,14 @@ export class VoidAccordionItem extends VoidElement {
       this._parts.set(content, 'role', 'region');
       this._parts.set(content, 'aria-labelledby', trigger ? this._parts.id(trigger, 'void-accordion-trigger') : null);
     }
+    this._closed.sync(content, this.open);
   }
+
+  /** Find-in-page (or a link, or a text fragment) reached text inside the closed content: open. */
+  private _onBeforeMatch = (e: Event): void => {
+    if (this.open || e.target !== this._parts.one('void-accordion-content')) return;
+    this._setOpen(true);
+  };
 
   private _fromTrigger(e: Event): boolean {
     const trigger = this._parts.one('void-accordion-trigger');
@@ -90,7 +105,11 @@ export class VoidAccordionItem extends VoidElement {
   };
 
   private _toggle(): void {
-    this.open = !this.open;
+    this._setOpen(!this.open);
+  }
+
+  private _setOpen(open: boolean): void {
+    this.open = open;
     const parent = this.parentElement;
     if (this.open && parent instanceof VoidAccordion && !parent.multiple) {
       for (const sib of Array.from(parent.children)) {

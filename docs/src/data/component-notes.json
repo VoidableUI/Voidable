@@ -351,9 +351,9 @@
   "void-alert": {
     "group": "feedback",
     "events": {
-      "void-dismiss": "Fires when the user presses the dismiss button of a `dismissible` alert, just before the alert removes itself from the page."
+      "void-close": "Fires when the user presses the control in the `void-alert-close` part, just before the alert removes itself from the page."
     },
-    "children": "Two parts: `void-alert-title` (optional, short) and `void-alert-description`, the message with any inline markup, such as a link."
+    "children": "Explicit parts, in this order: `void-alert-title` (optional, short), `void-alert-description` (the message, with any inline markup, such as a link) and `void-alert-close` (optional; wraps the one control that dismisses the alert, and without it the alert cannot be dismissed)."
   },
   "void-banner": {
     "group": "feedback",
@@ -396,9 +396,9 @@
   "void-accordion-item": {
     "group": "layout",
     "events": {
-      "void-toggle": "Fires after the item opens or closes. `detail.open` is the new state."
+      "void-toggle": "Fires after the item opens or closes, including when find-in-page opens it. `detail.open` is the new state."
     },
-    "children": "Two parts: `void-accordion-trigger`, the heading text that opens and closes it, and `void-accordion-content`, the body."
+    "children": "Two parts: `void-accordion-trigger`, the heading text that opens and closes it, and `void-accordion-content`, the body. The body opens and closes with a height animation (none under reduced motion or `--void-anim-scale: 0`)."
   },
   "void-card": {
     "group": "layout",
@@ -407,9 +407,9 @@
   "void-collapsible": {
     "group": "layout",
     "events": {
-      "void-toggle": "Fires after the section opens or closes. `detail.open` is the new state."
+      "void-toggle": "Fires after the section opens or closes, including when find-in-page opens it. `detail.open` is the new state."
     },
-    "children": "Two parts: `void-collapsible-trigger`, the heading text that opens and closes it, and `void-collapsible-content`, the body."
+    "children": "Two parts: `void-collapsible-trigger`, the heading text that opens and closes it, and `void-collapsible-content`, the body. The body opens and closes with a height animation (none under reduced motion or `--void-anim-scale: 0`)."
   },
   "void-divider": {
     "group": "layout"

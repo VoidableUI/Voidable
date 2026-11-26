@@ -1,6 +1,7 @@
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
 import { PartsController } from '../parts.js';
+import { closeControlPressed, removeWithFocus } from '../dismiss.js';
 
 /**
  * Full-width site-level announcement for maintenance windows, cookie consent, and promotional messaging.
@@ -8,7 +9,7 @@ import { PartsController } from '../parts.js';
  * Its text is written as parts: an optional `<void-banner-title>`, the `<void-banner-description>`, an optional
  * `<void-banner-actions>` (buttons or links) and an optional `<void-banner-close>`. The parts are never moved. The
  * close part wraps the one control the author writes (a `<void-button aria-label="Dismiss">`); pressing it fires
- * `void-close` and removes the banner. Without a close part the banner cannot be dismissed.
+ * `void-close` and removes the banner (focus inside it moves on to the next focusable element). Without a close part the banner cannot be dismissed.
  *
  * @fires {CustomEvent} void-close - The close control was pressed; the banner removes itself afterwards.
  */
@@ -38,12 +39,9 @@ export class VoidBanner extends VoidElement {
   }
 
   private _onClick = (e: Event): void => {
-    const close = this._parts.one('void-banner-close');
-    if (!close || !(e.target instanceof Node) || !close.contains(e.target)) return;
-    const control = close.firstElementChild as (HTMLElement & { disabled?: boolean }) | null;
-    if (control?.disabled || control?.hasAttribute('disabled')) return;
+    if (!closeControlPressed(this._parts.one('void-banner-close'), e)) return;
     this.dispatchEvent(new CustomEvent('void-close', { bubbles: true, composed: true }));
-    this.remove();
+    removeWithFocus(this);
   };
 }
 

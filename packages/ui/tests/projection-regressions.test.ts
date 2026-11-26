@@ -318,7 +318,6 @@ describe('container components project late children and survive reconnect', () 
 
 describe('host-region components keep content when their chrome toggles', () => {
   const cases: Array<[string, string]> = [
-    ['void-alert', 'dismissible'],
     ['void-tag', 'removable'],
   ];
   for (const [tag, prop] of cases) {

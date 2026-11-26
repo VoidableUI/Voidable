@@ -21,11 +21,11 @@ export const CONTRACT = {
   'void-accordion-item': {
     role: null,
     name: 'its void-accordion-trigger part (role="button") names the void-accordion-content part (role="region", aria-labelledby)',
-    state: ['open (reflected)', 'aria-expanded on the void-accordion-trigger part'],
+    state: ['open (reflected)', 'aria-expanded on the void-accordion-trigger part', 'closed content is out of the accessibility tree (hidden="until-found" where supported) and opens and closes with a height animation, none under reduced motion'],
     probe: { html: '<void-accordion-item><void-accordion-trigger>Shipping</void-accordion-trigger><void-accordion-content>Ships in 2 days</void-accordion-content></void-accordion-item>', click: { role: 'button', name: 'Shipping' }, expect: { host: { open: '' }, button: { name: 'Shipping', 'aria-expanded': 'true' } } },
   },
   'void-action-input': { role: 'inner', name: 'void-field label or aria-label / aria-labelledby on the host (moved onto it), on the inner input (aria-label falls back to the placeholder); the action button uses action-label', state: ['value (property only: the attribute is the initial value and is not updated)'], gaps: ['the current value is not reflected to an attribute: [value=...] selectors and attribute assertions see the initial value only', 'host has no role; void-action is its only signal for the action'] },
-  'void-alert': { role: 'alert', name: 'text content (its void-alert-title and void-alert-description parts)', state: ['color (reflected)'], gaps: ['always role="alert", so a static, non-urgent notice is announced as urgent; no status variant'] },
+  'void-alert': { role: 'alert', name: 'text content (its void-alert-title and void-alert-description parts)', state: ['color (reflected)', 'a void-alert-close part makes it dismissible'], gaps: ['always role="alert", so a static, non-urgent notice is announced as urgent; no status variant'] },
   'void-avatar': { role: 'img', name: 'alt attribute', state: [], gaps: ['without alt the host is role="img" with an empty aria-label: an unnamed image (axe image-alt / role-img-alt)'] },
   'void-badge': { role: 'status', name: 'text content', state: ['color (reflected)'], gaps: ['every badge is role="status", a live region: a table of status badges is a page of live regions, and a decorative badge cannot opt out'] },
   'void-banner': { role: 'banner', name: 'text content (its void-banner-title and void-banner-description parts)', state: ['color (reflected)', 'a void-banner-close part makes it dismissible'], gaps: ['role="banner" is the page header landmark; a second banner, or one inside <main>, is invalid'] },
@@ -53,7 +53,7 @@ export const CONTRACT = {
   'void-collapsible': {
     role: 'inner',
     name: 'its void-collapsible-trigger part, which is the button',
-    state: ['open (reflected)', 'aria-expanded on the trigger part'],
+    state: ['open (reflected)', 'aria-expanded on the trigger part', 'closed content is out of the accessibility tree (hidden="until-found" where supported) and opens and closes with a height animation, none under reduced motion'],
     probe: { html: '<void-collapsible><void-collapsible-trigger>Details</void-collapsible-trigger><void-collapsible-content>More</void-collapsible-content></void-collapsible>', click: { role: 'button', name: 'Details' }, expect: { host: { open: '' }, button: { name: 'Details', 'aria-expanded': 'true' } } },
   },
   'void-color-picker': { role: null, name: 'aria-label / aria-labelledby on the host, moved onto the inner hex input', state: ['value (reflected)', 'open (reflected)'], gaps: ['no role on the host'] },

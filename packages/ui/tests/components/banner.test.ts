@@ -71,6 +71,16 @@ describe('VoidBanner', () => {
       expect(document.body.contains(el)).toBe(false);
     });
 
+    it('moves focus to the next focusable element when the closed banner held it', () => {
+      const after = document.createElement('button');
+      document.body.append(after);
+      const button = el.querySelector('button') as HTMLButtonElement;
+      button.focus();
+      button.click();
+      expect(document.activeElement).toBe(after);
+      after.remove();
+    });
+
     it('is not dismissed by a click elsewhere', () => {
       (el.querySelector('void-banner-description') as HTMLElement).click();
       expect(document.body.contains(el)).toBe(true);

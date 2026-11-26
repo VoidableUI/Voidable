@@ -1,6 +1,7 @@
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
 import { PartsController } from '../parts.js';
+import { ClosedContent } from '../disclosure.js';
 
 /**
  * Simple expand/collapse panel for FAQ sections, spoiler text, and progressive disclosure of secondary content.
@@ -8,9 +9,12 @@ import { PartsController } from '../parts.js';
  * Written as two parts: a `<void-collapsible-trigger>` (the heading text that toggles it) followed by a
  * `<void-collapsible-content>`. Both are written by the author and never moved. The trigger becomes the button
  * (`role="button"`, a tab stop, Enter and Space, `aria-expanded`, `aria-controls`); the content is the region it
- * names. Closed content is hidden by the theme from the host's `open` attribute, before the script loads as well.
+ * names. Closed content is hidden by the theme from the host's `open` attribute, before the script loads as well, and
+ * opens and closes with a height animation (a grid row, no measuring; off under `prefers-reduced-motion` and when
+ * `--void-anim-scale` is 0). Where the browser supports `hidden="until-found"` the closed content carries it, so it is
+ * out of the accessibility tree and find-in-page opens the panel when it finds text inside.
  *
- * @fires {CustomEvent<{ open: boolean }>} void-toggle - The user opened or closed the panel.
+ * @fires {CustomEvent<{ open: boolean }>} void-toggle - The user opened or closed the panel, or find-in-page opened it.
  */
 export class VoidCollapsible extends VoidElement {
   /** Whether the content is shown. Add the attribute to start open; it follows the user's toggling. */
@@ -23,16 +27,20 @@ export class VoidCollapsible extends VoidElement {
     onChange: () => this._wire(),
   });
 
+  private readonly _closed = new ClosedContent(this, this._parts);
+
   connectedCallback(): void {
     super.connectedCallback();
     this.addEventListener('click', this._onClick);
     this.addEventListener('keydown', this._onKeydown);
+    this.addEventListener('beforematch', this._onBeforeMatch);
   }
 
   disconnectedCallback(): void {
     super.disconnectedCallback();
     this.removeEventListener('click', this._onClick);
     this.removeEventListener('keydown', this._onKeydown);
+    this.removeEventListener('beforematch', this._onBeforeMatch);
   }
 
   protected override updated(changed: Map<string, unknown>): void {
@@ -54,7 +62,15 @@ export class VoidCollapsible extends VoidElement {
       this._parts.set(content, 'role', 'region');
       this._parts.set(content, 'aria-labelledby', trigger ? this._parts.id(trigger, 'void-collapsible-trigger') : null);
     }
+    this._closed.sync(content, this.open);
   }
+
+  /** Find-in-page (or a link, or a text fragment) reached text inside the closed content: open. */
+  private _onBeforeMatch = (e: Event): void => {
+    if (this.open || e.target !== this._parts.one('void-collapsible-content')) return;
+    this.open = true;
+    this.dispatchEvent(new CustomEvent('void-toggle', { bubbles: true, composed: true, detail: { open: true } }));
+  };
 
   private _fromTrigger(e: Event): boolean {
     const trigger = this._parts.one('void-collapsible-trigger');

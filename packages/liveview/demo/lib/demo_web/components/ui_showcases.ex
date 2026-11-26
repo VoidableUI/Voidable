@@ -123,14 +123,17 @@ defmodule DemoWeb.UIShowcases do
     <div class="showcase-section">
       <h3>Dismissible</h3>
       <div style="display: flex; flex-direction: column; gap: 0.75rem;">
-        <VoidableUI.Components.alert events color="info" dismissible>
+        <VoidableUI.Components.alert events color="info">
           <void-alert-description>This alert can be dismissed. Click the close button.</void-alert-description>
+          <void-alert-close><button type="button" aria-label="Dismiss">&times;</button></void-alert-close>
         </VoidableUI.Components.alert>
-        <VoidableUI.Components.alert events color="success" dismissible>
+        <VoidableUI.Components.alert events color="success">
           <void-alert-description>Your changes have been saved successfully.</void-alert-description>
+          <void-alert-close><button type="button" aria-label="Dismiss">&times;</button></void-alert-close>
         </VoidableUI.Components.alert>
-        <VoidableUI.Components.alert events color="error" dismissible>
+        <VoidableUI.Components.alert events color="error">
           <void-alert-description>Failed to submit the form. Please try again.</void-alert-description>
+          <void-alert-close><button type="button" aria-label="Dismiss">&times;</button></void-alert-close>
         </VoidableUI.Components.alert>
       </div>
     </div>

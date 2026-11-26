@@ -289,11 +289,20 @@ export const parts = {
     children: 'parts',
     ordered: true,
     skeleton:
-      '<void-alert color="warning"><void-alert-title>Title</void-alert-title><void-alert-description>What happened and what to do.</void-alert-description></void-alert>',
-    legacy: { children: 'put the message in <void-alert-description> (and a short title in <void-alert-title> before it)' },
+      '<void-alert color="warning"><void-alert-title>Title</void-alert-title><void-alert-description>What happened and what to do.</void-alert-description><void-alert-close><button type="button" aria-label="Dismiss">&times;</button></void-alert-close></void-alert>',
+    legacy: {
+      attributes: { dismissible: 'add <void-alert-close><button type="button" aria-label="Dismiss">&times;</button></void-alert-close> as the last child; without it the alert is not dismissible' },
+      children: 'put the message in <void-alert-description> (and a short title in <void-alert-title> before it)',
+    },
     parts: [
       { tag: 'void-alert-title', max: 1, description: 'Short title of the message.' },
       { tag: 'void-alert-description', required: true, max: 1, description: 'The message.' },
+      {
+        tag: 'void-alert-close',
+        max: 1,
+        control: true,
+        description: 'Wraps the one control that dismisses the alert (a <button aria-label="Dismiss">); pressing it fires void-close and removes the alert. Without it the alert cannot be dismissed.',
+      },
     ],
   },
   'void-accordion': {

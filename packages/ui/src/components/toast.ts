@@ -1,6 +1,7 @@
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
 import { PartsController } from '../parts.js';
+import { closeControlPressed, removeWithFocus } from '../dismiss.js';
 
 /**
  * Temporary notification for action confirmations, error alerts, and copy-to-clipboard feedback.
@@ -103,10 +104,7 @@ export class VoidToast extends VoidElement {
   };
 
   private _onClick = (e: Event): void => {
-    const close = this._parts.one('void-toast-close');
-    if (!close || !(e.target instanceof Node) || !close.contains(e.target)) return;
-    const control = close.firstElementChild as HTMLElement | null;
-    if (control?.hasAttribute('disabled')) return;
+    if (!closeControlPressed(this._parts.one('void-toast-close'), e)) return;
     this._close();
   };
 
@@ -117,7 +115,7 @@ export class VoidToast extends VoidElement {
 
   private _close() {
     this.dispatchEvent(new CustomEvent('void-close', { bubbles: true, composed: true }));
-    this.remove();
+    removeWithFocus(this);
   }
 }
 

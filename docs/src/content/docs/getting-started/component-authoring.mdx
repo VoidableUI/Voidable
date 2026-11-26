@@ -58,8 +58,8 @@ render() {
 
 ```ts
 render() {
-  if (!this.dismissible) return nothing;
-  return html`<button class="void-x-close" @click="${this._dismiss}">&times;</button>`;
+  if (!this.removable) return nothing;
+  return html`<button class="void-x-remove" @click="${this._remove}">&times;</button>`;
 }
 ```
 
@@ -129,7 +129,7 @@ Use `@property` with `reflect: true` for attributes that CSS selects on. Reflect
 ```ts
 @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' = 'md';
 @property({ type: String, reflect: true }) color: 'default' | 'error' | 'warning' | 'caution' | 'success' | 'info' | 'notice' | 'highlight' = 'default';
-@property({ type: Boolean, reflect: true }) dismissible = false;
+@property({ type: Boolean, reflect: true }) disabled = false;
 ```
 
 Standard scales across all components:

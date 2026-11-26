@@ -13,6 +13,7 @@ function serverMarkup(v: number, o: { heading?: string; toast?: boolean; extraTi
     <void-collapsible id="mc"><void-collapsible-trigger>Details ${v}</void-collapsible-trigger><void-collapsible-content><p id="mcp">Body ${v}</p></void-collapsible-content></void-collapsible>
     <void-panel id="mp"><void-panel-header><void-panel-title>Panel ${v}</void-panel-title></void-panel-header><void-panel-body>Panel body ${v}</void-panel-body></void-panel>
     <void-banner id="mb"><void-banner-description>Banner ${v}</void-banner-description><void-banner-close><button type="button" id="mb-x" aria-label="Dismiss">&times;</button></void-banner-close></void-banner>
+    <void-alert id="ma"><void-alert-description>Alert ${v}</void-alert-description><void-alert-close><button type="button" id="ma-x" aria-label="Dismiss">&times;</button></void-alert-close></void-alert>
     <void-error-fallback id="me" heading="${o.heading ?? 'Oops'}" retryable></void-error-fallback>
     <void-error-fallback id="me2"><void-error-fallback-title>Mine ${v}</void-error-fallback-title>${o.extraTitle ? '<void-error-fallback-description>More</void-error-fallback-description>' : ''}<void-error-fallback-actions><button type="button" id="me2-b">Go</button></void-error-fallback-actions></void-error-fallback>
     <void-toast-container id="mt" position="inline">${o.toast === false ? '' : `<void-toast id="mtt" duration="0"><void-toast-title>Saved ${v}</void-toast-title><void-toast-description>Done</void-toast-description><void-toast-close><button type="button" id="mt-x" aria-label="Dismiss">&times;</button></void-toast-close></void-toast>`}</void-toast-container>`;
@@ -64,6 +65,65 @@ for (const engine of ENGINES) {
       await expect(page.locator('#root #me2 void-error-fallback-description')).toHaveText('More');
       await expect(page.locator('#root').getByRole('region', { name: 'Panel 2' })).toBeVisible();
       await expect(page.locator('#root #mc void-collapsible-trigger')).toHaveText('Details 2');
+    });
+
+    test('an alert keeps its nodes through a morph and still dismisses once, with one void-close', async ({ page }) => {
+      await page.evaluate(() => {
+        (window as any).__all = [...document.getElementById('ma')!.querySelectorAll('*')];
+        (window as any).__closes = 0;
+        document.addEventListener('void-close', (e) => { if ((e.target as Element).id === 'ma') (window as any).__closes++; });
+      });
+      await morph(page, serverMarkup(1));
+      await morph(page, serverMarkup(2));
+      const same = await page.evaluate(() => {
+        const now = [...document.getElementById('ma')!.querySelectorAll('*')];
+        const was: Element[] = (window as any).__all;
+        return now.length === was.length && now.every((e, i) => e === was[i]);
+      });
+      expect(same, 'the alert\'s elements are the same nodes').toBe(true);
+      await expect(page.locator('#ma void-alert-description')).toHaveText('Alert 2');
+      await page.locator('#ma-x').click();
+      await expect(page.locator('#ma')).toHaveCount(0);
+      expect(await page.evaluate(() => (window as any).__closes)).toBe(1);
+    });
+
+    test('a morph while the collapsible is open or still animating neither replays the animation nor loses the open state', async ({ page }) => {
+      await page.evaluate(() => {
+        document.documentElement.style.setProperty('--void-anim-scale', '4');
+      });
+      await page.locator('#mc void-collapsible-trigger').click();
+      // Mid-animation: a transition is running on the host.
+      await page.waitForFunction(() => document.getElementById('mc')!.getAnimations().some((a) => 'transitionProperty' in a));
+      const started = await page.evaluate(() => {
+        const a = document.getElementById('mc')!.getAnimations().find((x) => 'transitionProperty' in x)!;
+        (window as any).__anim = a;
+        return a.currentTime;
+      });
+      await morph(page, serverMarkup(1));
+      const during = await page.evaluate(() => {
+        const host = document.getElementById('mc')!;
+        const a = (window as any).__anim as Animation;
+        return {
+          same: host.getAnimations().includes(a),
+          progressed: Number(a.currentTime) >= 0,
+          open: host.hasAttribute('open'),
+          hidden: document.querySelector('#mc void-collapsible-content')!.hasAttribute('hidden'),
+        };
+      });
+      expect(started).not.toBeNull();
+      expect(during.same, 'the same transition keeps running: it was not restarted').toBe(true);
+      expect(during.open).toBe(true);
+      expect(during.hidden).toBe(false);
+      await page.evaluate(() => Promise.all(document.getAnimations().map((a) => a.finished.catch(() => undefined))));
+      await settle(page);
+      // Open and settled: another morph starts nothing at all.
+      await morph(page, serverMarkup(1));
+      const after = await page.evaluate(() => ({
+        running: document.getElementById('mc')!.getAnimations().length + document.querySelector('#mc void-collapsible-content')!.getAnimations().length,
+        open: document.getElementById('mc')!.hasAttribute('open'),
+      }));
+      expect(after.open).toBe(true);
+      expect(after.running).toBe(0);
     });
 
     test('a toast the server stops sending goes away and one it sends again comes back wired', async ({ page }) => {

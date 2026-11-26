@@ -44,17 +44,21 @@ void-tabs-content:not([active]) { display: none; }
 
 Where a part has state of its own the component writes it as a plain attribute on the part: `active` on the selected `<void-tabs-trigger>` and the visible `<void-tabs-content>`. Server markup can write the same attributes, so the page looks right before the script loads.
 
+## Opening and closing
+
+The content of a collapsible and of an accordion item animates its height when `open` changes, with no script measuring it: the host is a two-row grid, and the content row goes from `0fr` to `1fr` (animating grid rows is widely available in every browser). The animation follows `--void-anim-scale` and is off under `prefers-reduced-motion`. Closed content is hidden from the accessibility tree, the tab order and find-in-page by the theme from the host's attribute (`visibility`), and the component also marks it `hidden="until-found"` once the closing animation is over, where the browser supports that (Chrome and Edge 102, Firefox 148; not yet Safari): the content stays hidden from assistive technology, and find-in-page, a text fragment or an in-page link to text inside it opens the panel first (`void-toggle` fires). Both components use the same mechanism, and a server morph keeps the open state, the attribute and a running animation.
+
 ## Before the script loads
 
 `@voidable/theme/pre-upgrade.css` (included in the theme) gives every component its final layout before its JavaScript has run, so nothing shifts when it upgrades. The content of a closed popover, dropdown menu, hover card or tooltip is hidden until then, a closed dialog or drawer shows nothing, the first tab (or the one marked `active`) is visible, and a closed accordion item shows only its trigger.
 
 ## Dialogs and drawers
 
-`<void-dialog>` and `<void-drawer>` are the one place the library uses a shadow root. A modal needs the browser's native `<dialog>` and `showModal()` (the top layer, an inert page behind it, Escape and the backdrop), and that element has to contain the content. Rather than move your nodes into a rendered `<dialog>`, the component keeps a small shadow root, `<dialog part="surface">`, a close button and a `<slot>`, and your parts stay unmoved children of the host. The dialog is named and described by your `-title` and `-description` parts through ARIA element references. The theme styles the surface with `void-dialog::part(surface)` and its backdrop with `void-dialog::part(surface)::backdrop`. `<void-alert dismissible>` uses the same arrangement for its dismiss button.
+`<void-dialog>` and `<void-drawer>` are the one place the library uses a shadow root. A modal needs the browser's native `<dialog>` and `showModal()` (the top layer, an inert page behind it, Escape and the backdrop), and that element has to contain the content. Rather than move your nodes into a rendered `<dialog>`, the component keeps a small shadow root, `<dialog part="surface">`, a close button and a `<slot>`, and your parts stay unmoved children of the host. The dialog is named and described by your `-title` and `-description` parts through ARIA element references. The theme styles the surface with `void-dialog::part(surface)` and its backdrop with `void-dialog::part(surface)::backdrop`.
 
 ## Dismiss controls
 
-A banner and a toast can be dismissed, and the control that does it is a region the author writes, like any other: a `-close` part that wraps the one button, the same shape as a trigger part.
+An alert, a banner and a toast can be dismissed, and the control that does it is a region the author writes, like any other: a `-close` part that wraps the one button, the same shape as a trigger part.
 
 ```html
 <void-banner color="info">
@@ -63,7 +67,7 @@ A banner and a toast can be dismissed, and the control that does it is a region 
 </void-banner>
 ```
 
-Pressing the control fires `void-close` and removes the element. Without a `-close` part there is no control, so the element cannot be dismissed (a toast still closes itself after its `duration`). The component renders no button of its own, and no shadow root, so the page, the framework and a server morph all see the control as ordinary markup. `<void-alert dismissible>` still uses a shadow root for this (see above).
+Pressing the control fires `void-close` (it bubbles and cannot be cancelled) and removes the element. Without a `-close` part there is no control, so the element cannot be dismissed (a toast still closes itself after its `duration`). The component renders no button of its own, and no shadow root, so the page, the framework and a server morph all see the control as ordinary markup. If focus was inside the element when it closed, it moves to the next focusable element after it (or the last one before it), so keyboard users are not sent back to the top of the page.
 
 ## Frameworks and morphs
 
@@ -85,9 +89,9 @@ The machine-readable form of this table is the `voidParts` entry of each compone
 | `<void-tooltip>` | `-trigger` (one control), `-content` | Content describes the control. |
 | `<void-tabs>` | `-list` holding `<void-tabs-trigger value>`, then `<void-tabs-content value>` | Trigger and content are paired by `value`. |
 | `<void-card>` | `-header` (holding `-title`, `-description`), `-body` (required), `-footer` | |
-| `<void-alert>` | `-title`, `-description` (required) | Shadow dismiss button when `dismissible`. |
+| `<void-alert>` | `-title`, `-description` (required), `-close` (one control) | Without `-close` it cannot be dismissed. |
 | `<void-accordion>` | `<void-accordion-item>`, each with `<void-accordion-trigger>` and `<void-accordion-content>` | |
-| `<void-collapsible>` | `-trigger`, `-content` | The trigger is the button; closed content is hidden from `open`. |
+| `<void-collapsible>` | `-trigger`, `-content` | The trigger is the button; closed content is hidden from `open` and animates open and closed. |
 | `<void-panel>` | `-header` (holding `-title`, `-description`), `-body` (required) | The title names the region. |
 | `<void-banner>` | `-title`, `-description` (required), `-actions`, `-close` (one control) | Without `-close` it cannot be dismissed. |
 | `<void-toast>` | `-title`, `-description` (required), `-actions`, `-close` (one control) | `toast()` writes the same parts. |
@@ -102,7 +106,7 @@ What every component does today, and what it becomes. **Parts** components are c
 | Component | Today | Target | Status |
 |---|---|---|---|
 | accordion, accordion-item | Parts | `void-accordion-item` > `-trigger`, `-content` | Parts |
-| alert | Parts | `-title`, `-description` | Parts |
+| alert | Parts | `-title`, `-description`, `-close` | Parts |
 | card | Parts | `-header` (`-title`, `-description`), `-body`, `-footer` | Parts |
 | dialog, drawer | Parts | `-title`, `-description`, `-body`, `-actions` | Parts |
 | dropdown-menu, dropdown-menu-item | Parts | `-trigger`, `-content` (`-item`, `-separator`) | Parts |

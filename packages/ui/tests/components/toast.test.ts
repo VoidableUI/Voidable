@@ -97,6 +97,27 @@ describe('VoidToast', () => {
       el.close();
       expect(document.body.contains(el)).toBe(false);
     });
+
+    it('moves focus to the next focusable element on the page when the closed toast held it', async () => {
+      const before = document.createElement('button');
+      document.body.prepend(before);
+      const container = document.createElement('void-toast-container');
+      document.body.append(container);
+      const after = document.createElement('button');
+      document.body.append(after);
+      const el = document.createElement('void-toast') as VoidToast;
+      el.innerHTML =
+        '<void-toast-description>Saved</void-toast-description><void-toast-close><button type="button" aria-label="Dismiss">x</button></void-toast-close>';
+      container.append(el);
+      await el.updateComplete;
+      const button = el.querySelector('button') as HTMLButtonElement;
+      button.focus();
+      button.click();
+      expect(document.activeElement).toBe(after);
+      before.remove();
+      container.remove();
+      after.remove();
+    });
   });
 
   describe('auto-dismiss', () => {

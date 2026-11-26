@@ -98,7 +98,7 @@ defmodule VoidableUI.Components.InteractiveUITest do
   end
 
   # ===========================================================================
-  # 2. Alert (interactive -- void-dismiss, has slot)
+  # 2. Alert (interactive -- void-close, has slot)
   # ===========================================================================
 
   describe "alert" do
@@ -124,7 +124,7 @@ defmodule VoidableUI.Components.InteractiveUITest do
         """)
 
       assert html =~ ~s(phx-hook="VoidEvent")
-      assert html =~ ~s(data-void-events="void-dismiss")
+      assert html =~ ~s(data-void-events="void-close")
     end
 
     test "renders named attributes when provided" do
@@ -151,26 +151,21 @@ defmodule VoidableUI.Components.InteractiveUITest do
       refute html =~ "variant="
     end
 
-    test "renders dismissible boolean when true" do
+    test "renders the close part the author writes and has no dismissible attribute" do
       assigns = %{}
 
       html =
         rendered_to_string(~H"""
-        <VoidableUI.Components.alert dismissible={true}>Msg</VoidableUI.Components.alert>
+        <VoidableUI.Components.alert events>
+          <void-alert-description>Msg</void-alert-description>
+          <void-alert-close><button type="button" aria-label="Dismiss">&times;</button></void-alert-close>
+        </VoidableUI.Components.alert>
         """)
 
-      assert html =~ "dismissible"
-    end
-
-    test "omits dismissible when false (default)" do
-      assigns = %{}
-
-      html =
-        rendered_to_string(~H"""
-        <VoidableUI.Components.alert>Msg</VoidableUI.Components.alert>
-        """)
-
+      assert html =~ "void-alert-close"
+      assert html =~ ~s(data-void-events="void-close")
       refute html =~ "dismissible"
+      refute html =~ "void-dismiss"
     end
 
     test "passes through global attributes" do
