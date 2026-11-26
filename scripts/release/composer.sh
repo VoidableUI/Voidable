@@ -51,6 +51,7 @@ else
   find "$work/mirror" -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf {} +
   git archive "$SHA" "$PKG_DIR" | tar -x -C "$work"
   cp -a "$work/$PKG_DIR/." "$work/mirror/"
+  [ -s "$work/mirror/llms.txt" ] || { echo "the mirror would not carry llms.txt" >&2; exit 1; }
   git -C "$work/mirror" add -A
   changes="$(git -C "$work/mirror" status --porcelain | wc -l | tr -d ' ')"
   echo "voidable/laravel $TAG from $SHA: $changes changed path(s) in the mirror"

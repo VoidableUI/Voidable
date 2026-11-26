@@ -1,0 +1,28 @@
+# @voidable/ui-alpine
+
+> Alpine.js plugin and Livewire morph protection for Voidable UI web components.
+
+## Install and use
+
+```sh
+npm install @voidable/ui @voidable/theme @voidable/ui-alpine
+```
+
+```js
+import Alpine from 'alpinejs';
+import { VoidableAlpine, registerLivewireHooks } from '@voidable/ui-alpine';
+
+Alpine.plugin(VoidableAlpine);   // adds x-void-on and x-void-preserve
+registerLivewireHooks();         // with Livewire: keeps client state across morphs
+Alpine.start();
+```
+
+## API
+
+- `VoidableAlpine`: Alpine plugin. `x-void-on:<event>="expr"` listens for a Voidable event (`x-void-on:void-change="name = $event.detail.value"`); `x-void-preserve` adds `wire:ignore` so Livewire skips the element and its children.
+- `registerLivewireHooks()`: Livewire morph protection; reflected state survives while the server renders the same value.
+- The Laravel package `voidable/laravel` wraps both (`void_attrs()`, `@voidableScripts`).
+
+## Full reference
+
+Every `<void-*>` element (parts, attributes with allowed values, events with `detail`, examples) is in the core package: `@voidable/ui/reference.md` (`node_modules/@voidable/ui/dist/reference.md`), summarised in `@voidable/ui/llms.txt`. Online: https://voidable.dev/llms.txt. Offline per element: `voidable ref <tag>`.

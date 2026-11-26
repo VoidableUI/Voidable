@@ -46,6 +46,7 @@ EXPECT="$VERSION" ruby -I "$unpacked/voidable-hotwire-$VERSION/lib" -e '
   abort("VERSION is #{Voidable::Hotwire::VERSION}") unless Voidable::Hotwire::VERSION == v
 '
 grep -q 'Voidable::Hotwire::CDN::UI_URL' "$unpacked/voidable-hotwire-$VERSION/config/importmap.rb"
+[ -s "$unpacked/voidable-hotwire-$VERSION/llms.txt" ] || { echo "the gem does not carry llms.txt" >&2; exit 1; }
 
 if [ "$(node "$ROOT/scripts/release/registry.mjs" published gem "$VERSION")" = "true" ]; then
   result="skip     voidable-hotwire $VERSION (already on RubyGems)"

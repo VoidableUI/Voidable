@@ -111,3 +111,7 @@ and `maxlength` (and `pattern` on the single-line inputs); `inputmode`,
 `enterkeyhint`, `autocapitalize` and `spellcheck` pass through as global
 attributes. `number_input` accepts `step="any"` and decimal `value`, `min`
 and `max`, and `stat` takes `description`.
+
+## For AI agents
+
+`@voidable/ui-liveview/llms.txt` (npm) and `llms.txt` in the `live_voidable` Hex package summarise this adapter's API, including every HEEx component. Every element's parts, attributes and events are in `@voidable/ui/reference.md` (`node_modules/@voidable/ui/dist/reference.md`).

@@ -47,6 +47,10 @@ your controllers with `data-action`:
 </void-select>
 ```
 
+## For AI agents
+
+`@voidable/ui-hotwire/llms.txt` (in the package root) summarises this adapter's API. Every element's parts, attributes and events are in `@voidable/ui/reference.md` (`node_modules/@voidable/ui/dist/reference.md`).
+
 ## Documentation
 
 - [Storybook](https://voidable.dev/storybook/)

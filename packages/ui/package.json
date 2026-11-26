@@ -66,13 +66,15 @@
     "./custom-elements.json": "./dist/custom-elements.json",
     "./components.json": "./dist/components.json",
     "./vscode.html-custom-data.json": "./dist/vscode.html-custom-data.json",
-    "./web-types.json": "./dist/web-types.json"
+    "./web-types.json": "./dist/web-types.json",
+    "./llms.txt": "./dist/llms.txt",
+    "./reference.md": "./dist/reference.md"
   },
   "files": ["dist"],
   "customElements": "dist/custom-elements.json",
   "web-types": "./dist/web-types.json",
   "scripts": {
-    "build": "rm -rf dist && cem analyze && node cem/autoloader-table.js && node cem/dev-table.js && vite build && node cem/generate.js && node cem/check-types.js",
+    "build": "rm -rf dist && cem analyze && node cem/autoloader-table.js && node cem/dev-table.js && vite build && node cem/generate.js && node cem/reference.js && node cem/check-types.js",
     "test": "vitest run",
     "typecheck": "tsc --noEmit && tsc -p type-tests/react && tsc -p type-tests/solid && tsc -p type-tests/solid2 && tsc -p type-tests/svelte && tsc -p type-tests/vue"
   },
