@@ -35,8 +35,12 @@ function unavailable(name: Engine): string | null {
   if (name === 'webkit' && webkitWs) return null;
   if (!existsSync(engines[name].executablePath())) return 'not installed (run `mise run test:browser:install`)';
   if (name === 'webkit' && process.platform === 'linux') {
-    const bin = join(dirname(engines.webkit.executablePath()), 'minibrowser-wpe/bin/MiniBrowser');
-    const missing = (spawnSync('ldd', [bin], { encoding: 'utf8' }).stdout || '')
+    // Playwright's launcher adds the libraries bundled with its WebKit build to the
+    // search path; ask ldd the same question, or bundled ones read as missing.
+    const root = join(dirname(engines.webkit.executablePath()), 'minibrowser-wpe');
+    const bin = join(root, 'bin/MiniBrowser');
+    const bundled = [join(root, 'lib'), join(root, 'sys/lib'), process.env.LD_LIBRARY_PATH].filter(Boolean).join(':');
+    const missing = (spawnSync('ldd', [bin], { encoding: 'utf8', env: { ...process.env, LD_LIBRARY_PATH: bundled } }).stdout || '')
       .split('\n')
       .filter((l) => l.includes('not found') && !l.includes('libWPEWebKit'))
       .map((l) => l.trim().split(' ')[0]);
