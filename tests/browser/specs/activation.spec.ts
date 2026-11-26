@@ -107,6 +107,10 @@ test.describe('a void-button activates like a native button', () => {
       await page.evaluate(() => { (window as any).hashes = 0; });
       await host.click({ position: { x, y } });
       await expect.poll(() => page.evaluate(() => location.hash)).toBe('#followed2');
+      // hashchange is dispatched after location.hash has already changed, so wait for the
+      // count, then let the page settle and check that no second navigation followed.
+      await expect.poll(() => page.evaluate(() => (window as any).hashes), { message: `click at ${x},${y}` }).toBe(1);
+      await settle(page);
       expect(await page.evaluate(() => (window as any).hashes), `click at ${x},${y}`).toBe(1);
     }
   });
