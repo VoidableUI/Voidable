@@ -116,11 +116,12 @@ export class VoidRadio extends NativeFormControl(VoidElement) {
    */
   private _peers(): VoidRadio[] {
     const group = this.closest('void-radio-group');
-    if (group) return (Array.from(group.querySelectorAll('void-radio')) as VoidRadio[]).filter(r => r.closest('void-radio-group') === group);
+    // A radio not upgraded yet syncs the set itself when it connects.
+    if (group) return (Array.from(group.querySelectorAll('void-radio')) as VoidRadio[]).filter(r => r instanceof VoidRadio && r.closest('void-radio-group') === group);
     if (!this.name) return [this];
     const scope: ParentNode = this.form ?? (this.getRootNode() as ParentNode);
     return (Array.from(scope.querySelectorAll('void-radio')) as VoidRadio[])
-      .filter(r => r.name === this.name && r.form === this.form && !r.closest('void-radio-group'));
+      .filter(r => r instanceof VoidRadio && r.name === this.name && r.form === this.form && !r.closest('void-radio-group'));
   }
 
   /**
