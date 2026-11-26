@@ -32,7 +32,7 @@ export class VoidToast extends VoidElement {
 
   protected readonly _parts = new PartsController(this, {
     tags: ['void-toast-title', 'void-toast-description', 'void-toast-actions', 'void-toast-close'],
-    onChange: () => undefined,
+    onChange: () => this._syncRole(),
   });
 
   private _timer: ReturnType<typeof setTimeout> | undefined;
@@ -75,7 +75,21 @@ export class VoidToast extends VoidElement {
    */
   private _syncRole(): void {
     this.setHostAttribute('role', 'group');
+    // The title names the group (the message when there is no title), unless the author named the toast.
+    const named = this._parts.one('void-toast-title') ?? this._parts.one('void-toast-description');
+    const current = this.getAttribute('aria-labelledby');
+    const ours = this._labelledBy !== null && current === this._labelledBy;
+    if (named && !this.hasAttribute('aria-label') && (current === null || ours)) {
+      this._labelledBy = this._parts.id(named, named.localName);
+      this.setHostAttribute('aria-labelledby', this._labelledBy);
+    } else if (ours) {
+      this._labelledBy = null;
+      this.setHostAttribute('aria-labelledby', null);
+    }
   }
+
+  /** The `aria-labelledby` this toast wrote itself, so an author's own name is never replaced. */
+  private _labelledBy: string | null = null;
 
   /** What a screen reader should say for this toast: its title, then its message (or, without parts, its text). */
   announcement(): string {

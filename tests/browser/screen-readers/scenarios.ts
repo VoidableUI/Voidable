@@ -201,6 +201,7 @@ export const scenarios: Scenario[] = [
           await expect(page.getByRole('region', { name: 'Notifications' })).not.toHaveAttribute('aria-live', /.+/);
           await expect(page.locator('#flash [role=status]')).toHaveAttribute('aria-live', 'polite');
           await expect(page.locator('#flash > void-toast')).toHaveAttribute('role', 'group');
+          await expect(page.getByRole('group', { name: 'Changes saved' })).toHaveCount(1);
         },
         note: 'the container announces through a polite status announcer; the visible toast is a group, not a second live region',
       },
