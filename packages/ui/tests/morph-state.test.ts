@@ -338,6 +338,26 @@ describe('reflected value (#67)', () => {
   });
 });
 
+describe('reflected value, server markup without a value attribute', () => {
+  it('a select keeps the user pick when the server never writes value', async () => {
+    const markup = '<void-select><select name="k"><option value="a">a</option><option value="b">b</option></select></void-select>';
+    const sel = await mount<Host>(markup);
+    const native = sel.querySelector('select')!;
+    native.value = 'b';
+    native.dispatchEvent(new Event('change'));
+    await settle();
+    expect(sel.getAttribute('value')).toBe('b');
+    const next = server(markup);
+    sel.voidBeforeMorph(next);
+    morphAttributes(sel, next);
+    native.value = 'a';
+    await settle();
+    await new Promise((r) => setTimeout(r, 0));
+    expect(sel.value).toBe('b');
+    expect(sel.getAttribute('value')).toBe('b');
+  });
+});
+
 describe('keyed list edits (breadcrumbs, explicit parts)', () => {
   // The items are the author's own nodes in the trail itself: nothing wraps them, so every direct DOM edit a
   // framework makes leaves exactly the order it made.
