@@ -31,7 +31,7 @@ The component finds its parts where they are and wires them up. It sets the role
 
 ### Attribute or part?
 
-**Attributes configure the component; parts hold its content.** If the author writes text or markup that appears on the screen as a region of the component (a title, a description, a body, the thing you press), it is a part, even when it is plain text. Settings that are not on the screen stay attributes: `size`, `variant`, `position`, `align`, `open`, `value`, `delay`, `closable`. `aria-label` stays an attribute. A component that generates all of its content from data (a calendar, a chart, pagination) has no parts.
+**Attributes configure the component; parts hold its content.** If the author writes text or markup that appears on the screen as a region of the component (a title, a description, a body, the thing you press), it is a part, even when it is plain text. Settings that are not on the screen stay attributes: `size`, `variant`, `side`, `align`, `open`, `value`, `delay`, `hide-close`. `aria-label` stays an attribute. A component that generates all of its content from data (a calendar, a chart, pagination) has no parts.
 
 ## State lives on the parent
 
@@ -67,7 +67,7 @@ An alert, a banner and a toast can be dismissed, and the control that does it is
 </void-banner>
 ```
 
-Pressing the control fires `void-close` (it bubbles and cannot be cancelled) and removes the element. Without a `-close` part there is no control, so the element cannot be dismissed (a toast still closes itself after its `duration`). The component renders no button of its own, and no shadow root, so the page, the framework and a server morph all see the control as ordinary markup. If focus was inside the element when it closed, it moves to the next focusable element after it (or the last one before it), so keyboard users are not sent back to the top of the page.
+Pressing the control fires `void-close` with `reason` `close-button` (it does not bubble; `preventDefault()` keeps the element on the page) and removes the element. Without a `-close` part there is no control, so the element cannot be dismissed (a toast still closes itself after its `duration`). The component renders no button of its own, and no shadow root, so the page, the framework and a server morph all see the control as ordinary markup. If focus was inside the element when it closed, it moves to the next focusable element after it (or the last one before it), so keyboard users are not sent back to the top of the page.
 
 ## Pickers
 
