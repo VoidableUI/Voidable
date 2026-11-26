@@ -95,7 +95,7 @@ Open overlays form a stack. Escape and outside presses always go to the **topmos
 - **Hover card** never takes focus. It opens on hover or keyboard focus of the trigger and hides on Escape, and it does not reopen until the trigger is focused again.
 - **Combobox, multiselect and date picker** keep focus where the pattern puts it. For combobox and multiselect that is the field, which shows the highlighted option through `aria-activedescendant` (see [Keyboard and ARIA](/components/keyboard/)). The date picker moves focus into the calendar and returns it to the field.
 
-A closed overlay is not rendered (`display: none` through the closed `<dialog>` or popover), so it cannot be focused or seen, and assistive technology does not expose it. Triggers get `aria-haspopup`, `aria-expanded` and `aria-controls`.
+A closed overlay is not rendered (`display: none` through the closed `<dialog>` or popover), so it cannot be focused or seen, and assistive technology does not expose it. Triggers get `aria-haspopup`, `aria-expanded` and `aria-controls`; on a link button (a `<void-button>` holding an `<a href>`) they go on the inner link, the one control, and follow it if the link comes or goes.
 
 ## Server-driven pages
 
