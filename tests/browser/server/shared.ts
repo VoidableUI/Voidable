@@ -14,9 +14,23 @@ type Fixtures = {
   errors: string[];
   /** Console errors a test expects (matched by substring) and does not want to fail on. */
   allowErrors: string[];
+  /** VOID_CPU_THROTTLE=<rate>: Chromium runs the page that many times slower, as on a slow CI runner. Off by default. */
+  cpuThrottle: void;
 };
 
+const throttle = Number(process.env.VOID_CPU_THROTTLE || 0);
+
 export const test = base.extend<Fixtures>({
+  cpuThrottle: [
+    async ({ page }, use) => {
+      if (throttle > 1) {
+        const cdp = await page.context().newCDPSession(page);
+        await cdp.send('Emulation.setCPUThrottlingRate', { rate: throttle });
+      }
+      await use();
+    },
+    { auto: true },
+  ],
   // A new array for every test: a test that pushes to it must not change the next one.
   allowErrors: async ({}, use) => use([]),
   errors: [
