@@ -148,6 +148,40 @@ func TestCheckJSONAndClean(t *testing.T) {
 	}
 }
 
+// A `keys` attribute that is wrong or removes an essential key is a warning: reported, and the exit status stays 0.
+func TestCheckKeysWarnings(t *testing.T) {
+	dir := t.TempDir()
+	page := filepath.Join(dir, "keys.html")
+	src := `<void-dialog keys='{"close":[]}'><void-dialog-title>Title</void-dialog-title></void-dialog>
+<void-button keys='{"activte":["Enter"]}'>One</void-button>
+<void-button keys="Enter">Two</void-button>
+<void-button keys='{"activate":["Enter","x"]}'>Three</void-button>
+`
+	if err := os.WriteFile(page, []byte(src), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	out, err := run(t, "check", page)
+	if err != nil {
+		t.Fatalf("warnings must not fail the check: %v\n%s", err, out)
+	}
+	for _, w := range []string{
+		`keys.html:1:14: warning: [keys] keys on <void-dialog> leaves "close" with no key`,
+		`keys.html:2:14: warning: [keys] <void-button> has no key action "activte" (did you mean activate?)`,
+		`keys.html:3:14: warning: [keys] keys on <void-button> is not a JSON object`,
+	} {
+		if !strings.Contains(out, w) {
+			t.Errorf("missing %q in:\n%s", w, out)
+		}
+	}
+	if strings.Contains(out, "keys.html:4:") {
+		t.Errorf("a valid rebinding was reported:\n%s", out)
+	}
+	out, _ = run(t, "check", "--format", "json", page)
+	if !strings.Contains(out, `"severity": "warning"`) {
+		t.Errorf("json has no severity: %s", out)
+	}
+}
+
 func TestRefAndGen(t *testing.T) {
 	tests := []struct {
 		args []string
@@ -156,6 +190,8 @@ func TestRefAndGen(t *testing.T) {
 		{[]string{"ref"}, []string{"elements.", "void-button Action trigger"}},
 		{[]string{"ref", "void-button", "--format", "markdown"}, []string{"## `<void-button>`", "| `variant` | `outline\\|filled\\|ghost` |"}},
 		{[]string{"ref", "void-button", "--format", "json"}, []string{`"tag": "void-button"`, `"values": [`}},
+		{[]string{"ref", "void-tabs"}, []string{"keys (rebind or switch off", "next: Right Arrow (Left Arrow in right-to-left text)"}},
+		{[]string{"ref", "void-dialog", "--format", "markdown"}, []string{"| Action | Default keys | What it does |", "| `close` (essential) | Escape |"}},
 		{[]string{"ref", "--size"}, []string{"text     index", "164 elements"}},
 		{[]string{"gen", "snippet", "void-dialog", "--lang", "jsx"}, []string{`<void-dialog size="sm" onvoid-close=`, `<void-dialog-title>Delete project</void-dialog-title>`, `<void-button color="error" variant="filled">Delete</void-button>`}},
 		{[]string{"gen", "snippet", "void-dropdown-menu", "--lang", "erb"}, []string{`data-action="void-select->my-controller#handle"`}},

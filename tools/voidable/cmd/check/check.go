@@ -88,7 +88,14 @@ func NewCmd(checker CheckerProvider) *cobra.Command {
 					return err
 				}
 			}
-			if len(all) > 0 || stale {
+			// Warnings (the `keys` rule) are reported and do not fail the check.
+			failing := 0
+			for _, x := range all {
+				if x.Severity != domain.SeverityWarning {
+					failing++
+				}
+			}
+			if failing > 0 || stale {
 				return ErrProblems
 			}
 			return nil

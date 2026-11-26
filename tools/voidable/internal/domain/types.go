@@ -115,6 +115,52 @@ type Element struct {
 	// packages/ui/cem/messages-meta.js and src/messages.ts, #29): the English
 	// default and what replaces it on an element.
 	Messages []Message `json:"messages,omitempty"`
+	// Keys are the element's key actions and their default keys (#90), from
+	// the manifest's voidKeys (source: src/keymaps/ and cem/keys-meta.js).
+	// Nil when the element handles no keys of its own.
+	Keys *Keys `json:"keys,omitempty"`
+}
+
+// Keys is what an element's `keys` attribute can rebind or turn off, and the
+// keys that are not its to remap.
+type Keys struct {
+	Intro   string      `json:"intro,omitempty"`
+	Note    string      `json:"note,omitempty"`
+	Actions []KeyAction `json:"actions"`
+	// Browser lists keys that belong to a native control the element wraps (or
+	// to focus itself); they cannot be remapped.
+	Browser []KeyRow `json:"browser,omitempty"`
+}
+
+// KeyAction is one named action with its default bindings. Keys are the
+// bindings as written (`ArrowInlineEnd` follows the reading direction),
+// Labels the same for a reader.
+type KeyAction struct {
+	Action      string   `json:"action"`
+	Keys        []string `json:"keys"`
+	Labels      []string `json:"labels"`
+	Description string   `json:"description"`
+	// Essential: without a key for it the control can become unusable from
+	// the keyboard (`close` on a modal, `activate` on a button).
+	Essential bool `json:"essential,omitempty"`
+}
+
+// KeyRow is one key the browser owns.
+type KeyRow struct {
+	Keys   string `json:"keys"`
+	Action string `json:"action"`
+}
+
+// Action returns the named action.
+func (k *Keys) Action(name string) (KeyAction, bool) {
+	if k != nil {
+		for _, a := range k.Actions {
+			if a.Action == name {
+				return a, true
+			}
+		}
+	}
+	return KeyAction{}, false
 }
 
 // Message is one built-in string of a component: its key in the messages

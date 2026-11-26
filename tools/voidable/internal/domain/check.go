@@ -2,7 +2,9 @@ package domain
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"html"
 	"sort"
 	"strconv"
 	"strings"
@@ -30,7 +32,14 @@ const (
 	// value or event renamed or removed in 0.8 (#23), reported with the fix.
 	RuleLegacyMarkup Rule = "legacy-markup"
 	RuleMissingName  Rule = "missing-name"
+	// RuleKeys (a warning, #90): a `keys` attribute that is not a JSON object of
+	// action names, names an action the element does not have, or leaves an
+	// essential action (`close` on a modal, `activate` on a button) with no key.
+	RuleKeys Rule = "keys"
 )
+
+// SeverityWarning marks a finding that is reported but does not fail the check.
+const SeverityWarning = "warning"
 
 // Finding is one problem in a source file.
 type Finding struct {
@@ -42,6 +51,9 @@ type Finding struct {
 	Attr       string `json:"attr,omitempty"`
 	Message    string `json:"message"`
 	Suggestion string `json:"suggestion,omitempty"`
+	// Severity is "warning" for a finding that does not fail the check; empty
+	// for every other finding.
+	Severity string `json:"severity,omitempty"`
 	// Value is the attribute's literal value when it has one (invalid-value
 	// findings use it to match allowlist entries).
 	Value string `json:"value,omitempty"`
@@ -230,6 +242,9 @@ func (c *Checker) checkAttr(el *Element, t Tag, a AttrToken, f findingFn) []Find
 	if !a.HasValue || a.Dynamic || a.Syntax != SyntaxAttr {
 		return nil
 	}
+	if name == "keys" && el.Keys != nil {
+		return checkKeys(el, a, f)
+	}
 	v := a.Value
 	// A value renamed in 0.8 (an enum value, or "false" on a number such as
 	// stagger) is reported with its replacement before any type check.
@@ -257,6 +272,51 @@ func (c *Checker) checkAttr(el *Element, t Tag, a AttrToken, f findingFn) []Find
 		}
 	}
 	return nil
+}
+
+// checkKeys judges a literal `keys` attribute (#90): it must be a JSON object
+// of action names, each an action the element has, and no essential action may
+// be left without a key. All of it is a warning: the page still works, but a
+// control may no longer be usable from the keyboard.
+func checkKeys(el *Element, a AttrToken, f findingFn) []Finding {
+	warn := func(suggestion, format string, args ...any) Finding {
+		x := f(a.Line, a.Col, RuleKeys, a.Name, suggestion, format, args...)
+		x.Severity = SeverityWarning
+		return x
+	}
+	var names []string
+	for _, k := range el.Keys.Actions {
+		names = append(names, k.Action)
+	}
+	var spec map[string]json.RawMessage
+	if err := json.Unmarshal([]byte(html.UnescapeString(a.Value)), &spec); err != nil || spec == nil {
+		return []Finding{warn("", "keys on <%s> is not a JSON object of action names to keys, so it is ignored; write keys='{\"%s\":[\"...\"]}'", el.Tag, names[0])}
+	}
+	actions := make([]string, 0, len(spec))
+	for name := range spec {
+		actions = append(actions, name)
+	}
+	sort.Strings(actions)
+	var out []Finding
+	for _, name := range actions {
+		action, ok := el.Keys.Action(name)
+		if !ok {
+			s := Suggest(name, names)
+			out = append(out, warn(s, "<%s> has no key action %q%s; it has: %s", el.Tag, name, didYouMean(s, ""), strings.Join(names, ", ")))
+			continue
+		}
+		var one string
+		var many []string
+		raw := spec[name]
+		if string(raw) != "null" && json.Unmarshal(raw, &one) != nil && json.Unmarshal(raw, &many) != nil {
+			out = append(out, warn("", "keys.%s on <%s> must be a key, a list of keys or null", name, el.Tag))
+			continue
+		}
+		if action.Essential && one == "" && len(many) == 0 {
+			out = append(out, warn("", "keys on <%s> leaves %q with no key; it is essential, so the control may no longer be usable from the keyboard. Bind it to another key instead of removing it", el.Tag, name))
+		}
+	}
+	return out
 }
 
 func (c *Checker) unknownAttr(el *Element, a AttrToken, f findingFn) Finding {

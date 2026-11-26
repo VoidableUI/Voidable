@@ -171,6 +171,16 @@ func refText(p *printer, r *domain.Reference) {
 			p.f(" %s: %q # %s\n", m.Key, m.Default, m.Override.String())
 		}
 	}
+	if r.Keys != nil {
+		p.f("%s", "keys (rebind or switch off with keys='{\"action\":[\"Key\"]}'; [] turns an action off; essential ones can make the control unusable from the keyboard):\n")
+		for _, k := range r.Keys.Actions {
+			essential := ""
+			if k.Essential {
+				essential = " (essential)"
+			}
+			p.f(" %s%s: %s # %s\n", k.Action, essential, strings.Join(k.Labels, ", "), k.Description)
+		}
+	}
 	if r.Parts != nil {
 		partsText(p, r.Parts, " ")
 		if r.Parts.Skeleton != "" {
@@ -236,6 +246,17 @@ func refMarkdown(p *printer, r *domain.Reference) {
 		}
 		p.f("%s", "\n")
 	}
+	if r.Keys != nil {
+		p.f("%s", "Keys (an action can be rebound or switched off with the `keys` attribute, `keys='{\"next\":[\"l\"],\"close\":[]}'`; removing a key can make the control unusable from the keyboard):\n\n| Action | Default keys | What it does |\n|---|---|---|\n")
+		for _, k := range r.Keys.Actions {
+			essential := ""
+			if k.Essential {
+				essential = " (essential)"
+			}
+			p.f("| `%s`%s | %s | %s |\n", k.Action, essential, mdEscape(strings.Join(k.Labels, ", ")), mdEscape(k.Description))
+		}
+		p.f("%s", "\n")
+	}
 	if r.Example != nil {
 		p.f("Example (%s):\n\n```html\n%s```\n", r.Example.Source, r.Example.Code)
 	}
@@ -260,6 +281,10 @@ func Findings(w io.Writer, fs []domain.Finding, f Format) error {
 		return writeJSON(w, fs)
 	}
 	for _, x := range fs {
+		if x.Severity != "" {
+			p.f("%s:%d:%d: %s: [%s] %s\n", x.File, x.Line, x.Col, x.Severity, x.Rule, x.Message)
+			continue
+		}
 		p.f("%s:%d:%d: [%s] %s\n", x.File, x.Line, x.Col, x.Rule, x.Message)
 	}
 	return p.err
