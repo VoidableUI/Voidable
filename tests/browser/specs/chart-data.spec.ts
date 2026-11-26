@@ -96,9 +96,11 @@ test.describe('on a page', () => {
 
     test('is out of sight until show-table, and then sits below the chart', async ({ page }) => {
       const box = (sel: string) => page.locator(sel).evaluate((e) => { const r = e.getBoundingClientRect(); return { w: r.width, h: r.height, top: r.top }; });
-      const hidden = await box('#b table');
-      expect(hidden.w).toBeLessThanOrEqual(1);
-      expect(hidden.h).toBeLessThanOrEqual(1);
+      // A table cannot be narrower than its content, so it is hidden by clipping (and takes no room in the layout).
+      const clip = await page.locator('#b table').evaluate((e) => { const s = getComputedStyle(e); return { pos: s.position, clip: s.clipPath }; });
+      expect(clip).toEqual({ pos: 'absolute', clip: 'inset(50%)' });
+      const chartHeight = await page.locator('#b').evaluate((e) => e.getBoundingClientRect().height);
+      expect(chartHeight).toBeLessThanOrEqual(await page.locator('#b svg').evaluate((e) => e.getBoundingClientRect().height + 1));
       await page.evaluate(() => document.getElementById('b')!.setAttribute('show-table', ''));
       await settle(page);
       const shown = await box('#b table');
