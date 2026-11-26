@@ -16,7 +16,7 @@ new LiveSocket('/live', Socket, { hooks: { ...VoidHooks }, dom: VoidDOM });
 
 ## API
 
-- `VoidHooks`: LiveView hooks. `VoidEvent` pushes the Voidable events an element opted in to (`events` on the HEEx component) as LiveView events.
+- `VoidHooks`: LiveView hooks. `VoidProps` sets element properties (such as chart `data`) from JSON the HEEx components render. `VoidEvent` pushes the Voidable events an element opted in to (`events` on the HEEx component) as LiveView events.
 - `VoidDOM`: the `dom` option (`onBeforeElUpdated`); keeps client state across LiveView patches.
 - LiveView's own bindings (`phx-click`, `phx-change`, `phx-submit`) work on the components first; use `events` only for an event no binding covers.
 
