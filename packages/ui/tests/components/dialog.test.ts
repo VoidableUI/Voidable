@@ -79,6 +79,7 @@ describe('VoidDialog', () => {
       }
     });
 
+
     it('keeps a server role on the title', async () => {
       const el = await mount({}, '<void-dialog-title role="none">Confirm</void-dialog-title>');
       expect(el.querySelector('void-dialog-title')!.getAttribute('role')).toBe('none');

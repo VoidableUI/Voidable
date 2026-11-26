@@ -21,9 +21,6 @@ void-toast-container {
   pointer-events: none;
 }
 
-void-toast-container[popover]:not(:popover-open) {
-  display: none;
-}
 /* The placements name viewport corners (top-right is the top right corner of the
    screen in either direction), so these stay physical. */
 
@@ -42,8 +39,18 @@ void-toast-container[placement='inline'] {
   align-items: stretch;
 }
 
-/* Nothing to show: take no space, whatever the placement. */
-void-toast-container:not(:has(void-toast)) { display: none; }
+/* Nothing to show: take no space, whatever the placement, but stay rendered. The container is a live region and
+   a screen reader announces only what is added to a region it already knows, so it must never be display:none
+   (a closed popover is display:none by default; the display above overrides that). */
+void-toast-container:not(:has(void-toast)) {
+  width: 0;
+  height: 0;
+  min-width: 0;
+  min-height: 0;
+  padding: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
 
 void-toast {
   --_void-tone: var(--void-color-accent);

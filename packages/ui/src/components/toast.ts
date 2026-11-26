@@ -32,7 +32,7 @@ export class VoidToast extends VoidElement {
 
   protected readonly _parts = new PartsController(this, {
     tags: ['void-toast-title', 'void-toast-description', 'void-toast-actions', 'void-toast-close'],
-    onChange: () => undefined,
+    onChange: () => this._syncRole(),
   });
 
   private _timer: ReturnType<typeof setTimeout> | undefined;
@@ -68,14 +68,38 @@ export class VoidToast extends VoidElement {
     this.removeEventListener('click', this._onClick);
   }
 
-  protected override updated(changed: Map<string, unknown>): void {
-    super.updated(changed);
-    if (changed.has('color')) this._syncRole();
+  /**
+   * The toast is a plain group, reachable by a screen reader but not a live region itself: a live region inserted
+   * together with its text is commonly not announced. The container announces it instead, through its own
+   * announcer elements, which exist before any toast does.
+   */
+  private _syncRole(): void {
+    this.setHostAttribute('role', 'group');
+    // The title names the group (the message when there is no title), unless the author named the toast.
+    const named = this._parts.one('void-toast-title') ?? this._parts.one('void-toast-description');
+    const current = this.getAttribute('aria-labelledby');
+    const ours = this._labelledBy !== null && current === this._labelledBy;
+    if (named && !this.hasAttribute('aria-label') && (current === null || ours)) {
+      this._labelledBy = this._parts.id(named, named.localName);
+      this.setHostAttribute('aria-labelledby', this._labelledBy);
+    } else if (ours) {
+      this._labelledBy = null;
+      this.setHostAttribute('aria-labelledby', null);
+    }
   }
 
-  /** Errors and warnings interrupt (alert); everything else is polite (status). */
-  private _syncRole(): void {
-    this.setHostAttribute('role', this.color === 'error' || this.color === 'warning' ? 'alert' : 'status');
+  /** The `aria-labelledby` this toast wrote itself, so an author's own name is never replaced. */
+  private _labelledBy: string | null = null;
+
+  /** What a screen reader should say for this toast: its title, then its message (or, without parts, its text). */
+  announcement(): string {
+    const text = (el: Element | null | undefined): string => el?.textContent?.replace(/\s+/g, ' ').trim() ?? '';
+    const title = text(this._parts.one('void-toast-title'));
+    const description = text(this._parts.one('void-toast-description'));
+    if (title || description) return [title, description].filter(Boolean).join('. ');
+    const clone = this.cloneNode(true) as HTMLElement;
+    clone.querySelectorAll('void-toast-close, void-toast-actions').forEach(n => n.remove());
+    return text(clone);
   }
 
   private _startTimer(): void {
@@ -144,21 +168,80 @@ export class VoidToastContainer extends VoidElement {
   placement: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left' | 'top-center' | 'bottom-center' | 'inline' = 'bottom-right';
 
   private _observer: MutationObserver | null = null;
+  private _announceTimers = new Map<HTMLElement, ReturnType<typeof setTimeout>>();
 
   connectedCallback() {
     super.connectedCallback();
     this.setHostAttribute('role', 'region');
     this.setHostAttribute('aria-label', 'Notifications');
-    this.setHostAttribute('aria-live', 'polite');
+    // Neither the toasts nor the container are live regions: the two announcers below speak for them.
     if (typeof this.showPopover === 'function') this.setHostAttribute('popover', 'manual');
-    this._observer ??= new MutationObserver(records => this._syncShown(records.some(r => r.addedNodes.length > 0)));
+    this._ensureAnnouncers();
+    this._observer ??= new MutationObserver(records => {
+      this._syncShown(records.some(r => r.addedNodes.length > 0));
+      for (const r of records) {
+        for (const n of r.addedNodes) if (n instanceof VoidToast) this._announce(n);
+      }
+    });
     this._observer.observe(this, { childList: true });
     this._syncShown(true);
+    for (const toast of this.querySelectorAll(':scope > void-toast')) this._announce(toast as VoidToast);
   }
 
   disconnectedCallback() {
     super.disconnectedCallback();
     this._observer?.disconnect();
+    for (const t of this._announceTimers.values()) clearTimeout(t);
+    this._announceTimers.clear();
+  }
+
+  /**
+   * Two persistent, visually hidden live regions that exist from the container's connection: a polite one
+   * (`role="status"`) and an assertive one (`role="alert"`). A screen reader announces text that changes inside a
+   * region it already knows, so a toast's words are written here after the toast is in, never together with it.
+   */
+  private _ensureAnnouncers(): void {
+    // They live in a shadow root, so a server morph or a snapshot restore of the light DOM never removes or
+    // duplicates them; the toasts are slotted through.
+    const root = this.shadowRoot ?? this.attachShadow({ mode: 'open' });
+    if (root.querySelector('slot')) return;
+    const doc = this.ownerDocument;
+    const style = doc.createElement('style');
+    style.textContent =
+      '[data-void-announcer]{position:absolute;width:1px;height:1px;margin:-1px;padding:0;border:0;overflow:hidden;clip-path:inset(50%);white-space:nowrap;pointer-events:none}';
+    root.append(style);
+    for (const [kind, role] of [['polite', 'status'], ['assertive', 'alert']] as const) {
+      const el = doc.createElement('div');
+      el.setAttribute('data-void-announcer', kind);
+      el.setAttribute('role', role);
+      el.setAttribute('aria-live', kind);
+      el.setAttribute('aria-atomic', 'true');
+      root.append(el);
+    }
+    root.append(doc.createElement('slot'));
+  }
+
+  private _region(kind: 'polite' | 'assertive'): HTMLElement | null {
+    return this.shadowRoot?.querySelector<HTMLElement>(`[data-void-announcer="${kind}"]`) ?? null;
+  }
+
+  /** Writes a toast's text into the matching announcer on a later task, after clearing it so a repeat is spoken again. */
+  private _announce(toast: VoidToast): void {
+    const kind = toast.color === 'error' || toast.color === 'warning' ? 'assertive' : 'polite';
+    const region = this._region(kind);
+    if (!region) return;
+    clearTimeout(this._announceTimers.get(region));
+    region.textContent = '';
+    this._announceTimers.set(
+      region,
+      setTimeout(() => {
+        this._announceTimers.delete(region);
+        if (!toast.isConnected) return;
+        region.textContent = toast.announcement();
+        // Spoken by now; do not leave a stale copy of the message for a reader to find later.
+        this._announceTimers.set(region, setTimeout(() => { this._announceTimers.delete(region); region.textContent = ''; }, 5000));
+      }, 150),
+    );
   }
 
   /** Shown while it holds a toast; raised to the top of the top layer when one is added. */

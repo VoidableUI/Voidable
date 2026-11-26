@@ -107,7 +107,6 @@ export const scenarios: Scenario[] = [
     id: 'number-input',
     title: 'A number input announces its value, and the new value when it changes',
     page: '/sr-controls',
-    readerIssues: { VoiceOver: { key: 'untracked:voiceover-number-input-percent', detail: 'VoiceOver said "11.1% Seats stepper" for a value of 2; it should say "2".' } },
     steps: [
       { reach: { role: 'spinbutton', name: 'Seats', value: '2' }, by: 'control' },
       { act: true },
@@ -127,7 +126,8 @@ export const scenarios: Scenario[] = [
       { hear: { role: 'dialog', name: 'Profile settings', description: 'Change how your name appears.', describedByReference: true } },
       { focus: 'void-dialog' },
       { walk: 10, unreachable: { role: 'button', name: 'Background action' } },
-      { press: 'Escape' },
+      // NVDA in focus mode on the name field can spend the first Escape on leaving focus mode (browse mode) before the page sees it: press it twice there; a second Escape on a closed dialog does nothing.
+      { press: 'Escape', times: { NVDA: 2 } },
       { focus: '#opener' },
       { hear: { role: 'button', name: 'Edit profile' } },
     ],
@@ -189,19 +189,21 @@ export const scenarios: Scenario[] = [
   },
   {
     id: 'toast',
-    title: 'A toast is announced politely by its live region without moving focus',
+    title: 'A toast is announced once, politely, by the container\'s status announcer without moving focus',
     page: '/sr-notices',
-    readerIssues: {
-      VoiceOver: { key: 'untracked:voiceover-toast-silent', detail: 'The only phrase VoiceOver logged after the toast appeared was empty.' },
-      NVDA: { key: 'untracked:nvda-toast-silent', detail: 'The only phrase NVDA logged after the toast appeared was empty.' },
-    },
     steps: [
       { reach: { role: 'button', name: 'Send notification' }, by: 'control' },
       { act: true },
       { hear: { role: 'status', text: 'Changes saved', container: true, spoken: [/changes saved/] } },
+      { once: /changes saved/ },
       {
-        check: async (page) => expect(page.getByRole('region', { name: 'Notifications' })).toHaveAttribute('aria-live', 'polite'),
-        note: 'the toast container is a polite live region',
+        check: async (page) => {
+          await expect(page.getByRole('region', { name: 'Notifications' })).not.toHaveAttribute('aria-live', /.+/);
+          await expect(page.locator('#flash [role=status]')).toHaveAttribute('aria-live', 'polite');
+          await expect(page.locator('#flash > void-toast')).toHaveAttribute('role', 'group');
+          await expect(page.getByRole('group', { name: 'Changes saved' })).toHaveCount(1);
+        },
+        note: 'the container announces through a polite status announcer; the visible toast is a group, not a second live region',
       },
       { focus: '#notify' },
     ],

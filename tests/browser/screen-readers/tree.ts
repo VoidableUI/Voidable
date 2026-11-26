@@ -134,6 +134,8 @@ export function treeSuite(title: string, scenarios: Scenario[]): void {
               await settle(page);
             } else if ('hear' in step) {
               await expectFact(page, step.hear);
+            } else if ('once' in step) {
+              // Counting what was spoken has no tree equivalent.
             } else if ('walk' in step) {
               // Content behind a modal is inert: it cannot take focus, and so a screen reader cannot reach it.
               const loc = locate(page, step.unreachable);
