@@ -39,8 +39,11 @@ export const reference = {
   table500FirstMs: 114,
   /** One Turbo morph of that table (one cell changed), through VoidTurbo. */
   table500MorphMs: 37,
-  /** First render of a void-select with 5,000 options. */
-  select5000Ms: 15,
+  /** First render of a void-select with 5,000 options. Not normalised like the others: about two thirds
+   *  of it is the browser laying out 5,000 options inside the settle wait, which measured 31 to 34 ms on
+   *  the build host and on hosted runners alike whatever their calibration, so dividing by the
+   *  calibration (15 ms) made the test fail on any runner that calibrated fast. */
+  select5000Ms: 33,
   /** 200 open/close cycles of a dialog. */
   dialog200Ms: 276,
   /** Gzipped size of `import '@voidable/ui'` (everything, Lit included), minified. */
