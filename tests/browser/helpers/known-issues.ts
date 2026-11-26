@@ -18,9 +18,9 @@ export const KNOWN_ISSUES = {
   'untracked:voiceover-dialog-description':
     'VoiceOver names the dialog ("Profile settings web dialog with 6 items") but never speaks its description, "Change how your name appears.", which is attached with ARIA element references across a shadow root.',
   'untracked:voiceover-toast-silent':
-    'VoiceOver speaks nothing for a toast: the polite live region receives "Changes saved" and the only phrase logged is empty (""); it should say "Changes saved".',
+    'VoiceOver speaks nothing for a toast: the polite live region receives "Changes saved" and the only phrase logged is empty (""); it should say "Changes saved". Fix attempted in the toast commit of fix/screen-reader-defects (container stays rendered while empty).',
   'untracked:nvda-toast-silent':
-    'NVDA speaks nothing for a toast either: the only phrase logged after "Changes saved" was added to the polite live region is empty (""). With VoiceOver too, this is the strongest evidence of a component defect.',
+    'NVDA speaks nothing for a toast either: the only phrase logged after "Changes saved" was added to the polite live region is empty (""). With VoiceOver too, this is the strongest evidence of a component defect. Fix attempted in the toast commit of fix/screen-reader-defects.',
   'untracked:voiceover-multiselect-selection':
     'After Enter chooses an option in a multiselect, VoiceOver says only "You are currently on a selectable (null), inside of a list box." and nothing about the selection; NVDA says "selected".',
   'untracked:voiceover-menu-silent':

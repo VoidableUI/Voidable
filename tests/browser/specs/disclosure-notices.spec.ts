@@ -260,6 +260,39 @@ test.describe('disclosure and notices', () => {
       await expect(page.locator('#t-alert button')).toHaveCount(0);
     });
 
+    test('the live region is rendered and in the accessibility tree before the first toast is added', async ({ page }) => {
+      await load(page, '/sr-notices');
+      // Empty, the container is rendered (not display:none) and in the tree as a named, polite region.
+      await expect(page.getByRole('region', { name: 'Notifications' })).toHaveCount(1);
+      const before = await page.evaluate(() => {
+        const c = document.getElementById('flash')!;
+        return { display: getComputedStyle(c).display, live: c.getAttribute('aria-live'), kids: c.children.length };
+      });
+      expect(before.display).not.toBe('none');
+      expect(before.live).toBe('polite');
+      expect(before.kids).toBe(0);
+      // At the moment the toast is added, the region is already rendered.
+      const renderedWhenAdded = await page.evaluate(
+        () =>
+          new Promise<boolean>((resolve) => {
+            const c = document.getElementById('flash')!;
+            const mo = new MutationObserver(() => {
+              mo.disconnect();
+              resolve(getComputedStyle(c).display !== 'none');
+            });
+            mo.observe(c, { childList: true });
+            (window as any).VoidUI.toast({ description: 'Changes saved', duration: 0 });
+          }),
+      );
+      expect(renderedWhenAdded).toBe(true);
+      await expect(page.getByRole('status').filter({ hasText: 'Changes saved' })).toHaveCount(1);
+      // Emptied again, it leaves the top layer but stays rendered.
+      await page.evaluate(() => document.querySelectorAll('#flash > void-toast').forEach((t) => t.remove()));
+      await expect.poll(() => page.evaluate(() => document.getElementById('flash')!.matches(':popover-open'))).toBe(false);
+      expect(await page.evaluate(() => getComputedStyle(document.getElementById('flash')!).display)).not.toBe('none');
+      await expect(page.getByRole('region', { name: 'Notifications' })).toHaveCount(1);
+    });
+
     test('toast() writes the parts an author would write', async ({ page }) => {
       const built = await page.evaluate(() => {
         const toast = (window as any).VoidUI.toast as (o: object) => HTMLElement;
