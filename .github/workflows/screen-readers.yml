@@ -19,7 +19,9 @@
 # Playwright Chromium. Pinned by name, not `-latest`, so an image migration is a
 # change in this file. Tooling: Node and pnpm from mise (versions from mise.toml,
 # as ci.yml does); the dependency install and the build are narrowed to what the
-# browser suite needs, and run with pnpm directly because mise's file tasks are
+# browser suite needs (plus @voidable/type-test-solid2: packages/ui's build type-checks
+# its Solid 2 typings against that package's own node_modules, which a filter on the
+# browser suite alone does not install), and run with pnpm directly because mise's file tasks are
 # bash scripts and the full `mise run build` installs the whole workspace.
 #
 # After a run: download the `*-results` artifacts and merge them into the
@@ -95,7 +97,7 @@ jobs:
           sw_vers
 
       - name: Install the browser suite's dependencies
-        run: pnpm install --frozen-lockfile --filter "@voidable/browser-tests..."
+        run: pnpm install --frozen-lockfile --filter "@voidable/browser-tests..." --filter "@voidable/type-test-solid2..."
 
       - name: Build the packages the browser suite loads
         run: pnpm --filter "@voidable/browser-tests^..." build
@@ -162,7 +164,7 @@ jobs:
         run: npx -y --ignore-scripts=false "@guidepup/setup@${GUIDEPUP_SETUP}" setup --ci
 
       - name: Install the browser suite's dependencies
-        run: pnpm install --frozen-lockfile --filter "@voidable/browser-tests..."
+        run: pnpm install --frozen-lockfile --filter "@voidable/browser-tests..." --filter "@voidable/type-test-solid2..."
 
       - name: Build the packages the browser suite loads
         run: pnpm --filter "@voidable/browser-tests^..." build
