@@ -757,7 +757,7 @@ export const FileUpload = wrapWc<VoidFileUpload, {
   name?: string;
   /** Form validation: the control must have a value. */
   required?: boolean;
-} & VoidEvents<{ Change: { value: File[]; files: File[] } }>>('void-file-upload', 'FileUpload');
+} & VoidEvents<{ Change: { value: File[]; files: File[] }; Reject: { rejected: { file: File; reason: 'type' | 'size' | 'count' }[] } }>>('void-file-upload', 'FileUpload');
 
 export const NavBar = wrapWc<VoidNavBar, {
   sticky?: boolean;
@@ -768,7 +768,7 @@ export const NavBar = wrapWc<VoidNavBar, {
 export const Hamburger = wrapWc<VoidHamburger, {
   open?: boolean;
   size?: 'sm' | 'md' | 'lg';
-} & VoidEvents<{ Open: { reason: 'trigger' }; Close: { reason: 'trigger' } }>>('void-hamburger', 'Hamburger');
+} & VoidEvents<{ Open: { reason: 'trigger' | 'keyboard' }; Close: { reason: 'trigger' } }>>('void-hamburger', 'Hamburger');
 
 export const ComposeInput = wrapWc<VoidComposeInput, {
   value?: string;
@@ -920,11 +920,13 @@ export const DatePicker = wrapWc<VoidDatePicker, {
   placeholder?: string;
   format?: string;
   color?: 'default' | 'error' | 'warning' | 'caution' | 'success' | 'info' | 'notice' | 'highlight';
+  /** Marks the field invalid; the field also sets it when a typed date is refused. */
+  error?: string;
   /** Form field name; the value is submitted under it. */
   name?: string;
   /** Form validation: the control must have a value. */
   required?: boolean;
-} & VoidEvents<{ Change: { value: string; date: Date } } & OverlayEvents>>('void-date-picker', 'DatePicker');
+} & VoidEvents<{ Change: { value: string; date: Date | null } } & OverlayEvents>>('void-date-picker', 'DatePicker');
 
 export const NumberInput = wrapWc<VoidNumberInput, {
   value?: number;

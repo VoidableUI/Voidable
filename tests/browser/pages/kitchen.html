@@ -4,7 +4,7 @@
   main { padding: 1rem; max-width: 1100px; margin: auto; }
 </style>
 <!-- Every component @voidable/ui defines, in typical use. specs/axe.spec.ts checks that none is missing. -->
-<void-nav-bar aria-label="Main"><a href="#">Home</a><a href="#">Docs</a><a href="#">Blog</a></void-nav-bar>
+<void-nav-bar><nav aria-label="Main"><a href="#">Home</a><a href="#">Docs</a><a href="#">Blog</a></nav></void-nav-bar>
 <void-sidebar id="k-sidebar" aria-label="Sections"><a href="#s-buttons">Buttons</a><a href="#s-inputs">Inputs</a></void-sidebar>
 <main>
   <h1>Kitchen sink</h1>
@@ -84,7 +84,7 @@
       <void-progress value="40" aria-label="Progress"></void-progress><void-skeleton shape="text" style="width: 200px"></void-skeleton>
       <void-stat label="Revenue" value="$12k" delta="+4%" trend="up" style="width: 200px"></void-stat>
     </div>
-    <void-table striped bordered><table><thead><tr><th>Name</th><th>Role</th></tr></thead><tbody><tr><td>Alice</td><td>Engineer</td></tr><tr><td>Ben</td><td>Designer</td></tr></tbody></table></void-table>
+    <void-table striped bordered aria-label="Team"><table><thead><tr><th>Name</th><th>Role</th></tr></thead><tbody><tr><td>Alice</td><td>Engineer</td></tr><tr><td>Ben</td><td>Designer</td></tr></tbody></table></void-table>
     <void-calendar value="2026-11-10"></void-calendar>
     <div class="row">
       <void-gauge value="67" unit="%" aria-label="CPU 67%" style="max-width: 200px"></void-gauge>
@@ -99,7 +99,7 @@
       <void-hover-card><void-hover-card-trigger><a href="#h">Hover</a></void-hover-card-trigger><void-hover-card-content><div>Card</div></void-hover-card-content></void-hover-card>
     </div>
     <void-scroll-area max-height="80px"><p>Line 1</p><p>Line 2</p><p>Line 3</p><p>Line 4</p></void-scroll-area>
-    <void-carousel><void-carousel-content><void-carousel-item><div style="height: 80px">Slide 1</div></void-carousel-item><void-carousel-item><div style="height: 80px">Slide 2</div></void-carousel-item></void-carousel-content><void-carousel-previous aria-label="Previous slide"></void-carousel-previous><void-carousel-next aria-label="Next slide"></void-carousel-next><void-carousel-indicators></void-carousel-indicators></void-carousel>
+    <void-carousel aria-label="Slides"><void-carousel-content><void-carousel-item><div style="height: 80px">Slide 1</div></void-carousel-item><void-carousel-item><div style="height: 80px">Slide 2</div></void-carousel-item></void-carousel-content><void-carousel-previous aria-label="Previous slide"></void-carousel-previous><void-carousel-next aria-label="Next slide"></void-carousel-next><void-carousel-indicators></void-carousel-indicators></void-carousel>
     <void-error-fallback heading="Something broke" message="Try again" retryable></void-error-fallback>
     <void-error-fallback><void-error-fallback-title>Parts fallback</void-error-fallback-title><void-error-fallback-description>Written with parts.</void-error-fallback-description><void-error-fallback-actions><button type="button">Retry</button></void-error-fallback-actions></void-error-fallback>
     <void-divider label="Divider"></void-divider>

@@ -159,7 +159,7 @@ export const Empty: Story = {
     <div class="scaffold-index" style="max-width: 72rem; margin: 0 auto; padding: 2rem;">
       ${pageHeader}
       ${sectionHeader}
-      <void-table hoverable>
+      <void-table hoverable aria-label="Records">
         <table>
           <thead>
             <tr>

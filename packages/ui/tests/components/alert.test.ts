@@ -33,9 +33,32 @@ describe('VoidAlert', () => {
   });
 
   describe('ARIA', () => {
-    it('sets role="alert" when connected', () => {
+    it('is role="status" for a non-urgent colour', () => {
       const el = document.createElement('void-alert') as VoidAlert;
       document.body.appendChild(el);
+      expect(el.getAttribute('role')).toBe('status');
+    });
+
+    it('is role="alert" for error and warning, following the colour', async () => {
+      const el = document.createElement('void-alert') as VoidAlert;
+      el.color = 'error';
+      document.body.appendChild(el);
+      await el.updateComplete;
+      expect(el.getAttribute('role')).toBe('alert');
+      el.color = 'success';
+      await el.updateComplete;
+      expect(el.getAttribute('role')).toBe('status');
+      el.color = 'warning';
+      await el.updateComplete;
+      expect(el.getAttribute('role')).toBe('alert');
+    });
+
+    it('keeps a role the author wrote', async () => {
+      const el = document.createElement('void-alert') as VoidAlert;
+      el.setAttribute('role', 'alert');
+      el.color = 'info';
+      document.body.appendChild(el);
+      await el.updateComplete;
       expect(el.getAttribute('role')).toBe('alert');
     });
   });

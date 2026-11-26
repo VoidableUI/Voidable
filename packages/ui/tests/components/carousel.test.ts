@@ -172,6 +172,22 @@ describe('VoidCarousel', () => {
       expect(dots[0]!.getAttribute('role')).toBe('tab');
     });
 
+    it('is a polite live region for the slides, and not while it rotates by itself', async () => {
+      const el = createCarousel(3);
+      await mount(el, document.body);
+      const content = el.querySelector('void-carousel-content')!;
+      expect(el.getAttribute('role')).toBe('region');
+      expect(el.getAttribute('aria-roledescription')).toBe('carousel');
+      expect(content.getAttribute('aria-live')).toBe('polite');
+      el.autoplay = true;
+      await el.updateComplete;
+      expect(content.getAttribute('aria-live')).toBe('off');
+      el.autoplay = false;
+      await el.updateComplete;
+      expect(content.getAttribute('aria-live')).toBe('polite');
+      el.remove();
+    });
+
     it('gives each slide a group role, a slide role description and a numbered label unless it has its own', async () => {
       const own = document.createElement('void-carousel-item');
       own.setAttribute('aria-label', 'Mine');
@@ -180,7 +196,7 @@ describe('VoidCarousel', () => {
       const slides = Array.from(el.querySelectorAll('void-carousel-item'));
       expect(slides[0]!.getAttribute('role')).toBe('group');
       expect(slides[0]!.getAttribute('aria-roledescription')).toBe('slide');
-      expect(slides[0]!.getAttribute('aria-label')).toBe('Slide 1 of 4');
+      expect(slides[0]!.getAttribute('aria-label')).toBe('1 of 4');
       expect(slides[3]!.getAttribute('aria-label')).toBe('Mine');
     });
   });

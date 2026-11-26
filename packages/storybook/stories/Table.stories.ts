@@ -249,7 +249,7 @@ export const StackCellLabels: Story = {
     },
   },
   render: () => narrow('360px', html`
-    <void-table stack>
+    <void-table stack aria-label="Team members">
       <table>
         <thead>
           <tr><th data-stack="title">Name</th><th data-label="Job">Role</th><th>Status</th></tr>

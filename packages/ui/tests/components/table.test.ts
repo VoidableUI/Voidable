@@ -348,6 +348,46 @@ describe('VoidTable', () => {
     });
   });
 
+  describe('name', () => {
+    const settle = async (el: VoidTable) => {
+      await el.updateComplete;
+      for (let i = 0; i < 4; i++) await Promise.resolve();
+    };
+    const mount = async (attrs: Record<string, string>, inner = '') => {
+      const el = createElement();
+      for (const [k, v] of Object.entries(attrs)) el.setAttribute(k, v);
+      el.innerHTML = `<table>${inner}<thead><tr><th>A</th></tr></thead><tbody><tr><td>1</td></tr></tbody></table>`;
+      document.body.appendChild(el);
+      await settle(el);
+      return el;
+    };
+
+    it('copies the host aria-label onto the native table', async () => {
+      const el = await mount({ 'aria-label': 'Invoices' });
+      expect(el.querySelector('table')!.getAttribute('aria-label')).toBe('Invoices');
+      el.setAttribute('aria-label', 'Receipts');
+      await settle(el);
+      expect(el.querySelector('table')!.getAttribute('aria-label')).toBe('Receipts');
+      el.removeAttribute('aria-label');
+      await settle(el);
+      expect(el.querySelector('table')!.hasAttribute('aria-label')).toBe(false);
+      el.remove();
+    });
+
+    it('leaves a table named by its caption, or by its own aria-label, alone', async () => {
+      const captioned = await mount({ 'aria-label': 'Invoices' }, '<caption>Team</caption>');
+      expect(captioned.querySelector('table')!.hasAttribute('aria-label')).toBe(false);
+      captioned.remove();
+      const own = createElement();
+      own.setAttribute('aria-label', 'Host');
+      own.innerHTML = '<table aria-label="Mine"><tbody><tr><td>1</td></tr></tbody></table>';
+      document.body.appendChild(own);
+      await settle(own);
+      expect(own.querySelector('table')!.getAttribute('aria-label')).toBe('Mine');
+      own.remove();
+    });
+  });
+
   describe('scroll region', () => {
     const settle = async (el: VoidTable) => {
       await el.updateComplete;

@@ -25,6 +25,7 @@ const slideStyle = 'display: flex; align-items: center; justify-content: center;
 export const Default: Story = {
   render: (args) => html`
     <void-carousel
+      aria-label="Screenshots"
       index=${args.index ?? 0}
       ?loop=${args.loop}
       ?autoplay=${args.autoplay}
@@ -54,6 +55,7 @@ export const WithLoop: Story = {
   args: { loop: true },
   render: (args) => html`
     <void-carousel
+      aria-label="Screenshots"
       index=${args.index ?? 0}
       ?loop=${args.loop ?? true}
       ?autoplay=${args.autoplay}
@@ -81,7 +83,7 @@ export const WithLoop: Story = {
 
 export const Autoplay: Story = {
   render: () => html`
-    <void-carousel autoplay loop interval="3000">
+    <void-carousel aria-label="Screenshots" autoplay loop interval="3000">
       <void-carousel-content>
         <void-carousel-item>
           <div style="${slideStyle} background: var(--void-color-bg-elevated);">Auto 1</div>
@@ -102,7 +104,7 @@ export const Autoplay: Story = {
 
 export const Vertical: Story = {
   render: () => html`
-    <void-carousel orientation="vertical" loop style="height: 8rem;">
+    <void-carousel aria-label="Screenshots" orientation="vertical" loop style="height: 8rem;">
       <void-carousel-content>
         <void-carousel-item>
           <div style="${slideStyle} background: var(--void-color-bg-elevated); height: 100%; font-size: 1rem;">Top</div>
@@ -123,7 +125,7 @@ export const Vertical: Story = {
 
 export const NoControls: Story = {
   render: () => html`
-    <void-carousel>
+    <void-carousel aria-label="Screenshots">
       <void-carousel-content>
         <void-carousel-item>
           <div style="${slideStyle} background: var(--void-color-bg-elevated);">Slide 1</div>
@@ -142,7 +144,7 @@ export const NoControls: Story = {
 export const Sizes: Story = {
   render: () => html`
     <div style="display: flex; flex-direction: column; gap: 2rem;">
-      <void-carousel size="sm" loop>
+      <void-carousel aria-label="Screenshots" size="sm" loop>
         <void-carousel-content>
           <void-carousel-item>
             <div style="${slideStyle} background: var(--void-color-bg-elevated); height: 8rem; font-size: 1rem;">Small</div>
@@ -155,7 +157,7 @@ export const Sizes: Story = {
         <void-carousel-next aria-label="Next slide"></void-carousel-next>
         <void-carousel-indicators></void-carousel-indicators>
       </void-carousel>
-      <void-carousel size="md" loop>
+      <void-carousel aria-label="Screenshots" size="md" loop>
         <void-carousel-content>
           <void-carousel-item>
             <div style="${slideStyle} background: var(--void-color-bg-elevated);">Medium</div>
@@ -168,7 +170,7 @@ export const Sizes: Story = {
         <void-carousel-next aria-label="Next slide"></void-carousel-next>
         <void-carousel-indicators></void-carousel-indicators>
       </void-carousel>
-      <void-carousel size="lg" loop>
+      <void-carousel aria-label="Screenshots" size="lg" loop>
         <void-carousel-content>
           <void-carousel-item>
             <div style="${slideStyle} background: var(--void-color-bg-elevated); height: 16rem; font-size: 2rem;">Large</div>

@@ -88,7 +88,7 @@ func TestCheckFixtures(t *testing.T) {
 			`parts.html:17:27: [legacy-markup] dismissable`,
 			`parts.html:18:1: [missing-part] <void-carousel> has no <void-carousel-content>`,
 			`parts.html:18:16: [legacy-markup] controls`,
-			`parts.html:18:33: [legacy-markup] <void-carousel-slide> no longer exists; write each slide as <void-carousel-item> inside <void-carousel-content>`,
+			`parts.html:18:53: [legacy-markup] <void-carousel-slide> no longer exists; write each slide as <void-carousel-item> inside <void-carousel-content>`,
 			`parts.html:19:1: [missing-part] <void-menu> has no <void-menu-content>`,
 			`parts.html:19:12: [legacy-markup] searchable`,
 			`parts.html:19:23: [legacy-markup] placeholder`,

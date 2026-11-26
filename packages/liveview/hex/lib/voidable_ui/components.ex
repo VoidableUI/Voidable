@@ -1845,6 +1845,7 @@ defmodule VoidableUI.Components do
   attr :placeholder, :string, default: nil
   attr :format, :string, default: nil
   attr :color, :string, default: nil
+  attr :error, :string, default: nil
   attr :events, :any, default: nil, doc: @events_doc
   attr :rest, :global
 
@@ -1863,6 +1864,7 @@ defmodule VoidableUI.Components do
       placeholder={@placeholder}
       format={@format}
       color={@color}
+      error={@error}
       phx-hook={void_hook(@events)}
       data-void-events={void_events(@events, "void-change")}
       {@rest}

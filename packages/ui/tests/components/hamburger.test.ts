@@ -79,6 +79,41 @@ describe('VoidHamburger', () => {
       await el.updateComplete;
       expect(el.getAttribute('aria-label')).toBe('Menu');
     });
+
+    it('keeps the name the author wrote, open or closed', async () => {
+      const own = createElement();
+      own.setAttribute('aria-label', 'Main navigation');
+      document.body.appendChild(own);
+      expect(own.getAttribute('aria-label')).toBe('Main navigation');
+      own.open = true;
+      await own.updateComplete;
+      expect(own.getAttribute('aria-label')).toBe('Main navigation');
+      expect(own.getAttribute('aria-expanded')).toBe('true');
+      own.remove();
+    });
+
+    it('leaves a name given by aria-labelledby alone', () => {
+      const own = createElement();
+      own.setAttribute('aria-labelledby', 'x');
+      document.body.appendChild(own);
+      expect(own.hasAttribute('aria-label')).toBe(false);
+      own.remove();
+    });
+  });
+
+  describe('open reason', () => {
+    it('is keyboard for Enter and Space, trigger for a click and for closing', () => {
+      const el = createElement();
+      document.body.appendChild(el);
+      const reasons: string[] = [];
+      el.addEventListener('void-open', (e) => reasons.push(`open:${(e as CustomEvent).detail.reason}`));
+      el.addEventListener('void-close', (e) => reasons.push(`close:${(e as CustomEvent).detail.reason}`));
+      el.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+      el.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+      el.click();
+      expect(reasons).toEqual(['open:keyboard', 'close:trigger', 'open:trigger']);
+      el.remove();
+    });
   });
 
   describe('toggling', () => {

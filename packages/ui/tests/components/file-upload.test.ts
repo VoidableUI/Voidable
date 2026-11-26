@@ -397,4 +397,88 @@ describe('VoidFileUpload', () => {
       expect(dropzone.getAttribute('aria-disabled')).toBe('true');
     });
   });
+
+  describe('void-reject', () => {
+    let el: VoidFileUpload;
+    const drop = async (...files: File[]) => {
+      const dt = new DataTransfer();
+      for (const f of files) dt.items.add(f);
+      (el.querySelector('.void-file-upload-dropzone') as HTMLElement).dispatchEvent(makeDropEvent(dt));
+      await el.updateComplete;
+    };
+
+    beforeEach(async () => {
+      el = document.createElement('void-file-upload') as VoidFileUpload;
+      el.accept = '.png';
+      el.maxSize = 50;
+      document.body.appendChild(el);
+      await el.updateComplete;
+    });
+
+    afterEach(() => {
+      el.remove();
+    });
+
+    it('fires once, without bubbling, listing each file with its reason', async () => {
+      const seen: unknown[] = [];
+      document.body.addEventListener('void-reject', e => seen.push(e));
+      const own: CustomEvent[] = [];
+      el.addEventListener('void-reject', e => own.push(e as CustomEvent));
+      const pdf = makeFile('a.pdf', 10, 'application/pdf');
+      const big = makeFile('b.png', 100, 'image/png');
+      await drop(pdf, big);
+      expect(own).toHaveLength(1);
+      expect(seen).toHaveLength(0);
+      expect(own[0].bubbles).toBe(false);
+      expect(own[0].detail.rejected).toEqual([
+        { file: pdf, reason: 'type' },
+        { file: big, reason: 'size' },
+      ]);
+    });
+
+    it('marks the zone invalid, described by the message', async () => {
+      await drop(makeFile('a.pdf', 10, 'application/pdf'));
+      const zone = el.querySelector('.void-file-upload-dropzone') as HTMLElement;
+      const msg = el.querySelector('.void-file-upload-error') as HTMLElement;
+      expect(el.hasAttribute('error')).toBe(true);
+      expect(zone.getAttribute('aria-invalid')).toBe('true');
+      expect(zone.getAttribute('aria-describedby')).toBe(msg.id);
+      expect(msg.textContent).toContain('a.pdf');
+    });
+
+    it('clears on the next accepted selection and not before', async () => {
+      await drop(makeFile('a.pdf', 10, 'application/pdf'));
+      await drop(makeFile('b.pdf', 10, 'application/pdf'));
+      expect(el.error).not.toBe('');
+      await drop(makeFile('ok.png', 10, 'image/png'));
+      expect(el.error).toBe('');
+      const zone = el.querySelector('.void-file-upload-dropzone') as HTMLElement;
+      expect(zone.hasAttribute('aria-invalid')).toBe(false);
+      expect(zone.hasAttribute('aria-describedby')).toBe(false);
+    });
+
+    it('does not clear a message the author set', async () => {
+      await drop(makeFile('a.pdf', 10, 'application/pdf'));
+      el.error = 'Server said no';
+      await drop(makeFile('ok.png', 10, 'image/png'));
+      expect(el.error).toBe('Server said no');
+    });
+
+    it('reports reason count for extra files when multiple is off', async () => {
+      const a = makeFile('a.png', 10, 'image/png');
+      const b = makeFile('b.png', 10, 'image/png');
+      let detail: { rejected: { file: File; reason: string }[] } | undefined;
+      el.addEventListener('void-reject', e => { detail = (e as CustomEvent).detail; });
+      await drop(a, b);
+      expect(detail?.rejected).toEqual([{ file: b, reason: 'count' }]);
+      expect(el.querySelectorAll('.void-file-upload-file')).toHaveLength(1);
+    });
+
+    it('keeps the accepted files of a mixed drop', async () => {
+      el.multiple = true;
+      await drop(makeFile('a.png', 10, 'image/png'), makeFile('b.pdf', 10, 'application/pdf'));
+      expect(el.querySelectorAll('.void-file-upload-file')).toHaveLength(1);
+      expect(el.error).not.toBe('');
+    });
+  });
 });

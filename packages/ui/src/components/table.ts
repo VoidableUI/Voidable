@@ -48,6 +48,10 @@ interface Column {
  * `data-align="end"` on a header cell right-aligns a numeric column. Because browsers can drop table
  * semantics when `display` changes, a table with `stack` carries explicit table, row and cell roles.
  *
+ * **Name.** A table needs a name: write a `<caption>` (the caption part; it can be visually hidden), or an
+ * `aria-label` (or `label`) on the `<void-table>`, which the component copies onto the native `<table>`. `voidable check`
+ * reports a `<void-table>` with neither (rule `missing-name`).
+ *
  * **Overflow.** Nothing is clipped by default, so a menu, popover or tooltip opened from a cell is
  * always fully visible. `scrollable` makes the table its own horizontal scroll region: it is
  * focusable and labelled (`label`, else the `<caption>`, else `aria-label`) only while it actually
@@ -90,6 +94,9 @@ export class VoidTable extends VoidElement {
   #resize: ResizeObserver | null = null;
   #queued = false;
   #autoLabels = new WeakMap<Element, string>();
+  #tableLabels = new WeakMap<Element, string>();
+  /** Watches the host's own name, which no property reflects. */
+  #nameWatch: MutationObserver | null = null;
   #autoStack = new WeakMap<Element, string>();
   #autoAlign = new WeakMap<Element, string>();
   #writtenLabel: string | null = null;
@@ -106,6 +113,8 @@ export class VoidTable extends VoidElement {
       attributes: true,
       attributeFilter: ['data-label', 'data-stack', 'data-align', 'role', 'colspan'],
     });
+    this.#nameWatch ??= new MutationObserver(() => this.#schedule());
+    this.#nameWatch.observe(this, { attributes: true, attributeFilter: ['aria-label'] });
     if (typeof ResizeObserver !== 'undefined') {
       this.#resize ??= new ResizeObserver(() => this.#schedule());
       this.#resize.observe(this);
@@ -117,6 +126,7 @@ export class VoidTable extends VoidElement {
   override disconnectedCallback(): void {
     super.disconnectedCallback();
     this.#mutations?.disconnect();
+    this.#nameWatch?.disconnect();
     this.#resize?.disconnect();
     this.removeEventListener('scroll', this.#onScroll);
   }
@@ -160,6 +170,7 @@ export class VoidTable extends VoidElement {
     let rowCount = 0;
     for (const table of this.querySelectorAll('table')) {
       if (table.closest('void-table') !== this) continue;
+      this.#syncName(table);
       if (stacked) this.#setRole(table);
       const headRow = this.#headerRow(table);
       const columns: Column[] = [];
@@ -209,6 +220,27 @@ export class VoidTable extends VoidElement {
     this.setHostAttribute('data-stack-select', select ? '' : null);
     // A long table lets the browser skip the rows that are out of view while it stacks.
     this.setHostAttribute('data-long', rowCount > LONG_TABLE ? '' : null);
+  }
+
+  /**
+   * Names the native table: by its `<caption>` (the caption part), by a name the author wrote on it, or by the
+   * host's own `aria-label` or `label`, which a generic element cannot carry to a screen reader, so it is copied
+   * onto the table (the host keeps it too, as the name of its scroll region).
+   */
+  #syncName(table: HTMLTableElement): void {
+    const host = this.getAttribute('aria-label');
+    const own = host !== null && host !== this.#writtenLabel && host.trim() !== '' ? host : null;
+    const hostLabel = own ?? (this.label?.trim() ? this.label : null);
+    const current = table.getAttribute('aria-label');
+    const mine = this.#tableLabels.get(table);
+    const authored = (current !== null && current !== mine) || table.hasAttribute('aria-labelledby') || table.querySelector(':scope > caption') !== null;
+    if (hostLabel === null || authored) {
+      if (mine !== undefined && current === mine) table.removeAttribute('aria-label');
+      this.#tableLabels.delete(table);
+      return;
+    }
+    if (current !== hostLabel) table.setAttribute('aria-label', hostLabel);
+    this.#tableLabels.set(table, hostLabel);
   }
 
   #headerRow(table: HTMLTableElement): HTMLTableRowElement | null {

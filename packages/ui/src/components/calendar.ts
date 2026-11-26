@@ -2,7 +2,7 @@ import { html, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
 import { live } from 'lit/directives/live.js';
-import { InternalsFormControl } from '../form-control.js';
+import { InternalsFormControl, type FormValidityResult } from '../form-control.js';
 import { OverlayController } from '../overlay.js';
 import { inlineKeys, uid } from '../keyboard.js';
 import { useProjection } from '../projection.js';
@@ -44,6 +44,32 @@ function formatDisplay(iso: string, fmt: string): string {
     .replace('YYYY', String(y).padStart(4, '0'))
     .replace('MM', String(m + 1).padStart(2, '0'))
     .replace('DD', String(d).padStart(2, '0'));
+}
+
+/**
+ * Reads typed text as a date: ISO `YYYY-MM-DD` always, else the way `fmt` writes it (`YYYY`, `MM` and `DD` in
+ * any order and with any separators; a one-digit month or day is fine). Null when it is not a real date.
+ */
+function parseDisplay(text: string, fmt: string): string | null {
+  const trimmed = text.trim();
+  const iso = toDateParts(trimmed);
+  const fields: string[] = [];
+  let pattern = '';
+  for (const piece of fmt.split(/(YYYY|MM|DD)/)) {
+    if (piece === 'YYYY') { fields.push('y'); pattern += '(\\d{4})'; }
+    else if (piece === 'MM') { fields.push('m'); pattern += '(\\d{1,2})'; }
+    else if (piece === 'DD') { fields.push('d'); pattern += '(\\d{1,2})'; }
+    else pattern += piece.replace(/[.*+?^${}()|[\]\\/]/g, '\\$&').replace(/\s+/g, '\\s*');
+  }
+  let y: number, m: number, d: number;
+  const hit = iso ? null : new RegExp(`^${pattern}$`).exec(trimmed);
+  if (iso) [y, m, d] = [iso[0], iso[1] + 1, iso[2]];
+  else if (hit && fields.length === 3 && new Set(fields).size === 3) {
+    const at = (k: string) => Number(hit[fields.indexOf(k) + 1]);
+    [y, m, d] = [at('y'), at('m'), at('d')];
+  } else return null;
+  if (m < 1 || m > 12 || d < 1 || d > daysInMonth(y, m - 1) || y < 100) return null;
+  return toISO(y, m - 1, d);
 }
 
 /* ── VoidCalendar ── */
@@ -554,6 +580,12 @@ declare global {
  * field open it with focus on the selected (or current) day. Choosing a day, Escape, or a press outside closes
  * it and focus returns to the input.
  *
+ * The field also takes a typed date, in `format` or as ISO `YYYY-MM-DD`: it is read when the field loses focus
+ * and on Enter, the calendar follows, and `void-change` fires once with the ISO value. A date that is not a date,
+ * or is before `min` or after `max`, is refused: the text stays for correction, `error` explains it, the field
+ * is `aria-invalid` and described by the message, and the form is not submitted (`badInput`, `rangeUnderflow` or
+ * `rangeOverflow`). An empty field clears the value.
+ *
  * @fires {CustomEvent<{ reason: 'trigger' | 'focus' | 'keyboard' | 'api' }>} void-open - The calendar popup
  * opened: `trigger` from the calendar button, `focus` from a click on the field, `keyboard` from a key.
  * @fires {CustomEvent<{ reason: 'trigger' | 'select' | 'escape' | 'outside' | 'blur' | 'parent' | 'api' }>} void-close -
@@ -588,12 +620,31 @@ export class VoidDatePicker extends InternalsFormControl(VoidElement) {
   /** Hint shown in the field while no date is chosen. Defaults to `Select date`. */
   @property({ type: String }) placeholder = 'Select date';
   /**
-   * How the chosen date is written in the field, using `YYYY`, `MM` and `DD`. Defaults to `MM/DD/YYYY`.
-   * Display only; the value stays `YYYY-MM-DD`.
+   * How the date is written in the field, using `YYYY`, `MM` and `DD`. Defaults to `MM/DD/YYYY`. A date
+   * typed into the field is read the same way (and as ISO `YYYY-MM-DD` always); the value stays `YYYY-MM-DD`.
    */
   @property({ type: String }) format = 'MM/DD/YYYY';
   /** Status colour of the field: `default`, `error`, `warning`, `caution`, `success`, `info`, `notice` or `highlight`. */
   @property({ type: String, reflect: true }) color: 'default' | 'error' | 'warning' | 'caution' | 'success' | 'info' | 'notice' | 'highlight' = 'default';
+  /**
+   * Mark the field invalid: it gets the error styling and `aria-invalid`. Set it for a server-side message;
+   * the field also sets it itself, with the reason, when a typed date is not taken, and clears what it set
+   * once a valid date is typed or picked. A message you set is left alone.
+   */
+  @property({ type: String, reflect: true }) error = '';
+
+  /** Text typed and not committed yet; null while the field shows `value`. Survives re-renders and morphs until committed. */
+  private _draft: string | null = null;
+  /** Why the committed text was refused, as the browser's validity reports it; null when it was taken. */
+  private _rejected: { flags: ValidityStateFlags; message: string } | null = null;
+  /** The message this field wrote into `error`, so one the author wrote is told apart from it. */
+  private _ownError = '';
+  private readonly _errorId = uid('void-date-picker-error');
+
+  /** The typed text is the field's own to keep: a server patch of `value` discards it, any other morph does not. */
+  static override clientState = { _draft: 'value' };
+  /** While focus is inside, a morph does not apply the server's value over the date the user is typing. */
+  static override editState = ['value'];
 
   /** The calendar popup, controlled by the input (APG date picker combobox). */
   private readonly _dropdownId = uid('void-date-picker-dialog');
@@ -625,19 +676,24 @@ export class VoidDatePicker extends InternalsFormControl(VoidElement) {
 
   render() {
     const display = this.value ? formatDisplay(this.value, this.format) : '';
+    const message = this._rejected && this.error === this._ownError ? this.error : '';
     return html`
       <div class="void-date-picker-anchor">
         <input
           class="void-date-picker-input"
-          .value=${live(display)}
+          .value=${live(this._draft ?? display)}
           placeholder=${this.placeholder}
           ?disabled=${this.disabled}
-          readonly
+          autocomplete="off"
           role="combobox"
           aria-label=${this.placeholder}
           aria-haspopup="dialog"
           aria-expanded=${String(this.open)}
           aria-controls=${this._dropdownId}
+          aria-invalid=${this.error ? 'true' : nothing}
+          aria-describedby=${message ? this._errorId : nothing}
+          @input=${this._onInput}
+          @blur=${this._commit}
           @click=${this._onInputClick}
           @keydown=${this._onInputKeydown}
         />
@@ -657,6 +713,7 @@ export class VoidDatePicker extends InternalsFormControl(VoidElement) {
           </svg>
         </button>
       </div>
+      ${message ? html`<span class="void-date-picker-error" id=${this._errorId} role="alert">${message}</span>` : nothing}
       ${this.open ? html`
         <div class="void-date-picker-dropdown" id=${this._dropdownId} role="dialog" aria-label="Choose date" popover="manual">
           <void-calendar
@@ -684,8 +741,103 @@ export class VoidDatePicker extends InternalsFormControl(VoidElement) {
     this._overlay.toggle('focus');
   };
 
+  /** What the field shows for the committed value. */
+  private get _display(): string {
+    return this.value ? formatDisplay(this.value, this.format) : '';
+  }
+
+  private _onInput = (e: Event): void => {
+    this._draft = (e.target as HTMLInputElement).value;
+  };
+
+  /** Takes the typed text: a date in `format` or ISO sets the value, anything else is refused and kept for correction. */
+  private _commit = (): void => {
+    if (this._draft === null || this.disabled) return;
+    const text = this._draft.trim();
+    if (text === this._display) {
+      this._draft = null;
+      this._accept();
+      return;
+    }
+    if (text === '') {
+      this._draft = null;
+      this._accept();
+      this._setTyped('');
+      return;
+    }
+    const iso = parseDisplay(text, this.format);
+    const flags: ValidityStateFlags | null = !iso ? { badInput: true }
+      : this.min && iso < this.min ? { rangeUnderflow: true }
+      : this.max && iso > this.max ? { rangeOverflow: true }
+      : null;
+    if (flags || !iso) {
+      const message = flags?.rangeUnderflow ? `Choose ${formatDisplay(this.min, this.format)} or a later date.`
+        : flags?.rangeOverflow ? `Choose ${formatDisplay(this.max, this.format)} or an earlier date.`
+        : `Enter a date as ${this.format} or YYYY-MM-DD.`;
+      this._rejected = { flags: flags ?? { badInput: true }, message };
+      if (!this.error || this.error === this._ownError) {
+        this.error = message;
+        this._ownError = message;
+      }
+      this.requestUpdate();
+      return;
+    }
+    this._draft = null;
+    this._accept();
+    this._setTyped(iso);
+  };
+
+  /** The text was taken (or discarded): no refusal, and the error the field wrote itself goes. */
+  private _accept(rerender = true): void {
+    this._rejected = null;
+    if (this._ownError && this.error === this._ownError) this.error = '';
+    this._ownError = '';
+    if (rerender) this.requestUpdate();
+  }
+
+  /** A date typed in: keeps the calendar in step through `value`, fires `void-change` once, and closes the calendar. */
+  private _setTyped(iso: string): void {
+    if (iso === this.value) return;
+    this.value = iso;
+    const parts = toDateParts(iso);
+    this.dispatchEvent(new CustomEvent('void-change', {
+      bubbles: true,
+      composed: true,
+      detail: { value: iso, date: parts ? new Date(parts[0], parts[1], parts[2]) : null },
+    }));
+  }
+
+  protected override formValidity(): FormValidityResult | null {
+    if (this._rejected) {
+      return {
+        flags: this._rejected.flags,
+        message: this._rejected.message,
+        anchor: this.querySelector<HTMLElement>('.void-date-picker-input') ?? undefined,
+      };
+    }
+    return super.formValidity();
+  }
+
+  protected override formRestore(state: unknown): void {
+    this._draft = null;
+    this._accept();
+    super.formRestore(state);
+  }
+
+  protected override willUpdate(changed: Map<string, unknown>): void {
+    super.willUpdate(changed);
+    // Another value arrived (a script, or the server once focus left): what was typed is gone with it, as it is
+    // in a native field whose value is set, and so is the refusal. The field's own commits clear the draft first.
+    if (changed.has('value')) {
+      this._draft = null;
+      if (this._rejected) this._accept(false);
+    }
+  }
+
   private _onCalendarChange = (e: CustomEvent): void => {
     e.stopPropagation();
+    this._draft = null;
+    this._accept();
     this.value = e.detail.value;
     this._overlay.requestClose('select');
     this.dispatchEvent(new CustomEvent('void-change', {
@@ -696,7 +848,12 @@ export class VoidDatePicker extends InternalsFormControl(VoidElement) {
   };
 
   private _onInputKeydown = (e: KeyboardEvent): void => {
-    if (e.key === 'Enter' || e.key === ' ') {
+    if (e.key === 'Enter' && this._draft !== null && this._draft.trim() !== this._display) {
+      // Text was typed: Enter takes it (it does not open the calendar).
+      e.preventDefault();
+      this._commit();
+      if (!this._rejected && this.open) this._overlay.requestClose('select');
+    } else if (e.key === 'Enter' || (e.key === ' ' && this._draft === null)) {
       e.preventDefault();
       if (!this.disabled) this._overlay.toggle('keyboard');
     } else if (e.key === 'ArrowDown' && !this.disabled) {

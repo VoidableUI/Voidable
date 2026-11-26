@@ -51,7 +51,7 @@
   "void-date-picker": {
     "group": "forms",
     "events": {
-      "void-change": "Fires when the user picks a day. `detail.value` is the ISO date and `detail.date` the same day as a `Date`."
+      "void-change": "Fires when the user picks a day, or types a date that is accepted (on blur or Enter), once per change. `detail.value` is the ISO date (empty when the field was cleared) and `detail.date` the same day as a `Date` (`null` when cleared). A typed date that is refused fires nothing; `error` says why."
     }
   },
   "void-calendar": {
@@ -75,7 +75,8 @@
   "void-file-upload": {
     "group": "forms",
     "events": {
-      "void-change": "Fires when the chosen files change, by dropping, browsing or removing one. `detail.value` (and `detail.files`) is the list of accepted `File`s."
+      "void-change": "Fires when the chosen files change, by dropping, browsing or removing one. `detail.value` (and `detail.files`) is the list of accepted `File`s.",
+      "void-reject": "Fires, without bubbling, when a dropped or browsed file is refused. `detail.rejected` is a list of `{ file, reason }`, `reason` being `type` (not matched by `accept`), `size` (over `max-size`) or `count` (a further file while `multiple` is off). The zone also sets `error` to a message, which makes the drop zone `aria-invalid` and described by it; the next accepted selection clears it."
     }
   },
   "void-input": {
@@ -261,7 +262,7 @@
   "void-hamburger": {
     "group": "navigation",
     "events": {
-      "void-open": "Fires on the hamburger when the user opens it (`detail.reason` is `trigger`). Does not bubble.",
+      "void-open": "Fires on the hamburger when the user opens it (`detail.reason` is `trigger` for a click and `keyboard` for Enter or Space). Does not bubble.",
       "void-close": "Fires on the hamburger when the user closes it (`detail.reason` is `trigger`). Does not bubble."
     }
   },

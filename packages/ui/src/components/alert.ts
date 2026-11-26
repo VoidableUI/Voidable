@@ -6,6 +6,9 @@ import { closeControlPressed, removeWithFocus } from '../dismiss.js';
 /**
  * Inline contextual message for form validation feedback, permission warnings, and system status notices.
  *
+ * Its role follows the colour: `error` and `warning` are `role="alert"` (announced at once, interrupting), every
+ * other colour is `role="status"` (announced politely). A role you write on it is kept.
+ *
  * Its text is written as parts: an optional `<void-alert-title>`, the `<void-alert-description>` and an optional
  * `<void-alert-close>`. The parts are never moved. The close part wraps the one control the author writes (a
  * `<button type="button" aria-label="Dismiss">`); pressing it fires `void-close` and, unless that is cancelled, removes the alert (focus inside
@@ -33,9 +36,28 @@ export class VoidAlert extends VoidElement {
 
   connectedCallback(): void {
     super.connectedCallback();
-    this.setHostAttribute('role', 'alert');
+    this._syncRole();
     this.addEventListener('click', this._onClick);
   }
+
+  protected override updated(changed: Map<string, unknown>): void {
+    super.updated(changed);
+    if (changed.has('color')) this._syncRole();
+  }
+
+  /**
+   * `alert` (assertive: it interrupts) only for the urgent colours, `error` and `warning`; every other
+   * alert is `status` (polite). A role the author wrote is left alone.
+   */
+  private _syncRole(): void {
+    const current = this.getAttribute('role');
+    if (current !== null && current !== this._writtenRole) return;
+    this._writtenRole = this.color === 'error' || this.color === 'warning' ? 'alert' : 'status';
+    this.setHostAttribute('role', this._writtenRole);
+  }
+
+  /** The role this alert wrote itself, so one the author wrote is told apart from it. */
+  private _writtenRole: string | null = null;
 
   disconnectedCallback(): void {
     super.disconnectedCallback();

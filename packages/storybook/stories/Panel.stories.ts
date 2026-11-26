@@ -26,7 +26,7 @@ export const Default: Story = {
     variant: 'default',
   },
   render: (args) => html`
-    <void-panel variant=${args.variant}>
+    <void-panel aria-label="Details" variant=${args.variant}>
       <void-panel-body>
         <p>This is a default panel. Use it to group related content or provide a visual container for sections of your UI.</p>
       </void-panel-body>

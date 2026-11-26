@@ -58,7 +58,7 @@ export function StationState({ station }) {
 A state is quiet enough to repeat down a table column and plain enough for a navigation bar.
 
 export const table = `
-<void-table>
+<void-table aria-label="Stations">
   <table>
     <thead><tr><th>Station</th><th>State</th><th data-numeric>Passes</th></tr></thead>
     <tbody>
@@ -70,7 +70,7 @@ export const table = `
 </void-table>`;
 
 export const tableErb = `
-<void-table>
+<void-table aria-label="Stations">
   <table>
     <thead><tr><th>Station</th><th>State</th><th data-numeric>Passes</th></tr></thead>
     <tbody>
