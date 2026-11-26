@@ -14,9 +14,10 @@
     ".": {
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
-    }
+    },
+    "./llms.txt": "./llms.txt"
   },
-  "files": ["dist"],
+  "files": ["dist", "llms.txt"],
   "scripts": {
     "build": "node scripts/parts.mjs && vite build",
     "test": "node scripts/parts.mjs && vitest run",

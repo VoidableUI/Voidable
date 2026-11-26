@@ -86,6 +86,10 @@ The package starts with `"use client"`, so the components can be imported from A
 
 `useTheme()` returns the colour scheme in force, `'dark'` or `'light'`: what the page shows, not just the attribute. With `<html data-theme>` unset or `"system"` it reports what the theme resolves, so a theme or skin that prefers a scheme (Loft prefers light) is counted, and otherwise the operating system's `prefers-color-scheme`. It updates when the attribute or the operating system preference changes. During server rendering, and on the first render of a hydrating tree, it is `'dark'` (the server cannot know the visitor's preference); React then re-renders with the real value, with no hydration warning. It is read-only: set `data-theme` on `<html>` to change the scheme.
 
+## For AI agents
+
+`@voidable/ui-react/llms.txt` (in the package root) summarises this adapter's API: the naming rule, props, events and `useTheme`. Every element's parts, attributes and events are in `@voidable/ui/reference.md` (`node_modules/@voidable/ui/dist/reference.md`).
+
 ## Documentation
 
 - [Documentation](https://voidable.dev)

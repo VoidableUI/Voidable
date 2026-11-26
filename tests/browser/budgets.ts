@@ -17,28 +17,36 @@ export const TOLERANCE = 1.5;
 /** Plain-DOM calibration workload on the reference machine, in ms. */
 export const calibrationMs = 80;
 
-// Re-baselined 2026-11-25 against the current master (a Linux desktop, Playwright Chromium 159).
-// The machine was shared with other jobs (load average 20 to 27), so each run's timings were
-// divided by that run's own calibration and rescaled to calibrationMs; medians of four runs,
-// rounded up. The dialog figure moved from 28 to 330 ms when the dialog became a native <dialog>:
-// 1.6 ms per open and close instead of 0.14 (a top-layer showModal, a transition, focus handling). The
-// previous baseline, on the suite's old base, was 58, 75, 130, 170 and 28.5 ms and
-// 46.7 and 6.9 kB; the root entry grew from 52.4 to 59.5 kB gzipped with the overlay controller and anchor fallback.
+// Re-baselined 2026-11-26 against master after 194 further commits (the shared build host, 32 cores,
+// Playwright Chromium; the calibration there is about 177 ms against 80 here, so every run's timings
+// were divided by that run's own calibration and rescaled to calibrationMs: medians of four runs,
+// rounded up). Before: 65, 72, 115, 40 and 330 ms; 59.5 and 11.6 kB. The calibration now runs in an
+// unstyled iframe: in the page it timed the theme's style cost on native buttons and inputs, which
+// tripled as the theme grew, so scaled budgets had stopped tracking the machine.
+// Moves, measured on one host with the old and the new commit: the 500-row table's first render
+// grew about 50% (most likely the dropdown menu in each row is now a trigger and a content part, the explicit
+// parts of #52, and every component base gained the state rule and re-entrant morph hooks, #61 #31);
+// the dialog about 20% (likely a shadow-root surface, #52); the Turbo morph and the 5,000-option select
+// got about three times faster (likely unchanged components skipped in a morph, #61; a native <select>).
+// The single component (button) grew from 11.6 to 15.1 kB: the shared base chunk went from 18.0 to
+// 27.3 kB minified (0b32c8d state rule, 91d45a1 re-entrant morph hooks, 439dd84 skip unchanged,
+// 2309db4 parts infrastructure), the button from 1.8 to 3.2 kB (real-click activation, link button)
+// and the keyboard-activation and form-control chunks are new. The root entry grew from 59.4 to 67.8 kB.
 export const reference = {
   /** First render of 1,000 mixed components until all have rendered. */
-  mixed1000Ms: 65,
+  mixed1000Ms: 62,
   /** First render of a 500-row table with a dropdown-menu, a badge and two buttons per row. */
-  table500FirstMs: 72,
+  table500FirstMs: 114,
   /** One Turbo morph of that table (one cell changed), through VoidTurbo. */
-  table500MorphMs: 115,
+  table500MorphMs: 37,
   /** First render of a void-select with 5,000 options. */
-  select5000Ms: 40,
+  select5000Ms: 15,
   /** 200 open/close cycles of a dialog. */
-  dialog200Ms: 330,
+  dialog200Ms: 276,
   /** Gzipped size of `import '@voidable/ui'` (everything, Lit included), minified. */
-  rootEntryGzipKB: 59.5,
+  rootEntryGzipKB: 67.8,
   /** Gzipped size of `import '@voidable/ui/components/button'` (one component, Lit included), minified. */
-  singleComponentGzipKB: 11.6,
+  singleComponentGzipKB: 15.1,
 };
 
 /** Leak limits for the 200 dialog cycles (absolute, not scaled). */

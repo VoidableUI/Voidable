@@ -14,9 +14,10 @@
     ".": {
       "types": "./dist/index.d.ts",
       "default": "./dist/alpine.js"
-    }
+    },
+    "./llms.txt": "./llms.txt"
   },
-  "files": ["dist"],
+  "files": ["dist", "llms.txt"],
   "scripts": {
     "build": "vite build",
     "test": "vitest run",

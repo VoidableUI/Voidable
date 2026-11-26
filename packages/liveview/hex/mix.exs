@@ -31,7 +31,7 @@ defmodule VoidableUI.MixProject do
       name: "live_voidable",
       licenses: ["MIT"],
       links: %{"GitHub" => "https://github.com/VoidableUI/Voidable"},
-      files: ~w(lib mix.exs)
+      files: ~w(lib mix.exs llms.txt)
     ]
   end
 end
