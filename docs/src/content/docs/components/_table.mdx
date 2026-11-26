@@ -381,10 +381,15 @@ Empty cells sort last in both directions. One column is sorted at a time: multi-
 
 ## Server mode: `manual`
 
-`manual` is for a table the server drives (LiveView, Livewire, Turbo). The table never reorders or hides a row. It updates the header state (`aria-sort`, the select-all checkbox, the parts), fires `void-sort`, `void-filter` and `void-change`, and the server answers by rendering the order, the visible rows, `aria-sort` and the selection. The host's own attributes (`sort`, `sort-direction`, `filter`, `value`) are what the server renders too: an attribute the server changes wins, one it leaves alone keeps what the user did.
+`manual` is for a table the server drives (LiveView, Livewire, Turbo). The table never reorders or hides a row. It updates the header state (`aria-sort`, the select-all checkbox, the parts), fires `void-sort`, `void-filter` and `void-change`, and the server answers by rendering the order, the visible rows, `aria-sort` and the selection. The host's own attributes (`sort`, `sort-direction`, `filter`, `value`) are what the server renders too: an attribute the server changes wins, one it leaves alone keeps what the user did. The `voidable/laravel` Blade components (`<x-voidable::table>` and its parts) and the gem's `void_table` helpers write `value` and `keys` as JSON for you; full Livewire and Turbo examples, with select-all across pages, are in [Alpine and Livewire](/frameworks/alpine/#tables-the-server-drives) and [Hotwire](/frameworks/hotwire/#tables-the-server-drives).
 
 ```html
-<void-table manual selectable sort="name" sort-direction="ascending" value='["o2"]' aria-label="Orders">…</void-table>
+<void-table manual selectable sort="name" sort-direction="ascending" value='["o2"]' aria-label="Orders">
+  <table>
+    <thead><tr><th data-stack="select"><input type="checkbox" aria-label="Select all rows"></th><th data-key="name" data-sort>Name</th></tr></thead>
+    <tbody>…</tbody>
+  </table>
+</void-table>
 ```
 
 **Phoenix LiveView.** Bridge the events with `events` on the `live_voidable` table (each arrives as a LiveView event whose `"detail"` is the event's detail) and render the order, the rows and the state from assigns:
@@ -421,7 +426,10 @@ end
   sort="{{ $sort }}" sort-direction="{{ $direction }}" value='@json($selected)'
   x-void-on:void-sort="$wire.sortBy($event.detail.column, $event.detail.direction)"
   x-void-on:void-change="$wire.select($event.detail.value, $event.detail.all)">
-  …
+  <table>
+    <thead><tr><th data-stack="select"><input type="checkbox" aria-label="Select all rows"></th>…</tr></thead>
+    <tbody>…</tbody>
+  </table>
 </void-table>
 ```
 
@@ -455,7 +463,10 @@ In `manual` mode the table only knows the rows it was given, so "all" means **th
 
 ```html
 <void-table manual selectable total-rows="1250" aria-label="Orders">
-  …
+  <table>
+    <thead><tr><th data-stack="select"><input type="checkbox" aria-label="Select all rows"></th>…</tr></thead>
+    <tbody>…</tbody>
+  </table>
   <void-table-select-all hidden><button type="button">Select all 1,250 rows</button></void-table-select-all>
 </void-table>
 ```

@@ -200,10 +200,23 @@ class ServiceProviderTest extends TestCase
             . '</x-voidable::table>'
         );
 
-        $this->assertMatchesRegularExpression('/<void-table-filter\s*><input aria-label="Filter"><\/void-table-filter>/', $html);
-        $this->assertMatchesRegularExpression('/<void-table-empty hidden[^>]*>No rows<\/void-table-empty>/', $html);
-        $this->assertMatchesRegularExpression('/<void-table-selection hidden[^>]*><span data-count><\/span> selected<\/void-table-selection>/', $html);
-        $this->assertMatchesRegularExpression('/<void-table-select-all hidden[^>]*><button type="button">Select all 40<\/button><\/void-table-select-all>/', $html);
+        $dom = new \DOMDocument();
+        @$dom->loadHTML($html, LIBXML_NOERROR);
+        $parts = [];
+        foreach (['filter', 'empty', 'selection', 'select-all'] as $part) {
+            $nodes = $dom->getElementsByTagName('void-table-' . $part);
+            $this->assertSame(1, $nodes->length, "one $part part");
+            $this->assertSame('void-table', $nodes->item(0)->parentNode->nodeName);
+            $parts[$part] = $nodes->item(0);
+        }
+        $this->assertSame('Filter', $parts['filter']->getElementsByTagName('input')->item(0)->getAttribute('aria-label'));
+        $this->assertSame('No rows', $parts['empty']->textContent);
+        $this->assertStringContainsString('selected', $parts['selection']->textContent);
+        $this->assertSame('Select all 40', $parts['select-all']->textContent);
+        foreach (['empty', 'selection', 'select-all'] as $part) {
+            $this->assertTrue($parts[$part]->hasAttribute('hidden'), "$part is hidden");
+        }
+        $this->assertFalse($parts['filter']->hasAttribute('hidden'));
     }
 
     private function attributeJson(string $html, string $name): mixed
