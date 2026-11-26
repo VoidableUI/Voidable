@@ -1,5 +1,6 @@
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
+import { inlineKeys } from '../keyboard.js';
 import { KeyboardActivation } from '../keyboard-activation.js';
 import { PartsController } from '../parts.js';
 
@@ -263,8 +264,9 @@ export class VoidCarousel extends VoidElement {
 
   private _onKeydown = (e: KeyboardEvent): void => {
     const isHorizontal = this.orientation === 'horizontal';
-    const prevKey = isHorizontal ? 'ArrowLeft' : 'ArrowUp';
-    const nextKey = isHorizontal ? 'ArrowRight' : 'ArrowDown';
+    const keys = inlineKeys(this);
+    const prevKey = isHorizontal ? keys.prev : 'ArrowUp';
+    const nextKey = isHorizontal ? keys.next : 'ArrowDown';
 
     if (e.key === prevKey) {
       e.preventDefault();

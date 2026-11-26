@@ -589,7 +589,7 @@ export const Stepper = wrapWc<VoidStepper, {
 
 export const Drawer = wrapWc<VoidDrawer, {
   open?: boolean;
-  side?: 'left' | 'right' | 'top' | 'bottom';
+  side?: 'left' | 'right' | 'start' | 'end' | 'top' | 'bottom';
   size?: 'sm' | 'md' | 'lg';
   /** No close button; Escape and the backdrop do not close it. */
   hideClose?: boolean;
@@ -764,7 +764,7 @@ export const ComposeInput = wrapWc<VoidComposeInput, {
 } & VoidEvents<{ Input: { value: string }; Submit: { value: string } }>>('void-compose-input', 'ComposeInput');
 
 export const Sidebar = wrapWc<VoidSidebar, {
-  side?: 'left' | 'right';
+  side?: 'start' | 'end';
   collapsed?: boolean;
   width?: string;
   collapsedWidth?: string;
@@ -1059,7 +1059,7 @@ export const ActionInput = wrapWc<VoidActionInput, {
   spellcheck?: boolean;
   icon?: string;
   actionLabel?: string;
-  iconSide?: 'left' | 'right';
+  iconSide?: 'start' | 'end';
   /** Form field name; the value is submitted under it. */
   name?: string;
   /** Form validation: the control must have a value. */

@@ -1,6 +1,6 @@
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
-import { edgeEnabled, stepEnabled } from '../keyboard.js';
+import { edgeEnabled, inlineKeys, stepEnabled } from '../keyboard.js';
 import { PartsController } from '../parts.js';
 
 const LIST = 'void-tabs-list';
@@ -164,8 +164,9 @@ export class VoidTabs extends VoidElement {
     const index = triggers.indexOf(trigger);
     const disabled = triggers.map(t => this._disabled(t));
     let next = -1;
-    if (e.key === 'ArrowRight') next = stepEnabled(disabled, index, 1);
-    else if (e.key === 'ArrowLeft') next = stepEnabled(disabled, index, -1);
+    const keys = inlineKeys(this);
+    if (e.key === keys.next) next = stepEnabled(disabled, index, 1);
+    else if (e.key === keys.prev) next = stepEnabled(disabled, index, -1);
     else if (e.key === 'Home') next = edgeEnabled(disabled, 1);
     else if (e.key === 'End') next = edgeEnabled(disabled, -1);
     else return;

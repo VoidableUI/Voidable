@@ -18,8 +18,8 @@ export class VoidSidebar extends VoidElement {
   @property({ type: String, reflect: true }) width = 'var(--void-sidebar-width)';
   /** CSS width when collapsed. Defaults to the theme's `--void-sidebar-collapsed-width`. */
   @property({ type: String, attribute: 'collapsed-width', reflect: true }) collapsedWidth = 'var(--void-sidebar-collapsed-width)';
-  /** Which edge of the page the sidebar sits on: `left` (default) or `right`. */
-  @property({ type: String, reflect: true }) side: 'left' | 'right' = 'left';
+  /** Which side of the content the sidebar sits on, in the reading direction: `start` (default) or `end`. */
+  @property({ type: String, reflect: true }) side: 'start' | 'end' = 'start';
 
   /**
    * Collapses or expands the sidebar on behalf of the user (call it from the

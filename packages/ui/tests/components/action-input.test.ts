@@ -51,7 +51,7 @@ describe('VoidActionInput', () => {
     it('type defaults to "text"', () => expect(el.type).toBe('text'));
     it('icon defaults to "search"', () => expect(el.icon).toBe('search'));
     it('actionLabel defaults to "Action"', () => expect(el.actionLabel).toBe('Action'));
-    it('iconSide defaults to "right"', () => expect(el.iconSide).toBe('right'));
+    it('iconSide defaults to "end"', () => expect(el.iconSide).toBe('end'));
     it('tooltipSide defaults to "top"', () => expect(el.tooltipSide).toBe('top'));
   });
 
@@ -59,7 +59,7 @@ describe('VoidActionInput', () => {
     it('reflects configuration properties', async () => {
       const el = await mount({
         placeholder: 'p', disabled: true, readonly: true, name: 'n', size: 'lg', color: 'error',
-        type: 'password', icon: 'copy', iconSide: 'left', tooltipSide: 'bottom',
+        type: 'password', icon: 'copy', iconSide: 'start', tooltipSide: 'bottom',
       });
       expect(el.getAttribute('placeholder')).toBe('p');
       expect(el.hasAttribute('disabled')).toBe(true);
@@ -69,7 +69,7 @@ describe('VoidActionInput', () => {
       expect(el.getAttribute('color')).toBe('error');
       expect(el.getAttribute('type')).toBe('password');
       expect(el.getAttribute('icon')).toBe('copy');
-      expect(el.getAttribute('icon-side')).toBe('left');
+      expect(el.getAttribute('icon-side')).toBe('start');
       expect(el.getAttribute('tooltip-side')).toBe('bottom');
     });
 
@@ -103,14 +103,14 @@ describe('VoidActionInput', () => {
       expect(Array.from(el.children).map((c) => c.localName)).toEqual(['input', 'void-tooltip']);
     });
 
-    it('puts the button first with icon-side="left"', async () => {
-      const el = await mount({ iconSide: 'left' });
+    it('puts the button first with icon-side="start"', async () => {
+      const el = await mount({ iconSide: 'start' });
       expect(Array.from(el.children).map((c) => c.localName)).toEqual(['void-tooltip', 'input']);
     });
 
     it('moves the button when iconSide changes', async () => {
       const el = await mount();
-      el.iconSide = 'left';
+      el.iconSide = 'start';
       await el.updateComplete;
       expect(el.children[0]!.localName).toBe('void-tooltip');
       expect(el.querySelectorAll('button')).toHaveLength(1);

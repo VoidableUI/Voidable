@@ -2,6 +2,7 @@ import { html, nothing, type PropertyDeclaration, type PropertyValues } from 'li
 import { live } from 'lit/directives/live.js';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
+import { inlineKeys } from '../keyboard.js';
 import { InternalsFormControl } from '../form-control.js';
 import { dropReflectedValue, valueReflection } from '../secret-value.js';
 import { isFocusParked } from '../projection.js';
@@ -182,10 +183,10 @@ export class VoidPinInput extends InternalsFormControl(VoidElement) {
         this._syncValue();
       }
       e.preventDefault();
-    } else if (e.key === 'ArrowLeft') {
+    } else if (e.key === inlineKeys(this).prev) {
       e.preventDefault();
       this._focusCell(index - 1);
-    } else if (e.key === 'ArrowRight') {
+    } else if (e.key === inlineKeys(this).next) {
       e.preventDefault();
       this._focusCell(index + 1);
     } else if (e.key === 'Delete') {

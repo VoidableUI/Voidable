@@ -26,6 +26,17 @@ const preview: Preview = {
         title: 'Colour scheme',
       },
     },
+    // Reading direction: keys, sides and edges that follow it (tabs, sliders, menus, sidebar) flip.
+    direction: {
+      toolbar: {
+        icon: 'transfer',
+        items: [
+          { value: 'ltr', title: 'Left to right' },
+          { value: 'rtl', title: 'Right to left' },
+        ],
+        title: 'Direction',
+      },
+    },
     // The shipped themes: each is a file that only sets theme knobs.
     voidTheme: {
       toolbar: {
@@ -49,6 +60,7 @@ const preview: Preview = {
   },
   initialGlobals: {
     theme: 'dark',
+    direction: 'ltr',
     voidTheme: 'void',
     voidSkin: 'none',
   },
@@ -58,6 +70,7 @@ const preview: Preview = {
       const voidTheme = context.globals['voidTheme'] ?? 'void';
       const root = document.documentElement;
       root.setAttribute('data-theme', theme);
+      root.setAttribute('dir', context.globals['direction'] ?? 'ltr');
       root.setAttribute('data-void-theme', voidTheme);
       const voidSkin = context.globals['voidSkin'] ?? 'none';
       if (voidSkin === 'none') root.removeAttribute('data-void-skin');

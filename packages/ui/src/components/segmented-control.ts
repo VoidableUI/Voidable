@@ -2,7 +2,7 @@ import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
 import { KeyboardActivation } from '../keyboard-activation.js';
 import { InternalsFormControl, type FormSubmission } from '../form-control.js';
-import { edgeEnabled, stepEnabled } from '../keyboard.js';
+import { edgeEnabled, inlineKeys, stepEnabled } from '../keyboard.js';
 
 type ItemGroup = Element & { value?: string; _syncItems?: () => void };
 
@@ -156,8 +156,9 @@ export class VoidSegmentedControl extends InternalsFormControl(VoidElement) {
     if (e.altKey || e.ctrlKey || e.metaKey || this.formDisabled) return;
     const items = this._items;
     const focused = (e.target as Element | null)?.closest?.('void-segmented-control-item') as VoidSegmentedControlItem | null;
-    const forward = e.key === 'ArrowRight' || e.key === 'ArrowDown';
-    if (!forward && e.key !== 'ArrowLeft' && e.key !== 'ArrowUp') return;
+    const keys = inlineKeys(this);
+    const forward = e.key === keys.next || e.key === 'ArrowDown';
+    if (!forward && e.key !== keys.prev && e.key !== 'ArrowUp') return;
     e.preventDefault();
     const disabled = items.map(i => i.disabled);
     // Move from the focused item; with none (the key went to the group itself), from the checked one.

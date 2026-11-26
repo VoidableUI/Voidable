@@ -194,6 +194,19 @@ describe('VoidTabs', () => {
       expect(el.value).toBe('a');
     });
 
+    it('in right-to-left ArrowLeft moves to the next tab and ArrowRight to the previous', async () => {
+      const el = await mount('a');
+      el.style.direction = 'rtl';
+      const [a, b, c] = triggers(el);
+      a!.focus();
+      key(a!, 'ArrowLeft');
+      expect(document.activeElement).toBe(b);
+      key(b!, 'ArrowRight');
+      expect(document.activeElement).toBe(a);
+      key(a!, 'ArrowRight');
+      expect(document.activeElement).toBe(c);
+    });
+
     it('Home and End jump to the first and last enabled tab', async () => {
       const el = await mount('b');
       const [a, b, c] = triggers(el);

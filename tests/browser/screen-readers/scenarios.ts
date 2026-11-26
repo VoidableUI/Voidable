@@ -79,6 +79,13 @@ export const scenarios: Scenario[] = [
       { reach: { role: 'radio', name: 'Pro', checked: false, position: { n: 2, of: 3, within: '#plan' }, spoken: { VoiceOver: [/\b2 of 3\b/] } }, by: 'control' },
       { act: true },
       { hear: { role: 'radio', name: 'Pro', checked: true } },
+      // Arrow keys move through the group and check as they go; the group is one tab stop.
+      { press: 'ArrowDown' },
+      { hear: { role: 'radio', name: 'Team', checked: true, position: { n: 3, of: 3, within: '#plan' }, spoken: { VoiceOver: [/3 of 3/] } } },
+      { press: 'ArrowDown' },
+      { hear: { role: 'radio', name: 'Free', checked: true, position: { n: 1, of: 3, within: '#plan' } } },
+      { press: 'ArrowUp' },
+      { hear: { role: 'radio', name: 'Team', checked: true } },
     ],
   },
   {

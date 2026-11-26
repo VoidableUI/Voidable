@@ -143,6 +143,8 @@ export class VoidRadioGroup extends NativeFormControl(VoidElement) {
     for (const radio of this._radios()) {
       radio.checked = radio.value === this.value;
     }
+    // A radio not upgraded yet syncs itself when it connects.
+    this._radios()[0]?._syncTabStops?.();
   }
 
   private _handleChildChange = (e: CustomEvent): void => {

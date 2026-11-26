@@ -47,14 +47,14 @@ void-action-input .void-action-input-btn {
   border-end-end-radius: var(--void-control-radius);
 }
 
-void-action-input[icon-side="left"] input.void-action-input-field {
+void-action-input[icon-side="start"] input.void-action-input-field {
   border-start-start-radius: 0;
   border-end-start-radius: 0;
   border-start-end-radius: var(--void-control-radius);
   border-end-end-radius: var(--void-control-radius);
 }
 
-void-action-input[icon-side="left"] .void-action-input-btn {
+void-action-input[icon-side="start"] .void-action-input-btn {
   border-start-start-radius: var(--void-control-radius);
   border-end-start-radius: var(--void-control-radius);
   border-start-end-radius: 0;
@@ -125,8 +125,8 @@ void-action-input .void-action-input-btn {
   border-inline-start: var(--void-rule-between);
 }
 
-/* Button at the start (icon-side="left" is the start side in the reading direction) */
-void-action-input[icon-side="left"] .void-action-input-btn {
+/* Button at the start (icon-side="start" is the start side in the reading direction) */
+void-action-input[icon-side="start"] .void-action-input-btn {
   border-inline-start: none;
   border-inline-end: var(--void-rule-between);
 }
@@ -153,7 +153,7 @@ void-action-input:where([color="error"], [color="warning"], [color="caution"], [
   border-inline-start-color: var(--_void-tone-border);
 }
 
-void-action-input:where([color="error"], [color="warning"], [color="caution"], [color="highlight"], [color="success"], [color="info"], [color="notice"])[icon-side="left"] .void-action-input-btn {
+void-action-input:where([color="error"], [color="warning"], [color="caution"], [color="highlight"], [color="success"], [color="info"], [color="notice"])[icon-side="start"] .void-action-input-btn {
   border-inline-start-color: transparent;
   border-inline-end-color: var(--_void-tone-border);
 }
