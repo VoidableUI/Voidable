@@ -95,6 +95,56 @@ describe('VoidEvent hook', () => {
   });
 });
 
+describe('VoidProps hook', () => {
+  function mountProps(html: string) {
+    const tpl = document.createElement('template');
+    tpl.innerHTML = html;
+    const el = tpl.content.firstElementChild as HTMLElement;
+    document.body.appendChild(el);
+    const hook: any = { el, pushEvent: vi.fn(), pushEventTo: vi.fn() };
+    Object.assign(hook, VoidHooks.VoidProps);
+    hook.mounted();
+    return { el: el as any, hook };
+  }
+
+  afterEach(() => (document.body.innerHTML = ''));
+
+  it('assigns each property in data-void-props to the element', () => {
+    class Probe extends HTMLElement {}
+    if (!customElements.get('void-props-probe')) customElements.define('void-props-probe', Probe);
+    const { el } = mountProps(
+      `<void-props-probe id="p" data-void-props='{"data":{"segments":[{"name":"a","value":1}]},"zones":[1]}'></void-props-probe>`,
+    );
+    expect(el.data).toEqual({ segments: [{ name: 'a', value: 1 }] });
+    expect(el.zones).toEqual([1]);
+  });
+
+  it('waits for the element to be defined, and reassigns only when the JSON changes', async () => {
+    const { el, hook } = mountProps(`<void-props-late id="l" data-void-props='{"data":{"n":1}}'></void-props-late>`);
+    expect(el.data).toBeUndefined();
+    class Late extends HTMLElement {
+      calls: unknown[] = [];
+      set data(v: unknown) {
+        this.calls.push(v);
+      }
+    }
+    customElements.define('void-props-late', Late);
+    await customElements.whenDefined('void-props-late');
+    await Promise.resolve();
+    expect(el.calls).toEqual([{ n: 1 }]);
+    hook.updated();
+    expect(el.calls).toHaveLength(1);
+    el.dataset.voidProps = '{"data":{"n":2}}';
+    hook.updated();
+    expect(el.calls).toEqual([{ n: 1 }, { n: 2 }]);
+  });
+
+  it('ignores malformed JSON', () => {
+    const { el } = mountProps(`<void-props-probe id="m" data-void-props='{nope'></void-props-probe>`);
+    expect(el.data).toBeUndefined();
+  });
+});
+
 describe('buildPayload', () => {
   it('handles missing or non-object detail', () => {
     const el = document.createElement('void-button');
