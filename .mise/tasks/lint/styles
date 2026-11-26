@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #MISE description="Ensure UI components contain no visual styles (all styling in @voidable/theme) and the CSS-only elements stay unregistered"
-#MISE depends=["install"]
+#MISE depends=["build"]
 set -euo pipefail
 
 UI_SRC="packages/ui/src/components"
