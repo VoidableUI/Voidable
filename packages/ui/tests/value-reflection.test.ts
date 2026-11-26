@@ -225,6 +225,18 @@ describe('numbers and strings', () => {
     await settle(el);
     expect(el.value).toEqual(['c']);
   });
+
+  it('tags input never holds null when its reflected attribute is removed or invalid', async () => {
+    const el = await mount<VoidTagsInput>('<void-tags-input></void-tags-input>', 'void-tags-input');
+    el.value = ['a'];
+    await settle(el);
+    el.removeAttribute('value');
+    await settle(el);
+    expect(Array.isArray(el.value)).toBe(true);
+    el.setAttribute('value', 'not json');
+    await settle(el);
+    expect(Array.isArray(el.value)).toBe(true);
+  });
 });
 
 describe('void-select', () => {

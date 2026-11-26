@@ -339,6 +339,24 @@ describe('reflected value (#67)', () => {
 });
 
 describe('reflected value, server markup without a value attribute', () => {
+  it('a select keeps the pick when the morph library resets the native select before the server value arrives', async () => {
+    // LiveView: the server renders value="" first and the user's pick comes back as the server's value.
+    const markup = (v: string) => `<void-select value="${v}"><select name="k"><option value="" disabled selected hidden>Choose</option><option value="a">a</option></select></void-select>`;
+    const sel = await mount<Host>(markup(''));
+    const native = sel.querySelector('select')!;
+    native.value = 'a';
+    native.dispatchEvent(new Event('change'));
+    await settle();
+    const next = server(markup('a'));
+    sel.voidBeforeMorph(next);
+    morphAttributes(sel, next);
+    native.value = ''; // the morph library re-syncs the options from the server's `selected`
+    await settle();
+    await new Promise((r) => setTimeout(r, 0));
+    expect(sel.value).toBe('a');
+    expect(sel.getAttribute('value')).toBe('a');
+  });
+
   it('a select keeps the user pick when the server never writes value', async () => {
     const markup = '<void-select><select name="k"><option value="a">a</option><option value="b">b</option></select></void-select>';
     const sel = await mount<Host>(markup);
