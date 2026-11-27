@@ -276,3 +276,17 @@ test.describe('description list, page head and state (#133)', () => {
     expect(r.lg.dot).toBeGreaterThan(r.md.dot);
   });
 });
+
+// VOID_ALIGNMENT_SHOTS=<dir> photographs the page for a look at the result
+// (dark and light, no skin, Loft and Slab); nothing is compared or committed.
+test.describe('photographs', () => {
+  test.skip(!process.env.VOID_ALIGNMENT_SHOTS, 'set VOID_ALIGNMENT_SHOTS to a directory');
+  for (const skin of SKINS) {
+    for (const scheme of SCHEMES) {
+      test(`${skin} ${scheme}`, async ({ page, browserName }) => {
+        await open(page, skin, scheme);
+        await page.screenshot({ path: `${process.env.VOID_ALIGNMENT_SHOTS}/${browserName}-${skin}-${scheme}.png`, fullPage: true });
+      });
+    }
+  }
+});
