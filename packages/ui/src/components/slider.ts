@@ -79,16 +79,18 @@ export class VoidSlider extends NativeFormControl(VoidElement) {
 
   render() {
     const fill = this._fill();
+    // min, max and step come before .value: a range input clamps a value to the bounds it has at
+    // that moment, so a value set first is clamped to the default 0-100 range (#140).
     return html`
       <input
         type="range"
-        .value=${String(this.value)}
         min=${this.min}
         max=${this.max}
         step=${this.step}
         ?disabled=${this.disabled}
         name=${this.name}
         form=${this.formAttr ?? nothing}
+        .value=${String(this.value)}
         style="--void-slider-fill: ${fill}%"
         @input=${this._onInput}
         @change=${this._onChange}
