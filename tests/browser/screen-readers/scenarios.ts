@@ -144,7 +144,6 @@ export const scenarios: Scenario[] = [
     id: 'dropdown-menu',
     title: 'A dropdown menu announces menu items with their position, and choosing one closes it and returns focus',
     page: '/sr-menu',
-    readerIssues: { VoiceOver: { key: 'untracked:voiceover-menu-silent', detail: 'After the menu opened and focus moved to its first item (the focus step passed) VoiceOver said only "Actions menu pop up button", not "Rename".' } },
     steps: [
       // VoiceOver says "Actions menu pop up button" and leaves the collapsed state unspoken.
       { reach: { role: 'button', name: 'Actions', expanded: false, spoken: { VoiceOver: [/pop up/] } }, by: 'control' },

@@ -274,6 +274,9 @@ export class VoidMultiselect extends InternalsFormControl(VoidElement) {
 
   // aria-description is global in ARIA 1.3; the lint's role table predates it.
   /* eslint-disable lit-a11y/role-supports-aria-attr */
+  // The placeholder and the chips are drawn, not read: the combobox is named by its aria-label and described by
+  // the count. Left exposed, VoiceOver's cursor sat on the placeholder inside the combobox and, when choosing an
+  // option replaced it with a chip, said only "selectable (null), inside of a combo box" (#75).
   render() {
     const selectedOpts = this._options.filter(o => o.selected);
     const open = this.open && !this.formDisabled;
@@ -295,7 +298,7 @@ export class VoidMultiselect extends InternalsFormControl(VoidElement) {
       >
         ${count > 0
           ? selectedOpts.map(opt => html`
-              <span class="void-multiselect-pill">
+              <span class="void-multiselect-pill" aria-hidden="true">
                 <span class="void-multiselect-pill-label">${optionLabel(opt)}</span>
                 <button
                   type="button"
@@ -306,7 +309,7 @@ export class VoidMultiselect extends InternalsFormControl(VoidElement) {
                 >×</button>
               </span>
             `)
-          : html`<span class="void-multiselect-placeholder">${this._hint}</span>`
+          : html`<span class="void-multiselect-placeholder" aria-hidden="true">${this._hint}</span>`
         }
       </div>
       ${this.error ? html`<span class="void-multiselect-error">${this.error}</span>` : nothing}

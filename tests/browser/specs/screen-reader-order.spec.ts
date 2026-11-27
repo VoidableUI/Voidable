@@ -58,11 +58,11 @@ test.describe('screen reader order of operations', () => {
     expect(trace.slice(focused + 1).filter((e) => e.kind === 'attr' && e.name === 'aria-expanded'), 'nothing changes the trigger state after focus moved').toEqual([]);
   });
 
-  test('multiselect: every option has aria-selected true or false and an id and role before the highlight points at it, and a choice changes false to true', async ({ page }) => {
+  test('multiselect: options have id and role before the highlight points at them, a choice is made on the option the highlight is on, and the trigger has nothing exposed inside it', async ({ page }) => {
     await installTrace(page);
     await load(page, '/sr-pickers');
     const initial = await page.locator('#skills void-option').evaluateAll((os) => os.map((o) => `${o.getAttribute('role')}:${o.getAttribute('aria-selected')}:${o.id ? 'id' : 'no-id'}`));
-    expect(initial, 'a multiselectable listbox says, for each option, whether it is selected').toEqual(['option:false:id', 'option:false:id', 'option:false:id']);
+    expect(initial).toEqual(['option:null:id', 'option:null:id', 'option:null:id']);
     await page.locator('#skills [role=combobox]').focus();
     await clearTrace(page);
     await page.keyboard.press('ArrowDown');
@@ -73,16 +73,17 @@ test.describe('screen reader order of operations', () => {
       const target = document.getElementById(combo.getAttribute('aria-activedescendant') ?? '');
       return { expanded: combo.getAttribute('aria-expanded'), role: target?.getAttribute('role'), selected: target?.getAttribute('aria-selected'), text: target?.textContent?.trim(), focus: document.activeElement === combo };
     });
-    expect(state).toEqual({ expanded: 'true', role: 'option', selected: 'false', text: 'CSS', focus: true });
+    expect(state).toEqual({ expanded: 'true', role: 'option', selected: null, text: 'CSS', focus: true });
     const trace = await readTrace(page);
     const pointed = trace.findIndex((e) => e.kind === 'attr' && e.name === 'aria-activedescendant' && e.to);
     expect(pointed, 'aria-activedescendant was set').toBeGreaterThanOrEqual(0);
-    expect(trace.filter((e) => e.kind === 'attr' && e.name === 'aria-selected' && e.from === null), 'aria-selected is never added late: it was there before').toEqual([]);
     await clearTrace(page);
     await page.keyboard.press('Enter');
     await settle(page);
     const change = attr(await readTrace(page), 'aria-selected', /CSS/);
-    expect(change.map((e) => `${e.from}->${e.to}`), 'choosing CSS changes aria-selected from false to true on the option the highlight is on').toEqual(['false->true']);
+    expect(change.map((e) => `${e.from}->${e.to}`), 'choosing CSS sets aria-selected on the option the highlight is on').toEqual(['null->true']);
+    const kids = await page.locator('#skills [role=combobox] > *').evaluateAll((cs) => cs.map((c) => c.getAttribute('aria-hidden')));
+    expect(kids, 'the placeholder and the chips inside the combobox are hidden from assistive technology, before and after a choice').toEqual(['true']);
     expect(await page.locator('#skills void-option').first().getAttribute('aria-selected')).toBe('true');
   });
 

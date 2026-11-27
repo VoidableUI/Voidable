@@ -36,8 +36,8 @@ Each reader ran the same 26 scenarios.
 | | VoiceOver (WebKit) | NVDA (Chromium) |
 |---|---|---|
 | Spoken as expected | 22 | 17 |
-| Known defect (expected failure, speech recorded) | 3: dialog description, multiselect selection, dropdown menu first item | 2: checked radio, collapsed accordion |
-| Intermittent (failed, then passed on a retry) | 1: toast | 4: select, combobox, multiselect, checkbox |
+| Known defect (expected failure, speech recorded) | 2: dialog description, multiselect selection | 2: checked radio, collapsed accordion |
+| Intermittent (failed, then passed on a retry) | 1: dropdown menu (in run 45935068155; the toast passed there) | 4: select, combobox, multiselect, checkbox |
 | Failed with no speech recorded | 0 | 3: tabs, table, chart table |
 
 Two of the 26 scenarios, `link-button-one-control` and `breadcrumbs-list`, only check the page and speak nothing; they are counted among the passes. The failed NVDA scenarios heard only empty strings for every move (40 moves of the "next" command in each), so they say nothing about the components: see [Known defects](#known-defects-and-unexplained-results).
@@ -69,11 +69,11 @@ Two of the 26 scenarios, `link-button-one-control` and `breadcrumbs-list`, only 
 | Scenario | VoiceOver | NVDA |
 |---|---|---|
 | Dialog | `Profile settings web dialog with 6 items Ada Insertion on word: Ada , between characters: and Display name edit text`; the description is not spoken (known defect) | `button. Profile settings, dialog, Change how your name appears.. sr-dialog, document. Profile settings, dialog, Change how your name appears.. Display name, edit, Ada` |
-| Dropdown menu | `Actions menu pop up button`; after the menu opens, nothing about the first item (known defect) | `clickable, Actions, menu button, collapsed, sub Menu`; after opening `Rename, 1 of 3`; after Down `Duplicate, 2 of 3` |
+| Dropdown menu | `Actions menu pop up button`; after the menu opens `Rename menu item (1 of 3)` in two of three attempts, and only `Actions menu pop up button` in the third (intermittent) | `clickable, Actions, menu button, collapsed, sub Menu`; after opening `Rename, 1 of 3`; after Down `Duplicate, 2 of 3` |
 | Tabs | `Account sections tab group`, `Profile selected tab, 1 of 3`, `Billing tab, 2 of 3`, and after activation `Billing selected tab, 2 of 3` | no speech recorded |
 | Accordion | `How do refunds work? collapsed button`, then `How do refunds work? expanded button`, then `How do refunds work? region` and `Refunds arrive within five days.` | `clickable, How do refunds work?, button, expanded` for the collapsed trigger (known defect) |
 | Collapsible | `Shipping details collapsed button`, `Shipping details expanded button`, `Shipping details collapsed button` | `clickable, Shipping details, button, collapsed`, then `expanded`, then `collapsed` |
-| Toast | `Changes saved. Your profile is up to date.` on the retry; silent on the first attempt (intermittent) | `Changes saved. Your profile is up to date.` |
+| Toast | `Changes saved. Your profile is up to date.` (silent on the first attempt in the earlier runs, spoken at once in run 45935068155) | `Changes saved. Your profile is up to date.` |
 | Alert | `Payment failed. You are currently on a selectable text.` | `clickable, Payment failed` |
 | Tooltip | `Bold Make the selection bold button` | `Bold, button, Make the selection bold` |
 
@@ -94,8 +94,8 @@ The known defects are tracked in [issue 75](https://github.com/VoidableUI/Voidab
 
 - **Radio group on NVDA.** A checked radio is spoken as `not checked`, and without its position in the group, where VoiceOver says `Free selected radio button, 1 of 3`. The cause is not found.
 - **Accordion on NVDA.** A collapsed trigger is spoken as `expanded`, where VoiceOver says `collapsed`, and where the same NVDA says `collapsed` for the dropdown menu and collapsible triggers. The cause is not found.
-- **Multiselect on VoiceOver.** After Enter chooses an option, VoiceOver says only `You are currently on a selectable (null), inside of a list box.`; NVDA says `selected`. The cause is not found.
-- **Dropdown menu on VoiceOver.** Focus moves to the first item (a page-side check passes) but VoiceOver says nothing about it. This one is not reproducible every time: in the earlier run one attempt reported "expected to fail, but passed" (the item was spoken) and another did not speak it.
+- **Multiselect on VoiceOver.** After Enter chooses an option, VoiceOver says only `You are currently on a selectable (null), inside of a list box.`; NVDA says `selected`. Plain ARIA references said the choice (`JavaScript (2 of 3) completion selected`) whether or not unchosen options carried `aria-selected="false"`, so that is not the cause. Opening the list, VoiceOver's cursor was on a child of the combobox (`selectable (null), inside of a combo box`): the placeholder, which choosing an option replaces with a chip. The placeholder and chips are now `aria-hidden`; a run has not yet confirmed it.
+- **Dropdown menu on VoiceOver: intermittent, not a defect.** Focus moves to the first item and VoiceOver says `Rename menu item (1 of 3)` in most attempts (two of three in run 45935068155), and only `Actions menu pop up button` in others. A plain ARIA menu button focusing its first item in the same task was spoken the same way (`Rename menu item (1 of 3)`), and one that focused it 300 ms later was silent for the first item, so the component's timing is the one that works. It is no longer an expected failure.
 - **Dialog description on VoiceOver.** The name is spoken and the description is not, while NVDA speaks both. The description is correct in the accessibility tree, and a copy of it as `aria-description` made no difference, so this looks like VoiceOver behaviour rather than a component defect. It is kept as an expected failure as a record of the difference.
 - **Tabs, table and chart data table on NVDA: no speech, unexplained.** In both runs NVDA heard only empty strings while the script moved 40 times, so the script never reached the tab or table. The accessibility-tree checks for the same scenarios pass in Chromium, Firefox and WebKit, and VoiceOver reads them. Whether this is the components, NVDA with Chromium on this runner, or the script is not known; do not read it as "NVDA reads these correctly" or as "NVDA cannot read them".
 
