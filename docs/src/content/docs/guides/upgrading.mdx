@@ -158,7 +158,6 @@ Nothing breaks. `void-alert` gains a CSS-only `void-alert-actions` part for butt
 
 ### Cards and rows as links, and the card grid
 
-
 - **A card that is a link or a button.** Write one real `<a href>` or `<button>` inside `<void-card-title>`; the theme stretches it over the whole card, and the card points the control's `aria-describedby` at its description. If you wrapped a card in an `<a>` or `<button>`, or added a second control to a card that has one in its title, `voidable check` and the development warnings now report it (`nested-control`) with the markup to write. See [Cards as links](/patterns/card-grid/).
 - **A row that is a link or a button.** `<void-row>` takes the same form: one `<a href>` or `<button>` in `<void-row-text>`, stretched over the row, replaces the chevron link button at the end of a line. The checkers report a wrapped row and a second control the same way. Tokens: `--void-rows-surface-hover`, `--void-rows-surface-active`.
 - **`<void-card-grid>`** lays cards out in as many columns as fit. Nothing to change unless you wrote that grid yourself; then delete your CSS.
