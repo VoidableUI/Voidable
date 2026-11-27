@@ -33,6 +33,24 @@ export const Default: Story = {
   `,
 };
 
+export const FractionDigits: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story: 'The reading keeps the decimals it has (`0.21` stays `0.21`) and follows the element\'s `lang` (`0,21` under `lang="de"`). `fraction-digits` fixes the count, here `0` and `2`; the data table says the same number.',
+      },
+    },
+  },
+  render: () => html`
+    <div style="display: flex; flex-wrap: wrap; gap: var(--void-space-6);">
+      <void-gauge value="0.21" max="1" circular="triple" style="max-width: 200px;" aria-label="Ratio"></void-gauge>
+      <void-gauge value="0.2" max="1" fraction-digits="2" circular="triple" style="max-width: 200px;" aria-label="Ratio, two digits"></void-gauge>
+      <void-gauge value="75.6" fraction-digits="0" unit="%" unit-inline circular="triple" style="max-width: 200px;" aria-label="Load, whole numbers"></void-gauge>
+      <div lang="de"><void-gauge value="0.21" max="1" circular="triple" style="max-width: 200px;" aria-label="Verhältnis"></void-gauge></div>
+    </div>
+  `,
+};
+
 export const UnitInline: Story = {
   parameters: {
     docs: {

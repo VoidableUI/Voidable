@@ -2384,6 +2384,7 @@ defmodule VoidableUI.Components do
   attr :variant, :string, default: nil
   attr :hide_value, :boolean, default: false
   attr :unit_inline, :boolean, default: false
+  attr :fraction_digits, :integer, default: nil
   attr :tick_major, :integer, default: nil
   attr :tick_minor, :integer, default: nil
   attr :hide_tick_min, :boolean, default: false
@@ -2409,6 +2410,7 @@ defmodule VoidableUI.Components do
       variant={@variant}
       hide-value={@hide_value}
       unit-inline={@unit_inline}
+      fraction-digits={@fraction_digits}
       tick-major={@tick_major}
       tick-minor={@tick_minor}
       hide-tick-min={@hide_tick_min}
