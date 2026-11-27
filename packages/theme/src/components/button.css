@@ -206,6 +206,35 @@ void-button[disabled] {
   cursor: not-allowed;
 }
 
+/* aria-disabled — a button that is disabled but keeps focus and pointer events, so it can say why (an author's
+   aria-describedby). It is dimmed through its colours and not through opacity, so the focus ring keeps full strength.
+   A real `disabled` has its own rule above. */
+void-button[aria-disabled="true"]:not([disabled]) {
+  --_void-tone-text: var(--void-color-text-disabled);
+  --_void-tone-subtle: var(--void-color-control-fill);
+  --_void-tone-border: var(--void-color-border);
+  --_void-tone-hover: var(--void-color-control-fill);
+  --_void-tone-active: var(--void-color-control-fill);
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+void-button[variant="filled"][aria-disabled="true"]:not([disabled]) {
+  background: var(--void-color-bg-hover);
+  border-color: var(--void-color-border);
+  color: var(--void-color-text-disabled);
+  opacity: 1;
+}
+
+void-button[variant="ghost"][aria-disabled="true"]:not([disabled]) {
+  --_void-tone-subtle: transparent;
+  --_void-tone-text: var(--void-color-text-disabled);
+  --_void-tone-hover: transparent;
+  --_void-tone-active: transparent;
+  background: transparent;
+  border-color: transparent;
+}
+
 /* ── Touch targets ──
    Under a coarse pointer the hit area grows to --void-hit-target (44px,
    WCAG 2.5.5) without moving or resizing anything drawn: an empty ::after
