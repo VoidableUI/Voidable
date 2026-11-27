@@ -133,9 +133,9 @@
         },
         {
           "name": "sticky",
-          "type": "boolean",
+          "type": "'always' | null",
           "default": "",
-          "description": "as a child of void-split: stays in view while the other column scrolls"
+          "description": "as a child of void-split: stays in view while the other column scrolls (bare: on wide screens only; always: also when the split stacks below 48rem, for the length of the split)"
         }
       ]
     },

@@ -11,6 +11,10 @@
    --void-page-actions-border        Edge colour of their box.
    --void-page-actions-border-width  Edge thickness of their box; 0 by default. Set it (the colour may be transparent) whenever the box has a fill or a shadow: forced colours removes both, and the edge is what remains. */
 
+/* @tokens void-split
+   --void-sticky-top        Setting: how far from the top a sticky child sticks: the height of a sticky header it must sit below. Add to the group gap beside a wide split; the whole offset of sticky="always" when stacked. Default 0px.
+   --void-split-sticky-max  Setting: tallest a sticky="always" child grows when the split is stacked; it scrolls inside beyond that. Default 50svh. */
+
 /* @tokens void-section
    --void-section-surface       Fill of a titled section (one with a heading, or one that holds a table). Unset, a section draws nothing.
    --void-section-border        Edge colour of a titled section.
@@ -306,10 +310,12 @@ void-stack[gap="stack"]   { gap: var(--void-gap-stack); }
 void-stack[gap="group"]   { gap: var(--void-gap-group); }
 void-stack[gap="section"] { gap: var(--void-gap-section); }
 
-/* Stays in view while the column beside it scrolls. */
+/* Stays in view while the column beside it scrolls. The offset is the
+   group gap below whatever --void-sticky-top clears (a sticky header);
+   unset, that is the group gap alone. */
 void-split > [sticky] {
   position: sticky;
-  top: var(--void-gap-group);
+  top: calc(var(--void-sticky-top, 0px) + var(--void-gap-group));
 }
 
 @media (max-width: 48rem) {
@@ -325,8 +331,29 @@ void-split > [sticky] {
     grid-template-columns: minmax(0, 1fr);
   }
 
-  void-split > [sticky] {
+  void-split > [sticky]:not([sticky="always"]) {
     position: static;
+  }
+
+  /* sticky="always" stays stuck for the whole length of the split. A grid
+     item can only stick within its own row, so a split with such a child
+     becomes a flex column: the child's containing block is then the whole
+     split. A surface and a layer keep the content that scrolls under it
+     from showing through, and a cap keeps it from filling a phone. */
+  void-split:has(> [sticky="always"]) {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  void-split > [sticky="always"] {
+    position: sticky;
+    top: var(--void-sticky-top, 0px);
+    z-index: var(--void-z-sticky);
+    max-height: var(--void-split-sticky-max, 50svh);
+    overflow: auto;
+    padding-block-end: var(--void-gap-tight);
+    background: var(--_void-under, var(--void-color-bg));
   }
 }
 

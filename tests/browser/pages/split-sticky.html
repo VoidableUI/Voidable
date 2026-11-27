@@ -1,0 +1,44 @@
+<!-- A sticky header, then five splits far apart: bare sticky, sticky="always",
+     sticky="always" below a header (--void-sticky-top), and sticky="always"
+     with a tall child (with a height cap, and with the default one).
+     Specs: split-sticky.spec.ts. -->
+<style>
+  body { margin: 0; }
+  #head { position: sticky; top: 0; z-index: 1000; height: 3rem; background: #444; }
+  .gap { height: 40vh; }
+  .list { height: 1200px; background: repeating-linear-gradient(#8884 0 40px, #4444 40px 80px); }
+  .media { height: 6rem; }
+  .tall { height: 40rem; }
+</style>
+<div id="head">Header</div>
+<div class="gap"></div>
+
+<void-split id="bare" ratio="1:2">
+  <div id="bare-s" class="media" sticky>Media</div>
+  <div id="bare-l" class="list"></div>
+</void-split>
+<div class="gap"></div>
+
+<void-split id="always" ratio="1:2">
+  <div id="always-s" class="media" sticky="always">Media</div>
+  <div id="always-l" class="list"></div>
+</void-split>
+<div class="gap"></div>
+
+<void-split id="offset" ratio="1:2" style="--void-sticky-top: 3rem">
+  <div id="offset-s" class="media" sticky="always">Media</div>
+  <div id="offset-l" class="list"></div>
+</void-split>
+<div class="gap"></div>
+
+<void-split id="cap" ratio="1:2" style="--void-split-sticky-max: 10rem">
+  <div id="cap-s" class="tall" sticky="always">Tall media</div>
+  <div id="cap-l" class="list"></div>
+</void-split>
+<div class="gap"></div>
+
+<void-split id="cap-default" ratio="1:2">
+  <div id="cap-default-s" class="tall" sticky="always">Tall media</div>
+  <div id="cap-default-l" class="list"></div>
+</void-split>
+<div class="gap"></div>
