@@ -19,7 +19,7 @@ How to find every Voidable element and read its state the way a user, an agent d
 | `void-breadcrumbs` | navigation | fixed "Breadcrumb" | void-breadcrumbs-list is role="list" and each void-breadcrumbs-item in it role="listitem"<br>aria-current="page" on the void-breadcrumbs-item part the author marks | the landmark name is fixed English; there is no attribute to change it |
 | `void-button` | button | text content or aria-label; a link button (an <a href> or <button> inside) is presentational: no role, no tabindex, the inner link or button is the control and is named by its own text | disabled (reflected)<br>aria-disabled="true" while disabled (own or a disabled fieldset), absent otherwise; on a link button it goes on the inner <a> (with tabindex="-1"), a native <button> inside gets disabled | not form-associated: it submits and resets its closest form like a native button but is not in form.elements |
 | `void-calendar` | group | fixed "Calendar"; the grid is named "<Month> <Year>" | value (reflected, YYYY-MM-DD)<br>aria-selected on the day cell | day buttons are named with a long date ("Tuesday, November 3, 2026") that depends on locale |
-| `void-card` | — | none | — | no role by design, and the void-card-title part is not a heading (its level depends on the page): write your own heading element inside it, <void-card-title><h3>...</h3></void-card-title> |
+| `void-card` | — | none | — | no role by design, and the void-card-title part is not a heading (its level depends on the page): write your own heading element inside it, <void-card-title><h3>...</h3></void-card-title><br>a destination card holds exactly one control, a native <a href> or <button> inside the title (or in a heading in it), never a wrapper around the card and never a second control; the stretched control is the name (its text), aria-describedby on it points at void-card-description (added by the card, an author value is kept) |
 | `void-carousel` | region | aria-label / aria-labelledby on the host (aria-roledescription="carousel"); the slides are role="group" with aria-roledescription="slide" named "n of m"; the slides are a polite live region, off while autoplay rotates them | index (reflected) | — |
 | `void-carousel-next` | button | aria-label the author writes on it | aria-disabled at the last slide unless loop | — |
 | `void-carousel-previous` | button | aria-label the author writes on it | aria-disabled at the first slide unless loop | — |
@@ -96,7 +96,7 @@ Every control with a `value` reflects it to the `value` attribute whenever it ch
 - Withheld while it is a secret (3): `void-action-input`, `void-input`, `void-pin-input`. A `type="password"` field and a `mask`ed PIN input keep their text out of the attribute (readable by every script, devtools panel, DOM snapshot and session recorder); there the attribute stays the initial value.
 - Excluded, `void-file-upload`: the value is a list of File objects the browser only lets a user choose: it has no string form, a file name is private to the page and would leak into the markup, and scripts cannot assign it. The void-change detail carries the files.
 
-## Gaps (28)
+## Gaps (29)
 
 - `void-accordion`: no group role or name; the items are only found by their trigger buttons
 - `void-action-input`: host has no role; void-action is its only signal for the action
@@ -106,6 +106,7 @@ Every control with a `value` reflects it to the `value` attribute whenever it ch
 - `void-button`: not form-associated: it submits and resets its closest form like a native button but is not in form.elements
 - `void-calendar`: day buttons are named with a long date ("Tuesday, November 3, 2026") that depends on locale
 - `void-card`: no role by design, and the void-card-title part is not a heading (its level depends on the page): write your own heading element inside it, <void-card-title><h3>...</h3></void-card-title>
+- `void-card`: a destination card holds exactly one control, a native <a href> or <button> inside the title (or in a heading in it), never a wrapper around the card and never a second control; the stretched control is the name (its text), aria-describedby on it points at void-card-description (added by the card, an author value is kept)
 - `void-color-picker`: no role on the host
 - `void-compose-input`: no role on the host; the send button has no stable name
 - `void-date-picker`: a click on the field opens the calendar and keeps focus in it, so a second click closes it again
