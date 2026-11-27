@@ -66,6 +66,10 @@ func TestCheckFixtures(t *testing.T) {
 			`alert-close.html:1:1: [missing-part] <void-alert> has no <void-alert-description>`,
 			`alert-close.html:1:13: [legacy-markup] dismissible on <void-alert> was removed in 0.8; add <void-alert-close>`,
 		}, nil},
+		{"alert-actions.html", []string{
+			`alert-actions.html:1:1: [part-misuse] the parts of <void-alert> are out of order; write them as <void-alert-description>, <void-alert-actions>, <void-alert-close>, in that order`,
+			`alert-actions.html:2:66: [invalid-parent] <void-alert-actions> is not valid inside <void-banner>`,
+		}, nil},
 		{"parts.html", []string{
 			`parts.html:1:1: [missing-part] <void-popover> has no <void-popover-trigger>`,
 			`parts.html:1:1: [missing-part] <void-popover> has no <void-popover-content>`,
@@ -218,7 +222,7 @@ func TestRefAndGen(t *testing.T) {
 		{[]string{"ref", "void-button", "--format", "json"}, []string{`"tag": "void-button"`, `"values": [`}},
 		{[]string{"ref", "void-tabs"}, []string{"keys (rebind or switch off", "next: Right Arrow (Left Arrow in right-to-left text)"}},
 		{[]string{"ref", "void-dialog", "--format", "markdown"}, []string{"| Action | Default keys | What it does |", "| `close` (essential) | Escape |"}},
-		{[]string{"ref", "--size"}, []string{"text     index", "168 elements"}},
+		{[]string{"ref", "--size"}, []string{"text     index", "169 elements"}},
 		{[]string{"gen", "snippet", "void-dialog", "--lang", "jsx"}, []string{`<void-dialog size="sm" onvoid-close=`, `<void-dialog-title>Delete project</void-dialog-title>`, `<void-button color="error" variant="filled">Delete</void-button>`}},
 		{[]string{"gen", "snippet", "void-dropdown-menu", "--lang", "erb"}, []string{`data-action="void-select->my-controller#handle"`}},
 		{[]string{"gen", "heex"}, []string{"defmodule VoidableUI.Components do", "def status_dot(assigns) do"}},

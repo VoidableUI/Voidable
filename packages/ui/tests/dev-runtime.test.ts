@@ -107,6 +107,21 @@ describe('@voidable/ui/dev', () => {
     expect(seen.filter((w) => w.kind !== 'undefined-element' && (w.tag === 'void-error-fallback' || w.tag === 'void-banner'))).toEqual([]);
   });
 
+  it('is silent about alert actions between the description and the close part, and reports them out of order or outside an alert (#117)', async () => {
+    document.body.innerHTML =
+      '<void-alert id="ok"><void-alert-title>t</void-alert-title><void-alert-description>d</void-alert-description><void-alert-actions><void-button>Retry</void-button></void-alert-actions><void-alert-close><button type="button" aria-label="Dismiss">x</button></void-alert-close></void-alert>';
+    await settled();
+    expect(seen.filter((w) => w.kind !== 'undefined-element' && w.tag === 'void-alert')).toEqual([]);
+    seen.length = 0;
+    document.body.innerHTML =
+      '<void-alert><void-alert-description>d</void-alert-description><void-alert-close><button type="button" aria-label="Dismiss">x</button></void-alert-close><void-alert-actions><void-button>Retry</void-button></void-alert-actions></void-alert>' +
+      '<void-banner><void-banner-description>d</void-banner-description><void-alert-actions><void-button>Retry</void-button></void-alert-actions></void-banner>';
+    await settled();
+    const kinds = seen.map((w) => `${w.kind}:${w.tag}`);
+    expect(kinds).toContain('part-misuse:void-alert');
+    expect(kinds.some((k) => k.endsWith(':void-alert-actions'))).toBe(true);
+  });
+
   it('reports the picker forms before parts (#52): options straight in a combobox, options straight in a select', async () => {
     document.body.innerHTML =
       '<void-combobox name="c"><void-option value="a">A</void-option></void-combobox>' +

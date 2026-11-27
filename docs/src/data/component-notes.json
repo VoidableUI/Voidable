@@ -365,7 +365,7 @@
     "events": {
       "void-close": "Fires when the user presses the control in the `void-alert-close` part, with `detail.reason` `close-button`, just before the alert removes itself from the page. Cancelable: `preventDefault()` keeps the alert. Does not bubble."
     },
-    "children": "Explicit parts, in this order: `void-alert-title` (optional, short), `void-alert-description` (the message, with any inline markup, such as a link) and `void-alert-close` (optional; wraps the one control that dismisses the alert, and without it the alert cannot be dismissed)."
+    "children": "Explicit parts, in this order: `void-alert-title` (optional, short), `void-alert-description` (the message, with any inline markup, such as a link), `void-alert-actions` (optional buttons or links such as Retry, small by default, in a row below the text at the trailing edge, before the close part so Tab reads title, actions, close) and `void-alert-close` (optional; wraps the one control that dismisses the alert, and without it the alert cannot be dismissed)."
   },
   "void-banner": {
     "group": "feedback",

@@ -148,7 +148,7 @@ The machine-readable form of this table is the `voidParts` entry of each compone
 | `<void-tooltip>` | `-trigger` (one control), `-content` | Content describes the control. |
 | `<void-tabs>` | `-list` holding `<void-tabs-trigger value>`, then `<void-tabs-content value>` | Trigger and content are paired by `value`. |
 | `<void-card>` | `-header` (holding `-title`, `-description`), `-body` (required), `-footer` | |
-| `<void-alert>` | `-title`, `-description` (required), `-close` (one control) | Without `-close` it cannot be dismissed. |
+| `<void-alert>` | `-title`, `-description` (required), `-actions`, `-close` (one control) | Without `-close` it cannot be dismissed. |
 | `<void-accordion>` | `<void-accordion-item>`, each with `<void-accordion-trigger>` and `<void-accordion-content>` | |
 | `<void-collapsible>` | `-trigger`, `-content` | The trigger is the button; closed content is hidden from `open` and animates open and closed. |
 | `<void-panel>` | `-header` (holding `-title`, `-description`), `-body` (required) | The title names the region. |
@@ -168,7 +168,7 @@ What every component does today, and what it becomes. **Parts** components are c
 | Component | Today | Target | Status |
 |---|---|---|---|
 | accordion, accordion-item | Parts | `void-accordion-item` > `-trigger`, `-content` | Parts |
-| alert | Parts | `-title`, `-description`, `-close` | Parts |
+| alert | Parts | `-title`, `-description`, `-actions`, `-close` | Parts |
 | card | Parts | `-header` (`-title`, `-description`), `-body`, `-footer` | Parts |
 | dialog, drawer | Parts | `-title`, `-description`, `-body`, `-actions` | Parts |
 | dropdown-menu, dropdown-menu-item | Parts | `-trigger`, `-content` (`-item`, `-separator`) | Parts |

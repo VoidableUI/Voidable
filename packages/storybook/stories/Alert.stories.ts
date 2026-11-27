@@ -77,3 +77,33 @@ export const Dismissible: Story = {
     </div>
   `,
 };
+
+export const WithActions: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story: 'Put buttons (Retry, Sign in again, Undo) in a `void-alert-actions` part after the description and before the close part. They sit in a row below the text at the trailing edge, are small by default, wrap at narrow widths, and read in the order title, description, actions, close.',
+      },
+    },
+  },
+  render: () => html`
+    <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+      <void-alert color="error">
+        <void-alert-title>Could not save</void-alert-title>
+        <void-alert-description>The server did not respond.</void-alert-description>
+        <void-alert-actions><void-button>Retry</void-button><void-button variant="ghost">Details</void-button></void-alert-actions>
+        <void-alert-close><button type="button" aria-label="Dismiss">&times;</button></void-alert-close>
+      </void-alert>
+      <void-alert color="info">
+        <void-alert-description>Your session ends in five minutes.</void-alert-description>
+        <void-alert-actions><void-button>Sign in again</void-button></void-alert-actions>
+      </void-alert>
+      <void-alert color="success" variant="filled">
+        <void-alert-title>Archived</void-alert-title>
+        <void-alert-description>Three items were archived.</void-alert-description>
+        <void-alert-actions><void-button>Undo</void-button></void-alert-actions>
+        <void-alert-close><button type="button" aria-label="Dismiss">&times;</button></void-alert-close>
+      </void-alert>
+    </div>
+  `,
+};
