@@ -41,6 +41,7 @@ type declaration struct {
 	VoidParts    *partsJSON            `json:"voidParts"`
 	VoidName     *nameRule             `json:"voidName"`
 	VoidNative   *domain.NativeControl `json:"voidNative"`
+	VoidLinked   *domain.LinkedControl `json:"voidLinked"`
 	VoidRenamed  *domain.Renamed       `json:"voidRenamed"`
 	VoidMessages []domain.Message      `json:"voidMessages"`
 	VoidKeys     *domain.Keys          `json:"voidKeys"`
@@ -167,6 +168,7 @@ func element(path string, d declaration) domain.Element {
 	e := domain.Element{Tag: d.TagName, Class: d.Name, Module: path, Description: d.Description}
 	e.AllowedParents, e.RequiredChildren, e.AttrHints = d.VoidParents, d.VoidRequires, d.VoidHints
 	e.Native = d.VoidNative
+	e.Linked = d.VoidLinked
 	e.Renamed = d.VoidRenamed
 	e.Messages = d.VoidMessages
 	e.Keys = d.VoidKeys

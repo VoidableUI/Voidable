@@ -122,6 +122,11 @@
       ]
     },
     {
+      "tag": "void-card-grid",
+      "description": "Grid of void-card children in as many columns as fit (each at least 16rem, set with --void-card-grid-min), the cards of a row equally tall. CSS only.",
+      "attributes": []
+    },
+    {
       "tag": "void-stack",
       "description": "Vertical stack with a named gap from the layout rhythm.",
       "attributes": [

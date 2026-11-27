@@ -7,7 +7,9 @@
    --void-card-border-width  Edge thickness, every variant.
    --void-card-radius        Corner radius; the header, body and footer follow it.
    --void-card-shadow        Shadow of the default card.
-   --void-card-padding       Padding of the header (inline), the body and the footer (inline). Applies whatever the padding attribute says, except padding="none". */
+   --void-card-padding       Padding of the header (inline), the body and the footer (inline). Applies whatever the padding attribute says, except padding="none".
+   --void-card-surface-hover   Fill of a card that is a link or a button while the pointer is over it.
+   --void-card-surface-active  Fill of that card while it is pressed. */
 
 void-card {
   --_void-card-padding: var(--void-card-padding, var(--void-container-padding));
@@ -143,4 +145,68 @@ void-card[padding="sm"] {
 
 void-card[padding="lg"] {
   --_void-card-padding: var(--void-card-padding, var(--void-space-8));
+}
+
+/* ── A card that is a link or a button ──
+     <void-card>
+       <void-card-header>
+         <void-card-title><a href="/projects/ground-network">Ground network</a></void-card-title>
+         <void-card-description>41 stations, 2 in maintenance.</void-card-description>
+       </void-card-header>
+       <void-card-body>…</void-card-body>
+     </void-card>
+   The author writes one real <a href> or <button> inside the title. Its
+   ::after is stretched over the whole card, so the card is the hit area while
+   the link or button stays the one control that gets the name, the focus and
+   the keys. Text inside the card cannot be selected (the stretched box is on
+   top of it). A card with no link or button is not touched. */
+void-card:has(> void-card-header > void-card-title > :is(a[href], button)) {
+  position: relative;
+  cursor: pointer;
+}
+
+void-card-title > :is(a[href], button) {
+  appearance: none;
+  margin: 0;
+  border: 0;
+  padding: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  text-align: start;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+void-card-title > :is(a[href], button)::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: var(--_void-card-radius);
+}
+
+/* The ring goes around the whole card, not the title text. */
+void-card-title > :is(a[href], button):focus-visible {
+  outline: none;
+}
+
+void-card-title > :is(a[href], button):focus-visible::after {
+  outline: var(--void-focus-ring-width) solid var(--void-focus-ring-color);
+  outline-offset: var(--void-focus-ring-offset);
+}
+
+@media (hover: hover) {
+  void-card:has(> void-card-header > void-card-title > :is(a[href], button:not(:disabled))):hover {
+    background: var(--void-card-surface-hover, var(--void-color-bg-hover));
+  }
+}
+
+void-card:has(> void-card-header > void-card-title > :is(a[href], button:not(:disabled))):active {
+  background: var(--void-card-surface-active, var(--void-color-bg-active));
+}
+
+void-card:has(> void-card-header > void-card-title > button:disabled),
+void-card-title > button:disabled {
+  cursor: not-allowed;
 }

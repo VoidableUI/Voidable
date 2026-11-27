@@ -27,6 +27,8 @@
 //        a old attribute -> { to, values, fix }; v attribute -> { old value -> new };
 //        e old event -> what to listen for instead
 //   v  the native control the author writes inside it, from voidNative: { tag, fix }
+//   k  it can be one link or button as a whole (#116), from voidLinked: { p the part
+//        that holds the control, c the void-* tags that count as controls, s the correct markup }
 // Also exported: `removed`, tags that were replaced by parts, with the fix.
 // Also exported: `styled`, the tags of the CSS-only elements (the page patterns
 // and the media surface). @voidable/theme styles them and nothing registers
@@ -119,6 +121,7 @@ for (const mod of manifest.modules) {
       }
     }
     if (decl.voidNative) entry.v = { tag: decl.voidNative.tag, fix: decl.voidNative.fix };
+    if (decl.voidLinked) entry.k = { p: decl.voidLinked.part, c: decl.voidLinked.controls, s: decl.voidLinked.fix };
     tags[decl.tagName] = entry;
     if (decl.voidParts) {
       entry.q = partsEntry(decl.voidParts, decl.voidParts.skeleton);

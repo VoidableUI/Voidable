@@ -66,6 +66,11 @@ func TestCheckFixtures(t *testing.T) {
 			`alert-close.html:1:1: [missing-part] <void-alert> has no <void-alert-description>`,
 			`alert-close.html:1:13: [legacy-markup] dismissible on <void-alert> was removed in 0.8; add <void-alert-close>`,
 		}, nil},
+		{"linked-card.html", []string{
+			`linked-card.html:1:25: [nested-control] <void-card> is inside <a href>; block content inside a link or a button is invalid HTML and announces badly; instead put the one link or button in the title`,
+			`linked-card.html:2:23: [nested-control] <void-card> is inside <button>;`,
+			`linked-card.html:3:1: [nested-control] <void-card> is a link or button (its <void-card-title> holds a control) and also holds a second control;`,
+		}, nil},
 		{"parts.html", []string{
 			`parts.html:1:1: [missing-part] <void-popover> has no <void-popover-trigger>`,
 			`parts.html:1:1: [missing-part] <void-popover> has no <void-popover-content>`,

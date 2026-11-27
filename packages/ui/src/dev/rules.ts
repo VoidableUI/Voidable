@@ -638,3 +638,46 @@ export function checkRemoved(removed: Readonly<Record<string, string>>, el: Elem
     el,
   );
 }
+
+/** Native elements that are a control however they are written. */
+const NATIVE_CONTROLS = 'a[href], button, input:not([type="hidden"]), select, textarea, summary';
+
+/**
+ * A component that can be one link or one button as a whole (#116, `<void-card>`): wrapped in a link or a
+ * button (block content inside one is invalid HTML and announces badly), or linked (its title holds a
+ * control) with a second control anywhere inside (two things to Tab to, and the stretched link covers the
+ * second one so it cannot be clicked).
+ */
+export function checkLinked(table: DevTable, el: Element): DevWarning | undefined {
+  const k = table[el.localName]?.k;
+  if (!k || !el.isConnected) return undefined;
+  const wrapper = el.parentElement?.closest('a[href], button');
+  if (wrapper) {
+    return warning(
+      'nested-control',
+      el.localName,
+      'wrapped',
+      `${describe(el)} is inside ${describe(wrapper)}. Block content inside a link or a button is invalid HTML and announces badly. Instead ${k.s}.`,
+      el,
+    );
+  }
+  const selector = [NATIVE_CONTROLS, ...k.c].join(', ');
+  // Only the outermost match counts: a <void-button> around a <button> is one control.
+  const own = (root: Element) =>
+    Array.from(root.querySelectorAll(selector)).filter((c) => {
+      const up = c.parentElement?.closest(selector);
+      return !up || !root.contains(up);
+    });
+  const title = Array.from(el.querySelectorAll(k.p)).find((t) => t.closest(el.localName) === el);
+  if (!title || own(title).length === 0) return undefined;
+  const all = own(el);
+  if (all.length < 2) return undefined;
+  const second = all.find((c) => !title.contains(c)) ?? all[1];
+  return warning(
+    'nested-control',
+    el.localName,
+    'second-control',
+    `${describe(el)} is a link or button (its <${k.p}> holds a control) and also holds ${describe(second)}: a linked card holds exactly one control, and the stretched link covers any other. Instead ${k.s}.`,
+    el,
+  );
+}

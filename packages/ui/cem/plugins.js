@@ -55,6 +55,7 @@ import {
   attributeHints,
   extraAttributes,
   eventDetails,
+  linkedControls,
   nativeControls,
   parts,
   renamed,
@@ -520,6 +521,11 @@ export function manifestSupplementPlugin() {
       for (const [tag, native] of Object.entries(nativeControls)) {
         if (!/^[a-z]+$/.test(native.tag) || !native.fix) throw new Error(`cem/supplement.js nativeControls: <${tag}> needs a native tag and a fix`);
         get(tag, 'nativeControls').voidNative = native;
+      }
+
+      for (const [tag, linked] of Object.entries(linkedControls)) {
+        if (!linked.fix || !linked.part?.startsWith('void-')) throw new Error(`cem/supplement.js linkedControls: <${tag}> needs a part and a fix`);
+        get(tag, 'linkedControls').voidLinked = linked;
       }
 
       for (const [tag, events] of Object.entries(eventDetails)) {

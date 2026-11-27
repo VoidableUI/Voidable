@@ -30,6 +30,8 @@ export interface DevTag {
   v?: { tag: string; fix: string };
   /** What was renamed or removed in 0.8 (#23), with the form to write instead. */
   l?: DevRenamed;
+  /** It can be one link or one button as a whole (#116): the part that holds the control, and the correct markup. */
+  k?: { p: string; c: readonly string[]; s: string };
 }
 
 /** One renamed or removed attribute (cem/supplement.js `renamed`). */
@@ -109,7 +111,9 @@ export type WarningKind =
   /** A `keys` attribute that is not a JSON object, or names an action the element does not have (#90). */
   | 'keys'
   /** An attribute is set that another attribute on the same element makes without effect (`resize` with `autosize`). */
-  | 'attribute-conflict';
+  | 'attribute-conflict'
+  /** A card wrapped in a link or a button, or a linked card holding a second control (#116). */
+  | 'nested-control';
 
 /** One reported problem. */
 export interface DevWarning {
