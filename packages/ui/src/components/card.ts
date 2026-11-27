@@ -71,7 +71,8 @@ export class VoidCard extends VoidElement {
     const control = this._control();
     const description = this._parts.one('void-card-description');
     const disabled = this.getAttribute('aria-disabled') === 'true';
-    const describedby = description ? this._parts.id(description, 'void-card-description') : null;
+    // A static card that is available needs no id on its description.
+    const describedby = description && (control || disabled) ? this._parts.id(description, 'void-card-description') : null;
     if (control) {
       if (disabled) this._parts.provide(control, 'aria-disabled', 'true');
       if (describedby) this._parts.token(control, 'aria-describedby', describedby);
