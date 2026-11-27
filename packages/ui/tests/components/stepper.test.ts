@@ -36,8 +36,23 @@ describe('VoidStepper', () => {
       document.body.appendChild(el);
     });
 
-    it('sets role="navigation" on connect', () => {
-      expect(el.getAttribute('role')).toBe('navigation');
+    it('is a list, not a navigation landmark', () => {
+      expect(el.getAttribute('role')).toBe('list');
+    });
+
+    it('has no navigation landmark', async () => {
+      el.steps = 'A,B';
+      await el.updateComplete;
+      expect(el.querySelector('nav, [role="navigation"]')).toBeNull();
+      expect(el.getAttribute('role')).not.toBe('navigation');
+    });
+
+    it('makes each step a list item and hides the connectors', async () => {
+      el.steps = 'A,B,C';
+      await el.updateComplete;
+      const steps = el.querySelectorAll('.void-stepper-step');
+      expect([...steps].every((s) => s.getAttribute('role') === 'listitem')).toBe(true);
+      expect(el.querySelector('.void-stepper-connector')?.getAttribute('aria-hidden')).toBe('true');
     });
 
     it('sets aria-label="Progress" on connect', () => {

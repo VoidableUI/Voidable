@@ -140,6 +140,13 @@ See [Touch targets](/getting-started/theming/#touch-targets) for how each contro
 
 The growth in 0.13 switched on under `@media (pointer: coarse)`, which matches only when the primary pointer is a finger. It now follows `@media (any-pointer: coarse)`, so a touch laptop, or a tablet with a trackpad or mouse, gets the larger hit areas too. On such a desktop, the rows that cannot grow a pseudo-element (menu items, options, accordion triggers at a density below 1, PIN cells) are 44px tall for mouse users as well. To keep them small, put `data-hit-target="off"` on `<html>` or set `--void-hit-target: 0px`. Application rules you wrote with `pointer: coarse` for these controls keep matching only on a primary finger; switch them to `any-pointer: coarse` if you want them to follow too.
 
+### Landmarks
+
+The accessibility tree changes in two places, so a test or a style that reads roles may need a new query.
+
+- **Stepper is a list, not a navigation landmark.** It only shows progress, so it is `role="list"` named "Progress" (the name still follows `lang` and a name you write), each step is a list item with `aria-current="step"` on the current one, and the connectors are hidden from assistive technology. A page that counted it among its navigation regions, or a test with `getByRole('navigation', { name: 'Progress' })`, should look for the list instead. A stepper whose steps are links or buttons is yours to write: put them in a `<nav aria-label="...">`.
+- **Pagination can leave out its landmark.** It is still a navigation landmark named "Pagination" by default. Add `landmark="none"` (a named group of the same buttons, in either mode) when the page keeps a single navigation region. Inside a `<nav>` or an element with `role="navigation"` it never adds a landmark, with or without the attribute, so landmarks do not nest; a pagination you had inside a `<nav>` is now a group there.
+
 ## 4. Check again
 
 Run `voidable check` until it reports nothing, then run your application with the development warnings loaded and open each page once: a clean console means the markup is right.
