@@ -153,6 +153,7 @@ void-tags-input[disabled] {
 }
 
 void-tags-input[disabled] .void-tags-input {
+  background: var(--void-field-surface-disabled);
   cursor: not-allowed;
 }
 

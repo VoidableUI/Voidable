@@ -103,7 +103,10 @@ void-combobox[disabled] {
   opacity: 0.5;
   pointer-events: none;
 }
-void-combobox[disabled] .void-combobox-input { cursor: not-allowed; }
+void-combobox[disabled] .void-combobox-input {
+  background: var(--void-field-surface-disabled);
+  cursor: not-allowed;
+}
 
 /* Size variants: each step sets the field tokens and nothing else */
 void-combobox[size='sm'] { --_void-field-height: var(--void-control-height-sm); --_void-field-padding: var(--void-control-padding-sm); --_void-field-text: var(--void-control-text-sm); }

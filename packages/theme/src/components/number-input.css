@@ -189,6 +189,7 @@ void-number-input:where([color="error"], [color="warning"], [color="caution"], [
 
 /* Disabled state */
 void-number-input[disabled] {
+  background: var(--void-field-surface-disabled);
   opacity: 0.5;
   cursor: not-allowed;
 }

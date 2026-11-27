@@ -69,6 +69,7 @@ void-pin-input[disabled] {
 }
 
 void-pin-input[disabled] .void-pin-cell {
+  background: var(--void-field-surface-disabled);
   cursor: not-allowed;
   pointer-events: none;
 }
