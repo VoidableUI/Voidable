@@ -41,7 +41,7 @@ const preview: Preview = {
       },
     },
     // The language of the words the components write and of dates and numbers: sets `lang` on the page.
-    // The shipped French and Arabic are a starting set; pair Arabic with Direction: Right to left.
+    // Pair Arabic with Direction: Right to left.
     locale: {
       toolbar: {
         icon: 'globe',

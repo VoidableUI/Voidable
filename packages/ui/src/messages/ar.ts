@@ -1,5 +1,5 @@
-// Arabic (Modern Standard) messages, a right-to-left locale with six plural forms: a starting set to review
-// before you ship it (see the Translation guide).
+// Arabic (Modern Standard) messages, reviewed: a right-to-left locale with six plural forms. Adjust the wording
+// to your product's voice where needed (see the Translation guide).
 import { registerMessages } from '../messages.js';
 
 registerMessages('ar', {
@@ -87,7 +87,7 @@ registerMessages('ar', {
   'sidebar.label': 'التنقل الجانبي',
   'spinner.label': 'جارٍ التحميل',
   'statusDot.online': 'متصل',
-  'statusDot.away': 'بعيد',
+  'statusDot.away': 'غير متواجد',
   'statusDot.offline': 'غير متصل',
   'stepper.label': 'التقدّم',
   'table.selectAll': 'تحديد كل الصفوف',
@@ -121,11 +121,11 @@ registerMessages('ar', {
   'table.selected': ({ count }, c) =>
     c.plural(count, {
       zero: 'لا شيء محدد',
-      one: 'محدد صف واحد',
-      two: 'محدد صفان',
-      few: `محددة ${c.number(count)} صفوف`,
-      many: `محدد ${c.number(count)} صفًا`,
-      other: `محدد ${c.number(count)} صف`,
+      one: 'تم تحديد صف واحد',
+      two: 'تم تحديد صفين',
+      few: `تم تحديد ${c.number(count)} صفوف`,
+      many: `تم تحديد ${c.number(count)} صفًا`,
+      other: `تم تحديد ${c.number(count)} صف`,
     }),
   'table.noneSelected': 'لم يُحدد أي صف',
   'table.allSelected': ({ count }, c) => `تم تحديد جميع الصفوف (${c.number(count)})`,

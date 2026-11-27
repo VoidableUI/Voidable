@@ -68,14 +68,14 @@ test.describe('French', () => {
     await expect(s.getByRole('spinbutton')).toHaveValue('1234,50');
     await expect(s.getByRole('button', { name: 'Diminuer' })).toBeVisible();
     await expect(s.getByRole('button', { name: 'Augmenter' })).toBeVisible();
-    await expect(s.getByRole('combobox', { name: 'Rechercher...' })).toBeVisible();
+    await expect(s.getByRole('combobox', { name: 'Rechercher…' })).toBeVisible();
     await expect(s.getByRole('group', { name: 'Code PIN' })).toBeVisible();
     await expect(s.getByRole('textbox', { name: 'Chiffre 1 sur 4' })).toBeVisible();
     await expect(s.getByRole('status', { name: 'Chargement' })).toBeVisible();
     await expect(s.getByRole('status', { name: 'Absent' })).toBeVisible();
     await expect(s.getByRole('status', { name: '3 notifications' })).toBeVisible();
-    await expect(s.getByRole('button', { name: 'Supprimer Tag' })).toBeVisible();
-    await expect(s.locator('void-file-upload')).toContainText('Déposez des fichiers ici ou parcourez');
+    await expect(s.getByRole('button', { name: 'Retirer Tag' })).toBeVisible();
+    await expect(s.locator('void-file-upload')).toContainText('Déposez des fichiers ici ou parcourez votre appareil');
     await expect(s.locator('void-error-fallback')).toContainText('Une erreur est survenue');
     await expect(s.getByRole('button', { name: 'Réessayer' })).toBeVisible();
     await expect(s.getByRole('navigation', { name: 'Progression' })).toBeVisible();
@@ -107,7 +107,7 @@ test.describe('French', () => {
     const field = picker.getByRole('combobox');
     await field.fill('pas une date');
     await field.blur();
-    await expect(picker.getByRole('alert')).toHaveText('Saisissez une date au format MM/DD/YYYY ou AAAA-MM-JJ.');
+    await expect(picker.getByRole('alert')).toHaveText('Veuillez saisir une date au format MM/DD/YYYY ou AAAA-MM-JJ.');
   });
 });
 
@@ -126,7 +126,7 @@ test.describe('Arabic, right to left', () => {
     await expect(s.getByRole('group', { name: 'رمز PIN' })).toBeVisible();
     await expect(s.getByRole('textbox', { name: 'الرقم 1 من 4' })).toBeVisible();
     await expect(s.getByRole('status', { name: 'جارٍ التحميل' })).toBeVisible();
-    await expect(s.getByRole('status', { name: 'بعيد' })).toBeVisible();
+    await expect(s.getByRole('status', { name: 'غير متواجد' })).toBeVisible();
     await expect(s.getByRole('button', { name: 'إزالة Tag' })).toBeVisible();
     await expect(s.locator('void-file-upload')).toContainText('أفلت الملفات هنا أو تصفّح');
     await expect(s.locator('void-error-fallback')).toContainText('حدث خطأ ما');
@@ -269,7 +269,7 @@ for (const engine of ['turbo', 'morphdom', 'alpine'] as const) {
 
       await morph(app('fr'));
       await expect(page.getByRole('button', { name: 'Page suivante' })).toBeVisible();
-      await expect(page.getByRole('button', { name: 'Supprimer a' })).toBeVisible();
+      await expect(page.getByRole('button', { name: 'Retirer a' })).toBeVisible();
       await expect(page.locator('#dp').getByRole('combobox')).toHaveValue('12/31/2024');
     });
   });
