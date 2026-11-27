@@ -31,7 +31,7 @@ const people = [
 ];
 
 const sampleTable = html`
-  <table>
+  <table><caption>Team members</caption>
     <thead>
       <tr>
         <th>Name</th>
@@ -51,7 +51,7 @@ const sampleTable = html`
 // A table with every column role: a row checkbox, a title, labelled values, a numeric
 // column, a column that drops out of the stacked block, and ghost row actions.
 const stationsTable = html`
-  <table>
+  <table><caption>Ground stations</caption>
     <thead>
       <tr>
         <th data-stack="select"><void-checkbox aria-label="Select all stations"></void-checkbox></th>

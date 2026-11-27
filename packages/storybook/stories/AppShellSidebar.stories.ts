@@ -154,7 +154,7 @@ const mainContentWithTable = html`
           <span style="font-size: var(--void-text-xs); color: var(--void-color-text-muted); font-family: var(--void-font-mono);">5 orders</span>
         </div>
 
-        <void-table hoverable style="flex: 1; overflow: auto; min-height: 0;">
+        <void-table hoverable aria-label="Records" style="flex: 1; overflow: auto; min-height: 0;">
           <table>
             <thead>
               <tr>
