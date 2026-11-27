@@ -164,6 +164,9 @@ void-card[padding="lg"] {
    top of it). A card with no link or button is not touched. */
 void-card:has(> void-card-header > void-card-title :is(a[href], button)) {
   position: relative;
+}
+
+void-card:not([aria-disabled="true"]):has(> void-card-header > void-card-title :is(a[href], button)) {
   cursor: pointer;
 }
 
