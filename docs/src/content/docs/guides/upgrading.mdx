@@ -130,6 +130,13 @@ On a device whose main pointer is coarse (`@media (pointer: coarse)`: phones and
 
 See [Touch targets](/getting-started/theming/#touch-targets) for how each control gets there, what is not covered, and the density recipe for bigger drawn controls.
 
+## Fixes that change what you see (0.13.2)
+
+- **`void-gauge` prints decimals.** A reading of `75.6` is shown as `75.6` (it was rounded to `76`) and `0.21` as `0.21` (it was `0`), in the number format of the element's `lang` (`0,21` under `lang="de"`). Write `fraction-digits="0"` to keep whole numbers, or `fraction-digits="2"` to always show two. The digits otherwise come from the reading and from `tick-minor` / `tick-major`. Thousands abbreviate through `Intl` (`1.5K`, it was `1.5k`), and the data table says the same number as the centre. The HEEx component takes `fraction_digits`.
+- **`void-slider` with a range other than 0 to 100** puts the thumb on the value (it sat at the minimum for a value above 100). Nothing to change.
+- **A stacked `void-table`** no longer passes its breakpoint font-size to its parts: the selection bar, empty message, filter and anything you write inside the table now render at the body size. Remove any `font-size` you set to undo it.
+- **Astro** writes `checked={false}` on a custom element as `checked="false"`, which is on. Pass `undefined` instead (`checked={on || undefined}`); see the [Astro guide](/frameworks/astro/).
+
 ## 4. Check again
 
 Run `voidable check` until it reports nothing, then run your application with the development warnings loaded and open each page once: a clean console means the markup is right.
