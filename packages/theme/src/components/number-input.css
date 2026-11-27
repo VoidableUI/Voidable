@@ -1,6 +1,8 @@
 /* ============================================================
    void-number-input — Tone system component
    ============================================================ */
+/* @tokens void-number-input
+   --void-number-input-value-align  Setting: where the value sits in the field: start (as in every other field), center (a compact quantity stepper) or end (figures in a column). */
 
 void-number-input {
   /* Tone system */
@@ -46,7 +48,8 @@ void-number-input input.void-number-input-field {
   font-variant-numeric: tabular-nums;
   line-height: var(--void-leading-normal);
   outline: none;
-  text-align: center;
+  /* Where every other field puts its text, whatever the controls. */
+  text-align: var(--void-number-input-value-align, start);
   -moz-appearance: textfield;
 }
 
@@ -143,11 +146,6 @@ void-number-input[controls="right"] .void-number-input-btn {
 
 void-number-input[controls="right"] .void-number-input-btn-inc {
   border-bottom: var(--void-rule-between);
-}
-
-/* controls="none" — just the input, no separators */
-void-number-input[controls="none"] input.void-number-input-field {
-  text-align: start;
 }
 
 /* Color variants */

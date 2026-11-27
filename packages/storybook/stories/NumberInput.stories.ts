@@ -127,3 +127,21 @@ export const EmptyAndRequired: Story = {
     </form>
   `,
 };
+
+export const ValueAlignment: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story: 'The value starts at the start edge, as in every other field, whatever the `controls`. `--void-number-input-value-align` (`start`, `center` or `end`) moves it: `center` suits a compact quantity stepper, `end` a column of figures. Set it on the element, an ancestor or `:root`.',
+      },
+    },
+  },
+  render: () => html`
+    <div style="display: flex; flex-direction: column; gap: var(--void-space-4); max-width: 18rem;">
+      <void-input aria-label="Name" value="A text field, for comparison"></void-input>
+      <void-number-input label="Start (default)" value="1200" style="width: 100%;"></void-number-input>
+      <void-number-input label="End" value="1200" controls="right" style="width: 100%; --void-number-input-value-align: end;"></void-number-input>
+      <void-number-input label="Quantity" value="3" min="1" style="width: 8rem; --void-number-input-value-align: center;"></void-number-input>
+    </div>
+  `,
+};
