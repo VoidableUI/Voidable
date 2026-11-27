@@ -136,6 +136,12 @@ See [Touch targets](/getting-started/theming/#touch-targets) for how each contro
 
 `<void-row>` takes `color` (the status colours). The row's text, and text in the `code`, `value` and `body` roles inside it, take that colour; captions stay quiet. If you coloured a row with a `style` and its code text stayed in the text colour, write `color="warning"` on the row and remove the style. Nothing else changes: those roles are the text colour everywhere else, as before.
 
+### Ghost buttons at the end of a line, and section heads
+
+A labelled `ghost` button that ends a `void-row`, a `void-section-head`, a `void-page-head`, a `void-card-header`, `<void-actions justify="end">` or the last cell of a table row now has its label on the edge of the column: it moves out by its padding (16px at the default size). In the actions cell of a table the amount now follows the size of the button, and only a ghost button with a label moves. Remove any negative margin you wrote for this; `margin-inline-end: 0` on a button keeps its padding. See [Button](/components/button/#at-the-end-of-a-line).
+
+A `void-section-head` is as tall with `void-actions` or a button as without: content under a head that held a button moves up by the difference (about 12px with a default button). Nothing to change.
+
 ## 4. Check again
 
 Run `voidable check` until it reports nothing, then run your application with the development warnings loaded and open each page once: a clean console means the markup is right.

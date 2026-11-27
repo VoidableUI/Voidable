@@ -123,8 +123,9 @@ void-table :is(th, td)[data-numeric] {
   text-align: end;
 }
 
-/* A column of row actions: ghost buttons, end-aligned, their labels
-   (not their padding) on the table's edge. */
+/* A column of row actions: ghost buttons, end-aligned. The label of the
+   last one (not its padding) is on the table's edge: button.css has the one
+   rule for a ghost button that ends a line. */
 void-table :is(th, td)[data-stack="actions"] {
   text-align: end;
   white-space: nowrap;
@@ -132,10 +133,6 @@ void-table :is(th, td)[data-stack="actions"] {
 
 void-table td[data-stack="actions"] > * + * {
   margin-inline-start: var(--void-space-1);
-}
-
-void-table td[data-stack="actions"]:last-child > :last-child {
-  margin-inline-end: calc(var(--void-control-padding-sm) * -1.25);
 }
 /* Every other row that is shown: a row a filter hides does not count, so the stripes stay even. `:where` keeps the specificity of a plain `:nth-child`. */
 

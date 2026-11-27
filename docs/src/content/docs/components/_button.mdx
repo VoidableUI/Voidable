@@ -60,6 +60,24 @@ A ghost button has no border and no fill until it is hovered, so several of them
 
 With a `color`, a ghost button carries the colour in its label and its hover fill is a tint of that colour. Every label keeps 4.5:1 on every surface and on its own hover fill, in both colour schemes; `mise run lint:contrast` checks it.
 
+### At the end of a line
+
+A ghost button draws nothing at rest, so where it ends a line its **label**, not its padding, sits on the edge of the column and lines up with the values above and below it. The button moves out by its own padding; its hover fill extends past the edge by that much. This happens by itself wherever a line ends at the edge:
+
+- the last thing in a `<void-row>`, a `<void-section-head>`, a `<void-page-head>` or a `<void-card-header>`, directly or as the last button of the `<void-actions>` that ends it;
+- the last button of `<void-actions justify="end">` anywhere: a pager, the buttons under a list;
+- the last button in the last cell of a table row.
+
+```html
+<!-- A pager under a list: "Older" ends on the column's edge -->
+<void-actions justify="end">
+  <void-button variant="ghost">Newer</void-button>
+  <void-button variant="ghost">Older</void-button>
+</void-actions>
+```
+
+It applies to a ghost button with a label, at every size, and in right-to-left text on the other side. An outline or filled button keeps its box inside the column, a ghost button that is not the last keeps its padding, and an icon-only ghost button keeps its square. To keep the padding on one button, set `margin-inline-end: 0` on it.
+
 ## Colours
 
 `color` takes `default`, `error`, `warning`, `caution`, `success`, `info` and `notice`, on every variant.

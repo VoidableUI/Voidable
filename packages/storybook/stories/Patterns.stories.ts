@@ -187,6 +187,28 @@ export const Section: Story = {
           <void-button variant="filled">Save</void-button>
         </void-actions>
       </void-section>
+      <!-- A ghost button that ends a line has its label on the column's edge,
+           and a head is as tall with an action as without. -->
+      <void-section>
+        <void-section-head>
+          <h2>Recent contacts</h2>
+          <void-actions><void-button variant="ghost">View all</void-button></void-actions>
+        </void-section-head>
+        <void-rows>
+          <void-row>
+            <void-row-text><span>Svalbard 1</span><span data-void-type="caption">X band</span></void-row-text>
+            <void-actions><void-state color="success">Tracking</void-state><void-button variant="ghost" size="sm">Pause</void-button></void-actions>
+          </void-row>
+          <void-row>
+            <void-row-text><span>Troll</span><span data-void-type="caption">S band</span></void-row-text>
+            <void-actions><void-state>Idle</void-state><void-button variant="ghost" size="sm">Resume</void-button></void-actions>
+          </void-row>
+        </void-rows>
+        <void-actions justify="end">
+          <void-button variant="ghost">Newer</void-button>
+          <void-button variant="ghost">Older</void-button>
+        </void-actions>
+      </void-section>
       <void-split ratio="2:1">
         <void-section><h2>Activity</h2><p>The wider column of a split.</p></void-section>
         <void-section><h2>Notes</h2><p>The narrower one. Below 48rem they stack.</p></void-section>
