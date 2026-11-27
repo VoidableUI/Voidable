@@ -69,6 +69,12 @@ VOID_SR_BROWSER=chromium mise run test:screen-readers   # another browser (macOS
 5. Check the speech expectations read sensibly in `words.ts` terms; add a role or state word if the vocabulary lacks one, with a case in `specs/screen-reader-words.spec.ts`.
 6. Run it with a screen reader on a Mac or Windows machine, or let the workflow do it (`workflow_dispatch`).
 
+## Diagnosing a reader that says the wrong thing, or nothing
+
+- **The step-by-step record.** Every move, key and activation is printed as `[sr <reader> <id>] move 3 (control) -> ["..."] | page focus: true, active: <...>`: what was sent, what the reader said because of it, and where the page's own focus is. A reader that hears nothing for four moves in a row is asked what it sees (`diagnosis:` lines: window title, focus, current line) and given remedies (window to the front, a click in the page, a refresh of its copy of the page), each logged. A page whose document is not focused after `navigateToWebContent` is brought forward and navigated again, and the log says so.
+- **The page's own order of events.** `trace.ts` records focus changes and `aria-*`, `role` and `tabindex` writes in the order they happened, `[trace ...]`, and the browser's accessibility tree, `[ax ...]` (Chromium only), for a scenario with `trace: true`, a known issue, a failure or a probe. `specs/screen-reader-order.spec.ts` asserts the same orders without a screen reader.
+- **Reference controls.** `scenarios-reference.ts` holds probes (`probe: true`: they log and never fail) over `pages/sr-ref-*.html`: native or ARIA Authoring Practices controls with the semantics of a Voidable one that a reader gets wrong. If the reference is also silent or wrong, the reader or the harness is the cause; if it is right and the Voidable control is not, compare the `[ax ...]` and `[trace ...]` output of the two.
+
 ## Select, combobox and multiselect
 
 They use their explicit-parts markup (#52; the "Pickers" section of `docs/src/content/docs/guides/composition.mdx`): a native `<select>` inside `<void-select>`, and the options in `<void-combobox-content>` and `<void-multiselect-content>`. A combobox's highlighted option is its `aria-activedescendant` and is not selected; `aria-selected` marks the chosen one. Their scenarios, tree spec and page stay in their own files (`scenarios-pickers.ts`, `specs/screen-reader-tree-pickers.spec.ts`, `specs/pickers.spec.ts`, `pages/sr-pickers.html`).
