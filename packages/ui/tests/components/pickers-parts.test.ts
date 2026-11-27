@@ -199,7 +199,7 @@ describe('void-multiselect parts', () => {
     expect(content.getAttribute('role')).toBe('listbox');
     expect(content.getAttribute('aria-multiselectable')).toBe('true');
     const options = Array.from(el.querySelectorAll('void-option'));
-    expect(options.map((o) => o.getAttribute('aria-selected'))).toEqual(['true', 'false', 'false', 'false']);
+    expect(options.map((o) => o.getAttribute('aria-selected'))).toEqual(['true', null, null, null]);
     const trigger = el.querySelector('[role=combobox]')!;
     trigger.dispatchEvent(new MouseEvent('click', { bubbles: true }));
     await settle();

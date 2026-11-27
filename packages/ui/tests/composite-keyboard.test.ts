@@ -306,7 +306,7 @@ describe('VoidMultiselect keyboard', () => {
     await el.updateComplete;
     const list = el.querySelector('[role=listbox]')!;
     expect(list.getAttribute('aria-multiselectable')).toBe('true');
-    expect([...list.querySelectorAll('[role=option]')].map(o => o.getAttribute('aria-selected'))).toEqual(['true', 'false']);
+    expect([...list.querySelectorAll('[role=option]')].map(o => o.getAttribute('aria-selected'))).toEqual(['true', null]);
     expect(list.querySelector('[role=option]')!.hasAttribute('tabindex')).toBe(false);
     expect(active(el)!.textContent!.trim()).toBe('A'); // starts on the first selected option
   });

@@ -68,7 +68,7 @@ export function optionLabel(opt: Element): string {
  *
  * Follows the WAI-ARIA select-only combobox pattern with a multiselectable listbox popup: the trigger is the
  * `role="combobox"` element and keeps DOM focus; the highlighted option is exposed with `aria-activedescendant`
- * and drawn with the `active` attribute; chosen options have `aria-selected="true"` and the others `aria-selected="false"`. The trigger is described by
+ * and drawn with the `active` attribute; chosen options have `aria-selected="true"`. The trigger is described by
  * the number of chosen options ("2 selected"). The popup stays open while options are toggled.
  *
  * Keyboard (focus on the trigger): Enter, Space, ArrowDown and Alt+ArrowDown open the list on the first chosen
@@ -248,9 +248,7 @@ export class VoidMultiselect extends InternalsFormControl(VoidElement) {
     for (const opt of options) {
       this._parts.set(opt, 'role', 'option');
       this._parts.id(opt, 'void-option');
-      // Every option says whether it is chosen, true or false (the ARIA Authoring Practices for a multiselectable listbox):
-      // an option with no aria-selected is not exposed as selectable, so the change to "selected" has nothing to be announced against (#75).
-      this._parts.set(opt, 'aria-selected', opt.selected ? 'true' : 'false');
+      this._parts.set(opt, 'aria-selected', opt.selected ? 'true' : null);
       this._parts.set(opt, 'aria-disabled', opt.disabled ? 'true' : null);
       this._parts.set(opt, 'active', opt === this._active);
     }
