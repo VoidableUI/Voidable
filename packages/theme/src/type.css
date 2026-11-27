@@ -5,6 +5,11 @@
    components use the same tokens, so restyling a role in a theme
    restyles it in tables, stats, fields and your own markup alike.
    :where() keeps specificity at zero so any rule can override.
+
+   The roles drawn in the text colour (value, body, code) take the tone
+   of a toned row they are in (--_void-tone-ink, set by void-row[color]):
+   a tone replaces the primary ink, so a warning line is one colour.
+   The quiet roles (label, unit, caption) stay quiet there.
    ============================================================ */
 
 :where([data-void-type="label"]) {
@@ -24,7 +29,7 @@
   font-weight: var(--void-type-value-weight);
   letter-spacing: var(--void-type-value-tracking);
   font-variant-numeric: var(--void-type-value-numeric);
-  color: var(--void-type-value-color);
+  color: var(--_void-tone-ink, var(--void-type-value-color));
 }
 
 :where([data-void-type="value"][data-size="sm"]) {
@@ -91,7 +96,7 @@
   font-size: var(--void-type-body-size);
   line-height: var(--void-type-body-leading);
   font-weight: var(--void-type-body-weight);
-  color: var(--void-type-body-color);
+  color: var(--_void-tone-ink, var(--void-type-body-color));
 }
 
 :where([data-void-type="code"]) {
@@ -99,5 +104,5 @@
   font-size: var(--void-type-code-size);
   font-weight: var(--void-type-code-weight);
   font-variant-numeric: var(--void-type-code-numeric);
-  color: var(--void-type-code-color);
+  color: var(--_void-tone-ink, var(--void-type-code-color));
 }

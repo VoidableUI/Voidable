@@ -458,6 +458,8 @@ Each role, live:
   </div>
 </div>
 
+A role sets its own colour, so text in the `value`, `body` or `code` role does not take a colour you put on a parent. Inside a [row with a tone](/patterns/description-list/#a-row-with-a-tone) (`<void-row color="warning">`) those three roles take the tone; on an element of your own, set the role's colour token beside the colour: `style="color: var(--void-color-warning); --void-type-code-color: var(--void-color-warning)"`.
+
 Restyle a role once and it changes everywhere, in components and in your markup:
 
 ```css

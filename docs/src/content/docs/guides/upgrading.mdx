@@ -171,6 +171,23 @@ The accessibility tree changes in two places, so a test or a style that reads ro
 - **A stacked `void-table`** no longer passes its breakpoint font-size to its parts: the selection bar, empty message, filter and anything you write inside the table now render at the body size. Remove any `font-size` you set to undo it.
 - **Astro** writes `checked={false}` on a custom element as `checked="false"`, which is on. Pass `undefined` instead (`checked={on || undefined}`); see the [Astro guide](/frameworks/astro/).
 
+
+### A tone on a row
+
+`<void-row>` takes `color` (the status colours). The row's text, and text in the `code`, `value` and `body` roles inside it, take that colour; captions stay quiet. If you coloured a row with a `style` and its code text stayed in the text colour, write `color="warning"` on the row and remove the style. Nothing else changes: those roles are the text colour everywhere else, as before.
+
+### Ghost buttons at the end of a line, and section heads
+
+A labelled `ghost` button that ends a `void-row`, a `void-section-head`, a `void-page-head`, a `void-card-header`, `<void-actions justify="end">` or the last cell of a table row now has its label on the edge of the column: it moves out by its padding (16px at the default size). In the actions cell of a table the amount now follows the size of the button, and only a ghost button with a label moves. Remove any negative margin you wrote for this; `margin-inline-end: 0` on a button keeps its padding. See [Button](/components/button/#at-the-end-of-a-line).
+
+A `void-section-head` is as tall with `void-actions` or a button as without: content under a head that held a button moves up by the difference (about 12px with a default button). Nothing to change.
+
+### Page head eyebrow, description list and state
+
+- **A label above the title no longer pushes the title down** when `void-page-head` is the first thing in `void-page`: it hangs in the page's top padding, so the title sits about 24px higher than before on those pages, level with pages that have no label. Remove any margin you added to line titles up. Breadcrumbs are unchanged.
+- `void-description-list` takes `justify="start"`: every value starts on one line after a label column (`--void-description-list-label-width`, 12rem).
+- `void-state` takes `size="lg"`: the heading role, for a state that is the heading of its block.
+
 ## 4. Check again
 
 Run `voidable check` until it reports nothing, then run your application with the development warnings loaded and open each page once: a clean console means the markup is right.

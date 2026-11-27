@@ -22,7 +22,8 @@
 
 /* @tokens void-description-list
    --void-description-list-rule       The line between pairs.
-   --void-description-list-rule-edge  The lines above the first pair and below the last. */
+   --void-description-list-rule-edge  The lines above the first pair and below the last.
+   --void-description-list-label-width  Setting: width of the label column of a justify="start" list, where every value starts on one line; never more than 40% of the list. Default 12rem. */
 
 /* @tokens void-rows
    --void-rows-rule       The line between rows.
@@ -168,6 +169,24 @@ void-state[color="highlight"] { --_void-tone: var(--void-color-highlight); }
 void-state[color="error"]   { --_void-tone: var(--void-color-error); }
 void-state[color="notice"]  { --_void-tone: var(--void-color-notice); }
 
+/* size="lg": the state is the heading of its block (the status of a device
+   at the top of its section), set in the heading role with a dot to match.
+   It needs no <h2> around it to get the size; put it in one where the block
+   needs a heading for navigation. */
+void-state[size="lg"] {
+  font-family: var(--void-type-heading-family);
+  font-size: var(--void-type-heading-size);
+  line-height: var(--void-type-heading-leading);
+  font-weight: var(--void-type-heading-weight);
+  letter-spacing: var(--void-type-heading-tracking);
+  color: var(--void-type-heading-color);
+}
+
+void-state[size="lg"]::before {
+  width: 0.625rem;
+  height: 0.625rem;
+}
+
 void-state[pulse]::before {
   animation: void-state-pulse calc(1.6s * var(--void-anim-scale)) var(--void-ease-in-out) infinite;
 }
@@ -238,6 +257,24 @@ void-description-list dd {
   overflow-wrap: anywhere;
 }
 
+/* justify="start": the values start on one line, after a label column of a
+   set width, for values that are read down the list (text, links, states)
+   and not compared at their ends (numbers). The column has a width and is
+   not as wide as the longest label, so two lists on a page line up with
+   each other; a longer label wraps inside it. */
+void-description-list[justify="start"]:not([layout="grid"]) > dl > div {
+  display: grid;
+  grid-template-columns: minmax(0, min(var(--void-description-list-label-width, 12rem), 40%)) minmax(0, 1fr);
+}
+
+void-description-list[justify="start"]:not([layout="grid"]) dt {
+  overflow-wrap: anywhere;
+}
+
+void-description-list[justify="start"] dd {
+  text-align: start;
+}
+
 /* Rows in two columns, for a wide page with many short pairs. */
 void-description-list:not([layout="grid"])[columns="2"] > dl {
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -302,6 +339,24 @@ void-row {
 void-row:last-child {
   border-bottom: var(--void-rows-rule-edge, var(--void-rule-edge));
 }
+
+/* A row with a tone (a warning in a log, a failed step): its text is the
+   status colour, and so is text in the value, body and code roles inside it
+   (type.css reads --_void-tone-ink), so the line is one colour. Captions and
+   labels stay quiet, and a control or a void-state keeps its own colours.
+   The status colours keep 4.5:1 as text on the page and on every container. */
+void-row[color]:not([color="default"]) {
+  --_void-tone-ink: var(--_void-tone);
+  color: var(--_void-tone-ink);
+}
+
+void-row[color="success"]   { --_void-tone: var(--void-color-success); }
+void-row[color="info"]      { --_void-tone: var(--void-color-info); }
+void-row[color="warning"]   { --_void-tone: var(--void-color-warning); }
+void-row[color="caution"]   { --_void-tone: var(--void-color-caution); }
+void-row[color="highlight"] { --_void-tone: var(--void-color-highlight); }
+void-row[color="error"]     { --_void-tone: var(--void-color-error); }
+void-row[color="notice"]    { --_void-tone: var(--void-color-notice); }
 
 void-row-text {
   display: flex;

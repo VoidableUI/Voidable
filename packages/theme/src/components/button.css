@@ -115,6 +115,26 @@ void-button[variant="ghost"]:active {
   background: var(--_void-tone-active);
 }
 
+/* A ghost button that ends a line sits with its label, not its padding, on
+   the edge: it draws nothing at rest, so the label is what lines up with the
+   values above and below it. One rule for every place a line ends at the
+   edge of its column: a row, a section head, a page head, a card header, the
+   actions cell of a table, and end-aligned actions anywhere (a pager, the
+   buttons of a form), directly or as the last button of the void-actions
+   that ends the line. The button moves out by its own padding and border,
+   whatever its size; its hover fill extends past the edge by that much.
+   Not an icon-only button: the width of its icon is not known here, and its
+   square is the shape that lines up. Zero specificity beyond the button's
+   own, so `margin-inline-end: 0` on a ghost button turns it off. */
+void-button[variant="ghost"]:last-child:where(
+  :is(void-row, void-section-head, void-page-head, void-card-header, void-actions[justify="end"]) > *,
+  :is(void-row, void-section-head, void-page-head, void-card-header) > void-actions:last-child > *,
+  void-table td[data-stack="actions"]:last-child > *,
+  void-table:not([inset]) td:last-child > void-actions > *
+):where(:not([aria-label]:has(> :is(svg, i):only-child))) {
+  margin-inline-end: calc((var(--_void-button-padding) + var(--void-control-border-width)) * -1);
+}
+
 /* Color variants — one override cascades to all derived states */
 void-button[color="error"]   { --_void-tone: var(--void-color-error); }
 void-button[color="warning"] { --_void-tone: var(--void-color-warning); }

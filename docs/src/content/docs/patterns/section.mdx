@@ -83,6 +83,8 @@ export const basicJsx = `
 
 `<void-section-head>` takes an `<h2>` (or `h3`, `h4`), an optional `<p>` under it, and optionally one thing at the far end: a label, a badge, a state, or `<void-actions>`. A section that needs only a title can use a bare `<h2>` and no head element.
 
+A head is as tall as its text whatever sits at the far end: a button does not make it taller, so the headings of sections with and without an action, and the hairlines of `divided` ones, stay on the same lines. The button is centred on the text and overhangs it by a few pixels above and below. A `ghost` button there (the quiet "View all") has its label on the column's edge; see [Button](/components/button/#at-the-end-of-a-line).
+
 ## Divided
 
 Content that draws its own top line (a table, rows, figures, a description list) needs nothing more. Content that does not (the fields of a form, a paragraph, a chart) takes `divided`, which draws a hairline under the head. `gap="stack"` spaces the fields of a form.

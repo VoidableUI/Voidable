@@ -141,6 +141,27 @@ void-page-head > void-actions {
   align-self: end;
 }
 
+/* An eyebrow (a label above the title) does not move the title: at the top
+   of a page it hangs in the page's top padding, a tight gap above the h1, so
+   the title is where it is on a page without one and titles do not jump from
+   page to page. It takes no height and its text overhangs upward, lifted by
+   the tight gap, which what follows it then no longer adds (a grid row
+   cannot be negative, so a negative margin would not cancel it). Only
+   where the head is the first thing in void-page, which owns the room above;
+   anywhere else the label stays in flow. Breadcrumbs always stay in flow:
+   they are navigation with targets to hit, and a page deep enough to have
+   them sets its title lower by their height and one tight gap. */
+void-page > void-page-head:first-child > [data-void-type="label"]:first-child {
+  display: flex;
+  align-items: flex-end;
+  block-size: 0;
+  translate: 0 calc(var(--void-gap-tight) * -1);
+}
+
+void-page > void-page-head:first-child > [data-void-type="label"]:first-child + * {
+  margin-top: 0;
+}
+
 /* No rule under the head: for a page whose first block draws its own. */
 void-page-head[flush] {
   padding-bottom: 0;
@@ -160,10 +181,11 @@ void-actions {
 void-actions[justify="end"]    { justify-content: flex-end; }
 void-actions[justify="center"] { justify-content: center; }
 
-/* In a table row: ghost buttons at the end of the row, their labels (not
-   their padding) on the table's edge. These sit with the pattern, not in
-   table.css: a pattern layer rule beats a component layer rule whatever
-   its specificity, so the table context has to be in the pattern's layer. */
+/* In a table row: ghost buttons at the end of the row (button.css puts the
+   label of the last one on the table's edge). These sit with the pattern,
+   not in table.css: a pattern layer rule beats a component layer rule
+   whatever its specificity, so the table context has to be in the pattern's
+   layer. */
 void-table td > void-actions {
   flex-wrap: nowrap;
   gap: var(--void-space-1);
@@ -171,10 +193,6 @@ void-table td > void-actions {
 
 void-table td:last-child > void-actions {
   justify-content: flex-end;
-}
-
-void-table:not([inset]) td:last-child > void-actions:has(> void-button[variant="ghost"]:last-child) {
-  margin-inline-end: calc(var(--void-control-padding-sm) * -1.25);
 }
 
 /* ── void-section: a titled part of a page ──
@@ -263,8 +281,21 @@ void-section-head > :not(h2, h3, h4, p) {
   align-self: baseline;
 }
 
+/* An action does not make the head taller: a head with a button is as tall
+   as one without, so headings and the hairline of a `divided` section stay
+   on one line across a page. The actions take no height of their own and
+   their buttons, centred on the head's text, overhang it equally above and
+   below (4px or so for a default button, into the gap around the head). A
+   button placed directly in the head gives up its own height the same way. */
 void-section-head > void-actions {
   align-self: center;
+  align-content: center;
+  block-size: 0;
+}
+
+void-section-head > void-button {
+  align-self: center;
+  margin-block: calc(var(--_void-button-height) / -2);
 }
 
 void-section[divided] > void-section-head {
@@ -324,6 +355,7 @@ void-split > [sticky] {
   void-section-head > void-actions {
     grid-column: 1;
     grid-row: auto;
+    block-size: auto;
     margin-top: var(--void-gap-tight);
   }
 }
