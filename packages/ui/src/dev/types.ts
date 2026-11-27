@@ -30,7 +30,7 @@ export interface DevTag {
   v?: { tag: string; fix: string };
   /** What was renamed or removed in 0.8 (#23), with the form to write instead. */
   l?: DevRenamed;
-  /** It can be one link or one button as a whole (#116): the part that holds the control, and the correct markup. */
+  /** It can be one link or one button as a whole: the part that holds the control, and the correct markup. */
   k?: { p: string; c: readonly string[]; s: string };
 }
 
@@ -112,7 +112,7 @@ export type WarningKind =
   | 'keys'
   /** An attribute is set that another attribute on the same element makes without effect (`resize` with `autosize`). */
   | 'attribute-conflict'
-  /** A card wrapped in a link or a button, or a linked card holding a second control (#116). */
+  /** A card wrapped in a link or a button, or a linked card holding a second control. */
   | 'nested-control';
 
 /** One reported problem. */

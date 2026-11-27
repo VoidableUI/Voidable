@@ -643,7 +643,7 @@ export function checkRemoved(removed: Readonly<Record<string, string>>, el: Elem
 const NATIVE_CONTROLS = 'a[href], button, input:not([type="hidden"]), select, textarea, summary';
 
 /**
- * A component that can be one link or one button as a whole (#116, `<void-card>`): wrapped in a link or a
+ * A component that can be one link or one button as a whole (`<void-card>`): wrapped in a link or a
  * button (block content inside one is invalid HTML and announces badly), or linked (its title holds a
  * control) with a second control anywhere inside (two things to Tab to, and the stretched link covers the
  * second one so it cannot be clicked).
