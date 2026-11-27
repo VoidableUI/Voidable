@@ -1,4 +1,5 @@
 import { html, nothing } from 'lit';
+import { styleProps } from '../style-props.js';
 import { live } from 'lit/directives/live.js';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
@@ -196,7 +197,7 @@ export class VoidTextarea extends NativeFormControl(VoidElement) {
         spellcheck=${this.spellcheckAttr ?? nothing}
         form=${this.formAttr ?? nothing}
         rows=${this.rows}
-        style="--void-textarea-resize: ${this.resize}"
+        style=${styleProps({'--void-textarea-resize': this.resize})}
         aria-invalid=${this.error ? 'true' : 'false'}
         @input=${this._onInput}
         @change=${this._onChange}

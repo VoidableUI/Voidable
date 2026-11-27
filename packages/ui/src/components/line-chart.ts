@@ -1,4 +1,5 @@
 import { html, svg, nothing } from 'lit';
+import { styleProps } from '../style-props.js';
 import { VoidElement } from '../base.js';
 import { msg } from '../messages.js';
 import { property, state } from 'lit/decorators.js';
@@ -291,7 +292,7 @@ export class VoidLineChart extends VoidElement {
         preserveAspectRatio="none"
         aria-hidden="true"
         data-phase=${this._phase}
-        style="--reveal: ${this._reveal}"
+        style=${styleProps({'--reveal': this._reveal})}
       >
         <g class="void-line-chart-grid">
           ${yTicks.map(tick => {
@@ -311,7 +312,7 @@ export class VoidLineChart extends VoidElement {
           const color = s.color ?? `var(--void-chart-series-${(si % 6) + 1})`;
           const pts = seriesPoints[si]!;
           return svg`
-            <g class="void-line-chart-series" style="--series-color: ${color}">
+            <g class="void-line-chart-series" style=${styleProps({'--series-color': color})}>
               <path class="void-line-chart-area" d=${areaPathFn(pts, baseline)}></path>
               <path class="void-line-chart-line" d=${linePathFn(pts)}></path>
             </g>
@@ -399,7 +400,7 @@ export class VoidLineChart extends VoidElement {
             class="void-line-chart-marker"
             x=${hx - 5} y=${r.y - 5}
             width="10" height="10"
-            style="--marker-color: ${r.color}"
+            style=${styleProps({'--marker-color': r.color})}
           ></rect>
         `)}
         <rect
@@ -419,7 +420,7 @@ export class VoidLineChart extends VoidElement {
             cx=${tx + padding + 5}
             cy=${ty + headerH + padding + i * lineH + 4}
             r="4"
-            style="--swatch-color: ${r.color}"
+            style=${styleProps({'--swatch-color': r.color})}
           ></circle>
           <text
             class="void-line-chart-tooltip-name"

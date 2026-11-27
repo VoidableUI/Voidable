@@ -1,4 +1,5 @@
 import { html, nothing } from 'lit';
+import { styleProps } from '../style-props.js';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
 import { NativeFormControl } from '../form-control.js';
@@ -89,7 +90,7 @@ export class VoidSlider extends NativeFormControl(VoidElement) {
         ?disabled=${this.disabled}
         name=${this.name}
         form=${this.formAttr ?? nothing}
-        style="--void-slider-fill: ${fill}%"
+        style=${styleProps({ '--void-slider-fill': `${fill}%` })}
         @input=${this._onInput}
         @change=${this._onChange}
       />

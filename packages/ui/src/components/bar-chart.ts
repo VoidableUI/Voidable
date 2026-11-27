@@ -1,4 +1,5 @@
 import { html, svg, nothing } from 'lit';
+import { styleProps } from '../style-props.js';
 import { VoidElement } from '../base.js';
 import { msg } from '../messages.js';
 import { property, state } from 'lit/decorators.js';
@@ -255,7 +256,7 @@ export class VoidBarChart extends VoidElement {
           const seriesColor = s.color ?? `var(--void-chart-series-${(si % 6) + 1})`;
           const subBandWidth = xScale.bandwidth / series.length;
           return svg`
-            <g class="void-bar-chart-series" style="--series-color: ${seriesColor}">
+            <g class="void-bar-chart-series" style=${styleProps({'--series-color': seriesColor})}>
               ${s.values.map((_, bi) => {
                 const display = this._display.get(this._key(si, bi)) ?? 0;
                 const barX = xScale.scale(bi) + subBandWidth * si;
@@ -269,7 +270,7 @@ export class VoidBarChart extends VoidElement {
                   y=${barY}
                   width=${subBandWidth - 2}
                   height=${barH}
-                  style=${barColor ? `--series-color: ${barColor}` : nothing}
+                  style=${styleProps({ '--series-color': barColor })}
                 ></rect>`;
               })}
             </g>

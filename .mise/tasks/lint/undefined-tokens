@@ -21,7 +21,7 @@ defined=$(
     # wins), documented in an `@tokens` comment and read with a fallback.
     # lint:component-tokens keeps the comments and the reads in step.
     grep -rhPo --include='*.css' '^\s+\K--void-[a-z0-9-]+(?=\s{2,}\S)' "$THEME_SRC" || true
-    grep -rhPo --include='*.ts' "(?<![\w-])--void-[a-z0-9-]+(?=\s*:)|(?:setProperty|setHostStyle)\(\s*['\"]\K--void-[a-z0-9-]+|_css\([^,()]+,\s*['\"]\K--void-[a-z0-9-]+" "$UI_SRC" || true
+    grep -rhPo --include='*.ts' "(?<![\w-])--void-[a-z0-9-]+(?=['\"]?\s*:)|(?:setProperty|setHostStyle)\(\s*['\"]\K--void-[a-z0-9-]+|_css\([^,()]+,\s*['\"]\K--void-[a-z0-9-]+" "$UI_SRC" || true
   } | sort -u
 )
 
