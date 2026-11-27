@@ -58,3 +58,25 @@ export const Disabled: Story = {
     </void-collapsible>
   `,
 };
+
+export const InAForm: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story: 'By default one line frames the trigger and, when open, the content with it. In a column of fields, `--void-collapsible-rule-frame: none` removes the frame and `--void-collapsible-padding-inline: 0` the inset of the trigger and the content, so the fields inside line up with the fields above and below.',
+      },
+    },
+  },
+  render: () => html`
+    <div style="display: flex; flex-direction: column; gap: var(--void-space-4); max-width: 24rem;">
+      <void-input aria-label="Station" value="Kiruna 3"></void-input>
+      <void-collapsible open style="--void-collapsible-rule-frame: none; --void-collapsible-padding-inline: 0;">
+        <void-collapsible-trigger>Advanced</void-collapsible-trigger>
+        <void-collapsible-content>
+          <void-input aria-label="Minimum elevation" value="5"></void-input>
+        </void-collapsible-content>
+      </void-collapsible>
+      <void-input aria-label="Operator" value="Night shift"></void-input>
+    </div>
+  `,
+};

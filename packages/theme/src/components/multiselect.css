@@ -179,6 +179,7 @@ void-multiselect[disabled] {
 }
 
 void-multiselect[disabled] .void-multiselect-trigger {
+  background: var(--void-field-surface-disabled);
   cursor: not-allowed;
 }
 

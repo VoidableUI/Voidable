@@ -267,6 +267,7 @@
           <void-input value="Invalid value" error="This value is not accepted." aria-label="Email address"></void-input>
           <void-input value="Account name" disabled aria-label="Disabled"></void-input>
           <void-number-input value="3" controls="right" label="Number, controls right"></void-number-input>
+          <void-number-input value="3" disabled label="Number, disabled"></void-number-input>
           <void-date-picker value="2026-06-15" aria-label="Start date"></void-date-picker>
         </void-stack>
         <void-section>
@@ -373,6 +374,8 @@
           <void-accordion-item open><void-accordion-trigger>First section</void-accordion-trigger><void-accordion-content>Content of the first section.</void-accordion-content></void-accordion-item>
           <void-accordion-item><void-accordion-trigger>Second section</void-accordion-trigger><void-accordion-content>Content of the second section.</void-accordion-content></void-accordion-item>
         </void-accordion>
+        <void-collapsible><void-collapsible-trigger>Collapsible, closed</void-collapsible-trigger><void-collapsible-content>Hidden content.</void-collapsible-content></void-collapsible>
+        <void-collapsible open><void-collapsible-trigger>Collapsible, open</void-collapsible-trigger><void-collapsible-content>Content of an open collapsible, framed with its trigger.</void-collapsible-content></void-collapsible>
         <void-list dividers>
           <void-list-item>Item one</void-list-item>
           <void-list-item>Item two</void-list-item>

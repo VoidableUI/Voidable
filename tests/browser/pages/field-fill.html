@@ -1,0 +1,19 @@
+<!-- Each kind of field enabled and disabled, on the page and in a card.
+     Specs: field-fill.spec.ts. -->
+<main id="page" style="padding: 2rem; width: 40rem; display: grid; grid-template-columns: 1fr 1fr; gap: 1rem">
+  <void-input id="input" value="Kiruna 3" aria-label="Input"></void-input>
+  <void-input id="input-off" value="Kiruna 3" disabled aria-label="Input, disabled"></void-input>
+  <void-textarea id="textarea" value="Notes" rows="2" aria-label="Textarea"></void-textarea>
+  <void-textarea id="textarea-off" value="Notes" rows="2" disabled aria-label="Textarea, disabled"></void-textarea>
+  <void-select id="select" aria-label="Select"><select><option>One</option></select></void-select>
+  <void-select id="select-off" aria-label="Select, disabled"><select disabled><option>One</option></select></void-select>
+  <void-number-input id="number" value="12" label="Number"></void-number-input>
+  <void-number-input id="number-off" value="12" disabled label="Number, disabled"></void-number-input>
+  <void-combobox id="combobox" aria-label="Combobox" value="a"><void-combobox-content><void-option value="a">Alpha</void-option></void-combobox-content></void-combobox>
+  <void-combobox id="combobox-off" aria-label="Combobox, disabled" value="a" disabled><void-combobox-content><void-option value="a">Alpha</void-option></void-combobox-content></void-combobox>
+  <void-card id="card" style="grid-column: 1 / 3">
+    <void-card-body>
+      <void-input id="carded" value="In a card" aria-label="In a card"></void-input>
+    </void-card-body>
+  </void-card>
+</main>

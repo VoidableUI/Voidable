@@ -523,7 +523,12 @@
 
   /* field: a control text is entered or chosen in. Input, textarea,
      select, combobox, number, pin, tags and the like. */
-  --void-field-surface: var(--void-color-surface);
+  /* A field is the page colour in light, so it never wears the grey that
+     means "disabled" on a white page; in dark it is the lifted container
+     shade. A disabled field has a wash instead, strong enough to show
+     through the opacity a disabled control is drawn at. */
+  --void-field-surface: color-mix(in srgb, var(--void-color-surface) calc(100% * var(--void-scheme-dark)), var(--void-color-bg));
+  --void-field-surface-disabled: color-mix(in srgb, oklch(var(--void-fg)) 8%, var(--void-color-bg));
   --void-field-border:  var(--void-control-border);
 
   /* item: one of a set you move between. The link to the current page,

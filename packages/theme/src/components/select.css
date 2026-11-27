@@ -58,6 +58,7 @@ void-select select:focus {
 }
 
 void-select select:disabled {
+  background: var(--void-field-surface-disabled);
   opacity: 0.5;
   cursor: not-allowed;
 }
