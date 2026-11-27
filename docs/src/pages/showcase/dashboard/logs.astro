@@ -1,0 +1,101 @@
+---
+import DashboardLayout from '../../../components/showcase/DashboardLayout.astro';
+import iconDownload from '@tabler/icons/outline/download.svg?raw';
+import { levelColor, logs } from '../../../data/showcase-network';
+
+const sources = [...new Set(logs.map((l) => l.source))].sort((a, b) => a.localeCompare(b, 'en'));
+const count = (level: string) => logs.filter((l) => l.level === level).length;
+---
+
+<DashboardLayout
+  active="logs"
+  heading="Logs"
+  description="A filterable event log of stations, satellites and the scheduler: the logs page of the Voidable dashboard showcase."
+>
+  <Fragment slot="controls">
+    <void-segmented-control value="1h" aria-label="Window">
+      <void-segmented-control-item value="15m">15M</void-segmented-control-item>
+      <void-segmented-control-item value="1h">1H</void-segmented-control-item>
+      <void-segmented-control-item value="24h">24H</void-segmented-control-item>
+    </void-segmented-control>
+    <void-button variant="outline" size="md">
+      <span class="icon-inline" set:html={iconDownload} />
+      Export
+    </void-button>
+  </Fragment>
+
+  <div class="content-area">
+    <void-section>
+        <void-toolbar>
+          <void-input type="search" data-table-filter="logs-table" placeholder="Search messages and sources" aria-label="Search the log"></void-input>
+          <void-toggle-group id="logs-level" multiple value="error,warn,info,debug" aria-label="Levels">
+            <void-toggle value="error" size="sm">Error · {count('error')}</void-toggle>
+            <void-toggle value="warn" size="sm">Warn · {count('warn')}</void-toggle>
+            <void-toggle value="info" size="sm">Info · {count('info')}</void-toggle>
+            <void-toggle value="debug" size="sm">Debug · {count('debug')}</void-toggle>
+          </void-toggle-group>
+          <void-select id="logs-source" aria-label="Source">
+            <select>
+              <option value="">All sources</option>
+              {sources.map((s) => <option>{s}</option>)}
+            </select>
+          </void-select>
+          <void-spacer></void-spacer>
+          <void-switch id="logs-live" checked aria-label="Live tail"></void-switch>
+          <span>Live tail</span>
+        </void-toolbar>
+      <void-table id="logs-table" compact hoverable stack="48rem" filter-columns="source message" aria-label="Log events">
+
+        <table>
+          <thead>
+            <tr>
+              <th data-key="time" data-sort>Time (UTC)</th>
+              <th data-key="level">Level</th>
+              <th data-key="source" data-sort>Source</th>
+              <th data-key="message" data-stack="title">Message</th>
+            </tr>
+          </thead>
+          <tbody>
+            {logs.map((l) => (
+              <tr data-level={l.level} data-source={l.source}>
+                <td><span data-void-type="code">{l.time}</span></td>
+                <td><void-badge size="sm" variant="outline" color={levelColor[l.level]}>{l.level}</void-badge></td>
+                <td>{l.source}</td>
+                <td><span data-void-type="code">{l.message}</span></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <void-table-empty hidden>No event matches. Widen the window or clear the search.</void-table-empty>
+      </void-table>
+
+      <void-toolbar>
+        <span data-void-type="caption"><span id="logs-shown">{logs.length}</span> of 2,418 events in the last hour</span>
+        <void-spacer></void-spacer>
+        <void-pagination total="152" value="1" size="sm"></void-pagination>
+      </void-toolbar>
+    </void-section>
+  </div>
+</DashboardLayout>
+
+<script>
+  // Level and source are the page's own filters; the search box is the table's.
+  const table = document.getElementById('logs-table')!;
+  const level = document.getElementById('logs-level') as HTMLElement & { value: string | string[] };
+  const source = document.getElementById('logs-source') as HTMLElement & { value: string };
+  const shown = document.getElementById('logs-shown');
+
+  function apply() {
+    const raw = level.value;
+    const levels = new Set(Array.isArray(raw) ? raw : String(raw ?? '').split(/[\s,]+/));
+    let n = 0;
+    table.querySelectorAll<HTMLTableRowElement>('tbody tr').forEach((row) => {
+      const ok = levels.has(row.dataset.level!) && (!source.value || row.dataset.source === source.value);
+      row.hidden = !ok;
+      if (ok) n++;
+    });
+    if (shown) shown.textContent = String(n);
+  }
+  level.addEventListener('void-change', apply);
+  source.addEventListener('void-change', apply);
+</script>

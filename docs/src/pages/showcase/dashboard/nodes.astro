@@ -1,0 +1,320 @@
+---
+import DashboardLayout from '../../../components/showcase/DashboardLayout.astro';
+import iconPlus from '@tabler/icons/outline/plus.svg?raw';
+import iconRefresh from '@tabler/icons/outline/refresh.svg?raw';
+import iconDownload from '@tabler/icons/outline/download.svg?raw';
+import { nodes, series, stateColor, totals } from '../../../data/showcase-network';
+
+const fmt = (v: number | null, unit: string) => (v === null ? '—' : `${v.toLocaleString('en')} ${unit}`);
+// What the drawer shows for each node, read by the script below.
+const detail = Object.fromEntries(
+  nodes.map((node, i) => [
+    node.id,
+    {
+      ...node,
+      color: stateColor[node.state],
+      history: node.latency === null ? [] : series(12, node.latency, node.latency * 0.18, i + 1),
+    },
+  ]),
+);
+const minutes = ['-55', '-50', '-45', '-40', '-35', '-30', '-25', '-20', '-15', '-10', '-5', 'now'];
+---
+
+<DashboardLayout
+  active="nodes"
+  heading="Nodes"
+  description="Ground stations and satellites of the network in a selectable table with a detail drawer: the nodes page of the Voidable dashboard showcase."
+>
+  <Fragment slot="controls">
+    <void-button variant="outline" size="md" aria-label="Refresh">
+      <span class="icon-inline icon-only" set:html={iconRefresh} />
+    </void-button>
+    <void-button id="add-node" variant="filled" size="md">
+      <span class="icon-inline" set:html={iconPlus} />
+      Add Node
+    </void-button>
+  </Fragment>
+
+  <div class="content-area">
+    <void-figures>
+      <void-figure>
+        <span data-void-type="label">Online</span>
+        <span data-void-type="value">{totals.online} <span data-void-type="unit">of {totals.nodes}</span></span>
+        <span data-void-type="caption">{totals.stations} stations, {totals.satellites} satellites</span>
+      </void-figure>
+      <void-figure>
+        <span data-void-type="label">Degraded</span>
+        <span data-void-type="value">{totals.degraded}</span>
+        <span data-void-type="caption">Tromsø 2, on its backup link</span>
+      </void-figure>
+      <void-figure>
+        <span data-void-type="label">Maintenance</span>
+        <span data-void-type="value">{totals.maintenance}</span>
+        <span data-void-type="caption">Awarua, back at 14:00 UTC</span>
+      </void-figure>
+      <void-figure>
+        <span data-void-type="label">Offline</span>
+        <span data-void-type="value">{totals.offline}</span>
+        <span data-void-type="caption">Troll, for 47 minutes</span>
+      </void-figure>
+    </void-figures>
+
+    <void-section>
+        <void-toolbar>
+          <void-input type="search" data-table-filter="nodes-table" placeholder="Search nodes" aria-label="Search nodes"></void-input>
+          <void-select id="nodes-region" aria-label="Region">
+            <select>
+              <option value="">All regions</option>
+              <option>Arctic</option>
+              <option>Southern</option>
+              <option>Equatorial</option>
+              <option>Polar orbit</option>
+              <option>Inclined orbit</option>
+            </select>
+          </void-select>
+          <void-segmented-control id="nodes-kind" value="all" aria-label="Kind of node">
+            <void-segmented-control-item value="all">All</void-segmented-control-item>
+            <void-segmented-control-item value="Ground station">Stations</void-segmented-control-item>
+            <void-segmented-control-item value="Satellite">Satellites</void-segmented-control-item>
+          </void-segmented-control>
+          <void-spacer></void-spacer>
+          <void-button variant="ghost" aria-label="Download as CSV">
+            <span class="icon-inline icon-only" set:html={iconDownload} />
+          </void-button>
+        </void-toolbar>
+      <void-table id="nodes-table" selectable hoverable stack="60rem" filter-columns="node kind region state" aria-label="Nodes">
+
+        <void-table-selection hidden>
+          <span><span data-count></span> selected</span>
+          <void-button size="sm">Schedule Pass</void-button>
+          <void-button size="sm">Pause</void-button>
+          <void-button size="sm" color="error">Remove</void-button>
+        </void-table-selection>
+
+        <table>
+          <thead>
+            <tr>
+              <th data-stack="select"><void-checkbox aria-label="Select all nodes"></void-checkbox></th>
+              <th data-key="node" data-sort data-stack="title">Node</th>
+              <th data-key="state" data-sort>State</th>
+              <th data-key="region" data-sort>Region</th>
+              <th data-key="bands">Bands</th>
+              <th data-key="latency" data-sort="number" data-align="end">Latency</th>
+              <th data-key="throughput" data-sort="number" data-align="end">Throughput</th>
+              <th data-key="distance" data-sort="number" data-align="end">Distance</th>
+              <th data-key="uptime" data-sort="number" data-align="end" data-stack="hide">Uptime</th>
+              <th data-stack="actions">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {nodes.map((node) => (
+              <tr data-value={node.id} data-region={node.region} data-kind={node.kind}>
+                <td><void-checkbox aria-label={`Select ${node.name}`}></void-checkbox></td>
+                <td><void-row-text><span>{node.name}</span><span data-void-type="caption">{node.kind === 'Satellite' ? node.where : `${node.id} · ${node.where}`}</span></void-row-text></td>
+                <td>{node.state === 'online'
+                  ? <void-state color="success">online</void-state>
+                  : <void-badge color={stateColor[node.state]} variant="outline">{node.state}</void-badge>}</td>
+                <td>{node.region}</td>
+                <td><void-actions>{node.bands.map((b) => <void-tag size="sm">{b}</void-tag>)}</void-actions></td>
+                <td data-sort-value={node.latency ?? ''}>{fmt(node.latency, 'ms')}</td>
+                <td data-sort-value={node.throughput}>{node.throughput ? `${node.throughput} Mbit/s` : '—'}</td>
+                <td data-sort-value={node.distance ?? ''}>{fmt(node.distance, 'km')}</td>
+                <td data-sort-value={node.uptime}>{node.uptime.toFixed(2)}%</td>
+                <td><void-button variant="ghost" size="sm" data-open-node={node.id} aria-label={`Open ${node.name}`}>Open</void-button></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <void-table-empty hidden>No node matches. Try another region, or clear the search.</void-table-empty>
+      </void-table>
+
+      <void-toolbar>
+        <span data-void-type="caption">Showing {nodes.length} of {totals.nodes} nodes</span>
+        <void-spacer></void-spacer>
+        <void-pagination total="3" value="1" size="sm"></void-pagination>
+      </void-toolbar>
+    </void-section>
+  </div>
+
+  <Fragment slot="overlays">
+    <!-- Node detail: one drawer, filled from the row that opened it. -->
+    <void-drawer id="node-drawer" side="right" size="lg">
+      <void-drawer-title><span data-f="name">Node</span></void-drawer-title>
+      <void-drawer-description><span data-f="summary"></span></void-drawer-description>
+      <void-drawer-body>
+        <div class="overlay-stack">
+          <void-alert id="node-alert" color="warning" hidden>
+            <void-alert-description><span data-f="notice"></span></void-alert-description>
+          </void-alert>
+
+          <void-figures>
+            <void-figure>
+              <span data-void-type="label">Latency</span>
+              <span data-void-type="value" data-size="sm"><span data-f="latency"></span> <span data-void-type="unit">ms</span></span>
+            </void-figure>
+            <void-figure>
+              <span data-void-type="label">Throughput</span>
+              <span data-void-type="value" data-size="sm"><span data-f="throughput"></span> <span data-void-type="unit">Mbit/s</span></span>
+            </void-figure>
+            <void-figure>
+              <span data-void-type="label">Distance</span>
+              <span data-void-type="value" data-size="sm"><span data-f="distance"></span> <span data-void-type="unit">km</span></span>
+            </void-figure>
+          </void-figures>
+
+          <void-section>
+            <void-section-head>
+              <h3>Latency</h3>
+              <span data-void-type="label">ms · last hour</span>
+            </void-section-head>
+            <void-line-chart id="node-chart" height="150" aria-label="Round-trip latency of this node over the last hour, in milliseconds"></void-line-chart>
+          </void-section>
+
+          <void-description-list>
+            <dl>
+              <div><dt>Identifier</dt><dd><span data-void-type="code" data-f="id"></span></dd></div>
+              <div><dt>Kind</dt><dd data-f="kind"></dd></div>
+              <div><dt>Region</dt><dd data-f="region"></dd></div>
+              <div><dt data-f="whereLabel">Position</dt><dd data-f="where"></dd></div>
+              <div><dt>Bands</dt><dd data-f="bands"></dd></div>
+              <div><dt>Linked to</dt><dd data-f="peer"></dd></div>
+              <div><dt>Uptime, 30 days</dt><dd data-f="uptime"></dd></div>
+              <div><dt>Last contact</dt><dd data-f="lastContact"></dd></div>
+              <div><dt>Firmware</dt><dd><span data-void-type="code" data-f="firmware"></span></dd></div>
+            </dl>
+          </void-description-list>
+
+          <void-section>
+            <void-section-head>
+              <h3>Automation</h3>
+            </void-section-head>
+            <void-rows>
+              <void-row>
+                <void-row-text><span>Accept scheduled passes</span><span data-void-type="caption">The scheduler may book this node.</span></void-row-text>
+                <void-switch id="node-accept" checked aria-label="Accept scheduled passes"></void-switch>
+              </void-row>
+              <void-row>
+                <void-row-text><span>Alert when unreachable</span><span data-void-type="caption">After three missed heartbeats.</span></void-row-text>
+                <void-switch checked aria-label="Alert when unreachable"></void-switch>
+              </void-row>
+            </void-rows>
+          </void-section>
+        </div>
+      </void-drawer-body>
+      <void-drawer-actions>
+        <void-button data-close-drawer autofocus>Close</void-button>
+        <void-button variant="filled">Schedule Pass</void-button>
+      </void-drawer-actions>
+    </void-drawer>
+
+    <!-- Add a node -->
+    <void-dialog id="node-dialog" size="md">
+      <void-dialog-title>Add a node</void-dialog-title>
+      <void-dialog-description>The node joins the network once its first heartbeat arrives.</void-dialog-description>
+      <void-dialog-body>
+        <div class="overlay-stack">
+          <void-radio-group label="Kind" name="kind" value="station" orientation="horizontal">
+            <void-radio value="station">Ground station</void-radio>
+            <void-radio value="satellite">Satellite</void-radio>
+          </void-radio-group>
+          <void-field label="Name" required>
+            <void-input name="name" placeholder="Svalbard 3" required></void-input>
+          </void-field>
+          <void-split>
+            <void-field label="Region">
+              <void-select>
+                <select name="region">
+                  <option>Arctic</option>
+                  <option>Southern</option>
+                  <option>Equatorial</option>
+                </select>
+              </void-select>
+            </void-field>
+            <void-field label="Minimum elevation" helper="Degrees above the horizon.">
+              <void-number-input name="elevation" value="5" min="0" max="45" step="1"></void-number-input>
+            </void-field>
+          </void-split>
+          <void-checkbox-group label="Bands" name="bands">
+            <void-checkbox value="S" checked>S-band</void-checkbox>
+            <void-checkbox value="X" checked>X-band</void-checkbox>
+            <void-checkbox value="Ka">Ka-band</void-checkbox>
+          </void-checkbox-group>
+        </div>
+      </void-dialog-body>
+      <void-dialog-actions>
+        <void-button data-close-dialog>Cancel</void-button>
+        <void-button variant="filled" data-close-dialog>Add Node</void-button>
+      </void-dialog-actions>
+    </void-dialog>
+
+    <script type="application/json" id="nodes-data" set:html={JSON.stringify({ detail, minutes })} />
+  </Fragment>
+</DashboardLayout>
+
+<script>
+  const { detail, minutes } = JSON.parse(document.getElementById('nodes-data')!.textContent!);
+  const drawer = document.getElementById('node-drawer') as HTMLElement & { open: boolean };
+  const dialog = document.getElementById('node-dialog') as HTMLElement & { open: boolean };
+  const table = document.getElementById('nodes-table')!;
+  const put = (name: string, text: string) => {
+    drawer.querySelectorAll(`[data-f="${name}"]`).forEach((el) => { el.textContent = text; });
+  };
+  const notices: Record<string, string> = {
+    degraded: 'Running on a backup link. Passes here may be moved to another station.',
+    maintenance: 'In a planned maintenance window. The scheduler is not booking this node.',
+    offline: 'Unreachable. The last heartbeat is older than the alert threshold.',
+  };
+
+  function openNode(id: string) {
+    const node = detail[id];
+    if (!node) return;
+    const dash = (v: number | null) => (v === null ? '—' : v.toLocaleString('en'));
+    put('name', node.name);
+    put('summary', `${node.kind} · ${node.region} · ${node.state}`);
+    put('latency', dash(node.latency));
+    put('throughput', dash(node.throughput || null));
+    put('distance', dash(node.distance));
+    put('id', node.id);
+    put('kind', node.kind);
+    put('region', node.region);
+    put('whereLabel', node.kind === 'Satellite' ? 'Orbit' : 'Position');
+    put('where', node.where);
+    put('bands', node.bands.join(', '));
+    put('peer', node.peer);
+    put('uptime', `${node.uptime.toFixed(2)}%`);
+    put('lastContact', node.lastContact);
+    put('firmware', node.firmware);
+
+    const alert = document.getElementById('node-alert')!;
+    alert.hidden = node.state === 'online';
+    if (node.color) alert.setAttribute('color', node.color);
+    put('notice', notices[node.state] ?? '');
+
+    const chart = document.getElementById('node-chart') as HTMLElement & { data: unknown };
+    chart.data = { labels: minutes, series: [{ name: 'Latency', values: node.history }] };
+    (document.getElementById('node-accept') as HTMLElement & { checked: boolean }).checked = node.state !== 'maintenance';
+    drawer.open = true;
+  }
+
+  table.addEventListener('click', (e) => {
+    const button = (e.target as HTMLElement).closest<HTMLElement>('[data-open-node]');
+    if (button) openNode(button.dataset.openNode!);
+  });
+  drawer.querySelector('[data-close-drawer]')?.addEventListener('click', () => { drawer.open = false; });
+  document.getElementById('add-node')?.addEventListener('click', () => { dialog.open = true; });
+  dialog.querySelectorAll('[data-close-dialog]').forEach((b) => b.addEventListener('click', () => { dialog.open = false; }));
+
+  // Region and kind are the page's own filters: they hide rows, and the
+  // table's search and sort work on what is left.
+  const region = document.getElementById('nodes-region') as HTMLElement & { value: string };
+  const kind = document.getElementById('nodes-kind') as HTMLElement & { value: string };
+  function applyFilters() {
+    table.querySelectorAll<HTMLTableRowElement>('tbody tr').forEach((row) => {
+      const byRegion = !region.value || row.dataset.region === region.value;
+      const byKind = kind.value === 'all' || row.dataset.kind === kind.value;
+      row.hidden = !(byRegion && byKind);
+    });
+  }
+  region.addEventListener('void-change', applyFilters);
+  kind.addEventListener('void-change', applyFilters);
+</script>
