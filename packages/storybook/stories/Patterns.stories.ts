@@ -352,6 +352,34 @@ export const Rows: Story = {
     `),
 };
 
+// A tone on a row: its text and the code text in it are one status colour.
+export const RowsWithTone: Story = {
+  render: () =>
+    inPage(html`
+      <void-rows>
+        <void-row>
+          <span>Carrier lock on MRD-0412</span>
+          <span data-void-type="code">14:02:11</span>
+        </void-row>
+        <void-row color="warning">
+          <void-row-text>
+            <span>Warning: signal to noise below 5 dB</span>
+            <span data-void-type="caption">Tromsø 2, X band</span>
+          </void-row-text>
+          <span data-void-type="code">14:02:48</span>
+        </void-row>
+        <void-row color="error">
+          <span>Error: carrier lost</span>
+          <span data-void-type="code">14:03:05</span>
+        </void-row>
+        <void-row color="success">
+          <span>Carrier lock restored</span>
+          <span data-void-type="code">14:03:40</span>
+        </void-row>
+      </void-rows>
+    `),
+};
+
 // A state as a dot and a word: colour is never the only signal.
 export const State: Story = {
   render: () =>

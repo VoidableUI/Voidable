@@ -337,6 +337,24 @@ void-row:last-child {
   border-bottom: var(--void-rows-rule-edge, var(--void-rule-edge));
 }
 
+/* A row with a tone (a warning in a log, a failed step): its text is the
+   status colour, and so is text in the value, body and code roles inside it
+   (type.css reads --_void-tone-ink), so the line is one colour. Captions and
+   labels stay quiet, and a control or a void-state keeps its own colours.
+   The status colours keep 4.5:1 as text on the page and on every container. */
+void-row[color]:not([color="default"]) {
+  --_void-tone-ink: var(--_void-tone);
+  color: var(--_void-tone-ink);
+}
+
+void-row[color="success"]   { --_void-tone: var(--void-color-success); }
+void-row[color="info"]      { --_void-tone: var(--void-color-info); }
+void-row[color="warning"]   { --_void-tone: var(--void-color-warning); }
+void-row[color="caution"]   { --_void-tone: var(--void-color-caution); }
+void-row[color="highlight"] { --_void-tone: var(--void-color-highlight); }
+void-row[color="error"]     { --_void-tone: var(--void-color-error); }
+void-row[color="notice"]    { --_void-tone: var(--void-color-notice); }
+
 void-row-text {
   display: flex;
   flex-direction: column;

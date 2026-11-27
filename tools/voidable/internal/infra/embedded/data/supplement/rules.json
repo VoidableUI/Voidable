@@ -225,7 +225,19 @@
       "parents": [
         "void-rows"
       ],
-      "attributes": []
+      "hints": {
+        "tone": "use color",
+        "status": "use color",
+        "variant": "use color"
+      },
+      "attributes": [
+        {
+          "name": "color",
+          "type": "'default' | 'success' | 'info' | 'warning' | 'caution' | 'error' | 'notice' | 'highlight'",
+          "default": "default",
+          "description": "sets the row's text, and code, value and body text inside it, in a status colour (a warning in a log); captions stay quiet"
+        }
+      ]
     },
     {
       "tag": "void-row-text",

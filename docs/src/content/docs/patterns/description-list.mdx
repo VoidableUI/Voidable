@@ -147,12 +147,55 @@ export const settingsJsx = `
 
 `void-row-text` also works in a table cell, for a name with a line of detail under it.
 
+### A row with a tone
+
+`color` on a `<void-row>` sets the line in a status colour: a warning in a log, a step that failed. Plain text takes the tone, and so does text in the `code`, `value` and `body` roles, so the line is one colour; a caption or a label stays quiet, and a control or a `<void-state>` keeps its own colours. The values are those of every `color` attribute. Each keeps 4.5:1 as text on the page and on every container, in both schemes and every skin. Say the level in words too (the message, or a `<void-state>`): colour must not be the only signal.
+
+export const toned = `
+<void-rows>
+  <void-row>
+    <span>Carrier lock on MRD-0412</span>
+    <span data-void-type="code">14:02:11</span>
+  </void-row>
+  <void-row color="warning">
+    <span>Warning: signal to noise below 5 dB</span>
+    <span data-void-type="code">14:02:48</span>
+  </void-row>
+  <void-row color="error">
+    <span>Error: carrier lost</span>
+    <span data-void-type="code">14:03:05</span>
+  </void-row>
+</void-rows>`;
+
+export const tonedErb = `
+<void-rows>
+  <% @events.each do |event| %>
+    <void-row color="<%= LEVEL_COLORS.fetch(event.level, "default") %>">
+      <span><%= event.message %></span>
+      <span data-void-type="code"><%= l event.at, format: :clock %></span>
+    </void-row>
+  <% end %>
+</void-rows>`;
+
+export const tonedJsx = `
+<void-rows>
+  {events.map((event) => (
+    <void-row key={event.id} color={LEVEL_COLORS[event.level] ?? 'default'}>
+      <span>{event.message}</span>
+      <span data-void-type="code">{event.at}</span>
+    </void-row>
+  ))}
+</void-rows>`;
+
+<Example html={toned} erb={tonedErb} jsx={tonedJsx} />
+
 ## Reference
 
 | Element | Attribute | Values |
 |---|---|---|
 | `void-description-list` | `layout` | `rows` (default): label left, value right, a hairline between pairs. `grid`: label over value. |
 | | `columns` | Rows: `1` (default) or `2`. Grid: `1` to `4`, default `2`. |
+| `void-row` | `color` | `default`, or a status colour (`success`, `info`, `warning`, `caution`, `error`, `notice`, `highlight`): the row's text, and `code`, `value` and `body` text in it, take that colour. |
 
 ## Which one
 
