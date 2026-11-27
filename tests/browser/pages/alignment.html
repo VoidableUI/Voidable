@@ -1,0 +1,166 @@
+<!-- Edges and tones of the page patterns (specs/alignment.spec.ts).
+     [data-edge] is the box whose content edge a trailing ghost button's label
+     must sit on; [data-flush] is that button; [data-inset] is a button that
+     must keep its padding. ?skin=loft|slab is applied by the spec. -->
+<link rel="stylesheet" href="/build/loft.css">
+<link rel="stylesheet" href="/build/slab.css">
+<main>
+  <void-page id="page-plain">
+    <void-page-head>
+      <h1>Stations</h1>
+      <p>Every station in the network.</p>
+    </void-page-head>
+  </void-page>
+
+  <void-page id="page-eyebrow">
+    <void-page-head>
+      <span data-void-type="label">Network</span>
+      <h1>Stations</h1>
+      <p>Every station in the network.</p>
+    </void-page-head>
+  </void-page>
+
+  <void-page id="page-crumbs">
+    <void-page-head data-edge>
+      <void-breadcrumbs><void-breadcrumbs-list><void-breadcrumbs-item><a href="#n">Network</a></void-breadcrumbs-item><void-breadcrumbs-item>Stations</void-breadcrumbs-item></void-breadcrumbs-list></void-breadcrumbs>
+      <h1>Stations</h1>
+      <void-actions>
+        <void-button>Pause</void-button>
+        <void-button variant="ghost" data-flush="page head">Export</void-button>
+      </void-actions>
+    </void-page-head>
+
+    <!-- Section heads: the same height with and without an action. -->
+    <void-section id="sh-plain">
+      <void-section-head><h2>Passes</h2></void-section-head>
+      <p>Content</p>
+    </void-section>
+    <void-section id="sh-action">
+      <void-section-head><h2>Passes</h2><void-actions><void-button>Assign</void-button></void-actions></void-section-head>
+      <p>Content</p>
+    </void-section>
+    <void-section id="sh-ghost">
+      <void-section-head data-edge><h2>Passes</h2><void-actions><void-button variant="ghost" data-flush="section head, actions">View all</void-button></void-actions></void-section-head>
+      <p>Content</p>
+    </void-section>
+    <void-section id="sh-ghost-sm">
+      <void-section-head data-edge><h2>Passes</h2><void-button variant="ghost" size="sm" data-flush="section head, small button">View all</void-button></void-section-head>
+      <p>Content</p>
+    </void-section>
+    <void-section id="sh-ghost-link">
+      <void-section-head data-edge><h2>Passes</h2><void-actions><void-button variant="ghost" data-flush="section head, link button"><a href="#all">View all</a></void-button></void-actions></void-section-head>
+      <p>Content</p>
+    </void-section>
+    <void-section id="sh-label">
+      <void-section-head><h2>Passes</h2><span data-void-type="label">3 passes</span></void-section-head>
+      <p>Content</p>
+    </void-section>
+    <void-section id="shd-plain" divided>
+      <void-section-head><h2>Passes</h2></void-section-head>
+      <p>Content</p>
+    </void-section>
+    <void-section id="shd-action" divided>
+      <void-section-head><h2>Passes</h2><void-actions><void-button variant="filled" size="lg">Assign</void-button></void-actions></void-section-head>
+      <p>Content</p>
+    </void-section>
+    <void-section id="shp-plain">
+      <void-section-head><h2>Passes</h2><p>In the next 24 hours.</p></void-section-head>
+      <p>Content</p>
+    </void-section>
+    <void-section id="shp-action">
+      <void-section-head><h2>Passes</h2><p>In the next 24 hours.</p><void-actions><void-button>Assign</void-button></void-actions></void-section-head>
+      <p>Content</p>
+    </void-section>
+
+    <!-- Rows: a tone, code text, a state word with a control. -->
+    <void-section id="rows">
+      <h2>Log</h2>
+      <void-rows>
+        <void-row id="row-plain">
+          <void-row-text><span>Link nominal</span><span data-void-type="caption">Tromsø 2</span></void-row-text>
+          <span data-void-type="code">14:02:11</span>
+        </void-row>
+        <void-row color="success" data-tone="success"><span data-plain>ok</span><span data-void-type="code">carrier lock</span><span data-void-type="body">body</span><span data-void-type="caption">caption</span></void-row>
+        <void-row color="info" data-tone="info"><span data-plain>info</span><span data-void-type="code">sweep 3 of 9</span></void-row>
+        <void-row color="warning" data-tone="warning"><span data-plain>warn</span><span data-void-type="code">snr 4.1 dB</span></void-row>
+        <void-row color="caution" data-tone="caution"><span data-plain>caution</span><span data-void-type="code">wind 24 m/s</span></void-row>
+        <void-row color="error" data-tone="error"><span data-plain>error</span><span data-void-type="code">carrier lost</span></void-row>
+        <void-row color="notice" data-tone="notice"><span data-plain>notice</span><span data-void-type="code">firmware 4.2</span></void-row>
+        <void-row color="highlight" data-tone="highlight"><span data-plain>highlight</span><span data-void-type="code">first light</span></void-row>
+        <void-row color="default" id="row-default"><span data-plain>default</span><span data-void-type="code">idle</span></void-row>
+        <void-row data-edge>
+          <void-row-text><span>Svalbard 1</span><span data-void-type="caption">X band</span></void-row-text>
+          <void-actions id="row-actions"><void-state color="success">Tracking</void-state><void-button variant="ghost" size="sm" data-flush="row, state and control">Pause</void-button></void-actions>
+        </void-row>
+        <void-row data-edge>
+          <void-row-text><span>Troll</span></void-row-text>
+          <void-button variant="ghost" data-flush="row, button">Open</void-button>
+        </void-row>
+        <void-row data-edge>
+          <void-row-text><span>Outline stays inside</span></void-row-text>
+          <void-button data-inset="row, outline button">Open</void-button>
+        </void-row>
+        <void-row data-edge>
+          <void-row-text><span>Ghost before a filled one</span></void-row-text>
+          <void-actions><void-button variant="ghost" data-inset="row, ghost not last">Skip</void-button><void-button variant="filled">Run</void-button></void-actions>
+        </void-row>
+      </void-rows>
+      <!-- A pager: ghost buttons at the end of the column. -->
+      <void-actions justify="end" data-edge><void-button variant="ghost">Newer</void-button><void-button variant="ghost" data-flush="pager">Older</void-button></void-actions>
+      <void-actions justify="center"><void-button variant="ghost" data-inset="centred actions">More</void-button></void-actions>
+      <void-actions><void-button variant="ghost" data-inset="start actions">More</void-button></void-actions>
+    </void-section>
+
+    <void-card id="card">
+      <void-card-header data-edge><void-card-title>Passes</void-card-title><void-actions><void-button variant="ghost" size="sm" data-flush="card header">View all</void-button></void-actions></void-card-header>
+      <void-card-body>
+        <void-rows>
+          <void-row color="warning" data-tone="warning"><span data-plain>warn</span><span data-void-type="code">snr 4.1 dB</span></void-row>
+          <void-row color="error" data-tone="error"><span data-plain>error</span><span data-void-type="code">carrier lost</span></void-row>
+          <void-row color="success" data-tone="success"><span data-plain>ok</span><span data-void-type="code">carrier lock</span></void-row>
+        </void-rows>
+      </void-card-body>
+    </void-card>
+
+    <void-table aria-label="Stations">
+      <table>
+        <thead><tr><th>Station</th><th data-stack="actions">Actions</th></tr></thead>
+        <tbody>
+          <tr><td>Svalbard 1</td><td data-stack="actions" data-edge><void-button variant="ghost" size="sm">Edit</void-button><void-button variant="ghost" size="sm" data-flush="table, actions cell">Pause</void-button></td></tr>
+          <tr><td>Troll</td><td data-edge><void-actions><void-button variant="ghost" size="sm">Edit</void-button><void-button variant="ghost" data-flush="table, void-actions">Pause</void-button></void-actions></td></tr>
+        </tbody>
+      </table>
+    </void-table>
+
+    <div dir="rtl">
+      <void-rows>
+        <void-row data-edge>
+          <void-row-text><span>Right to left</span></void-row-text>
+          <void-button variant="ghost" data-flush="row, right to left">Open</void-button>
+        </void-row>
+      </void-rows>
+    </div>
+
+    <!-- Description lists. -->
+    <void-description-list id="dl-end">
+      <dl>
+        <div><dt>Region</dt><dd>eu-north-2</dd></div>
+        <div><dt>Antenna diameter</dt><dd>7.3 m</dd></div>
+      </dl>
+    </void-description-list>
+    <void-description-list id="dl-start" justify="start">
+      <dl>
+        <div><dt>Region</dt><dd>eu-north-2</dd></div>
+        <div><dt>Antenna diameter</dt><dd>7.3 m</dd></div>
+        <div><dt>Bands</dt><dd>S, X, Ka</dd></div>
+      </dl>
+    </void-description-list>
+
+    <!-- A state as large as a section heading. -->
+    <void-section id="state-head">
+      <void-section-head><h2 id="state-ref">Tracking</h2></void-section-head>
+      <void-state id="state-lg" size="lg" color="success">Tracking</void-state>
+      <void-state id="state-md" color="success">Tracking</void-state>
+    </void-section>
+  </void-page>
+</main>
