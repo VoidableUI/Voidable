@@ -1,0 +1,26 @@
+<style>
+  /* A sidebar column with a footer at the bottom left of the viewport: the trigger sits in the corner, in a
+     scroll container, beside a user name. ?inset=right adds the page rule an author might plausibly write to
+     "right-align" the panel: an inset on the content, which pins it to the viewport and defeats the anchoring. */
+  #side { position: fixed; top: 0; bottom: 0; left: 0; width: 220px; display: flex; flex-direction: column; border-right: 1px solid gray; transform: translateZ(0); }
+  #nav { flex: 1; overflow: auto; }
+  #foot { display: flex; align-items: center; gap: 8px; padding: 8px; }
+  #foot > span { flex: 1; }
+</style>
+<aside id="side">
+  <nav id="nav">Navigation</nav>
+  <div id="foot">
+    <span>Alex</span>
+    <void-popover id="pop" side="top"><void-popover-trigger><button id="pop-t" aria-label="Settings">S</button></void-popover-trigger><void-popover-content><div style="width: 160px; height: 80px">settings <button>in</button></div></void-popover-content></void-popover>
+    <void-dropdown-menu id="menu" side="top"><void-dropdown-menu-trigger><button id="menu-t">Menu</button></void-dropdown-menu-trigger><void-dropdown-menu-content><void-dropdown-menu-item>One</void-dropdown-menu-item><void-dropdown-menu-item>Two</void-dropdown-menu-item></void-dropdown-menu-content></void-dropdown-menu>
+    <void-hover-card id="card" side="top" open-delay="50" close-delay="50"><void-hover-card-trigger><a href="#card" id="card-t">Card</a></void-hover-card-trigger><void-hover-card-content><div style="width: 160px; height: 60px">hover card</div></void-hover-card-content></void-hover-card>
+    <void-tooltip id="tip" side="top" delay="50"><void-tooltip-trigger><button id="tip-t">Tip</button></void-tooltip-trigger><void-tooltip-content>A tooltip</void-tooltip-content></void-tooltip>
+  </div>
+</aside>
+<script>
+  if (new URLSearchParams(location.search).get('inset') === 'right') {
+    const s = document.createElement('style');
+    s.textContent = 'void-popover-content { right: 0; left: auto; }';
+    document.head.append(s);
+  }
+</script>
