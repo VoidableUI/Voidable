@@ -195,7 +195,7 @@ Consumers toggle shape globally (`<html data-shape="sharp">`) or locally on any 
 
 ### Patterns (CSS-only elements)
 
-`packages/theme/src/patterns/` and `packages/theme/src/media/` style `void-*` tags that `@voidable/ui` never registers: the frame and parts of a page (`void-shell`, `void-brand`, `void-nav-links`, `void-spacer`, `void-page`, `void-page-head`, `void-actions`, `void-section`, `void-section-head`, `void-split`, `void-stack`, `void-figures`, `void-figure`, `void-delta`, `void-state`, `void-description-list`, `void-rows`, `void-row`, `void-row-text`, `void-toolbar`, `void-empty`) and UI over imagery (`void-media`, `void-media-content`, `void-glass`).
+`packages/theme/src/patterns/` and `packages/theme/src/media/` style `void-*` tags that `@voidable/ui` never registers: the frame and parts of a page (`void-shell`, `void-brand`, `void-nav-links`, `void-spacer`, `void-page`, `void-page-head`, `void-actions`, `void-section`, `void-section-head`, `void-split`, `void-stack`, `void-card-grid`, `void-figures`, `void-figure`, `void-delta`, `void-state`, `void-description-list`, `void-rows`, `void-row`, `void-row-text`, `void-toolbar`, `void-empty`) and UI over imagery (`void-media`, `void-media-content`, `void-glass`).
 
 - Build pages from them. Do not write page padding, max-widths, grids for figures or margins between sections.
 - A pattern has no behaviour, so it has no JavaScript. If something needs behaviour it is a component in `@voidable/ui`; if it only arranges or styles, it is a pattern. `lint:styles` fails if a pattern tag is registered.

@@ -52,6 +52,12 @@ describe('a card that is a link or a button: wiring', () => {
     expect(el.querySelector('button')!.getAttribute('aria-describedby')).toBe('mine d');
   });
 
+  it('wires a link inside a heading in the title', async () => {
+    const el = mount(card('<void-card-title><h3><a href="/x">Ada</a></h3></void-card-title><void-card-description>One line.</void-card-description>'));
+    await ready(el);
+    expect(el.querySelector('a')!.getAttribute('aria-describedby')).toBe(el.querySelector('void-card-description')!.id);
+  });
+
   it('leaves a static card, and a card with a title but no description, alone', async () => {
     const el = mount(card('<void-card-title>Static</void-card-title><void-card-description>One line.</void-card-description>'));
     await ready(el);

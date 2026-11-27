@@ -216,6 +216,10 @@ func (s *state) scanRegion(r region) []domain.Tag {
 		skipped := false
 		for _, native := range []string{"a", "button"} {
 			if bytes.HasPrefix(src[i+1:], []byte(native)) && i+1+len(native) < len(src) && (src[i+1+len(native)] == '>' || isSpace(src[i+1+len(native)])) {
+				// A link or button written in backticks in prose is a mention, not an open element.
+				if r.lang == domain.LangMarkdown && inInlineCode(src, i) {
+					break
+				}
 				t, next := s.parseTag(src, i, native, r.lang)
 				if !t.SelfClosing && isControl(native, t.Attrs) {
 					stack = append(stack, frame{name: native, kind: kindControl})

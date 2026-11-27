@@ -155,17 +155,18 @@ void-card[padding="lg"] {
        </void-card-header>
        <void-card-body>…</void-card-body>
      </void-card>
-   The author writes one real <a href> or <button> inside the title. Its
+   The author writes one real <a href> or <button> in the title (or in a
+   heading inside it). Its
    ::after is stretched over the whole card, so the card is the hit area while
    the link or button stays the one control that gets the name, the focus and
    the keys. Text inside the card cannot be selected (the stretched box is on
    top of it). A card with no link or button is not touched. */
-void-card:has(> void-card-header > void-card-title > :is(a[href], button)) {
+void-card:has(> void-card-header > void-card-title :is(a[href], button)) {
   position: relative;
   cursor: pointer;
 }
 
-void-card-title > :is(a[href], button) {
+void-card-title :is(a[href], button) {
   appearance: none;
   margin: 0;
   border: 0;
@@ -179,34 +180,35 @@ void-card-title > :is(a[href], button) {
   cursor: pointer;
 }
 
-void-card-title > :is(a[href], button)::after {
+void-card-title :is(a[href], button)::after {
   content: "";
   position: absolute;
-  inset: 0;
+  /* Over the card's edge too: the box the ring is drawn around is the whole card. */
+  inset: calc(var(--_void-card-border-width) * -1);
   border-radius: var(--_void-card-radius);
 }
 
 /* The ring goes around the whole card, not the title text. */
-void-card-title > :is(a[href], button):focus-visible {
+void-card-title :is(a[href], button):focus-visible {
   outline: none;
 }
 
-void-card-title > :is(a[href], button):focus-visible::after {
+void-card-title :is(a[href], button):focus-visible::after {
   outline: var(--void-focus-ring-width) solid var(--void-focus-ring-color);
   outline-offset: var(--void-focus-ring-offset);
 }
 
 @media (hover: hover) {
-  void-card:has(> void-card-header > void-card-title > :is(a[href], button:not(:disabled))):hover {
+  void-card:has(> void-card-header > void-card-title :is(a[href], button:not(:disabled))):hover {
     background: var(--void-card-surface-hover, var(--void-color-bg-hover));
   }
 }
 
-void-card:has(> void-card-header > void-card-title > :is(a[href], button:not(:disabled))):active {
+void-card:has(> void-card-header > void-card-title :is(a[href], button:not(:disabled))):active {
   background: var(--void-card-surface-active, var(--void-color-bg-active));
 }
 
-void-card:has(> void-card-header > void-card-title > button:disabled),
-void-card-title > button:disabled {
+void-card:has(> void-card-header > void-card-title button:disabled),
+void-card-title button:disabled {
   cursor: not-allowed;
 }

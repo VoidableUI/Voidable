@@ -35,7 +35,7 @@ export class VoidCard extends VoidElement {
   /** A linked card: its title holds the one link or button, which the description describes. */
   private _wire(): void {
     const title = this._parts.one('void-card-title');
-    const control = title ? Array.from(title.children).find((c) => c.matches('a[href], button')) : undefined;
+    const control = title?.querySelector('a[href], button');
     const description = this._parts.one('void-card-description');
     if (!control || !description) return;
     this._parts.token(control, 'aria-describedby', this._parts.id(description, 'void-card-description'));

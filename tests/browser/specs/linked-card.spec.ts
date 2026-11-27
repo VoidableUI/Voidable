@@ -36,6 +36,13 @@ const CARDS = `
       </void-card-header>
       <void-card-body id="off-body">Disabled.</void-card-body>
     </void-card>
+    <void-card id="head-card">
+      <void-card-header>
+        <void-card-title><h3><a id="hlink" href="#head">Heading link</a></h3></void-card-title>
+        <void-card-description>The link sits in a heading inside the title.</void-card-description>
+      </void-card-header>
+      <void-card-body>Body.</void-card-body>
+    </void-card>
   </void-card-grid>
   <button id="after" type="button">after</button>`;
 
@@ -113,14 +120,21 @@ test.describe('a card that is a link or a button', () => {
   test('Tab stops once per card, in order, and a static card is skipped', async ({ page }) => {
     await page.locator('#before').focus();
     const order: string[] = [];
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < 4; i++) {
       await page.keyboard.press('Tab');
       order.push(await page.evaluate(() => document.activeElement?.id ?? ''));
     }
-    // The link card, the button card, then (the static and disabled cards skipped) the control after the grid.
-    expect(order).toEqual(['link', 'press', 'after']);
+    // The link card, the button card, (the static and disabled cards skipped), the heading link card, the control after the grid.
+    expect(order).toEqual(['link', 'press', 'hlink', 'after']);
     await page.keyboard.press('Shift+Tab');
-    expect(await page.evaluate(() => document.activeElement?.id)).toBe('press');
+    expect(await page.evaluate(() => document.activeElement?.id)).toBe('hlink');
+  });
+
+  test('a link inside a heading in the title makes the whole card the link too', async ({ page }) => {
+    const box = (await page.locator('#head-card').boundingBox())!;
+    await page.mouse.click(box.x + box.width / 2, box.y + box.height - 6);
+    expect(await hash(page)).toBe('#head');
+    expect(await page.locator('#hlink').getAttribute('aria-describedby')).not.toBeNull();
   });
 
   test('Enter follows the link; Enter and Space press the button; Space does not follow the link', async ({ page }) => {

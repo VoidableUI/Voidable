@@ -85,6 +85,8 @@ A screen is assembled from named patterns. They are CSS-only elements (styled by
 | Title, description and page actions | `void-page-head` holding a label or `void-breadcrumbs`, `<h1>`, `<p>`, `void-actions` |
 | A titled part of the page | `void-section` with `void-section-head` (`<h2>`, optional `<p>`, optional aside) |
 | Two columns that collapse on a phone | `void-split` (`ratio="2:1"`, `"1:2"`, `"aside"`) |
+| Cards in as many columns as fit | `void-card-grid` around `void-card`s |
+| A whole card that is a link or a button | ONE `<a href>` or `<button>` inside `void-card-title` (never wrap the card in `<a>`/`<button>`, never a second control in it) |
 | A vertical stack with a standard gap | `void-stack` (`gap` is `tight`, `inside`, `stack`, `group` or `section`) |
 | A number with a unit, caption, change or progress | `void-figure`, in a `void-figures` row; `void-delta` for the change |
 | Labels and values | `void-description-list` around a native `<dl>` of `<div><dt>…</dt><dd>…</dd></div>` |

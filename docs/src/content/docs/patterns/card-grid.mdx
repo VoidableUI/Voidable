@@ -1,0 +1,84 @@
+---
+title: Cards as links, and the card grid
+description: A void-card that is one link or one button, with the whole card as the hit area, and void-card-grid, which lays cards out in as many columns as fit. Markup, behaviour, accessibility, and what is not allowed.
+---
+
+import Tokens from '../../../components/api/Tokens.astro';
+import Example from '../../../components/Example.astro';
+
+A destination card (a title, a description, maybe a status, the whole card clickable) is a `<void-card>` with **one real link or one real button in its title**. `<void-card-grid>` lays several cards out in as many columns as fit.
+
+## A card that is a link or a button
+
+A card is one of three things: **static** (no control), **a link**, or **a button**. Never a card with a second control inside.
+
+export const links = `
+<void-card-grid>
+  <void-card>
+    <void-card-header>
+      <void-card-title><a href="/networks/ground">Ground network</a></void-card-title>
+      <void-card-description>41 stations, 2 in maintenance.</void-card-description>
+    </void-card-header>
+    <void-card-body>Downlink at 79.6 TB today.</void-card-body>
+  </void-card>
+  <void-card>
+    <void-card-header>
+      <void-card-title><button type="button" data-action="stations#add">Add a station</button></void-card-title>
+      <void-card-description>Register a new antenna.</void-card-description>
+    </void-card-header>
+    <void-card-body>Opens the registration form.</void-card-body>
+  </void-card>
+  <void-card>
+    <void-card-header><void-card-title>Static card</void-card-title></void-card-header>
+    <void-card-body>No control, so nothing to click and the text can be selected.</void-card-body>
+  </void-card>
+</void-card-grid>`;
+
+export const linksErb = `
+<void-card>
+  <void-card-header>
+    <void-card-title><%= link_to network.name, network_path(network) %></void-card-title>
+    <void-card-description><%= network.summary %></void-card-description>
+  </void-card-header>
+  <void-card-body><%= network.status %></void-card-body>
+</void-card>`;
+
+export const linksJsx = `
+<void-card>
+  <void-card-header>
+    <void-card-title><a href={\`/networks/\${network.id}\`}>{network.name}</a></void-card-title>
+    <void-card-description>{network.summary}</void-card-description>
+  </void-card-header>
+  <void-card-body>{network.status}</void-card-body>
+</void-card>`;
+
+<Example html={links} erb={linksErb} jsx={linksJsx} />
+
+How it works: the theme stretches the link's (or button's) `::after` over the whole card, so a click anywhere on the card is a click on the control. Nothing else is added: the control is the native element, so it keeps its own keys (Enter follows a link; Enter and Space press a button), its focus order (Tab stops **once** per card, a static card is skipped), its `disabled` state and your event handlers.
+
+- **The accessible name is the link or button text.** Screen readers announce "Ground network, link". The card points the control's `aria-describedby` at `<void-card-description>` (and gives the description an id when it has none), so the description is read after the name. An `aria-describedby` you wrote is kept.
+- **Hover, focus and press come from tokens.** The card fills with `--void-card-surface-hover` while the pointer is over it and `--void-card-surface-active` while pressed; the focus ring is drawn around the whole card, not the title text. A disabled button gives the card the `not-allowed` cursor and no hover.
+- **Put the control in the title.** `<void-card-title><a href>…</a></void-card-title>`, or inside a heading there (`<void-card-title><h3><a href>…</a></h3></void-card-title>`) when the page needs the card to appear in its outline. A link or a button anywhere else in the card does not make it a destination card.
+
+### What not to write
+
+- **Wrapping the card in a link or a button**, as in `<a href="/x"><void-card>…</void-card></a>` or `<button><void-card>…</void-card></button>`. A card is block content and a link or button holds phrasing content only, so this is invalid HTML and announces badly. Put the control in the title instead.
+- **A second control in a linked card**: a `<void-button>` in the footer, a link in the body, an input. The stretched link covers it, so it cannot be clicked, and Tab would stop twice. A card with no control in its title is static and may hold any controls.
+
+`voidable check` reports both as `nested-control`, and the [development warnings](/getting-started/development-warnings/) report them in the browser, each with the correct markup. If a destination card needs a second action, make the two things two cards, or put the action next to the card (in the `<void-card-grid>` item list), not inside it.
+
+### Trade-off: text in a linked card cannot be selected
+
+The stretched box sits on top of the card's content, so a drag across the body does not select it (a static card is untouched). This is the price of a hit area that needs no JavaScript and no nested controls. If the text must be selectable, make the card static and put a link in it as a normal control.
+
+## The card grid
+
+`<void-card-grid>` is CSS only: its cards go in as many columns as fit, each at least `--void-card-grid-min` wide (`16rem` by default), sharing the row. The count follows the width of the container, not the screen, so the same markup is four columns in a wide page, two in a narrow one and one on a phone. The cards of a row are as tall as the tallest, and each card's body grows, so footers line up along the bottom. The gap is `--void-gap-stack`, so `--void-rhythm` and `--void-density` move it.
+
+## Tokens
+
+<Tokens component="card-grid" />
+
+The hover and press fills of a card that is a link or a button are two tokens of the card:
+
+<Tokens component="card" />

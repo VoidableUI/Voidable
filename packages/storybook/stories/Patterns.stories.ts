@@ -194,6 +194,34 @@ export const Section: Story = {
     `),
 };
 
+// Cards in as many columns as fit, each at least 16rem; the cards of a row
+// are equally tall. One card is a link, one a button, one static.
+export const CardGrid: Story = {
+  render: () =>
+    inPage(html`
+      <void-card-grid>
+        <void-card>
+          <void-card-header>
+            <void-card-title><a href="#ground-network">Ground network</a></void-card-title>
+            <void-card-description>41 stations, 2 in maintenance.</void-card-description>
+          </void-card-header>
+          <void-card-body>Downlink at 79.6 TB today.</void-card-body>
+        </void-card>
+        <void-card>
+          <void-card-header>
+            <void-card-title><button type="button">Add a station</button></void-card-title>
+            <void-card-description>Register a new antenna.</void-card-description>
+          </void-card-header>
+          <void-card-body>Opens the registration form.</void-card-body>
+        </void-card>
+        <void-card>
+          <void-card-header><void-card-title>Static card</void-card-title></void-card-header>
+          <void-card-body>No control: nothing to click.</void-card-body>
+        </void-card>
+      </void-card-grid>
+    `),
+};
+
 // A column that stays stuck: beside the list on a wide screen, above it
 // below 48rem. Narrow the viewport and scroll to see it.
 export const StickySplit: Story = {
