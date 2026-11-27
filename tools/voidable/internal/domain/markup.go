@@ -137,6 +137,9 @@ type Tag struct {
 	// Ancestors are the enclosing elements the name check needs, outermost
 	// first: every `void-*` element with its attributes, and `label`.
 	Ancestors []Ancestor `json:"ancestors,omitempty"`
+	// InControl is the nearest enclosing native link (`<a href>`) or `<button>`
+	// ("a" or "button"), or "": a block component inside one is invalid HTML.
+	InControl string `json:"inControl,omitempty"`
 	// Labelled is true when a native `<label>` names the element: it sits
 	// inside one, or a `<label for>` in the same source names its id.
 	Labelled bool `json:"labelled,omitempty"`
@@ -163,6 +166,10 @@ type Content struct {
 	// Native are the other (lowercase, non-void) elements written inside,
 	// so a component that enhances a native control can tell it is there.
 	Native []string `json:"native,omitempty"`
+	// Counts is how many times each element is written inside: every void-*
+	// tag, and the native elements that are a control (`a` with `href`,
+	// `button`, `input` that is not hidden, `select`, `textarea`, `summary`).
+	Counts map[string]int `json:"counts,omitempty"`
 	// HeaderCheckbox is true when a checkbox (a <void-checkbox> or an
 	// <input type="checkbox">) is written inside a <th>: the select-all of a
 	// selectable table.

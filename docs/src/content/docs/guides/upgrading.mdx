@@ -80,10 +80,6 @@ Charts take their data from markup and carry a data table; two things in existin
 
 New: the `data` attribute (a gauge's `zones` too) with JSON, `show-table`, and the adapter helpers (React `data` as an attribute, Rails `void_bar_chart` and the other chart helpers, Blade `<x-voidable::bar-chart>` and the other chart components). See [Accessibility](/guides/accessibility/#charts-and-gauges) and the [conventions](/guides/conventions/).
 
-## 0.14.0
-
-Nothing breaks. The narrow layout (the sideways link row of `void-sidebar` and `void-nav-bar`, the shell's bar, `data-void-hide` and the narrow rules of the other patterns) still starts below 48rem. New: `data-void-narrow` on `<html>` (`sm` 36rem, `lg` 64rem, `off`) moves or removes that point, for an application whose smallest window is wider than a phone. See [Where the narrow layout starts](/patterns/app-shell/#where-the-narrow-layout-starts). If you load single pattern files (`@voidable/theme/patterns/shell` and the others), they now carry the narrow rules for every size; the stylesheet is larger by that much.
-
 ## 0.12.0 at a glance
 
 Three things change behaviour, and only for code that relied on them:
@@ -93,10 +89,6 @@ Three things change behaviour, and only for code that relied on them:
 - **`KeyboardActivation` loses its `enter` and `space` options** (internal API; the element's `keyMap` decides).
 
 Nothing else breaks. New in 0.12.0: the [testing helper](/guides/testing/) (`@voidable/ui/testing`), the messages registry with French and Arabic (`@voidable/ui/messages`), key actions (`keys`, `configureKeys`, `@voidable/ui/keys`), and sorting, filtering and selection in `void-table` (below). The sections that follow say what each does to existing markup.
-
-## Alert actions (0.14.0)
-
-Nothing breaks. `void-alert` gains a CSS-only `void-alert-actions` part for buttons or links (Retry, Sign in again, Undo): write it after `void-alert-description` and before `void-alert-close`. It lays out like the banner's and the card's actions, a row at the trailing edge below the text that wraps at narrow widths; `void-button`s in it are small unless one says `size="lg"`. Tab follows the markup, so the order is title, description, actions, then the close control. `voidable check` and the development warnings know the part; the HEEx `alert` component, Rails and Blade write it as markup.
 
 ## Sticky columns in a split (0.13)
 
@@ -155,6 +147,23 @@ The accessibility tree changes in two places, so a test or a style that reads ro
 - **Stepper is a list, not a navigation landmark.** It only shows progress, so it is `role="list"` named "Progress" (the name still follows `lang` and a name you write), each step is a list item with `aria-current="step"` on the current one, and the connectors are hidden from assistive technology. A page that counted it among its navigation regions, or a test with `getByRole('navigation', { name: 'Progress' })`, should look for the list instead. A stepper whose steps are links or buttons is yours to write: put them in a `<nav aria-label="...">`.
 - **Pagination can leave out its landmark.** It is still a navigation landmark named "Pagination" by default. Add `landmark="none"` (a named group of the same buttons, in either mode) when the page keeps a single navigation region. Inside a `<nav>` or an element with `role="navigation"` it never adds a landmark, with or without the attribute, so landmarks do not nest; a pagination you had inside a `<nav>` is now a group there.
 ## 0.14.0
+
+### Narrow breakpoint
+
+Nothing breaks. The narrow layout (the sideways link row of `void-sidebar` and `void-nav-bar`, the shell's bar, `data-void-hide` and the narrow rules of the other patterns) still starts below 48rem. New: `data-void-narrow` on `<html>` (`sm` 36rem, `lg` 64rem, `off`) moves or removes that point, for an application whose smallest window is wider than a phone. See [Where the narrow layout starts](/patterns/app-shell/#where-the-narrow-layout-starts). If you load single pattern files (`@voidable/theme/patterns/shell` and the others), they now carry the narrow rules for every size; the stylesheet is larger by that much.
+
+### Alert actions
+
+Nothing breaks. `void-alert` gains a CSS-only `void-alert-actions` part for buttons or links (Retry, Sign in again, Undo): write it after `void-alert-description` and before `void-alert-close`. It lays out like the banner's and the card's actions, a row at the trailing edge below the text that wraps at narrow widths; `void-button`s in it are small unless one says `size="lg"`. Tab follows the markup, so the order is title, description, actions, then the close control. `voidable check` and the development warnings know the part; the HEEx `alert` component, Rails and Blade write it as markup.
+
+### Cards and rows as links, and the card grid
+
+
+- **A card that is a link or a button.** Write one real `<a href>` or `<button>` inside `<void-card-title>`; the theme stretches it over the whole card, and the card points the control's `aria-describedby` at its description. If you wrapped a card in an `<a>` or `<button>`, or added a second control to a card that has one in its title, `voidable check` and the development warnings now report it (`nested-control`) with the markup to write. See [Cards as links](/patterns/card-grid/).
+- **A row that is a link or a button.** `<void-row>` takes the same form: one `<a href>` or `<button>` in `<void-row-text>`, stretched over the row, replaces the chevron link button at the end of a line. The checkers report a wrapped row and a second control the same way. Tokens: `--void-rows-surface-hover`, `--void-rows-surface-active`.
+- **`<void-card-grid>`** lays cards out in as many columns as fit. Nothing to change unless you wrote that grid yourself; then delete your CSS.
+- **An unavailable card.** `aria-disabled="true"` on a `<void-card>` mutes the title and icons (`--void-card-ink-disabled`), shows `not-allowed` and stops its link or button doing anything while it stays focusable, with the description as the reason. Use it instead of the native `disabled`.
+- `<void-card>` now has a small script (it wires `aria-describedby` for a linked card; a static card is untouched). New tokens: `--void-card-surface-hover`, `--void-card-surface-active`, `--void-card-grid-min`, `--void-card-grid-gap`.
 
 ### Sidebar, breadcrumbs and kbd
 

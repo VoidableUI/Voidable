@@ -295,7 +295,12 @@ export const parts = {
         description:
           'Top row of the card, divided from the body by a hairline: the title, an optional description, and anything that sits at the far end (a badge, void-actions).',
         parts: [
-          { tag: 'void-card-title', max: 1, description: 'Title of the card.' },
+          {
+            tag: 'void-card-title',
+            max: 1,
+            description:
+              'Title of the card. Holds plain text, or the one `<a href>` or `<button>` that makes the whole card a link or a button (the card takes no second control).',
+          },
           { tag: 'void-card-description', max: 1, description: 'One line under the title.' },
         ],
       },
@@ -714,6 +719,29 @@ export const nativeControls = {
   'void-select': {
     tag: 'select',
     fix: 'write a native <select> (with the name and the options) inside: <void-select><select name="plan"><option value="free">Free</option><option value="pro">Pro</option></select></void-select>',
+  },
+};
+
+/**
+ * Components that can be one link or one button as a whole (#116): the author writes the real
+ * `<a href>` or `<button>` inside `part`, and the theme stretches it over the component. The
+ * component is never wrapped in a link or a button, and a linked one holds no second control.
+ * Written to the declaration as `voidLinked`; `voidable check` and the development warnings
+ * report both mistakes with `fix`.
+ * `controls` are the `void-*` tags that count as a control besides the native `a[href]`,
+ * `button`, `input` (not hidden), `select`, `textarea` and `summary`.
+ * @type {Record<string, { part: string, controls: string[], fix: string }>}
+ */
+export const linkedControls = {
+  'void-card': {
+    part: 'void-card-title',
+    controls: [
+      'void-button', 'void-checkbox', 'void-radio', 'void-switch', 'void-toggle', 'void-toggle-group', 'void-segmented-control',
+      'void-select', 'void-multiselect', 'void-combobox', 'void-input', 'void-textarea', 'void-number-input', 'void-slider',
+      'void-dropdown-menu', 'void-popover', 'void-hamburger', 'void-editable', 'void-date-picker', 'void-color-picker',
+      'void-file-upload', 'void-pin-input', 'void-tags-input', 'void-action-input', 'void-compose-input', 'void-tabs',
+    ],
+    fix: 'put the one link or button in the title and leave the card unwrapped: <void-card><void-card-header><void-card-title><a href="/projects/ada">Ada</a></void-card-title><void-card-description>One line.</void-card-description></void-card-header><void-card-body>...</void-card-body></void-card>',
   },
 };
 

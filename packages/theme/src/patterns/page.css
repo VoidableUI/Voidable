@@ -15,6 +15,10 @@
    --void-split-sticky-top        Setting: how far from the top a sticky child sticks: the height of a sticky header it must sit below. Add to the group gap beside a wide split; the whole offset of sticky="always" when stacked. Default 0px.
    --void-split-sticky-max  Setting: tallest a sticky="always" child grows when the split is stacked; it scrolls inside beyond that. Default 50svh. */
 
+/* @tokens void-card-grid
+   --void-card-grid-min  Setting: narrowest a column of cards gets before the grid drops a column. Default 16rem.
+   --void-card-grid-gap  Space between the cards, both ways. */
+
 /* @tokens void-section
    --void-section-surface       Fill of a titled section (one with a heading, or one that holds a table). Unset, a section draws nothing.
    --void-section-border        Edge colour of a titled section.
@@ -340,6 +344,30 @@ void-stack[gap="tight"]   { gap: var(--void-gap-tight); }
 void-stack[gap="stack"]   { gap: var(--void-gap-stack); }
 void-stack[gap="group"]   { gap: var(--void-gap-group); }
 void-stack[gap="section"] { gap: var(--void-gap-section); }
+
+/* ── void-card-grid: cards in as many columns as fit ──
+     <void-card-grid>
+       <void-card>…</void-card>
+       <void-card>…</void-card>
+     </void-card-grid>
+   Columns are at least --void-card-grid-min wide (16rem by default) and share
+   the row, so the count follows the width of the container, not the screen.
+   The cards of a row are as tall as the tallest, and each card's body grows,
+   so footers line up along the bottom. */
+void-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(var(--void-card-grid-min, 16rem), 100%), 1fr));
+  gap: var(--void-card-grid-gap, var(--void-gap-stack));
+  align-items: stretch;
+}
+
+void-card-grid > * {
+  min-width: 0;
+}
+
+void-card-grid > void-card > void-card-body {
+  flex: 1 1 auto;
+}
 
 /* Stays in view while the column beside it scrolls. The offset is the
    group gap below whatever --void-split-sticky-top clears (a sticky header);

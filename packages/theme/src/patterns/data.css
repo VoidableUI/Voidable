@@ -28,7 +28,9 @@
 /* @tokens void-rows
    --void-rows-rule       The line between rows.
    --void-rows-rule-edge  The lines above the first row and below the last.
-   --void-rows-padding    Block padding of a row. */
+   --void-rows-padding    Block padding of a row.
+   --void-rows-surface-hover   Fill of a row that is a link or a button while the pointer is over it.
+   --void-rows-surface-active  Fill of that row while it is pressed. */
 
 void-figure {
   display: flex;
@@ -368,6 +370,59 @@ void-row-text {
 
 void-row > :not(void-row-text) {
   flex: none;
+}
+
+/* A row that is a link or a button: one real <a href> or <button> in the
+   row text, stretched over the whole row exactly as in a card (see
+   components/card.css). The row keeps any badge or chevron beside the text
+   as decoration; a second control in it is a mistake the checkers report. */
+void-row:has(> void-row-text :is(a[href], button)) {
+  position: relative;
+  cursor: pointer;
+}
+
+void-row-text :is(a[href], button) {
+  appearance: none;
+  margin: 0;
+  border: 0;
+  padding: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  text-align: start;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+void-row-text :is(a[href], button)::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+
+void-row-text :is(a[href], button):focus-visible {
+  outline: none;
+}
+
+void-row-text :is(a[href], button):focus-visible::after {
+  outline: var(--void-focus-ring-width) solid var(--void-focus-ring-color);
+  outline-offset: calc(var(--void-focus-ring-offset) * -1);
+}
+
+@media (hover: hover) {
+  void-row:has(> void-row-text :is(a[href], button:not(:disabled))):hover {
+    background: var(--void-rows-surface-hover, var(--void-color-bg-hover));
+  }
+}
+
+void-row:has(> void-row-text :is(a[href], button:not(:disabled))):active {
+  background: var(--void-rows-surface-active, var(--void-color-bg-active));
+}
+
+void-row:has(> void-row-text button:disabled),
+void-row-text button:disabled {
+  cursor: not-allowed;
 }
 
 /* The same two lines in a table cell sit closer together. */

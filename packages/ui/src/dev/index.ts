@@ -36,6 +36,7 @@ import {
   checkControl,
   checkDefined,
   checkEvent,
+  checkLinked,
   checkName,
   checkNative,
   checkParent,
@@ -44,7 +45,7 @@ import {
   checkRequired,
   keyOf,
 } from './rules.js';
-import { removed, renamedEvents, styled, table } from './table.generated.js';
+import { linked, removed, renamedEvents, styled, table } from './table.generated.js';
 import type { DevWarning } from './types.js';
 
 export type { DevWarning, WarningKind } from './types.js';
@@ -198,6 +199,7 @@ async function flushDeferred(): Promise<void> {
     for (const w of checkParts(table, el)) report(w);
     report(checkNative(table, el));
     report(checkControl(table, el));
+    report(checkLinked(table, el, linked));
     report(checkName(table, el));
   }
 }
@@ -287,6 +289,7 @@ export function check(root: ParentNode & Node = document): DevWarning[] {
       ...checkParts(table, el),
       checkNative(table, el),
       checkControl(table, el),
+      checkLinked(table, el, linked),
       checkName(table, el),
     ]) {
       if (!w || ignored(w)) continue;

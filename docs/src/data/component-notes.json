@@ -426,7 +426,7 @@
   },
   "void-card": {
     "group": "layout",
-    "children": "Explicit parts, in this order: `void-card-header` (with `void-card-title` and `void-card-description`, and anything that sits at its far end), `void-card-body` and `void-card-footer`."
+    "children": "Explicit parts, in this order: `void-card-header` (with `void-card-title` and `void-card-description`, and anything that sits at its far end), `void-card-body` and `void-card-footer`. For a destination card, write one real `<a href>` or `<button>` inside `void-card-title`: the theme stretches it over the whole card (a click anywhere follows the link or presses the button, Tab stops once, the control's text is the name, `void-card-description` describes it). Never wrap the card in a link or button and never put a second control in a linked card; `voidable check` and the development warnings report both. `aria-disabled=\"true\"` on the card is the unavailable look (muted, control stays focusable, the description is the reason). Text in a linked card cannot be selected. `void-card-grid` lays cards out in as many columns as fit."
   },
   "void-collapsible": {
     "group": "layout",

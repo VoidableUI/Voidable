@@ -122,6 +122,11 @@
       ]
     },
     {
+      "tag": "void-card-grid",
+      "description": "Grid of void-card children in as many columns as fit (each at least 16rem, set with --void-card-grid-min), the cards of a row equally tall. CSS only.",
+      "attributes": []
+    },
+    {
       "tag": "void-stack",
       "description": "Vertical stack with a named gap from the layout rhythm.",
       "attributes": [
@@ -240,6 +245,11 @@
       "parents": [
         "void-rows"
       ],
+      "linked": {
+        "part": "void-row-text",
+        "controls": ["void-button", "void-checkbox", "void-radio", "void-switch", "void-toggle", "void-toggle-group", "void-segmented-control", "void-select", "void-multiselect", "void-combobox", "void-input", "void-textarea", "void-number-input", "void-slider", "void-dropdown-menu", "void-popover", "void-hamburger", "void-editable", "void-date-picker", "void-color-picker", "void-file-upload", "void-pin-input", "void-tags-input", "void-action-input", "void-compose-input", "void-tabs"],
+        "fix": "put the one link or button in the row text and leave the row unwrapped: <void-row><void-row-text><a href=\"/stations/kiruna\">Kiruna 3</a><span data-void-type=\"caption\">Online</span></void-row-text><void-badge>Online</void-badge></void-row>"
+      },
       "hints": {
         "tone": "use color",
         "status": "use color",

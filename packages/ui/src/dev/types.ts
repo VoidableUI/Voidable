@@ -30,6 +30,8 @@ export interface DevTag {
   v?: { tag: string; fix: string };
   /** What was renamed or removed in 0.8 (#23), with the form to write instead. */
   l?: DevRenamed;
+  /** It can be one link or one button as a whole: the part that holds the control, and the correct markup. */
+  k?: { p: string; c: readonly string[]; s: string };
 }
 
 /** One renamed or removed attribute (cem/supplement.js `renamed`). */
@@ -111,7 +113,9 @@ export type WarningKind =
   /** An attribute is set that another attribute on the same element makes without effect (`resize` with `autosize`). */
   | 'attribute-conflict'
   /** An overlay opened away from its trigger because a page rule pins it (an inset on the content beats anchor positioning). */
-  | 'misplaced-overlay';
+  | 'misplaced-overlay'
+  /** A card wrapped in a link or a button, or a linked card holding a second control. */
+  | 'nested-control';
 
 /** One reported problem. */
 export interface DevWarning {

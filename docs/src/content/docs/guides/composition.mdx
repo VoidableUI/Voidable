@@ -147,7 +147,7 @@ The machine-readable form of this table is the `voidParts` entry of each compone
 | `<void-dropdown-menu>` | `-trigger` (one control), `-content` holding `<void-dropdown-menu-item>` and `<void-dropdown-menu-separator>` | Items take a `value`, sent in `void-select`. |
 | `<void-tooltip>` | `-trigger` (one control), `-content` | Content describes the control. |
 | `<void-tabs>` | `-list` holding `<void-tabs-trigger value>`, then `<void-tabs-content value>` | Trigger and content are paired by `value`. |
-| `<void-card>` | `-header` (holding `-title`, `-description`), `-body` (required), `-footer` | |
+| `<void-card>` | `-header` (holding `-title`, `-description`), `-body` (required), `-footer` | The title may hold the one `<a href>` or `<button>` that makes the whole card a link or a button (a plain native element, not a `-trigger` part: nothing opens). [Never wrap the card in a link or button, never add a second control.](/patterns/card-grid/) |
 | `<void-alert>` | `-title`, `-description` (required), `-actions`, `-close` (one control) | Without `-close` it cannot be dismissed. |
 | `<void-accordion>` | `<void-accordion-item>`, each with `<void-accordion-trigger>` and `<void-accordion-content>` | |
 | `<void-collapsible>` | `-trigger`, `-content` | The trigger is the button; closed content is hidden from `open` and animates open and closed. |

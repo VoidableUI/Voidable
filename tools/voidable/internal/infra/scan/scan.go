@@ -113,6 +113,9 @@ const (
 	kindVoid frameKind = iota
 	kindLabel
 	kindComponent
+	// kindControl is an open native link (`<a href>`) or `<button>`, which a
+	// block component must not sit inside.
+	kindControl
 )
 
 // closeFrame pops the innermost frame of the kind and name that the end tag
@@ -178,6 +181,11 @@ func (s *state) scanRegion(r region) []domain.Tag {
 			stack, _, _ = closeFrame(stack, kindLabel, "label")
 			continue
 		}
+		for _, native := range []string{"a", "button"} {
+			if bytes.HasPrefix(src[i+1:], []byte("/"+native)) && i+2+len(native) < len(src) && (src[i+2+len(native)] == '>' || isSpace(src[i+2+len(native)])) {
+				stack, _, _ = closeFrame(stack, kindControl, native)
+			}
+		}
 		if i+1 < len(src) && src[i+1] == '/' {
 			if name := componentNameIn(src, i+2, r.lang); name != "" {
 				stack, _, _ = closeFrame(stack, kindComponent, name)
@@ -203,6 +211,25 @@ func (s *state) scanRegion(r region) []domain.Tag {
 				stack = append(stack, frame{name: name, kind: kindComponent})
 			}
 			i = next - 1
+			continue
+		}
+		skipped := false
+		for _, native := range []string{"a", "button"} {
+			if bytes.HasPrefix(src[i+1:], []byte(native)) && i+1+len(native) < len(src) && (src[i+1+len(native)] == '>' || isSpace(src[i+1+len(native)])) {
+				// A link or button written in backticks in prose is a mention, not an open element.
+				if r.lang == domain.LangMarkdown && inInlineCode(src, i) {
+					break
+				}
+				t, next := s.parseTag(src, i, native, r.lang)
+				if !t.SelfClosing && isControl(native, t.Attrs) {
+					stack = append(stack, frame{name: native, kind: kindControl})
+				}
+				i = next - 1
+				skipped = true
+				break
+			}
+		}
+		if skipped {
 			continue
 		}
 		if !bytes.HasPrefix(src[i+1:], []byte("void-")) {
@@ -234,6 +261,12 @@ func (s *state) scanRegion(r region) []domain.Tag {
 			// void-* element above it renders a void-* element the scan cannot see: the parent is unknown,
 			// not that element above.
 			if stack[k].kind == kindComponent {
+				break
+			}
+		}
+		for k := len(stack) - 1; k >= 0; k-- {
+			if stack[k].kind == kindControl {
+				t.InControl = stack[k].name
 				break
 			}
 		}
@@ -293,6 +326,8 @@ func (s *state) analyzeContent(src []byte, from, to int, lang domain.Lang) domai
 	b := src[:to]
 	// header is how many <th> are open at this point: a checkbox inside one is a select-all.
 	header := 0
+	// wrapped is how many <void-button> are open at this point.
+	wrapped := 0
 	for i := from; i < to; i++ {
 		if end := skipComment(b, i); end > i {
 			i = end - 1
@@ -305,6 +340,9 @@ func (s *state) analyzeContent(src []byte, from, to int, lang domain.Lang) domai
 		case ch == '<' && i+1 < to && (b[i+1] == '/' || b[i+1] == '!'):
 			if b[i+1] == '/' && header > 0 && readTagName(b, i+2) == "th" {
 				header--
+			}
+			if b[i+1] == '/' && wrapped > 0 && readTagName(b, i+2) == "void-button" {
+				wrapped--
 			}
 			for i < to && b[i] != '>' {
 				i++
@@ -320,6 +358,16 @@ func (s *state) analyzeContent(src []byte, from, to int, lang domain.Lang) domai
 				c.Native = append(c.Native, name)
 			}
 			t, next := s.parseTag(b, i, name, lang)
+			// A native link or button inside a <void-button> is that button, not a second control.
+			if strings.HasPrefix(name, "void-") || (wrapped == 0 && isControl(name, t.Attrs)) {
+				if c.Counts == nil {
+					c.Counts = map[string]int{}
+				}
+				c.Counts[name]++
+			}
+			if name == "void-button" && !t.SelfClosing {
+				wrapped++
+			}
 			if name == "th" && !t.SelfClosing {
 				header++
 			}
@@ -349,6 +397,30 @@ func (s *state) analyzeContent(src []byte, from, to int, lang domain.Lang) domai
 		}
 	}
 	return c
+}
+
+// isControl reports whether a native element is a control however it is
+// written: a link with an href, a button, a select, a textarea, a summary, an
+// input that is not hidden.
+func isControl(name string, attrs []domain.AttrToken) bool {
+	switch name {
+	case "button", "select", "textarea", "summary":
+		return true
+	case "a":
+		for _, a := range attrs {
+			if a.Name == "href" {
+				return true
+			}
+		}
+	case "input":
+		for _, a := range attrs {
+			if a.Name == "type" && a.HasValue && !a.Dynamic && strings.EqualFold(a.Value, "hidden") {
+				return false
+			}
+		}
+		return true
+	}
+	return false
 }
 
 // readTagName reads an element name (lowercase, digits and hyphens, as in svg

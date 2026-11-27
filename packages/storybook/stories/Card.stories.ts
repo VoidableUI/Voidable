@@ -166,3 +166,102 @@ export const NoHeaderRule: Story = {
     </void-card>
   `,
 };
+
+export const LinkCard: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'The one link goes in the title. Its text is the name, the description is read after it, the whole card is the hit area, and Tab stops once. Text inside the card cannot be selected. Never wrap the card in an <a>, and never put a second control inside.',
+      },
+    },
+  },
+  render: () => html`
+    <void-card>
+      <void-card-header>
+        <void-card-title><a href="#ground-network">Ground network</a></void-card-title>
+        <void-card-description>41 stations, 2 in maintenance.</void-card-description>
+      </void-card-header>
+      <void-card-body>
+        <p>Downlink at 79.6 TB today, 64% of the daily plan.</p>
+      </void-card-body>
+    </void-card>
+  `,
+};
+
+export const UnavailableCard: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'aria-disabled="true" mutes the title and icons, keeps the link focusable and inert, and the description is the reason, announced with it.',
+      },
+    },
+  },
+  render: () => html`
+    <void-card aria-disabled="true">
+      <void-card-header>
+        <void-card-title><a href="#pro">Pro plan</a></void-card-title>
+        <void-card-description>Upgrade your workspace to unlock this plan.</void-card-description>
+      </void-card-header>
+      <void-card-body><p>Unlimited stations.</p></void-card-body>
+    </void-card>
+  `,
+};
+
+export const ButtonCard: Story = {
+  parameters: { docs: { description: { story: 'A button in the title makes the whole card a button: listen for its click as for any button.' } } },
+  render: () => html`
+    <void-card variant="bordered">
+      <void-card-header>
+        <void-card-title><button type="button">Add a station</button></void-card-title>
+        <void-card-description>Register a new antenna.</void-card-description>
+      </void-card-header>
+      <void-card-body>
+        <p>Opens the registration form.</p>
+      </void-card-body>
+    </void-card>
+  `,
+};
+
+export const CardGrid: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'void-card-grid packs the cards in as many columns as fit, each at least --void-card-grid-min wide (16rem), the cards of a row equally tall. Static, link and button cards mix freely.',
+      },
+    },
+  },
+  render: () => html`
+    <void-card-grid>
+      <void-card>
+        <void-card-header>
+          <void-card-title><a href="#ground-network">Ground network</a></void-card-title>
+          <void-card-description>41 stations, 2 in maintenance.</void-card-description>
+        </void-card-header>
+        <void-card-body><p>Downlink at 79.6 TB today.</p></void-card-body>
+        <void-card-footer>Updated a minute ago</void-card-footer>
+      </void-card>
+      <void-card>
+        <void-card-header>
+          <void-card-title><button type="button">Add a station</button></void-card-title>
+          <void-card-description>Register a new antenna.</void-card-description>
+        </void-card-header>
+        <void-card-body><p>Opens the registration form. A longer body makes this card taller, and the others in its row follow.</p><p>Footers line up along the bottom.</p></void-card-body>
+        <void-card-footer>Takes two minutes</void-card-footer>
+      </void-card>
+      <void-card>
+        <void-card-header><void-card-title>Static card</void-card-title></void-card-header>
+        <void-card-body><p>No control: nothing to click, and the text can be selected.</p></void-card-body>
+        <void-card-footer>Read only</void-card-footer>
+      </void-card>
+      <void-card variant="elevated">
+        <void-card-header>
+          <void-card-title><a href="#alerts">Alerts</a></void-card-title>
+        </void-card-header>
+        <void-card-body><p>3 open.</p></void-card-body>
+      </void-card>
+    </void-card-grid>
+  `,
+};

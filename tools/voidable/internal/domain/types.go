@@ -106,6 +106,9 @@ type Element struct {
 	// Native is the native control the author writes inside the component
 	// (voidNative in the manifest: `<select>` in `<void-select>`), or nil.
 	Native *NativeControl `json:"native,omitempty"`
+	// Linked is set when the component can be one link or button as a whole
+	// (voidLinked in the manifest, #116), or nil.
+	Linked *LinkedControl `json:"linked,omitempty"`
 	// Renamed is what was renamed or removed on this element in 0.8 (#23),
 	// from the manifest's voidRenamed (source: `renamed` in
 	// packages/ui/cem/supplement.js).
@@ -199,6 +202,17 @@ func (o *MessageOverride) String() string {
 type NativeControl struct {
 	Tag string `json:"tag"`
 	Fix string `json:"fix"`
+}
+
+// LinkedControl says a component can be one link or one button as a whole
+// (#116, `<void-card>`): the author writes the control inside Part, never
+// wraps the component in a link or button, and a linked component holds no
+// second control. Controls are the void-* tags that count as a control
+// besides the native ones; Fix is the correct markup.
+type LinkedControl struct {
+	Part     string   `json:"part"`
+	Controls []string `json:"controls"`
+	Fix      string   `json:"fix"`
 }
 
 // RenamedAttribute is one attribute renamed or removed in 0.8 (#23).
