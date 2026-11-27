@@ -356,8 +356,8 @@ describe('VoidGauge', () => {
     });
 
     it('abbreviates thousands and millions', async () => {
-      expect(centerText(await mount<VoidGauge>(TAG, { value: 1500, max: 5000 }))).toBe('1.5k');
-      expect(centerText(await mount<VoidGauge>(TAG, { value: 12000, max: 50000 }))).toBe('12k');
+      expect(centerText(await mount<VoidGauge>(TAG, { value: 1500, max: 5000 }))).toBe('1.5K');
+      expect(centerText(await mount<VoidGauge>(TAG, { value: 12000, max: 50000 }))).toBe('12K');
       expect(centerText(await mount<VoidGauge>(TAG, { value: 2_500_000, max: 5_000_000 }))).toBe('2.5M');
     });
 
