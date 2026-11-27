@@ -322,6 +322,12 @@ void-table[stack] {
   font-size: var(--_void-table-stack-at);
 }
 
+/* The host's size is the breakpoint, not a text size, so every child of it, the table and any part or
+   toolbar the author writes beside it, sets the body size back; whatever is inside inherits that. */
+void-table[stack] > * {
+  font-size: var(--void-type-body-size);
+}
+
 void-table[stack="always"] {
   --_void-table-stack-at: var(--void-table-stack-at, 100000px);
 }
