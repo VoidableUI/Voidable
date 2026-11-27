@@ -88,6 +88,7 @@ export function voiceOverReader(vo: VoiceOverPlaywright): Reader {
 }
 
 export function nvdaReader(nvda: NVDAPlaywright): Reader {
+  let inTable = false;
   return {
     name: 'NVDA',
     async move(by) {
@@ -107,6 +108,7 @@ export function nvdaReader(nvda: NVDAPlaywright): Reader {
         case 'control':
           return nvda.perform(nvda.keyboardCommands.moveToNextFormField);
         case 'table':
+          inTable = false;
           return nvda.perform(nvda.keyboardCommands.moveToNextTable);
       }
     },
@@ -114,7 +116,16 @@ export function nvdaReader(nvda: NVDAPlaywright): Reader {
     act: () => nvda.act(),
     press: (key) => nvda.press(key),
     type: (text) => nvda.type(text),
-    cell: (direction) => nvda.perform(direction === 'right' ? nvda.keyboardCommands.moveToNextColumn : nvda.keyboardCommands.moveToNextRow),
+    async cell(direction) {
+      // The table quick key (T) puts NVDA's cursor on the table itself ("Team members, table, with 3 rows and
+      // 3 columns"), where the cell commands say "Not in a table cell", for the native table of sr-ref-table
+      // as much as for ours (#75). One Down Arrow steps into the first cell; then the cell commands work.
+      if (!inTable) {
+        await nvda.next();
+        inTable = true;
+      }
+      await nvda.perform(direction === 'right' ? nvda.keyboardCommands.moveToNextColumn : nvda.keyboardCommands.moveToNextRow);
+    },
     log: () => nvda.spokenPhraseLog(),
     async diagnose() {
       const out: string[] = [];

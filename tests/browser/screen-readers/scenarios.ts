@@ -12,6 +12,13 @@
 import { expect } from '@playwright/test';
 import type { Scenario } from './facts';
 
+/**
+ * NVDA reads a checked radio as "radio button, checked, Free" and does not say its position in the group: the
+ * native radios and the ARIA radios of the reference page (sr-ref-radio) are read the same way, so for NVDA the
+ * position is checked in the accessibility tree (tree.ts) and the speech must carry the role and the state (#75).
+ */
+const NVDA_CHECKED = [/\bradio button\b/, /(?<!\bnot )\bchecked\b/];
+
 export const scenarios: Scenario[] = [
   {
     id: 'button',
@@ -60,7 +67,6 @@ export const scenarios: Scenario[] = [
   },
   {
     id: 'checkbox',
-    trace: true,
     title: 'A checkbox announces unchecked, then checked after activation',
     page: '/sr-controls',
     steps: [
@@ -75,15 +81,15 @@ export const scenarios: Scenario[] = [
     page: '/sr-controls',
     steps: [
       // VoiceOver, arriving by quick navigation, says "Free selected radio button, 1 of 3": the group name is not repeated.
-      { reach: { role: 'radio', name: 'Free', checked: true, group: { role: 'radiogroup', name: 'Plan' }, position: { n: 1, of: 3, within: '#plan' }, spoken: { VoiceOver: [/selected/, /1 of 3/] } }, by: 'control' },
-      { reach: { role: 'radio', name: 'Pro', checked: false, position: { n: 2, of: 3, within: '#plan' }, spoken: { VoiceOver: [/\b2 of 3\b/] } }, by: 'control' },
+      { reach: { role: 'radio', name: 'Free', checked: true, group: { role: 'radiogroup', name: 'Plan' }, position: { n: 1, of: 3, within: '#plan' }, spoken: { VoiceOver: [/selected/, /1 of 3/], NVDA: NVDA_CHECKED } }, by: 'control' },
+      { reach: { role: 'radio', name: 'Pro', checked: false, position: { n: 2, of: 3, within: '#plan' }, spoken: { VoiceOver: [/\b2 of 3\b/], NVDA: [/\bnot checked\b/] } }, by: 'control' },
       { act: true },
       { hear: { role: 'radio', name: 'Pro', checked: true } },
       // Arrow keys move through the group and check as they go; the group is one tab stop.
       { press: 'ArrowDown' },
-      { hear: { role: 'radio', name: 'Team', checked: true, position: { n: 3, of: 3, within: '#plan' }, spoken: { VoiceOver: [/3 of 3/] } } },
+      { hear: { role: 'radio', name: 'Team', checked: true, position: { n: 3, of: 3, within: '#plan' }, spoken: { VoiceOver: [/3 of 3/], NVDA: NVDA_CHECKED } } },
       { press: 'ArrowDown' },
-      { hear: { role: 'radio', name: 'Free', checked: true, position: { n: 1, of: 3, within: '#plan' } } },
+      { hear: { role: 'radio', name: 'Free', checked: true, position: { n: 1, of: 3, within: '#plan' }, spoken: { NVDA: NVDA_CHECKED } } },
       { press: 'ArrowUp' },
       { hear: { role: 'radio', name: 'Team', checked: true } },
     ],
@@ -159,12 +165,13 @@ export const scenarios: Scenario[] = [
   },
   {
     id: 'tabs',
-    trace: true,
     title: 'Tabs announce tab, selected state and position; selecting one reads its panel',
     page: '/sr-tabs',
     steps: [
-      { reach: { role: 'tab', name: 'Profile', selected: true, position: { n: 1, of: 3, within: 'void-tabs-list' } } },
-      { reach: { role: 'tab', name: 'Billing', selected: false, position: { n: 2, of: 3, within: 'void-tabs-list' } } },
+      // NVDA reads a tab as "tab, selected, Profile" and an unselected one as "tab, Billing", with no position and
+      // no "not selected": the APG tabs of sr-ref-tabs are read the same way (#75). The position stays in the tree test.
+      { reach: { role: 'tab', name: 'Profile', selected: true, position: { n: 1, of: 3, within: 'void-tabs-list' }, spoken: { NVDA: [/\btab\b/, /\bselected\b/] } } },
+      { reach: { role: 'tab', name: 'Billing', selected: false, position: { n: 2, of: 3, within: 'void-tabs-list' }, spoken: { NVDA: [/\btab\b/] } } },
       { act: true },
       { hear: { role: 'tab', name: 'Billing', selected: true } },
       { reach: { role: 'tabpanel', name: 'Billing', text: 'Your invoices and cards.', container: true } },
@@ -195,7 +202,6 @@ export const scenarios: Scenario[] = [
   },
   {
     id: 'toast',
-    trace: true,
     title: 'A toast is announced once, politely, by the container\'s status announcer without moving focus',
     page: '/sr-notices',
     steps: [
@@ -247,7 +253,6 @@ export const scenarios: Scenario[] = [
   },
   {
     id: 'table',
-    trace: true,
     title: 'A table is announced with its name, and a cell is read with its column header',
     page: '/sr-table',
     steps: [
@@ -306,7 +311,6 @@ export const scenarios: Scenario[] = [
     // A chart is a drawing hidden from the reader plus a visually hidden table of its data (#71): the
     // reader finds the table by the chart's name and moves through the values like any table.
     id: 'chart-table',
-    trace: true,
     title: 'A chart is read as a data table named by the chart, and a value is read with its series header',
     page: '/sr-chart',
     steps: [

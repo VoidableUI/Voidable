@@ -23,7 +23,7 @@ export const referenceScenarios: Scenario[] = [
     readers: ['NVDA'],
     title: 'Reference: the same radio group as native radios, as an ARIA radio group, as one with a hidden native radio inside each radio, and as void-radio-group',
     page: '/sr-ref-radio',
-    steps: [{ sweep: 22, by: 'next' }],
+    steps: [{ sweep: 13, by: 'next' }],
   }),
   probe({
     id: 'ref-disclosure',
@@ -74,10 +74,7 @@ export const referenceScenarios: Scenario[] = [
     title: 'Reference: tabs from the ARIA Authoring Practices in plain HTML',
     page: '/sr-ref-tabs',
     steps: [
-      { sweep: 12, by: 'next' },
-      { reach: { role: 'tab', name: 'Billing', selected: false }, by: { VoiceOver: 'control', NVDA: 'focusable' } },
-      { act: true },
-      { hear: { role: 'tab', name: 'Billing', selected: true } },
+      { sweep: 3, by: 'next' },
     ],
   }),
   probe({

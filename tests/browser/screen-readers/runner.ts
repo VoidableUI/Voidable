@@ -50,15 +50,26 @@ const tail = (phrases: string[], n = 12) => phrases.slice(-n).map((p) => `    - 
 export async function prepareReading(reader: Reader, page: Page, log: (line: string) => void): Promise<void> {
   if (!reader.browseMode) return;
   const focused = () => page.evaluate(() => document.hasFocus()).catch(() => false);
-  for (let i = 0; i < 8 && !(await focused()); i++) {
-    log(`the document has no keyboard focus (the browser's own controls have it): Tab ${i + 1}`);
+  const reloadAndBrowse = async () => {
+    await page.reload();
+    await page.waitForFunction(() => typeof (window as unknown as { __settle?: unknown }).__settle === 'function' && !!customElements.get('void-button'));
+    await page.evaluate(() => (window as unknown as { __settle: (d: Document) => Promise<void> }).__settle(document));
+    await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur?.());
+    await reader.browseMode?.();
+  };
+  let tabs = 0;
+  for (; tabs < 8 && !(await focused()); tabs++) {
+    log(`the document has no keyboard focus (the browser's own controls have it): Tab ${tabs + 1}`);
     await reader.press('Tab');
   }
-  await page.reload();
-  await page.waitForFunction(() => typeof (window as unknown as { __settle?: unknown }).__settle === 'function' && !!customElements.get('void-button'));
-  await page.evaluate(() => (window as unknown as { __settle: (d: Document) => Promise<void> }).__settle(document));
-  await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur?.());
-  await reader.browseMode();
+  await reloadAndBrowse();
+  // The table and chart pages heard nothing after one pass (NVDA's focus was still on a toolbar button) and spoke
+  // after a second one that began by bringing the window forward and refreshing NVDA's copy of the page.
+  if (tabs > 0) {
+    await page.bringToFront().catch(() => undefined);
+    await reader.refresh?.();
+    await reloadAndBrowse();
+  }
   log(`prepared for reading: document focused: ${await focused()}`);
 }
 
