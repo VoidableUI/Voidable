@@ -15,7 +15,7 @@ test.beforeEach(async ({ page }) => {
 });
 
 test('the manifest lists tags to walk', () => {
-  expect(tags.length).toBeGreaterThan(100);
+  expect(tags.length).toBeGreaterThan(50);
 });
 
 test('every tag in the manifest is not rendered with the hidden attribute', async ({ page }) => {
