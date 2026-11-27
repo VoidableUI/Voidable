@@ -111,6 +111,10 @@ Keys are named actions now that an application can switch off or move (see [Cust
 
 No default key changed, and no component binds a shortcut by default.
 
+## Textarea that grows (0.12)
+
+Nothing breaks. `void-textarea` gains `autosize` (off by default) and `max-rows`, and the React `autosize` and `maxRows` props, and the HEEx `autosize` and `max_rows` attributes; Rails and Blade write the attributes as they are. A textarea without `autosize` behaves, and costs, as before: nothing is measured or observed. See [Textarea](/components/textarea/) for how it sizes (CSS where the browser supports `field-sizing`, a measured fallback elsewhere), what happens before the component is defined, and why `resize` is ignored while `autosize` is on.
+
 ## 4. Check again
 
 Run `voidable check` until it reports nothing, then run your application with the development warnings loaded and open each page once: a clean console means the markup is right.

@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>textarea-autosize-early</title>
+<link rel="stylesheet" href="/build/theme.css">
+</head>
+<body>
+<!-- No script: the spec loads /build/ui.js later, to measure the page before and after the component is defined. -->
+<main style="padding: 1rem; width: 480px">
+  <void-textarea id="t" aria-label="Notes" autosize max-rows="8" value="one&#10;two&#10;three&#10;four&#10;five&#10;six"></void-textarea>
+  <p id="after">after</p>
+</main>
+</body>
+</html>

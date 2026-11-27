@@ -139,6 +139,22 @@ defmodule VoidableUI.Components.InteractiveFormTest do
       assert html =~ ~s(value="hello")
     end
 
+    test "renders autosize and max-rows only when given" do
+      assigns = %{}
+
+      html =
+        rendered_to_string(~H"""
+        <VoidableUI.Components.textarea autosize max_rows={8} />
+        """)
+
+      assert html =~ ~r/<void-textarea[^>]* autosize/
+      assert html =~ ~s(max-rows="8")
+
+      plain = rendered_to_string(~H"<VoidableUI.Components.textarea />")
+      refute plain =~ "autosize"
+      refute plain =~ "max-rows"
+    end
+
     test "has phx-hook and data-void-events with events" do
       assigns = %{}
 
