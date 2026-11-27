@@ -60,6 +60,7 @@ export const scenarios: Scenario[] = [
   },
   {
     id: 'checkbox',
+    trace: true,
     title: 'A checkbox announces unchecked, then checked after activation',
     page: '/sr-controls',
     steps: [
@@ -160,6 +161,7 @@ export const scenarios: Scenario[] = [
   },
   {
     id: 'tabs',
+    trace: true,
     title: 'Tabs announce tab, selected state and position; selecting one reads its panel',
     page: '/sr-tabs',
     steps: [
@@ -196,6 +198,7 @@ export const scenarios: Scenario[] = [
   },
   {
     id: 'toast',
+    trace: true,
     title: 'A toast is announced once, politely, by the container\'s status announcer without moving focus',
     page: '/sr-notices',
     steps: [
@@ -247,6 +250,7 @@ export const scenarios: Scenario[] = [
   },
   {
     id: 'table',
+    trace: true,
     title: 'A table is announced with its name, and a cell is read with its column header',
     page: '/sr-table',
     steps: [
@@ -305,6 +309,7 @@ export const scenarios: Scenario[] = [
     // A chart is a drawing hidden from the reader plus a visually hidden table of its data (#71): the
     // reader finds the table by the chart's name and moves through the values like any table.
     id: 'chart-table',
+    trace: true,
     title: 'A chart is read as a data table named by the chart, and a value is read with its series header',
     page: '/sr-chart',
     steps: [

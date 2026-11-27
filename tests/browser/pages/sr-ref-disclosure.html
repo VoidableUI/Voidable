@@ -1,0 +1,47 @@
+<!-- Reference disclosure buttons for the screen-reader probes: a collapsed trigger built five ways, so a run
+     shows what a reader says for aria-expanded="false" with and without aria-controls, with a hidden="until-found"
+     panel, and on an element that is not a native button. -->
+<main>
+  <h1>Disclosure references</h1>
+
+  <!-- 1. A native button, aria-expanded, no aria-controls. -->
+  <button type="button" id="b1" aria-expanded="false">Native bare</button>
+
+  <!-- 2. A native button with aria-controls and a plainly hidden panel. -->
+  <button type="button" id="b2" aria-expanded="false" aria-controls="p2">Native controls</button>
+  <div id="p2" role="region" aria-labelledby="b2" hidden>Panel two.</div>
+
+  <!-- 3. Like 2, with the panel hidden until found (what void-accordion does). -->
+  <button type="button" id="b3" aria-expanded="false" aria-controls="p3">Native until-found</button>
+  <div id="p3" role="region" aria-labelledby="b3" hidden="until-found">Panel three.</div>
+
+  <!-- 4. role=button on a custom element with a tabindex, aria-expanded and aria-controls (what the trigger part is). -->
+  <div id="b4" role="button" tabindex="0" aria-expanded="false" aria-controls="p4">Custom button</div>
+  <div id="p4" role="region" aria-labelledby="b4" hidden="until-found">Panel four.</div>
+
+  <!-- 5. The Voidable accordion, as the scenario has it. -->
+  <void-accordion id="faq">
+    <void-accordion-item id="faq-1">
+      <void-accordion-trigger>Void refunds</void-accordion-trigger>
+      <void-accordion-content>Refunds arrive within five days.</void-accordion-content>
+    </void-accordion-item>
+    <void-accordion-item id="faq-2">
+      <void-accordion-trigger>Void plans</void-accordion-trigger>
+      <void-accordion-content>Plans change at any time.</void-accordion-content>
+    </void-accordion-item>
+  </void-accordion>
+</main>
+<script>
+  // Native and custom buttons toggle themselves, so a probe can activate them too.
+  for (const [b, p] of [['b1', null], ['b2', 'p2'], ['b3', 'p3'], ['b4', 'p4']]) {
+    const button = document.getElementById(b);
+    const panel = p && document.getElementById(p);
+    const toggle = () => {
+      const open = button.getAttribute('aria-expanded') !== 'true';
+      button.setAttribute('aria-expanded', String(open));
+      if (panel) { if (open) panel.removeAttribute('hidden'); else panel.setAttribute('hidden', p === 'p2' ? '' : 'until-found'); }
+    };
+    button.addEventListener('click', toggle);
+    button.addEventListener('keydown', (e) => { if (button.localName !== 'button' && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); toggle(); } });
+  }
+</script>

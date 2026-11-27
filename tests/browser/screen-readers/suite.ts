@@ -12,6 +12,7 @@ import type { Scenario } from './facts';
 import { nvdaReader, voiceOverReader, type Reader } from './readers';
 import { RESULTS_DIR } from './results';
 import { runScenario, type TranscriptEntry } from './runner';
+import { axTree, formatTrace, installTrace, readTrace } from './trace';
 
 // Capture everything spoken, including announcements nobody asked for (a toast
 // arriving): `true` instead of the Guidepup default `"initial"`.
@@ -30,21 +31,41 @@ async function play(reader: Reader, navigateToWebContent: () => Promise<void>, p
     testInfo.annotations.push({ type: 'known issue', description: `${issue.key}: ${issue.detail}` });
     testInfo.fail(true, `${issue.key}: ${issue.detail}`);
   }
+  const tag = `${reader.name} ${scenario.id}`;
+  await installTrace(page);
   await page.goto(scenario.page);
   await page.waitForFunction(() => typeof (window as any).__settle === 'function' && !!customElements.get('void-button'));
   await page.evaluate(() => (window as any).__settle(document));
   await page.bringToFront();
   await navigateToWebContent();
+  // The reader speaks only for the window that has focus. A page that is not focused is why a scenario can hear
+  // nothing at all, so say whether it is, and when it is not bring it forward and start again once.
+  const focused = () => page.evaluate(() => document.hasFocus()).catch(() => false);
+  console.log(`[sr ${tag}] after navigating to the web content: document focused: ${await focused()}, title ${JSON.stringify(await page.title())}`);
+  if (!(await focused())) {
+    await page.bringToFront();
+    await page.locator('h1').first().click({ timeout: 2000 }).catch(() => undefined);
+    await navigateToWebContent();
+    console.log(`[sr ${tag}] the document was not focused: brought it forward, clicked the heading, navigated again; document focused now: ${await focused()}`);
+  }
 
   let transcript: TranscriptEntry[] = [];
+  let failed = false;
   try {
     transcript = await runScenario(reader, page, scenario);
   } catch (err) {
+    failed = true;
     transcript = (err as Error & { transcript?: TranscriptEntry[] }).transcript ?? transcript;
     // An expected failure prints no error of its own: keep what was spoken in the log.
     if (issue) console.log(`[known issue ${issue.key}] ${(err as Error).message}`);
-    throw err;
+    if (scenario.probe) console.log(`[probe ${tag}] a step failed (a probe never fails the run): ${(err as Error).message}`);
+    else throw err;
   } finally {
+    if (scenario.probe || scenario.trace || issue || failed) {
+      // What the page did, in order, and what the browser exposed: the evidence for the cause.
+      console.log(`[trace ${tag}] page events (focus, role, tabindex, aria-*):\n${formatTrace(await readTrace(page).catch(() => []))}`);
+      console.log(`[ax ${tag}] accessibility tree:\n${await axTree(page)}`);
+    }
     // The transcript is the main diagnostic: keep it for passing runs as well.
     const dir = join(RESULTS_DIR, 'transcripts');
     mkdirSync(dir, { recursive: true });

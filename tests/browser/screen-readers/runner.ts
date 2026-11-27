@@ -63,6 +63,26 @@ export async function runScenario(reader: Reader, page: Page, scenario: Scenario
     return { n: log.length, last: log[log.length - 1] };
   };
   const spokenSince = async (at: typeof mark) => since(await reader.log(), at);
+
+  /** One line of the step-by-step record a silent or surprising run is read from: `[sr NVDA tabs] ...`. */
+  const note = (line: string) => console.log(`[sr ${reader.name} ${scenario.id}] ${line}`);
+  /** Where the page's own focus is, as the page reports it (not as the screen reader does). */
+  const state = async (): Promise<string> => {
+    try {
+      const s = await page.evaluate(() => {
+        const a = document.activeElement as HTMLElement | null;
+        const d = (window as unknown as { __srDescribe?: (e: Element) => string }).__srDescribe;
+        return { active: a && d ? d(a) : a ? `<${a.localName}>` : 'none', focus: document.hasFocus() };
+      });
+      return `page focus: ${s.focus}, active: ${s.active}`;
+    } catch (e) {
+      return `(page not readable: ${(e as Error).message.split('\n')[0]})`;
+    }
+  };
+  /** Records a key or command that was sent and what the reader said because of it. */
+  const sent = async (what: string, before: { n: number; last: string | undefined }) => {
+    note(`${what} -> ${JSON.stringify(since(await reader.log(), before))} | ${await state()}`);
+  };
   const begin = async () => {
     mark = await snapshot();
   };
@@ -83,13 +103,14 @@ export async function runScenario(reader: Reader, page: Page, scenario: Scenario
     let restarted = false;
     let stuck = 0;
     let silent = 0;
-    let restartedSilent = false;
+    let silentRounds = 0;
     let previous: string | undefined;
     for (let i = 0; i < MAX_MOVES; i++) {
       const before = await snapshot();
       await reader.move(by);
       const said = since(await reader.log(), before);
       seen.push(...said);
+      note(`move ${i + 1} (${by}) -> ${JSON.stringify(said)} | ${await state()}`);
       // The element may be split over several phrases; judge the words of this move together.
       const joined = said.join(' ');
       if (said.length && matchFact(joined, fact).isElement) return check(fact, said);
@@ -106,11 +127,22 @@ export async function runScenario(reader: Reader, page: Page, scenario: Scenario
       // A reader that says nothing at all (every phrase empty) is not on the page: the window may not be in front
       // or the cursor may be nowhere. Bring the page forward and send the reader to the web content, once.
       silent = phrase ? 0 : silent + 1;
-      if (silent >= 4 && !restartedSilent) {
-        restartedSilent = true;
+      if (silent >= 4 && silentRounds < 3) {
+        silentRounds++;
         silent = 0;
+        // What is still working? The title, the focus and the line under the cursor are asked for by their own
+        // commands: speech after those proves the reader speaks and its cursor is simply not in the page.
+        note(`SILENT for 4 moves (round ${silentRounds}): ${await state()}`);
+        note(`diagnosis: ${await (reader.diagnose?.() ?? Promise.resolve('(none for this reader)'))}`);
+        // Round 1: window to the front, the page focused, the cursor back at the top. Round 2: a click in the
+        // page, then the reader's own refresh of its copy of the page. Round 3: both, once more.
         await page.bringToFront().catch(() => undefined);
+        if (silentRounds >= 2) {
+          await page.locator('h1').first().click({ timeout: 2000 }).catch((e: Error) => note(`click on the heading failed: ${e.message.split('\n')[0]}`));
+          await reader.refresh?.();
+        }
         await reader.restart();
+        note(`after remedy ${silentRounds}: ${await state()}`);
       }
     }
     throw new Error(`never reached ${describeFact(fact)} in ${MAX_MOVES} moves by "${by}".\n  Heard since the step began:\n${tail(seen, 20)}\n${await where()}`);
@@ -164,14 +196,29 @@ export async function runScenario(reader: Reader, page: Page, scenario: Scenario
         if (!reached) throw new Error('act needs an element reached first');
         await begin();
         await reader.act();
+        await sent("act", mark);
       } else if ('press' in step) {
         await begin();
         for (let n = pick(step.times, reader.name) ?? 1; n > 0; n--) await reader.press(step.press);
+        await sent(`press ${step.press}`, mark);
       } else if ('type' in step) {
         await begin();
         await reader.type(step.type);
+        await sent(`type ${JSON.stringify(step.type)}`, mark);
       } else if ('hear' in step) {
         await hear(forReader(step.hear, reader.name));
+        note(`heard ${describeFact(step.hear)}: ${JSON.stringify(await spokenSince(mark))} | ${await state()}`);
+      } else if ('sweep' in step) {
+        // Diagnosis: say what every move says, matching nothing.
+        const by = pick(step.by, reader.name) ?? 'next';
+        for (let n = 0; n < step.sweep; n++) {
+          const before = await snapshot();
+          await reader.move(by);
+          note(`sweep ${n + 1} (${by}) -> ${JSON.stringify(since(await reader.log(), before))} | ${await state()}`);
+        }
+        moved = true;
+      } else if ('pause' in step) {
+        await new Promise((resolve) => setTimeout(resolve, step.pause));
       } else if ('once' in step) {
         // Give a second, doubled announcement time to arrive, then count the phrases with these words.
         await page.waitForTimeout(1500);
@@ -188,6 +235,7 @@ export async function runScenario(reader: Reader, page: Page, scenario: Scenario
       } else if ('cell' in step) {
         await begin();
         await reader.cell(step.cell);
+        await sent(`cell ${step.cell}`, mark);
       } else if ('focus' in step) {
         await expect
           .poll(() => page.evaluate((sel) => !!document.activeElement?.closest(sel), step.focus), { message: `keyboard focus inside ${step.focus}` })
@@ -198,6 +246,12 @@ export async function runScenario(reader: Reader, page: Page, scenario: Scenario
     } catch (err) {
       entry.error = (err as Error).message;
       entry.phrases = (await reader.log()).slice(phrasesFrom);
+      if (scenario.probe) {
+        // A probe records what each step found and carries on with the next one.
+        if ('reach' in step) reached = step.reach;
+        note(`PROBE step ${i + 1} did not match (carrying on): ${entry.error.split('\n').slice(0, 12).join(' | ')}`);
+        continue;
+      }
       const failure = new Error(`${scenario.id}, step ${entry.step}\n${entry.error}`);
       (failure as Error & { transcript?: TranscriptEntry[] }).transcript = transcript;
       throw failure;

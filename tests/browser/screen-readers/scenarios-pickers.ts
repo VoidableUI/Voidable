@@ -9,6 +9,7 @@ import type { Scenario } from './facts';
 export const pickerScenarios: Scenario[] = [
   {
     id: 'select',
+    trace: true,
     title: 'A select announces its label, and the option chosen by typing',
     page: '/sr-pickers',
     steps: [
@@ -20,6 +21,7 @@ export const pickerScenarios: Scenario[] = [
   },
   {
     id: 'combobox',
+    trace: true,
     title: 'A combobox announces expanded, the highlighted option as you arrow, and the chosen value',
     page: '/sr-pickers',
     steps: [

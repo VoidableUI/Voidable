@@ -1,0 +1,64 @@
+<!-- Reference menu buttons for the screen-reader probes: the ARIA Authoring Practices menu button, three ways,
+     so a run shows whether VoiceOver says the first item when focus moves to it as the menu opens:
+       plain  the menu is shown (popover) and the first item is focused in the same task; no transition
+       fade   as plain, with the opacity fade the theme gives its menus (entry from opacity 0)
+       late   as fade, the first item is focused 300 ms later, after the fade has ended -->
+<style>
+  .ref-menu { display: none; margin: 0; padding: 4px 0; border: 1px solid; background: Canvas; color: CanvasText; inset: auto; }
+  .ref-menu:popover-open { display: block; }
+  .ref-menu.fade { opacity: 0; transition: opacity 150ms ease-out, display 150ms allow-discrete, overlay 150ms allow-discrete; }
+  .ref-menu.fade:popover-open { opacity: 1; }
+  @starting-style { .ref-menu.fade:popover-open { opacity: 0; } }
+  .ref-menu [role=menuitem] { padding: 4px 12px; }
+</style>
+<main>
+  <h1>Menu references</h1>
+  <div class="ref" data-variant="plain">
+    <button type="button" id="plain-trigger" aria-haspopup="menu" aria-expanded="false" aria-controls="plain-menu">Plain menu</button>
+    <div id="plain-menu" class="ref-menu" popover="manual" role="menu" aria-labelledby="plain-trigger">
+      <div role="menuitem" tabindex="-1">Rename</div><div role="menuitem" tabindex="-1">Duplicate</div><div role="menuitem" tabindex="-1">Delete</div>
+    </div>
+  </div>
+  <div class="ref" data-variant="fade">
+    <button type="button" id="fade-trigger" aria-haspopup="menu" aria-expanded="false" aria-controls="fade-menu">Fade menu</button>
+    <div id="fade-menu" class="ref-menu fade" popover="manual" role="menu" aria-labelledby="fade-trigger">
+      <div role="menuitem" tabindex="-1">Rename</div><div role="menuitem" tabindex="-1">Duplicate</div><div role="menuitem" tabindex="-1">Delete</div>
+    </div>
+  </div>
+  <div class="ref" data-variant="late">
+    <button type="button" id="late-trigger" aria-haspopup="menu" aria-expanded="false" aria-controls="late-menu">Late menu</button>
+    <div id="late-menu" class="ref-menu fade" popover="manual" role="menu" aria-labelledby="late-trigger">
+      <div role="menuitem" tabindex="-1">Rename</div><div role="menuitem" tabindex="-1">Duplicate</div><div role="menuitem" tabindex="-1">Delete</div>
+    </div>
+  </div>
+</main>
+<script>
+  for (const root of document.querySelectorAll('.ref')) {
+    const variant = root.dataset.variant;
+    const trigger = root.querySelector('button');
+    const menu = root.querySelector('[role=menu]');
+    const items = [...menu.querySelectorAll('[role=menuitem]')];
+    const open = () => {
+      menu.showPopover();
+      const r = trigger.getBoundingClientRect();
+      menu.style.left = r.left + 'px';
+      menu.style.top = r.bottom + 4 + 'px';
+      trigger.setAttribute('aria-expanded', 'true');
+      if (variant === 'late') setTimeout(() => items[0].focus(), 300);
+      else items[0].focus();
+    };
+    const close = () => {
+      menu.hidePopover();
+      trigger.setAttribute('aria-expanded', 'false');
+      trigger.focus();
+    };
+    trigger.addEventListener('click', () => (menu.matches(':popover-open') ? close() : open()));
+    menu.addEventListener('keydown', (e) => {
+      const i = items.indexOf(document.activeElement);
+      if (e.key === 'ArrowDown') { e.preventDefault(); items[(i + 1) % items.length].focus(); }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); items[(i + items.length - 1) % items.length].focus(); }
+      else if (e.key === 'Escape') { e.preventDefault(); close(); }
+      else if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); close(); }
+    });
+  }
+</script>

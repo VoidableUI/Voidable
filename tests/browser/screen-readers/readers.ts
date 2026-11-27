@@ -25,6 +25,14 @@ export interface Reader {
   log(): Promise<string[]>;
   /** The screen reader's own version string, for the results file. */
   version(): string;
+  /**
+   * Asks the reader what it is looking at with commands that do not depend on its page cursor (the window
+   * title, the focused object, the current line), and returns what each said, for a log. Used when the reader
+   * has gone silent. Optional: the fake reader of the runner's own tests has none.
+   */
+  diagnose?(): Promise<string>;
+  /** Asks the reader to rebuild its copy of the page (NVDA: refresh the browse document). */
+  refresh?(): Promise<void>;
 }
 
 export function voiceOverReader(vo: VoiceOverPlaywright): Reader {
@@ -102,6 +110,22 @@ export function nvdaReader(nvda: NVDAPlaywright): Reader {
     type: (text) => nvda.type(text),
     cell: (direction) => nvda.perform(direction === 'right' ? nvda.keyboardCommands.moveToNextColumn : nvda.keyboardCommands.moveToNextRow),
     log: () => nvda.spokenPhraseLog(),
+    async diagnose() {
+      const out: string[] = [];
+      const ask = async (label: string, command: Parameters<typeof nvda.perform>[0]) => {
+        try {
+          await nvda.perform(command);
+          out.push(`${label}: ${JSON.stringify(await nvda.lastSpokenPhrase())}`);
+        } catch (e) {
+          out.push(`${label}: failed (${(e as Error).message.split('\n')[0]})`);
+        }
+      };
+      await ask('window title', nvda.keyboardCommands.reportTitle);
+      await ask('focus', nvda.keyboardCommands.reportCurrentFocus);
+      await ask('current line', nvda.keyboardCommands.readLine);
+      return out.join('; ');
+    },
+    refresh: () => nvda.perform(nvda.keyboardCommands.refreshBrowseDocument),
     version: () => {
       try {
         return String(nvda.version);

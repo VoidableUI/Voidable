@@ -1,0 +1,36 @@
+<!-- Reference radio groups for the screen-reader probes (screen-readers/scenarios-reference.ts): the same
+     three-radio group, built four ways, so a run shows whether a reader says "checked" and "1 of 3" for the
+     pattern at all. Names differ so that a probe can tell them apart. -->
+<main>
+  <h1>Radio references</h1>
+
+  <!-- 1. Native radios. -->
+  <fieldset id="native">
+    <legend>Native plan</legend>
+    <label><input type="radio" name="native" value="free" checked> Native Free</label>
+    <label><input type="radio" name="native" value="pro"> Native Pro</label>
+    <label><input type="radio" name="native" value="team"> Native Team</label>
+  </fieldset>
+
+  <!-- 2. The ARIA Authoring Practices radio group: role=radio on a div with aria-checked and a roving tabindex. -->
+  <div role="radiogroup" id="apg" aria-label="Apg plan">
+    <div role="radio" aria-checked="true" tabindex="0">Apg Free</div>
+    <div role="radio" aria-checked="false" tabindex="-1">Apg Pro</div>
+    <div role="radio" aria-checked="false" tabindex="-1">Apg Team</div>
+  </div>
+
+  <!-- 3. The same, with what void-radio renders inside its host: a native radio hidden from assistive technology
+       (aria-hidden, inert) and an empty circle span, then the label. Isolates that child as a cause. -->
+  <div role="radiogroup" id="hidden-input" aria-label="Hidden input plan">
+    <div role="radio" aria-checked="true" tabindex="0"><input type="radio" name="hi" tabindex="-1" aria-hidden="true" inert checked><span class="circle"></span>Hidden Free</div>
+    <div role="radio" aria-checked="false" tabindex="-1"><input type="radio" name="hi" tabindex="-1" aria-hidden="true" inert><span class="circle"></span>Hidden Pro</div>
+    <div role="radio" aria-checked="false" tabindex="-1"><input type="radio" name="hi" tabindex="-1" aria-hidden="true" inert><span class="circle"></span>Hidden Team</div>
+  </div>
+
+  <!-- 4. The Voidable group, as the scenario has it. -->
+  <void-radio-group id="plan" label="Void plan" name="void-plan" value="free">
+    <void-radio value="free">Void Free</void-radio>
+    <void-radio value="pro">Void Pro</void-radio>
+    <void-radio value="team">Void Team</void-radio>
+  </void-radio-group>
+</main>
