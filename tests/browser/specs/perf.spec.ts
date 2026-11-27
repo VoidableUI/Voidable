@@ -100,6 +100,23 @@ test('a select with 5,000 options', async ({ page }) => {
   within('select with 5,000 options', ms, reference.select5000Ms, 'ms');
 });
 
+test('a diff and a code block of 5,000 lines', async ({ page }) => {
+  type Diff = { ms: number; plainMs: number; lines: number; touched: number; tall: boolean; focusable: string | null };
+  type Code = { ms: number; lines: number; touched: number; chars: number; textMs: number; tall: boolean };
+  const diffs: Diff[] = [];
+  const codes: Code[] = [];
+  for (let i = 0; i < 5; i++) diffs.push(await run<Diff>(page, 'diff5000'));
+  for (let i = 0; i < 5; i++) codes.push(await run<Code>(page, 'code5000'));
+  const med = <T,>(xs: T[], k: (x: T) => number) => xs.map(k).sort((a, b) => a - b)[Math.floor(xs.length / 2)];
+  // Every line is drawn, and the component wrote on none of them: the work is the browser's style and layout.
+  for (const d of diffs) expect({ lines: d.lines, touched: d.touched, tall: d.tall }).toEqual({ lines: 5000, touched: 0, tall: true });
+  for (const c of codes) expect({ lines: c.lines, touched: c.touched, tall: c.tall }).toEqual({ lines: 5000, touched: 0, tall: true });
+  expect(codes[0].chars).toBeGreaterThan(5000 * 30);
+  console.log(`[perf] 5,000 plain <div> lines (no component, no theme rule): ${med(diffs, (d) => d.plainMs).toFixed(1)} ms; the text of the 5,000-line code block for a copy: ${med(codes, (c) => c.textMs).toFixed(1)} ms`);
+  within('diff of 5,000 lines, first render', med(diffs, (d) => d.ms), reference.diff5000Ms, 'ms');
+  within('code block of 5,000 numbered lines, first render', med(codes, (c) => c.ms), reference.code5000Ms, 'ms');
+});
+
 test('200 dialog open and close cycles, without leaks', async ({ page }) => {
   const runs: { ms: number; nodeGrowth: number; heapGrowthKB: number | null }[] = [];
   for (let i = 0; i < 3; i++) runs.push(await run(page, 'dialog200'));

@@ -77,6 +77,8 @@ export {
   LineChart,
   DonutChart,
   Gauge,
+  Code,
+  Diff,
 } from './components.js';
 
 export type {

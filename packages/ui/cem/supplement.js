@@ -324,6 +324,62 @@ export const parts = {
       },
     ],
   },
+  'void-code': {
+    children: 'any',
+    ordered: true,
+    skeleton:
+      '<void-code line-numbers><void-code-title>app.js</void-code-title><void-code-copy><button type="button"></button></void-code-copy><pre><code><void-code-line>const a = 1;</void-code-line><void-code-line>const b = 2;</void-code-line></code></pre></void-code>',
+    parts: [
+      { tag: 'void-code-title', max: 1, description: 'A file name or the language, shown above the code; names the block for assistive technology.' },
+      {
+        tag: 'void-code-copy',
+        max: 1,
+        control: true,
+        description:
+          'Wraps the one control that copies the code (a <button type="button">; leave it empty for the theme\'s icon and the name "Copy code", or write its text). Pressing it copies the text of the code, fires void-copy and announces "Copied".',
+        attributes: [{ name: 'copied', type: 'boolean', description: 'Set by the code block for two seconds after a copy; the theme shows a tick.' }],
+      },
+      {
+        tag: 'void-code-line',
+        children: 'any',
+        description:
+          'One line of code, inside the <code>. Optional: write the text straight into the <code> when you need no line numbers. Holds text and any inline markup (the spans of a syntax highlighter).',
+        attributes: [
+          { name: 'number', type: 'string', description: 'The number shown for this line with `line-numbers`, in place of its position (an excerpt that starts at line 40).' },
+        ],
+      },
+    ],
+  },
+  'void-diff': {
+    children: 'parts',
+    ordered: true,
+    skeleton:
+      '<void-diff line-numbers><void-diff-title>src/app.js</void-diff-title><void-diff-hunk><void-diff-header>@@ -1,2 +1,2 @@</void-diff-header><void-diff-line old="1" new="1">const a = 1;</void-diff-line><void-diff-line kind="del" old="2">const b = <del>2</del>;</void-diff-line><void-diff-line kind="add" new="2">const b = <ins>3</ins>;</void-diff-line></void-diff-hunk></void-diff>',
+    parts: [
+      { tag: 'void-diff-title', max: 1, description: 'The file name (or any heading of the diff), shown above the hunks; names the diff for assistive technology.' },
+      {
+        tag: 'void-diff-hunk',
+        required: true,
+        children: 'parts',
+        ordered: true,
+        description: 'One hunk: a run of lines that belong together. A rule separates it from the next.',
+        parts: [
+          { tag: 'void-diff-header', max: 1, description: 'The header line of the hunk, such as @@ -1,4 +1,5 @@ and the enclosing function.' },
+          {
+            tag: 'void-diff-line',
+            children: 'any',
+            description:
+              'One line. Its text, with the words that changed wrapped in native <ins> (in an added line) or <del> (in a removed line); any other inline markup (the spans of a syntax highlighter) is kept.',
+            attributes: [
+              { name: 'kind', type: "'add' | 'del' | 'context'", description: 'What happened to the line: `add` (drawn with +), `del` (drawn with −) or `context` (unchanged, the default).' },
+              { name: 'old', type: 'string', description: 'Line number in the old file, shown with `line-numbers`. Leave it out on an added line.' },
+              { name: 'new', type: 'string', description: 'Line number in the new file, shown with `line-numbers`. Leave it out on a removed line.' },
+            ],
+          },
+        ],
+      },
+    ],
+  },
   'void-accordion': {
     children: 'parts',
     skeleton:
@@ -651,6 +707,10 @@ export const parts = {
  * @type {Record<string, { tag: string, fix: string }>}
  */
 export const nativeControls = {
+  'void-code': {
+    tag: 'pre',
+    fix: 'write the code in a native <pre><code> inside: <void-code><pre><code>npm install</code></pre></void-code>',
+  },
   'void-select': {
     tag: 'select',
     fix: 'write a native <select> (with the name and the options) inside: <void-select><select name="plan"><option value="free">Free</option><option value="pro">Pro</option></select></void-select>',

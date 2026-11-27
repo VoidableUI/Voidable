@@ -79,6 +79,10 @@
       <void-panel variant="bordered" style="width: 260px"><void-panel-header><void-panel-title>Panel</void-panel-title></void-panel-header><void-panel-body><p>Panel body</p></void-panel-body></void-panel>
     </div>
     <void-alert color="info"><void-alert-description>Info alert message.</void-alert-description></void-alert><void-alert color="error"><void-alert-description>Error alert message.</void-alert-description><void-alert-close><button type="button" aria-label="Dismiss">&times;</button></void-alert-close></void-alert><void-alert color="success" variant="filled"><void-alert-description>Success filled alert.</void-alert-description></void-alert>
+    <div style="width: 420px; display: grid; gap: 1rem">
+      <void-code line-numbers><void-code-title>total.js</void-code-title><void-code-copy><button type="button"></button></void-code-copy><pre><code><void-code-line>export function total(items) {</void-code-line><void-code-line>  return items.reduce((sum, item) => sum + item.price * item.quantity, 0); // wider than the block</void-code-line><void-code-line>}</void-code-line></code></pre></void-code>
+      <void-diff line-numbers><void-diff-title>src/invoice.js</void-diff-title><void-diff-hunk><void-diff-header>@@ -10,3 +10,3 @@</void-diff-header><void-diff-line old="10" new="10">  let sum = 0;</void-diff-line><void-diff-line kind="del" old="11">  for (const item of items) sum += <del>item.price</del>;</void-diff-line><void-diff-line kind="add" new="11">  for (const item of items) sum += <ins>item.price * item.quantity</ins>;</void-diff-line></void-diff-hunk></void-diff>
+    </div>
     <void-banner color="warning"><void-banner-description>Page-level banner.</void-banner-description><void-banner-close><button type="button" aria-label="Dismiss">&times;</button></void-banner-close></void-banner>
     <div class="row">
       <void-progress value="40" aria-label="Progress"></void-progress><void-skeleton shape="text" style="width: 200px"></void-skeleton>

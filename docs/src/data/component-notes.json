@@ -360,6 +360,17 @@
     },
     "children": "Short text."
   },
+  "void-code": {
+    "group": "data-display",
+    "events": {
+      "void-copy": "Fires after the code was copied to the clipboard, by the control in the `void-code-copy` part or by `copy()`. `detail.value` is the text that was copied: the lines joined by newlines, without line numbers or highlighter markup. It bubbles."
+    },
+    "children": "A native `<pre><code>` holding the code (required): the text itself, or one `void-code-line` per line, which `line-numbers` needs. Before it, the optional parts: `void-code-title` (a file name or the language) and `void-code-copy` (wraps the one button that copies the code; leave the button empty for the theme's icon). Inside the `<code>` or a line, any inline markup is kept, so a syntax highlighter's spans go there."
+  },
+  "void-diff": {
+    "group": "data-display",
+    "children": "Explicit parts, in this order: `void-diff-title` (optional; the file name) and one `void-diff-hunk` per hunk. A hunk holds an optional `void-diff-header` (the `@@ -1,4 +1,5 @@` line) and one `void-diff-line` per line, with `kind=\"add\"`, `kind=\"del\"` or no `kind` for an unchanged line, and `old` and `new` for its line numbers. Inside a line, the words that changed go in native `<ins>` and `<del>`; any other inline markup is kept."
+  },
   "void-alert": {
     "group": "feedback",
     "events": {

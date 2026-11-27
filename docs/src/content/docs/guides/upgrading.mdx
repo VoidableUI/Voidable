@@ -189,6 +189,8 @@ A `void-section-head` is as tall with `void-actions` or a button as without: con
 - `void-state` takes `size="lg"`: the heading role, for a state that is the heading of its block.
 
 
+### Collapsible, card header, number input and field fills
+
 No markup changes. What looks different, and the token for each:
 
 - **Collapsible.** The line is drawn around `void-collapsible`, not around its trigger, so an open one frames the trigger and the content together. Closed, it is the same box as before. CSS of yours that set `border` or `border-radius` on `void-collapsible-trigger` now draws a second box: set `--void-collapsible-rule-frame` (a whole border; `none` removes it) and `--void-collapsible-radius` instead. `--void-collapsible-surface` and `--void-collapsible-shadow` are new, and Loft uses them: there a collapsible is a filled, lifted tile.
@@ -196,6 +198,15 @@ No markup changes. What looks different, and the token for each:
 - **Number input.** The value starts at the start edge, as in every other field, with any `controls`; it was centred with `sides` and `right`. For a compact quantity stepper, put `--void-number-input-value-align: center` on the element, an ancestor or `:root` (`end` also works).
 - **Fields.** In light, an enabled field is the colour of the page (white by default), not the faint grey of a container, which read as disabled; dark is unchanged. A disabled field has a grey wash as well as its faded text. Both are role tokens: `--void-field-surface` and the new `--void-field-surface-disabled`. To keep the old fill: `--void-field-surface: var(--void-color-surface)`.
 - **Card.** `--void-card-header-rule: none` removes the line under `void-card-header`, for a header that is only a title. Nothing changes unless you set it.
+
+
+### Code and diff
+
+Nothing breaks. Two elements are new: [`<void-code>`](/components/code/), a code block around a native `<pre><code>` (line numbers, wrap, a title, a copy button), and [`<void-diff>`](/components/diff/), a unified diff your application computes and writes as `<void-diff-hunk>` and `<void-diff-line>` elements. React has `Code` and `Diff` and their parts, HEEx `<.code>` and `<.diff>`; ERB and Blade write the tags as they are.
+
+- **New tokens**: `--void-color-diff-ins`, `--void-color-diff-del` and their `-subtle` and `-strong` fills ([Diff colors](/getting-started/tokens/#diff-colors)). A theme or skin of your own needs nothing; they follow the success and error colours.
+- **New messages**: `code.copy`, `code.copied`, `diff.added` and `diff.removed`, in English, French and Arabic. A locale you registered yourself falls back to English for them until you add the four.
+- **If you styled `<pre>`, `<ins>` or `<del>` yourself** inside another Voidable component, nothing changes: the theme styles them only inside `<void-code>` and `<void-diff-line>`.
 
 ## 4. Check again
 

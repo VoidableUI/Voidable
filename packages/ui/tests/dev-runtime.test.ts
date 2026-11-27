@@ -262,6 +262,29 @@ describe('the generated table', () => {
     const decl = manifest.modules.flatMap((m: { declarations?: { tagName?: string }[] }) => m.declarations ?? []).find((d: { tagName?: string }) => d.tagName === 'void-option');
     expect(decl.voidParents).toEqual(table['void-option'].p);
   });
+
+  it('is silent about a correct code block and a correct diff (#109)', async () => {
+    document.body.innerHTML =
+      '<void-code line-numbers wrap><void-code-title>app.js</void-code-title><void-code-copy><button type="button"></button></void-code-copy><pre><code><void-code-line number="40">a</void-code-line><void-code-line>b</void-code-line></code></pre></void-code>' +
+      '<void-code><pre><code>npm install</code></pre></void-code>' +
+      '<void-diff line-numbers wrap><void-diff-title>a.js</void-diff-title><void-diff-hunk><void-diff-header>@@ -1 +1 @@</void-diff-header><void-diff-line old="1" new="1">a</void-diff-line><void-diff-line kind="del" old="2">b <del>c</del></void-diff-line><void-diff-line kind="add" new="2">b <ins>d</ins></void-diff-line><void-diff-line kind="context" old="3" new="3">e</void-diff-line></void-diff-hunk></void-diff>';
+    await settled();
+    expect(seen.filter((w) => w.kind !== 'undefined-element')).toEqual([]);
+  });
+
+  it('reports code written without a <pre>, diff lines outside a hunk and a kind that does not exist, each with the markup to write (#109)', async () => {
+    document.body.innerHTML =
+      '<void-code>npm install</void-code>' +
+      '<void-diff><void-diff-line kind="add">a</void-diff-line></void-diff>' +
+      '<void-diff><void-diff-hunk><void-diff-line kind="added">a</void-diff-line></void-diff-hunk></void-diff>';
+    await settled();
+    const kinds = seen.map((w) => `${w.kind}:${w.tag}:${w.subject}`);
+    expect(kinds).toContain('missing-part:void-code:pre');
+    expect(seen.find((w) => w.kind === 'missing-part' && w.tag === 'void-code')!.message).toContain('<void-code><pre><code>');
+    expect(kinds).toContain('missing-part:void-diff:void-diff-hunk');
+    expect(seen.find((w) => w.kind === 'missing-part' && w.tag === 'void-diff')!.message).toContain('<void-diff-hunk>');
+    expect(kinds).toContain('invalid-value:void-diff-line:kind');
+  });
 });
 
 describe('zero cost in production', () => {

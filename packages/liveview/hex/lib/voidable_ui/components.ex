@@ -2428,4 +2428,75 @@ defmodule VoidableUI.Components do
     />
     """
   end
+
+  # ---------------------------------------------------------------------------
+  # Code (interactive with a copy part — void-copy) and Diff (static)
+  # ---------------------------------------------------------------------------
+
+  @doc """
+  Renders a `<void-code>` block of code.
+
+  Write the code as a native `<pre><code>` inside: the text, or one `<void-code-line>` per line when you want
+  `line_numbers`. Before the `<pre>` come the optional parts, `<void-code-title>` (a file name or the language)
+  and `<void-code-copy>` wrapping the one button that copies the code. No highlighter is included: put the
+  highlighted spans of your own (Makeup, for example) inside the `<code>` or the lines.
+
+      <.code line_numbers>
+        <void-code-title>lib/greeter.ex</void-code-title>
+        <void-code-copy><button type="button"></button></void-code-copy>
+        <pre><code><void-code-line :for={line <- @lines}>{line}</void-code-line></code></pre>
+      </.code>
+
+  With `events`, a copy pushes `void-copy` (`%{"value" => text}`).
+  """
+  attr :id, :string, default: nil
+  attr :line_numbers, :boolean, default: false
+  attr :wrap, :boolean, default: false
+  attr :events, :any, default: nil, doc: @events_doc
+  attr :rest, :global
+  slot :inner_block, required: true
+
+  def code(assigns) do
+    ~H"""
+    <void-code
+      id={@id || (@events && auto_id("void-code", @rest))}
+      line-numbers={@line_numbers}
+      wrap={@wrap}
+      phx-hook={void_hook(@events)}
+      data-void-events={void_events(@events, "void-copy")}
+      {@rest}
+    >
+      {render_slot(@inner_block)}
+    </void-code>
+    """
+  end
+
+  @doc """
+  Renders a `<void-diff>`, a unified diff your application computed.
+
+  Write an optional `<void-diff-title>` (the file name) and one `<void-diff-hunk>` per hunk, each holding an
+  optional `<void-diff-header>` and one `<void-diff-line>` per line. A line's `kind` is `add`, `del` or
+  `context` (the default); `old` and `new` are its line numbers, shown with `line_numbers`. Wrap the words that
+  changed inside a line in `<ins>` and `<del>`.
+
+      <.diff line_numbers>
+        <void-diff-title>{@file}</void-diff-title>
+        <void-diff-hunk :for={hunk <- @hunks}>
+          <void-diff-header>{hunk.header}</void-diff-header>
+          <void-diff-line :for={line <- hunk.lines} kind={line.kind} old={line.old} new={line.new}>{line.text}</void-diff-line>
+        </void-diff-hunk>
+      </.diff>
+  """
+  attr :line_numbers, :boolean, default: false
+  attr :wrap, :boolean, default: false
+  attr :rest, :global
+  slot :inner_block, required: true
+
+  def diff(assigns) do
+    ~H"""
+    <void-diff line-numbers={@line_numbers} wrap={@wrap} {@rest}>
+      {render_slot(@inner_block)}
+    </void-diff>
+    """
+  end
 end

@@ -179,7 +179,7 @@ export function closure(name, ownerOfTag) {
 // ── Scoped reset ────────────────────────────────────────────────────────────
 
 /** The words a part tag ends in (`void-<component>-<region>`, see "Explicit parts" in AGENTS.md). */
-const PART_SUFFIX = /-(trigger|content|title|description|body|actions|header|footer|item|list|separator|close)$/;
+const PART_SUFFIX = /-(trigger|content|title|description|body|actions|header|footer|item|list|separator|close|copy|line|hunk)$/;
 
 /**
  * The tags the reset names: `tags` without the parts whose component is in `tags` too. A part is always inside

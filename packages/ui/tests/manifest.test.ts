@@ -160,7 +160,7 @@ describe('custom-elements.json', () => {
   it('describes the explicit parts of every component that has them, and no slots for those (#52)', () => {
     const withParts = declared.filter(({ decl }) => (decl as { voidParts?: unknown }).voidParts).map(({ decl }) => decl.tagName!).sort();
     expect(withParts).toEqual(
-      ['void-accordion', 'void-alert', 'void-banner', 'void-breadcrumbs', 'void-card', 'void-carousel', 'void-collapsible', 'void-dialog', 'void-drawer', 'void-dropdown-menu', 'void-error-fallback', 'void-hover-card', 'void-menu', 'void-menu-group', 'void-menu-item', 'void-nav-menu', 'void-panel', 'void-popover', 'void-tabs', 'void-toast', 'void-tooltip', 'void-combobox', 'void-multiselect', 'void-table'].sort(),
+      ['void-accordion', 'void-alert', 'void-banner', 'void-breadcrumbs', 'void-card', 'void-carousel', 'void-code', 'void-collapsible', 'void-dialog', 'void-diff', 'void-drawer', 'void-dropdown-menu', 'void-error-fallback', 'void-hover-card', 'void-menu', 'void-menu-group', 'void-menu-item', 'void-nav-menu', 'void-panel', 'void-popover', 'void-tabs', 'void-toast', 'void-tooltip', 'void-combobox', 'void-multiselect', 'void-table'].sort(),
     );
     for (const tag of withParts) {
       const decl = byTag.get(tag)!.decl as { slots?: unknown[]; voidParts: { parts: { tag: string }[] } };

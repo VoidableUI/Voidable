@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- A strict policy: no inline styles, no inline scripts, nothing from elsewhere. The theme's icons are data: masks,
+     which img-src governs. The spec fails on any violation (specs/code-diff.spec.ts). -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self'">
+<title>code-diff</title>
+<script src="/build/harness.js"></script>
+<link rel="stylesheet" href="/build/theme.css">
+</head>
+<body>
+<!-- No component script: the spec loads /build/ui.js itself, to measure the page before and after the components are defined. -->
+<main>
+  <div class="cell">
+    <void-code id="code-plain"><pre><code>const answer = await fetch('https://example.test/api/v1/a/very/long/path/that/does/not/fit/in/the/block').then((r) =&gt; r.json());
+console.log(answer);
+</code></pre></void-code>
+  </div>
+
+  <div class="cell">
+    <void-code id="code-short"><void-code-copy><button type="button"></button></void-code-copy><pre><code>npm install</code></pre></void-code>
+  </div>
+
+  <div class="cell">
+    <void-code id="code-lines" line-numbers>
+      <void-code-title>greet.js</void-code-title>
+      <void-code-copy><button type="button"></button></void-code-copy>
+      <pre><code>
+        <void-code-line><span class="tok-k">function</span> greet(name) {</void-code-line>
+        <void-code-line>  <span class="tok-k">return</span> `Hello, ${name}`;</void-code-line>
+        <void-code-line>}</void-code-line>
+        <void-code-line></void-code-line>
+        <void-code-line number="40">greet('a long argument that makes this line wider than the block it is shown in, so it scrolls');</void-code-line>
+      </code></pre>
+    </void-code>
+  </div>
+
+  <div class="cell">
+    <void-code id="code-wrap" wrap line-numbers><pre><code><void-code-line>one</void-code-line><void-code-line>a long line that wraps instead of scrolling: lorem ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod</void-code-line><void-code-line>three</void-code-line></code></pre></void-code>
+  </div>
+
+  <div class="cell">
+    <void-diff id="diff" line-numbers>
+      <void-diff-title>src/invoice.js</void-diff-title>
+      <void-diff-hunk>
+        <void-diff-header>@@ -10,4 +10,5 @@ export function total(items) {</void-diff-header>
+        <void-diff-line old="10" new="10">  let sum = 0;</void-diff-line>
+        <void-diff-line kind="del" old="11">  for (const item of items) sum += <del>item.price</del>;</void-diff-line>
+        <void-diff-line kind="add" new="11">  for (const item of items) sum += <ins>item.price * item.quantity</ins>;</void-diff-line>
+        <void-diff-line kind="add" new="12">  if (sum &lt; 0) throw new RangeError('a total below zero is a mistake somewhere in the data, not a refund');</void-diff-line>
+        <void-diff-line old="12" new="13">  return sum;</void-diff-line>
+        <void-diff-line old="13" new="14"></void-diff-line>
+      </void-diff-hunk>
+      <void-diff-hunk>
+        <void-diff-header>@@ -40,2 +41,2 @@</void-diff-header>
+        <void-diff-line kind="context" old="40" new="41">export const currency = 'EUR';</void-diff-line>
+        <void-diff-line kind="del" old="41">export const digits = 2;</void-diff-line>
+      </void-diff-hunk>
+    </void-diff>
+  </div>
+
+  <div class="cell">
+    <void-diff id="diff-plain">
+      <void-diff-hunk>
+        <void-diff-line>unchanged</void-diff-line>
+        <void-diff-line kind="del">old</void-diff-line>
+        <void-diff-line kind="add">new</void-diff-line>
+      </void-diff-hunk>
+    </void-diff>
+  </div>
+
+  <div class="cell">
+    <void-diff id="diff-wrap" wrap>
+      <void-diff-hunk>
+        <void-diff-line>The <del>quick</del><ins>fast</ins> brown fox jumps over the lazy dog, and then it does it again and again until the line is far too long to fit.</void-diff-line>
+      </void-diff-hunk>
+    </void-diff>
+  </div>
+
+  <div class="cell" lang="fr">
+    <void-diff id="diff-fr">
+      <void-diff-hunk>
+        <void-diff-line kind="add">bonjour</void-diff-line>
+        <void-diff-line kind="del">salut</void-diff-line>
+      </void-diff-hunk>
+    </void-diff>
+    <void-code id="code-fr"><void-code-copy><button type="button"></button></void-code-copy><pre><code>bonjour</code></pre></void-code>
+  </div>
+
+  <div class="cell" dir="rtl">
+    <void-diff id="diff-rtl" line-numbers>
+      <void-diff-title>rtl.js</void-diff-title>
+      <void-diff-hunk>
+        <void-diff-line kind="add" new="1">const a = 1;</void-diff-line>
+      </void-diff-hunk>
+    </void-diff>
+    <void-code id="code-rtl" line-numbers><pre><code><void-code-line>const a = 1;</void-code-line></code></pre></void-code>
+  </div>
+</main>
+</body>
+</html>

@@ -1,0 +1,145 @@
+---
+title: Code
+description: A block of code that scrolls sideways or wraps, with optional line numbers, a title and a copy button. No highlighter is bundled; bring the spans of your own. Live examples.
+---
+
+import Example from '../../../components/Example.astro';
+
+A code block is a native `<pre><code>` in a `<void-code>`. The element draws the box, makes the code scroll sideways inside it (never the page), and wires up the two optional parts you write before the `<pre>`: a title and a copy button. It renders nothing itself and never rewrites the code, so what the server sent is what is on the page.
+
+## A command, with a copy button
+
+Without a title, the button sits beside the code, never over it. Leave the `<button>` empty and the theme draws the icon and the element names it "Copy code" (in the language of the page); write text in it and it is left as you wrote it.
+
+export const command = `
+<void-code>
+  <void-code-copy><button type="button"></button></void-code-copy>
+  <pre><code>npm install @voidable/ui @voidable/theme</code></pre>
+</void-code>`;
+
+export const commandJsx = `
+import { Code, CodeCopy } from '@voidable/ui-react';
+
+<Code onVoidCopy={(e) => track('copied', e.detail.value)}>
+  <CodeCopy><button type="button" /></CodeCopy>
+  <pre><code>npm install @voidable/ui @voidable/theme</code></pre>
+</Code>`;
+
+<Example html={command} jsx={commandJsx} />
+
+Pressing the button copies the text of the code, shows a tick for two seconds, announces "Copied" to screen readers and fires `void-copy` with the text in `detail.value`. `element.copy()` does the same from a script, and `element.text` is the text it would copy.
+
+## Line numbers and a title
+
+Line numbers need to know where the lines are, so write one `<void-code-line>` per line inside the `<code>`. The numbers are CSS counters: no script runs per line, they are there before the component loads, and they are never selected, copied or read out. The white space your template leaves between two lines draws nothing, so you can indent the markup; white space inside a line is kept as code.
+
+export const numbered = `
+<void-code line-numbers>
+  <void-code-title>total.js</void-code-title>
+  <void-code-copy><button type="button"></button></void-code-copy>
+  <pre><code>
+    <void-code-line>export function total(items) {</void-code-line>
+    <void-code-line>  let sum = 0;</void-code-line>
+    <void-code-line>  for (const item of items) sum += item.price * item.quantity;</void-code-line>
+    <void-code-line>  return sum;</void-code-line>
+    <void-code-line>}</void-code-line>
+  </code></pre>
+</void-code>`;
+
+export const numberedErb = `
+<void-code line-numbers>
+  <void-code-title><%= @file.name %></void-code-title>
+  <void-code-copy><button type="button"></button></void-code-copy>
+  <pre><code>
+    <% @file.lines.each do |line| %>
+      <void-code-line><%= line.chomp %></void-code-line>
+    <% end %>
+  </code></pre>
+</void-code>`;
+
+export const numberedHeex = `
+<.code line_numbers>
+  <void-code-title>{@file.name}</void-code-title>
+  <void-code-copy><button type="button"></button></void-code-copy>
+  <pre><code><%= for line <- @file.lines do %><void-code-line>{line}</void-code-line><% end %></code></pre>
+</.code>`;
+
+export const numberedBlade = `
+<void-code line-numbers>
+  <void-code-title>{{ $file->name }}</void-code-title>
+  <void-code-copy><button type="button"></button></void-code-copy>
+  <pre><code>
+    @foreach ($file->lines as $line)
+      <void-code-line>{{ $line }}</void-code-line>
+    @endforeach
+  </code></pre>
+</void-code>`;
+
+export const numberedJsx = `
+import { Code, CodeTitle, CodeCopy, CodeLine } from '@voidable/ui-react';
+
+<Code lineNumbers>
+  <CodeTitle>{file.name}</CodeTitle>
+  <CodeCopy><button type="button" /></CodeCopy>
+  <pre><code>{file.lines.map((line, i) => <CodeLine key={i}>{line}</CodeLine>)}</code></pre>
+</Code>`;
+
+<Example html={numbered} erb={numberedErb} heex={numberedHeex} blade={numberedBlade} jsx={numberedJsx} />
+
+Counting starts at 1. For an excerpt, give each line its real `number`:
+
+```html
+<void-code-line number="40">export function total(items) {</void-code-line>
+<void-code-line number="41">  let sum = 0;</void-code-line>
+```
+
+The number column is `4ch` wide, room for 9999; set `--void-code-number-width` for a longer file.
+
+## Long lines: scroll or wrap
+
+By default a long line scrolls sideways inside the block. While there is something to scroll to, the `<pre>` is in the tab order, so the arrow keys scroll it; while the code fits it is not a tab stop, so a page of short snippets does not become a page of tab stops. `wrap` breaks long lines instead: the continuation sits under its own text, beside the number.
+
+export const wrapped = `
+<void-code wrap line-numbers>
+  <pre><code>
+    <void-code-line>curl --request POST --header "Content-Type: application/json" --data '{"name":"example"}' https://example.test/api/projects</void-code-line>
+    <void-code-line>echo done</void-code-line>
+  </code></pre>
+</void-code>`;
+
+<Example html={wrapped} />
+
+## Syntax highlighting
+
+No highlighter is bundled: which languages, which grammar and where it runs (the server, the build, the browser) are your choices, and a highlighter is larger than the rest of the library. The hook is the markup. Whatever is inside the `<code>`, or inside a `<void-code-line>`, stays exactly as written, so put your highlighter's output there:
+
+- **On the server or at build time** (Rouge, Chroma, Makeup, Pygments, Shiki, Prism): write the highlighted spans into the `<code>`. For line numbers, split the highlighter's output on newlines and wrap each line in a `<void-code-line>`.
+- **In the browser** (highlight.js, Prism): give the `<code>` the conventional `class="language-js"` and run the highlighter as usual. It replaces the content of the `<code>`; the component holds no reference to it and follows the change.
+
+The theme sets no colour on those spans. Colour them with your highlighter's stylesheet, or map its classes to the theme's tokens so that the code follows the theme and the colour scheme, and keeps its contrast:
+
+```css
+.tok-keyword { color: var(--void-color-notice); }
+.tok-string  { color: var(--void-color-success); }
+.tok-number  { color: var(--void-color-info); }
+.tok-comment { color: var(--void-color-text-secondary); }
+```
+
+Copying takes the text without the markup. Under a strict Content-Security-Policy, choose a highlighter that writes classes, not `style` attributes; the component itself needs neither inline styles nor inline scripts.
+
+export const highlighted = `
+<void-code line-numbers>
+  <void-code-title>greet.js</void-code-title>
+  <pre><code>
+    <void-code-line><span class="vd-tok-comment">// Says hello.</span></void-code-line>
+    <void-code-line><span class="vd-tok-keyword">function</span> greet(name) {</void-code-line>
+    <void-code-line>  <span class="vd-tok-keyword">return</span> <span class="vd-tok-string">'Hello, '</span> + name;</void-code-line>
+    <void-code-line>}</void-code-line>
+  </code></pre>
+</void-code>`;
+
+<Example html={highlighted} />
+
+## Large files
+
+Nothing is done per line in script: the component writes on the `<pre>`, the title and the button, and on no line. A block of 5,000 numbered lines is the browser's own style and layout of 5,000 elements, and its first render is held to a budget in the browser suite (`tests/browser/budgets.ts`).

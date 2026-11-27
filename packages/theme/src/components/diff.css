@@ -1,0 +1,230 @@
+/* A unified diff: a container that scrolls sideways, holding hunks of lines.
+   Everything is CSS, so a diff of thousands of lines costs no script per line
+   and looks the same before the component is defined:
+
+   - the + and − markers and the line numbers are generated content (read from
+     the line's `kind`, `old` and `new` attributes), so they are never selected
+     or copied;
+   - a change is never told by colour alone: the marker says it for a line,
+     the underline and the strike-through for a word (`ins`, `del`);
+   - the marker of a changed line carries a text alternative ("added",
+     "removed"; the component sets it from the messages, in the language of the
+     page), and the line numbers are silent. */
+/* @tokens void-diff
+   --void-diff-surface       Fill behind the diff.
+   --void-diff-border        Edge colour.
+   --void-diff-radius        Corner radius.
+   --void-diff-padding       Space between the edge and the lines, the title and a hunk's header (inline).
+   --void-diff-font-size     Size of the lines.
+   --void-diff-number-width  Setting: width of each of the two line-number columns, a length in ch (4ch, room for 9999, by default). */
+
+void-diff {
+  --_void-diff-padding: var(--void-diff-padding, var(--void-space-4));
+  --_void-diff-number: var(--void-diff-number-width, 4ch);
+  /* Before the text of a line: the inset, the marker and a space. */
+  --_void-diff-gutter: calc(var(--_void-diff-padding) + 2ch);
+
+  display: grid;
+  /* One column as wide as the longest line and never narrower than the diff:
+     every line's fill then runs the whole scrolled width. */
+  grid-template-columns: minmax(max-content, 1fr);
+  overflow-x: auto;
+  border: var(--void-container-border-width) solid var(--void-diff-border, var(--void-container-border));
+  border-radius: var(--void-diff-radius, var(--void-container-radius));
+  background: var(--void-diff-surface, var(--void-container-surface));
+  color: var(--void-type-code-color);
+  font-family: var(--void-type-code-family);
+  font-size: var(--void-diff-font-size, var(--void-type-code-size));
+  font-weight: var(--void-type-code-weight);
+  font-variant-numeric: var(--void-type-code-numeric);
+  line-height: var(--void-leading-normal);
+  tab-size: 2;
+}
+
+/* With numbers: the inset, the old number, a space, the new number, a space,
+   the marker and a space. */
+void-diff[line-numbers] {
+  --_void-diff-gutter: calc(var(--_void-diff-padding) + var(--_void-diff-number) * 2 + 4ch);
+}
+
+void-diff[wrap] {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+void-diff:focus-visible {
+  outline: var(--void-focus-ring-width) solid var(--void-focus-ring-color);
+  outline-offset: calc(var(--void-focus-ring-width) * -1);
+}
+
+/* The title (a file name) stays in view while the lines scroll sideways. */
+void-diff-title {
+  position: sticky;
+  inset-inline-start: 0;
+  justify-self: start;
+  padding: var(--void-space-2) var(--_void-diff-padding);
+  font-size: var(--void-text-xs);
+  color: var(--void-color-text-secondary);
+  white-space: nowrap;
+}
+
+/* Hunks. Code is left to right whatever the page is. */
+void-diff-hunk {
+  display: block;
+  padding-block: var(--void-space-2);
+  direction: ltr;
+  text-align: left;
+}
+
+void-diff-title + void-diff-hunk {
+  border-block-start: var(--void-rule-head);
+}
+
+void-diff-hunk + void-diff-hunk {
+  border-block-start: var(--void-rule-between);
+}
+
+void-diff-header {
+  display: block;
+  padding: 0 var(--_void-diff-padding) var(--void-space-1);
+  color: var(--void-color-text-secondary);
+  white-space: pre;
+}
+
+/* Lines. An empty line is still a line tall. */
+void-diff-line {
+  position: relative;
+  display: block;
+  min-block-size: 1lh;
+  padding-inline: var(--_void-diff-gutter) var(--_void-diff-padding);
+  white-space: pre;
+}
+
+void-diff[wrap] void-diff-line {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+void-diff-line[kind="add"] {
+  background: var(--void-color-diff-ins-subtle);
+}
+
+void-diff-line[kind="del"] {
+  background: var(--void-color-diff-del-subtle);
+}
+
+/* The gutter. `::before` is the marker; with line numbers it is the old
+   number and `::after` is the new number followed by the marker (right
+   aligned, in a fixed-width face, so the columns line up). */
+void-diff-line::before,
+void-diff-line::after {
+  position: absolute;
+  inset-block-start: 0;
+  text-align: end;
+  white-space: pre;
+  color: var(--void-color-text-secondary);
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+void-diff-line[kind="add"]::before,
+void-diff-line[kind="add"]::after {
+  color: var(--void-color-diff-ins);
+}
+
+void-diff-line[kind="del"]::before,
+void-diff-line[kind="del"]::after {
+  color: var(--void-color-diff-del);
+}
+
+void-diff-line::before {
+  inset-inline-start: var(--_void-diff-padding);
+  inline-size: 1ch;
+}
+
+void-diff-line[kind="add"]::before {
+  content: "+";
+}
+
+void-diff-line[kind="del"]::before {
+  content: "\2212";
+}
+
+void-diff[line-numbers] void-diff-line::before {
+  /* The zero-width space keeps the box (and its text alternative) when a
+     line has no old number. */
+  content: "\200B" attr(old);
+  inline-size: var(--_void-diff-number);
+}
+
+void-diff[line-numbers] void-diff-line::after {
+  content: attr(new) "  ";
+  inset-inline-start: calc(var(--_void-diff-padding) + var(--_void-diff-number));
+  inline-size: calc(var(--_void-diff-number) + 3ch);
+}
+
+void-diff[line-numbers] void-diff-line[kind="add"]::after {
+  content: attr(new) " +";
+}
+
+void-diff[line-numbers] void-diff-line[kind="del"]::after {
+  content: attr(new) " \2212";
+}
+
+/* Text alternatives: "added" or "removed" before a changed line, nothing for
+   the numbers. The strings come from the component (--_void-diff-added and
+   --_void-diff-removed, set from the messages); the English here is what is
+   said before the component is defined. */
+@supports (content: "a" / "b") {
+  void-diff-line[kind="add"]::before {
+    content: "+" / var(--_void-diff-added, "added");
+  }
+
+  void-diff-line[kind="del"]::before {
+    content: "\2212" / var(--_void-diff-removed, "removed");
+  }
+
+  void-diff[line-numbers] void-diff-line::before {
+    content: "\200B" attr(old) / "";
+  }
+
+  void-diff[line-numbers] void-diff-line[kind="add"]::before {
+    content: "\200B" attr(old) / var(--_void-diff-added, "added");
+  }
+
+  void-diff[line-numbers] void-diff-line[kind="del"]::before {
+    content: "\200B" attr(old) / var(--_void-diff-removed, "removed");
+  }
+
+  void-diff[line-numbers] void-diff-line::after {
+    content: attr(new) "  " / "";
+  }
+
+  void-diff[line-numbers] void-diff-line[kind="add"]::after {
+    content: attr(new) " +" / "";
+  }
+
+  void-diff[line-numbers] void-diff-line[kind="del"]::after {
+    content: attr(new) " \2212" / "";
+  }
+}
+
+/* The words that changed inside a line: native <ins> and <del>, with the
+   stronger fill over the line's and the underline or strike-through that says
+   the same without colour. */
+void-diff-line ins,
+void-diff-line del {
+  border-radius: var(--void-radius-sm);
+  color: inherit;
+  text-decoration-thickness: 1px;
+}
+
+void-diff-line ins {
+  background: var(--void-color-diff-ins-strong);
+  text-decoration-line: underline;
+  text-underline-offset: 0.2em;
+}
+
+void-diff-line del {
+  background: var(--void-color-diff-del-strong);
+  text-decoration-line: line-through;
+}
