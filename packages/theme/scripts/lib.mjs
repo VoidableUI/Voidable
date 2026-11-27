@@ -200,16 +200,33 @@ export function resetRoots(tags) {
 
 /**
  * The reset, scoped to the given tags and everything inside them. Nothing
- * outside a `void-*` element is touched. `:where()` keeps specificity at zero.
+ * outside a `void-*` element is touched.
+ *
+ * The box rule (margin, padding, box-sizing: every element inside, and its
+ * pseudo-elements) is written one selector pair per tag, `void-card, void-card *`,
+ * not as one `:where(:is(<every tag>) *)`. The browser keeps a Bloom filter of the
+ * tag names, classes and attributes of an element's ancestors and rejects a
+ * descendant selector that names a tag with one test; it cannot do that for a
+ * list inside `:is()` or `:where()`, so the list was compared with every
+ * ancestor of every element: about 30 of the 42 ms of style recalculation of
+ * the 500-row table's first render (#77). The per-tag form costs about 5 of
+ * them. The price is specificity (0,0,1) where the old form had none, which can
+ * only matter between two rules of this layer (no other rule in it sets these
+ * properties; layers decide against everything else). The rules that matter
+ * rarely (`[hidden]`, forced-colours focus) and the typed ones keep the
+ * `:where()` form: they are bucketed by their right-most compound.
+ * `@scope` was measured and is not used: Firefox supports it from 146, the
+ * baseline here is Firefox 125 and Safari 17.
  */
 export function resetCss(tags) {
   const S = resetRoots(tags);
   const roots = `:is(${S.join(', ')})`;
   const any = `:where(${roots}, ${roots} *)`;
   const within = (sel) => `:where(${roots} :is(${sel}))`;
-  return `${any},
-${any}::before,
-${any}::after {
+  const box = (suffix) => S.flatMap((t) => [`${t}${suffix}`, `${t} *${suffix}`]).join(',\n');
+  return `${box('')},
+${box('::before')},
+${box('::after')} {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
