@@ -33,10 +33,32 @@ function easeOutCubic(t: number) {
   return 1 - Math.pow(1 - t, 3);
 }
 
-function formatValue(v: number): string {
-  if (Math.abs(v) >= 1_000_000) return `${(v / 1_000_000).toFixed(1)}M`;
-  if (Math.abs(v) >= 1000) return `${(v / 1000).toFixed(v >= 10000 ? 0 : 1)}k`;
-  return Math.round(v).toString();
+/** Fraction digits `v` needs to be written exactly, up to three. */
+function decimalsOf(v: number): number {
+  if (!Number.isFinite(v)) return 0;
+  const s = Number(v.toFixed(3)).toString();
+  const dot = s.indexOf('.');
+  return dot < 0 || s.includes('e') ? 0 : s.length - dot - 1;
+}
+
+/** A number formatter for `lang`, with `digits` fraction digits fixed (or compact, for thousands and above). */
+function numberFormat(lang: string, digits: number, compact: boolean): Intl.NumberFormat {
+  const options: Intl.NumberFormatOptions = compact
+    ? { notation: 'compact', maximumSignificantDigits: 2 }
+    : { minimumFractionDigits: digits, maximumFractionDigits: digits };
+  try {
+    return new Intl.NumberFormat(lang, options);
+  } catch {
+    return new Intl.NumberFormat(undefined, options);
+  }
+}
+
+/** The reading as printed in the centre and the tooltip: in the element's language, thousands and up abbreviated unless the digits were fixed. */
+function formatValue(v: number, lang: string, digits: number | null, inferred: number): string {
+  if (digits === null && Math.abs(v) >= 1000) {
+    return numberFormat(lang, 0, true).format(v);
+  }
+  return numberFormat(lang, digits ?? inferred, false).format(v);
 }
 
 /** Stroke-based arc path — browser renders as a centered stroke of the given width. */
@@ -242,6 +264,13 @@ export class VoidGauge extends VoidElement {
   @property({ reflect: true }) variant: 'filled' | 'outline' | 'wireframe' = 'filled';
   /** Leave the reading out of the centre (it is printed by default). */
   @property({ type: Boolean, attribute: 'hide-value', reflect: true }) hideValue = false;
+  /**
+   * Digits after the decimal point in the printed reading and in the data table, such as `2` for `0.20`.
+   * Without it the gauge prints the digits the reading has (up to three; `0.21` stays `0.21`, `75` stays
+   * `75`), or those of `tick-minor` / `tick-major` when they have more, and abbreviates thousands (`1.5K`).
+   * Numbers follow the element's `lang`.
+   */
+  @property({ type: Number, attribute: 'fraction-digits' }) fractionDigits?: number;
   /** When true, render the unit right next to the value (e.g. "75%").
       When false (default), render it on the line below. Short units like
       % or ° look better inline; longer multi-char units often look
@@ -795,9 +824,24 @@ export class VoidGauge extends VoidElement {
     return svg`<g class="void-gauge-segments">${caps}${results}</g>`;
   }
 
+  /** The fixed digits from `fraction-digits`, or null to infer them. */
+  private _fixedDigits(): number | null {
+    const d = this.fractionDigits;
+    return typeof d === 'number' && Number.isFinite(d) ? Math.min(10, Math.max(0, Math.round(d))) : null;
+  }
+
+  /** Digits for a reading whose own decimals are `own`: the tick step's count when that is larger. */
+  private _inferredDigits(own: number): number {
+    return Math.max(own, decimalsOf(this.tickMinor > 0 ? this.tickMinor : this.tickMajor));
+  }
+
+  private _format(v: number, own: number): string {
+    return formatValue(v, chartLocale(this), this._fixedDigits(), this._inferredDigits(own));
+  }
+
   private _renderCenter(cx: number, cy: number) {
     const displayVal = this._displayValue;
-    const formatted = formatValue(displayVal);
+    const formatted = this._format(displayVal, decimalsOf(this._targetValue));
     // For semi-circle place label slightly above center; for others at center
     const labelY = this.circular === 'semi' ? cy * 0.7 : cy;
     const unitY = labelY + 20;
@@ -968,7 +1012,7 @@ export class VoidGauge extends VoidElement {
   private _table() {
     const { value, min, max, unit, segmentsSort, _data: data } = this;
     const label = this.ariaLabel || msg(this, 'chart.gauge');
-    return guard([value, min, max, unit, segmentsSort, data, label, chartLocale(this)], () => {
+    return guard([value, min, max, unit, segmentsSort, data, label, chartLocale(this), this.fractionDigits, this.tickMinor, this.tickMajor], () => {
       let table: ChartTable | null;
       const segments = data.segments ?? [];
       if (segments.length > 0) {
@@ -977,8 +1021,14 @@ export class VoidGauge extends VoidElement {
       } else {
         const n = tableNumbers(this);
         const reading = data.value ?? value;
-        const withUnit = (v: number) => n.number(v) + (unit ? (/^[\p{L}]/u.test(unit) ? ` ${unit}` : unit) : '');
-        table = { caption: label, head: [msg(this, 'chart.value'), msg(this, 'chart.minimum'), msg(this, 'chart.maximum')], rows: [{ cells: [withUnit(reading), withUnit(min), withUnit(max)] }] };
+        const fixed = this._fixedDigits();
+        const lang = chartLocale(this);
+        const suffix = unit ? (/^[\p{L}]/u.test(unit) ? ` ${unit}` : unit) : '';
+        // The reading says what the centre says: same language, same digits, never abbreviated. The range
+        // ends keep their own digits unless the author fixed them.
+        const readingText = numberFormat(lang, fixed ?? this._inferredDigits(decimalsOf(reading)), false).format(reading) + suffix;
+        const end = (v: number) => (fixed === null ? n.number(v) : numberFormat(lang, fixed, false).format(v)) + suffix;
+        table = { caption: label, head: [msg(this, 'chart.value'), msg(this, 'chart.minimum'), msg(this, 'chart.maximum')], rows: [{ cells: [readingText, end(min), end(max)] }] };
       }
       return dataTable('void-gauge-table', table);
     });
@@ -1020,7 +1070,7 @@ export class VoidGauge extends VoidElement {
           class="void-gauge-tooltip-value"
           x=${tx + padding}
           y=${ty + padding + titleH + 10}
-        >${formatValue(display)} <tspan class="void-gauge-tooltip-pct">(${pct}%)</tspan></text>
+        >${this._format(display, decimalsOf(seg.value))} <tspan class="void-gauge-tooltip-pct">(${pct}%)</tspan></text>
       </g>
     `;
   }

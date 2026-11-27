@@ -52,6 +52,31 @@ Astro's scoped `<style>` tags add `data-astro-*` attributes to selectors, which 
 </style>
 ```
 
+### A boolean expression on a custom element is always on
+
+On a built-in element Astro drops a boolean attribute whose value is `false`. On a custom element it does not: `checked={false}` is written as `checked="false"`, and a boolean attribute that is present is true, whatever its value says (`disabled="false"` is still disabled). So every switch below is on:
+
+```astro
+{settings.map((s) => <void-switch checked={s.enabled}>{s.label}</void-switch>)}
+```
+
+Give Astro `undefined` (or `null`) instead of `false`, so the attribute is left out:
+
+```astro
+{settings.map((s) => <void-switch checked={s.enabled || undefined}>{s.label}</void-switch>)}
+```
+
+The same goes for every boolean attribute of a component: `disabled`, `open`, `selected`, `pressed`, `indeterminate`, `selectable`, `hidden` and the `hide-*` and `show-*` attributes. Where several attributes depend on data, spread an object that holds only the ones that apply:
+
+```astro
+---
+const attrs = { ...(s.enabled && { checked: true }), ...(s.locked && { disabled: true }) };
+---
+<void-switch {...attrs}>{s.label}</void-switch>
+```
+
+`checked={true}` is fine (it is written as `checked="true"`, present), and so are the plain forms `checked` and `checked=""`. Enumerated and numeric attributes are not affected: `size="sm"`, `max={100}` and `stagger={0}` are written as they are. [Development warnings](#development-warnings) report `checked="false"` in the browser if one slips through.
+
 ### Curly braces in templates
 
 Curly braces `{}` are expression delimiters in Astro templates. If you're rendering CSS or code content that contains braces, use `set:html`:
