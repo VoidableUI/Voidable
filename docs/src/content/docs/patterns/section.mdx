@@ -162,6 +162,47 @@ export const splitJsx = `
 
 <Example html={split} erb={splitErb} jsx={splitJsx} />
 
+### A column that stays in view
+
+A child with `sticky` stays in view while the column beside it scrolls. It has three states:
+
+- **Bare `sticky`**: sticks on a wide screen and is an ordinary block once the split stacks below 48rem.
+- **`sticky="always"`, wide**: the same as bare `sticky`.
+- **`sticky="always"`, stacked**: the child stays stuck at the top for the whole length of the split, and the rest scrolls under it. Put it first, so it sits above the list it belongs to. It is painted with the page surface and lies above the content, and it never grows taller than half the screen (`--void-split-sticky-max`, default `50svh`): beyond that it scrolls inside.
+
+A grid item can only stick inside its own row, which is why a stacked split with such a child is laid out as one column of flex items: the child's range is then the whole split. Nothing changes for a split without `sticky="always"`.
+
+export const stuck = `
+<void-split ratio="1:2">
+  <void-stack sticky="always">
+    <img alt="Pass geometry" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 3'%3E%3Crect width='4' height='3' fill='%23888'/%3E%3C/svg%3E" style="width: 100%; height: auto; display: block">
+  </void-stack>
+  <void-rows>
+    <void-row><void-row-text><p>Pass 1041</p></void-row-text></void-row>
+    <void-row><void-row-text><p>Pass 1042</p></void-row-text></void-row>
+    <void-row><void-row-text><p>Pass 1043</p></void-row-text></void-row>
+    <void-row><void-row-text><p>Pass 1044</p></void-row-text></void-row>
+    <void-row><void-row-text><p>Pass 1045</p></void-row-text></void-row>
+    <void-row><void-row-text><p>Pass 1046</p></void-row-text></void-row>
+  </void-rows>
+</void-split>`;
+
+export const stuckErb = `
+<void-split ratio="1:2">
+  <void-stack sticky="always"><%= image_tag @station.photo, alt: "Pass geometry" %></void-stack>
+  <%= render "passes", passes: @passes %>
+</void-split>`;
+
+export const stuckJsx = `
+<void-split ratio="1:2">
+  <void-stack sticky="always"><img src={photo} alt="Pass geometry" /></void-stack>
+  <Passes passes={passes} />
+</void-split>`;
+
+<Example html={stuck} erb={stuckErb} jsx={stuckJsx} />
+
+The media sits beside the list on a wide screen and stays above it when you narrow the window below 48rem and scroll. When the page has a sticky header, set `--void-split-sticky-top` to its height, on the split or an ancestor, so the child sits below it and not under it; on a wide screen it is added to the group gap.
+
 ## Reference
 
 | Element | Attribute | Values |
@@ -171,7 +212,7 @@ export const splitJsx = `
 | `void-split` | `ratio` | `1:1` (default), `2:1`, `1:2`, `aside` (a 12rem first column, for a settings list) |
 | | `valign` | `start` (default), `center`, `end` |
 | `void-stack` | `gap` | `tight` 8px, `inside` 16px (default), `stack` 24px, `group` 40px, `section` 72px |
-| | `sticky` | As a child of `void-split`: stays in view while the other column scrolls |
+| | `sticky` | As a child of `void-split`: stays in view while the other column scrolls on a wide screen. `sticky="always"` also keeps it stuck at the top when the split stacks |
 
 The attribute is `valign` and not `align` because `align` is an old HTML attribute that browsers still honour on unknown elements: it would also set the text alignment of everything inside.
 

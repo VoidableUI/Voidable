@@ -194,6 +194,25 @@ export const Section: Story = {
     `),
 };
 
+// A column that stays stuck: beside the list on a wide screen, above it
+// below 48rem. Narrow the viewport and scroll to see it.
+export const StickySplit: Story = {
+  render: () =>
+    inPage(html`
+      <void-split ratio="1:2">
+        <void-stack sticky="always">
+          <span data-void-type="label">Pass geometry</span>
+          <void-skeleton style="height: 8rem"></void-skeleton>
+        </void-stack>
+        <void-rows>
+          ${[1041, 1042, 1043, 1044, 1045, 1046, 1047, 1048, 1049, 1050].map(
+            (n) => html`<void-row><void-row-text><p>Pass ${n}</p></void-row-text></void-row>`,
+          )}
+        </void-rows>
+      </void-split>
+    `),
+};
+
 // The label recipe: one attribute, the small quiet name of a thing.
 export const Labels: Story = {
   render: () =>
