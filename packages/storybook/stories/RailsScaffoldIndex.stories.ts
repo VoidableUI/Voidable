@@ -124,7 +124,7 @@ const deleteDialog = html`
 `;
 
 const productTable = html`
-  <void-table hoverable>
+  <void-table hoverable aria-label="Records">
     <table>
       <thead>
         <tr>

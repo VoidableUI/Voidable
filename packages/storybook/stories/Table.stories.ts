@@ -353,7 +353,7 @@ export const Inset: Story = {
           <void-table inset hoverable stack>${stationsTable}</void-table>
         </void-card-body>
       </void-card>
-      <void-panel>
+      <void-panel aria-label="Inset table in a panel">
         <void-panel-body>
           <void-table inset hoverable>${sampleTable}</void-table>
         </void-panel-body>
