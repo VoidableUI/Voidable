@@ -4,7 +4,7 @@
     "events": {
       "void-click": "Fires after an enabled button is activated, once any form submit or reset it does has run. Not fired while the button is disabled. A native `click` listener works too."
     },
-    "children": "The label: text, or text with an icon. For an icon-only button put an `aria-label` on the button. A link (`<a href>`) or a native `<button>` can go inside to make a link that looks like a button: the inner element is then the one control (the host has no role and no tab stop, and draws the focus ring when the link has focus). `disabled` marks the link `aria-disabled=\"true\"`, takes it out of the tab order and stops it navigating."
+    "children": "The label: text, or text with an icon. For an icon-only button put an `aria-label` on the button. A link (`<a href>`) or a native `<button>` can go inside to make a link that looks like a button: the inner element is then the one control (the host has no role and no tab stop, and draws the focus ring when the link has focus). `disabled` marks the link `aria-disabled=\"true\"`, takes it out of the tab order and stops it navigating. `aria-disabled=\"true\"` on the button instead keeps the link focusable and passes the button's `aria-describedby` on to it."
   },
   "void-action-input": {
     "group": "forms",

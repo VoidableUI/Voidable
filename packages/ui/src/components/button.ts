@@ -13,6 +13,11 @@ import { isInDisabledFieldset, watchDisabledAncestors } from '../form-control.js
  * handling) and the theme draws the button's focus ring when the inner element has focus. `disabled` on a link
  * button sets `aria-disabled="true"` and `tabindex="-1"` on the link and stops it navigating (a link cannot be
  * disabled); on an inner `<button>` it disables that button.
+ *
+ * `aria-disabled="true"` on the host (written by the author, not by `disabled`) makes a button that is disabled but
+ * keeps focus: it stays in the tab order, announces itself as disabled, and does nothing on click, Enter, Space,
+ * form submission or link navigation. Its `aria-describedby` is announced when it has focus (a link button passes
+ * it on to the inner control), so the page can say why the action is unavailable. Removing it restores everything.
  */
 export class VoidButton extends VoidElement {
   /** Key bindings for this element's actions, as JSON (`{"activate":["Enter"]}`); `[]` switches an action off. See the keyboard guide. */
@@ -67,7 +72,9 @@ export class VoidButton extends VoidElement {
   }
 
   /** What the button wrote on the control while disabled, to take back off when it is enabled or replaced. */
-  private _inert: { el: HTMLAnchorElement | HTMLButtonElement; aria: boolean; tabindex: boolean; disabled: boolean } | null = null;
+  private _inert: { el: HTMLAnchorElement | HTMLButtonElement; aria: boolean; tabindex: boolean; disabled: boolean; describedby: boolean } | null = null;
+  /** True while the host's `aria-disabled="true"` is the button's own (written for `disabled`), not the author's. */
+  private _wroteAria = false;
   private _observer: MutationObserver | null = null;
   private _syncQueued = false;
 
@@ -93,11 +100,11 @@ export class VoidButton extends VoidElement {
     this._syncDisabledState(this.formDisabled);
     this._unwatch = watchDisabledAncestors(this, () => this._syncDisabledState(this.formDisabled));
     // A link or button arriving, leaving or changing after first render (a framework render, a morph).
-    // Attributes of the host itself (an author's `aria-disabled`) are not a reason to re-sync.
+    // The host's own `aria-disabled` and `aria-describedby` are the author's to change, and are followed.
     this._observer ??= new MutationObserver((records) => {
-      if (records.some((r) => r.type === 'childList' || r.target !== this)) this._requestSync();
+      if (records.some((r) => r.type === 'childList' || r.target !== this || r.attributeName === 'aria-disabled' || r.attributeName === 'aria-describedby')) this._requestSync();
     });
-    this._observer.observe(this, { childList: true, subtree: true, attributes: true, attributeFilter: ['href', 'aria-disabled', 'tabindex', 'disabled'] });
+    this._observer.observe(this, { childList: true, subtree: true, attributes: true, attributeFilter: ['href', 'aria-disabled', 'aria-describedby', 'tabindex', 'disabled'] });
   }
 
   disconnectedCallback(): void {
@@ -132,43 +139,85 @@ export class VoidButton extends VoidElement {
   /** Writes the host's button semantics, or, for a link button, none and the disabled state of its control. */
   private _syncDisabledState(disabled: boolean): void {
     const control = this._control;
+    const soft = !disabled && this._authorDisabled;
     if (control) {
       // The inner element is the one control: the host is presentational.
       this.setHostAttribute('role', null);
       this.setHostAttribute('tabindex', null);
-      this.setHostAttribute('aria-disabled', null);
-      if (!disabled || this._inert?.el !== control) this._release();
-      if (disabled) this._disableControl(control);
+      this._dropOwnAria();
+      if ((!disabled && !soft) || (this._inert && this._inert.el !== control)) this._release();
+      if (disabled || soft) this._disableControl(control, disabled);
       return;
     }
     this._release();
     this.setHostAttribute('role', 'button');
-    // Absent when enabled, as on every other control.
-    this.setHostAttribute('aria-disabled', disabled ? 'true' : null);
+    // Absent when enabled, as on every other control. An `aria-disabled` the author wrote stays: the button is
+    // then disabled but focusable, so it can say why (`aria-describedby`).
+    if (disabled) {
+      if (this._wroteAria || this.getAttribute('aria-disabled') !== 'true') {
+        this.setHostAttribute('aria-disabled', 'true');
+        this._wroteAria = true;
+      }
+    } else {
+      this._dropOwnAria();
+    }
+    // Truly disabled leaves the tab order; `aria-disabled` alone stays in it.
     this.setHostAttribute('tabindex', disabled ? '-1' : '0');
+  }
+
+  /** The author set `aria-disabled="true"` on the host: not disabled, but it does nothing and says it is disabled. */
+  private get _authorDisabled(): boolean {
+    return !this._wroteAria && this.getAttribute('aria-disabled') === 'true';
+  }
+
+  /** True when the button does nothing: `disabled` (also from a fieldset) or an author's `aria-disabled="true"`. */
+  private get _blocked(): boolean {
+    return this.formDisabled || this._authorDisabled;
+  }
+
+  /** Takes back the host `aria-disabled` the button wrote itself (never one the author wrote). */
+  private _dropOwnAria(): void {
+    if (!this._wroteAria) return;
+    this._wroteAria = false;
+    this.setHostAttribute('aria-disabled', null);
   }
 
   /**
    * A link cannot be disabled: it is announced as disabled (`aria-disabled`), leaves the tab order, and
-   * `_handleClick` stops it navigating. A native button is disabled for real. Only what is not already there is
-   * written, and remembered so enabling takes back exactly that.
+   * `_handleClick` stops it navigating. A native button is disabled for real. With only `aria-disabled` on the
+   * host (`hard` false) the control stays in the tab order and is only announced as disabled, and the host's
+   * `aria-describedby` is passed on to it, so a reason can be read when it has focus. Only what is not already
+   * there is written, and remembered so enabling takes back exactly that.
    */
-  private _disableControl(control: HTMLAnchorElement | HTMLButtonElement): void {
-    const mine = this._inert?.el === control ? this._inert : { el: control, aria: false, tabindex: false, disabled: false };
-    if (control instanceof HTMLButtonElement) {
-      if (!control.disabled) {
-        control.disabled = true;
-        mine.disabled = true;
-      }
-    } else {
-      if (!control.hasAttribute('aria-disabled')) {
-        control.setAttribute('aria-disabled', 'true');
-        mine.aria = true;
-      }
-      if (!control.hasAttribute('tabindex')) {
+  private _disableControl(control: HTMLAnchorElement | HTMLButtonElement, hard: boolean): void {
+    const mine = this._inert?.el === control ? this._inert : { el: control, aria: false, tabindex: false, disabled: false, describedby: false };
+    if (!control.hasAttribute('aria-disabled')) {
+      control.setAttribute('aria-disabled', 'true');
+      mine.aria = true;
+    }
+    if (hard) {
+      if (control instanceof HTMLButtonElement) {
+        if (!control.disabled) {
+          control.disabled = true;
+          mine.disabled = true;
+        }
+      } else if (!control.hasAttribute('tabindex')) {
         control.setAttribute('tabindex', '-1');
         mine.tabindex = true;
       }
+    } else {
+      if (mine.disabled) control.removeAttribute('disabled');
+      if (mine.tabindex) control.removeAttribute('tabindex');
+      mine.disabled = false;
+      mine.tabindex = false;
+    }
+    const reason = this.getAttribute('aria-describedby');
+    if (reason && (!control.hasAttribute('aria-describedby') || mine.describedby)) {
+      if (control.getAttribute('aria-describedby') !== reason) control.setAttribute('aria-describedby', reason);
+      mine.describedby = true;
+    } else if (!reason && mine.describedby) {
+      control.removeAttribute('aria-describedby');
+      mine.describedby = false;
     }
     this._inert = mine;
   }
@@ -180,21 +229,22 @@ export class VoidButton extends VoidElement {
     this._inert = null;
     if (mine.el instanceof HTMLButtonElement) {
       if (mine.disabled) mine.el.disabled = false;
-    } else {
-      if (mine.aria) mine.el.removeAttribute('aria-disabled');
-      if (mine.tabindex) mine.el.removeAttribute('tabindex');
+    } else if (mine.tabindex) {
+      mine.el.removeAttribute('tabindex');
     }
+    if (mine.aria) mine.el.removeAttribute('aria-disabled');
+    if (mine.describedby) mine.el.removeAttribute('aria-describedby');
   }
 
-  /** A click on the link or button inside a disabled button goes nowhere: not to its own listeners, not to the page. */
+  /** A click on a disabled button, or on the link or button inside it, goes nowhere: not to its own listeners, not to the page. */
   private _blockDisabledControl = (e: Event): void => {
-    if (e.target === this || !this.formDisabled || !this._control) return;
+    if (!this._blocked) return;
     e.preventDefault();
     e.stopImmediatePropagation();
   };
 
   private _handleClick = (e: Event): void => {
-    if (this.formDisabled) {
+    if (this._blocked) {
       // Also stops a disabled link button's link from navigating.
       e.preventDefault();
       e.stopImmediatePropagation();

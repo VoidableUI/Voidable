@@ -25,6 +25,24 @@ An `<a href>` (or a native `<button>`) as the content makes a link that looks li
 
 A link cannot be disabled, so `disabled` on a link button marks the link `aria-disabled="true"`, takes it out of the tab order (`tabindex="-1"`) and stops clicks and Enter from following it. A native `<button>` inside is disabled for real. Enabling the button takes back exactly what it wrote.
 
+## Showing why an action is unavailable
+
+A button with `disabled` leaves the tab order, so a keyboard or screen-reader user cannot reach it and never learns why it does not work. When the reason matters (a form that is incomplete, a missing permission), write `aria-disabled="true"` on the `void-button` instead, and point `aria-describedby` at the reason. The button stays in the tab order, is announced as a disabled button, and reads the reason when it has focus. Click, Enter, Space, form submission (`type="submit"`) and link navigation do nothing, and it is drawn as disabled with its focus ring at full strength. Remove the attribute and it works again.
+
+<div class="vd-example not-content">
+  <div class="vd-row">
+    <void-button variant="filled" aria-disabled="true" aria-describedby="why-save">Save station</void-button>
+    <span id="why-save">Enter a station name to save.</span>
+  </div>
+</div>
+
+```html
+<void-button variant="filled" type="submit" aria-disabled="true" aria-describedby="why-save">Save station</void-button>
+<p id="why-save">Enter a station name to save.</p>
+```
+
+On a link button the inner link or button is the control, so it gets the `aria-disabled` and a copy of the button's `aria-describedby`; a link stays focusable and does not navigate. Use real `disabled` when there is nothing to explain and the control should be skipped. The attribute is yours: the button never writes or removes an `aria-disabled` you set. React (`<Button aria-disabled="true" aria-describedby="why">`), `.heex` (`<.button aria-disabled="true" aria-describedby="why">`) and plain ERB or Blade markup all pass both attributes through to the element.
+
 ## Ghost
 
 A ghost button has no border and no fill until it is hovered, so several of them in a row read as text, not as a row of boxes. Its label is the normal text colour, its focus ring is the same as every other button's, and in forced-colours mode it shows a border on hover and focus.

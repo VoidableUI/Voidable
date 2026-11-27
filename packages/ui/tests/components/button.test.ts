@@ -449,6 +449,179 @@ describe('VoidButton', () => {
     });
   });
 
+  describe('author aria-disabled (disabled but focusable, with a reason)', () => {
+    const settle = () => new Promise<void>((r) => setTimeout(r));
+    let el: VoidButton;
+
+    function mount(attrs: string, inner = 'Save', wrap?: HTMLElement): VoidButton {
+      const host = document.createElement('div');
+      host.innerHTML = `<void-button ${attrs}>${inner}</void-button>`;
+      el = host.firstElementChild as VoidButton;
+      (wrap ?? document.body).append(host);
+      return el;
+    }
+
+    it('keeps the attribute, role and the tab stop', async () => {
+      mount('aria-disabled="true" aria-describedby="why"');
+      await el.updateComplete;
+      expect(el.getAttribute('aria-disabled')).toBe('true');
+      expect(el.getAttribute('role')).toBe('button');
+      expect(el.getAttribute('tabindex')).toBe('0');
+      expect(el.getAttribute('aria-describedby')).toBe('why');
+    });
+
+    it('does nothing on click, Enter or Space', async () => {
+      mount('aria-disabled="true"');
+      await el.updateComplete;
+      let clicks = 0;
+      let voidClicks = 0;
+      document.addEventListener('click', () => clicks++);
+      el.addEventListener('void-click', () => voidClicks++);
+      el.click();
+      el.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+      el.dispatchEvent(new KeyboardEvent('keydown', { key: ' ', bubbles: true }));
+      el.dispatchEvent(new KeyboardEvent('keyup', { key: ' ', bubbles: true }));
+      expect(clicks).toBe(0);
+      expect(voidClicks).toBe(0);
+    });
+
+    it('does not submit or reset a form', async () => {
+      const form = document.createElement('form');
+      document.body.append(form);
+      let submits = 0;
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        submits++;
+      });
+      const input = document.createElement('input');
+      input.defaultValue = 'a';
+      form.append(input);
+      mount('type="submit" aria-disabled="true"', 'Send', form);
+      const reset = mount('type="reset" aria-disabled="true"', 'Reset', form);
+      await reset.updateComplete;
+      input.value = 'b';
+      form.querySelectorAll('void-button').forEach((b) => (b as HTMLElement).click());
+      expect(submits).toBe(0);
+      expect(input.value).toBe('b');
+    });
+
+    it('works again when aria-disabled is removed, and the button never wrote or removed it itself', async () => {
+      mount('aria-disabled="true"');
+      await el.updateComplete;
+      el.removeAttribute('aria-disabled');
+      await settle();
+      expect(el.hasAttribute('aria-disabled')).toBe(false);
+      let voidClicks = 0;
+      el.addEventListener('void-click', () => voidClicks++);
+      el.click();
+      expect(voidClicks).toBe(1);
+    });
+
+    it('is blocked when aria-disabled is added later', async () => {
+      mount('');
+      await el.updateComplete;
+      el.setAttribute('aria-disabled', 'true');
+      await settle();
+      let voidClicks = 0;
+      el.addEventListener('void-click', () => voidClicks++);
+      el.click();
+      expect(voidClicks).toBe(0);
+      expect(el.getAttribute('tabindex')).toBe('0');
+    });
+
+    it('real disabled keeps its meaning (leaves the tab order) and leaves the author attribute in place when enabled', async () => {
+      mount('aria-disabled="true"');
+      await el.updateComplete;
+      el.disabled = true;
+      await el.updateComplete;
+      expect(el.getAttribute('tabindex')).toBe('-1');
+      expect(el.getAttribute('aria-disabled')).toBe('true');
+      el.disabled = false;
+      await el.updateComplete;
+      expect(el.getAttribute('tabindex')).toBe('0');
+      expect(el.getAttribute('aria-disabled')).toBe('true');
+    });
+
+    it('real disabled still writes and then removes its own aria-disabled', async () => {
+      mount('');
+      el.disabled = true;
+      await el.updateComplete;
+      expect(el.getAttribute('aria-disabled')).toBe('true');
+      el.disabled = false;
+      await el.updateComplete;
+      expect(el.hasAttribute('aria-disabled')).toBe(false);
+    });
+
+    describe('link button', () => {
+      const link = () => el.querySelector('a, button') as HTMLElement;
+
+      it('keeps the link in the tab order, marks it aria-disabled and blocks navigation', async () => {
+        mount('aria-disabled="true"', '<a href="#docs">Docs</a>');
+        await el.updateComplete;
+        await settle();
+        expect(link().getAttribute('aria-disabled')).toBe('true');
+        expect(link().hasAttribute('tabindex')).toBe(false);
+        expect(el.hasAttribute('role')).toBe(false);
+        expect(el.hasAttribute('tabindex')).toBe(false);
+        let reached = 0;
+        document.addEventListener('click', () => reached++, { once: true });
+        const click = new MouseEvent('click', { bubbles: true, cancelable: true });
+        link().dispatchEvent(click);
+        expect(click.defaultPrevented).toBe(true);
+        expect(reached).toBe(0);
+      });
+
+      it('passes aria-describedby on to the control, and takes everything back when removed', async () => {
+        mount('aria-disabled="true" aria-describedby="why"', '<a href="#docs">Docs</a>');
+        await el.updateComplete;
+        await settle();
+        expect(link().getAttribute('aria-describedby')).toBe('why');
+        el.setAttribute('aria-describedby', 'other');
+        await settle();
+        expect(link().getAttribute('aria-describedby')).toBe('other');
+        el.removeAttribute('aria-disabled');
+        await settle();
+        expect(link().hasAttribute('aria-disabled')).toBe(false);
+        expect(link().hasAttribute('aria-describedby')).toBe(false);
+      });
+
+      it('a native button inside stays enabled (focusable) but aria-disabled, and does not submit', async () => {
+        const form = document.createElement('form');
+        document.body.append(form);
+        let submits = 0;
+        form.addEventListener('submit', (e) => {
+          e.preventDefault();
+          submits++;
+        });
+        mount('aria-disabled="true"', '<button type="submit">Send</button>', form);
+        await el.updateComplete;
+        await settle();
+        const button = link() as HTMLButtonElement;
+        expect(button.disabled).toBe(false);
+        expect(button.getAttribute('aria-disabled')).toBe('true');
+        button.click();
+        expect(submits).toBe(0);
+        el.removeAttribute('aria-disabled');
+        await settle();
+        button.click();
+        expect(submits).toBe(1);
+      });
+
+      it('real disabled on top of aria-disabled disables the control, and going back keeps it aria-disabled', async () => {
+        mount('aria-disabled="true"', '<button>Go</button>');
+        await el.updateComplete;
+        await settle();
+        el.disabled = true;
+        await el.updateComplete;
+        expect((link() as HTMLButtonElement).disabled).toBe(true);
+        el.disabled = false;
+        await el.updateComplete;
+        expect((link() as HTMLButtonElement).disabled).toBe(false);
+        expect(link().getAttribute('aria-disabled')).toBe('true');
+      });
+    });
+  });
+
   describe('form association', () => {
     it('resets the form when type="reset" and clicked', () => {
       const form = document.createElement('form');
