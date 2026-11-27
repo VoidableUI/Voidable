@@ -109,7 +109,9 @@ export type WarningKind =
   /** A `keys` attribute that is not a JSON object, or names an action the element does not have (#90). */
   | 'keys'
   /** An attribute is set that another attribute on the same element makes without effect (`resize` with `autosize`). */
-  | 'attribute-conflict';
+  | 'attribute-conflict'
+  /** An overlay opened away from its trigger because a page rule pins it (an inset on the content beats anchor positioning). */
+  | 'misplaced-overlay';
 
 /** One reported problem. */
 export interface DevWarning {
