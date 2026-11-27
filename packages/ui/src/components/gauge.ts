@@ -1,4 +1,5 @@
 import { html, svg, nothing } from 'lit';
+import { styleProps } from '../style-props.js';
 import { VoidElement } from '../base.js';
 import { msg } from '../messages.js';
 import { property, state } from 'lit/decorators.js';
@@ -646,7 +647,7 @@ export class VoidGauge extends VoidElement {
         bands.push(svg`
           <path
             class="void-gauge-zone"
-            style="--zone-color: ${z.color};"
+            style=${styleProps({'--zone-color': z.color})}
             d=${gaugeZoneBand(cx, cy, r, this.thickness, renderStart, zoneEnd, leadingCap, trailingCap)}
           ></path>
         `);
@@ -670,7 +671,7 @@ export class VoidGauge extends VoidElement {
       bands.push(svg`
         <path
           class="void-gauge-zone"
-          style="--zone-color: ${z.color}; --gauge-stroke-width: ${zoneThickness};"
+          style=${styleProps({'--zone-color': z.color, '--gauge-stroke-width': zoneThickness})}
           d=${gaugeArc(cx, cy, r, this._angleAt(z.from), this._angleAt(z.to))}
         ></path>
       `);
@@ -688,11 +689,11 @@ export class VoidGauge extends VoidElement {
     const caps: unknown[] = [];
     const first = this.zones[0];
     if (first && Math.abs(first.from - this.min) < 1e-6) {
-      caps.push(svg`<path class="void-gauge-zone-cap" d=${halfDisk(this._angleAt(first.from), 1)} style="--zone-color: ${first.color};"></path>`);
+      caps.push(svg`<path class="void-gauge-zone-cap" d=${halfDisk(this._angleAt(first.from), 1)} style=${styleProps({'--zone-color': first.color})}></path>`);
     }
     const last = this.zones[this.zones.length - 1];
     if (last && Math.abs(last.to - this.max) < 1e-6) {
-      caps.push(svg`<path class="void-gauge-zone-cap" d=${halfDisk(this._angleAt(last.to), 0)} style="--zone-color: ${last.color};"></path>`);
+      caps.push(svg`<path class="void-gauge-zone-cap" d=${halfDisk(this._angleAt(last.to), 0)} style=${styleProps({'--zone-color': last.color})}></path>`);
     }
 
     return svg`<g class="void-gauge-zones">${bands}${caps}</g>`;
@@ -757,7 +758,7 @@ export class VoidGauge extends VoidElement {
           <path
             class="void-gauge-segment"
             d=${d}
-            style="--segment-color: ${color}; --gauge-stroke-width: ${this.thickness};"
+            style=${styleProps({'--segment-color': color, '--gauge-stroke-width': this.thickness})}
             data-segment-index=${origIdx}
           ></path>
         `);
@@ -783,12 +784,12 @@ export class VoidGauge extends VoidElement {
     if (firstStart !== null && firstColor !== null) {
       const lx = cx + r * Math.cos(firstStart);
       const ly = cy + r * Math.sin(firstStart);
-      caps.push(svg`<circle class="void-gauge-segment-cap" cx=${lx} cy=${ly} r=${capR} style="--segment-color: ${firstColor};"></circle>`);
+      caps.push(svg`<circle class="void-gauge-segment-cap" cx=${lx} cy=${ly} r=${capR} style=${styleProps({'--segment-color': firstColor})}></circle>`);
     }
     if (lastEnd !== null && lastColor !== null) {
       const tx = cx + r * Math.cos(lastEnd);
       const ty = cy + r * Math.sin(lastEnd);
-      caps.push(svg`<circle class="void-gauge-segment-cap" cx=${tx} cy=${ty} r=${capR} style="--segment-color: ${lastColor};"></circle>`);
+      caps.push(svg`<circle class="void-gauge-segment-cap" cx=${tx} cy=${ty} r=${capR} style=${styleProps({'--segment-color': lastColor})}></circle>`);
     }
 
     return svg`<g class="void-gauge-segments">${caps}${results}</g>`;
@@ -917,7 +918,7 @@ export class VoidGauge extends VoidElement {
              matching the unfilled portion of the gauge). -->
         <path
           class="void-gauge-track"
-          style="--gauge-stroke-width: ${this.thickness};"
+          style=${styleProps({'--gauge-stroke-width': this.thickness})}
           d=${gaugeArc(cx, cy, r, startAngle, endAngle)}
         ></path>
 
@@ -935,7 +936,7 @@ export class VoidGauge extends VoidElement {
         ${hasFill && !this._hasSegments() ? svg`
           <path
             class="void-gauge-value"
-            style="--value-color: ${fillColor}; --gauge-stroke-width: ${this.thickness};"
+            style=${styleProps({'--value-color': fillColor, '--gauge-stroke-width': this.thickness})}
             d=${this.variant === 'outline'
               ? gaugeBand(cx, cy, r, this.thickness, startAngle, fillEndAngle)
               : gaugeArc(cx, cy, r, startAngle, fillEndAngle)}

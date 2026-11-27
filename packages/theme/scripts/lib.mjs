@@ -388,7 +388,7 @@ export function runtimeProperties() {
   const ui = path.resolve(ROOT, '../ui/src');
   if (!fs.existsSync(ui)) return out;
   for (const file of walk(ui).filter((x) => x.endsWith('.ts'))) {
-    for (const m of read(file).matchAll(/(?<![\w-])(--void-[a-z0-9-]+)(?=\s*:)|(?:setProperty|setHostStyle)\(\s*['"](--void-[a-z0-9-]+)/g)) out.add(m[1] ?? m[2]);
+    for (const m of read(file).matchAll(/(?<![\w-])(--void-[a-z0-9-]+)(?=['"]?\s*:)|(?:setProperty|setHostStyle)\(\s*['"](--void-[a-z0-9-]+)/g)) out.add(m[1] ?? m[2]);
   }
   return out;
 }

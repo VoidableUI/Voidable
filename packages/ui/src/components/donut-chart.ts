@@ -1,4 +1,5 @@
 import { html, svg, nothing, type TemplateResult } from 'lit';
+import { styleProps } from '../style-props.js';
 import { VoidElement } from '../base.js';
 import { msg } from '../messages.js';
 import { property, state } from 'lit/decorators.js';
@@ -331,7 +332,7 @@ export class VoidDonutChart extends VoidElement {
           <path
             class="void-donut-chart-segment"
             d=${arcPath(cx, cy, outerR, startPadded, endPadded, innerR)}
-            style="--segment-color: ${color}"
+            style=${styleProps({'--segment-color': color})}
             data-segment-index=${i}
           ></path>
         `);

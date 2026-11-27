@@ -1,0 +1,17 @@
+---
+title: Content Security Policy
+description: The strict policy Voidable runs under, with no 'unsafe-inline' and no 'unsafe-eval', and what each directive is for.
+---
+
+Voidable works under a strict Content Security Policy. It needs no `'unsafe-inline'` and no `'unsafe-eval'`:
+
+```text
+Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self'
+```
+
+- **Styles.** The components set their state (a progress fill, a slider position, chart colours) through the CSSOM, which a policy allows, never through `style="…"` attributes or `<style>` elements. The toast's live regions take their rule from a constructable stylesheet. Your own `style` attributes are still yours to allow or remove.
+- **Scripts.** Nothing uses `eval`, `new Function` or a worker. The optional autoloader imports its component modules from the folder it was loaded from, so they fall under `script-src 'self'`.
+- **Images.** The theme draws some icons (the chevrons of the select, accordion, collapsible and multiselect) as CSS masks from `data:` SVG, so it needs `img-src data:`. Without it those icons do not appear.
+- **Fonts and network.** The theme uses system fonts and loads nothing from another origin.
+
+A browser test serves every component under this policy and fails on any `securitypolicyviolation` event, in Chromium, Firefox and WebKit.
