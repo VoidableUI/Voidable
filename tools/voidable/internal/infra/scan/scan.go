@@ -322,6 +322,8 @@ func (s *state) analyzeContent(src []byte, from, to int, lang domain.Lang) domai
 	b := src[:to]
 	// header is how many <th> are open at this point: a checkbox inside one is a select-all.
 	header := 0
+	// wrapped is how many <void-button> are open at this point.
+	wrapped := 0
 	for i := from; i < to; i++ {
 		if end := skipComment(b, i); end > i {
 			i = end - 1
@@ -334,6 +336,9 @@ func (s *state) analyzeContent(src []byte, from, to int, lang domain.Lang) domai
 		case ch == '<' && i+1 < to && (b[i+1] == '/' || b[i+1] == '!'):
 			if b[i+1] == '/' && header > 0 && readTagName(b, i+2) == "th" {
 				header--
+			}
+			if b[i+1] == '/' && wrapped > 0 && readTagName(b, i+2) == "void-button" {
+				wrapped--
 			}
 			for i < to && b[i] != '>' {
 				i++
@@ -349,11 +354,15 @@ func (s *state) analyzeContent(src []byte, from, to int, lang domain.Lang) domai
 				c.Native = append(c.Native, name)
 			}
 			t, next := s.parseTag(b, i, name, lang)
-			if strings.HasPrefix(name, "void-") || isControl(name, t.Attrs) {
+			// A native link or button inside a <void-button> is that button, not a second control.
+			if strings.HasPrefix(name, "void-") || (wrapped == 0 && isControl(name, t.Attrs)) {
 				if c.Counts == nil {
 					c.Counts = map[string]int{}
 				}
 				c.Counts[name]++
+			}
+			if name == "void-button" && !t.SelfClosing {
+				wrapped++
 			}
 			if name == "th" && !t.SelfClosing {
 				header++

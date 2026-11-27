@@ -428,19 +428,16 @@ func isGlobalProperty(name string) bool {
 }
 
 // controlsIn counts the controls written inside a tag: the native ones the
-// scanner counted and the void-* tags the element names as controls. A
-// <void-button> around a native link or button is one control, not two.
+// scanner counted (not those inside a <void-button>, which is one control)
+// and the void-* tags the element names as controls.
 func controlsIn(t Tag, l *LinkedControl) int {
-	native, wrapped := 0, 0
+	n := 0
 	for name, count := range t.Content.Counts {
-		switch {
-		case !strings.HasPrefix(name, "void-"):
-			native += count
-		case contains(l.Controls, name):
-			wrapped += count
+		if !strings.HasPrefix(name, "void-") || contains(l.Controls, name) {
+			n += count
 		}
 	}
-	return native + wrapped - min(native, t.Content.Counts["void-button"])
+	return n
 }
 
 // withinTag reports whether tags[j] is inside tags[i] (anywhere below it).
