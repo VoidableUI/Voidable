@@ -46,6 +46,19 @@ describe('table messages', () => {
     expect(msg(host, 'table.rowsShown', { shown: 2, total: 4 })).toBe('2 lignes sur 4');
   });
 
+  it('has the scroll-region name in English, French and Arabic', () => {
+    const host = document.createElement('div');
+    document.body.append(host);
+    const seen = new Set<string>();
+    for (const lang of ['en', 'fr', 'ar']) {
+      host.setAttribute('lang', lang);
+      const text = msg(host, 'table.scrollRegion');
+      expect(text).not.toBe('table.scrollRegion');
+      seen.add(text);
+    }
+    expect(seen.size).toBe(3);
+  });
+
   it('announces a filter in the language of the page', async () => {
     const el = make('fr', 'filter="a"', ROWS, '<th data-key="n">Nom</th><th data-key="v" data-sort="number">Valeur</th>');
     await settle(el);

@@ -177,7 +177,7 @@ interface Column {
  *
  * **Overflow.** Nothing is clipped by default, so a menu, popover or tooltip opened from a cell is
  * always fully visible. `scrollable` makes the table its own horizontal scroll region: it is
- * focusable and labelled (`label`, else the `<caption>`, else `aria-label`) only while it actually
+ * focusable and labelled (`label`, else the `<caption>`, else an `aria-label` you wrote, else the message `table.scrollRegion`) only while it actually
  * overflows, and fades its edges while there is more to scroll to. `max-height` makes the region
  * scroll vertically too, which is what `sticky-header` needs; without it a sticky header sticks to
  * the page.
@@ -236,7 +236,7 @@ export class VoidTable extends InternalsFormControl(VoidElement) {
   @property({ type: Boolean, reflect: true, attribute: 'sticky-column' }) stickyColumn = false;
   /** Height (a CSS length) at which a scrollable table scrolls vertically. */
   @property({ type: String, reflect: true, attribute: 'max-height' }) maxHeight: string | null = null;
-  /** Accessible name of the scroll region (default: the table's caption, then `aria-label`). */
+  /** Accessible name of the scroll region (default: the table's caption, then an `aria-label` you wrote, then the `table.scrollRegion` message). */
   @property({ type: String, reflect: true }) label: string | null = null;
   /** The key (`data-key` of the header cell, else its position) of the column the rows are sorted by. */
   @property({ type: String, reflect: true }) sort: string | null = null;
@@ -299,7 +299,8 @@ export class VoidTable extends InternalsFormControl(VoidElement) {
   #autoStack = new WeakMap<Element, string>();
   #autoAlign = new WeakMap<Element, string>();
   #writtenLabel: string | null = null;
-  #warned = false;
+  #wroteTabindex = false;
+  #wroteRole = false;
   #stackStyled = false;
 
   override connectedCallback(): void {
@@ -1109,13 +1110,16 @@ export class VoidTable extends InternalsFormControl(VoidElement) {
       this.label ||
       (authorLabel || this.hasAttribute('aria-labelledby')
         ? ''
-        : (this.querySelector('caption')?.textContent ?? '').replace(/\s+/g, ' ').trim());
-    if (!name && !authorLabel && !this.hasAttribute('aria-labelledby') && !this.#warned) {
-      this.#warned = true;
-      console.warn('<void-table scrollable>: the scroll region has no accessible name. Set label, aria-label or add a <caption>.', this);
+        : (this.querySelector('caption')?.textContent ?? '').replace(/\s+/g, ' ').trim()) ||
+      (authorLabel || this.hasAttribute('aria-labelledby') ? '' : msg(this, 'table.scrollRegion'));
+    if (!this.hasAttribute('tabindex')) {
+      this.setHostAttribute('tabindex', '0');
+      this.#wroteTabindex = true;
     }
-    this.setHostAttribute('tabindex', '0');
-    if (!this.hasAttribute('role') || this.getAttribute('role') === 'region') this.setHostAttribute('role', 'region');
+    if (!this.hasAttribute('role')) {
+      this.setHostAttribute('role', 'region');
+      this.#wroteRole = true;
+    }
     if (name && !authorLabel) {
       this.setHostAttribute('aria-label', name);
       this.#writtenLabel = name;
@@ -1124,8 +1128,10 @@ export class VoidTable extends InternalsFormControl(VoidElement) {
   }
 
   #clearRegionSemantics(): void {
-    this.setHostAttribute('tabindex', null);
-    if (this.getAttribute('role') === 'region') this.setHostAttribute('role', null);
+    if (this.#wroteTabindex) this.setHostAttribute('tabindex', null);
+    this.#wroteTabindex = false;
+    if (this.#wroteRole) this.setHostAttribute('role', null);
+    this.#wroteRole = false;
     if (this.#writtenLabel !== null) {
       if (this.getAttribute('aria-label') === this.#writtenLabel) this.setHostAttribute('aria-label', null);
       this.#writtenLabel = null;
