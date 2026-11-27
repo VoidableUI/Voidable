@@ -32,23 +32,20 @@ export class VoidCard extends VoidElement {
     onChange: () => this._wire(),
   });
 
-  static override get observedAttributes(): string[] {
-    return [...super.observedAttributes, 'aria-disabled'];
-  }
-
-  override attributeChangedCallback(name: string, old: string | null, value: string | null): void {
-    super.attributeChangedCallback(name, old, value);
-    if (name === 'aria-disabled') this._parts.requestSync();
-  }
+  /** Re-wires when the author turns `aria-disabled` on or off (it is not a declared attribute). */
+  private _watch: MutationObserver | null = null;
 
   override connectedCallback(): void {
     super.connectedCallback();
     this.addEventListener('click', this._onClick, true);
+    this._watch ??= new MutationObserver(() => this._parts.requestSync());
+    this._watch.observe(this, { attributes: true, attributeFilter: ['aria-disabled'] });
   }
 
   override disconnectedCallback(): void {
     super.disconnectedCallback();
     this.removeEventListener('click', this._onClick, true);
+    this._watch?.disconnect();
   }
 
   /** An unavailable card (`aria-disabled="true"`) does nothing when its link or button is activated. */
