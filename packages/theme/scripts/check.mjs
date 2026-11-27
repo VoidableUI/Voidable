@@ -36,7 +36,7 @@ const LAYER_OF = (file) => {
   if (file === 'type.css') return 'components.void.type';
   if (file === 'forced-colors.css') return 'components.void.a11y';
   if (file === 'pre-upgrade.css' || file.startsWith('components/')) return 'components.void.components';
-  if (/^(patterns|media|app-shell)\//.test(file)) return 'components.void.patterns';
+  if (/^(patterns|media|app-shell|narrow)\//.test(file)) return 'components.void.patterns';
   return undefined;
 };
 const imports = L.indexImports();
@@ -53,7 +53,7 @@ const SKIP = new Set(['index.css', 'core.css', 'layers.css', 'base.css']);
 const walk = (d) => fs.readdirSync(d, { withFileTypes: true }).flatMap((e) => (e.isDirectory() ? walk(path.join(d, e.name)) : [path.join(d, e.name)]));
 const srcFiles = walk(SRC).filter((f) => f.endsWith('.css')).map((f) => path.relative(SRC, f));
 for (const f of srcFiles) {
-  if (SKIP.has(f) || /^(themes|skins)\//.test(f)) continue;
+  if (SKIP.has(f) || /^(themes|skins|narrow-src)\//.test(f)) continue; // narrow-src holds templates; narrow/ is built from them
   const n = seen.get(f) ?? 0;
   if (n !== 1) fail(`src/${f} is imported ${n} times by src/core.css (it must be exactly once, or it is never built)`);
 }
@@ -105,6 +105,8 @@ const IMPORTANT_OK = new Map([
   ['components/overlay.css|translate', 'reduced motion beats the transform the component sets inline'],
   ['components/overlay.css|scale', 'reduced motion beats the transform the component sets inline'],
   ['patterns/shell.css|display', 'data-void-hide is a utility: it must win over any display rule'],
+  ['narrow-src/shell.css|display', 'data-void-hide is a utility: it must win over any display rule (template)'],
+  ['narrow/shell.css|display', 'data-void-hide is a utility: it must win over any display rule (generated from narrow-src)'],
 ]);
 for (const f of srcFiles) {
   postcss.parse(L.read(path.join(SRC, f)), { from: f }).walkDecls((d) => {

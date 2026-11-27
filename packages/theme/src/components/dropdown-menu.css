@@ -86,3 +86,17 @@ void-dropdown-menu-item[disabled] {
   void-dropdown-menu-item { min-block-size: var(--void-hit-target); }
   void-dropdown-menu-item:has(> a) { align-items: stretch; }
 }
+
+/* `block`: the trigger fills the host, and where the browser can size from the anchor the menu is at least as wide
+   as the trigger (as a select's list is), so a switcher and its menu match the column they sit in. */
+void-dropdown-menu[block] > void-dropdown-menu-trigger > :is(void-button, button) {
+  flex: 1;
+  justify-content: flex-start;
+  min-width: 0;
+}
+
+@supports (min-width: anchor-size(width)) {
+  void-dropdown-menu[block] > void-dropdown-menu-content {
+    min-width: anchor-size(width);
+  }
+}

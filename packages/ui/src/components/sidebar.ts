@@ -15,10 +15,13 @@ export class VoidSidebar extends VoidElement {
    * has no built-in toggle button, so wire one (for example a `void-hamburger`) to this attribute.
    */
   @property({ type: Boolean, reflect: true }) collapsed = false;
-  /** CSS width when expanded. Defaults to the theme's `--void-sidebar-width`. */
-  @property({ type: String, reflect: true }) width = 'var(--void-sidebar-width)';
-  /** CSS width when collapsed. Defaults to the theme's `--void-sidebar-collapsed-width`. */
-  @property({ type: String, attribute: 'collapsed-width', reflect: true }) collapsedWidth = 'var(--void-sidebar-collapsed-width)';
+  /**
+   * CSS width when expanded. Without it the width is `--void-sidebar-width`, which you can set in CSS on the
+   * sidebar or an ancestor; the attribute overrides it.
+   */
+  @property({ type: String, reflect: true }) width: string | null = null;
+  /** CSS width when collapsed. Without it the width is `--void-sidebar-collapsed-width`. */
+  @property({ type: String, attribute: 'collapsed-width', reflect: true }) collapsedWidth: string | null = null;
   /** Which side of the content the sidebar sits on, in the reading direction: `start` (default) or `end`. */
   @property({ type: String, reflect: true }) side: 'start' | 'end' = 'start';
 
@@ -60,7 +63,9 @@ export class VoidSidebar extends VoidElement {
   }
 
   private _updateWidth(): void {
-    this.setHostStyle('--void-sidebar-width', this.collapsed ? this.collapsedWidth : this.width);
+    // A private override the theme reads before the token, so an attribute wins and an unset one leaves the
+    // token (set in CSS on the sidebar or an ancestor) in charge.
+    this.setHostStyle('--_void-sidebar-width', this.collapsed ? this.collapsedWidth : this.width);
   }
 }
 

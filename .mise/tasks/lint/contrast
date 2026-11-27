@@ -256,6 +256,18 @@ function checkConfig(name, overrides, { quiet = false, skin = {} } = {}) {
       check(`text on ${st} tint over ${s}`, c('text'), tintOf(st, base), 4.5);
       check(`stat label (text-secondary) on ${st} tint over ${s}`, c('text-secondary'), tintOf(st, base), 4.5);
     }
+    // Diff (void-diff): on a changed line, the marker ink, the text and the line numbers (text-secondary) on
+    // the subtle fill; on a changed word, the text on the strong fill over that line. Over every surface a
+    // diff sits on, the container surface (which a skin may assign) included.
+    const diffBases = [...['bg', 'surface', 'bg-secondary', 'bg-elevated'].map((s) => [s, solid(s)]), ['container-surface', flat(tokenColor('--void-container-surface'))]];
+    for (const kind of ['ins', 'del']) for (const [s, base] of diffBases) {
+      const line = over(c(`diff-${kind}-subtle`), base);
+      const word = over(c(`diff-${kind}-strong`), line);
+      check(`diff ${kind} marker on a changed line over ${s}`, c(`diff-${kind}`), line, 4.5);
+      check(`text on a diff ${kind} line over ${s}`, c('text'), line, 4.5);
+      check(`line number (text-secondary) on a diff ${kind} line over ${s}`, c('text-secondary'), line, 4.5);
+      check(`text on a diff ${kind} word over ${s}`, c('text'), word, 4.5);
+    }
   }
   return local;
 }

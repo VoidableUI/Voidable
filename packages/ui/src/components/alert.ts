@@ -9,7 +9,8 @@ import { closeControlPressed, removeWithFocus } from '../dismiss.js';
  * Its role follows the colour: `error` and `warning` are `role="alert"` (announced at once, interrupting), every
  * other colour is `role="status"` (announced politely). A role you write on it is kept.
  *
- * Its text is written as parts: an optional `<void-alert-title>`, the `<void-alert-description>` and an optional
+ * Its text is written as parts: an optional `<void-alert-title>`, the `<void-alert-description>`, an optional
+ * `<void-alert-actions>` (buttons or links such as Retry, small by default, below the text at the trailing edge) and an optional
  * `<void-alert-close>`. The parts are never moved. The close part wraps the one control the author writes (a
  * `<button type="button" aria-label="Dismiss">`); pressing it fires `void-close` and, unless that is cancelled, removes the alert (focus inside
  * it moves on to the next focusable element). Without a close part the alert cannot be dismissed.
@@ -30,7 +31,7 @@ export class VoidAlert extends VoidElement {
   @property({ type: String, reflect: true }) variant: 'subtle' | 'filled' = 'subtle';
 
   protected readonly _parts = new PartsController(this, {
-    tags: ['void-alert-title', 'void-alert-description', 'void-alert-close'],
+    tags: ['void-alert-title', 'void-alert-description', 'void-alert-actions', 'void-alert-close'],
     onChange: () => undefined,
   });
 

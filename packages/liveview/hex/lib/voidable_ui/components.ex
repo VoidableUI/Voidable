@@ -280,7 +280,7 @@ defmodule VoidableUI.Components do
   @doc """
   Renders a `<void-alert>` message.
 
-  Write its parts as children: an optional `<void-alert-title>`, the `<void-alert-description>` and an optional
+  Write its parts as children: an optional `<void-alert-title>`, the `<void-alert-description>`, an optional `<void-alert-actions>` (buttons or links, small by default) and an optional
   `<void-alert-close>` wrapping the one control that dismisses it (without it the alert cannot be dismissed).
   With `events`, pressing that control pushes `void-close`.
   """
@@ -828,12 +828,13 @@ defmodule VoidableUI.Components do
   on the current one. The component gives the list and the items their list roles.
   """
   attr :separator, :string, default: nil
+  attr :landmark, :string, default: nil, doc: "`\"none\"` renders a named group instead of a navigation landmark"
   attr :rest, :global
   slot :inner_block, required: true
 
   def breadcrumbs(assigns) do
     ~H"""
-    <void-breadcrumbs separator={@separator} {@rest}>
+    <void-breadcrumbs separator={@separator} landmark={@landmark} {@rest}>
       {render_slot(@inner_block)}
     </void-breadcrumbs>
     """
@@ -1480,6 +1481,7 @@ defmodule VoidableUI.Components do
   attr :open, :boolean, default: false
   attr :side, :string, default: nil, doc: "top, bottom, left or right (flips when there is no room)"
   attr :align, :string, default: nil, doc: "start, center or end"
+  attr :block, :boolean, default: false, doc: "fill the container: the trigger stretches and the menu is at least as wide"
   attr :events, :any, default: nil, doc: @events_doc
   attr :rest, :global
   slot :inner_block, required: true
@@ -1491,6 +1493,7 @@ defmodule VoidableUI.Components do
       open={@open}
       side={@side}
       align={@align}
+      block={@block}
       phx-hook={void_hook(@events)}
       data-void-events={void_events(@events, "void-select")}
       {@rest}
@@ -2386,6 +2389,7 @@ defmodule VoidableUI.Components do
   attr :variant, :string, default: nil
   attr :hide_value, :boolean, default: false
   attr :unit_inline, :boolean, default: false
+  attr :fraction_digits, :integer, default: nil
   attr :tick_major, :integer, default: nil
   attr :tick_minor, :integer, default: nil
   attr :hide_tick_min, :boolean, default: false
@@ -2411,6 +2415,7 @@ defmodule VoidableUI.Components do
       variant={@variant}
       hide-value={@hide_value}
       unit-inline={@unit_inline}
+      fraction-digits={@fraction_digits}
       tick-major={@tick_major}
       tick-minor={@tick_minor}
       hide-tick-min={@hide_tick_min}
@@ -2421,6 +2426,77 @@ defmodule VoidableUI.Components do
       aria-label={@aria_label}
       {@rest}
     />
+    """
+  end
+
+  # ---------------------------------------------------------------------------
+  # Code (interactive with a copy part — void-copy) and Diff (static)
+  # ---------------------------------------------------------------------------
+
+  @doc """
+  Renders a `<void-code>` block of code.
+
+  Write the code as a native `<pre><code>` inside: the text, or one `<void-code-line>` per line when you want
+  `line_numbers`. Before the `<pre>` come the optional parts, `<void-code-title>` (a file name or the language)
+  and `<void-code-copy>` wrapping the one button that copies the code. No highlighter is included: put the
+  highlighted spans of your own (Makeup, for example) inside the `<code>` or the lines.
+
+      <.code line_numbers>
+        <void-code-title>lib/greeter.ex</void-code-title>
+        <void-code-copy><button type="button"></button></void-code-copy>
+        <pre><code><void-code-line :for={line <- @lines}>{line}</void-code-line></code></pre>
+      </.code>
+
+  With `events`, a copy pushes `void-copy` (`%{"value" => text}`).
+  """
+  attr :id, :string, default: nil
+  attr :line_numbers, :boolean, default: false
+  attr :wrap, :boolean, default: false
+  attr :events, :any, default: nil, doc: @events_doc
+  attr :rest, :global
+  slot :inner_block, required: true
+
+  def code(assigns) do
+    ~H"""
+    <void-code
+      id={@id || (@events && auto_id("void-code", @rest))}
+      line-numbers={@line_numbers}
+      wrap={@wrap}
+      phx-hook={void_hook(@events)}
+      data-void-events={void_events(@events, "void-copy")}
+      {@rest}
+    >
+      {render_slot(@inner_block)}
+    </void-code>
+    """
+  end
+
+  @doc """
+  Renders a `<void-diff>`, a unified diff your application computed.
+
+  Write an optional `<void-diff-title>` (the file name) and one `<void-diff-hunk>` per hunk, each holding an
+  optional `<void-diff-header>` and one `<void-diff-line>` per line. A line's `kind` is `add`, `del` or
+  `context` (the default); `old` and `new` are its line numbers, shown with `line_numbers`. Wrap the words that
+  changed inside a line in `<ins>` and `<del>`.
+
+      <.diff line_numbers>
+        <void-diff-title>{@file}</void-diff-title>
+        <void-diff-hunk :for={hunk <- @hunks}>
+          <void-diff-header>{hunk.header}</void-diff-header>
+          <void-diff-line :for={line <- hunk.lines} kind={line.kind} old={line.old} new={line.new}>{line.text}</void-diff-line>
+        </void-diff-hunk>
+      </.diff>
+  """
+  attr :line_numbers, :boolean, default: false
+  attr :wrap, :boolean, default: false
+  attr :rest, :global
+  slot :inner_block, required: true
+
+  def diff(assigns) do
+    ~H"""
+    <void-diff line-numbers={@line_numbers} wrap={@wrap} {@rest}>
+      {render_slot(@inner_block)}
+    </void-diff>
     """
   end
 end

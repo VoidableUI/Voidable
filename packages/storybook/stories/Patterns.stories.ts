@@ -187,10 +187,83 @@ export const Section: Story = {
           <void-button variant="filled">Save</void-button>
         </void-actions>
       </void-section>
+      <!-- A ghost button that ends a line has its label on the column's edge,
+           and a head is as tall with an action as without. -->
+      <void-section>
+        <void-section-head>
+          <h2>Recent contacts</h2>
+          <void-actions><void-button variant="ghost">View all</void-button></void-actions>
+        </void-section-head>
+        <void-rows>
+          <void-row>
+            <void-row-text><span>Svalbard 1</span><span data-void-type="caption">X band</span></void-row-text>
+            <void-actions><void-state color="success">Tracking</void-state><void-button variant="ghost" size="sm">Pause</void-button></void-actions>
+          </void-row>
+          <void-row>
+            <void-row-text><span>Troll</span><span data-void-type="caption">S band</span></void-row-text>
+            <void-actions><void-state>Idle</void-state><void-button variant="ghost" size="sm">Resume</void-button></void-actions>
+          </void-row>
+        </void-rows>
+        <void-actions justify="end">
+          <void-button variant="ghost">Newer</void-button>
+          <void-button variant="ghost">Older</void-button>
+        </void-actions>
+      </void-section>
       <void-split ratio="2:1">
         <void-section><h2>Activity</h2><p>The wider column of a split.</p></void-section>
         <void-section><h2>Notes</h2><p>The narrower one. Below 48rem they stack.</p></void-section>
       </void-split>
+    `),
+};
+
+// Cards in as many columns as fit, each at least 16rem; the cards of a row
+// are equally tall. One card is a link, one a button, one static.
+export const CardGrid: Story = {
+  render: () =>
+    inPage(html`
+      <void-card-grid>
+        <void-card>
+          <void-card-header>
+            <void-card-title><a href="#ground-network">Ground network</a></void-card-title>
+            <void-card-description>41 stations, 2 in maintenance.</void-card-description>
+          </void-card-header>
+          <void-card-body>Downlink at 79.6 TB today.</void-card-body>
+        </void-card>
+        <void-card>
+          <void-card-header>
+            <void-card-title><button type="button">Add a station</button></void-card-title>
+            <void-card-description>Register a new antenna.</void-card-description>
+          </void-card-header>
+          <void-card-body>Opens the registration form.</void-card-body>
+        </void-card>
+        <void-card>
+          <void-card-header><void-card-title>Static card</void-card-title></void-card-header>
+          <void-card-body>No control: nothing to click.</void-card-body>
+        </void-card>
+      </void-card-grid>
+    `),
+};
+
+// Rows that are one link or one button: the control sits in the row text and
+// is stretched over the whole row. The badge is decoration.
+export const LinkRows: Story = {
+  render: () =>
+    inPage(html`
+      <void-rows>
+        <void-row>
+          <void-row-text>
+            <a href="#kiruna">Kiruna 3</a>
+            <span data-void-type="caption">Online since March</span>
+          </void-row-text>
+          <void-badge color="success" variant="outline">Online</void-badge>
+        </void-row>
+        <void-row>
+          <void-row-text><button type="button">Add a station</button></void-row-text>
+        </void-row>
+        <void-row>
+          <void-row-text>Static row</void-row-text>
+        </void-row>
+      </void-rows>
     `),
 };
 
@@ -319,6 +392,13 @@ export const DescriptionList: Story = {
           <div><dt>Wind</dt><dd>9 m/s</dd></div>
         </dl>
       </void-description-list>
+      <void-description-list justify="start">
+        <dl>
+          <div><dt>Operator</dt><dd>Kongsberg Satellite Services</dd></div>
+          <div><dt>State</dt><dd><void-state color="success">Online</void-state></dd></div>
+          <div><dt>Notes</dt><dd>Closed to visitors from November to February; deliveries by arrangement.</dd></div>
+        </dl>
+      </void-description-list>
     `),
 };
 
@@ -352,6 +432,34 @@ export const Rows: Story = {
     `),
 };
 
+// A tone on a row: its text and the code text in it are one status colour.
+export const RowsWithTone: Story = {
+  render: () =>
+    inPage(html`
+      <void-rows>
+        <void-row>
+          <span>Carrier lock on MRD-0412</span>
+          <span data-void-type="code">14:02:11</span>
+        </void-row>
+        <void-row color="warning">
+          <void-row-text>
+            <span>Warning: signal to noise below 5 dB</span>
+            <span data-void-type="caption">Tromsø 2, X band</span>
+          </void-row-text>
+          <span data-void-type="code">14:02:48</span>
+        </void-row>
+        <void-row color="error">
+          <span>Error: carrier lost</span>
+          <span data-void-type="code">14:03:05</span>
+        </void-row>
+        <void-row color="success">
+          <span>Carrier lock restored</span>
+          <span data-void-type="code">14:03:40</span>
+        </void-row>
+      </void-rows>
+    `),
+};
+
 // A state as a dot and a word: colour is never the only signal.
 export const State: Story = {
   render: () =>
@@ -365,6 +473,7 @@ export const State: Story = {
         <void-state color="error">Offline</void-state>
         <void-state color="notice">Preview</void-state>
         <void-state>Idle</void-state>
+        <void-state size="lg" color="success" pulse>Tracking MRD-0412</void-state>
       </void-stack>
     `),
 };

@@ -60,6 +60,8 @@ type styled struct {
 	// Hints is advice for attributes people guess that do not exist (attribute -> advice).
 	Hints      map[string]string `json:"hints"`
 	Attributes []styledAttr      `json:"attributes"`
+	// Linked: the element can be one link or button as a whole (#116).
+	Linked *domain.LinkedControl `json:"linked"`
 }
 
 type styledAttr struct {
@@ -70,7 +72,7 @@ type styledAttr struct {
 }
 
 func (s styled) element() domain.Element {
-	e := domain.Element{Tag: s.Tag, Module: "@voidable/theme", Description: s.Description, CSSOnly: true, AllowedParents: s.Parents, AttrHints: s.Hints}
+	e := domain.Element{Tag: s.Tag, Module: "@voidable/theme", Description: s.Description, CSSOnly: true, AllowedParents: s.Parents, AttrHints: s.Hints, Linked: s.Linked}
 	for _, a := range s.Attributes {
 		kind, values, nullable := domain.ParseType(a.Type)
 		e.Attributes = append(e.Attributes, domain.Attribute{

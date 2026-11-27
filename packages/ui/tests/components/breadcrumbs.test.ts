@@ -45,6 +45,69 @@ describe('VoidBreadcrumbs', () => {
     });
   });
 
+  describe('landmark (#123)', () => {
+    let host: HTMLElement;
+    beforeEach(() => {
+      host = document.createElement('div');
+      document.body.appendChild(host);
+    });
+    afterEach(() => host.remove());
+
+    async function mountIn(markup: string): Promise<VoidBreadcrumbs> {
+      host.innerHTML = markup;
+      const el = host.querySelector('void-breadcrumbs') as VoidBreadcrumbs;
+      await el.updateComplete;
+      return el;
+    }
+
+    it('is a navigation landmark named Breadcrumb by default', async () => {
+      const el = await mountIn('<void-breadcrumbs></void-breadcrumbs>');
+      expect(el.getAttribute('role')).toBe('navigation');
+      expect(el.getAttribute('aria-label')).toBe('Breadcrumb');
+    });
+
+    it('landmark="none" is a named group, not a landmark', async () => {
+      const el = await mountIn('<void-breadcrumbs landmark="none"></void-breadcrumbs>');
+      expect(el.getAttribute('role')).toBe('group');
+      expect(el.getAttribute('aria-label')).toBe('Breadcrumb');
+    });
+
+    it('follows landmark changing at run time', async () => {
+      const el = await mountIn('<void-breadcrumbs></void-breadcrumbs>');
+      el.landmark = 'none';
+      await el.updateComplete;
+      expect(el.getAttribute('role')).toBe('group');
+      el.landmark = 'navigation';
+      await el.updateComplete;
+      expect(el.getAttribute('role')).toBe('navigation');
+    });
+
+    it('is a group inside a nav or a role="navigation" ancestor, with or without the attribute', async () => {
+      let el = await mountIn('<nav aria-label="Main"><void-breadcrumbs></void-breadcrumbs></nav>');
+      expect(el.getAttribute('role')).toBe('group');
+      el = await mountIn('<div role="navigation"><div><void-breadcrumbs landmark="navigation"></void-breadcrumbs></div></div>');
+      expect(el.getAttribute('role')).toBe('group');
+    });
+
+    it('follows a move into and out of a nav', async () => {
+      const el = await mountIn('<void-breadcrumbs></void-breadcrumbs><nav id="n"></nav>');
+      host.querySelector('#n')!.append(el);
+      await el.updateComplete;
+      expect(el.getAttribute('role')).toBe('group');
+      host.append(el);
+      await el.updateComplete;
+      expect(el.getAttribute('role')).toBe('navigation');
+    });
+
+    it('keeps the list and item roles in either form', async () => {
+      const el = await mountIn(
+        '<void-breadcrumbs landmark="none"><void-breadcrumbs-list><void-breadcrumbs-item>A</void-breadcrumbs-item></void-breadcrumbs-list></void-breadcrumbs>',
+      );
+      expect(el.querySelector('void-breadcrumbs-list')!.getAttribute('role')).toBe('list');
+      expect(el.querySelector('void-breadcrumbs-item')!.getAttribute('role')).toBe('listitem');
+    });
+  });
+
   describe('Light DOM', () => {
     it('createRenderRoot returns the element itself', () => {
       const el = document.createElement('void-breadcrumbs') as VoidBreadcrumbs;

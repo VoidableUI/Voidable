@@ -205,11 +205,11 @@ describe('owned host attributes', () => {
 
   it('keeps owned style custom properties when the style attribute is replaced', async () => {
     const sb = await mount<Host>('<void-sidebar width="300px"><div>s</div></void-sidebar>');
-    const value = sb.style.getPropertyValue('--void-sidebar-width');
+    const value = sb.style.getPropertyValue('--_void-sidebar-width');
     expect(value).not.toBe('');
     sb.setAttribute('style', 'color: red');
     await Promise.resolve();
-    expect(sb.style.getPropertyValue('--void-sidebar-width')).toBe(value);
+    expect(sb.style.getPropertyValue('--_void-sidebar-width')).toBe(value);
     expect(sb.style.getPropertyValue('color')).toBe('red');
   });
 

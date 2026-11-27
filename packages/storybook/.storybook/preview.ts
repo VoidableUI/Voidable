@@ -73,6 +73,19 @@ const preview: Preview = {
         title: 'Skin',
       },
     },
+    // Where the narrow layout starts (data-void-narrow on <html>): 36, 48 (the default), 64rem, or never.
+    narrow: {
+      toolbar: {
+        icon: 'mobile',
+        items: [
+          { value: 'sm', title: 'Narrow layout below 36rem' },
+          { value: 'md', title: 'Narrow layout below 48rem (default)' },
+          { value: 'lg', title: 'Narrow layout below 64rem' },
+          { value: 'off', title: 'Narrow layout: off' },
+        ],
+        title: 'Narrow layout',
+      },
+    },
     // Touch targets: on a coarse pointer (a phone, or a desktop browser emulating one) every control's hit
     // area grows to 44px; "Off" is data-hit-target="off", the same as --void-hit-target: 0px.
     hitTarget: {
@@ -87,6 +100,7 @@ const preview: Preview = {
     },
   },
   initialGlobals: {
+    narrow: 'md',
     theme: 'dark',
     direction: 'ltr',
     locale: 'en',
@@ -108,6 +122,9 @@ const preview: Preview = {
       else root.setAttribute('data-void-skin', voidSkin);
       if (context.globals['hitTarget'] === 'off') root.setAttribute('data-hit-target', 'off');
       else root.removeAttribute('data-hit-target');
+      const narrow = context.globals['narrow'] ?? 'md';
+      if (narrow === 'md') root.removeAttribute('data-void-narrow');
+      else root.setAttribute('data-void-narrow', narrow);
       // The page colour comes from the theme, so a tinted page shows too.
       root.style.background = 'var(--void-color-bg)';
       return storyFn();

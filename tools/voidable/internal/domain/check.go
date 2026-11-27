@@ -32,6 +32,9 @@ const (
 	// value or event renamed or removed in 0.8 (#23), reported with the fix.
 	RuleLegacyMarkup Rule = "legacy-markup"
 	RuleMissingName  Rule = "missing-name"
+	// RuleNestedControl: a card wrapped in a link or a button, or a linked card
+	// (its title holds a control) with a second control inside (#116).
+	RuleNestedControl Rule = "nested-control"
 	// RuleKeys (a warning, #90): a `keys` attribute that is not a JSON object of
 	// action names, names an action the element does not have, or leaves an
 	// essential action (`close` on a modal, `activate` on a button) with no key.
@@ -88,6 +91,7 @@ func (c *Checker) Check(ctx context.Context, file string, src []byte, lang Lang)
 		out = append(out, c.CheckTag(file, t)...)
 	}
 	out = append(out, c.CheckParts(file, tags)...)
+	out = append(out, c.CheckLinked(file, tags)...)
 	sort.SliceStable(out, func(i, j int) bool {
 		if out[i].Line != out[j].Line {
 			return out[i].Line < out[j].Line
@@ -421,6 +425,69 @@ func isGlobalProperty(name string) bool {
 		return true
 	}
 	return false
+}
+
+// controlsIn counts the controls written inside a tag: the native ones the
+// scanner counted (not those inside a <void-button>, which is one control)
+// and the void-* tags the element names as controls.
+func controlsIn(t Tag, l *LinkedControl) int {
+	n := 0
+	for name, count := range t.Content.Counts {
+		if !strings.HasPrefix(name, "void-") || contains(l.Controls, name) {
+			n += count
+		}
+	}
+	return n
+}
+
+// withinTag reports whether tags[j] is inside tags[i] (anywhere below it).
+func withinTag(tags []Tag, j, i int) bool {
+	for k := tags[j].ParentIndex; k >= 0 && k < len(tags); k = tags[k].ParentIndex {
+		if k == i {
+			return true
+		}
+	}
+	return false
+}
+
+// CheckLinked validates a component that can be one link or button as a
+// whole (#116, `<void-card>`): it must not be wrapped in an `<a href>` or a
+// `<button>`, and when its title part holds a control (it is linked) it holds
+// no second control anywhere. A component whose content holds template
+// expressions is not checked for the second control.
+func (c *Checker) CheckLinked(file string, tags []Tag) []Finding {
+	var out []Finding
+	for i, t := range tags {
+		el, ok := c.lib.cat.Element(t.Name)
+		if !ok || el.Linked == nil || t.Mention {
+			continue
+		}
+		l := el.Linked
+		finding := func(msg string, args ...any) Finding {
+			return Finding{File: file, Line: t.Line, Col: t.Col, Rule: RuleNestedControl, Tag: t.Name, Message: fmt.Sprintf(msg, args...) + "; instead " + l.Fix}
+		}
+		if t.InControl != "" {
+			wrapper := "<a href>"
+			if t.InControl == "button" {
+				wrapper = "<button>"
+			}
+			out = append(out, finding("<%s> is inside %s; block content inside a link or a button is invalid HTML and announces badly", t.Name, wrapper))
+			continue
+		}
+		if !t.Closed || t.Dynamic || t.Content.Dynamic {
+			continue
+		}
+		linked := false
+		for j, part := range tags {
+			if part.Name == l.Part && part.Closed && controlsIn(part, l) > 0 && withinTag(tags, j, i) {
+				linked = true
+			}
+		}
+		if linked && controlsIn(t, l) > 1 {
+			out = append(out, finding("<%s> is a link or button (its <%s> holds a control) and also holds a second control; a linked <%s> holds exactly one, and the stretched link covers any other", t.Name, l.Part, t.Name))
+		}
+	}
+	return out
 }
 
 // CheckParts validates the explicit parts (#52) of every component in one

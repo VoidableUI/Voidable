@@ -22,12 +22,15 @@
 
 /* @tokens void-description-list
    --void-description-list-rule       The line between pairs.
-   --void-description-list-rule-edge  The lines above the first pair and below the last. */
+   --void-description-list-rule-edge  The lines above the first pair and below the last.
+   --void-description-list-label-width  Setting: width of the label column of a justify="start" list, where every value starts on one line; never more than 40% of the list. Default 12rem. */
 
 /* @tokens void-rows
    --void-rows-rule       The line between rows.
    --void-rows-rule-edge  The lines above the first row and below the last.
-   --void-rows-padding    Block padding of a row. */
+   --void-rows-padding    Block padding of a row.
+   --void-rows-surface-hover   Fill of a row that is a link or a button while the pointer is over it.
+   --void-rows-surface-active  Fill of that row while it is pressed. */
 
 void-figure {
   display: flex;
@@ -67,7 +70,7 @@ void-figure > void-progress {
 
 /* ── void-figures: figures in a hairline-divided row ──
      <void-figures columns="4">…void-figure children…</void-figures>
-   columns: 2, 3 or 4 (default). Below 48rem it is two columns and an
+   columns: 2, 3 or 4 (default). In the narrow layout (48rem by default) it is two columns and an
    odd last figure takes the full width. */
 void-figures {
   --_void-figures-columns: 4;
@@ -105,31 +108,6 @@ void-figures[columns="2"] > void-figure:nth-child(n + 3) {
   border-top: var(--_void-figures-rule);
 }
 
-@media (max-width: 48rem) {
-  void-figures,
-  void-figures[columns] {
-    --_void-figures-columns: 2;
-  }
-
-  void-figures > void-figure:nth-child(n) {
-    padding-inline-start: var(--void-figure-padding, var(--void-gap-inside));
-    border-inline-start: var(--_void-figures-rule);
-    border-top: 0;
-  }
-
-  void-figures > void-figure:nth-child(2n + 1) {
-    padding-inline-start: var(--void-figure-padding, 0);
-    border-inline-start: 0;
-  }
-
-  void-figures > void-figure:nth-child(n + 3) {
-    border-top: var(--_void-figures-rule);
-  }
-
-  void-figures > void-figure:last-child:nth-child(2n + 1) {
-    grid-column: 1 / -1;
-  }
-}
 
 /* ── void-delta: a change, with its direction ──
      <void-delta trend="up">4.2%</void-delta>
@@ -192,6 +170,24 @@ void-state[color="caution"] { --_void-tone: var(--void-color-caution); }
 void-state[color="highlight"] { --_void-tone: var(--void-color-highlight); }
 void-state[color="error"]   { --_void-tone: var(--void-color-error); }
 void-state[color="notice"]  { --_void-tone: var(--void-color-notice); }
+
+/* size="lg": the state is the heading of its block (the status of a device
+   at the top of its section), set in the heading role with a dot to match.
+   It needs no <h2> around it to get the size; put it in one where the block
+   needs a heading for navigation. */
+void-state[size="lg"] {
+  font-family: var(--void-type-heading-family);
+  font-size: var(--void-type-heading-size);
+  line-height: var(--void-type-heading-leading);
+  font-weight: var(--void-type-heading-weight);
+  letter-spacing: var(--void-type-heading-tracking);
+  color: var(--void-type-heading-color);
+}
+
+void-state[size="lg"]::before {
+  width: 0.625rem;
+  height: 0.625rem;
+}
 
 void-state[pulse]::before {
   animation: void-state-pulse calc(1.6s * var(--void-anim-scale)) var(--void-ease-in-out) infinite;
@@ -263,6 +259,24 @@ void-description-list dd {
   overflow-wrap: anywhere;
 }
 
+/* justify="start": the values start on one line, after a label column of a
+   set width, for values that are read down the list (text, links, states)
+   and not compared at their ends (numbers). The column has a width and is
+   not as wide as the longest label, so two lists on a page line up with
+   each other; a longer label wraps inside it. */
+void-description-list[justify="start"]:not([layout="grid"]) > dl > div {
+  display: grid;
+  grid-template-columns: minmax(0, min(var(--void-description-list-label-width, 12rem), 40%)) minmax(0, 1fr);
+}
+
+void-description-list[justify="start"]:not([layout="grid"]) dt {
+  overflow-wrap: anywhere;
+}
+
+void-description-list[justify="start"] dd {
+  text-align: start;
+}
+
 /* Rows in two columns, for a wide page with many short pairs. */
 void-description-list:not([layout="grid"])[columns="2"] > dl {
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -293,15 +307,6 @@ void-description-list[layout="grid"] dd {
   text-align: start;
 }
 
-@media (max-width: 48rem) {
-  void-description-list:not([layout="grid"])[columns="2"] > dl {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  void-description-list[layout="grid"]:is([columns="3"], [columns="4"]) > dl {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
 
 /* ── void-rows: a list of rows, text left and a value or control right ──
      <void-rows>
@@ -337,6 +342,24 @@ void-row:last-child {
   border-bottom: var(--void-rows-rule-edge, var(--void-rule-edge));
 }
 
+/* A row with a tone (a warning in a log, a failed step): its text is the
+   status colour, and so is text in the value, body and code roles inside it
+   (type.css reads --_void-tone-ink), so the line is one colour. Captions and
+   labels stay quiet, and a control or a void-state keeps its own colours.
+   The status colours keep 4.5:1 as text on the page and on every container. */
+void-row[color]:not([color="default"]) {
+  --_void-tone-ink: var(--_void-tone);
+  color: var(--_void-tone-ink);
+}
+
+void-row[color="success"]   { --_void-tone: var(--void-color-success); }
+void-row[color="info"]      { --_void-tone: var(--void-color-info); }
+void-row[color="warning"]   { --_void-tone: var(--void-color-warning); }
+void-row[color="caution"]   { --_void-tone: var(--void-color-caution); }
+void-row[color="highlight"] { --_void-tone: var(--void-color-highlight); }
+void-row[color="error"]     { --_void-tone: var(--void-color-error); }
+void-row[color="notice"]    { --_void-tone: var(--void-color-notice); }
+
 void-row-text {
   display: flex;
   flex-direction: column;
@@ -347,6 +370,59 @@ void-row-text {
 
 void-row > :not(void-row-text) {
   flex: none;
+}
+
+/* A row that is a link or a button: one real <a href> or <button> in the
+   row text, stretched over the whole row exactly as in a card (see
+   components/card.css). The row keeps any badge or chevron beside the text
+   as decoration; a second control in it is a mistake the checkers report. */
+void-row:has(> void-row-text :is(a[href], button)) {
+  position: relative;
+  cursor: pointer;
+}
+
+void-row-text :is(a[href], button) {
+  appearance: none;
+  margin: 0;
+  border: 0;
+  padding: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  text-align: start;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+void-row-text :is(a[href], button)::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+
+void-row-text :is(a[href], button):focus-visible {
+  outline: none;
+}
+
+void-row-text :is(a[href], button):focus-visible::after {
+  outline: var(--void-focus-ring-width) solid var(--void-focus-ring-color);
+  outline-offset: calc(var(--void-focus-ring-offset) * -1);
+}
+
+@media (hover: hover) {
+  void-row:has(> void-row-text :is(a[href], button:not(:disabled))):hover {
+    background: var(--void-rows-surface-hover, var(--void-color-bg-hover));
+  }
+}
+
+void-row:has(> void-row-text :is(a[href], button:not(:disabled))):active {
+  background: var(--void-rows-surface-active, var(--void-color-bg-active));
+}
+
+void-row:has(> void-row-text button:disabled),
+void-row-text button:disabled {
+  cursor: not-allowed;
 }
 
 /* The same two lines in a table cell sit closer together. */

@@ -84,11 +84,11 @@ The bar's content lines up with the page column under it, at every width.
 
 `<void-nav-links>` holds plain `<a>` elements. Mark the current one with `aria-current="page"`: that is what a screen reader announces, and it is what the theme styles, so the two cannot disagree.
 
-On a narrow screen the links move to a row of their own under the brand and scroll sideways. Nothing is truncated and nothing is hidden behind a menu button: with four to seven destinations, a row you can swipe is faster than a drawer, and it works with no JavaScript. For more destinations than that, use a sidebar.
+On a narrow screen (below 48rem by default; see [Where the narrow layout starts](#where-the-narrow-layout-starts)) the links move to a row of their own under the brand and scroll sideways. Nothing is truncated and nothing is hidden behind a menu button: with four to seven destinations, a row you can swipe is faster than a drawer, and it works with no JavaScript. For more destinations than that, use a sidebar.
 
 ## Sidebar
 
-`nav="side"` puts a `<void-sidebar>` beside the page. Below 48rem it becomes a bar across the top and its links scroll sideways in the same way.
+`nav="side"` puts a `<void-sidebar>` beside the page. In the narrow layout (below 48rem by default, [movable](#where-the-narrow-layout-starts)) it becomes a bar across the top and its links scroll sideways in the same way.
 
 export const side = `
 <void-shell nav="side">
@@ -157,6 +157,47 @@ export const sideJsx = `
 
 <Example frame="frame" html={side} erb={sideErb} jsx={sideJsx} />
 
+The rail is `--void-sidebar-width` wide (15rem by default; `--void-sidebar-collapsed-width` when collapsed). Set the token in CSS on the sidebar or any ancestor to change it everywhere, or write `width` (and `collapsed-width`) on one sidebar: the attribute wins over the token.
+
+### A switcher and links with counts
+
+A menu above the links, such as a project or workspace switcher, is a `<void-dropdown-menu>` whose trigger is a ghost button. It spans the rail (anywhere else, `block` on the `<void-dropdown-menu>` does the same) and its icon and label start where the icon and label of a link do; the open menu is at least as wide as the trigger. A link takes an icon, a label and, after a `<void-spacer>`, a trailing count that stays at the far end of the row.
+
+export const switcher = `
+<void-shell nav="side">
+  <void-sidebar>
+    <void-dropdown-menu>
+      <void-dropdown-menu-trigger>
+        <void-button variant="ghost">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" aria-hidden="true"><rect x="2.5" y="2.5" width="11" height="11" rx="2"/></svg>
+          <span>Northwind</span>
+        </void-button>
+      </void-dropdown-menu-trigger>
+      <void-dropdown-menu-content>
+        <void-dropdown-menu-item>Northwind</void-dropdown-menu-item>
+        <void-dropdown-menu-item>Contoso</void-dropdown-menu-item>
+      </void-dropdown-menu-content>
+    </void-dropdown-menu>
+    <void-nav-links>
+      <a href="/" aria-current="page">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" aria-hidden="true"><path d="M2 7l6-5 6 5v7H2z"/></svg>
+        <span>Overview</span>
+      </a>
+      <a href="/inbox">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" aria-hidden="true"><path d="M2 3h12v10H2zM2 9h4l1 2h2l1-2h4"/></svg>
+        <span>Inbox</span>
+        <void-spacer></void-spacer>
+        <span>12</span>
+      </a>
+    </void-nav-links>
+  </void-sidebar>
+  <main>
+    <void-page><p>The page goes here.</p></void-page>
+  </main>
+</void-shell>`;
+
+<Example frame="frame" html={switcher} />
+
 ## Overlay
 
 `nav="overlay"` lays the bar over the top of the page, for a page that opens on a photograph. Give the bar `data-void-surface="media"` so its text is off-white over the image. Where the browser supports scroll-driven animation the bar stays with you and becomes a blurred bar once the image has scrolled past; elsewhere it scrolls away with the page. See [UI over imagery](/patterns/ui-over-imagery/#navigation-over-the-image).
@@ -174,6 +215,23 @@ Direct children of a page sit a group apart (`--void-gap-group`), and one sectio
 
 Something outside a `void-page` that must line up with it (a full-bleed band, a footer) takes `padding-inline: var(--void-page-inset)`.
 
+## Where the narrow layout starts
+
+The narrow layout (the sidebar and nav-bar links as a sideways row, the shell's side navigation as a bar, `data-void-hide`, and the narrow rules of the page, section, figures, description-list and media patterns) starts below 48rem. An application whose smallest window is wider than a phone, a desktop app with a 45rem minimum for one, can move that point or switch it off with `data-void-narrow` on `<html>`:
+
+| `data-void-narrow` | Narrow layout |
+|---|---|
+| *(absent)*, `md` | Below 48rem (768px): what the theme has always done |
+| `sm` | Below 36rem (576px) |
+| `lg` | Below 64rem (1024px) |
+| `off` | Never: the wide layout at every width, `data-void-hide="wide"` always hides |
+
+```html
+<html data-void-narrow="off">
+```
+
+A value that is not in the table counts as the default. The attribute goes on `<html>`: media queries cannot read custom properties, so the theme carries one copy of its narrow rules per size and the attribute picks the copy. Rules that only matter on a phone, such as a search field filling its row below 30rem, are not moved; a window that is never that narrow never reaches them. `void-table`'s `stack` has its own breakpoint, measured on the table.
+
 ## Reference
 
 | Element | Attribute | Values |
@@ -182,7 +240,7 @@ Something outside a `void-page` that must line up with it (a full-bleed band, a 
 | `void-nav-links` | `orientation` | `horizontal` (default), `vertical` (automatic in a sidebar) |
 | `void-brand` | | Put an `<a>` inside to link it home |
 | `void-spacer` | | Pushes what follows to the far end of a bar or toolbar |
-| any element | `data-void-hide` | `narrow` removes it below 48rem, `wide` above |
+| any element | `data-void-hide` | `narrow` removes it in the narrow layout (below 48rem by default), `wide` removes it otherwise |
 
 `void-nav-bar` and `void-sidebar` are components (they have behaviour: a menu button, collapsing). Everything else here is CSS only.
 

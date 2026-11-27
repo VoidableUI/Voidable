@@ -1,0 +1,44 @@
+<main style="padding: 1rem; max-width: 40rem">
+  <h1>Alert actions</h1>
+  <button id="before">before</button>
+
+  <void-alert id="a-plain" color="error">
+    <void-alert-title>Could not save</void-alert-title>
+    <void-alert-description>The server did not respond.</void-alert-description>
+    <void-alert-actions><void-button id="a-plain-retry">Retry</void-button><void-button id="a-plain-more">Details</void-button></void-alert-actions>
+    <void-alert-close><button type="button" id="a-plain-close" aria-label="Dismiss">&times;</button></void-alert-close>
+  </void-alert>
+
+  <void-alert id="a-nodismiss" color="info">
+    <void-alert-description>Your session ends soon.</void-alert-description>
+    <void-alert-actions><void-button id="a-nodismiss-btn">Sign in again</void-button></void-alert-actions>
+  </void-alert>
+
+  <void-alert id="a-filled" color="success" variant="filled">
+    <void-alert-title>Archived</void-alert-title>
+    <void-alert-description>Three items were archived.</void-alert-description>
+    <void-alert-actions><void-button>Undo</void-button></void-alert-actions>
+    <void-alert-close><button type="button" aria-label="Dismiss">&times;</button></void-alert-close>
+  </void-alert>
+
+  <void-alert id="a-default" color="default"><void-alert-description>Default colour.</void-alert-description><void-alert-actions><void-button>OK</void-button></void-alert-actions></void-alert>
+  <void-alert id="a-warning" color="warning"><void-alert-description>Warning.</void-alert-description><void-alert-actions><void-button>OK</void-button></void-alert-actions><void-alert-close><button type="button" aria-label="Dismiss">&times;</button></void-alert-close></void-alert>
+  <void-alert id="a-caution" color="caution"><void-alert-description>Caution.</void-alert-description><void-alert-actions><void-button>OK</void-button></void-alert-actions></void-alert>
+  <void-alert id="a-notice" color="notice"><void-alert-description>Notice.</void-alert-description><void-alert-actions><void-button>OK</void-button></void-alert-actions></void-alert>
+  <void-alert id="a-highlight" color="highlight"><void-alert-description>Highlight.</void-alert-description><void-alert-actions><void-button>OK</void-button></void-alert-actions></void-alert>
+
+  <void-alert id="a-lg" color="info"><void-alert-description>A large button is kept.</void-alert-description><void-alert-actions><void-button size="lg">Large</void-button></void-alert-actions></void-alert>
+
+  <div id="narrow" style="width: 14rem">
+    <void-alert id="a-narrow" color="error">
+      <void-alert-title>Upload failed</void-alert-title>
+      <void-alert-description>The file could not be sent over this connection.</void-alert-description>
+      <void-alert-actions><void-button>Try again</void-button><void-button>Choose another file</void-button><void-button>Cancel upload</void-button></void-alert-actions>
+      <void-alert-close><button type="button" aria-label="Dismiss">&times;</button></void-alert-close>
+    </void-alert>
+  </div>
+
+  <void-button id="ref-sm" size="sm">Small reference</void-button>
+  <void-button id="ref-md">Medium reference</void-button>
+  <button id="after">after</button>
+</main>

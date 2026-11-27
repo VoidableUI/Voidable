@@ -86,6 +86,8 @@ import type {
   VoidLineChart,
   VoidDonutChart,
   VoidGauge,
+  VoidCode,
+  VoidDiff,
   BarChartData,
   LineChartData,
   DonutChartData,
@@ -593,6 +595,8 @@ export const AccordionItem = wrapWc<VoidAccordionItem, {
 
 export const Breadcrumbs = wrapWc<VoidBreadcrumbs, {
   separator?: string;
+  /** `none` renders a named group instead of a navigation landmark (it is never a landmark inside a `nav`). */
+  landmark?: 'navigation' | 'none';
 }>('void-breadcrumbs', 'Breadcrumbs');
 
 export const List = wrapWc<VoidList, {
@@ -845,6 +849,8 @@ export const DropdownMenu = wrapWc<VoidDropdownMenu, {
   side?: 'top' | 'bottom' | 'left' | 'right';
   /** Alignment along the trigger edge. */
   align?: 'start' | 'center' | 'end';
+  /** Fills its container: the trigger stretches and the menu is at least as wide as the trigger. */
+  block?: boolean;
 } & VoidEvents<OverlayEvents>>('void-dropdown-menu', 'DropdownMenu');
 
 export const DropdownMenuItem = wrapWc<VoidDropdownMenuItem, {
@@ -1180,3 +1186,22 @@ export const Gauge = wrapWc<VoidGauge, {
   segmentsSort?: 'value' | 'manual';
   gaps?: boolean | number;
 }>('void-gauge', 'Gauge');
+
+/**
+ * A block of code. Children: optional `CodeTitle` and `CodeCopy` (wrapping one button), then a native
+ * `<pre><code>` holding the text or one `CodeLine` per line. `onVoidCopy` fires after the code was copied.
+ */
+export const Code = wrapWc<VoidCode, {
+  lineNumbers?: boolean;
+  wrap?: boolean;
+} & VoidEvents<{ Copy: { value: string } }>>('void-code', 'Code');
+
+/**
+ * A unified diff the application computed. Children: an optional `DiffTitle`, then one `DiffHunk` per hunk,
+ * each holding an optional `DiffHeader` and one `DiffLine` (`kind`, `old`, `new`) per line, with the changed
+ * words in native `<ins>` and `<del>`.
+ */
+export const Diff = wrapWc<VoidDiff, {
+  lineNumbers?: boolean;
+  wrap?: boolean;
+}>('void-diff', 'Diff');

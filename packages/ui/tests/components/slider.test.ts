@@ -288,3 +288,32 @@ describe('VoidSlider', () => {
     });
   });
 });
+
+describe('VoidSlider native input order (#140)', () => {
+  it('writes min and max to the input before the render writes its value', async () => {
+    const el = createElement();
+    el.min = 500;
+    el.max = 3500;
+    el.value = 2500;
+    document.body.append(el);
+    await el.updateComplete;
+    const input = el.querySelector('input[type="range"]') as HTMLInputElement;
+    const log: string[] = [];
+    const set = input.setAttribute.bind(input);
+    input.setAttribute = (n: string, v: string) => { log.push(n); set(n, v); };
+    const desc = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(input), 'value')!;
+    Object.defineProperty(input, 'value', {
+      configurable: true,
+      get() { return desc.get!.call(this); },
+      set(v) { log.push('value'); desc.set!.call(this, v); },
+    });
+    el.min = 1000;
+    el.max = 5000;
+    el.value = 4000;
+    await el.updateComplete;
+    expect(log.indexOf('min')).toBeGreaterThan(-1);
+    expect(log.indexOf('min')).toBeLessThan(log.lastIndexOf('value'));
+    expect(log.indexOf('max')).toBeLessThan(log.lastIndexOf('value'));
+    el.remove();
+  });
+});

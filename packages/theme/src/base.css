@@ -2,7 +2,8 @@
    @voidable/theme — Base
    The only styling the theme applies to the page itself rather than to
    `void-*` elements and what is inside them: the colour scheme, the page
-   background and the default text of the document. Every other element
+   background, the default text of the document and the look of `kbd`, which
+   a shortcut hint in a button, menu or tooltip needs. Every other element
    selector in the theme is scoped to the inside of a theme element
    (reset.css), so the theme does not restyle an application's own markup.
 
@@ -25,4 +26,40 @@ body {
   font-weight: var(--void-type-body-weight);
   color: var(--void-type-body-color);
   background: var(--void-color-bg);
+}
+
+/* A keyboard key: <kbd>Esc</kbd>, or a combination with one <kbd> per key
+   inside another, <kbd><kbd>Ctrl</kbd>+<kbd>K</kbd></kbd>. A small raised box
+   in the mono family, a little smaller than the text around it. Its ink, edge
+   and fill are all taken from the text colour it sits in (currentColor), so
+   it stays legible, and keeps its contrast, in a paragraph, a filled, outline
+   or ghost button, a menu item or a tooltip, in light and dark and under
+   every skin, with no colour of its own. */
+kbd {
+  display: inline-block;
+  box-sizing: border-box;
+  min-inline-size: 1.5em;
+  margin-block: -0.25em; /* the box may overhang the line; it never makes the line taller */
+  padding: 0.1em 0.4em;
+  border: var(--void-control-border-width) solid color-mix(in srgb, currentColor calc(var(--void-tone-tint) * 3), transparent);
+  border-block-end-width: calc(var(--void-control-border-width) * 2);
+  border-radius: var(--void-radius-sm);
+  background: color-mix(in srgb, currentColor var(--void-tone-tint), transparent);
+  color: inherit;
+  font-family: var(--void-type-code-family);
+  font-size: 0.85em;
+  font-weight: var(--void-type-code-weight);
+  line-height: 1;
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* The outer key of a combination is only a wrapper: the keys inside are the boxes, each the size of a single key. */
+kbd:has(> kbd) {
+  min-inline-size: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  font-size: inherit;
+  line-height: inherit;
 }

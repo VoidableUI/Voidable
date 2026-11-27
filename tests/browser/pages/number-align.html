@@ -1,0 +1,14 @@
+<!-- Number inputs beside a text field, at one width: the value starts where the
+     text of any other field starts, whatever the controls, unless the
+     alignment token says otherwise. Specs: number-input-align.spec.ts. -->
+<main style="padding: 2rem; width: 24rem; display: grid; gap: 1rem">
+  <void-input id="text" value="1200" aria-label="Text"></void-input>
+  <void-number-input id="sides" value="1200" label="Sides" style="width: 100%"></void-number-input>
+  <void-number-input id="right" value="1200" controls="right" label="Right" style="width: 100%"></void-number-input>
+  <void-number-input id="none" value="1200" controls="none" label="None" style="width: 100%"></void-number-input>
+  <void-number-input id="center" value="1200" label="Centred" style="width: 100%; --void-number-input-value-align: center"></void-number-input>
+  <void-number-input id="end" value="1200" controls="right" label="End" style="width: 100%; --void-number-input-value-align: end"></void-number-input>
+  <div id="group" style="--void-number-input-value-align: center">
+    <void-number-input id="inherited" value="3" label="Quantity"></void-number-input>
+  </div>
+</main>

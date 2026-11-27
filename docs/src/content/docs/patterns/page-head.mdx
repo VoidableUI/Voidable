@@ -57,6 +57,12 @@ In this order, all but the `<h1>` optional:
 
 Below 48rem, two or more actions drop under the text and wrap; a single action stays beside the title.
 
+## The eyebrow and the title
+
+The label above the title is an eyebrow, and it does not move the title. When the head is the first thing in `<void-page>`, the label hangs in the page's top padding, a tight gap above the `<h1>`, so the title is at the same height on a page with an eyebrow and on one without, and titles do not jump as you move between pages. Anywhere else (a head that follows an alert, or one outside `void-page`) the label takes its own line.
+
+`<void-breadcrumbs>` always takes its own line: it is navigation, with links to hit. A page with breadcrumbs sets its title lower by their height and one tight gap, the same on every such page.
+
 ## Without the hairline
 
 `flush` removes the line and the space under it, for a page whose first block draws its own top line (a row of figures, a table) directly under the title.

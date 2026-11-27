@@ -46,6 +46,7 @@ Patterns come with `@voidable/theme`. If you import the theme piece by piece, th
 | [App shell](/patterns/app-shell/) | `void-shell`, `void-brand`, `void-nav-links`, `void-spacer`, `void-page` | The frame: navigation, then one centred column |
 | [Page head](/patterns/page-head/) | `void-page-head`, `void-actions` | Where you are, and what you can do here |
 | [Section](/patterns/section/) | `void-section`, `void-section-head`, `void-split`, `void-stack` | A titled part of a page, and how parts sit together |
+| [Card grid](/patterns/card-grid/) | `void-card-grid` (with `void-card` as a link or a button) | Cards in as many columns as fit, and a whole card as one link or button |
 | [Labels](/patterns/labels/) | `data-void-type="label"` | The small quiet name of a thing |
 | [Figure](/patterns/figure/) | `void-figures`, `void-figure`, `void-delta` | One number that matters, with its unit and caption |
 | [Description list](/patterns/description-list/) | `void-description-list`, `void-rows`, `void-row` | Labels and their values; one thing per line |
@@ -58,7 +59,7 @@ Patterns come with `@voidable/theme`. If you import the theme piece by piece, th
 
 - **Space comes from the rhythm, not from you.** Blocks in a page are a group apart, sections a section apart, things in a section 16px apart. These distances are the [layout rhythm](/getting-started/theming/#layout-rhythm) tokens, so `--void-rhythm` and `--void-density` move a whole application at once.
 - **Nothing is boxed by default.** A section has no border, fill or shadow. Hairlines separate; boxes are for things that float (dialogs, menus, glass over an image).
-- **One breakpoint.** Below 48rem (768px) columns become one, figures become two across, page actions drop under the title and navigation links move to a row of their own that scrolls sideways. Every pattern is checked at 390px.
+- **One breakpoint.** Below 48rem (768px; [movable or off](/patterns/app-shell/#where-the-narrow-layout-starts) with `data-void-narrow` on `<html>`) columns become one, figures become two across, page actions drop under the title and navigation links move to a row of their own that scrolls sideways. Every pattern is checked at 390px.
 - **Attributes take words, not sizes.** `gap="stack"`, `width="narrow"`, `columns="3"`. If a pattern does not offer what you need, that is a signal to look for a different pattern before writing CSS.
 
 ## In a framework
@@ -78,7 +79,7 @@ declare module 'react' {
     interface IntrinsicElements {
       'void-shell': Pattern; 'void-brand': Pattern; 'void-nav-links': Pattern; 'void-spacer': Pattern;
       'void-page': Pattern; 'void-page-head': Pattern; 'void-actions': Pattern;
-      'void-section': Pattern; 'void-section-head': Pattern; 'void-split': Pattern; 'void-stack': Pattern;
+      'void-section': Pattern; 'void-section-head': Pattern; 'void-split': Pattern; 'void-stack': Pattern; 'void-card-grid': Pattern;
       'void-figures': Pattern; 'void-figure': Pattern; 'void-delta': Pattern; 'void-state': Pattern;
       'void-description-list': Pattern; 'void-rows': Pattern; 'void-row': Pattern; 'void-row-text': Pattern;
       'void-toolbar': Pattern; 'void-empty': Pattern;

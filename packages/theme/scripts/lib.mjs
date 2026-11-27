@@ -179,7 +179,7 @@ export function closure(name, ownerOfTag) {
 // ── Scoped reset ────────────────────────────────────────────────────────────
 
 /** The words a part tag ends in (`void-<component>-<region>`, see "Explicit parts" in AGENTS.md). */
-const PART_SUFFIX = /-(trigger|content|title|description|body|actions|header|footer|item|list|separator|close)$/;
+const PART_SUFFIX = /-(trigger|content|title|description|body|actions|header|footer|item|list|separator|close|copy|line|hunk)$/;
 
 /**
  * The tags the reset names: `tags` without the parts whose component is in `tags` too. A part is always inside
@@ -396,7 +396,7 @@ export function runtimeProperties() {
 }
 
 /** Every stylesheet that can read a component token, as [{ file, css }]. */
-export const tokenFiles = () => [...listCss('components'), ...listCss('patterns'), ...listCss('media'), ...listCss('app-shell'), 'pre-upgrade.css', 'forced-colors.css'].map((file) => ({ file, css: read(path.join(SRC, file)) }));
+export const tokenFiles = () => [...listCss('components'), ...listCss('patterns'), ...listCss('media'), ...listCss('app-shell'), ...listCss('narrow'), 'pre-upgrade.css', 'forced-colors.css'].map((file) => ({ file, css: read(path.join(SRC, file)) }));
 
 /** Names a component token can belong to: component stylesheets and CSS-only pattern tags, without `void-`. */
 export function tokenOwners() {

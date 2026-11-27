@@ -52,7 +52,7 @@
     },
     {
       "tag": "void-page-head",
-      "description": "Head of a page, first child of void-page: a label or void-breadcrumbs, an <h1>, an optional <p>, and void-actions. Text left, actions bottom right; a hairline under it.",
+      "description": "Head of a page, first child of void-page: a label (an eyebrow, which hangs above the title without moving it) or void-breadcrumbs, an <h1>, an optional <p>, and void-actions. Text left, actions bottom right; a hairline under it.",
       "attributes": [
         {
           "name": "flush",
@@ -120,6 +120,11 @@
           "description": "vertical alignment of the two columns"
         }
       ]
+    },
+    {
+      "tag": "void-card-grid",
+      "description": "Grid of void-card children in as many columns as fit (each at least 16rem, set with --void-card-grid-min), the cards of a row equally tall. CSS only.",
+      "attributes": []
     },
     {
       "tag": "void-stack",
@@ -193,12 +198,21 @@
           "type": "boolean",
           "default": "",
           "description": "animated ring: something happening now"
+        },
+        {
+          "name": "size",
+          "type": "'md' | 'lg'",
+          "default": "md",
+          "description": "lg sets the state in the heading role, for a state that is the heading of its block"
         }
       ]
     },
     {
       "tag": "void-description-list",
       "description": "Labels and their values. Wraps a native <dl> whose pairs are each a <div> holding a <dt> and a <dd>.",
+      "hints": {
+        "align": "use justify (align is a legacy HTML attribute that sets text-align)"
+      },
       "attributes": [
         {
           "name": "layout",
@@ -211,6 +225,12 @@
           "type": "'1' | '2' | '3' | '4'",
           "default": "",
           "description": "columns of pairs (rows: 1 or 2; grid: 1 to 4, default 2)"
+        },
+        {
+          "name": "justify",
+          "type": "'end' | 'start'",
+          "default": "end",
+          "description": "rows: end puts each value at the end of its row (numbers, codes); start begins every value on one line after a label column (text, links, states)"
         }
       ]
     },
@@ -221,11 +241,28 @@
     },
     {
       "tag": "void-row",
-      "description": "One row of void-rows: a void-row-text on the left, a value or one control on the right.",
+      "description": "One row of void-rows: a void-row-text on the left, a value or one control on the right; several things at the end (a void-state and a button) go in void-actions.",
       "parents": [
         "void-rows"
       ],
-      "attributes": []
+      "linked": {
+        "part": "void-row-text",
+        "controls": ["void-button", "void-checkbox", "void-radio", "void-switch", "void-toggle", "void-toggle-group", "void-segmented-control", "void-select", "void-multiselect", "void-combobox", "void-input", "void-textarea", "void-number-input", "void-slider", "void-dropdown-menu", "void-popover", "void-hamburger", "void-editable", "void-date-picker", "void-color-picker", "void-file-upload", "void-pin-input", "void-tags-input", "void-action-input", "void-compose-input", "void-tabs"],
+        "fix": "put the one link or button in the row text and leave the row unwrapped: <void-row><void-row-text><a href=\"/stations/kiruna\">Kiruna 3</a><span data-void-type=\"caption\">Online</span></void-row-text><void-badge>Online</void-badge></void-row>"
+      },
+      "hints": {
+        "tone": "use color",
+        "status": "use color",
+        "variant": "use color"
+      },
+      "attributes": [
+        {
+          "name": "color",
+          "type": "'default' | 'success' | 'info' | 'warning' | 'caution' | 'error' | 'notice' | 'highlight'",
+          "default": "default",
+          "description": "sets the row's text, and code, value and body text inside it, in a status colour (a warning in a log); captions stay quiet"
+        }
+      ]
     },
     {
       "tag": "void-row-text",

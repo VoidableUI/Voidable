@@ -45,6 +45,8 @@ export { VoidPagination } from './components/pagination.js';
 export { VoidErrorFallback } from './components/error-fallback.js';
 export { VoidCheckboxGroup } from './components/checkbox-group.js';
 export { VoidCombobox } from './components/combobox.js';
+export { VoidCode } from './components/code.js';
+export { VoidDiff } from './components/diff.js';
 export { VoidSlider } from './components/slider.js';
 export { VoidFileUpload } from './components/file-upload.js';
 export { VoidNavBar } from './components/nav-bar.js';

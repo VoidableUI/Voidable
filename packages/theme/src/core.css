@@ -75,9 +75,13 @@
 @import './patterns/shell.css' layer(components.void.patterns);
 @import './patterns/page.css' layer(components.void.patterns);
 @import './patterns/data.css' layer(components.void.patterns);
+@import './narrow/shell.css' layer(components.void.patterns);
+@import './narrow/page.css' layer(components.void.patterns);
+@import './narrow/data.css' layer(components.void.patterns);
 
 /* UI over imagery: the media surface, on-media and glass */
 @import './media/media.css' layer(components.void.patterns);
+@import './narrow/media.css' layer(components.void.patterns);
 @import './media/surface.css' layer(components.void.patterns);
 
 /* App-shell layout primitives */
@@ -90,6 +94,10 @@
 @import './components/line-chart.css' layer(components.void.components);
 @import './components/donut-chart.css' layer(components.void.components);
 @import './components/gauge.css' layer(components.void.components);
+
+/* Code and diffs */
+@import './components/code.css' layer(components.void.components);
+@import './components/diff.css' layer(components.void.components);
 
 /* Pre-upgrade state: :not(:defined) rules, after every component file */
 @import './pre-upgrade.css' layer(components.void.components);

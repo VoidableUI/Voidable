@@ -236,6 +236,19 @@ Subtle status colors are the status color at `--void-tone-tint`: 14% in dark, 8%
 | `--void-color-notice-subtle` | notice at the tone tint |
 | `--void-color-highlight-subtle` | highlight at the tone tint |
 
+### Diff colors
+
+Inserted and removed text in [`<void-diff>`](/components/diff/). The ink colors the `+` and `−` markers, the subtle fill lies behind a whole line, and the strong fill lies on top of it behind the changed words (`<ins>`, `<del>`). Text keeps its own color on both fills at 4.5:1 in every theme and skin, so the colors only repeat what the markers, the underline and the strike-through already say. To recolor a diff, set the two inks; the fills follow.
+
+| Token | Value |
+|---|---|
+| `--void-color-diff-ins` | `var(--void-color-success)` |
+| `--void-color-diff-ins-subtle` | the inserted ink at the tone tint |
+| `--void-color-diff-ins-strong` | the inserted ink at one and a half times the tone tint |
+| `--void-color-diff-del` | `var(--void-color-error)` |
+| `--void-color-diff-del-subtle` | the removed ink at the tone tint |
+| `--void-color-diff-del-strong` | the removed ink at one and a half times the tone tint |
+
 ---
 
 ## Spacing
@@ -477,7 +490,7 @@ A fixed stacking order so overlapping elements layer predictably:
 
 | Token | Value |
 |---|---|
-| `--void-sidebar-width` | `15rem` |
+| `--void-sidebar-width` | `15rem` (a `width` attribute on a sidebar overrides it) |
 | `--void-sidebar-collapsed-width` | `3.75rem` |
 
 ---

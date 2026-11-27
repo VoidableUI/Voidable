@@ -360,12 +360,23 @@
     },
     "children": "Short text."
   },
+  "void-code": {
+    "group": "data-display",
+    "events": {
+      "void-copy": "Fires after the code was copied to the clipboard, by the control in the `void-code-copy` part or by `copy()`. `detail.value` is the text that was copied: the lines joined by newlines, without line numbers or highlighter markup. It bubbles."
+    },
+    "children": "A native `<pre><code>` holding the code (required): the text itself, or one `void-code-line` per line, which `line-numbers` needs. Before it, the optional parts: `void-code-title` (a file name or the language) and `void-code-copy` (wraps the one button that copies the code; leave the button empty for the theme's icon). Inside the `<code>` or a line, any inline markup is kept, so a syntax highlighter's spans go there."
+  },
+  "void-diff": {
+    "group": "data-display",
+    "children": "Explicit parts, in this order: `void-diff-title` (optional; the file name) and one `void-diff-hunk` per hunk. A hunk holds an optional `void-diff-header` (the `@@ -1,4 +1,5 @@` line) and one `void-diff-line` per line, with `kind=\"add\"`, `kind=\"del\"` or no `kind` for an unchanged line, and `old` and `new` for its line numbers. Inside a line, the words that changed go in native `<ins>` and `<del>`; any other inline markup is kept."
+  },
   "void-alert": {
     "group": "feedback",
     "events": {
       "void-close": "Fires when the user presses the control in the `void-alert-close` part, with `detail.reason` `close-button`, just before the alert removes itself from the page. Cancelable: `preventDefault()` keeps the alert. Does not bubble."
     },
-    "children": "Explicit parts, in this order: `void-alert-title` (optional, short), `void-alert-description` (the message, with any inline markup, such as a link) and `void-alert-close` (optional; wraps the one control that dismisses the alert, and without it the alert cannot be dismissed)."
+    "children": "Explicit parts, in this order: `void-alert-title` (optional, short), `void-alert-description` (the message, with any inline markup, such as a link), `void-alert-actions` (optional buttons or links such as Retry, small by default, in a row below the text at the trailing edge, before the close part so Tab reads title, actions, close) and `void-alert-close` (optional; wraps the one control that dismisses the alert, and without it the alert cannot be dismissed)."
   },
   "void-banner": {
     "group": "feedback",
@@ -415,7 +426,7 @@
   },
   "void-card": {
     "group": "layout",
-    "children": "Explicit parts, in this order: `void-card-header` (with `void-card-title` and `void-card-description`, and anything that sits at its far end), `void-card-body` and `void-card-footer`."
+    "children": "Explicit parts, in this order: `void-card-header` (with `void-card-title` and `void-card-description`, and anything that sits at its far end), `void-card-body` and `void-card-footer`. For a destination card, write one real `<a href>` or `<button>` inside `void-card-title`: the theme stretches it over the whole card (a click anywhere follows the link or presses the button, Tab stops once, the control's text is the name, `void-card-description` describes it). Never wrap the card in a link or button and never put a second control in a linked card; `voidable check` and the development warnings report both. `aria-disabled=\"true\"` on the card is the unavailable look (muted, control stays focusable, the description is the reason). Text in a linked card cannot be selected. `void-card-grid` lays cards out in as many columns as fit."
   },
   "void-collapsible": {
     "group": "layout",

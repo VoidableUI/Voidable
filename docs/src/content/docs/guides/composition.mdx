@@ -147,8 +147,8 @@ The machine-readable form of this table is the `voidParts` entry of each compone
 | `<void-dropdown-menu>` | `-trigger` (one control), `-content` holding `<void-dropdown-menu-item>` and `<void-dropdown-menu-separator>` | Items take a `value`, sent in `void-select`. |
 | `<void-tooltip>` | `-trigger` (one control), `-content` | Content describes the control. |
 | `<void-tabs>` | `-list` holding `<void-tabs-trigger value>`, then `<void-tabs-content value>` | Trigger and content are paired by `value`. |
-| `<void-card>` | `-header` (holding `-title`, `-description`), `-body` (required), `-footer` | |
-| `<void-alert>` | `-title`, `-description` (required), `-close` (one control) | Without `-close` it cannot be dismissed. |
+| `<void-card>` | `-header` (holding `-title`, `-description`), `-body` (required), `-footer` | The title may hold the one `<a href>` or `<button>` that makes the whole card a link or a button (a plain native element, not a `-trigger` part: nothing opens). [Never wrap the card in a link or button, never add a second control.](/patterns/card-grid/) |
+| `<void-alert>` | `-title`, `-description` (required), `-actions`, `-close` (one control) | Without `-close` it cannot be dismissed. |
 | `<void-accordion>` | `<void-accordion-item>`, each with `<void-accordion-trigger>` and `<void-accordion-content>` | |
 | `<void-collapsible>` | `-trigger`, `-content` | The trigger is the button; closed content is hidden from `open` and animates open and closed. |
 | `<void-panel>` | `-header` (holding `-title`, `-description`), `-body` (required) | The title names the region. |
@@ -158,8 +158,12 @@ The machine-readable form of this table is the `voidParts` entry of each compone
 | `<void-combobox>` | `-content` (required) holding `<void-option>`s | The input is rendered by the component, before the content. |
 | `<void-multiselect>` | `-content` (required) holding `<void-option>`s | The trigger and its chips are rendered by the component. |
 | `<void-select>` | A native `<select>` (required), with native `<option>`s | No parts: the native control is enhanced in place. |
+| `<void-code>` | `-title`, `-copy` (one control), then a native `<pre><code>` (required) holding the text or `<void-code-line>`s | The `<pre>` is the scroller. Lines are needed only for `line-numbers`. |
+| `<void-diff>` | `-title`, then `<void-diff-hunk>` (required) holding `-header` and `<void-diff-line kind old new>`s | The application computes the diff. Changed words are native `<ins>` and `<del>` inside a line. |
 
 Every part above except the dropdown menu item, the accordion item and `<void-option>` is CSS-only.
+
+`-copy`, `-line` and `-hunk` are not region names used elsewhere: a code block and a diff are made of lines, and their parts are named for what an author calls them. A line is a part because the theme has to find it (a number, a marker and a fill per line) and nothing per line may cost script; the component writes nothing on one.
 
 ### Inventory
 
@@ -168,7 +172,7 @@ What every component does today, and what it becomes. **Parts** components are c
 | Component | Today | Target | Status |
 |---|---|---|---|
 | accordion, accordion-item | Parts | `void-accordion-item` > `-trigger`, `-content` | Parts |
-| alert | Parts | `-title`, `-description`, `-close` | Parts |
+| alert | Parts | `-title`, `-description`, `-actions`, `-close` | Parts |
 | card | Parts | `-header` (`-title`, `-description`), `-body`, `-footer` | Parts |
 | dialog, drawer | Parts | `-title`, `-description`, `-body`, `-actions` | Parts |
 | dropdown-menu, dropdown-menu-item | Parts | `-trigger`, `-content` (`-item`, `-separator`) | Parts |
@@ -191,6 +195,8 @@ What every component does today, and what it becomes. **Parts** components are c
 | scroll-area | Projects content into a rendered viewport | Unchanged | Projects, and stays that way: not converted, and no shadow root |
 | select | Native `<select>` written inside | Enhances the native `<select>` in place | Parts (no parts) |
 | combobox, multiselect, option | `-content` part holding `void-option` | `void-combobox-content` / `void-multiselect-content` holding `void-option` | Parts |
+| code | Parts around a native `<pre><code>` | `-title`, `-copy`, the `<pre><code>` (text, or `void-code-line`s) | Parts |
+| diff | Parts | `-title`, `void-diff-hunk` > `-header`, `void-diff-line` | Parts |
 | action-input, avatar, badge, bar-chart, button, calendar, date-picker, color-picker, compose-input, divider, donut-chart, editable, file-upload, gauge, hamburger, indicator, input, line-chart, list, list-item, number-input, pagination, pin-input, progress, segmented-control, segmented-control-item, sidebar, skeleton, slider, spinner, stat, status-dot, stepper, switch, table, tags-input, textarea, toast-container, toggle, toggle-group | Text content, attributes, or content generated from data | Unchanged | No parts |
 
 ## What to avoid

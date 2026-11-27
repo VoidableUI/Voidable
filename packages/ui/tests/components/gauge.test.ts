@@ -316,14 +316,48 @@ describe('VoidGauge', () => {
   });
 
   describe('center label', () => {
-    it('shows the rounded value', async () => {
-      const el = await mount<VoidGauge>(TAG, { value: 75.6 });
-      expect(centerText(el)).toBe('76');
+    it('shows the decimals of the reading (#141)', async () => {
+      expect(centerText(await mount<VoidGauge>(TAG, { value: 75.6 }))).toBe('75.6');
+      expect(centerText(await mount<VoidGauge>(TAG, { value: 0.21, max: 1 }))).toBe('0.21');
+      expect(centerText(await mount<VoidGauge>(TAG, { value: 75 }))).toBe('75');
+    });
+
+    it('fraction-digits fixes the digits shown (#141)', async () => {
+      expect(centerText(await mount<VoidGauge>(TAG, { value: 75.6, fractionDigits: 0 }))).toBe('76');
+      expect(centerText(await mount<VoidGauge>(TAG, { value: 0.2, max: 1, fractionDigits: 2 }))).toBe('0.20');
+      const el = document.createElement(TAG) as VoidGauge;
+      el.setAttribute('fraction-digits', '1');
+      expect(el.fractionDigits).toBe(1);
+    });
+
+    it('takes the digits of a tick step too (#141)', async () => {
+      expect(centerText(await mount<VoidGauge>(TAG, { value: 1, max: 2, tickMinor: 0.25 }))).toBe('1.00');
+    });
+
+    it('formats with the element lang (#141)', async () => {
+      const host = document.createElement('div');
+      host.lang = 'de';
+      document.body.append(host);
+      const el = document.createElement(TAG) as VoidGauge;
+      noAnimation(el);
+      Object.assign(el, { value: 0.21, max: 1 });
+      host.append(el);
+      await settle(el);
+      expect(centerText(el)).toBe('0,21');
+      host.remove();
+    });
+
+    it('the accessible table says the same number as the centre (#141)', async () => {
+      const el = await mount<VoidGauge>(TAG, { value: 0.21, max: 1 });
+      const cells = qa(el, 'table tbody td').map((c) => c.textContent);
+      expect(cells).toEqual(['0.21', '0', '1']);
+      const two = await mount<VoidGauge>(TAG, { value: 0.2, max: 1, fractionDigits: 2 });
+      expect(qa(two, 'table tbody td').map((c) => c.textContent)).toEqual(['0.20', '0.00', '1.00']);
     });
 
     it('abbreviates thousands and millions', async () => {
-      expect(centerText(await mount<VoidGauge>(TAG, { value: 1500, max: 5000 }))).toBe('1.5k');
-      expect(centerText(await mount<VoidGauge>(TAG, { value: 12000, max: 50000 }))).toBe('12k');
+      expect(centerText(await mount<VoidGauge>(TAG, { value: 1500, max: 5000 }))).toBe('1.5K');
+      expect(centerText(await mount<VoidGauge>(TAG, { value: 12000, max: 50000 }))).toBe('12K');
       expect(centerText(await mount<VoidGauge>(TAG, { value: 2_500_000, max: 5_000_000 }))).toBe('2.5M');
     });
 

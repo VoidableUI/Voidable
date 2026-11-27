@@ -1,0 +1,162 @@
+---
+title: Diff
+description: A unified diff of lines, with the changed words marked inside a line. Your application computes the diff; the element presents it with markers, line numbers and documented colours. Live examples.
+---
+
+import Example from '../../../components/Example.astro';
+
+`<void-diff>` presents a diff that your application or your server has already computed (with `git diff`, a diff library, or the two versions of a record). It does not compute one. You write the result as hunks of lines, and the theme draws it: a `+` or a `−` and a fill for each changed line, line numbers if you ask for them, and a stronger fill under the words that changed.
+
+## A unified diff
+
+One `<void-diff-hunk>` per hunk, one `<void-diff-line>` per line. A line's `kind` is `add`, `del` or, when you leave it out, an unchanged line of context. `old` and `new` are the line numbers in the two files; they are shown when the diff has `line-numbers`. The white space your template leaves between two lines draws nothing; white space inside a line is kept.
+
+export const unified = `
+<void-diff line-numbers>
+  <void-diff-title>src/invoice.js</void-diff-title>
+  <void-diff-hunk>
+    <void-diff-header>@@ -10,4 +10,5 @@ export function total(items) {</void-diff-header>
+    <void-diff-line old="10" new="10">  let sum = 0;</void-diff-line>
+    <void-diff-line kind="del" old="11">  for (const item of items) sum += <del>item.price</del>;</void-diff-line>
+    <void-diff-line kind="add" new="11">  for (const item of items) sum += <ins>item.price * item.quantity</ins>;</void-diff-line>
+    <void-diff-line kind="add" new="12">  if (sum &lt; 0) throw new RangeError('a total below zero is a mistake in the data');</void-diff-line>
+    <void-diff-line old="12" new="13">  return sum;</void-diff-line>
+  </void-diff-hunk>
+  <void-diff-hunk>
+    <void-diff-header>@@ -40,2 +41,2 @@</void-diff-header>
+    <void-diff-line old="40" new="41">export const currency = 'EUR';</void-diff-line>
+    <void-diff-line kind="del" old="41">export const digits = <del>2</del>;</void-diff-line>
+    <void-diff-line kind="add" new="42">export const digits = <ins>3</ins>;</void-diff-line>
+  </void-diff-hunk>
+</void-diff>`;
+
+export const unifiedErb = `
+<void-diff line-numbers>
+  <void-diff-title><%= @diff.path %></void-diff-title>
+  <% @diff.hunks.each do |hunk| %>
+    <void-diff-hunk>
+      <void-diff-header><%= hunk.header %></void-diff-header>
+      <% hunk.lines.each do |line| %>
+        <%= tag.void_diff_line line.html, kind: line.kind, old: line.old_number, new: line.new_number %>
+      <% end %>
+    </void-diff-hunk>
+  <% end %>
+</void-diff>`;
+
+export const unifiedHeex = `
+<.diff line_numbers>
+  <void-diff-title>{@diff.path}</void-diff-title>
+  <%= for hunk <- @diff.hunks do %>
+    <void-diff-hunk>
+      <void-diff-header>{hunk.header}</void-diff-header>
+      <%= for line <- hunk.lines do %>
+        <void-diff-line kind={line.kind} old={line.old} new={line.new}>{line.text}</void-diff-line>
+      <% end %>
+    </void-diff-hunk>
+  <% end %>
+</.diff>`;
+
+export const unifiedBlade = `
+<void-diff line-numbers>
+  <void-diff-title>{{ $diff->path }}</void-diff-title>
+  @foreach ($diff->hunks as $hunk)
+    <void-diff-hunk>
+      <void-diff-header>{{ $hunk->header }}</void-diff-header>
+      @foreach ($hunk->lines as $line)
+        <void-diff-line kind="{{ $line->kind ?? 'context' }}" old="{{ $line->old }}" new="{{ $line->new }}">{{ $line->text }}</void-diff-line>
+      @endforeach
+    </void-diff-hunk>
+  @endforeach
+</void-diff>`;
+
+export const unifiedJsx = `
+import { Diff, DiffTitle, DiffHunk, DiffHeader, DiffLine } from '@voidable/ui-react';
+
+<Diff lineNumbers>
+  <DiffTitle>{diff.path}</DiffTitle>
+  {diff.hunks.map((hunk) => (
+    <DiffHunk key={hunk.header}>
+      <DiffHeader>{hunk.header}</DiffHeader>
+      {hunk.lines.map((line, i) => (
+        <DiffLine key={i} kind={line.kind} old={line.old} new={line.new}>{line.text}</DiffLine>
+      ))}
+    </DiffHunk>
+  ))}
+</Diff>`;
+
+<Example html={unified} erb={unifiedErb} heex={unifiedHeex} blade={unifiedBlade} jsx={unifiedJsx} />
+
+A long line scrolls sideways inside the diff, and every line's fill runs the whole scrolled width. While there is something to scroll to, the diff is in the tab order, so the arrow keys scroll it; while everything fits it is not a tab stop. The title stays in view while the lines scroll. `wrap` breaks long lines instead.
+
+Without `line-numbers` the gutter is the marker alone:
+
+export const plain = `
+<void-diff>
+  <void-diff-hunk>
+    <void-diff-line>retries: 3</void-diff-line>
+    <void-diff-line kind="del">timeout: 30</void-diff-line>
+    <void-diff-line kind="add">timeout: 60</void-diff-line>
+    <void-diff-line>verbose: false</void-diff-line>
+  </void-diff-hunk>
+</void-diff>`;
+
+<Example html={plain} />
+
+## Changed words
+
+Inside a line, wrap what changed in the native elements for it: `<ins>` for inserted text, `<del>` for removed text. They take a stronger fill than their line, an underline and a strike-through. In a pair of lines, mark the removed words in the `del` line and the inserted words in the `add` line, as above.
+
+For a diff of words in running text, such as two versions of a paragraph, write unchanged lines with the insertions and deletions inline, and let them wrap:
+
+export const words = `
+<void-diff wrap>
+  <void-diff-title>Terms of service, section 4</void-diff-title>
+  <void-diff-hunk>
+    <void-diff-line>You may cancel <del>within 14 days</del><ins>within 30 days</ins> of the purchase. Refunds are paid to the <del>original</del> payment method <ins>you choose</ins>.</void-diff-line>
+    <void-diff-line>This does not affect your statutory rights.</void-diff-line>
+  </void-diff-hunk>
+</void-diff>`;
+
+<Example html={words} />
+
+Any other inline markup inside a line is kept, so highlighted code works as it does in a [code block](/components/code/#syntax-highlighting).
+
+## Not by colour alone
+
+Every change is said twice, once without colour:
+
+| Change | Without colour | Colour |
+|---|---|---|
+| Added line | `+` in the gutter | `--void-color-diff-ins-subtle` behind the line, the marker in `--void-color-diff-ins` |
+| Removed line | `−` in the gutter | `--void-color-diff-del-subtle` behind the line, the marker in `--void-color-diff-del` |
+| Inserted words (`<ins>`) | Underline | `--void-color-diff-ins-strong` over the line's fill |
+| Removed words (`<del>`) | Strike-through | `--void-color-diff-del-strong` over the line's fill |
+
+The text keeps its own colour on every fill, and each pair (text, line numbers and marker on a changed line; text on a changed word) is held to 4.5:1 in dark and light, in every theme and in the Loft and Slab skins, by the theme's contrast lint. In forced-colours mode the fills go and the markers, the underline and the strike-through remain. To recolour, set the two inks where the theme's tokens are declared (`:root`, or an element with `data-void-theme`); the fills follow:
+
+```css
+:root {
+  --void-color-diff-ins: var(--void-color-info);
+  --void-color-diff-del: var(--void-color-warning);
+}
+```
+
+## What a screen reader hears
+
+- **A changed line** starts with the word "added" or "removed". It is the text alternative of the marker (CSS `content: "+" / "added"`), so it costs no element and no script per line, and it follows the language of the page: the words are the `diff.added` and `diff.removed` [messages](/guides/translation/). The line numbers have an empty alternative and are not read.
+- **Changed words** are native `<ins>` and `<del>`, which browsers expose as insertion and deletion. Whether a screen reader announces those roles depends on the screen reader and its settings, which is why the line itself says "added" or "removed" in words.
+- **A titled diff** is a group named by its title, so a page of several files can be told apart.
+
+Text alternatives for generated content need Chrome or Edge 77, Safari 17.4 or Firefox 128. An older browser reads the marker itself ("plus", "minus") and the line numbers.
+
+## Selecting and copying
+
+Markers and line numbers are generated by CSS, so selecting lines and copying them takes the text alone, with a line break per line. To offer a copy button for one version of a file, show it in a [`<void-code>`](/components/code/).
+
+## Large diffs
+
+The component writes nothing on a hunk or a line: no role, no id, no listener. A diff of 5,000 lines is the browser's own style and layout of 5,000 elements. There is no virtual scrolling; for a diff much larger than that, show the files one at a time or load hunks as they are opened.
+
+## Side by side
+
+There is no split view. A split view needs the lines paired by the server, takes twice the width, and falls back to a unified view on a narrow screen anyway; the unified view with word-level changes covers review, history and audit screens. It may come later as an attribute on the same markup.

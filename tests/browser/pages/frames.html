@@ -1,0 +1,42 @@
+<!-- A closed and an open collapsible, one whose frame is turned off, and cards
+     with and without the rule under the header. Specs: collapsible-frame.spec.ts. -->
+<main style="padding: 2rem; width: 32rem; display: grid; gap: 2rem">
+  <void-collapsible id="closed">
+    <void-collapsible-trigger>Shipping details</void-collapsible-trigger>
+    <void-collapsible-content><p>Ships in two days.</p></void-collapsible-content>
+  </void-collapsible>
+
+  <void-collapsible id="open" open>
+    <void-collapsible-trigger>Returns</void-collapsible-trigger>
+    <void-collapsible-content><p id="open-text">Returns are free for thirty days.</p><p>A second paragraph.</p></void-collapsible-content>
+  </void-collapsible>
+
+  <void-collapsible id="bare" open style="--void-collapsible-rule-frame: none">
+    <void-collapsible-trigger>No frame</void-collapsible-trigger>
+    <void-collapsible-content><p>Content with no line around it.</p></void-collapsible-content>
+  </void-collapsible>
+
+  <void-input id="outside" value="Outside" aria-label="Outside"></void-input>
+
+  <void-collapsible id="flush" open style="--void-collapsible-rule-frame: none; --void-collapsible-padding-inline: 0">
+    <void-collapsible-trigger>Advanced</void-collapsible-trigger>
+    <void-collapsible-content><void-input id="flush-field" value="Inside" aria-label="Inside"></void-input></void-collapsible-content>
+  </void-collapsible>
+
+  <void-collapsible id="framed-flush" open style="--void-collapsible-padding-inline: 0">
+    <void-collapsible-trigger>Advanced</void-collapsible-trigger>
+    <void-collapsible-content><void-input id="framed-field" value="Inside" aria-label="Inside"></void-input></void-collapsible-content>
+  </void-collapsible>
+
+  <void-card id="card">
+    <void-card-header><void-card-title>Card</void-card-title></void-card-header>
+    <void-card-body>Body.</void-card-body>
+  </void-card>
+
+  <void-card id="card-plain" style="--void-card-header-rule: none">
+    <void-card-header><void-card-title>Card</void-card-title></void-card-header>
+    <void-card-body>Body.</void-card-body>
+  </void-card>
+
+  <div id="after"></div>
+</main>

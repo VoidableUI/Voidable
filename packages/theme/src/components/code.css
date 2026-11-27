@@ -1,0 +1,231 @@
+/* A code block is a container (a hairline and a fill you can barely see)
+   around a native <pre> that scrolls sideways. Everything is CSS: the
+   line numbers are counters over the <void-code-line> elements, so a block
+   of thousands of lines costs no script, looks the same before the
+   component is defined, and a number is never selected or copied. */
+/* @tokens void-code
+   --void-code-surface       Fill behind the code.
+   --void-code-border        Edge colour.
+   --void-code-radius        Corner radius.
+   --void-code-padding       Space between the edge and the code, and beside the title.
+   --void-code-font-size     Size of the code.
+   --void-code-number-width  Setting: width of the line-number column, a length in ch (4ch, room for 9999, by default). */
+
+void-code {
+  --_void-code-padding: var(--void-code-padding, var(--void-space-4));
+  --_void-code-number: var(--void-code-number-width, 4ch);
+
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  border:var(--void-container-border-width) solid var(--void-code-border, var(--void-container-border));
+  border-radius: var(--void-code-radius, var(--void-container-radius));
+  background: var(--void-code-surface, var(--void-container-surface));
+  color: var(--void-type-code-color);
+  font-family: var(--void-font-sans);
+}
+
+/* The title: a file name or the language. Not a label role: a file name
+   keeps its case. */
+void-code-title {
+  grid-column: 1;
+  min-inline-size: 0;
+  padding: var(--void-space-2) var(--_void-code-padding);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--void-type-code-family);
+  font-size: var(--void-text-xs);
+  line-height: var(--void-leading-normal);
+  color: var(--void-color-text-secondary);
+}
+
+/* The copy control the author wrote: a part wrapping their own button, at
+   the far end of the first row. */
+void-code-copy {
+  grid-column: 2;
+  grid-row: 1;
+  align-self: start;
+  display: flex;
+  padding: var(--void-space-1);
+}
+
+void-code-copy > button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-inline-size: var(--void-control-height-sm);
+  block-size: var(--void-control-height-sm);
+  padding: 0 var(--void-space-2);
+  border: none;
+  border-radius: var(--void-control-radius);
+  background: transparent;
+  color: var(--void-color-text-secondary);
+  font-family: var(--void-font-sans);
+  font-size: var(--void-text-xs);
+  cursor: pointer;
+  transition: background-color var(--void-duration-fast) var(--void-ease-in-out), color var(--void-duration-fast) var(--void-ease-in-out);
+}
+
+void-code-copy > button:hover {
+  background: var(--void-color-bg-hover);
+  color: var(--void-color-text);
+}
+
+void-code-copy > button:focus-visible {
+  outline: var(--void-focus-ring-width) solid var(--void-focus-ring-color);
+  outline-offset: calc(var(--void-focus-ring-width) * -1);
+}
+
+/* An empty button gets the theme's icon: two sheets, and a tick for the two
+   seconds after a copy. A button with text of its own is left as written. */
+void-code-copy > button:empty {
+  padding: 0;
+}
+
+void-code-copy > button:empty::before {
+  content: "";
+  inline-size: 1rem;
+  block-size: 1rem;
+  background: currentColor;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='black' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='5.5' y='5.5' width='8' height='8' rx='1.5'/%3E%3Cpath d='M10.5 3.5v-.5a1 1 0 0 0-1-1h-6.5a1 1 0 0 0-1 1v6.5a1 1 0 0 0 1 1h.5'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+void-code-copy[copied] > button:empty::before {
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='black' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 8.5l3.5 3.5 6.5-7.5'/%3E%3C/svg%3E");
+}
+
+/* The code. The <pre> is the scroller; the <code> inside is as wide as its
+   longest line and never narrower than the block, and is a column flex box so
+   that the white space a template leaves between two <void-code-line>
+   elements draws nothing (a run of white space alone is not a flex item). */
+void-code pre {
+  grid-column: 1 / -1;
+  min-inline-size: 0;
+  overflow-x: auto;
+  /* The scroller follows the block's lower corners (and its upper ones when
+     nothing is above it), so a scrollbar never pokes out of a round corner. */
+  border-end-start-radius: inherit;
+  border-end-end-radius: inherit;
+  padding-block: calc(var(--_void-code-padding) * 0.75);
+  font-family: var(--void-type-code-family);
+  font-size: var(--void-code-font-size, var(--void-type-code-size));
+  font-weight: var(--void-type-code-weight);
+  font-variant-numeric: var(--void-type-code-numeric);
+  line-height: var(--void-leading-normal);
+  color: inherit;
+  white-space: pre;
+  tab-size: 2;
+  /* Code is left to right whatever the page is. */
+  direction: ltr;
+  text-align: left;
+}
+
+void-code pre > code {
+  display: flex;
+  flex-direction: column;
+  inline-size: max-content;
+  min-inline-size: 100%;
+  padding-inline: var(--_void-code-padding);
+  font: inherit;
+}
+
+/* A <pre> with no <code> inside keeps the same inset. */
+void-code pre:not(:has(> code)) {
+  padding-inline: var(--_void-code-padding);
+}
+
+/* Without a title the code and the copy button share the row: the button
+   never lies over the code. With a title, a rule separates the two rows. */
+void-code-copy:first-child ~ pre {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+void-code-title ~ pre {
+  border-block-start: var(--void-rule-head);
+}
+
+void-code pre:focus-visible {
+  outline: var(--void-focus-ring-width) solid var(--void-focus-ring-color);
+  outline-offset: calc(var(--void-focus-ring-width) * -1);
+}
+
+void-code[wrap] pre {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+void-code[wrap] pre > code {
+  inline-size: auto;
+}
+
+/* Lines. An empty line is still a line tall. */
+void-code-line {
+  display: block;
+  min-block-size: 1lh;
+}
+
+void-code[line-numbers] pre {
+  counter-reset: void-code-line;
+}
+
+void-code[line-numbers] void-code-line {
+  position: relative;
+  padding-inline-start: calc(var(--_void-code-number) + var(--void-space-4));
+  counter-increment: void-code-line;
+}
+
+void-code[line-numbers] void-code-line::before {
+  content: counter(void-code-line);
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  inline-size: var(--_void-code-number);
+  text-align: end;
+  white-space: pre;
+  color: var(--void-color-text-muted);
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+void-code[line-numbers] void-code-line[number]::before {
+  content: attr(number);
+}
+
+/* The numbers are not read out before every line. */
+@supports (content: "a" / "b") {
+  void-code[line-numbers] void-code-line::before {
+    content: counter(void-code-line) / "";
+  }
+
+  void-code[line-numbers] void-code-line[number]::before {
+    content: attr(number) / "";
+  }
+}
+
+/* The polite live region the component adds ("Copied"). */
+void-code > [data-void-announcer] {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+/* Touch targets: the copy button's hit area grows to --void-hit-target
+   (44px) under any coarse pointer without resizing it. */
+@media (any-pointer: coarse) {
+  void-code-copy > button::after {
+    content: ""; position: absolute; inset: 50% auto auto 50%; translate: -50% -50%;
+    min-inline-size: var(--void-hit-target);
+    min-block-size: var(--void-hit-target);
+  }
+}

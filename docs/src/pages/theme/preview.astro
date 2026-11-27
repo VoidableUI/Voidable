@@ -46,7 +46,7 @@ const screens = Object.entries(bodies).map(([id, body]) => {
   </head>
   <body>
     {screens.map((s, i) => (
-      <void-shell nav={s.overlay ? 'overlay' : undefined} data-screen={s.id} hidden={i !== 0} set:html={s.html} />
+      <void-shell nav={s.overlay ? 'overlay' : undefined} data-screen={s.id} hidden={i !== 0 || undefined} set:html={s.html} />
     ))}
 
     <script>

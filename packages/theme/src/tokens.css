@@ -279,6 +279,21 @@
   --void-color-notice-subtle:    color-mix(in srgb, var(--void-color-notice)    var(--void-tone-tint), transparent);
   --void-color-highlight-subtle: color-mix(in srgb, var(--void-color-highlight) var(--void-tone-tint), transparent);
 
+  /* ── Diff ──
+     Inserted and removed text (void-diff, and `ins` / `del` inside it).
+     The ink is for the + and − markers; the subtle fill lies behind a
+     whole line and the strong fill, on top of it, behind the changed
+     words. Text keeps its own colour on both fills (4.5:1, checked by
+     lint:contrast with the strong fill over the subtle one), so the
+     colours only repeat what the markers, the underline and the
+     strike-through already say. */
+  --void-color-diff-ins:        var(--void-color-success);
+  --void-color-diff-ins-subtle: color-mix(in srgb, var(--void-color-diff-ins) var(--void-tone-tint), transparent);
+  --void-color-diff-ins-strong: color-mix(in srgb, var(--void-color-diff-ins) calc(var(--void-tone-tint) * 1.5), transparent);
+  --void-color-diff-del:        var(--void-color-error);
+  --void-color-diff-del-subtle: color-mix(in srgb, var(--void-color-diff-del) var(--void-tone-tint), transparent);
+  --void-color-diff-del-strong: color-mix(in srgb, var(--void-color-diff-del) calc(var(--void-tone-tint) * 1.5), transparent);
+
   /* ── Elevation ──
      Only for things that overlap the page. A hairline ring and a soft
      dark shadow; on black the ring and the lifted surface do the
@@ -523,7 +538,12 @@
 
   /* field: a control text is entered or chosen in. Input, textarea,
      select, combobox, number, pin, tags and the like. */
-  --void-field-surface: var(--void-color-surface);
+  /* A field is the page colour in light, so it never wears the grey that
+     means "disabled" on a white page; in dark it is the lifted container
+     shade. A disabled field has a wash instead, strong enough to show
+     through the opacity a disabled control is drawn at. */
+  --void-field-surface: color-mix(in srgb, var(--void-color-surface) calc(100% * var(--void-scheme-dark)), var(--void-color-bg));
+  --void-field-surface-disabled: color-mix(in srgb, oklch(var(--void-fg)) 8%, var(--void-color-bg));
   --void-field-border:  var(--void-control-border);
 
   /* item: one of a set you move between. The link to the current page,

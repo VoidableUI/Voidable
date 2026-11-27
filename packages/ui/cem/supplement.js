@@ -295,7 +295,12 @@ export const parts = {
         description:
           'Top row of the card, divided from the body by a hairline: the title, an optional description, and anything that sits at the far end (a badge, void-actions).',
         parts: [
-          { tag: 'void-card-title', max: 1, description: 'Title of the card.' },
+          {
+            tag: 'void-card-title',
+            max: 1,
+            description:
+              'Title of the card. Holds plain text, or the one `<a href>` or `<button>` that makes the whole card a link or a button (the card takes no second control).',
+          },
           { tag: 'void-card-description', max: 1, description: 'One line under the title.' },
         ],
       },
@@ -307,7 +312,7 @@ export const parts = {
     children: 'parts',
     ordered: true,
     skeleton:
-      '<void-alert color="warning"><void-alert-title>Title</void-alert-title><void-alert-description>What happened and what to do.</void-alert-description><void-alert-close><button type="button" aria-label="Dismiss">&times;</button></void-alert-close></void-alert>',
+      '<void-alert color="warning"><void-alert-title>Title</void-alert-title><void-alert-description>What happened and what to do.</void-alert-description><void-alert-actions><void-button>Retry</void-button></void-alert-actions><void-alert-close><button type="button" aria-label="Dismiss">&times;</button></void-alert-close></void-alert>',
     legacy: {
       attributes: { dismissible: 'add <void-alert-close><button type="button" aria-label="Dismiss">&times;</button></void-alert-close> as the last child; without it the alert is not dismissible' },
       children: 'put the message in <void-alert-description> (and a short title in <void-alert-title> before it)',
@@ -315,11 +320,68 @@ export const parts = {
     parts: [
       { tag: 'void-alert-title', max: 1, description: 'Short title of the message.' },
       { tag: 'void-alert-description', required: true, max: 1, description: 'The message.' },
+      { tag: 'void-alert-actions', max: 1, description: 'Buttons or links for the message (Retry, Sign in again, Undo), in a row at the trailing edge below the text; buttons in it are small.' },
       {
         tag: 'void-alert-close',
         max: 1,
         control: true,
         description: 'Wraps the one control that dismisses the alert (a <button aria-label="Dismiss">); pressing it fires void-close and removes the alert. Without it the alert cannot be dismissed.',
+      },
+    ],
+  },
+  'void-code': {
+    children: 'any',
+    ordered: true,
+    skeleton:
+      '<void-code line-numbers><void-code-title>app.js</void-code-title><void-code-copy><button type="button"></button></void-code-copy><pre><code><void-code-line>const a = 1;</void-code-line><void-code-line>const b = 2;</void-code-line></code></pre></void-code>',
+    parts: [
+      { tag: 'void-code-title', max: 1, description: 'A file name or the language, shown above the code; names the block for assistive technology.' },
+      {
+        tag: 'void-code-copy',
+        max: 1,
+        control: true,
+        description:
+          'Wraps the one control that copies the code (a <button type="button">; leave it empty for the theme\'s icon and the name "Copy code", or write its text). Pressing it copies the text of the code, fires void-copy and announces "Copied".',
+        attributes: [{ name: 'copied', type: 'boolean', description: 'Set by the code block for two seconds after a copy; the theme shows a tick.' }],
+      },
+      {
+        tag: 'void-code-line',
+        children: 'any',
+        description:
+          'One line of code, inside the <code>. Optional: write the text straight into the <code> when you need no line numbers. Holds text and any inline markup (the spans of a syntax highlighter).',
+        attributes: [
+          { name: 'number', type: 'string', description: 'The number shown for this line with `line-numbers`, in place of its position (an excerpt that starts at line 40).' },
+        ],
+      },
+    ],
+  },
+  'void-diff': {
+    children: 'parts',
+    ordered: true,
+    skeleton:
+      '<void-diff line-numbers><void-diff-title>src/app.js</void-diff-title><void-diff-hunk><void-diff-header>@@ -1,2 +1,2 @@</void-diff-header><void-diff-line old="1" new="1">const a = 1;</void-diff-line><void-diff-line kind="del" old="2">const b = <del>2</del>;</void-diff-line><void-diff-line kind="add" new="2">const b = <ins>3</ins>;</void-diff-line></void-diff-hunk></void-diff>',
+    parts: [
+      { tag: 'void-diff-title', max: 1, description: 'The file name (or any heading of the diff), shown above the hunks; names the diff for assistive technology.' },
+      {
+        tag: 'void-diff-hunk',
+        required: true,
+        children: 'parts',
+        ordered: true,
+        description: 'One hunk: a run of lines that belong together. A rule separates it from the next.',
+        parts: [
+          { tag: 'void-diff-header', max: 1, description: 'The header line of the hunk, such as @@ -1,4 +1,5 @@ and the enclosing function.' },
+          {
+            tag: 'void-diff-line',
+            children: 'any',
+            description:
+              'One line. Its text, with the words that changed wrapped in native <ins> (in an added line) or <del> (in a removed line); any other inline markup (the spans of a syntax highlighter) is kept.',
+            attributes: [
+              { name: 'kind', type: "'add' | 'del' | 'context'", description: 'What happened to the line: `add` (drawn with +), `del` (drawn with −) or `context` (unchanged, the default).' },
+              { name: 'old', type: 'string', description: 'Line number in the old file, shown with `line-numbers`. Leave it out on an added line.' },
+              { name: 'new', type: 'string', description: 'Line number in the new file, shown with `line-numbers`. Leave it out on a removed line.' },
+            ],
+          },
+        ],
       },
     ],
   },
@@ -650,9 +712,36 @@ export const parts = {
  * @type {Record<string, { tag: string, fix: string }>}
  */
 export const nativeControls = {
+  'void-code': {
+    tag: 'pre',
+    fix: 'write the code in a native <pre><code> inside: <void-code><pre><code>npm install</code></pre></void-code>',
+  },
   'void-select': {
     tag: 'select',
     fix: 'write a native <select> (with the name and the options) inside: <void-select><select name="plan"><option value="free">Free</option><option value="pro">Pro</option></select></void-select>',
+  },
+};
+
+/**
+ * Components that can be one link or one button as a whole (#116): the author writes the real
+ * `<a href>` or `<button>` inside `part`, and the theme stretches it over the component. The
+ * component is never wrapped in a link or a button, and a linked one holds no second control.
+ * Written to the declaration as `voidLinked`; `voidable check` and the development warnings
+ * report both mistakes with `fix`.
+ * `controls` are the `void-*` tags that count as a control besides the native `a[href]`,
+ * `button`, `input` (not hidden), `select`, `textarea` and `summary`.
+ * @type {Record<string, { part: string, controls: string[], fix: string }>}
+ */
+export const linkedControls = {
+  'void-card': {
+    part: 'void-card-title',
+    controls: [
+      'void-button', 'void-checkbox', 'void-radio', 'void-switch', 'void-toggle', 'void-toggle-group', 'void-segmented-control',
+      'void-select', 'void-multiselect', 'void-combobox', 'void-input', 'void-textarea', 'void-number-input', 'void-slider',
+      'void-dropdown-menu', 'void-popover', 'void-hamburger', 'void-editable', 'void-date-picker', 'void-color-picker',
+      'void-file-upload', 'void-pin-input', 'void-tags-input', 'void-action-input', 'void-compose-input', 'void-tabs',
+    ],
+    fix: 'put the one link or button in the title and leave the card unwrapped: <void-card><void-card-header><void-card-title><a href="/projects/ada">Ada</a></void-card-title><void-card-description>One line.</void-card-description></void-card-header><void-card-body>...</void-card-body></void-card>',
   },
 };
 

@@ -103,6 +103,36 @@ export const tableJsx = `
 
 <Example html={table} erb={tableErb} jsx={tableJsx} />
 
+## As a heading
+
+`size="lg"` sets the state in the [heading role](/patterns/labels/), with a dot to match: the state of a device at the top of its block, as large as the section headings around it. It needs no `<h2>` around it to get the size. Where the block needs a heading for navigation, the state can be that heading: put it inside the `<h2>` of a `<void-section-head>`.
+
+export const large = `
+<void-stack gap="tight">
+  <void-state size="lg" color="success" pulse>Tracking MRD-0412</void-state>
+  <span data-void-type="caption">Svalbard 1, X band, 41.7° elevation</span>
+</void-stack>`;
+
+export const largeErb = `
+<void-section>
+  <void-section-head>
+    <h2><void-state size="lg" color="<%= state_color(@station) %>"><%= @station.state.humanize %></void-state></h2>
+    <span data-void-type="label">Since <%= l @station.state_changed_at, format: :short %></span>
+  </void-section-head>
+  <%= render @station.current_pass %>
+</void-section>`;
+
+export const largeJsx = `
+<void-section>
+  <void-section-head>
+    <h2><void-state size="lg" color={station.stateColor}>{station.state}</void-state></h2>
+    <span data-void-type="label">Since {station.stateSince}</span>
+  </void-section-head>
+  <CurrentPass station={station} />
+</void-section>`;
+
+<Example html={large} erb={largeErb} jsx={largeJsx} />
+
 ## State, badge or alert
 
 - **`void-state`**: the current condition of a thing, shown where the thing is. Repeats well. Sentence case.

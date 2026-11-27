@@ -13,7 +13,7 @@ async function mount(props: Partial<VoidSidebar> = {}): Promise<VoidSidebar> {
   return el;
 }
 
-const widthVar = (el: HTMLElement) => el.style.getPropertyValue('--void-sidebar-width');
+const widthVar = (el: HTMLElement) => el.style.getPropertyValue('--_void-sidebar-width');
 
 afterEach(() => {
   document.body.innerHTML = '';
@@ -33,9 +33,9 @@ describe('VoidSidebar', () => {
   describe('default property values', () => {
     const el = document.createElement(TAG) as VoidSidebar;
     it('collapsed defaults to false', () => expect(el.collapsed).toBe(false));
-    it('width defaults to the theme token', () => expect(el.width).toBe('var(--void-sidebar-width)'));
-    it('collapsedWidth defaults to the theme token', () =>
-      expect(el.collapsedWidth).toBe('var(--void-sidebar-collapsed-width)'));
+    it('width is unset, so the token decides', () => expect(el.width).toBeNull());
+    it('collapsedWidth is unset, so the collapsed token decides', () =>
+      expect(el.collapsedWidth).toBeNull());
     it('side defaults to "start"', () => expect(el.side).toBe('start'));
   });
 
@@ -65,12 +65,12 @@ describe('VoidSidebar', () => {
   });
 
   describe('width variable', () => {
-    it('sets --void-sidebar-width to the expanded width when open', async () => {
+    it('sets the width override to the expanded width when open', async () => {
       const el = await mount({ width: '280px', collapsedWidth: '56px' });
       expect(widthVar(el)).toBe('280px');
     });
 
-    it('sets --void-sidebar-width to the collapsed width when collapsed', async () => {
+    it('sets the width override to the collapsed width when collapsed', async () => {
       const el = await mount({ width: '280px', collapsedWidth: '56px', collapsed: true });
       expect(widthVar(el)).toBe('56px');
     });
@@ -106,12 +106,28 @@ describe('VoidSidebar', () => {
       expect(widthVar(el)).toBe('280px');
     });
 
-    it('falls back to the theme tokens by default', async () => {
+    it('writes nothing by default, so the theme tokens decide and no self-reference exists (#122)', async () => {
       const el = await mount();
-      expect(widthVar(el)).toBe('var(--void-sidebar-width)');
+      expect(widthVar(el)).toBe('');
+      expect(el.style.getPropertyValue('--void-sidebar-width')).toBe('');
       el.collapsed = true;
       await el.updateComplete;
-      expect(widthVar(el)).toBe('var(--void-sidebar-collapsed-width)');
+      expect(widthVar(el)).toBe('');
+    });
+
+    it('leaves a --void-sidebar-width the author set on the element alone', async () => {
+      const el = await mount();
+      el.style.setProperty('--void-sidebar-width', '287px');
+      el.collapsed = true;
+      await el.updateComplete;
+      expect(el.style.getPropertyValue('--void-sidebar-width')).toBe('287px');
+    });
+
+    it('removing the width attribute clears the override', async () => {
+      const el = await mount({ width: '280px' });
+      el.removeAttribute('width');
+      await el.updateComplete;
+      expect(widthVar(el)).toBe('');
     });
   });
 
