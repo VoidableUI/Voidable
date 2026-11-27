@@ -213,7 +213,7 @@ describe('void-multiselect parts', () => {
   it('describes the trigger with the number of chosen options', async () => {
     const el = await mount<VoidMultiselect>(MULTI);
     const trigger = el.querySelector('[role=combobox]')!;
-    expect(trigger.getAttribute('aria-description')).toBe('1 selected');
+    expect(trigger.getAttribute('aria-description')).toBe('Alpha');
     el.value = [];
     await settle();
     expect(trigger.hasAttribute('aria-description')).toBe(false);

@@ -37,12 +37,50 @@ const show = (step: Step) =>
 
 const tail = (phrases: string[], n = 12) => phrases.slice(-n).map((p) => `    - ${JSON.stringify(p)}`).join('\n') || '    (nothing was spoken)';
 
+/**
+ * The set-up every scenario starts from, once, before its first move. What the first NVDA runs showed (#75):
+ * Guidepup's navigation to the web content ends with a Tab (focus on the first control), two focus/browse
+ * toggles and Escape, which left (a) the page's keyboard focus on a widget with NVDA in focus mode, where NVDA's
+ * own keys (Down, F, T) go to the page and say nothing, or moved or toggled that first control (a radio group
+ * with the second radio checked, an accordion with its first item open, so "not checked" and "expanded" were
+ * the truth), and (b) on some pages the window's focus in the browser toolbar (`document.hasFocus()` false).
+ * So: Tab into the page until the document has focus, reload it (state as the page wrote it), take focus off
+ * whatever has it, and put the reader in browse mode at the top. Each step is logged.
+ */
+export async function prepareReading(reader: Reader, page: Page, log: (line: string) => void): Promise<void> {
+  if (!reader.browseMode) return;
+  const focused = () => page.evaluate(() => document.hasFocus()).catch(() => false);
+  const reloadAndBrowse = async () => {
+    await page.reload();
+    await page.waitForFunction(() => typeof (window as unknown as { __settle?: unknown }).__settle === 'function' && !!customElements.get('void-button'));
+    await page.evaluate(() => (window as unknown as { __settle: (d: Document) => Promise<void> }).__settle(document));
+    await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur?.());
+    await reader.browseMode?.();
+  };
+  let tabs = 0;
+  for (; tabs < 8 && !(await focused()); tabs++) {
+    log(`the document has no keyboard focus (the browser's own controls have it): Tab ${tabs + 1}`);
+    await reader.press('Tab');
+  }
+  await reloadAndBrowse();
+  // The table and chart pages heard nothing after one pass (NVDA's focus was still on a toolbar button) and spoke
+  // after a second one that began by bringing the window forward and refreshing NVDA's copy of the page.
+  if (tabs > 0) {
+    await page.bringToFront().catch(() => undefined);
+    await reader.refresh?.();
+    await reloadAndBrowse();
+  }
+  log(`prepared for reading: document focused: ${await focused()}`);
+}
+
 /** Runs the steps; returns the transcript. Throws on the first failing step, with the transcript so far in `error.transcript`. */
 export async function runScenario(reader: Reader, page: Page, scenario: Scenario): Promise<TranscriptEntry[]> {
   const transcript: TranscriptEntry[] = [];
   let mark = { n: 0, last: undefined as string | undefined };
   let moved = false;
   let reached: Fact | null = null;
+  /** The silence diagnosis and remedies run once per scenario. */
+  let silenceHandled = false;
 
   /**
    * What was spoken after a point in the log. A screen reader may keep appending to its latest phrase (NVDA joins
@@ -63,6 +101,26 @@ export async function runScenario(reader: Reader, page: Page, scenario: Scenario
     return { n: log.length, last: log[log.length - 1] };
   };
   const spokenSince = async (at: typeof mark) => since(await reader.log(), at);
+
+  /** One line of the step-by-step record a silent or surprising run is read from: `[sr NVDA tabs] ...`. */
+  const note = (line: string) => console.log(`[sr ${reader.name} ${scenario.id}] ${line}`);
+  /** Where the page's own focus is, as the page reports it (not as the screen reader does). */
+  const state = async (): Promise<string> => {
+    try {
+      const s = await page.evaluate(() => {
+        const a = document.activeElement as HTMLElement | null;
+        const d = (window as unknown as { __srDescribe?: (e: Element) => string }).__srDescribe;
+        return { active: a && d ? d(a) : a ? `<${a.localName}>` : 'none', focus: document.hasFocus() };
+      });
+      return `page focus: ${s.focus}, active: ${s.active}`;
+    } catch (e) {
+      return `(page not readable: ${(e as Error).message.split('\n')[0]})`;
+    }
+  };
+  /** Records a key or command that was sent and what the reader said because of it. */
+  const sent = async (what: string, before: { n: number; last: string | undefined }) => {
+    note(`${what} -> ${JSON.stringify(since(await reader.log(), before))} | ${await state()}`);
+  };
   const begin = async () => {
     mark = await snapshot();
   };
@@ -83,13 +141,14 @@ export async function runScenario(reader: Reader, page: Page, scenario: Scenario
     let restarted = false;
     let stuck = 0;
     let silent = 0;
-    let restartedSilent = false;
     let previous: string | undefined;
-    for (let i = 0; i < MAX_MOVES; i++) {
+    // A probe's pages are short: ten moves find anything on them, and a miss must not cost forty.
+    for (let i = 0; i < (scenario.probe ? 10 : MAX_MOVES); i++) {
       const before = await snapshot();
       await reader.move(by);
       const said = since(await reader.log(), before);
       seen.push(...said);
+      note(`move ${i + 1} (${by}) -> ${JSON.stringify(said)} | ${await state()}`);
       // The element may be split over several phrases; judge the words of this move together.
       const joined = said.join(' ');
       if (said.length && matchFact(joined, fact).isElement) return check(fact, said);
@@ -106,11 +165,20 @@ export async function runScenario(reader: Reader, page: Page, scenario: Scenario
       // A reader that says nothing at all (every phrase empty) is not on the page: the window may not be in front
       // or the cursor may be nowhere. Bring the page forward and send the reader to the web content, once.
       silent = phrase ? 0 : silent + 1;
-      if (silent >= 4 && !restartedSilent) {
-        restartedSilent = true;
+      if (silent >= 4) {
         silent = 0;
+        // Once per scenario: ask the reader what it sees (title, focus, current line: speech after those proves it
+        // speaks and its cursor is not in the page), then every remedy together: window to the front, a click in
+        // the page, the reader's refresh of its copy of the page, the cursor back at the top. Silent again after
+        // that, the scenario stops here: more moves only cost minutes.
+        if (silenceHandled) throw new Error(`the reader stayed silent after the remedies (${await state()}); stopping instead of moving on.\n${await where()}`);
+        silenceHandled = true;
+        note(`SILENT for 4 moves: ${await state()}`);
+        note(`diagnosis: ${await (reader.diagnose?.() ?? Promise.resolve('(none for this reader)'))}`);
         await page.bringToFront().catch(() => undefined);
-        await reader.restart();
+        await reader.refresh?.();
+        await prepareReading(reader, page, note);
+        note(`after the remedies: ${await state()}`);
       }
     }
     throw new Error(`never reached ${describeFact(fact)} in ${MAX_MOVES} moves by "${by}".\n  Heard since the step began:\n${tail(seen, 20)}\n${await where()}`);
@@ -164,14 +232,32 @@ export async function runScenario(reader: Reader, page: Page, scenario: Scenario
         if (!reached) throw new Error('act needs an element reached first');
         await begin();
         await reader.act();
+        await sent("act", mark);
       } else if ('press' in step) {
         await begin();
         for (let n = pick(step.times, reader.name) ?? 1; n > 0; n--) await reader.press(step.press);
+        await sent(`press ${step.press}`, mark);
       } else if ('type' in step) {
         await begin();
         await reader.type(step.type);
+        await sent(`type ${JSON.stringify(step.type)}`, mark);
       } else if ('hear' in step) {
         await hear(forReader(step.hear, reader.name));
+        note(`heard ${describeFact(step.hear)}: ${JSON.stringify(await spokenSince(mark))} | ${await state()}`);
+      } else if ('sweep' in step) {
+        // Diagnosis: say what every move says, matching nothing.
+        const by = pick(step.by, reader.name) ?? 'next';
+        for (let n = 0; n < step.sweep; n++) {
+          const before = await snapshot();
+          await reader.move(by);
+          note(`sweep ${n + 1} (${by}) -> ${JSON.stringify(since(await reader.log(), before))} | ${await state()}`);
+        }
+        moved = true;
+      } else if ('mode' in step) {
+        await reader.focusMode?.();
+        note(`focus mode requested: ${await state()}`);
+      } else if ('pause' in step) {
+        await new Promise((resolve) => setTimeout(resolve, step.pause));
       } else if ('once' in step) {
         // Give a second, doubled announcement time to arrive, then count the phrases with these words.
         await page.waitForTimeout(1500);
@@ -188,6 +274,7 @@ export async function runScenario(reader: Reader, page: Page, scenario: Scenario
       } else if ('cell' in step) {
         await begin();
         await reader.cell(step.cell);
+        await sent(`cell ${step.cell}`, mark);
       } else if ('focus' in step) {
         await expect
           .poll(() => page.evaluate((sel) => !!document.activeElement?.closest(sel), step.focus), { message: `keyboard focus inside ${step.focus}` })
@@ -198,6 +285,12 @@ export async function runScenario(reader: Reader, page: Page, scenario: Scenario
     } catch (err) {
       entry.error = (err as Error).message;
       entry.phrases = (await reader.log()).slice(phrasesFrom);
+      if (scenario.probe) {
+        // A probe records what each step found and carries on with the next one.
+        if ('reach' in step) reached = step.reach;
+        note(`PROBE step ${i + 1} did not match (carrying on): ${entry.error.split('\n').slice(0, 12).join(' | ')}`);
+        continue;
+      }
       const failure = new Error(`${scenario.id}, step ${entry.step}\n${entry.error}`);
       (failure as Error & { transcript?: TranscriptEntry[] }).transcript = transcript;
       throw failure;

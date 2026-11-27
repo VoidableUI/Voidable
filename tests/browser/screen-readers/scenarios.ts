@@ -12,6 +12,13 @@
 import { expect } from '@playwright/test';
 import type { Scenario } from './facts';
 
+/**
+ * NVDA reads a checked radio as "radio button, checked, Free" and does not say its position in the group: the
+ * native radios and the ARIA radios of the reference page (sr-ref-radio) are read the same way, so for NVDA the
+ * position is checked in the accessibility tree (tree.ts) and the speech must carry the role and the state (#75).
+ */
+const NVDA_CHECKED = [/\bradio button\b/, /(?<!\bnot )\bchecked\b/];
+
 export const scenarios: Scenario[] = [
   {
     id: 'button',
@@ -72,18 +79,20 @@ export const scenarios: Scenario[] = [
     id: 'radio-group',
     title: 'A radio group announces its name, each radio, its position and which is checked',
     page: '/sr-controls',
-    readerIssues: { NVDA: { key: 'untracked:nvda-radio-not-checked', detail: 'NVDA said "Plan, grouping, Free, radio button, not checked" for the checked radio; VoiceOver said "Free selected radio button, 1 of 3".' } },
     steps: [
       // VoiceOver, arriving by quick navigation, says "Free selected radio button, 1 of 3": the group name is not repeated.
-      { reach: { role: 'radio', name: 'Free', checked: true, group: { role: 'radiogroup', name: 'Plan' }, position: { n: 1, of: 3, within: '#plan' }, spoken: { VoiceOver: [/selected/, /1 of 3/] } }, by: 'control' },
-      { reach: { role: 'radio', name: 'Pro', checked: false, position: { n: 2, of: 3, within: '#plan' }, spoken: { VoiceOver: [/\b2 of 3\b/] } }, by: 'control' },
+      { reach: { role: 'radio', name: 'Free', checked: true, group: { role: 'radiogroup', name: 'Plan' }, position: { n: 1, of: 3, within: '#plan' }, spoken: { VoiceOver: [/selected/, /1 of 3/], NVDA: NVDA_CHECKED } }, by: 'control' },
+      { reach: { role: 'radio', name: 'Pro', checked: false, position: { n: 2, of: 3, within: '#plan' }, spoken: { VoiceOver: [/\b2 of 3\b/], NVDA: [/\bnot checked\b/] } }, by: 'control' },
       { act: true },
       { hear: { role: 'radio', name: 'Pro', checked: true } },
-      // Arrow keys move through the group and check as they go; the group is one tab stop.
+      // Arrow keys move through the group and check as they go; the group is one tab stop. NVDA reached Pro by
+      // quick navigation, in browse mode, where it consumes the arrow and moves its own cursor to Team (not
+      // checked) without the key reaching the radio: a native radio group does the same. Focus mode passes keys on.
+      { mode: 'focus' },
       { press: 'ArrowDown' },
-      { hear: { role: 'radio', name: 'Team', checked: true, position: { n: 3, of: 3, within: '#plan' }, spoken: { VoiceOver: [/3 of 3/] } } },
+      { hear: { role: 'radio', name: 'Team', checked: true, position: { n: 3, of: 3, within: '#plan' }, spoken: { VoiceOver: [/3 of 3/], NVDA: NVDA_CHECKED } } },
       { press: 'ArrowDown' },
-      { hear: { role: 'radio', name: 'Free', checked: true, position: { n: 1, of: 3, within: '#plan' } } },
+      { hear: { role: 'radio', name: 'Free', checked: true, position: { n: 1, of: 3, within: '#plan' }, spoken: { NVDA: NVDA_CHECKED } } },
       { press: 'ArrowUp' },
       { hear: { role: 'radio', name: 'Team', checked: true } },
     ],
@@ -143,7 +152,6 @@ export const scenarios: Scenario[] = [
     id: 'dropdown-menu',
     title: 'A dropdown menu announces menu items with their position, and choosing one closes it and returns focus',
     page: '/sr-menu',
-    readerIssues: { VoiceOver: { key: 'untracked:voiceover-menu-silent', detail: 'After the menu opened and focus moved to its first item (the focus step passed) VoiceOver said only "Actions menu pop up button", not "Rename".' } },
     steps: [
       // VoiceOver says "Actions menu pop up button" and leaves the collapsed state unspoken.
       { reach: { role: 'button', name: 'Actions', expanded: false, spoken: { VoiceOver: [/pop up/] } }, by: 'control' },
@@ -163,8 +171,10 @@ export const scenarios: Scenario[] = [
     title: 'Tabs announce tab, selected state and position; selecting one reads its panel',
     page: '/sr-tabs',
     steps: [
-      { reach: { role: 'tab', name: 'Profile', selected: true, position: { n: 1, of: 3, within: 'void-tabs-list' } } },
-      { reach: { role: 'tab', name: 'Billing', selected: false, position: { n: 2, of: 3, within: 'void-tabs-list' } } },
+      // NVDA reads a tab as "tab, selected, Profile" and an unselected one as "tab, Billing", with no position and
+      // no "not selected": the APG tabs of sr-ref-tabs are read the same way (#75). The position stays in the tree test.
+      { reach: { role: 'tab', name: 'Profile', selected: true, position: { n: 1, of: 3, within: 'void-tabs-list' }, spoken: { NVDA: [/\btab\b/, /\bselected\b/] } } },
+      { reach: { role: 'tab', name: 'Billing', selected: false, position: { n: 2, of: 3, within: 'void-tabs-list' }, spoken: { NVDA: [/\btab\b/] } } },
       { act: true },
       { hear: { role: 'tab', name: 'Billing', selected: true } },
       { reach: { role: 'tabpanel', name: 'Billing', text: 'Your invoices and cards.', container: true } },
@@ -174,7 +184,6 @@ export const scenarios: Scenario[] = [
     id: 'accordion',
     title: 'An accordion trigger announces collapsed, expanded after activation, and collapsed again',
     page: '/sr-disclosure',
-    readerIssues: { NVDA: { key: 'untracked:nvda-accordion-expanded', detail: 'NVDA said "clickable, How do refunds work?, button, expanded" for a collapsed trigger (aria-expanded=false); VoiceOver said collapsed.' } },
     steps: [
       { reach: { role: 'button', name: 'How do refunds work?', expanded: false }, by: 'control' },
       { act: true },

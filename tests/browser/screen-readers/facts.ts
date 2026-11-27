@@ -109,7 +109,13 @@ export type Step =
   /** The page's own focus is on the element matching this selector (or inside it). */
   | { focus: string }
   /** A check on the page itself, in both runs. */
-  | { check: (page: Page) => Promise<void>; note: string };
+  | { check: (page: Page) => Promise<void>; note: string }
+  /** Screen readers only, for diagnosis: move `sweep` times (default by "next") and record what each move said, whether or not anything matches. */
+  | { sweep: number; by?: PerReader<Nav> }
+  /** Wait this many milliseconds (an animation, a late announcement), then carry on. */
+  | { pause: number }
+  /** Screen readers only: put the reader in focus mode (NVDA) so the keys of the next steps reach the page. */
+  | { mode: 'focus' };
 
 export interface Scenario {
   /** Stable id: names the test and the row in the results file. */
@@ -131,4 +137,19 @@ export interface Scenario {
    * it as known and a fix turns it red. Not used by the tree replay or by the other reader.
    */
   readerIssues?: Partial<Record<ReaderName, { key: KnownIssue; detail: string }>>;
+  /**
+   * A diagnostic run, not a test: the steps run with the screen reader, every failing step is logged
+   * (`[probe <reader> <id>] ...`) and the scenario passes regardless. Used for reference controls built
+   * with plain HTML or the ARIA Authoring Practices pattern beside a Voidable one, so a run shows what
+   * the reader says about the pattern itself. Never run by the tree replay.
+   */
+  probe?: boolean;
+  /** Run with these readers only (default: both). A probe about one reader's behaviour need not cost the other's job minutes. */
+  readers?: ReaderName[];
+  /**
+   * Print the page's event trace (focus changes and `aria-*`, `role`, `tabindex` mutations in the order they
+   * happened, see trace.ts) and the browser's accessibility tree after the scenario ran. Always printed
+   * for a probe, a known issue and a failure.
+   */
+  trace?: boolean;
 }

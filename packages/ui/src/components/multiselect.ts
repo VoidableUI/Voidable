@@ -102,6 +102,26 @@ export class VoidMultiselect extends InternalsFormControl(VoidElement) {
    */
   @property({ type: String }) placeholder = '';
   private get _hint(): string { return this.placeholder || msg(this, 'multiselect.placeholder'); }
+
+  /**
+   * What the trigger is described by once options are chosen. The chips are drawn, not read (they are
+   * `aria-hidden`, so a reader's cursor never rests on one), so the names of the chosen options are in the
+   * description: all of them up to three ("CSS and JavaScript"), else the first three and how many in all
+   * ("CSS, JavaScript, HTML, 5 selected").
+   */
+  private _chosenText(chosen: VoidOption[]): string {
+    const MAX = 3;
+    const lang = this.closest('[lang]')?.getAttribute('lang') || undefined;
+    const names = chosen.slice(0, MAX).map(optionLabel);
+    const list = () => {
+      try {
+        return new Intl.ListFormat(lang, { type: 'conjunction', style: 'long' }).format(names);
+      } catch {
+        return names.join(', ');
+      }
+    };
+    return chosen.length <= MAX ? list() : `${names.join(', ')}, ${msg(this, 'multiselect.selected', { count: chosen.length })}`;
+  }
   /** Stop the trigger opening and exclude the values from the form submission. */
   @property({ type: Boolean, reflect: true }) disabled = false;
   /** Size step: `sm`, `md` (default) or `lg`. */
@@ -274,6 +294,9 @@ export class VoidMultiselect extends InternalsFormControl(VoidElement) {
 
   // aria-description is global in ARIA 1.3; the lint's role table predates it.
   /* eslint-disable lit-a11y/role-supports-aria-attr */
+  // The placeholder and the chips are drawn, not read: the combobox is named by its aria-label and described by
+  // the count. Left exposed, VoiceOver's cursor sat on the placeholder inside the combobox and, when choosing an
+  // option replaced it with a chip, said only "selectable (null), inside of a combo box" (#75).
   render() {
     const selectedOpts = this._options.filter(o => o.selected);
     const open = this.open && !this.formDisabled;
@@ -287,7 +310,7 @@ export class VoidMultiselect extends InternalsFormControl(VoidElement) {
         aria-haspopup="listbox"
         aria-expanded=${String(open)}
         aria-controls=${this._controls(open)}
-        aria-description=${count ? msg(this, 'multiselect.selected', { count }) : nothing}
+        aria-description=${count ? this._chosenText(selectedOpts) : nothing}
         aria-disabled=${this.formDisabled ? 'true' : nothing}
         aria-required=${this.required ? 'true' : nothing}
         aria-invalid=${this.error ? 'true' : nothing}
@@ -295,7 +318,7 @@ export class VoidMultiselect extends InternalsFormControl(VoidElement) {
       >
         ${count > 0
           ? selectedOpts.map(opt => html`
-              <span class="void-multiselect-pill">
+              <span class="void-multiselect-pill" aria-hidden="true">
                 <span class="void-multiselect-pill-label">${optionLabel(opt)}</span>
                 <button
                   type="button"
@@ -306,7 +329,7 @@ export class VoidMultiselect extends InternalsFormControl(VoidElement) {
                 >×</button>
               </span>
             `)
-          : html`<span class="void-multiselect-placeholder">${this._hint}</span>`
+          : html`<span class="void-multiselect-placeholder" aria-hidden="true">${this._hint}</span>`
         }
       </div>
       ${this.error ? html`<span class="void-multiselect-error">${this.error}</span>` : nothing}

@@ -44,7 +44,7 @@ const KIT = `
   <void-hamburger></void-hamburger>
   <void-stepper value="1" steps="A,B,C"></void-stepper>
   <void-donut-chart data='{"segments":[{"name":"Search","value":75},{"name":"Direct","value":25}]}' style="width: 160px; height: 160px; --void-anim-scale: 0"></void-donut-chart>
-  <void-multiselect><void-multiselect-content><void-option value="a" selected>A</void-option></void-multiselect-content></void-multiselect>
+  <void-multiselect><void-multiselect-content><void-option value="a" selected>A</void-option><void-option value="b" selected>B</void-option><void-option value="c" selected>C</void-option><void-option value="d" selected>D</void-option></void-multiselect-content></void-multiselect>
 `;
 
 test.beforeEach(async ({ page }) => {
@@ -79,7 +79,7 @@ test.describe('French', () => {
     await expect(s.locator('void-error-fallback')).toContainText('Une erreur est survenue');
     await expect(s.getByRole('button', { name: 'Réessayer' })).toBeVisible();
     await expect(s.getByRole('navigation', { name: 'Progression' })).toBeVisible();
-    await expect(s.locator('void-multiselect [role=combobox]')).toHaveAttribute('aria-description', '1 sélectionné');
+    await expect(s.locator('void-multiselect [role=combobox]')).toHaveAttribute('aria-description', 'A, B, C, 4 sélectionnés');
   });
 
   test('the calendar writes month and weekday names in French and starts on Monday', async ({ page }) => {

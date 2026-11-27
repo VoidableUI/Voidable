@@ -11,7 +11,8 @@ import { join } from 'node:path';
 import type { Scenario } from './facts';
 import { nvdaReader, voiceOverReader, type Reader } from './readers';
 import { RESULTS_DIR } from './results';
-import { runScenario, type TranscriptEntry } from './runner';
+import { prepareReading, runScenario, type TranscriptEntry } from './runner';
+import { axTree, formatTrace, installTrace, readTrace } from './trace';
 
 // Capture everything spoken, including announcements nobody asked for (a toast
 // arriving): `true` instead of the Guidepup default `"initial"`.
@@ -30,21 +31,36 @@ async function play(reader: Reader, navigateToWebContent: () => Promise<void>, p
     testInfo.annotations.push({ type: 'known issue', description: `${issue.key}: ${issue.detail}` });
     testInfo.fail(true, `${issue.key}: ${issue.detail}`);
   }
+  const tag = `${reader.name} ${scenario.id}`;
+  await installTrace(page);
   await page.goto(scenario.page);
   await page.waitForFunction(() => typeof (window as any).__settle === 'function' && !!customElements.get('void-button'));
   await page.evaluate(() => (window as any).__settle(document));
   await page.bringToFront();
   await navigateToWebContent();
+  // The reader speaks only for the window that has focus. A page that is not focused is why a scenario can hear
+  // nothing at all, so say whether it is, and when it is not bring it forward and start again once.
+  const focused = () => page.evaluate(() => document.hasFocus()).catch(() => false);
+  console.log(`[sr ${tag}] after navigating to the web content: document focused: ${await focused()}, title ${JSON.stringify(await page.title())}`);
+  await prepareReading(reader, page, (line) => console.log(`[sr ${tag}] ${line}`));
 
   let transcript: TranscriptEntry[] = [];
+  let failed = false;
   try {
     transcript = await runScenario(reader, page, scenario);
   } catch (err) {
+    failed = true;
     transcript = (err as Error & { transcript?: TranscriptEntry[] }).transcript ?? transcript;
     // An expected failure prints no error of its own: keep what was spoken in the log.
     if (issue) console.log(`[known issue ${issue.key}] ${(err as Error).message}`);
-    throw err;
+    if (scenario.probe) console.log(`[probe ${tag}] a step failed (a probe never fails the run): ${(err as Error).message}`);
+    else throw err;
   } finally {
+    if (scenario.probe || scenario.trace || issue || failed) {
+      // What the page did, in order, and what the browser exposed: the evidence for the cause.
+      console.log(`[trace ${tag}] page events (focus, role, tabindex, aria-*):\n${formatTrace(await readTrace(page).catch(() => []))}`);
+      console.log(`[ax ${tag}] accessibility tree:\n${await axTree(page)}`);
+    }
     // The transcript is the main diagnostic: keep it for passing runs as well.
     const dir = join(RESULTS_DIR, 'transcripts');
     mkdirSync(dir, { recursive: true });
@@ -65,6 +81,7 @@ export function screenReaderSuite(title: string, scenarios: Scenario[]): void {
         nvdaTest(scenario.id, async ({ page, nvda }, testInfo) => {
           // A scenario whose tree test is a known defect says nothing new with a screen reader.
           nvdaTest.skip(!!scenario.knownIssue, `known defect, see the tree test: ${scenario.knownIssue?.key}`);
+          nvdaTest.skip(!!scenario.readers && !scenario.readers.includes('NVDA'), 'not run with NVDA');
           await play(nvdaReader(nvda), () => nvda.navigateToWebContent(), page, scenario, testInfo);
         });
       }
@@ -74,6 +91,7 @@ export function screenReaderSuite(title: string, scenarios: Scenario[]): void {
       for (const scenario of scenarios) {
         voiceOverTest(scenario.id, async ({ page, voiceOver }, testInfo) => {
           voiceOverTest.skip(!!scenario.knownIssue, `known defect, see the tree test: ${scenario.knownIssue?.key}`);
+          voiceOverTest.skip(!!scenario.readers && !scenario.readers.includes('VoiceOver'), 'not run with VoiceOver');
           await play(voiceOverReader(voiceOver), () => voiceOver.navigateToWebContent(), page, scenario, testInfo);
         });
       }

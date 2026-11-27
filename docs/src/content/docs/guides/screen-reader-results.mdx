@@ -35,12 +35,12 @@ Each reader ran the same 26 scenarios.
 
 | | VoiceOver (WebKit) | NVDA (Chromium) |
 |---|---|---|
-| Spoken as expected | 22 | 17 |
-| Known defect (expected failure, speech recorded) | 3: dialog description, multiselect selection, dropdown menu first item | 2: checked radio, collapsed accordion |
-| Intermittent (failed, then passed on a retry) | 1: toast | 4: select, combobox, multiselect, checkbox |
-| Failed with no speech recorded | 0 | 3: tabs, table, chart table |
+| Spoken as expected | 22 | 22 |
+| Known (expected failure, speech recorded) | 2: dialog description (reader behaviour), multiselect selection (not confirmed as a component defect) | 0 |
+| Intermittent (failed, then passed on a retry) | 2: select, dropdown menu | 0 |
+| Failed (harness limitation, not a component defect) | 0 | 4: radio group, tabs, table, chart table |
 
-Two of the 26 scenarios, `link-button-one-control` and `breadcrumbs-list`, only check the page and speak nothing; they are counted among the passes. The failed NVDA scenarios heard only empty strings for every move (40 moves of the "next" command in each), so they say nothing about the components: see [Known defects](#known-defects-and-unexplained-results).
+Two of the 26 scenarios, `link-button-one-control` and `breadcrumbs-list`, only check the page and speak nothing; they are counted among the passes. The four failed NVDA scenarios say nothing about the components (NVDA spoke, and the same words are missing for plain native and ARIA controls): see [Known defects](#known-defects-and-unexplained-results).
 
 ## What each reader said
 
@@ -55,25 +55,25 @@ Two of the 26 scenarios, `link-button-one-control` and `breadcrumbs-list`, only 
 | Icon-only button | `Close panel button` | `Close panel, button` |
 | Field, required | `Email address We never share it. required edit text email field` | `section, Email address, edit, required, We never share it.` |
 | Field, invalid | `abc Insertion on word: abc , between characters: and Invite code Enter the six character code. invalid data edit text` | `Invite code, edit, invalid entry, Enter the six character code., abc` |
-| Checkbox | `Accept the terms unchecked checkbox`, then after activation `checked Accept the terms checkbox` | `Accept the terms, check box, not checked`, then `checked` (intermittent) |
-| Radio group | `Free selected radio button, 1 of 3`, `Pro radio button, 2 of 3`, then `selected Pro radio button, 2 of 3` | `Plan, grouping, Free, radio button, not checked` for the radio that is checked (known defect) |
+| Checkbox | `Accept the terms unchecked checkbox`, then after activation `checked Accept the terms checkbox` | `Accept the terms, check box, not checked`, then `checked` |
+| Radio group | `Free selected radio button, 1 of 3`, `Pro radio button, 2 of 3`, then `selected Pro radio button, 2 of 3` | `Plan, grouping, Free, radio button, checked`; no position, as for native radios (harness limitation, scenario failed in this run) |
 | Switch | `Weekly newsletter off switch`, then `on Weekly newsletter switch` | `Weekly newsletter, switch, off`, then `on` |
 | Slider | `50 Volume slider`, then `60` | `Volume, slider, 50`, then `60` |
 | Number input | `2 Seats stepper` | `Seats, spin button, editable, 2`, then `3` |
-| Select | `Choose a country Country collapsed pop up button, group`, then after typing "Aus" `Australia menu item (2 of 3) menu.` | `Country, combo box, collapsed, Choose a country`, then `Australia` (intermittent) |
+| Select | `Choose a country Country collapsed pop up button, group`, then after typing "Aus" `Australia menu item (2 of 3) menu.` | `Country, combo box, collapsed, Choose a country`, then `Australia` |
 | Combobox | `Framework Pick a framework list box pop up expanded combo box.`, then `React (1 of 3) React (1 of 3) completion selected`, `Vue (2 of 3) completion selected.`, and after Enter `Vue.` | `Framework, combo box, expanded, has auto complete, editable, Pick a framework, blank`, then `Framework, list. React, 1 of 3`, `Vue, 2 of 3`, and after Enter `Framework, combo box, collapsed, has auto complete, editable, Vue` (intermittent) |
-| Multiselect | `CSS (1 of 3). CSS (1 of 3) completion selected.`; after Enter, only `You are currently on a selectable (null), inside of a list box.` (known defect) | `Skills, list. CSS, 1 of 3`, then after Enter `selected` (intermittent) |
+| Multiselect | `CSS (1 of 3). CSS (1 of 3) completion selected.`; after Enter, only `You are currently on a selectable (null), inside of a list box.` (known defect) | `Skills, list. CSS, 1 of 3`, then after Enter `selected` |
 
 ### Overlays, disclosure and messages
 
 | Scenario | VoiceOver | NVDA |
 |---|---|---|
 | Dialog | `Profile settings web dialog with 6 items Ada Insertion on word: Ada , between characters: and Display name edit text`; the description is not spoken (known defect) | `button. Profile settings, dialog, Change how your name appears.. sr-dialog, document. Profile settings, dialog, Change how your name appears.. Display name, edit, Ada` |
-| Dropdown menu | `Actions menu pop up button`; after the menu opens, nothing about the first item (known defect) | `clickable, Actions, menu button, collapsed, sub Menu`; after opening `Rename, 1 of 3`; after Down `Duplicate, 2 of 3` |
-| Tabs | `Account sections tab group`, `Profile selected tab, 1 of 3`, `Billing tab, 2 of 3`, and after activation `Billing selected tab, 2 of 3` | no speech recorded |
-| Accordion | `How do refunds work? collapsed button`, then `How do refunds work? expanded button`, then `How do refunds work? region` and `Refunds arrive within five days.` | `clickable, How do refunds work?, button, expanded` for the collapsed trigger (known defect) |
+| Dropdown menu | `Actions menu pop up button`; after the menu opens `Rename menu item (1 of 3)` in two of three attempts, and only `Actions menu pop up button` in the third (intermittent) | `clickable, Actions, menu button, collapsed, sub Menu`; after opening `Rename, 1 of 3`; after Down `Duplicate, 2 of 3` |
+| Tabs | `Account sections tab group`, `Profile selected tab, 1 of 3`, `Billing tab, 2 of 3`, and after activation `Billing selected tab, 2 of 3` | `clickable, tab, selected, Profile`; no position, as for the plain ARIA tabs (harness limitation, scenario failed in this run) |
+| Accordion | `How do refunds work? collapsed button`, then `How do refunds work? expanded button`, then `How do refunds work? region` and `Refunds arrive within five days.` | `clickable, How do refunds work?, button, collapsed`, then `expanded`, then `How do refunds work?, region, Refunds arrive within five days.` |
 | Collapsible | `Shipping details collapsed button`, `Shipping details expanded button`, `Shipping details collapsed button` | `clickable, Shipping details, button, collapsed`, then `expanded`, then `collapsed` |
-| Toast | `Changes saved. Your profile is up to date.` on the retry; silent on the first attempt (intermittent) | `Changes saved. Your profile is up to date.` |
+| Toast | `Changes saved. Your profile is up to date.` (silent on the first attempt in the earlier runs, spoken at once in run 45935068155) | `Changes saved. Your profile is up to date.` |
 | Alert | `Payment failed. You are currently on a selectable text.` | `clickable, Payment failed` |
 | Tooltip | `Bold Make the selection bold button` | `Bold, button, Make the selection bold` |
 
@@ -81,8 +81,8 @@ Two of the 26 scenarios, `link-button-one-control` and `breadcrumbs-list`, only 
 
 | Scenario | VoiceOver | NVDA |
 |---|---|---|
-| Table | `TEAM MEMBERS table 3 columns, 3 rows.`, then `ROLE Engineer column 2 of 3.` | no speech recorded |
-| Chart data table | `Visitors by day table 2 columns, 4 rows.`, then `Visitors 120 column 2 of 2` | no speech recorded |
+| Table | `TEAM MEMBERS table 3 columns, 3 rows.`, then `ROLE Engineer column 2 of 3.` | `clickable, TEAM MEMBERS, table, with 3 rows and 3 columns, caption, TEAM MEMBERS`, then `Not in a table cell` (harness limitation, scenario failed in this run) |
+| Chart data table | `Visitors by day table 2 columns, 4 rows.`, then `Visitors 120 column 2 of 2` | `Visitors by day, figure, Visitors by day, table, with 4 rows and 2 columns`, then `Not in a table cell` (harness limitation, scenario failed in this run) |
 | Breadcrumbs | `Breadcrumb navigation.`, then `KEYBOARDS current page 3 of 3.` | `Breadcrumb, navigation landmark, list, with 3 items, HOME, same page, link`, then `current page, KEYBOARDS` |
 | Pagination | `Pagination navigation.`, then `3 dimmed current page button.` | `Pagination, navigation landmark, Previous page, button`, then `3, button, unavailable, current page` |
 
@@ -92,21 +92,22 @@ The assertions behind these are loose by design: they look for the name, a word 
 
 The known defects are tracked in [issue 75](https://github.com/VoidableUI/Voidable/issues/75). Each runs as an expected failure with the speech recorded, so a fix turns the scenario red and the record is removed.
 
-- **Radio group on NVDA.** A checked radio is spoken as `not checked`, and without its position in the group, where VoiceOver says `Free selected radio button, 1 of 3`. The cause is not found.
-- **Accordion on NVDA.** A collapsed trigger is spoken as `expanded`, where VoiceOver says `collapsed`, and where the same NVDA says `collapsed` for the dropdown menu and collapsible triggers. The cause is not found.
-- **Multiselect on VoiceOver.** After Enter chooses an option, VoiceOver says only `You are currently on a selectable (null), inside of a list box.`; NVDA says `selected`. The cause is not found.
-- **Dropdown menu on VoiceOver.** Focus moves to the first item (a page-side check passes) but VoiceOver says nothing about it. This one is not reproducible every time: in the earlier run one attempt reported "expected to fail, but passed" (the item was spoken) and another did not speak it.
-- **Dialog description on VoiceOver.** The name is spoken and the description is not, while NVDA speaks both. The description is correct in the accessibility tree, and a copy of it as `aria-description` made no difference, so this looks like VoiceOver behaviour rather than a component defect. It is kept as an expected failure as a record of the difference.
-- **Tabs, table and chart data table on NVDA: no speech, unexplained.** In both runs NVDA heard only empty strings while the script moved 40 times, so the script never reached the tab or table. The accessibility-tree checks for the same scenarios pass in Chromium, Firefox and WebKit, and VoiceOver reads them. Whether this is the components, NVDA with Chromium on this runner, or the script is not known; do not read it as "NVDA reads these correctly" or as "NVDA cannot read them".
+Every item below is labelled as a component defect, reader behaviour, a harness limitation or intermittent. There is currently no confirmed component defect. This is run 45942438143 for both readers.
+
+- **Multiselect on VoiceOver: not confirmed as a component defect (expected failure).** After Enter chooses an option, VoiceOver says only `You are currently on a selectable (null), inside of a list box.`; NVDA says `selected`. The placeholder and chips are now `aria-hidden` (so VoiceOver's cursor does not rest on a child of the combobox), and the names of the chosen options are in the combobox description (up to three, such as `CSS and JavaScript`, then the first three and the count, `A, B, C, 5 selected`). This run did not change the result. The plain-HTML references with the same trigger children said nothing on the first Enter either (`Children skills`, `Hidden skills`, `Absent skills`) and spoke on the next one (`HTML (3 of 3) completion selected`), so VoiceOver reports a choice late or not at all in plain HTML as well. Treat it as reader behaviour until shown otherwise.
+- **Dropdown menu and select on VoiceOver: intermittent.** Both passed on a retry in this run. Focus moves to the first item and VoiceOver says `Rename menu item (1 of 3)` in most attempts, and only `Actions menu pop up button` in others; a plain ARIA menu button was spoken the same way.
+- **Dialog description on VoiceOver: reader behaviour (expected failure).** The name is spoken and the description is not, while NVDA speaks both. The description is correct in the accessibility tree, and a copy of it as `aria-description` made no difference.
+- **Radio group and tabs on NVDA: harness limitation, not a component defect (failed in this run).** NVDA now speaks for both (`Plan, grouping, Free, radio button, checked`; `clickable, tab, selected, Profile`). What the scenarios asked for and NVDA did not say is the position (`1 of 3`). The reference page shows NVDA does not say it for native radios (`radio button, checked, Native Free`), for ARIA radios (`radio button, checked, Apg Free`) or for plain ARIA tabs (`tab, selected, Profile, tab, Billing, tab, Team`). Since this run the scenarios check the role and the state in NVDA's speech and the position in the accessibility tree; the change has not run against NVDA yet.
+- **Table and chart data table on NVDA: harness limitation, not a component defect (failed in this run).** After the script's set-up NVDA speaks (`clickable, TEAM MEMBERS, table, with 3 rows and 3 columns, caption, TEAM MEMBERS`), but the table key leaves NVDA's cursor on the table itself, where the cell commands answer `Not in a table cell`. The native table of the reference page does the same. Since this run NVDA steps into the first cell with one Down Arrow first; this has not run against NVDA yet. These pages also start with the browser's toolbar holding the keyboard focus (`document.hasFocus()` false, NVDA on `Bookmark this tab`): the set-up presses Tab until the document has it, then repeats the reload and the switch to browse mode, which is what made NVDA speak.
+- **Radio group and accordion on NVDA, earlier runs: the script, not the components (removed from the known defects).** In the earlier run the script's set-up had already changed the first control (`Pro` checked in the radio group, the first item open in the accordion) before NVDA's first move, so `not checked` and `expanded` were true. The accordion passes now (`clickable, How do refunds work?, button, collapsed`).
 
 Fixed in earlier runs and confirmed: the number input value (VoiceOver spoke a percentage of the range, now `2 Seats stepper`) and the toast announcement.
 
 ## Intermittent results
 
-A hosted runner is not a stable test bench, and a screen reader on it less so. Between the two runs, these changed without a code change that would explain them:
+A hosted runner is not a stable test bench, and a screen reader on it less so. In this run `select` and `dropdown-menu` on VoiceOver passed only after a retry, and no NVDA scenario needed one. In earlier runs NVDA `select`, `combobox`, `multiselect` and `checkbox` needed retries or failed with empty speech, which came from the focus state described above; they passed here.
 
-- NVDA: `select` failed all three attempts in the earlier run and passed on a retry in the later one; `field-required-invalid` failed all three attempts in the earlier run (NVDA heard only `f`) and passed in the later one; `combobox` passed in the earlier run and needed a retry in the later one; `multiselect` and `checkbox` needed a retry in both.
-- VoiceOver: `field-required-invalid` needed a retry in the earlier run (VoiceOver kept reading `Last form element ... Invite code` and never reached the email field) and passed in the later one; `toast` needed a retry in the later run and `dropdown-menu` in the earlier one.
+A scenario that passes only after a retry is counted as intermittent here, not as passing.
 
 A scenario that passes only after a retry is counted as intermittent here, not as passing.
 

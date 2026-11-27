@@ -25,6 +25,26 @@ export interface Reader {
   log(): Promise<string[]>;
   /** The screen reader's own version string, for the results file. */
   version(): string;
+  /**
+   * Asks the reader what it is looking at with commands that do not depend on its page cursor (the window
+   * title, the focused object, the current line), and returns what each said, for a log. Used when the reader
+   * has gone silent. Optional: the fake reader of the runner's own tests has none.
+   */
+  diagnose?(): Promise<string>;
+  /** Asks the reader to rebuild its copy of the page (NVDA: refresh the browse document). */
+  refresh?(): Promise<void>;
+  /**
+   * Puts the reader in the mode where its own navigation keys work, with its cursor at the top of the page
+   * (NVDA: leave focus mode, Ctrl+Home). A reader that has switched to passing keys to a focused widget
+   * (NVDA in focus mode on a radio, a switch or a tab) hears the page's keys and says nothing for its own.
+   */
+  browseMode?(): Promise<void>;
+  /**
+   * Switches the reader to passing keys to the focused control (NVDA: focus mode), for a step that presses arrow
+   * keys and expects the page to receive them. In browse mode NVDA consumes the arrow and moves its own cursor.
+   * A no-op for VoiceOver.
+   */
+  focusMode?(): Promise<void>;
 }
 
 export function voiceOverReader(vo: VoiceOverPlaywright): Reader {
@@ -74,6 +94,7 @@ export function voiceOverReader(vo: VoiceOverPlaywright): Reader {
 }
 
 export function nvdaReader(nvda: NVDAPlaywright): Reader {
+  let inTable = false;
   return {
     name: 'NVDA',
     async move(by) {
@@ -93,6 +114,7 @@ export function nvdaReader(nvda: NVDAPlaywright): Reader {
         case 'control':
           return nvda.perform(nvda.keyboardCommands.moveToNextFormField);
         case 'table':
+          inTable = false;
           return nvda.perform(nvda.keyboardCommands.moveToNextTable);
       }
     },
@@ -100,8 +122,44 @@ export function nvdaReader(nvda: NVDAPlaywright): Reader {
     act: () => nvda.act(),
     press: (key) => nvda.press(key),
     type: (text) => nvda.type(text),
-    cell: (direction) => nvda.perform(direction === 'right' ? nvda.keyboardCommands.moveToNextColumn : nvda.keyboardCommands.moveToNextRow),
+    async cell(direction) {
+      // The table quick key (T) puts NVDA's cursor on the table itself ("Team members, table, with 3 rows and
+      // 3 columns"), where the cell commands say "Not in a table cell", for the native table of sr-ref-table
+      // as much as for ours (#75). One Down Arrow steps into the first cell; then the cell commands work.
+      if (!inTable) {
+        await nvda.next();
+        inTable = true;
+      }
+      await nvda.perform(direction === 'right' ? nvda.keyboardCommands.moveToNextColumn : nvda.keyboardCommands.moveToNextRow);
+    },
     log: () => nvda.spokenPhraseLog(),
+    async diagnose() {
+      const out: string[] = [];
+      const ask = async (label: string, command: Parameters<typeof nvda.perform>[0]) => {
+        try {
+          await nvda.perform(command);
+          out.push(`${label}: ${JSON.stringify(await nvda.lastSpokenPhrase())}`);
+        } catch (e) {
+          out.push(`${label}: failed (${(e as Error).message.split('\n')[0]})`);
+        }
+      };
+      await ask('window title', nvda.keyboardCommands.reportTitle);
+      await ask('focus', nvda.keyboardCommands.reportCurrentFocus);
+      await ask('current line', nvda.keyboardCommands.readLine);
+      return out.join('; ');
+    },
+    refresh: () => nvda.perform(nvda.keyboardCommands.refreshBrowseDocument),
+    async focusMode() {
+      // The toggle says which mode it switched to; if it says browse mode, toggle back.
+      for (let i = 0; i < 2; i++) {
+        await nvda.perform(nvda.keyboardCommands.toggleBetweenBrowseAndFocusMode);
+        if (!/browse mode/i.test(await nvda.lastSpokenPhrase())) return;
+      }
+    },
+    async browseMode() {
+      await nvda.perform(nvda.keyboardCommands.exitFocusMode);
+      await nvda.press('Control+Home');
+    },
     version: () => {
       try {
         return String(nvda.version);
