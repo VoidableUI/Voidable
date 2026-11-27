@@ -113,14 +113,14 @@ export class VoidMultiselect extends InternalsFormControl(VoidElement) {
     const MAX = 3;
     const lang = this.closest('[lang]')?.getAttribute('lang') || undefined;
     const names = chosen.slice(0, MAX).map(optionLabel);
-    const list = (type: 'conjunction' | 'unit') => {
+    const list = () => {
       try {
-        return new Intl.ListFormat(lang, { type, style: 'long' }).format(names);
+        return new Intl.ListFormat(lang, { type: 'conjunction', style: 'long' }).format(names);
       } catch {
         return names.join(', ');
       }
     };
-    return chosen.length <= MAX ? list('conjunction') : `${list('unit')}, ${msg(this, 'multiselect.selected', { count: chosen.length })}`;
+    return chosen.length <= MAX ? list() : `${names.join(', ')}, ${msg(this, 'multiselect.selected', { count: chosen.length })}`;
   }
   /** Stop the trigger opening and exclude the values from the form submission. */
   @property({ type: Boolean, reflect: true }) disabled = false;
