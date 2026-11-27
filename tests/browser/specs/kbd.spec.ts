@@ -138,11 +138,12 @@ for (const scheme of SCHEMES) {
         for (const inner of [a, b]) {
           expect(inner.top).toBeGreaterThan(0);
           expect(inner.fill).toBeGreaterThan(0);
-          // The keys keep the size of the combination, not a smaller one for each level.
-          expect(inner.size).toBeCloseTo(inner.parentSize, 1);
+          // Each key is the size of a single key: smaller than the text, not smaller again for the nesting.
+          expect(inner.size).toBeLessThan(outer.parentSize);
+          expect(inner.size).toBeGreaterThan(outer.parentSize * 0.7);
           expect(inner.contrast, JSON.stringify(inner)).toBeGreaterThanOrEqual(4.5);
         }
-        expect(a.size).toBeLessThan(outer.parentSize);
+        expect(outer.size).toBeCloseTo(outer.parentSize, 1);
       });
     });
   }

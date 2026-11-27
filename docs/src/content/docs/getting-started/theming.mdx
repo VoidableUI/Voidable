@@ -470,6 +470,21 @@ Restyle a role once and it changes everywhere, in components and in your markup:
 
 Role tokens are the second layer of theming, below the knobs: reach for them when a knob cannot express what you want.
 
+### Keyboard keys
+
+The base styles a `<kbd>` as a small raised key: the `code` role's family and weight, a hairline edge a little thicker below, and 0.85 times the size of the text around it, so it fits in a sentence, a button label, a menu item or a tooltip. A combination is one `<kbd>` per key inside another, and only the keys draw a box. Its ink, edge and fill are taken from the text colour it sits in, so it is legible in light and dark, on a filled button, and under every skin, and needs no colour of its own.
+
+```html
+<p>Press <kbd>Esc</kbd> to close, or <kbd><kbd>Ctrl</kbd>+<kbd>K</kbd></kbd> to search.</p>
+<void-button variant="outline">Search <kbd>/</kbd></void-button>
+```
+
+<div class="vd-example not-content">
+  <p>Press <kbd>Esc</kbd> to close, or <kbd><kbd>Ctrl</kbd>+<kbd>K</kbd></kbd> to search. <void-button variant="outline">Search <kbd>/</kbd></void-button></p>
+</div>
+
+The rule is in the base (`@voidable/theme/base`, included in the full theme) because `kbd` is plain HTML, not a `void-*` element; `@voidable/theme/core` leaves it out. To restyle it, write your own `kbd` rule in a layer above the theme or unlayered. To change only its family or weight, set `--void-type-code-family` or `--void-type-code-weight`. Showing a key binding is still yours to write: Voidable binds no shortcut by default (see [keyboard](/components/keyboard/)).
+
 ## Design values
 
 The default look is light and airy, and it gets there with three decisions. Each is a knob, so a theme can move it.
@@ -550,20 +565,20 @@ Full theme (recommended):
 @import '@voidable/theme';
 ```
 
-That resolves to one built file, `dist/void.css` (`dist/void.min.css` is the minified copy). It carries the tokens, the scoped reset, the `html` and `body` base, the type roles, every component and pattern, the pre-upgrade rules and the forced-colours rules, each in its own [cascade layer](#cascade-layers).
+That resolves to one built file, `dist/void.css` (`dist/void.min.css` is the minified copy). It carries the tokens, the scoped reset, the `html`, `body` and `kbd` base, the type roles, every component and pattern, the pre-upgrade rules and the forced-colours rules, each in its own [cascade layer](#cascade-layers).
 
 Parts of it, when you want less:
 
 ```css
 @import '@voidable/theme/tokens';     /* primitives, knobs and everything derived, in one file */
 @import '@voidable/theme/reset';      /* the reset, scoped to void-* elements */
-@import '@voidable/theme/base';       /* html and body (margin, font, colour, background) */
+@import '@voidable/theme/base';       /* html, body and kbd (margin, font, colour, background, keys) */
 @import '@voidable/theme/type';       /* data-void-type roles */
 @import '@voidable/theme/core';       /* everything except base: touches nothing outside void-* */
 @import '@voidable/theme/themes/dune.css';
 ```
 
-The full theme sets `html` and `body` (margin, font, colour, background) through `base`, in the `components.void.reset` layer. Everything else in it matches only `void-*` elements and what they contain. Use `core` instead of the full theme if the page's `html` and `body` are yours to style.
+The full theme sets `html`, `body` (margin, font, colour, background) and `kbd` through `base`, in the `components.void.reset` layer. Everything else in it matches only `void-*` elements and what they contain. Use `core` instead of the full theme if the page's `html` and `body` are yours to style.
 
 ### Per-component CSS
 
@@ -591,7 +606,7 @@ The theme puts everything in named layers, declared once and in this order, lowe
        utilities;
 ```
 
-- `components.void.reset`: the reset, scoped to `void-*` elements, and the `html` and `body` base.
+- `components.void.reset`: the reset, scoped to `void-*` elements, and the `html`, `body` and `kbd` base.
 - `components.void.tokens`: primitives, knobs and the derived tokens.
 - `components.void.themes`: the theme files (they set knobs only).
 - `components.void.type`: the `data-void-type` roles.
