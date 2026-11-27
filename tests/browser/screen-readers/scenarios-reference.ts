@@ -20,12 +20,14 @@ const pause = { pause: 900 } as const;
 export const referenceScenarios: Scenario[] = [
   probe({
     id: 'ref-radio',
+    readers: ['NVDA'],
     title: 'Reference: the same radio group as native radios, as an ARIA radio group, as one with a hidden native radio inside each radio, and as void-radio-group',
     page: '/sr-ref-radio',
-    steps: [{ sweep: 28, by: 'next' }],
+    steps: [{ sweep: 22, by: 'next' }],
   }),
   probe({
     id: 'ref-disclosure',
+    readers: ['NVDA'],
     title: 'Reference: a collapsed disclosure button as a native button (bare, with aria-controls, with an until-found panel), as a custom element, and as void-accordion',
     page: '/sr-ref-disclosure',
     steps: [
@@ -48,9 +50,10 @@ export const referenceScenarios: Scenario[] = [
   }),
   probe({
     id: 'ref-multiselect',
+    readers: ['VoiceOver'],
     title: 'Reference: a multiselect combobox with explicit aria-selected="false", with it absent (as void-multiselect had it), and with a status announcement',
     page: '/sr-ref-multiselect',
-    steps: ['Explicit skills', 'Absent skills', 'Live skills'].flatMap((name): Scenario['steps'] => [
+    steps: ['Absent skills', 'Children skills', 'Hidden skills'].flatMap((name): Scenario['steps'] => [
       { reach: { role: 'combobox', name, expanded: false }, by: 'control' },
       { act: true },
       pause,
@@ -66,35 +69,8 @@ export const referenceScenarios: Scenario[] = [
     ]),
   }),
   probe({
-    id: 'ref-menu',
-    title: 'Reference: a menu button whose first item is focused as the menu opens, with no transition, with the theme\'s fade, and with focus after the fade',
-    page: '/sr-ref-menu',
-    steps: ['Plain menu', 'Fade menu', 'Late menu'].flatMap((name): Scenario['steps'] => [
-      { reach: { role: 'button', name, expanded: false }, by: 'control' },
-      { act: true },
-      { pause: 1500 },
-      { press: 'ArrowDown' },
-      pause,
-      { press: 'Escape' },
-      pause,
-    ]),
-  }),
-  probe({
-    id: 'ref-toast',
-    title: 'Reference: a polite status region written to 0, 150, 600 and 1500 ms after a button press (the toast writes at 150), each pressed twice, then an assertive alert',
-    page: '/sr-ref-toast',
-    steps: [
-      ...['Announce at 0 ms', 'Announce at 150 ms', 'Announce at 600 ms', 'Announce at 1500 ms', 'Announce alert at 150 ms'].flatMap((name): Scenario['steps'] => [
-        { reach: { role: 'button', name }, by: 'control' },
-        { act: true },
-        { pause: 3000 },
-        { act: true },
-        { pause: 3000 },
-      ]),
-    ],
-  }),
-  probe({
     id: 'ref-tabs',
+    readers: ['NVDA'],
     title: 'Reference: tabs from the ARIA Authoring Practices in plain HTML',
     page: '/sr-ref-tabs',
     steps: [
@@ -106,6 +82,7 @@ export const referenceScenarios: Scenario[] = [
   }),
   probe({
     id: 'ref-table',
+    readers: ['NVDA'],
     title: 'Reference: a native table with a caption and column headers, no Voidable element around it',
     page: '/sr-ref-table',
     steps: [

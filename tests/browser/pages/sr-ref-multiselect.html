@@ -20,6 +20,16 @@
       <div id="o3-css" role="option">CSS</div><div id="o3-js" role="option">JavaScript</div><div id="o3-html" role="option">HTML</div>
     </div>
     <div id="status3" role="status" style="position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)"></div></div>
+  <!-- As void-multiselect renders its trigger: an aria-label, and children (a placeholder span, then a pill with a
+       remove button) that are replaced when an option is chosen. "children": as it was. "hidden": the children are aria-hidden. -->
+  <div class="ref" data-variant="children"><div id="c4" role="combobox" tabindex="0" aria-label="Children skills" aria-haspopup="listbox" aria-expanded="false" aria-controls="o4"></div>
+    <div id="o4" role="listbox" aria-multiselectable="true" aria-label="Children skills" hidden>
+      <div id="o4-css" role="option">CSS</div><div id="o4-js" role="option">JavaScript</div><div id="o4-html" role="option">HTML</div>
+    </div></div>
+  <div class="ref" data-variant="hidden"><div id="c5" role="combobox" tabindex="0" aria-label="Hidden skills" aria-haspopup="listbox" aria-expanded="false" aria-controls="o5"></div>
+    <div id="o5" role="listbox" aria-multiselectable="true" aria-label="Hidden skills" hidden>
+      <div id="o5-css" role="option">CSS</div><div id="o5-js" role="option">JavaScript</div><div id="o5-html" role="option">HTML</div>
+    </div></div>
 </main>
 <script>
   for (const root of document.querySelectorAll('.ref')) {
@@ -30,7 +40,15 @@
     const status = root.querySelector('[role=status]');
     let active = -1;
     const text = () => options.filter((o) => o.getAttribute('aria-selected') === 'true').map((o) => o.textContent).join(', ');
-    const show = () => { combo.textContent = text() || 'None'; };
+    const show = () => {
+      if (variant !== 'children' && variant !== 'hidden') { combo.textContent = text() || 'None'; return; }
+      combo.replaceChildren();
+      const chosen = options.filter((o) => o.getAttribute('aria-selected') === 'true');
+      const parts = chosen.length
+        ? chosen.map((o) => { const s = document.createElement('span'); s.append(o.textContent + ' '); const b = document.createElement('button'); b.type = 'button'; b.tabIndex = -1; b.setAttribute('aria-label', 'Remove ' + o.textContent); b.textContent = '×'; s.append(b); return s; })
+        : [Object.assign(document.createElement('span'), { textContent: 'Pick skills' })];
+      for (const p of parts) { if (variant === 'hidden') p.setAttribute('aria-hidden', 'true'); combo.append(p); }
+    };
     const highlight = (i) => {
       active = Math.max(0, Math.min(options.length - 1, i));
       for (const [n, o] of options.entries()) o.classList.toggle('active', n === active);
@@ -39,7 +57,7 @@
     const open = () => {
       list.hidden = false;
       combo.setAttribute('aria-expanded', 'true');
-      if (variant !== 'absent') for (const o of options) if (!o.hasAttribute('aria-selected')) o.setAttribute('aria-selected', 'false');
+      if (variant !== 'absent' && variant !== 'children' && variant !== 'hidden') for (const o of options) if (!o.hasAttribute('aria-selected')) o.setAttribute('aria-selected', 'false');
       highlight(Math.max(active, 0));
     };
     const close = () => {
@@ -50,7 +68,7 @@
     const toggle = () => {
       const o = options[active];
       const on = o.getAttribute('aria-selected') !== 'true';
-      if (variant === 'absent') { if (on) o.setAttribute('aria-selected', 'true'); else o.removeAttribute('aria-selected'); }
+      if (variant === 'absent' || variant === 'children' || variant === 'hidden') { if (on) o.setAttribute('aria-selected', 'true'); else o.removeAttribute('aria-selected'); }
       else o.setAttribute('aria-selected', String(on));
       show();
       if (status) status.textContent = `${o.textContent} ${on ? 'selected' : 'not selected'}`;

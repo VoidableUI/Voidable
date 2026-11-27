@@ -142,6 +142,8 @@ export interface Scenario {
    * the reader says about the pattern itself. Never run by the tree replay.
    */
   probe?: boolean;
+  /** Run with these readers only (default: both). A probe about one reader's behaviour need not cost the other's job minutes. */
+  readers?: ReaderName[];
   /**
    * Print the page's event trace (focus changes and `aria-*`, `role`, `tabindex` mutations in the order they
    * happened, see trace.ts) and the browser's accessibility tree after the scenario ran. Always printed

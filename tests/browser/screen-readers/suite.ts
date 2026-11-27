@@ -86,6 +86,7 @@ export function screenReaderSuite(title: string, scenarios: Scenario[]): void {
         nvdaTest(scenario.id, async ({ page, nvda }, testInfo) => {
           // A scenario whose tree test is a known defect says nothing new with a screen reader.
           nvdaTest.skip(!!scenario.knownIssue, `known defect, see the tree test: ${scenario.knownIssue?.key}`);
+          nvdaTest.skip(!!scenario.readers && !scenario.readers.includes('NVDA'), 'not run with NVDA');
           await play(nvdaReader(nvda), () => nvda.navigateToWebContent(), page, scenario, testInfo);
         });
       }
@@ -95,6 +96,7 @@ export function screenReaderSuite(title: string, scenarios: Scenario[]): void {
       for (const scenario of scenarios) {
         voiceOverTest(scenario.id, async ({ page, voiceOver }, testInfo) => {
           voiceOverTest.skip(!!scenario.knownIssue, `known defect, see the tree test: ${scenario.knownIssue?.key}`);
+          voiceOverTest.skip(!!scenario.readers && !scenario.readers.includes('VoiceOver'), 'not run with VoiceOver');
           await play(voiceOverReader(voiceOver), () => voiceOver.navigateToWebContent(), page, scenario, testInfo);
         });
       }

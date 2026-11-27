@@ -43,6 +43,8 @@ export async function runScenario(reader: Reader, page: Page, scenario: Scenario
   let mark = { n: 0, last: undefined as string | undefined };
   let moved = false;
   let reached: Fact | null = null;
+  /** The silence diagnosis and remedies run once per scenario. */
+  let silenceHandled = false;
 
   /**
    * What was spoken after a point in the log. A screen reader may keep appending to its latest phrase (NVDA joins
@@ -103,9 +105,9 @@ export async function runScenario(reader: Reader, page: Page, scenario: Scenario
     let restarted = false;
     let stuck = 0;
     let silent = 0;
-    let silentRounds = 0;
     let previous: string | undefined;
-    for (let i = 0; i < MAX_MOVES; i++) {
+    // A probe's pages are short: ten moves find anything on them, and a miss must not cost forty.
+    for (let i = 0; i < (scenario.probe ? 10 : MAX_MOVES); i++) {
       const before = await snapshot();
       await reader.move(by);
       const said = since(await reader.log(), before);
@@ -127,22 +129,21 @@ export async function runScenario(reader: Reader, page: Page, scenario: Scenario
       // A reader that says nothing at all (every phrase empty) is not on the page: the window may not be in front
       // or the cursor may be nowhere. Bring the page forward and send the reader to the web content, once.
       silent = phrase ? 0 : silent + 1;
-      if (silent >= 4 && silentRounds < 3) {
-        silentRounds++;
+      if (silent >= 4) {
         silent = 0;
-        // What is still working? The title, the focus and the line under the cursor are asked for by their own
-        // commands: speech after those proves the reader speaks and its cursor is simply not in the page.
-        note(`SILENT for 4 moves (round ${silentRounds}): ${await state()}`);
+        // Once per scenario: ask the reader what it sees (title, focus, current line: speech after those proves it
+        // speaks and its cursor is not in the page), then every remedy together: window to the front, a click in
+        // the page, the reader's refresh of its copy of the page, the cursor back at the top. Silent again after
+        // that, the scenario stops here: more moves only cost minutes.
+        if (silenceHandled) throw new Error(`the reader stayed silent after the remedies (${await state()}); stopping instead of moving on.\n${await where()}`);
+        silenceHandled = true;
+        note(`SILENT for 4 moves: ${await state()}`);
         note(`diagnosis: ${await (reader.diagnose?.() ?? Promise.resolve('(none for this reader)'))}`);
-        // Round 1: window to the front, the page focused, the cursor back at the top. Round 2: a click in the
-        // page, then the reader's own refresh of its copy of the page. Round 3: both, once more.
         await page.bringToFront().catch(() => undefined);
-        if (silentRounds >= 2) {
-          await page.locator('h1').first().click({ timeout: 2000 }).catch((e: Error) => note(`click on the heading failed: ${e.message.split('\n')[0]}`));
-          await reader.refresh?.();
-        }
+        await page.locator('h1').first().click({ timeout: 2000 }).catch((e: Error) => note(`click on the heading failed: ${e.message.split('\n')[0]}`));
+        await reader.refresh?.();
         await reader.restart();
-        note(`after remedy ${silentRounds}: ${await state()}`);
+        note(`after the remedies: ${await state()}`);
       }
     }
     throw new Error(`never reached ${describeFact(fact)} in ${MAX_MOVES} moves by "${by}".\n  Heard since the step began:\n${tail(seen, 20)}\n${await where()}`);
