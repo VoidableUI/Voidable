@@ -22,6 +22,7 @@ import path from 'node:path';
 import { bundleAsync } from 'lightningcss';
 import * as L from './lib.mjs';
 import { readSkin, scopes, skinCss } from '../build/skins.js';
+import { writeNarrow } from './narrow.mjs';
 
 const { SRC, DIST } = L;
 const generatedOnly = process.argv.includes('--generated-only');
@@ -42,6 +43,7 @@ const FOCUS_RING = (tags) => {
 `;
 };
 
+writeNarrow(SRC);
 const allTags = [...L.allStyledTags()].sort();
 const resetSource = L.RESET_HEADER + L.resetCss(allTags) + FOCUS_RING(allTags);
 fs.writeFileSync(path.join(SRC, 'reset.css'), resetSource);
@@ -158,10 +160,10 @@ for (const name of components) {
 
 // per pattern group
 const patternGroups = {
-  shell: ['patterns/shell.css'],
-  page: ['patterns/page.css'],
-  data: ['patterns/data.css'],
-  media: ['media/media.css'],
+  shell: ['patterns/shell.css', 'narrow/shell.css'],
+  page: ['patterns/page.css', 'narrow/page.css'],
+  data: ['patterns/data.css', 'narrow/data.css'],
+  media: ['media/media.css', 'narrow/media.css'],
   'app-shell': L.listCss('app-shell'),
 };
 for (const f of L.listCss('patterns')) {

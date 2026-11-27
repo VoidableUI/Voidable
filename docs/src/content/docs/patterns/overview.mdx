@@ -58,7 +58,7 @@ Patterns come with `@voidable/theme`. If you import the theme piece by piece, th
 
 - **Space comes from the rhythm, not from you.** Blocks in a page are a group apart, sections a section apart, things in a section 16px apart. These distances are the [layout rhythm](/getting-started/theming/#layout-rhythm) tokens, so `--void-rhythm` and `--void-density` move a whole application at once.
 - **Nothing is boxed by default.** A section has no border, fill or shadow. Hairlines separate; boxes are for things that float (dialogs, menus, glass over an image).
-- **One breakpoint.** Below 48rem (768px) columns become one, figures become two across, page actions drop under the title and navigation links move to a row of their own that scrolls sideways. Every pattern is checked at 390px.
+- **One breakpoint.** Below 48rem (768px; [movable or off](/patterns/app-shell/#where-the-narrow-layout-starts) with `data-void-narrow` on `<html>`) columns become one, figures become two across, page actions drop under the title and navigation links move to a row of their own that scrolls sideways. Every pattern is checked at 390px.
 - **Attributes take words, not sizes.** `gap="stack"`, `width="narrow"`, `columns="3"`. If a pattern does not offer what you need, that is a signal to look for a different pattern before writing CSS.
 
 ## In a framework

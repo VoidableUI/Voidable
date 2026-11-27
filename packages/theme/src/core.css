@@ -75,9 +75,13 @@
 @import './patterns/shell.css' layer(components.void.patterns);
 @import './patterns/page.css' layer(components.void.patterns);
 @import './patterns/data.css' layer(components.void.patterns);
+@import './narrow/shell.css' layer(components.void.patterns);
+@import './narrow/page.css' layer(components.void.patterns);
+@import './narrow/data.css' layer(components.void.patterns);
 
 /* UI over imagery: the media surface, on-media and glass */
 @import './media/media.css' layer(components.void.patterns);
+@import './narrow/media.css' layer(components.void.patterns);
 @import './media/surface.css' layer(components.void.patterns);
 
 /* App-shell layout primitives */

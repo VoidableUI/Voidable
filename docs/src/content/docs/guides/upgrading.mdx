@@ -80,6 +80,10 @@ Charts take their data from markup and carry a data table; two things in existin
 
 New: the `data` attribute (a gauge's `zones` too) with JSON, `show-table`, and the adapter helpers (React `data` as an attribute, Rails `void_bar_chart` and the other chart helpers, Blade `<x-voidable::bar-chart>` and the other chart components). See [Accessibility](/guides/accessibility/#charts-and-gauges) and the [conventions](/guides/conventions/).
 
+## 0.14.0
+
+Nothing breaks. The narrow layout (the sideways link row of `void-sidebar` and `void-nav-bar`, the shell's bar, `data-void-hide` and the narrow rules of the other patterns) still starts below 48rem. New: `data-void-narrow` on `<html>` (`sm` 36rem, `lg` 64rem, `off`) moves or removes that point, for an application whose smallest window is wider than a phone. See [Where the narrow layout starts](/patterns/app-shell/#where-the-narrow-layout-starts). If you load single pattern files (`@voidable/theme/patterns/shell` and the others), they now carry the narrow rules for every size; the stylesheet is larger by that much.
+
 ## 0.12.0 at a glance
 
 Three things change behaviour, and only for code that relied on them:

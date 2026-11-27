@@ -4,6 +4,9 @@
    void-* tag that the theme styles. Nothing to import, nothing to
    upgrade, nothing a server morph can break. Semantics come from the
    native elements you put inside (main, h1, h2, dl, a).
+   The narrow-screen rules (48rem by default, movable with data-void-narrow
+   on <html>) are in narrow-src/, written once; scripts/narrow.mjs generates
+   narrow/ from them for every breakpoint. Edit narrow-src, never narrow. 
    ============================================================ */
 
 /* @tokens void-nav-links
@@ -93,16 +96,6 @@ void-shell[nav="overlay"] > main > void-media:first-child > void-media-content {
   padding-top: calc(var(--_void-shell-bar-height) + var(--void-gap-group));
 }
 
-@media (max-width: 48rem) {
-  void-shell[nav="overlay"] {
-    --_void-shell-bar-height: calc(var(--void-control-height) + var(--void-control-height-sm) + var(--void-space-6));
-  }
-
-  /* Stacked, the content is under the image, not under the bar. */
-  void-shell[nav="overlay"] > main > void-media[stack]:first-child > void-media-content {
-    padding-top: 0;
-  }
-}
 
 /* Where the browser can tie an animation to scrolling, the bar stays
    with you and becomes a blurred bar once the image has scrolled by.
@@ -216,121 +209,6 @@ void-spacer {
   min-width: 0;
 }
 
-@media (max-width: 48rem) {
-  /* Narrow-width navigation (#49). In a bar the links drop to a row of
-     their own that scrolls sideways: every destination stays one tap
-     away and the application writes no JavaScript, which a menu behind
-     void-hamburger would need.
-
-     The row used to end a few pixels short of the screen and cut the last
-     link off mid-word ("Li") with nothing to say there was more. It now
-     runs to both edges of the screen, the links snap to its start, and
-     the far edge fades out. The fade lies over padding the row adds after
-     its last link (--_void-nav-links-fade), so a link is only ever faded
-     while there is more to scroll to, and never at the end of the row.
-
-     --_void-nav-links-bleed is how far the row has to reach to get to the
-     edge of the screen: the inline padding of what it sits in. It is the
-     one value here that depends on the bar's own padding; keep the two in
-     step if that padding changes. */
-  void-nav-bar,
-  void-sidebar {
-    --_void-nav-links-bleed: var(--void-space-4);
-    --_void-nav-links-fade: var(--void-space-8);
-  }
-
-  void-shell > void-nav-bar,
-  void-shell[nav="side"] > void-sidebar {
-    --_void-nav-links-bleed: var(--void-gutter);
-  }
-
-  void-nav-bar void-nav-links,
-  void-shell[nav="side"] > void-sidebar void-nav-links {
-    order: 1;
-    flex: 0 0 calc(100% + 2 * var(--_void-nav-links-bleed));
-    margin-inline: calc(var(--_void-nav-links-bleed) * -1);
-    /* The first link's text, not its box, lines up with the page column. */
-    padding-inline: max(0px, calc(var(--_void-nav-links-bleed) - var(--void-control-padding))) var(--_void-nav-links-fade);
-    overflow-x: auto;
-    scrollbar-width: none;
-    overscroll-behavior-x: contain;
-    scroll-snap-type: inline proximity;
-    scroll-padding-inline: max(0px, calc(var(--_void-nav-links-bleed) - var(--void-control-padding))) var(--_void-nav-links-fade);
-    -webkit-mask-image: linear-gradient(to right, transparent, black var(--_void-nav-links-fade-start), black calc(100% - var(--_void-nav-links-fade)), transparent);
-    mask-image: linear-gradient(to right, transparent, black var(--_void-nav-links-fade-start), black calc(100% - var(--_void-nav-links-fade)), transparent);
-  }
-
-  :is(void-nav-bar, void-shell[nav="side"] > void-sidebar) void-nav-links:dir(rtl) {
-    -webkit-mask-image: linear-gradient(to left, transparent, black var(--_void-nav-links-fade-start), black calc(100% - var(--_void-nav-links-fade)), transparent);
-    mask-image: linear-gradient(to left, transparent, black var(--_void-nav-links-fade-start), black calc(100% - var(--_void-nav-links-fade)), transparent);
-  }
-
-  /* The near edge has no padding to fade over (the first link lines up
-     with the page), so it fades only once the row has been scrolled, where
-     the browser can tie an animation to the row's scroll position.
-     Elsewhere links leave by the edge of the screen unfaded. */
-  @supports (animation-timeline: scroll()) {
-    void-nav-bar void-nav-links,
-    void-shell[nav="side"] > void-sidebar void-nav-links {
-      animation: void-nav-links-fade linear both;
-      animation-timeline: var(--_void-timeline, scroll(self inline));
-    }
-
-    @keyframes void-nav-links-fade {
-      0% { --_void-nav-links-fade-start: 0px; }
-      25%, 100% { --_void-nav-links-fade-start: var(--_void-nav-links-fade); }
-    }
-  }
-
-  :is(void-nav-bar, void-shell[nav="side"] > void-sidebar) void-nav-links > a {
-    scroll-snap-align: start;
-  }
-
-  /* Where the browser supports it, the row opens scrolled to the link of
-     the current page, so that link is never the one off screen. */
-  :is(void-nav-bar, void-shell[nav="side"] > void-sidebar) void-nav-links > a[aria-current="page"] {
-    scroll-initial-target: nearest;
-  }
-
-  void-nav-bar void-nav-links::-webkit-scrollbar,
-  void-shell[nav="side"] > void-sidebar void-nav-links::-webkit-scrollbar {
-    display: none;
-  }
-
-  /* The sidebar becomes a bar across the top; its links scroll
-     sideways the same way. */
-  void-shell[nav="side"] {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  void-shell[nav="side"] > void-sidebar {
-    position: static;
-    flex-direction: row;
-    flex-wrap: wrap;
-    align-items: center;
-    width: auto;
-    height: auto;
-    gap: var(--void-gap-tight) var(--void-gap-inside);
-    padding: var(--void-gap-tight) var(--void-gutter);
-    border-inline: 0;
-    border-bottom: var(--void-sidebar-rule, var(--void-rule));
-    overflow: visible;
-  }
-
-  void-shell[nav="side"] > void-sidebar void-nav-links {
-    flex-direction: row;
-    align-items: center;
-  }
-
-  void-shell[nav="side"] > void-sidebar void-nav-links > a {
-    min-height: var(--void-control-height-sm);
-  }
-
-  void-shell[nav="side"] > void-sidebar void-nav-links > [data-void-type="label"] {
-    display: none;
-  }
-}
 
 /* ── void-brand: the product's name (and mark) in a bar ──
      <void-brand><a href="/">Meridian</a></void-brand> */
@@ -356,16 +234,6 @@ void-brand > a {
 }
 
 /* ── Responsive visibility ──
-   data-void-hide="narrow" removes an element below 48rem (a table
-   column, a secondary action); "wide" removes it above. */
-@media (max-width: 48rem) {
-  [data-void-hide="narrow"] {
-    display: none !important;
-  }
-}
-
-@media (min-width: 48.0625rem) {
-  [data-void-hide="wide"] {
-    display: none !important;
-  }
-}
+   data-void-hide="narrow" removes an element in the narrow layout (48rem by default; a table
+   column, a secondary action); "wide" removes it above. The rules are in
+   narrow-src/shell.css, with the other narrow-screen rules (see below). */

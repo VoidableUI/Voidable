@@ -67,7 +67,7 @@ void-figure > void-progress {
 
 /* ── void-figures: figures in a hairline-divided row ──
      <void-figures columns="4">…void-figure children…</void-figures>
-   columns: 2, 3 or 4 (default). Below 48rem it is two columns and an
+   columns: 2, 3 or 4 (default). In the narrow layout (48rem by default) it is two columns and an
    odd last figure takes the full width. */
 void-figures {
   --_void-figures-columns: 4;
@@ -105,31 +105,6 @@ void-figures[columns="2"] > void-figure:nth-child(n + 3) {
   border-top: var(--_void-figures-rule);
 }
 
-@media (max-width: 48rem) {
-  void-figures,
-  void-figures[columns] {
-    --_void-figures-columns: 2;
-  }
-
-  void-figures > void-figure:nth-child(n) {
-    padding-inline-start: var(--void-figure-padding, var(--void-gap-inside));
-    border-inline-start: var(--_void-figures-rule);
-    border-top: 0;
-  }
-
-  void-figures > void-figure:nth-child(2n + 1) {
-    padding-inline-start: var(--void-figure-padding, 0);
-    border-inline-start: 0;
-  }
-
-  void-figures > void-figure:nth-child(n + 3) {
-    border-top: var(--_void-figures-rule);
-  }
-
-  void-figures > void-figure:last-child:nth-child(2n + 1) {
-    grid-column: 1 / -1;
-  }
-}
 
 /* ── void-delta: a change, with its direction ──
      <void-delta trend="up">4.2%</void-delta>
@@ -293,15 +268,6 @@ void-description-list[layout="grid"] dd {
   text-align: start;
 }
 
-@media (max-width: 48rem) {
-  void-description-list:not([layout="grid"])[columns="2"] > dl {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  void-description-list[layout="grid"]:is([columns="3"], [columns="4"]) > dl {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
 
 /* ── void-rows: a list of rows, text left and a value or control right ──
      <void-rows>
