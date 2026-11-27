@@ -1193,6 +1193,7 @@ defmodule VoidableUI.Components do
   attr :value, :integer, default: nil
   attr :siblings, :integer, default: nil
   attr :size, :string, default: nil
+  attr :landmark, :string, default: nil, doc: "`\"none\"` renders a named group instead of a navigation landmark"
   attr :events, :any, default: nil, doc: @events_doc
   attr :rest, :global
 
@@ -1204,6 +1205,7 @@ defmodule VoidableUI.Components do
       value={@value}
       siblings={@siblings}
       size={@size}
+      landmark={@landmark}
       phx-hook={void_hook(@events)}
       data-void-events={void_events(@events, "void-change")}
       {@rest}

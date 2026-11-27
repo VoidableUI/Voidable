@@ -131,7 +131,7 @@ export const CONTRACT = {
   'void-option': { role: null, name: 'text content', state: ['role="option", written by the picker whose content part holds it', 'selected (reflected)', 'aria-selected="true" when chosen', 'active (highlighted)', 'disabled (reflected)', 'aria-disabled'], gaps: ['selected is the initial choice: the current choice is aria-selected, not the attribute'] },
   'void-pagination': {
     role: 'inner',
-    name: 'the rendered nav is named "Pagination"; buttons by page number, "Previous page", "Next page"',
+    name: 'the rendered nav (a group with landmark="none" or inside a nav) is named "Pagination"; buttons by page number, "Previous page", "Next page"',
     state: ['value (reflected)', 'aria-current="page" on the current page button or link'],
     probe: { html: '<void-pagination total="5" value="1"></void-pagination>', click: { role: 'button', name: '2' }, expect: { button: { name: '2', 'aria-current': 'page' } }, event: 'void-change' },
   },
@@ -166,7 +166,7 @@ export const CONTRACT = {
   'void-spinner': { role: 'status', name: 'label attribute (default "Loading")', state: [] },
   'void-stat': { role: null, name: 'with a label it is role="group" named by it (aria-labelledby on the void-stat-label text); with none it has no role and no name; an aria-label the author writes wins', state: ['trend (reflected)'] },
   'void-status-dot': { role: 'status', name: 'status attribute ("Online", "Away", "Offline")', state: ['status (reflected)'] },
-  'void-stepper': { role: 'navigation', name: 'fixed "Progress"', state: ['value (reflected)', 'aria-current="step" and data-state="completed|active|upcoming" on each step'] },
+  'void-stepper': { role: 'list', name: 'fixed "Progress" unless aria-label is set', state: ['each step is role="listitem"; it is not a navigation landmark', 'value (reflected)', 'aria-current="step" and data-state="completed|active|upcoming" on each step'] },
   'void-switch': {
     role: 'switch',
     name: 'text content',

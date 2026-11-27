@@ -39,3 +39,14 @@ export const TwoSteps: Story = {
 export const ManySteps: Story = {
   render: () => html`<void-stepper value=${2} steps=${'One,Two,Three,Four,Five,Six'}></void-stepper>`,
 };
+
+export const AsAList: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story: 'The stepper shows progress: it is a list named "Progress" with `aria-current="step"` on the current step, not a navigation landmark. When the steps are links or buttons the user moves between, write them inside your own `<nav aria-label="...">`.',
+      },
+    },
+  },
+  render: () => html`<void-stepper value=${1} steps=${'Details,Payment,Confirm'}></void-stepper>`,
+};

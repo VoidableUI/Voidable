@@ -130,6 +130,13 @@ On a device whose main pointer is coarse (`@media (pointer: coarse)`: phones and
 
 See [Touch targets](/getting-started/theming/#touch-targets) for how each control gets there, what is not covered, and the density recipe for bigger drawn controls.
 
+## Landmarks (0.13.1)
+
+The accessibility tree changes in two places, so a test or a style that reads roles may need a new query.
+
+- **Stepper is a list, not a navigation landmark.** It only shows progress, so it is `role="list"` named "Progress" (the name still follows `lang` and a name you write), each step is a list item with `aria-current="step"` on the current one, and the connectors are hidden from assistive technology. A page that counted it among its navigation regions, or a test with `getByRole('navigation', { name: 'Progress' })`, should look for the list instead. A stepper whose steps are links or buttons is yours to write: put them in a `<nav aria-label="...">`.
+- **Pagination can leave out its landmark.** It is still a navigation landmark named "Pagination" by default. Add `landmark="none"` (a named group of the same buttons, in either mode) when the page keeps a single navigation region. Inside a `<nav>` or an element with `role="navigation"` it never adds a landmark, with or without the attribute, so landmarks do not nest; a pagination you had inside a `<nav>` is now a group there.
+
 ## 4. Check again
 
 Run `voidable check` until it reports nothing, then run your application with the development warnings loaded and open each page once: a clean console means the markup is right.

@@ -20,7 +20,7 @@ void-pagination {
   min-width: 0;
 }
 
-void-pagination nav {
+void-pagination > :is(nav, [role="group"]) {
   display: flex;
   flex-wrap: wrap;
   align-items: center;

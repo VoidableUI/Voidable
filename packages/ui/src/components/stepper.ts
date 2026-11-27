@@ -6,7 +6,14 @@ import { useProjection } from '../projection.js';
 
 useProjection();
 
-/** Multi-step progress tracker for onboarding flows, checkout funnels, and guided wizards. */
+/**
+ * Multi-step progress tracker for onboarding flows, checkout funnels, and guided wizards.
+ *
+ * It shows where the user is, so it is a list (`role="list"`, named "Progress") of steps with
+ * `aria-current="step"` on the current one, not a navigation landmark: its steps are text, not links or
+ * buttons. A page with one navigation region can use it freely. When the steps are controls the user moves
+ * between, write them yourself inside a `<nav aria-label="...">`.
+ */
 export class VoidStepper extends VoidElement {
   /** Zero-based index of the current step. Earlier steps show as completed, later ones as upcoming. */
   @property({ type: Number, reflect: true }) value: number = 0;
@@ -18,7 +25,7 @@ export class VoidStepper extends VoidElement {
 
   connectedCallback(): void {
     super.connectedCallback();
-    this.setHostAttribute('role', 'navigation');
+    this.setHostAttribute('role', 'list');
     this._name();
   }
 
@@ -42,9 +49,10 @@ export class VoidStepper extends VoidElement {
         i < this.value ? 'completed' : i === this.value ? 'active' : 'upcoming';
 
       return html`${i > 0
-          ? html`<div class="void-stepper-connector" data-state=${i <= this.value ? 'completed' : 'upcoming'}></div>`
+          ? html`<div class="void-stepper-connector" aria-hidden="true" data-state=${i <= this.value ? 'completed' : 'upcoming'}></div>`
           : null}<div
           class="void-stepper-step"
+          role="listitem"
           data-state=${state}
           aria-current=${i === this.value ? 'step' : nothing}
         >

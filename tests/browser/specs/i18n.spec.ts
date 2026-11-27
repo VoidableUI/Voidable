@@ -78,7 +78,7 @@ test.describe('French', () => {
     await expect(s.locator('void-file-upload')).toContainText('Déposez des fichiers ici ou parcourez votre appareil');
     await expect(s.locator('void-error-fallback')).toContainText('Une erreur est survenue');
     await expect(s.getByRole('button', { name: 'Réessayer' })).toBeVisible();
-    await expect(s.getByRole('navigation', { name: 'Progression' })).toBeVisible();
+    await expect(s.getByRole('list', { name: 'Progression' })).toBeVisible();
     await expect(s.locator('void-multiselect [role=combobox]')).toHaveAttribute('aria-description', 'A, B, C, 4 sélectionnés');
   });
 
