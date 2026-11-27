@@ -237,7 +237,7 @@
      toward a mid tone that still carries 4.5:1 text in each scheme. */
   --void-accent-c: clamp(0, var(--void-accent-chroma), 0.3);
   --void-accent-l: calc(
-    var(--void-scheme-dark) * max(0.97 - 0.9 * var(--void-accent-c), 0.78)
+    var(--void-scheme-dark) * max(0.97 - 0.9 * var(--void-accent-c), 0.83)
     + (1 - var(--void-scheme-dark)) * min(0.145 + 2 * var(--void-accent-c), 0.42)
   );
   /* On a media surface or glass the backdrop is unknown, so a coloured
