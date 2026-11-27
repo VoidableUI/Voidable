@@ -245,3 +245,9 @@ h1#_top {
   margin: 0 0 var(--void-gap-inside);
   color: var(--void-color-text-secondary);
 }
+
+/* The highlighted example on the code page: what an application writes to colour its own
+   highlighter's spans from the theme's tokens. */
+.vd-tok-keyword { color: var(--void-color-notice); }
+.vd-tok-string { color: var(--void-color-success); }
+.vd-tok-comment { color: var(--void-color-text-secondary); }

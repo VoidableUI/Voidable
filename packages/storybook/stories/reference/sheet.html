@@ -411,5 +411,46 @@
           <void-gauge value="67" unit="%" unit-inline circular="triple" aria-label="Disk used"></void-gauge>
         </void-split>
       </void-section>
+
+      <void-section gap="stack">
+        <h2>Code and diffs</h2>
+        <void-code>
+          <void-code-copy><button type="button"></button></void-code-copy>
+          <pre><code>npm install @voidable/ui @voidable/theme</code></pre>
+        </void-code>
+        <void-code line-numbers>
+          <void-code-title>total.js</void-code-title>
+          <void-code-copy><button type="button"></button></void-code-copy>
+          <pre><code>
+            <void-code-line>export function total(items) {</void-code-line>
+            <void-code-line>  let sum = 0;</void-code-line>
+            <void-code-line>  for (const item of items) sum += item.price * item.quantity;</void-code-line>
+            <void-code-line>  return sum;</void-code-line>
+            <void-code-line>}</void-code-line>
+          </code></pre>
+        </void-code>
+        <void-diff line-numbers>
+          <void-diff-title>src/invoice.js</void-diff-title>
+          <void-diff-hunk>
+            <void-diff-header>@@ -10,4 +10,5 @@ export function total(items) {</void-diff-header>
+            <void-diff-line old="10" new="10">  let sum = 0;</void-diff-line>
+            <void-diff-line kind="del" old="11">  for (const item of items) sum += <del>item.price</del>;</void-diff-line>
+            <void-diff-line kind="add" new="11">  for (const item of items) sum += <ins>item.price * item.quantity</ins>;</void-diff-line>
+            <void-diff-line kind="add" new="12">  if (sum &lt; 0) throw new RangeError('a total below zero is a mistake in the data');</void-diff-line>
+            <void-diff-line old="12" new="13">  return sum;</void-diff-line>
+          </void-diff-hunk>
+          <void-diff-hunk>
+            <void-diff-header>@@ -40,2 +41,2 @@</void-diff-header>
+            <void-diff-line old="40" new="41">export const currency = 'EUR';</void-diff-line>
+            <void-diff-line kind="del" old="41">export const digits = <del>2</del>;</void-diff-line>
+            <void-diff-line kind="add" new="42">export const digits = <ins>3</ins>;</void-diff-line>
+          </void-diff-hunk>
+        </void-diff>
+        <void-diff wrap>
+          <void-diff-hunk>
+            <void-diff-line>You may cancel <del>within 14 days</del><ins>within 30 days</ins> of the purchase. Refunds are paid to the <del>original</del> payment method <ins>you choose</ins>.</void-diff-line>
+          </void-diff-hunk>
+        </void-diff>
+      </void-section>
   </void-page>
 </main>

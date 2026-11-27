@@ -50,6 +50,18 @@ export const CONTRACT = {
     probe: { html: '<void-checkbox name="tos">Accept</void-checkbox>', click: { role: 'checkbox', name: 'Accept' }, expect: { host: { checked: '', 'aria-checked': 'true' } }, event: 'void-change' },
   },
   'void-checkbox-group': { role: 'group', name: 'label attribute (aria-label)', state: ['value (reflected, a JSON array of the checked values)', 'disabled (reflected)'] },
+  'void-code': {
+    role: null,
+    name: 'its void-code-title part (then the host is role="group", aria-labelledby the title), or aria-label from the author; without either it has no role and no name. The button in the void-code-copy part is named "Copy code" (the code.copy message) unless it has text or a name of its own',
+    state: ['line-numbers (reflected)', 'wrap (reflected)', 'tabindex="0" on the native <pre> while its content is wider than it', 'copied on the void-code-copy part for two seconds after a copy; a polite live region says "Copied"', 'the text property is the code as plain text (what a copy takes)'],
+    gaps: ['line numbers are CSS counters: not in the DOM and not in the accessibility tree'],
+  },
+  'void-diff': {
+    role: null,
+    name: 'its void-diff-title part (then the host is role="group", aria-labelledby the title), or aria-label from the author; without either it has no role and no name',
+    state: ['line-numbers (reflected)', 'wrap (reflected)', 'tabindex="0" on the host while a line is wider than it', 'kind="add" | "del" on each void-diff-line (none or "context" for an unchanged line), old and new for its line numbers: written by the author, read by the theme', 'native <ins> and <del> inside a line are the insertion and deletion roles', 'the + and − markers are CSS generated content whose text alternative is "added" / "removed" (the diff.added and diff.removed messages): in the accessibility tree, not in the DOM'],
+    gaps: ['markers and line numbers are generated content: a DOM query finds the kind attribute, not the marker'],
+  },
   'void-collapsible': {
     role: 'inner',
     name: 'its void-collapsible-trigger part, which is the button',

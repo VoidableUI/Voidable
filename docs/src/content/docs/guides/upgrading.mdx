@@ -130,6 +130,16 @@ On a device whose main pointer is coarse (`@media (pointer: coarse)`: phones and
 
 See [Touch targets](/getting-started/theming/#touch-targets) for how each control gets there, what is not covered, and the density recipe for bigger drawn controls.
 
+## 0.14.0
+
+### Code and diff
+
+Nothing breaks. Two elements are new: [`<void-code>`](/components/code/), a code block around a native `<pre><code>` (line numbers, wrap, a title, a copy button), and [`<void-diff>`](/components/diff/), a unified diff your application computes and writes as `<void-diff-hunk>` and `<void-diff-line>` elements. React has `Code` and `Diff` and their parts, HEEx `<.code>` and `<.diff>`; ERB and Blade write the tags as they are.
+
+- **New tokens**: `--void-color-diff-ins`, `--void-color-diff-del` and their `-subtle` and `-strong` fills ([Diff colors](/getting-started/tokens/#diff-colors)). A theme or skin of your own needs nothing; they follow the success and error colours.
+- **New messages**: `code.copy`, `code.copied`, `diff.added` and `diff.removed`, in English, French and Arabic. A locale you registered yourself falls back to English for them until you add the four.
+- **If you styled `<pre>`, `<ins>` or `<del>` yourself** inside another Voidable component, nothing changes: the theme styles them only inside `<void-code>` and `<void-diff-line>`.
+
 ## 4. Check again
 
 Run `voidable check` until it reports nothing, then run your application with the development warnings loaded and open each page once: a clean console means the markup is right.
