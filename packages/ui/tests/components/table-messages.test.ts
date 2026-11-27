@@ -43,7 +43,7 @@ describe('table messages', () => {
     expect(msg(host, 'table.rows', { count: 1234 })).toBe('1,234 rows');
     expect(msg(host, 'table.rowsShown', { shown: 2, total: 4 })).toBe('2 of 4 rows');
     host.setAttribute('lang', 'fr');
-    expect(msg(host, 'table.rowsShown', { shown: 2, total: 4 })).toBe('2 sur 4 lignes');
+    expect(msg(host, 'table.rowsShown', { shown: 2, total: 4 })).toBe('2 lignes sur 4');
   });
 
   it('announces a filter in the language of the page', async () => {
@@ -51,7 +51,7 @@ describe('table messages', () => {
     await settle(el);
     el.filter = 'zz';
     await settle(el);
-    expect((el.querySelector('[data-void-announcer]') as HTMLElement).textContent).toBe('0 sur 2 lignes');
+    expect((el.querySelector('[data-void-announcer]') as HTMLElement).textContent).toBe('0 ligne sur 2');
   });
 
   it('names the header checkbox and announces a sort in French', async () => {
