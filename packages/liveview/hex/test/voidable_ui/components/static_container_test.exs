@@ -704,4 +704,67 @@ defmodule VoidableUI.Components.StaticContainerTest do
     assert html =~ ~s(<void-tabs-content value="general">General settings</void-tabs-content>)
     refute function_exported?(VoidableUI.Components, :tab_panel, 1)
   end
+
+  # ---------------------------------------------------------------------------
+  # code and diff
+  # ---------------------------------------------------------------------------
+
+  test "code renders void-code around the pre and parts as written, with no id or hook of its own" do
+    assigns = %{lines: ["a = 1", "b = 2"]}
+
+    html =
+      rendered_to_string(~H"""
+      <VoidableUI.Components.code line_numbers>
+        <void-code-title>app.ex</void-code-title>
+        <void-code-copy><button type="button"></button></void-code-copy>
+        <pre><code><%= for line <- @lines do %><void-code-line>{line}</void-code-line><% end %></code></pre>
+      </VoidableUI.Components.code>
+      """)
+
+    assert html =~ ~r/void-code line-numbers>/
+    assert html =~ "<void-code-line>a = 1</void-code-line><void-code-line>b = 2</void-code-line>"
+    assert html =~ ~s(<void-code-copy><button type="button"></button></void-code-copy>)
+    refute html =~ "phx-hook"
+    refute html =~ ~s(id=")
+    refute html =~ "wrap"
+  end
+
+  test "code pushes void-copy with events, and then has a stable id for the hook" do
+    assigns = %{}
+
+    html =
+      rendered_to_string(~H"""
+      <VoidableUI.Components.code events><pre><code>mix test</code></pre></VoidableUI.Components.code>
+      """)
+
+    assert html =~ ~s(phx-hook="VoidEvent")
+    assert html =~ ~s(data-void-events="void-copy")
+    assert html =~ ~r/id="void-code-\d+"/
+  end
+
+  test "diff renders void-diff around the hunks and lines as written" do
+    assigns = %{
+      lines: [
+        %{kind: nil, old: 1, new: 1, text: "a = 1"},
+        %{kind: "del", old: 2, new: nil, text: "b = 2"},
+        %{kind: "add", old: nil, new: 2, text: "b = 3"}
+      ]
+    }
+
+    html =
+      rendered_to_string(~H"""
+      <VoidableUI.Components.diff line_numbers wrap>
+        <void-diff-title>app.ex</void-diff-title>
+        <void-diff-hunk>
+          <%= for line <- @lines do %><void-diff-line kind={line.kind} old={line.old} new={line.new}>{line.text}</void-diff-line><% end %>
+        </void-diff-hunk>
+      </VoidableUI.Components.diff>
+      """)
+
+    assert html =~ ~r/void-diff line-numbers wrap>/
+    assert html =~ ~s(<void-diff-line old="1" new="1">a = 1</void-diff-line>)
+    assert html =~ ~s(<void-diff-line kind="del" old="2">b = 2</void-diff-line>)
+    assert html =~ ~s(<void-diff-line kind="add" new="2">b = 3</void-diff-line>)
+    refute html =~ ~s(id=")
+  end
 end

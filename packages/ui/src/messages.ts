@@ -65,6 +65,14 @@ export interface MessageParameters {
   'composeInput.send': undefined;
   'combobox.placeholder': undefined;
   'combobox.empty': undefined;
+  /** The name of the copy button of a code block that has no text or name of its own. */
+  'code.copy': undefined;
+  /** The announcement after the code was copied. */
+  'code.copied': undefined;
+  /** What a screen reader hears before an added line of a diff (the text alternative of the + marker). */
+  'diff.added': undefined;
+  /** What a screen reader hears before a removed line of a diff (the text alternative of the − marker). */
+  'diff.removed': undefined;
   'actionInput.action': undefined;
   'editable.placeholder': undefined;
   'errorFallback.heading': undefined;
@@ -185,6 +193,10 @@ const english: { [K in MessageKey]: Message<K> } = {
   'composeInput.send': 'Send',
   'combobox.placeholder': 'Search...',
   'combobox.empty': 'No options found',
+  'code.copy': 'Copy code',
+  'code.copied': 'Copied',
+  'diff.added': 'added',
+  'diff.removed': 'removed',
   'actionInput.action': 'Action',
   'editable.placeholder': 'Click to edit',
   'errorFallback.heading': 'Something went wrong',

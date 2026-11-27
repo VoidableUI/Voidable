@@ -105,6 +105,10 @@ func TestCheckFixtures(t *testing.T) {
 			`parts.html:24:1: [legacy-markup] <void-select> no longer takes options directly; write a native <select> (with the name and the options) inside: <void-select><select name="plan">`,
 			`parts.html:24:14: [unknown-attribute] unknown attribute name on <void-select>; put name on the native <select> inside`,
 			`parts.html:24:1: [missing-name] <void-select> has no accessible name`,
+			`parts.html:25:1: [missing-part] <void-code> has no native <pre> inside, which it needs; write the code in a native <pre><code> inside`,
+			`parts.html:26:1: [missing-part] <void-diff> has no <void-diff-hunk>`,
+			`parts.html:26:12: [invalid-parent] <void-diff-line> is not valid inside <void-diff>; it belongs in <void-diff-hunk>`,
+			`parts.html:26:28: [invalid-value] kind="added" is not valid on <void-diff-line>; allowed: add|del|context`,
 		}, nil},
 	}
 	for _, tt := range tests {
@@ -218,7 +222,7 @@ func TestRefAndGen(t *testing.T) {
 		{[]string{"ref", "void-button", "--format", "json"}, []string{`"tag": "void-button"`, `"values": [`}},
 		{[]string{"ref", "void-tabs"}, []string{"keys (rebind or switch off", "next: Right Arrow (Left Arrow in right-to-left text)"}},
 		{[]string{"ref", "void-dialog", "--format", "markdown"}, []string{"| Action | Default keys | What it does |", "| `close` (essential) | Escape |"}},
-		{[]string{"ref", "--size"}, []string{"text     index", "168 elements"}},
+		{[]string{"ref", "--size"}, []string{"text     index", "177 elements"}},
 		{[]string{"gen", "snippet", "void-dialog", "--lang", "jsx"}, []string{`<void-dialog size="sm" onvoid-close=`, `<void-dialog-title>Delete project</void-dialog-title>`, `<void-button color="error" variant="filled">Delete</void-button>`}},
 		{[]string{"gen", "snippet", "void-dropdown-menu", "--lang", "erb"}, []string{`data-action="void-select->my-controller#handle"`}},
 		{[]string{"gen", "heex"}, []string{"defmodule VoidableUI.Components do", "def status_dot(assigns) do"}},

@@ -14,6 +14,15 @@ import {
   Switch,
   BarChart,
   Textarea,
+  Code,
+  CodeCopy,
+  CodeLine,
+  CodeTitle,
+  Diff,
+  DiffHeader,
+  DiffHunk,
+  DiffLine,
+  DiffTitle,
 } from '../src/index.js';
 import type { VoidButton } from '@voidable/ui';
 
@@ -194,6 +203,51 @@ describe('props', () => {
     const el = c.querySelector('void-button')!;
     expect(el.getAttribute('variant')).toBe('filled');
     expect(el.getAttribute('color')).toBe('error');
+  });
+});
+
+describe('code and diff', () => {
+  it('renders a code block and its parts as the tags, with booleans as attributes, and delivers onVoidCopy', async () => {
+    let copied = '';
+    const c = await render(
+      <Code lineNumbers onVoidCopy={(e) => { copied = e.detail.value; }}>
+        <CodeTitle>a.js</CodeTitle>
+        <CodeCopy><button type="button" /></CodeCopy>
+        <pre><code>{['a', 'b'].map((line, i) => <CodeLine key={i} number={String(i + 40)}>{line}</CodeLine>)}</code></pre>
+      </Code>,
+    );
+    const el = c.querySelector('void-code') as HTMLElement & { lineNumbers: boolean; text: string; updateComplete: Promise<boolean> };
+    await el.updateComplete;
+    expect(el.lineNumbers).toBe(true);
+    expect(el.hasAttribute('line-numbers')).toBe(true);
+    expect(el.text).toBe('a\nb');
+    expect(c.querySelector('void-code-title')!.textContent).toBe('a.js');
+    expect(c.querySelectorAll('void-code-copy > button').length).toBe(1);
+    expect(c.querySelector('void-code-line')!.getAttribute('number')).toBe('40');
+    el.dispatchEvent(new CustomEvent('void-copy', { detail: { value: 'a\nb' } }));
+    expect(copied).toBe('a\nb');
+  });
+
+  it('renders a diff and its parts as the tags, with kind, old and new as attributes', async () => {
+    const c = await render(
+      <Diff lineNumbers wrap>
+        <DiffTitle>a.js</DiffTitle>
+        <DiffHunk>
+          <DiffHeader>@@ -1 +1 @@</DiffHeader>
+          <DiffLine kind="del" old="1">a <del>b</del></DiffLine>
+          <DiffLine kind="add" new="1">a <ins>c</ins></DiffLine>
+        </DiffHunk>
+      </Diff>,
+    );
+    const el = c.querySelector('void-diff') as HTMLElement & { wrap: boolean; updateComplete: Promise<boolean> };
+    await el.updateComplete;
+    expect(el.wrap).toBe(true);
+    expect(el.hasAttribute('line-numbers')).toBe(true);
+    const lines = c.querySelectorAll('void-diff-hunk > void-diff-line');
+    expect(lines.length).toBe(2);
+    expect([lines[0].getAttribute('kind'), lines[0].getAttribute('old'), lines[0].hasAttribute('new')]).toEqual(['del', '1', false]);
+    expect([lines[1].getAttribute('kind'), lines[1].getAttribute('new')]).toEqual(['add', '1']);
+    expect(c.querySelector('void-diff-header')!.textContent).toBe('@@ -1 +1 @@');
   });
 });
 
