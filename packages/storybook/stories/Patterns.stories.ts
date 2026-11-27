@@ -341,6 +341,13 @@ export const DescriptionList: Story = {
           <div><dt>Wind</dt><dd>9 m/s</dd></div>
         </dl>
       </void-description-list>
+      <void-description-list justify="start">
+        <dl>
+          <div><dt>Operator</dt><dd>Kongsberg Satellite Services</dd></div>
+          <div><dt>State</dt><dd><void-state color="success">Online</void-state></dd></div>
+          <div><dt>Notes</dt><dd>Closed to visitors from November to February; deliveries by arrangement.</dd></div>
+        </dl>
+      </void-description-list>
     `),
 };
 
@@ -415,6 +422,7 @@ export const State: Story = {
         <void-state color="error">Offline</void-state>
         <void-state color="notice">Preview</void-state>
         <void-state>Idle</void-state>
+        <void-state size="lg" color="success" pulse>Tracking MRD-0412</void-state>
       </void-stack>
     `),
 };

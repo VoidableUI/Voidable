@@ -141,6 +141,22 @@ void-page-head > void-actions {
   align-self: end;
 }
 
+/* An eyebrow (a label above the title) does not move the title: at the top
+   of a page it hangs in the page's top padding, a tight gap above the h1, so
+   the title is where it is on a page without one and titles do not jump from
+   page to page. It takes no height; its text overhangs upward, and the
+   negative margin cancels the gap the h1 keeps from what precedes it. Only
+   where the head is the first thing in void-page, which owns the room above;
+   anywhere else the label stays in flow. Breadcrumbs always stay in flow:
+   they are navigation with targets to hit, and a page deep enough to have
+   them sets its title lower by their height and one tight gap. */
+void-page > void-page-head:first-child > [data-void-type="label"]:first-child {
+  display: flex;
+  align-items: flex-end;
+  block-size: 0;
+  margin-top: calc(var(--void-gap-tight) * -1);
+}
+
 /* No rule under the head: for a page whose first block draws its own. */
 void-page-head[flush] {
   padding-bottom: 0;

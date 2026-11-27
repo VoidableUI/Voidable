@@ -142,6 +142,12 @@ A labelled `ghost` button that ends a `void-row`, a `void-section-head`, a `void
 
 A `void-section-head` is as tall with `void-actions` or a button as without: content under a head that held a button moves up by the difference (about 12px with a default button). Nothing to change.
 
+### Page head eyebrow, description list and state
+
+- **A label above the title no longer pushes the title down** when `void-page-head` is the first thing in `void-page`: it hangs in the page's top padding, so the title sits about 24px higher than before on those pages, level with pages that have no label. Remove any margin you added to line titles up. Breadcrumbs are unchanged.
+- `void-description-list` takes `justify="start"`: every value starts on one line after a label column (`--void-description-list-label-width`, 12rem).
+- `void-state` takes `size="lg"`: the heading role, for a state that is the heading of its block.
+
 ## 4. Check again
 
 Run `voidable check` until it reports nothing, then run your application with the development warnings loaded and open each page once: a clean console means the markup is right.
