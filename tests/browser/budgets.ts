@@ -41,6 +41,10 @@ export const calibrationMs = 80;
 // observer once), the button 5.1 kB smaller (projection.ts loads only where used). The table is still well above
 // its 72 ms of before the parts: about 40% of it is the browser's style and layout of 2,000 theme-styled cells
 // and the rest is the components' own connect and update work.
+// Tightened after the one-tag-per-rule scoped reset (#77): the 500-row table's cold first render, master and the change back to back
+// on the build host (11 rounds, medians), went from 178.7 to 158.7 ms (11% faster; style recalculation 44.7 to 22.9 ms), and the perf
+// spec on that change read 125.7 ms at calibration 106 ms (94.5 ms normalised). 105 -> 95 ms. The host type differs from the one the
+// other figures were set on (calibration 106 against about 170 ms), so only this figure moved; the others stay until re-measured together.
 // Moves, measured on one host with the old and the new commit: the 500-row table's first render
 // grew about 50% (most likely the dropdown menu in each row is now a trigger and a content part, the explicit
 // parts of #52, and every component base gained the state rule and re-entrant morph hooks, #61 #31);
@@ -54,7 +58,7 @@ export const reference = {
   /** First render of 1,000 mixed components until all have rendered. */
   mixed1000Ms: 73,
   /** First render of a 500-row table with a dropdown-menu, a badge and two buttons per row. */
-  table500FirstMs: 105,
+  table500FirstMs: 95,
   /** One Turbo morph of that table (one cell changed), through VoidTurbo. */
   table500MorphMs: 40,
   /** First render of a void-select with 5,000 options. Not normalised like the others: about two thirds
