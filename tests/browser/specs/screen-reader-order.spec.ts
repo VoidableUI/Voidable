@@ -6,7 +6,7 @@
 // unchecked, is heard as stale or missing speech. The page's own trace (screen-readers/trace.ts) records focus
 // changes and `aria-*` mutations in order; these tests read it.
 import { test, expect, load, settle, type Page } from '../helpers/test';
-import { clearTrace, installTrace, readTrace, type TraceEntry } from '../screen-readers/trace';
+import { axTree, clearTrace, installTrace, readTrace, type TraceEntry } from '../screen-readers/trace';
 
 /** Every state of one element at the moment focus arrives on any element matching `selector` (a capture-phase focusin). */
 async function snapshotOnFocus(page: Page, selector: string, read: string): Promise<void> {
@@ -139,5 +139,30 @@ test.describe('screen reader order of operations', () => {
     await settle(page);
     expect(await page.getByRole('tab', { name: 'Billing' }).getAttribute('aria-selected')).toBe('true');
     expect(await page.getByRole('tab', { name: 'Profile' }).getAttribute('aria-selected')).toBe('false');
+  });
+});
+
+test.describe('what the browser exposes (the tree NVDA reads on Windows)', () => {
+  test('radio: the checked radio is exposed as checked, in a named radio group', async ({ page, browserName }) => {
+    test.skip(browserName !== 'chromium', 'the DevTools protocol accessibility tree is Chromium only');
+    await load(page, '/sr-ref-radio');
+    const tree = await axTree(page);
+    console.log(`[ax sr-ref-radio]\n${tree}`);
+    expect(tree).toMatch(/radio "Void Free".*checked=true/);
+    expect(tree).toMatch(/radio "Void Pro".*checked=false/);
+    expect(tree).toMatch(/radiogroup "Void plan"/);
+    // The references built the other ways have the same states.
+    expect(tree).toMatch(/radio "Apg Free".*checked=true/);
+    expect(tree).toMatch(/radio "Hidden Free".*checked=true/);
+  });
+
+  test('accordion: a collapsed trigger is exposed as collapsed, like the native button', async ({ page, browserName }) => {
+    test.skip(browserName !== 'chromium', 'the DevTools protocol accessibility tree is Chromium only');
+    await load(page, '/sr-ref-disclosure');
+    const tree = await axTree(page);
+    console.log(`[ax sr-ref-disclosure]\n${tree}`);
+    expect(tree).toMatch(/button "Void refunds".*expanded=false/);
+    expect(tree).toMatch(/button "Native until-found".*expanded=false/);
+    expect(tree).toMatch(/button "Custom button".*expanded=false/);
   });
 });
