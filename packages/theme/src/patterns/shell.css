@@ -64,8 +64,31 @@ void-shell[nav="side"] > main {
 
 /* The brand and anything else in the sidebar line up with the text of
    the links, which sit inside their own padding. */
-void-shell[nav="side"] > void-sidebar > :not(void-nav-links) {
+void-shell[nav="side"] > void-sidebar > :not(void-nav-links, void-dropdown-menu) {
   padding-inline: var(--void-control-padding);
+}
+
+/* A menu in the sidebar (a project or workspace switcher) is its own
+   control: it spans the rail like a link and its trigger's icon and label
+   start where a link's do, so it takes no padding of its own on top of
+   the button's. The button's border sits inside the link's padding. */
+void-shell[nav="side"] > void-sidebar > void-dropdown-menu {
+  display: flex;
+  /* Not the fit-content of an anchored overlay: its trigger fills the rail, so the panel still sits against the trigger. */
+  width: auto;
+}
+
+void-shell[nav="side"] > void-sidebar > void-dropdown-menu > void-dropdown-menu-trigger > void-button {
+  flex: 1;
+  justify-content: flex-start;
+  min-width: 0;
+  padding-inline: calc(var(--void-control-padding) - var(--void-control-border-width));
+}
+
+@supports (min-width: anchor-size(width)) {
+  void-shell[nav="side"] > void-sidebar > void-dropdown-menu > void-dropdown-menu-content {
+    min-width: anchor-size(width);
+  }
 }
 
 /* ── Overlay navigation ──

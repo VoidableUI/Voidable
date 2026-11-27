@@ -15,8 +15,19 @@ const ITEM = 'void-breadcrumbs-item';
  * list and the items are CSS-only parts; the component gives them `role="list"` and `role="listitem"` (so a screen
  * reader says "list, 3 items" and "2 of 3"), also for items added, removed or reordered later. It renders nothing of
  * its own: the separators are drawn by the theme between the items and are not exposed to assistive technology.
+ *
+ * Add `landmark="none"` when the page keeps one navigation region: the trail is then a named group of the same
+ * list. Inside a `<nav>` or an element with `role="navigation"` it is never a landmark, whatever this says, so
+ * landmarks do not nest.
  */
 export class VoidBreadcrumbs extends VoidElement {
+  /**
+   * `none` makes the trail a named `group` instead of a `navigation` landmark, for a page that keeps a single
+   * navigation region. Any other value (the default) is a landmark. Inside a `<nav>` or an element with
+   * `role="navigation"` it is never a landmark, whatever this says.
+   */
+  @property({ type: String, reflect: true }) landmark: 'navigation' | 'none' = 'navigation';
+
   /**
    * Character drawn between the crumbs. Defaults to `/`. It is drawn by CSS and hidden from assistive
    * technology.
@@ -37,8 +48,14 @@ export class VoidBreadcrumbs extends VoidElement {
 
   connectedCallback(): void {
     super.connectedCallback();
-    this.setHostAttribute('role', 'navigation');
+    this._role();
     this._name();
+  }
+
+  /** `navigation`, unless the author opted out or an enclosing navigation already is the landmark. */
+  private _role(): void {
+    const landmark = this.landmark !== 'none' && !this.parentElement?.closest('nav, [role="navigation"]');
+    this.setHostAttribute('role', landmark ? 'navigation' : 'group');
   }
 
   /** The landmark's name: the author's `aria-label`, else the message. */
@@ -48,6 +65,7 @@ export class VoidBreadcrumbs extends VoidElement {
 
   protected override updated(changed: Map<string, unknown>): void {
     this._name();
+    if (changed.has('landmark')) this._role();
     super.updated(changed);
     if (changed.has('separator')) {
       // A CSS string, read by `content` in breadcrumbs.css.

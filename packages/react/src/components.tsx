@@ -593,6 +593,8 @@ export const AccordionItem = wrapWc<VoidAccordionItem, {
 
 export const Breadcrumbs = wrapWc<VoidBreadcrumbs, {
   separator?: string;
+  /** `none` renders a named group instead of a navigation landmark (it is never a landmark inside a `nav`). */
+  landmark?: 'navigation' | 'none';
 }>('void-breadcrumbs', 'Breadcrumbs');
 
 export const List = wrapWc<VoidList, {
@@ -845,6 +847,8 @@ export const DropdownMenu = wrapWc<VoidDropdownMenu, {
   side?: 'top' | 'bottom' | 'left' | 'right';
   /** Alignment along the trigger edge. */
   align?: 'start' | 'center' | 'end';
+  /** Fills its container: the trigger stretches and the menu is at least as wide as the trigger. */
+  block?: boolean;
 } & VoidEvents<OverlayEvents>>('void-dropdown-menu', 'DropdownMenu');
 
 export const DropdownMenuItem = wrapWc<VoidDropdownMenuItem, {

@@ -65,6 +65,25 @@ export const SingleItem: Story = {
   `,
 };
 
+export const NoLandmark: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story: 'A page that keeps one navigation region adds `landmark="none"`: the trail is a named group instead. Inside a `<nav>` it is never a landmark, with or without the attribute.',
+      },
+    },
+  },
+  render: () => html`
+    <void-breadcrumbs landmark="none">
+      <void-breadcrumbs-list>
+        <void-breadcrumbs-item><a href="/">Home</a></void-breadcrumbs-item>
+        <void-breadcrumbs-item><a href="/docs">Docs</a></void-breadcrumbs-item>
+        <void-breadcrumbs-item aria-current="page">Page</void-breadcrumbs-item>
+      </void-breadcrumbs-list>
+    </void-breadcrumbs>
+  `,
+};
+
 export const DeepNesting: Story = {
   render: () => html`
     <void-breadcrumbs separator="/">
