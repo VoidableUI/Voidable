@@ -154,7 +154,7 @@ void-dialog::part(close):focus-visible {
 /* Touch targets: the close button's hit area grows to --void-hit-target
    (44px) under a coarse pointer without resizing it (the button is already
    positioned). */
-@media (pointer: coarse) {
+@media (any-pointer: coarse) {
   void-dialog::part(close)::after {
     content: ""; position: absolute; inset: 50% auto auto 50%; translate: -50% -50%;
     min-inline-size: var(--void-hit-target);

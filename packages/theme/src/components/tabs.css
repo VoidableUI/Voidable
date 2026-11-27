@@ -140,7 +140,7 @@ void-tabs[size="lg"] { --_void-tabs-height: var(--void-tabs-height, var(--void-c
    nothing moves; the tab's ::after fills that padding. A tab is as wide as its
    label, with eight pixels between tabs, and is not extended along the row.
    At the large size a tab is already 44px tall. */
-@media (pointer: coarse) {
+@media (any-pointer: coarse) {
   void-tabs-list {
     --_void-tabs-extra: max(0px, calc(var(--void-hit-target) - var(--_void-tabs-height)));
     padding-block-start: var(--_void-tabs-extra);

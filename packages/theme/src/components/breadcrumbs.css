@@ -46,7 +46,7 @@ void-breadcrumbs-item a:hover {
 
 /* Touch targets: the link's hit area grows to --void-hit-target (44px) under a
    coarse pointer without moving anything. */
-@media (pointer: coarse) {
+@media (any-pointer: coarse) {
   void-breadcrumbs-item a { position: relative; }
   void-breadcrumbs-item a::after {
     content: ""; position: absolute; inset: 50% auto auto 50%; translate: -50% -50%;

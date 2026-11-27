@@ -143,6 +143,6 @@ void-accordion-item:defined > void-accordion-content[hidden="until-found"] {
    least --void-hit-target (44px) tall under a coarse pointer instead of
    growing a pseudo-element (its ::after is the chevron). At the default
    density it already is. */
-@media (pointer: coarse) {
+@media (any-pointer: coarse) {
   void-accordion-trigger { min-block-size: var(--void-hit-target); }
 }

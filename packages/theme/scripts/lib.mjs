@@ -221,7 +221,8 @@ export function resetRoots(tags) {
 export function resetCss(tags) {
   const S = resetRoots(tags);
   const roots = `:is(${S.join(', ')})`;
-  const any = `:where(${roots}, ${roots} *)`;
+  // `hidden` names every tag, parts included: a part outside its component has no ancestor in `roots`.
+  const any = `:where(:is(${[...new Set(tags)].sort().join(", ")}), ${roots} *)`;
   const within = (sel) => `:where(${roots} :is(${sel}))`;
   const box = (suffix) => S.flatMap((t) => [`${t}${suffix}`, `${t} *${suffix}`]).join(',\n');
   return `${box('')},
@@ -235,7 +236,8 @@ ${box('::after')} {
 /* \`hidden\` hides. Every component and pattern sets a display of its own,
    and any of those beats the browser's \`[hidden] { display: none }\`, so an
    alert, a row or a part with the attribute stayed on screen. Stated once
-   here for every theme element and what it contains, and important: in this
+   here for every theme element (a part too, even outside its component) and
+   what it contains, and important: in this
    lowest layer that beats every display rule above it, the theme's and an
    application's. \`hidden="until-found"\` keeps the browser's behaviour. */
 ${any}[hidden]:not([hidden="until-found"]) {
