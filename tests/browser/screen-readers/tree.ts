@@ -134,6 +134,8 @@ export function treeSuite(title: string, scenarios: Scenario[]): void {
               await settle(page);
             } else if ('hear' in step) {
               await expectFact(page, step.hear);
+            } else if ('mode' in step) {
+              // The reader's mode has no tree equivalent: the page always receives the keys.
             } else if ('once' in step) {
               // Counting what was spoken has no tree equivalent.
             } else if ('walk' in step) {

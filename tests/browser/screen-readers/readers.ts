@@ -39,6 +39,12 @@ export interface Reader {
    * (NVDA in focus mode on a radio, a switch or a tab) hears the page's keys and says nothing for its own.
    */
   browseMode?(): Promise<void>;
+  /**
+   * Switches the reader to passing keys to the focused control (NVDA: focus mode), for a step that presses arrow
+   * keys and expects the page to receive them. In browse mode NVDA consumes the arrow and moves its own cursor.
+   * A no-op for VoiceOver.
+   */
+  focusMode?(): Promise<void>;
 }
 
 export function voiceOverReader(vo: VoiceOverPlaywright): Reader {
@@ -143,6 +149,13 @@ export function nvdaReader(nvda: NVDAPlaywright): Reader {
       return out.join('; ');
     },
     refresh: () => nvda.perform(nvda.keyboardCommands.refreshBrowseDocument),
+    async focusMode() {
+      // The toggle says which mode it switched to; if it says browse mode, toggle back.
+      for (let i = 0; i < 2; i++) {
+        await nvda.perform(nvda.keyboardCommands.toggleBetweenBrowseAndFocusMode);
+        if (!/browse mode/i.test(await nvda.lastSpokenPhrase())) return;
+      }
+    },
     async browseMode() {
       await nvda.perform(nvda.keyboardCommands.exitFocusMode);
       await nvda.press('Control+Home');

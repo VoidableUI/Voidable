@@ -113,7 +113,9 @@ export type Step =
   /** Screen readers only, for diagnosis: move `sweep` times (default by "next") and record what each move said, whether or not anything matches. */
   | { sweep: number; by?: PerReader<Nav> }
   /** Wait this many milliseconds (an animation, a late announcement), then carry on. */
-  | { pause: number };
+  | { pause: number }
+  /** Screen readers only: put the reader in focus mode (NVDA) so the keys of the next steps reach the page. */
+  | { mode: 'focus' };
 
 export interface Scenario {
   /** Stable id: names the test and the row in the results file. */

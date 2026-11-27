@@ -85,7 +85,10 @@ export const scenarios: Scenario[] = [
       { reach: { role: 'radio', name: 'Pro', checked: false, position: { n: 2, of: 3, within: '#plan' }, spoken: { VoiceOver: [/\b2 of 3\b/], NVDA: [/\bnot checked\b/] } }, by: 'control' },
       { act: true },
       { hear: { role: 'radio', name: 'Pro', checked: true } },
-      // Arrow keys move through the group and check as they go; the group is one tab stop.
+      // Arrow keys move through the group and check as they go; the group is one tab stop. NVDA reached Pro by
+      // quick navigation, in browse mode, where it consumes the arrow and moves its own cursor to Team (not
+      // checked) without the key reaching the radio: a native radio group does the same. Focus mode passes keys on.
+      { mode: 'focus' },
       { press: 'ArrowDown' },
       { hear: { role: 'radio', name: 'Team', checked: true, position: { n: 3, of: 3, within: '#plan' }, spoken: { VoiceOver: [/3 of 3/], NVDA: NVDA_CHECKED } } },
       { press: 'ArrowDown' },

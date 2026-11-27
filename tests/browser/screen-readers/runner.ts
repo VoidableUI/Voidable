@@ -253,6 +253,9 @@ export async function runScenario(reader: Reader, page: Page, scenario: Scenario
           note(`sweep ${n + 1} (${by}) -> ${JSON.stringify(since(await reader.log(), before))} | ${await state()}`);
         }
         moved = true;
+      } else if ('mode' in step) {
+        await reader.focusMode?.();
+        note(`focus mode requested: ${await state()}`);
       } else if ('pause' in step) {
         await new Promise((resolve) => setTimeout(resolve, step.pause));
       } else if ('once' in step) {
