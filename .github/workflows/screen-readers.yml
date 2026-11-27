@@ -73,10 +73,10 @@ jobs:
       run:
         shell: bash
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       # Node (and pnpm) first, from mise.toml: Guidepup's setup and install run on it.
-      - uses: jdx/mise-action@5228313ee0372e111a38da051671ca30fc5a96db # v3.6.3
+      - uses: jdx/mise-action@924e7c586e33d7d4bae9c14e26c5d22e2beb6e78 # v5.3.0
         with:
           install_args: "node npm:pnpm"
         env:
@@ -114,7 +114,7 @@ jobs:
 
       - name: Upload the results, spoken-phrase logs, traces and recordings
         if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: voiceover-macos-15-results
           path: |
@@ -137,10 +137,10 @@ jobs:
       # `rm -rf dist && cem analyze && ...`. Run them with Git Bash instead.
       npm_config_script_shell: 'C:\Program Files\Git\bin\bash.exe'
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       # Node (and pnpm) first, from mise.toml: Guidepup's setup and install run on it.
-      - uses: jdx/mise-action@5228313ee0372e111a38da051671ca30fc5a96db # v3.6.3
+      - uses: jdx/mise-action@924e7c586e33d7d4bae9c14e26c5d22e2beb6e78 # v5.3.0
         with:
           install_args: "node npm:pnpm"
         env:
@@ -181,7 +181,7 @@ jobs:
 
       - name: Upload the results, spoken-phrase logs, traces and recordings
         if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: nvda-windows-2025-results
           path: |
