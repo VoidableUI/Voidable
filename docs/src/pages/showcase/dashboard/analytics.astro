@@ -1,0 +1,360 @@
+---
+import DashboardLayout from '../../../components/showcase/DashboardLayout.astro';
+import iconChevronDown from '@tabler/icons/outline/chevron-down.svg?raw';
+import iconDownload from '@tabler/icons/outline/download.svg?raw';
+import { analytics, links, periods, totals, type Period } from '../../../data/showcase-network';
+
+const initial: Period = '7d';
+const byPeriod = Object.fromEntries((Object.keys(periods) as Period[]).map((p) => [p, analytics(p)]));
+const now = byPeriod[initial];
+
+const bands = {
+  segments: [
+    { name: 'Ka-band', value: 46 },
+    { name: 'X-band', value: 38 },
+    { name: 'S-band', value: 16 },
+  ],
+};
+const latencyByRegion = {
+  labels: ['Arctic', 'Southern', 'Equatorial'],
+  series: [
+    { name: 'P50', values: [33, 44, 52] },
+    { name: 'P99', values: [118, 79, 87] },
+  ],
+};
+const zones = (warn: number, bad: number, max: number, lowIsGood = true) =>
+  JSON.stringify(
+    lowIsGood
+      ? [
+          { from: 0, to: warn, color: 'var(--void-color-success)' },
+          { from: warn, to: bad, color: 'var(--void-color-warning)' },
+          { from: bad, to: max, color: 'var(--void-color-error)' },
+        ]
+      : [
+          { from: 0, to: bad, color: 'var(--void-color-error)' },
+          { from: bad, to: warn, color: 'var(--void-color-warning)' },
+          { from: warn, to: max, color: 'var(--void-color-success)' },
+        ],
+  );
+const gauges = [
+  { label: 'Link availability', caption: '63 of 65 links carrying traffic', value: 97, unit: '%', max: 100, zones: zones(95, 85, 100, false) },
+  { label: 'Antenna utilisation', caption: '312 of 440 antenna-hours booked', value: 71, unit: '%', max: 100, zones: zones(80, 92, 100) },
+  { label: 'P99 latency', caption: 'Alert threshold at 100 ms', value: 96, unit: 'ms', max: 150, zones: zones(80, 100, 150) },
+  { label: 'Buffer fill', caption: 'On-board storage, fleet mean', value: 46, unit: '%', max: 100, zones: zones(70, 85, 100) },
+];
+const slowest = [...links].filter((l) => l.latency !== null).sort((a, b) => b.latency! - a.latency!).slice(0, 4);
+
+const linkState = { nominal: 'success', degraded: 'warning', down: 'error' } as const;
+const n = (v: number | null, unit = '') => (v === null ? '—' : `${v.toLocaleString('en')}${unit}`);
+
+const downlinkByStation = {
+  labels: ['SVB1', 'SVB2', 'TOS1', 'TOS2', 'PUQ1', 'SIN1', 'MRU1', 'HBK1'],
+  series: [
+    { name: 'Downlinked', values: [14.2, 12.9, 10.4, 8.1, 11.6, 5.4, 4.9, 6.8] },
+    { name: 'Planned', values: [16, 15, 12, 14, 13, 8, 7, 9] },
+  ],
+};
+const outcomes = {
+  segments: [
+    { name: 'Complete', value: 1231, color: 'var(--void-color-success)' },
+    { name: 'Moved', value: 46, color: 'var(--void-color-warning)' },
+    { name: 'Missed', value: 7, color: 'var(--void-color-error)' },
+  ],
+};
+const regions = [
+  { name: 'Arctic', stations: 'Svalbard 1, Svalbard 2, Tromsø 1, Tromsø 2', used: 82, color: 'warning' },
+  { name: 'Southern', stations: 'Punta Arenas, Awarua, Troll', used: 57, color: undefined },
+  { name: 'Equatorial', stations: 'Singapore, Mauritius, Hartebeesthoek', used: 34, color: undefined },
+];
+---
+
+<DashboardLayout
+  active="analytics"
+  heading="Analytics"
+  description="Latency, throughput, link distance and capacity of a satellite ground network: the analytics page of the Voidable dashboard showcase."
+>
+  <Fragment slot="controls">
+    <void-segmented-control id="period" value={initial} aria-label="Period">
+      <void-segmented-control-item value="24h">24H</void-segmented-control-item>
+      <void-segmented-control-item value="7d">7D</void-segmented-control-item>
+      <void-segmented-control-item value="30d">30D</void-segmented-control-item>
+      <void-segmented-control-item value="90d">90D</void-segmented-control-item>
+    </void-segmented-control>
+
+    <void-dropdown-menu align="end">
+      <void-dropdown-menu-trigger><void-button variant="outline" size="md">
+        <span class="icon-inline" set:html={iconDownload} />
+        Export
+        <span class="icon-inline icon-chevron" set:html={iconChevronDown} />
+      </void-button></void-dropdown-menu-trigger>
+      <void-dropdown-menu-content>
+        <void-dropdown-menu-item>Export CSV</void-dropdown-menu-item>
+        <void-dropdown-menu-item>Export PDF Report</void-dropdown-menu-item>
+        <void-dropdown-menu-item>Copy Share Link</void-dropdown-menu-item>
+        <void-dropdown-menu-separator></void-dropdown-menu-separator>
+        <void-dropdown-menu-item>Schedule Weekly Email</void-dropdown-menu-item>
+      </void-dropdown-menu-content>
+    </void-dropdown-menu>
+  </Fragment>
+
+  <div class="stats-row">
+    <void-stat label="Median latency" value="38ms" delta="-4ms" trend="up" description="P99 at 96ms"></void-stat>
+    <void-stat label="Throughput" value="4.8Gb/s" delta="+6.1%" trend="up" description="peak 5.9Gb/s"></void-stat>
+    <void-stat label="Mean distance" value="1,480km" delta="+32km" trend="flat" description="slant range per link"></void-stat>
+    <void-stat label="Nodes online" value={`${totals.online}/${totals.nodes}`} delta={`${totals.offline} offline`} trend="error" description={`${totals.degraded} degraded · ${totals.maintenance} in maintenance`}></void-stat>
+  </div>
+
+  <div class="content-area">
+    <void-tabs value="performance">
+      <void-tabs-list>
+        <void-tabs-trigger value="performance">Performance</void-tabs-trigger>
+        <void-tabs-trigger value="links">Links</void-tabs-trigger>
+        <void-tabs-trigger value="capacity">Capacity</void-tabs-trigger>
+      </void-tabs-list>
+
+      <!-- Performance -->
+      <void-tabs-content value="performance">
+        <div class="tab-panel">
+          <div class="charts-grid">
+            <div class="chart-panel">
+              <div class="chart-panel-header">
+                <span class="chart-panel-title">Latency</span>
+                <span class="chart-panel-meta">ms · P99, P95, P50 · <span data-period-label>{now.label}</span></span>
+              </div>
+              <void-line-chart id="chart-latency" height="260" variant="wireframe" aria-label="Round-trip latency in milliseconds: P99, P95 and P50" data={JSON.stringify(now.latency)}></void-line-chart>
+            </div>
+
+            <div class="chart-panel">
+              <div class="chart-panel-header">
+                <span class="chart-panel-title">Traffic by Band</span>
+                <span class="chart-panel-meta">% of volume</span>
+              </div>
+              <void-donut-chart size="200" variant="outline" show-value gaps aria-label="Share of traffic by radio band, in percent" data={JSON.stringify(bands)}></void-donut-chart>
+            </div>
+          </div>
+
+          <div class="charts-grid charts-grid-half">
+            <div class="chart-panel">
+              <div class="chart-panel-header">
+                <span class="chart-panel-title">Throughput</span>
+                <span class="chart-panel-meta">Gbit/s · downlink and uplink</span>
+              </div>
+              <void-line-chart id="chart-throughput" height="220" aria-label="Downlink and uplink throughput in gigabits per second" data={JSON.stringify(now.throughput)}></void-line-chart>
+            </div>
+
+            <div class="chart-panel">
+              <div class="chart-panel-header">
+                <span class="chart-panel-title">Latency by Region</span>
+                <span class="chart-panel-meta">ms · P50 and P99</span>
+              </div>
+              <void-bar-chart height="220" variant="outline" show-value aria-label="P50 and P99 latency in milliseconds by region" data={JSON.stringify(latencyByRegion)}></void-bar-chart>
+            </div>
+          </div>
+
+          <void-section>
+            <void-section-head>
+              <h2>Link Health</h2>
+              <span data-void-type="label">Against alert thresholds</span>
+            </void-section-head>
+            <div class="gauge-row">
+              {gauges.map((g) => (
+                <div class="gauge-cell">
+                  <void-gauge value={g.value} max={g.max} unit={g.unit} size="180" thickness="10" circular="semi" aria-label={g.label} zones={g.zones}></void-gauge>
+                  <span data-void-type="label">{g.label}</span>
+                  <span data-void-type="caption">{g.caption}</span>
+                </div>
+              ))}
+            </div>
+          </void-section>
+
+          <div class="charts-grid">
+            <div class="chart-panel">
+              <div class="chart-panel-header">
+                <span class="chart-panel-title">Link Distance</span>
+                <span class="chart-panel-meta">km · mean slant range</span>
+              </div>
+              <void-line-chart id="chart-distance" height="220" interpolation="step" aria-label="Mean slant range of active links in kilometres" data={JSON.stringify(now.distance)}></void-line-chart>
+            </div>
+
+            <void-section>
+              <void-section-head>
+                <h2>Slowest Links</h2>
+                <span data-void-type="label">Now</span>
+              </void-section-head>
+              <void-rows>
+                {slowest.map((l) => (
+                  <void-row>
+                    <void-row-text>
+                      <span data-void-type="code">{l.satellite}</span>
+                      <span data-void-type="caption">{l.station} · {n(l.distance, ' km')}</span>
+                    </void-row-text>
+                    <span data-void-type="value" data-size="sm">{l.latency} <span data-void-type="unit">ms</span></span>
+                  </void-row>
+                ))}
+              </void-rows>
+            </void-section>
+          </div>
+        </div>
+      </void-tabs-content>
+
+      <!-- Links -->
+      <void-tabs-content value="links">
+        <div class="tab-panel">
+          <void-section>
+            <void-section-head>
+              <h2>Active Links</h2>
+              <span data-void-type="label">{links.length} of 65 · sort by any column</span>
+            </void-section-head>
+
+              <void-toolbar>
+                <void-input type="search" data-table-filter="links-table" placeholder="Filter links" aria-label="Filter links"></void-input>
+                <void-segmented-control id="links-state" value="all" aria-label="Link state">
+                  <void-segmented-control-item value="all">All</void-segmented-control-item>
+                  <void-segmented-control-item value="nominal">Nominal</void-segmented-control-item>
+                  <void-segmented-control-item value="attention">Attention</void-segmented-control-item>
+                </void-segmented-control>
+                <void-spacer></void-spacer>
+                <void-button variant="ghost">
+                  <span class="icon-inline" set:html={iconDownload} />
+                  CSV
+                </void-button>
+              </void-toolbar>
+            <void-table id="links-table" hoverable stack="56rem" sort="latency" sort-direction="descending" filter-columns="link band state" aria-label="Active links">
+              <table>
+                <thead>
+                  <tr>
+                    <th data-key="link" data-sort data-stack="title">Link</th>
+                    <th data-key="state" data-sort>State</th>
+                    <th data-key="band" data-sort>Band</th>
+                    <th data-key="latency" data-sort="number" data-align="end">Latency</th>
+                    <th data-key="throughput" data-sort="number" data-align="end">Throughput</th>
+                    <th data-key="distance" data-sort="number" data-align="end">Distance</th>
+                    <th data-key="loss" data-sort="number" data-align="end">Loss</th>
+                    <th data-key="snr" data-sort="number" data-align="end">SNR</th>
+                    <th data-key="elevation" data-sort="number" data-align="end">Elevation</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {links.map((l) => (
+                    <tr data-state={l.state}>
+                      <td><void-row-text><span data-void-type="code">{l.satellite}</span><span data-void-type="caption">{l.station}</span></void-row-text></td>
+                      <td><void-state color={linkState[l.state]}>{l.state}</void-state></td>
+                      <td><void-tag size="sm">{l.band}</void-tag></td>
+                      <td data-sort-value={l.latency ?? ''}>{n(l.latency, ' ms')}</td>
+                      <td data-sort-value={l.throughput}>{l.throughput ? `${l.throughput} Mbit/s` : '—'}</td>
+                      <td data-sort-value={l.distance ?? ''}>{n(l.distance, ' km')}</td>
+                      <td data-sort-value={l.loss ?? ''}>{l.loss === null ? '—' : `${l.loss.toFixed(2)}%`}</td>
+                      <td data-sort-value={l.snr ?? ''}>{l.snr === null ? '—' : `${l.snr.toFixed(1)} dB`}</td>
+                      <td data-sort-value={l.elevation ?? ''}>{n(l.elevation, '°')}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <void-table-empty hidden>No link matches. Clear the filter to see all of them.</void-table-empty>
+            </void-table>
+
+            <void-toolbar>
+              <span data-void-type="caption">Showing {links.length} of 65 links</span>
+              <void-spacer></void-spacer>
+              <void-pagination total="6" value="1" size="sm"></void-pagination>
+            </void-toolbar>
+          </void-section>
+        </div>
+      </void-tabs-content>
+
+      <!-- Capacity -->
+      <void-tabs-content value="capacity">
+        <div class="tab-panel">
+          <void-figures>
+            <void-figure>
+              <span data-void-type="label">Downlinked today</span>
+              <span data-void-type="value">79.6 <span data-void-type="unit">TB</span></span>
+              <void-progress value="64" size="sm" aria-label="Downlink against the daily plan"></void-progress>
+              <span data-void-type="caption">64% of the daily plan</span>
+            </void-figure>
+            <void-figure>
+              <span data-void-type="label">Passes today</span>
+              <span data-void-type="value">1,284</span>
+              <span data-void-type="caption"><void-delta trend="up">3.4%</void-delta> on last week</span>
+            </void-figure>
+            <void-figure>
+              <span data-void-type="label">Antenna time</span>
+              <span data-void-type="value">312 <span data-void-type="unit">of 440 h</span></span>
+              <void-progress value="71" size="sm" aria-label="Antenna-hours booked"></void-progress>
+              <span data-void-type="caption">71% booked</span>
+            </void-figure>
+            <void-figure>
+              <span data-void-type="label">Missed passes</span>
+              <span data-void-type="value">7</span>
+              <span data-void-type="caption"><void-delta trend="down" invert>2</void-delta> fewer than yesterday</span>
+            </void-figure>
+          </void-figures>
+
+          <div class="charts-grid">
+            <div class="chart-panel">
+              <div class="chart-panel-header">
+                <span class="chart-panel-title">Downlink by Station</span>
+                <span class="chart-panel-meta">TB · today against plan</span>
+              </div>
+              <void-bar-chart height="260" variant="outline" aria-label="Terabytes downlinked today by ground station, against the plan" data={JSON.stringify(downlinkByStation)}></void-bar-chart>
+            </div>
+
+            <div class="chart-panel">
+              <div class="chart-panel-header">
+                <span class="chart-panel-title">Pass Outcomes</span>
+                <span class="chart-panel-meta">today</span>
+              </div>
+              <void-donut-chart size="200" variant="outline" show-total aria-label="Passes today by outcome" data={JSON.stringify(outcomes)}></void-donut-chart>
+            </div>
+          </div>
+
+          <void-section>
+            <void-section-head>
+              <h2>Capacity by Region</h2>
+              <span data-void-type="label">Antenna time used today</span>
+            </void-section-head>
+            <void-rows>
+              {regions.map((r) => (
+                <void-row>
+                  <void-row-text><span>{r.name}</span><span data-void-type="caption">{r.stations}</span></void-row-text>
+                  <div class="row-meter">
+                    <span data-void-type="value" data-size="sm">{r.used} <span data-void-type="unit">%</span></span>
+                    <void-progress value={r.used} size="sm" color={r.color} aria-label={`${r.name} capacity used`}></void-progress>
+                  </div>
+                </void-row>
+              ))}
+            </void-rows>
+          </void-section>
+        </div>
+      </void-tabs-content>
+    </void-tabs>
+  </div>
+
+  <script type="application/json" id="analytics-data" set:html={JSON.stringify(byPeriod)} />
+</DashboardLayout>
+
+<script>
+  // The period control swaps the data of the three time series.
+  const byPeriod = JSON.parse(document.getElementById('analytics-data')!.textContent!);
+  const period = document.getElementById('period');
+  period?.addEventListener('void-change', (e) => {
+    const set = byPeriod[(e as CustomEvent).detail.value];
+    if (!set) return;
+    for (const key of ['latency', 'throughput', 'distance']) {
+      const chart = document.getElementById(`chart-${key}`) as (HTMLElement & { data: unknown }) | null;
+      if (chart) chart.data = set[key];
+    }
+    document.querySelectorAll('[data-period-label]').forEach((el) => { el.textContent = set.label; });
+  });
+
+  // The state control hides rows itself; the table's own filter and sort
+  // leave rows hidden by the page alone.
+  const table = document.getElementById('links-table');
+  document.getElementById('links-state')?.addEventListener('void-change', (e) => {
+    const want = (e as CustomEvent).detail.value;
+    table?.querySelectorAll<HTMLTableRowElement>('tbody tr').forEach((row) => {
+      const state = row.dataset.state;
+      row.hidden = want === 'nominal' ? state !== 'nominal' : want === 'attention' ? state === 'nominal' : false;
+    });
+  });
+</script>

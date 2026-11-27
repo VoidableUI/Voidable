@@ -1,0 +1,259 @@
+---
+// The shell every page of the dashboard showcase shares: the site bar, the
+// sidebar with its navigation and settings popover, and the page header.
+// A page gives its title and fills three slots: `controls` (the header's
+// right side), the default slot (below the header) and `overlays` (dialogs
+// and drawers, outside the shell).
+import '@voidable/theme';
+import './dashboard.css';
+import iconLayoutDashboard from '@tabler/icons/outline/layout-dashboard.svg?raw';
+import iconChartBar from '@tabler/icons/outline/chart-bar.svg?raw';
+import iconAntenna from '@tabler/icons/outline/antenna.svg?raw';
+import iconAlertTriangle from '@tabler/icons/outline/alert-triangle.svg?raw';
+import iconUsers from '@tabler/icons/outline/users.svg?raw';
+import iconList from '@tabler/icons/outline/list.svg?raw';
+import iconCreditCard from '@tabler/icons/outline/credit-card.svg?raw';
+import iconSettings from '@tabler/icons/outline/settings.svg?raw';
+import iconChevronDown from '@tabler/icons/outline/chevron-down.svg?raw';
+import iconSun from '@tabler/icons/outline/sun.svg?raw';
+import iconMoon from '@tabler/icons/outline/moon.svg?raw';
+import iconLogout from '@tabler/icons/outline/logout.svg?raw';
+import { openAlerts } from '../../data/showcase-network';
+
+interface Props {
+  /** Which sidebar destination this page is. */
+  active: 'overview' | 'analytics' | 'nodes' | 'alerts' | 'logs' | 'users' | 'billing' | 'settings';
+  /** The page's heading. */
+  heading: string;
+  /** Document title; defaults to the heading. */
+  title?: string;
+  description: string;
+}
+
+const { active, heading, description } = Astro.props;
+const title = Astro.props.title ?? `${heading} — Dashboard Showcase — Voidable`;
+const base = '/showcase/dashboard/';
+
+const nav = [
+  {
+    label: 'Network',
+    items: [
+      { id: 'overview', label: 'Overview', href: base, icon: iconLayoutDashboard },
+      { id: 'analytics', label: 'Analytics', href: `${base}analytics/`, icon: iconChartBar, badge: 'New' },
+      { id: 'nodes', label: 'Nodes', href: `${base}nodes/`, icon: iconAntenna },
+      { id: 'alerts', label: 'Alerts', href: `${base}alerts/`, icon: iconAlertTriangle, badge: String(openAlerts), badgeColor: 'error' },
+      { id: 'logs', label: 'Logs', href: `${base}logs/`, icon: iconList },
+    ],
+  },
+  {
+    label: 'Account',
+    items: [
+      { id: 'users', label: 'Users', href: `${base}users/`, icon: iconUsers },
+      { id: 'billing', label: 'Billing', href: `${base}billing/`, icon: iconCreditCard },
+      { id: 'settings', label: 'Settings', href: `${base}settings/`, icon: iconSettings },
+    ],
+  },
+];
+const breadcrumb = active === 'overview' ? 'Showcase / Dashboard' : `Showcase / Dashboard / ${heading}`;
+---
+
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+    <!-- The scheme chosen on one page of the showcase carries to the next. -->
+    <script is:inline>
+      try {
+        const t = sessionStorage.getItem('void-showcase-theme');
+        if (t === 'dark' || t === 'light') document.documentElement.setAttribute('data-theme', t);
+      } catch {}
+    </script>
+  </head>
+
+  <body>
+
+    <!-- Site nav -->
+    <nav class="site-nav" aria-label="Site">
+      <div class="site-nav-inner">
+        <a href="/" class="site-wordmark">voidable</a>
+        <void-hamburger id="sidebar-toggle" class="mobile-hamburger" size="md" aria-label="Navigation"></void-hamburger>
+        <ul class="site-nav-links">
+          <li><a href="/getting-started/introduction/">Docs</a></li>
+          <li><a href="/components/overview/">Components</a></li>
+          <li><a href="/showcase/dashboard/" class="active">Showcase</a></li>
+        </ul>
+        <div class="site-nav-right">
+          <void-button id="theme-toggle" variant="ghost" size="md" aria-label="Toggle theme">
+            <span class="theme-icon theme-icon-sun" set:html={iconSun} />
+            <span class="theme-icon theme-icon-moon" set:html={iconMoon} />
+          </void-button>
+          <void-button variant="ghost" size="md">
+            <a href="https://github.com/VoidableUI/Voidable" target="_blank">GitHub</a>
+          </void-button>
+        </div>
+      </div>
+    </nav>
+
+    <!-- App shell -->
+    <div class="app-shell">
+
+      <!-- Sidebar -->
+      <div class="sidebar-column">
+      <void-sidebar width="220px" collapsed-width="52px" style="--void-sidebar-width: 220px;">
+        <div class="sidebar-header">
+          <void-dropdown-menu style="width: 100%;">
+            <void-dropdown-menu-trigger><div class="sidebar-project">
+              <div class="sidebar-project-icon">M</div>
+              <div class="sidebar-project-info">
+                <span class="sidebar-project-name">Meridian Network</span>
+                <span class="sidebar-project-env">production</span>
+              </div>
+              <span class="sidebar-chevron" set:html={iconChevronDown} />
+            </div></void-dropdown-menu-trigger>
+            <void-dropdown-menu-content>
+              <void-dropdown-menu-item class="project-item-active">&#x2713;&ensp;Meridian Network</void-dropdown-menu-item>
+              <void-dropdown-menu-item>Meridian Staging</void-dropdown-menu-item>
+              <void-dropdown-menu-item>Orbit Simulator</void-dropdown-menu-item>
+              <void-dropdown-menu-separator></void-dropdown-menu-separator>
+              <void-dropdown-menu-item>Create New Network</void-dropdown-menu-item>
+            </void-dropdown-menu-content>
+          </void-dropdown-menu>
+        </div>
+
+        <nav class="sidebar-nav" aria-label="Dashboard">
+          {nav.map((group) => (
+            <>
+              <span class="sidebar-section-label">{group.label}</span>
+              {group.items.map((item) => (
+                <a
+                  href={item.href}
+                  class:list={['sidebar-nav-item', { active: item.id === active }]}
+                  aria-current={item.id === active ? 'page' : undefined}
+                >
+                  <span class="sidebar-nav-icon" set:html={item.icon} />
+                  <span>{item.label}</span>
+                  {item.badge && <void-badge size="sm" color={item.badgeColor}>{item.badge}</void-badge>}
+                </a>
+              ))}
+            </>
+          ))}
+        </nav>
+
+        <div class="sidebar-footer">
+          <void-avatar initials="AR" size="sm"></void-avatar>
+          <div class="sidebar-user-info">
+            <span class="sidebar-user-name">Alex Rivera</span>
+            <span class="sidebar-user-role">Admin</span>
+          </div>
+          <void-popover side="top" id="settings-popover">
+            <void-popover-trigger><button class="sidebar-settings-btn" aria-label="Settings">
+              <span class="sidebar-nav-icon" set:html={iconSettings} />
+            </button></void-popover-trigger>
+            <void-popover-content>
+              <div class="settings-menu">
+                <label class="settings-menu-item">
+                  <span class="settings-menu-icon settings-theme-moon" set:html={iconMoon} />
+                  <span class="settings-menu-icon settings-theme-sun" set:html={iconSun} />
+                  <span class="settings-theme-dark">Dark Mode</span>
+                  <span class="settings-theme-light">Light Mode</span>
+                  <void-switch id="theme-switch" size="sm"></void-switch>
+                </label>
+                <button class="settings-menu-item settings-sign-out" type="button">
+                  <span class="settings-menu-icon" set:html={iconLogout} />
+                  <span>Sign Out</span>
+                </button>
+              </div>
+            </void-popover-content>
+          </void-popover>
+        </div>
+      </void-sidebar>
+      </div>
+
+      <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
+
+      <!-- Main content area -->
+      <main class="main-content">
+
+        <!-- Dashboard header -->
+        <header class="dash-header">
+          <div class="dash-title-group">
+            <span class="dash-breadcrumb">{breadcrumb}</span>
+            <h1 class="dash-title">{heading}</h1>
+          </div>
+
+          {Astro.slots.has('controls') && (
+            <div class="dash-header-controls">
+              <slot name="controls" />
+            </div>
+          )}
+        </header>
+
+        <slot />
+      </main>
+    </div>
+
+    <slot name="overlays" />
+
+    <script>
+      import '@voidable/ui';
+      // Development warnings, `astro dev` only.
+      if (import.meta.env.DEV) import('@voidable/ui/dev');
+
+      const toggle = document.getElementById('theme-toggle')!;
+      const themeSwitch = document.getElementById('theme-switch') as any;
+      const html = document.documentElement;
+
+      function syncTheme() {
+        const isDark = html.getAttribute('data-theme') === 'dark';
+        if (themeSwitch) themeSwitch.checked = isDark;
+      }
+      function setTheme(theme: string) {
+        html.setAttribute('data-theme', theme);
+        try { sessionStorage.setItem('void-showcase-theme', theme); } catch {}
+        syncTheme();
+        // Pages with their own scheme control (Settings) follow.
+        document.dispatchEvent(new CustomEvent('showcase-theme', { detail: { theme } }));
+      }
+      syncTheme();
+
+      toggle.addEventListener('click', () => {
+        setTheme(html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+      });
+
+      themeSwitch?.addEventListener('void-change', () => {
+        setTheme(themeSwitch.checked ? 'dark' : 'light');
+      });
+
+      document.addEventListener('showcase-set-theme', (e) => {
+        setTheme((e as CustomEvent).detail.theme);
+      });
+
+      // A search field in a toolbar filters the table it names. The table's
+      // own filter part must be its direct child, so a field that shares a
+      // toolbar with other controls sets the `filter` attribute instead.
+      document.querySelectorAll<HTMLElement & { value: string }>('[data-table-filter]').forEach((field) => {
+        const table = document.getElementById(field.dataset.tableFilter!);
+        field.addEventListener('void-input', () => table?.setAttribute('filter', field.value));
+      });
+
+      const hamburger = document.getElementById('sidebar-toggle');
+      const appShell = document.querySelector('.app-shell');
+      const backdrop = document.getElementById('sidebar-backdrop');
+
+      hamburger?.addEventListener('click', () => {
+        appShell?.classList.toggle('sidebar-open');
+      });
+
+      backdrop?.addEventListener('click', () => {
+        appShell?.classList.remove('sidebar-open');
+        if (hamburger) (hamburger as any).open = false;
+      });
+    </script>
+  </body>
+</html>
