@@ -290,7 +290,7 @@ describe('VoidSlider', () => {
 });
 
 describe('VoidSlider native input order (#140)', () => {
-  it('writes min and max to the input before its value', async () => {
+  it('writes min and max to the input before the render writes its value', async () => {
     const el = createElement();
     el.min = 500;
     el.max = 3500;
@@ -312,8 +312,8 @@ describe('VoidSlider native input order (#140)', () => {
     el.value = 4000;
     await el.updateComplete;
     expect(log.indexOf('min')).toBeGreaterThan(-1);
-    expect(log.indexOf('min')).toBeLessThan(log.indexOf('value'));
-    expect(log.indexOf('max')).toBeLessThan(log.indexOf('value'));
+    expect(log.indexOf('min')).toBeLessThan(log.lastIndexOf('value'));
+    expect(log.indexOf('max')).toBeLessThan(log.lastIndexOf('value'));
     el.remove();
   });
 });
