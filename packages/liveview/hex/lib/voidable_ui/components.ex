@@ -828,12 +828,13 @@ defmodule VoidableUI.Components do
   on the current one. The component gives the list and the items their list roles.
   """
   attr :separator, :string, default: nil
+  attr :landmark, :string, default: nil, doc: "`\"none\"` renders a named group instead of a navigation landmark"
   attr :rest, :global
   slot :inner_block, required: true
 
   def breadcrumbs(assigns) do
     ~H"""
-    <void-breadcrumbs separator={@separator} {@rest}>
+    <void-breadcrumbs separator={@separator} landmark={@landmark} {@rest}>
       {render_slot(@inner_block)}
     </void-breadcrumbs>
     """

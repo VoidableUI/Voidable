@@ -134,6 +134,7 @@ See [Touch targets](/getting-started/theming/#touch-targets) for how each contro
 
 - **Sidebar width.** `--void-sidebar-width` set in CSS on a sidebar or an ancestor now sets the rail's width; before, only the `width` attribute did. The attribute still wins over the token. `void-sidebar` no longer writes `--void-sidebar-width` on itself (it writes the private `--_void-sidebar-width`, and only when `width` or `collapsed-width` is set); the `width` and `collapsedWidth` properties are `null` until set instead of `var(--void-sidebar-width)` text. Read the token, not the element's inline style, if you need the width.
 - **Dropdown menu in a sidebar.** In `<void-shell nav="side">` a `<void-dropdown-menu>` directly in the sidebar (a project switcher) spans the rail and lines up with the links instead of sitting about 14px further in. Remove margins or padding you added to compensate.
+- **Breadcrumbs can leave out their landmark.** `<void-breadcrumbs>` is still a `navigation` landmark named "Breadcrumb" by default. Add `landmark="none"` (a named `group` of the same list) when the page keeps a single navigation region. Inside a `<nav>` or an element with `role="navigation"` it never adds a landmark, with or without the attribute, so landmarks do not nest; breadcrumbs you had inside a `<nav>` are now a group there.
 
 ## 4. Check again
 

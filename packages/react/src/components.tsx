@@ -593,6 +593,8 @@ export const AccordionItem = wrapWc<VoidAccordionItem, {
 
 export const Breadcrumbs = wrapWc<VoidBreadcrumbs, {
   separator?: string;
+  /** `none` renders a named group instead of a navigation landmark (it is never a landmark inside a `nav`). */
+  landmark?: 'navigation' | 'none';
 }>('void-breadcrumbs', 'Breadcrumbs');
 
 export const List = wrapWc<VoidList, {
