@@ -175,3 +175,11 @@ void-menu[size='lg'] void-menu-item {
 void-menu[size='lg'] void-menu-content {
   max-height: 28rem;
 }
+
+/* Touch targets: items in a menu touch each other, so a pseudo-element would
+   steal the next item's taps; under a coarse pointer an item is at least
+   --void-hit-target (44px) tall instead. The menu floats over the page, so
+   nothing in the page moves. */
+@media (pointer: coarse) {
+  void-menu-item { min-block-size: var(--void-hit-target); }
+}

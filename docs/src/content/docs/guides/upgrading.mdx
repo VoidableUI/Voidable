@@ -90,6 +90,10 @@ Three things change behaviour, and only for code that relied on them:
 
 Nothing else breaks. New in 0.12.0: the [testing helper](/guides/testing/) (`@voidable/ui/testing`), the messages registry with French and Arabic (`@voidable/ui/messages`), key actions (`keys`, `configureKeys`, `@voidable/ui/keys`), and sorting, filtering and selection in `void-table` (below). The sections that follow say what each does to existing markup.
 
+## Sticky columns in a split (0.13)
+
+Nothing breaks. A child of `void-split` can say `sticky="always"` to stay stuck at the top when the split stacks below 48rem; a bare `sticky` is unchanged. See [Section](/patterns/section/#a-column-that-stays-in-view). `--void-split-sticky-top` (default `0px`) and `--void-split-sticky-max` (default `50svh`) are new settings.
+
 ## Language and locale (0.12)
 
 The words the components write and the locale they format in follow `lang` now (see [Translation](/guides/translation/)). In a page with no `lang` nothing changes, apart from the points below.
@@ -110,6 +114,21 @@ Keys are named actions now that an application can switch off or move (see [Cust
 - **Static `keyMap` and `keys`.** Every element with key actions has a `keys` property (not reflected) and a static `keyMap`; `isRtl` and `inlineKeys` are unchanged. The radio group takes `keys` on each `<void-radio>`.
 
 No default key changed, and no component binds a shortcut by default.
+
+## Textarea that grows (0.13)
+
+Nothing breaks. `void-textarea` gains `autosize` (off by default) and `max-rows`, and the React `autosize` and `maxRows` props, and the HEEx `autosize` and `max_rows` attributes; Rails and Blade write the attributes as they are. A textarea without `autosize` behaves, and costs, as before: nothing is measured or observed. See [Textarea](/components/textarea/) for how it sizes (CSS where the browser supports `field-sizing`, a measured fallback elsewhere), what happens before the component is defined, and why `resize` is ignored while `autosize` is on.
+
+## Touch targets (0.13)
+
+On a device whose main pointer is coarse (`@media (pointer: coarse)`: phones and tablets) the hit areas of controls grow to at least 44 by 44 CSS pixels, so taps that used to miss a control by a few pixels now land on it. Nothing drawn changes size and nothing moves, except in these places, where rows that touch could not grow a pseudo-element and so are at least 44px tall: menu and dropdown-menu items, combobox, multiselect and (in browsers with customizable selects) select options, accordion triggers at a density below 1, and the cells of a PIN input (40px before). With a mouse, nothing changes.
+
+- **An element you place next to a control** may now sit under its larger hit area: a tap on a 36px button's neighbour within 4px of the button goes to the button. Gaps of 8px or more between separate controls, and half the gap inside a group, never overlap.
+- **To turn it off**, set `--void-hit-target: 0px` on `:root` (unlayered, or in any layer after the theme's), or put `data-hit-target="off"` on `<html>`. A different minimum is any length: `--void-hit-target: 3rem`.
+- **Tests that tap** just outside a control's box on an emulated phone now hit the control. A test that checked a miss at that spot needs the knob off.
+- **New markup is not needed.** Remove the `@media (pointer: coarse)` padding rules you wrote for these controls; they stack with the growth.
+
+See [Touch targets](/getting-started/theming/#touch-targets) for how each control gets there, what is not covered, and the density recipe for bigger drawn controls.
 
 ## 4. Check again
 

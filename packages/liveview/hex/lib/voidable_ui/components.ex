@@ -442,6 +442,8 @@ defmodule VoidableUI.Components do
   attr :name, :string, default: nil
   attr :rows, :integer, default: nil
   attr :resize, :string, default: nil
+  attr :autosize, :boolean, default: false
+  attr :max_rows, :integer, default: nil
   attr :size, :string, default: nil
   attr :error, :string, default: nil
   attr :autocomplete, :string, default: nil
@@ -462,6 +464,8 @@ defmodule VoidableUI.Components do
       name={@name}
       rows={@rows}
       resize={@resize}
+      autosize={@autosize}
+      max-rows={@max_rows}
       size={@size}
       error={@error}
       autocomplete={@autocomplete}

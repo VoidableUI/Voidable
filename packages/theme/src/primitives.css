@@ -208,3 +208,27 @@
 :root[data-anim-speed="fast"]     { --void-anim-scale: 0.5; }
 :root[data-anim-speed="faster"]   { --void-anim-scale: 0.25; }
 :root[data-anim-speed="instant"]  { --void-anim-scale: 0.05; }
+
+/* ── Touch targets ──────────────────────────────────────────────
+   --void-hit-target is the least size of the area that takes a tap
+   (WCAG 2.5.5 asks for 44px). Under a coarse pointer (a finger) it is
+   2.75rem and every control's hit area grows to it without its drawn
+   size changing; with a fine pointer it is 0px and nothing happens.
+   The component rules that use it sit inside @media (pointer: coarse),
+   so a fine pointer pays nothing. Set it to 0px to turn the growth
+   off, or to another length for another minimum:
+
+     :root { --void-hit-target: 0px; }
+
+   data-hit-target="off" on :root does the same, as data-anim-speed
+   does for the animation knob. It is not one of the theme knobs: it
+   follows the device, not the look.
+   ─────────────────────────────────────────────────────────────── */
+
+:root { --void-hit-target: 0px; }
+
+@media (pointer: coarse) {
+  :root { --void-hit-target: 2.75rem; }
+}
+
+:root[data-hit-target="off"] { --void-hit-target: 0px; }

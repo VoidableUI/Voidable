@@ -73,6 +73,18 @@ const preview: Preview = {
         title: 'Skin',
       },
     },
+    // Touch targets: on a coarse pointer (a phone, or a desktop browser emulating one) every control's hit
+    // area grows to 44px; "Off" is data-hit-target="off", the same as --void-hit-target: 0px.
+    hitTarget: {
+      toolbar: {
+        icon: 'cursor',
+        items: [
+          { value: 'device', title: 'Touch targets: device default' },
+          { value: 'off', title: 'Touch targets: off' },
+        ],
+        title: 'Touch targets',
+      },
+    },
   },
   initialGlobals: {
     theme: 'dark',
@@ -80,6 +92,7 @@ const preview: Preview = {
     locale: 'en',
     voidTheme: 'void',
     voidSkin: 'none',
+    hitTarget: 'device',
   },
   decorators: [
     (storyFn, context) => {
@@ -93,6 +106,8 @@ const preview: Preview = {
       const voidSkin = context.globals['voidSkin'] ?? 'none';
       if (voidSkin === 'none') root.removeAttribute('data-void-skin');
       else root.setAttribute('data-void-skin', voidSkin);
+      if (context.globals['hitTarget'] === 'off') root.setAttribute('data-hit-target', 'off');
+      else root.removeAttribute('data-hit-target');
       // The page colour comes from the theme, so a tinted page shows too.
       root.style.background = 'var(--void-color-bg)';
       return storyFn();

@@ -73,3 +73,14 @@ void-hamburger[size="lg"][open] .void-hamburger-line:nth-child(1) {
 void-hamburger[size="lg"][open] .void-hamburger-line:nth-child(3) {
   transform: rotate(-45deg) translate(0.4375rem, -0.4375rem);
 }
+
+/* Touch targets: the hit area grows to --void-hit-target (44px) under a coarse
+   pointer without resizing the button: an empty ::after centred on it. */
+@media (pointer: coarse) {
+  void-hamburger { position: relative; }
+  void-hamburger::after {
+    content: ""; position: absolute; inset: 50% auto auto 50%; translate: -50% -50%;
+    min-inline-size: var(--void-hit-target);
+    min-block-size: var(--void-hit-target);
+  }
+}

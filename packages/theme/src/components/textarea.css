@@ -2,6 +2,8 @@ void-textarea {
   --_void-field-height: var(--void-control-height);
   --_void-field-padding: var(--void-control-padding);
   --_void-field-text: var(--void-control-text);
+  /* Block padding that puts one line of text where it sits in an input. */
+  --_void-textarea-pad: calc((var(--_void-field-height) - 2px - var(--_void-field-text) * var(--void-leading-normal)) / 2);
   display: flex;
   flex-direction: column;
   gap: var(--void-space-1h);
@@ -11,8 +13,7 @@ void-textarea {
 void-textarea textarea {
   width: 100%;
   resize: var(--void-textarea-resize, vertical);
-  /* One line of text sits exactly where it does in an input. */
-  padding: calc((var(--_void-field-height) - 2px - var(--_void-field-text) * var(--void-leading-normal)) / 2) var(--_void-field-padding);
+  padding: var(--_void-textarea-pad) var(--_void-field-padding);
   background: var(--void-field-surface);
   border: var(--void-control-border-width) solid var(--void-field-border);
   border-radius: var(--void-control-radius);
@@ -59,3 +60,59 @@ void-textarea[error]:not([error=""]) textarea:focus {
 
 void-textarea[size="sm"]  { --_void-field-height: var(--void-control-height-sm);  --_void-field-padding: var(--void-control-padding-sm);  --_void-field-text: var(--void-control-text-sm); }
 void-textarea[size="lg"]  { --_void-field-height: var(--void-control-height-lg);  --_void-field-padding: var(--void-control-padding-lg);  --_void-field-text: var(--void-control-text-lg); }
+
+/*
+ * autosize: as tall as the text, between `rows` and `max-rows` lines (the component writes both on the
+ * host), then it scrolls. Lines are `lh` units of the textarea's own line height, so the bounds follow
+ * the size step and any font; the padding and border are added because the box is border-box.
+ * Without --_void-textarea-max-rows the max rule is invalid at computed-value time: no maximum.
+ */
+void-textarea[autosize] textarea {
+  resize: none;
+  field-sizing: content;
+  min-block-size: calc(var(--_void-textarea-rows, 3) * 1lh + 2 * var(--_void-textarea-pad) + 2 * var(--void-control-border-width));
+  max-block-size: calc(var(--_void-textarea-max-rows) * 1lh + 2 * var(--_void-textarea-pad) + 2 * var(--void-control-border-width));
+}
+
+/*
+ * Where the browser cannot size a textarea to its content, the component renders a sizer and measures the
+ * text itself, writing the height on the host; the min and max above still clamp it. The sizer is a
+ * zero-height box the width of the host, observed so the measurement is redone when the width changes or a
+ * hidden box is shown. The component decides (one place, in script) and these rules follow its sizer.
+ */
+void-textarea[autosize]:has(> .void-textarea-sizer) {
+  position: relative;
+}
+
+void-textarea[autosize]:has(> .void-textarea-sizer) textarea {
+  field-sizing: fixed;
+  block-size: var(--_void-textarea-fit, auto);
+}
+
+void-textarea > .void-textarea-sizer {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline: 0;
+  block-size: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+/*
+ * Before the component is defined the host has no textarea. Its `value` attribute drawn as text reserves
+ * the height the text will have, so a long server-rendered value does not push the page down when the
+ * script arrives. An estimate (md text size); it stops at `max-rows` only where typed attr() exists.
+ */
+void-textarea[autosize]:not(:defined) {
+  overflow: hidden;
+  max-height: calc(attr(max-rows type(<number>), 1000) * var(--void-text-sm) * var(--void-leading-normal) + var(--void-space-2) * 2 + 2px); /* token-ok: total height with the 1px border on each side (border-box) */
+}
+
+void-textarea[autosize]:not(:defined)::before {
+  content: attr(value);
+  display: block;
+  padding: var(--void-space-2) var(--void-control-padding);
+  font: var(--void-text-sm) / var(--void-leading-normal) var(--void-font-sans);
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+}

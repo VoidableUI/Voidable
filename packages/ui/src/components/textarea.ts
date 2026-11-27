@@ -7,10 +7,23 @@ import { useProjection } from '../projection.js';
 
 useProjection();
 
+/** Whether the browser sizes a textarea to its content in CSS (`field-sizing: content`). Only asked when `autosize` is on. */
+const fieldSizing = (): boolean => typeof CSS !== 'undefined' && !!CSS.supports?.('field-sizing', 'content');
+
 /**
  * Multi-line text entry for comment fields, description inputs, and freeform text that needs more than one line.
  * The host has no role: the native textarea is the (multi-line) textbox and carries the accessible name,
  * which `<void-field>` supplies.
+ *
+ * With `autosize` the box is as tall as its text, between `rows` and `max-rows` lines, then it scrolls
+ * (`<void-textarea autosize rows="2" max-rows="8">`). The theme does it in CSS (`field-sizing: content`)
+ * where the browser supports it; elsewhere the component measures the text itself, when the text changes,
+ * when the width changes and when a hidden box (a closed dialog) is first shown, and creates its one
+ * `ResizeObserver` only then. Without `autosize` nothing is observed or measured. An autosizing box has no
+ * corner handle: `resize` is ignored (the development warnings say so). A server-rendered value does not
+ * move the page once the component is defined; before that the host has no text box yet, so the theme
+ * draws the `value` attribute as text to reserve its height, an estimate that is exact for the default
+ * size and can be a line off for another size or a font that loads late.
  */
 export class VoidTextarea extends NativeFormControl(VoidElement) {
   /** The host's `aria-label` / `aria-labelledby` name the inner control. */
@@ -45,9 +58,16 @@ export class VoidTextarea extends NativeFormControl(VoidElement) {
   @property({ type: Boolean, reflect: true }) required = false;
   /** Key the value is submitted under in the form's `FormData`. Without a name the box submits nothing. */
   @property({ type: String, reflect: true }) name = '';
-  /** Visible height in lines of text. Defaults to 3. */
+  /** Visible height in lines of text. Defaults to 3. With `autosize` it is the least height the box shrinks to. */
   @property({ type: Number, reflect: true }) rows = 3;
-  /** Which way the user may drag the corner handle: `vertical` (default), `both` or `none`. */
+  /**
+   * Grow with the content: the box is as tall as its text, between `rows` and `max-rows` lines, then scrolls.
+   * Off by default. The corner handle is gone while it is on (`resize` is ignored).
+   */
+  @property({ type: Boolean, reflect: true }) autosize = false;
+  /** With `autosize`, the most lines the box grows to before it scrolls. Unset: it never stops growing. Ignored without `autosize`. */
+  @property({ type: Number, reflect: true, attribute: 'max-rows' }) maxRows: number | undefined = undefined;
+  /** Which way the user may drag the corner handle: `vertical` (default), `both` or `none`. Ignored with `autosize`. */
   @property({ type: String, reflect: true }) resize: 'none' | 'vertical' | 'both' = 'vertical';
   /** Size step: `sm`, `md` (default) or `lg`; sets the text size and padding. */
   @property({ type: String, reflect: true }) size: 'sm' | 'md' | 'lg' = 'md';
@@ -75,6 +95,89 @@ export class VoidTextarea extends NativeFormControl(VoidElement) {
    */
   @property({ type: String, attribute: 'spellcheck' }) protected spellcheckAttr: string | null = null;
 
+  /** Watches the zero-height sizer, whose width is the box's width and which no height change of ours can move. */
+  #observer: ResizeObserver | null = null;
+  #observed: Element | null = null;
+  /** Width of the box at the last measurement; 0 while it was hidden. */
+  #width = 0;
+  /** Whether the host carries the custom properties the theme sizes the box from. */
+  #styled = false;
+  #fitted = false;
+
+  protected override willUpdate(changed: Map<PropertyKey, unknown>): void {
+    super.willUpdate(changed);
+    if (this.autosize || this.#styled) {
+      // The theme turns these into the minimum and maximum block size, in `lh` units.
+      const max = this.maxRows !== undefined && this.maxRows >= 1 ? Math.max(this.maxRows, this.rows) : null;
+      this.setHostStyle('--_void-textarea-rows', this.autosize ? String(this.rows) : null);
+      this.setHostStyle('--_void-textarea-max-rows', this.autosize && max ? String(max) : null);
+      this.#styled = this.autosize;
+    }
+  }
+
+  protected override updated(changed: Map<PropertyKey, unknown>): void {
+    super.updated(changed);
+    if (!this.autosize && !this.#fitted && !this.#observer) return;
+    if (changed.has('autosize') || changed.has('resize')) this.#checkResize();
+    if (['autosize', 'value', 'rows', 'maxRows', 'size'].some((k) => changed.has(k))) this.#sync(true);
+  }
+
+  override connectedCallback(): void {
+    super.connectedCallback();
+    if (this.hasUpdated && this.autosize) this.#sync(true);
+  }
+
+  override disconnectedCallback(): void {
+    super.disconnectedCallback();
+    this.#observer?.disconnect();
+    this.#observer = this.#observed = null;
+  }
+
+  /** `resize` has no effect with `autosize`. The default, `vertical`, is reflected whether or not it was written, so only `both` can be told apart as a choice. */
+  #checkResize(): void {
+    if (this.autosize && this.resize === 'both') {
+      this.reportDev('attribute-conflict', 'resize', `resize="${this.resize}" is ignored while autosize is on: an autosizing box has no corner handle. Remove resize, or remove autosize.`);
+    }
+  }
+
+  /**
+   * Where the browser cannot size a textarea to its content (`field-sizing: content`), set the height from
+   * the content here: once when something changes, and again when the width changes or the box first shows.
+   */
+  #sync(force: boolean): void {
+    if (!this.autosize || fieldSizing()) {
+      this.#observer?.disconnect();
+      this.#observer = this.#observed = null;
+      if (this.#fitted) this.setHostStyle('--_void-textarea-fit', null);
+      this.#fitted = false;
+      return;
+    }
+    const sizer = this.querySelector('.void-textarea-sizer');
+    if (sizer && sizer !== this.#observed && typeof ResizeObserver !== 'undefined') {
+      this.#observer ??= new ResizeObserver(() => this.#sync(false));
+      this.#observer.disconnect();
+      this.#observer.observe((this.#observed = sizer));
+    }
+    const ta = this.querySelector('textarea');
+    if (!ta) return;
+    // Read everything first, then write, then read once: two layouts for a change, however long the text.
+    const width = ta.clientWidth;
+    // Hidden (a closed dialog) has no scrollHeight; the observer calls again when the box shows.
+    if (!width || (!force && width === this.#width)) {
+      this.#width = width;
+      return;
+    }
+    this.#width = width;
+    // Hold the host's height while the box is reset, so a page scrolled to the bottom does not jump.
+    this.style.setProperty('min-block-size', `${this.offsetHeight}px`);
+    ta.style.setProperty('block-size', 'auto');
+    const fit = ta.scrollHeight + ta.offsetHeight - ta.clientHeight;
+    ta.style.removeProperty('block-size');
+    this.style.removeProperty('min-block-size');
+    this.#fitted = true;
+    this.setHostStyle('--_void-textarea-fit', `${fit}px`);
+  }
+
   render() {
     return html`
       <textarea
@@ -98,6 +201,7 @@ export class VoidTextarea extends NativeFormControl(VoidElement) {
         @input=${this._onInput}
         @change=${this._onChange}
       ></textarea>
+      ${this.autosize && !fieldSizing() ? html`<span class="void-textarea-sizer" aria-hidden="true"></span>` : nothing}
       ${this.error ? html`<span class="void-textarea-error">${this.error}</span>` : ''}
     `;
   }

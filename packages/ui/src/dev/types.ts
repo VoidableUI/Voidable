@@ -107,7 +107,9 @@ export type WarningKind =
   /** A chart's `data` or `zones` attribute is not valid JSON of the expected shape; the chart draws nothing. */
   | 'invalid-data'
   /** A `keys` attribute that is not a JSON object, or names an action the element does not have (#90). */
-  | 'keys';
+  | 'keys'
+  /** An attribute is set that another attribute on the same element makes without effect (`resize` with `autosize`). */
+  | 'attribute-conflict';
 
 /** One reported problem. */
 export interface DevWarning {

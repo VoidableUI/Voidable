@@ -91,3 +91,14 @@ void-pagination nav {
 
 void-pagination[size="sm"] { --_void-pagination-size: var(--void-pagination-size, var(--void-control-height-sm)); --_void-pagination-font-size: var(--void-pagination-font-size, var(--void-control-text-sm)); }
 void-pagination[size="lg"] { --_void-pagination-size: var(--void-pagination-size, var(--void-control-height-lg)); --_void-pagination-font-size: var(--void-pagination-font-size, var(--void-control-text-lg)); }
+
+/* Touch targets: the buttons are four pixels apart, so each grows by half the
+   gap at most along the row, and fully across it. */
+@media (pointer: coarse) {
+  .void-pagination-btn { position: relative; }
+  .void-pagination-btn::after {
+    content: ""; position: absolute; inset: 50% auto auto 50%; translate: -50% -50%;
+    min-inline-size: min(var(--void-hit-target), calc(100% + 2 * var(--void-control-border-width) + var(--void-space-1)));
+    min-block-size: var(--void-hit-target);
+  }
+}

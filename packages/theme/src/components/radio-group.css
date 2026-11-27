@@ -23,3 +23,12 @@ void-radio-group[orientation="horizontal"] .void-radio-group-options {
   flex-wrap: wrap;
   gap: var(--void-space-4);
 }
+
+/* Touch targets: stacked rows share the gap, so a radio in a group grows its
+   hit area by half the gap on each side at most and never into the next. */
+@media (pointer: coarse) {
+  void-radio-group void-radio::after {
+    min-inline-size: min(var(--void-hit-target), calc(100% + var(--void-space-2)));
+    min-block-size: min(var(--void-hit-target), calc(100% + var(--void-space-2)));
+  }
+}

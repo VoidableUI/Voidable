@@ -74,3 +74,14 @@ void-tag[size="lg"]  { --_void-tag-height: var(--void-tag-height, 1.75rem);  --_
   outline: var(--void-focus-ring-width) solid currentColor;
   outline-offset: var(--void-focus-ring-offset);
 }
+
+/* Touch targets: the remove button's hit area grows to --void-hit-target
+   (44px) under a coarse pointer without resizing it. */
+@media (pointer: coarse) {
+  .void-tag-close { position: relative; }
+  .void-tag-close::after {
+    content: ""; position: absolute; inset: 50% auto auto 50%; translate: -50% -50%;
+    min-inline-size: var(--void-hit-target);
+    min-block-size: var(--void-hit-target);
+  }
+}

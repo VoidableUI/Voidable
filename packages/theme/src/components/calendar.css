@@ -489,3 +489,14 @@ void-date-picker[size="lg"] .void-date-picker-input {
   padding-inline: var(--void-space-4) var(--void-space-10);
   font-size: var(--void-text-base);
 }
+
+/* Touch targets: the previous and next buttons grow their hit area to
+   --void-hit-target (44px) under a coarse pointer without resizing them. */
+@media (pointer: coarse) {
+  .void-calendar-nav { position: relative; }
+  .void-calendar-nav::after {
+    content: ""; position: absolute; inset: 50% auto auto 50%; translate: -50% -50%;
+    min-inline-size: var(--void-hit-target);
+    min-block-size: var(--void-hit-target);
+  }
+}

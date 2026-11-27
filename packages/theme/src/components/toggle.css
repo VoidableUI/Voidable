@@ -76,3 +76,14 @@ void-toggle[disabled] {
   pointer-events: none;
   cursor: not-allowed;
 }
+
+/* Touch targets: the hit area grows to --void-hit-target (44px) under a coarse
+   pointer without resizing the toggle: an empty ::after centred on it. */
+@media (pointer: coarse) {
+  void-toggle { position: relative; }
+  void-toggle::after {
+    content: ""; position: absolute; inset: 50% auto auto 50%; translate: -50% -50%;
+    min-inline-size: var(--void-hit-target);
+    min-block-size: var(--void-hit-target);
+  }
+}
