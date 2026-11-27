@@ -141,7 +141,7 @@ void-slider[disabled] input[type="range"] {
    padding around the drawn track (clipped to the content box), and a negative
    margin gives the padding back: the track is drawn where it was and nothing
    moves. */
-@media (pointer: coarse) {
+@media (any-pointer: coarse) {
   void-slider input[type="range"] {
     --_void-slider-track: 4px;
     --_void-slider-pad: max(0px, calc((var(--void-hit-target) - var(--_void-slider-track)) / 2));

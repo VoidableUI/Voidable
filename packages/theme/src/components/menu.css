@@ -180,6 +180,6 @@ void-menu[size='lg'] void-menu-content {
    steal the next item's taps; under a coarse pointer an item is at least
    --void-hit-target (44px) tall instead. The menu floats over the page, so
    nothing in the page moves. */
-@media (pointer: coarse) {
+@media (any-pointer: coarse) {
   void-menu-item { min-block-size: var(--void-hit-target); }
 }

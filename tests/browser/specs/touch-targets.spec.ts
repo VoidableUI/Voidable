@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 //
-// Touch targets (#100): under a coarse pointer every control's hit area is at least
+// Touch targets (#100, #106): when any pointer is coarse (`any-pointer: coarse`: a touch screen on a machine whose
+// primary pointer is a mouse counts) every control's hit area is at least
 // --void-hit-target (44px) without its drawn size changing. A real tap lands just outside
 // the drawn box and must still activate the control; in a dense group a tap between two
 // controls goes to the nearer one; with a fine pointer nothing is added.
@@ -131,6 +132,7 @@ coarse.describe('coarse pointer', () => {
   coarse.beforeEach(async ({ page }) => {
     await load(page, '/touch-targets');
     expect(await matches(page, '(pointer: coarse)'), 'the engine reports a coarse pointer').toBe(true);
+    expect(await matches(page, '(any-pointer: coarse)'), 'the engine reports a coarse pointer among the pointers').toBe(true);
     expect(await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--void-hit-target').trim())).toBe('2.75rem');
     // Nothing in motion while a rect is measured (a selected dot scales, a slide slides).
     await page.evaluate(() => document.documentElement.setAttribute('data-anim-speed', 'off'));
@@ -321,6 +323,7 @@ base.describe('fine pointer', () => {
   base('no hit-area box is generated and the knob is 0px', async ({ page }) => {
     await load(page, '/touch-targets');
     expect(await matches(page, '(pointer: coarse)')).toBe(false);
+    expect(await matches(page, '(any-pointer: coarse)')).toBe(false);
     expect(await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--void-hit-target').trim())).toBe('0px');
     const pseudo = await page.evaluate(() => {
       const probes: Array<[string, string, '::before' | '::after']> = [

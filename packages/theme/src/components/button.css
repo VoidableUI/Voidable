@@ -212,7 +212,7 @@ void-button[disabled] {
    centred on the control, never smaller than the drawn box, that takes the
    taps. It costs nothing on a fine pointer (the rules are inside the media
    query). --void-hit-target: 0px turns it off. */
-@media (pointer: coarse) {
+@media (any-pointer: coarse) {
   void-button { position: relative; }
   void-button::after {
     content: ""; position: absolute; inset: 50% auto auto 50%; translate: -50% -50%;

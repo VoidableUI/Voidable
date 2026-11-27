@@ -130,6 +130,12 @@ On a device whose main pointer is coarse (`@media (pointer: coarse)`: phones and
 
 See [Touch targets](/getting-started/theming/#touch-targets) for how each control gets there, what is not covered, and the density recipe for bigger drawn controls.
 
+## 0.13.1
+
+### Touch targets follow any pointer
+
+The growth in 0.13 switched on under `@media (pointer: coarse)`, which matches only when the primary pointer is a finger. It now follows `@media (any-pointer: coarse)`, so a touch laptop, or a tablet with a trackpad or mouse, gets the larger hit areas too. On such a desktop, the rows that cannot grow a pseudo-element (menu items, options, accordion triggers at a density below 1, PIN cells) are 44px tall for mouse users as well. To keep them small, put `data-hit-target="off"` on `<html>` or set `--void-hit-target: 0px`. Application rules you wrote with `pointer: coarse` for these controls keep matching only on a primary finger; switch them to `any-pointer: coarse` if you want them to follow too.
+
 ## 4. Check again
 
 Run `voidable check` until it reports nothing, then run your application with the development warnings loaded and open each page once: a clean console means the markup is right.
