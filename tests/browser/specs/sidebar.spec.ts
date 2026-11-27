@@ -134,3 +134,30 @@ test.describe('project switcher above the links', () => {
     expect(m.linkRight - m.countRight).toBeLessThan(24);
   });
 });
+
+test.describe('block dropdown menu (#137)', () => {
+  const block = `
+    <div style="width: 320px">
+      <void-dropdown-menu block id="dd">
+        <void-dropdown-menu-trigger><void-button id="trigger">Project</void-button></void-dropdown-menu-trigger>
+        <void-dropdown-menu-content><void-dropdown-menu-item>One</void-dropdown-menu-item></void-dropdown-menu-content>
+      </void-dropdown-menu>
+    </div>`;
+
+  test('the trigger fills its container and the open menu is at least as wide as the trigger', async ({ page }) => {
+    await mount(page, block);
+    expect(await widthOf(page, '#trigger')).toBe(320);
+    await page.locator('#dd').evaluate(async (el: any) => {
+      el.open = true;
+      await el.updateComplete;
+    });
+    const supported = await page.evaluate(() => CSS.supports('min-width', 'anchor-size(width)'));
+    if (supported) await expect.poll(() => widthOf(page, 'void-dropdown-menu-content')).toBeGreaterThanOrEqual(320);
+    else expect(await widthOf(page, 'void-dropdown-menu-content')).toBeGreaterThanOrEqual(180);
+  });
+
+  test('without block the trigger keeps its own width', async ({ page }) => {
+    await mount(page, block.replace(' block', ''));
+    expect(await widthOf(page, '#trigger')).toBeLessThan(200);
+  });
+});

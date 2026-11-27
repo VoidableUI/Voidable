@@ -373,3 +373,10 @@ void-split > [sticky] {
 :is(void-tooltip, void-hover-card, void-popover, void-dropdown-menu) {
   width: fit-content;
 }
+
+/* A dropdown menu with `block` fills its container, like a block-level button: its trigger fills it and the
+   menu is at least as wide (dropdown-menu.css). */
+void-dropdown-menu[block] {
+  display: flex;
+  width: auto;
+}

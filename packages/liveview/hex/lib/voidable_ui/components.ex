@@ -1479,6 +1479,7 @@ defmodule VoidableUI.Components do
   attr :open, :boolean, default: false
   attr :side, :string, default: nil, doc: "top, bottom, left or right (flips when there is no room)"
   attr :align, :string, default: nil, doc: "start, center or end"
+  attr :block, :boolean, default: false, doc: "fill the container: the trigger stretches and the menu is at least as wide"
   attr :events, :any, default: nil, doc: @events_doc
   attr :rest, :global
   slot :inner_block, required: true
@@ -1490,6 +1491,7 @@ defmodule VoidableUI.Components do
       open={@open}
       side={@side}
       align={@align}
+      block={@block}
       phx-hook={void_hook(@events)}
       data-void-events={void_events(@events, "void-select")}
       {@rest}

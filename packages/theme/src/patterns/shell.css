@@ -82,6 +82,12 @@ void-shell[nav="side"] > void-sidebar > void-dropdown-menu > void-dropdown-menu-
   padding-inline: calc(var(--void-control-padding) - var(--void-control-border-width));
 }
 
+@supports (min-width: anchor-size(width)) {
+  void-shell[nav="side"] > void-sidebar > void-dropdown-menu > void-dropdown-menu-content {
+    min-width: anchor-size(width);
+  }
+}
+
 /* ── Overlay navigation ──
    The bar and the page share one grid cell, so the bar lies over the
    top of the page. It carries the on-media surface (off-white text,

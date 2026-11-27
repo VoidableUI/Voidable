@@ -161,7 +161,7 @@ The rail is `--void-sidebar-width` wide (15rem by default; `--void-sidebar-colla
 
 ### A switcher and links with counts
 
-A menu above the links, such as a project or workspace switcher, is a `<void-dropdown-menu>` whose trigger is a ghost button. It spans the rail and its icon and label start where the icon and label of a link do. A link takes an icon, a label and, after a `<void-spacer>`, a trailing count that stays at the far end of the row.
+A menu above the links, such as a project or workspace switcher, is a `<void-dropdown-menu>` whose trigger is a ghost button. It spans the rail (anywhere else, `block` on the `<void-dropdown-menu>` does the same) and its icon and label start where the icon and label of a link do; the open menu is at least as wide as the trigger. A link takes an icon, a label and, after a `<void-spacer>`, a trailing count that stays at the far end of the row.
 
 export const switcher = `
 <void-shell nav="side">

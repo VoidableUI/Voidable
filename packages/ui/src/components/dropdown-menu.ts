@@ -37,6 +37,12 @@ export class VoidDropdownMenu extends VoidElement {
 
   /** Whether the menu is open. A click on the trigger toggles it; choosing an item, Escape, Tab or a press outside closes it. */
   @property({ type: Boolean, reflect: true }) open = false;
+  /**
+   * Fills the width of its container instead of the trigger's own: the trigger stretches to it and, in browsers
+   * that size from the anchor, the menu is at least as wide as the trigger. For a project or workspace switcher in
+   * a sidebar. Inside a `void-shell nav="side"` sidebar it is the default.
+   */
+  @property({ type: Boolean, reflect: true }) block = false;
   /** Side of the trigger the menu opens on; it flips to the opposite side when there is no room. */
   @property({ type: String, reflect: true }) side: 'top' | 'bottom' | 'left' | 'right' = 'bottom';
   /** Alignment with the trigger along that side. */
