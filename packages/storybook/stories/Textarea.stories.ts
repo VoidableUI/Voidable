@@ -48,6 +48,21 @@ export const Sizes: Story = {
   `,
 };
 
+export const Autosize: Story = {
+  render: () => html`
+    <void-field label="Notes" helper="Two lines when empty, growing to six, then it scrolls.">
+      <void-textarea name="notes" autosize rows="2" max-rows="6" placeholder="Start typing…"></void-textarea>
+    </void-field>
+  `,
+};
+
+export const AutosizeWithValue: Story = {
+  render: () => html`
+    <void-textarea aria-label="Description" autosize rows="2" max-rows="10"
+      value="A server-rendered value.&#10;Each line is shown without a scrollbar,&#10;up to ten lines.&#10;&#10;Edit it and the box follows."></void-textarea>
+  `,
+};
+
 export const Disabled: Story = {
   args: { disabled: true, placeholder: 'Disabled textarea' },
 };

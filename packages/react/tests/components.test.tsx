@@ -13,6 +13,7 @@ import {
   TagsInput,
   Switch,
   BarChart,
+  Textarea,
 } from '../src/index.js';
 import type { VoidButton } from '@voidable/ui';
 
@@ -161,6 +162,16 @@ describe('props', () => {
     const c = await render(<Calendar firstDay={1} />);
     const el = c.querySelector('void-calendar') as HTMLElement & { firstDay: number };
     expect(el.firstDay).toBe(1);
+  });
+
+  it('sets a textarea autosize and maxRows, which reflect to autosize and max-rows', async () => {
+    const c = await render(<Textarea autosize maxRows={6} />);
+    const el = c.querySelector('void-textarea') as HTMLElement & { autosize: boolean; maxRows: number };
+    expect(el.autosize).toBe(true);
+    expect(el.maxRows).toBe(6);
+    await (el as any).updateComplete;
+    expect(el.hasAttribute('autosize')).toBe(true);
+    expect(el.getAttribute('max-rows')).toBe('6');
   });
 
   it('supports number-input prefix and unit', async () => {

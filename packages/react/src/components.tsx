@@ -463,6 +463,10 @@ export const Textarea = wrapWc<VoidTextarea, {
   name?: string;
   rows?: number;
   resize?: 'none' | 'vertical' | 'both';
+  /** Grow with the content, between `rows` and `maxRows` lines. */
+  autosize?: boolean;
+  /** With `autosize`, the most lines the box grows to before it scrolls. */
+  maxRows?: number;
   size?: 'sm' | 'md' | 'lg';
   error?: string;
   /** Autofill hint for the native control, e.g. `current-password`. */
