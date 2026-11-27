@@ -121,3 +121,13 @@ void-pin-input[size="lg"] .void-pin-cell {
 void-pin-input[size="lg"] .void-pin-input {
   gap: var(--void-space-3);
 }
+
+/* Touch targets: a cell is an input, which cannot take a pseudo-element, so
+   under a coarse pointer a cell is at least --void-hit-target (44px) square
+   (the cells are 40px by default). */
+@media (pointer: coarse) {
+  .void-pin-cell {
+    min-inline-size: var(--void-hit-target);
+    min-block-size: var(--void-hit-target);
+  }
+}

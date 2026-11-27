@@ -108,3 +108,10 @@ void-combobox[disabled] .void-combobox-input { cursor: not-allowed; }
 /* Size variants: each step sets the field tokens and nothing else */
 void-combobox[size='sm'] { --_void-field-height: var(--void-control-height-sm); --_void-field-padding: var(--void-control-padding-sm); --_void-field-text: var(--void-control-text-sm); }
 void-combobox[size='lg'] { --_void-field-height: var(--void-control-height-lg); --_void-field-padding: var(--void-control-padding-lg); --_void-field-text: var(--void-control-text-lg); }
+
+/* Touch targets: options in the list touch each other, so under a coarse
+   pointer an option is at least --void-hit-target (44px) tall instead of
+   growing a pseudo-element. The list floats over the page. */
+@media (pointer: coarse) {
+  void-combobox-content > void-option { min-block-size: var(--void-hit-target); }
+}

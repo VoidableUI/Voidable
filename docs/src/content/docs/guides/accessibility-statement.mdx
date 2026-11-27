@@ -24,6 +24,7 @@ Everything in this section runs in the repository, on every pull request unless 
 - **Contrast.** `lint:contrast` evaluates the derived theme colours for the default settings, every theme and skin, and the extremes of each colour setting, in dark and light, on the page, on media and on glass. Text must reach 4.5:1 and control borders and focus rings 3:1. A browser spec repeats the check from the computed styles of rendered components, including the visible boundary of controls (WCAG 1.4.11).
 - **Focus visibility.** Another browser spec presses Tab through every keyboard stop of the kitchen-sink page and checks that each one shows a focus indicator that differs from its unfocused state by 3:1.
 - **Forced colours and reduced motion.** A spec turns `prefers-reduced-motion: reduce` on in every engine and checks that nothing animates forever (a spinner excepted) and that transitions are effectively instant. A second spec turns `forced-colors: active` on and checks that component states stay distinguishable; it runs in **Chromium only**, because that is the only engine Playwright can emulate forced colours in.
+- **Target size.** The theme gives every control a hit area of at least 44 by 44 CSS pixels under a coarse pointer (WCAG 2.5.5, the enhanced criterion; 2.5.8 asks for 24). A browser spec emulates a coarse pointer in Chromium, Firefox and WebKit (it first checks that `(pointer: coarse)` matches), clicks at a point just outside the drawn box of each covered control and asserts the control activates, clicks between neighbours in each dense group and asserts the nearer one gets it, and asserts that with a fine pointer no hit-area box is generated. The segmented control, the number input's steppers and the calendar's days are not covered (see [Touch targets](/getting-started/theming/#touch-targets)), and the spec clicks at exact points: it does not model the way a browser adjusts a touch tap to a nearby control.
 - **Development warnings and `voidable check`.** These report a missing accessible name, an invalid attribute or a part in the wrong place while you write the markup. They help a page author; they are not an audit.
 - **Scripted screen readers.** VoiceOver on macOS and NVDA on Windows are driven by scripts through [Guidepup](https://www.guidepup.dev), and what they actually speak is asserted. See the next section.
 
@@ -51,7 +52,7 @@ Be clear about what the checks above are not.
 - **No JAWS, no TalkBack, no VoiceOver on iOS.** Only VoiceOver on macOS and NVDA on Windows are scripted, each with one browser. Narrator, Orca, Dragon, switch access, magnifiers and braille displays are not tested. The [screen reader results](/guides/screen-reader-results/#what-has-not-been-tested) page lists this and has a checklist and a [report form](https://github.com/VoidableUI/Voidable/issues/new?template=assistive-technology-report.yml) for a mobile pass.
 - **No screen reader in other languages.** The French and Arabic messages have been reviewed for grammar and usual interface wording, but no screen reader is run in a language other than English.
 - **No cognitive, language or usability evaluation.** Reading level, consistent behaviour, error recovery, time limits and similar concerns are not assessed.
-- **Not every combination.** One browser per screen reader, one version of each runner image, desktop only. Touch, zoom and reflow at 400%, and text spacing overrides are not tested by a dedicated check.
+- **Not every combination.** One browser per screen reader, one version of each runner image, desktop only. Zoom and reflow at 400%, and text spacing overrides are not tested by a dedicated check, and touch is tested by emulation, not on a device.
 - **Not your page.** The components give you the pieces. Headings, landmarks, names for icon-only controls, focus after your own actions and the meaning of your content are yours; the [accessibility guide](/guides/accessibility/#what-you-still-have-to-provide) lists them.
 
 ## Known gaps
@@ -63,7 +64,7 @@ These are real, current findings, not a complete audit.
 - `void-nav-menu` holds plain links inside a `menubar`, which axe reports as missing required children.
 - The `void-color-picker` host is a focusable widget around native controls.
 - The viewport of `void-scroll-area` cannot be scrolled by keyboard unless its content is focusable.
-- Several targets are smaller than 24 by 24 CSS pixels: sidebar and breadcrumb links, carousel indicators, the compact colour input.
+- Several targets are smaller than 24 by 24 CSS pixels in their drawn box: sidebar and breadcrumb links, carousel indicators, the compact colour input. Under a coarse pointer the breadcrumb links and carousel indicators now have a larger hit area (see Target size above); with a mouse they are unchanged.
 
 **From real screen readers.** The first scripted runs of VoiceOver (macOS, Safari engine) and NVDA (Windows, Chromium) found these. The accessibility tree is correct in each case; what the reader says is not. They are being worked on, and fixes made so far are attempts that have not yet been confirmed by a real run (issue 75):
 

@@ -163,3 +163,13 @@ void-select[error]:not([error=""]) select:focus {
 
 void-select[size="sm"]  { --_void-field-height: var(--void-control-height-sm);  --_void-field-padding: var(--void-control-padding-sm);  --_void-field-text: var(--void-control-text-sm); }
 void-select[size="lg"]  { --_void-field-height: var(--void-control-height-lg);  --_void-field-padding: var(--void-control-padding-lg);  --_void-field-text: var(--void-control-text-lg); }
+
+/* Touch targets: options in the picker touch each other, so under a coarse
+   pointer an option is at least --void-hit-target (44px) tall instead of
+   growing a pseudo-element. The picker floats over the page. (Without
+   appearance: base-select the options belong to the system.) */
+@media (pointer: coarse) {
+  @supports (appearance: base-select) {
+    void-select select option { min-block-size: max(var(--void-control-height), var(--void-hit-target)); }
+  }
+}
