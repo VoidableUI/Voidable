@@ -110,7 +110,7 @@ test.describe('narrow', () => {
     expect(m.sBottom).toBeLessThanOrEqual(m.splitBottom + 1);
   });
 
-  test('--void-sticky-top puts it below a sticky header', async ({ page }) => {
+  test('--void-split-sticky-top puts it below a sticky header', async ({ page }) => {
     const m = await at(page, 'offset', 400);
     expect(m.sTop).toBeCloseTo(48, 0);
     const head = await page.evaluate(() => document.getElementById('head')!.getBoundingClientRect().bottom);

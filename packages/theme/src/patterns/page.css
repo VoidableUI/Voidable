@@ -12,7 +12,7 @@
    --void-page-actions-border-width  Edge thickness of their box; 0 by default. Set it (the colour may be transparent) whenever the box has a fill or a shadow: forced colours removes both, and the edge is what remains. */
 
 /* @tokens void-split
-   --void-sticky-top        Setting: how far from the top a sticky child sticks: the height of a sticky header it must sit below. Add to the group gap beside a wide split; the whole offset of sticky="always" when stacked. Default 0px.
+   --void-split-sticky-top        Setting: how far from the top a sticky child sticks: the height of a sticky header it must sit below. Add to the group gap beside a wide split; the whole offset of sticky="always" when stacked. Default 0px.
    --void-split-sticky-max  Setting: tallest a sticky="always" child grows when the split is stacked; it scrolls inside beyond that. Default 50svh. */
 
 /* @tokens void-section
@@ -311,11 +311,11 @@ void-stack[gap="group"]   { gap: var(--void-gap-group); }
 void-stack[gap="section"] { gap: var(--void-gap-section); }
 
 /* Stays in view while the column beside it scrolls. The offset is the
-   group gap below whatever --void-sticky-top clears (a sticky header);
+   group gap below whatever --void-split-sticky-top clears (a sticky header);
    unset, that is the group gap alone. */
 void-split > [sticky] {
   position: sticky;
-  top: calc(var(--void-sticky-top, 0px) + var(--void-gap-group));
+  top: calc(var(--void-split-sticky-top, 0px) + var(--void-gap-group));
 }
 
 @media (max-width: 48rem) {
@@ -348,7 +348,7 @@ void-split > [sticky] {
 
   void-split > [sticky="always"] {
     position: sticky;
-    top: var(--void-sticky-top, 0px);
+    top: var(--void-split-sticky-top, 0px);
     z-index: var(--void-z-sticky);
     max-height: var(--void-split-sticky-max, 50svh);
     overflow: auto;

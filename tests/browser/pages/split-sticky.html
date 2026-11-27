@@ -1,5 +1,5 @@
 <!-- A sticky header, then five splits far apart: bare sticky, sticky="always",
-     sticky="always" below a header (--void-sticky-top), and sticky="always"
+     sticky="always" below a header (--void-split-sticky-top), and sticky="always"
      with a tall child (with a height cap, and with the default one).
      Specs: split-sticky.spec.ts. -->
 <style>
@@ -25,7 +25,7 @@
 </void-split>
 <div class="gap"></div>
 
-<void-split id="offset" ratio="1:2" style="--void-sticky-top: 3rem">
+<void-split id="offset" ratio="1:2" style="--void-split-sticky-top: 3rem">
   <div id="offset-s" class="media" sticky="always">Media</div>
   <div id="offset-l" class="list"></div>
 </void-split>
