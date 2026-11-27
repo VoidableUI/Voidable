@@ -528,6 +528,10 @@ To scale:
   </div>
 </div>
 
+## Narrow layout
+
+The layout patterns switch to their narrow form below 48rem. `data-void-narrow` on `<html>` moves that point to 36rem (`sm`) or 64rem (`lg`), or removes it (`off`), for an application with its own minimum width. It is an attribute, not a token, because a media query cannot read a custom property. See [Where the narrow layout starts](/patterns/app-shell/#where-the-narrow-layout-starts).
+
 ## Overriding a single token
 
 Reach for the lowest tier last. A knob moves everything that depends on it; a role moves every component of a kind; a component token moves one component; a semantic token is one value.

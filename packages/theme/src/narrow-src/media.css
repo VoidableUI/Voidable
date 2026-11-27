@@ -1,0 +1,68 @@
+@media (min-width: 48.0625rem) {
+  /* A column on one side, the image clear on the other. */
+  void-media:is([place="start"], [place="end"]) > void-media-content {
+    --scrim-to: to left;
+    align-self: stretch;
+    justify-self: start;
+    justify-content: center;
+    box-sizing: border-box;
+    width: min(100%, calc(var(--void-media-inset) + var(--void-measure) + var(--void-gap-group)));
+    padding-inline: var(--void-media-inset) var(--void-gap-group);
+  }
+
+  void-media:is([place="start"], [place="end"]) > void-media-content::before {
+    inset-block: 0;
+    inset-inline: 0 calc(var(--void-scrim-fade) * -1);
+  }
+
+  void-media[place="end"] > void-media-content {
+    --scrim-to: to right;
+    justify-self: end;
+    padding-inline: var(--void-gap-group) var(--void-media-inset);
+  }
+
+  void-media[place="end"] > void-media-content::before {
+    inset-block: 0;
+    inset-inline: calc(var(--void-scrim-fade) * -1) 0;
+  }
+
+  /* The gradient's physical direction mirrors with the column it fades from. */
+  void-media:is([place="start"], [place="end"]):dir(rtl) > void-media-content {
+    --scrim-to: to right;
+  }
+
+  void-media[place="end"]:dir(rtl) > void-media-content {
+    --scrim-to: to left;
+  }
+}
+@media (max-width: 48rem) {
+  void-media[stack] {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    aspect-ratio: auto;
+  }
+
+  void-media[stack] > :is(img, video, picture) {
+    position: relative;
+    inset: auto;
+    height: auto;
+    aspect-ratio: 4 / 3;
+    max-height: 62svh;
+    -webkit-mask-image: linear-gradient(to bottom, black 62%, transparent);
+    mask-image: linear-gradient(to bottom, black 62%, transparent);
+  }
+
+  void-media[stack] > picture > img {
+    position: static;
+    aspect-ratio: 4 / 3;
+  }
+
+  void-media[stack] > void-media-content {
+    padding-top: 0;
+  }
+
+  void-media[stack] > void-media-content::before {
+    content: none;
+  }
+}

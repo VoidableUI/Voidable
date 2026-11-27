@@ -1,0 +1,24 @@
+<!-- A side-navigation shell, a bar shell and the two visibility helpers: what
+     the narrow-screen switch (data-void-narrow on <html>) changes.
+     Specs: narrow.spec.ts. -->
+<style>body { margin: 0; }</style>
+<void-shell id="side" nav="side">
+  <void-sidebar>
+    <void-brand><a href="/">Brand</a></void-brand>
+    <void-nav-links>
+      <a href="#a" aria-current="page">Alpha</a>
+      <a href="#b">Beta</a>
+      <a href="#c">Gamma</a>
+    </void-nav-links>
+  </void-sidebar>
+  <main><void-page><p>Content</p></void-page></main>
+</void-shell>
+<void-shell id="bar">
+  <void-nav-bar>
+    <void-brand><a href="/">Brand</a></void-brand>
+    <void-nav-links><a href="#a">Alpha</a><a href="#b">Beta</a></void-nav-links>
+  </void-nav-bar>
+  <main><void-page><p>Content</p></void-page></main>
+</void-shell>
+<p id="hide-narrow" data-void-hide="narrow">Wide only</p>
+<p id="hide-wide" data-void-hide="wide">Narrow only</p>
