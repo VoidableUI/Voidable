@@ -75,3 +75,44 @@ export const EndSide: Story = {
     </div>
   `,
 };
+
+export const SwitcherAndCounts: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story: 'A project switcher (a dropdown menu with a ghost button as its trigger) above the links lines up with the link icons and labels. A link takes an icon, a label and, after a `void-spacer`, a trailing count. The rail is `--void-sidebar-width` wide; a `width` attribute overrides the token.',
+      },
+    },
+  },
+  render: () => html`
+    <void-shell nav="side" style="min-height: 320px">
+      <void-sidebar>
+        <void-dropdown-menu>
+          <void-dropdown-menu-trigger>
+            <void-button variant="ghost">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" aria-hidden="true"><rect x="2.5" y="2.5" width="11" height="11" rx="2"/></svg>
+              <span>Northwind</span>
+            </void-button>
+          </void-dropdown-menu-trigger>
+          <void-dropdown-menu-content>
+            <void-dropdown-menu-item>Northwind</void-dropdown-menu-item>
+            <void-dropdown-menu-item>Contoso</void-dropdown-menu-item>
+          </void-dropdown-menu-content>
+        </void-dropdown-menu>
+        <void-nav-links>
+          <a href="#overview" aria-current="page">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" aria-hidden="true"><path d="M2 7l6-5 6 5v7H2z"/></svg>
+            <span>Overview</span>
+          </a>
+          <a href="#inbox">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" aria-hidden="true"><path d="M2 3h12v10H2zM2 9h4l1 2h2l1-2h4"/></svg>
+            <span>Inbox</span>
+            <void-spacer></void-spacer>
+            <span>12</span>
+          </a>
+        </void-nav-links>
+      </void-sidebar>
+      <main></main>
+    </void-shell>
+  `,
+};
