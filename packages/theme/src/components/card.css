@@ -166,7 +166,7 @@ void-card:has(> void-card-header > void-card-title :is(a[href], button)) {
   position: relative;
 }
 
-void-card:not([aria-disabled="true"]):has(> void-card-header > void-card-title :is(a[href], button)) {
+void-card:not([aria-disabled="true"]):has(> void-card-header > void-card-title :is(a[href], button:not(:disabled))) {
   cursor: pointer;
 }
 
