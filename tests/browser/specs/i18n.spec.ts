@@ -131,7 +131,7 @@ test.describe('Arabic, right to left', () => {
     await expect(s.locator('void-file-upload')).toContainText('أفلت الملفات هنا أو تصفّح');
     await expect(s.locator('void-error-fallback')).toContainText('حدث خطأ ما');
     await expect(s.getByRole('button', { name: 'إعادة المحاولة' })).toBeVisible();
-    await expect(s.getByRole('navigation', { name: 'التقدّم' })).toBeVisible();
+    await expect(s.getByRole('list', { name: 'التقدّم' })).toBeVisible();
     await expect(s.getByRole('button', { name: 'القائمة', exact: true })).toBeVisible();
   });
 
