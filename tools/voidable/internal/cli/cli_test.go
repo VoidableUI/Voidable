@@ -70,6 +70,8 @@ func TestCheckFixtures(t *testing.T) {
 			`linked-card.html:1:25: [nested-control] <void-card> is inside <a href>; block content inside a link or a button is invalid HTML and announces badly; instead put the one link or button in the title`,
 			`linked-card.html:2:23: [nested-control] <void-card> is inside <button>;`,
 			`linked-card.html:3:1: [nested-control] <void-card> is a link or button (its <void-card-title> holds a control) and also holds a second control;`,
+			`linked-card.html:18:30: [nested-control] <void-row> is inside <a href>;`,
+			`linked-card.html:19:3: [nested-control] <void-row> is a link or button (its <void-row-text> holds a control) and also holds a second control;`,
 		}, nil},
 		{"parts.html", []string{
 			`parts.html:1:1: [missing-part] <void-popover> has no <void-popover-trigger>`,

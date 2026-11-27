@@ -222,6 +222,29 @@ export const CardGrid: Story = {
     `),
 };
 
+// Rows that are one link or one button: the control sits in the row text and
+// is stretched over the whole row. The badge is decoration.
+export const LinkRows: Story = {
+  render: () =>
+    inPage(html`
+      <void-rows>
+        <void-row>
+          <void-row-text>
+            <a href="#kiruna">Kiruna 3</a>
+            <span data-void-type="caption">Online since March</span>
+          </void-row-text>
+          <void-badge color="success" variant="outline">Online</void-badge>
+        </void-row>
+        <void-row>
+          <void-row-text><button type="button">Add a station</button></void-row-text>
+        </void-row>
+        <void-row>
+          <void-row-text>Static row</void-row-text>
+        </void-row>
+      </void-rows>
+    `),
+};
+
 // A column that stays stuck: beside the list on a wide screen, above it
 // below 48rem. Narrow the viewport and scroll to see it.
 export const StickySplit: Story = {

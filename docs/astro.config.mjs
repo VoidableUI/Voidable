@@ -118,7 +118,7 @@ export default defineConfig({
             { label: 'App shell', slug: 'patterns/app-shell' },
             { label: 'Page head', slug: 'patterns/page-head' },
             { label: 'Section', slug: 'patterns/section' },
-            { label: 'Cards as links, card grid', slug: 'patterns/card-grid' },
+            { label: 'Cards and rows as links', slug: 'patterns/card-grid' },
             { label: 'Labels', slug: 'patterns/labels' },
             { label: 'Figure', slug: 'patterns/figure' },
             { label: 'Description list', slug: 'patterns/description-list' },

@@ -114,6 +114,17 @@ describe('checkLinked', () => {
     }
   });
 
+  it('does the same for a row, from the styled table', () => {
+    const styled = { 'void-row': { p: 'void-row-text', c: ['void-switch'], s: 'put the one link in the row text' } };
+    document.body.innerHTML = '<a href="/x"><void-row><void-row-text>T</void-row-text></void-row></a>';
+    expect(checkLinked(table, document.querySelector('void-row')!, styled)!.message).toContain('is inside <a>');
+    document.body.innerHTML = '<void-row><void-row-text><a href="/x">T</a></void-row-text><void-switch aria-label="x"></void-switch></void-row>';
+    const w = checkLinked(table, document.querySelector('void-row')!, styled)!;
+    expect(w.message).toContain('a linked <void-row>');
+    document.body.innerHTML = '<void-row><void-row-text><a href="/x">T</a></void-row-text><void-badge>b</void-badge></void-row>';
+    expect(checkLinked(table, document.querySelector('void-row')!, styled)).toBeUndefined();
+  });
+
   it('ignores tags that cannot be linked', () => {
     document.body.innerHTML = '<a href="/x"><void-badge>x</void-badge></a>';
     expect(checkLinked(table, document.querySelector('void-badge')!)).toBeUndefined();

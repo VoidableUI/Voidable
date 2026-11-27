@@ -1,5 +1,5 @@
 ---
-title: Cards as links, and the card grid
+title: Cards and rows as links, and the card grid
 description: A void-card that is one link or one button, with the whole card as the hit area, and void-card-grid, which lays cards out in as many columns as fit. Markup, behaviour, accessibility, and what is not allowed.
 ---
 
@@ -71,6 +71,34 @@ How it works: the theme stretches the link's (or button's) `::after` over the wh
 
 The stretched box sits on top of the card's content, so a drag across the body does not select it (a static card is untouched). This is the price of a hit area that needs no JavaScript and no nested controls. If the text must be selectable, make the card static and put a link in it as a normal control.
 
+## A row that is a link or a button
+
+`<void-row>` takes the same form, so a list of destinations needs no chevron link button at the end of each line. Write the one `<a href>` or `<button>` in the `<void-row-text>`; the stretched control, the states, the focus ring (drawn inside the row), the keys and the rules above all apply unchanged. What sits at the far end (a badge, a chevron icon) is decoration, not a control.
+
+export const rows = `
+<void-rows>
+  <void-row>
+    <void-row-text>
+      <a href="/stations/kiruna">Kiruna 3</a>
+      <span data-void-type="caption">Online since March</span>
+    </void-row-text>
+    <void-badge color="success" variant="outline">Online</void-badge>
+  </void-row>
+  <void-row>
+    <void-row-text>
+      <button type="button" data-action="stations#add">Add a station</button>
+    </void-row-text>
+  </void-row>
+  <void-row>
+    <void-row-text>Static row</void-row-text>
+    <void-switch checked aria-label="Alerts for the static row"></void-switch>
+  </void-row>
+</void-rows>`;
+
+<Example html={rows} />
+
+A row that is a link or button holds no second control (the switch in the static row above is fine because the row has no control in its text), and is never wrapped in an `<a>` or `<button>`; `voidable check` and the development warnings report both. Unlike a card, a row has no `<void-card-description>`, so it adds no `aria-describedby`; write one yourself if the caption should be read with the name.
+
 ## The card grid
 
 `<void-card-grid>` is CSS only: its cards go in as many columns as fit, each at least `--void-card-grid-min` wide (`16rem` by default), sharing the row. The count follows the width of the container, not the screen, so the same markup is four columns in a wide page, two in a narrow one and one on a phone. The cards of a row are as tall as the tallest, and each card's body grows, so footers line up along the bottom. The gap is `--void-gap-stack`, so `--void-rhythm` and `--void-density` move it.
@@ -82,3 +110,7 @@ The stretched box sits on top of the card's content, so a drag across the body d
 The hover and press fills of a card that is a link or a button are two tokens of the card:
 
 <Tokens component="card" />
+
+And of a row:
+
+<Tokens component="rows" />

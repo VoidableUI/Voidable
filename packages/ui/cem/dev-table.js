@@ -139,7 +139,10 @@ for (const [tag, entry] of Object.entries(tags)) {
 }
 
 const stylesRules = resolve(root, '../../tools/voidable/internal/infra/embedded/data/supplement/rules.json');
-const styled = (JSON.parse(readFileSync(stylesRules, 'utf8')).styled ?? []).map((s) => s.tag).sort();
+const styledEntries = JSON.parse(readFileSync(stylesRules, "utf8")).styled ?? [];
+const styled = styledEntries.map((s) => s.tag).sort();
+/** CSS-only tags that can be one link or button as a whole (`linked` in rules.json), keyed like `k`. */
+const linked = Object.fromEntries(styledEntries.filter((s) => s.linked).map((s) => [s.tag, { p: s.linked.part, c: s.linked.controls, s: s.linked.fix }]));
 for (const tag of styled) {
   if (!/^void-/.test(tag)) throw new Error(`styled element ${tag} is not a void-* tag`);
   if (tags[tag]) throw new Error(`${tag} is both a registered component and a styled element`);
@@ -156,6 +159,9 @@ export const table: DevTable = ${JSON.stringify(sorted)};
 
 /** CSS-only \`void-*\` tags: styled by the theme, never registered, never "unknown". */
 export const styled: readonly string[] = ${JSON.stringify(styled)};
+
+/** CSS-only tags that can be one link or button as a whole, with the part that holds the control. */
+export const linked: Readonly<Record<string, { p: string; c: readonly string[]; s: string }>> = ${JSON.stringify(linked)};
 
 /** Tags that were replaced by explicit parts, with the fix. */
 export const removed: Readonly<Record<string, string>> = ${JSON.stringify(removed)};

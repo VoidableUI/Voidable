@@ -91,6 +91,7 @@ A screen is assembled from named patterns. They are CSS-only elements (styled by
 | A number with a unit, caption, change or progress | `void-figure`, in a `void-figures` row; `void-delta` for the change |
 | Labels and values | `void-description-list` around a native `<dl>` of `<div><dt>…</dt><dd>…</dd></div>` |
 | One thing per line with a control or value at the end | `void-rows` > `void-row` > `void-row-text` + the control |
+| A whole row that is a link or a button | ONE `<a href>` or `<button>` inside `void-row-text` (never wrap the row, never a second control in it) |
 | A state (running, failed, idle) | `<void-state color="success">Running</void-state>`: always with the word |
 | Controls above a table | `void-toolbar` (search, filters, `void-spacer`, ghost icon buttons) |
 | Nothing to show | `void-empty` (icon, `<h3>`, `<p>`, `void-actions`) |

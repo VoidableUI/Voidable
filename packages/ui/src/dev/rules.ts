@@ -648,8 +648,8 @@ const NATIVE_CONTROLS = 'a[href], button, input:not([type="hidden"]), select, te
  * control) with a second control anywhere inside (two things to Tab to, and the stretched link covers the
  * second one so it cannot be clicked).
  */
-export function checkLinked(table: DevTable, el: Element): DevWarning | undefined {
-  const k = table[el.localName]?.k;
+export function checkLinked(table: DevTable, el: Element, styled: Readonly<Record<string, NonNullable<DevTag['k']>>> = {}): DevWarning | undefined {
+  const k = table[el.localName]?.k ?? styled[el.localName];
   if (!k || !el.isConnected) return undefined;
   const wrapper = el.parentElement?.closest('a[href], button');
   if (wrapper) {
@@ -677,7 +677,7 @@ export function checkLinked(table: DevTable, el: Element): DevWarning | undefine
     'nested-control',
     el.localName,
     'second-control',
-    `${describe(el)} is a link or button (its <${k.p}> holds a control) and also holds ${describe(second)}: a linked card holds exactly one control, and the stretched link covers any other. Instead ${k.s}.`,
+    `${describe(el)} is a link or button (its <${k.p}> holds a control) and also holds ${describe(second)}: a linked <${el.localName}> holds exactly one control, and the stretched link covers any other. Instead ${k.s}.`,
     el,
   );
 }

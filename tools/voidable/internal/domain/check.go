@@ -484,7 +484,7 @@ func (c *Checker) CheckLinked(file string, tags []Tag) []Finding {
 			}
 		}
 		if linked && controlsIn(t, l) > 1 {
-			out = append(out, finding("<%s> is a link or button (its <%s> holds a control) and also holds a second control; a linked card holds exactly one, and the stretched link covers any other", t.Name, l.Part))
+			out = append(out, finding("<%s> is a link or button (its <%s> holds a control) and also holds a second control; a linked <%s> holds exactly one, and the stretched link covers any other", t.Name, l.Part, t.Name))
 		}
 	}
 	return out

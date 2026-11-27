@@ -234,6 +234,59 @@ test.describe('a card that is a link or a button', () => {
   });
 });
 
+test.describe('a row that is a link or a button', () => {
+  test.beforeEach(async ({ page }) => {
+    await load(page, '/blank');
+    await mount(
+      page,
+      `<button id="before" type="button">before</button>
+       <void-rows>
+         <void-row id="link-row"><void-row-text><a id="link" href="#went">Kiruna 3</a><span data-void-type="caption">Online</span></void-row-text><void-badge>Online</void-badge></void-row>
+         <void-row id="button-row"><void-row-text><button id="press" type="button">Add a station</button></void-row-text></void-row>
+         <void-row id="static-row"><void-row-text>Static</void-row-text></void-row>
+       </void-rows>
+       <button id="after" type="button">after</button>`,
+    );
+  });
+
+  test('a click anywhere on a link row follows it, on a button row presses it', async ({ page }) => {
+    const box = (await page.locator('#link-row').boundingBox())!;
+    for (const [dx, dy] of [[4, 4], [box.width / 2, box.height / 2], [box.width - 4, box.height - 4]]) {
+      await page.evaluate(() => (location.hash = ''));
+      await page.mouse.click(box.x + dx, box.y + dy);
+      expect(await hash(page)).toBe('#went');
+    }
+    const b = (await page.locator('#button-row').boundingBox())!;
+    await page.mouse.click(b.x + b.width - 4, b.y + b.height / 2);
+    expect(await presses(page)).toBe(1);
+  });
+
+  test('Tab stops once per row, the focus ring surrounds the row, and hover fills it', async ({ page }) => {
+    await page.locator('#before').focus();
+    const order: string[] = [];
+    for (let i = 0; i < 3; i++) {
+      await page.keyboard.press('Tab');
+      order.push(await page.evaluate(() => document.activeElement?.id ?? ''));
+    }
+    expect(order).toEqual(['link', 'press', 'after']);
+    await page.locator('#before').focus();
+    await page.keyboard.press('Tab');
+    const ring = await page.evaluate(() => {
+      const after = getComputedStyle(document.getElementById('link')!, '::after');
+      return { style: after.outlineStyle, width: parseFloat(after.width), row: document.getElementById('link-row')!.getBoundingClientRect().width };
+    });
+    expect(ring.style).toBe('solid');
+    expect(ring.width).toBeCloseTo(ring.row, 0);
+    const fill = (id: string) => page.locator(id).evaluate((el) => getComputedStyle(el).backgroundColor);
+    const rest = await fill('#link-row');
+    await page.locator('#link-row').hover();
+    expect(await fill('#link-row')).not.toBe(rest);
+    const staticRest = await fill('#static-row');
+    await page.locator('#static-row').hover();
+    expect(await fill('#static-row')).toBe(staticRest);
+  });
+});
+
 test.describe('card grid', () => {
   const cards = (n: number) =>
     Array.from({ length: n }, (_, i) => {
