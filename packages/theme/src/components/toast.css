@@ -146,7 +146,7 @@ void-toast-close > button:focus-visible {
 
 /* Touch targets: the close button's hit area grows to --void-hit-target
    (44px) under a coarse pointer without resizing it. */
-@media (pointer: coarse) {
+@media (any-pointer: coarse) {
   void-toast-close > button { position: relative; }
   void-toast-close > button::after {
     content: ""; position: absolute; inset: 50% auto auto 50%; translate: -50% -50%;

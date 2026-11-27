@@ -1,4 +1,4 @@
-import { html, nothing } from 'lit';
+import { html, nothing, type TemplateResult } from 'lit';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
 import { msg } from '../messages.js';
@@ -6,7 +6,12 @@ import { useProjection } from '../projection.js';
 
 useProjection();
 
-/** Page navigation for data tables, search result lists, and content archives. */
+/**
+ * Page navigation for data tables, search result lists, and content archives.
+ *
+ * It is a `navigation` landmark named "Pagination" by default. Add `landmark="none"` (or place it inside a
+ * `<nav>`) when the page keeps one navigation region: it is then a named group of the same buttons.
+ */
 export class VoidPagination extends VoidElement {
   /** Number of pages. Defaults to 1. */
   @property({ type: Number }) total = 1;
@@ -26,6 +31,30 @@ export class VoidPagination extends VoidElement {
   @property({ type: String, attribute: 'href-template', reflect: true }) hrefTemplate = '';
   /** Opt-in link mode: query parameter rewritten on the current location, e.g. `page`. Ignored when `href-template` is set. */
   @property({ type: String, reflect: true }) param = '';
+
+  /**
+   * `none` leaves out the navigation landmark and wraps the buttons in a named group, for a page that keeps a
+   * single navigation region. Any other value (the default) is a `navigation` landmark. Inside a `<nav>` or an
+   * element with `role="navigation"` it is never a landmark, whatever this says, so landmarks do not nest.
+   */
+  @property({ type: String, reflect: true }) landmark: 'navigation' | 'none' = 'navigation';
+
+  override connectedCallback(): void {
+    super.connectedCallback();
+    this.requestUpdate(); // the new parent decides whether this is a landmark
+  }
+
+  private get _isLandmark(): boolean {
+    return this.landmark !== 'none' && !this.parentElement?.closest('nav, [role="navigation"]');
+  }
+
+  /** The buttons in a `nav`, or in a labelled `group` when this is not a landmark. */
+  private _wrap(inner: TemplateResult) {
+    const label = msg(this, 'pagination.label');
+    return this._isLandmark
+      ? html`<nav role="navigation" aria-label=${label}>${inner}</nav>`
+      : html`<div role="group" aria-label=${label}>${inner}</div>`;
+  }
 
   private get _linkMode(): boolean {
     return this.hrefTemplate !== '' || this.param !== '';
@@ -78,8 +107,7 @@ export class VoidPagination extends VoidElement {
       ? html`<span class="void-pagination-btn" aria-disabled="true" aria-label=${label}>${glyph}</span>`
       : html`<a class="void-pagination-btn" href=${this._href(target)} aria-label=${label}
           @click=${(e: MouseEvent) => this._onLinkClick(e, target)}>${glyph}</a>`;
-    return html`
-      <nav role="navigation" aria-label=${msg(this, 'pagination.label')}>
+    return this._wrap(html`
         ${edge(msg(this, 'pagination.previous'), '«', this.value - 1, this.value <= 1)}
         ${pages.map((p) => {
           if (p === 'ellipsis') {
@@ -94,8 +122,7 @@ export class VoidPagination extends VoidElement {
           >${p}</a>`;
         })}
         ${edge(msg(this, 'pagination.next'), '»', this.value + 1, this.value >= this.total)}
-      </nav>
-    `;
+    `);
   }
 
   private _pages(): Array<number | 'ellipsis'> {
@@ -151,8 +178,7 @@ export class VoidPagination extends VoidElement {
     if (this._linkMode) return this._renderLinks(pages);
     let ellipsisCount = 0;
 
-    return html`
-      <nav role="navigation" aria-label=${msg(this, 'pagination.label')}>
+    return this._wrap(html`
         <button
           type="button"
           class="void-pagination-btn"
@@ -182,8 +208,7 @@ export class VoidPagination extends VoidElement {
           @click=${() => this._go(this.value + 1)}
           aria-label=${msg(this, 'pagination.next')}
         >»</button>
-      </nav>
-    `;
+    `);
   }
 }
 

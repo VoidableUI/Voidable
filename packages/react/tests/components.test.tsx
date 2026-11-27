@@ -189,6 +189,14 @@ describe('props', () => {
     expect(el.getAttribute('data-x')).toBe('1');
   });
 
+  it('passes aria-disabled and aria-describedby through, and keeps aria-disabled on the button (#105)', async () => {
+    const c = await render(<Button aria-disabled="true" aria-describedby="why">x</Button>);
+    const el = c.querySelector('void-button')!;
+    expect(el.getAttribute('aria-disabled')).toBe('true');
+    expect(el.getAttribute('aria-describedby')).toBe('why');
+    expect(el.getAttribute('tabindex')).toBe('0');
+  });
+
   it('passes plain string attributes', async () => {
     const c = await render(<Button variant="filled" color="error">x</Button>);
     const el = c.querySelector('void-button')!;

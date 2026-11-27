@@ -1,0 +1,213 @@
+---
+import DashboardLayout from '../../../components/showcase/DashboardLayout.astro';
+import { alerts, severityColor, type NetworkAlert } from '../../../data/showcase-network';
+
+const groups: { value: NetworkAlert['status']; label: string; empty: string }[] = [
+  { value: 'open', label: 'Open', empty: 'Nothing is open. The network is quiet.' },
+  { value: 'acknowledged', label: 'Acknowledged', empty: 'No one is working on an alert.' },
+  { value: 'resolved', label: 'Resolved', empty: 'Nothing was resolved in the last 24 hours.' },
+];
+const of = (status: NetworkAlert['status']) => alerts.filter((a) => a.status === status);
+const critical = alerts.find((a) => a.status === 'open' && a.severity === 'critical');
+// A false boolean must be an absent attribute, which Astro only does for native ones.
+const flag = (name: string, on: boolean) => (on ? { [name]: '' } : {});
+const initials = (name: string) => name.split(' ').map((p) => p[0]).join('');
+
+const rules = [
+  { name: 'Node unreachable', detail: 'Three missed heartbeats · critical', on: true },
+  { name: 'Latency above threshold', detail: 'P99 over 100 ms for 5 minutes · warning', on: true },
+  { name: 'Frame loss above 0.5%', detail: 'Averaged over 60 seconds · warning', on: true },
+  { name: 'Throughput below plan', detail: 'Under 60% of the pass plan · warning', on: false },
+  { name: 'Slant range beyond 2,500 km', detail: 'Link likely to drop before the pass ends · info', on: false },
+];
+const guides = [
+  { title: 'A ground station stops answering', body: 'Check the management network first: a station that answers there has lost its antenna controller, not its power. Move its next three passes to the nearest station with the same bands, then page the site contact.' },
+  { title: 'Latency climbs on one link', body: 'Compare the elevation with the slant range. Below 10° the path is long and noisy and the alert clears by itself as the satellite rises; above it, look at the station’s backhaul.' },
+  { title: 'A pass is missed', body: 'The scheduler repeats it on the next orbit when the buffer allows. Confirm the repeat in the pass list and acknowledge the alert with the new pass time.' },
+];
+---
+
+<DashboardLayout
+  active="alerts"
+  heading="Alerts"
+  description="Open, acknowledged and resolved incidents of a satellite ground network: the alerts page of the Voidable dashboard showcase."
+>
+  <Fragment slot="controls">
+    <void-toggle variant="outline" size="md">Mute for 1 h</void-toggle>
+    <void-button variant="outline" size="md">Create Incident</void-button>
+  </Fragment>
+
+  <div class="content-area">
+    {critical && (
+      <void-alert color="error">
+        <void-alert-title>{critical.title}</void-alert-title>
+        <void-alert-description>{critical.detail} Open for {critical.duration}.</void-alert-description>
+        <void-alert-close><button type="button" aria-label="Dismiss">&times;</button></void-alert-close>
+      </void-alert>
+    )}
+
+    <void-figures>
+      <void-figure>
+        <span data-void-type="label">Open</span>
+        <span data-void-type="value">{of('open').length}</span>
+        <span data-void-type="caption">1 critical, 2 warnings</span>
+      </void-figure>
+      <void-figure>
+        <span data-void-type="label">Acknowledged</span>
+        <span data-void-type="value">{of('acknowledged').length}</span>
+        <span data-void-type="caption">Oldest for 3 h 49 min</span>
+      </void-figure>
+      <void-figure>
+        <span data-void-type="label">Time to acknowledge</span>
+        <span data-void-type="value">4 <span data-void-type="unit">min</span></span>
+        <span data-void-type="caption"><void-delta trend="down" invert>1 min</void-delta> on last week</span>
+      </void-figure>
+      <void-figure>
+        <span data-void-type="label">Resolved, 24 h</span>
+        <span data-void-type="value">{of('resolved').length}</span>
+        <span data-void-type="caption">Median 26 min to resolve</span>
+      </void-figure>
+    </void-figures>
+
+    <void-tabs value="open">
+      <void-tabs-list>
+        {groups.map((g) => (
+          <void-tabs-trigger value={g.value}>{g.label} ({of(g.value).length})</void-tabs-trigger>
+        ))}
+      </void-tabs-list>
+      {groups.map((g) => (
+        <void-tabs-content value={g.value}>
+          <void-table hoverable stack="56rem" aria-label={`${g.label} alerts`}>
+            <table>
+              <thead>
+                <tr>
+                  <th>Severity</th>
+                  <th data-stack="title">Alert</th>
+                  <th>Node</th>
+                  <th>Started</th>
+                  <th data-align="end">Duration</th>
+                  {g.value !== 'open' && <th>Owner</th>}
+                  <th data-stack="actions">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {of(g.value).map((a) => (
+                  <tr data-alert={a.id}>
+                    <td><void-badge color={severityColor[a.severity]} variant="outline">{a.severity}</void-badge></td>
+                    <td><void-row-text><span>{a.title}</span><span data-void-type="caption">{a.id} · {a.detail}</span></void-row-text></td>
+                    <td>{a.node}</td>
+                    <td>{a.started}</td>
+                    <td>{a.duration}</td>
+                    {g.value !== 'open' && (
+                      <td><span class="cell-with-dot"><void-avatar initials={initials(a.owner!)} size="sm"></void-avatar>{a.owner}</span></td>
+                    )}
+                    <td>
+                      {g.value === 'open' && <void-button variant="ghost" size="sm" data-ack={a.id} data-title={a.title}>Acknowledge</void-button>}
+                      {g.value === 'acknowledged' && <void-button variant="ghost" size="sm" data-resolve={a.id}>Resolve</void-button>}
+                      <void-button variant="ghost" size="sm"><a href="/showcase/dashboard/logs/">Logs</a></void-button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </void-table>
+        </void-tabs-content>
+      ))}
+    </void-tabs>
+
+    <void-split>
+      <void-section>
+        <void-section-head>
+          <h2>Alert Rules</h2>
+          <span data-void-type="label">{rules.filter((r) => r.on).length} of {rules.length} on</span>
+        </void-section-head>
+        <void-rows>
+          {rules.map((r) => (
+            <void-row>
+              <void-row-text><span>{r.name}</span><span data-void-type="caption">{r.detail}</span></void-row-text>
+              <void-switch {...flag('checked', r.on)} aria-label={r.name}></void-switch>
+            </void-row>
+          ))}
+        </void-rows>
+      </void-section>
+
+      <void-section>
+        <void-section-head>
+          <h2>Response Guides</h2>
+        </void-section-head>
+        <void-accordion>
+          {guides.map((g, i) => (
+            <void-accordion-item {...flag('open', i === 0)}>
+              <void-accordion-trigger>{g.title}</void-accordion-trigger>
+              <void-accordion-content>{g.body}</void-accordion-content>
+            </void-accordion-item>
+          ))}
+        </void-accordion>
+      </void-section>
+    </void-split>
+  </div>
+
+  <Fragment slot="overlays">
+    <void-dialog id="ack-dialog" size="sm">
+      <void-dialog-title>Acknowledge <span data-ack-id></span></void-dialog-title>
+      <void-dialog-description><span data-ack-title></span>. Acknowledging stops the reminders and shows the team who has it.</void-dialog-description>
+      <void-dialog-body>
+        <div class="overlay-stack">
+          <void-field label="Assign to">
+            <void-select>
+              <select name="owner">
+                <option>Alex Rivera (you)</option>
+                <option>Sarah Mitchell</option>
+                <option>James Walker</option>
+                <option>Emily Parker</option>
+              </select>
+            </void-select>
+          </void-field>
+          <void-field label="Note" helper="Shown on the alert and in the weekly summary.">
+            <void-textarea name="note" autosize rows="2" max-rows="6" placeholder="What you know so far"></void-textarea>
+          </void-field>
+        </div>
+      </void-dialog-body>
+      <void-dialog-actions>
+        <void-button id="ack-cancel">Cancel</void-button>
+        <void-button id="ack-confirm" variant="filled">Acknowledge</void-button>
+      </void-dialog-actions>
+    </void-dialog>
+
+    <void-toast-container placement="bottom-right"></void-toast-container>
+  </Fragment>
+</DashboardLayout>
+
+<script>
+  import { toast } from '@voidable/ui';
+
+  const dialog = document.getElementById('ack-dialog') as HTMLElement & { open: boolean };
+  let current: HTMLElement | null = null;
+
+  document.addEventListener('click', (e) => {
+    const target = e.target as HTMLElement;
+    const ack = target.closest<HTMLElement>('[data-ack]');
+    if (ack) {
+      current = ack;
+      dialog.querySelector('[data-ack-id]')!.textContent = ack.dataset.ack!;
+      dialog.querySelector('[data-ack-title]')!.textContent = ack.dataset.title!;
+      dialog.open = true;
+      return;
+    }
+    const resolve = target.closest<HTMLElement>('[data-resolve]');
+    if (resolve) {
+      resolve.closest('tr')?.setAttribute('hidden', '');
+      toast({ color: 'success', title: 'Resolved', description: `${resolve.dataset.resolve} was closed and moved to Resolved.` });
+    }
+  });
+
+  document.getElementById('ack-cancel')?.addEventListener('click', () => { dialog.open = false; });
+  document.getElementById('ack-confirm')?.addEventListener('click', () => {
+    dialog.open = false;
+    if (!current) return;
+    const id = current.dataset.ack;
+    current.closest('tr')?.setAttribute('hidden', '');
+    toast({ color: 'info', title: 'Acknowledged', description: `${id} is yours. Reminders are off.` });
+    current = null;
+  });
+</script>

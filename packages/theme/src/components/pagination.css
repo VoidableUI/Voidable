@@ -20,7 +20,7 @@ void-pagination {
   min-width: 0;
 }
 
-void-pagination nav {
+void-pagination > :is(nav, [role="group"]) {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -94,7 +94,7 @@ void-pagination[size="lg"] { --_void-pagination-size: var(--void-pagination-size
 
 /* Touch targets: the buttons are four pixels apart, so each grows by half the
    gap at most along the row, and fully across it. */
-@media (pointer: coarse) {
+@media (any-pointer: coarse) {
   .void-pagination-btn { position: relative; }
   .void-pagination-btn::after {
     content: ""; position: absolute; inset: 50% auto auto 50%; translate: -50% -50%;

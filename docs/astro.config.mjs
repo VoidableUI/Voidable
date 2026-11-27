@@ -102,6 +102,7 @@ export default defineConfig({
             { label: 'Accessibility statement', slug: 'guides/accessibility-statement' },
             { label: 'Screen reader results', slug: 'guides/screen-reader-results' },
             { label: 'Browser support', slug: 'guides/browser-support' },
+            { label: 'Content Security Policy', slug: 'guides/content-security-policy' },
             { label: 'Translation', slug: 'guides/translation' },
             { label: 'Testing', slug: 'guides/testing' },
             { label: 'Editor setup and typings', slug: 'guides/editor-setup' },

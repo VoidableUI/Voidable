@@ -119,6 +119,8 @@ export interface MessageParameters {
   'table.sortedAscending': { column: string };
   'table.sortedDescending': { column: string };
   'table.sortCleared': { column: string };
+  /** The fallback name of a scrollable table's scroll region while it overflows (no label, caption or author-written name). */
+  'table.scrollRegion': undefined;
   'tagsInput.placeholder': undefined;
   'toast.region': undefined;
 }
@@ -226,6 +228,7 @@ const english: { [K in MessageKey]: Message<K> } = {
   'table.sortedAscending': ({ column }) => `Sorted by ${column}, ascending`,
   'table.sortedDescending': ({ column }) => `Sorted by ${column}, descending`,
   'table.sortCleared': ({ column }) => `Sorting by ${column} removed`,
+  'table.scrollRegion': 'Table, scrolls sideways',
   'tagsInput.placeholder': 'Add tag...',
   'toast.region': 'Notifications',
 };

@@ -424,4 +424,49 @@ describe('VoidPagination', () => {
       expect(click.defaultPrevented).toBe(true);
     });
   });
+
+  describe('landmark (#118)', () => {
+    async function mountIn(markup: string): Promise<VoidPagination> {
+      container.innerHTML = markup;
+      const el = container.querySelector('void-pagination') as VoidPagination;
+      await el.updateComplete;
+      return el;
+    }
+
+    it('is a navigation landmark by default, in both modes', async () => {
+      let el = await mountIn('<void-pagination total="5" value="2"></void-pagination>');
+      expect(el.querySelector('nav[role="navigation"]')?.getAttribute('aria-label')).toBe('Pagination');
+      el = await mountIn('<void-pagination total="5" value="2" param="page"></void-pagination>');
+      expect(el.querySelector('nav[role="navigation"]')).not.toBeNull();
+    });
+
+    it('landmark="none" renders a named group, not a landmark, in both modes', async () => {
+      for (const extra of ['', ' param="page"']) {
+        const el = await mountIn(`<void-pagination total="5" value="2" landmark="none"${extra}></void-pagination>`);
+        expect(el.querySelector('nav, [role="navigation"]')).toBeNull();
+        const group = el.querySelector('[role="group"]');
+        expect(group?.getAttribute('aria-label')).toBe('Pagination');
+        expect(group?.querySelectorAll('.void-pagination-btn').length).toBeGreaterThan(3);
+      }
+    });
+
+    it('is not a landmark inside a nav or a role="navigation" ancestor', async () => {
+      let el = await mountIn('<nav aria-label="Main"><void-pagination total="5" value="2"></void-pagination></nav>');
+      expect(el.querySelector('nav')).toBeNull();
+      expect(el.querySelector('[role="group"]')).not.toBeNull();
+      el = await mountIn('<div role="navigation"><div><void-pagination total="5" value="2"></void-pagination></div></div>');
+      expect(el.querySelector('nav')).toBeNull();
+    });
+
+    it('follows a move into and out of a nav', async () => {
+      const el = await mountIn('<void-pagination total="5" value="2"></void-pagination><nav id="n"></nav>');
+      expect(el.querySelector('nav')).not.toBeNull();
+      container.querySelector('#n')!.append(el);
+      await el.updateComplete;
+      expect(el.querySelector('nav')).toBeNull();
+      container.append(el);
+      await el.updateComplete;
+      expect(el.querySelector('nav')).not.toBeNull();
+    });
+  });
 });

@@ -214,7 +214,7 @@ void-carousel[size="lg"] {
    positioned; in the vertical carousel they join the flow, so they become
    positioned there). A dot grows by half the gap at most along the row, and
    fully across it. */
-@media (pointer: coarse) {
+@media (any-pointer: coarse) {
   void-carousel[orientation="vertical"] :is(void-carousel-previous, void-carousel-next) { position: relative; }
 
   void-carousel-indicators > button { position: relative; }

@@ -83,6 +83,7 @@ registerMessages('fr', {
   'table.sortedAscending': ({ column }) => `Trié par ${column}, ordre croissant`,
   'table.sortedDescending': ({ column }) => `Trié par ${column}, ordre décroissant`,
   'table.sortCleared': ({ column }) => `Tri par ${column} retiré`,
+  'table.scrollRegion': 'Tableau, défilement horizontal',
   'tagsInput.placeholder': 'Ajouter une étiquette…',
   'toast.region': 'Notifications',
 });

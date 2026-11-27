@@ -1026,7 +1026,7 @@ export class OverlayController implements ReactiveController {
           if (this._active && this._mode === 'anchor' && this._overflows(surface)) {
             this._mode = 'fixed';
             this._position();
-          }
+          } else if (this._active && this._mode === 'anchor') this._checkPinned(surface, anchor, side);
         });
       }
     } else {
@@ -1034,6 +1034,36 @@ export class OverlayController implements ReactiveController {
       this._placeFixed();
       this._registry.position(this);
     }
+  }
+
+  /**
+   * Anchored placement leaves a surface beside its anchor on the cross axis (it spans the anchor's extent or runs
+   * on from it). A surface that shares none of it has been pinned elsewhere by the page, usually an inset
+   * (`right: 0`, `left`, `top`, `bottom`) on the content, which beats anchor positioning and sends the panel to a
+   * screen edge. Reported to `@voidable/ui/dev`; nothing is changed.
+   */
+  private _checkPinned(surface: HTMLElement, anchor: Element, side: OverlaySide): void {
+    const dev = (globalThis as Record<symbol, unknown>)[Symbol.for('voidable.dev')] as
+      | { report?: (w: { kind: string; tag: string; subject: string; message: string; element?: Element }) => void }
+      | undefined;
+    if (!dev?.report) return;
+    const s = surface.getBoundingClientRect();
+    const a = anchor.getBoundingClientRect();
+    if (!s.width || !s.height || !a.width || !a.height) return;
+    const horizontal = side === 'top' || side === 'bottom';
+    const apart = horizontal ? s.left > a.right + 1 || s.right < a.left - 1 : s.top > a.bottom + 1 || s.bottom < a.top - 1;
+    if (!apart) return;
+    const tag = surface.localName;
+    dev.report({
+      kind: 'misplaced-overlay',
+      tag,
+      subject: horizontal ? 'left/right' : 'top/bottom',
+      message:
+        `<${tag}> opened away from its trigger: its ${horizontal ? 'horizontal' : 'vertical'} position does not meet the trigger's. ` +
+        `A CSS rule on <${tag}> that sets left, right, top, bottom or inset pins it to the viewport and overrides anchor positioning. ` +
+        `Remove that rule and use the align attribute (start, center, end) to choose which edge lines up with the trigger.`,
+      element: surface,
+    });
   }
 
   private _overflows(surface: HTMLElement): boolean {

@@ -1,4 +1,5 @@
 import { html, nothing } from 'lit';
+import { styleProps } from '../style-props.js';
 import { live } from 'lit/directives/live.js';
 import { property } from 'lit/decorators.js';
 import { VoidElement } from '../base.js';
@@ -292,7 +293,7 @@ export class VoidColorPicker extends InternalsFormControl(VoidElement) {
               <button
                 type="button"
                 class="void-color-picker-swatch"
-                style="--void-cp-swatch:${swatch}"
+                style=${styleProps({'--void-cp-swatch': swatch})}
                 aria-label=${swatch}
                 ?disabled=${this.disabled}
                 @click=${() => this._onSwatchClick(swatch)}

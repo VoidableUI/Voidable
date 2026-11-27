@@ -1,0 +1,195 @@
+---
+import DashboardLayout from '../../../components/showcase/DashboardLayout.astro';
+import iconDownload from '@tabler/icons/outline/download.svg?raw';
+
+const usage = [
+  { name: 'Downlink volume', detail: '1,842 of 2,500 TB included', used: 74, color: undefined },
+  { name: 'Antenna time', detail: '6,930 of 9,000 antenna-hours', used: 77, color: undefined },
+  { name: 'Passes', detail: '36,410 of 40,000 scheduled passes', used: 91, color: 'warning' },
+  { name: 'API requests', detail: '4.1 of 10 million', used: 41, color: undefined },
+];
+const spend = {
+  labels: ['Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov'],
+  series: [{ name: 'Invoiced', values: [17200, 17900, 19400, 18800, 20600, 21900] }],
+};
+const services = {
+  segments: [
+    { name: 'Antenna time', value: 11400 },
+    { name: 'Downlink volume', value: 6200 },
+    { name: 'Backhaul', value: 2900 },
+    { name: 'Support', value: 1400 },
+  ],
+};
+const plans = [
+  { id: 'orbit', name: 'Orbit', price: '$4,800', line: 'Up to 10 nodes', points: ['500 TB downlink', '2,000 antenna-hours', 'Email support'] },
+  { id: 'constellation', name: 'Constellation', price: '$18,500', line: 'Up to 50 nodes', points: ['2,500 TB downlink', '9,000 antenna-hours', 'Support within the hour'], current: true },
+  { id: 'fleet', name: 'Fleet', price: 'Custom', line: 'Unlimited nodes', points: ['Committed volume pricing', 'Dedicated antennas', 'A named engineer on call'] },
+];
+const invoices = [
+  { id: 'MRD-2026-011', period: 'November 2026', amount: '$21,900.00', status: 'Due 1 Dec', color: 'warning' },
+  { id: 'MRD-2026-010', period: 'October 2026', amount: '$20,600.00', status: 'Paid', color: 'success' },
+  { id: 'MRD-2026-009', period: 'September 2026', amount: '$18,800.00', status: 'Paid', color: 'success' },
+  { id: 'MRD-2026-008', period: 'August 2026', amount: '$19,400.00', status: 'Paid', color: 'success' },
+  { id: 'MRD-2026-007', period: 'July 2026', amount: '$17,900.00', status: 'Paid', color: 'success' },
+  { id: 'MRD-2026-006', period: 'June 2026', amount: '$17,200.00', status: 'Paid', color: 'success' },
+];
+---
+
+<DashboardLayout
+  active="billing"
+  heading="Billing"
+  description="Plan, usage against the plan and invoices: the billing page of the Voidable dashboard showcase."
+>
+  <Fragment slot="controls">
+    <void-button variant="outline" size="md">
+      <span class="icon-inline" set:html={iconDownload} />
+      Statement
+    </void-button>
+    <void-button variant="filled" size="md"><a href="#plans">Change Plan</a></void-button>
+  </Fragment>
+
+  <div class="content-area">
+    <void-figures>
+      <void-figure>
+        <span data-void-type="label">Plan</span>
+        <span data-void-type="value">Constellation</span>
+        <span data-void-type="caption">44 of 50 nodes · renews 1 January</span>
+      </void-figure>
+      <void-figure>
+        <span data-void-type="label">This month</span>
+        <span data-void-type="value">$21,900</span>
+        <span data-void-type="caption"><void-delta trend="up" invert>6.3%</void-delta> on October</span>
+      </void-figure>
+      <void-figure>
+        <span data-void-type="label">Overage</span>
+        <span data-void-type="value">$3,400</span>
+        <span data-void-type="caption">Backhaul and extra passes</span>
+      </void-figure>
+      <void-figure>
+        <span data-void-type="label">Next invoice</span>
+        <span data-void-type="value">1 Dec</span>
+        <span data-void-type="caption">Bank transfer, 30 days net</span>
+      </void-figure>
+    </void-figures>
+
+    <void-alert color="warning">
+      <void-alert-title>Passes are at 91% of the plan</void-alert-title>
+      <void-alert-description>At this rate the allowance runs out on 28 November. Passes beyond it are billed at $0.42 each.</void-alert-description>
+    </void-alert>
+
+    <void-section>
+      <void-section-head>
+        <h2>Usage This Period</h2>
+        <span data-void-type="label">1 – 27 November</span>
+      </void-section-head>
+      <void-rows>
+        {usage.map((u) => (
+          <void-row>
+            <void-row-text><span>{u.name}</span><span data-void-type="caption">{u.detail}</span></void-row-text>
+            <div class="row-meter">
+              <span data-void-type="value" data-size="sm">{u.used} <span data-void-type="unit">%</span></span>
+              <void-progress value={u.used} size="sm" color={u.color} aria-label={`${u.name} used`}></void-progress>
+            </div>
+          </void-row>
+        ))}
+      </void-rows>
+    </void-section>
+
+    <div class="charts-grid">
+      <div class="chart-panel">
+        <div class="chart-panel-header">
+          <span class="chart-panel-title">Spend</span>
+          <span class="chart-panel-meta">USD · last 6 months</span>
+        </div>
+        <void-bar-chart height="240" variant="outline" show-value aria-label="Invoiced amount in US dollars over the last six months" data={JSON.stringify(spend)}></void-bar-chart>
+      </div>
+      <div class="chart-panel">
+        <div class="chart-panel-header">
+          <span class="chart-panel-title">By Service</span>
+          <span class="chart-panel-meta">USD · November</span>
+        </div>
+        <void-donut-chart size="200" variant="outline" show-total gaps aria-label="November spend in US dollars by service" data={JSON.stringify(services)}></void-donut-chart>
+      </div>
+    </div>
+
+    <void-section id="plans">
+      <void-section-head>
+        <h2>Plans</h2>
+        <span data-void-type="label">Billed monthly</span>
+      </void-section-head>
+      <div class="plan-grid">
+        {plans.map((p) => (
+          <void-card variant="bordered">
+            <void-card-header>
+              <void-card-title>{p.name} {p.current && <void-badge size="sm">Current</void-badge>}</void-card-title>
+              <void-card-description>{p.line}</void-card-description>
+            </void-card-header>
+            <void-card-body>
+              <void-stack>
+                <span data-void-type="value" data-size="sm">{p.price} {p.price !== 'Custom' && <span data-void-type="unit">/ month</span>}</span>
+                <void-list>
+                  {p.points.map((point) => <void-list-item>{point}</void-list-item>)}
+                </void-list>
+              </void-stack>
+            </void-card-body>
+            <void-card-footer>
+              {p.current
+                ? <void-button disabled>Your Plan</void-button>
+                : <void-button variant={p.id === 'fleet' ? 'filled' : 'outline'}>{p.id === 'fleet' ? 'Talk to Us' : 'Switch'}</void-button>}
+            </void-card-footer>
+          </void-card>
+        ))}
+      </div>
+    </void-section>
+
+    <void-section>
+      <void-section-head>
+        <h2>Invoices</h2>
+        <span data-void-type="label">{invoices.length} of 23</span>
+      </void-section-head>
+      <void-table hoverable stack="44rem" aria-label="Invoices">
+        <table>
+          <thead>
+            <tr>
+              <th data-stack="title">Invoice</th>
+              <th>Period</th>
+              <th>Status</th>
+              <th data-align="end">Amount</th>
+              <th data-stack="actions">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {invoices.map((i) => (
+              <tr>
+                <td><span data-void-type="code">{i.id}</span></td>
+                <td>{i.period}</td>
+                <td><void-badge color={i.color} variant="outline">{i.status}</void-badge></td>
+                <td>{i.amount}</td>
+                <td><void-button variant="ghost" size="sm" aria-label={`Download invoice ${i.id} as PDF`}>PDF</void-button></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </void-table>
+      <void-toolbar>
+        <span data-void-type="caption">Invoices are sent to billing@meridian.example</span>
+        <void-spacer></void-spacer>
+        <void-pagination total="4" value="1" size="sm"></void-pagination>
+      </void-toolbar>
+    </void-section>
+  </div>
+</DashboardLayout>
+
+<style>
+  .plan-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--void-gap-stack);
+  }
+
+  @media (max-width: 1024px) {
+    .plan-grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+</style>

@@ -743,6 +743,8 @@ export const Pagination = wrapWc<VoidPagination, {
   hrefTemplate?: string;
   /** Link mode: query parameter set on the current URL when there is no `hrefTemplate`. */
   param?: string;
+  /** `none` renders a named group instead of a navigation landmark (it is never a landmark inside a `nav`). */
+  landmark?: 'navigation' | 'none';
 } & VoidEvents<{ Change: { value: number } }>>('void-pagination', 'Pagination');
 
 export const ErrorFallback = wrapWc<VoidErrorFallback, {

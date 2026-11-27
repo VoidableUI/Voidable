@@ -4,6 +4,24 @@ import { PartsController } from '../parts.js';
 import { closeControlPressed, removeWithFocus } from '../dismiss.js';
 import { msg, nameHost } from '../messages.js';
 
+const ANNOUNCER_CSS =
+  '[data-void-announcer]{position:absolute;width:1px;height:1px;margin:-1px;padding:0;border:0;overflow:hidden;clip-path:inset(50%);white-space:nowrap;pointer-events:none}';
+let announcerStyles: CSSStyleSheet | undefined;
+
+/** Gives `root` the visually-hidden rule of the announcers. A constructable stylesheet, because a policy without 'unsafe-inline' blocks a `<style>` element. */
+function adoptAnnouncerStyles(root: ShadowRoot): void {
+  try {
+    announcerStyles ??= new CSSStyleSheet();
+    if (!announcerStyles.cssRules.length) announcerStyles.replaceSync(ANNOUNCER_CSS);
+    root.adoptedStyleSheets = [...root.adoptedStyleSheets, announcerStyles];
+  } catch {
+    // An engine without constructable stylesheets (an old one, a test DOM).
+    const style = root.ownerDocument.createElement('style');
+    style.textContent = ANNOUNCER_CSS;
+    root.append(style);
+  }
+}
+
 /**
  * Temporary notification for action confirmations, error alerts, and copy-to-clipboard feedback.
  *
@@ -216,10 +234,8 @@ export class VoidToastContainer extends VoidElement {
     const root = this.shadowRoot ?? this.attachShadow({ mode: 'open' });
     if (root.querySelector('slot')) return;
     const doc = this.ownerDocument;
-    const style = doc.createElement('style');
-    style.textContent =
-      '[data-void-announcer]{position:absolute;width:1px;height:1px;margin:-1px;padding:0;border:0;overflow:hidden;clip-path:inset(50%);white-space:nowrap;pointer-events:none}';
-    root.append(style);
+    // A constructable stylesheet, not a `<style>` element: a Content Security Policy without 'unsafe-inline' blocks the latter.
+    adoptAnnouncerStyles(root);
     for (const [kind, role] of [['polite', 'status'], ['assertive', 'alert']] as const) {
       const el = doc.createElement('div');
       el.setAttribute('data-void-announcer', kind);

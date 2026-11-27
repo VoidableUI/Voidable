@@ -1,0 +1,258 @@
+---
+import DashboardLayout from '../../../components/showcase/DashboardLayout.astro';
+
+const sections = [
+  { id: 'organisation', label: 'Organisation' },
+  { id: 'network', label: 'Network defaults' },
+  { id: 'notifications', label: 'Notifications' },
+  { id: 'appearance', label: 'Appearance' },
+  { id: 'tokens', label: 'API tokens' },
+  { id: 'danger', label: 'Danger zone' },
+];
+// A false boolean must be an absent attribute, which Astro only does for native ones.
+const flag = (name: string, on: boolean) => (on ? { [name]: '' } : {});
+const notifications = [
+  { name: 'Node goes offline', detail: 'Sent immediately, at any hour.', on: true },
+  { name: 'Pass moved or missed', detail: 'One message per pass, with the reason.', on: true },
+  { name: 'Latency above the threshold', detail: 'When P99 stays above it for five minutes.', on: true },
+  { name: 'Weekly summary', detail: 'Mondays at 08:00 in your time zone.', on: false },
+];
+const tokens = [
+  { key: 'mrd_live_9f2c…e41a', detail: 'Scheduler integration · last used 4 min ago' },
+  { key: 'mrd_live_03ab…77d0', detail: 'Metrics export · last used yesterday' },
+];
+---
+
+<DashboardLayout
+  active="settings"
+  heading="Settings"
+  description="Organisation, network defaults, notifications and API tokens as forms: the settings page of the Voidable dashboard showcase."
+>
+  <Fragment slot="controls">
+    <void-button variant="ghost" size="md">Discard</void-button>
+    <void-button id="save-settings" variant="filled" size="md">Save Changes</void-button>
+  </Fragment>
+
+  <div class="content-area">
+    <void-split ratio="aside">
+      <void-stack sticky>
+        <void-list id="settings-nav" role="list" aria-label="Settings sections">
+          {sections.map((s, i) => (
+            <void-list-item interactive {...flag('selected', i === 0)} data-target={s.id}>{s.label}</void-list-item>
+          ))}
+        </void-list>
+      </void-stack>
+
+      <void-stack gap="section">
+        <void-section id="organisation">
+          <void-section-head>
+            <h2>Organisation</h2>
+            <span data-void-type="label">Visible to your team</span>
+          </void-section-head>
+          <void-stack>
+            <void-split>
+              <void-field label="Network name" required>
+                <void-input name="name" value="Meridian Network" required></void-input>
+              </void-field>
+              <void-field label="Operations email" helper="Alerts and invoices are sent here.">
+                <void-input name="email" type="email" value="ops@meridian.example"></void-input>
+              </void-field>
+            </void-split>
+            <void-split>
+              <void-field label="Time zone" helper="Pass times are always also shown in UTC.">
+                <void-combobox name="timezone" value="Europe/Oslo" placeholder="Search time zones">
+                  <void-combobox-content>
+                    <void-option value="UTC">UTC</void-option>
+                    <void-option value="Europe/Oslo">Europe/Oslo</void-option>
+                    <void-option value="America/Punta_Arenas">America/Punta_Arenas</void-option>
+                    <void-option value="Africa/Johannesburg">Africa/Johannesburg</void-option>
+                    <void-option value="Asia/Singapore">Asia/Singapore</void-option>
+                    <void-option value="Pacific/Auckland">Pacific/Auckland</void-option>
+                  </void-combobox-content>
+                </void-combobox>
+              </void-field>
+              <void-field label="Units">
+                <void-select>
+                  <select name="units">
+                    <option>Metric (km, Mbit/s)</option>
+                    <option>Nautical (nmi, Mbit/s)</option>
+                  </select>
+                </void-select>
+              </void-field>
+            </void-split>
+            <void-field label="Description" helper="Shown on the status page.">
+              <void-textarea name="description" autosize rows="2" max-rows="6" value="Fourteen ground stations on three continents, serving a constellation of thirty satellites in polar and inclined orbits."></void-textarea>
+            </void-field>
+          </void-stack>
+        </void-section>
+
+        <void-section id="network">
+          <void-section-head>
+            <h2>Network Defaults</h2>
+            <span data-void-type="label">Applied to new nodes</span>
+          </void-section-head>
+          <void-stack>
+            <void-split>
+              <void-field label="Latency alert threshold" helper="P99 round trip, in milliseconds.">
+                <void-slider name="latency" value="100" min="20" max="250" step="10" show-value></void-slider>
+              </void-field>
+              <void-field label="Minimum elevation" helper="Degrees above the horizon.">
+                <void-slider name="elevation" value="5" min="0" max="45" step="1" show-value></void-slider>
+              </void-field>
+            </void-split>
+            <void-split>
+              <void-field label="Maximum link distance" helper="Slant range, in kilometres. Longer links are not scheduled.">
+                <void-number-input name="distance" value="2500" min="500" max="3500" step="100"></void-number-input>
+              </void-field>
+              <void-field label="Heartbeat interval" helper="Seconds between heartbeats.">
+                <void-number-input name="heartbeat" value="30" min="5" max="300" step="5"></void-number-input>
+              </void-field>
+            </void-split>
+            <void-checkbox-group label="Bands enabled by default" name="bands" orientation="horizontal">
+              <void-checkbox value="S" checked>S-band</void-checkbox>
+              <void-checkbox value="X" checked>X-band</void-checkbox>
+              <void-checkbox value="Ka">Ka-band</void-checkbox>
+            </void-checkbox-group>
+            <void-radio-group label="When a station degrades" name="degraded" value="move">
+              <void-radio value="move">Move its passes to the nearest station</void-radio>
+              <void-radio value="keep">Keep its passes and alert the operator</void-radio>
+              <void-radio value="hold">Hold its passes until someone decides</void-radio>
+            </void-radio-group>
+            <void-field label="Labels" helper="Added to every new node. Press Enter after each.">
+              <void-tags-input name="labels" value='["production","meridian"]' placeholder="Add a label"></void-tags-input>
+            </void-field>
+          </void-stack>
+        </void-section>
+
+        <void-section id="notifications">
+          <void-section-head>
+            <h2>Notifications</h2>
+          </void-section-head>
+          <void-rows>
+            {notifications.map((n) => (
+              <void-row>
+                <void-row-text><span>{n.name}</span><span data-void-type="caption">{n.detail}</span></void-row-text>
+                <void-switch {...flag('checked', n.on)} aria-label={n.name}></void-switch>
+              </void-row>
+            ))}
+          </void-rows>
+        </void-section>
+
+        <void-section id="appearance">
+          <void-section-head>
+            <h2>Appearance</h2>
+          </void-section-head>
+          <void-rows>
+            <void-row>
+              <void-row-text><span>Colour scheme</span><span data-void-type="caption">Changes this showcase as you choose.</span></void-row-text>
+              <void-segmented-control id="scheme" value="dark" aria-label="Colour scheme">
+                <void-segmented-control-item value="dark">Dark</void-segmented-control-item>
+                <void-segmented-control-item value="light">Light</void-segmented-control-item>
+              </void-segmented-control>
+            </void-row>
+            <void-row>
+              <void-row-text><span>Default period</span><span data-void-type="caption">What the charts open on.</span></void-row-text>
+              <void-select aria-label="Default period">
+                <select>
+                  <option>Last 24 hours</option>
+                  <option selected>Last 7 days</option>
+                  <option>Last 30 days</option>
+                </select>
+              </void-select>
+            </void-row>
+          </void-rows>
+        </void-section>
+
+        <void-section id="tokens">
+          <void-section-head>
+            <h2>API Tokens</h2>
+            <span data-void-type="label">{tokens.length} active</span>
+          </void-section-head>
+          <void-rows>
+            {tokens.map((t) => (
+              <void-row>
+                <void-row-text><span data-void-type="code">{t.key}</span><span data-void-type="caption">{t.detail}</span></void-row-text>
+                <void-button variant="ghost" size="sm" color="error">Revoke</void-button>
+              </void-row>
+            ))}
+          </void-rows>
+          <void-actions>
+            <void-button>Create Token</void-button>
+          </void-actions>
+        </void-section>
+
+        <void-section id="danger">
+          <void-section-head>
+            <h2>Danger Zone</h2>
+          </void-section-head>
+          <void-rows>
+            <void-row>
+              <void-row-text><span>Pause all scheduling</span><span data-void-type="caption">Passes in progress finish; nothing new is booked until you resume.</span></void-row-text>
+              <void-button color="warning">Pause</void-button>
+            </void-row>
+            <void-row>
+              <void-row-text><span>Delete this network</span><span data-void-type="caption">Removes every node, schedule and log. This cannot be undone.</span></void-row-text>
+              <void-button id="delete-network" color="error">Delete</void-button>
+            </void-row>
+          </void-rows>
+        </void-section>
+      </void-stack>
+    </void-split>
+  </div>
+
+  <Fragment slot="overlays">
+    <void-dialog id="delete-dialog" size="sm">
+      <void-dialog-title>Delete Meridian Network?</void-dialog-title>
+      <void-dialog-description>44 nodes, their schedules and 90 days of logs are removed at once. Type the network name to confirm.</void-dialog-description>
+      <void-dialog-body>
+        <void-field label="Network name">
+          <void-input id="delete-confirm" placeholder="Meridian Network" autocomplete="off"></void-input>
+        </void-field>
+      </void-dialog-body>
+      <void-dialog-actions>
+        <void-button id="delete-cancel">Cancel</void-button>
+        <void-button id="delete-go" color="error" variant="filled" disabled>Delete Network</void-button>
+      </void-dialog-actions>
+    </void-dialog>
+
+    <void-toast-container placement="bottom-right"></void-toast-container>
+  </Fragment>
+</DashboardLayout>
+
+<script>
+  import { toast } from '@voidable/ui';
+
+  // Section list: jump to a section and mark it.
+  const nav = document.getElementById('settings-nav')!;
+  const items = [...nav.querySelectorAll<HTMLElement & { selected: boolean }>('void-list-item')];
+  items.forEach((item) => {
+    item.addEventListener('void-click', () => {
+      items.forEach((other) => { other.selected = other === item; });
+      document.getElementById(item.dataset.target!)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+
+  // The scheme control and the shell's own toggle stay in step.
+  const scheme = document.getElementById('scheme') as HTMLElement & { value: string };
+  scheme.value = document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
+  scheme.addEventListener('void-change', (e) => {
+    document.dispatchEvent(new CustomEvent('showcase-set-theme', { detail: { theme: (e as CustomEvent).detail.value } }));
+  });
+  document.addEventListener('showcase-theme', (e) => { scheme.value = (e as CustomEvent).detail.theme; });
+
+  document.getElementById('save-settings')?.addEventListener('click', () => {
+    toast({ color: 'success', title: 'Saved', description: 'The new defaults apply to nodes added from now on.' });
+  });
+
+  // Deleting asks for the name first.
+  const dialog = document.getElementById('delete-dialog') as HTMLElement & { open: boolean };
+  const confirm = document.getElementById('delete-confirm') as HTMLElement & { value: string };
+  const go = document.getElementById('delete-go') as HTMLElement & { disabled: boolean };
+  document.getElementById('delete-network')?.addEventListener('click', () => { dialog.open = true; });
+  document.getElementById('delete-cancel')?.addEventListener('click', () => { dialog.open = false; });
+  confirm.addEventListener('void-input', () => { go.disabled = confirm.value.trim() !== 'Meridian Network'; });
+  go.addEventListener('click', () => {
+    dialog.open = false;
+    toast({ color: 'info', description: 'Nothing was deleted: this is a showcase.' });
+  });
+</script>

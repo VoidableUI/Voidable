@@ -86,3 +86,16 @@ export const LinkMode: Story = {
     </div>
   `,
 };
+
+export const NoLandmark: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story: 'A page that keeps one navigation region adds `landmark="none"`: the buttons sit in a named group instead. Inside a `<nav>` it is never a landmark, with or without the attribute.',
+      },
+    },
+  },
+  render: () => html`
+    <void-pagination total="20" value="6" landmark="none"></void-pagination>
+  `,
+};

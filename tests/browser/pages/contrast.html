@@ -1,0 +1,72 @@
+<style>
+  main { padding: 1rem; max-width: 1100px; margin: auto; }
+  .row { display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center; margin: 0.5rem 0; }
+  h2 { margin: 1rem 0 0.25rem; }
+</style>
+<!-- Every colour and variant of every component that shows text, for specs/contrast.spec.ts. -->
+<main>
+  <h1>Contrast</h1>
+  <h2>Buttons</h2>
+  <div class="row" id="buttons"></div>
+  <h2>Badges</h2>
+  <div class="row" id="badges"></div>
+  <h2>Tags</h2>
+  <div class="row" id="tags"></div>
+  <h2>Alerts</h2>
+  <div id="alerts"></div>
+  <h2>Banners</h2>
+  <div id="banners"></div>
+  <h2>Toasts</h2>
+  <div id="toasts"></div>
+  <h2>Stats and status</h2>
+  <div class="row" id="stats"></div>
+  <h2>Tabs</h2>
+  <void-tabs value="one"><void-tabs-list><void-tabs-trigger value="one">One</void-tabs-trigger><void-tabs-trigger value="two">Two</void-tabs-trigger><void-tabs-trigger value="three" disabled>Three</void-tabs-trigger></void-tabs-list><void-tabs-content value="one">Panel one</void-tabs-content><void-tabs-content value="two">Panel two</void-tabs-content></void-tabs>
+  <void-tabs value="b" size="sm"><void-tabs-list><void-tabs-trigger value="a">Alpha</void-tabs-trigger><void-tabs-trigger value="b">Beta</void-tabs-trigger></void-tabs-list><void-tabs-content value="a">Alpha panel</void-tabs-content><void-tabs-content value="b">Beta panel</void-tabs-content></void-tabs>
+  <h2>On other surfaces</h2>
+  <div id="surfaces"></div>
+  <h2>Text and links</h2>
+  <p>Body text with a <a href="#x">link</a> and <small>small text</small>.</p>
+  <h2>Fields</h2>
+  <div class="row">
+    <void-field label="Name" helper="Helper text"><void-input placeholder="Placeholder"></void-input></void-field>
+    <void-field label="With error" error="Something is wrong"><void-input value="bad"></void-input></void-field>
+    <void-field label="Required" required helper="Required helper"><void-input value="x"></void-input></void-field>
+  </div>
+  <h2>Navigation and data</h2>
+  <void-breadcrumbs><void-breadcrumbs-list><void-breadcrumbs-item><a href="/">Home</a></void-breadcrumbs-item><void-breadcrumbs-item aria-current="page">Details</void-breadcrumbs-item></void-breadcrumbs-list></void-breadcrumbs>
+  <void-pagination total="20" value="6"></void-pagination>
+  <void-stepper value="1" steps="Cart,Shipping,Payment"></void-stepper>
+  <void-list dividers><void-list-item>Item one</void-list-item><void-list-item selected>Item two</void-list-item></void-list>
+  <void-card style="width: 260px"><void-card-header><void-card-title>Card</void-card-title></void-card-header><void-card-body><p>Card body text.</p></void-card-body></void-card>
+  <void-table striped bordered aria-label="Team"><table><thead><tr><th>Name</th><th>Role</th></tr></thead><tbody><tr><td>Alice</td><td>Engineer</td></tr><tr><td>Ben</td><td>Designer</td></tr></tbody></table></void-table>
+  <void-calendar value="2026-11-10"></void-calendar>
+  <void-menu open aria-label="Actions"><void-menu-content><void-menu-group><void-menu-group-label>File</void-menu-group-label><void-menu-item value="edit">Edit</void-menu-item><void-menu-item value="dup">Duplicate<void-menu-item-shortcut>⌘D</void-menu-item-shortcut></void-menu-item></void-menu-group></void-menu-content></void-menu>
+  <void-segmented-control value="list" aria-label="View"><void-segmented-control-item value="list">List</void-segmented-control-item><void-segmented-control-item value="grid">Grid</void-segmented-control-item></void-segmented-control>
+  <void-toggle-group value="bold" aria-label="Format"><void-toggle value="bold">Bold</void-toggle><void-toggle value="italic">Italic</void-toggle></void-toggle-group>
+</main>
+<script>
+  const colors = ['default', 'error', 'warning', 'caution', 'success', 'info', 'notice', 'highlight'];
+  const fill = (id, html) => { document.getElementById(id).innerHTML = html; };
+  fill('buttons', ['outline', 'filled', 'ghost'].map((v) => colors.map((c) => `<void-button variant="${v}" color="${c}">${v} ${c}</void-button>`).join('')).join(''));
+  fill('badges', ['filled', 'outline'].map((v) => colors.map((c) => `<void-badge variant="${v}" color="${c}">${v} ${c}</void-badge>`).join('')).join(''));
+  fill('tags', colors.map((c) => `<void-tag color="${c}" removable>${c}</void-tag>`).join(''));
+  fill('alerts', ['subtle', 'filled'].map((v) => colors.map((c) => `<void-alert color="${c}" variant="${v}"><void-alert-title>${v} ${c}</void-alert-title><void-alert-description>Message with <a href="#a">a link</a>.</void-alert-description></void-alert>`).join('')).join(''));
+  fill('banners', ['subtle', 'filled'].map((v) => colors.map((c) => `<void-banner color="${c}" variant="${v}"><void-banner-description>${v} ${c} banner</void-banner-description></void-banner>`).join('')).join(''));
+  fill('toasts', `<void-toast-container placement="inline">${colors.map((c) => `<void-toast color="${c}" duration="0"><void-toast-title>${c}</void-toast-title><void-toast-description>Toast message.</void-toast-description></void-toast>`).join('')}</void-toast-container>`);
+  const sample = () =>
+    '<div class="row">' + colors.map((x) => `<void-badge color="${x}">${x}</void-badge><void-badge color="${x}" variant="outline">${x}</void-badge><void-tag color="${x}">${x}</void-tag><void-button variant="ghost" color="${x}">${x}</void-button><void-button color="${x}">${x}</void-button>`).join('') + '</div>' +
+    '<void-tabs value="one"><void-tabs-list><void-tabs-trigger value="one">One</void-tabs-trigger><void-tabs-trigger value="two">Two</void-tabs-trigger></void-tabs-list><void-tabs-content value="one">Panel</void-tabs-content><void-tabs-content value="two">Panel two</void-tabs-content></void-tabs><p>Text with a <a href="#s">link</a></p>';
+  const surfaces = {
+    'card': (s) => `<void-card><void-card-body>${s}</void-card-body></void-card>`,
+    'elevated card': (s) => `<void-card variant="elevated"><void-card-body>${s}</void-card-body></void-card>`,
+    'bordered panel': (s) => `<void-panel variant="bordered"><void-panel-body>${s}</void-panel-body></void-panel>`,
+    'selected list item': (s) => `<void-list><void-list-item selected>${s}</void-list-item></void-list>`,
+    'interactive list item': (s) => `<void-list><void-list-item interactive>${s}</void-list-item></void-list>`,
+    'striped table row': (s) => `<void-table striped aria-label="t"><table><tbody><tr><td>a</td></tr><tr><td>${s}</td></tr><tr><td>c</td></tr></tbody></table></void-table>`,
+    'info alert': (s) => `<void-alert color="info"><void-alert-description>${s}</void-alert-description></void-alert>`,
+    'warning banner': (s) => `<void-banner color="warning"><void-banner-description>${s}</void-banner-description></void-banner>`,
+  };
+  fill('surfaces', Object.entries(surfaces).map(([n, f]) => `<h3>${n}</h3>${f(sample())}`).join(''));
+  fill('stats',['up', 'down', 'flat', 'error', 'warning', 'caution', 'success', 'info', 'notice', 'highlight'].map((t) => `<void-stat label="Revenue" value="$12k" delta="+4%" description="vs last month" trend="${t}" style="width: 180px"></void-stat>`).join('') + ['online', 'away', 'offline'].map((s) => `<span><void-status-dot status="${s}"></void-status-dot> ${s}</span>`).join(''));
+</script>

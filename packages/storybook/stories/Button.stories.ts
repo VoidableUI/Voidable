@@ -117,3 +117,14 @@ export const Disabled: Story = {
     </div>
   `,
 };
+
+/** `aria-disabled="true"` keeps the button focusable and says why it cannot be used (`aria-describedby`). */
+export const DisabledWithReason: Story = {
+  render: () => html`
+    <div style="display: flex; flex-wrap: wrap; gap: 12px; align-items: center;">
+      <void-button variant="filled" aria-disabled="true" aria-describedby="why-save">Save changes</void-button>
+      <void-button aria-disabled="true" aria-describedby="why-save"><a href="#docs">A link</a></void-button>
+      <span id="why-save">Change at least one field to save.</span>
+    </div>
+  `,
+};

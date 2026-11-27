@@ -581,7 +581,7 @@ void-table tbody tr[aria-selected="true"] {
 
 /* Touch targets: the sort button's ::after is the direction chevron, so its
    hit area (--void-hit-target, 44px, under a coarse pointer) is the ::before. */
-@media (pointer: coarse) {
+@media (any-pointer: coarse) {
   void-table th[data-sort] > button { position: relative; }
   void-table th[data-sort] > button::before {
     content: ""; position: absolute; inset: 50% auto auto 50%; translate: -50% -50%;
