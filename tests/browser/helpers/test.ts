@@ -71,8 +71,22 @@ export async function settle(page: Page, rootSelector?: string): Promise<void> {
 /** Opens a page from tests/browser/pages and waits for its components. */
 export async function load(page: Page, path: string): Promise<void> {
   await page.goto(path);
-  await page.waitForFunction(() => typeof (window as any).__settle === 'function' && !!customElements.get('void-button'));
+  // Poll on a timer, not on animation frames (the default): an engine that paints no frame in some state would never call back.
+  await page.waitForFunction(() => typeof (window as any).__settle === 'function' && !!customElements.get('void-button'), undefined, { polling: 50 });
   await settle(page);
+}
+
+/**
+ * Waits until nothing under `locator` (the element and its descendants, shadow
+ * roots included) is still transitioning or animating. Measure geometry only
+ * after this: a panel that slides or scales in is, by design, partly outside
+ * the viewport and off its final size until its transition ends.
+ */
+export async function expectAnimationsDone(locator: Locator): Promise<void> {
+  await locator.evaluate(async (el) => {
+    const running = () => el.getAnimations({ subtree: true }).filter((a) => a.playState !== 'finished' && a.playState !== 'idle');
+    for (let guard = 0; guard < 20 && running().length; guard++) await Promise.allSettled(running().map((a) => a.finished));
+  });
 }
 
 /**
