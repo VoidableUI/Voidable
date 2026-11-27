@@ -148,3 +148,21 @@ export const Scrollable: Story = {
     </div>
   `,
 };
+
+export const NoHeaderRule: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story: 'A header that is only a title may not want the line under it: `--void-card-header-rule: none` removes it, on one card or, set on `:root`, on every card. The header keeps its height.',
+      },
+    },
+  },
+  render: () => html`
+    <void-card style="--void-card-header-rule: none; max-width: 24rem;">
+      <void-card-header><void-card-title>Next pass</void-card-title></void-card-header>
+      <void-card-body>
+        <p>Kiruna 3 at 14:20, eleven minutes above the horizon.</p>
+      </void-card-body>
+    </void-card>
+  `,
+};

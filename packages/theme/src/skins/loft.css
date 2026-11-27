@@ -111,4 +111,11 @@
   /* An alert follows the containers around it. */
   --void-alert-border: transparent;
   --void-alert-radius: var(--void-radius-lg);
+
+  /* A collapsible is a small tile: filled and lifted, closed or open, with
+     the edge every tile keeps for forced colours. */
+  --void-collapsible-surface: var(--void-color-surface);
+  --void-collapsible-rule-frame: var(--void-container-border-width) solid transparent;
+  --void-collapsible-radius: var(--void-radius-lg);
+  --void-collapsible-shadow: var(--_void-loft-shadow);
 }

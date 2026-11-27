@@ -7,7 +7,8 @@
    --void-card-border-width  Edge thickness, every variant.
    --void-card-radius        Corner radius; the header, body and footer follow it.
    --void-card-shadow        Shadow of the default card.
-   --void-card-padding       Padding of the header (inline), the body and the footer (inline). Applies whatever the padding attribute says, except padding="none". */
+   --void-card-padding       Padding of the header (inline), the body and the footer (inline). Applies whatever the padding attribute says, except padding="none".
+   --void-card-header-rule   Line under the header. A whole border; none removes it, for a header that is only a title. */
 
 void-card {
   --_void-card-padding: var(--void-card-padding, var(--void-container-padding));
@@ -65,7 +66,7 @@ void-card-header {
   row-gap: var(--void-space-1);
   border-radius: var(--_void-card-inner-radius) var(--_void-card-inner-radius) 0 0;
   padding: var(--void-space-2) var(--_void-card-padding);
-  border-bottom: var(--void-rule-head);
+  border-bottom: var(--void-card-header-rule, var(--void-rule-head));
 }
 
 void-card-title {
