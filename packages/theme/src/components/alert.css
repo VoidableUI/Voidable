@@ -46,6 +46,25 @@ void-alert-description {
   display: block;
 }
 
+/* Actions (Retry, Sign in again, Undo): a row below the text at the trailing
+   edge, as the banner's and the card's sit, wrapping at narrow widths. The
+   alert's padding already keeps the text, and so this row, clear of the close
+   control. Buttons are small unless one says size="lg". */
+void-alert-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--void-space-2);
+  margin-top: var(--void-space-1);
+}
+
+void-alert-actions > void-button:not([size="lg"]) {
+  --_void-button-height: var(--void-button-height, var(--void-control-height-sm));
+  --_void-button-padding: var(--void-button-padding, calc(var(--void-control-padding-sm) * 1.25));
+  --_void-button-font-size: var(--void-button-font-size, var(--void-control-text-sm));
+}
+
 /* The close control the author wrote: a part wrapping their own button, in the
    top corner. The text keeps clear of it. */
 void-alert:has(> void-alert-close) {

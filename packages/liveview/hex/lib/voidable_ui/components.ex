@@ -280,7 +280,7 @@ defmodule VoidableUI.Components do
   @doc """
   Renders a `<void-alert>` message.
 
-  Write its parts as children: an optional `<void-alert-title>`, the `<void-alert-description>` and an optional
+  Write its parts as children: an optional `<void-alert-title>`, the `<void-alert-description>`, an optional `<void-alert-actions>` (buttons or links, small by default) and an optional
   `<void-alert-close>` wrapping the one control that dismisses it (without it the alert cannot be dismissed).
   With `events`, pressing that control pushes `void-close`.
   """

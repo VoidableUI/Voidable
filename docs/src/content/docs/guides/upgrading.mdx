@@ -90,6 +90,10 @@ Three things change behaviour, and only for code that relied on them:
 
 Nothing else breaks. New in 0.12.0: the [testing helper](/guides/testing/) (`@voidable/ui/testing`), the messages registry with French and Arabic (`@voidable/ui/messages`), key actions (`keys`, `configureKeys`, `@voidable/ui/keys`), and sorting, filtering and selection in `void-table` (below). The sections that follow say what each does to existing markup.
 
+## Alert actions (0.14.0)
+
+Nothing breaks. `void-alert` gains a CSS-only `void-alert-actions` part for buttons or links (Retry, Sign in again, Undo): write it after `void-alert-description` and before `void-alert-close`. It lays out like the banner's and the card's actions, a row at the trailing edge below the text that wraps at narrow widths; `void-button`s in it are small unless one says `size="lg"`. Tab follows the markup, so the order is title, description, actions, then the close control. `voidable check` and the development warnings know the part; the HEEx `alert` component, Rails and Blade write it as markup.
+
 ## Sticky columns in a split (0.13)
 
 Nothing breaks. A child of `void-split` can say `sticky="always"` to stay stuck at the top when the split stacks below 48rem; a bare `sticky` is unchanged. See [Section](/patterns/section/#a-column-that-stays-in-view). `--void-split-sticky-top` (default `0px`) and `--void-split-sticky-max` (default `50svh`) are new settings.

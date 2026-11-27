@@ -199,6 +199,29 @@ describe('VoidAlert', () => {
     });
   });
 
+  describe('actions part (#117)', () => {
+    it('is a CSS-only part: never defined, and the parts are not moved', async () => {
+      const el = document.createElement('void-alert') as VoidAlert;
+      el.innerHTML = '<void-alert-title>T</void-alert-title><void-alert-description>d</void-alert-description><void-alert-actions><button type="button">Retry</button></void-alert-actions><void-alert-close><button type="button" aria-label="Dismiss">x</button></void-alert-close>';
+      const before = [...el.children];
+      document.body.appendChild(el);
+      await el.updateComplete;
+      expect(customElements.get('void-alert-actions')).toBeUndefined();
+      expect([...el.children]).toEqual(before);
+      el.remove();
+    });
+
+    it('a click on an action does not dismiss the alert', async () => {
+      const el = document.createElement('void-alert') as VoidAlert;
+      el.innerHTML = '<void-alert-description>d</void-alert-description><void-alert-actions><button type="button">Retry</button></void-alert-actions><void-alert-close><button type="button" aria-label="Dismiss">x</button></void-alert-close>';
+      document.body.appendChild(el);
+      await el.updateComplete;
+      (el.querySelector('void-alert-actions button') as HTMLButtonElement).click();
+      expect(document.body.contains(el)).toBe(true);
+      el.remove();
+    });
+  });
+
   describe('Light DOM', () => {
     it('createRenderRoot returns the element itself', () => {
       const el = document.createElement('void-alert') as VoidAlert;

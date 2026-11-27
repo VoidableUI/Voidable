@@ -307,7 +307,7 @@ export const parts = {
     children: 'parts',
     ordered: true,
     skeleton:
-      '<void-alert color="warning"><void-alert-title>Title</void-alert-title><void-alert-description>What happened and what to do.</void-alert-description><void-alert-close><button type="button" aria-label="Dismiss">&times;</button></void-alert-close></void-alert>',
+      '<void-alert color="warning"><void-alert-title>Title</void-alert-title><void-alert-description>What happened and what to do.</void-alert-description><void-alert-actions><void-button>Retry</void-button></void-alert-actions><void-alert-close><button type="button" aria-label="Dismiss">&times;</button></void-alert-close></void-alert>',
     legacy: {
       attributes: { dismissible: 'add <void-alert-close><button type="button" aria-label="Dismiss">&times;</button></void-alert-close> as the last child; without it the alert is not dismissible' },
       children: 'put the message in <void-alert-description> (and a short title in <void-alert-title> before it)',
@@ -315,6 +315,7 @@ export const parts = {
     parts: [
       { tag: 'void-alert-title', max: 1, description: 'Short title of the message.' },
       { tag: 'void-alert-description', required: true, max: 1, description: 'The message.' },
+      { tag: 'void-alert-actions', max: 1, description: 'Buttons or links for the message (Retry, Sign in again, Undo), in a row at the trailing edge below the text; buttons in it are small.' },
       {
         tag: 'void-alert-close',
         max: 1,
