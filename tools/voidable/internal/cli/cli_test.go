@@ -233,7 +233,7 @@ func TestRefAndGen(t *testing.T) {
 		{[]string{"ref", "void-button", "--format", "json"}, []string{`"tag": "void-button"`, `"values": [`}},
 		{[]string{"ref", "void-tabs"}, []string{"keys (rebind or switch off", "next: Right Arrow (Left Arrow in right-to-left text)"}},
 		{[]string{"ref", "void-dialog", "--format", "markdown"}, []string{"| Action | Default keys | What it does |", "| `close` (essential) | Escape |"}},
-		{[]string{"ref", "--size"}, []string{"text     index", "178 elements"}},
+		{[]string{"ref", "--size"}, []string{"text     index", "179 elements"}},
 		{[]string{"gen", "snippet", "void-dialog", "--lang", "jsx"}, []string{`<void-dialog size="sm" onvoid-close=`, `<void-dialog-title>Delete project</void-dialog-title>`, `<void-button color="error" variant="filled">Delete</void-button>`}},
 		{[]string{"gen", "snippet", "void-dropdown-menu", "--lang", "erb"}, []string{`data-action="void-select->my-controller#handle"`}},
 		{[]string{"gen", "heex"}, []string{"defmodule VoidableUI.Components do", "def status_dot(assigns) do"}},
