@@ -234,6 +234,58 @@ test.describe('a card that is a link or a button', () => {
   });
 });
 
+test.describe('an unavailable card (aria-disabled)', () => {
+  test.beforeEach(async ({ page }) => {
+    await load(page, '/blank');
+    await mount(
+      page,
+      `<button id="before" type="button">before</button>
+       <void-card id="off" aria-disabled="true">
+         <void-card-header>
+           <void-card-title><a id="offlink" href="#went">Pro plan</a></void-card-title>
+           <void-card-description id="why">Upgrade to unlock.</void-card-description>
+         </void-card-header>
+         <void-card-body>Body</void-card-body>
+       </void-card>
+       <void-card id="on"><void-card-header><void-card-title><a id="onlink" href="#went">Free plan</a></void-card-title></void-card-header><void-card-body>Body</void-card-body></void-card>
+       <void-card id="plain" aria-disabled="true"><void-card-header><void-card-title>Static</void-card-title><void-card-description id="why2">Not offered here.</void-card-description></void-card-header><void-card-body>Body</void-card-body></void-card>`,
+    );
+  });
+
+  test('the link stays focusable with the reason announced, and does nothing', async ({ page }) => {
+    await page.locator('#before').focus();
+    await page.keyboard.press('Tab');
+    expect(await page.evaluate(() => document.activeElement?.id)).toBe('offlink');
+    const a = page.locator('#offlink');
+    await expect(a).toHaveAttribute('aria-disabled', 'true');
+    await expect(a).toHaveAttribute('aria-describedby', 'why');
+    await page.keyboard.press('Enter');
+    expect(await hash(page)).toBe('');
+    const box = (await page.locator('#off').boundingBox())!;
+    await page.mouse.click(box.x + box.width / 2, box.y + box.height - 6);
+    expect(await hash(page)).toBe('');
+    // An available card still works.
+    const on = (await page.locator('#on').boundingBox())!;
+    await page.mouse.click(on.x + on.width / 2, on.y + on.height / 2);
+    expect(await hash(page)).toBe('#went');
+  });
+
+  test('is muted through the token, shows a not-allowed cursor and does not react to the pointer', async ({ page }) => {
+    const css = (sel: string, prop: 'color' | 'backgroundColor' | 'cursor') => page.locator(sel).evaluate((el, p) => getComputedStyle(el)[p as 'color'], prop);
+    expect(await css('#off void-card-title', 'color')).not.toBe(await css('#on void-card-title', 'color'));
+    expect(await css('#off', 'cursor')).toBe('not-allowed');
+    const rest = await css('#off', 'backgroundColor');
+    await page.locator('#off').hover();
+    expect(await css('#off', 'backgroundColor')).toBe(rest);
+    await page.evaluate(() => document.getElementById('off')!.style.setProperty('--void-card-ink-disabled', 'rgb(9, 8, 7)'));
+    expect(await css('#off void-card-title', 'color')).toBe('rgb(9, 8, 7)');
+  });
+
+  test('a static unavailable card names its reason', async ({ page }) => {
+    await expect(page.locator('#plain')).toHaveAttribute('aria-describedby', 'why2');
+  });
+});
+
 test.describe('a row that is a link or a button', () => {
   test.beforeEach(async ({ page }) => {
     await load(page, '/blank');

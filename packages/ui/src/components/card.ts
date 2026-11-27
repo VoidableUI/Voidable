@@ -32,13 +32,56 @@ export class VoidCard extends VoidElement {
     onChange: () => this._wire(),
   });
 
-  /** A linked card: its title holds the one link or button, which the description describes. */
+  static override get observedAttributes(): string[] {
+    return [...super.observedAttributes, 'aria-disabled'];
+  }
+
+  override attributeChangedCallback(name: string, old: string | null, value: string | null): void {
+    super.attributeChangedCallback(name, old, value);
+    if (name === 'aria-disabled') this._parts.requestSync();
+  }
+
+  override connectedCallback(): void {
+    super.connectedCallback();
+    this.addEventListener('click', this._onClick, true);
+  }
+
+  override disconnectedCallback(): void {
+    super.disconnectedCallback();
+    this.removeEventListener('click', this._onClick, true);
+  }
+
+  /** An unavailable card (`aria-disabled="true"`) does nothing when its link or button is activated. */
+  private _onClick = (e: Event): void => {
+    if (this.getAttribute('aria-disabled') !== 'true') return;
+    const control = this._control();
+    if (control && e.target instanceof Node && control.contains(e.target)) {
+      e.preventDefault();
+      e.stopImmediatePropagation();
+    }
+  };
+
+  private _control(): Element | null {
+    return this._parts.one('void-card-title')?.querySelector('a[href], button') ?? null;
+  }
+
+  /**
+   * A linked card: its title holds the one link or button, which the description describes. An unavailable
+   * card (`aria-disabled="true"`) gives its control `aria-disabled` too; the control stays focusable, so the
+   * reason in the description is reachable.
+   */
   private _wire(): void {
-    const title = this._parts.one('void-card-title');
-    const control = title?.querySelector('a[href], button');
+    const control = this._control();
     const description = this._parts.one('void-card-description');
-    if (!control || !description) return;
-    this._parts.token(control, 'aria-describedby', this._parts.id(description, 'void-card-description'));
+    const disabled = this.getAttribute('aria-disabled') === 'true';
+    const describedby = description ? this._parts.id(description, 'void-card-description') : null;
+    if (control) {
+      if (disabled) this._parts.provide(control, 'aria-disabled', 'true');
+      if (describedby) this._parts.token(control, 'aria-describedby', describedby);
+    } else if (disabled && describedby) {
+      // A static card: the reason is reachable from the card itself.
+      this._parts.token(this, 'aria-describedby', describedby);
+    }
   }
 }
 

@@ -71,6 +71,23 @@ How it works: the theme stretches the link's (or button's) `::after` over the wh
 
 The stretched box sits on top of the card's content, so a drag across the body does not select it (a static card is untouched). This is the price of a hit area that needs no JavaScript and no nested controls. If the text must be selectable, make the card static and put a link in it as a normal control.
 
+## An unavailable card
+
+Mark a card that cannot be used right now with `aria-disabled="true"`, as with a [button](/components/button/). The title and any icon (`svg`) are muted by `--void-card-ink-disabled`, the cursor is `not-allowed` and the card ignores hover and press. Put the reason in `<void-card-description>`:
+
+- **A card with a link or button** keeps it focusable and gives it `aria-disabled="true"` (you need not write it), so a keyboard or screen-reader user reaches the card and hears the reason through `aria-describedby`; activating it (click, Enter, Space) does nothing. Do not use the native `disabled` on the button for this: it drops focus and hides the reason.
+- **A static card** gets `aria-describedby` pointing at the description.
+
+```html
+<void-card aria-disabled="true">
+  <void-card-header>
+    <void-card-title><a href="/plans/pro">Pro plan</a></void-card-title>
+    <void-card-description>Upgrade your workspace to unlock this plan.</void-card-description>
+  </void-card-header>
+  <void-card-body>Unlimited stations.</void-card-body>
+</void-card>
+```
+
 ## A row that is a link or a button
 
 `<void-row>` takes the same form, so a list of destinations needs no chevron link button at the end of each line. Write the one `<a href>` or `<button>` in the `<void-row-text>`; the stretched control, the states, the focus ring (drawn inside the row), the keys and the rules above all apply unchanged. What sits at the far end (a badge, a chevron icon) is decoration, not a control.

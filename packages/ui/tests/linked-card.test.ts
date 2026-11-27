@@ -75,6 +75,41 @@ describe('a card that is a link or a button: wiring', () => {
   });
 });
 
+describe('an unavailable card (aria-disabled)', () => {
+  it('marks its link aria-disabled and blocks activation, and unmarks it when it becomes available', async () => {
+    const el = mount(
+      `<void-card aria-disabled="true"><void-card-header><void-card-title><a href="/x">Ada</a></void-card-title><void-card-description>Needs a plan.</void-card-description></void-card-header><void-card-body>b</void-card-body></void-card>`,
+    );
+    await ready(el);
+    const a = el.querySelector('a')!;
+    expect(a.getAttribute('aria-disabled')).toBe('true');
+    expect(a.hasAttribute('tabindex')).toBe(false);
+    const click = new MouseEvent('click', { bubbles: true, cancelable: true });
+    a.dispatchEvent(click);
+    expect(click.defaultPrevented).toBe(true);
+    el.removeAttribute('aria-disabled');
+    await ready(el);
+    expect(a.hasAttribute('aria-disabled')).toBe(false);
+    const again = new MouseEvent('click', { bubbles: true, cancelable: true });
+    a.dispatchEvent(again);
+    expect(again.defaultPrevented).toBe(false);
+  });
+
+  it('keeps an aria-disabled the author wrote on the control', async () => {
+    const el = mount(card('<void-card-title><button type="button" aria-disabled="true">Go</button></void-card-title>'));
+    await ready(el);
+    expect(el.querySelector('button')!.getAttribute('aria-disabled')).toBe('true');
+  });
+
+  it('points a static unavailable card at its reason', async () => {
+    const el = mount(
+      `<void-card aria-disabled="true"><void-card-header><void-card-title>T</void-card-title><void-card-description>Reason.</void-card-description></void-card-header><void-card-body>b</void-card-body></void-card>`,
+    );
+    await ready(el);
+    expect(el.getAttribute('aria-describedby')).toBe(el.querySelector('void-card-description')!.id);
+  });
+});
+
 describe('checkLinked', () => {
   it('reports a card inside a link or a button, with the corrected markup', () => {
     document.body.innerHTML = `<a href="/x">${card('<void-card-title>T</void-card-title>')}</a>`;

@@ -171,6 +171,26 @@ export const LinkCard: Story = {
   `,
 };
 
+export const UnavailableCard: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'aria-disabled="true" mutes the title and icons, keeps the link focusable and inert, and the description is the reason, announced with it.',
+      },
+    },
+  },
+  render: () => html`
+    <void-card aria-disabled="true">
+      <void-card-header>
+        <void-card-title><a href="#pro">Pro plan</a></void-card-title>
+        <void-card-description>Upgrade your workspace to unlock this plan.</void-card-description>
+      </void-card-header>
+      <void-card-body><p>Unlimited stations.</p></void-card-body>
+    </void-card>
+  `,
+};
+
 export const ButtonCard: Story = {
   parameters: { docs: { description: { story: 'A button in the title makes the whole card a button: listen for its click as for any button.' } } },
   render: () => html`
