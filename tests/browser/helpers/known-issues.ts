@@ -17,10 +17,6 @@ export const KNOWN_ISSUES = {
     'Reader behaviour, not a component defect: VoiceOver says "Profile settings web dialog with 6 items" on entry and does not speak the dialog description ("Change how your name appears."), which it exposes as help text rather than reading it. The dialog is correct in the accessibility tree and NVDA speaks name and description once ("Profile settings, dialog, Change how your name appears."). An aria-description mirror was tried and made no difference, so it was removed. The scenario stays an expected failure as a record of the difference.',
   'untracked:voiceover-multiselect-selection':
     'After Enter chooses an option in a multiselect, VoiceOver says only "You are currently on a selectable (null), inside of a list box." and nothing about the selection; NVDA says "selected".',
-  'untracked:nvda-radio-not-checked':
-    'NVDA says "Plan, grouping, Free, radio button, not checked" for the radio that is checked, and no position; VoiceOver says "Free selected radio button, 1 of 3".',
-  'untracked:nvda-accordion-expanded':
-    'NVDA says "clickable, How do refunds work?, button, expanded" for an accordion trigger whose aria-expanded is false; the dropdown menu trigger is spoken as "collapsed" by the same NVDA, and VoiceOver says collapsed for the accordion.',
 } as const;
 
 export type KnownIssue = keyof typeof KNOWN_ISSUES;

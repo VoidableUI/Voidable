@@ -282,6 +282,34 @@ describe('VoidMultiselect', () => {
     });
   });
 
+  describe('the trigger names the chosen options (the chips are hidden from assistive technology)', () => {
+    const described = async (labels: string[], chosen: number) => {
+      const el = createWithOptions(labels.map((label, i) => ({ value: label.toLowerCase(), label, selected: i < chosen })));
+      document.body.appendChild(el);
+      await el.updateComplete;
+      const trigger = el.querySelector('[role=combobox]')!;
+      return { el, description: trigger.getAttribute('aria-description') };
+    };
+
+    it('hides the placeholder and the chips, so a reader\'s cursor never rests inside the combobox', async () => {
+      const { el } = await described(['React', 'Vue'], 1);
+      expect([...el.querySelectorAll('[role=combobox] > *')].every((c) => c.getAttribute('aria-hidden') === 'true')).toBe(true);
+      const none = await described(['React', 'Vue'], 0);
+      expect(none.el.querySelector('.void-multiselect-placeholder')!.getAttribute('aria-hidden')).toBe('true');
+      expect(none.description).toBeNull();
+    });
+
+    it('lists the names of up to three chosen options', async () => {
+      expect((await described(['React', 'Vue', 'Lit'], 1)).description).toBe('React');
+      expect((await described(['React', 'Vue', 'Lit'], 2)).description).toBe('React and Vue');
+      expect((await described(['React', 'Vue', 'Lit'], 3)).description).toBe('React, Vue, and Lit');
+    });
+
+    it('lists the first three and says how many in all beyond three', async () => {
+      expect((await described(['A', 'B', 'C', 'D', 'E'], 5)).description).toBe('A, B, C, 5 selected');
+    });
+  });
+
   describe('disabled blocks interaction', () => {
     let el: VoidMultiselect;
 

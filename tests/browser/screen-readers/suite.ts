@@ -11,7 +11,7 @@ import { join } from 'node:path';
 import type { Scenario } from './facts';
 import { nvdaReader, voiceOverReader, type Reader } from './readers';
 import { RESULTS_DIR } from './results';
-import { runScenario, type TranscriptEntry } from './runner';
+import { prepareReading, runScenario, type TranscriptEntry } from './runner';
 import { axTree, formatTrace, installTrace, readTrace } from './trace';
 
 // Capture everything spoken, including announcements nobody asked for (a toast
@@ -42,12 +42,7 @@ async function play(reader: Reader, navigateToWebContent: () => Promise<void>, p
   // nothing at all, so say whether it is, and when it is not bring it forward and start again once.
   const focused = () => page.evaluate(() => document.hasFocus()).catch(() => false);
   console.log(`[sr ${tag}] after navigating to the web content: document focused: ${await focused()}, title ${JSON.stringify(await page.title())}`);
-  if (!(await focused())) {
-    await page.bringToFront();
-    await page.locator('h1').first().click({ timeout: 2000 }).catch(() => undefined);
-    await navigateToWebContent();
-    console.log(`[sr ${tag}] the document was not focused: brought it forward, clicked the heading, navigated again; document focused now: ${await focused()}`);
-  }
+  await prepareReading(reader, page, (line) => console.log(`[sr ${tag}] ${line}`));
 
   let transcript: TranscriptEntry[] = [];
   let failed = false;

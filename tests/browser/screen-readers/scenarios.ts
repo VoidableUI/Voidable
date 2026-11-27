@@ -73,7 +73,6 @@ export const scenarios: Scenario[] = [
     id: 'radio-group',
     title: 'A radio group announces its name, each radio, its position and which is checked',
     page: '/sr-controls',
-    readerIssues: { NVDA: { key: 'untracked:nvda-radio-not-checked', detail: 'NVDA said "Plan, grouping, Free, radio button, not checked" for the checked radio; VoiceOver said "Free selected radio button, 1 of 3".' } },
     steps: [
       // VoiceOver, arriving by quick navigation, says "Free selected radio button, 1 of 3": the group name is not repeated.
       { reach: { role: 'radio', name: 'Free', checked: true, group: { role: 'radiogroup', name: 'Plan' }, position: { n: 1, of: 3, within: '#plan' }, spoken: { VoiceOver: [/selected/, /1 of 3/] } }, by: 'control' },
@@ -175,7 +174,6 @@ export const scenarios: Scenario[] = [
     id: 'accordion',
     title: 'An accordion trigger announces collapsed, expanded after activation, and collapsed again',
     page: '/sr-disclosure',
-    readerIssues: { NVDA: { key: 'untracked:nvda-accordion-expanded', detail: 'NVDA said "clickable, How do refunds work?, button, expanded" for a collapsed trigger (aria-expanded=false); VoiceOver said collapsed.' } },
     steps: [
       { reach: { role: 'button', name: 'How do refunds work?', expanded: false }, by: 'control' },
       { act: true },

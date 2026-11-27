@@ -37,6 +37,31 @@ const show = (step: Step) =>
 
 const tail = (phrases: string[], n = 12) => phrases.slice(-n).map((p) => `    - ${JSON.stringify(p)}`).join('\n') || '    (nothing was spoken)';
 
+/**
+ * The set-up every scenario starts from, once, before its first move. What the first NVDA runs showed (#75):
+ * Guidepup's navigation to the web content ends with a Tab (focus on the first control), two focus/browse
+ * toggles and Escape, which left (a) the page's keyboard focus on a widget with NVDA in focus mode, where NVDA's
+ * own keys (Down, F, T) go to the page and say nothing, or moved or toggled that first control (a radio group
+ * with the second radio checked, an accordion with its first item open, so "not checked" and "expanded" were
+ * the truth), and (b) on some pages the window's focus in the browser toolbar (`document.hasFocus()` false).
+ * So: Tab into the page until the document has focus, reload it (state as the page wrote it), take focus off
+ * whatever has it, and put the reader in browse mode at the top. Each step is logged.
+ */
+export async function prepareReading(reader: Reader, page: Page, log: (line: string) => void): Promise<void> {
+  if (!reader.browseMode) return;
+  const focused = () => page.evaluate(() => document.hasFocus()).catch(() => false);
+  for (let i = 0; i < 8 && !(await focused()); i++) {
+    log(`the document has no keyboard focus (the browser's own controls have it): Tab ${i + 1}`);
+    await reader.press('Tab');
+  }
+  await page.reload();
+  await page.waitForFunction(() => typeof (window as unknown as { __settle?: unknown }).__settle === 'function' && !!customElements.get('void-button'));
+  await page.evaluate(() => (window as unknown as { __settle: (d: Document) => Promise<void> }).__settle(document));
+  await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur?.());
+  await reader.browseMode();
+  log(`prepared for reading: document focused: ${await focused()}`);
+}
+
 /** Runs the steps; returns the transcript. Throws on the first failing step, with the transcript so far in `error.transcript`. */
 export async function runScenario(reader: Reader, page: Page, scenario: Scenario): Promise<TranscriptEntry[]> {
   const transcript: TranscriptEntry[] = [];
@@ -140,9 +165,8 @@ export async function runScenario(reader: Reader, page: Page, scenario: Scenario
         note(`SILENT for 4 moves: ${await state()}`);
         note(`diagnosis: ${await (reader.diagnose?.() ?? Promise.resolve('(none for this reader)'))}`);
         await page.bringToFront().catch(() => undefined);
-        await page.locator('h1').first().click({ timeout: 2000 }).catch((e: Error) => note(`click on the heading failed: ${e.message.split('\n')[0]}`));
         await reader.refresh?.();
-        await reader.restart();
+        await prepareReading(reader, page, note);
         note(`after the remedies: ${await state()}`);
       }
     }

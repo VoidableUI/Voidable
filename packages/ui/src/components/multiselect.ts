@@ -102,6 +102,26 @@ export class VoidMultiselect extends InternalsFormControl(VoidElement) {
    */
   @property({ type: String }) placeholder = '';
   private get _hint(): string { return this.placeholder || msg(this, 'multiselect.placeholder'); }
+
+  /**
+   * What the trigger is described by once options are chosen. The chips are drawn, not read (they are
+   * `aria-hidden`, so a reader's cursor never rests on one), so the names of the chosen options are in the
+   * description: all of them up to three ("CSS and JavaScript"), else the first three and how many in all
+   * ("CSS, JavaScript, HTML, 5 selected").
+   */
+  private _chosenText(chosen: VoidOption[]): string {
+    const MAX = 3;
+    const lang = this.closest('[lang]')?.getAttribute('lang') || undefined;
+    const names = chosen.slice(0, MAX).map(optionLabel);
+    const list = (type: 'conjunction' | 'unit') => {
+      try {
+        return new Intl.ListFormat(lang, { type, style: 'long' }).format(names);
+      } catch {
+        return names.join(', ');
+      }
+    };
+    return chosen.length <= MAX ? list('conjunction') : `${list('unit')}, ${msg(this, 'multiselect.selected', { count: chosen.length })}`;
+  }
   /** Stop the trigger opening and exclude the values from the form submission. */
   @property({ type: Boolean, reflect: true }) disabled = false;
   /** Size step: `sm`, `md` (default) or `lg`. */
@@ -290,7 +310,7 @@ export class VoidMultiselect extends InternalsFormControl(VoidElement) {
         aria-haspopup="listbox"
         aria-expanded=${String(open)}
         aria-controls=${this._controls(open)}
-        aria-description=${count ? msg(this, 'multiselect.selected', { count }) : nothing}
+        aria-description=${count ? this._chosenText(selectedOpts) : nothing}
         aria-disabled=${this.formDisabled ? 'true' : nothing}
         aria-required=${this.required ? 'true' : nothing}
         aria-invalid=${this.error ? 'true' : nothing}

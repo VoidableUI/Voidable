@@ -33,6 +33,12 @@ export interface Reader {
   diagnose?(): Promise<string>;
   /** Asks the reader to rebuild its copy of the page (NVDA: refresh the browse document). */
   refresh?(): Promise<void>;
+  /**
+   * Puts the reader in the mode where its own navigation keys work, with its cursor at the top of the page
+   * (NVDA: leave focus mode, Ctrl+Home). A reader that has switched to passing keys to a focused widget
+   * (NVDA in focus mode on a radio, a switch or a tab) hears the page's keys and says nothing for its own.
+   */
+  browseMode?(): Promise<void>;
 }
 
 export function voiceOverReader(vo: VoiceOverPlaywright): Reader {
@@ -126,6 +132,10 @@ export function nvdaReader(nvda: NVDAPlaywright): Reader {
       return out.join('; ');
     },
     refresh: () => nvda.perform(nvda.keyboardCommands.refreshBrowseDocument),
+    async browseMode() {
+      await nvda.perform(nvda.keyboardCommands.exitFocusMode);
+      await nvda.press('Control+Home');
+    },
     version: () => {
       try {
         return String(nvda.version);
