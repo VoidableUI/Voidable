@@ -77,3 +77,12 @@ void-dropdown-menu-item[disabled] {
   pointer-events: none;
   cursor: default;
 }
+
+/* Touch targets: items in a menu touch each other, so a pseudo-element would
+   steal the next item's taps; under a coarse pointer an item is at least
+   --void-hit-target (44px) tall instead (and a link inside fills it). The
+   menu floats over the page, so nothing in the page moves. */
+@media (pointer: coarse) {
+  void-dropdown-menu-item { min-block-size: var(--void-hit-target); }
+  void-dropdown-menu-item:has(> a) { align-items: stretch; }
+}

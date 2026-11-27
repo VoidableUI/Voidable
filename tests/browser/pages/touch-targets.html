@@ -1,0 +1,56 @@
+<!-- Every control that has a hit area on a coarse pointer, each alone in a cell with room round it
+     (so a tap outside a control's drawn box lands on nothing else), then the dense groups.
+     specs/touch-targets.spec.ts taps just outside each control's box. -->
+<style>
+  .cells { display: flex; flex-wrap: wrap; align-items: center; }
+  .cell { padding: 40px 48px; position: relative; }
+  .dense { padding: 40px 48px; display: flex; gap: 80px; flex-wrap: wrap; align-items: flex-start; }
+  void-toast-container { position: static; }
+</style>
+<main style="padding: 1rem; max-width: 1100px">
+  <h1>Touch targets</h1>
+
+  <div class="cells">
+    <div class="cell"><void-button id="b-md">Save</void-button></div>
+    <div class="cell"><void-button id="b-sm" size="sm">Save</void-button></div>
+    <div class="cell"><void-button id="b-lg" size="lg">Save</void-button></div>
+    <div class="cell"><void-button id="b-icon" size="sm" variant="ghost" aria-label="Add">+</void-button></div>
+    <div class="cell"><void-checkbox id="cb">Remember me</void-checkbox></div>
+    <div class="cell"><void-radio-group id="rg" name="touch-r" value="a" aria-label="One"><void-radio id="rd" value="a">Only</void-radio></void-radio-group></div>
+    <div class="cell"><void-switch id="sw">Notify</void-switch></div>
+    <div class="cell"><void-toggle id="tg" aria-label="Bold">B</void-toggle></div>
+    <div class="cell"><void-hamburger id="hb" aria-label="Menu"></void-hamburger></div>
+    <div class="cell"><void-tag id="tag" removable>Filter</void-tag></div>
+    <div class="cell" style="width: 320px"><void-alert id="alert" color="info"><void-alert-description>Heads up</void-alert-description><void-alert-close id="alert-close"><button type="button" aria-label="Dismiss">&times;</button></void-alert-close></void-alert></div>
+    <div class="cell" style="width: 320px"><void-banner id="banner" color="warning"><void-banner-description>Page banner</void-banner-description><void-banner-close id="banner-close"><button type="button" aria-label="Dismiss">&times;</button></void-banner-close></void-banner></div>
+    <div class="cell" style="width: 360px"><void-toast-container placement="top-left"><void-toast id="toast" duration="0"><void-toast-title>Saved</void-toast-title><void-toast-description>Your changes were saved.</void-toast-description><void-toast-close id="toast-close"><button type="button" aria-label="Dismiss">&times;</button></void-toast-close></void-toast></void-toast-container></div>
+    <div class="cell"><void-breadcrumbs id="bc"><void-breadcrumbs-list><void-breadcrumbs-item><a id="bc-home" href="#bc-home">Home</a></void-breadcrumbs-item><void-breadcrumbs-item aria-current="page">Details</void-breadcrumbs-item></void-breadcrumbs-list></void-breadcrumbs></div>
+    <div class="cell"><void-pagination id="pg" total="20" value="6"></void-pagination></div>
+    <div class="cell" style="width: 420px">
+      <void-tabs id="tabs" value="one"><void-tabs-list><void-tabs-trigger id="tab-one" value="one">One</void-tabs-trigger><void-tabs-trigger id="tab-two" value="two">Two</void-tabs-trigger></void-tabs-list><void-tabs-content value="one">Panel one</void-tabs-content><void-tabs-content value="two">Panel two</void-tabs-content></void-tabs>
+    </div>
+    <div class="cell" style="width: 420px"><void-accordion id="acc"><void-accordion-item><void-accordion-trigger id="acc-t">Section</void-accordion-trigger><void-accordion-content>Content</void-accordion-content></void-accordion-item></void-accordion></div>
+    <div class="cell"><void-calendar id="cal" value="2026-11-10"></void-calendar></div>
+    <div class="cell" style="width: 320px"><void-slider id="slider" value="10" aria-label="Level"></void-slider></div>
+    <div class="cell"><void-pin-input id="pin" length="4" aria-label="Code"></void-pin-input></div>
+    <div class="cell" style="width: 420px">
+      <void-table id="tbl" aria-label="Team"><table><thead><tr><th data-sort>Name</th><th>Pick</th></tr></thead><tbody><tr><td>Alice</td><td><void-checkbox id="row-cb" aria-label="Select Alice"></void-checkbox></td></tr><tr><td>Ben</td><td><void-checkbox aria-label="Select Ben"></void-checkbox></td></tr></tbody></table></void-table>
+    </div>
+    <div class="cell" style="width: 420px; height: 200px"><void-carousel id="car" aria-label="Slides"><void-carousel-content><void-carousel-item><div style="height: 120px">Slide 1</div></void-carousel-item><void-carousel-item><div style="height: 120px">Slide 2</div></void-carousel-item><void-carousel-item><div style="height: 120px">Slide 3</div></void-carousel-item></void-carousel-content><void-carousel-previous id="car-prev" aria-label="Previous slide"></void-carousel-previous><void-carousel-next id="car-next" aria-label="Next slide"></void-carousel-next><void-carousel-indicators id="car-dots"></void-carousel-indicators></void-carousel></div>
+    <div class="cell"><void-menu id="menu" open aria-label="Actions"><void-menu-content><void-menu-item id="mi-1" value="a">Edit</void-menu-item><void-menu-item id="mi-2" value="b">Delete</void-menu-item></void-menu-content></void-menu></div>
+    <div class="cell"><void-dropdown-menu id="dd"><void-dropdown-menu-trigger><button type="button">Menu</button></void-dropdown-menu-trigger><void-dropdown-menu-content><void-dropdown-menu-item id="ddi-1">One</void-dropdown-menu-item><void-dropdown-menu-item id="ddi-2">Two</void-dropdown-menu-item></void-dropdown-menu-content></void-dropdown-menu></div>
+    <div class="cell"><void-combobox id="combo" placeholder="Pick" aria-label="Framework"><void-combobox-content><void-option id="opt-1" value="react">React</void-option><void-option id="opt-2" value="vue">Vue</void-option></void-combobox-content></void-combobox></div>
+  </div>
+
+  <h2>Dense groups</h2>
+  <div class="dense">
+    <void-toggle-group id="tgg" value="bold" aria-label="Format"><void-toggle id="tgg-a" value="bold">B</void-toggle><void-toggle id="tgg-b" value="italic">I</void-toggle><void-toggle id="tgg-c" value="under">U</void-toggle></void-toggle-group>
+    <void-toggle-group id="tgv" orientation="vertical" aria-label="Vertical format"><void-toggle id="tgv-a" value="a">Aa</void-toggle><void-toggle id="tgv-b" value="b">Bb</void-toggle></void-toggle-group>
+    <void-segmented-control id="seg" value="list" aria-label="View"><void-segmented-control-item id="seg-a" value="list">List</void-segmented-control-item><void-segmented-control-item id="seg-b" value="grid">Grid</void-segmented-control-item></void-segmented-control>
+    <void-checkbox-group id="cbg" label="Toppings" orientation="vertical"><void-checkbox id="cbg-a" value="a">Olives</void-checkbox><void-checkbox id="cbg-b" value="b">Basil</void-checkbox></void-checkbox-group>
+    <void-radio-group id="rgg" name="touch-g" label="Size" value="s"><void-radio id="rgg-a" value="s">Small</void-radio><void-radio id="rgg-b" value="m">Medium</void-radio></void-radio-group>
+  </div>
+
+  <void-dialog id="dlg"><void-dialog-title>Dialog</void-dialog-title><void-dialog-body><p>Body</p></void-dialog-body></void-dialog>
+  <void-drawer id="drw"><void-drawer-title>Drawer</void-drawer-title><void-drawer-body><p>Body</p></void-drawer-body></void-drawer>
+</main>

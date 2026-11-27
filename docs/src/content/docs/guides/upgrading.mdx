@@ -111,6 +111,17 @@ Keys are named actions now that an application can switch off or move (see [Cust
 
 No default key changed, and no component binds a shortcut by default.
 
+## Touch targets (0.13)
+
+On a device whose main pointer is coarse (`@media (pointer: coarse)`: phones and tablets) the hit areas of controls grow to at least 44 by 44 CSS pixels, so taps that used to miss a control by a few pixels now land on it. Nothing drawn changes size and nothing moves, except in these places, where rows that touch could not grow a pseudo-element and so are at least 44px tall: menu and dropdown-menu items, combobox, multiselect and (in browsers with customizable selects) select options, accordion triggers at a density below 1, and the cells of a PIN input (40px before). With a mouse, nothing changes.
+
+- **An element you place next to a control** may now sit under its larger hit area: a tap on a 36px button's neighbour within 4px of the button goes to the button. Gaps of 8px or more between separate controls, and half the gap inside a group, never overlap.
+- **To turn it off**, set `--void-hit-target: 0px` on `:root` (unlayered, or in any layer after the theme's), or put `data-hit-target="off"` on `<html>`. A different minimum is any length: `--void-hit-target: 3rem`.
+- **Tests that tap** just outside a control's box on an emulated phone now hit the control. A test that checked a miss at that spot needs the knob off.
+- **New markup is not needed.** Remove the `@media (pointer: coarse)` padding rules you wrote for these controls; they stack with the growth.
+
+See [Touch targets](/getting-started/theming/#touch-targets) for how each control gets there, what is not covered, and the density recipe for bigger drawn controls.
+
 ## 4. Check again
 
 Run `voidable check` until it reports nothing, then run your application with the development warnings loaded and open each page once: a clean console means the markup is right.

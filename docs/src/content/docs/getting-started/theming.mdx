@@ -53,6 +53,8 @@ Set these on `:root`. Everything else follows.
 
 The knobs are declared, with the same explanations, in `@voidable/theme/knobs` (`src/knobs.css`).
 
+One more input follows the device and not the look, so it is not a knob: `--void-hit-target`, the least size of the area that takes a tap. See [Touch targets](#touch-targets).
+
 ### Try them: the theme builder
 
 The [theme builder](/theme/) puts every knob on this page next to a real application (an overview, a data table, a form, a settings page and a page over a photograph), at desktop and phone width, in dark and light at once. It measures contrast as you go and gives you the theme four ways: the CSS to paste, a file to download, a link, and a description for an AI agent.
@@ -365,6 +367,54 @@ function toggleTheme() {
 ```
 
 Each framework guide shows a few lines that track this attribute reactively (the React adapter ships a `useTheme` hook).
+
+## Touch targets
+
+On a device whose main pointer is coarse (a finger: `@media (pointer: coarse)`) every control the library draws takes taps in an area of at least 44 by 44 CSS pixels, the size WCAG 2.5.5 and the platform guidelines ask for. The drawn control does not change and nothing on the page moves: the hit area grows past the box with an empty `::after` centred on the control. With a mouse nothing is added and nothing costs anything, because the rules live inside the media query.
+
+One input sets the minimum:
+
+```css
+:root { --void-hit-target: 2.75rem; }  /* the default under a coarse pointer; 0px with a fine one */
+```
+
+Set it to `0px` to turn the growth off, or put `data-hit-target="off"` on `<html>` (the way `data-anim-speed` sets the animation knob). A larger length gives a larger minimum. Applications that wrote their own `@media (pointer: coarse)` rules for these controls can delete them.
+
+How each kind of control gets there:
+
+| Control | How the area grows |
+|---|---|
+| Button (every size, icon-only), toggle, switch, hamburger | A 44px `::after` centred on it. |
+| Checkbox and radio (a table's row checkbox too) | The same, across the whole control including its label. In a checkbox or radio group the area grows by half the gap between rows at most, so a row never takes the next row's taps. |
+| Close buttons of dialog, drawer, toast, alert, banner; the remove button of a tag or chip | A 44px `::after` on the button. |
+| Toggle group, pagination, carousel dots | A 44px `::after` across the row, and along it by half the gap between neighbours at most: a tap between two controls goes to the nearer one. |
+| Tabs | A tab is as wide as its label and the row scrolls, which would cut off anything outside it, so the row takes the missing height as padding above the tabs (the tabs sit on the rule) and gives it back as a negative margin: nothing moves, and the tab's `::after` fills that space. |
+| Breadcrumb links, calendar previous and next, carousel arrows, table sort buttons | A 44px `::after` (on `::before` for the sort button, whose `::after` is its arrow). |
+| Slider | The input is 44px tall, with padding around the 4px track (the background is clipped to the content box) and a negative margin that gives the padding back, so the track is drawn where it was. |
+| Menu, dropdown menu, combobox, multiselect and select options, accordion triggers | Rows that touch cannot grow past each other, so under a coarse pointer a row is at least 44px tall. A menu floats over the page, so nothing in the page moves; an accordion trigger is already about that tall at the default density. |
+| PIN input cells | A native `<input>` cannot take a pseudo-element, so a cell is at least 44px square (it is 40px otherwise). |
+
+Not covered, and why:
+
+- **Segmented control, number input steppers and calendar days.** Their parts sit in a box that scrolls or clips (the segments scroll sideways, the stepper is inside the field's rounded border) or touch their neighbours (the days of a month), so no area can reach past the drawn box without taking a neighbour's taps. They keep their drawn size. Where this matters in your application, use the density step below.
+- **Text fields.** `<void-input>`, `<void-select>` and friends are 36px tall at the default density, and a field is not a small target the way a button is: the whole field is its hit area.
+- **Links inside prose.** They are your elements, not the library's, so the library does nothing to them. For a row of links (a footer, a list of results) a one-line rule gives them the same area:
+
+```css
+@media (pointer: coarse) { footer a { display: inline-block; padding-block: 0.75rem; margin-block: -0.75rem; } }
+```
+
+When two controls are closer than a finger, a tap between them goes to the nearer one, never to the farther: where the library cannot give both 44px it gives each half the gap.
+
+### Bigger controls on touch
+
+The growth above keeps the layout and changes only what takes a tap. An application that wants bigger drawn controls on touch devices (a 44px button, not a 36px button with a 44px area) can raise the density knob for coarse pointers, which scales control height, padding and spacing together. It is a choice, not a default:
+
+```css
+@media (pointer: coarse) { :root { --void-density: 1.375 } }
+```
+
+Controls are 36px at density 1, so `1.375` makes them 49.5px and `1.22` makes them 44px. The two options combine: the growth still applies to whatever the density leaves under 44px.
 
 ## Shape
 

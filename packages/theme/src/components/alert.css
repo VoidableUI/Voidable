@@ -92,3 +92,14 @@ void-alert:not([variant="filled"]):is([color="default"], :not([color])) {
   --_void-tone-subtle: var(--void-color-bg-secondary);
   --_void-tone-border: var(--void-color-border);
 }
+
+/* Touch targets: the close button's hit area grows to --void-hit-target
+   (44px) under a coarse pointer without resizing it. */
+@media (pointer: coarse) {
+  void-alert-close > button { position: relative; }
+  void-alert-close > button::after {
+    content: ""; position: absolute; inset: 50% auto auto 50%; translate: -50% -50%;
+    min-inline-size: var(--void-hit-target);
+    min-block-size: var(--void-hit-target);
+  }
+}

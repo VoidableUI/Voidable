@@ -17,3 +17,16 @@ void-toggle-group[disabled] {
   opacity: 0.5;
   pointer-events: none;
 }
+
+/* Touch targets: the toggles in a group are four pixels apart, so each grows
+   by half the gap at most along the row, and fully across it. */
+@media (pointer: coarse) {
+  void-toggle-group > void-toggle::after {
+    min-inline-size: min(var(--void-hit-target), calc(100% + 2 * var(--void-control-border-width) + var(--void-space-1)));
+  }
+
+  void-toggle-group[orientation="vertical"] > void-toggle::after {
+    min-inline-size: var(--void-hit-target);
+    min-block-size: min(var(--void-hit-target), calc(100% + 2 * var(--void-control-border-width) + var(--void-space-1)));
+  }
+}

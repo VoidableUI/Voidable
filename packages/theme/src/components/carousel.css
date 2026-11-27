@@ -208,3 +208,32 @@ void-carousel[size="lg"] {
   --_void-carousel-glyph: 0.5rem;
   --_void-carousel-dot: 0.625rem;
 }
+
+/* Touch targets: the arrows grow their hit area to --void-hit-target (44px)
+   under a coarse pointer without resizing them (horizontally they are already
+   positioned; in the vertical carousel they join the flow, so they become
+   positioned there). A dot grows by half the gap at most along the row, and
+   fully across it. */
+@media (pointer: coarse) {
+  void-carousel[orientation="vertical"] :is(void-carousel-previous, void-carousel-next) { position: relative; }
+
+  void-carousel-indicators > button { position: relative; }
+
+  void-carousel-previous::after,
+  void-carousel-next::after {
+    content: ""; position: absolute; inset: 50% auto auto 50%; translate: -50% -50%;
+    min-inline-size: var(--void-hit-target);
+    min-block-size: var(--void-hit-target);
+  }
+
+  void-carousel-indicators > button::after {
+    content: ""; position: absolute; inset: 50% auto auto 50%; translate: -50% -50%;
+    min-inline-size: min(var(--void-hit-target), calc(100% + var(--void-space-2)));
+    min-block-size: var(--void-hit-target);
+  }
+
+  void-carousel[orientation="vertical"] void-carousel-indicators > button::after {
+    min-inline-size: var(--void-hit-target);
+    min-block-size: min(var(--void-hit-target), calc(100% + var(--void-space-2)));
+  }
+}

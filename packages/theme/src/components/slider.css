@@ -135,3 +135,24 @@ void-slider[disabled] input[type="range"] {
   cursor: not-allowed;
   pointer-events: none;
 }
+
+/* Touch targets: the track is the input and is only a few pixels tall, so
+   under a coarse pointer the input's box is --void-hit-target (44px) tall,
+   padding around the drawn track (clipped to the content box), and a negative
+   margin gives the padding back: the track is drawn where it was and nothing
+   moves. */
+@media (pointer: coarse) {
+  void-slider input[type="range"] {
+    --_void-slider-track: 4px;
+    --_void-slider-pad: max(0px, calc((var(--void-hit-target) - var(--_void-slider-track)) / 2));
+    box-sizing: content-box;
+    height: var(--_void-slider-track);
+    padding-block: var(--_void-slider-pad);
+    margin-block: calc(-1 * var(--_void-slider-pad));
+    background-origin: content-box;
+    background-clip: content-box;
+  }
+
+  void-slider[size="sm"] input[type="range"] { --_void-slider-track: 2px; }
+  void-slider[size="lg"] input[type="range"] { --_void-slider-track: 6px; }
+}
