@@ -107,6 +107,7 @@ const GROWN: Array<[string, string, Side[]]> = [
   ['hamburger', '#hb', ['bottom', 'right']],
   ['tag remove', '#tag .void-tag-close', ['bottom', 'right']],
   ['alert close', '#alert-close > button', ['bottom', 'right']],
+  ['code copy', '#code-copy > button', ['bottom', 'left']],
   ['banner close', '#banner-close > button', ['bottom', 'right']],
   ['toast close', '#toast-close > button', ['bottom', 'right']],
   ['breadcrumb link', '#bc-home', ['bottom', 'top']],

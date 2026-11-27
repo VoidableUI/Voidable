@@ -103,6 +103,37 @@
       await clear();
       return { ms, value };
     },
+    // A unified diff of 5,000 lines with line numbers (a third added, a third removed, a changed word in every
+    // fifth line), and the same lines as a numbered code block. `plain` is the same text in unstyled <div>s: what
+    // the browser needs for 5,000 lines of anything. The component writes nothing on a line (`touched`).
+    async diff5000() {
+      const kinds = ['context', 'add', 'del'];
+      const line = (i) => `const value${i} = compute(${i}, ${i % 5 ? 'options' : `<ins>options.fast</ins>`}); // line ${i}`;
+      const diff = `<void-diff id="big" line-numbers><void-diff-title>src/big.js</void-diff-title>${Array.from({ length: 50 }, (_, h) => `<void-diff-hunk><void-diff-header>@@ -${h * 100 + 1},100 +${h * 100 + 1},100 @@</void-diff-header>${Array.from({ length: 100 }, (_, j) => { const i = h * 100 + j; const kind = kinds[i % 3]; return `<void-diff-line kind="${kind}"${kind === 'add' ? '' : ` old="${i + 1}"`}${kind === 'del' ? '' : ` new="${i + 1}"`}>${line(i)}</void-diff-line>`; }).join('')}</void-diff-hunk>`).join('')}</void-diff>`;
+      const ms = await timed(() => (root.innerHTML = diff));
+      const big = document.getElementById('big');
+      const lines = big.querySelectorAll('void-diff-line');
+      let touched = 0;
+      for (const l of lines) if (l.attributes.length > 3 || l.hasAttribute('role') || l.hasAttribute('id')) touched++;
+      const result = { ms, lines: lines.length, touched, tall: big.getBoundingClientRect().height > 5000 * 10, focusable: big.getAttribute('tabindex') };
+      await clear();
+      result.plainMs = await timed(() => (root.innerHTML = `<div>${Array.from({ length: 5000 }, (_, i) => `<div>${line(i)}</div>`).join('')}</div>`));
+      await clear();
+      return result;
+    },
+    async code5000() {
+      const ms = await timed(() => (root.innerHTML = `<void-code id="big" line-numbers><void-code-title>big.js</void-code-title><void-code-copy><button type="button"></button></void-code-copy><pre><code>${Array.from({ length: 5000 }, (_, i) => `<void-code-line>const value${i} = compute(${i}, <span class="tok">options</span>); // line ${i}</void-code-line>`).join('\n')}</code></pre></void-code>`));
+      const big = document.getElementById('big');
+      const lines = big.querySelectorAll('void-code-line');
+      let touched = 0;
+      for (const l of lines) if (l.attributes.length) touched++;
+      const t0 = now();
+      const chars = big.text.length;
+      const textMs = now() - t0;
+      const result = { ms, lines: lines.length, touched, chars, textMs, tall: big.getBoundingClientRect().height > 5000 * 10 };
+      await clear();
+      return result;
+    },
     async dialog200() {
       root.innerHTML = '<void-dialog id="dlg"><void-dialog-title>Perf</void-dialog-title><void-dialog-body><p>Body</p><input aria-label="x"></void-dialog-body><void-dialog-actions><void-button>OK</void-button></void-dialog-actions></void-dialog>';
       await window.__settle(root);

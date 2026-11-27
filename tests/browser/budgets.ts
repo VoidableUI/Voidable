@@ -74,6 +74,14 @@ export const reference = {
   table5000FilterFirstMs: 80,
   table5000FilterNextMs: 65,
   table5000SelectAllMs: 145,
+  /** First render of a void-diff of 5,000 lines in 50 hunks, with line numbers, and of a void-code of 5,000
+   *  numbered lines (#109). The components write nothing on a line, so this is the browser's style and layout
+   *  of 5,000 theme-styled lines and their generated numbers and markers. */
+  // Measured on the build host (medians of 5, calibration x2.38): diff 412 ms, code 218 ms, against 90 ms for
+  // 5,000 plain <div> lines with no component and no theme rule. Divided by the scale: 173 and 91 ms here.
+  // The diff costs about twice the code block: it has more generated content per line (two numbers and a marker).
+  diff5000Ms: 175,
+  code5000Ms: 92,
   /** 200 open/close cycles of a dialog. */
   dialog200Ms: 318,
   /** Gzipped size of `import '@voidable/ui'` (everything, Lit included), minified. */
