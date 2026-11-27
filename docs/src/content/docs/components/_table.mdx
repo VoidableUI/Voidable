@@ -118,7 +118,7 @@ A stacked row is still a table row to assistive technology. Browsers can drop ta
 
 Nothing in `<void-table>` clips by default, so a table that is wider than its container overflows the page. Add `scrollable` to make the table a horizontal scroll region:
 
-- While it actually overflows it becomes focusable (`tabindex="0"`, `role="region"`) and takes its accessible name from `label`, else the `<caption>`, else an `aria-label` you wrote; without a name a warning is logged. Arrow keys scroll it.
+- While it actually overflows it becomes focusable (`tabindex="0"`, `role="region"`) and takes its accessible name from `label`, else the `<caption>`, else an `aria-label` you wrote, else the translated `table.scrollRegion` message ("Table, scrolls sideways"). It adds only what you have not written: your own `tabindex`, `role` and `aria-label` are left alone. Arrow keys scroll it, and it has a visible focus ring.
 - Its edges fade where there is more to scroll to.
 - Cells stay on one line.
 

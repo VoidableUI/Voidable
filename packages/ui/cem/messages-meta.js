@@ -102,6 +102,7 @@ export const messageMeta = {
   'table.sortedAscending': { tags: ['void-table'], purpose: 'Announcement after a column is sorted ascending. `column` is the header\'s `data-label` or text.', override: null },
   'table.sortedDescending': { tags: ['void-table'], purpose: 'Announcement after a column is sorted descending. `column` is the header\'s `data-label` or text.', override: null },
   'table.sortCleared': { tags: ['void-table'], purpose: 'Announcement after sorting is removed from a column.', override: null },
+  'table.scrollRegion': { tags: ['void-table'], purpose: 'Fallback name of a scrollable table\'s scroll region while it overflows, used when there is no `label`, caption or author-written name.', override: { attribute: 'label' } },
   'tagsInput.placeholder': { tags: ['void-tags-input'], purpose: 'Hint of the entry field while there are no tags.', override: placeholder },
   'toast.region': { tags: ['void-toast-container'], purpose: 'Name of the region that holds the toasts.', override: name },
 };

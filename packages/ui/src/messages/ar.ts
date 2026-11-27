@@ -132,6 +132,7 @@ registerMessages('ar', {
   'table.sortedAscending': ({ column }) => `مرتب حسب ${column}، تصاعديًا`,
   'table.sortedDescending': ({ column }) => `مرتب حسب ${column}، تنازليًا`,
   'table.sortCleared': ({ column }) => `أُزيل الترتيب حسب ${column}`,
+  'table.scrollRegion': 'جدول، يمرَّر أفقيًا',
   'tagsInput.placeholder': 'أضف وسمًا...',
   'toast.region': 'الإشعارات',
 });

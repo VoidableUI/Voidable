@@ -1,0 +1,35 @@
+<main style="padding: 1rem; display: flex; flex-direction: column; gap: 2rem; max-width: 30rem">
+  <!-- Wider than 30rem: scrolls sideways; named by its caption -->
+  <void-table id="wide" scrollable>
+    <table>
+      <caption>Quarterly figures</caption>
+      <thead>
+        <tr><th>Region</th><th>Q1 revenue</th><th>Q2 revenue</th><th>Q3 revenue</th><th>Q4 revenue</th><th>Year total revenue</th><th>Notes for the year</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>North</td><td>1,000,000</td><td>1,100,000</td><td>1,200,000</td><td>1,300,000</td><td>4,600,000</td><td>Steady growth through the year</td></tr>
+      </tbody>
+    </table>
+  </void-table>
+
+  <!-- No caption: the default message names it -->
+  <void-table id="nameless" scrollable>
+    <table>
+      <thead>
+        <tr><th>Region</th><th>Q1 revenue</th><th>Q2 revenue</th><th>Q3 revenue</th><th>Q4 revenue</th><th>Year total revenue</th><th>Notes for the year</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>North</td><td>1,000,000</td><td>1,100,000</td><td>1,200,000</td><td>1,300,000</td><td>4,600,000</td><td>Steady growth through the year</td></tr>
+      </tbody>
+    </table>
+  </void-table>
+
+  <!-- Fits: never focusable -->
+  <void-table id="small" scrollable>
+    <table>
+      <caption>Short</caption>
+      <thead><tr><th>A</th></tr></thead>
+      <tbody><tr><td>1</td></tr></tbody>
+    </table>
+  </void-table>
+</main>

@@ -449,17 +449,28 @@ describe('VoidTable', () => {
       el.remove();
     });
 
-    it('warns once when the overflowing region has no name', async () => {
-      const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    it('falls back to the translated default name when nothing else names the region', async () => {
       const el = build();
       el.querySelector('caption')!.remove();
       overflowing(el, 900, 300);
       document.body.appendChild(el);
       await settle(el);
+      expect(el.getAttribute('aria-label')).toBe('Table, scrolls sideways');
+      el.remove();
+    });
+
+    it('leaves a tabindex and role the author wrote, also when the table fits again', async () => {
+      const el = build({ tabindex: '-1', role: 'group' });
+      overflowing(el, 900, 300);
+      document.body.appendChild(el);
+      await settle(el);
+      expect(el.getAttribute('tabindex')).toBe('-1');
+      expect(el.getAttribute('role')).toBe('group');
+      overflowing(el, 300, 300);
       el.setAttribute('striped', '');
       await settle(el);
-      expect(warn).toHaveBeenCalledTimes(1);
-      warn.mockRestore();
+      expect(el.getAttribute('tabindex')).toBe('-1');
+      expect(el.getAttribute('role')).toBe('group');
       el.remove();
     });
 
