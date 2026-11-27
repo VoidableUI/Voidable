@@ -7,7 +7,7 @@
 // that must leave nothing behind (nodes, listeners, top layer, scroll lock),
 // also through a Turbo morph. specs/overlays.spec.ts covers each component's
 // own behaviour; this file covers what they do together and over time.
-import { test, expect, load, settle, expectPerceivable, scrollLocked, focusedId, type Locator, type Page } from '../helpers/test';
+import { test, expect, load, settle, expectPerceivable, expectAnimationsDone, scrollLocked, focusedId, type Locator, type Page } from '../helpers/test';
 
 declare global {
   interface Window {
@@ -185,6 +185,7 @@ test.describe('overlays inside overflow: hidden, transformed and scrolled boxes'
     await expect(panel).toBeVisible();
     // A tooltip ignores the pointer, so it cannot be hit-tested; everything else must be the topmost thing where it is.
     if (hitTest) await expectPerceivable(panel, `${what} is not perceivable`);
+    await expectAnimationsDone(panel);
     await expect
       .poll(
         async () =>
@@ -283,10 +284,9 @@ test.describe('overlays inside overflow: hidden, transformed and scrolled boxes'
         await expect(panel).toBeVisible();
         await expectPerceivable(page.locator(`${host} .mc`));
         const vp = page.viewportSize()!;
-        // A drawer slides in: measure it once it has stopped.
-        await expect.poll(async () => { const b = (await panel.boundingBox())!; return Math.round(b.x + b.width); }).toBeLessThanOrEqual(vp.width + 1);
-        let r = await panel.boundingBox();
-        await expect.poll(async () => { const b = (await panel.boundingBox())!; const same = Math.abs(b.x - r!.x) < 0.5; r = b; return same; }).toBe(true);
+        // A drawer slides in, so for a while it is partly outside the viewport by design: measure it once its transition has ended.
+        await expectAnimationsDone(panel);
+        const r = await panel.boundingBox();
         expect(r!.x).toBeGreaterThanOrEqual(0);
         expect(r!.y).toBeGreaterThanOrEqual(0);
         expect(r!.x + r!.width).toBeLessThanOrEqual(vp.width + 0.5);
@@ -342,6 +342,8 @@ test.describe('at every corner of the viewport', () => {
             const panel = page.locator(k.panel);
             await expect(panel).toBeVisible();
             await expectPerceivable(panel);
+            // The geometry is read once: not while the panel is still scaling or sliding in.
+            await expectAnimationsDone(panel);
             await settle(page);
             const geometry = await page.evaluate(
               ([panelSel, triggerSel]) => {
@@ -520,10 +522,13 @@ test.describe('a close the page cancels', () => {
       for (const [route, act, reason] of c.routes) {
         await clearLog(page);
         await act(page);
-        await expect.poll(async () => (await closesOf(page)).length, `void-close fires for ${route}`).toBeGreaterThanOrEqual(1);
+        // Clicking an option or the page takes focus off a combobox's input, which asks to close it again ("blur",
+        // 150 ms later, so a request from the previous route can land during this one); the veto covers that too,
+        // and it is not the event this route is waiting for.
+        const mine = async () => (await closesOf(page)).filter((e) => !(c.id === 'cb' && reason !== 'blur' && e.reason === 'blur'));
+        await expect.poll(async () => (await mine()).length, `void-close fires for ${route}`).toBeGreaterThanOrEqual(1);
         await settle(page);
-        // Clicking an option or the page takes focus off a combobox's input, which asks to close it again ("blur"); the veto covers that too.
-        const events = (await closesOf(page)).filter((e) => !(c.id === 'cb' && reason !== 'blur' && e.reason === 'blur'));
+        const events = await mine();
         expect(events, route).toEqual([{ type: 'close', id: c.id, reason, cancelable: true }]);
         expect(await isOpen(page, c.id), `still open after ${route}`).toBe(true);
         await expectPerceivable(page.locator(`#${c.id}`).locator('input, button, [role=menuitem], [role=option], [role=grid] button, .pc').first());

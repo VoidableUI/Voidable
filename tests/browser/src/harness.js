@@ -7,7 +7,18 @@
   addEventListener('error', (e) => errors.push(String(e.message || e.error)));
   addEventListener('unhandledrejection', (e) => errors.push('unhandled rejection: ' + String(e.reason)));
 
-  const frame = () => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+  // Two painted frames, or 250 ms when the engine paints none (a page in a state where WebKit
+  // schedules no frame never calls back), so a wait on a frame cannot hang the test.
+  const frame = () =>
+    new Promise((r) => {
+      const timer = setTimeout(r, 250);
+      requestAnimationFrame(() =>
+        requestAnimationFrame(() => {
+          clearTimeout(timer);
+          r();
+        }),
+      );
+    });
 
   /**
    * Resolves once every Lit element under `root` has finished updating
