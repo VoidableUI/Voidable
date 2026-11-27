@@ -21,6 +21,9 @@ test.describe('table scroll region', () => {
   test('narrow: a table with no caption is named by the default message', async ({ page }) => {
     await page.setViewportSize({ width: 480, height: 800 });
     await load(page, '/table-scroll');
+    await page.locator('#nameless caption').evaluate((c) => c.remove());
+    await page.locator('#nameless').evaluate((el) => el.toggleAttribute('striped'));
+    await settle(page);
     expect(await page.locator('#nameless').ariaSnapshot()).toContain('region "Table, scrolls sideways"');
   });
 
